@@ -19,6 +19,27 @@ async function createModule(scope, module) {
   }
 }
 
+// How long to wait for an idle period before giving up and running the work
+// anyway.
+const IDLE_TIMEOUT = 5000;
+
+/**
+ * Resolve once the browser has an idle period.
+ *
+ * #### Notes
+ * Falls back to the next task when `requestIdleCallback` is not available
+ * (Safari before 16.4).
+ */
+function whenIdle() {
+  return new Promise(resolve => {
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(() => resolve(), { timeout: IDLE_TIMEOUT });
+    } else {
+      setTimeout(resolve, 0);
+    }
+  });
+}
+
 /**
  * The main entry point for the application.
  */
@@ -114,6 +135,21 @@ export async function main() {
     return disabledExtensions.some(val => val === id || (extName && val === extName));
   }
 
+  // Whether a whole extension package is disabled, that is whether its name is
+  // listed in `disabledExtensions`. Such a package is disabled as a unit: every
+  // plugin it provides is disabled, including a plugin whose id does not start
+  // with the package name.
+  const isExtensionDisabled = (name) => {
+    return disabledExtensions.some(val => val === name);
+  }
+
+  // Report a plugin which is only disabled because the whole package providing
+  // it is disabled. Such a plugin does not follow the plugin id convention, so
+  // the user cannot tell from the config that it was disabled too.
+  const warnAboutPackageLevelDisable = (pluginId, scope) => {
+    console.warn(`Plugin ${pluginId} does not start with the name of the extension providing it (${scope}), which is disabled, so this plugin is disabled too. To keep it enabled, list the plugin ids to disable in disabledExtensions instead of ${scope}.`);
+  }
+
   // This is basically a copy of PageConfig.Extension.isDeferred to
   // take into account the case of renamed plugins.
   const isPluginDeferred = (id) => {
@@ -128,7 +164,7 @@ export async function main() {
   const queuedFederated = [];
 
   extensions.forEach(data => {
-    const isDisabled = isPluginDisabled(data.name);
+    const isDisabled = isExtensionDisabled(data.name);
     if (data.extension) {
       queuedFederated.push(data.name);
       if (isDisabled) {
@@ -199,6 +235,9 @@ export async function main() {
     const plugins = [];
     const pluginIds = [];
     for (let plugin of getPlugins(extension)) {
+      if (!isPluginDisabled(plugin.id)) {
+        warnAboutPackageLevelDisable(plugin.id, extension.__scope__);
+      }
       plugins.push(createPluginInfo(plugin, extension, true));
       pluginIds.push(plugin.id);
     }
@@ -214,7 +253,12 @@ export async function main() {
   function* activePlugins(extension) {
     const plugins = getPlugins(extension);
     for (let plugin of plugins) {
-      const isDisabled = isPluginDisabled(plugin.id);
+      const disabledById = isPluginDisabled(plugin.id);
+      const isDisabled =
+        disabledById || isExtensionDisabled(extension.__scope__);
+      if (isDisabled && !disabledById) {
+        warnAboutPackageLevelDisable(plugin.id, extension.__scope__);
+      }
       recordPlugin(plugin, extension, isDisabled);
       if (isDisabled) {
         continue;
@@ -227,8 +271,8 @@ export async function main() {
     }
   }
 
-  // Disabled federated extensions are loaded after restoration only to discover
-  // their plugin metadata; they must not be registered or activated.
+  // Disabled federated extensions are loaded once the application started, only
+  // to discover their plugin metadata; they must not be registered or activated.
   async function loadDeferredDisabledFederatedPlugins() {
     const deferredDisabledFederatedPlugins = await Promise.allSettled(
       deferredDisabledFederatedModules.map(data => createModule(data.name, data.module))
@@ -355,9 +399,12 @@ export async function main() {
   // 4. Start the application, which will activate the other plugins
   lab.start({ ignorePlugins, bubblingKeydown: true });
 
-  const deferredDisabledFederatedPluginsReady = lab.restored.then(() =>
-    loadDeferredDisabledFederatedPlugins()
-  );
+  // Wait for all plugins, including the deferred ones, to be activated and for
+  // the browser to be idle, so that loading the disabled extensions does not
+  // compete with the work the application does while starting.
+  const deferredDisabledFederatedPluginsReady = lab.allPluginsActivated
+    .then(whenIdle)
+    .then(() => loadDeferredDisabledFederatedPlugins());
   deferredDisabledFederatedPluginsReady.catch(reason => {
     console.error('Error when loading disabled federated extensions:', reason);
   });

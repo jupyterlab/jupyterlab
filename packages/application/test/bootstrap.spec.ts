@@ -91,7 +91,21 @@ interface ITestContext {
     };
   };
   console: Pick<Console, 'error' | 'warn'>;
+  requestIdleCallback: (
+    callback: () => void,
+    options?: { timeout: number }
+  ) => unknown;
+  setTimeout: (handler: () => void, timeout?: number) => unknown;
 }
+
+/**
+ * The idle callback and timer the bootstrap uses to wait for an idle browser.
+ */
+const timers: Pick<ITestContext, 'requestIdleCallback' | 'setTimeout'> = {
+  requestIdleCallback: (callback: () => void) => setTimeout(callback, 0),
+  setTimeout: (handler: () => void, timeout?: number) =>
+    setTimeout(handler, timeout)
+};
 
 function isExports(value: unknown): value is IExports {
   return (
@@ -108,18 +122,38 @@ async function flushPromises(): Promise<void> {
   });
 }
 
-function loadBootstrap(context: ITestContext): () => Promise<void> {
+/**
+ * Render one of the handlebars blocks of the template for the given packages,
+ * the way the application build does.
+ */
+function renderEach(source: string, name: string, packages: string[]): string {
+  const block = new RegExp(
+    `\\s*\\{\\{#each ${name}\\}\\}([\\s\\S]*?)\\{\\{\\/each\\}\\}`
+  );
+  return source.replace(block, (_match, body: string) =>
+    packages
+      .map(packageName =>
+        body
+          .replace(/\{\{#if this\}\}[\s\S]*?\{\{\/if\}\}/g, '')
+          .replace(/\{\{@key\}\}/g, packageName)
+      )
+      .join('\n')
+  );
+}
+
+function loadBootstrap(
+  context: ITestContext,
+  extensions: string[]
+): () => Promise<void> {
   const sourcePath = path.resolve(__dirname, '../../../dev_mode/index.js');
-  const source = fs
+  let source = fs
     .readFileSync(sourcePath, 'utf8')
     .replace(/^import .*;\n/gm, '')
-    .replace(/export async function main\(\)/, 'async function main()')
-    .replace(
-      /\s*\{\{#each jupyterlab_mime_extensions\}\}[\s\S]*?\{\{\/each\}\}/,
-      ''
-    )
-    .replace(/\s*\{\{#each jupyterlab_extensions\}\}[\s\S]*?\{\{\/each\}\}/, '')
-    .concat('\nexports.main = main;\n');
+    .replace(/export async function main\(\)/, 'async function main()');
+  source = renderEach(source, 'jupyterlab_mime_extensions', []);
+  source = renderEach(source, 'jupyterlab_extensions', extensions).concat(
+    '\nexports.main = main;\n'
+  );
 
   vm.runInNewContext(source, context, { filename: sourcePath });
 
@@ -130,232 +164,340 @@ function loadBootstrap(context: ITestContext): () => Promise<void> {
   return context.exports.main;
 }
 
-describe('bootstrap federated extensions', () => {
-  it('defers package-level disabled extension modules until after restoration', async () => {
-    const moduleRequests: string[] = [];
-    const registeredPlugins: ITestPlugin[] = [];
-    let labOptions: IJupyterLabOptions | null = null;
-    let labInfo: ITestInfo | null = null;
-    let resolveRestored: () => void;
+interface IHarnessOptions {
+  /**
+   * Entries of the `federated_extensions` page config option.
+   */
+  federated?: {
+    name: string;
+    extension?: string;
+    mimeExtension?: string;
+    style?: string;
+  }[];
+  /**
+   * Modules the federated containers expose, by package and then module name.
+   *
+   * A module given as a promise is returned as is, so that a test can settle it
+   * on its own.
+   */
+  modules?: Record<
+    string,
+    Record<string, ITestModule | Promise<() => ITestModule>>
+  >;
+  /**
+   * Statically linked extension packages, by package name.
+   */
+  staticExtensions?: Record<string, ITestModule>;
+  /**
+   * The `disabledExtensions` page config option.
+   */
+  disabled?: string[];
+  /**
+   * The `deferredExtensions` page config option.
+   */
+  deferred?: string[];
+  /**
+   * Whether the page runs a browser test.
+   */
+  browserTest?: boolean;
+}
 
-    function getLabOptions(): IJupyterLabOptions {
-      if (!labOptions) {
-        throw new Error('JupyterLab options were not captured.');
-      }
-      return labOptions;
+interface IHarness {
+  /**
+   * Run the bootstrap.
+   */
+  main: () => Promise<void>;
+  /**
+   * The modules requested from the federated containers, as `package:module`.
+   */
+  moduleRequests: string[];
+  /**
+   * The plugins passed to `registerPlugins`.
+   */
+  registeredPlugins: ITestPlugin[];
+  /**
+   * The console the bootstrap writes to.
+   */
+  console: ITestContext['console'];
+  /**
+   * The options the application was constructed with.
+   */
+  labOptions: () => IJupyterLabOptions;
+  /**
+   * The information the application exposes.
+   */
+  labInfo: () => ITestInfo;
+  /**
+   * The element a browser test reports through.
+   */
+  browserTestElement: () => ITestElement;
+  /**
+   * Resolve `lab.restored`.
+   */
+  resolveRestored: () => void;
+  /**
+   * Resolve `lab.allPluginsActivated`.
+   */
+  resolveAllPluginsActivated: () => void;
+}
+
+/**
+ * Run the bootstrap against mock extensions in a mock browser context.
+ */
+function createHarness(options: IHarnessOptions = {}): IHarness {
+  const moduleRequests: string[] = [];
+  const registeredPlugins: ITestPlugin[] = [];
+  const modules = options.modules ?? {};
+  const staticExtensions = options.staticExtensions ?? {};
+  let labOptions: IJupyterLabOptions | null = null;
+  let labInfo: ITestInfo | null = null;
+  let browserTestElement: ITestElement | null = null;
+  let resolveRestored: () => void = () => undefined;
+  let resolveAllPluginsActivated: () => void = () => undefined;
+
+  function captured<T>(value: T | null, what: string): T {
+    if (value === null) {
+      throw new Error(`${what} was not captured.`);
+    }
+    return value;
+  }
+
+  class MockJupyterPluginRegistry implements IPluginRegistry {
+    registeredPlugins = registeredPlugins;
+
+    registerPlugins(plugins: ITestPlugin[]): void {
+      this.registeredPlugins.push(...plugins);
     }
 
-    function getLabInfo(): ITestInfo {
-      if (!labInfo) {
-        throw new Error('JupyterLab info was not captured.');
-      }
-      return labInfo;
+    resolveOptionalService(): Promise<null> {
+      return Promise.resolve(null);
     }
 
-    const modules: Record<string, Record<string, ITestModule>> = {
-      '@jupyterlab/enabled-extension': {
-        './extension': {
-          __esModule: true,
-          default: {
-            id: '@jupyterlab/enabled-extension:plugin',
-            description: 'Enabled plugin',
-            autoStart: true
-          }
+    resolveRequiredService(): Promise<Record<string, never>> {
+      return Promise.resolve({});
+    }
+  }
+
+  class MockJupyterLab {
+    info: ITestInfo;
+    restored: Promise<void>;
+    allPluginsActivated: Promise<void>;
+
+    constructor(appOptions: IJupyterLabOptions) {
+      labOptions = appOptions;
+      const info: ITestInfo = {
+        availablePlugins: appOptions.availablePlugins,
+        disabled: {
+          matches: [...appOptions.disabled.matches],
+          patterns: [...appOptions.disabled.patterns]
         },
-        './mimeExtension': {
-          __esModule: true,
-          default: {
-            id: '@jupyterlab/enabled-extension:mime',
-            description: 'Enabled mime plugin',
-            autoStart: true
-          }
+        addAvailablePlugins: (plugins: IPluginInfo[]) => {
+          info.availablePlugins.push(...plugins);
         },
-        './style': {
-          __esModule: true,
-          default: []
+        addDisabledPluginIds: (pluginIds: string[]) => {
+          info.disabled.matches.push(...pluginIds);
+        }
+      };
+      this.info = info;
+      labInfo = info;
+      this.restored = new Promise<void>(resolve => {
+        resolveRestored = resolve;
+      });
+      this.allPluginsActivated = new Promise<void>(resolve => {
+        resolveAllPluginsActivated = resolve;
+      });
+    }
+
+    start(): void {
+      return;
+    }
+  }
+
+  const context: ITestContext = {
+    exports: {},
+    PageConfig: {
+      getOption: (name: string) => {
+        switch (name) {
+          case 'browserTest':
+            return options.browserTest ? 'true' : 'false';
+          case 'exposeAppInBrowser':
+          case 'devMode':
+            return 'false';
+          case 'federated_extensions':
+            return JSON.stringify(options.federated ?? []);
+          default:
+            return '';
         }
       },
-      '@jupyterlab/disabled-extension': {
-        './extension': {
-          __esModule: true,
-          default: {
-            id: '@jupyterlab/disabled-extension:plugin',
-            description: 'Disabled plugin',
-            autoStart: true
-          }
-        },
-        './mimeExtension': {
-          __esModule: true,
-          default: {
-            id: '@jupyterlab/disabled-extension:mime',
-            description: 'Disabled mime plugin',
-            autoStart: true
-          }
-        },
-        './style': {
-          __esModule: true,
-          default: []
-        }
-      },
-      '@jupyterlab/plugin-disabled-extension': {
-        './extension': {
-          __esModule: true,
-          default: [
-            {
-              id: '@jupyterlab/plugin-disabled-extension:disabled',
-              description: 'Plugin disabled by id',
-              autoStart: true
-            },
-            {
-              id: '@jupyterlab/plugin-disabled-extension:enabled',
-              description: 'Sibling plugin',
-              autoStart: true
+      Extension: {
+        disabled: options.disabled ?? [],
+        deferred: options.deferred ?? []
+      }
+    },
+    JupyterPluginRegistry: MockJupyterPluginRegistry,
+    require: (id: string) => {
+      if (id === '@jupyterlab/application') {
+        return { JupyterLab: MockJupyterLab };
+      }
+      if (id === '@jupyterlab/services') {
+        return { IConnectionStatus: {}, IServiceManager: {} };
+      }
+      if (id in staticExtensions) {
+        return staticExtensions[id];
+      }
+      throw new Error(`Unexpected require: ${id}`);
+    },
+    window: {
+      _JUPYTERLAB: Object.fromEntries(
+        Object.entries(modules).map(([scope, extensionModules]) => [
+          scope,
+          {
+            get: async (module: string) => {
+              moduleRequests.push(`${scope}:${module}`);
+              const value = extensionModules[module];
+              return value instanceof Promise ? value : () => value;
             }
-          ]
-        }
-      }
-    };
-
-    class MockJupyterPluginRegistry implements IPluginRegistry {
-      registeredPlugins = registeredPlugins;
-
-      registerPlugins(plugins: ITestPlugin[]): void {
-        this.registeredPlugins.push(...plugins);
-      }
-
-      resolveOptionalService(): Promise<null> {
-        return Promise.resolve(null);
-      }
-
-      resolveRequiredService(): Promise<Record<string, never>> {
-        return Promise.resolve({});
-      }
-    }
-
-    class MockJupyterLab {
-      info: ITestInfo;
-      restored: Promise<void>;
-
-      constructor(options: IJupyterLabOptions) {
-        labOptions = options;
-        const info: ITestInfo = {
-          availablePlugins: options.availablePlugins,
-          disabled: {
-            matches: [...options.disabled.matches],
-            patterns: [...options.disabled.patterns]
-          },
-          addAvailablePlugins: (plugins: IPluginInfo[]) => {
-            info.availablePlugins.push(...plugins);
-          },
-          addDisabledPluginIds: (pluginIds: string[]) => {
-            info.disabled.matches.push(...pluginIds);
           }
-        };
-        this.info = info;
-        labInfo = info;
-        this.restored = new Promise<void>(resolve => {
-          resolveRestored = resolve;
-        });
-      }
-
-      start(): void {
-        return;
-      }
-    }
-
-    const context: ITestContext = {
-      exports: {},
-      PageConfig: {
-        getOption: (name: string) => {
-          switch (name) {
-            case 'browserTest':
-            case 'exposeAppInBrowser':
-            case 'devMode':
-              return 'false';
-            case 'federated_extensions':
-              return JSON.stringify([
-                {
-                  name: '@jupyterlab/enabled-extension',
-                  extension: './extension',
-                  mimeExtension: './mimeExtension',
-                  style: './style'
-                },
-                {
-                  name: '@jupyterlab/disabled-extension',
-                  extension: './extension',
-                  mimeExtension: './mimeExtension',
-                  style: './style'
-                },
-                {
-                  name: '@jupyterlab/plugin-disabled-extension',
-                  extension: './extension'
-                }
-              ]);
-            default:
-              return '';
-          }
-        },
-        Extension: {
-          disabled: [
-            '@jupyterlab/disabled-extension',
-            '@jupyterlab/plugin-disabled-extension:disabled'
-          ],
-          deferred: []
-        }
-      },
-      JupyterPluginRegistry: MockJupyterPluginRegistry,
-      require: (id: string) => {
-        if (id === '@jupyterlab/application') {
-          return { JupyterLab: MockJupyterLab };
-        }
-        if (id === '@jupyterlab/services') {
-          return { IConnectionStatus: {}, IServiceManager: {} };
-        }
-        throw new Error(`Unexpected require: ${id}`);
-      },
-      window: {
-        _JUPYTERLAB: Object.fromEntries(
-          Object.entries(modules).map(([scope, extensionModules]) => [
-            scope,
-            {
-              get: async (module: string) => {
-                moduleRequests.push(`${scope}:${module}`);
-                return () => extensionModules[module];
-              }
-            }
-          ])
-        )
-      },
-      document: {
-        createElement: () => ({
+        ])
+      ),
+      setTimeout: jest.fn()
+    },
+    document: {
+      createElement: () => {
+        browserTestElement = {
           id: '',
           textContent: '',
           className: '',
           style: { display: '' }
-        }),
-        body: {
-          appendChild: () => undefined
-        }
+        };
+        return browserTestElement;
       },
-      console: {
-        error: jest.fn(),
-        warn: jest.fn()
+      body: {
+        appendChild: () => undefined
       }
-    };
+    },
+    console: {
+      error: jest.fn(),
+      warn: jest.fn()
+    },
+    ...timers
+  };
 
-    const main = loadBootstrap(context);
+  return {
+    main: loadBootstrap(context, Object.keys(staticExtensions)),
+    moduleRequests,
+    registeredPlugins,
+    console: context.console,
+    labOptions: () => captured(labOptions, 'JupyterLab options'),
+    labInfo: () => captured(labInfo, 'JupyterLab info'),
+    browserTestElement: () =>
+      captured(browserTestElement, 'Browser test element'),
+    resolveRestored: () => resolveRestored(),
+    resolveAllPluginsActivated: () => resolveAllPluginsActivated()
+  };
+}
 
-    await main();
+describe('bootstrap federated extensions', () => {
+  it('defers package-level disabled extension modules until the application started', async () => {
+    const harness = createHarness({
+      federated: [
+        {
+          name: '@jupyterlab/enabled-extension',
+          extension: './extension',
+          mimeExtension: './mimeExtension',
+          style: './style'
+        },
+        {
+          name: '@jupyterlab/disabled-extension',
+          extension: './extension',
+          mimeExtension: './mimeExtension',
+          style: './style'
+        },
+        {
+          name: '@jupyterlab/plugin-disabled-extension',
+          extension: './extension'
+        }
+      ],
+      disabled: [
+        '@jupyterlab/disabled-extension',
+        '@jupyterlab/plugin-disabled-extension:disabled'
+      ],
+      modules: {
+        '@jupyterlab/enabled-extension': {
+          './extension': {
+            __esModule: true,
+            default: {
+              id: '@jupyterlab/enabled-extension:plugin',
+              description: 'Enabled plugin',
+              autoStart: true
+            }
+          },
+          './mimeExtension': {
+            __esModule: true,
+            default: {
+              id: '@jupyterlab/enabled-extension:mime',
+              description: 'Enabled mime plugin',
+              autoStart: true
+            }
+          },
+          './style': {
+            __esModule: true,
+            default: []
+          }
+        },
+        '@jupyterlab/disabled-extension': {
+          './extension': {
+            __esModule: true,
+            default: {
+              id: '@jupyterlab/disabled-extension:plugin',
+              description: 'Disabled plugin',
+              autoStart: true
+            }
+          },
+          './mimeExtension': {
+            __esModule: true,
+            default: {
+              id: '@jupyterlab/disabled-extension:mime',
+              description: 'Disabled mime plugin',
+              autoStart: true
+            }
+          },
+          './style': {
+            __esModule: true,
+            default: []
+          }
+        },
+        '@jupyterlab/plugin-disabled-extension': {
+          './extension': {
+            __esModule: true,
+            default: [
+              {
+                id: '@jupyterlab/plugin-disabled-extension:disabled',
+                description: 'Plugin disabled by id',
+                autoStart: true
+              },
+              {
+                id: '@jupyterlab/plugin-disabled-extension:enabled',
+                description: 'Sibling plugin',
+                autoStart: true
+              }
+            ]
+          }
+        }
+      }
+    });
 
-    const options = getLabOptions();
+    await harness.main();
 
-    expect(moduleRequests).toEqual([
+    const options = harness.labOptions();
+
+    expect(harness.moduleRequests).toEqual([
       '@jupyterlab/enabled-extension:./extension',
       '@jupyterlab/enabled-extension:./mimeExtension',
       '@jupyterlab/enabled-extension:./style',
       '@jupyterlab/plugin-disabled-extension:./extension'
     ]);
-    expect(registeredPlugins.map(plugin => plugin.id)).toEqual([
+    expect(harness.registeredPlugins.map(plugin => plugin.id)).toEqual([
       '@jupyterlab/enabled-extension:plugin',
       '@jupyterlab/plugin-disabled-extension:enabled'
     ]);
@@ -370,15 +512,28 @@ describe('bootstrap federated extensions', () => {
         plugin => plugin.id === '@jupyterlab/plugin-disabled-extension:disabled'
       )?.enabled
     ).toBe(false);
-    expect(getLabInfo().disabled.matches).toEqual([
+    expect(harness.labInfo().disabled.matches).toEqual([
       '@jupyterlab/plugin-disabled-extension:disabled'
     ]);
 
-    resolveRestored!();
+    // Restoring the application is not enough: the disabled extensions are only
+    // loaded once every plugin, including the deferred ones, was activated.
+    harness.resolveRestored();
     await flushPromises();
     await flushPromises();
 
-    expect(moduleRequests).toEqual([
+    expect(harness.moduleRequests).toEqual([
+      '@jupyterlab/enabled-extension:./extension',
+      '@jupyterlab/enabled-extension:./mimeExtension',
+      '@jupyterlab/enabled-extension:./style',
+      '@jupyterlab/plugin-disabled-extension:./extension'
+    ]);
+
+    harness.resolveAllPluginsActivated();
+    await flushPromises();
+    await flushPromises();
+
+    expect(harness.moduleRequests).toEqual([
       '@jupyterlab/enabled-extension:./extension',
       '@jupyterlab/enabled-extension:./mimeExtension',
       '@jupyterlab/enabled-extension:./style',
@@ -386,10 +541,10 @@ describe('bootstrap federated extensions', () => {
       '@jupyterlab/disabled-extension:./extension',
       '@jupyterlab/disabled-extension:./mimeExtension'
     ]);
-    expect(moduleRequests).not.toContain(
+    expect(harness.moduleRequests).not.toContain(
       '@jupyterlab/disabled-extension:./style'
     );
-    expect(registeredPlugins.map(plugin => plugin.id)).toEqual([
+    expect(harness.registeredPlugins.map(plugin => plugin.id)).toEqual([
       '@jupyterlab/enabled-extension:plugin',
       '@jupyterlab/plugin-disabled-extension:enabled'
     ]);
@@ -401,7 +556,7 @@ describe('bootstrap federated extensions', () => {
       { id: '@jupyterlab/disabled-extension:plugin', enabled: false },
       { id: '@jupyterlab/disabled-extension:mime', enabled: false }
     ]);
-    expect(getLabInfo().disabled.matches).toEqual([
+    expect(harness.labInfo().disabled.matches).toEqual([
       '@jupyterlab/plugin-disabled-extension:disabled',
       '@jupyterlab/disabled-extension:plugin',
       '@jupyterlab/disabled-extension:mime'
@@ -409,157 +564,153 @@ describe('bootstrap federated extensions', () => {
   });
 
   it('waits for deferred disabled extension load failures in browser test mode', async () => {
-    const moduleRequests: string[] = [];
-    const registeredPlugins: ITestPlugin[] = [];
-    let resolveRestored: () => void;
-    let rejectDeferredModule: (reason: Error) => void;
-    let browserTestElement: ITestElement | null = null;
-
-    function getBrowserTestElement(): ITestElement {
-      if (!browserTestElement) {
-        throw new Error('Browser test element was not created.');
-      }
-      return browserTestElement;
-    }
-
+    let rejectDeferredModule: (reason: Error) => void = () => undefined;
     const deferredModule = new Promise<() => ITestModule>((_, reject) => {
       rejectDeferredModule = reject;
     });
 
-    class MockJupyterPluginRegistry implements IPluginRegistry {
-      registeredPlugins = registeredPlugins;
-
-      registerPlugins(plugins: ITestPlugin[]): void {
-        this.registeredPlugins.push(...plugins);
-      }
-
-      resolveOptionalService(): Promise<null> {
-        return Promise.resolve(null);
-      }
-
-      resolveRequiredService(): Promise<Record<string, never>> {
-        return Promise.resolve({});
-      }
-    }
-
-    class MockJupyterLab {
-      info: ITestInfo;
-      restored: Promise<void>;
-
-      constructor(options: IJupyterLabOptions) {
-        const info: ITestInfo = {
-          availablePlugins: options.availablePlugins,
-          disabled: {
-            matches: [...options.disabled.matches],
-            patterns: [...options.disabled.patterns]
-          },
-          addAvailablePlugins: (plugins: IPluginInfo[]) => {
-            info.availablePlugins.push(...plugins);
-          },
-          addDisabledPluginIds: (pluginIds: string[]) => {
-            info.disabled.matches.push(...pluginIds);
-          }
-        };
-        this.info = info;
-        this.restored = new Promise<void>(resolve => {
-          resolveRestored = resolve;
-        });
-      }
-
-      start(): void {
-        return;
-      }
-    }
-
-    const context: ITestContext = {
-      exports: {},
-      PageConfig: {
-        getOption: (name: string) => {
-          switch (name) {
-            case 'browserTest':
-              return 'true';
-            case 'exposeAppInBrowser':
-            case 'devMode':
-              return 'false';
-            case 'federated_extensions':
-              return JSON.stringify([
-                {
-                  name: '@jupyterlab/failing-disabled-extension',
-                  extension: './extension'
-                }
-              ]);
-            default:
-              return '';
-          }
-        },
-        Extension: {
-          disabled: ['@jupyterlab/failing-disabled-extension'],
-          deferred: []
+    const harness = createHarness({
+      browserTest: true,
+      federated: [
+        {
+          name: '@jupyterlab/failing-disabled-extension',
+          extension: './extension'
         }
-      },
-      JupyterPluginRegistry: MockJupyterPluginRegistry,
-      require: (id: string) => {
-        if (id === '@jupyterlab/application') {
-          return { JupyterLab: MockJupyterLab };
+      ],
+      disabled: ['@jupyterlab/failing-disabled-extension'],
+      modules: {
+        '@jupyterlab/failing-disabled-extension': {
+          './extension': deferredModule
         }
-        if (id === '@jupyterlab/services') {
-          return { IConnectionStatus: {}, IServiceManager: {} };
-        }
-        throw new Error(`Unexpected require: ${id}`);
-      },
-      window: {
-        _JUPYTERLAB: {
-          '@jupyterlab/failing-disabled-extension': {
-            get: async (module: string) => {
-              moduleRequests.push(
-                `@jupyterlab/failing-disabled-extension:${module}`
-              );
-              return deferredModule;
-            }
-          }
-        },
-        setTimeout: jest.fn()
-      },
-      document: {
-        createElement: () => {
-          browserTestElement = {
-            id: '',
-            textContent: '',
-            className: '',
-            style: { display: '' }
-          };
-          return browserTestElement;
-        },
-        body: {
-          appendChild: () => undefined
-        }
-      },
-      console: {
-        error: jest.fn(),
-        warn: jest.fn()
       }
-    };
+    });
 
-    const main = loadBootstrap(context);
+    await harness.main();
 
-    await main();
-
-    resolveRestored!();
+    harness.resolveRestored();
+    harness.resolveAllPluginsActivated();
     await flushPromises();
     await flushPromises();
 
-    expect(getBrowserTestElement().className).toBe('');
+    expect(harness.browserTestElement().className).toBe('');
 
-    rejectDeferredModule!(new Error('deferred disabled extension failed'));
+    rejectDeferredModule(new Error('deferred disabled extension failed'));
     await flushPromises();
     await flushPromises();
 
-    expect(moduleRequests).toEqual([
+    expect(harness.moduleRequests).toEqual([
       '@jupyterlab/failing-disabled-extension:./extension'
     ]);
-    expect(getBrowserTestElement().className).toBe('completed');
-    expect(getBrowserTestElement().textContent).toContain(
+    expect(harness.browserTestElement().className).toBe('completed');
+    expect(harness.browserTestElement().textContent).toContain(
       'deferred disabled extension failed'
+    );
+  });
+
+  it('disables every plugin of a package disabled by name', async () => {
+    // Both packages provide a plugin whose id does not start with the package
+    // name, which the plugin id convention discourages but does not prevent.
+    const harness = createHarness({
+      federated: [
+        {
+          name: '@jupyterlab/federated-disabled-extension',
+          extension: './extension'
+        }
+      ],
+      disabled: [
+        '@jupyterlab/federated-disabled-extension',
+        '@jupyterlab/static-disabled-extension'
+      ],
+      staticExtensions: {
+        '@jupyterlab/static-disabled-extension': {
+          __esModule: true,
+          default: [
+            {
+              id: 'static-other-prefix:plugin',
+              description: 'Static plugin with a mismatched id',
+              autoStart: true
+            },
+            {
+              id: '@jupyterlab/static-disabled-extension:plugin',
+              description: 'Static plugin',
+              autoStart: true
+            }
+          ]
+        }
+      },
+      modules: {
+        '@jupyterlab/federated-disabled-extension': {
+          './extension': {
+            __esModule: true,
+            default: [
+              {
+                id: 'federated-other-prefix:plugin',
+                description: 'Federated plugin with a mismatched id',
+                autoStart: true
+              },
+              {
+                id: '@jupyterlab/federated-disabled-extension:plugin',
+                description: 'Federated plugin',
+                autoStart: true
+              }
+            ]
+          }
+        }
+      }
+    });
+
+    await harness.main();
+
+    // No plugin of the statically linked package is registered, including the
+    // one whose id does not start with the package name.
+    expect(harness.registeredPlugins).toEqual([]);
+    expect(
+      harness
+        .labOptions()
+        .availablePlugins.map(plugin => [plugin.id, plugin.enabled])
+    ).toEqual([
+      ['static-other-prefix:plugin', false],
+      ['@jupyterlab/static-disabled-extension:plugin', false]
+    ]);
+    expect(harness.labInfo().disabled.matches).toEqual([
+      'static-other-prefix:plugin',
+      '@jupyterlab/static-disabled-extension:plugin'
+    ]);
+    // Only the plugin which does not follow the id convention is reported, as
+    // the user cannot tell from the config that it was disabled too.
+    expect(harness.console.warn).toHaveBeenCalledTimes(1);
+    expect(harness.console.warn).toHaveBeenCalledWith(
+      expect.stringContaining('static-other-prefix:plugin')
+    );
+
+    harness.resolveRestored();
+    harness.resolveAllPluginsActivated();
+    await flushPromises();
+    await flushPromises();
+
+    // The federated package is treated the same way once it is loaded.
+    expect(harness.moduleRequests).toEqual([
+      '@jupyterlab/federated-disabled-extension:./extension'
+    ]);
+    expect(harness.registeredPlugins).toEqual([]);
+    expect(
+      harness
+        .labOptions()
+        .availablePlugins.filter(
+          plugin =>
+            plugin.extension === '@jupyterlab/federated-disabled-extension'
+        )
+        .map(plugin => [plugin.id, plugin.enabled])
+    ).toEqual([
+      ['federated-other-prefix:plugin', false],
+      ['@jupyterlab/federated-disabled-extension:plugin', false]
+    ]);
+    expect(harness.labInfo().disabled.matches).toContain(
+      'federated-other-prefix:plugin'
+    );
+    expect(harness.console.warn).toHaveBeenCalledTimes(2);
+    expect(harness.console.warn).toHaveBeenLastCalledWith(
+      expect.stringContaining('federated-other-prefix:plugin')
     );
   });
 });
