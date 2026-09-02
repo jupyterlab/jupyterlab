@@ -6,6 +6,14 @@ import { expect } from '@playwright/test';
 import type { CDPSession, Page } from '@playwright/test';
 
 type ObjectCounts = Record<string, number>;
+type ObjectCountGrowth = Record<
+  string,
+  {
+    baseline: number;
+    actual: number;
+    retained: number;
+  }
+>;
 
 interface IRemoteObject {
   objectId?: string;
@@ -130,20 +138,16 @@ export class MemoryLeakHelper {
       .poll(
         async () => {
           const actual = await this.countObjects(names);
-          return names
-            .filter(name => actual[name] > expected[name])
-            .map(name => `${name}: ${actual[name]} > ${expected[name]}`)
-            .join('\n');
+          return this._objectCountGrowth(expected, actual, names);
         },
         {
           intervals: [250, 500, 1000],
           timeout: options.timeout ?? 15000,
-          message: `Expected object counts not to exceed baseline for ${names.join(
-            ', '
-          )}`
+          message:
+            'Expected object counts not to exceed baseline after garbage collection.'
         }
       )
-      .toBe('');
+      .toEqual({});
   }
 
   /**
@@ -213,6 +217,25 @@ export class MemoryLeakHelper {
         objectId: objectsObjectId
       });
     }
+  }
+
+  private _objectCountGrowth(
+    expected: ObjectCounts,
+    actual: ObjectCounts,
+    names: string[]
+  ): ObjectCountGrowth {
+    const growth: ObjectCountGrowth = {};
+    for (const name of names) {
+      if (actual[name] <= expected[name]) {
+        continue;
+      }
+      growth[name] = {
+        baseline: expected[name],
+        actual: actual[name],
+        retained: actual[name] - expected[name]
+      };
+    }
+    return growth;
   }
 
   private _throwIfEvaluationFailed(
