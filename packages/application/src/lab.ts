@@ -323,6 +323,17 @@ export namespace JupyterLab {
      * Application connection status.
      */
     connectionStatus?: IConnectionStatus;
+
+    /**
+     * Information about plugins which becomes available only after the
+     * application started, for example the plugins of disabled federated
+     * extensions, whose modules are loaded once the application is idle.
+     *
+     * Once the promise resolves, the plugins are appended to
+     * `info.availablePlugins`, the ids of the disabled ones are added to
+     * `info.disabled.matches`, and `info.availablePluginsChanged` is emitted.
+     */
+    pendingAvailablePlugins?: Promise<IPluginInfo[]>;
   }
 
   /**
@@ -363,19 +374,11 @@ export namespace JupyterLab {
     readonly availablePlugins: IPluginInfo[];
 
     /**
-     * A signal emitted when available plugin metadata changes.
+     * A signal emitted when `availablePlugins` changes, for example once the
+     * plugins of disabled federated extensions, which are loaded after
+     * startup, are known.
      */
     readonly availablePluginsChanged?: ISignal<IInfo, void>;
-
-    /**
-     * Add available plugin metadata and notify listeners.
-     */
-    addAvailablePlugins?(plugins: IPluginInfo[]): void;
-
-    /**
-     * Add disabled plugin IDs discovered after startup.
-     */
-    addDisabledPluginIds?(pluginIds: string[]): void;
 
     /**
      * Whether files are cached on the server.
@@ -401,12 +404,17 @@ export namespace JupyterLab {
   export class Info implements IInfo {
     constructor({
       connectionStatus,
+      pendingAvailablePlugins,
       ...options
-    }: Partial<IInfo> & { connectionStatus?: IConnectionStatus } = {}) {
+    }: Partial<IInfo> & {
+      connectionStatus?: IConnectionStatus;
+      pendingAvailablePlugins?: Promise<IPluginInfo[]>;
+    } = {}) {
       this._connectionStatus = connectionStatus ?? new ConnectionStatus();
 
-      this._availablePlugins =
-        options.availablePlugins ?? JupyterLab.defaultInfo.availablePlugins;
+      this._availablePlugins = options.availablePlugins ?? [
+        ...JupyterLab.defaultInfo.availablePlugins
+      ];
       this._devMode = options.devMode ?? JupyterLab.defaultInfo.devMode;
       this._deferred = JSON.parse(
         JSON.stringify(options.deferred ?? JupyterLab.defaultInfo.deferred)
@@ -423,6 +431,30 @@ export namespace JupyterLab {
       );
       this.isConnected =
         options.isConnected ?? JupyterLab.defaultInfo.isConnected;
+
+      if (pendingAvailablePlugins) {
+        pendingAvailablePlugins
+          .then(plugins => {
+            if (plugins.length === 0) {
+              return;
+            }
+            const disabled = new Set(this._disabled.matches);
+            for (const plugin of plugins) {
+              this._availablePlugins.push(plugin);
+              if (!plugin.enabled && !disabled.has(plugin.id)) {
+                this._disabled.matches.push(plugin.id);
+                disabled.add(plugin.id);
+              }
+            }
+            this._availablePluginsChanged.emit();
+          })
+          .catch(reason => {
+            console.error(
+              'Error when loading the pending plugin information:',
+              reason
+            );
+          });
+      }
     }
 
     /**
@@ -433,37 +465,10 @@ export namespace JupyterLab {
     }
 
     /**
-     * A signal emitted when available plugin metadata changes.
+     * A signal emitted when `availablePlugins` changes.
      */
     get availablePluginsChanged(): ISignal<IInfo, void> {
       return this._availablePluginsChanged;
-    }
-
-    /**
-     * Add available plugin metadata and notify listeners.
-     */
-    addAvailablePlugins(plugins: IPluginInfo[]): void {
-      if (plugins.length === 0) {
-        return;
-      }
-      this._availablePlugins.push(...plugins);
-      this._availablePluginsChanged.emit(void 0);
-    }
-
-    /**
-     * Add disabled plugin IDs discovered after startup.
-     */
-    addDisabledPluginIds(pluginIds: string[]): void {
-      if (pluginIds.length === 0) {
-        return;
-      }
-      const disabled = new Set(this._disabled.matches);
-      for (const pluginId of pluginIds) {
-        if (!disabled.has(pluginId)) {
-          this._disabled.matches.push(pluginId);
-          disabled.add(pluginId);
-        }
-      }
     }
 
     /**

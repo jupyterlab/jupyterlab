@@ -4,6 +4,7 @@
 import fs from 'fs';
 import path from 'path';
 import vm from 'vm';
+import { PromiseDelegate } from '@lumino/coreutils';
 
 interface ITestPlugin {
   id: string;
@@ -44,6 +45,7 @@ interface ITestElement {
 
 interface IJupyterLabOptions {
   availablePlugins: IPluginInfo[];
+  pendingAvailablePlugins: Promise<IPluginInfo[]>;
   disabled: { matches: string[]; patterns: unknown[] };
   deferred: { matches: string[]; patterns: unknown[] };
   mimeExtensions: ITestPlugin[];
@@ -52,13 +54,6 @@ interface IJupyterLabOptions {
 
 interface IPluginRegistry {
   registeredPlugins: ITestPlugin[];
-}
-
-interface ITestInfo {
-  availablePlugins: IPluginInfo[];
-  disabled: { matches: string[]; patterns: unknown[] };
-  addAvailablePlugins: (plugins: IPluginInfo[]) => void;
-  addDisabledPluginIds: (pluginIds: string[]) => void;
 }
 
 interface IExports {
@@ -75,6 +70,7 @@ interface ITestContext {
     };
   };
   JupyterPluginRegistry: new () => IPluginRegistry;
+  PromiseDelegate: typeof PromiseDelegate;
   require: (id: string) => unknown;
   window: {
     _JUPYTERLAB: Record<
@@ -224,10 +220,6 @@ interface IHarness {
    */
   labOptions: () => IJupyterLabOptions;
   /**
-   * The information the application exposes.
-   */
-  labInfo: () => ITestInfo;
-  /**
    * The element a browser test reports through.
    */
   browserTestElement: () => ITestElement;
@@ -250,7 +242,6 @@ function createHarness(options: IHarnessOptions = {}): IHarness {
   const modules = options.modules ?? {};
   const staticExtensions = options.staticExtensions ?? {};
   let labOptions: IJupyterLabOptions | null = null;
-  let labInfo: ITestInfo | null = null;
   let browserTestElement: ITestElement | null = null;
   let resolveRestored: () => void = () => undefined;
   let resolveAllPluginsActivated: () => void = () => undefined;
@@ -279,27 +270,11 @@ function createHarness(options: IHarnessOptions = {}): IHarness {
   }
 
   class MockJupyterLab {
-    info: ITestInfo;
     restored: Promise<void>;
     allPluginsActivated: Promise<void>;
 
     constructor(appOptions: IJupyterLabOptions) {
       labOptions = appOptions;
-      const info: ITestInfo = {
-        availablePlugins: appOptions.availablePlugins,
-        disabled: {
-          matches: [...appOptions.disabled.matches],
-          patterns: [...appOptions.disabled.patterns]
-        },
-        addAvailablePlugins: (plugins: IPluginInfo[]) => {
-          info.availablePlugins.push(...plugins);
-        },
-        addDisabledPluginIds: (pluginIds: string[]) => {
-          info.disabled.matches.push(...pluginIds);
-        }
-      };
-      this.info = info;
-      labInfo = info;
       this.restored = new Promise<void>(resolve => {
         resolveRestored = resolve;
       });
@@ -335,6 +310,7 @@ function createHarness(options: IHarnessOptions = {}): IHarness {
       }
     },
     JupyterPluginRegistry: MockJupyterPluginRegistry,
+    PromiseDelegate,
     require: (id: string) => {
       if (id === '@jupyterlab/application') {
         return { JupyterLab: MockJupyterLab };
@@ -389,7 +365,6 @@ function createHarness(options: IHarnessOptions = {}): IHarness {
     registeredPlugins,
     console: context.console,
     labOptions: () => captured(labOptions, 'JupyterLab options'),
-    labInfo: () => captured(labInfo, 'JupyterLab info'),
     browserTestElement: () =>
       captured(browserTestElement, 'Browser test element'),
     resolveRestored: () => resolveRestored(),
@@ -512,7 +487,7 @@ describe('bootstrap federated extensions', () => {
         plugin => plugin.id === '@jupyterlab/plugin-disabled-extension:disabled'
       )?.enabled
     ).toBe(false);
-    expect(harness.labInfo().disabled.matches).toEqual([
+    expect(options.disabled.matches).toEqual([
       '@jupyterlab/plugin-disabled-extension:disabled'
     ]);
 
@@ -548,18 +523,39 @@ describe('bootstrap federated extensions', () => {
       '@jupyterlab/enabled-extension:plugin',
       '@jupyterlab/plugin-disabled-extension:enabled'
     ]);
-    expect(
-      options.availablePlugins
-        .filter(plugin => plugin.extension === '@jupyterlab/disabled-extension')
-        .map(plugin => ({ id: plugin.id, enabled: plugin.enabled }))
-    ).toEqual([
-      { id: '@jupyterlab/disabled-extension:plugin', enabled: false },
-      { id: '@jupyterlab/disabled-extension:mime', enabled: false }
+    // The plugins of the disabled extensions reach the application through
+    // the promise it was constructed with, as disabled plugins.
+    expect(await options.pendingAvailablePlugins).toEqual([
+      {
+        id: '@jupyterlab/disabled-extension:plugin',
+        description: 'Disabled plugin',
+        requires: [],
+        optional: [],
+        provides: null,
+        autoStart: true,
+        enabled: false,
+        extension: '@jupyterlab/disabled-extension'
+      },
+      {
+        id: '@jupyterlab/disabled-extension:mime',
+        description: 'Disabled mime plugin',
+        requires: [],
+        optional: [],
+        provides: null,
+        autoStart: true,
+        enabled: false,
+        extension: '@jupyterlab/disabled-extension'
+      }
     ]);
-    expect(harness.labInfo().disabled.matches).toEqual([
+    // The lists the application was constructed with are left to it.
+    expect(options.availablePlugins.map(plugin => plugin.id)).toEqual([
+      '@jupyterlab/enabled-extension:mime',
+      '@jupyterlab/enabled-extension:plugin',
       '@jupyterlab/plugin-disabled-extension:disabled',
-      '@jupyterlab/disabled-extension:plugin',
-      '@jupyterlab/disabled-extension:mime'
+      '@jupyterlab/plugin-disabled-extension:enabled'
+    ]);
+    expect(options.disabled.matches).toEqual([
+      '@jupyterlab/plugin-disabled-extension:disabled'
     ]);
   });
 
@@ -672,7 +668,7 @@ describe('bootstrap federated extensions', () => {
       ['static-other-prefix:plugin', false],
       ['@jupyterlab/static-disabled-extension:plugin', false]
     ]);
-    expect(harness.labInfo().disabled.matches).toEqual([
+    expect(harness.labOptions().disabled.matches).toEqual([
       'static-other-prefix:plugin',
       '@jupyterlab/static-disabled-extension:plugin'
     ]);
@@ -694,20 +690,14 @@ describe('bootstrap federated extensions', () => {
     ]);
     expect(harness.registeredPlugins).toEqual([]);
     expect(
-      harness
-        .labOptions()
-        .availablePlugins.filter(
-          plugin =>
-            plugin.extension === '@jupyterlab/federated-disabled-extension'
-        )
-        .map(plugin => [plugin.id, plugin.enabled])
+      (await harness.labOptions().pendingAvailablePlugins).map(plugin => [
+        plugin.id,
+        plugin.enabled
+      ])
     ).toEqual([
       ['federated-other-prefix:plugin', false],
       ['@jupyterlab/federated-disabled-extension:plugin', false]
     ]);
-    expect(harness.labInfo().disabled.matches).toContain(
-      'federated-other-prefix:plugin'
-    );
     expect(harness.console.warn).toHaveBeenCalledTimes(2);
     expect(harness.console.warn).toHaveBeenLastCalledWith(
       expect.stringContaining('federated-other-prefix:plugin')

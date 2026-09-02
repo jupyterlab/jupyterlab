@@ -4,6 +4,7 @@
  */
 
 import { PageConfig, JupyterPluginRegistry} from '@jupyterlab/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
 import './style.js';
 
@@ -231,17 +232,18 @@ export async function main() {
     }
   }
 
+  /**
+   * Collect the metadata of the plugins of an extension disabled as a whole.
+   */
   function collectDisabledPlugins(extension) {
     const plugins = [];
-    const pluginIds = [];
     for (let plugin of getPlugins(extension)) {
       if (!isPluginDisabled(plugin.id)) {
         warnAboutPackageLevelDisable(plugin.id, extension.__scope__);
       }
       plugins.push(createPluginInfo(plugin, extension, true));
-      pluginIds.push(plugin.id);
     }
-    return { pluginIds, plugins };
+    return plugins;
   }
 
   /**
@@ -278,14 +280,11 @@ export async function main() {
       deferredDisabledFederatedModules.map(data => createModule(data.name, data.module))
     );
     const disabledPlugins = [];
-    const disabledPluginIds = [];
 
     deferredDisabledFederatedPlugins.forEach(p => {
       if (p.status === "fulfilled") {
         try {
-          const pluginInfo = collectDisabledPlugins(p.value);
-          disabledPlugins.push(...pluginInfo.plugins);
-          disabledPluginIds.push(...pluginInfo.pluginIds);
+          disabledPlugins.push(...collectDisabledPlugins(p.value));
         } catch (e) {
           console.error(e);
         }
@@ -294,19 +293,7 @@ export async function main() {
       }
     });
 
-    const addDisabledPluginIds = lab.info.addDisabledPluginIds?.bind(lab.info);
-    if (addDisabledPluginIds) {
-      addDisabledPluginIds(disabledPluginIds);
-    } else {
-      disabled.push(...disabledPluginIds);
-    }
-
-    const addAvailablePlugins = lab.info.addAvailablePlugins?.bind(lab.info);
-    if (addAvailablePlugins) {
-      addAvailablePlugins(disabledPlugins);
-    } else {
-      allPlugins.push(...disabledPlugins);
-    }
+    return disabledPlugins;
   }
 
   // Handle the registered mime extensions.
@@ -378,6 +365,11 @@ export async function main() {
   const connectionStatus = await pluginRegistry.resolveOptionalService(IConnectionStatus);
   const serviceManager = await pluginRegistry.resolveRequiredService(IServiceManager);
 
+  // The plugins of the disabled federated extensions are only known once the
+  // application started; the application adds them to its info once this
+  // promise resolves.
+  const disabledFederatedPlugins = new PromiseDelegate();
+
   const lab = new JupyterLab({
     pluginRegistry,
     serviceManager,
@@ -393,7 +385,8 @@ export async function main() {
       patterns: deferredExtensions
         .map(function (val) { return val.raw; })
     },
-    availablePlugins: allPlugins
+    availablePlugins: allPlugins,
+    pendingAvailablePlugins: disabledFederatedPlugins.promise
   });
 
   // 4. Start the application, which will activate the other plugins
@@ -402,12 +395,13 @@ export async function main() {
   // Wait for all plugins, including the deferred ones, to be activated and for
   // the browser to be idle, so that loading the disabled extensions does not
   // compete with the work the application does while starting.
-  const deferredDisabledFederatedPluginsReady = lab.allPluginsActivated
+  lab.allPluginsActivated
     .then(whenIdle)
-    .then(() => loadDeferredDisabledFederatedPlugins());
-  deferredDisabledFederatedPluginsReady.catch(reason => {
-    console.error('Error when loading disabled federated extensions:', reason);
-  });
+    .then(loadDeferredDisabledFederatedPlugins)
+    .then(
+      plugins => disabledFederatedPlugins.resolve(plugins),
+      reason => disabledFederatedPlugins.reject(reason)
+    );
 
   // Expose global app instance when in dev mode or when toggled explicitly.
   var exposeAppInBrowser = (PageConfig.getOption('exposeAppInBrowser') || '').toLowerCase() === 'true';
@@ -419,7 +413,7 @@ export async function main() {
 
   // Handle a browser test.
   if (browserTest.toLowerCase() === 'true') {
-    deferredDisabledFederatedPluginsReady
+    disabledFederatedPlugins.promise
       .then(function() { report(errors); })
       .catch(function(reason) { report([`RestoreError: ${reason.message}`]); });
 
