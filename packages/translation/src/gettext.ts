@@ -124,7 +124,7 @@ export interface IOptions {
  */
 interface ITOptions {
   /**
-  * Whether to use the plural form.
+   * Whether to use the plural form.
    */
   pluralForm?: boolean;
 
