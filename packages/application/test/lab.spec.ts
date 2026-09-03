@@ -4,9 +4,8 @@
 import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import { JupyterLab, LayoutRestorer } from '@jupyterlab/application';
 import { StateDB } from '@jupyterlab/statedb';
-import { signalToPromise } from '@jupyterlab/testing';
 import { CommandRegistry } from '@lumino/commands';
-import { PromiseDelegate } from '@lumino/coreutils';
+import { Signal } from '@lumino/signaling';
 import type { DockPanel } from '@lumino/widgets';
 
 describe('plugins', () => {
@@ -97,29 +96,24 @@ describe('JupyterLab.Info', () => {
     };
   }
 
-  async function flushPromises(): Promise<void> {
-    await new Promise<void>(resolve => {
-      setTimeout(resolve, 0);
-    });
-  }
-
-  describe('#pendingAvailablePlugins', () => {
-    it('should add the plugins and emit once they are known', async () => {
-      const pending = new PromiseDelegate<JupyterLab.IPluginInfo[]>();
+  describe('#availablePluginsAdded', () => {
+    it('should add the announced plugins and emit', () => {
+      const added = new Signal<unknown, JupyterLab.IPluginInfo[]>({});
       const info = new JupyterLab.Info({
         availablePlugins: [pluginInfo('@jupyterlab/a-extension:plugin', true)],
         disabled: { patterns: ['@jupyterlab/b-extension'], matches: [] },
-        pendingAvailablePlugins: pending.promise
+        availablePluginsAdded: added
       });
-      const changed = signalToPromise(info.availablePluginsChanged);
+      const slot = jest.fn();
+      info.availablePluginsChanged.connect(slot);
 
-      pending.resolve([
+      added.emit([
         pluginInfo('@jupyterlab/b-extension:plugin', false),
         pluginInfo('@jupyterlab/c-extension:plugin', true)
       ]);
-      const [sender] = await changed;
 
-      expect(sender).toBe(info);
+      expect(slot).toHaveBeenCalledTimes(1);
+      expect(slot.mock.calls[0][0]).toBe(info);
       expect(info.availablePlugins.map(plugin => plugin.id)).toEqual([
         '@jupyterlab/a-extension:plugin',
         '@jupyterlab/b-extension:plugin',
@@ -128,59 +122,55 @@ describe('JupyterLab.Info', () => {
       expect(info.disabled.matches).toEqual(['@jupyterlab/b-extension:plugin']);
     });
 
-    it('should not repeat a disabled plugin id', async () => {
+    it('should add plugins announced more than once', () => {
+      const added = new Signal<unknown, JupyterLab.IPluginInfo[]>({});
+      const info = new JupyterLab.Info({ availablePluginsAdded: added });
+      const slot = jest.fn();
+      info.availablePluginsChanged.connect(slot);
+
+      added.emit([pluginInfo('@jupyterlab/a-extension:plugin', true)]);
+      added.emit([pluginInfo('@jupyterlab/b-extension:plugin', false)]);
+
+      expect(slot).toHaveBeenCalledTimes(2);
+      expect(info.availablePlugins.map(plugin => plugin.id)).toEqual([
+        '@jupyterlab/a-extension:plugin',
+        '@jupyterlab/b-extension:plugin'
+      ]);
+      expect(info.disabled.matches).toEqual(['@jupyterlab/b-extension:plugin']);
+    });
+
+    it('should not repeat a disabled plugin id', () => {
+      const added = new Signal<unknown, JupyterLab.IPluginInfo[]>({});
       const info = new JupyterLab.Info({
         disabled: { patterns: [], matches: ['@jupyterlab/b-extension:plugin'] },
-        pendingAvailablePlugins: Promise.resolve([
-          pluginInfo('@jupyterlab/b-extension:plugin', false)
-        ])
+        availablePluginsAdded: added
       });
-      await signalToPromise(info.availablePluginsChanged);
+
+      added.emit([pluginInfo('@jupyterlab/b-extension:plugin', false)]);
 
       expect(info.disabled.matches).toEqual(['@jupyterlab/b-extension:plugin']);
     });
 
-    it('should not emit when no plugin was pending', async () => {
-      const info = new JupyterLab.Info({
-        pendingAvailablePlugins: Promise.resolve([])
-      });
+    it('should not emit when no plugin was announced', () => {
+      const added = new Signal<unknown, JupyterLab.IPluginInfo[]>({});
+      const info = new JupyterLab.Info({ availablePluginsAdded: added });
       const slot = jest.fn();
       info.availablePluginsChanged.connect(slot);
-      await flushPromises();
+
+      added.emit([]);
 
       expect(slot).not.toHaveBeenCalled();
       expect(info.availablePlugins).toEqual([]);
     });
 
-    it('should not add the plugins to the default info', async () => {
-      const info = new JupyterLab.Info({
-        pendingAvailablePlugins: Promise.resolve([
-          pluginInfo('@jupyterlab/a-extension:plugin', true)
-        ])
-      });
-      await signalToPromise(info.availablePluginsChanged);
+    it('should not add the plugins to the default info', () => {
+      const added = new Signal<unknown, JupyterLab.IPluginInfo[]>({});
+      const info = new JupyterLab.Info({ availablePluginsAdded: added });
+
+      added.emit([pluginInfo('@jupyterlab/a-extension:plugin', true)]);
 
       expect(info.availablePlugins).toHaveLength(1);
       expect(JupyterLab.defaultInfo.availablePlugins).toEqual([]);
-    });
-
-    it('should report a failure to get the plugins', async () => {
-      const error = jest
-        .spyOn(console, 'error')
-        .mockImplementation(() => undefined);
-      const slot = jest.fn();
-      const info = new JupyterLab.Info({
-        pendingAvailablePlugins: Promise.reject(new Error('not loaded'))
-      });
-      info.availablePluginsChanged.connect(slot);
-      await flushPromises();
-
-      expect(error).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({ message: 'not loaded' })
-      );
-      expect(slot).not.toHaveBeenCalled();
-      error.mockRestore();
     });
   });
 });

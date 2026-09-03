@@ -4,7 +4,7 @@
  */
 
 import { PageConfig, JupyterPluginRegistry} from '@jupyterlab/coreutils';
-import { PromiseDelegate } from '@lumino/coreutils';
+import { Signal } from '@lumino/signaling';
 
 import './style.js';
 
@@ -366,9 +366,9 @@ export async function main() {
   const serviceManager = await pluginRegistry.resolveRequiredService(IServiceManager);
 
   // The plugins of the disabled federated extensions are only known once the
-  // application started; the application adds them to its info once this
-  // promise resolves.
-  const disabledFederatedPlugins = new PromiseDelegate();
+  // application started; the application adds them to its info when they are
+  // announced through this signal.
+  const availablePluginsAdded = new Signal({});
 
   const lab = new JupyterLab({
     pluginRegistry,
@@ -386,7 +386,7 @@ export async function main() {
         .map(function (val) { return val.raw; })
     },
     availablePlugins: allPlugins,
-    pendingAvailablePlugins: disabledFederatedPlugins.promise
+    availablePluginsAdded
   });
 
   // 4. Start the application, which will activate the other plugins
@@ -395,13 +395,15 @@ export async function main() {
   // Wait for all plugins, including the deferred ones, to be activated and for
   // the browser to be idle, so that loading the disabled extensions does not
   // compete with the work the application does while starting.
-  lab.allPluginsActivated
+  const disabledFederatedPluginsLoaded = lab.allPluginsActivated
     .then(whenIdle)
     .then(loadDeferredDisabledFederatedPlugins)
-    .then(
-      plugins => disabledFederatedPlugins.resolve(plugins),
-      reason => disabledFederatedPlugins.reject(reason)
-    );
+    .then(plugins => {
+      availablePluginsAdded.emit(plugins);
+    });
+  disabledFederatedPluginsLoaded.catch(reason => {
+    console.error('Error when loading disabled federated extensions:', reason);
+  });
 
   // Expose global app instance when in dev mode or when toggled explicitly.
   var exposeAppInBrowser = (PageConfig.getOption('exposeAppInBrowser') || '').toLowerCase() === 'true';
@@ -413,7 +415,7 @@ export async function main() {
 
   // Handle a browser test.
   if (browserTest.toLowerCase() === 'true') {
-    disabledFederatedPlugins.promise
+    disabledFederatedPluginsLoaded
       .then(function() { report(errors); })
       .catch(function(reason) { report([`RestoreError: ${reason.message}`]); });
 

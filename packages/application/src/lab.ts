@@ -325,15 +325,16 @@ export namespace JupyterLab {
     connectionStatus?: IConnectionStatus;
 
     /**
-     * Information about plugins which becomes available only after the
+     * A signal announcing plugins which become known only after the
      * application started, for example the plugins of disabled federated
      * extensions, whose modules are loaded once the application is idle.
      *
-     * Once the promise resolves, the plugins are appended to
-     * `info.availablePlugins`, the ids of the disabled ones are added to
-     * `info.disabled.matches`, and `info.availablePluginsChanged` is emitted.
+     * On each emission, the plugins are appended to `info.availablePlugins`,
+     * the ids of the disabled ones are added to `info.disabled.matches`, and
+     * `info.availablePluginsChanged` is emitted. An emission before the
+     * application is constructed is not seen.
      */
-    pendingAvailablePlugins?: Promise<IPluginInfo[]>;
+    availablePluginsAdded?: ISignal<unknown, IPluginInfo[]>;
   }
 
   /**
@@ -404,11 +405,11 @@ export namespace JupyterLab {
   export class Info implements IInfo {
     constructor({
       connectionStatus,
-      pendingAvailablePlugins,
+      availablePluginsAdded,
       ...options
     }: Partial<IInfo> & {
       connectionStatus?: IConnectionStatus;
-      pendingAvailablePlugins?: Promise<IPluginInfo[]>;
+      availablePluginsAdded?: ISignal<unknown, IPluginInfo[]>;
     } = {}) {
       this._connectionStatus = connectionStatus ?? new ConnectionStatus();
 
@@ -432,29 +433,7 @@ export namespace JupyterLab {
       this.isConnected =
         options.isConnected ?? JupyterLab.defaultInfo.isConnected;
 
-      if (pendingAvailablePlugins) {
-        pendingAvailablePlugins
-          .then(plugins => {
-            if (plugins.length === 0) {
-              return;
-            }
-            const disabled = new Set(this._disabled.matches);
-            for (const plugin of plugins) {
-              this._availablePlugins.push(plugin);
-              if (!plugin.enabled && !disabled.has(plugin.id)) {
-                this._disabled.matches.push(plugin.id);
-                disabled.add(plugin.id);
-              }
-            }
-            this._availablePluginsChanged.emit();
-          })
-          .catch(reason => {
-            console.error(
-              'Error when loading the pending plugin information:',
-              reason
-            );
-          });
-      }
+      availablePluginsAdded?.connect(this._onAvailablePluginsAdded, this);
     }
 
     /**
@@ -521,6 +500,24 @@ export namespace JupyterLab {
      */
     get mimeExtensions(): IRenderMime.IExtensionModule[] {
       return this._mimeExtensions;
+    }
+
+    /**
+     * Add the announced plugins to the available plugins.
+     */
+    private _onAvailablePluginsAdded(_: unknown, plugins: IPluginInfo[]): void {
+      if (plugins.length === 0) {
+        return;
+      }
+      const disabled = new Set(this._disabled.matches);
+      for (const plugin of plugins) {
+        this._availablePlugins.push(plugin);
+        if (!plugin.enabled && !disabled.has(plugin.id)) {
+          this._disabled.matches.push(plugin.id);
+          disabled.add(plugin.id);
+        }
+      }
+      this._availablePluginsChanged.emit();
     }
 
     private _devMode: boolean;

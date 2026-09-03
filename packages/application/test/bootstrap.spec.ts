@@ -4,7 +4,8 @@
 import fs from 'fs';
 import path from 'path';
 import vm from 'vm';
-import { PromiseDelegate } from '@lumino/coreutils';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 interface ITestPlugin {
   id: string;
@@ -45,7 +46,7 @@ interface ITestElement {
 
 interface IJupyterLabOptions {
   availablePlugins: IPluginInfo[];
-  pendingAvailablePlugins: Promise<IPluginInfo[]>;
+  availablePluginsAdded: ISignal<unknown, IPluginInfo[]>;
   disabled: { matches: string[]; patterns: unknown[] };
   deferred: { matches: string[]; patterns: unknown[] };
   mimeExtensions: ITestPlugin[];
@@ -70,7 +71,7 @@ interface ITestContext {
     };
   };
   JupyterPluginRegistry: new () => IPluginRegistry;
-  PromiseDelegate: typeof PromiseDelegate;
+  Signal: typeof Signal;
   require: (id: string) => unknown;
   window: {
     _JUPYTERLAB: Record<
@@ -220,6 +221,11 @@ interface IHarness {
    */
   labOptions: () => IJupyterLabOptions;
   /**
+   * The batches of plugins announced through `availablePluginsAdded`, in
+   * order.
+   */
+  announcedPlugins: IPluginInfo[][];
+  /**
    * The element a browser test reports through.
    */
   browserTestElement: () => ITestElement;
@@ -239,6 +245,7 @@ interface IHarness {
 function createHarness(options: IHarnessOptions = {}): IHarness {
   const moduleRequests: string[] = [];
   const registeredPlugins: ITestPlugin[] = [];
+  const announcedPlugins: IPluginInfo[][] = [];
   const modules = options.modules ?? {};
   const staticExtensions = options.staticExtensions ?? {};
   let labOptions: IJupyterLabOptions | null = null;
@@ -275,6 +282,11 @@ function createHarness(options: IHarnessOptions = {}): IHarness {
 
     constructor(appOptions: IJupyterLabOptions) {
       labOptions = appOptions;
+      // The application connects when it is constructed, so an earlier
+      // emission would be lost the same way.
+      appOptions.availablePluginsAdded.connect((_, plugins) => {
+        announcedPlugins.push(plugins);
+      });
       this.restored = new Promise<void>(resolve => {
         resolveRestored = resolve;
       });
@@ -310,7 +322,7 @@ function createHarness(options: IHarnessOptions = {}): IHarness {
       }
     },
     JupyterPluginRegistry: MockJupyterPluginRegistry,
-    PromiseDelegate,
+    Signal,
     require: (id: string) => {
       if (id === '@jupyterlab/application') {
         return { JupyterLab: MockJupyterLab };
@@ -363,6 +375,7 @@ function createHarness(options: IHarnessOptions = {}): IHarness {
     main: loadBootstrap(context, Object.keys(staticExtensions)),
     moduleRequests,
     registeredPlugins,
+    announcedPlugins,
     console: context.console,
     labOptions: () => captured(labOptions, 'JupyterLab options'),
     browserTestElement: () =>
@@ -503,6 +516,7 @@ describe('bootstrap federated extensions', () => {
       '@jupyterlab/enabled-extension:./style',
       '@jupyterlab/plugin-disabled-extension:./extension'
     ]);
+    expect(harness.announcedPlugins).toEqual([]);
 
     harness.resolveAllPluginsActivated();
     await flushPromises();
@@ -524,8 +538,9 @@ describe('bootstrap federated extensions', () => {
       '@jupyterlab/plugin-disabled-extension:enabled'
     ]);
     // The plugins of the disabled extensions reach the application through
-    // the promise it was constructed with, as disabled plugins.
-    expect(await options.pendingAvailablePlugins).toEqual([
+    // the signal it was constructed with, as one batch of disabled plugins.
+    expect(harness.announcedPlugins).toHaveLength(1);
+    expect(harness.announcedPlugins[0]).toEqual([
       {
         id: '@jupyterlab/disabled-extension:plugin',
         description: 'Disabled plugin',
@@ -690,13 +705,14 @@ describe('bootstrap federated extensions', () => {
     ]);
     expect(harness.registeredPlugins).toEqual([]);
     expect(
-      (await harness.labOptions().pendingAvailablePlugins).map(plugin => [
-        plugin.id,
-        plugin.enabled
-      ])
+      harness.announcedPlugins.map(batch =>
+        batch.map(plugin => [plugin.id, plugin.enabled])
+      )
     ).toEqual([
-      ['federated-other-prefix:plugin', false],
-      ['@jupyterlab/federated-disabled-extension:plugin', false]
+      [
+        ['federated-other-prefix:plugin', false],
+        ['@jupyterlab/federated-disabled-extension:plugin', false]
+      ]
     ]);
     expect(harness.console.warn).toHaveBeenCalledTimes(2);
     expect(harness.console.warn).toHaveBeenLastCalledWith(
