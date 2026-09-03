@@ -118,7 +118,12 @@ test.describe('Notebook memory lifecycle', () => {
       expect(await page.notebook.runCell(0, { inplace: true })).toBe(true);
 
       const firstOutput = await page.notebook.getCellOutputLocator(0);
-      await expect(firstOutput!).toContainText('baseline');
+      if (!firstOutput) {
+        throw new Error(
+          'Expected an output area after running the baseline cell.'
+        );
+      }
+      await expect(firstOutput).toContainText('baseline');
 
       await captureNotebookPrototypes(probe, [
         'CodeCell',
