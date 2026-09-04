@@ -572,6 +572,17 @@ class TestExtension(AppHandlerTest):
         assert not check_extension(name, app_options=options)
         assert check_extension(name, installed=True, app_options=options)
 
+    def test_disable_extension_does_not_lock_it(self):
+        options = AppOptions(app_dir=self.tempdir())
+        assert install_extension(self.mock_extension, app_options=options) is True
+        name = self.pkg_names["extension"]
+        assert disable_extension(name, app_options=options) is True
+        # Reading the info goes through a new handler, which runs the
+        # `disabledExtensions` -> `lockedExtensions` migration from 4.0
+        info = get_app_info(app_options=options)
+        assert info["disabled"].get(name) is True
+        assert info["locked"].get(name, False) is False
+
     def test_enable_extension(self):
         options = AppOptions(app_dir=self.tempdir())
         assert install_extension(self.mock_extension, app_options=options) is True
