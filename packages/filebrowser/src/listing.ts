@@ -408,7 +408,26 @@ export class DirListing extends Widget {
       return Promise.resolve(undefined);
     }
 
-    const basePath = this._model.path;
+    let basePath = this._model.path;
+    const selectedPaths = Object.keys(this.selection);
+
+    if (selectedPaths.length > 0) {
+      const items = this._sortedItems;
+      const focusedItem = items[this._focusIndex];
+
+      const target =
+        focusedItem && this.selection[focusedItem.path]
+          ? focusedItem
+          : items.find(item => item.path === selectedPaths.slice(-1)[0]);
+
+      if (
+        target?.type === 'directory' &&
+        !this._clipboard.includes(target.path)
+      ) {
+        basePath = target.path;
+      }
+    }
+
     const promises: Promise<Contents.IModel>[] = [];
 
     for (const path of this._clipboard) {
