@@ -171,6 +171,8 @@ test.describe('General', () => {
     });
 
     await page.notebook.createNew();
+    // Give the initial cell a deterministic ID so the Common Tools
+    // property inspector metadata is stable in the screenshot.
     await page.evaluate(cellId => {
       const notebookPanel = window.galata.app.shell
         .currentWidget as NotebookPanel;
