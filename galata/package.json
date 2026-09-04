@@ -40,6 +40,7 @@
     "test:debug": "PWDEBUG=1 playwright test",
     "test:doc": "jlpm test --project documentation",
     "test:doc:update": "jlpm test --project documentation --update-snapshots",
+    "test:memory-leak": "jlpm test --project memory-leak --workers=1",
     "test:report": "playwright show-report",
     "test:update": "jlpm test:base:update ; jlpm test:benchmark:update"
   },

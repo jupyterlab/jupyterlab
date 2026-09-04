@@ -74,6 +74,16 @@ jobs:
             suite: csp
             shard: 1
             shards: 1
+          - browser: chromium
+            project: memory-leak
+            suite: memory-leak
+            shard: 1
+            shards: 2
+          - browser: chromium
+            project: memory-leak
+            suite: memory-leak
+            shard: 2
+            shards: 2
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -97,7 +107,8 @@ jobs:
             const byProject = {
               documentation: [],
               galata: [],
-              jupyterlab: []
+              jupyterlab: [],
+              memoryLeak: []
             };
 
             for (const file of files) {
@@ -116,16 +127,19 @@ jobs:
                 byProject.galata.push(galataPath);
               } else if (filename.startsWith('galata/test/jupyterlab/')) {
                 byProject.jupyterlab.push(galataPath);
+              } else if (filename.startsWith('galata/test/memory-leak/')) {
+                byProject.memoryLeak.push(galataPath);
               }
             }
 
             core.info(
-              `Modified test files: documentation=${byProject.documentation.length}, galata=${byProject.galata.length}, jupyterlab=${byProject.jupyterlab.length}`
+              `Modified test files: documentation=${byProject.documentation.length}, galata=${byProject.galata.length}, jupyterlab=${byProject.jupyterlab.length}, memory-leak=${byProject.memoryLeak.length}`
             );
 
             core.setOutput('documentation', JSON.stringify(byProject.documentation));
             core.setOutput('galata', JSON.stringify(byProject.galata));
             core.setOutput('jupyterlab', JSON.stringify(byProject.jupyterlab));
+            core.setOutput('memory_leak', JSON.stringify(byProject.memoryLeak));
 
       - name: Checkout demo project
         if: ${{ matrix.project == 'documentation' }}
@@ -209,6 +223,7 @@ jobs:
           MODIFIED_DOC_TESTS: ${{ steps.modified-tests.outputs.documentation || '[]' }}
           MODIFIED_GALATA_TESTS: ${{ steps.modified-tests.outputs.galata || '[]' }}
           MODIFIED_JUPYTERLAB_TESTS: ${{ steps.modified-tests.outputs.jupyterlab || '[]' }}
+          MODIFIED_MEMORY_LEAK_TESTS: ${{ steps.modified-tests.outputs.memory_leak || '[]' }}
         run: |
           cd core/galata
           set +e  # we want to move the reports even if we fail
@@ -223,6 +238,9 @@ jobs:
           fi
 
           TEST_ARGS=(--project ${{ matrix.project }} --shard ${{ matrix.shard }}/${{ matrix.shards }})
+          if [[ "${{ matrix.project }}" == "memory-leak" ]]; then
+            TEST_ARGS+=(--workers=1)
+          fi
           if [[ -n "${TEST_PATTERN}" ]]; then
             TEST_ARGS+=(--grep "${TEST_PATTERN}")
           fi
@@ -259,6 +277,9 @@ jobs:
               jupyterlab)
                 MODIFIED_TESTS_JSON="${MODIFIED_JUPYTERLAB_TESTS}"
                 ;;
+              memory-leak)
+                MODIFIED_TESTS_JSON="${MODIFIED_MEMORY_LEAK_TESTS}"
+                ;;
             esac
 
             MODIFIED_TEST_FILES=()
@@ -275,6 +296,9 @@ jobs:
               echo "Running modified tests with video recording enabled:"
               printf '  - %s\n' "${MODIFIED_TEST_FILES[@]}"
               MODIFIED_TEST_ARGS=(--project=${{ matrix.project }})
+              if [[ "${{ matrix.project }}" == "memory-leak" ]]; then
+                MODIFIED_TEST_ARGS+=(--workers=1)
+              fi
               MODIFIED_TEST_ARGS+=("${MODIFIED_TEST_FILES[@]}")
               PLAYWRIGHT_BLOB_OUTPUT_DIR=blob-report-modified \
               PLAYWRIGHT_JSON_OUTPUT_FILE=test-results-replay/report.json \
