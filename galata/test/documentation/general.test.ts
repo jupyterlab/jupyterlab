@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import type { NotebookPanel } from '@jupyterlab/notebook';
 import path from 'path';
 import {
   ensureMathTypeset,
@@ -30,6 +31,8 @@ test.use({
 });
 
 test.describe('General', () => {
+  const COMMON_TOOLS_CELL_ID = 'right-sidebar-common-tools-cell';
+
   test('Welcome', async ({ page }) => {
     await galata.Mock.freezeContentLastModified(page, filterContent);
     await page.goto();
@@ -168,6 +171,37 @@ test.describe('General', () => {
     });
 
     await page.notebook.createNew();
+    // Give the initial cell a deterministic ID so the Common Tools
+    // property inspector metadata is stable in the screenshot.
+    await page.evaluate(cellId => {
+      const notebookPanel = window.galata.app.shell
+        .currentWidget as NotebookPanel;
+      const notebook = notebookPanel.content;
+      const activeCell = notebook.activeCell;
+      const activeCellIndex = notebook.activeCellIndex;
+
+      if (!notebookPanel.model || !activeCell || activeCellIndex < 0) {
+        throw new Error(
+          'No active cell available for Common Tools screenshot.'
+        );
+      }
+
+      const cellJSON = activeCell.model.toJSON();
+      const sharedModel = notebookPanel.model.sharedModel;
+      sharedModel.transact(() => {
+        sharedModel.deleteCell(activeCellIndex);
+        sharedModel.insertCell(activeCellIndex, {
+          ...cellJSON,
+          id: cellId
+        });
+      });
+      notebook.activeCellIndex = activeCellIndex;
+    }, COMMON_TOOLS_CELL_ID);
+    await page.waitForFunction(cellId => {
+      const notebookPanel = window.galata.app.shell
+        .currentWidget as NotebookPanel;
+      return notebookPanel.content.activeCell?.model.id === cellId;
+    }, COMMON_TOOLS_CELL_ID);
     await page.click('[title="Property Inspector"]');
     await page.sidebar.setWidth(251, 'right');
 
