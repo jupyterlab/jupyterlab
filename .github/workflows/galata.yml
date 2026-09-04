@@ -173,12 +173,6 @@ jobs:
           bash ./scripts/ci_install.sh
         working-directory: core
 
-      - name: Install ipykernel pre-release that supports subshells (TEMPORARY)
-        if: ${{ matrix.project != 'documentation' }}
-        run: |
-          uv pip install --system --upgrade --pre "ipykernel<=7.0.0a1"
-        working-directory: core
-
       - name: Launch JupyterLab
         run: |
           set -ex
