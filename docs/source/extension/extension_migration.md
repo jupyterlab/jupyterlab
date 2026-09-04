@@ -8,6 +8,14 @@
 
 ## JupyterLab 4.6 to 4.7 (not released yet)
 
+### Behavior updates
+
+- Listing an extension package name in `disabledExtensions` now disables every plugin that
+  package provides. Before, a plugin whose id did not start with the package name stayed
+  enabled, so a package not following the plugin id convention could not be disabled as a
+  whole. Each such plugin is named in a browser console warning. To keep it enabled, list
+  the plugin ids to disable in `disabledExtensions` instead of the package name.
+
 ### API updates
 
 - Xterm.js, used by `@jupyterlab/terminal`, was upgraded from 5.x to 6.x, along with the

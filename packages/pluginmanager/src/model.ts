@@ -92,6 +92,7 @@ export namespace PluginListModel {
   /** A subset of `JupyterLab.IInfo` interface (defined to reduce API surface) */
   export interface IPluginData {
     readonly availablePlugins: JupyterLab.IPluginInfo[];
+    readonly availablePluginsChanged?: ISignal<unknown, void>;
   }
   /**
    * The initialization options for a plugins list model.
@@ -132,6 +133,10 @@ export class PluginListModel extends VDomModel {
     this._query = options.query || '';
     this._isDisclaimed = options.isDisclaimed ?? false;
     this._extraLockedPlugins = options.extraLockedPlugins ?? [];
+    this._pluginData.availablePluginsChanged?.connect(
+      this._onAvailablePluginsChanged,
+      this
+    );
     this.refresh()
       .then(() => this._ready.resolve())
       .catch(e => this._ready.reject(e));
@@ -140,6 +145,20 @@ export class PluginListModel extends VDomModel {
 
   get available(): ReadonlyArray<IEntry> {
     return [...this._available.values()];
+  }
+
+  /**
+   * Dispose the plugin list model.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._pluginData.availablePluginsChanged?.disconnect(
+      this._onAvailablePluginsChanged,
+      this
+    );
+    super.dispose();
   }
 
   /**
@@ -418,6 +437,13 @@ export class PluginListModel extends VDomModel {
       return true;
     }
     return false;
+  }
+
+  private _onAvailablePluginsChanged(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    void this.refresh();
   }
 
   /**
