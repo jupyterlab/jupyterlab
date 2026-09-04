@@ -8,7 +8,7 @@ import type { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { MimeModel } from '@jupyterlab/rendermime';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
-import type { PartialJSONObject } from '@lumino/coreutils';
+import type { PartialJSONObject, PartialJSONValue } from '@lumino/coreutils';
 import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
@@ -144,8 +144,20 @@ export class MimeContent extends Widget {
     if (this._dataType === 'string') {
       data[this.mimeType] = model.toString();
     } else {
-      data[this.mimeType] = model.toJSON();
+      // `model.toJSON()` parses the document source, which throws when the
+      // content is not valid JSON. Surface that as an inline error in the
+      // widget (and keep the document open) rather than letting the render
+      // pass fail silently. See https://github.com/jupyterlab/jupyterlab/issues/4490
+      try {
+        data[this.mimeType] = model.toJSON();
+      } catch (reason) {
+        this._setError(
+          this._trans.__('The file does not contain valid JSON: %1', `${reason}`)
+        );
+        return;
+      }
     }
+    this._setError(null);
     const mimeModel = new MimeModel({
       data,
       callback: this._changeCallback,
@@ -175,6 +187,39 @@ export class MimeContent extends Widget {
   }
 
   /**
+   * Show or clear an inline error banner in the widget.
+   *
+   * @param message - The error message to show, or `null` to clear it.
+   *
+   * #### Notes
+   * While an error is shown, the (now stale) rendered content is hidden so
+   * that the viewer reflects the current error state rather than the last
+   * successfully rendered value. The content is shown again once the error
+   * is cleared and the document is valid.
+   */
+  private _setError(message: string | null): void {
+    if (message === null) {
+      if (this._errorNode) {
+        this._errorNode.remove();
+        this._errorNode = null;
+      }
+      this.removeClass('jp-MimeDocument-error');
+      this.renderer.show();
+      return;
+    }
+    if (!this._errorNode) {
+      this._errorNode = document.createElement('div');
+      this._errorNode.className = 'jp-MimeDocument-errorBanner';
+      this._errorNode.setAttribute('role', 'alert');
+      this.node.insertBefore(this._errorNode, this.node.firstChild);
+    }
+    this._errorNode.textContent = message;
+    this.addClass('jp-MimeDocument-error');
+    // Hide the stale rendered content while the source is invalid.
+    this.renderer.hide();
+  }
+
+  /**
    * A bound change callback.
    */
   private _changeCallback = (
@@ -188,12 +233,19 @@ export class MimeContent extends Widget {
       if (data !== this._context.model.toString()) {
         this._context.model.fromString(data);
       }
-    } else if (
-      data !== null &&
-      data !== undefined &&
-      !JSONExt.deepEqual(data, this._context.model.toJSON())
-    ) {
-      this._context.model.fromJSON(data);
+    } else if (data !== null && data !== undefined) {
+      // `model.toJSON()` throws when the current source is not valid JSON.
+      // In that case the renderer callback is operating on stale data, so
+      // skip applying the write rather than letting the parse error escape.
+      let current: PartialJSONValue;
+      try {
+        current = this._context.model.toJSON();
+      } catch {
+        return;
+      }
+      if (!JSONExt.deepEqual(data, current)) {
+        this._context.model.fromJSON(data);
+      }
     }
   };
 
@@ -206,6 +258,7 @@ export class MimeContent extends Widget {
   private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null;
   private _ready = new PromiseDelegate<void>();
   private _dataType: 'string' | 'json';
+  private _errorNode: HTMLDivElement | null = null;
   private _isRendering = false;
   private _renderRequested = false;
 }
