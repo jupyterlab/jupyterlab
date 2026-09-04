@@ -62,6 +62,22 @@ the classic Jupyter Notebook. The keyboard shortcuts of the classic
 Notebook continue to work (with command and edit mode). However, a
 number of new things are possible with notebooks in JupyterLab.
 
+## Links to Files
+
+Links in Markdown cells can open files that are available to JupyterLab. Use
+paths relative to the notebook when possible, for example:
+
+```markdown
+[Configuration](../config/settings.json)
+[Project README](../../README.md)
+```
+
+JupyterLab resolves relative paths from the directory containing the notebook.
+Paths that start with `/` are resolved from the Jupyter server root when the
+server supports path resolution, so relative paths are usually more portable.
+Links to external URLs, such as `https://example.com`, are opened as external
+links rather than as files in JupyterLab.
+
 ## Edit Mode vs Command Mode
 
 JupyterLab notebooks operate in two primary modes: **Edit Mode** and **Command Mode**.
