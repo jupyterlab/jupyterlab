@@ -57,6 +57,12 @@ const CODE_RUNNER = 'jpCodeRunner';
 const UNDOER = 'jpUndoer';
 
 /**
+ * The data attribute recording what the most recent context menu event of the
+ * notebook happened over: `cell` or `notebook`.
+ */
+const CONTEXT_MENU_TARGET = 'jpContextMenuTarget';
+
+/**
  * The class name added to notebook widgets.
  */
 const NB_CLASS = 'jp-Notebook';
@@ -3163,6 +3169,12 @@ export class Notebook extends StaticNotebook {
    * Handle `contextmenu` event.
    */
   private _evtContextMenuCapture(event: PointerEvent): void {
+    const [target, index] = this._findEventTargetAndCell(event);
+
+    // Record what the context menu was opened over; this runs before the
+    // application builds the menu, so items can be scoped with a selector.
+    this.node.dataset[CONTEXT_MENU_TARGET] = index === -1 ? 'notebook' : 'cell';
+
     // Allow the event to propagate un-modified if the user
     // is holding the shift-key (and probably requesting
     // the native context menu).
@@ -3170,7 +3182,6 @@ export class Notebook extends StaticNotebook {
       return;
     }
 
-    const [target, index] = this._findEventTargetAndCell(event);
     const widget = this.widgets[index];
 
     if (widget && widget.editorWidget?.node.contains(target)) {
