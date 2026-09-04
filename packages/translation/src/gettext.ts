@@ -12,7 +12,6 @@
 | Distributed under the terms of the Modified MIT License.
 | See: https://github.com/DefinitelyTyped/DefinitelyTyped
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { DEFAULT_LANGUAGE_CODE } from './tokens';
 import { normalizeDomain } from './utils';
@@ -20,7 +19,15 @@ import { normalizeDomain } from './utils';
 /**
  * A plural form function.
  */
-export type PluralForm = (n: number) => number;
+export type PluralForm = (n: number) => IPluralResult;
+
+/**
+ * Plural form evaluation result.
+ */
+export interface IPluralResult {
+  nplurals: number;
+  plural: number;
+}
 
 /**
  * Metadata for a language pack.
@@ -117,10 +124,9 @@ export interface IOptions {
  */
 interface ITOptions {
   /**
-   * String describing the plural of the given language.
-   * See: https://www.gnu.org/software/gettext/manual/html_node/Translating-plural-forms.html
+   * Whether to use the plural form.
    */
-  pluralForm?: string;
+  pluralForm?: boolean;
 
   /**
    * Plural form function.
@@ -131,6 +137,16 @@ interface ITOptions {
    * Language locale. Example: es_CO, es-CO.
    */
   locale?: string;
+}
+
+type TranslationMessages = IJsonDataMessages | string[];
+
+interface IDefaults {
+  domain: string;
+  locale: string;
+  pluralFunc: PluralForm;
+  contextDelimiter: string;
+  stringsPrefix: string;
 }
 
 /**
@@ -255,14 +271,14 @@ class Gettext {
    * strfmt("%1 dogs are in %2", 7, "the kitchen"); => "7 dogs are in the kitchen"
    * strfmt("I like %1, bananas and %1", "apples"); => "I like apples, bananas and apples"
    */
-  static strfmt(fmt: string, ...args: any[]): string {
+  static strfmt(fmt: string, ...args: unknown[]): string {
     return (
       fmt
         // put space after double % to prevent placeholder replacement of such matches
         .replace(/%%/g, '%% ')
         // replace placeholders
-        .replace(/%(\d+)/g, function (str, p1) {
-          return args[p1 - 1];
+        .replace(/%(\d+)/g, function (str, p1: string) {
+          return String(args[Number(p1) - 1]);
         })
         // replace double % and space with single %
         .replace(/%% /g, '%')
@@ -289,7 +305,9 @@ class Gettext {
     domain = normalizeDomain(domain);
 
     let headers = jsonData[''];
-    let jsonDataCopy = JSON.parse(JSON.stringify(jsonData));
+    let jsonDataCopy = JSON.parse(
+      JSON.stringify(jsonData)
+    ) as IJsonDataMessages;
     delete jsonDataCopy[''];
 
     this.setMessages(
@@ -312,7 +330,7 @@ class Gettext {
    * This is not a private method (starts with an underscore) it is just
    * a shorter and standard way to call these methods.
    */
-  __(msgid: string, ...args: any[]): string {
+  __(msgid: string, ...args: unknown[]): string {
     return this.gettext(msgid, ...args);
   }
 
@@ -330,7 +348,12 @@ class Gettext {
    * This is not a private method (starts with an underscore) it is just
    * a shorter and standard way to call these methods.
    */
-  _n(msgid: string, msgid_plural: string, n: number, ...args: any[]): string {
+  _n(
+    msgid: string,
+    msgid_plural: string,
+    n: number,
+    ...args: unknown[]
+  ): string {
     return this.ngettext(msgid, msgid_plural, n, ...args);
   }
 
@@ -347,7 +370,7 @@ class Gettext {
    * This is not a private method (starts with an underscore) it is just
    * a shorter and standard way to call these methods.
    */
-  _p(msgctxt: string, msgid: string, ...args: any[]): string {
+  _p(msgctxt: string, msgid: string, ...args: unknown[]): string {
     return this.pgettext(msgctxt, msgid, ...args);
   }
 
@@ -371,7 +394,7 @@ class Gettext {
     msgid: string,
     msgid_plural: string,
     n: number,
-    ...args: any[]
+    ...args: unknown[]
   ): string {
     return this.npgettext(msgctxt, msgid, msgid_plural, n, ...args);
   }
@@ -384,7 +407,7 @@ class Gettext {
    *
    * @returns A translated string if found, or the original string.
    */
-  gettext(msgid: string, ...args: any[]): string {
+  gettext(msgid: string, ...args: unknown[]): string {
     return this.dcnpgettext('', '', msgid, '', 0, ...args);
   }
 
@@ -400,7 +423,7 @@ class Gettext {
     msgid: string,
     msgid_plural: string,
     n: number,
-    ...args: any[]
+    ...args: unknown[]
   ): string {
     return this.dcnpgettext('', '', msgid, msgid_plural, n, ...args);
   }
@@ -418,7 +441,7 @@ class Gettext {
    * This is not a private method (starts with an underscore) it is just
    * a shorter and standard way to call these methods.
    */
-  pgettext(msgctxt: string, msgid: string, ...args: any[]): string {
+  pgettext(msgctxt: string, msgid: string, ...args: unknown[]): string {
     return this.dcnpgettext('', msgctxt, msgid, '', 0, ...args);
   }
 
@@ -438,7 +461,7 @@ class Gettext {
     msgid: string,
     msgid_plural: string,
     n: number,
-    ...args: any[]
+    ...args: unknown[]
   ): string {
     return this.dcnpgettext('', msgctxt, msgid, msgid_plural, n, ...args);
   }
@@ -461,38 +484,36 @@ class Gettext {
     msgid: string,
     msgid_plural: string,
     n: number,
-    ...args: any[]
+    ...args: unknown[]
   ): string {
     domain = normalizeDomain(domain) || this._domain;
 
     let translation: Array<string>;
+    let foundTranslation: Array<string> | undefined;
     let key: string = msgctxt
       ? msgctxt + this._contextDelimiter + msgid
       : msgid;
-    let options: any = { pluralForm: false };
+    let options: ITOptions = { pluralForm: false };
     let exist: boolean = false;
-    let locale: string = this._locale;
     let locales = this.expandLocale(this._locale);
 
     for (let i in locales) {
-      locale = locales[i];
-      exist =
-        this._dictionary[domain] &&
-        this._dictionary[domain][locale] &&
-        this._dictionary[domain][locale][key];
+      const locale = locales[i];
+      const message = this.getMessage(domain, locale, key);
 
       // check condition are valid (.length)
       // because it's not possible to define both a singular and a plural form of the same msgid,
       // we need to check that the stored form is the same as the expected one.
       // if not, we'll just ignore the translation and consider it as not translated.
       if (msgid_plural) {
-        exist = exist && this._dictionary[domain][locale][key].length > 1;
+        exist = !!message && message.length > 1;
       } else {
-        exist = exist && this._dictionary[domain][locale][key].length == 1;
+        exist = !!message && message.length == 1;
       }
 
       if (exist) {
         // This ensures that a variation is used.
+        foundTranslation = message;
         options.locale = locale;
         break;
       }
@@ -502,7 +523,7 @@ class Gettext {
       translation = [msgid];
       options.pluralFunc = this._defaults.pluralFunc;
     } else {
-      translation = this._dictionary[domain][locale][key];
+      translation = foundTranslation!;
     }
 
     // Singular form
@@ -540,7 +561,7 @@ class Gettext {
    * @param pluralForm - Plural form string..
    * @returns An function to compute plural forms.
    */
-  private getPluralFunc(pluralForm: string): Function {
+  private getPluralFunc(pluralForm: string): PluralForm {
     // Plural form string regexp
     // taken from https://github.com/Orange-OpenSource/gettext.js/blob/master/lib.gettext.js
     // plural forms list available here http://localization-guide.readthedocs.org/en/latest/l10n/pluralforms.html
@@ -558,12 +579,26 @@ class Gettext {
     // Risk should be reasonable though since we test the pluralForm through regex before
     // taken from https://github.com/Orange-OpenSource/gettext.js/blob/master/lib.gettext.js
     // TODO: should test if https://github.com/soney/jsep present and use it if so
-    return new Function(
+    const pluralFunc = new Function(
       'n',
       'let plural, nplurals; ' +
         pluralForm +
         ' return { nplurals: nplurals, plural: (plural === true ? 1 : (plural ? plural : 0)) };'
-    );
+    ) as PluralForm;
+    return pluralFunc;
+  }
+
+  private getMessage(
+    domain: string,
+    locale: string,
+    key: string
+  ): string[] | undefined {
+    const messages = this._dictionary[domain]?.[locale];
+    if (!messages || Array.isArray(messages)) {
+      return undefined;
+    }
+    const message = messages[key];
+    return Array.isArray(message) ? message : undefined;
   }
 
   /**
@@ -598,7 +633,7 @@ class Gettext {
     messages: Array<string>,
     n: number,
     options: ITOptions,
-    ...args: any[]
+    ...args: unknown[]
   ): string {
     // Singular is very easy, just pass dictionary message through strfmt
     if (!options.pluralForm)
@@ -607,7 +642,7 @@ class Gettext {
         Gettext.strfmt(this.removeContext(messages[0]), ...args)
       );
 
-    let plural;
+    let plural: IPluralResult;
 
     // if a plural func is given, use that one
     if (options.pluralFunc) {
@@ -637,7 +672,7 @@ class Gettext {
       this._stringsPrefix +
       Gettext.strfmt(
         this.removeContext(messages[plural.plural]),
-        ...[n].concat(args)
+        ...[n, ...args]
       )
     );
   }
@@ -669,13 +704,13 @@ class Gettext {
   }
 
   private _stringsPrefix: string;
-  private _pluralForms: any;
-  private _dictionary: any;
+  private _pluralForms: Record<string, string>;
+  private _dictionary: Record<string, Record<string, TranslationMessages>>;
   private _locale: string;
   private _domain: string;
   private _contextDelimiter: string;
-  private _pluralFuncs: any;
-  private _defaults: any;
+  private _pluralFuncs: Record<string, PluralForm>;
+  private _defaults: IDefaults;
 }
 
 export { Gettext };

@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /*eslint no-invalid-regexp: ["error", { "allowConstructorFlags": ["d"] }]*/
 
@@ -14,6 +13,10 @@ import type { Widget } from '@lumino/widgets';
 import type { FileEditor } from '../widget';
 import type { IEditorHeading } from './factory';
 import { EditorTableOfContentsFactory } from './factory';
+
+type RegExpExecArrayWithIndices = RegExpExecArray & {
+  indices: [number, number][];
+};
 
 /**
  * Regular expression to create the outline
@@ -82,7 +85,7 @@ export class PythonTableOfContentsModel extends TableOfContentsModel<
       }
       if (hasKeyword) {
         // Index 0 contains the spaces, index 1 is the keyword group
-        const [start] = (hasKeyword as any).indices[1];
+        const [start] = (hasKeyword as RegExpExecArrayWithIndices).indices[1];
         if (indent === 1 && start > 0) {
           indent = start;
         }
@@ -124,9 +127,9 @@ export class PythonTableOfContentsFactory extends EditorTableOfContentsFactory {
   isApplicable(widget: Widget): boolean {
     const isApplicable = super.isApplicable(widget);
 
-    if (isApplicable) {
-      let mime = (widget as any).content?.model?.mimeType;
-      return (
+    if (isApplicable && Private.isFileEditorWidget(widget)) {
+      let mime = widget.content.model.mimeType;
+      return Boolean(
         mime &&
         (mime === 'application/x-python-code' || mime === 'text/x-python')
       );
@@ -146,5 +149,13 @@ export class PythonTableOfContentsFactory extends EditorTableOfContentsFactory {
     configuration?: TableOfContents.IConfig
   ): PythonTableOfContentsModel {
     return new PythonTableOfContentsModel(widget, configuration);
+  }
+}
+
+namespace Private {
+  export function isFileEditorWidget(
+    widget: Widget
+  ): widget is IDocumentWidget<FileEditor, DocumentRegistry.IModel> {
+    return 'content' in widget;
   }
 }
