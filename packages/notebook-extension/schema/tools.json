@@ -108,6 +108,21 @@
           "/toc/base_numbering": {
             "title": "Table of content - Base number",
             "type": "integer"
+          },
+          "/kernel_lock": {
+            "title": "Notebook kernel",
+            "type": "boolean",
+            "default": false,
+            "oneOf": [
+              {
+                "const": false,
+                "title": "Unlocked"
+              },
+              {
+                "const": true,
+                "title": "Locked"
+              }
+            ]
           }
         }
       },
@@ -116,6 +131,9 @@
           "ui:widget": "select"
         },
         "/deletable": {
+          "ui:widget": "select"
+        },
+        "/kernel_lock": {
           "ui:widget": "select"
         }
       },
@@ -127,6 +145,9 @@
           "cellTypes": ["raw"]
         },
         "/toc/base_numbering": {
+          "metadataLevel": "notebook"
+        },
+        "/kernel_lock": {
           "metadataLevel": "notebook"
         }
       }
