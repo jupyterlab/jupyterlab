@@ -20,25 +20,38 @@ const inline = '$'; // the inline math delimiter
  * (pandoc's smart delimiter rule), otherwise it is left literal so that e.g.
  * a lone currency `$` is not treated as math.
  */
-function isSmartDollarStart(blocks: string[], index: number): boolean {
-  const nextText = blocks.slice(index + 1).join('');
-  return nextText.length > 0 && !/\s/.test(nextText.charAt(0));
+function getNextChar(blocks: string[], index: number): string {
+  for (let i = index + 1; i < blocks.length; i++) {
+    const block = blocks[i];
+    if (block.length > 0) {
+      return block.charAt(0);
+    }
+  }
+  return '';
 }
 
-/**
- * Check whether a `$` at the given block index may close inline math.
- *
- * The closing `$` must have a non-space character immediately to its left and
- * must not be followed immediately by a digit (pandoc's smart-closing rules),
- * so that e.g. "$24 and $27" is not parsed as math.
- */
+function getPrevChar(blocks: string[], index: number): string {
+  for (let i = index - 1; i >= 0; i--) {
+    const block = blocks[i];
+    if (block.length > 0) {
+      return block.charAt(block.length - 1);
+    }
+  }
+  return '';
+}
+
+function isSmartDollarStart(blocks: string[], index: number): boolean {
+  const nextChar = getNextChar(blocks, index);
+  return nextChar !== '' && !/\s/.test(nextChar);
+}
+
 function isSmartDollarEnd(blocks: string[], index: number): boolean {
-  const previousText = blocks.slice(0, index).join('');
-  const nextText = blocks.slice(index + 1).join('');
+  const previousChar = getPrevChar(blocks, index);
+  const nextChar = getNextChar(blocks, index);
   return (
-    previousText.length > 0 &&
-    !/\s/.test(previousText.slice(-1)) &&
-    !/\d/.test(nextText.charAt(0))
+    previousChar !== '' &&
+    !/\s/.test(previousChar) &&
+    !/\d/.test(nextChar)
   );
 }
 
