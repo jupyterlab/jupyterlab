@@ -84,10 +84,10 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
     };
 
     // if available, set the fully-rendered SVG
-    const img = figure.querySelector('img');
+    const svgSource = figure.querySelector('img')?.src.split(',')[1];
 
-    if (img) {
-      const svg = decodeURIComponent(img.src.split(',')[1]);
+    if (svgSource !== undefined) {
+      const svg = decodeURIComponent(svgSource);
       const oldSvg = model.data[SVG_MIME];
       if (svg !== oldSvg) {
         model.setData({

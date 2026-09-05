@@ -470,39 +470,29 @@ class Gettext {
       ? msgctxt + this._contextDelimiter + msgid
       : msgid;
     let options: any = { pluralForm: false };
-    let exist: boolean = false;
-    let locale: string = this._locale;
     let locales = this.expandLocale(this._locale);
+    let foundTranslation: Array<string> | undefined;
 
-    for (let i in locales) {
-      locale = locales[i];
-      exist =
-        this._dictionary[domain] &&
-        this._dictionary[domain][locale] &&
-        this._dictionary[domain][locale][key];
+    for (const locale of locales) {
+      const entry = this._dictionary[domain]?.[locale]?.[key];
 
       // check condition are valid (.length)
       // because it's not possible to define both a singular and a plural form of the same msgid,
       // we need to check that the stored form is the same as the expected one.
       // if not, we'll just ignore the translation and consider it as not translated.
-      if (msgid_plural) {
-        exist = exist && this._dictionary[domain][locale][key].length > 1;
-      } else {
-        exist = exist && this._dictionary[domain][locale][key].length == 1;
-      }
-
-      if (exist) {
+      if (entry && (msgid_plural ? entry.length > 1 : entry.length == 1)) {
         // This ensures that a variation is used.
         options.locale = locale;
+        foundTranslation = entry;
         break;
       }
     }
 
-    if (!exist) {
+    if (!foundTranslation) {
       translation = [msgid];
       options.pluralFunc = this._defaults.pluralFunc;
     } else {
-      translation = this._dictionary[domain][locale][key];
+      translation = foundTranslation;
     }
 
     // Singular form
@@ -512,7 +502,9 @@ class Gettext {
 
     // Plural one
     options.pluralForm = true;
-    let value: Array<string> = exist ? translation : [msgid, msgid_plural];
+    let value: Array<string> = foundTranslation
+      ? translation
+      : [msgid, msgid_plural];
     return this.t(value, n, options, ...args);
   }
 
@@ -575,8 +567,8 @@ class Gettext {
   private removeContext(str: string): string {
     // if there is context, remove it
     if (str.indexOf(this._contextDelimiter) !== -1) {
-      let parts = str.split(this._contextDelimiter);
-      return parts[1];
+      const [, value] = str.split(this._contextDelimiter);
+      return value ?? '';
     }
     return str;
   }
@@ -601,28 +593,28 @@ class Gettext {
     ...args: any[]
   ): string {
     // Singular is very easy, just pass dictionary message through strfmt
+    const singular = messages[0] ?? '';
     if (!options.pluralForm)
       return (
         this._stringsPrefix +
-        Gettext.strfmt(this.removeContext(messages[0]), ...args)
+        Gettext.strfmt(this.removeContext(singular), ...args)
       );
 
     let plural;
+    const locale = options.locale || '';
 
     // if a plural func is given, use that one
     if (options.pluralFunc) {
       plural = options.pluralFunc(n);
 
       // if plural form never interpreted before, do it now and store it
-    } else if (!this._pluralFuncs[options.locale || '']) {
-      this._pluralFuncs[options.locale || ''] = this.getPluralFunc(
-        this._pluralForms[options.locale || '']
-      );
-      plural = this._pluralFuncs[options.locale || ''](n);
-
-      // we have the plural function, compute the plural result
     } else {
-      plural = this._pluralFuncs[options.locale || ''](n);
+      let pluralFunc = this._pluralFuncs[locale];
+      if (!pluralFunc) {
+        pluralFunc = this.getPluralFunc(this._pluralForms[locale]!);
+        this._pluralFuncs[locale] = pluralFunc;
+      }
+      plural = pluralFunc(n);
     }
 
     // If there is a problem with plurals, fallback to singular one
@@ -636,7 +628,7 @@ class Gettext {
     return (
       this._stringsPrefix +
       Gettext.strfmt(
-        this.removeContext(messages[plural.plural]),
+        this.removeContext(messages[plural.plural] ?? singular),
         ...[n].concat(args)
       )
     );

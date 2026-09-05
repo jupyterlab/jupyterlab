@@ -338,7 +338,7 @@ export function compareVersions(
   a: [number, number, number],
   b: [number, number, number]
 ): number {
-  for (let index = 0; index < 3; index++) {
+  for (const index of [0, 1, 2] as const) {
     if (a[index] !== b[index]) {
       return a[index] - b[index];
     }

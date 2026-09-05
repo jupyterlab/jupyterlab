@@ -877,7 +877,7 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
       exportFormats = Object.keys(response ?? {})
         .filter(key => !FORMAT_EXCLUDE.includes(key))
         .map(key => {
-          const formattedKey = key[0].toLocaleUpperCase() + key.slice(1);
+          const formattedKey = key.charAt(0).toLocaleUpperCase() + key.slice(1);
           // Fallback for export formats the server offers but `formatLabels`
           // does not know about, so there is no literal to extract.
           // eslint-disable-next-line jupyter/no-dynamic-translation
@@ -1281,13 +1281,17 @@ const updateRawMimetype: JupyterFrontEndPlugin<void> = {
             value => value.const === key
           ).length > 0;
         if (!mimetypeExists) {
-          const formattedKey = key[0].toLocaleUpperCase() + key.slice(1);
+          const format = response[key];
+          if (format === undefined) {
+            return;
+          }
+          const formattedKey = key.charAt(0).toLocaleUpperCase() + key.slice(1);
           // Fallback for export formats the server offers but `formatLabels`
           // does not know about, so there is no literal to extract.
           // eslint-disable-next-line jupyter/no-dynamic-translation
           const altOption = trans.__(formattedKey);
           const option = formatLabels[key] ? formatLabels[key] : altOption;
-          const mimeTypeValue = response[key].output_mimetype;
+          const mimeTypeValue = format.output_mimetype;
 
           (properties!.oneOf as Array<enumeration>)!.push({
             const: mimeTypeValue,
@@ -1965,7 +1969,7 @@ function activateCodeConsole(
         let curLine = selection.start.line;
         while (
           curLine < editor.lineCount &&
-          !srcLines[curLine].replace(/\s/g, '').length
+          !(srcLines[curLine] ?? '').replace(/\s/g, '').length
         ) {
           curLine += 1;
         }
@@ -1988,7 +1992,7 @@ function activateCodeConsole(
               // we find a block of complete statement containing the current line, great!
               while (
                 lastLine < editor.lineCount &&
-                !srcLines[lastLine].replace(/\s/g, '').length
+                !(srcLines[lastLine] ?? '').replace(/\s/g, '').length
               ) {
                 lastLine += 1;
               }
@@ -2013,10 +2017,10 @@ function activateCodeConsole(
           } else {
             // if we have searched both from first line and from current line and we
             // cannot find anything, we submit the current line.
-            code = srcLines[curLine];
+            code = srcLines[curLine] ?? '';
             while (
               curLine + 1 < editor.lineCount &&
-              !srcLines[curLine + 1].replace(/\s/g, '').length
+              !(srcLines[curLine + 1] ?? '').replace(/\s/g, '').length
             ) {
               curLine += 1;
             }
@@ -5552,7 +5556,8 @@ namespace Private {
     // If there are selections that are not the active cell,
     // this command is confusing, so disable it.
     for (let i = 0; i < content.widgets.length; ++i) {
-      if (content.isSelected(content.widgets[i]) && i !== index) {
+      const cell = content.widgets[i];
+      if (cell && content.isSelected(cell) && i !== index) {
         return false;
       }
     }
@@ -5577,7 +5582,8 @@ namespace Private {
     // If there are selections that are not the active cell,
     // this command is confusing, so disable it.
     for (let i = 0; i < content.widgets.length; ++i) {
-      if (content.isSelected(content.widgets[i]) && i !== index) {
+      const cell = content.widgets[i];
+      if (cell && content.isSelected(cell) && i !== index) {
         return false;
       }
     }
