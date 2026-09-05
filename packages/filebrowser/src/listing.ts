@@ -2282,7 +2282,7 @@ export class DirListing extends Widget {
       this._drag.mimeData.setData(CONTENTS_MIME_RICH, {
         model: item,
         withContent: async () => {
-          return await services.contents.get(item.path);
+          return await services.contents.get(item.path, { content: true });
         }
       } as DirListing.IContentsThunk);
     }
