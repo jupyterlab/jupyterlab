@@ -18,7 +18,13 @@ jobs:
   start-work:
     name: Start work
     if: >
-      (github.event.issue.pull_request || github.event.pull_request) &&
+      (
+        github.event.issue.pull_request ||
+        (
+          github.event.pull_request &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        )
+      ) &&
       (
         contains(github.event.comment.body || github.event.review.body || '', 'would you be so kind as to update galata snapshots please') ||
         contains(github.event.comment.body || github.event.review.body || '', 'would you be so kind as to update example snapshots please') ||
@@ -34,16 +40,19 @@ jobs:
     steps:
       - name: React positively to the triggering comment
         shell: bash -l {0}
-        run: |
-          if [[ "${{ github.event_name }}" == "pull_request_review" ]]; then
-            gh api repos/${{ github.repository }}/pulls/comments/${{ github.event.comment.id }}/reactions --raw-field 'content=+1'
-          elif [[ "${{ github.event_name }}" == "pull_request_review_comment" ]]; then
-            gh api repos/${{ github.repository }}/pulls/comments/${{ github.event.comment.id }}/reactions --raw-field 'content=+1'
-          else
-            gh api repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions --raw-field 'content=+1'
-          fi
         env:
           GH_TOKEN: ${{ secrets.BOT_USER_PAT }}
+          COMMENT_ID: ${{ github.event.comment.id || '' }}
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          if [[ "$EVENT_NAME" == "pull_request_review" ]]; then
+            echo "Skipping reaction for review body; GitHub does not expose a comment reaction endpoint for it."
+          elif [[ "$EVENT_NAME" == "pull_request_review_comment" ]]; then
+            gh api "repos/${REPOSITORY}/pulls/comments/${COMMENT_ID}/reactions" --raw-field 'content=+1'
+          else
+            gh api "repos/${REPOSITORY}/issues/comments/${COMMENT_ID}/reactions" --raw-field 'content=+1'
+          fi
 
   get-snapshot-updates:
     name: Fetch test assets once ready
