@@ -178,6 +178,13 @@ export class RawEditor extends SplitPanel {
   }
 
   /**
+   * The user editor wrapper widget.
+   */
+  get userEditor(): CodeEditorWrapper {
+    return this._user;
+  }
+
+  /**
    * Dispose of the resources held by the raw editor.
    */
   dispose(): void {
