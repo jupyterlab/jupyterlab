@@ -48,10 +48,7 @@ test.describe('General', () => {
     await page.click('text=Open With');
     await page.click('text=Markdown Preview');
 
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
-    await page.dblclick('text=Lorenz.ipynb');
+    await page.notebook.openByPath('notebooks/Lorenz.ipynb');
 
     // Force the Lorenz equations to typeset at their correct size while the
     // notebook is still the active tab. Otherwise MathJax can render them too
@@ -70,9 +67,9 @@ test.describe('General', () => {
     await page.click('#jp-mainmenu-file-new >> text=Console');
     await page.click('button:has-text("Select")');
 
-    await page.dblclick('text=Data.ipynb');
+    await page.notebook.open('Data.ipynb');
 
-    await page.dblclick('text=lorenz.py');
+    await page.filebrowser.open('lorenz.py');
 
     await page.click('div[role="main"] >> text=Lorenz.ipynb');
 
@@ -133,7 +130,7 @@ test.describe('General', () => {
 
     await page.sidebar.setWidth();
 
-    await page.dblclick('[aria-label="File Browser Section"] >> text=data');
+    await page.filebrowser.openDirectory('data');
     // Wait for the `data` folder to load to have something to blur
     await page.locator('text=1024px').waitFor();
 
@@ -359,9 +356,7 @@ test.describe('General', () => {
 
     await page.sidebar.setWidth();
 
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
+    await page.filebrowser.openDirectory('notebooks');
 
     await page.click('text=Lorenz.ipynb', { button: 'right' });
     await page.hover('text=Copy Shareable Link');
@@ -419,10 +414,7 @@ test.describe('General', () => {
     });
 
     // Open jupyterlab.md
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=narrative'
-    );
-    await page.dblclick('text=jupyterlab.md');
+    await page.filebrowser.open('narrative/jupyterlab.md');
 
     // Hide file browser
     await page.click('[title^="File Browser"]');
@@ -441,10 +433,7 @@ test.describe('General', () => {
     await page.sidebar.setWidth();
 
     // Open jupyterlab.md
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=narrative'
-    );
-    await page.dblclick('text=jupyterlab.md');
+    await page.filebrowser.open('narrative/jupyterlab.md');
 
     await page.click('text=Settings');
     await page.click(
@@ -468,10 +457,7 @@ test.describe('General', () => {
     await page.sidebar.setWidth();
 
     // Open Data.ipynb
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
-    await page.dblclick('text=Data.ipynb');
+    await page.notebook.openByPath('notebooks/Data.ipynb');
     await page.menu.clickMenuItem('Edit>Clear Outputs of All Cells');
     await page.notebook.setCell(
       1,
@@ -500,10 +486,7 @@ test.describe('General', () => {
   test('Trust indicator', async ({ page }) => {
     await page.goto();
     // Open Data.ipynb which is not trusted by default
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
-    await page.dblclick('text=Data.ipynb');
+    await page.notebook.openByPath('notebooks/Data.ipynb');
 
     // Wait for the notebook to fully load up to avoid sub-pixel shift on statusbar
     // AND because the "not trusted" status only shows up once untrusted cells are loaded up.
@@ -536,10 +519,7 @@ test.describe('General', () => {
     await page.sidebar.setWidth();
 
     // Open Data.ipynb
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
-    await page.dblclick('text=Data.ipynb');
+    await page.notebook.openByPath('notebooks/Data.ipynb');
 
     const heading = page.locator(
       'h2[data-jupyter-id="Open-a-CSV-file-using-Pandas"]'
@@ -589,10 +569,7 @@ test.describe('General', () => {
     await page.sidebar.setWidth();
 
     // Open Data.ipynb
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
-    await page.dblclick('text=Data.ipynb');
+    await page.notebook.openByPath('notebooks/Data.ipynb');
 
     // Open a terminal
     await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
@@ -633,11 +610,8 @@ test.describe('General', () => {
 
     await setTerminalTitle(page, 'Terminal 1');
 
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
-    await page.dblclick('text=Data.ipynb');
-    await page.dblclick('text=Julia.ipynb');
+    await page.notebook.openByPath('notebooks/Data.ipynb');
+    await page.notebook.open('Julia.ipynb');
 
     await page.click('[title="Running Terminals and Kernels"]');
 

@@ -5,6 +5,11 @@ import { expect, test } from '@playwright/test';
 import { benchmark, galata } from '@jupyterlab/galata';
 import type * as nbformat from '@jupyterlab/nbformat';
 
+// The benchmarks run on the plain Playwright fixture, which does not provide
+// `page.filebrowser`, and the timed blocks must contain the interaction being
+// measured and nothing else.
+/* eslint-disable jupyter/galata-prefer-filebrowser-helper */
+
 const tmpPath = 'test-performance-resize';
 const printNotebook = 'print_output_notebook.ipynb';
 const displayNotebook = 'display_output_notebook.ipynb';
