@@ -111,6 +111,24 @@ test.describe('Notebook Search', () => {
     expect(await overlay.screenshot()).toMatchSnapshot('multi-line-search.png');
   });
 
+  test('Tab from Find focuses Replace when replace is shown', async ({
+    page
+  }) => {
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Replace"]');
+
+    await page.getByPlaceholder('Find').focus();
+    await page.keyboard.press('Tab');
+    await expect(page.getByPlaceholder('Replace')).toBeFocused();
+
+    await page.keyboard.press('Shift+Tab');
+    await expect(page.getByPlaceholder('Find')).toBeFocused();
+
+    await page.getByRole('button', { name: 'Replace All' }).focus();
+    await page.keyboard.press('Tab');
+    await expect(page.getByTitle('Match Case')).toBeFocused();
+  });
+
   test('Populate search box with selected text', async ({ page }) => {
     // Enter first cell
     await page.notebook.enterCellEditingMode(0);
