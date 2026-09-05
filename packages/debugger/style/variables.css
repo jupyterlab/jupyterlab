@@ -22,7 +22,7 @@
 }
 
 .jp-DebuggerVariables-name {
-  color: var(--jp-mirror-editor-variable-color);
+  color: var(--jp-mirror-editor-attribute-color);
   grid-area: name;
 }
 
