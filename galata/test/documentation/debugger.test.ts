@@ -22,7 +22,7 @@ const COLUMN_HEADER_HEIGHT = 20;
 const ROW_HEIGHT = 20;
 const VALUES_ROW = 2;
 
-test.describe('Debugger', () => {
+test.describe.serial('Debugger', () => {
   test('Kernel capability', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
 
@@ -49,7 +49,7 @@ test.describe('Debugger', () => {
     await createNotebook(page);
 
     await page.debugger.switchOn();
-    await page.waitForCondition(() => page.debugger.isOpen());
+    await page.sidebar.openTab('jp-debugger-sidebar');
     await page.sidebar.setWidth(251, 'right');
 
     expect(
@@ -63,7 +63,7 @@ test.describe('Debugger', () => {
     await createNotebook(page);
 
     await page.debugger.switchOn();
-    await page.waitForCondition(() => page.debugger.isOpen());
+    await page.sidebar.openTab('jp-debugger-sidebar');
     await page.sidebar.setWidth(251, 'right');
 
     await setBreakpoint(page);
@@ -117,7 +117,7 @@ test.describe('Debugger', () => {
     await createNotebook(page);
 
     await page.debugger.switchOn();
-    await page.waitForCondition(() => page.debugger.isOpen());
+    await page.sidebar.openTab('jp-debugger-sidebar');
     await page.sidebar.setWidth(251, 'right');
 
     await setBreakpoint(page);
@@ -143,7 +143,7 @@ test.describe('Debugger', () => {
     await createNotebook(page);
 
     await page.debugger.switchOn();
-    await page.waitForCondition(() => page.debugger.isOpen());
+    await page.sidebar.openTab('jp-debugger-sidebar');
     await page.sidebar.setWidth(251, 'right');
 
     await expect(
@@ -253,7 +253,7 @@ test.describe('Debugger', () => {
     await createNotebook(page);
 
     await page.debugger.switchOn();
-    await page.waitForCondition(() => page.debugger.isOpen());
+    await page.sidebar.openTab('jp-debugger-sidebar');
     await page.sidebar.setWidth(275, 'right');
 
     await setBreakpoint(page);
@@ -349,7 +349,7 @@ test.describe('Debugger', () => {
     await createNotebook(page);
 
     await page.debugger.switchOn();
-    await page.waitForCondition(() => page.debugger.isOpen());
+    await page.sidebar.openTab('jp-debugger-sidebar');
     await page.sidebar.setWidth(275, 'right');
 
     await setBreakpoint(page);
@@ -382,7 +382,7 @@ test.describe('Debugger', () => {
     await createNotebook(page);
 
     await page.debugger.switchOn();
-    await page.waitForCondition(() => page.debugger.isOpen());
+    await page.sidebar.openTab('jp-debugger-sidebar');
     await page.sidebar.setWidth(275, 'right');
 
     await setBreakpoint(page);
@@ -423,7 +423,7 @@ test.describe('Debugger', () => {
         await createNotebook(page);
 
         await page.debugger.switchOn();
-        await page.waitForCondition(() => page.debugger.isOpen());
+        await page.sidebar.openTab('jp-debugger-sidebar');
         await page.sidebar.setWidth(275, 'right');
 
         await setBreakpoint(page);
@@ -468,7 +468,7 @@ test.describe('Debugger', () => {
         await createNotebook(page);
 
         await page.debugger.switchOn();
-        await page.waitForCondition(() => page.debugger.isOpen());
+        await page.sidebar.openTab('jp-debugger-sidebar');
 
         await page.notebook.setCell(
           0,
