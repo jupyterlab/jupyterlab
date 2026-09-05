@@ -232,11 +232,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       output: {
         title: trans.__('Search Cell Outputs'),
         description: trans.__('Search in the cell outputs.'),
-        disabledDescription: trans.__(
-          'Search in the cell outputs (not available when replace options are shown).'
-        ),
-        default: false,
-        supportReplace: false
+        default: false
       },
       selection: {
         title:
@@ -254,8 +250,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         description: trans.__(
           'Search only in the selected cells or text (depending on edit/command mode).'
         ),
-        default: false,
-        supportReplace: true
+        default: false
       }
     };
   }
@@ -423,6 +418,15 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._currentProviderIndex = null;
   }
 
+  getCurrentMatch(): ISearchMatch | undefined {
+    if (this._currentProviderIndex != null) {
+      const searchEngine = this._searchProviders[this._currentProviderIndex];
+      const match = searchEngine.getCurrentMatch();
+      return match;
+    }
+    return undefined;
+  }
+
   /**
    * Replace the currently selected match with the provided text
    *
@@ -465,7 +469,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       );
       if (searchEngine.currentMatchIndex === null) {
         // switch to next cell
-        await this.highlightNext(loop, { from: 'previous-match' });
+        await this.highlightNext(loop, {
+          from: 'previous-match',
+          skipReadOnly: true
+        });
       }
     }
 
@@ -691,7 +698,16 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this._currentProviderIndex += atEndOfCurrentCell ? 1 : 0;
     }
     do {
-      const searchEngine = this._searchProviders[this._currentProviderIndex];
+      let searchEngine = this._searchProviders[this._currentProviderIndex];
+
+      while (options?.skipReadOnly && searchEngine.isReadOnlyProvider()) {
+        if (this._currentProviderIndex + 1 < this._searchProviders.length)
+          this._currentProviderIndex += 1;
+        else {
+          this._currentProviderIndex = 0;
+        }
+        searchEngine = this._searchProviders[this._currentProviderIndex];
+      }
 
       const match = reverse
         ? await searchEngine.highlightPrevious(false, options)
