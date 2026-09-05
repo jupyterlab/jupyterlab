@@ -9,8 +9,6 @@ const TRUSTED_SELECTOR = 'svg[data-icon="ui-components:trusted"]';
 const NOT_TRUSTED_SELECTOR = 'svg[data-icon="ui-components:not-trusted"]';
 const PAGER_SCRIPT_MARKER_CLASS = 'jp-pager-script-marker';
 const PAGER_FALLBACK_MARKER_CLASS = 'jp-pager-fallback-marker';
-const PAGER_SCRIPT_MARKER_SELECTOR = `.${PAGER_SCRIPT_MARKER_CLASS}`;
-const PAGER_FALLBACK_MARKER_SELECTOR = `.${PAGER_FALLBACK_MARKER_CLASS}`;
 
 type PagerWindow = Window & { __jpPagerScriptExecuted?: boolean };
 
@@ -126,7 +124,7 @@ test.describe('Notebook Trust', () => {
       ].join('')
     );
 
-    await expect(page.locator(PAGER_FALLBACK_MARKER_SELECTOR)).toContainText(
+    await expect(page.locator(`.${PAGER_FALLBACK_MARKER_CLASS}`)).toContainText(
       'Pager fallback HTML'
     );
     await expect(page.locator('.jp-HelpPanel')).toHaveCount(0);
@@ -160,7 +158,7 @@ test.describe('Notebook Trust', () => {
 
       const helpPanel = page.locator('.jp-HelpPanel');
       await expect(
-        helpPanel.locator(PAGER_SCRIPT_MARKER_SELECTOR)
+        helpPanel.locator(`.${PAGER_SCRIPT_MARKER_CLASS}`)
       ).toContainText('Pager panel HTML');
       await expect(helpPanel.locator('script')).toHaveCount(0);
       expect(await pagerScriptExecuted(page)).toBe(false);
