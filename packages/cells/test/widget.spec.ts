@@ -23,7 +23,6 @@ import { NBTestUtils } from '@jupyterlab/cells/lib/testutils';
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
 import { defaultRenderMime } from '@jupyterlab/rendermime/lib/testutils';
-import type { IExecuteReplyMsg } from '@jupyterlab/services/lib/kernel/messages';
 import {
   framePromise,
   JupyterServer,
@@ -975,9 +974,12 @@ describe('cells/widget', () => {
         expect(widget.promptNode!.textContent).toEqual('[*]:');
         const msg = await future2;
         expect(msg).not.toBeUndefined();
+        if (msg?.content.status !== 'ok') {
+          throw new Error('Expected an ok execute reply');
+        }
 
         expect(widget.promptNode!.textContent).toEqual(
-          `[${(msg as IExecuteReplyMsg).content.execution_count}]:`
+          `[${msg.content.execution_count}]:`
         );
       });
 

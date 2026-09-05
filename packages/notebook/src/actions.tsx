@@ -62,14 +62,15 @@ export class KernelError extends Error {
    * Construct the kernel error.
    */
   constructor(content: KernelMessage.IExecuteReplyMsg['content']) {
-    const errorContent = content as KernelMessage.IReplyErrorContent;
-    const errorName = errorContent.ename;
-    const errorValue = errorContent.evalue;
+    const errorName =
+      content.status === 'error' ? content.ename : 'ExecutionAborted';
+    const errorValue =
+      content.status === 'error' ? content.evalue : 'Execution was aborted';
     super(`KernelReplyNotOK: ${errorName} ${errorValue}`);
 
     this.errorName = errorName;
     this.errorValue = errorValue;
-    this.traceback = errorContent.traceback;
+    this.traceback = content.status === 'error' ? content.traceback : [];
     Object.setPrototypeOf(this, KernelError.prototype);
   }
 }
@@ -2783,7 +2784,9 @@ namespace Private {
           // The future is authoritative for the prompt number; a snapshot
           // taken before completion would be stale (still null). Setting a
           // non-null execution count also flips the state back to 'idle'.
-          cellRef.model.executionCount = reply.content.execution_count;
+          if ('execution_count' in reply.content) {
+            cellRef.model.executionCount = reply.content.execution_count;
+          }
           cellRef.model.executionState = 'idle';
         }
       },
