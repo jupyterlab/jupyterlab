@@ -14,11 +14,10 @@ import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 const inline = '$'; // the inline math delimiter
 
 /**
- * Check whether a `$` at the given block index may open inline math.
+ * Return the first character of the next non-empty block after `index`.
  *
- * The opening `$` must have a non-space character immediately to its right
- * (pandoc's smart delimiter rule), otherwise it is left literal so that e.g.
- * a lone currency `$` is not treated as math.
+ * Used by the smart `$` delimiter helpers to inspect the characters adjacent
+ * to a potential delimiter in the original source.
  */
 function getNextChar(blocks: string[], index: number): string {
   for (let i = index + 1; i < blocks.length; i++) {
