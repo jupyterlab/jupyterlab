@@ -13,6 +13,47 @@ import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 const inline = '$'; // the inline math delimiter
 
+/**
+ * Return the first character of the next non-empty block after `index`.
+ *
+ * Used by the smart `$` delimiter helpers to inspect the characters adjacent
+ * to a potential delimiter in the original source.
+ */
+function getNextChar(blocks: string[], index: number): string {
+  for (let i = index + 1; i < blocks.length; i++) {
+    const block = blocks[i];
+    if (block.length > 0) {
+      return block.charAt(0);
+    }
+  }
+  return '';
+}
+
+function getPrevChar(blocks: string[], index: number): string {
+  for (let i = index - 1; i >= 0; i--) {
+    const block = blocks[i];
+    if (block.length > 0) {
+      return block.charAt(block.length - 1);
+    }
+  }
+  return '';
+}
+
+function isSmartDollarStart(blocks: string[], index: number): boolean {
+  const nextChar = getNextChar(blocks, index);
+  return nextChar !== '' && !/\s/.test(nextChar);
+}
+
+function isSmartDollarEnd(blocks: string[], index: number): boolean {
+  const previousChar = getPrevChar(blocks, index);
+  const nextChar = getNextChar(blocks, index);
+  return (
+    previousChar !== '' &&
+    !/\s/.test(previousChar) &&
+    !/\d/.test(nextChar)
+  );
+}
+
 // MATHSPLIT contains the pattern for math delimiters and special symbols
 // needed for searching for math in the text input.
 const MATHSPLIT =
@@ -32,6 +73,10 @@ export function removeMath(
   // When `false`, a single `$` is left literal (e.g. currency) while `$$`
   // display math and `\(...\)` / `\[...\]` delimiters keep working.
   const dollarInlineMath = options?.dollarInlineMath ?? true;
+  // When `true`, a single `$` only opens or closes inline math when it is
+  // surrounded by non-space characters (and the closing `$` is not followed
+  // by a digit), mirroring pandoc's smart delimiter rules.
+  const smartInlineMath = options?.smartInlineMath ?? true;
   const math: string[] = []; // stores math strings for later
   let start: number | null = null;
   let end: string | null = null;
@@ -89,13 +134,16 @@ export function removeMath(
       //    and balance braces within the math.
       //
       if (block === end) {
-        if (braces) {
+        const smartDollarEnd =
+          smartInlineMath && end === inline && !isSmartDollarEnd(blocks, i);
+        if (braces && !smartDollarEnd) {
           last = i;
-        } else {
+        } else if (!smartDollarEnd) {
           blocks = processMath(start, i, deTilde, math, blocks);
           start = null;
           end = null;
           last = null;
+          braces = 0;
         }
       } else if (block.match(/\n.*\n/)) {
         if (last !== null) {
@@ -116,7 +164,12 @@ export function removeMath(
       //  Look for math start delimiters and when
       //    found, set up the end delimiter.
       //
-      if ((block === inline && dollarInlineMath) || block === '$$') {
+      if (
+        (block === inline &&
+          dollarInlineMath &&
+          (!smartInlineMath || isSmartDollarStart(blocks, i))) ||
+        block === '$$'
+      ) {
         start = i;
         end = block;
         braces = 0;
