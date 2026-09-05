@@ -26,6 +26,16 @@ export class ResizeHandle extends Widget {
    * Dispose the resizer handle.
    */
   dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    // The node can be retained past disposal (e.g. by design-token bindings
+    // on ancestor elements); remove the listeners so the retained DOM does
+    // not keep this widget and everything it references reachable.
+    this.node.removeEventListener('dblclick', this);
+    this.node.removeEventListener('mousedown', this);
+    window.removeEventListener('mousemove', this);
+    window.removeEventListener('mouseup', this);
     this._resizer.dispose();
     super.dispose();
   }
