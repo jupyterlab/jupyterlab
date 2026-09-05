@@ -85,7 +85,9 @@ The left sidebar contains a number of commonly-used tabs including:
 
 The right sidebar contains:
 
-- the property inspector (active in notebooks),
+- the property inspector (active in notebooks), which includes the
+  {ref}`metadata editor <metadata-editor>` for viewing and modifying
+  notebook and cell metadata,
 - the {ref}`debugger <debugger>`.
 
 ```{image} ../images/interface-right.png
