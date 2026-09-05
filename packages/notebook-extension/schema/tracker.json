@@ -694,7 +694,8 @@
       "title": "Notify about code execution if kernel is initializing",
       "description": "Display notification if code cells are run while kernel is initializing.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "tags": ["%UI%"]
     },
     "codeCellConfig": {
       "title": "Code Cell Configuration",
@@ -726,7 +727,8 @@
       "title": "Show input placeholder",
       "description": "Show placeholder text for standard input fields (requires reload)",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "tags": ["%UI%"]
     },
     "inputHistoryScope": {
       "type": "string",
@@ -757,7 +759,8 @@
       "title": "Automatically render markdown when cursor leaves markdown cells",
       "description": "Whether to render markdown cells when the cursor moves out of them.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "tags": ["%UI%"]
     },
     "rawCellConfig": {
       "title": "Raw Cell Configuration",
@@ -772,7 +775,8 @@
       "title": "Scroll past last cell",
       "description": "Whether to be able to scroll so the last cell is at the top of the panel",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "tags": ["%UI%"]
     },
     "recordTiming": {
       "title": "Recording timing",
@@ -791,19 +795,22 @@
       "title": "The maximum number of output cells to be rendered in the output area.",
       "description": "Defines the maximum number of output cells to be rendered in the output area for cells with many outputs. The output area will have a head and the remaining outputs will be trimmed and not displayed unless the user clicks on the information message. Set to 0 to have the complete display.",
       "type": "number",
-      "default": 50
+      "default": 50,
+      "tags": ["%UI%"]
     },
     "scrollHeadingToTop": {
       "title": "Scroll heading to top",
       "description": "Whether to scroll heading to the document top when selecting it in the table of contents.",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "tags": ["%UI%"]
     },
     "showEditorForReadOnlyMarkdown": {
       "title": "Show editor for read-only Markdown cells",
       "description": "Should an editor be shown for read-only markdown",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "tags": ["%UI%"]
     },
     "kernelStatus": {
       "title": "Kernel status icon configuration",
@@ -813,7 +820,8 @@
         "showOnStatusBar": false,
         "showProgress": true,
         "showJumpToRecentExecutionButton": false
-      }
+      },
+      "tags": ["%UI%"]
     },
     "documentWideUndoRedo": {
       "title": "Enable undo/redo actions at the notebook document level.",
@@ -825,7 +833,8 @@
       "type": "boolean",
       "title": "Show hidden cells button if collapsed",
       "description": "If set to true, a button is shown below collapsed headings, indicating how many cells are hidden beneath the collapsed heading.",
-      "default": true
+      "default": true,
+      "tags": ["%UI%"]
     },
     "renderingLayout": {
       "title": "Rendering Layout",
@@ -835,28 +844,32 @@
         { "const": "default", "title": "Default" },
         { "const": "side-by-side", "title": "Side by side" }
       ],
-      "default": "default"
+      "default": "default",
+      "tags": ["%UI%"]
     },
     "sideBySideLeftMarginOverride": {
       "title": "Side-by-side left margin override",
       "description": "Side-by-side left margin override.",
       "type": "string",
       "pattern": "^-?(?:0|(?:[0-9]+|[0-9]*\\.[0-9]+)(?:px|em|rem|%|vw|vh|vmin|vmax|ch|ex|cm|mm|in|pt|pc))$",
-      "default": "10px"
+      "default": "10px",
+      "tags": ["%UI%"]
     },
     "sideBySideRightMarginOverride": {
       "title": "Side-by-side right margin override",
       "description": "Side-by-side right margin override.",
       "type": "string",
       "pattern": "^-?(?:0|(?:[0-9]+|[0-9]*\\.[0-9]+)(?:px|em|rem|%|vw|vh|vmin|vmax|ch|ex|cm|mm|in|pt|pc))$",
-      "default": "10px"
+      "default": "10px",
+      "tags": ["%UI%"]
     },
     "sideBySideOutputRatio": {
       "title": "Side-by-side output ratio",
       "description": "For the side-by-side rendering, the side-by-side output ratio defines the width of the output vs the input. Set 1 for same size, > 1 for larger output, < 1 for smaller output.",
       "type": "number",
       "default": 1,
-      "minimum": 0
+      "minimum": 0,
+      "tags": ["%UI%"]
     },
     "windowingMode": {
       "title": "Windowing mode",
@@ -886,7 +899,8 @@
       "title": "Show minimap",
       "description": "Whether to show the notebook minimap (virtual scrollbar) by default for all notebooks.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "tags": ["%UI%"]
     },
     "useSystemClipboardForCells": {
       "title": "Use system clipboard for copy/cut/paste of cells",
@@ -904,7 +918,8 @@
       "title": "Show Help in Bottom Panel",
       "description": "Whether to display help output (e.g. pager output from 'source: page' payloads) in a bottom panel inspector instead of inlining it.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "tags": ["%UI%"]
     }
   },
   "additionalProperties": false,
