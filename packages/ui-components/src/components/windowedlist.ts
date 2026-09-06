@@ -1752,13 +1752,16 @@ export class WindowedList<
     switch (event.type) {
       case 'wheel':
         if (
+          this._scrollToItem !== null &&
           event instanceof WheelEvent &&
           // Ctrl+wheel zooms rather than scrolls; since the scrollback
           // target is an item index, scrolling back keeps the followed
           // item in view through the zoom reflow.
           !event.ctrlKey &&
           // A wheel event without vertical delta cannot scroll the list.
-          event.deltaY !== 0
+          event.deltaY !== 0 &&
+          !event.defaultPrevented &&
+          !this._isWheelEventConsumed(event)
         ) {
           this._cancelScrollback();
         }
@@ -1818,6 +1821,35 @@ export class WindowedList<
         break;
     }
   };
+
+  /**
+   * Whether a nested scroll container keeps a wheel event from scrolling the list.
+   */
+  private _isWheelEventConsumed(event: WheelEvent): boolean {
+    for (const target of event.composedPath()) {
+      if (target === this._outerElement) {
+        break;
+      }
+      if (!(target instanceof Element)) {
+        continue;
+      }
+      const style = window.getComputedStyle(target);
+      if (style.overflowY !== 'auto' && style.overflowY !== 'scroll') {
+        continue;
+      }
+      if (
+        (event.deltaY < 0 && target.scrollTop > 0) ||
+        (event.deltaY > 0 &&
+          target.scrollTop < target.scrollHeight - target.clientHeight) ||
+        // Containment prevents scroll chaining even at the nested boundary.
+        style.overscrollBehaviorY === 'contain' ||
+        style.overscrollBehaviorY === 'none'
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   /**
    * Cancel scrollback when the user explicitly scrolls away from its target.

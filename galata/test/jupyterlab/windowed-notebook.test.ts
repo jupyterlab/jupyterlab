@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 import { expect, galata, test } from '@jupyterlab/galata';
 import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import type { NotebookPanel } from '@jupyterlab/notebook';
 import type { Locator } from '@playwright/test';
 import * as path from 'path';
 
@@ -314,6 +315,104 @@ test.describe('Scrolling on keyboard interaction when active editor is above the
 });
 
 test.describe('Scrollback cancellation on user scrolling', () => {
+  for (const [atBoundary, overscrollBehaviorY] of [
+    [false, 'auto'],
+    [true, 'auto'],
+    [true, 'contain'],
+    [true, 'none']
+  ] as const) {
+    const cancels = atBoundary && overscrollBehaviorY === 'auto';
+    test(`should ${cancels ? 'cancel' : 'preserve'} scrollback when wheeling ${atBoundary ? 'at the output boundary' : 'inside an output'} (overscroll=${overscrollBehaviorY})`, async ({
+      page,
+      tmpPath,
+      browserName
+    }) => {
+      test.skip(
+        browserName === 'firefox' && overscrollBehaviorY !== 'auto',
+        'Firefox synthetic wheel events ignore overscroll-behavior.'
+      );
+      const outputNotebook = 'output_scrolling.ipynb';
+      await page.contents.uploadFile(
+        path.resolve(__dirname, `notebooks/${outputNotebook}`),
+        `${tmpPath}/${outputNotebook}`
+      );
+      await page.notebook.openByPath(`${tmpPath}/${outputNotebook}`);
+      await page.notebook.selectCells(0, 1);
+      await page.evaluate(() =>
+        window.jupyterapp.commands.execute('notebook:enable-output-scrolling')
+      );
+      await page.evaluate(() => {
+        const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+        panel.content.model!.sharedModel.insertCell(2, {
+          cell_type: 'raw',
+          source: 'Trailing content\n'.repeat(100)
+        });
+      });
+      const notebook = await page.notebook.getNotebookInPanelLocator();
+      const outer = notebook.locator('.jp-WindowedPanel-outer');
+      const firstCell = notebook.locator('[data-windowed-list-index="0"]');
+      const secondCell = notebook.locator('[data-windowed-list-index="1"]');
+      const output = firstCell.locator('.jp-Cell-outputArea');
+      await notebook.locator('.jp-Cell-outputArea').evaluateAll(nodes => {
+        for (const node of nodes) {
+          (node as HTMLElement).style.height = '120px';
+        }
+      });
+      await expect(secondCell).toBeInViewport();
+      await output.evaluate((node, atBoundary) => {
+        node.scrollTop = atBoundary
+          ? node.scrollHeight - node.clientHeight
+          : 100;
+      }, atBoundary);
+      await output.evaluate((node, overscrollBehaviorY) => {
+        node.style.overscrollBehaviorY = overscrollBehaviorY;
+        node.addEventListener('wheel', () => (node.dataset.wheeled = 'true'), {
+          once: true
+        });
+      }, overscrollBehaviorY);
+      await output.hover();
+      await page.evaluate(async () => {
+        const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+        await panel.content.scrollToItem(1);
+      });
+      const initialOuterTop = await outer.evaluate(node => node.scrollTop);
+      const initialOutputTop = await output.evaluate(node => node.scrollTop);
+      await page.mouse.wheel(0, 100);
+      await expect(output).toHaveAttribute('data-wheeled', 'true');
+      if (cancels) {
+        await expect
+          .poll(() => outer.evaluate(node => node.scrollTop))
+          .toBeGreaterThan(initialOuterTop);
+      } else {
+        if (!atBoundary) {
+          await expect
+            .poll(() => output.evaluate(node => node.scrollTop))
+            .toBeGreaterThan(initialOutputTop);
+        }
+        expect(await outer.evaluate(node => node.scrollTop)).toBe(
+          initialOuterTop
+        );
+      }
+
+      // A cell growing above the followed cell must still keep it in view
+      // unless the user has scrolled the notebook itself.
+      await firstCell.evaluate(node => {
+        (node as HTMLElement).style.minHeight = '1500px';
+      });
+      if (cancels) {
+        // Cover the delayed scrollback paths, including the scrollend fallback.
+        // eslint-disable-next-line playwright/no-wait-for-timeout
+        await page.waitForTimeout(1000);
+        await expect(secondCell).not.toBeInViewport();
+      } else {
+        await expect
+          .poll(() => outer.evaluate(node => node.scrollTop))
+          .toBeGreaterThan(initialOuterTop);
+        await expect(secondCell).toBeInViewport();
+      }
+    });
+  }
+
   /**
    * Arm the scrollback anchor: type into the active editor which is above
    * the viewport, which scrolls back to the active cell and keeps the

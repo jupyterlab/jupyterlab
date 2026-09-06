@@ -289,6 +289,67 @@ describe('@jupyterlab/ui-components', () => {
         await expect(promise).rejects.toMatch('cancelled');
       });
 
+      it.each([-100, 100])(
+        'should preserve nested scrolling and cancel at its boundary (deltaY=%s)',
+        async deltaY => {
+          const output = document.createElement('div');
+          output.style.overflowY = 'auto';
+          Object.defineProperties(output, {
+            clientHeight: { value: 100 },
+            scrollHeight: { value: 300 }
+          });
+          output.scrollTop = 100;
+          const content = output.appendChild(document.createElement('span'));
+          list.viewportNode.appendChild(output);
+          const promise = list.scrollToItem(50);
+
+          content.dispatchEvent(
+            new WheelEvent('wheel', { deltaY, bubbles: true })
+          );
+          await expectPending(promise);
+
+          output.scrollTop = deltaY > 0 ? 200 : 0;
+          content.dispatchEvent(
+            new WheelEvent('wheel', { deltaY, bubbles: true })
+          );
+          await expect(promise).rejects.toMatch('cancelled');
+        }
+      );
+
+      it.each(['visible', 'hidden'])(
+        'should cancel when nested content cannot consume wheel events (overflow=%s)',
+        async overflowY => {
+          const content = document.createElement('div');
+          content.style.overflowY = overflowY;
+          Object.defineProperties(content, {
+            clientHeight: { value: 100 },
+            scrollHeight: { value: 300 }
+          });
+          list.viewportNode.appendChild(content);
+          const promise = list.scrollToItem(50);
+          content.dispatchEvent(
+            new WheelEvent('wheel', { deltaY: 100, bubbles: true })
+          );
+          await expect(promise).rejects.toMatch('cancelled');
+        }
+      );
+
+      it('should preserve the pending scroll when nested content prevents wheel scrolling', async () => {
+        expect.assertions(1);
+        const content = document.createElement('div');
+        content.addEventListener('wheel', event => event.preventDefault());
+        list.viewportNode.appendChild(content);
+        const promise = list.scrollToItem(50);
+        content.dispatchEvent(
+          new WheelEvent('wheel', {
+            deltaY: 100,
+            bubbles: true,
+            cancelable: true
+          })
+        );
+        await expectPending(promise);
+      });
+
       it('should reject the pending scroll when the user presses PageDown', async () => {
         const promise = list.scrollToItem(50);
         list.outerNode.dispatchEvent(
