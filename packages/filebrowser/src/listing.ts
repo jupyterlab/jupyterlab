@@ -1133,7 +1133,12 @@ export class DirListing extends Widget {
   /**
    * Update only the created dates.
    */
-  protected updateCreated(items: Contents.IModel[], nodes: HTMLElement[]) {
+  protected updateCreated(
+    items: Contents.IModel[],
+    nodes: HTMLElement[],
+    timestampFormat?: Time.TimestampFormat
+  ) {
+    const format = timestampFormat ?? this._timestampFormat;
     items.forEach((item, i) => {
       const node = nodes[i];
       if (node && item.created) {
@@ -1145,13 +1150,15 @@ export class DirListing extends Widget {
           this.renderer.updateItemCreated(
             created,
             item.created,
-            this._createdStyle
+            this._createdStyle,
+            format
           );
         } else {
           DirListing.defaultRenderer.updateItemCreated(
             created,
             item.created,
-            this._createdStyle
+            this._createdStyle,
+            format
           );
         }
       }
@@ -1176,7 +1183,8 @@ export class DirListing extends Widget {
           item,
           this._modifiedStyle,
           this._columnSizes,
-          this._createdStyle
+          this._createdStyle,
+          this._timestampFormat
         );
       }
       const ft = this._manager.registry.getFileTypeForModel(item);
@@ -1540,11 +1548,12 @@ export class DirListing extends Widget {
 
   /**
    * Update the setting for timestamp format.
-   * This refreshes the modified dates with the new format.
+   * This refreshes the modified and created dates with the new format.
    */
   setTimestampFormat(format: Time.TimestampFormat) {
     this._timestampFormat = format;
     this.updateModified(this._sortedItems, this._items);
+    this.updateCreated(this._sortedItems, this._items);
   }
 
   /**
@@ -3035,11 +3044,14 @@ export namespace DirListing {
      * @param createdDate - String representation of the created date.
      *
      * @param createdStyle - The date style for the created column: narrow, short, or long
+     *
+     * @param timestampFormat - The timestamp format: 'relative' or 'absolute'
      */
     updateItemCreated?(
       created: HTMLElement,
       createdDate: string,
-      createdStyle: Time.HumanStyle
+      createdStyle: Time.HumanStyle,
+      timestampFormat?: Time.TimestampFormat
     ): void;
 
     /**
@@ -3074,7 +3086,8 @@ export namespace DirListing {
       model: Contents.IModel,
       modifiedStyle?: Time.HumanStyle,
       columnsSizes?: Record<IColumn['id'], number | null>,
-      createdStyle?: Time.HumanStyle
+      createdStyle?: Time.HumanStyle,
+      timestampFormat?: Time.TimestampFormat
     ): void;
 
     /**
@@ -3489,17 +3502,21 @@ export namespace DirListing {
      * @param createdDate - String representation of the created date.
      *
      * @param createdStyle - The date style for the created column: narrow, short, or long
+     *
+     * @param timestampFormat - The timestamp format: 'relative' or 'absolute'
      */
     updateItemCreated(
       created: HTMLElement,
       createdDate: string,
-      createdStyle: Time.HumanStyle
+      createdStyle: Time.HumanStyle,
+      timestampFormat: Time.TimestampFormat = 'relative'
     ): void {
       this._updateItemDate(
         created,
         createdDate,
         createdStyle,
-        this._createdColumnLastUpdate
+        this._createdColumnLastUpdate,
+        timestampFormat
       );
     }
 
@@ -3591,7 +3608,8 @@ export namespace DirListing {
         createdStyle,
         hiddenColumns: Array.from(hiddenColumns ?? []).sort(),
         columnsSizes,
-        fileSize: model.size
+        fileSize: model.size,
+        timestampFormat
       });
 
       const checkboxWrapper = DOMUtils.findElement(
@@ -3695,13 +3713,13 @@ export namespace DirListing {
       if (model.created) {
         hoverText += trans.__(
           '\nCreated: %1',
-          Time.formatTimestamp(new Date(model.created), timestampFormat)
+          Time.format(new Date(model.created))
         );
       }
       if (model.last_modified) {
         hoverText += trans.__(
           '\nModified: %1',
-          Time.formatTimestamp(new Date(model.last_modified), timestampFormat)
+          Time.format(new Date(model.last_modified))
         );
       }
       hoverText += trans.__('\nWritable: %1', model.writable);
@@ -3742,7 +3760,8 @@ export namespace DirListing {
         model,
         modifiedStyle,
         columnsSizes,
-        createdStyle
+        createdStyle,
+        timestampFormat
       );
     }
 
@@ -3754,7 +3773,8 @@ export namespace DirListing {
       model: Contents.IModel,
       modifiedStyle?: Time.HumanStyle,
       columnsSizes?: Record<DirListing.IColumn['id'], number | null>,
-      createdStyle?: Time.HumanStyle
+      createdStyle?: Time.HumanStyle,
+      timestampFormat: Time.TimestampFormat = 'relative'
     ): void {
       if (columnsSizes) {
         for (const column of columns) {
@@ -3777,7 +3797,8 @@ export namespace DirListing {
         this.updateItemModified(
           modified,
           model.last_modified,
-          modifiedStyle ?? 'short'
+          modifiedStyle ?? 'short',
+          timestampFormat
         );
       }
 
@@ -3786,7 +3807,12 @@ export namespace DirListing {
         | undefined;
 
       if (model.created && created) {
-        this.updateItemCreated(created, model.created, createdStyle ?? 'short');
+        this.updateItemCreated(
+          created,
+          model.created,
+          createdStyle ?? 'short',
+          timestampFormat
+        );
       }
     }
 
@@ -3986,7 +4012,7 @@ namespace Private {
     edit: HTMLInputElement,
     original: string
   ): Promise<string> {
-    const parent = text.parentElement as HTMLElement;
+    const parent = text.parentElement!;
     parent.replaceChild(edit, text);
     edit.focus();
     const index = edit.value.lastIndexOf('.');

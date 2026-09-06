@@ -78,7 +78,7 @@ export namespace Time {
    */
   export function formatTimestamp(
     value: string | Date,
-    format: TimestampFormat = 'absolute',
+    format: TimestampFormat = 'relative',
     humanStyle: HumanStyle = 'long'
   ): string {
     if (format === 'absolute') {

@@ -3,7 +3,8 @@
 
 import { showErrorMessage } from '@jupyterlab/apputils';
 import type { IMovableSectionDestination } from '@jupyterlab/apputils';
-import { PathExt, Time } from '@jupyterlab/coreutils';
+import type { Time } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import type { Contents } from '@jupyterlab/services';
 import { ServerConnection } from '@jupyterlab/services';

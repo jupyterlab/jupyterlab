@@ -289,6 +289,19 @@ describe('filebrowser/browser', () => {
         expect(items.every(item => item.type === 'notebook')).toBe(true);
       });
     });
+
+    describe('#timestampFormat', () => {
+      it('should default to relative', () => {
+        expect(fileBrowser.timestampFormat).toBe('relative');
+      });
+
+      it('should update timestamp format when set', () => {
+        fileBrowser.timestampFormat = 'absolute';
+        expect(fileBrowser.timestampFormat).toBe('absolute');
+        fileBrowser.timestampFormat = 'relative';
+        expect(fileBrowser.timestampFormat).toBe('relative');
+      });
+    });
   });
 });
 
