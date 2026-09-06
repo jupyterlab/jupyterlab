@@ -155,12 +155,17 @@ export class DebuggerModel implements IDebugger.Model.IService {
   }
 
   /**
-   * Clear the model.
+   * Clear the model
+   * @param options Options for clearing the model
+   * @param options.preserveBreakpoints Whether to preserve breakpoints when clearing (default: false)
    */
-  clear(): void {
+  clear(options: { preserveBreakpoints?: boolean } = {}): void {
+    const { preserveBreakpoints = false } = options;
     this._stoppedThreads.clear();
-    const breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
-    this.breakpoints.restoreBreakpoints(breakpoints);
+    if (!preserveBreakpoints) {
+      const breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
+      this.breakpoints.restoreBreakpoints(breakpoints);
+    }
     this.callstack.frames = [];
     this.variables.scopes = [];
     this.sources.currentSource = null;
