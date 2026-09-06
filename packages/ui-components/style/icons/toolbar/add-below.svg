@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 14 14">
+  <g clip-path="url(#addbelowa)">
+    <path fill="#616161" stroke="#616161" stroke-width=".7" d="M9.25 10.07H7.375V8.193A.376.376 0 0 0 7 7.82a.376.376 0 0 0-.375.375v1.875H4.75a.376.376 0 0 0-.375.375c0 .207.169.375.375.375h1.875v1.875c0 .207.169.375.375.375a.376.376 0 0 0 .375-.375V10.82H9.25a.376.376 0 0 0 .375-.375.376.376 0 0 0-.375-.375Z" class="jp-icon3"/>
+  </g>
+  <path fill="#616161" fill-rule="evenodd" d="M2.5 5.5v-2h9v2zM2 7a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1z" class="jp-icon3" clip-rule="evenodd"/>
+  <defs>
+    <clipPath id="addbelowa">
+      <path fill="#fff" d="M4 13.444h6v-6H4z" class="jp-icon3"/>
+    </clipPath>
+  </defs>
+</svg>

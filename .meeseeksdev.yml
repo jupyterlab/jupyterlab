@@ -1,0 +1,6 @@
+special:
+  everyone:
+    can:
+      - say
+      - tag
+      - untag

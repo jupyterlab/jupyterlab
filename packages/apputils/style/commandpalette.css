@@ -1,0 +1,248 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+:root {
+  --jp-private-commandpalette-search-height: 28px;
+}
+
+/*-----------------------------------------------------------------------------
+| Overall styles
+|----------------------------------------------------------------------------*/
+
+.lm-CommandPalette {
+  padding-bottom: 0;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+
+  /* This is needed so that all font sizing of children done in ems is
+   * relative to this base size */
+  font-size: var(--jp-ui-font-size1);
+}
+
+/*-----------------------------------------------------------------------------
+| Modal variant
+|----------------------------------------------------------------------------*/
+
+.jp-ModalCommandPalette.jp-ThemedContainer {
+  position: absolute;
+  z-index: 10000;
+  top: 38px;
+  left: 30%;
+  margin: 0;
+  padding: 4px;
+  width: 40%;
+  box-shadow: var(--jp-elevation-z4);
+  border-radius: 4px;
+  background: var(--jp-layout-color0);
+}
+
+.jp-ModalCommandPalette .lm-CommandPalette {
+  max-height: 40vh;
+}
+
+.jp-ModalCommandPalette .lm-CommandPalette .lm-close-icon::after {
+  display: none;
+}
+
+.jp-ModalCommandPalette .lm-CommandPalette .lm-CommandPalette-header {
+  display: none;
+}
+
+.jp-ModalCommandPalette .lm-CommandPalette .lm-CommandPalette-item {
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+.jp-ModalCommandPalette
+  .lm-CommandPalette
+  .lm-CommandPalette-item.lm-mod-disabled {
+  display: none;
+}
+
+/*-----------------------------------------------------------------------------
+| Search
+|----------------------------------------------------------------------------*/
+
+.lm-CommandPalette-search {
+  padding: 4px;
+  background-color: var(--jp-layout-color1);
+  z-index: 2;
+}
+
+.lm-CommandPalette-wrapper {
+  /* stylelint-disable-next-line csstree/validator */
+  overflow: overlay;
+  padding: 0 9px;
+  background-color: var(--jp-input-active-background);
+  height: 30px;
+  box-shadow: inset 0 0 0 var(--jp-border-width) var(--jp-input-border-color);
+}
+
+.lm-CommandPalette.lm-mod-focused .lm-CommandPalette-wrapper {
+  box-shadow:
+    inset 0 0 0 1px var(--jp-input-active-box-shadow-color),
+    inset 0 0 0 3px var(--jp-input-active-box-shadow-color);
+}
+
+.jp-SearchIconGroup {
+  color: white;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 5px 5px 1px;
+}
+
+.jp-SearchIconGroup svg {
+  height: 20px;
+  width: 20px;
+}
+
+.jp-SearchIconGroup .jp-icon3[fill] {
+  fill: var(--jp-inverse-layout-color3);
+}
+
+.lm-CommandPalette-input {
+  background: transparent;
+  width: calc(100% - 18px);
+  float: left;
+  border: none;
+  outline: none;
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color0);
+  line-height: var(--jp-private-commandpalette-search-height);
+}
+
+.lm-CommandPalette-input::-webkit-input-placeholder,
+.lm-CommandPalette-input::-moz-placeholder,
+.lm-CommandPalette-input:-ms-input-placeholder {
+  color: var(--jp-ui-font-color2);
+  font-size: var(--jp-ui-font-size1);
+}
+
+/*-----------------------------------------------------------------------------
+| Results
+|----------------------------------------------------------------------------*/
+
+.lm-CommandPalette-header:first-child {
+  margin-top: 0;
+}
+
+.lm-CommandPalette-header {
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
+  color: var(--jp-ui-font-color1);
+  cursor: pointer;
+  display: flex;
+  font-size: var(--jp-ui-font-size0);
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-top: 8px;
+  padding: 8px 0 8px 12px;
+  text-transform: uppercase;
+}
+
+.lm-CommandPalette-header.lm-mod-active {
+  background: var(--jp-layout-color2);
+}
+
+.lm-CommandPalette-header > mark {
+  background-color: transparent;
+  font-weight: bold;
+  color: var(--jp-ui-font-color1);
+}
+
+.lm-CommandPalette-item {
+  padding: 4px 12px 4px 4px;
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size1);
+  font-weight: 400;
+  display: flex;
+}
+
+.lm-CommandPalette-item.lm-mod-disabled {
+  color: var(--jp-ui-font-color2);
+}
+
+.lm-CommandPalette-item.lm-mod-active {
+  color: var(--jp-ui-inverse-font-color1);
+  background: var(--jp-brand-color1);
+}
+
+.lm-CommandPalette-item.lm-mod-active .lm-CommandPalette-itemLabel > mark {
+  color: var(--jp-ui-inverse-font-color0);
+}
+
+.lm-CommandPalette-item.lm-mod-active .jp-icon-selectable[fill] {
+  fill: var(--jp-layout-color0);
+}
+
+.lm-CommandPalette-item.lm-mod-active:hover:not(.lm-mod-disabled) {
+  color: var(--jp-ui-inverse-font-color1);
+  background: var(--jp-brand-color1);
+}
+
+.lm-CommandPalette-item:hover:not(.lm-mod-active):not(.lm-mod-disabled) {
+  background: var(--jp-layout-color2);
+}
+
+.lm-CommandPalette-itemContent {
+  overflow: hidden;
+}
+
+.lm-CommandPalette-itemLabel > mark {
+  color: var(--jp-ui-font-color0);
+  background-color: transparent;
+  font-weight: bold;
+}
+
+.lm-CommandPalette-item.lm-mod-disabled mark {
+  color: var(--jp-ui-font-color2);
+}
+
+.lm-CommandPalette-item .lm-CommandPalette-itemIcon {
+  margin: 0 4px 0 0;
+  position: relative;
+  width: 16px;
+  top: 2px;
+  flex: 0 0 auto;
+}
+
+.lm-CommandPalette-item.lm-mod-disabled .lm-CommandPalette-itemIcon {
+  opacity: 0.6;
+}
+
+.lm-CommandPalette-item .lm-CommandPalette-itemShortcut {
+  flex: 0 0 auto;
+}
+
+.lm-CommandPalette-itemCaption {
+  display: none;
+}
+
+.lm-CommandPalette-content {
+  background-color: var(--jp-layout-color1);
+}
+
+.lm-CommandPalette-content:empty::after {
+  content: 'No results';
+  margin: auto;
+  margin-top: 20px;
+  width: 100px;
+  display: block;
+  font-size: var(--jp-ui-font-size2);
+  font-family: var(--jp-ui-font-family);
+  font-weight: lighter;
+}
+
+.lm-CommandPalette-emptyMessage {
+  text-align: center;
+  margin-top: 24px;
+  line-height: 1.32;
+  padding: 0 8px;
+  color: var(--jp-content-font-color3);
+}

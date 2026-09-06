@@ -1,0 +1,40 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| DockPanel
+|----------------------------------------------------------------------------*/
+
+.lm-DockPanel-widget,
+.lm-TabPanel-stackedPanel {
+  border-left: var(--jp-border-width) solid var(--jp-border-color1);
+  border-right: var(--jp-border-width) solid var(--jp-border-color1);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
+:where(.lm-DockPanel-widget),
+.lm-TabPanel-stackedPanel {
+  background: var(--jp-layout-color0);
+}
+
+.lm-DockPanel-overlay {
+  background: rgba(33, 150, 243, 0.1);
+  border: var(--jp-border-width) dashed var(--jp-brand-color1);
+  transition-property: top, left, right, bottom;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
+}
+
+.lm-DockPanel-overlay.lm-mod-root-top,
+.lm-DockPanel-overlay.lm-mod-root-left,
+.lm-DockPanel-overlay.lm-mod-root-right,
+.lm-DockPanel-overlay.lm-mod-root-bottom,
+.lm-DockPanel-overlay.lm-mod-root-center {
+  border-width: 2px;
+}

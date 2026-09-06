@@ -1,0 +1,26 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.lm-DataGrid {
+  min-width: 64px;
+  min-height: 64px;
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
+.lm-DataGrid-scrollCorner {
+  /* stylelint-disable-next-line declaration-property-value-allowed-list */
+  background-color: #f0f0f0;
+}
+
+.lm-DataGrid-scrollCorner::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  /* stylelint-disable-next-line declaration-property-value-allowed-list */
+  background-color: #a0a0a0;
+}

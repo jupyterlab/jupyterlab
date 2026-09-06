@@ -1,0 +1,82 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+.jp-lineFormSearch {
+  padding: 4px 12px;
+  background-color: var(--jp-layout-color2);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  z-index: 2;
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-lineFormCaption {
+  font-size: var(--jp-ui-font-size0);
+  line-height: var(--jp-ui-font-size1);
+  margin-top: 4px;
+  color: var(--jp-ui-font-color0);
+}
+
+.jp-baseLineForm {
+  border: none;
+  border-top-right-radius: var(--jp-border-radius);
+  border-bottom-right-radius: var(--jp-border-radius);
+  position: absolute;
+  background-size: 16px;
+  background-repeat: no-repeat;
+  background-position: center;
+  outline: none;
+}
+
+.jp-lineFormButtonContainer {
+  top: 4px;
+  right: 8px;
+  height: 24px;
+  padding: 0 12px;
+  width: 12px;
+}
+
+.jp-lineFormButtonIcon {
+  top: 0;
+  right: 0;
+  background-color: var(--jp-brand-color1);
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px 6px;
+}
+
+.jp-lineFormButton {
+  top: 0;
+  right: 0;
+  background-color: transparent;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.jp-lineFormWrapper {
+  overflow: hidden;
+  padding: 0 8px;
+  border: 1px solid var(--jp-border-color0);
+  border-top-left-radius: var(--jp-border-radius);
+  border-bottom-left-radius: var(--jp-border-radius);
+  background-color: var(--jp-input-active-background);
+  height: 22px;
+}
+
+.jp-lineFormWrapperFocusWithin {
+  border: var(--jp-border-width) solid var(--jp-input-active-border-color);
+  box-shadow: var(--jp-input-box-shadow);
+}
+
+.jp-lineFormInput {
+  background: transparent;
+  width: 200px;
+  height: 100%;
+  border: none;
+  outline: none;
+  color: var(--jp-ui-font-color0);
+  padding: 0;
+}

@@ -1,0 +1,36 @@
+<!--
+  ~ Copyright (c) Jupyter Development Team.
+  ~ Distributed under the terms of the Modified BSD License.
+-->
+
+<div role="contentinfo">
+  <p>
+  {%- if show_copyright %}
+    {%- if hasdoc('copyright') %}
+      {% trans path=pathto('copyright'), copyright=copyright|e %}&copy; <a href="{{ path }}">Copyright</a> {{ copyright }}.{% endtrans %}
+    {%- else %}
+      {% trans copyright=copyright|e %}&copy; Copyright {{ copyright }}.<br/>
+      The Jupyter Trademark is registered with the U.S. Patent &amp Trademark Office.
+      {% endtrans %}
+    {%- endif %}
+  {%- endif %}
+
+  {%- if build_id and build_url %}
+    {% trans build_url=build_url, build_id=build_id %}
+      <span class="build">
+        Build
+        <a href="{{ build_url }}">{{ build_id }}</a>.
+      </span>
+    {% endtrans %}
+  {%- elif commit %}
+    {% trans commit=commit %}
+      <span class="commit">
+        Revision <code>{{ commit }}</code>.
+      </span>
+    {% endtrans %}
+  {%- elif last_updated %}
+    {% trans last_updated=last_updated|e %}Last updated on {{ last_updated }}.{% endtrans %}
+  {%- endif %}
+
+  </p>
+</div>

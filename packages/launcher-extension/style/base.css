@@ -1,0 +1,26 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+.jp-FileBrowser-toolbar
+  .jp-ToolbarButtonComponent[data-command='launcher:create'] {
+  width: 72px;
+  background: var(--jp-accept-color-normal, var(--jp-brand-color1));
+}
+
+.jp-FileBrowser-toolbar
+  .jp-ToolbarButtonComponent[data-command='launcher:create']:hover {
+  background-color: var(--jp-accept-color-hover);
+}
+
+.jp-FileBrowser-toolbar
+  .jp-ToolbarButtonComponent[data-command='launcher:create']:focus-visible {
+  background-color: var(--jp-accept-color-active, var(--jp-brand-color0));
+}
+
+.jp-FileBrowser-toolbar
+  .jp-ToolbarButtonComponent[data-command='launcher:create']
+  .jp-icon3 {
+  fill: var(--jp-layout-color1);
+}

@@ -1,0 +1,45 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+body.jp-ThemedContainer {
+  background: white;
+  margin: 0;
+  padding: 0;
+}
+
+#main {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: white;
+}
+
+.jp-Toolbar {
+  min-height: 27px;
+}
+
+.jp-CodeCell {
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-Cell-inputWrapper {
+  flex: 0 0 auto;
+}
+
+.jp-Cell-outputWrapper {
+  flex: 1 1 auto;
+}
+
+.jp-OutputArea {
+  overflow: visible;
+}
+
+.jp-Completer-Cell {
+  position: fixed;
+}

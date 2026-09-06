@@ -1,0 +1,30 @@
+{
+  "extends": "./tsconfigbase",
+  "include": [
+    "packages/**/src/**/*",
+    "packages/**/test/**/*",
+    "packages/**/style/**/*",
+    "testutils/**/*",
+    "buildutils/**/*",
+    "tests/**/*",
+    "dev_mode/*",
+    "docs/**/*",
+    "eslint.config.mjs",
+    "eslint.config.typecheck.mjs",
+    "examples/**/*",
+    "galata/eslint.config.mjs",
+    "galata/*.config.js",
+    "galata/extension/**/*",
+    "galata/src/**/*",
+    "galata/test/**/*",
+    "galata/style/**/*",
+    "*",
+    "packages/services/examples/**/*",
+    "packages/testing/**/*",
+    "packages/**/*.config.js",
+    "packages/metapackage/build-doc-index.js",
+    "scripts/*",
+    "jupyterlab/*",
+    "jupyterlab/staging/*"
+  ]
+}

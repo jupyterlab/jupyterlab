@@ -1,0 +1,37 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src"
+  },
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../application"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../csvviewer"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../documentsearch"
+    },
+    {
+      "path": "../mainmenu"
+    },
+    {
+      "path": "../observables"
+    },
+    {
+      "path": "../settingregistry"
+    },
+    {
+      "path": "../translation"
+    }
+  ]
+}

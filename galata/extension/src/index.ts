@@ -1,0 +1,45 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import type {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import { Dialog, Notification } from '@jupyterlab/apputils';
+import { GalataInpage } from './global';
+import type { IGalataHelpers } from './tokens';
+import { PLUGIN_ID_GALATA_HELPERS } from './tokens';
+import { fontsPlugin } from './fonts';
+
+export type {
+  IGalataInpage,
+  INotebookRunCallback,
+  IPluginNameToInterfaceMap,
+  IWaitForSelectorOptions
+} from './tokens';
+
+export { IGalataHelpers } from './tokens';
+
+/**
+ * Galata in-page object
+ */
+window.galata = new GalataInpage();
+/**
+ * Galata in-page object
+ * @deprecated
+ */
+window.galataip = window.galata;
+
+const galataPlugin: JupyterFrontEndPlugin<IGalataHelpers> = {
+  id: PLUGIN_ID_GALATA_HELPERS,
+  description: 'Galata in-page extension helpers.',
+  autoStart: true,
+  activate: (app: JupyterFrontEnd): IGalataHelpers => {
+    return Object.freeze({
+      notifications: Notification.manager,
+      dialogs: Dialog.tracker
+    });
+  }
+};
+
+export default [galataPlugin, fontsPlugin];

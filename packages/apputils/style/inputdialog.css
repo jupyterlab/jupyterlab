@@ -1,0 +1,31 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+.jp-Input-Boolean-Dialog {
+  flex-direction: row-reverse;
+  align-items: end;
+  width: 100%;
+}
+
+.jp-Input-Boolean-Dialog > label {
+  flex: 1 1 auto;
+}
+
+.jp-InputDialog-inputWrapper {
+  display: flex;
+  align-items: baseline;
+}
+
+.jp-InputDialog-inputWrapper > input.jp-mod-styled:invalid {
+  border-color: var(--jp-error-color0);
+  background: var(--jp-error-color3);
+}
+
+.jp-InputDialog-inputWrapper
+  > input[required].jp-mod-styled:invalid:placeholder-shown {
+  /* Do not show invalid style when placeholder is shown */
+  border-color: unset;
+  background: unset;
+}

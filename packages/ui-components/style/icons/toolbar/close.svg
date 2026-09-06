@@ -1,0 +1,5 @@
+<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <circle fill="none" class="jp-icon-none jp-icon-selectable-inverse jp-icon3-hover" cx="8" cy="8" r="7.3"/>
+  <path class="jp-icon3 jp-icon-selectable jp-icon-accent2-hover" d="m13 4.2-1-1-3.8 3.8-3.8-3.8-1 1 3.8 3.8-3.8 3.8 1 1 3.8-3.8 3.8 3.8 1-1-3.8-3.8z" fill="currentColor"/>
+  <circle class="jp-icon-none jp-icon-busy" cx="8" cy="8" r="4.6" fill="none"/>
+</svg>

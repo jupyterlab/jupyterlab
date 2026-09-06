@@ -1,0 +1,39 @@
+{
+  "blocked_extensions": [
+    {
+      "name": "@jupyterlab-examples/launcher",
+      "type": "jupyterlab",
+      "reason": "No reason, this is just a test",
+      "creation_date": "2020-03-11T03:28:56.782Z",
+      "last_update_date": "2020-03-11T03:28:56.782Z"
+    },
+    {
+      "name": "@tpoff/jupyterlab-tpoff_xkcd",
+      "type": "jupyterlab",
+      "reason": "No reason, this is just a test",
+      "creation_date": "2020-03-11T03:28:56.782Z",
+      "last_update_date": "2020-03-11T03:28:56.782Z"
+    },
+    {
+      "name": "@mohansrk/test",
+      "type": "jupyterlab",
+      "reason": "No reason, this is just a test",
+      "creation_date": "2020-03-11T03:28:56.782Z",
+      "last_update_date": "2020-03-11T03:28:56.782Z"
+    },
+    {
+      "name": "custom-git",
+      "type": "jupyterlab",
+      "reason": "No reason, this is just a test",
+      "creation_date": "2020-03-11T03:28:56.782Z",
+      "last_update_date": "2020-03-11T03:28:56.782Z"
+    },
+    {
+      "name": "jupyterlabtd_git",
+      "type": "jupyterlab",
+      "reason": "No reason, this is just a test",
+      "creation_date": "2020-03-11T03:28:56.782Z",
+      "last_update_date": "2020-03-11T03:28:56.782Z"
+    }
+  ]
+}

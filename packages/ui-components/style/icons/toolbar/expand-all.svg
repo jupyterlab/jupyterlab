@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" viewBox="0 0 24 24">
+  <g fill="#616161" class="jp-icon3">
+    <path d="M8 2h12c1 0 2 1 2 2v12c0 1 0 2-2 2V4H6c0-2 1-2 2-2"/>
+    <path d="M18 8c0-1-1-2-2-2H4C3 6 2 7 2 8v12c0 1 1 2 2 2h12c1 0 2-1 2-2zm-2 0v12H4V8z"/>
+    <path d="M11 10H9v3H6v2h3v3h2v-3h3v-2h-3z"/>
+  </g>
+</svg>

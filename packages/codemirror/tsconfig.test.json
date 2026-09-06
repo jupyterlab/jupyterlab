@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfigbase.test",
+  "include": ["src/**/*", "test/*"],
+  "references": [
+    {
+      "path": "../codeeditor"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../documentsearch"
+    },
+    {
+      "path": "../nbformat"
+    },
+    {
+      "path": "../translation"
+    },
+    {
+      "path": "."
+    },
+    {
+      "path": "../testing"
+    }
+  ]
+}

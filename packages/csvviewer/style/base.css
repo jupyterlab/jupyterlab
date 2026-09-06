@@ -1,0 +1,53 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-CSVViewer {
+  display: flex;
+  flex-direction: column;
+  outline: none;
+
+  /* This is needed so that all font sizing of children done in ems is
+   * relative to this base size */
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-CSVDelimiter {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: row;
+  border: none;
+  min-height: 24px;
+  background: var(--jp-toolbar-background);
+  z-index: 1;
+}
+
+.jp-CSVDelimiter .jp-CSVDelimiter-label {
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size1);
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.jp-CSVDelimiter .jp-CSVDelimiter-dropdown {
+  flex: 0 0 auto;
+  vertical-align: middle;
+  border-radius: 0;
+  outline: none;
+  height: 20px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+.jp-CSVDelimiter .jp-CSVDelimiter-dropdown select.jp-mod-styled {
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  font-size: var(--jp-ui-font-size1);
+  height: 20px;
+  padding-right: 20px;
+}
+
+.jp-CSVViewer-grid {
+  flex: 1 1 auto;
+}

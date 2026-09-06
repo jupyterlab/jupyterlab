@@ -1,0 +1,24 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "lib": ["DOM", "DOM.Iterable", "ES2021.WeakRef"],
+    "outDir": "lib",
+    "rootDir": "src",
+    "types": ["node"]
+  },
+  "include": ["src/**/*"],
+  "references": [
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../observables"
+    },
+    {
+      "path": "../rendermime-interfaces"
+    },
+    {
+      "path": "../translation"
+    }
+  ]
+}

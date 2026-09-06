@@ -1,0 +1,17 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-RenderedVegaCommon5 {
+  margin-left: 8px;
+  margin-top: 8px;
+}
+
+.jp-MimeDocument .jp-RenderedVegaCommon5 {
+  padding: 16px;
+}
+
+.vega canvas {
+  background: var(--jp-vega-background);
+}

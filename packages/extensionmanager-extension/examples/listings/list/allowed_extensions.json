@@ -1,0 +1,25 @@
+{
+  "allowed_extensions": [
+    {
+      "name": "@jupyterlab/*",
+      "type": "jupyterlab",
+      "reason": "No reason, this is just a test",
+      "creation_date": "2020-03-11T03:28:56.782Z",
+      "last_update_date": "2020-03-11T03:28:56.782Z"
+    },
+    {
+      "name": "@jupyterlab/git",
+      "type": "jupyterlab",
+      "reason": "No reason, this is just a test",
+      "creation_date": "2020-03-11T03:28:56.782Z",
+      "last_update_date": "2020-03-11T03:28:56.782Z"
+    },
+    {
+      "name": "@krassowski/jupyterlab_go_to_definition",
+      "type": "jupyterlab",
+      "reason": "No reason, this is just a test",
+      "creation_date": "2020-03-11T03:28:56.782Z",
+      "last_update_date": "2020-03-11T03:28:56.782Z"
+    }
+  ]
+}

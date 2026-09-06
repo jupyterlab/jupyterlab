@@ -1,0 +1,64 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Table of Contents
+|----------------------------------------------------------------------------*/
+
+.jp-TableOfContents {
+  display: flex;
+  flex-direction: column;
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size1);
+  height: 100%;
+}
+
+.jp-TableOfContents-placeholder {
+  text-align: center;
+}
+
+.jp-TableOfContents-placeholderContent {
+  color: var(--jp-content-font-color2);
+  padding: 8px;
+}
+
+.jp-TableOfContents-placeholderContent > h3 {
+  margin-bottom: var(--jp-content-heading-margin-bottom);
+}
+
+.jp-TableOfContents .jp-SidePanel-content {
+  overflow-y: auto;
+}
+
+.jp-TableOfContents-tree {
+  margin: 4px;
+}
+
+.jp-TableOfContents-content {
+  padding: 0;
+  background-color: var(--jp-layout-color1);
+}
+
+.jp-tocItem {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.jp-tocItem-heading {
+  display: flex;
+  cursor: pointer;
+  width: 100%;
+}
+
+.jp-tocItem-content {
+  display: block;
+  padding: 4px 0;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+}

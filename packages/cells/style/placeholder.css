@@ -1,0 +1,81 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Placeholder
+|----------------------------------------------------------------------------*/
+
+.jp-Placeholder {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.jp-Placeholder-prompt {
+  flex: 0 0 var(--jp-cell-prompt-width);
+  box-sizing: border-box;
+}
+
+.jp-Placeholder-content {
+  flex: 1 1 auto;
+  padding: 4px 6px;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: none;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.jp-Placeholder-contentContainer {
+  display: flex;
+}
+
+.jp-Placeholder-content:hover,
+.jp-InputPlaceholder > .jp-Placeholder-content:hover {
+  border-color: var(--jp-layout-color3);
+}
+
+.jp-Placeholder-content .jp-MoreHorizIcon {
+  width: 32px;
+  height: 16px;
+  border: 1px solid transparent;
+  border-radius: var(--jp-border-radius);
+}
+
+.jp-Placeholder-content .jp-MoreHorizIcon:hover {
+  border: 1px solid var(--jp-border-color1);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  background-color: var(--jp-layout-color0);
+}
+
+.jp-PlaceholderText {
+  white-space: nowrap;
+  overflow-x: hidden;
+  color: var(--jp-inverse-layout-color3);
+  font-family: var(--jp-code-font-family);
+}
+
+.jp-InputPlaceholder > .jp-Placeholder-content {
+  border-color: var(--jp-cell-editor-border-color);
+  background: var(--jp-cell-editor-background);
+}
+
+/*-----------------------------------------------------------------------------
+| Print
+|----------------------------------------------------------------------------*/
+@media print {
+  .jp-Placeholder {
+    display: table;
+    table-layout: fixed;
+  }
+
+  .jp-Placeholder-content {
+    display: table-cell;
+  }
+
+  .jp-Placeholder-prompt {
+    display: table-cell;
+  }
+}

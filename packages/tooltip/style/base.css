@@ -1,0 +1,29 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-Tooltip {
+  background: var(--jp-layout-color1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  font-size: var(--jp-ui-font-size0);
+  box-shadow: var(--jp-elevation-z6);
+  max-width: 750px;
+  max-height: 350px;
+  z-index: 10001;
+  padding: 4px;
+  display: flex;
+}
+
+.jp-Tooltip-content {
+  overflow: auto;
+}
+
+.jp-Tooltip:focus {
+  outline: 0;
+}
+
+.jp-Tooltip pre {
+  white-space: pre-wrap;
+  margin: 0;
+}

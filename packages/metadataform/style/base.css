@@ -1,0 +1,24 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-MetadataForm {
+  width: 100%;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+}
+
+.jp-MetadataForm-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jp-MetadataForm-placeholderContent {
+  padding: 8px;
+}
+
+.jp-MetadataForm .panel-danger.errors {
+  display: none;
+}

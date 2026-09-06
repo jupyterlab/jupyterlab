@@ -1,0 +1,58 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-switch {
+  display: flex;
+  align-items: center;
+  padding-left: 4px;
+  padding-right: 4px;
+  font-size: var(--jp-ui-font-size1);
+  background-color: transparent;
+  color: var(--jp-ui-font-color1);
+  border: none;
+  height: 20px;
+}
+
+.jp-switch:hover {
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-switch-label {
+  margin-right: 5px;
+  font-family: var(--jp-ui-font-family);
+}
+
+.jp-switch-track {
+  cursor: pointer;
+  background-color: var(--jp-switch-color, var(--jp-border-color1));
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+  border-radius: 34px;
+  height: 16px;
+  width: 35px;
+  position: relative;
+}
+
+.jp-switch-track::before {
+  content: '';
+  position: absolute;
+  height: 10px;
+  width: 10px;
+  margin: 3px;
+  left: 0;
+  background-color: var(--jp-ui-inverse-font-color1);
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+.jp-switch[aria-checked='true'] .jp-switch-track {
+  background-color: var(--jp-switch-true-position-color, var(--jp-warn-color0));
+}
+
+.jp-switch[aria-checked='true'] .jp-switch-track::before {
+  /* track width (35) - margins (3 + 3) - thumb width (10) */
+  left: 19px;
+}

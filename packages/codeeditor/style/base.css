@@ -1,0 +1,54 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+@import url('./linecol.css');
+
+.jp-JSONEditor {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.jp-JSONEditor-host {
+  flex: 1 1 auto;
+  border: var(--jp-border-width) solid var(--jp-input-border-color);
+  border-radius: 0;
+  background: var(--jp-layout-color0);
+  min-height: 50px;
+  padding: 1px;
+}
+
+.jp-JSONEditor.jp-mod-error .jp-JSONEditor-host {
+  border-color: var(--jp-error-color0);
+  outline-color: var(--jp-error-color0);
+}
+
+.jp-JSONEditor-header {
+  display: flex;
+  flex: 1 0 auto;
+  padding: 0 0 0 12px;
+}
+
+.jp-JSONEditor-header label {
+  flex: 0 0 auto;
+}
+
+.jp-JSONEditor-commitButton {
+  height: 16px;
+  width: 16px;
+  background-size: 18px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.jp-JSONEditor-host.jp-mod-focused {
+  background-color: var(--jp-input-active-background);
+  border: 1px solid var(--jp-input-active-border-color);
+  box-shadow: var(--jp-input-box-shadow);
+}
+
+.jp-Editor.jp-mod-dropTarget {
+  border: var(--jp-border-width) solid var(--jp-input-active-border-color);
+  box-shadow: var(--jp-input-box-shadow);
+}

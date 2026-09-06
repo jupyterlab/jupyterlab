@@ -1,0 +1,239 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import type { IThemeManager } from '@jupyterlab/apputils';
+
+import type { IEditorServices } from '@jupyterlab/codeeditor';
+
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+
+import { bugIcon, SidePanel } from '@jupyterlab/ui-components';
+
+import { Widget } from '@lumino/widgets';
+
+import { Breakpoints as BreakpointsPanel } from './panels/breakpoints';
+
+import { Callstack as CallstackPanel } from './panels/callstack';
+
+import { Sources as SourcesPanel } from './panels/sources';
+
+import { KernelSources as KernelSourcesPanel } from './panels/kernelSources';
+
+import { Variables as VariablesPanel } from './panels/variables';
+
+import type { IDebugger } from './tokens';
+
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+
+/**
+ * A debugger sidebar.
+ */
+export class DebuggerSidebar extends SidePanel {
+  /**
+   * Instantiate a new Debugger.Sidebar
+   *
+   * @param options The instantiation options for a Debugger.Sidebar
+   */
+  constructor(options: DebuggerSidebar.IOptions) {
+    const translator = options.translator || nullTranslator;
+    super({ translator });
+    this.id = 'jp-debugger-sidebar';
+    this.title.icon = bugIcon;
+    this.addClass('jp-DebuggerSidebar');
+
+    const {
+      callstackCommands,
+      breakpointsCommands,
+      editorServices,
+      service,
+      themeManager
+    } = options;
+
+    const model = service.model;
+    this._sourcesOptions = {
+      model: model.sources,
+      service,
+      editorServices,
+      translator
+    };
+
+    this.variables = new VariablesPanel({
+      model: model.variables,
+      commands: callstackCommands.registry,
+      service,
+      themeManager,
+      translator
+    });
+
+    this.callstack = new CallstackPanel({
+      commands: callstackCommands,
+      model: model.callstack,
+      translator
+    });
+
+    this.breakpoints = new BreakpointsPanel({
+      service,
+      commands: breakpointsCommands,
+      model: model.breakpoints,
+      translator
+    });
+
+    this.kernelSources = new KernelSourcesPanel({
+      model: model.kernelSources,
+      service,
+      translator
+    });
+
+    const header = new DebuggerSidebar.Header();
+
+    this.header.addWidget(header);
+    model.titleChanged.connect((_, title) => {
+      header.title.label = title;
+    }, this);
+
+    this.content.addClass('jp-DebuggerSidebar-body');
+
+    this.addWidget(this.variables);
+    this.addWidget(this.callstack);
+    this.addWidget(this.breakpoints);
+    this.addWidget(this.kernelSources);
+  }
+
+  /**
+   * Whether to show the sources panel in the sidebar.
+   */
+  get showSourcesPanel(): boolean {
+    return this._showSourcesPanel;
+  }
+
+  set showSourcesPanel(value: boolean) {
+    if (value === this._showSourcesPanel) {
+      return;
+    }
+
+    this._showSourcesPanel = value;
+
+    if (value) {
+      // ShowSourcesPanel is true => ensure widget exists
+
+      if (!this._sources || this._sources.isDisposed) {
+        this._sources = new SourcesPanel(this._sourcesOptions);
+        this.insertWidget(3, this._sources);
+      }
+    } else {
+      // ShowSourcesPanel is false => remove widget if present
+      if (this._sources && !this._sources.isDisposed) {
+        this._sources.dispose();
+        this._sources = undefined;
+      }
+    }
+  }
+
+  /**
+   * The variables widget.
+   */
+  readonly variables: VariablesPanel;
+
+  /**
+   * The callstack widget.
+   */
+  readonly callstack: CallstackPanel;
+
+  /**
+   * The breakpoints widget.
+   */
+  readonly breakpoints: BreakpointsPanel;
+
+  /**
+   * The sources widget.
+   */
+  get sources(): SourcesPanel | undefined {
+    return this._sources;
+  }
+
+  readonly kernelSources: KernelSourcesPanel;
+
+  private _sources?: SourcesPanel;
+
+  private _showSourcesPanel = false;
+
+  private _sourcesOptions: SourcesPanel.IOptions;
+}
+
+/**
+ * A namespace for DebuggerSidebar statics
+ */
+export namespace DebuggerSidebar {
+  /**
+   * Instantiation options for `DebuggerSidebar`.
+   */
+  export interface IOptions {
+    /**
+     * The debug service.
+     */
+    service: IDebugger;
+
+    /**
+     * The callstack toolbar commands.
+     */
+    callstackCommands: CallstackPanel.ICommands;
+
+    /**
+     * The breakpoints toolbar commands.
+     */
+    breakpointsCommands: BreakpointsPanel.ICommands;
+
+    /**
+     * The editor services.
+     */
+    editorServices: IEditorServices;
+
+    /**
+     * Settings from the setting registry
+     */
+    settings?: ISettingRegistry.ISettings | null;
+
+    /**
+     * An optional application theme manager to detect theme changes.
+     */
+    themeManager?: IThemeManager | null;
+
+    /**
+     * An optional application language translator.
+     */
+    translator?: ITranslator;
+  }
+
+  /**
+   * The header for a debugger sidebar.
+   */
+  export class Header extends Widget {
+    /**
+     * Instantiate a new sidebar header.
+     */
+    constructor() {
+      super({ node: Private.createHeader() });
+      this.title.changed.connect(_ => {
+        this.node.textContent = this.title.label;
+      });
+    }
+  }
+}
+
+/**
+ * A namespace for private module data.
+ */
+namespace Private {
+  /**
+   * Create a sidebar header node.
+   */
+  export function createHeader(): HTMLElement {
+    const title = document.createElement('h2');
+
+    title.textContent = '-';
+    title.classList.add('jp-text-truncated');
+
+    return title;
+  }
+}

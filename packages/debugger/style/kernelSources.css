@@ -1,0 +1,48 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-DebuggerKernelSources {
+  min-height: 50px;
+  margin-top: 3px;
+}
+
+[data-jp-debugger='true'].jp-Editor .jp-mod-readOnly {
+  background: var(--jp-layout-color2);
+  height: 100%;
+}
+
+.jp-DebuggerKernelSources-body [data-jp-debugger='true'].jp-Editor {
+  height: 100%;
+}
+
+.jp-DebuggerKernelSources-body {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.jp-DebuggerKernelSource-source {
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.jp-DebuggerKernelSource-source:hover {
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-DebuggerKernelSource-source > svg {
+  height: 16px;
+  width: 16px;
+}
+
+.jp-DebuggerKernelSources-header .jp-Toolbar-item[data-jp-item-name='filter'] {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.jp-Debugger-KernelSources-Filter {
+  font-weight: 400;
+}

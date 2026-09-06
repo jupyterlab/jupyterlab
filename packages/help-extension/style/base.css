@@ -1,0 +1,83 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-Help {
+  min-width: 240px;
+  min-height: 240px;
+  background: var(--jp-layout-color0);
+  outline: none;
+}
+
+.jp-Help > iframe {
+  border: none;
+
+  /* Forcing white color to avoid contrast issues see issue #11320 */
+  background: white;
+}
+
+.jp-About-body {
+  display: flex;
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color1);
+  text-align: left;
+  flex-direction: column;
+  width: 100%;
+  min-width: 360px;
+  overflow: visible;
+}
+
+.jp-About-version-info {
+  color: var(--jp-ui-font-color1);
+
+  /* Dialog-header sets the font size to 3, we reset to 1 */
+  font-size: var(--jp-ui-font-size1);
+  width: 200px;
+  font-weight: 400;
+  letter-spacing: 0.4px;
+  text-align: left;
+  line-height: 1.12;
+}
+
+.jp-About-version {
+  display: block;
+  padding-top: 8px;
+}
+
+.jp-About-externalLinks {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding-top: 12px;
+}
+
+.jp-About-externalLinks > .jp-Button-flat {
+  text-decoration: none;
+}
+
+.jp-About-externalLinks > .jp-Button-flat:hover {
+  color: var(--jp-content-link-color);
+  text-decoration: underline;
+}
+
+.jp-About-copyright {
+  padding-top: 25px;
+}
+
+.jp-About-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.jp-About-body pre {
+  white-space: pre-wrap;
+}
+
+.jp-About-header-info {
+  display: flex;
+  flex-direction: column;
+  margin-left: 16px;
+}

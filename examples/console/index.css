@@ -1,0 +1,27 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+body {
+  background: white;
+  margin: 0;
+  padding: 0;
+  font-family: var(--jp-ui-font-family);
+}
+
+#main {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+}
+
+#main .lm-CommandPalette {
+  border-top: var(--jp-border-width) solid var(--jp-border-color2);
+  min-width: 300px;
+}
+
+#main .jp-ConsolePanel {
+  margin-top: 0;
+}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" viewBox="0 0 24 24">
+  <mask id="cleara">
+    <path fill="#fff" d="M0 0h24v24H0z"/>
+    <circle cx="12" cy="12" r="8" fill="#000"/>
+  </mask>
+  <g fill="#616161" class="jp-icon3">
+    <path d="M4.929 6.343 6.343 4.93l12.728 12.728-1.414 1.414z"/>
+    <circle cx="12" cy="12" r="10" mask="url(#cleara)"/>
+  </g>
+</svg>

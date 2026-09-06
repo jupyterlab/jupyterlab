@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 14 14">
+  <g clip-path="url(#addabovea)">
+    <path fill="#616161" stroke="#616161" stroke-width=".7" d="M4.75 4.93h1.875v1.876c0 .206.169.375.375.375a.376.376 0 0 0 .375-.375V4.93H9.25a.376.376 0 0 0 .375-.375.376.376 0 0 0-.375-.375H7.375V2.306A.376.376 0 0 0 7 1.93a.376.376 0 0 0-.375.375V4.18H4.75a.376.376 0 0 0-.375.375c0 .206.169.375.375.375Z" class="jp-icon3"/>
+  </g>
+  <path fill="#616161" fill-rule="evenodd" d="M11.5 9.5v2h-9v-2zM12 8a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" class="jp-icon3" clip-rule="evenodd"/>
+  <defs>
+    <clipPath id="addabovea">
+      <path fill="#fff" d="M10 1.556H4v6h6z" class="jp-icon3"/>
+    </clipPath>
+  </defs>
+</svg>

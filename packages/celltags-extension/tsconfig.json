@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "outDir": "lib",
+    "rootDir": "src"
+  },
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../application"
+    },
+    {
+      "path": "../notebook"
+    },
+    {
+      "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
+    }
+  ],
+  "extends": "../../tsconfigbase"
+}

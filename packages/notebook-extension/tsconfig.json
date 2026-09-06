@@ -1,0 +1,103 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src"
+  },
+  "include": ["src/**/*"],
+  "references": [
+    {
+      "path": "../application"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../cell-toolbar"
+    },
+    {
+      "path": "../cells"
+    },
+    {
+      "path": "../codeeditor"
+    },
+    {
+      "path": "../codemirror"
+    },
+    {
+      "path": "../completer"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../docmanager"
+    },
+    {
+      "path": "../docmanager-extension"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../documentsearch"
+    },
+    {
+      "path": "../filebrowser"
+    },
+    {
+      "path": "../launcher"
+    },
+    {
+      "path": "../logconsole"
+    },
+    {
+      "path": "../lsp"
+    },
+    {
+      "path": "../mainmenu"
+    },
+    {
+      "path": "../metadataform"
+    },
+    {
+      "path": "../nbformat"
+    },
+    {
+      "path": "../notebook"
+    },
+    {
+      "path": "../observables"
+    },
+    {
+      "path": "../outputarea"
+    },
+    {
+      "path": "../property-inspector"
+    },
+    {
+      "path": "../rendermime"
+    },
+    {
+      "path": "../services"
+    },
+    {
+      "path": "../settingregistry"
+    },
+    {
+      "path": "../statedb"
+    },
+    {
+      "path": "../statusbar"
+    },
+    {
+      "path": "../toc"
+    },
+    {
+      "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
+    }
+  ]
+}

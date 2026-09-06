@@ -1,0 +1,18 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-SidePanel-header > h2 {
+  /* Set font-size to override default h2 sizing but keeping default --jp-ui-font-size0 */
+  font-size: 100%;
+  font-weight: 600;
+  margin: 0 auto 0 0;
+  padding: 4px 10px;
+}
+
+.jp-DebuggerSidebar-body
+  .jp-AccordionPanel-title
+  jp-toolbar::part(positioning-region) {
+  flex-wrap: nowrap;
+}

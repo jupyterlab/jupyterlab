@@ -1,0 +1,287 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+/*
+  Main widget layout and styling
+*/
+
+.jp-extensionmanager-view .lm-SplitPanel-child {
+  overflow-y: auto;
+}
+
+.jp-extensionmanager-header {
+  width: 100%;
+}
+
+.jp-extensionmanager-title {
+  display: flex;
+  margin: 4px 10px 0;
+}
+
+.jp-extensionmanager-title svg {
+  width: 14px;
+  height: 14px;
+}
+
+.jp-extensionmanager-title .jp-icon3[fill] {
+  fill: currentcolor;
+}
+
+.jp-extensionmanager-path {
+  display: inline flex;
+  padding-left: 4px;
+}
+
+.jp-extensionmanager-header .jp-FilterBox {
+  margin: 4px 10px 0;
+  width: calc(100% - 20px);
+  font-weight: normal;
+}
+
+.jp-extensionmanager-disclaimer {
+  padding: 0 8px;
+  min-height: 160px;
+}
+
+.jp-extensionmanager-disclaimer a {
+  color: var(--jp-content-link-color);
+  text-decoration: none;
+}
+
+.jp-extensionmanager-disclaimer a:hover {
+  color: var(--jp-content-link-hover-color, var(--jp-content-link-color));
+  text-decoration: underline;
+}
+
+.jp-extensionmanager-disclaimer .jp-Button {
+  margin: 0 5px;
+}
+
+/*
+  List view layout and styling
+*/
+
+.jp-extensionmanager-listview-wrapper {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.jp-extensionmanager-listview {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+/*
+  Error messages
+*/
+
+.jp-extensionmanager-view .jp-extensionmanager-error pre {
+  white-space: pre-wrap;
+}
+
+/*
+  List view pagination styling
+*/
+
+.jp-extensionmanager-pagination li {
+  display: inline-block;
+}
+
+/* stylelint-disable selector-max-type */
+.jp-extensionmanager-pagination li > a {
+  padding: 0 5px;
+  cursor: pointer;
+}
+/* stylelint-enable selector-max-type */
+
+.jp-extensionmanager-pagination li.active > a {
+  background: var(--jp-brand-color1);
+  color: var(--jp-layout-color1);
+}
+
+.jp-extensionmanager-pagination li > a:hover {
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-extensionmanager-pagination .break > a {
+  cursor: default;
+}
+
+.jp-extensionmanager-installedlist,
+.jp-extensionmanager-searchresults {
+  min-height: 100px;
+}
+
+/*
+  Entry layout and styling
+*/
+
+.jp-extensionmanager-entry {
+  padding: 8px;
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
+}
+
+.jp-extensionmanager-entry-description {
+  min-width: 0;
+  flex-grow: 1;
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color2);
+  font-weight: 400;
+}
+
+.jp-extensionmanager-entry-title {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.jp-extensionmanager-entry.jp-extensionmanager-entry-should-be-uninstalled {
+  background-color: var(--jp-error-color3);
+}
+
+/* Precedence order update/error/warning matters! */
+
+.jp-extensionmanager-entry.jp-extensionmanager-entry-error {
+  border-left: solid 8px var(--jp-error-color2);
+  padding-left: 4px;
+}
+
+.jp-extensionmanager-entry-name {
+  font-size: var(--jp-ui-font-size1);
+  font-weight: 600;
+  padding: 0 8px 0 0;
+  margin-bottom: 4px;
+  overflow-wrap: anywhere;
+}
+
+.jp-extensionmanager-entry-name a:link {
+  color: var(--jp-content-link-color);
+  text-decoration: none;
+}
+
+.jp-extensionmanager-entry-name a:visited {
+  color: var(--jp-content-link-visited-color, var(--jp-content-link-color));
+  text-decoration: none;
+}
+
+.jp-extensionmanager-entry-name a:hover {
+  color: var(--jp-content-link-hover-color, var(--jp-content-link-color));
+  text-decoration: underline;
+}
+
+.jp-extensionmanager-loader,
+.jp-extensionmanager-error,
+.jp-extensionmanager-listview-message {
+  padding: 4px 12px;
+}
+
+.jp-extensionmanager-listview-message {
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-extensionmanager-entry-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/*
+  Pending entry progress indicator
+*/
+
+.jp-extensionmanager-pending {
+  height: 4px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  flex: 0 0 auto;
+  background-color: var(--jp-layout-color1);
+}
+
+.jp-extensionmanager-pending.jp-mod-hasPending::before {
+  display: block;
+  position: absolute;
+  content: '';
+  left: -200px;
+  width: 200px;
+  height: 4px;
+  border-radius: 4px;
+  background-color: var(--jp-brand-color1);
+  animation: loading 2s linear infinite;
+}
+
+@keyframes loading {
+  0% {
+    left: -200px;
+    width: 30%;
+  }
+
+  50% {
+    width: 30%;
+  }
+
+  70% {
+    width: 70%;
+  }
+
+  80% {
+    left: 50%;
+  }
+
+  95% {
+    left: 120%;
+  }
+
+  100% {
+    left: 100%;
+  }
+}
+
+/*
+  Disclaimer buttons
+*/
+
+.jp-extensionmanager-disclaimer-disable {
+  background-color: var(--jp-reject-color-normal) !important;
+  color: white !important;
+  border: 0;
+  background-image: none !important;
+}
+
+.jp-extensionmanager-disclaimer-enable {
+  background-color: var(--jp-error-color1) !important;
+  color: white !important;
+  border: 0;
+  background-image: none !important;
+}
+
+/*
+  Entry buttons layout and styling
+*/
+
+.jp-extensionmanager-entry-buttons {
+  display: flex;
+  flex-direction: row;
+  padding-block-start: 4px;
+  justify-content: flex-end;
+}
+
+/*
+  Generic dialog
+*/
+
+.jp-extensionmanager-dialog .jp-extensionmanager-dialog-subheader {
+  font-size: var(--jp-ui-font-size1);
+  font-weight: 600;
+  color: var(--jp-ui-font-color0);
+}

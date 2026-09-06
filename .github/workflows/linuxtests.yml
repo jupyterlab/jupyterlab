@@ -1,0 +1,199 @@
+name: Linux Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  linuxtests:
+    name: Linux
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /home/runner/pw-browsers
+    strategy:
+      matrix:
+        group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, interop, nonode, lint]
+        # This will be used by the base setup action
+        python-version: ["3.10", "3.14"]
+        include:
+          - group: release_test
+            upload-output: true
+          - group: lint
+            cache-path: |
+              ./.eslintcache
+              ./.prettiercache
+              ./.stylelintcache
+        exclude:
+          - group: integrity
+            python-version: "3.10"
+          - group: integrity2
+            python-version: "3.10"
+          - group: integrity3
+            python-version: "3.10"
+          - group: release_test
+            python-version: "3.10"
+          - group: docs
+            python-version: "3.10"
+          - group: usage
+            python-version: "3.10"
+          - group: usage2
+            python-version: "3.10"
+          - group: nonode
+            python-version: "3.10"
+          - group: lint
+            python-version: "3.10"
+          - group: splice_source
+            python-version: "3.10"
+      fail-fast: false
+    timeout-minutes: 45
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        with:
+          python_package_manager: "uv pip"
+
+      - name: Find out Playwright version
+        id: pw-version
+        run: |
+          set -e
+          PW_VERSION=$(grep -m1 "playwright@" yarn.lock)
+          echo "Playwright version: $PW_VERSION"
+          echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Restore Playwright browsers cache
+        if: ${{ github.event_name != 'release' }}
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # zizmor: ignore[cache-poisoning] v5 cache is disabled for release-triggered runs
+        id: playwright-cache
+        with:
+          path: /home/runner/pw-browsers
+          key: ${{ runner.os }}-playwright-${{ steps.pw-version.outputs.version }}
+
+      - name: Restore ${{ matrix.group }} cache
+        if: ${{ matrix.cache-path && github.event_name != 'release' }}
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # zizmor: ignore[cache-poisoning] v5 cache is disabled for release-triggered runs
+        with:
+          path: ${{ matrix.cache-path }}
+          key: |-
+            ${{ matrix.group }}-${{ runner.os }}-${{ matrix.python-version  }}
+
+      - name: Install dependencies
+        env:
+          GROUP: ${{ matrix.group }}
+        run: |
+          bash ./scripts/ci_install.sh
+
+      - name: Run test ${{ matrix.group }}
+        env:
+          GROUP: ${{ matrix.group }}
+          JLAB_BROWSER_TYPE: firefox
+        run: |
+          bash ./scripts/ci_script.sh
+
+      - name: Upload ${{ matrix.group }} results
+        if: ${{ matrix.upload-output && always() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: ${{ matrix.group }} ${{ github.run_number }}
+          path: |
+            ./build/${{ matrix.group }}_output
+
+  test_minimum_versions:
+    name: Test Minimum Versions
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        with:
+          python_version: "3.10"
+          dependency_type: minimum
+          python_package_manager: "uv pip"
+      - name: Install dependencies
+        run: |
+          bash ./scripts/ci_install.sh
+      - name: Run the unit tests
+        run: pytest -vv || pytest -vv --lf
+
+  make_sdist:
+    name: Make SDist
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        with:
+          python_package_manager: "uv pip"
+      - name: Install dependencies
+        run: |
+          bash ./scripts/ci_install.sh
+      - name: Build SDist
+        run: |
+          pip install build
+          python -m build --sdist
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: "sdist"
+          path: dist/*.tar.gz
+
+  test_sdist:
+    runs-on: ubuntu-latest
+    needs: [make_sdist]
+    name: Install from SDist and Test
+    timeout-minutes: 20
+    steps:
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+      - name: Download sdist
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: "sdist"
+          path: "sdist"
+      - name: Install From SDist
+        run: |
+          set -ex
+          cd sdist
+          mkdir test
+          tar --strip-components=1 -zxvf *.tar.gz -C ./test
+          cd test
+          pip install -e .[dev,test]
+          pip install pytest-github-actions-annotate-failures
+      - name: Run Test
+        run: |
+          cd sdist/test
+          pytest -vv || pytest -vv --lf
+
+  check_links:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+      - run: |
+          pip install -vv --group builder
+          jlpm
+          jlpm build:packages
+          jlpm docs
+      - uses: jupyterlab/maintainer-tools/.github/actions/check-links@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        with:
+          ignore_glob: "docs/api packages/ui-components/docs/source/ui_components.rst images"
+          ignore_links: "https?://.* .*/images/[\\w-]+.png"

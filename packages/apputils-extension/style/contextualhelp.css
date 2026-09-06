@@ -1,0 +1,42 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+:root {
+  --jp-private-shortcuts-key-padding-horizontal: 0.47em;
+  --jp-private-shortcuts-key-padding-vertical: 0.28em;
+  --jp-private-shortcuts-label-padding-horizontal: 0.47em;
+}
+
+.jp-ContextualShortcut-TableRow {
+  font-size: var(--jp-ui-font-size1);
+  font-family: var(--jp-ui-font-family);
+}
+
+.jp-ContextualShortcut-TableItem {
+  margin-left: auto;
+  margin-right: auto;
+  color: var(--jp-inverse-layout-color0);
+  font-size: var(--jp-ui-font-size1);
+  line-height: 2em;
+  padding-right: var(--jp-private-shortcuts-label-padding-horizontal);
+}
+
+.jp-ContextualShortcut-TableLastRow {
+  height: 2em;
+}
+
+.jp-ContextualShortcut-Key {
+  font-family: var(--jp-code-font-family);
+  border-width: var(--jp-border-width);
+  border-radius: var(--jp-border-radius);
+  border-style: solid;
+  border-color: var(--jp-border-color1);
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  padding-left: var(--jp-private-shortcuts-key-padding-horizontal);
+  padding-right: var(--jp-private-shortcuts-key-padding-horizontal);
+  padding-top: var(--jp-private-shortcuts-key-padding-vertical);
+  padding-bottom: var(--jp-private-shortcuts-key-padding-vertical);
+}

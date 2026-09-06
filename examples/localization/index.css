@@ -1,0 +1,98 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+body {
+  display: grid;
+  min-height: 100vh;
+  margin: 0;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  font-family: var(--jp-ui-font-family);
+  font-size: var(--jp-ui-font-size1);
+  place-items: center;
+}
+
+#main {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 560px;
+  padding: 32px 24px;
+}
+
+#main h1 {
+  margin: 0 0 12px;
+  font-size: var(--jp-ui-font-size3);
+  font-weight: 600;
+}
+
+.jp-Localization-header p,
+.jp-Localization-greeting,
+.jp-Localization-counter p {
+  margin: 0;
+}
+
+.jp-Localization-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.jp-Localization-greeting {
+  margin-bottom: 20px;
+}
+
+.jp-Localization-counter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+
+.jp-Localization-field select,
+.jp-Localization-controls button {
+  min-height: 28px;
+  border: 1px solid var(--jp-border-color1);
+  border-radius: 2px;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  font: inherit;
+}
+
+.jp-Localization-field select {
+  padding: 0 24px 0 8px;
+}
+
+.jp-Localization-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.jp-Localization-controls button {
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.jp-Localization-controls button:hover:not(:disabled) {
+  background: var(--jp-layout-color2);
+}
+
+.jp-Localization-field select:focus-visible,
+.jp-Localization-controls button:focus-visible {
+  outline: 2px solid var(--jp-brand-color1);
+  outline-offset: 2px;
+}
+
+.jp-Localization-controls button:disabled,
+.jp-Localization-field select:disabled {
+  color: var(--jp-ui-font-color3);
+  cursor: default;
+}
+
+.jp-Localization-status {
+  min-height: 20px;
+  color: var(--jp-error-color1);
+}

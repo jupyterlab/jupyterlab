@@ -1,0 +1,29 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+:root {
+  --jp-notebook-toolbar-padding: 0 5px 0 2px;
+}
+
+/*-----------------------------------------------------------------------------
+
+/*-----------------------------------------------------------------------------
+| Styles
+|----------------------------------------------------------------------------*/
+
+.jp-NotebookPanel-toolbar {
+  padding: var(--jp-notebook-toolbar-padding);
+
+  /* disable paint containment from lumino 2.0 default strict CSS containment */
+  contain: style size !important;
+}
+
+.jp-Toolbar > .jp-Toolbar-responsive-opener {
+  margin-left: auto;
+}

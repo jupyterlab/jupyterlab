@@ -1,0 +1,26 @@
+{
+  "extends": "../../../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "build",
+    "rootDir": "src",
+    "module": "commonjs",
+    "strictNullChecks": false,
+    "types": ["node"],
+    "verbatimModuleSyntax": false
+  },
+  "include": ["src/**/*"],
+  "references": [
+    {
+      "path": "../../../coreutils"
+    },
+    {
+      "path": "../../../outputarea"
+    },
+    {
+      "path": "../../../rendermime"
+    },
+    {
+      "path": "../.."
+    }
+  ]
+}

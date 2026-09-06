@@ -1,0 +1,93 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import { test } from '@jupyterlab/galata';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { expect } from '@playwright/test';
+
+/**
+ * Normalize rgba color format for comparison (remove spaces, use .XX instead of 0.XX for decimals < 1)
+ */
+function normalizeColor(color: string): string {
+  return color.replace(/\s/g, '').replace(/,0\./g, ',.');
+}
+
+const toolbars: string[][] = [
+  ['@jupyterlab/csvviewer-extension:csv', 'toolbar'],
+  ['@jupyterlab/csvviewer-extension:tsv', 'toolbar'],
+  ['@jupyterlab/fileeditor-extension:plugin', 'toolbar'],
+  ['@jupyterlab/htmlviewer-extension:plugin', 'toolbar'],
+  ['@jupyterlab/notebook-extension:panel', 'toolbar']
+];
+
+toolbars.forEach(([plugin, parameter]) => {
+  test(`Toolbar commands for ${plugin} must exists`, async ({ page }) => {
+    const [toolbarItems, commands] = await page.evaluate(
+      async ([plugin, parameter]) => {
+        const settings = await window.galata.getPlugin(
+          '@jupyterlab/apputils-extension:settings'
+        );
+        const toolbar = await settings.get(plugin, parameter);
+
+        const commandIds = window.jupyterapp.commands.listCommands();
+        return Promise.resolve([
+          toolbar.composite as ISettingRegistry.IToolbarItem[],
+          commandIds
+        ]);
+      },
+      [plugin, parameter]
+    );
+
+    const missingCommands = toolbarItems.filter(
+      item => item.command !== undefined && !commands.includes(item.command)
+    );
+    expect(missingCommands).toEqual([]);
+  });
+});
+test.describe('Toolbar Button', () => {
+  test.beforeEach(async ({ page, tmpPath }) => {
+    await page.notebook.createNew();
+  });
+
+  test('Render Switch Kernel ToolbarButton in default theme', async ({
+    page
+  }) => {
+    const label = page.locator(
+      'jp-button.jp-Toolbar-kernelName .jp-ToolbarButtonComponent-label'
+    );
+    const labelColor = await label.evaluate(el => getComputedStyle(el).color);
+
+    const color = await page.evaluate(() =>
+      getComputedStyle(document.body)
+        .getPropertyValue('--jp-ui-font-color1')
+        .trim()
+    );
+
+    expect(normalizeColor(labelColor)).toEqual(normalizeColor(color));
+  });
+
+  test('Render Switch Kernel ToolbarButton in dark theme', async ({ page }) => {
+    await page.theme.setDarkTheme();
+    const label = page.locator(
+      'jp-button.jp-Toolbar-kernelName .jp-ToolbarButtonComponent-label'
+    );
+    const labelColor = await label.evaluate(el => getComputedStyle(el).color);
+
+    const color = await page.evaluate(() =>
+      getComputedStyle(document.body)
+        .getPropertyValue('--jp-ui-font-color1')
+        .trim()
+    );
+
+    expect(normalizeColor(labelColor)).toEqual(normalizeColor(color));
+  });
+});
+test('Toolbar widget visibility', async ({ page }) => {
+  const workspaceSelector = page.locator('div.jp-WorkspaceSelector');
+  await expect(workspaceSelector).toHaveCount(0);
+  await page.menu.clickMenuItem('View>Appearance>Show Workspace Indicator');
+  await expect(workspaceSelector).toHaveCount(1);
+  await expect(workspaceSelector).toHaveText('default');
+  await page.menu.clickMenuItem('View>Appearance>Show Workspace Indicator');
+  await expect(workspaceSelector).toHaveCount(0);
+});

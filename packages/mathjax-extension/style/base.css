@@ -1,0 +1,11 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+@import './fonts.css';
+
+/* This can be removed after upgrading to MathJax 4, as the issue will be fixed in the new version */
+mjx-assistive-mml {
+  bottom: 0;
+}

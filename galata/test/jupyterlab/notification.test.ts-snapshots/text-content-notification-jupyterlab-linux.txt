@@ -1,0 +1,1 @@
+<div><div class="jp-toast-message">&lt;style&gt;.jp-dummy {<br>  color: pink;<br>}<br>&lt;/style&gt;<br>&lt;script&gt;alert("I'm in");&lt;/script&gt;<br><br>## Title<br><br>This _is_ a **Markdown** message.<br><br>![logo](https:/…</div></div>

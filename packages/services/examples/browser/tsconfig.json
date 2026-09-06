@@ -1,0 +1,20 @@
+{
+  "extends": "../../../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "build",
+    "rootDir": "src",
+    "module": "commonjs",
+    "strictNullChecks": true,
+    "types": ["node"],
+    "verbatimModuleSyntax": false
+  },
+  "include": ["src/**/*"],
+  "references": [
+    {
+      "path": "../../../coreutils"
+    },
+    {
+      "path": "../.."
+    }
+  ]
+}

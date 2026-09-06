@@ -1,0 +1,182 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*
+ * Mozilla scrollbar styling
+ */
+
+/* use standard opaque scrollbars for most nodes */
+[data-jp-theme-scrollbars='true'] {
+  scrollbar-color: rgb(var(--jp-scrollbar-thumb-color))
+    var(--jp-scrollbar-background-color);
+}
+
+/* for code nodes, use a transparent style of scrollbar. These selectors
+ * will match lower in the tree, and so will override the above */
+[data-jp-theme-scrollbars='true'] .CodeMirror-hscrollbar,
+[data-jp-theme-scrollbars='true'] .CodeMirror-vscrollbar {
+  scrollbar-color: rgba(var(--jp-scrollbar-thumb-color), 0.5) transparent;
+}
+
+/* tiny scrollbar */
+
+.jp-scrollbar-tiny {
+  scrollbar-color: rgba(var(--jp-scrollbar-thumb-color), 0.5) transparent;
+  scrollbar-width: thin;
+}
+
+/* tiny scrollbar */
+
+.jp-scrollbar-tiny::-webkit-scrollbar,
+.jp-scrollbar-tiny::-webkit-scrollbar-corner {
+  background-color: transparent;
+  height: 4px;
+  width: 4px;
+}
+
+.jp-scrollbar-tiny::-webkit-scrollbar-thumb {
+  background: rgba(var(--jp-scrollbar-thumb-color), 0.5);
+}
+
+.jp-scrollbar-tiny::-webkit-scrollbar-track:horizontal {
+  border-left: 0 solid transparent;
+  border-right: 0 solid transparent;
+}
+
+.jp-scrollbar-tiny::-webkit-scrollbar-track:vertical {
+  border-top: 0 solid transparent;
+  border-bottom: 0 solid transparent;
+}
+
+/*
+ * Lumino
+ *
+ * The Lumino scrollbar (used by every DataGrid — CSV viewer, Debugger
+ * Variables panel, …) is themed via the shared scrollbar variables.
+ * Fallbacks equal the previous hardcoded values, so themes that do not
+ * define `--jp-scrollbar-*` (the default light theme) are unchanged at
+ * rest. Hover/active blend towards `--jp-ui-font-color1` (dark in the
+ * light theme, light in the dark themes) with `color-mix` so the
+ * feedback stays visible in every theme. See issue #18797.
+ */
+.lm-ScrollBar[data-orientation='horizontal'] {
+  min-height: 16px;
+  max-height: 16px;
+  min-width: 45px;
+  border-top: 1px solid var(--jp-border-color1);
+}
+
+.lm-ScrollBar[data-orientation='vertical'] {
+  min-width: 16px;
+  max-width: 16px;
+  min-height: 45px;
+  border-left: 1px solid var(--jp-border-color1);
+}
+
+.lm-ScrollBar-button {
+  position: relative;
+  background-color: var(--jp-scrollbar-background-color, #f0f0f0);
+  min-height: 15px;
+  max-height: 15px;
+  min-width: 15px;
+  max-width: 15px;
+}
+
+/*
+ * The caret SVGs have a fixed fill, so render them as a theme-aware
+ * mask tinted with --jp-ui-font-color1 (light in the dark themes, dark
+ * in the light theme) rather than a fixed-colour background image, so
+ * the arrows keep enough contrast in every theme.
+ */
+.lm-ScrollBar-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--jp-ui-font-color1);
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 17px;
+  mask-size: 17px;
+}
+
+.lm-ScrollBar-button:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--jp-scrollbar-background-color, #f0f0f0) 86%,
+    var(--jp-ui-font-color1) 14%
+  );
+}
+
+.lm-ScrollBar-button.lm-mod-active {
+  background-color: color-mix(
+    in srgb,
+    var(--jp-scrollbar-background-color, #f0f0f0) 74%,
+    var(--jp-ui-font-color1) 26%
+  );
+}
+
+.lm-ScrollBar-track {
+  background: var(--jp-scrollbar-background-color, #f0f0f0);
+}
+
+.lm-ScrollBar-thumb {
+  background: rgb(var(--jp-scrollbar-thumb-color, 205, 205, 205));
+}
+
+.lm-ScrollBar-thumb:hover {
+  background: color-mix(
+    in srgb,
+    rgb(var(--jp-scrollbar-thumb-color, 205, 205, 205)) 78%,
+    var(--jp-ui-font-color1) 22%
+  );
+}
+
+.lm-ScrollBar-thumb.lm-mod-active {
+  background: color-mix(
+    in srgb,
+    rgb(var(--jp-scrollbar-thumb-color, 205, 205, 205)) 62%,
+    var(--jp-ui-font-color1) 38%
+  );
+}
+
+.lm-ScrollBar[data-orientation='horizontal'] .lm-ScrollBar-thumb {
+  height: 100%;
+  min-width: 15px;
+  border-left: 1px solid var(--jp-border-color1);
+  border-right: 1px solid var(--jp-border-color1);
+}
+
+.lm-ScrollBar[data-orientation='vertical'] .lm-ScrollBar-thumb {
+  width: 100%;
+  min-height: 15px;
+  border-top: 1px solid var(--jp-border-color1);
+  border-bottom: 1px solid var(--jp-border-color1);
+}
+
+.lm-ScrollBar[data-orientation='horizontal']
+  .lm-ScrollBar-button[data-action='decrement']::before {
+  -webkit-mask-image: var(--jp-icon-caret-left);
+  mask-image: var(--jp-icon-caret-left);
+}
+
+.lm-ScrollBar[data-orientation='horizontal']
+  .lm-ScrollBar-button[data-action='increment']::before {
+  -webkit-mask-image: var(--jp-icon-caret-right);
+  mask-image: var(--jp-icon-caret-right);
+}
+
+.lm-ScrollBar[data-orientation='vertical']
+  .lm-ScrollBar-button[data-action='decrement']::before {
+  -webkit-mask-image: var(--jp-icon-caret-up);
+  mask-image: var(--jp-icon-caret-up);
+}
+
+.lm-ScrollBar[data-orientation='vertical']
+  .lm-ScrollBar-button[data-action='increment']::before {
+  -webkit-mask-image: var(--jp-icon-caret-down);
+  mask-image: var(--jp-icon-caret-down);
+}

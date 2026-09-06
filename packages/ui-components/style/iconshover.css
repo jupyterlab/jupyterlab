@@ -1,0 +1,193 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-icon-hoverShow:not(:hover) .jp-icon-hoverShow-content {
+  display: none !important;
+}
+
+/**
+ * Support for hover colors for icons as inline SVG HTMLElements
+ */
+
+/**
+ * regular colors
+ */
+
+/* recolor the primary elements of an icon */
+.jp-icon-hover :hover .jp-icon0-hover[fill] {
+  fill: var(--jp-inverse-layout-color0);
+}
+
+.jp-icon-hover :hover .jp-icon1-hover[fill] {
+  fill: var(--jp-inverse-layout-color1);
+}
+
+.jp-icon-hover :hover .jp-icon2-hover[fill] {
+  fill: var(--jp-inverse-layout-color2);
+}
+
+.jp-icon-hover :hover .jp-icon3-hover[fill] {
+  fill: var(--jp-inverse-layout-color3);
+}
+
+.jp-icon-hover :hover .jp-icon4-hover[fill] {
+  fill: var(--jp-inverse-layout-color4);
+}
+
+.jp-icon-hover :hover .jp-icon0-hover[stroke] {
+  stroke: var(--jp-inverse-layout-color0);
+}
+
+.jp-icon-hover :hover .jp-icon1-hover[stroke] {
+  stroke: var(--jp-inverse-layout-color1);
+}
+
+.jp-icon-hover :hover .jp-icon2-hover[stroke] {
+  stroke: var(--jp-inverse-layout-color2);
+}
+
+.jp-icon-hover :hover .jp-icon3-hover[stroke] {
+  stroke: var(--jp-inverse-layout-color3);
+}
+
+.jp-icon-hover :hover .jp-icon4-hover[stroke] {
+  stroke: var(--jp-inverse-layout-color4);
+}
+
+/* recolor the accent elements of an icon */
+.jp-icon-hover :hover .jp-icon-accent0-hover[fill] {
+  fill: var(--jp-layout-color0);
+}
+
+.jp-icon-hover :hover .jp-icon-accent1-hover[fill] {
+  fill: var(--jp-layout-color1);
+}
+
+.jp-icon-hover :hover .jp-icon-accent2-hover[fill] {
+  fill: var(--jp-layout-color2);
+}
+
+.jp-icon-hover :hover .jp-icon-accent3-hover[fill] {
+  fill: var(--jp-layout-color3);
+}
+
+.jp-icon-hover :hover .jp-icon-accent4-hover[fill] {
+  fill: var(--jp-layout-color4);
+}
+
+.jp-icon-hover :hover .jp-icon-accent0-hover[stroke] {
+  stroke: var(--jp-layout-color0);
+}
+
+.jp-icon-hover :hover .jp-icon-accent1-hover[stroke] {
+  stroke: var(--jp-layout-color1);
+}
+
+.jp-icon-hover :hover .jp-icon-accent2-hover[stroke] {
+  stroke: var(--jp-layout-color2);
+}
+
+.jp-icon-hover :hover .jp-icon-accent3-hover[stroke] {
+  stroke: var(--jp-layout-color3);
+}
+
+.jp-icon-hover :hover .jp-icon-accent4-hover[stroke] {
+  stroke: var(--jp-layout-color4);
+}
+
+/* set the color of an icon to transparent */
+.jp-icon-hover :hover .jp-icon-none-hover[fill] {
+  fill: none;
+}
+
+.jp-icon-hover :hover .jp-icon-none-hover[stroke] {
+  stroke: none;
+}
+
+/**
+ * inverse colors
+ */
+
+/* inverse recolor the primary elements of an icon */
+.jp-icon-hover.jp-icon-alt :hover .jp-icon0-hover[fill] {
+  fill: var(--jp-layout-color0);
+}
+
+.jp-icon-hover.jp-icon-alt :hover .jp-icon1-hover[fill] {
+  fill: var(--jp-layout-color1);
+}
+
+.jp-icon-hover.jp-icon-alt :hover .jp-icon2-hover[fill] {
+  fill: var(--jp-layout-color2);
+}
+
+.jp-icon-hover.jp-icon-alt :hover .jp-icon3-hover[fill] {
+  fill: var(--jp-layout-color3);
+}
+
+.jp-icon-hover.jp-icon-alt :hover .jp-icon4-hover[fill] {
+  fill: var(--jp-layout-color4);
+}
+
+.jp-icon-hover.jp-icon-alt :hover .jp-icon0-hover[stroke] {
+  stroke: var(--jp-layout-color0);
+}
+
+.jp-icon-hover.jp-icon-alt :hover .jp-icon1-hover[stroke] {
+  stroke: var(--jp-layout-color1);
+}
+
+.jp-icon-hover.jp-icon-alt :hover .jp-icon2-hover[stroke] {
+  stroke: var(--jp-layout-color2);
+}
+
+.jp-icon-hover.jp-icon-alt :hover .jp-icon3-hover[stroke] {
+  stroke: var(--jp-layout-color3);
+}
+
+.jp-icon-hover.jp-icon-alt :hover .jp-icon4-hover[stroke] {
+  stroke: var(--jp-layout-color4);
+}
+
+/* inverse recolor the accent elements of an icon */
+.jp-icon-hover.jp-icon-alt :hover .jp-icon-accent0-hover[fill] {
+  fill: var(--jp-inverse-layout-color0);
+}
+
+.jp-icon-hover.jp-icon-alt :hover .jp-icon-accent1-hover[fill] {
+  fill: var(--jp-inverse-layout-color1);
+}
+
+.jp-icon-hover.jp-icon-alt :hover .jp-icon-accent2-hover[fill] {
+  fill: var(--jp-inverse-layout-color2);
+}
+
+.jp-icon-hover.jp-icon-alt :hover .jp-icon-accent3-hover[fill] {
+  fill: var(--jp-inverse-layout-color3);
+}
+
+.jp-icon-hover.jp-icon-alt :hover .jp-icon-accent4-hover[fill] {
+  fill: var(--jp-inverse-layout-color4);
+}
+
+.jp-icon-hover.jp-icon-alt :hover .jp-icon-accent0-hover[stroke] {
+  stroke: var(--jp-inverse-layout-color0);
+}
+
+.jp-icon-hover.jp-icon-alt :hover .jp-icon-accent1-hover[stroke] {
+  stroke: var(--jp-inverse-layout-color1);
+}
+
+.jp-icon-hover.jp-icon-alt :hover .jp-icon-accent2-hover[stroke] {
+  stroke: var(--jp-inverse-layout-color2);
+}
+
+.jp-icon-hover.jp-icon-alt :hover .jp-icon-accent3-hover[stroke] {
+  stroke: var(--jp-inverse-layout-color3);
+}
+
+.jp-icon-hover.jp-icon-alt :hover .jp-icon-accent4-hover[stroke] {
+  stroke: var(--jp-inverse-layout-color4);
+}

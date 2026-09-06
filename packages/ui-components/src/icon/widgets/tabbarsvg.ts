@@ -1,0 +1,149 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { VirtualElement } from '@lumino/virtualdom';
+import { h, hpass } from '@lumino/virtualdom';
+import type { Title, Widget } from '@lumino/widgets';
+import { DockPanel, TabBar, TabPanel } from '@lumino/widgets';
+import { LabIconStyle } from '../../style';
+import { classes } from '../../utils';
+import { addIcon, closeIcon } from '../iconimports';
+
+/**
+ * a widget which displays titles as a single row or column of tabs.
+ * Tweaked to use an inline svg as the close icon
+ */
+export class TabBarSvg<T> extends TabBar<T> {
+  /**
+   * Translator object
+   */
+  static translator: ITranslator | null = null;
+
+  /**
+   * Construct a new tab bar. Overrides the default renderer.
+   *
+   * @param options - The options for initializing the tab bar.
+   */
+  constructor(options: TabBar.IOptions<T> = {}) {
+    super({ renderer: TabBarSvg.defaultRenderer, ...options });
+    const trans = (TabBarSvg.translator ?? nullTranslator).load('jupyterlab');
+    addIcon.element({
+      container: this.addButtonNode,
+      title: trans.__('New Launcher')
+    });
+  }
+}
+
+export namespace TabBarSvg {
+  /**
+   * Resolve the display label for a widget title.
+   *
+   * Falls back to the `jpTabLabel` dataset entry, then to the caption.
+   */
+  export function titleLabel(title: Title<any>): string {
+    return title.label || title.dataset['jpTabLabel'] || title.caption;
+  }
+
+  /**
+   * A modified implementation of the TabBar Renderer.
+   */
+  export class Renderer extends TabBar.Renderer {
+    /**
+     * Render the label element for a tab.
+     *
+     * @param data - The data to use for rendering the tab.
+     *
+     * @returns A virtual element representing the tab label.
+     */
+    renderLabel(data: TabBar.IRenderData<any>): VirtualElement {
+      return h.div({ className: 'lm-TabBar-tabLabel' }, titleLabel(data.title));
+    }
+
+    /**
+     * Render the close icon element for a tab.
+     *
+     * @param data - The data to use for rendering the tab.
+     *
+     * @returns A virtual element representing the tab close icon.
+     */
+    renderCloseIcon(data: TabBar.IRenderData<any>): VirtualElement {
+      const trans = (TabBarSvg.translator ?? nullTranslator).load('jupyterlab');
+      const label = titleLabel(data.title);
+      const title = label ? trans.__('Close %1', label) : trans.__('Close tab');
+      const className = classes(
+        'jp-icon-hover lm-TabBar-tabCloseIcon',
+        LabIconStyle.styleClass({
+          elementPosition: 'center',
+          height: '16px',
+          width: '16px'
+        })
+      );
+
+      return hpass(
+        'div',
+        { className, title },
+        closeIcon
+      ) as unknown as VirtualElement;
+    }
+  }
+
+  export const defaultRenderer = new Renderer();
+}
+
+/**
+ * a widget which provides a flexible docking area for widgets.
+ * Tweaked to use an inline svg as the close icon
+ */
+export class DockPanelSvg extends DockPanel {
+  /**
+   * Construct a new dock panel.
+   *
+   * @param options - The options for initializing the panel.
+   */
+  constructor(options: DockPanel.IOptions = {}) {
+    super({
+      renderer: DockPanelSvg.defaultRenderer,
+      ...options
+    });
+  }
+}
+
+export namespace DockPanelSvg {
+  /**
+   * A modified implementation of the DockPanel Renderer.
+   */
+  export class Renderer extends DockPanel.Renderer {
+    /**
+     * Create a new tab bar (with inline svg icons enabled
+     * for use with a dock panel.
+     *
+     * @returns A new tab bar for a dock panel.
+     */
+    createTabBar(): TabBarSvg<Widget> {
+      const bar = new TabBarSvg<Widget>();
+      bar.addClass('lm-DockPanel-tabBar');
+      return bar;
+    }
+  }
+
+  export const defaultRenderer = new Renderer();
+}
+
+/**
+ * A widget which combines a `TabBar` and a `StackedPanel`.
+ * Tweaked to use an inline svg as the close icon
+ */
+export class TabPanelSvg extends TabPanel {
+  /**
+   * Construct a new tab panel.
+   *
+   * @param options - The options for initializing the tab panel.
+   */
+  constructor(options: TabPanel.IOptions = {}) {
+    options.renderer = options.renderer || TabBarSvg.defaultRenderer;
+    super(options);
+  }
+}

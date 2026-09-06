@@ -1,0 +1,25 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Presentation Mode (.jp-mod-presentationMode)
+|----------------------------------------------------------------------------*/
+
+.jp-mod-presentationMode .jp-FileEditor {
+  --jp-code-font-size: var(--jp-code-presentation-font-size);
+}
+
+.jp-FileEditorCodeWrapper {
+  overflow: auto;
+}
+
+.jp-FileEditorCodeWrapper .cm-editor {
+  height: 100%;
+}
+
+/* Add extra space at the bottom when scrollPastEnd is enabled */
+.jp-FileEditor.jp-mod-scrollPastEnd .cm-content {
+  padding-bottom: var(--jp-editor-scroll-padding);
+}

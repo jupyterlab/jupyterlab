@@ -1,0 +1,42 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-Collapser {
+  flex: 0 0 var(--jp-cell-collapser-width);
+  padding: 0;
+  margin: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  border-radius: var(--jp-border-radius);
+  opacity: 1;
+}
+
+.jp-Collapser-child {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+
+  /* height: 100% doesn't work because the height of its parent is computed from content */
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+/*-----------------------------------------------------------------------------
+| Printing
+|----------------------------------------------------------------------------*/
+
+/*
+Hiding collapsers in print mode.
+
+Note: input and output wrappers have "display: block" property in print mode.
+*/
+
+@media print {
+  .jp-Collapser {
+    display: none;
+  }
+}

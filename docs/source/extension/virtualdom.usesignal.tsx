@@ -1,0 +1,32 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+import * as React from 'react';
+
+import { ReactWidget, UseSignal } from '@jupyterlab/ui-components';
+
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+
+import { Widget } from '@lumino/widgets';
+
+function MyComponent() {
+  return <div>My Widget</div>;
+}
+
+function UseSignalComponent(props: { signal: ISignal<MyWidget, void> }) {
+  return <UseSignal signal={props.signal}>{() => <MyComponent />}</UseSignal>;
+}
+
+class MyWidget extends ReactWidget {
+  render() {
+    return <UseSignalComponent signal={this._signal} />;
+  }
+
+  private _signal = new Signal<this, void>(this);
+}
+
+const myWidget: Widget = new MyWidget();
+Widget.attach(myWidget, document.body);

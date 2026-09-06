@@ -1,0 +1,21 @@
+<!--
+  ~ Copyright (c) Jupyter Development Team.
+  ~ Distributed under the terms of the Modified BSD License.
+-->
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Jupyter Services Demo</title>
+    {% set page_config_full = {'baseUrl': base_url} %}
+
+    <script id="jupyter-config-data" type="application/json">
+      {{ page_config_full | tojson }}
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.js"></script>
+    <script src="{{page_config['fullStaticUrl'] | e}}/bundle.js" main="index"></script>
+  </head>
+  <body>
+    <span id='outputarea'></span>
+  </body>
+</html>

@@ -1,0 +1,123 @@
+name: Update Playwright Snapshots
+
+on:
+  issue_comment:
+    types: [created, edited]
+
+permissions: {}
+
+jobs:
+  update-galata-snapshots:
+    name: Update Galata References
+    if: github.event.issue.pull_request && (
+        contains(github.event.comment.body, 'please update galata snapshots') ||
+        contains(github.event.comment.body, 'please update snapshots')
+      )
+    timeout-minutes: 80
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots-checkout@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        with:
+          python_package_manager: "uv pip"
+
+      - name: Install dependencies
+        run: |
+          bash ./scripts/ci_install.sh
+          # Build dev-mode
+          jlpm build
+
+      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          server_url: http-get://localhost:8888/lab
+          test_folder: galata
+          artifact_name: updated-galata-snapshots
+          report_name: update-galata-report
+          npm_client: jlpm
+
+      - name: Comment back on the PR
+        run: |
+          gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Galata snapshots updated.'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update-documentation-snapshots:
+    name: Update Documentation Snapshots
+    if: github.event.issue.pull_request && (
+        contains(github.event.comment.body, 'please update documentation snapshots') ||
+        contains(github.event.comment.body, 'please update snapshots')
+      )
+    timeout-minutes: 80
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      pull-requests: write
+
+    # Python version is frozen through strategy.matrix.python-version
+    # Python dependencies are frozen in the installation step
+    # Note: IPython is among the frozen package
+    strategy:
+      matrix:
+        # Freeze Python version because it appears in console header
+        python-version: ['3.10.6']
+
+    steps:
+      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots-checkout@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout demo project
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          repository: jupyterlab/jupyterlab-demo
+          ref: master
+          path: demo
+          persist-credentials: false
+
+      - name: Get demo folder
+        run: |
+          echo "JUPYTERLAB_GALATA_ROOT_DIR=$PWD" >> $GITHUB_ENV
+        working-directory: demo
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        with:
+          python_package_manager: "uv pip"
+
+      - name: Install dependencies
+        env:
+          OPTIONAL_DEPENDENCIES: "docs-screenshots"
+        run: |
+          set -ex
+          # Note: any changes to dependency pins need to
+          # be done by updating the [docs-screenshots] group.
+          bash ./scripts/ci_install.sh
+
+          # Build dev-mode
+          jlpm build
+
+      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          server_url: http-get://localhost:8888/lab
+          test_folder: galata
+          start_server_script: start:doc
+          update_script: test:doc:update
+          artifact_name: updated-documentation-snapshots
+          report_name: update-documentation-report
+          npm_client: jlpm
+
+      - name: Comment back on the PR
+        run: |
+          gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Documentation snapshots updated.'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

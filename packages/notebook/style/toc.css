@@ -1,0 +1,43 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+/*
+ * Execution indicator
+ */
+.jp-tocItem-content::after {
+  content: '';
+
+  /* Must be identical to form a circle */
+  width: 12px;
+  height: 12px;
+  background: none;
+  border: none;
+  position: absolute;
+  right: 0;
+}
+
+.jp-tocItem-content[data-running='0']::after {
+  border-radius: 50%;
+  border: var(--jp-border-width) solid var(--jp-inverse-layout-color3);
+  background: none;
+}
+
+.jp-tocItem-content[data-running='1']::after {
+  border-radius: 50%;
+  border: var(--jp-border-width) solid var(--jp-inverse-layout-color3);
+  background-color: var(--jp-inverse-layout-color3);
+}
+
+.jp-tocItem-content[data-running='-0.5']::after {
+  /* \FE0E forces the preceding unicode to be rendered as text */
+  content: '\26A0 \FE0E';
+  color: var(--jp-error-color1);
+}
+
+.jp-tocItem-content[data-running='0'],
+.jp-tocItem-content[data-running='1'],
+.jp-tocItem-content[data-running='-0.5'] {
+  margin-right: 12px;
+}

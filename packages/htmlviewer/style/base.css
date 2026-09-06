@@ -1,0 +1,37 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/* Document styles */
+.jp-HTMLViewer {
+  overflow: hidden;
+  min-width: 100px;
+  min-height: 100px;
+  width: 100%;
+  height: 100%;
+}
+
+.jp-HTMLViewer > iframe {
+  border: none;
+}
+
+/*
+When drag events occur, `lm-mod-override-cursor` is added to the body.
+Because iframes steal all cursor events, the following two rules are necessary
+to suppress pointer events while resize drags are occurring. There may be a
+better solution to this problem.
+*/
+body.lm-mod-override-cursor .jp-HTMLViewer {
+  position: relative;
+}
+
+body.lm-mod-override-cursor .jp-HTMLViewer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+}

@@ -1,0 +1,458 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/* Shortcut Input Style */
+
+.jp-Shortcuts-InputBox {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.jp-Shortcuts-InputBox-controls {
+  display: inline-flex;
+  align-items: center;
+}
+
+.jp-Shortcuts-CaptureHint {
+  margin: 2px 0 0;
+  font-size: var(--jp-ui-font-size0);
+  color: var(--jp-ui-font-color2);
+}
+
+.jp-mod-hidden {
+  display: none;
+}
+
+@keyframes slide-animation {
+  from {
+    width: 0;
+    left: 0;
+  }
+
+  to {
+    width: 120px;
+    left: 0;
+  }
+}
+
+.jp-Shortcuts-Input {
+  animation-duration: 0.3s;
+  animation-timing-function: ease-out;
+  animation-name: slide-animation;
+  border-width: var(--jp-border-width);
+  border-color: var(--jp-border-color3);
+  border-radius: var(--jp-border-radius);
+  border-style: solid;
+  background-color: var(--jp-layout-color0);
+  min-width: 120px;
+  height: 26px;
+  line-height: 26px;
+  display: block;
+  position: relative;
+}
+
+.jp-Shortcuts-CaptureTimer {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  background-color: color-mix(in srgb, var(--jp-brand-color1) 25%, transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.jp-Shortcuts-CaptureTimer.jp-mod-running {
+  /* Duration is set inline from CAPTURE_IDLE_MS */
+  animation-name: jp-shortcuts-capture-timer;
+  animation-timing-function: linear;
+}
+
+@keyframes jp-shortcuts-capture-timer {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.jp-Shortcuts-Input:focus {
+  outline: none;
+  color: var(--jp-content-font-color1);
+  border-color: var(--jp-focus-outline-color);
+}
+
+.jp-mod-unavailable-Input:focus {
+  border-color: var(--jp-error-color2);
+}
+
+.jp-Shortcuts-InputText {
+  position: relative;
+  z-index: 1;
+  overflow-y: hidden;
+  margin: 4px;
+  padding: 0 5px;
+  height: 18px;
+  line-height: 18px;
+  width: max-content;
+}
+
+.jp-mod-selected-InputText {
+  background-color: var(
+    --jp-editor-selected-background,
+    var(--jp-layout-color2)
+  );
+}
+
+.jp-mod-waiting-InputText {
+  color: var(--jp-content-font-color3);
+}
+
+button.jp-mod-styled.jp-Shortcuts-Overwrite.jp-mod-defunc-Submit,
+button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit,
+button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
+  cursor: not-allowed;
+  background-color: transparent;
+  color: var(--jp-content-font-color3);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
+.jp-Shortcuts-Overwrite {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: unset;
+  height: 24px;
+  min-height: 24px;
+  padding: 0 8px;
+  white-space: nowrap;
+  border-radius: 0;
+  cursor: pointer;
+  font-family: var(--jp-ui-font-family);
+}
+
+/* Shortcut Item Style */
+.jp-Shortcuts-Cell {
+  padding: 6px 12px;
+  display: table-cell;
+  width: 20%;
+  vertical-align: middle;
+}
+
+.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell .jp-HTMLSelect {
+  position: relative;
+  max-width: 300px;
+}
+
+.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell .jp-HTMLSelect select {
+  max-width: 300px;
+  white-space: pre-wrap;
+}
+
+.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell .jp-HTMLSelect svg {
+  top: 4px;
+}
+
+.jp-Shortcuts-Cell button {
+  margin-left: 5px;
+  height: 24px;
+  min-height: 24px;
+  padding: 0 5px;
+}
+
+.jp-Shortcuts-Cell button.jp-Shortcuts-Overwrite:focus-visible,
+.jp-Shortcuts-Cell button.jp-Shortcuts-Icon:focus-visible {
+  outline-offset: 1px;
+}
+
+.jp-Shortcuts-Cell button.jp-Shortcuts-Icon {
+  width: 24px;
+  min-width: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.jp-Shortcuts-Cell button.jp-Shortcuts-Icon svg {
+  height: 16px;
+  width: 16px;
+}
+
+.jp-Shortcuts-AddShortcut.jp-mod-styled .jp-icon3[fill],
+.jp-Shortcuts-Cell button.jp-Shortcuts-Icon .jp-icon3[fill],
+.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-SaveNew .jp-icon3[fill] {
+  fill: currentcolor;
+}
+
+.jp-Shortcuts-ShortcutCell {
+  display: flex;
+  align-items: center;
+  min-width: max-content;
+  flex-wrap: wrap;
+}
+
+.jp-Shortcuts-EmptyCell {
+  min-height: 32px;
+}
+
+.jp-Shortcuts-Row {
+  width: 100%;
+  display: table-row;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+  vertical-align: middle;
+  background-color: var(--jp-layout-color0);
+}
+
+.jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut {
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut
+  .jp-Shortcuts-Cell:first-of-type {
+  display: none;
+}
+
+.jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell:nth-child(2) {
+  width: 40%;
+}
+
+.jp-Shortcuts-Row button.jp-Shortcuts-Plus:focus-visible,
+.jp-Shortcuts-Row:hover button.jp-Shortcuts-Plus,
+.jp-Shortcuts-Row:hover .jp-Shortcuts-Or,
+.jp-Shortcuts-Or:has(+ .jp-Shortcuts-Plus:focus-visible) {
+  opacity: 1;
+}
+
+.jp-Shortcuts-ErrorMessage {
+  color: var(--jp-error-color1);
+  align-self: center;
+}
+
+.jp-Shortcuts-RowWithConflict {
+  height: 45px;
+  position: relative;
+}
+
+.jp-Shortcuts-ShortcutContainer {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  border-radius: var(--jp-border-radius);
+  padding: 3px;
+  cursor: pointer;
+}
+
+.jp-Shortcuts-ShortcutContainer:hover {
+  background: var(--jp-layout-color3);
+}
+
+.jp-Shortcuts-ShortcutContainer:focus-visible {
+  background: var(--jp-layout-color2);
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
+  outline-offset: 1px;
+}
+
+.jp-Shortcuts-Row:hover .jp-Shortcuts-ShortcutContainer {
+  background: var(--jp-layout-color2);
+}
+
+.jp-Shortcuts-ConflictContainer {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.jp-Shortcuts-Conflict {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.jp-Shortcuts-ShortcutKeys {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.jp-Shortcuts-Or {
+  margin-right: 12px;
+  margin-left: 12px;
+  color: var(--jp-content-font-color3);
+  opacity: 0;
+}
+
+.jp-Shortcuts-Or:hover {
+  opacity: 1;
+}
+
+.jp-Shortcuts-Or-Forced {
+  opacity: 1;
+}
+
+.jp-Shortcuts-Comma {
+  margin: 0 0.5em;
+}
+
+.jp-Shortcuts-Plus {
+  opacity: 0;
+}
+
+.jp-Shortcuts-Cell button.jp-Shortcuts-Plus {
+  margin: 0;
+}
+
+.jp-Shortcuts-SourceCell {
+  display: inline-block;
+}
+
+/* Shortcut List Style */
+.jp-Shortcuts-ShortcutList {
+  width: 100%;
+  display: table;
+  border-collapse: collapse;
+}
+
+.jp-Shortcuts-ShortcutListContainer {
+  overflow-y: scroll;
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
+/* Shortcut Title Item Style */
+.jp-Shortcuts-Header {
+  display: flex;
+  cursor: pointer;
+}
+
+.jp-Shortcuts-Header:hover .jp-ShortcutTitleItem-sortButton .jp-icon3[fill],
+.jp-Shortcuts-Header:focus .jp-ShortcutTitleItem-sortButton .jp-icon3[fill] {
+  fill: var(--jp-ui-font-color0);
+}
+
+.jp-Shortcuts-Header:active .jp-ShortcutTitleItem-sortButton {
+  outline: none;
+}
+
+.jp-Shortcuts-CurrentHeader .jp-icon3[fill] {
+  fill: var(--jp-ui-font-color0);
+}
+
+/* Shortcut UI Style */
+
+.jp-Shortcuts-ShortcutUI {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--jp-ui-font-size1);
+  font-family: var(--jp-ui-font-family);
+  color: var(--jp-content-font-color1);
+  min-width: 450px;
+  width: 100%;
+}
+
+/* TopNav Style */
+
+.jp-Shortcuts-TopNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  font-size: var(--jp-ui-font-size1);
+  background-color: var(--jp-layout-color0);
+}
+
+.jp-Shortcuts-TopNav > .jp-FilterBox {
+  width: 70%;
+}
+
+.jp-Shortcuts-AdvancedOptions {
+  padding-left: 12px;
+  display: flex;
+  align-items: center;
+}
+
+button.jp-mod-styled.jp-Shortcuts-SelectorsToggle {
+  margin-right: 15px;
+  min-width: fit-content;
+}
+
+button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
+  outline-offset: 1px;
+}
+
+.jp-Shortcuts-AddShortcut.jp-mod-styled.jp-mod-accept {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jp-Shortcuts-AddShortcut.jp-mod-styled:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.jp-Shortcuts-AddShortcut.jp-Shortcuts-Icon svg {
+  height: 20px;
+  width: 20px;
+}
+
+.jp-Shortcuts-AddShortcut.jp-mod-styled:focus-visible {
+  outline-offset: 1px;
+}
+
+.jp-Shortcuts-HeaderRowContainer {
+  padding-right: 14px;
+}
+
+.jp-Shortcuts-HeaderRow {
+  font-weight: bold;
+  font-size: var(--jp-ui-font-size1);
+  background-color: var(--jp-layout-color0);
+  width: 100%;
+  z-index: 1;
+  display: table;
+  padding: 10px 0;
+}
+
+.jp-Shortcuts-CustomOptionsDialogBody {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-Shortcuts-CustomOptionDialog-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 500px;
+  height: 400px;
+  padding: 12px;
+}
+
+.jp-Shortcuts-CustomOptionDialog-container label {
+  margin: 0;
+  font-weight: bold;
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-Shortcuts-CustomOptionDialog-container input {
+  padding: 8px;
+  border: 1px solid var(--jp-border-color1);
+  border-radius: 2px;
+}
+
+.jp-JSONEditor {
+  flex: 1;
+}

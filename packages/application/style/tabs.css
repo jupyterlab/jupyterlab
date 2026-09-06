@@ -1,0 +1,182 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+:root {
+  /* These need to be root because tabs get attached to the body during dragging. */
+  --jp-private-horizontal-tab-height: 24px;
+  --jp-private-horizontal-tab-width: 216px;
+  --jp-private-horizontal-tab-active-top-border: 2px;
+}
+
+/*-----------------------------------------------------------------------------
+| Tabs in the dock panel
+|----------------------------------------------------------------------------*/
+
+.lm-DockPanel-tabBar,
+.lm-TabPanel-tabBar {
+  overflow: visible;
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size1);
+}
+
+.lm-DockPanel-tabBar[data-orientation='horizontal'],
+.lm-TabPanel-tabBar[data-orientation='horizontal'] {
+  min-height: calc(
+    var(--jp-private-horizontal-tab-height) + 2 * var(--jp-border-width)
+  );
+}
+
+.lm-DockPanel-tabBar[data-orientation='vertical'] {
+  min-width: 80px;
+}
+
+.lm-DockPanel-tabBar > .lm-TabBar-content,
+.lm-TabPanel-tabBar > .lm-TabBar-content {
+  align-items: flex-end;
+  min-width: 0;
+  min-height: 0;
+}
+
+.lm-DockPanel-tabBar .lm-TabBar-tab,
+.lm-TabPanel-tabBar .lm-TabBar-tab {
+  flex: 0 1 var(--jp-private-horizontal-tab-width);
+  align-items: center;
+  min-height: calc(
+    var(--jp-private-horizontal-tab-height) + 2 * var(--jp-border-width)
+  );
+  min-width: 0;
+  margin-left: calc(-1 * var(--jp-border-width));
+  line-height: var(--jp-private-horizontal-tab-height);
+  padding: 0 8px;
+  background: var(--jp-layout-color2);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  border-bottom: none;
+  position: relative;
+}
+
+.lm-DockPanel-tabBar .lm-TabBar-tab:focus-visible,
+.lm-DockPanel-tabBar .lm-TabBar-addButton:focus-visible,
+.lm-TabPanel-tabBar .lm-TabBar-tab:focus-visible {
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
+  outline-offset: calc(-1 * var(--jp-focus-outline-width));
+}
+
+.lm-DockPanel-tabBar .lm-TabBar-tab:not(.lm-mod-current):focus-visible::after,
+.lm-TabPanel-tabBar .lm-TabBar-tab:not(.lm-mod-current):focus-visible::after {
+  border-bottom-color: var(--jp-focus-outline-color);
+}
+
+.lm-DockPanel-tabBar .lm-TabBar-tab:hover:not(.lm-mod-current),
+.lm-TabPanel-tabBar .lm-TabBar-tab:hover:not(.lm-mod-current) {
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.lm-DockPanel-tabBar .lm-TabBar-tab:not(.lm-mod-current)::after,
+.lm-DockPanel-tabBar .lm-TabBar-addButton::after {
+  position: absolute;
+  content: '';
+  bottom: 0;
+  left: calc(-1 * var(--jp-border-width));
+  width: calc(100% + 2 * var(--jp-border-width));
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
+.lm-DockPanel-tabBar .lm-TabBar-tab:first-child,
+.lm-TabPanel-tabBar .lm-TabBar-tab:first-child {
+  margin-left: 0;
+}
+
+/* This is a current tab of a tab bar in the dock panel: each tab bar has 1. */
+.lm-DockPanel-tabBar .lm-TabBar-tab.lm-mod-current {
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.lm-TabPanel-tabBar .lm-TabBar-tab.lm-mod-current {
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+/* This is the main application level current tab: only 1 exists. */
+.lm-DockPanel-tabBar .lm-TabBar-tab.jp-mod-current::before {
+  position: absolute;
+  top: calc(-1 * var(--jp-border-width) + 1px);
+  left: calc(-1 * var(--jp-border-width));
+  content: '';
+  height: var(--jp-private-horizontal-tab-active-top-border);
+  width: calc(100% + 2 * var(--jp-border-width));
+  background: var(--jp-brand-color1);
+}
+
+/* This is the left tab bar current tab: only 1 exists. */
+.lm-TabBar-tab.lm-mod-current {
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.lm-DockPanel-tabBar .lm-TabBar.lm-mod-left .lm-TabBar-tab,
+.lm-DockPanel-tabBar .lm-TabBar.lm-mod-right .lm-TabBar-tab {
+  flex: 0 1 40px;
+  margin-top: -1px;
+  line-height: 40px;
+}
+
+.lm-DockPanel-tabBar .lm-TabBar.lm-mod-left .lm-TabBar-tab {
+  border-right: none;
+}
+
+.lm-DockPanel-tabBar .lm-TabBar.lm-mod-right .lm-TabBar-tab {
+  border-left: none;
+}
+
+.lm-DockPanel-tabBar .lm-TabBar.lm-mod-left .lm-TabBar-tab:first-child,
+.lm-DockPanel-tabBar .lm-TabBar.lm-mod-right .lm-TabBar-tab:first-child {
+  margin-top: 0;
+}
+
+/* stylelint-disable selector-max-class */
+
+.lm-DockPanel-tabBar .lm-TabBar.lm-mod-left .lm-TabBar-tab.lm-mod-current,
+.lm-DockPanel-tabBar .lm-TabBar.lm-mod-right .lm-TabBar-tab.lm-mod-current {
+  min-width: 80px;
+  max-width: 80px;
+}
+
+.lm-DockPanel-tabBar .lm-TabBar.lm-mod-right .lm-TabBar-tab.lm-mod-current {
+  transform: translateX(-1px);
+}
+
+.lm-DockPanel-tabBar .lm-TabBar-tab .lm-TabBar-tabIcon,
+.lm-TabBar-tab.lm-mod-drag-image .lm-TabBar-tabIcon,
+.lm-TabPanel-tabBar .lm-TabBar-tab .lm-TabBar-tabIcon {
+  width: 14px;
+  background-position: left center;
+  background-repeat: no-repeat;
+  background-size: 14px;
+  margin-right: 4px;
+}
+
+/* stylelint-enable selector-max-class */
+
+.lm-TabBar-tab.lm-mod-drag-image {
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  border-top: var(--jp-border-width) solid var(--jp-brand-color1);
+  box-shadow: var(--jp-elevation-z4);
+  font-size: var(--jp-ui-font-size1);
+  line-height: var(--jp-private-horizontal-tab-height);
+  min-height: var(--jp-private-horizontal-tab-height);
+  min-width: var(--jp-private-horizontal-tab-width);
+  padding: 0 10px;
+  transform: translateX(-40%) translateY(-58%);
+}

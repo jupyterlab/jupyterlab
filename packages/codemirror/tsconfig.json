@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src"
+  },
+  "include": ["src/**/*"],
+  "references": [
+    {
+      "path": "../codeeditor"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../documentsearch"
+    },
+    {
+      "path": "../nbformat"
+    },
+    {
+      "path": "../translation"
+    }
+  ]
+}

@@ -1,0 +1,563 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import { act } from 'react-dom/test-utils';
+
+import type { Button } from '@jupyter/web-components';
+
+import type { CodeEditorWrapper } from '@jupyterlab/codeeditor';
+
+import {
+  CodeMirrorEditorFactory,
+  CodeMirrorMimeTypeService,
+  EditorExtensionRegistry,
+  EditorLanguageRegistry,
+  ybinding
+} from '@jupyterlab/codemirror';
+
+import type { Session } from '@jupyterlab/services';
+import { KernelSpecManager } from '@jupyterlab/services';
+
+import { createSession } from '@jupyterlab/docregistry/lib/testutils';
+
+import { JupyterServer, signalToPromise } from '@jupyterlab/testing';
+
+import { CommandRegistry } from '@lumino/commands';
+
+import { UUID } from '@lumino/coreutils';
+
+import { MessageLoop } from '@lumino/messaging';
+
+import { Widget } from '@lumino/widgets';
+
+import { Debugger } from '../src/debugger';
+
+import { DebuggerService } from '../src/service';
+
+import type { DebuggerModel } from '../src/model';
+
+import type { SourcesBody } from '../src/panels/sources/body';
+
+import type * as GridPanel from '../src/panels/variables/gridpanel';
+
+import { VariablesModel } from '../src/panels/variables/model';
+
+import type { IYText } from '@jupyter/ydoc';
+import type { IDebugger } from '../src/tokens';
+import { DebuggerDisplayRegistry } from '../src';
+
+const server = new JupyterServer();
+const emptyFn = () => undefined;
+
+beforeAll(async () => {
+  await server.start();
+}, 30000);
+
+afterAll(async () => {
+  await server.shutdown();
+});
+
+describe('Debugger', () => {
+  const specsManager = new KernelSpecManager();
+  const config = new Debugger.Config();
+  const displayRegistry = new DebuggerDisplayRegistry();
+
+  const registry = new CommandRegistry();
+  const languages = new EditorLanguageRegistry();
+  const callstackToolbarCommands = {
+    continue: 'continue',
+    terminate: 'terminate',
+    next: 'next',
+    stepIn: 'stepIn',
+    stepOut: 'stepOut',
+    evaluate: 'evaluate'
+  };
+  EditorLanguageRegistry.getDefaultLanguages()
+    .filter(lang => ['Python'].includes(lang.name))
+    .forEach(lang => {
+      languages.addLanguage(lang);
+    });
+  const extensions = new EditorExtensionRegistry();
+  EditorExtensionRegistry.getDefaultExtensions()
+    .filter(ext => ['lineNumbers'].includes(ext.name))
+    .forEach(ext => extensions.addExtension(ext));
+  extensions.addExtension({
+    name: 'binding',
+    factory: ({ model }) => {
+      const m = model.sharedModel as IYText;
+      return EditorExtensionRegistry.createImmutableExtension(
+        ybinding({ ytext: m.ysource, undoManager: m.undoManager ?? undefined })
+      );
+    }
+  });
+  const factoryService = new CodeMirrorEditorFactory({ extensions, languages });
+  const mimeTypeService = new CodeMirrorMimeTypeService(languages);
+  const service = new DebuggerService({
+    displayRegistry,
+    specsManager,
+    config,
+    mimeTypeService
+  });
+  const lines = [3, 5];
+  const code = [
+    'i = 0',
+    'i += 1',
+    'i += 1',
+    'j = i**2',
+    'j += 1',
+    'print(i, j)'
+  ].join('\n');
+
+  let breakpoints: IDebugger.IBreakpoint[];
+  let session: Debugger.Session;
+  let path: string;
+  let connection: Session.ISessionConnection;
+  let sidebar: Debugger.Sidebar;
+
+  beforeAll(async () => {
+    connection = await createSession({
+      name: '',
+      type: 'test',
+      path: UUID.uuid4()
+    });
+    await connection.changeKernel({ name: 'python3' });
+
+    session = new Debugger.Session({ connection, config });
+    service.session = session;
+
+    // Populate the command registry with fake command to render the button.
+    Object.keys(callstackToolbarCommands).forEach(command => {
+      registry.addCommand(command, { execute: emptyFn });
+    });
+
+    sidebar = new Debugger.Sidebar({
+      service,
+      callstackCommands: {
+        registry,
+        ...callstackToolbarCommands
+      },
+      breakpointsCommands: {
+        registry,
+        pauseOnExceptions: ''
+      },
+      editorServices: {
+        factoryService,
+        mimeTypeService
+      }
+    });
+
+    sidebar.showSourcesPanel = true;
+
+    await act(async () => {
+      Widget.attach(sidebar, document.body);
+      MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
+      await service.restoreState(true);
+    });
+
+    path = service.getCodeId(code);
+
+    breakpoints = lines.map((line: number, id: number) => {
+      return {
+        id,
+        line,
+        verified: true,
+        source: {
+          path
+        }
+      };
+    });
+
+    const model = service.model as DebuggerModel;
+    const currentFrameChanged = signalToPromise(
+      model.callstack.currentFrameChanged
+    );
+
+    await act(async () => {
+      await service.updateBreakpoints(code, breakpoints);
+      connection!.kernel!.requestExecute({ code });
+      await currentFrameChanged;
+    });
+  });
+
+  afterAll(async () => {
+    await connection.shutdown();
+    connection.dispose();
+    session.dispose();
+    sidebar.dispose();
+  });
+
+  describe('#constructor()', () => {
+    it('should create a new debugger sidebar', () => {
+      expect(sidebar).toBeInstanceOf(Debugger.Sidebar);
+    });
+  });
+
+  describe('Panel', () => {
+    let toolbarList: NodeListOf<Element>;
+    describe('when the sources panel is visible', () => {
+      beforeEach(() => {
+        sidebar.showSourcesPanel = true;
+        MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
+        toolbarList = sidebar.content.node.querySelectorAll(
+          '.jp-AccordionPanel-title'
+        );
+      });
+      it('should have 5 child widgets', () => {
+        expect(sidebar.widgets.length).toBe(5);
+      });
+      it('should have 5 toolbars', () => {
+        expect(toolbarList.length).toBe(5);
+      });
+    });
+
+    describe('when there is no sources panel', () => {
+      beforeEach(() => {
+        sidebar.showSourcesPanel = false;
+        MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
+        toolbarList = sidebar.content.node.querySelectorAll(
+          '.jp-AccordionPanel-title'
+        );
+      });
+      it('should have 4 child widgets', () => {
+        expect(sidebar.widgets.length).toBe(4);
+      });
+      it('should have 4 toolbars', () => {
+        expect(toolbarList.length).toBe(4);
+      });
+    });
+
+    describe('Variable toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        toolbar = toolbarList.item(0);
+      });
+      it('should have expanding icon', () => {
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
+        );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll(
+          'span.lm-AccordionPanel-titleLabel'
+        );
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Variables');
+      });
+      it('should have two buttons', () => {
+        const buttons = toolbar.querySelectorAll('jp-button');
+        expect(buttons.length).toBe(2);
+        expect((buttons[0] as Button).title).toBe('Tree View');
+        expect((buttons[1] as Button).title).toBe('Table View');
+      });
+    });
+    describe('Callstack toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        toolbar = toolbarList.item(1);
+      });
+      it('should have expanding icon', () => {
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
+        );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll(
+          'span.lm-AccordionPanel-titleLabel'
+        );
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Callstack');
+      });
+      it('should have six buttons', () => {
+        const buttons = toolbar.querySelectorAll('jp-button');
+        expect(buttons.length).toBe(6);
+      });
+    });
+    describe('Breakpoints toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        toolbar = toolbarList.item(2);
+      });
+      it('should have expanding icon', () => {
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
+        );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+      });
+      it('should have title', () => {
+        const title = toolbar.querySelectorAll(
+          'span.lm-AccordionPanel-titleLabel'
+        );
+        expect(title.length).toBe(1);
+        expect(title[0].innerHTML).toContain('Breakpoints');
+      });
+      it('should have two buttons', () => {
+        const buttons = toolbar.querySelectorAll('jp-button');
+        expect(buttons.length).toBe(2);
+      });
+    });
+    describe('Source toolbar', () => {
+      describe('when sources panel is visible', () => {
+        let toolbarList: NodeListOf<Element>;
+        let toolbar: Element;
+        beforeEach(() => {
+          sidebar.showSourcesPanel = true;
+          MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
+          toolbarList = sidebar.content.node.querySelectorAll(
+            '.jp-AccordionPanel-title'
+          );
+          toolbar = toolbarList.item(3);
+        });
+
+        it('should have expanding icon', () => {
+          const title = toolbar.querySelectorAll(
+            '.lm-AccordionPanel-titleCollapser'
+          );
+          expect(title[0].innerHTML).toContain('ui-components:caret-down');
+        });
+        it('should have title', () => {
+          const title = toolbar.querySelectorAll(
+            'span.lm-AccordionPanel-titleLabel'
+          );
+          expect(title.length).toBe(1);
+          expect(title[0].innerHTML).toContain('Source');
+        });
+
+        it('should have no buttons', () => {
+          const buttons = toolbar.querySelectorAll('jp-button');
+          expect(buttons.length).toBe(0);
+        });
+      });
+    });
+    describe('Kernel sources toolbar', () => {
+      let toolbar: Element;
+      beforeEach(() => {
+        sidebar.showSourcesPanel = true;
+        MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
+        toolbarList = sidebar.content.node.querySelectorAll(
+          '.jp-AccordionPanel-title'
+        );
+
+        toolbar = Array.from(
+          sidebar.content.node.querySelectorAll('.jp-AccordionPanel-title')
+        ).find(
+          el =>
+            el.querySelector('span.lm-AccordionPanel-titleLabel')
+              ?.textContent === 'Kernel Sources'
+        ) as Element;
+      });
+
+      it('should have expanding icon', () => {
+        expect(toolbar).toBeTruthy();
+        const title = toolbar.querySelectorAll(
+          '.lm-AccordionPanel-titleCollapser'
+        );
+        expect(title[0].innerHTML).toContain('ui-components:caret-down');
+      });
+
+      it('should have no buttons', () => {
+        const buttons = toolbar.querySelectorAll('jp-button');
+        expect(buttons.length).toBe(0);
+      });
+    });
+  });
+
+  describe('#callstack', () => {
+    it('should have a body', () => {
+      expect(sidebar.callstack.widgets.length).toEqual(1);
+    });
+
+    it('should have the jp-DebuggerCallstack class', () => {
+      expect(sidebar.callstack.hasClass('jp-DebuggerCallstack')).toBe(true);
+    });
+
+    it('should display the stack frames', () => {
+      const node = sidebar.callstack.node;
+      const items = node.querySelectorAll('.jp-DebuggerCallstack-body li');
+
+      expect(items).toHaveLength(1);
+      expect(items[0].innerHTML).toContain('module');
+      expect(items[0].innerHTML).toContain('3'); // line for the first breakpoint
+    });
+  });
+
+  describe('#breakpoints', () => {
+    beforeEach(() => {
+      sidebar.showSourcesPanel = true;
+      MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
+    });
+
+    it('should have the jp-DebuggerBreakpoints class', () => {
+      expect(sidebar.breakpoints.hasClass('jp-DebuggerBreakpoints')).toBe(true);
+    });
+
+    it('should contain the list of breakpoints', async () => {
+      const node = sidebar.breakpoints.node;
+      const items = node.querySelectorAll('.jp-DebuggerBreakpoint');
+      expect(items).toHaveLength(2);
+    });
+
+    it('should contain the path to the breakpoints', async () => {
+      const node = sidebar.breakpoints.node;
+      const items = node.querySelectorAll('.jp-DebuggerBreakpoint-source');
+      items.forEach(item => {
+        // TODO: replace by toEqual when there is an alternative to the rtl
+        // breakpoint display
+        expect(item.innerHTML).toContain(path.slice(1));
+      });
+    });
+
+    it('should contain the line number', async () => {
+      const node = sidebar.breakpoints.node;
+      const items = node.querySelectorAll('.jp-DebuggerBreakpoint-line');
+
+      await act(() => service.updateBreakpoints(code, breakpoints));
+
+      items.forEach((item, i) => {
+        const parsed = parseInt(item.innerHTML, 10);
+        expect(parsed).toEqual(lines[i]);
+      });
+    });
+
+    it('should be updated when new breakpoints are added', async () => {
+      const node = sidebar.breakpoints.node;
+      let items = node.querySelectorAll('.jp-DebuggerBreakpoint');
+      const len1 = items.length;
+
+      const bps = breakpoints.concat([
+        {
+          id: 3,
+          line: 4,
+          verified: true,
+          source: {
+            path
+          }
+        }
+      ]);
+
+      await act(() => service.updateBreakpoints(code, bps));
+
+      items = node.querySelectorAll('.jp-DebuggerBreakpoint');
+      const len2 = items.length;
+
+      expect(len2).toEqual(len1 + 1);
+    });
+
+    it('should contain the path after a restore', async () => {
+      await service.restoreState(true);
+      const node = sidebar.breakpoints.node;
+      const items = node.querySelectorAll('.jp-DebuggerBreakpoint-source');
+      items.forEach(item => {
+        // TODO: replace by toEqual when there is an alternative to the rtl
+        // breakpoint display
+        expect(item.innerHTML).toContain(path.slice(1));
+      });
+    });
+  });
+
+  describe('#sources', () => {
+    beforeEach(() => {
+      sidebar.showSourcesPanel = true;
+      MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
+    });
+    it('should have a body', () => {
+      expect(sidebar.sources?.widgets.length).toEqual(1);
+    });
+
+    it('should display the source path in the header', () => {
+      const header = sidebar.sources?.toolbar;
+      const pathWidget = header?.node.innerHTML;
+      expect(pathWidget).toContain(path);
+    });
+
+    it('should display the source code in the body', () => {
+      const body = sidebar.sources?.widgets[0] as SourcesBody;
+      const children = Array.from(body.children());
+      const editor = children[0] as CodeEditorWrapper;
+      expect(editor.model.sharedModel.getSource()).toEqual(code);
+    });
+  });
+
+  describe('VariablesGrid', () => {
+    const inspected: IDebugger.IScope[] = [
+      {
+        name: 'measurements',
+        variables: [
+          { name: '0', value: '3', type: 'int', variablesReference: 0 },
+          { name: '1', value: '1', type: 'int', variablesReference: 0 }
+        ]
+      }
+    ];
+    const locals: IDebugger.IScope[] = [
+      {
+        name: 'Locals',
+        variables: [
+          { name: 'total', value: '4', type: 'int', variablesReference: 0 }
+        ]
+      }
+    ];
+    let variables: VariablesModel;
+    let grid: Debugger.VariablesGrid;
+
+    beforeEach(() => {
+      variables = new VariablesModel();
+    });
+
+    afterEach(() => {
+      grid.dispose();
+    });
+
+    /**
+     * Attach the grid and let it load the data grid module it needs.
+     */
+    const attach = async (): Promise<GridPanel.GridModel> => {
+      Widget.attach(grid, document.body);
+      await new Promise(resolve => setTimeout(resolve, 0));
+      MessageLoop.sendMessage(grid, Widget.Msg.UpdateRequest);
+      return (grid.widgets[0] as GridPanel.Grid).dataModel;
+    };
+
+    it('should display the scopes it was given once attached', async () => {
+      // The grid opened by `debugger:inspect-variable` is visible as soon as
+      // it is attached, hence it never receives a `before-show` message.
+      grid = new Debugger.VariablesGrid({
+        model: variables,
+        commands: registry,
+        scopes: inspected
+      });
+
+      const dataModel = await attach();
+
+      expect(grid.node.querySelectorAll('canvas').length).toBeGreaterThan(0);
+      expect(dataModel.rowCount('body')).toEqual(inspected[0].variables.length);
+    });
+
+    it('should display the scopes of the model when it changes', async () => {
+      grid = new Debugger.VariablesGrid({
+        model: variables,
+        commands: registry,
+        scopes: inspected
+      });
+
+      const dataModel = await attach();
+      variables.scopes = locals;
+      MessageLoop.sendMessage(grid, Widget.Msg.UpdateRequest);
+
+      expect(dataModel.rowCount('body')).toEqual(1);
+      expect(dataModel.data('row-header', 0, 0)).toEqual('total');
+    });
+
+    it('should display the scopes of the model when given none', async () => {
+      grid = new Debugger.VariablesGrid({
+        model: variables,
+        commands: registry
+      });
+      variables.scopes = locals;
+
+      const dataModel = await attach();
+
+      expect(dataModel.data('row-header', 0, 0)).toEqual('total');
+    });
+  });
+});

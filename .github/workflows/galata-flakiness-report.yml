@@ -1,0 +1,154 @@
+name: Galata Flakiness Report
+
+on:
+  workflow_dispatch:
+    inputs:
+      runs:
+        description: Number of scheduled UI test runs to analyze
+        required: false
+        default: 28
+        type: number
+  schedule:
+    - cron: '0 6 * * 1'
+
+permissions: {}
+
+env:
+  TRACKING_REPOSITORY: jupyterlab/jupyterlab
+  TRACKING_ISSUE_NUMBER: 19153
+
+jobs:
+  analyze:
+    name: Analyze scheduled UI test runs
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      checks: read
+      contents: read
+    outputs:
+      runs: ${{ steps.params.outputs.runs }}
+      window_start: ${{ steps.report.outputs.window_start }}
+      window_end: ${{ steps.report.outputs.window_end }}
+    steps:
+      - name: Set report parameters
+        id: params
+        env:
+          INPUT_RUNS: ${{ github.event.inputs.runs || '28' }}
+        run: |
+          set -euo pipefail
+
+          if ! [[ "$INPUT_RUNS" =~ ^[1-9][0-9]*$ ]]; then
+            echo "Invalid runs value: $INPUT_RUNS"
+            exit 1
+          fi
+
+          {
+            echo "runs=$INPUT_RUNS"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+
+      - name: Analyze flakiness
+        id: report
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUNS: ${{ steps.params.outputs.runs }}
+        run: |
+          python scripts/analyze_flaky_tests.py "$RUNS" \
+            --markdown flake-report.md \
+            --json flake-report.json \
+            --github-output "$GITHUB_OUTPUT"
+
+      - name: Add report to job summary
+        run: |
+          cat flake-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload report
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: galata-flake-report
+          path: |
+            flake-report.md
+            flake-report.json
+
+  update-issue:
+    name: Update tracking issue
+    needs: analyze
+    if: >-
+      ${{
+        always() &&
+        github.repository == 'jupyterlab/jupyterlab'
+      }}
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      issues: write
+    steps:
+      - name: Download report
+        if: ${{ needs.analyze.result == 'success' }}
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: galata-flake-report
+
+      - name: Post report comment
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          ANALYZE_RESULT: ${{ needs.analyze.result }}
+          RUNS_REQUESTED: ${{ needs.analyze.outputs.runs }}
+          TRACKING_ISSUE_NUMBER: ${{ env.TRACKING_ISSUE_NUMBER }}
+          TRACKING_REPOSITORY: ${{ env.TRACKING_REPOSITORY }}
+          WINDOW_START: ${{ needs.analyze.outputs.window_start }}
+          WINDOW_END: ${{ needs.analyze.outputs.window_end }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const [owner, repo] = process.env.TRACKING_REPOSITORY.split('/');
+            const issueNumber = Number(process.env.TRACKING_ISSUE_NUMBER);
+            const status = process.env.ANALYZE_RESULT === 'success' ? 'completed' : 'failed';
+            const sourceRepo = 'jupyterlab/jupyterlab';
+            const branch = 'main';
+
+            if (!owner || !repo || !Number.isInteger(issueNumber) || issueNumber < 1) {
+              throw new Error('Invalid tracking issue configuration.');
+            }
+
+            const cell = value => String(value || 'n/a').replace(/\n/g, ' ').replace(/\|/g, '\\|');
+            const windowStart = process.env.WINDOW_START || '';
+            const windowEnd = process.env.WINDOW_END || '';
+            const window = windowStart && windowEnd && windowStart !== 'n/a' && windowEnd !== 'n/a'
+              ? `${windowStart} to ${windowEnd}`
+              : 'n/a';
+            const details = [
+              '| Field | Value |',
+              '| --- | --- |',
+              `| Status | ${cell(status)} |`,
+              `| Source | ${cell(sourceRepo)} |`,
+              `| Branch | ${cell(branch)} |`,
+              `| Runs requested | ${cell(process.env.RUNS_REQUESTED)} |`,
+              `| Window | ${cell(window)} |`,
+              `| Workflow run | [Run ${context.runId}](${runUrl}) |`
+            ].join('\n');
+
+            let body;
+            if (process.env.ANALYZE_RESULT === 'success' && fs.existsSync('flake-report.md')) {
+              const fullReport = fs.readFileSync('flake-report.md', 'utf8');
+              const summaryIndex = fullReport.indexOf('\n## Summary\n');
+              const report = summaryIndex >= 0
+                ? fullReport.slice(summaryIndex + 1).trim()
+                : fullReport.replace(/^# Galata Flakiness Report\s*/, '').trim();
+              body = `## Galata flakiness report\n\n${details}\n\n${report}`;
+            } else {
+              body = `## Galata flakiness report\n\n${details}\n\nThe flakiness analyzer failed before producing a report.`;
+            }
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: issueNumber,
+              body
+            });

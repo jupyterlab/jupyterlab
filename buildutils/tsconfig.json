@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src",
+    "module": "Node16",
+    "moduleResolution": "node16",
+    "verbatimModuleSyntax": false
+  },
+  "include": ["src/*"],
+  "references": []
+}

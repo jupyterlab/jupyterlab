@@ -1,0 +1,20 @@
+# https://github.com/marketplace/actions/auto-author-assign
+name: 'Auto Author Assign'
+
+#####
+# This workflow is triggered by pull_request_target event.
+# Never checkout the PR and run ANY local code on it.
+#####
+
+on: # zizmor: ignore[dangerous-triggers] safe metadata-only PR labeling; no checkout or code execution
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  assign-author:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: toshimaru/auto-author-assign@4d585cc37690897bd9015942ed6e766aa7cdb97f # v3.0.1

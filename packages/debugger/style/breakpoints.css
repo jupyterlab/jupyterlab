@@ -1,0 +1,86 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-DebuggerBreakpoints {
+  display: flex;
+  flex-direction: column;
+  min-height: 50px;
+  padding-top: 3px;
+}
+
+.jp-DebuggerBreakpoints-body {
+  padding: 10px;
+  overflow: auto;
+}
+
+.jp-DebuggerBreakpoint {
+  display: flex;
+  align-items: center;
+  height: 24px;
+}
+
+.jp-DebuggerBreakpoint:hover {
+  background: var(--jp-layout-color2);
+  cursor: pointer;
+}
+
+.jp-DebuggerBreakpoint-container {
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+}
+
+.jp-DebuggerBreakpoint-source {
+  white-space: nowrap;
+  margin-right: 5px;
+}
+
+.jp-DebuggerBreakpoint-line {
+  margin-left: auto;
+}
+
+.jp-DebuggerCallstackFrame {
+  display: flex;
+  align-items: center;
+}
+
+.jp-DebuggerCallstackFrame-name {
+  white-space: nowrap;
+  margin-right: 5px;
+}
+
+.jp-DebuggerCallstackFrame-location {
+  margin-left: auto;
+}
+
+[data-jp-debugger='true'] .cm-breakpoint-gutter .cm-gutterElement:empty::after {
+  color: var(--jp-error-color1);
+  opacity: 0;
+}
+
+.cm-gutter {
+  cursor: default;
+}
+
+.cm-breakpoint-gutter .cm-gutterElement {
+  padding-top: 1.1px;
+  height: 18.2px;
+}
+
+[data-jp-debugger='true'].jp-Editor
+  .cm-breakpoint-gutter
+  .cm-gutterElement:empty:hover::after,
+[data-jp-debugger='true']
+  .jp-Notebook
+  .jp-CodeCell.jp-mod-selected
+  .cm-breakpoint-gutter:empty:hover::after,
+[data-jp-debugger='true']
+  .jp-Editor
+  .cm-breakpoint-gutter
+  .cm-gutterElement:empty:hover::after {
+  opacity: 0.5;
+}

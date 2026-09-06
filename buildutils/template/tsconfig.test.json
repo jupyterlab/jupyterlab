@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfigbase.test",
+  "include": ["src/*", "test/*"],
+  "references": [
+    {
+      "path": "."
+    },
+    {
+      "path": "../../packages/testing"
+    }
+  ]
+}

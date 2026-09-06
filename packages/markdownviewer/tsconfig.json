@@ -1,0 +1,28 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src"
+  },
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../rendermime"
+    },
+    {
+      "path": "../toc"
+    },
+    {
+      "path": "../translation"
+    }
+  ]
+}

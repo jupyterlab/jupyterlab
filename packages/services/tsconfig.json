@@ -1,0 +1,26 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "lib": ["DOM", "ES2018"],
+    "outDir": "lib",
+    "rootDir": "src",
+    "module": "commonjs",
+    "verbatimModuleSyntax": false,
+    "types": ["node"]
+  },
+  "include": ["src/**/*"],
+  "references": [
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../nbformat"
+    },
+    {
+      "path": "../settingregistry"
+    },
+    {
+      "path": "../statedb"
+    }
+  ]
+}

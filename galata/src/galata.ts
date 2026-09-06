@@ -1,0 +1,1350 @@
+/* eslint-disable camelcase */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import type * as nbformat from '@jupyterlab/nbformat';
+import type {
+  Kernel,
+  Session,
+  TerminalAPI,
+  User,
+  Workspace
+} from '@jupyterlab/services';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { JSONObject } from '@lumino/coreutils';
+import { UUID } from '@lumino/coreutils';
+import type { APIRequestContext, Browser, Page } from '@playwright/test';
+import * as json5 from 'json5';
+import { ContentsHelper } from './contents';
+import { PerformanceHelper } from './helpers';
+import type { IJupyterLabPage, IJupyterLabPageFixture } from './jupyterlabpage';
+import { JupyterLabPage } from './jupyterlabpage';
+
+/**
+ * Galata namespace
+ */
+export namespace galata {
+  /**
+   * Default user settings:
+   * - Deactivate cursor blinking to avoid noise in screenshots
+   * - Fix fonts to ensure consistent screenshots
+   */
+  export const DEFAULT_SETTINGS: Record<string, any> = {
+    '@jupyterlab/apputils-extension:notification': {
+      checkForUpdates: false,
+      fetchNews: 'false'
+    },
+    '@jupyterlab/console-extension:tracker': {
+      // Do not show IPython banner as it includes variable elements,
+      // see https://github.com/jupyterlab/jupyterlab/issues/18552
+      // once https://github.com/ipython/ipython/pull/15144 is released
+      // we can use SOURCE_DATE_EPOCH env variable instead
+      showBanner: false
+    },
+    '@jupyterlab/fileeditor-extension:plugin': {},
+    '@jupyterlab/notebook-extension:tracker': {},
+    '@jupyterlab/codemirror-extension:plugin': {
+      defaultConfig: {
+        cursorBlinkRate: 0
+      }
+    },
+    '@jupyterlab/terminal-extension:plugin': {
+      cursorBlink: false,
+      fontFamily: '"DejaVu Mono"'
+    },
+    '@jupyterlab/apputils-extension:themes': {
+      overrides: {
+        'code-font-family': '"DejaVu Mono"',
+        // DejaVu Sans (system on Ubuntu) does not support Chinese, so
+        // we fall back to Noto Simplified Chinese (for tests where only
+        // a few Chinese characters are shown). For tests where the whole
+        // UI is meant to be displayed in a non-Latin script, drop the
+        // "DejaVu Sans" part so that `font-display: swap` is respected.
+        'content-font-family': '"DejaVu Sans", "Noto Sans SC Variable"',
+        'ui-font-family': '"DejaVu Sans", "Noto Sans SC Variable"'
+      }
+    }
+  };
+
+  export const DEFAULT_DOCUMENTATION_STATE: Record<string, any> = {
+    data: {
+      'layout-restorer:data': {
+        relativeSizes: [0, 1, 0]
+      }
+    }
+  };
+
+  /**
+   * Sidebar position
+   */
+  export type SidebarPosition = 'left' | 'right';
+
+  /**
+   * Default sidebar ids
+   */
+  export type DefaultSidebarTabId =
+    | 'filebrowser'
+    | 'jp-running-sessions'
+    | 'jp-property-inspector'
+    | 'table-of-contents'
+    | 'extensionmanager.main-view'
+    | 'jp-debugger-sidebar';
+
+  /**
+   * Sidebar id type
+   */
+  export type SidebarTabId = DefaultSidebarTabId | string;
+
+  /**
+   * Default toolbar item ids
+   */
+  export type DefaultNotebookToolbarItemId =
+    | 'save'
+    | 'insert'
+    | 'cut'
+    | 'copy'
+    | 'paste'
+    | 'run'
+    | 'interrupt'
+    | 'restart'
+    | 'restart-and-run'
+    | 'cellType'
+    | 'kernelName'
+    | 'kernelStatus';
+
+  /**
+   * Notebook toolbar item type
+   */
+  export type NotebookToolbarItemId = DefaultNotebookToolbarItemId | string;
+
+  /**
+   * Options to create a new page
+   */
+  export interface INewPageOption {
+    /**
+     * Application base URL
+     */
+    baseURL: string;
+    /**
+     * Playwright browser model
+     */
+    browser: Browser;
+    /**
+     * Callback that resolved when the application page is ready
+     */
+    waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>;
+    /**
+     * Application URL path fragment
+     *
+     * Default: /lab
+     */
+    appPath?: string;
+    /**
+     * Whether to go to JupyterLab page within the fixture or not.
+     *
+     * Default: true
+     */
+    autoGoto?: boolean;
+    /**
+     * Whether to reset workspace state before loading the page.
+     *
+     * Default: true
+     */
+    resetWorkspace?: boolean;
+    /**
+     * Mock Jupyter Server configuration in-memory or not.
+     *
+     * Default true
+     */
+    mockConfig?: boolean | Record<string, unknown>;
+    /**
+     * Mock JupyterLab state in-memory or not.
+     *
+     * Default galata.DEFAULT_SETTINGS
+     */
+    mockSettings?: boolean | Record<string, unknown>;
+    /**
+     * Mock JupyterLab settings in-memory or not.
+     *
+     * Default true
+     */
+    mockState?: boolean | Record<string, unknown>;
+    /**
+     * Mock JupyterLab user in-memory or not.
+     *
+     * Default true
+     */
+    mockUser?: boolean | Partial<User.IUser>;
+    /**
+     * Whether to store kernels in memory or not.
+     *
+     * Default true
+     */
+    mockKernels?: boolean;
+    /**
+     * Whether to store sessions in memory or not.
+     *
+     * Default true
+     */
+    mockSessions?: boolean;
+    /**
+     * Whether to store terminals in memory or not.
+     *
+     * Default true
+     */
+    mockTerminals?: boolean;
+    /**
+     * Create and delete a temporary path during the page existence
+     *
+     * Default ''
+     */
+    tmpPath?: string;
+  }
+
+  /**
+   * Add the Galata helpers to the page model
+   *
+   * @param page Playwright page model
+   * @param baseURL Application base URL
+   * @param waitForApplication Callback that resolved when the application page is ready
+   * @param appPath Application URL path fragment
+   * @returns Playwright page model with Galata helpers
+   */
+  export function addHelpersToPage(
+    page: Page,
+    baseURL: string,
+    waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>,
+    appPath?: string
+  ): IJupyterLabPageFixture {
+    const jlabPage = new JupyterLabPage(
+      page,
+      baseURL,
+      waitForApplication,
+      appPath
+    );
+
+    const handler = {
+      get: function (obj: JupyterLabPage, prop: string) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        return prop in obj ? obj[prop] : page[prop];
+      }
+    };
+
+    // Proxy playwright page object
+    return new Proxy(jlabPage, handler) as any;
+  }
+
+  export async function initTestPage(
+    appPath: string,
+    autoGoto: boolean,
+    baseURL: string,
+    mockConfig: boolean | Record<string, unknown>,
+    mockSettings: boolean | Record<string, unknown>,
+    mockState: boolean | Record<string, unknown>,
+    mockUser: boolean | Partial<User.IUser>,
+    page: Page,
+    sessions: Map<string, Session.IModel> | null,
+    terminals: Map<string, TerminalAPI.IModel> | null,
+    tmpPath: string,
+    waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>,
+    kernels?: Map<string, Kernel.IModel> | null,
+    resetWorkspace?: boolean
+  ): Promise<IJupyterLabPageFixture> {
+    // Hook the helpers
+    const jlabWithPage = addHelpersToPage(
+      page,
+      baseURL,
+      waitForApplication,
+      appPath
+    );
+
+    // Add server mocks
+    if (mockConfig) {
+      const config: Record<string, JSONObject> =
+        typeof mockConfig !== 'boolean' ? ({ ...mockConfig } as any) : {};
+      await Mock.mockConfig(page, config);
+    }
+
+    const settings: ISettingRegistry.IPlugin[] = [];
+    if (mockSettings) {
+      // Settings will be stored in-memory (after loading the initial version from disk)
+      await Mock.mockSettings(
+        page,
+        settings,
+        typeof mockSettings === 'boolean' ? {} : { ...mockSettings }
+      );
+    }
+
+    const workspace: Workspace.IWorkspace = {
+      data: {},
+      metadata: { id: 'default' }
+    };
+    if (mockState) {
+      if (typeof mockState !== 'boolean') {
+        workspace.data = { ...mockState } as any;
+      }
+      // State will be stored in-memory (after loading the initial version from disk)
+      await Mock.mockState(page, workspace);
+    }
+
+    let user: User.IUser = {
+      identity: {
+        username: UUID.uuid4(),
+        name: 'jovyan',
+        display_name: 'jovyan',
+        initials: 'JP',
+        color: 'var(--jp-collaborator-color1)'
+      },
+      permissions: {}
+    };
+    if (mockUser) {
+      if (typeof mockUser !== 'boolean') {
+        user = { ...mockUser } as any;
+      }
+      // The user will be stored in-memory
+      await Mock.mockUser(page, user);
+    }
+
+    // Add kernels, sessions and terminals trackers
+    if (kernels) {
+      await Mock.mockRunners(page, kernels, 'kernels');
+    }
+    if (sessions) {
+      await Mock.mockRunners(page, sessions, 'sessions', kernels ?? undefined);
+    }
+    if (terminals) {
+      await Mock.mockRunners(page, terminals, 'terminals');
+    }
+
+    if (autoGoto) {
+      // Load and initialize JupyterLab and goto test folder
+      const path = `tree/${tmpPath}`;
+      // Reset workspace state to avoid stale state from previous runs
+      await jlabWithPage.goto(
+        resetWorkspace !== false ? `${path}?reset` : path
+      );
+    }
+
+    return jlabWithPage;
+  }
+
+  /**
+   * Create a contents REST API helpers object
+   *
+   * @param request Playwright API request context
+   * @param page Playwright page model
+   * @returns Contents REST API helpers
+   */
+  export function newContentsHelper(
+    request?: APIRequestContext,
+    page?: Page
+  ): ContentsHelper {
+    return new ContentsHelper(request, page);
+  }
+
+  /**
+   * Create a page with Galata helpers for the given browser in a new context.
+   *
+   * @returns Playwright page model with Galata helpers
+   */
+  export async function newPage(options: INewPageOption): Promise<{
+    page: IJupyterLabPageFixture;
+    kernels: Map<string, Kernel.IModel> | null;
+    sessions: Map<string, Session.IModel> | null;
+    terminals: Map<string, TerminalAPI.IModel> | null;
+  }> {
+    const {
+      appPath,
+      autoGoto,
+      baseURL,
+      browser,
+      waitForApplication,
+      mockConfig,
+      mockKernels,
+      mockSessions,
+      mockSettings,
+      mockState,
+      mockTerminals,
+      mockUser,
+      resetWorkspace,
+      tmpPath
+    } = {
+      appPath: '/lab',
+      autoGoto: true,
+      mockConfig: true,
+      mockKernels: true,
+      mockSessions: true,
+      mockSettings: galata.DEFAULT_SETTINGS,
+      mockState: true,
+      mockTerminals: true,
+      mockUser: true,
+      resetWorkspace: true,
+      tmpPath: '',
+      ...options
+    };
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    const kernels = mockKernels ? new Map<string, Kernel.IModel>() : null;
+    const sessions = mockSessions ? new Map<string, Session.IModel>() : null;
+    const terminals = mockTerminals
+      ? new Map<string, TerminalAPI.IModel>()
+      : null;
+
+    return {
+      page: await initTestPage(
+        appPath,
+        autoGoto,
+        baseURL,
+        mockConfig,
+        mockSettings,
+        mockState,
+        mockUser,
+        page,
+        sessions,
+        terminals,
+        tmpPath,
+        waitForApplication,
+        kernels,
+        resetWorkspace
+      ),
+      kernels,
+      sessions,
+      terminals
+    };
+  }
+
+  /**
+   * Create a new performance helper
+   *
+   * @param page Playwright page model
+   * @returns Performance helper
+   */
+  export function newPerformanceHelper(page: Page): PerformanceHelper {
+    return new PerformanceHelper(page);
+  }
+
+  /**
+   * Regex to capture JupyterLab API call
+   */
+  export namespace Routes {
+    /**
+     * Config API
+     *
+     * The config section can be found in the named group `section`.
+     */
+    export const config = /.*\/api\/config\/(?<section>\w+)/;
+
+    /**
+     * Contents API
+     *
+     * The content path can be found in the named group `path`.
+     *
+     * The path will be prefixed by '/'.
+     * The path will be undefined for the root folder.
+     */
+    export const contents = /.*\/api\/contents(?<path>\/.+)?\?/;
+
+    /**
+     * Custom CSS
+     */
+    export const customCSS = /.*\/custom\/custom.css/;
+
+    /**
+     * Extensions API
+     */
+    export const extensions = /.*\/lab\/api\/extensions.*/;
+
+    /**
+     * Kernels API
+     *
+     * The kernel id can be found in the named group `id`.
+     *
+     * The id will be prefixed by '/'.
+     */
+    export const kernels = /.*\/api\/kernels(?!pecs)(?<id>\/[@:\-\w]+)?/;
+
+    /**
+     * Sessions API
+     *
+     * The session id can be found in the named group `id`.
+     *
+     * The id will be prefixed by '/'.
+     */
+    export const sessions = /.*\/api\/sessions(?<id>\/[@:\-\w]+)?/;
+
+    /**
+     * Settings API
+     *
+     * The schema name can be found in the named group `id`.
+     *
+     * The id will be prefixed by '/'.
+     */
+    export const settings = /.*\/api\/settings(?<id>(\/[@:\-\w]+)*)/;
+
+    /**
+     * Terminals API
+     *
+     * The terminal id can be found in the named group `id`.
+     *
+     * The id will be prefixed by '/'.
+     */
+    export const terminals = /.*\/api\/terminals(?<id>\/[@:\-\w]+)?/;
+
+    /**
+     * Translations API
+     *
+     * The locale can be found in the named group `id`.
+     *
+     * The id will be prefixed by '/'.
+     */
+    export const translations = /.*\/api\/translations(?<id>\/[@:\-\w]+)?/;
+
+    /**
+     * Workspaces API
+     *
+     * The space name can be found in the named group `id`.
+     *
+     * The id will be prefixed by '/'.
+     * The id will be undefined for workspaces listing route.
+     */
+    export const workspaces = /.*\/api\/workspaces(?<id>(\/[-\w]+)+)?/;
+
+    /**
+     * User API
+     */
+    export const user = /.*\/api\/me.*/;
+  }
+
+  /**
+   * Notebook generation helpers
+   */
+  export namespace Notebook {
+    /**
+     * Generate a notebook with identical cells
+     *
+     * @param nCells Number of cells
+     * @param cellType Type of cells
+     * @param defaultInput Default input source
+     * @param defaultOutput Default outputs
+     * @returns The notebook
+     */
+    export function generateNotebook(
+      nCells: number = 0,
+      cellType: nbformat.CellType = 'code',
+      defaultInput: string[] = [],
+      defaultOutput: nbformat.IOutput[] = []
+    ): nbformat.INotebookContent {
+      const cells = new Array<nbformat.ICell>();
+      for (let i = 0; i < nCells; i++) {
+        const execution_count =
+          cellType === 'code'
+            ? defaultOutput.length > 0
+              ? i + 1
+              : null
+            : undefined;
+        const cell = makeCell({
+          cell_type: cellType,
+          source: [...defaultInput],
+          outputs: cellType === 'code' ? [...defaultOutput] : undefined,
+          execution_count
+        });
+        cells.push(cell);
+      }
+
+      return makeNotebook(cells);
+    }
+
+    /**
+     * Generate a cell object
+     *
+     * @param skeleton Cell description template
+     * @returns A cell
+     */
+    export function makeCell(
+      skeleton: Partial<nbformat.ICell>
+    ): nbformat.ICell {
+      switch (skeleton.cell_type ?? 'code') {
+        case 'code':
+          return {
+            cell_type: 'code',
+            execution_count: null,
+            metadata: {},
+            outputs: [],
+            source: [],
+            ...skeleton
+          };
+        default: {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { execution_count, outputs, ...others } = skeleton;
+          return {
+            cell_type: 'markdown',
+            metadata: {},
+            source: [],
+            ...others
+          };
+        }
+      }
+    }
+
+    /**
+     * Generate a notebook object from a cell list
+     *
+     * @param cells Notebook cells
+     * @returns Notebook
+     */
+    export function makeNotebook(
+      cells: Array<nbformat.ICell>
+    ): nbformat.INotebookContent {
+      return {
+        cells,
+        metadata: {
+          kernelspec: {
+            display_name: 'Python 3',
+            language: 'python',
+            name: 'python3'
+          },
+          language_info: {
+            codemirror_mode: {
+              name: 'ipython',
+              version: 3
+            },
+            file_extension: '.py',
+            mimetype: 'text/x-python',
+            name: 'python',
+            nbconvert_exporter: 'python',
+            pygments_lexer: 'ipython3',
+            version: '3.8.0'
+          }
+        },
+        nbformat: 4,
+        nbformat_minor: 4
+      };
+    }
+  }
+
+  /**
+   * Mock methods
+   */
+  export namespace Mock {
+    /**
+     * Set last modified attributes one day ago one listing
+     * directory content.
+     *
+     * @param page Page model object
+     *
+     * #### Notes
+     * The goal is to freeze the file browser display
+     */
+    export async function freezeContentLastModified(
+      page: Page,
+      filter?: <T = any>(directoryList: T[]) => T[]
+    ): Promise<void> {
+      // Listen for closing connection (may happen when request are still being processed)
+      let isClosed = false;
+      const ctxt = page.context();
+      ctxt.once('close', () => {
+        isClosed = true;
+      });
+      ctxt.browser()?.once('disconnected', () => {
+        isClosed = true;
+      });
+
+      await page.route(Routes.contents, async (route, request) => {
+        switch (request.method()) {
+          case 'GET': {
+            // Proxy the GET request
+            if (page.isClosed() || isClosed) {
+              console.warn(
+                `Route handler: aborting ${request.url()} because page/context is closed`
+              );
+              return route.abort();
+            }
+            const response = await ctxt.request.fetch(request);
+            if (!response.ok()) {
+              if (!page.isClosed() && !isClosed) {
+                return route.fulfill({
+                  status: response.status(),
+                  body: await response.text()
+                });
+              }
+              break;
+            }
+            const data = await response.json();
+            // Modify the last_modified values to be set one day before now.
+            if (
+              data['type'] === 'directory' &&
+              Array.isArray(data['content'])
+            ) {
+              if (filter) {
+                data['content'] = filter(data['content']);
+              }
+              const now = Date.now();
+              const aDayAgo = new Date(now - 24 * 3600 * 1000).toISOString();
+              for (const entry of data['content'] as any[]) {
+                // Mutate the list in-place
+                entry['last_modified'] = aDayAgo;
+              }
+            }
+
+            if (!page.isClosed() && !isClosed) {
+              return route.fulfill({
+                status: 200,
+                body: JSON.stringify(data),
+                contentType: 'application/json'
+              });
+            }
+            break;
+          }
+          default:
+            return route.continue();
+        }
+      });
+    }
+
+    /**
+     * Set a notebook's writable attribute to false
+     *
+     * @param page Page model object
+     *
+     * #### Notes
+     * The goal is to have the notebook to appear as read-only
+     */
+    export async function makeNotebookReadonly(page: Page): Promise<void> {
+      // Listen for closing connection (may happen when request are still being processed)
+      let isClosed = false;
+      const ctxt = page.context();
+      ctxt.once('close', () => {
+        isClosed = true;
+      });
+      ctxt.browser()?.once('disconnected', () => {
+        isClosed = true;
+      });
+
+      await page.route(Routes.contents, async (route, request) => {
+        switch (request.method()) {
+          case 'GET': {
+            // Proxy the GET request
+            if (page.isClosed() || isClosed) {
+              console.warn(
+                `Route handler: aborting ${request.url()} because page/context is closed`
+              );
+              return route.abort();
+            }
+            const response = await ctxt.request.fetch(request);
+            if (!response.ok()) {
+              if (!page.isClosed() && !isClosed) {
+                return route.fulfill({
+                  status: response.status(),
+                  body: await response.text()
+                });
+              }
+              break;
+            }
+            const data = await response.json();
+            if (data['type'] === 'notebook') {
+              data['writable'] = false;
+            }
+            if (!page.isClosed() && !isClosed) {
+              return route.fulfill({
+                status: 200,
+                body: JSON.stringify(data),
+                contentType: 'application/json'
+              });
+            }
+            break;
+          }
+          default:
+            return route.continue();
+        }
+      });
+    }
+
+    /**
+     * Clear all wanted sessions or terminals.
+     *
+     * @param baseURL Application base URL
+     * @param runners Session or terminal ids to stop
+     * @param type Type of runner; session or terminal
+     * @param request API request context
+     * @returns Whether the runners were closed or not
+     */
+    export async function clearRunners(
+      request: APIRequestContext,
+      runners: string[],
+      type: 'kernels' | 'sessions' | 'terminals'
+    ): Promise<boolean> {
+      const responses = await Promise.all(
+        [...new Set(runners)].map(id =>
+          request.fetch(`/api/${type}/${id}`, {
+            method: 'DELETE'
+          })
+        )
+      );
+      return responses.every(response => response.ok());
+    }
+
+    /**
+     * Mock config route.
+     *
+     * @param page Page model object
+     * @param config In-memory config
+     */
+    export async function mockConfig(
+      page: Page,
+      config: Record<string, JSONObject>
+    ): Promise<void> {
+      await page.route(Routes.config, (route, request) => {
+        const { section } = Routes.config.exec(request.url())!.groups!;
+        switch (request.method()) {
+          case 'GET':
+            return route.fulfill({
+              status: 200,
+              body: JSON.stringify(config[section] ?? {})
+            });
+          case 'PATCH': {
+            const data = request.postDataJSON();
+            // FIXME jupyter-server does a recursive update
+            // We are not doing it here as @jupyterlab/services is actually not recursively
+            // updating the object.
+            config[section] = { ...(config[section] ?? {}), ...data };
+            return route.fulfill({
+              status: 200,
+              body: JSON.stringify(config[section])
+            });
+          }
+          case 'PUT': {
+            const data = request.postDataJSON();
+            config[section] = data;
+            return route.fulfill({ status: 204 });
+          }
+          default:
+            return route.continue();
+        }
+      });
+    }
+
+    /**
+     * Mock custom CSS.
+     *
+     * @param page Page model object
+     * @param customCSS Custom CSS content
+     */
+    export async function mockCustomCSS(
+      page: Page,
+      customCSS: string
+    ): Promise<void> {
+      await page.route(Routes.customCSS, async (route, request) => {
+        switch (request.method()) {
+          case 'GET':
+            return route.fulfill({
+              status: 200,
+              body: customCSS,
+              contentType: 'text/css'
+            });
+          default:
+            return route.continue();
+        }
+      });
+    }
+
+    const routes = {
+      kernels: Routes.kernels,
+      sessions: Routes.sessions,
+      terminals: Routes.terminals
+    };
+
+    /**
+     * Custom error thrown when a response is disposed.
+     */
+    class ResponseDisposedError extends Error {
+      constructor(error: string) {
+        super(error);
+        this.name = 'ResponseDisposedError';
+      }
+    }
+
+    /**
+     * Parse response JSON with response disposal error detection.
+     *
+     * @param response The API response to parse
+     * @returns Parsed JSON data
+     * @throws ResponseDisposedError if response was disposed
+     * @throws Error if parsing fails for other reasons
+     */
+    async function handleJsonResponse(
+      response: Awaited<ReturnType<APIRequestContext['fetch']>>
+    ): Promise<any> {
+      try {
+        return await response.json();
+      } catch (error) {
+        // Check if this is a disposal error
+        const isDisposalError =
+          error instanceof Error &&
+          error.message.toLowerCase().includes('disposed');
+        if (isDisposalError) {
+          throw new ResponseDisposedError(error.message);
+        }
+        // Re-throw other errors
+        throw error;
+      }
+    }
+
+    /**
+     * Mock the runners API to display only those created during a test
+     *
+     * @param page Page model object
+     * @param runners Mapping of current test runners
+     * @param type Type of runner; session or terminal
+     */
+    export async function mockRunners(
+      page: Page,
+      runners: Map<string, any>,
+      type: 'kernels' | 'sessions' | 'terminals',
+      kernels?: Map<string, Kernel.IModel>
+    ): Promise<void> {
+      const routeRegex = routes[type];
+      // Listen for closing connection (may happen when request are still being processed)
+      let isClosed = false;
+      const ctxt = page.context();
+      ctxt.once('close', () => {
+        isClosed = true;
+      });
+      ctxt.browser()?.once('disconnected', () => {
+        isClosed = true;
+      });
+      await page.route(routeRegex, async (route, request) => {
+        switch (request.method()) {
+          case 'DELETE': {
+            // slice is used to remove the '/' prefix
+            const id = routeRegex.exec(request.url())?.groups?.id?.slice(1);
+
+            await route.continue();
+
+            if (id && runners.has(id)) {
+              runners.delete(id);
+            }
+
+            break;
+          }
+          case 'GET': {
+            // slice is used to remove the '/' prefix
+            const id = routeRegex.exec(request.url())?.groups?.id?.slice(1);
+
+            if (id) {
+              if (runners.has(id)) {
+                // Proxy the GET request
+                if (page.isClosed() || isClosed) {
+                  console.warn(
+                    `Route handler: aborting ${request.url()} because page/context is closed`
+                  );
+                  return route.abort();
+                }
+                const response = await ctxt.request.fetch(request);
+                if (!response.ok()) {
+                  if (!page.isClosed() && !isClosed) {
+                    return route.fulfill({
+                      status: response.status(),
+                      body: await response.text()
+                    });
+                  }
+                  break;
+                }
+                try {
+                  const data = await handleJsonResponse(response);
+                  // Update stored runners
+                  runners.set(type === 'terminals' ? data.name : data.id, data);
+
+                  if (!page.isClosed() && !isClosed) {
+                    return route.fulfill({
+                      status: 200,
+                      body: JSON.stringify(data),
+                      contentType: 'application/json'
+                    });
+                  }
+                } catch (error) {
+                  if (
+                    error instanceof ResponseDisposedError &&
+                    (page.isClosed() || isClosed)
+                  ) {
+                    console.warn(
+                      `Route handler: ${error.message} during teardown`
+                    );
+                    return route.abort();
+                  }
+                  throw error;
+                }
+                break;
+              } else {
+                if (!page.isClosed() && !isClosed) {
+                  return route.fulfill({
+                    status: 404
+                  });
+                }
+                break;
+              }
+            } else {
+              // Proxy the GET request
+              if (page.isClosed() || isClosed) {
+                console.warn(
+                  `Route handler: aborting ${request.url()} because page/context is closed`
+                );
+                return route.abort();
+              }
+              const response = await ctxt.request.fetch(request);
+              if (!response.ok()) {
+                if (!page.isClosed() && !isClosed) {
+                  return route.fulfill({
+                    status: response.status(),
+                    body: await response.text()
+                  });
+                }
+                break;
+              }
+              let data: any[];
+              try {
+                data = (await handleJsonResponse(response)) as any[];
+              } catch (error) {
+                if (
+                  error instanceof ResponseDisposedError &&
+                  (page.isClosed() || isClosed)
+                ) {
+                  console.warn(
+                    `Route handler: ${error.message} during teardown`
+                  );
+                  return route.abort();
+                }
+                throw error;
+              }
+              const updated = new Set<string>();
+              data.forEach(item => {
+                const itemID: string =
+                  type === 'terminals' ? item.name : item.id;
+                if (runners.has(itemID)) {
+                  updated.add(itemID);
+                  runners.set(itemID, item);
+                }
+              });
+
+              if (updated.size !== runners.size) {
+                for (const [runnerID] of runners) {
+                  if (!updated.has(runnerID)) {
+                    runners.delete(runnerID);
+                  }
+                }
+              }
+
+              if (!page.isClosed() && !isClosed) {
+                return route.fulfill({
+                  status: 200,
+                  body: JSON.stringify([...runners.values()]),
+                  contentType: 'application/json'
+                });
+              }
+              break;
+            }
+          }
+          case 'PATCH': {
+            // Proxy the PATCH request
+            if (page.isClosed() || isClosed) {
+              console.warn(
+                `Route handler: aborting ${request.url()} because page/context is closed`
+              );
+              return route.abort();
+            }
+            const response = await ctxt.request.fetch(request);
+            if (!response.ok()) {
+              if (!page.isClosed() && !isClosed) {
+                return route.fulfill({
+                  status: response.status(),
+                  body: await response.text()
+                });
+              }
+              break;
+            }
+            let data: any;
+            try {
+              data = await handleJsonResponse(response);
+            } catch (error) {
+              if (
+                error instanceof ResponseDisposedError &&
+                (page.isClosed() || isClosed)
+              ) {
+                console.warn(`Route handler: ${error.message} during teardown`);
+                return route.abort();
+              }
+              throw error;
+            }
+            // Update stored runners
+            runners.set(type === 'terminals' ? data.name : data.id, data);
+            // Update kernels
+            if (kernels && type === 'sessions' && data.kernel.id) {
+              kernels.set(data.kernel.id, data.kernel);
+            }
+
+            if (!page.isClosed() && !isClosed) {
+              return route.fulfill({
+                status: 200,
+                body: JSON.stringify(data),
+                contentType: 'application/json'
+              });
+            }
+            break;
+          }
+          case 'POST': {
+            // Proxy the POST request
+            if (page.isClosed() || isClosed) {
+              console.warn(
+                `Route handler: aborting ${request.url()} because page/context is closed`
+              );
+              return route.abort();
+            }
+            const response = await ctxt.request.fetch(request);
+            if (!response.ok()) {
+              if (!page.isClosed() && !isClosed) {
+                return route.fulfill({
+                  status: response.status(),
+                  body: await response.text()
+                });
+              }
+              break;
+            }
+            let data: any;
+            try {
+              data = await handleJsonResponse(response);
+            } catch (error) {
+              if (
+                error instanceof ResponseDisposedError &&
+                (page.isClosed() || isClosed)
+              ) {
+                console.warn(`Route handler: ${error.message} during teardown`);
+                return route.abort();
+              }
+              throw error;
+            }
+            const id = type === 'terminals' ? data.name : data.id;
+            runners.set(id, data);
+            // Update kernels
+            if (kernels && type === 'sessions' && data.kernel.id) {
+              kernels.set(data.kernel.id, data.kernel);
+            }
+            if (!page.isClosed() && !isClosed) {
+              return route.fulfill({
+                status: type === 'terminals' ? 200 : 201,
+                body: JSON.stringify(data),
+                contentType: 'application/json',
+                headers: response.headers as any
+              });
+            }
+            break;
+          }
+          default:
+            return route.continue();
+        }
+      });
+    }
+
+    /**
+     * Mock workspace route.
+     *
+     * @param page Page model object
+     * @param workspace In-memory workspace
+     */
+    export async function mockState(
+      page: Page,
+      workspace: Workspace.IWorkspace
+    ): Promise<void> {
+      await page.route(Routes.workspaces, (route, request) => {
+        switch (request.method()) {
+          case 'GET': {
+            const id = Routes.workspaces.exec(request.url())?.groups?.id;
+            if (id) {
+              return route.fulfill({
+                status: 200,
+                body: JSON.stringify(workspace)
+              });
+            } else {
+              return route.fulfill({
+                status: 200,
+                body: JSON.stringify({
+                  workspaces: {
+                    ids: [workspace.metadata.id],
+                    values: [workspace]
+                  }
+                })
+              });
+            }
+          }
+          case 'PUT': {
+            const data = request.postDataJSON();
+            workspace.data = { ...workspace.data, ...data.data };
+            workspace.metadata = { ...workspace.metadata, ...data.metadata };
+            return route.fulfill({ status: 204 });
+          }
+          default:
+            return route.continue();
+        }
+      });
+    }
+
+    /**
+     * Settings REST API endpoint
+     */
+    const settingsRegex = Routes.settings;
+
+    /**
+     * Mock settings route.
+     *
+     * @param page Page model object
+     * @param settings In-memory settings
+     * @param mockedSettings Test mocked settings
+     */
+    export async function mockSettings(
+      page: Page,
+      settings: ISettingRegistry.IPlugin[],
+      mockedSettings: Record<string, any>
+    ): Promise<void> {
+      // Listen for closing connection (may happen when request are still being processed)
+      let isClosed = false;
+      const ctxt = page.context();
+      ctxt.once('close', () => {
+        isClosed = true;
+      });
+      ctxt.browser()?.once('disconnected', () => {
+        isClosed = true;
+      });
+
+      await page.route(settingsRegex, async (route, request) => {
+        switch (request.method()) {
+          case 'GET': {
+            // slice is used to remove the '/' prefix
+            const id = settingsRegex.exec(request.url())?.groups?.id.slice(1);
+
+            if (!id) {
+              // Get all settings
+              if (settings.length === 0) {
+                if (page.isClosed() || isClosed) {
+                  console.warn(
+                    `Route handler: aborting ${request.url()} because page/context is closed`
+                  );
+                  return route.abort();
+                }
+                const response = await ctxt.request.fetch(request);
+                const loadedSettings = (await response.json())
+                  .settings as ISettingRegistry.IPlugin[];
+
+                settings.push(
+                  ...loadedSettings.map(plugin => {
+                    const mocked = mockedSettings[plugin.id] ?? {};
+                    return {
+                      ...plugin,
+                      raw: JSON.stringify(mocked),
+                      settings: mocked
+                    };
+                  })
+                );
+              }
+              if (!page.isClosed() && !isClosed) {
+                return route.fulfill({
+                  status: 200,
+                  body: JSON.stringify({ settings })
+                });
+              }
+              break;
+            } else {
+              // Get specific settings
+              let pluginSettings = settings.find(setting => setting.id === id);
+              if (!pluginSettings) {
+                if (page.isClosed() || isClosed) {
+                  console.warn(
+                    `Route handler: aborting ${request.url()} because page/context is closed`
+                  );
+                  return route.abort();
+                }
+                const response = await ctxt.request.fetch(request);
+                pluginSettings = await response.json();
+                if (pluginSettings) {
+                  const mocked = mockedSettings[id] ?? {};
+                  pluginSettings = {
+                    ...pluginSettings,
+                    raw: JSON.stringify(mocked),
+                    settings: mocked
+                  };
+                  settings.push(pluginSettings);
+                }
+              }
+
+              if (!page.isClosed() && !isClosed) {
+                return route.fulfill({
+                  status: 200,
+                  body: JSON.stringify(pluginSettings)
+                });
+              }
+
+              break;
+            }
+          }
+
+          case 'PUT': {
+            // slice is used to remove the '/' prefix
+            const id = settingsRegex.exec(request.url())?.groups?.id?.slice(1);
+            if (!id) {
+              return route.abort('addressunreachable');
+            }
+            const pluginSettings = settings.find(setting => setting.id === id);
+            const data = request.postDataJSON();
+
+            if (pluginSettings) {
+              pluginSettings.raw = data.raw;
+              try {
+                pluginSettings.settings = json5.parse(pluginSettings.raw);
+              } catch (e) {
+                console.warn(
+                  `Failed to read raw settings ${pluginSettings.raw}`
+                );
+                pluginSettings.settings = {};
+              }
+            } else {
+              settings.push({
+                id,
+                ...data
+              });
+            }
+            // Stop mocking if a new version is pushed
+            delete mockedSettings[id];
+            return route.fulfill({
+              status: 204
+            });
+          }
+          default:
+            return route.continue();
+        }
+      });
+    }
+
+    /**
+     * Mock user route.
+     *
+     * @param page Page model object
+     * @param user In-memory user
+     */
+    export async function mockUser(
+      page: Page,
+      user: User.IUser
+    ): Promise<void> {
+      await page.route(Routes.user, (route, request) => {
+        switch (request.method()) {
+          case 'GET':
+            return route.fulfill({
+              status: 200,
+              body: JSON.stringify(user)
+            });
+          default:
+            return route.continue();
+        }
+      });
+    }
+  }
+}

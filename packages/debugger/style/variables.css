@@ -1,0 +1,104 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-DebuggerVariables {
+  display: flex;
+  flex-direction: column;
+  min-height: 50px;
+  padding-top: 3px;
+}
+
+.jp-DebuggerVariables-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 24px;
+  overflow: auto;
+
+  /* For absolute positioning of jp-DebuggerVariables-buttons. */
+  position: relative;
+}
+
+.jp-DebuggerVariables-name {
+  color: var(--jp-mirror-editor-attribute-color);
+  grid-area: name;
+}
+
+.jp-DebuggerVariables-name:last-of-type {
+  flex: 1 1 auto;
+}
+
+.jp-DebuggerVariables-name::after {
+  content: ':';
+  margin-right: 5px;
+}
+
+.jp-DebuggerVariables-detail {
+  /* detail contains value for primitive types or name of the type otherwise */
+  color: var(--jp-mirror-editor-string-color);
+  flex: 1 1 auto;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.jp-DebuggerVariables-grid {
+  flex: 1 1 auto;
+}
+
+.jp-DebuggerVariables-grid .lm-DataGrid {
+  border: none;
+}
+
+.jp-DebuggerVariables-colorPalette {
+  visibility: hidden;
+  z-index: -999;
+  position: absolute;
+  left: -999px;
+  top: -999px;
+}
+
+.jp-DebuggerVariables-colorPalette .jp-mod-void {
+  color: var(--jp-layout-color1);
+}
+
+.jp-DebuggerVariables-colorPalette .jp-mod-background {
+  color: var(--jp-rendermime-table-row-background);
+}
+
+.jp-DebuggerVariables-colorPalette .jp-mod-header-background {
+  color: var(--jp-layout-color2);
+}
+
+.jp-DebuggerVariables-colorPalette .jp-mod-grid-line {
+  color: var(--jp-border-color3);
+}
+
+.jp-DebuggerVariables-colorPalette .jp-mod-header-grid-line {
+  color: var(--jp-border-color3);
+}
+
+.jp-DebuggerVariables-colorPalette .jp-mod-selection {
+  color: color-mix(in srgb, var(--jp-info-color1) 20%, transparent);
+}
+
+.jp-DebuggerVariables-colorPalette .jp-mod-text {
+  color: var(--jp-content-font-color0);
+  font-family: var(--jp-datagrid-font-family, var(--jp-content-font-family));
+  font-size: var(--jp-datagrid-font-size, 12px);
+}
+
+.jp-VariableRendererPanel {
+  overflow: auto;
+}
+
+.jp-VariableRendererPanel-renderer {
+  overflow: auto;
+  height: 100%;
+}
+
+.jp-DebuggerRichVariable div[data-mime-type='text/plain'] > pre {
+  white-space: normal;
+}

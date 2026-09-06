@@ -1,0 +1,139 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-ConsolePanel {
+  display: flex;
+  margin-top: -1px;
+  min-width: 240px;
+  min-height: 120px;
+}
+
+.jp-CodeConsole {
+  height: 100%;
+  padding: 0;
+  display: flex;
+}
+
+.jp-CodeConsole .jp-Cell {
+  padding: var(--jp-cell-padding);
+}
+
+/*-----------------------------------------------------------------------------
+| Content (already run cells)
+|----------------------------------------------------------------------------*/
+
+.jp-CodeConsole-content {
+  background: var(--jp-layout-color0);
+  overflow: auto;
+  padding: 0 var(--jp-console-padding);
+  min-width: calc(10 * var(--jp-ui-font-size1));
+  min-height: calc(5 * var(--jp-ui-font-size1));
+}
+
+.jp-CodeConsole-content .jp-Cell:not(.jp-mod-active) .jp-InputPrompt {
+  opacity: var(--jp-cell-prompt-not-active-opacity);
+  color: var(--jp-cell-inprompt-font-color);
+  cursor: move;
+}
+
+.jp-CodeConsole-content .jp-Cell:not(.jp-mod-active) .jp-OutputPrompt {
+  opacity: var(--jp-cell-prompt-not-active-opacity);
+  color: var(--jp-cell-outprompt-font-color);
+}
+
+/* This rule is for styling cell run by another activity in this console */
+
+/* .jp-CodeConsole-content .jp-Cell.jp-CodeConsole-foreignCell {
+} */
+
+.jp-CodeConsole-content .jp-InputArea-editor.jp-InputArea-editor {
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.jp-CodeConsole-content .jp-CodeConsole-banner .jp-InputPrompt {
+  display: none;
+}
+
+/* collapser is hovered */
+.jp-CodeConsole-content .jp-Cell .jp-Collapser:hover {
+  box-shadow: var(--jp-elevation-z2);
+  background: var(--jp-brand-color1);
+  opacity: var(--jp-cell-collapser-not-active-hover-opacity);
+}
+
+.jp-CodeConsole-input:focus-visible,
+.jp-CodeConsole-content:focus-visible {
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
+  outline-offset: calc(-1 * var(--jp-focus-outline-width));
+}
+
+/*-----------------------------------------------------------------------------
+| Input/prompt cell
+|----------------------------------------------------------------------------*/
+
+.jp-CodeConsole-input {
+  overflow: auto;
+  padding: var(--jp-cell-padding) var(--jp-console-padding);
+
+  /* This matches the box shadow on the notebook toolbar, eventually we should create
+   * CSS variables for this */
+  box-shadow: 0 0.4px 6px 0 rgba(0, 0, 0, 0.1);
+  background: var(--jp-layout-color0);
+  min-width: calc(10 * var(--jp-ui-font-size1));
+  min-height: calc(4 * var(--jp-ui-font-size1));
+}
+
+.jp-CodeConsole-input .jp-CodeConsole-prompt .jp-InputArea {
+  height: 100%;
+  min-height: 100%;
+}
+
+.jp-CodeConsole-promptCell .jp-InputArea-editor.jp-mod-focused {
+  border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
+  box-shadow: var(--jp-input-box-shadow);
+  background-color: var(--jp-cell-editor-active-background);
+}
+
+/*-----------------------------------------------------------------------------
+| Presentation Mode (.jp-mod-presentationMode)
+|----------------------------------------------------------------------------*/
+
+.jp-mod-presentationMode .jp-CodeConsole {
+  --jp-content-font-size1: var(--jp-content-presentation-font-size1);
+  --jp-code-font-size: var(--jp-code-presentation-font-size);
+}
+
+.jp-mod-presentationMode .jp-CodeConsole .jp-Cell .jp-InputPrompt,
+.jp-mod-presentationMode .jp-CodeConsole .jp-Cell .jp-OutputPrompt {
+  flex: 0 0 110px;
+}
+
+/*-----------------------------------------------------------------------------
+| Split Panel Container
+|----------------------------------------------------------------------------*/
+.jp-CodeConsole-split {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.jp-CodeConsole-split.lm-SplitPanel .lm-SplitPanel-handle::after {
+  background-color: var(--jp-border-color2);
+  min-height: calc(2 * var(--jp-border-width));
+  min-width: calc(2 * var(--jp-border-width));
+}
+
+/*-----------------------------------------------------------------------------
+| Mobile
+|----------------------------------------------------------------------------*/
+@media only screen and (width <= 760px) {
+  .jp-CodeConsole-input {
+    min-height: calc(6 * var(--jp-ui-font-size1));
+  }
+}

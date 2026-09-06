@@ -1,0 +1,353 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------
+| Main OutputArea
+| OutputArea has a list of Outputs
+|----------------------------------------------------------------------------*/
+
+.jp-OutputArea {
+  overflow-y: auto;
+  anchor-name: --jp-output-area;
+  anchor-scope: --jp-output-area;
+}
+
+.jp-OutputArea-child {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  overflow: hidden;
+}
+
+.jp-OutputPrompt {
+  width: var(--jp-cell-prompt-width);
+  flex: 0 0 var(--jp-cell-prompt-width);
+  color: var(--jp-cell-outprompt-font-color);
+  font-family: var(--jp-cell-prompt-font-family);
+  padding: var(--jp-code-padding);
+  letter-spacing: var(--jp-cell-prompt-letter-spacing);
+  line-height: var(--jp-code-line-height);
+  font-size: var(--jp-code-font-size);
+  border: var(--jp-border-width) solid transparent;
+  opacity: var(--jp-cell-prompt-opacity);
+
+  /* Right align prompt text, don't wrap to handle large prompt numbers */
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  /* Disable text selection */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.jp-OutputArea-output {
+  width: 100%;
+  height: auto;
+  overflow: auto;
+  user-select: text;
+  -moz-user-select: text;
+  -webkit-user-select: text;
+  -ms-user-select: text;
+}
+
+.jp-OutputArea .jp-RenderedText {
+  padding-left: 1ch;
+}
+
+/**
+ * Prompt overlay.
+ */
+
+.jp-OutputArea-promptOverlay {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: var(--jp-cell-prompt-width);
+  opacity: 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jp-OutputArea-promptOverlay .jp-icon-output {
+  display: none;
+}
+
+.jp-OutputArea-promptOverlay:hover .jp-icon-output {
+  display: initial;
+}
+
+.jp-OutputArea-promptOverlay:hover {
+  background: var(--jp-layout-color2);
+  box-shadow: inset 0 0 1px var(--jp-inverse-layout-color0);
+}
+
+.jp-OutputArea-child .jp-OutputArea-output {
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+/**
+ * Isolated output.
+ */
+.jp-OutputArea-output.jp-mod-isolated {
+  width: 100%;
+  display: block;
+}
+
+/*
+When drag events occur, `lm-mod-override-cursor` is added to the body.
+Because iframes steal all cursor events, the following two rules are necessary
+to suppress pointer events while resize drags are occurring. There may be a
+better solution to this problem.
+*/
+body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated {
+  position: relative;
+}
+
+body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+}
+
+/* pre */
+
+.jp-OutputArea-output pre {
+  border: none;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  overflow-y: auto;
+  word-break: break-all;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+/* tables */
+
+.jp-OutputArea-output.jp-RenderedHTMLCommon table {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* description lists */
+
+.jp-OutputArea-output dl,
+.jp-OutputArea-output dt,
+.jp-OutputArea-output dd {
+  display: block;
+}
+
+.jp-OutputArea-output dl {
+  width: 100%;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+}
+
+.jp-OutputArea-output dt {
+  font-weight: bold;
+  float: left;
+  width: 20%;
+  padding: 0;
+  margin: 0;
+}
+
+.jp-OutputArea-output dd {
+  float: left;
+  width: 80%;
+  padding: 0;
+  margin: 0;
+}
+
+.jp-TrimmedOutputs-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: var(--jp-flat-button-padding);
+  margin: 8px 0;
+  min-height: var(--jp-flat-button-height);
+  font-size: var(--jp-ui-font-size1);
+  font-family: var(--jp-ui-font-family);
+  background-color: var(--jp-layout-color1);
+  border: 1px solid var(--jp-border-color2);
+  color: var(--jp-ui-font-color1);
+  cursor: pointer;
+}
+
+.jp-TrimmedOutputs-button:hover {
+  background-color: var(--jp-layout-color2);
+  border-color: var(--jp-border-color1);
+}
+
+.jp-TrimmedOutputs-button:active {
+  background-color: var(--jp-layout-color3);
+  border-color: var(--jp-border-color1);
+}
+
+.jp-TrimmedOutputs-button:focus-visible {
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
+  outline-offset: -1px;
+}
+
+/* Hide the gutter in case of
+ *  - nested output areas (e.g. in the case of output widgets)
+ *  - mirrored output areas
+ */
+.jp-OutputArea .jp-OutputArea .jp-OutputArea-prompt {
+  display: none;
+}
+
+/* Hide empty lines in the output area, for instance due to cleared widgets */
+.jp-OutputArea-prompt:empty {
+  padding: 0;
+  border: 0;
+}
+
+/*-----------------------------------------------------------------------------
+| executeResult is added to any Output-result for the display of the object
+| returned by a cell
+|----------------------------------------------------------------------------*/
+
+.jp-OutputArea-output.jp-OutputArea-executeResult {
+  margin-left: 0;
+  width: 100%;
+  flex: 1 1 auto;
+}
+
+/* Text output with the Out[] prompt needs a top padding to match the
+ * alignment of the Out[] prompt itself.
+ */
+.jp-OutputArea-executeResult .jp-RenderedText.jp-OutputArea-output {
+  padding-top: var(--jp-code-padding);
+  border-top: var(--jp-border-width) solid transparent;
+}
+
+/*-----------------------------------------------------------------------------
+| The Stdin output
+|----------------------------------------------------------------------------*/
+
+.jp-Stdin-prompt {
+  color: var(--jp-content-font-color0);
+  padding-right: var(--jp-code-padding);
+  vertical-align: baseline;
+  flex: 0 0 auto;
+}
+
+.jp-Stdin-input {
+  font-family: var(--jp-code-font-family);
+  font-size: inherit;
+  color: inherit;
+  background-color: inherit;
+  width: 42%;
+  min-width: 200px;
+
+  /* make sure input baseline aligns with prompt */
+  vertical-align: baseline;
+
+  /* padding + margin = 0.5em between prompt and cursor */
+  padding: 0 0.25em;
+  margin: 0 0.25em;
+  flex: 0 0 70%;
+}
+
+.jp-Stdin-input::placeholder {
+  opacity: 0;
+}
+
+.jp-Stdin-input:focus {
+  box-shadow: none;
+}
+
+.jp-Stdin-input:focus-visible {
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
+  outline-offset: -2px;
+}
+
+.jp-Stdin-input:focus::placeholder {
+  opacity: 1;
+}
+
+.jp-OutputArea-stdin-hiding {
+  /* soft-hide the output, preserving focus */
+  opacity: 0;
+  height: 0;
+}
+
+/*-----------------------------------------------------------------------------
+| Output Area View
+|----------------------------------------------------------------------------*/
+
+.jp-LinkedOutputView .jp-OutputArea {
+  height: 100%;
+  display: block;
+}
+
+.jp-LinkedOutputView .jp-OutputArea-child:only-child {
+  height: 100%;
+}
+
+.jp-LinkedOutputView .jp-OutputArea-output:only-child {
+  height: 100%;
+}
+
+/*-----------------------------------------------------------------------------
+| Printing
+|----------------------------------------------------------------------------*/
+
+@media print {
+  .jp-OutputArea-child {
+    display: table;
+    table-layout: fixed;
+    break-inside: avoid-page;
+  }
+
+  .jp-OutputArea-prompt {
+    display: table-cell;
+    vertical-align: top;
+  }
+
+  .jp-OutputArea-output {
+    display: table-cell;
+  }
+}
+
+/*-----------------------------------------------------------------------------
+| Mobile
+|----------------------------------------------------------------------------*/
+@media only screen and (width <= 760px) {
+  .jp-OutputArea-child {
+    flex-direction: column;
+  }
+
+  .jp-OutputPrompt {
+    flex: 0 0 auto;
+    text-align: left;
+  }
+
+  .jp-OutputArea-promptOverlay {
+    display: none;
+  }
+}
+
+/* Trimmed outputs container */
+.jp-TrimmedOutputs {
+  /* Left-align the button within the output area */
+  text-align: left;
+}

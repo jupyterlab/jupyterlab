@@ -1,0 +1,304 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/**
+ * Support for icons as inline SVG HTMLElements
+ */
+
+/* recolor the primary elements of an icon */
+.jp-icon0[fill] {
+  fill: var(--jp-inverse-layout-color0);
+}
+
+.jp-icon1[fill] {
+  fill: var(--jp-inverse-layout-color1);
+}
+
+.jp-icon2[fill] {
+  fill: var(--jp-inverse-layout-color2);
+}
+
+.jp-icon3[fill] {
+  fill: var(--jp-inverse-layout-color3);
+}
+
+.jp-icon4[fill] {
+  fill: var(--jp-inverse-layout-color4);
+}
+
+.jp-icon0[stroke] {
+  stroke: var(--jp-inverse-layout-color0);
+}
+
+.jp-icon1[stroke] {
+  stroke: var(--jp-inverse-layout-color1);
+}
+
+.jp-icon2[stroke] {
+  stroke: var(--jp-inverse-layout-color2);
+}
+
+.jp-icon3[stroke] {
+  stroke: var(--jp-inverse-layout-color3);
+}
+
+.jp-icon4[stroke] {
+  stroke: var(--jp-inverse-layout-color4);
+}
+
+/* recolor the accent elements of an icon */
+.jp-icon-accent0[fill] {
+  fill: var(--jp-layout-color0);
+}
+
+.jp-icon-accent1[fill] {
+  fill: var(--jp-layout-color1);
+}
+
+.jp-icon-accent2[fill] {
+  fill: var(--jp-layout-color2);
+}
+
+.jp-icon-accent3[fill] {
+  fill: var(--jp-layout-color3);
+}
+
+.jp-icon-accent4[fill] {
+  fill: var(--jp-layout-color4);
+}
+
+.jp-icon-accent0[stroke] {
+  stroke: var(--jp-layout-color0);
+}
+
+.jp-icon-accent1[stroke] {
+  stroke: var(--jp-layout-color1);
+}
+
+.jp-icon-accent2[stroke] {
+  stroke: var(--jp-layout-color2);
+}
+
+.jp-icon-accent3[stroke] {
+  stroke: var(--jp-layout-color3);
+}
+
+.jp-icon-accent4[stroke] {
+  stroke: var(--jp-layout-color4);
+}
+
+/* set the color of an icon to transparent */
+.jp-icon-none[fill] {
+  fill: none;
+}
+
+.jp-icon-none[stroke] {
+  stroke: none;
+}
+
+/* brand icon colors. Same for light and dark */
+.jp-icon-brand0[fill] {
+  fill: var(--jp-brand-color0);
+}
+
+.jp-icon-brand1[fill] {
+  fill: var(--jp-brand-color1);
+}
+
+.jp-icon-brand2[fill] {
+  fill: var(--jp-brand-color2);
+}
+
+.jp-icon-brand3[fill] {
+  fill: var(--jp-brand-color3);
+}
+
+.jp-icon-brand4[fill] {
+  fill: var(--jp-brand-color4);
+}
+
+.jp-icon-brand0[stroke] {
+  stroke: var(--jp-brand-color0);
+}
+
+.jp-icon-brand1[stroke] {
+  stroke: var(--jp-brand-color1);
+}
+
+.jp-icon-brand2[stroke] {
+  stroke: var(--jp-brand-color2);
+}
+
+.jp-icon-brand3[stroke] {
+  stroke: var(--jp-brand-color3);
+}
+
+.jp-icon-brand4[stroke] {
+  stroke: var(--jp-brand-color4);
+}
+
+/* warn icon colors. Same for light and dark */
+.jp-icon-warn0[fill] {
+  fill: var(--jp-warn-color0);
+}
+
+.jp-icon-warn1[fill] {
+  fill: var(--jp-warn-color1);
+}
+
+.jp-icon-warn2[fill] {
+  fill: var(--jp-warn-color2);
+}
+
+.jp-icon-warn3[fill] {
+  fill: var(--jp-warn-color3);
+}
+
+.jp-icon-warn0[stroke] {
+  stroke: var(--jp-warn-color0);
+}
+
+.jp-icon-warn1[stroke] {
+  stroke: var(--jp-warn-color1);
+}
+
+.jp-icon-warn2[stroke] {
+  stroke: var(--jp-warn-color2);
+}
+
+.jp-icon-warn3[stroke] {
+  stroke: var(--jp-warn-color3);
+}
+
+/* icon colors that contrast well with each other and most backgrounds */
+.jp-icon-contrast0[fill] {
+  fill: var(--jp-icon-contrast-color0);
+}
+
+.jp-icon-contrast1[fill] {
+  fill: var(--jp-icon-contrast-color1);
+}
+
+.jp-icon-contrast2[fill] {
+  fill: var(--jp-icon-contrast-color2);
+}
+
+.jp-icon-contrast3[fill] {
+  fill: var(--jp-icon-contrast-color3);
+}
+
+.jp-icon-contrast0[stroke] {
+  stroke: var(--jp-icon-contrast-color0);
+}
+
+.jp-icon-contrast1[stroke] {
+  stroke: var(--jp-icon-contrast-color1);
+}
+
+.jp-icon-contrast2[stroke] {
+  stroke: var(--jp-icon-contrast-color2);
+}
+
+.jp-icon-contrast3[stroke] {
+  stroke: var(--jp-icon-contrast-color3);
+}
+
+.jp-icon-dot[fill] {
+  fill: var(--jp-warn-color0);
+}
+
+.jp-jupyter-icon-color[fill] {
+  fill: var(--jp-jupyter-icon-color, var(--jp-warn-color0));
+}
+
+.jp-notebook-icon-color[fill] {
+  fill: var(--jp-notebook-icon-color, var(--jp-warn-color0));
+}
+
+.jp-json-icon-color[fill] {
+  fill: var(--jp-json-icon-color, var(--jp-warn-color1));
+}
+
+.jp-console-icon-color[fill] {
+  fill: var(--jp-console-icon-color, white);
+}
+
+.jp-console-icon-background-color[fill] {
+  fill: var(--jp-console-icon-background-color, var(--jp-brand-color1));
+}
+
+.jp-terminal-icon-color[fill] {
+  fill: var(--jp-terminal-icon-color, var(--jp-layout-color2));
+}
+
+.jp-terminal-icon-background-color[fill] {
+  fill: var(
+    --jp-terminal-icon-background-color,
+    var(--jp-inverse-layout-color2)
+  );
+}
+
+.jp-text-editor-icon-color[fill] {
+  fill: var(--jp-text-editor-icon-color, var(--jp-inverse-layout-color3));
+}
+
+.jp-inspector-icon-color[fill] {
+  fill: var(--jp-inspector-icon-color, var(--jp-inverse-layout-color3));
+}
+
+/* CSS for icons in selected filebrowser listing items */
+.jp-DirListing-item.jp-mod-selected .jp-icon-selectable[fill] {
+  fill: #fff;
+}
+
+.jp-DirListing-item.jp-mod-selected .jp-icon-selectable-inverse[fill] {
+  fill: var(--jp-brand-color1);
+}
+
+/* stylelint-disable selector-max-class, selector-max-compound-selectors */
+
+/**
+* TODO: come up with non css-hack solution for showing the busy icon on top
+*  of the close icon
+* CSS for complex behavior of close icon of tabs in the main area tabbar
+*/
+.lm-DockPanel-tabBar
+  .lm-TabBar-tab.lm-mod-closable.jp-mod-dirty
+  > .lm-TabBar-tabCloseIcon
+  > :not(:hover)
+  > .jp-icon3[fill] {
+  fill: none;
+}
+
+.lm-DockPanel-tabBar
+  .lm-TabBar-tab.lm-mod-closable.jp-mod-dirty
+  > .lm-TabBar-tabCloseIcon
+  > :not(:hover)
+  > .jp-icon-busy[fill] {
+  fill: var(--jp-inverse-layout-color3);
+}
+
+/* stylelint-enable selector-max-class, selector-max-compound-selectors */
+
+/* CSS for icons in status bar */
+#jp-main-statusbar .jp-mod-selected .jp-icon-selectable[fill] {
+  fill: #fff;
+}
+
+#jp-main-statusbar .jp-mod-selected .jp-icon-selectable-inverse[fill] {
+  fill: var(--jp-brand-color1);
+}
+
+/* special handling for splash icon CSS. While the theme CSS reloads during
+   splash, the splash icon can loose theming. To prevent that, we set a
+   default for its color variable */
+:root {
+  --jp-warn-color0: var(--md-orange-700, #f57c00);
+}
+
+/* not sure what to do with this one, used in filebrowser listing */
+.jp-DragIcon {
+  margin-right: 4px;
+}

@@ -1,0 +1,26 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+body {
+  background: white;
+  margin: 0;
+  padding: 0;
+}
+
+#main {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+}
+
+.jp-NotebookPanel {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.notebookCommandPalette {
+  min-width: 225px;
+}

@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "noImplicitAny": true,
+    "noEmitOnError": true,
+    "noUnusedLocals": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "ES2018",
+    "outDir": "lib",
+    "lib": ["DOM", "DOM.iterable"],
+    "types": ["jest", "node"],
+    "jsx": "react",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "strictNullChecks": true
+  }
+}

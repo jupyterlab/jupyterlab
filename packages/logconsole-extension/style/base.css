@@ -1,0 +1,64 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+@keyframes flash {
+  0% {
+    background-color: var(--jp-brand-color1);
+  }
+
+  50% {
+    color: unset;
+    background-color: unset;
+  }
+
+  100% {
+    background-color: var(--jp-brand-color1);
+  }
+}
+
+.jp-LogConsoleStatusItem.jp-LogConsole-flash {
+  animation: flash 300ms both;
+}
+
+.jp-LogConsoleStatusItem.jp-mod-selected {
+  background-color: var(--jp-brand-color1);
+}
+
+/* Override semi-transparent white with opaque white for higher contrast */
+.jp-LogConsoleStatusItem.jp-mod-selected,
+.jp-LogConsoleStatusItem.jp-mod-selected .jp-StatusBar-TextItem {
+  color: white;
+}
+
+.jp-LogConsole .jp-ClearIcon {
+  transform: rotate(90deg);
+  margin-top: -1px;
+  padding: 0 8px;
+}
+
+.jp-Toolbar-item.jp-LogConsole-toolbarLogLevel {
+  align-items: center;
+  padding: 0 6px;
+}
+
+/* Matches the disabled style elsewhere in JupyterLab */
+.jp-LogConsole-toolbarLogLevel-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Copied from the notebook cell type dropdown styling */
+.jp-LogConsole-toolbarLogLevelDropdown select {
+  height: 24px;
+  font-size: var(--jp-ui-font-size1);
+  line-height: 14px;
+  border-radius: 0;
+  display: block;
+}
+
+/* Copied from the notebook cell type dropdown styling */
+.jp-LogConsole-toolbarLogLevelDropdown span {
+  top: 5px !important;
+}

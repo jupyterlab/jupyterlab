@@ -1,0 +1,159 @@
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
+"""
+This file is mean to be called with a path to an example directory as
+its argument.  We import the application entry point for the example
+and add instrument them with a Playwright test that makes sure
+there are no console errors or uncaught errors prior to a sentinel
+string being printed.
+
+e.g. python example_check.py ./app
+"""
+
+import importlib.util
+import json
+import os
+import shutil
+import sys
+from pathlib import Path
+from tempfile import NamedTemporaryFile
+
+from jupyterlab.browser_check import run_async_process, run_test
+from jupyterlab.labapp import get_app_dir
+
+here = Path(__file__).parent.resolve()
+TEST_FILE = here / "example.spec.ts"
+REF_SNAPSHOT = Path(TEST_FILE.with_suffix(".ts-snapshots").name) / "example-linux.png"
+
+
+def _blob_report_name(example_dir: Path) -> str:
+    try:
+        stem = "-".join(example_dir.resolve().relative_to(here.parent).parts)
+    except ValueError:
+        stem = example_dir.name
+    return f"{stem}.zip"
+
+
+def _playwright_config(example_dir: Path) -> str:
+    reporters = []
+    if os.environ.get("CI"):
+        reporters.append(
+            [
+                "blob",
+                {"outputDir": "blob-report", "fileName": _blob_report_name(example_dir)},
+            ]
+        )
+    reporters.append(["json", {"outputFile": "test-results/report.json"}])
+    return f"module.exports = {{\n  reporter: {json.dumps(reporters)}\n}};\n"
+
+
+def main() -> None:
+    # Load the main file and grab the example class so we can subclass
+    example_dir = Path(sys.argv[-1])
+    mod_path = (example_dir / "main.py").resolve()
+    spec = importlib.util.spec_from_file_location("example", mod_path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    sys.modules[__name__] = mod
+
+    with NamedTemporaryFile(mode="w", delete=False) as tmp:
+        tmp.write('PS1="$ "\n')
+        rcfile_path = tmp.name
+
+    class App(mod.ExampleApp):
+        """An app that launches an example and waits for it to start up, checking for
+        JS console errors, JS errors, and Python logged errors.
+        """
+
+        name = __name__
+        open_browser = False
+
+        serverapp_config = {
+            "base_url": "/foo/",
+            "root_dir": str(example_dir.resolve()),
+            "preferred_dir": str(example_dir.resolve()),
+            "terminado_settings": {"shell_command": ["/bin/bash", "--rcfile", rcfile_path]},
+        }
+        ip = "127.0.0.1"
+
+        def initialize_settings(self):
+            run_test(self.serverapp, run_browser)
+            super().initialize_settings()
+
+    def _jupyter_server_extension_points() -> list[dict[str, str | type]]:
+        return [{"module": __name__, "app": App}]
+
+    mod._jupyter_server_extension_points = _jupyter_server_extension_points
+
+    App.__name__ = example_dir.name.capitalize() + "Test"
+    App.launch_instance()
+
+
+async def run_browser(url: str):
+    """Run the browser test and return an exit code."""
+    # Run the browser test and return an exit code.
+    target = Path(get_app_dir()) / "example_test"
+    if not (target / "node_modules").exists():
+        if not target.exists():
+            target.mkdir(parents=True, exist_ok=True)
+        await run_async_process(["npm", "init", "-y"], cwd=str(target))
+        playwright_version = os.environ.get("PLAYWRIGHT_VERSION", "^1")
+        await run_async_process(
+            ["npm", "install", "-D", f"@playwright/test@{playwright_version}"],
+            cwd=str(target),
+        )
+        await run_async_process(
+            ["npx", "playwright", "install", "--only-shell", "chromium"], cwd=str(target)
+        )
+    test_target = target / TEST_FILE.name
+
+    # Copy test file
+    shutil.copy(
+        str(TEST_FILE),
+        str(test_target),
+    )
+    example_dir = Path(sys.argv[-1])
+    (target / "playwright.config.js").write_text(_playwright_config(example_dir))
+    # Copy reference snapshot
+    snapshot = example_dir / REF_SNAPSHOT
+    has_snapshot = False
+    if snapshot.exists():
+        has_snapshot = True
+        snapshot_target = target / REF_SNAPSHOT
+        snapshot_target.parent.mkdir(exist_ok=True)
+        shutil.copy(str(snapshot), str(snapshot_target))
+
+    results_target = target / "test-results"
+    dst = example_dir / results_target.name
+    blob_report_target = target / "blob-report"
+    blob_dst = example_dir / blob_report_target.name
+    # Force creation of the results folder as it may be listed in the filebrowser to avoid
+    # snapshots discrepancy
+    dst.mkdir(exist_ok=True)
+    if results_target.exists():
+        shutil.rmtree(results_target)
+    if blob_report_target.exists():
+        shutil.rmtree(blob_report_target)
+
+    current_env = os.environ.copy()
+    current_env["BASE_URL"] = url
+    current_env["EXAMPLE_NAME"] = example_dir.name
+    current_env["TEST_SNAPSHOT"] = "1" if has_snapshot else "0"
+
+    try:
+        await run_async_process(["npx", "playwright", "test"], env=current_env, cwd=str(target))
+    finally:
+        # Copy back test-results folder to analyze snapshot error
+        if results_target.exists():
+            if dst.exists():
+                shutil.rmtree(dst)
+            shutil.copytree(str(results_target), str(dst))
+        if blob_report_target.exists():
+            if blob_dst.exists():
+                shutil.rmtree(blob_dst)
+            shutil.copytree(str(blob_report_target), str(blob_dst))
+
+
+if __name__ == "__main__":
+    main()

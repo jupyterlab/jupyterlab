@@ -1,0 +1,72 @@
+{
+  "name": "@jupyterlab/services",
+  "version": "7.7.0-alpha.1",
+  "description": "Client APIs for the Jupyter services REST APIs",
+  "keywords": [
+    "jupyter",
+    "notebook",
+    "services"
+  ],
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "main": "lib/index.js",
+  "browser": {
+    "ws": "./lib/shim/ws.js"
+  },
+  "typings": "lib/index.d.ts",
+  "files": [
+    "lib/**/*.js",
+    "lib/*.js.map",
+    "lib/**/*.d.ts",
+    "lib/**/*.js.map",
+    "lib/*.js",
+    "lib/*.d.ts",
+    "dist/*.js",
+    "dist/**/*.js",
+    "src/**/*.{ts,tsx}"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "build:all": "npm run build && rspack",
+    "build:test": "tsc --build tsconfig.test.json",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "test": "jest -i",
+    "test:cov": "jest -i --verbose --collect-coverage",
+    "test:debug": "node --inspect-brk ../../node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk ../../node_modules/.bin/jest --runInBand --watch",
+    "watch": "tsc -b --watch"
+  },
+  "dependencies": {
+    "@jupyter/ydoc": "^4.0.0",
+    "@jupyterlab/coreutils": "^6.7.0-alpha.1",
+    "@jupyterlab/nbformat": "^4.7.0-alpha.1",
+    "@jupyterlab/settingregistry": "^4.7.0-alpha.1",
+    "@jupyterlab/statedb": "^4.7.0-alpha.1",
+    "@lumino/coreutils": "^2.2.3",
+    "@lumino/disposable": "^2.1.6",
+    "@lumino/polling": "^2.1.6",
+    "@lumino/properties": "^2.0.5",
+    "@lumino/signaling": "^2.1.6",
+    "ws": "^8.11.0"
+  },
+  "devDependencies": {
+    "@jupyterlab/testing": "^4.7.0-alpha.1",
+    "@rspack/cli": "^2.0.2",
+    "@types/jest": "^29.2.0",
+    "@types/ws": "^8.5.3",
+    "jest": "^29.2.0",
+    "rimraf": "~5.0.5",
+    "typescript": "~5.9.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

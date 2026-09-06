@@ -1,0 +1,27 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-PropertyInspector {
+  display: flex;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+}
+
+.jp-PropertyInspector-content {
+  flex-grow: 1;
+}
+
+.jp-PropertyInspector-placeholder {
+  text-align: center;
+}
+
+.jp-PropertyInspector-placeholderContent {
+  color: var(--jp-content-font-color2);
+  padding: 8px;
+}
+
+.jp-PropertyInspector-placeholderContent > h3 {
+  margin-bottom: var(--jp-content-heading-margin-bottom);
+}

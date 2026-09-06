@@ -1,0 +1,489 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import type { IDocumentManager } from '@jupyterlab/docmanager';
+import { DocumentManager } from '@jupyterlab/docmanager';
+import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
+import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
+import type { ServiceManager } from '@jupyterlab/services';
+import { framePromise, signalToPromise } from '@jupyterlab/testing';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
+import expect from 'expect';
+import { simulate } from 'simulate-event';
+import { BreadCrumbs, FileBrowserModel } from '../src';
+import { PageConfig } from '@jupyterlab/coreutils';
+
+const BREADCRUMB_ROOT_CLASS = 'jp-BreadCrumbs-home';
+const BREADCRUMB_PREFERRED_CLASS = 'jp-BreadCrumbs-preferred';
+const HOME_ITEM_CLASS = 'jp-BreadCrumbs-home';
+const ITEM_CLASS = 'jp-BreadCrumbs-item';
+const ITEM_QUERY = `.${HOME_ITEM_CLASS}, .${ITEM_CLASS}`;
+
+class LogCrumbs extends BreadCrumbs {
+  methods: string[] = [];
+  events: string[] = [];
+
+  handleEvent(event: Event): void {
+    super.handleEvent(event);
+    this.events.push(event.type);
+  }
+
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    this.methods.push('onAfterAttach');
+  }
+
+  protected onBeforeDetach(msg: Message): void {
+    super.onBeforeDetach(msg);
+    this.methods.push('onBeforeDetach');
+  }
+
+  protected onUpdateRequest(msg: Message): void {
+    super.onUpdateRequest(msg);
+    this.methods.push('onUpdateRequest');
+  }
+}
+
+describe('filebrowser/model', () => {
+  let manager: IDocumentManager;
+  let serviceManager: ServiceManager.IManager;
+  let registry: DocumentRegistry;
+  let model: FileBrowserModel;
+  let crumbs: LogCrumbs;
+  let first: string;
+  let second: string;
+  let third: string;
+  let path: string;
+
+  beforeAll(async () => {
+    const opener = new DocumentWidgetOpenerMock();
+
+    registry = new DocumentRegistry({
+      textModelFactory: new TextModelFactory()
+    });
+    serviceManager = new ServiceManagerMock();
+    manager = new DocumentManager({
+      registry,
+      opener,
+      manager: serviceManager
+    });
+
+    const contents = serviceManager.contents;
+    let cModel = await contents.newUntitled({ type: 'directory' });
+    first = cModel.name;
+    cModel = await contents.newUntitled({
+      path: cModel.path,
+      type: 'directory'
+    });
+    second = cModel.name;
+    cModel = await contents.newUntitled({
+      path: cModel.path,
+      type: 'directory'
+    });
+    third = cModel.name;
+    path = cModel.path;
+  });
+
+  beforeEach(async () => {
+    model = new FileBrowserModel({ manager });
+    await model.cd(path);
+    // Remove leading '/' from preferredPath (as done by jupyter server)
+    const preferredPath = path.startsWith('/') ? path.slice(1) : path;
+    PageConfig.setOption('preferredPath', preferredPath);
+    PageConfig.setOption('preferredPathIsHome', 'false');
+    crumbs = new LogCrumbs({ model });
+  });
+
+  afterEach(() => {
+    model.dispose();
+  });
+
+  describe('BreadCrumbs', () => {
+    describe('#constructor()', () => {
+      it('should create a new BreadCrumbs instance', () => {
+        const bread = new BreadCrumbs({ model });
+        expect(bread).toBeInstanceOf(BreadCrumbs);
+        // Before attachment, the breadcrumb container is empty (items are
+        // populated during onUpdateRequest which runs after attach).
+        const items = crumbs.node.querySelectorAll(ITEM_QUERY);
+        expect(items.length).toBe(0);
+        // After attachment, the root node should have two child elements:
+        // the breadcrumb container and the path navigator.
+        Widget.attach(bread, document.body);
+        expect(bread.node.children.length).toBe(2);
+        Widget.detach(bread);
+        bread.dispose();
+      });
+
+      it('should add the jp-BreadCrumbs class', () => {
+        expect(crumbs.hasClass('jp-BreadCrumbs')).toBe(true);
+      });
+
+      it('should use the home icon only when the preferred path is home', () => {
+        PageConfig.setOption('preferredPathIsHome', 'true');
+        const bread = new BreadCrumbs({ model });
+        Widget.attach(bread, document.body);
+        MessageLoop.sendMessage(bread, Widget.Msg.UpdateRequest);
+
+        const rootIcon = bread.node.querySelector(
+          `.${BREADCRUMB_ROOT_CLASS} svg`
+        );
+        const preferredHomeIcon = bread.node.querySelector(
+          `.${BREADCRUMB_PREFERRED_CLASS} svg`
+        );
+        expect(rootIcon?.getAttribute('data-icon')).toBe(
+          'ui-components:folder'
+        );
+        expect(preferredHomeIcon?.getAttribute('data-icon')).toBe(
+          'ui-components:home'
+        );
+
+        Widget.detach(bread);
+        bread.dispose();
+
+        PageConfig.setOption('preferredPathIsHome', 'false');
+        const nonHomeBread = new BreadCrumbs({ model });
+        Widget.attach(nonHomeBread, document.body);
+        MessageLoop.sendMessage(nonHomeBread, Widget.Msg.UpdateRequest);
+
+        const preferredIcon = nonHomeBread.node.querySelector(
+          `.${BREADCRUMB_PREFERRED_CLASS} svg`
+        );
+        expect(preferredIcon?.getAttribute('data-icon')).toBe(
+          'ui-components:folder-favorite'
+        );
+
+        Widget.detach(nonHomeBread);
+        nonHomeBread.dispose();
+      });
+    });
+
+    describe('#handleEvent()', () => {
+      describe('click', () => {
+        it('should switch to the parent directory', async () => {
+          Widget.attach(crumbs, document.body);
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          let items = crumbs.node.querySelectorAll(ITEM_QUERY);
+          expect(items.length).toBe(4);
+          const promise = signalToPromise(model.pathChanged);
+          expect(items[2].textContent).toBe(second);
+          simulate(items[2], 'click');
+          await promise;
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          items = crumbs.node.querySelectorAll(ITEM_QUERY);
+          expect(items.length).toBe(3);
+        });
+
+        it('should switch to the home directory', async () => {
+          Widget.attach(crumbs, document.body);
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          let items = crumbs.node.querySelectorAll(ITEM_QUERY);
+          const promise = signalToPromise(model.pathChanged);
+          simulate(items[0], 'click');
+          await promise;
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          items = crumbs.node.querySelectorAll(ITEM_QUERY);
+          expect(items.length).toBe(1);
+          expect(model.path).toBe('');
+        });
+
+        it('should switch to the grandparent directory', async () => {
+          Widget.attach(crumbs, document.body);
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          let items = crumbs.node.querySelectorAll(ITEM_QUERY);
+          const promise = signalToPromise(model.pathChanged);
+          simulate(items[1], 'click');
+          await promise;
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          items = crumbs.node.querySelectorAll(ITEM_QUERY);
+          expect(items.length).toBe(2);
+          expect(model.path).toBe(first);
+        });
+
+        it('should refresh the current directory', async () => {
+          Widget.attach(crumbs, document.body);
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          let items = crumbs.node.querySelectorAll(ITEM_QUERY);
+          const promise = signalToPromise(model.refreshed);
+          expect(items[3].textContent).toBe(third);
+          simulate(items[3], 'click');
+          await promise;
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          items = crumbs.node.querySelectorAll(ITEM_QUERY);
+          expect(items.length).toBe(4);
+          expect(model.path).toBe(path);
+        });
+
+        it('should handle preferred and root breadcrumb clicks', async () => {
+          Widget.attach(crumbs, document.body);
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          // Should start at the preferred path
+          expect(model.path).toBe(path);
+
+          const rootElement = crumbs.node.querySelector(
+            `.${BREADCRUMB_ROOT_CLASS}`
+          ) as HTMLElement;
+          expect(rootElement).not.toBeNull();
+          let promise = signalToPromise(model.pathChanged);
+          simulate(rootElement, 'click');
+          await promise;
+          // Should navigate to the root directory on root breadcrumb click
+          expect(model.path).toBe('');
+
+          // Should find the preferred breadcrumb element as preferred path is set
+          const preferredElement = crumbs.node.querySelector(
+            `.${BREADCRUMB_PREFERRED_CLASS}`
+          ) as HTMLElement;
+          expect(preferredElement).not.toBeNull();
+          promise = signalToPromise(model.pathChanged);
+          simulate(preferredElement, 'click');
+          await promise;
+          // Should navigate back to the preferred path on preferred breadcrumb click
+          expect(model.path).toBe(path);
+        });
+      });
+    });
+
+    describe('#onAfterAttach()', () => {
+      it('should post an update request', async () => {
+        Widget.attach(crumbs, document.body);
+        expect(crumbs.methods).toEqual(
+          expect.arrayContaining(['onAfterAttach'])
+        );
+        await framePromise();
+        expect(crumbs.methods).toEqual(
+          expect.arrayContaining(['onUpdateRequest'])
+        );
+      });
+
+      it('should add event listeners', () => {
+        Widget.attach(crumbs, document.body);
+        simulate(crumbs.node, 'click');
+        expect(crumbs.events).toEqual(expect.arrayContaining(['click']));
+      });
+    });
+
+    describe('#onBeforeDetach()', () => {
+      it('should remove event listeners', () => {
+        Widget.attach(crumbs, document.body);
+        Widget.detach(crumbs);
+        simulate(crumbs.node, 'click');
+        expect(crumbs.events).not.toEqual(expect.arrayContaining(['click']));
+      });
+    });
+
+    describe('#fullPath', () => {
+      it('should show/hide full path', async () => {
+        Widget.attach(crumbs, document.body);
+        MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+        expect(crumbs.node.textContent).toMatch(
+          /\/\/Untitled Folder.*?\/Untitled Folder.*?\//
+        );
+        crumbs.fullPath = true;
+        MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+        await framePromise();
+        expect(crumbs.node.textContent).toMatch(
+          /\/Untitled Folder.*?\/Untitled Folder.*?\/Untitled Folder.*?\//
+        );
+      });
+    });
+
+    describe('#onUpdateRequest()', () => {
+      it('should be called when the model updates', async () => {
+        const model = new FileBrowserModel({ manager });
+        await model.cd(path);
+        crumbs = new LogCrumbs({ model });
+        await model.cd('..');
+        await framePromise();
+
+        expect(crumbs.methods).toEqual(
+          expect.arrayContaining(['onUpdateRequest'])
+        );
+        const items = crumbs.node.querySelectorAll(ITEM_QUERY);
+        expect(items.length).toBe(3);
+        model.dispose();
+      });
+
+      it('should trigger DOM updates if state changes', async () => {
+        const model = new FileBrowserModel({ manager });
+        crumbs = new LogCrumbs({ model });
+        let modifications = 0;
+        const observer = new MutationObserver(() => modifications++);
+        observer.observe(crumbs.node, {
+          attributes: true,
+          childList: true,
+          subtree: true
+        });
+
+        // Should modify the DOM once
+        await model.cd(path);
+        crumbs.update();
+        await framePromise();
+        expect(modifications).toBe(1);
+
+        // Should modify the DOM once
+        await model.cd('..');
+        crumbs.update();
+        await framePromise();
+        expect(modifications).toBe(2);
+
+        observer.disconnect();
+        model.dispose();
+      });
+
+      it('should not touch DOM if state is unchanged', async () => {
+        const model = new FileBrowserModel({ manager });
+        crumbs = new LogCrumbs({ model });
+        let modifications = 0;
+        const observer = new MutationObserver(() => modifications++);
+        observer.observe(crumbs.node, {
+          attributes: true,
+          childList: true,
+          subtree: true
+        });
+
+        // Should modify the DOM once
+        await model.cd(path);
+        crumbs.update();
+        await framePromise();
+        expect(modifications).toBe(1);
+
+        // Should not increase the number of modifications
+        crumbs.update();
+        await framePromise();
+        expect(modifications).toBe(1);
+
+        observer.disconnect();
+        model.dispose();
+      });
+    });
+    describe('#breadcrumbitems', () => {
+      it('should show correct number of left and right directories with ellipsis', async () => {
+        const customCrumbs = new LogCrumbs({
+          model,
+          minimumLeftItems: 1,
+          minimumRightItems: 1
+        });
+        Widget.attach(customCrumbs, document.body);
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+
+        let items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        expect(items.length).toBe(4);
+        expect(items[1].textContent).toBe(first);
+        expect((items[1] as HTMLElement).title).toBe(`${first}`);
+        // Ellipsis
+        expect(items[2].querySelector('svg')).not.toBeNull();
+        expect(items[3].textContent).toBe(third);
+        expect((items[3] as HTMLElement).title).toBe(
+          `${first}/${second}/${third}`
+        );
+
+        customCrumbs.minimumLeftItems = 0;
+        customCrumbs.minimumRightItems = 0;
+        customCrumbs.update();
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+        items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        // Should show: preferred, ellipsis
+        expect(items.length).toBe(2);
+        expect(items[1].querySelector('svg')).not.toBeNull();
+
+        customCrumbs.minimumLeftItems = 0;
+        customCrumbs.minimumRightItems = 2;
+        customCrumbs.update();
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+        items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        // Should show: preferred, ellipsis, second, third
+        expect(items.length).toBe(4);
+        expect(items[1].querySelector('svg')).not.toBeNull();
+        expect(items[2].textContent).toBe(second);
+        expect(items[3].textContent).toBe(third);
+
+        // Set minimumLeftItems = 2, minimumRightItems = 0,
+        customCrumbs.minimumLeftItems = 2;
+        customCrumbs.minimumRightItems = 0;
+        customCrumbs.update();
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+        items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        // Should show: preferred, first, second, ellipsis
+        expect(items.length).toBe(4);
+        expect(items[1].textContent).toBe(first);
+        expect(items[2].textContent).toBe(second);
+        expect(items[3].querySelector('svg')).not.toBeNull();
+
+        Widget.detach(customCrumbs);
+        customCrumbs.dispose();
+      });
+
+      it('should show more items when container width increases', async () => {
+        const customCrumbs = new LogCrumbs({
+          model,
+          minimumLeftItems: 0,
+          minimumRightItems: 1
+        });
+
+        // Create a container with controlled width
+        const container = document.createElement('div');
+        container.style.width = '200px';
+        document.body.appendChild(container);
+
+        Widget.attach(customCrumbs, container);
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+
+        // Stub clientWidth to return controlled values
+        const originalClientWidth = Object.getOwnPropertyDescriptor(
+          HTMLElement.prototype,
+          'clientWidth'
+        );
+
+        // First, test with narrow width
+        Object.defineProperty(customCrumbs.node, 'clientWidth', {
+          configurable: true,
+          get: () => 150
+        });
+
+        // Force cache invalidation and recalculation
+        (customCrumbs as any)._cachedWidths = null;
+        (customCrumbs as any)._previousState = null;
+        customCrumbs.update();
+        await framePromise();
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+
+        let items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        const narrowItemCount = items.length;
+
+        // Force truncation in narrow mode by ensuring it's very small if needed
+        // But with 150px and the setup, it should be small.
+
+        Object.defineProperty(customCrumbs.node, 'clientWidth', {
+          configurable: true,
+          get: () => 1000
+        });
+
+        // Force cache invalidation and recalculation
+        (customCrumbs as any)._cachedWidths = null;
+        (customCrumbs as any)._previousState = null;
+        customCrumbs.update();
+        await framePromise();
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+
+        items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        const wideItemCount = items.length;
+
+        // With sufficient width (1000px), it should show MORE items than the constricted 150px case
+        expect(wideItemCount).toBeGreaterThan(narrowItemCount);
+
+        // Restore original clientWidth descriptor if it existed
+        if (originalClientWidth) {
+          delete (customCrumbs.node as any).clientWidth;
+        }
+
+        Widget.detach(customCrumbs);
+        customCrumbs.dispose();
+        document.body.removeChild(container);
+      });
+    });
+  });
+});

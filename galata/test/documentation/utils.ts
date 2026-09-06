@@ -1,0 +1,265 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+import type { ElementHandle, Locator, Page } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
+
+/**
+ * Filter directory content
+ *
+ * @param array Array of content models
+ * @returns Filtered array
+ */
+export function filterContent(array: any[]): any[] {
+  return array.filter(
+    item =>
+      item['type'] !== 'directory' ||
+      !(item['name'] as string).startsWith('test-')
+  );
+}
+
+/**
+ * Generate a SVG arrow to inject in a HTML document.
+ *
+ * @param position Absolute position
+ * @param rotation Rotation in degree
+ * @returns The svg to inject in the page
+ */
+export function generateArrow(
+  position: { x: number; y: number },
+  rotation: number = 0
+): string {
+  return `<svg style="position: absolute;top: ${position.y}px;left: ${position.x}px;transform: rotate(${rotation}deg);z-index: 100000" width="28.579" height="162.02" version="1.1" viewBox="0 0 28.579 62.619" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+   <marker id="a" overflow="visible" orient="auto">
+    <path transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="m8.7186 4.0337-10.926-4.0177 10.926-4.0177c-1.7455 2.3721-1.7354 5.6175-6e-7 8.0354z" fill="#ff0000" fill-rule="evenodd" stroke="#ff0000" stroke-linejoin="round" stroke-width=".625"/>
+   </marker>
+  </defs>
+  <g transform="translate(-131.33 -99.265)">
+   <path d="m145.67 211.28v-157" fill="none" marker-end="url(#a)" stroke="#ff0000" stroke-width="3"/>
+  </g>
+ </svg>`;
+}
+
+/**
+ * Generate a SVG mouse pointer to inject in a HTML document.
+ *
+ * @param position Absolute position
+ * @returns The svg to inject in the page
+ */
+export function positionMouse(position: { x: number; y: number }): string {
+  // The cursor is CC-0 1.0 from https://github.com/sevmeyer/mocu-xcursor
+  return `<svg style="pointer-events: none; position: absolute;top: ${position.y}px;left: ${position.x}px;z-index: 100000" width="40" height="40" version="1.1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <path id="c" class="left(-1,22)" d="m1 1v13.75l3.94-1.63 1.72 4.16 1.84-0.78-1.71-4.15 3.94-1.63z"/>
+  </defs>
+  <use xlink:href="#c" style="fill:#0a0b0c;stroke:#0a0b0c;stroke-width:2;stroke-linejoin:round;opacity:.1" x="1" y="1"/>
+  <use xlink:href="#c" style="fill:#1a1b1c;stroke:#1a1b1c;stroke-width:2;stroke-linejoin:round"/>
+  <use xlink:href="#c" style="fill:#fafbfc"/>
+  <circle id="hot" class="left(-1,22)" cx="1" cy="1" r="1" style="fill:#f00;opacity:.5"/>
+</svg>`;
+}
+
+/**
+ * Position of an injected sprint in a DOM element.
+ */
+export interface IPositionInElement {
+  /**
+   * X-coordinate multiplier for the element's width.
+   */
+  top?: number;
+  /**
+   * Y-coordinate multiplier for the element's height.
+   */
+  left?: number;
+  /**
+   * Offset added to x-coordinate after calculating position with multipliers.
+   */
+  offsetLeft?: number;
+  /**
+   * Offset added to y-coordinate after calculating position with multipliers.
+   */
+  offsetTop?: number;
+}
+
+/**
+ * Generate a SVG mouse pointer to inject in a HTML document over a DOM element.
+ *
+ * @param element A playwright handle or locator for the target DOM element
+ * @param position A position within the target element (default: bottom right quarter).
+ * @returns The svg to inject in the page
+ */
+export async function positionMouseOver(
+  element: ElementHandle | Locator,
+  position: IPositionInElement = {}
+): Promise<string> {
+  const top = position.top ?? 0.75;
+  const left = position.left ?? 0.75;
+  const offsetTop = position.offsetTop ?? 0;
+  const offsetLeft = position.offsetLeft ?? 0;
+  const bBox = await element.boundingBox();
+  return positionMouse({
+    x: bBox.x + bBox.width * left + offsetLeft,
+    y: bBox.y + bBox.height * top + offsetTop
+  });
+}
+
+/**
+ * A rectangle usable as the `clip` option of `page.screenshot()`.
+ */
+export interface IClip {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * Compute the smallest rectangle enclosing all the given elements.
+ *
+ * Useful to screenshot a widget together with the element it relates to
+ * (for example a completer and the cell it completes) without hard-coding
+ * pixel coordinates.
+ *
+ * @param page The page the elements belong to
+ * @param elements The elements to enclose
+ * @param padding Margin added on each side (default: 8 pixels)
+ * @returns The enclosing rectangle, clipped to the viewport
+ */
+export async function boundsAround(
+  page: Page,
+  elements: Locator[],
+  padding: number = 8
+): Promise<IClip> {
+  const boxes = await Promise.all(
+    elements.map(element => element.boundingBox())
+  );
+  const found = boxes.filter(box => box !== null);
+  if (found.length === 0) {
+    throw new Error('None of the given elements is visible');
+  }
+
+  const viewport = page.viewportSize()!;
+  const left = Math.max(0, Math.min(...found.map(box => box.x)) - padding);
+  const top = Math.max(0, Math.min(...found.map(box => box.y)) - padding);
+  const right = Math.min(
+    viewport.width,
+    Math.max(...found.map(box => box.x + box.width)) + padding
+  );
+  const bottom = Math.min(
+    viewport.height,
+    Math.max(...found.map(box => box.y + box.height)) + padding
+  );
+
+  return { x: left, y: top, width: right - left, height: bottom - top };
+}
+
+export async function stubGitHubUserIcons(page: Page): Promise<void> {
+  // stub out github user icons
+  // only first and last icon for now
+  // logic in @jupyterlab/extensionmanager/src/models::ListEntry#translateSearchResult
+  await page.route('https://github.com/*.png*', async (route, request) => {
+    return route.fulfill({
+      status: 200,
+      contentType: 'image/png',
+      body: fs.readFileSync(path.resolve(__dirname, './data/jupyter.png'))
+    });
+  });
+}
+
+export async function freeezeKernelIds(
+  node: Locator,
+  mockMap: Record<string, string>
+): Promise<void> {
+  const KERNEL_ID_SELECTOR = '.jp-RunningSessions-item-label-kernel-id';
+  // wait for the kernel IDs to be rendered.
+  await node.locator(KERNEL_ID_SELECTOR).first().waitFor();
+
+  return node.evaluate(
+    (node, [KERNEL_ID_SELECTOR, mockMap]) => {
+      const isTree = node.querySelector('.jp-TreeView');
+      for (const [notebook, kernelId] of Object.entries(mockMap)) {
+        const selector = isTree
+          ? `[title*='${notebook}'] ${KERNEL_ID_SELECTOR}`
+          : `${KERNEL_ID_SELECTOR}[title='${notebook}']`;
+        const element = node.querySelector(selector) as HTMLElement;
+        element.innerText = `(${kernelId})`;
+      }
+    },
+    [KERNEL_ID_SELECTOR, mockMap]
+  );
+}
+
+/**
+ * Work around a MathJax rendering race that makes notebook screenshots flaky.
+ *
+ * MathJax (CHTML, `matchFontHeight: true`) scales each equation to match the
+ * surrounding font by measuring the container's `ex`/`em`. When it typesets
+ * against a zero-width container (which happens when the notebook is typeset
+ * while not the visible/active tab) it falls back to a smaller `exFactor` and
+ * renders the equation ~12% too small - and that wrong size sticks.
+ *
+ * A mis-sized equation in a markdown cell shifts every cell below it; in the
+ * windowed notebook the scroll compensation snaps to an integer pixel, leaving
+ * a sub-pixel (~0.2px) residual that moves a glyph row across the device-pixel
+ * grid in the next code cell, flipping a line by 1px between runs.
+ *
+ * Re-render the markdown cells while the notebook is visible so the equations
+ * typeset against a properly laid-out container at their correct size, making
+ * the layout below them deterministic. Must be called while the target
+ * notebook is the active tab and before it gets covered by other panels.
+ */
+export async function ensureMathTypeset(page: Page): Promise<void> {
+  // Display equations render as `<mjx-container display="true">`.
+  await page.locator('mjx-container[display="true"]').first().waitFor();
+  await page.evaluate(async () => {
+    const nextFrame = () =>
+      new Promise(resolve => requestAnimationFrame(() => resolve(null)));
+    // A correctly typeset display equation is clearly taller than the
+    // mis-scaled fallback (the two observed states are ~66px and ~58px).
+    const hasMisScaledEquation = () =>
+      Array.from(
+        document.querySelectorAll('mjx-container[display="true"]')
+      ).some(node => (node as HTMLElement).getBoundingClientRect().height < 60);
+    const jupyterapp = (window as any).jupyterapp;
+    for (let attempt = 0; attempt < 25; attempt++) {
+      await nextFrame();
+      if (!hasMisScaledEquation()) {
+        return;
+      }
+      for (const panel of Array.from(
+        jupyterapp.shell.widgets('main')
+      ) as any[]) {
+        for (const cell of panel?.content?.widgets ?? []) {
+          if (cell.model?.type === 'markdown' && cell.rendered) {
+            cell.rendered = false;
+            cell.rendered = true;
+          }
+        }
+      }
+    }
+  });
+}
+
+export async function setTerminalTitle(page: Page, title: string) {
+  const terminal = page.locator('.jp-Terminal-body');
+  await terminal.waitFor();
+  await terminal.focus();
+  if (process.platform === 'win32') {
+    const escapedTitle = title.replace(/"/g, '""').replace(/'/g, "''");
+    // `host.UI.RawUI.WindowTitle` works on PowerShell, `title` works on cmd.exe
+    await page.keyboard.type(
+      `powershell -Command "\"$host.UI.RawUI.WindowTitle='${escapedTitle}'\"" 2>nul || title ${escapedTitle}`
+    );
+  } else {
+    // Linux and Mac
+    const escapedTitle = title.replace(/'/g, `'\\''`);
+    await page.keyboard.type(
+      `PROMPT_COMMAND='printf "\\033]0;${escapedTitle}\\007"'`
+    );
+  }
+  await page.keyboard.press('Enter');
+}

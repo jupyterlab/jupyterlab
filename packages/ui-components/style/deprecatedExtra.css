@@ -1,0 +1,45 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/**
+ * (DEPRECATED) Support for consuming icons as CSS background images
+ */
+
+.jp-Icon,
+.jp-MaterialIcon {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  min-width: 16px;
+  min-height: 16px;
+}
+
+.jp-Icon-cover {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/**
+ * (DEPRECATED) Support for specific CSS icon sizes
+ */
+
+.jp-Icon-16 {
+  background-size: 16px;
+  min-width: 16px;
+  min-height: 16px;
+}
+
+.jp-Icon-18 {
+  background-size: 18px;
+  min-width: 18px;
+  min-height: 18px;
+}
+
+.jp-Icon-20 {
+  background-size: 20px;
+  min-width: 20px;
+  min-height: 20px;
+}

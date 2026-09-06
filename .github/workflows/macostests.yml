@@ -1,0 +1,49 @@
+name: macOS Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  macostests:
+    name: macOS
+    strategy:
+      matrix:
+        group: [integrity, python, usage, usage2]
+        python-version: ["3.14"]
+      fail-fast: false
+    timeout-minutes: 45
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        with:
+          python_package_manager: "uv pip"
+
+      - name: Setup firefox
+        run: brew install --cask firefox
+
+      - name: Install dependencies
+        env:
+          GROUP: ${{ matrix.group }}
+        run: |
+          bash ./scripts/ci_install.sh
+
+      - name: Run test ${{ matrix.group }}
+        env:
+          GROUP: ${{ matrix.group }}
+          JLAB_BROWSER_TYPE: webkit
+        run: |
+          bash ./scripts/ci_script.sh

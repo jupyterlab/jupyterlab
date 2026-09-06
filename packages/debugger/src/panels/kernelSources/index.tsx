@@ -1,0 +1,83 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+import * as React from 'react';
+import { ReactWidget } from '@jupyterlab/apputils';
+
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+
+import { PanelWithToolbar } from '@jupyterlab/ui-components';
+
+import type { IDebugger } from '../../tokens';
+
+import { KernelSourcesBody } from './body';
+import { KernelSourcesFilter } from './filter';
+
+/**
+ * A Panel that shows a preview of the source code while debugging.
+ */
+export class KernelSources extends PanelWithToolbar {
+  /**
+   * Instantiate a new Sources preview Panel.
+   *
+   * @param options The Sources instantiation options.
+   */
+  constructor(options: KernelSources.IOptions) {
+    super();
+    const { model, service } = options;
+    this._model = model;
+    const trans = (options.translator ?? nullTranslator).load('jupyterlab');
+    this.title.label = trans.__('Kernel Sources');
+    this.toolbar.addClass('jp-DebuggerKernelSources-header');
+    this.toolbar.node.setAttribute(
+      'aria-label',
+      trans.__('Kernel sources panel toolbar')
+    );
+    this._body = new KernelSourcesBody({
+      service,
+      model,
+      translator: options.translator
+    });
+
+    this.toolbar.addItem(
+      'filter',
+      ReactWidget.create(<KernelSourcesFilter model={model} trans={trans} />)
+    );
+
+    this.addClass('jp-DebuggerKernelSources-header');
+    this.addWidget(this._body);
+    this.addClass('jp-DebuggerKenelSources');
+  }
+
+  public set filter(filter: string) {
+    this._model.filter = filter;
+  }
+
+  private _model: IDebugger.Model.IKernelSources;
+  private _body: KernelSourcesBody;
+}
+
+/**
+ * A namespace for `Sources` statics.
+ */
+export namespace KernelSources {
+  /**
+   * The options used to create a Sources.
+   */
+  export interface IOptions {
+    /**
+     * The debugger service.
+     */
+    service: IDebugger;
+
+    /**
+     * The model for the sources.
+     */
+    model: IDebugger.Model.IKernelSources;
+
+    /**
+     * The application language translator
+     */
+    translator?: ITranslator;
+  }
+}

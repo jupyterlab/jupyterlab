@@ -1,0 +1,159 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.cm-editor {
+  line-height: var(--jp-code-line-height);
+  font-size: var(--jp-code-font-size);
+  font-family: var(--jp-code-font-family);
+  border: 0;
+  border-radius: 0;
+  height: auto;
+
+  /* Changed to auto to autogrow */
+}
+
+/* Suppress automatic focus indicator outline */
+.cm-editor.cm-focused {
+  outline: unset;
+}
+
+.cm-editor pre {
+  padding: 0 var(--jp-code-padding);
+}
+
+.jp-CodeMirrorEditor[data-type='inline'] .cm-dialog {
+  background-color: var(--jp-layout-color0);
+  color: var(--jp-content-font-color1);
+}
+
+.jp-CodeMirrorEditor {
+  cursor: text;
+}
+
+/* When zoomed out 67% and 33% on a screen of 1440 width x 900 height */
+@media screen and (width >= 2138px) and (width <= 4319px) {
+  .jp-CodeMirrorEditor[data-type='inline'] .cm-cursor {
+    border-left: var(--jp-code-cursor-width1) solid
+      var(--jp-editor-cursor-color);
+  }
+}
+
+/* When zoomed out less than 33% */
+@media screen and (width >= 4320px) {
+  .jp-CodeMirrorEditor[data-type='inline'] .cm-cursor {
+    border-left: var(--jp-code-cursor-width2) solid
+      var(--jp-editor-cursor-color);
+  }
+}
+
+/* stylelint-disable selector-max-class */
+
+/* We need all this classes for higher specificity to override CodeMirror's rule */
+.cm-editor.jp-mod-readOnly > .cm-scroller > .cm-cursorLayer .cm-cursor {
+  display: none;
+}
+
+/* stylelint-enable selector-max-class */
+
+.jp-CollaboratorCursor {
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: none;
+  border-bottom: 3px solid;
+  background-clip: content-box;
+  margin-left: -5px;
+  margin-right: -5px;
+}
+
+.cm-builtin {
+  color: var(--jp-mirror-editor-builtin-color);
+}
+
+.cm-searching,
+.cm-searching span {
+  /* `.cm-searching span`: we need to override syntax highlighting */
+  background-color: var(--jp-search-unselected-match-background-color);
+  color: var(--jp-search-unselected-match-color);
+}
+
+.cm-searching::selection,
+.cm-searching span::selection {
+  background-color: var(--jp-search-unselected-match-background-color);
+  color: var(--jp-search-unselected-match-color);
+}
+
+.jp-current-match.cm-searching,
+.jp-current-match > .cm-searching,
+.jp-current-match > .cm-searching span,
+.cm-searching > .jp-current-match,
+.cm-searching > .jp-current-match span {
+  background-color: var(--jp-search-selected-match-background-color);
+  color: var(--jp-search-selected-match-color);
+}
+
+.jp-current-match > .cm-searching::selection,
+.jp-current-match > .cm-searching span::selection,
+.cm-searching > .jp-current-match::selection,
+.cm-searching > .jp-current-match span::selection {
+  background-color: var(--jp-search-selected-match-background-color);
+  color: var(--jp-search-selected-match-color);
+}
+
+.jp-CollaboratorCursor-hover {
+  position: absolute;
+  z-index: 1;
+  transform: translateX(-50%);
+  color: white;
+  border-radius: 3px;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  text-align: center;
+  font-size: var(--jp-ui-font-size1);
+  white-space: nowrap;
+}
+
+.jp-CodeMirror-ruler {
+  border-left: 1px dashed var(--jp-border-color2);
+}
+
+/* Styles for shared cursors (remote cursor locations and selected ranges) */
+.jp-CodeMirrorEditor .cm-ySelectionCaret {
+  position: relative;
+  border-left: 1px solid black;
+  margin-left: -1px;
+  margin-right: -1px;
+  box-sizing: border-box;
+}
+
+.jp-CodeMirrorEditor .cm-ySelectionCaret > .cm-ySelectionInfo {
+  white-space: nowrap;
+  position: absolute;
+  top: -1.15em;
+  padding-bottom: 0.05em;
+  left: -1px;
+  /* stylelint-disable-next-line declaration-property-value-allowed-list */
+  font-size: 0.95em;
+  font-family: var(--jp-ui-font-family);
+  font-weight: bold;
+  line-height: normal;
+  user-select: none;
+  color: white;
+  padding-left: 2px;
+  padding-right: 2px;
+  z-index: 101;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.jp-CodeMirrorEditor .cm-ySelectionInfo {
+  transition-delay: 0.7s;
+  opacity: 0;
+}
+
+.jp-CodeMirrorEditor .cm-ySelectionCaret:hover > .cm-ySelectionInfo {
+  opacity: 1;
+  transition-delay: 0s;
+}

@@ -1,0 +1,164 @@
+# project files
+coverage/
+.eslintcache
+.stylelintcache
+.prettiercache
+
+dev_mode/listings
+dev_mode/schemas
+dev_mode/static
+dev_mode/themes
+dev_mode/workspaces
+dev_mode/stats.json
+
+docs/_build
+docs/source/user/commands_list.md
+docs/source/extension/plugins_list.md
+docs/source/extension/tokens_list.md
+docs/source/api
+**/docs/source/_build
+
+examples/app/build
+examples/app/themes
+examples/app/schemas
+examples/**/static
+examples/federated/labextensions
+
+junit.xml
+
+jupyterlab/galata/@jupyterlab
+jupyterlab/geckodriver
+jupyterlab/static
+jupyterlab/schemas
+jupyterlab/themes
+jupyterlab/style.js
+jupyterlab/tests/**/static
+jupyterlab/tests/**/labextension
+
+ui-tests/test-output
+
+# Remove after next release
+jupyterlab/imports.css
+
+packages/codemirror/test/foo*.js
+packages/nbconvert-css/style/
+packages/services/examples/node/config.json
+packages/services/examples/browser/tmp
+packages/theme-*/static
+
+tests/**/coverage
+tests/**/.cache-loader
+
+# galata
+galata/benchmark-results
+galata/playwright-report
+galata/test-results
+galata/*benchmark-expected.json
+
+package_json.tar.gz
+
+# javascript/typescript
+lib
+node_modules
+
+*.tsbuildinfo
+lerna-debug.log
+yarn-error.log
+
+# python
+.cache
+*.py[co]
+.pytest_cache
+__pycache__
+*.egg-info
+.ipynb_checkpoints
+pip-wheel-metadata
+Pipfile
+Pipfile.lock
+venv/
+
+# xeus-python debug logs
+xpython_debug_logs
+xeus.log
+
+build
+dist
+
+MANIFEST
+
+# misc
+*~
+*.bak
+*.map
+*.swp
+.DS_Store
+.log/
+\#*#
+.#*
+
+*.swp
+*.map
+
+coverage/
+tests/**/coverage
+tests/**/.cache-loader
+docs/_build
+docs/api
+docs/source/_build
+packages/services/examples/node/config.json
+examples/app/build
+examples/app/themes
+examples/app/schemas
+iframe_figures/
+
+lerna-debug.log
+yarn-error.log
+
+# yarn >=2.x local files
+.yarn/*
+.pnp.*
+jupyterlab/staging/.yarn/*
+jupyterlab/staging/.pnp.*
+jupyterlab/tests/mock_packages/test-hyphens-underscore/.yarn/*
+jupyterlab/tests/mock_packages/test-hyphens-underscore/.pnp/*
+jupyterlab/tests/mock_packages/test_no_hyphens/.yarn/*
+jupyterlab/tests/mock_packages/test_no_hyphens/.pnp/*
+jupyterlab/tests/mock_packages/test-hyphens/.yarn/*
+
+# copied changelog file
+docs/source/getting_started/changelog.md
+
+junit.xml
+
+*.tsbuildinfo
+
+# jetbrains IDE stuff
+*.iml
+.idea/
+
+# ms IDE stuff
+*.code-workspace
+.history
+.vscode/*
+!.vscode/extension.json
+
+.jupyter_releaser_checkout
+
+# generated LSP interfaces
+packages/lsp/src/_*
+
+# generated reports
+webpack-bundle-analyzer.html
+examples/**/test-results/
+
+# untitled (default name) files
+Untitled*.ipynb
+untitled*.md
+untitled*.py
+untitled*.txt
+
+# pixi environments
+.pixi
+
+# temporary files, useful for testing
+tmp
