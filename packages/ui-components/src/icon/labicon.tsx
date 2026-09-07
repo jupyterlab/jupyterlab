@@ -465,6 +465,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
           title,
           slot,
           tag = 'div',
+          'aria-hidden': ariaHidden,
           ...styleProps
         }: LabIcon.IProps = { ...this._props, ...props };
 
@@ -502,7 +503,8 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
                 ? classes(className, LabIconStyle.styleClass(styleProps))
                 : undefined,
             title: title,
-            slot: slot
+            slot: slot,
+            'aria-hidden': ariaHidden
           });
         }
 
@@ -533,7 +535,8 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
                   ? classes(className, LabIconStyle.styleClass(styleProps))
                   : undefined,
               title: title,
-              slot: slot
+              slot: slot,
+              'aria-hidden': ariaHidden
             };
           }
           return (
@@ -724,6 +727,11 @@ export namespace LabIcon {
      * Optional slot property to specify the position of the icon in the template
      */
     slot?: string | null;
+
+    /**
+     * Optional aria-hidden attribute for accessibility
+     */
+    'aria-hidden'?: boolean | 'true' | 'false';
   }
 
   export interface IResolverProps {
