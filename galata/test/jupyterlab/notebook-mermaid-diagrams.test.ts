@@ -60,7 +60,23 @@ const PIXEL_DIFF_THRESHOLD: Record<string, number> = {
  */
 async function resizePageAndScreenshot(locator: Locator) {
   const page = locator.page();
-  const box = await locator.boundingBox();
+
+  let previousBox = await locator.boundingBox();
+  for (let i = 0; i < 3; i++) {
+    await page.waitForTimeout(100);
+    const currentBox = await locator.boundingBox();
+    if (
+      currentBox &&
+      previousBox &&
+      currentBox.width === previousBox.width &&
+      currentBox.height === previousBox.height
+    ) {
+      break;
+    }
+    previousBox = currentBox;
+  }
+
+  const box = previousBox!;
   const originalSize = page.viewportSize();
   if (box.width > originalSize.width || box.height > originalSize.height) {
     const scaleFactor = Math.max(
@@ -72,16 +88,10 @@ async function resizePageAndScreenshot(locator: Locator) {
       height: Math.ceil(box.height * scaleFactor)
     });
   }
-  // Wait for next animation frame (next rendering cycle)
-  await page.evaluate(() => {
-    return new Promise<void>(resolve => {
-      requestAnimationFrame(() => resolve());
-    });
-  });
-  const screenshot = await locator.screenshot();
-  await page.setViewportSize(originalSize);
-  return screenshot;
+
+  return locator.screenshot();
 }
+
 
 for (const theme of ['default', 'dark']) {
   const dark = theme === 'dark';
