@@ -1817,16 +1817,15 @@ export class RestContentProvider implements IContentProvider {
     options?: Contents.IFetchOptions
   ): Promise<Contents.IModel> {
     let url = this._getUrl(localPath);
-    if (options) {
-      // The notebook type cannot take a format option.
-      if (options.type === 'notebook') {
-        delete options['format'];
-      }
-      const content = options.content ? '1' : '0';
-      const hash = options.hash ? '1' : '0';
-      const params: PartialJSONObject = { ...options, content, hash };
-      url += URLExt.objectToQueryString(params);
+
+    // The notebook type cannot take a format option.
+    if (options && options.type === 'notebook') {
+      delete options['format'];
     }
+    const content = options?.content ? '1' : '0';
+    const hash = options?.hash ? '1' : '0';
+    const params: PartialJSONObject = { ...options, content, hash };
+    url += URLExt.objectToQueryString(params);
 
     const settings = this._options.serverSettings;
     const response = await ServerConnection.makeRequest(url, {}, settings);

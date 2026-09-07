@@ -8,6 +8,26 @@
 
 ## JupyterLab 4.6 to 4.7 (not released yet)
 
+### Default content provider
+
+When fetching a file without explicitly setting the `content` option, **no file content is returned**
+by default. This affects the entire call chain: `ContentsManager.get()` → `DefaultDrive.get()` →
+`RestContentProvider.get()`. Previously, omitting `options` (or omitting the `content` field) caused
+no query parameter to be sent, so the Jupyter Server fell back to its own default and returned the
+full file body. Now `content=0` is always sent unless you opt in explicitly.
+
+If your extension reads file content via `ContentsManager`, pass `{ content: true }` explicitly:
+
+```ts
+// Before (accidentally returned content via server default)
+const model = await contentsManager.get(path);
+
+// After (request content explicitly)
+const model = await contentsManager.get(path, { content: true });
+```
+
+The same applies if you call `DefaultDrive.get()` or `RestContentProvider.get()` directly.
+
 ### API updates
 
 - Xterm.js, used by `@jupyterlab/terminal`, was upgraded from 5.x to 6.x, along with the
