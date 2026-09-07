@@ -6,8 +6,13 @@
   "jupyter.lab.menus": {
     "context": [
       {
+        "command": "markdownviewer:copy",
+        "selector": ".jp-MarkdownViewer",
+        "rank": 0
+      },
+      {
         "command": "markdownviewer:edit",
-        "selector": ".jp-RenderedMarkdown"
+        "selector": ".jp-MarkdownViewer"
       }
     ]
   },

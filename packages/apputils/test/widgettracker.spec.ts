@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { WidgetTracker } from '@jupyterlab/apputils';
+import { type IRestorable, StateDB } from '@jupyterlab/statedb';
 import { signalToPromise, testEmission } from '@jupyterlab/testing';
 import { CommandRegistry } from '@lumino/commands';
 import { Panel, Widget } from '@lumino/widgets';
@@ -436,53 +437,107 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#restore()', () => {
-      function createRestoreOptions() {
-        const connector = {
-          fetch: jest.fn(async () => undefined),
-          list: jest.fn(async () => ({ ids: [], values: [] })),
-          remove: jest.fn(async () => undefined),
-          save: jest.fn(async () => undefined)
-        };
+      let state: StateDB;
+      let widgets: Widget[];
 
+      beforeEach(() => {
+        state = new StateDB();
+        widgets = [];
+      });
+
+      afterEach(() => {
+        widgets.forEach(widget => widget.dispose());
+      });
+
+      function createRestoreOptions(
+        connector: StateDB = state
+      ): IRestorable.IOptions<Widget> {
+        const registry = new CommandRegistry();
+        registry.addCommand('test:restore', {
+          execute: async args => {
+            if (typeof args.id !== 'string' || typeof args.label !== 'string') {
+              throw new Error('Invalid saved widget');
+            }
+            const widget = createWidget();
+            widget.id = args.id;
+            widget.title.label = args.label;
+            widgets.push(widget);
+            await tracker.add(widget);
+          }
+        });
         return {
           command: 'test:restore',
           connector,
           name: (widget: Widget) => widget.id,
-          registry: new CommandRegistry()
+          args: (widget: Widget) => ({
+            id: widget.id,
+            label: widget.title.label
+          }),
+          registry
         };
       }
 
-      it('should restore with the supplied options', async () => {
-        const options = createRestoreOptions();
+      it('should recreate and track widgets from saved command arguments', async () => {
+        const data = { id: 'saved-widget', label: 'Saved title' };
+        await state.save(`${namespace}:${data.id}`, { data });
+        await state.save('another-tracker:ignored', {
+          data: { id: 'ignored', label: 'Another tracker' }
+        });
 
-        await tracker.restore(options);
+        await tracker.restore(createRestoreOptions());
 
-        expect(options.connector.list).toHaveBeenCalledTimes(1);
-        expect(options.connector.list).toHaveBeenCalledWith(namespace);
+        expect(tracker.size).toBe(1);
+        const widget = tracker.find(widget => widget.id === data.id);
+        expect(widget).toBe(widgets[0]);
+        expect(widget?.title.label).toBe(data.label);
+        expect(await state.fetch(`${namespace}:${data.id}`)).toEqual({ data });
         await expect(tracker.restored).resolves.toBeUndefined();
       });
 
       it('should prefer deferred options', async () => {
-        const deferred = createRestoreOptions();
-        const supplied = createRestoreOptions();
+        const suppliedState = new StateDB();
+        await state.save(`${namespace}:deferred`, {
+          data: { id: 'deferred', label: 'Deferred widget' }
+        });
+        await suppliedState.save(`${namespace}:supplied`, {
+          data: { id: 'supplied', label: 'Supplied widget' }
+        });
 
-        tracker.defer(deferred);
-        await tracker.restore(supplied);
+        tracker.defer(createRestoreOptions());
+        expect(tracker.size).toBe(0);
+        await tracker.restore(createRestoreOptions(suppliedState));
 
-        expect(deferred.connector.list).toHaveBeenCalledTimes(1);
-        expect(supplied.connector.list).not.toHaveBeenCalled();
+        expect(tracker.size).toBe(1);
+        expect(
+          tracker.find(widget => widget.id === 'deferred')?.title.label
+        ).toBe('Deferred widget');
+        expect(
+          tracker.find(widget => widget.id === 'supplied')
+        ).toBeUndefined();
       });
 
       it('should consume deferred options only once', async () => {
-        const deferred = createRestoreOptions();
-        const warning = jest.spyOn(console, 'warn').mockImplementation(() => {});
+        await state.save(`${namespace}:deferred`, {
+          data: { id: 'deferred', label: 'Deferred widget' }
+        });
+        const warning = jest
+          .spyOn(console, 'warn')
+          .mockImplementation(() => {});
 
         try {
-          tracker.defer(deferred);
+          tracker.defer(createRestoreOptions());
           await tracker.restore();
+          expect(tracker.size).toBe(1);
+          const restoredWidget = tracker.find(
+            widget => widget.id === 'deferred'
+          );
           await expect(tracker.restore()).resolves.toBeUndefined();
 
-          expect(deferred.connector.list).toHaveBeenCalledTimes(1);
+          expect(tracker.size).toBe(1);
+          expect(widgets).toHaveLength(1);
+          expect(tracker.find(widget => widget.id === 'deferred')).toBe(
+            restoredWidget
+          );
           expect(warning).toHaveBeenCalledTimes(1);
           expect(warning).toHaveBeenCalledWith(
             'No options provided to restore the tracker.'
@@ -492,8 +547,28 @@ describe('@jupyterlab/apputils', () => {
         }
       });
 
+      it('should remove failed restore records while retaining successful widgets', async () => {
+        await state.save(`${namespace}:invalid`, { data: { id: 'invalid' } });
+        await state.save(`${namespace}:missing-data`, {});
+        const data = { id: 'valid', label: 'Valid widget' };
+        await state.save(`${namespace}:valid`, { data });
+
+        await tracker.restore(createRestoreOptions());
+
+        expect(tracker.size).toBe(1);
+        expect(tracker.find(widget => widget.id === data.id)?.title.label).toBe(
+          data.label
+        );
+        expect(await state.fetch(`${namespace}:invalid`)).toBeUndefined();
+        expect(await state.fetch(`${namespace}:missing-data`)).toBeUndefined();
+        expect(await state.fetch(`${namespace}:valid`)).toEqual({ data });
+        await expect(tracker.restored).resolves.toBeUndefined();
+      });
+
       it('should warn when no options are available', async () => {
-        const warning = jest.spyOn(console, 'warn').mockImplementation(() => {});
+        const warning = jest
+          .spyOn(console, 'warn')
+          .mockImplementation(() => {});
 
         try {
           await expect(tracker.restore()).resolves.toBeUndefined();

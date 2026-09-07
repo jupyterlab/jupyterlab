@@ -22,6 +22,8 @@ test.describe('Notebook Footer Responsive Alignment', () => {
 
     // Hover to make the footer visible
     await footer.hover();
+    // allow the hover-triggered opacity change to render before taking the screenshot
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(200);
 
     const imageName = 'footer-alignment.png';

@@ -29,7 +29,7 @@ export class ModalCommandPalette extends Panel {
       if (this.isAttached && this.isVisible) {
         this.hideAndReset();
       }
-    });
+    }, this);
     // required to properly receive blur and focus events;
     // selection of items with mouse may not work without this.
     this.node.tabIndex = 0;

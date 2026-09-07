@@ -181,12 +181,16 @@ test.describe('General', () => {
 
     await page.click('.jp-PropertyInspector >> text=Common Tools');
 
-    // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18460
+    // Settling the kernel before the snapshot: `language_info` and `kernelspec`
+    // are written to the notebook metadata when it resolves, and each write
+    // rebuilds the form below.
     await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 
-    await expect(
-      page.locator('.jp-ActiveCellTool .jp-InputPrompt')
-    ).not.toBeEmpty();
+    // Asserted positively: `not.toBeEmpty()` also passes when the element is
+    // missing altogether.
+    await expect(page.locator('.jp-ActiveCellTool .jp-InputPrompt')).toHaveText(
+      '[ ]:'
+    );
     await expect(
       page.locator('.jp-ActiveCellTool .jp-InputPrompt')
     ).not.toHaveClass(/lm-mod-hidden/);
@@ -255,33 +259,31 @@ test.describe('General', () => {
     expect(newNotebookMetadata).toContain('"base_numbering":3');
 
     // Test the active cell widget
-    await expect(
-      page.locator('.jp-ActiveCellTool .jp-ActiveCellTool-Content pre')
-    ).toHaveText('Raw cell');
-    await expect(
-      page.locator('.jp-ActiveCellTool .jp-InputPrompt')
-    ).toHaveClass(/lm-mod-hidden/);
+    const activeCellPreview = page.locator(
+      '.jp-ActiveCellTool .jp-ActiveCellTool-Content pre'
+    );
+    const activeCellPrompt = page.locator('.jp-ActiveCellTool .jp-InputPrompt');
+
+    await expect(activeCellPreview).toHaveText('Raw cell');
+    await expect(activeCellPrompt).toHaveClass(/lm-mod-hidden/);
     await (await page.notebook.getCellInputLocator(1))?.click();
     await page.keyboard.type(' content');
-    await expect(
-      page.locator('.jp-ActiveCellTool .jp-ActiveCellTool-Content pre')
-    ).toHaveText('Raw cell content');
+    await expect(activeCellPreview).toHaveText('Raw cell content');
 
     await page.notebook.addCell('code', 'print("test")');
-    await expect(
-      page.locator('.jp-ActiveCellTool .jp-ActiveCellTool-Content pre')
-    ).toHaveText('print("test")');
-    await expect(
-      page.locator('.jp-ActiveCellTool .jp-InputPrompt')
-    ).not.toHaveClass(/lm-mod-hidden/);
-    await expect(page.locator('.jp-ActiveCellTool .jp-InputPrompt')).toHaveText(
-      '[ ]:'
-    );
+    await expect(activeCellPreview).toHaveText('print("test")');
+    await expect(activeCellPrompt).not.toHaveClass(/lm-mod-hidden/);
+    await expect(activeCellPrompt).toHaveText('[ ]:');
+
+    await page.notebook.selectCells(1);
+    await expect(activeCellPrompt).toHaveClass(/lm-mod-hidden/);
+
+    await page.notebook.selectCells(2);
+    await expect(activeCellPrompt).not.toHaveClass(/lm-mod-hidden/);
+    await expect(activeCellPrompt).toHaveText('[ ]:');
 
     await page.notebook.runCell(2, true);
-    await expect(page.locator('.jp-ActiveCellTool .jp-InputPrompt')).toHaveText(
-      '[1]:'
-    );
+    await expect(activeCellPrompt).toHaveText('[1]:');
   });
 
   test('File menu', async ({ page }) => {
@@ -485,6 +487,7 @@ test.describe('General', () => {
 
     if (testInfo.config.updateSnapshots !== 'none') {
       // Wait a bit for the map to load when updating the snapshots
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(300);
     }
 
@@ -607,6 +610,7 @@ test.describe('General', () => {
     await page.keyboard.press('Enter');
 
     // Wait for command answer
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(200);
 
     expect(await page.screenshot()).toMatchSnapshot('terminal_layout.png');

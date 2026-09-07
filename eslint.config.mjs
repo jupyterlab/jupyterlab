@@ -10,10 +10,38 @@ import jestPlugin from 'eslint-plugin-jest';
 import reactPlugin from 'eslint-plugin-react';
 import tsdocPlugin from 'eslint-plugin-tsdoc';
 import regexpPlugin from 'eslint-plugin-regexp';
+import playwrightPlugin from 'eslint-plugin-playwright';
 import prettierPluginRecommended from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
 import * as jsoncParser from 'jsonc-eslint-parser';
 import jupyterPlugin from '@jupyter/eslint-plugin';
+
+// Application-lifetime sender types for the signal lifetime rules. The
+// `longLivedTypes` option replaces the plugin's built-in list, so the twelve
+// defaults are restated here, followed by the kernel session types: a session
+// (and its context) outlives the widgets built on it, e.g. when one of
+// several views of a document is closed.
+const LONG_LIVED_TYPES = [
+  // Plugin defaults:
+  'CommandRegistry',
+  'IDebugger',
+  'IDocumentManager',
+  'ILSPConnection',
+  'ILabShell',
+  'ILanguageServerManager',
+  'IRenderMimeRegistry',
+  'ISettingRegistry',
+  'IShell',
+  'IStateDB',
+  'IThemeManager',
+  'ServiceManager',
+  // Kernel session types:
+  'ISessionContext',
+  'SessionContext',
+  'ISessionConnection',
+  'IKernelConnection',
+  'KernelConnection'
+];
 
 // Filter globals to remove any with leading/trailing whitespace
 const cleanGlobals = globalsObj => {
@@ -240,7 +268,21 @@ export default defineConfig([
       'jupyter/plugin-description': 'error',
       'jupyter/token-format': 'error',
       'jupyter/no-translation-concatenation': 'error',
+      'jupyter/no-dynamic-translation': 'error',
+      'jupyter/incorrect-translator-usage': 'error',
       'jupyter/no-untranslated-string': 'error',
+      'jupyter/no-pageconfig-base-url': 'error',
+      'jupyter/require-signal-cleanup': [
+        'error',
+        { longLivedTypes: LONG_LIVED_TYPES }
+      ],
+      'jupyter/require-signal-this-arg': 'error',
+      'jupyter/prefer-signal-this-arg': [
+        'error',
+        { longLivedTypes: LONG_LIVED_TYPES }
+      ],
+      'jupyter/require-disposable-ownership': 'error',
+      'jupyter/require-disposable-transfer': 'error',
       'tsdoc/syntax': 'warn',
       'jupyter/require-soft-assertions-before-snapshots': 'error',
       '@typescript-eslint/naming-convention': [
@@ -414,16 +456,6 @@ export default defineConfig([
           memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
           allowSeparatedGroups: false
         }
-      ],
-
-      'no-restricted-syntax': [
-        'error',
-        {
-          selector:
-            'CallExpression[callee.type="MemberExpression"][callee.object.name="PageConfig"][callee.property.name="getBaseUrl"]',
-          message:
-            'PageConfig.getBaseUrl() should only be called in makeSettings() function and in tests/examples'
-        }
       ]
     },
 
@@ -459,8 +491,6 @@ export default defineConfig([
       '**/*.spec.tsx',
       '**/test/**/*.ts',
       '**/test/**/*.tsx',
-      '**/tests/**/*.ts',
-      '**/tests/**/*.tsx',
       'testutils/**/*.ts',
       'testutils/**/*.tsx',
       'galata/test/**/*.ts',
@@ -477,7 +507,6 @@ export default defineConfig([
       '**/*.spec.ts',
       '**/*.spec.tsx',
       '**/test/**/*.ts',
-      '**/tests/**/*.ts',
       'examples/**/*.ts',
       'packages/*/examples/**/*.ts',
       'packages/services/src/serverconnection.ts',
@@ -485,15 +514,42 @@ export default defineConfig([
     ],
 
     rules: {
-      'no-restricted-syntax': 'off',
+      'jupyter/no-pageconfig-base-url': 'off',
       'jupyter/command-described-by': 'off',
       'jupyter/no-untranslated-string': 'off'
     }
   },
   {
-    files: ['galata/test/**/*.ts', 'galata/test/**/*.tsx'],
+    // Disposables created in a test are torn down with the jest environment,
+    // and the example applications keep theirs for the lifetime of the page,
+    // so neither has an owner to hand them to.
+    files: [
+      '**/*.spec.ts',
+      '**/*.spec.tsx',
+      '**/test/**/*.ts',
+      '**/test/**/*.tsx',
+      'packages/*/src/testutils.ts',
+      'testutils/**/*.ts',
+      'examples/**/*.ts',
+      'examples/**/*.tsx',
+      'packages/*/examples/**/*.ts',
+      'packages/*/examples/**/*.tsx'
+    ],
 
     rules: {
+      'jupyter/require-disposable-ownership': 'off',
+      'jupyter/require-disposable-transfer': 'off'
+    }
+  },
+  {
+    files: ['galata/test/**/*.ts', 'galata/test/**/*.tsx'],
+    plugins: { playwright: playwrightPlugin, jupyter: jupyterPlugin },
+    rules: {
+      // A warning while the documentation and benchmark tests, which drive the
+      // file browser by hand to take their screenshots, are migrated to the
+      // helpers.
+      'jupyter/galata-prefer-filebrowser-helper': 'warn',
+      // Custom Galata guards not covered by eslint-plugin-playwright.
       'no-restricted-syntax': [
         'error',
         {
@@ -508,7 +564,12 @@ export default defineConfig([
           message:
             "Do not use test.describe.configure({ mode: 'serial' }). Tests should run in parallel for better performance and to allow updating all snapshots at once."
         }
-      ]
+      ],
+      'playwright/no-wait-for-timeout': 'error',
+      'playwright/no-element-handle': 'error',
+      'playwright/no-networkidle': 'error',
+      'playwright/prefer-to-have-count': 'error',
+      'playwright/prefer-web-first-assertions': 'error'
     }
   },
   {

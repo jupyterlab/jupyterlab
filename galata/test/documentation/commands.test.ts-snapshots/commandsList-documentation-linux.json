@@ -90,6 +90,16 @@
     }
   },
   {
+    "id": "application:copy-image",
+    "label": "Copy Image",
+    "caption": "Copy image to clipboard",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "application:move-widget",
     "label": "Move Widget",
     "caption": "",
@@ -3862,6 +3872,16 @@
   {
     "id": "mainmenu:open-first",
     "label": "Open First Menu",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "markdownviewer:copy",
+    "label": "Copy",
     "caption": "",
     "shortcuts": [],
     "args": {
