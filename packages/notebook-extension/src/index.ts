@@ -2477,6 +2477,19 @@ function activateNotebookHandler(
           widget.context.path,
           { contentsReadOnly, modelReadOnly }
         );
+
+        // Intercept kernel start for view-only notebooks
+        const sessionContext = widget.context.sessionContext;
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          shouldStart: false,
+          canStart: false,
+          autoStartDefault: false
+        };
+        // Safety net in case a kernel started already
+        if (sessionContext.session?.kernel) {
+          void sessionContext.shutdown();
+        }
       }
       updateNotebookViewOnlyFromContext(widget);
 
