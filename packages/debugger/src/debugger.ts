@@ -134,6 +134,10 @@ export namespace Debugger {
     export const executeConsole = 'debugger:run-in-console';
 
     export const openSource = 'debugger:open-source';
+
+    export const openKernelSource = 'debugger:open-kernel-source';
+
+    export const copyKernelSourcePath = 'debugger:copy-kernel-source-path';
   }
 
   /**
