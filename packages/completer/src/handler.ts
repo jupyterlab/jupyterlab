@@ -488,17 +488,6 @@ export class CompletionHandler implements IDisposable {
     }
 
     const line = editor.getLine(position.line);
-    if (
-      trigger === InlineCompletionTriggerKind.Automatic &&
-      (typeof line === 'undefined' ||
-        line.slice(0, position.column).match(/^\s*$/))
-    ) {
-      // In Automatic mode we only auto-trigger on the end of line (and not on the beginning).
-      // Increase the counter to avoid out-of date replies when pressing Backspace quickly.
-      this._fetchingInline += 1;
-      return;
-    }
-
     let isMiddleOfLine = false;
 
     if (typeof line !== 'undefined' && position.column < line.length) {
