@@ -2470,7 +2470,7 @@ function activateNotebookHandler(
     for (const cell of panel.content.widgets) {
       cell.viewOnly = viewOnly;
     }
-
+    panel.content.viewOnly = viewOnly;
     panel.content.node.classList.toggle('jp-mod-view-only', viewOnly);
   }
 
