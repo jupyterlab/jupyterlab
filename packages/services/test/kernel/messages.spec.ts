@@ -79,6 +79,8 @@ describe('kernel/messages', () => {
       const replies: KernelMessage.IExecuteReplyMsg['content'][] = [
         { status: 'abort' },
         { status: 'aborted' },
+        { status: 'abort', execution_count: 1 },
+        { status: 'aborted', execution_count: 1 },
         {
           status: 'error',
           execution_count: 1,
@@ -107,7 +109,7 @@ describe('kernel/messages', () => {
         traceback: []
       };
 
-      expect(replies).toHaveLength(4);
+      expect(replies).toHaveLength(6);
       expect(invalidReply.status).toBe('ok');
       expect(invalidError.status).toBe('error');
     });

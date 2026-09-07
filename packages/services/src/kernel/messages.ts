@@ -1172,7 +1172,8 @@ export interface IExecuteReply extends IExecuteReplyBase {
 export type IExecuteReplyContent =
   | IExecuteReply
   | (IReplyErrorContent & IExecuteCount)
-  | IReplyAbortContent;
+  | IReplyAbortContent
+  | (IReplyAbortContent & IExecuteCount);
 
 /**
  * An `'execute_reply'` message on the `'stream'` channel.

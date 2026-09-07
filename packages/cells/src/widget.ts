@@ -1858,6 +1858,8 @@ export namespace CodeCell {
       const msg = (await msgPromise)!;
       if ('execution_count' in msg.content) {
         model.executionCount = msg.content.execution_count;
+      } else {
+        model.executionState = 'idle';
       }
       if (recordTiming) {
         const timingInfo = Object.assign(

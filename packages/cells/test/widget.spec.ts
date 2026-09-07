@@ -23,6 +23,7 @@ import { NBTestUtils } from '@jupyterlab/cells/lib/testutils';
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
 import { defaultRenderMime } from '@jupyterlab/rendermime/lib/testutils';
+import { KernelMessage } from '@jupyterlab/services';
 import {
   framePromise,
   JupyterServer,
@@ -922,6 +923,29 @@ describe('cells/widget', () => {
         await CodeCell.execute(widget, sessionContext);
         const executionCount = widget.model.executionCount;
         expect(executionCount).not.toEqual(originalCount);
+      });
+
+      it('should return to idle after an uncounted aborted reply', async () => {
+        const widget = new CodeCell({
+          model,
+          rendermime,
+          contentFactory,
+          placeholder: false
+        });
+        widget.initializeState();
+        widget.model.sharedModel.setSource('foo');
+        const reply =
+          KernelMessage.createMessage<KernelMessage.IExecuteReplyMsg>({
+            msgType: 'execute_reply',
+            channel: 'shell',
+            session: 'baz',
+            content: { status: 'aborted' }
+          });
+        jest.spyOn(OutputArea, 'execute').mockResolvedValueOnce(reply);
+
+        await CodeCell.execute(widget, sessionContext);
+
+        expect(widget.model.executionState).toBe('idle');
       });
 
       const TIMING_KEYS = [
