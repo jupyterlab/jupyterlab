@@ -46,7 +46,10 @@ export class HistoryInlineCompletionProvider implements IInlineCompletionProvide
       default: {
         // make this provider opt-in
         enabled: false,
-        maxSuggestions: 100
+        maxSuggestions: 100,
+        // Each fetch sends a `history_request` to the kernel, so wait until
+        // the user stops typing instead of querying on every key press.
+        debouncerDelay: 250
       }
     };
   }
