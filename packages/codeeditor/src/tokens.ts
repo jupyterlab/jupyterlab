@@ -24,6 +24,46 @@ export const COMPLETER_LINE_BEGINNING_CLASS: string =
   'jp-mod-at-line-beginning';
 
 /**
+ * The `data-*` attribute (on `document.documentElement`) listing which
+ * completer contexts (see `COMPLETER_TAB_CONTEXTS`) currently have `Tab`
+ * live-bound to their `completer:invoke-*` command, space-separated.
+ *
+ * This lets the stateless editor keymap (which has no access to the live
+ * command registry) defer to the completer only when something is actually,
+ * presently bound to `Tab` for the relevant context, instead of guessing
+ * from cursor state alone.
+ */
+export const COMPLETER_TAB_CONTEXTS_ATTRIBUTE = 'completerTabContexts';
+
+/**
+ * The known completer contexts and how to recognize each one: the command
+ * that invokes completion there, and a selector matching that context's
+ * outer scope. Kept as a single source of truth for both the writer (which
+ * command to watch) and the reader (which ancestor identifies the context).
+ */
+export const COMPLETER_TAB_CONTEXTS: ReadonlyArray<{
+  key: string;
+  command: string;
+  scopeSelector: string;
+}> = [
+  {
+    key: 'notebook',
+    command: 'completer:invoke-notebook',
+    scopeSelector: '.jp-Notebook'
+  },
+  {
+    key: 'console',
+    command: 'completer:invoke-console',
+    scopeSelector: '.jp-CodeConsole'
+  },
+  {
+    key: 'file',
+    command: 'completer:invoke-file',
+    scopeSelector: '.jp-FileEditor'
+  }
+];
+
+/**
  * Code editor services token.
  */
 export const IEditorServices = new Token<IEditorServices>(

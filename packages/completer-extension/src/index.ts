@@ -9,7 +9,11 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { COMPLETER_ACTIVE_CLASS } from '@jupyterlab/codeeditor';
+import {
+  COMPLETER_ACTIVE_CLASS,
+  COMPLETER_TAB_CONTEXTS,
+  COMPLETER_TAB_CONTEXTS_ATTRIBUTE
+} from '@jupyterlab/codeeditor';
 import { CommandToolbarButton } from '@jupyterlab/ui-components';
 import type {
   IInlineCompleterSettings,
@@ -530,6 +534,46 @@ const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
 };
 
 /**
+ * Flags, via a `data-*` attribute on `document.documentElement`, which
+ * completer contexts (see `COMPLETER_TAB_CONTEXTS`) currently have `Tab`
+ * live-bound to their invoke command.
+ *
+ * The editor keymap that decides whether to insert a literal tab or defer
+ * to the completer (`indentMoreOrInsertTab`, in the stateless
+ * `@jupyterlab/codemirror` package) has no access to the live command
+ * registry. This plugin computes the one fact it actually needs — is Tab
+ * *currently* bound here, not merely "could completion apply here" — and
+ * publishes it as a cheap, always-current DOM read, recomputed only on the
+ * rare `keyBindingChanged` event rather than on every keystroke.
+ */
+const tabCompleterBridge: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/completer-extension:tab-bridge',
+  description:
+    'Tracks whether Tab is live-bound to invoke completion, for the stateless editor keymap to read.',
+  autoStart: true,
+  activate: (app: JupyterFrontEnd): void => {
+    const isBoundToTab = (commandID: string): boolean =>
+      app.commands.keyBindings.some(
+        binding =>
+          binding.command === commandID &&
+          binding.keys.length === 1 &&
+          binding.keys[0] === 'Tab'
+      );
+
+    const refresh = (): void => {
+      const contexts = COMPLETER_TAB_CONTEXTS.filter(({ command }) =>
+        isBoundToTab(command)
+      ).map(({ key }) => key);
+      document.documentElement.dataset[COMPLETER_TAB_CONTEXTS_ATTRIBUTE] =
+        contexts.join(' ');
+    };
+
+    refresh();
+    app.commands.keyBindingChanged.connect(refresh);
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<unknown>[] = [
@@ -537,6 +581,7 @@ const plugins: JupyterFrontEndPlugin<unknown>[] = [
   defaultProviders,
   inlineHistoryProvider,
   inlineCompleterFactory,
-  inlineCompleter
+  inlineCompleter,
+  tabCompleterBridge
 ];
 export default plugins;

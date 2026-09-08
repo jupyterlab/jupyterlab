@@ -15,8 +15,34 @@ import type { EditorState, Transaction } from '@codemirror/state';
 import {
   COMPLETER_ACTIVE_CLASS,
   COMPLETER_ENABLED_CLASS,
-  COMPLETER_LINE_BEGINNING_CLASS
+  COMPLETER_LINE_BEGINNING_CLASS,
+  COMPLETER_TAB_CONTEXTS,
+  COMPLETER_TAB_CONTEXTS_ATTRIBUTE
 } from '@jupyterlab/codeeditor';
+
+/**
+ * Whether `Tab` is actually, currently bound to invoke completion for the
+ * context `dom` sits in (see `COMPLETER_TAB_CONTEXTS`).
+ *
+ * This package has no access to the live command registry, so it can't
+ * check `app.commands.keyBindings` directly. `@jupyterlab/completer-extension`
+ * computes that fact for us and publishes it as a `data-*` attribute on
+ * `document.documentElement` (kept fresh via `keyBindingChanged`, not
+ * recomputed per keystroke) — this just reads it.
+ */
+function isTabClaimedByCompleter(dom: HTMLElement): boolean {
+  const boundContexts =
+    document.documentElement.dataset[COMPLETER_TAB_CONTEXTS_ATTRIBUTE]?.split(
+      ' '
+    ) ?? [];
+  if (boundContexts.length === 0) {
+    return false;
+  }
+  return COMPLETER_TAB_CONTEXTS.some(
+    ({ key, scopeSelector }) =>
+      boundContexts.includes(key) && dom.closest(scopeSelector)
+  );
+}
 
 /**
  * Selector for a widget that can run code.
@@ -55,7 +81,11 @@ export namespace StateCommands {
     let classList = target.dom.parentElement?.classList;
     let completerEnabled = classList?.contains(COMPLETER_ENABLED_CLASS);
     let lineBeggining = classList?.contains(COMPLETER_LINE_BEGINNING_CLASS);
-    if (completerEnabled && !lineBeggining) {
+    if (
+      completerEnabled &&
+      !lineBeggining &&
+      isTabClaimedByCompleter(target.dom)
+    ) {
       return false;
     }
 
