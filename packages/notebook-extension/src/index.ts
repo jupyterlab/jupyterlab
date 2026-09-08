@@ -2199,6 +2199,12 @@ function activateNotebookHandler(
       `${sideBySideOutputRatio}fr`
     );
 
+  const setScrolledOutputMaxHeight = (scrolledOutputMaxHeight: string) =>
+    document.documentElement.style.setProperty(
+      '--jp-cell-scrolled-output-max-height',
+      scrolledOutputMaxHeight
+    );
+
   // Fetch settings if possible.
   const fetchSettings = settingRegistry
     ? settingRegistry.load(trackerPlugin.id)
@@ -2489,6 +2495,9 @@ function activateNotebookHandler(
       showMinimap: settings.get('showMinimap').composite as boolean
     };
     setSideBySideOutputRatio(factory.notebookConfig.sideBySideOutputRatio);
+    setScrolledOutputMaxHeight(
+      settings.get('scrolledOutputMaxHeight').composite as string
+    );
     const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
       margin-left: ${factory.notebookConfig.sideBySideLeftMarginOverride} !important;
       margin-right: ${factory.notebookConfig.sideBySideRightMarginOverride} !important;
