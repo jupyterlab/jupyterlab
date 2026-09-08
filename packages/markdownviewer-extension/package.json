@@ -40,6 +40,7 @@
     "@jupyterlab/application": "^4.7.0-alpha.1",
     "@jupyterlab/apputils": "^4.8.0-alpha.1",
     "@jupyterlab/coreutils": "^6.7.0-alpha.1",
+    "@jupyterlab/documentsearch": "^4.7.0-alpha.1",
     "@jupyterlab/markdownviewer": "^4.7.0-alpha.1",
     "@jupyterlab/rendermime": "^4.7.0-alpha.1",
     "@jupyterlab/settingregistry": "^4.7.0-alpha.1",

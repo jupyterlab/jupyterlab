@@ -147,7 +147,7 @@
   "@jupyterlab/mermaid-extension:factory": "Provides a renderer for mermaid text-based diagrams.",
   "@jupyterlab/mermaid-extension:markdown": "Provides the Mermaid markdown renderer.",
   "@jupyterlab/metadataform-extension:metadataforms": "Provides the metadata form registry.",
-  "@jupyterlab/notebook-extension:active-cell-tool": "Adds active cell field in the metadata editor tab.",
+  "@jupyterlab/notebook-extension:active-cell-tool": "Adds active cell fields in the metadata editor tab.",
   "@jupyterlab/notebook-extension:cell-counter-status": "Adds a notebook cell counter status widget.",
   "@jupyterlab/notebook-extension:cell-executor": "Provides the notebook cell executor.",
   "@jupyterlab/notebook-extension:cloned-outputs": "Adds the clone output feature.",

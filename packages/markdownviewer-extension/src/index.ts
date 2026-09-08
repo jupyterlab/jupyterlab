@@ -12,6 +12,7 @@ import type {
 import { ILayoutRestorer } from '@jupyterlab/application';
 import { Clipboard, ISanitizer, WidgetTracker } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
+import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import type { MarkdownDocument } from '@jupyterlab/markdownviewer';
 import {
   IMarkdownViewerTracker,
@@ -27,6 +28,8 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
+
+import { markdownViewerSearchProviderFactory } from './searchprovider';
 
 /**
  * The command IDs used by the markdownviewer plugin.
@@ -56,6 +59,7 @@ const plugin: JupyterFrontEndPlugin<IMarkdownViewerTracker> = {
     ILayoutRestorer,
     ISettingRegistry,
     ITableOfContentsRegistry,
+    ISearchProviderRegistry,
     ISanitizer
   ],
   autoStart: true
@@ -71,6 +75,7 @@ function activate(
   restorer: ILayoutRestorer | null,
   settingRegistry: ISettingRegistry | null,
   tocRegistry: ITableOfContentsRegistry | null,
+  searchRegistry: ISearchProviderRegistry | null,
   sanitizer: IRenderMime.ISanitizer | null
 ): IMarkdownViewerTracker {
   const trans = translator.load('jupyterlab');
@@ -83,6 +88,14 @@ function activate(
   const tracker = new WidgetTracker<MarkdownDocument>({
     namespace
   });
+
+  // Register the search provider for the rendered markdown.
+  if (searchRegistry) {
+    searchRegistry.add(
+      'jp-markdownViewerSearchProvider',
+      markdownViewerSearchProviderFactory
+    );
+  }
 
   let config: Partial<MarkdownViewer.IConfig> = {
     ...MarkdownViewer.defaultConfig
