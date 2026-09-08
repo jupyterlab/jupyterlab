@@ -176,6 +176,20 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       }
       dragSetupDone.add(accordion);
 
+      // Add drag handles to all sections already present in the accordion.
+      for (const widget of accordion.widgets) {
+        addDragHandle(widget, accordion);
+      }
+
+      // Add drag handles to any section added to the accordion in the future
+      // (e.g. native sections added after initial setup, or moved-in sections).
+      const titleObserver = new MutationObserver(() => {
+        for (const widget of accordion.widgets) {
+          addDragHandle(widget, accordion);
+        }
+      });
+      titleObserver.observe(accordion.node, { childList: true });
+
       // Persist collapse/expand state whenever the user toggles a section.
       accordion.expansionToggled.connect(() => void saveState());
 
@@ -440,7 +454,7 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
         rank: 10
       });
 
-      if (panel.accordionPanel && panel.sections.length > 0) {
+      if (panel.accordionPanel) {
         setupAccordionDrag(panel.accordionPanel);
       }
     };

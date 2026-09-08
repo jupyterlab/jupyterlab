@@ -3,6 +3,7 @@
 
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
+import type { AccordionLayout } from '@lumino/widgets';
 import { AccordionPanel, Panel, PanelLayout, Widget } from '@lumino/widgets';
 import { AccordionToolbar } from './accordiontoolbar';
 import { Toolbar } from './toolbar';
@@ -38,6 +39,11 @@ export class SidePanel extends Widget {
     content.node.setAttribute('aria-label', trans.__('side panel content'));
     content.addClass('jp-SidePanel-content');
     layout.addWidget(content);
+
+    // Set up drag-to-reorder for the accordion sections.
+    if (content instanceof AccordionPanel) {
+      this._setupDrag(content as AccordionPanel);
+    }
 
     if (options.toolbar) {
       this.addToolbar(options.toolbar);
@@ -87,6 +93,7 @@ export class SidePanel extends Widget {
    */
   addWidget(widget: Toolbar.IWidgetToolbar): void {
     this.content.addWidget(widget);
+    this._addDragHandle(widget);
   }
 
   /**
@@ -97,6 +104,7 @@ export class SidePanel extends Widget {
    */
   insertWidget(index: number, widget: Toolbar.IWidgetToolbar): void {
     this.content.insertWidget(index, widget);
+    this._addDragHandle(widget);
   }
 
   private addHeader(header?: Panel) {
@@ -113,6 +121,127 @@ export class SidePanel extends Widget {
       (this.layout as PanelLayout).widgets.length - 1,
       theToolbar
     );
+  }
+
+  /**
+   * Add a drag handle to the accordion title of a widget.
+   */
+  private _addDragHandle(widget: Widget): void {
+    const accordion = this._content as AccordionPanel;
+    if (!(accordion instanceof AccordionPanel)) {
+      return;
+    }
+    const idx = Array.from(accordion.widgets).indexOf(widget);
+    if (idx < 0) {
+      return;
+    }
+    const titleEl = accordion.titles[idx];
+    if (!titleEl || titleEl.querySelector('.jp-SidePanel-dragHandle')) {
+      return;
+    }
+    const handle = document.createElement('span');
+    handle.className = 'jp-SidePanel-dragHandle';
+    handle.setAttribute('aria-hidden', 'true');
+    handle.title = this._trans.__('Drag to reorder');
+    titleEl.prepend(handle);
+  }
+
+  /**
+   * Set up pointer-based drag-to-reorder for the accordion panel.
+   */
+  private _setupDrag(accordion: AccordionPanel): void {
+    let draggedWidget: Widget | null = null;
+    let startY = 0;
+    let isDragging = false;
+
+    const indicator = document.createElement('div');
+    indicator.className = 'jp-SidePanel-dropIndicator';
+    indicator.style.display = 'none';
+    accordion.node.appendChild(indicator);
+
+    const getTargetSlot = (clientY: number): number => {
+      const layout = accordion.layout as AccordionLayout;
+      const titles = Array.from(layout.titles);
+      for (let i = 0; i < titles.length; i++) {
+        const rect = titles[i].getBoundingClientRect();
+        if (clientY < rect.top + rect.height / 2) {
+          return i;
+        }
+      }
+      return titles.length;
+    };
+
+    const showIndicator = (slot: number): void => {
+      const layout = accordion.layout as AccordionLayout;
+      const titles = Array.from(layout.titles);
+      const panelRect = accordion.node.getBoundingClientRect();
+      let top: number;
+      if (slot < titles.length) {
+        top = titles[slot].getBoundingClientRect().top - panelRect.top;
+      } else {
+        const last = titles[titles.length - 1].getBoundingClientRect();
+        top = last.bottom - panelRect.top;
+      }
+      indicator.style.top = `${top}px`;
+      indicator.style.display = 'block';
+    };
+
+    const endDrag = (clientY?: number): void => {
+      indicator.style.display = 'none';
+      accordion.node.classList.remove('jp-mod-dragging');
+      if (isDragging && draggedWidget && clientY !== undefined) {
+        const currentIdx = Array.from(accordion.widgets).indexOf(draggedWidget);
+        const targetSlot = getTargetSlot(clientY);
+        const insertIdx = targetSlot > currentIdx ? targetSlot - 1 : targetSlot;
+        if (insertIdx !== currentIdx) {
+          accordion.insertWidget(insertIdx, draggedWidget);
+        }
+      }
+      draggedWidget = null;
+      isDragging = false;
+    };
+
+    accordion.node.addEventListener('pointerdown', (event: PointerEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.jp-SidePanel-dragHandle')) {
+        return;
+      }
+      const titleEl = target.closest(
+        '.lm-AccordionPanel-title'
+      ) as HTMLElement | null;
+      if (!titleEl) {
+        return;
+      }
+      const layout = accordion.layout as AccordionLayout;
+      const idx = Array.from(layout.titles).indexOf(titleEl);
+      if (idx < 0) {
+        return;
+      }
+      draggedWidget = accordion.widgets[idx];
+      startY = event.clientY;
+      accordion.node.setPointerCapture(event.pointerId);
+    });
+
+    accordion.node.addEventListener('pointermove', (event: PointerEvent) => {
+      if (!draggedWidget) {
+        return;
+      }
+      if (!isDragging && Math.abs(event.clientY - startY) > 5) {
+        isDragging = true;
+        accordion.node.classList.add('jp-mod-dragging');
+      }
+      if (isDragging) {
+        showIndicator(getTargetSlot(event.clientY));
+      }
+    });
+
+    accordion.node.addEventListener('pointerup', (event: PointerEvent) => {
+      endDrag(event.clientY);
+    });
+
+    accordion.node.addEventListener('pointercancel', () => {
+      endDrag();
+    });
   }
 
   protected _content: Panel;
