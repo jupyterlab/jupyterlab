@@ -47,9 +47,12 @@ export class HistoryInlineCompletionProvider implements IInlineCompletionProvide
         // make this provider opt-in
         enabled: false,
         maxSuggestions: 100,
-        // Each fetch sends a `history_request` to the kernel, so wait until
-        // the user stops typing instead of querying on every key press.
-        debouncerDelay: 250
+        // Each fetch sends a `history_request` to the kernel, so wait for a
+        // short pause instead of querying on every key press. The delay is
+        // also a window in which `inline-completer:accept` has nothing to
+        // accept yet, so it is kept close to the 100 ms that still reads as
+        // an immediate response.
+        debouncerDelay: 100
       }
     };
   }
