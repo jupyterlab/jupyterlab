@@ -28,7 +28,8 @@ export class ViewMenu extends RankedMenu implements IViewMenu {
       toggleLineNumbers: new SemanticCommand(),
       toggleMinimap: new SemanticCommand(),
       toggleMatchBrackets: new SemanticCommand(),
-      toggleWordWrap: new SemanticCommand()
+      toggleWordWrap: new SemanticCommand(),
+      toggleToolbar: new SemanticCommand()
     };
   }
 
@@ -66,5 +67,10 @@ export namespace IViewMenu {
      * A semantic command to match brackets in the editor.
      */
     toggleMatchBrackets: SemanticCommand;
+
+    /**
+     * A semantic command to show or hide the document toolbar.
+     */
+    toggleToolbar: SemanticCommand;
   }
 }
