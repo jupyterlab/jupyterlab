@@ -281,6 +281,42 @@
   white-space: normal;
 }
 
+.jp-CellIdField {
+  padding: 12px 0;
+}
+
+.jp-CellIdField label {
+  display: block;
+  line-height: 1.4;
+}
+
+.jp-CellIdField-row {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.jp-CellIdField .jp-CellIdField-input {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  font-family: var(--jp-code-font-family);
+  font-size: var(--jp-code-font-size);
+}
+
+.jp-CellIdField .jp-CellIdField-button {
+  flex: 0 0 28px;
+  width: 28px;
+  padding: 2px;
+  margin: 0;
+  color: var(--jp-ui-font-color2);
+  transition: color 120ms ease;
+}
+
+.jp-CellIdField .jp-CellIdField-button.jp-mod-copied {
+  color: var(--jp-success-color1);
+}
+
 .jp-MetadataEditorTool {
   flex-direction: column;
   padding: 12px 0;
