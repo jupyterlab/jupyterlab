@@ -608,6 +608,41 @@ describe('rendermime/registry', () => {
           expect(resolutions[199]).toEqual({ scope: 'server', path: 'foo.py' });
         });
 
+        it('should send at most four requests at a time', async () => {
+          // Distinct paths cannot be answered from the cache, and the server
+          // takes one path per request, so they are paced instead.
+          const answer: (() => void)[] = [];
+          const { resolver, fetchMock } = resolverWithMockedServer({
+            respond: () =>
+              new Promise<Response>(resolve => {
+                answer.push(() =>
+                  resolve(new Response(JSON.stringify({ resolved: [] })))
+                );
+              })
+          });
+          const flush = () => new Promise(resolve => setTimeout(resolve, 0));
+
+          const asked = Promise.all(
+            Array.from({ length: 20 }, (_, path) =>
+              resolver.resolvePath(`/tmp/foo${path}.py`)
+            )
+          );
+          await flush();
+          expect(fetchMock).toHaveBeenCalledTimes(4);
+
+          // Each answer lets the next resolution in that lane start.
+          answer[0]();
+          await flush();
+          expect(fetchMock).toHaveBeenCalledTimes(5);
+
+          while (answer.length) {
+            answer.pop()!();
+            await flush();
+          }
+          await asked;
+          expect(fetchMock).toHaveBeenCalledTimes(20);
+        });
+
         it('should forget results obtained for a previous kernel', async () => {
           let kernelId = UUID.uuid4();
           const { resolver, fetchMock } = resolverWithMockedServer({

@@ -26,6 +26,15 @@ const RESOLVE_PATH_CACHE_TTL = 60 * 1000;
 const RESOLVE_PATH_CACHE_SIZE = 500;
 
 /**
+ * How many path resolutions one resolver runs at a time.
+ *
+ * Browsers allow about six connections per host, and an output can hold
+ * thousands of distinct path-like strings; leaving connections free keeps such
+ * an output from delaying the rest of the application.
+ */
+const RESOLVE_PATH_LANES = 4;
+
+/**
  * An object which manages mime renderer factories.
  *
  * This object is used to render mime models using registered mime
@@ -480,7 +489,7 @@ export namespace RenderMimeRegistry {
       const entry: Private.IResolvePathCacheEntry = {
         pending: true,
         time: Date.now(),
-        result: this._resolveUncachedPath(path)
+        result: this._resolveInLane(path)
       };
       entry.result = entry.result.then(
         result => {
@@ -497,6 +506,23 @@ export namespace RenderMimeRegistry {
       );
       this._resolvePathCache.set(path, entry);
       return entry.result;
+    }
+
+    /**
+     * Resolve a path in one of the lanes, each of which runs the resolutions
+     * given to it one after another.
+     */
+    private _resolveInLane(
+      path: string
+    ): Promise<IRenderMime.IResolvedLocation | null> {
+      const lane = (this._resolvePathLane + 1) % RESOLVE_PATH_LANES;
+      this._resolvePathLane = lane;
+      const result = this._resolvePathLanes[lane].then(() =>
+        this._resolveUncachedPath(path)
+      );
+      // A rejection must not stop the lane from taking the next resolution.
+      this._resolvePathLanes[lane] = result.catch(() => undefined);
+      return result;
     }
 
     private async _resolveUncachedPath(
@@ -626,6 +652,11 @@ export namespace RenderMimeRegistry {
       Private.IResolvePathCacheEntry
     >({ maxSize: RESOLVE_PATH_CACHE_SIZE });
     private _resolvePathCacheKernelId = '';
+    private _resolvePathLanes: Promise<unknown>[] = Array.from(
+      { length: RESOLVE_PATH_LANES },
+      () => Promise.resolve()
+    );
+    private _resolvePathLane = 0;
   }
 
   /**
