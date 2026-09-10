@@ -14,6 +14,19 @@ import { MimeModel } from './mimemodel';
 import type { IRenderMimeRegistry } from './tokens';
 
 /**
+ * How long the result of a path resolution stays usable, in milliseconds.
+ *
+ * Whether a file exists can change, so an answer is not kept indefinitely: a
+ * file created after the output was rendered links on the next render.
+ */
+const RESOLVE_PATH_CACHE_TTL = 60 * 1000;
+
+/**
+ * How many resolved paths one resolver keeps; the oldest are dropped first.
+ */
+const RESOLVE_PATH_CACHE_SIZE = 500;
+
+/**
  * An object which manages mime renderer factories.
  *
  * This object is used to render mime models using registered mime
@@ -420,15 +433,29 @@ export namespace RenderMimeRegistry {
      * - path understood and known by kernel (if such a path exists).
      * Returns `null` if there is no file matching provided path in neither
      * kernel nor jupyter-server contents manager.
+     *
+     * #### Notes
+     * Results are cached: resolution asks the server, and an output can hold
+     * thousands of path-like strings (a log printing `date=/18/2025` gives one
+     * per line).
      */
     async resolvePath(
       path: string
     ): Promise<IRenderMime.IResolvedLocation | null> {
-      const resolved = await this._resolvePathUsingServerApi(path);
-      if (resolved !== undefined) {
-        return resolved;
+      const kernelId = this._getKernelId?.() ?? '';
+      if (kernelId !== this._resolvePathCacheKernelId) {
+        // A path can resolve to a file which only the kernel can see.
+        this._resolvePathCache.clear();
+        this._resolvePathCacheKernelId = kernelId;
       }
-      return this._resolvePathUsingLegacyHeuristics(path);
+      const cached = this._resolvePathCache.get(path);
+      if (
+        cached &&
+        (cached.pending || Date.now() - cached.time < RESOLVE_PATH_CACHE_TTL)
+      ) {
+        return cached.result;
+      }
+      return this._resolveAndRememberPath(path);
     }
 
     /**
@@ -444,6 +471,56 @@ export namespace RenderMimeRegistry {
         }
         throw error;
       }
+    }
+
+    /**
+     * Resolve a path and keep the result for the callers which follow.
+     */
+    private _resolveAndRememberPath(
+      path: string
+    ): Promise<IRenderMime.IResolvedLocation | null> {
+      const entry: Private.IResolvePathCacheEntry = {
+        pending: true,
+        time: Date.now(),
+        result: this._resolveUncachedPath(path)
+      };
+      entry.result = entry.result.then(
+        result => {
+          entry.pending = false;
+          // Time the entry from the answer, not from the question.
+          entry.time = Date.now();
+          return result;
+        },
+        error => {
+          // Do not keep a failure: the next caller should ask again.
+          if (this._resolvePathCache.get(path) === entry) {
+            this._resolvePathCache.delete(path);
+          }
+          throw error;
+        }
+      );
+      this._resolvePathCache.set(path, entry);
+      // `Map` iterates in insertion order, so the oldest entry goes first. A
+      // request still in flight is kept whatever the size, otherwise the next
+      // caller would send it again.
+      while (this._resolvePathCache.size > RESOLVE_PATH_CACHE_SIZE) {
+        const oldest = this._resolvePathCache.entries().next();
+        if (oldest.done || oldest.value[1].pending) {
+          break;
+        }
+        this._resolvePathCache.delete(oldest.value[0]);
+      }
+      return entry.result;
+    }
+
+    private async _resolveUncachedPath(
+      path: string
+    ): Promise<IRenderMime.IResolvedLocation | null> {
+      const resolved = await this._resolvePathUsingServerApi(path);
+      if (resolved !== undefined) {
+        return resolved;
+      }
+      return this._resolvePathUsingLegacyHeuristics(path);
     }
 
     private async _resolvePathUsingServerApi(
@@ -558,6 +635,11 @@ export namespace RenderMimeRegistry {
     private _contents: Contents.IManager;
     private _getKernelId?: () => string | null | undefined;
     private _resolvePathApiAvailable: boolean | null = null;
+    private _resolvePathCache = new Map<
+      string,
+      Private.IResolvePathCacheEntry
+    >();
+    private _resolvePathCacheKernelId = '';
   }
 
   /**
@@ -609,6 +691,25 @@ namespace Private {
   export interface IResolvePathResponse {
     resolved?: unknown[];
     unresolved?: unknown[];
+  }
+
+  /**
+   * A remembered path resolution.
+   */
+  export interface IResolvePathCacheEntry {
+    /**
+     * The resolution, shared by every caller asking for the same path.
+     */
+    result: Promise<IRenderMime.IResolvedLocation | null>;
+    /**
+     * When the request finished, or when it started while it is pending.
+     */
+    time: number;
+    /**
+     * Whether the request is still in flight; a pending entry is always reused,
+     * which keeps a burst of identical paths down to one request.
+     */
+    pending: boolean;
   }
 
   export function isResolvedLocation(
