@@ -26,6 +26,14 @@ test.use({
       // once https://github.com/ipython/ipython/pull/15144 is released
       // we can use SOURCE_DATE_EPOCH env variable instead
       showBanner: false
+    },
+    // Comm messages go to a kernel subshell by default, so an ipywidgets
+    // callback can run on that thread while the main shell is still executing
+    // cells. Both then use matplotlib's global pyplot state, and the Lorenz
+    // figure is captured while it is still being drawn. Keeping comms on the
+    // main shell makes the output deterministic.
+    '@jupyterlab/apputils-extension:kernels-settings': {
+      commsOverSubshells: 'disabled'
     }
   }
 });
