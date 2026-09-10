@@ -126,6 +126,29 @@ describe('documentsearch/searchview', () => {
       expect(document.activeElement).toBe(matchCase);
     });
 
+    it('should not select Replace text when replaceText changes', async () => {
+      view.showReplace();
+      await framePromise();
+      await view.renderPromise;
+
+      const replace = view.node.querySelector(
+        '[placeholder="Replace"]'
+      ) as HTMLTextAreaElement;
+
+      replace.focus();
+      replace.value = 'hello';
+      replace.setSelectionRange(5, 5);
+
+      model.replaceText = 'hello';
+      await framePromise();
+      await view.renderPromise;
+
+      expect(document.activeElement).toBe(replace);
+      expect(replace.value).toBe('hello');
+      expect(replace.selectionStart).toBe(5);
+      expect(replace.selectionEnd).toBe(5);
+    });
+
     it('should not steal Ctrl+Tab from the Find field', async () => {
       view.showReplace();
       await framePromise();

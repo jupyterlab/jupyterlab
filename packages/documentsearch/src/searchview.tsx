@@ -101,7 +101,11 @@ function SearchInput(props: ISearchInputProps): JSX.Element {
     // triggers React re-render to update `defaultValue` (implemented via `key`)
     // which means that `focusSearchInput` is no longer effective as it has
     // already fired before the re-render, hence we use this conditional effect.
-    props.inputRef?.current?.select();
+    // Only the Find field remounts via `autoUpdate`. Do not select on Replace:
+    // typing updates model.replaceText and would otherwise overwrite the field.
+    if (props.autoUpdate) {
+      props.inputRef?.current?.select();
+    }
     // After any change to initial value we also want to update rows in case if
     // multi-line text was selected.
     updateDimensions();

@@ -67,6 +67,20 @@ test.describe('Notebook Search', () => {
     await expect(page.locator('[placeholder="Find"]')).toHaveValue('1234');
   });
 
+  test('Typing in replace box', async ({ page }) => {
+    // Replace shares SearchInput with Find, but must not select() on each
+    // replaceText update or typed characters get overwritten.
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Replace"]');
+
+    await page.fill('[placeholder="Replace"]', '14');
+    await page.press('[placeholder="Replace"]', 'ArrowLeft');
+    await page.locator('[placeholder="Replace"]').pressSequentially('2');
+    await page.locator('[placeholder="Replace"]').pressSequentially('3');
+
+    await expect(page.locator('[placeholder="Replace"]')).toHaveValue('1234');
+  });
+
   test('Consecutive searches in the search box', async ({ page }) => {
     await page.keyboard.press('Control+f');
 
