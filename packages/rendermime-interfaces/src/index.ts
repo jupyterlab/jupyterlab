@@ -661,6 +661,26 @@ export namespace IRenderMime {
        * pre-processing) is also left literal when this option is `false`.
        */
       readonly dollarInlineMath?: boolean;
+
+      /**
+       * Whether a single `$` is only treated as an inline math delimiter when
+       * it satisfies pandoc's "smart" delimiter rules.
+       *
+       * With this enabled, the opening `$` must have a non-space character
+       * immediately to its right, and the closing `$` must have a non-space
+       * character immediately to its left and must not be followed
+       * immediately by a digit. This prevents currency amounts such as
+       * "$20,000 and $30,000" (or "$24 and $27") from being parsed as math.
+       * Display math (`$$...$$`) and the `\(...\)` / `\[...\]` delimiters
+       * are unaffected by this option. Defaults to `true`.
+       *
+       * Note that this option applies wherever the typesetter is used, not
+       * only to Markdown: in particular, a `$...$` expression in a
+       * `text/latex` output (which is typeset directly, without Markdown
+       * pre-processing) is also subject to the smart rules when this option
+       * is `true`.
+       */
+      readonly smartInlineMath?: boolean;
     }
   }
 

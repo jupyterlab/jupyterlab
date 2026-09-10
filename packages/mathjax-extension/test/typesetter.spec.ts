@@ -27,6 +27,50 @@ describe('@jupyterlab/mathjax-extension', () => {
       });
 
       it.each([
+        'Hello $24 and $27',
+        'Prices are $20,000 and $30,000',
+        'The cost is $1,239.50'
+      ])(
+        'should leave currency amounts containing `$` literal: %s',
+        async input => {
+          const host = document.createElement('div');
+          host.innerHTML = input;
+          document.body.appendChild(host);
+          await typesetter.typeset(host);
+          expect(host.innerHTML).toContain(input);
+          expect(host.innerHTML).not.toContain('<mn>2</mn>');
+        }
+      );
+
+      it('should leave a `$` followed by whitespace literal', async () => {
+        const host = document.createElement('div');
+        host.innerHTML = 'Store $ and compute $x^2$';
+        document.body.appendChild(host);
+        await typesetter.typeset(host);
+        expect(host.innerHTML).toContain('Store $ and compute ');
+        expect(host.innerHTML).not.toContain('$x^2$');
+        expect(host.innerHTML).toContain('mjx-container');
+      });
+
+      it('should not treat a `$` followed by a digit as closing math', async () => {
+        const host = document.createElement('div');
+        host.innerHTML = '$x^2$1 is not math';
+        document.body.appendChild(host);
+        await typesetter.typeset(host);
+        expect(host.innerHTML).toContain('$x^2$1 is not math');
+        expect(host.innerHTML).not.toContain('mjx-container');
+      });
+
+      it('should still typeset genuine inline math under the smart rules', async () => {
+        const host = document.createElement('div');
+        host.innerHTML = 'Euler stated $e^{i\\pi} + 1 = 0$ is beautiful.';
+        document.body.appendChild(host);
+        await typesetter.typeset(host);
+        expect(host.innerHTML).toContain('<mn>1</mn>');
+        expect(host.innerHTML).toContain('Euler stated');
+      });
+
+      it.each([
         '$$\\href{https://jupyter.org}{1}$$',
         '$\\href{https://jupyter.org}{1}$'
       ])('should harden remote URLs in links', async input => {
@@ -56,6 +100,20 @@ describe('@jupyterlab/mathjax-extension', () => {
         expect(new MathJaxTypesetter().mathParseOptions?.dollarInlineMath).toBe(
           true
         );
+      });
+
+      it('should enable smart inline math by default', () => {
+        expect(new MathJaxTypesetter().mathParseOptions?.smartInlineMath).toBe(
+          true
+        );
+      });
+
+      it('should disable smart inline math when instructed', () => {
+        expect(
+          new MathJaxTypesetter({
+            smartInlineMath: false
+          }).mathParseOptions?.smartInlineMath
+        ).toBe(false);
       });
 
       it('should report dollarInlineMath=false when `$` is not a delimiter', () => {
