@@ -581,6 +581,19 @@ describe('rendermime/registry', () => {
           expect(fetchMock).toHaveBeenCalledTimes(1);
         });
 
+        it('should send one request for a path which is not a file', async () => {
+          // The reported case: the path-like text resolves to nothing, and
+          // that answer has to be remembered like any other.
+          const { resolver, fetchMock } = resolverWithMockedServer({
+            respond: async () =>
+              new Response(JSON.stringify({ resolved: [] }), { status: 200 })
+          });
+
+          expect(await resolver.resolvePath('/18/2025')).toBeNull();
+          expect(await resolver.resolvePath('/18/2025')).toBeNull();
+          expect(fetchMock).toHaveBeenCalledTimes(1);
+        });
+
         it('should send one request for concurrent resolutions of a path', async () => {
           // A streamed output which prints a path-like string on every line
           // (see https://github.com/jupyterlab/jupyterlab/issues/19721) asks
@@ -668,23 +681,21 @@ describe('rendermime/registry', () => {
       });
 
       describe('path links in a streamed output', () => {
-        it('should resolve a repeated path once', async () => {
-          // A program writing a date to stderr prints a path-like string on
-          // every line, and every chunk of the stream re-renders the whole
-          // output, so the same path is looked up over and over. Resolving
-          // each of those separately froze the application, see
-          // https://github.com/jupyterlab/jupyterlab/issues/19721
+        /**
+         * Render 50 stderr lines carrying the same path-like string, one line
+         * per chunk, against a server answering every path with `resolved`.
+         */
+        async function renderStreamedLines(
+          resolved: { scope: string; path: string }[]
+        ) {
           const contents = new ContentsManager();
           const settings = contents.serverSettings as IWritableSettings;
           const previousFetch = settings.fetch;
-          const fetchMock = jest.fn().mockResolvedValue(
-            new Response(
-              JSON.stringify({
-                resolved: [{ scope: 'server', path: 'dates.log' }]
-              }),
-              { status: 200 }
-            )
-          );
+          const fetchMock = jest
+            .fn()
+            .mockResolvedValue(
+              new Response(JSON.stringify({ resolved }), { status: 200 })
+            );
           settings.fetch = fetchMock as ServerConnection.ISettings['fetch'];
 
           const rendermime = new RenderMimeRegistry({
@@ -716,15 +727,38 @@ describe('rendermime/registry', () => {
               ).runAllTimersAsync();
               await rendered;
             }
-            const anchors = renderer.node.querySelectorAll('a');
-            expect(anchors).toHaveLength(50);
-            expect(anchors[49].getAttribute('href')).toBe('dates.log');
-            expect(fetchMock).toHaveBeenCalledTimes(1);
+            return {
+              anchors: Array.from(renderer.node.querySelectorAll('a')),
+              requests: fetchMock.mock.calls.length
+            };
           } finally {
             jest.useRealTimers();
             renderer.dispose();
             settings.fetch = previousFetch;
           }
+        }
+
+        // A program writing a date to stderr prints a path-like string on
+        // every line, and every chunk of the stream re-renders the whole
+        // output, so the same path is looked up over and over. Resolving each
+        // of those separately froze the application, see
+        // https://github.com/jupyterlab/jupyterlab/issues/19721
+        it('should resolve a repeated path once', async () => {
+          const { anchors, requests } = await renderStreamedLines([
+            { scope: 'server', path: 'dates.log' }
+          ]);
+
+          expect(anchors).toHaveLength(50);
+          expect(anchors[49].getAttribute('href')).toBe('dates.log');
+          expect(requests).toBe(1);
+        });
+
+        it('should resolve a repeated path which is not a file once', async () => {
+          const { anchors, requests } = await renderStreamedLines([]);
+
+          expect(anchors).toHaveLength(50);
+          expect(anchors[49].getAttribute('href')).toBeNull();
+          expect(requests).toBe(1);
         });
       });
     });
