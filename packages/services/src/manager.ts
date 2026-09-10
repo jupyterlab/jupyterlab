@@ -7,6 +7,8 @@ import type { Poll } from '@lumino/polling';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+
 import type { Builder } from './builder';
 import { BuildManager } from './builder';
 
@@ -242,7 +244,7 @@ export namespace ServiceManager {
     /**
      * The application language translator.
      */
-    readonly translator?: BuildManager.ITranslator;
+    readonly translator?: IRenderMime.ITranslator;
 
     /**
      * When the manager stops polling the API. Defaults to `when-hidden`.
