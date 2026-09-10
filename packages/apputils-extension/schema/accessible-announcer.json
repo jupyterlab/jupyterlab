@@ -1,0 +1,22 @@
+{
+  "title": "Accessibility announcements",
+  "description": "Settings for messages announced to screen readers.",
+  "jupyter.lab.setting-icon": "ui-components:accessibility",
+  "additionalProperties": false,
+  "properties": {
+    "enabled": {
+      "title": "Enable accessibility announcements",
+      "description": "Whether application messages should be announced to screen readers.",
+      "type": "boolean",
+      "default": true
+    },
+    "clearTimeout": {
+      "title": "Announcement clear timeout",
+      "description": "The time in milliseconds after which an announcement is cleared. Set to 0 to keep announcements until they are replaced.",
+      "type": "number",
+      "minimum": 0,
+      "default": 5000
+    }
+  },
+  "type": "object"
+}
