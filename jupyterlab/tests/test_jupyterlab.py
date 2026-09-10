@@ -42,6 +42,7 @@ from jupyterlab.commands import (
     update_extension,
 )
 from jupyterlab.coreconfig import CoreConfig, _get_default_core_data
+from jupyterlab.labapp import LabApp
 
 here = os.path.dirname(os.path.abspath(__file__))
 
@@ -807,3 +808,25 @@ def test_load_extension(jp_serverapp, make_lab_app):
     app._link_jupyter_server_extension(jp_serverapp)
     app.initialize()
     sys.stderr = stderr
+
+
+def test_raise_config_file_errors_default():
+    app = LabApp()
+    assert app.raise_config_file_errors is True
+
+
+def test_raise_config_file_errors_on_invalid_config(tmp_path):
+    bad_config = tmp_path / "jupyter_lab_config.py"
+    bad_config.write_text("c.LabApp.broken_syntax = [")
+
+    app = LabApp(config_file=str(bad_config))
+    with pytest.raises(SyntaxError):
+        app.load_config_file()
+
+
+def test_raise_config_file_errors_suppressed_when_disabled(tmp_path):
+    bad_config = tmp_path / "jupyter_lab_config.py"
+    bad_config.write_text("c.LabApp.broken_syntax = [")
+
+    app = LabApp(config_file=str(bad_config), raise_config_file_errors=False)
+    app.load_config_file()
