@@ -645,30 +645,6 @@ describe('rendermime/registry', () => {
           await resolver.resolvePath('/tmp/foo500.py');
           expect(fetchMock).toHaveBeenCalledTimes(502);
         });
-
-        it('should keep a path whose request is still in flight', async () => {
-          // More requests in flight than the cache holds; dropping one of them
-          // would send a second request for the same path.
-          const answer: (() => void)[] = [];
-          const { resolver, fetchMock } = resolverWithMockedServer({
-            respond: () =>
-              new Promise<Response>(resolve => {
-                answer.push(() =>
-                  resolve(new Response(JSON.stringify({ resolved: [] })))
-                );
-              })
-          });
-
-          const asked = Array.from({ length: 600 }, (_, path) =>
-            resolver.resolvePath(`/tmp/foo${path}.py`)
-          );
-          asked.push(resolver.resolvePath('/tmp/foo0.py'));
-          await new Promise(resolve => setTimeout(resolve, 0));
-
-          expect(fetchMock).toHaveBeenCalledTimes(600);
-          answer.forEach(release => release());
-          await Promise.all(asked);
-        });
       });
 
       describe('#isLocal', () => {

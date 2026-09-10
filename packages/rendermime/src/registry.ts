@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import { Sanitizer } from '@jupyterlab/apputils';
-import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
+import { LruCache, PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ServerConnection } from '@jupyterlab/services';
 import type { Contents } from '@jupyterlab/services';
@@ -16,13 +16,12 @@ import type { IRenderMimeRegistry } from './tokens';
 /**
  * How long the result of a path resolution stays usable, in milliseconds.
  *
- * Whether a file exists can change, so an answer is not kept indefinitely: a
- * file created after the output was rendered links on the next render.
+ * A file named in an output may be created after it was rendered.
  */
 const RESOLVE_PATH_CACHE_TTL = 60 * 1000;
 
 /**
- * How many resolved paths one resolver keeps; the oldest are dropped first.
+ * How many resolved paths one resolver keeps.
  */
 const RESOLVE_PATH_CACHE_SIZE = 500;
 
@@ -436,8 +435,7 @@ export namespace RenderMimeRegistry {
      *
      * #### Notes
      * Results are cached: resolution asks the server, and an output can hold
-     * thousands of path-like strings (a log printing `date=/18/2025` gives one
-     * per line).
+     * thousands of path-like strings.
      */
     async resolvePath(
       path: string
@@ -487,29 +485,17 @@ export namespace RenderMimeRegistry {
       entry.result = entry.result.then(
         result => {
           entry.pending = false;
-          // Time the entry from the answer, not from the question.
           entry.time = Date.now();
           return result;
         },
         error => {
-          // Do not keep a failure: the next caller should ask again.
-          if (this._resolvePathCache.get(path) === entry) {
-            this._resolvePathCache.delete(path);
-          }
+          // Leave the entry expired so that the next caller asks again.
+          entry.pending = false;
+          entry.time = 0;
           throw error;
         }
       );
       this._resolvePathCache.set(path, entry);
-      // `Map` iterates in insertion order, so the oldest entry goes first. A
-      // request still in flight is kept whatever the size, otherwise the next
-      // caller would send it again.
-      while (this._resolvePathCache.size > RESOLVE_PATH_CACHE_SIZE) {
-        const oldest = this._resolvePathCache.entries().next();
-        if (oldest.done || oldest.value[1].pending) {
-          break;
-        }
-        this._resolvePathCache.delete(oldest.value[0]);
-      }
       return entry.result;
     }
 
@@ -635,10 +621,10 @@ export namespace RenderMimeRegistry {
     private _contents: Contents.IManager;
     private _getKernelId?: () => string | null | undefined;
     private _resolvePathApiAvailable: boolean | null = null;
-    private _resolvePathCache = new Map<
+    private _resolvePathCache = new LruCache<
       string,
       Private.IResolvePathCacheEntry
-    >();
+    >({ maxSize: RESOLVE_PATH_CACHE_SIZE });
     private _resolvePathCacheKernelId = '';
   }
 
@@ -706,8 +692,7 @@ namespace Private {
      */
     time: number;
     /**
-     * Whether the request is still in flight; a pending entry is always reused,
-     * which keeps a burst of identical paths down to one request.
+     * Whether the request is still in flight; a pending entry never expires.
      */
     pending: boolean;
   }
