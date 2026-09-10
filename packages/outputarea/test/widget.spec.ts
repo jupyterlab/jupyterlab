@@ -400,8 +400,10 @@ describe('outputarea/widget', () => {
         });
         widget.future = future;
         const reply = await future.done;
-        expect(reply!.content.execution_count).toBeTruthy();
         expect(reply!.content.status).toBe('ok');
+        if (reply!.content.status === 'ok') {
+          expect(reply!.content.execution_count).toBeTruthy();
+        }
         expect(model.length).toBe(1);
       });
 
@@ -412,7 +414,10 @@ describe('outputarea/widget', () => {
         });
         widget.future = future;
         const reply = await future.done;
-        expect(reply!.content.execution_count).toBeTruthy();
+        expect(reply!.content.status).toBe('ok');
+        if (reply!.content.status === 'ok') {
+          expect(reply!.content.execution_count).toBeTruthy();
+        }
         expect(model.length).toBe(1);
       });
     });
@@ -583,15 +588,20 @@ describe('outputarea/widget', () => {
 
       it('should execute code on a kernel and send outputs to the model', async () => {
         const reply = await OutputArea.execute(CODE, widget, sessionContext);
-        expect(reply!.content.execution_count).toBeTruthy();
         expect(reply!.content.status).toBe('ok');
+        if (reply!.content.status === 'ok') {
+          expect(reply!.content.execution_count).toBeTruthy();
+        }
         expect(model.length).toBe(1);
       });
 
       it('should clear existing outputs', async () => {
         widget.model.fromJSON(DEFAULT_OUTPUTS);
         const reply = await OutputArea.execute(CODE, widget, sessionContext);
-        expect(reply!.content.execution_count).toBeTruthy();
+        expect(reply!.content.status).toBe('ok');
+        if (reply!.content.status === 'ok') {
+          expect(reply!.content.execution_count).toBeTruthy();
+        }
         expect(model.length).toBe(1);
       });
 
