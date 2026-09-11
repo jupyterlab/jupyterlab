@@ -1615,10 +1615,7 @@ function activatePageHandler(
       const mimeData = data as nbformat.IMimeBundle;
       const metadata = (payload['metadata'] ?? {}) as ReadonlyJSONObject;
       const trusted = false;
-      const mimeType = rendermime.preferredMimeType(
-        mimeData,
-        trusted ? 'any' : 'ensure'
-      );
+      const mimeType = rendermime.preferredMimeType(mimeData, 'ensure');
       if (!mimeType) {
         return false;
       }
