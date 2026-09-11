@@ -32,28 +32,15 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
     this.editor = editorWidget.content;
     this._cellToEditor = new WeakMap();
     this.isReady = this.isReady.bind(this);
-    const sessionContextReady = this.widget.context.sessionContext.ready;
-    const connectionManagerReady = this.connectionManager.ready;
-    const adapter: { current: NotebookAdapter | null } = { current: this };
-    this.disposed.connect(() => {
-      adapter.current = null;
-    });
-    void Promise.all([sessionContextReady, connectionManagerReady])
+    Promise.all([
+      this.widget.context.sessionContext.ready,
+      this.connectionManager.ready
+    ])
       .then(async () => {
-        const currentAdapter = adapter.current;
-        if (!currentAdapter) {
-          return;
-        }
-        await currentAdapter.initOnceReady();
-        currentAdapter._readyDelegate.resolve();
+        await this.initOnceReady();
+        this._readyDelegate.resolve();
       })
-      .catch(reason => {
-        const currentAdapter = adapter.current;
-        if (!currentAdapter || currentAdapter.isDisposed) {
-          return;
-        }
-        console.error(reason);
-      });
+      .catch(console.error);
   }
 
   /**
@@ -198,14 +185,8 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
     try {
       // note: we need to wait until ready before updating language info
       const oldLanguageInfo = this._languageInfo;
-      await untilReady(() => this.isDisposed || this.isReady(), -1);
-      if (this.isDisposed) {
-        return;
-      }
+      await untilReady(this.isReady, -1);
       await this._updateLanguageInfo();
-      if (this.isDisposed) {
-        return;
-      }
       const newLanguageInfo = this._languageInfo;
       if (
         oldLanguageInfo?.name != newLanguageInfo.name ||
@@ -369,14 +350,8 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
    * connect various signals.
    */
   protected async initOnceReady(): Promise<void> {
-    await untilReady(() => this.isDisposed || this.isReady(), -1);
-    if (this.isDisposed) {
-      return;
-    }
+    await untilReady(this.isReady.bind(this), -1);
     await this._updateLanguageInfo();
-    if (this.isDisposed) {
-      return;
-    }
     this.initVirtual();
 
     // connect the document, but do not open it as the adapter will handle this

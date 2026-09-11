@@ -331,8 +331,6 @@ async function activateTOC(
   function onConnect() {
     let widget = app.shell.currentWidget;
     if (!widget) {
-      setCurrentModel(null);
-      disposeFactoryToolbarItems();
       return;
     }
     let model = tracker.get(widget);
@@ -343,18 +341,26 @@ async function activateTOC(
       }
 
       widget.disposed.connect(() => {
-        if (toc.model === model) {
-          setCurrentModel(null);
-          disposeFactoryToolbarItems();
-        }
         model?.dispose();
       });
     }
 
-    setCurrentModel(model);
+    if (toc.model) {
+      toc.model.headingsChanged.disconnect(onCollapseChange);
+      toc.model.collapseChanged.disconnect(onCollapseChange);
+    }
+
+    toc.model = model;
+    if (toc.model) {
+      toc.model.headingsChanged.connect(onCollapseChange);
+      toc.model.collapseChanged.connect(onCollapseChange);
+    }
 
     // Clean up previous factory items
-    disposeFactoryToolbarItems();
+    factoryToolbarItems.forEach(item => {
+      item.dispose();
+    });
+    factoryToolbarItems = [];
 
     const toolbarItems = tocRegistry.getToolbarItems?.(widget);
 
@@ -368,28 +374,8 @@ async function activateTOC(
         factoryToolbarItems.push(item.widget);
       });
     }
-  }
-
-  function setCurrentModel(model: TableOfContents.Model | null): void {
-    if (toc.model) {
-      toc.model.headingsChanged.disconnect(onCollapseChange);
-      toc.model.collapseChanged.disconnect(onCollapseChange);
-    }
-
-    toc.model = model;
-    if (toc.model) {
-      toc.model.headingsChanged.connect(onCollapseChange);
-      toc.model.collapseChanged.connect(onCollapseChange);
-    }
 
     setToolbarButtonsState();
-  }
-
-  function disposeFactoryToolbarItems(): void {
-    factoryToolbarItems.forEach(item => {
-      item.dispose();
-    });
-    factoryToolbarItems = [];
   }
 
   function setToolbarButtonsState() {
