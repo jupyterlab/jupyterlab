@@ -535,6 +535,193 @@ describe('rendermime/registry', () => {
           expect(resolved).toEqual({ scope: 'server', path: 'foo.py' });
           expect(getSpy).not.toHaveBeenCalled();
         });
+
+        /**
+         * Create a resolver whose server answers every path with `resolved`,
+         * and a fetch mock counting the requests it received.
+         */
+        function resolverWithMockedServer(options?: {
+          getKernelId?: () => string | null | undefined;
+          respond?: (url: string) => Promise<Response>;
+        }) {
+          const localContents = new ContentsManager();
+          const resolver = new RenderMimeRegistry.UrlResolver({
+            path: pathParent + '/pr%25 ' + UUID.uuid4(),
+            contents: localContents,
+            getKernelId: options?.getKernelId
+          });
+          const settings = localContents.serverSettings as IWritableSettings;
+          const previousFetch = settings.fetch;
+          const fetchMock = jest.fn(async (request: Request) => {
+            if (options?.respond) {
+              return options.respond(request.url);
+            }
+            return new Response(
+              JSON.stringify({
+                resolved: [{ scope: 'server', path: 'foo.py' }]
+              }),
+              { status: 200 }
+            );
+          });
+          settings.fetch =
+            fetchMock as unknown as ServerConnection.ISettings['fetch'];
+          restoreFetch = () => {
+            settings.fetch = previousFetch;
+          };
+          return { resolver, fetchMock };
+        }
+
+        it('should send one request for repeated resolutions of a path', async () => {
+          const { resolver, fetchMock } = resolverWithMockedServer();
+
+          const first = await resolver.resolvePath('/tmp/foo.py');
+          const second = await resolver.resolvePath('/tmp/foo.py');
+
+          expect(second).toEqual(first);
+          expect(fetchMock).toHaveBeenCalledTimes(1);
+        });
+
+        it('should send one request for a path which is not a file', async () => {
+          // The reported case: the path-like text resolves to nothing, and
+          // that answer has to be remembered like any other.
+          const { resolver, fetchMock } = resolverWithMockedServer({
+            respond: async () =>
+              new Response(JSON.stringify({ resolved: [] }), { status: 200 })
+          });
+
+          expect(await resolver.resolvePath('/18/2025')).toBeNull();
+          expect(await resolver.resolvePath('/18/2025')).toBeNull();
+          expect(fetchMock).toHaveBeenCalledTimes(1);
+        });
+
+        it('should not remember a path the server failed to answer', async () => {
+          // A failed request does not show whether the file exists, unlike an
+          // answer of `resolved: []`.
+          const answers = [
+            () => Promise.reject(new TypeError('offline')),
+            () => Promise.resolve(new Response('', { status: 500 })),
+            () =>
+              Promise.resolve(
+                new Response(
+                  JSON.stringify({
+                    resolved: [{ scope: 'server', path: 'foo.py' }]
+                  }),
+                  { status: 200 }
+                )
+              )
+          ];
+          const { resolver, fetchMock } = resolverWithMockedServer({
+            respond: () => answers.shift()!()
+          });
+
+          expect(await resolver.resolvePath('/tmp/foo.py')).toBeNull();
+          expect(await resolver.resolvePath('/tmp/foo.py')).toBeNull();
+          expect(await resolver.resolvePath('/tmp/foo.py')).toEqual({
+            scope: 'server',
+            path: 'foo.py'
+          });
+          expect(fetchMock).toHaveBeenCalledTimes(3);
+        });
+
+        it('should send one request for concurrent resolutions of a path', async () => {
+          // A streamed output which prints a path-like string on every line
+          // (see https://github.com/jupyterlab/jupyterlab/issues/19721) asks
+          // for the same path once per line, all at once.
+          const { resolver, fetchMock } = resolverWithMockedServer();
+
+          const resolutions = await Promise.all(
+            Array.from({ length: 200 }, () => resolver.resolvePath('/18/2025'))
+          );
+
+          expect(fetchMock).toHaveBeenCalledTimes(1);
+          expect(resolutions[199]).toEqual({ scope: 'server', path: 'foo.py' });
+        });
+
+        it('should send at most four requests at a time', async () => {
+          // Distinct paths cannot be answered from the cache, and the server
+          // takes one path per request, so they are paced instead.
+          const answer: (() => void)[] = [];
+          const { resolver, fetchMock } = resolverWithMockedServer({
+            respond: () =>
+              new Promise<Response>(resolve => {
+                answer.push(() =>
+                  resolve(new Response(JSON.stringify({ resolved: [] })))
+                );
+              })
+          });
+          const flush = () => new Promise(resolve => setTimeout(resolve, 0));
+
+          const asked = Promise.all(
+            Array.from({ length: 20 }, (_, path) =>
+              resolver.resolvePath(`/tmp/foo${path}.py`)
+            )
+          );
+          await flush();
+          expect(fetchMock).toHaveBeenCalledTimes(4);
+
+          // Each answer lets the next resolution in that lane start.
+          answer[0]();
+          await flush();
+          expect(fetchMock).toHaveBeenCalledTimes(5);
+
+          while (answer.length) {
+            answer.pop()!();
+            await flush();
+          }
+          await asked;
+          expect(fetchMock).toHaveBeenCalledTimes(20);
+        });
+
+        it('should forget results obtained for a previous kernel', async () => {
+          let kernelId = UUID.uuid4();
+          const { resolver, fetchMock } = resolverWithMockedServer({
+            getKernelId: () => kernelId
+          });
+
+          await resolver.resolvePath('/tmp/foo.py');
+          expect(fetchMock).toHaveBeenCalledTimes(1);
+
+          kernelId = UUID.uuid4();
+          await resolver.resolvePath('/tmp/foo.py');
+          expect(fetchMock).toHaveBeenCalledTimes(2);
+          expect((fetchMock.mock.calls[1][0] as Request).url).toContain(
+            `&kernel=${kernelId}`
+          );
+        });
+
+        it('should resolve a path again once the result is a minute old', async () => {
+          const { resolver, fetchMock } = resolverWithMockedServer();
+          const now = Date.now();
+          const clock = jest.spyOn(Date, 'now').mockReturnValue(now);
+
+          await resolver.resolvePath('/tmp/foo.py');
+          expect(fetchMock).toHaveBeenCalledTimes(1);
+
+          clock.mockReturnValue(now + 59 * 1000);
+          await resolver.resolvePath('/tmp/foo.py');
+          expect(fetchMock).toHaveBeenCalledTimes(1);
+
+          clock.mockReturnValue(now + 61 * 1000);
+          await resolver.resolvePath('/tmp/foo.py');
+          expect(fetchMock).toHaveBeenCalledTimes(2);
+          clock.mockRestore();
+        });
+
+        it('should forget the oldest path once it holds five hundred', async () => {
+          const { resolver, fetchMock } = resolverWithMockedServer();
+          for (let path = 0; path < 501; path++) {
+            await resolver.resolvePath(`/tmp/foo${path}.py`);
+          }
+          expect(fetchMock).toHaveBeenCalledTimes(501);
+
+          // The first path was dropped to make room for the last one.
+          await resolver.resolvePath('/tmp/foo0.py');
+          expect(fetchMock).toHaveBeenCalledTimes(502);
+
+          // The last one is still remembered.
+          await resolver.resolvePath('/tmp/foo500.py');
+          expect(fetchMock).toHaveBeenCalledTimes(502);
+        });
       });
 
       describe('#isLocal', () => {
@@ -554,6 +741,88 @@ describe('rendermime/registry', () => {
           expect(resolverPath.isLocal('http://www.example.com%bad')).toBe(
             false
           );
+        });
+      });
+
+      describe('path links in a streamed output', () => {
+        /**
+         * Render 50 stderr lines carrying the same path-like string, one line
+         * per chunk, against a server answering every path with `resolved`.
+         */
+        async function renderStreamedLines(
+          resolved: { scope: string; path: string }[]
+        ) {
+          const contents = new ContentsManager();
+          const settings = contents.serverSettings as IWritableSettings;
+          const previousFetch = settings.fetch;
+          const fetchMock = jest
+            .fn()
+            .mockResolvedValue(
+              new Response(JSON.stringify({ resolved }), { status: 200 })
+            );
+          settings.fetch = fetchMock as ServerConnection.ISettings['fetch'];
+
+          const rendermime = new RenderMimeRegistry({
+            initialFactories: standardRendererFactories,
+            resolver: new RenderMimeRegistry.UrlResolver({
+              path: 'notebook.ipynb',
+              contents
+            }),
+            linkHandler: {
+              handleLink: () => undefined,
+              handlePath: () => undefined
+            }
+          });
+          const mimeType = 'application/vnd.jupyter.stderr';
+          const renderer = rendermime.createRenderer(mimeType);
+          Widget.attach(renderer, document.body);
+          jest.useFakeTimers();
+
+          try {
+            let text = '';
+            for (let line = 0; line < 50; line++) {
+              text += `${line}: date=/18/2025\n`;
+              const rendered = renderer.renderModel(
+                createModel({ [mimeType]: text })
+              );
+              // Rendering runs across animation frames, which are timers here.
+              await (
+                jest as unknown as { runAllTimersAsync(): Promise<void> }
+              ).runAllTimersAsync();
+              await rendered;
+            }
+            return {
+              anchors: Array.from(renderer.node.querySelectorAll('a')),
+              requests: fetchMock.mock.calls.length
+            };
+          } finally {
+            jest.useRealTimers();
+            renderer.dispose();
+            settings.fetch = previousFetch;
+          }
+        }
+
+        // A program writing a date to stderr prints a path-like string on
+        // every line, and every chunk of the stream re-renders the whole
+        // output, so the same path is looked up over and over. Resolving each
+        // of those separately froze the application, see
+        // https://github.com/jupyterlab/jupyterlab/issues/19721
+        it('should resolve a repeated path once', async () => {
+          const { anchors, requests } = await renderStreamedLines([
+            { scope: 'server', path: 'dates.log' }
+          ]);
+
+          expect(anchors).toHaveLength(50);
+          expect(anchors[49].getAttribute('href')).toBe('dates.log');
+          expect(requests).toBe(1);
+        });
+
+        it('should resolve a repeated path which is not a file once', async () => {
+          const { anchors, requests } = await renderStreamedLines([]);
+
+          expect(anchors).toHaveLength(50);
+          expect(anchors[49].getAttribute('href')).toBeNull();
+          expect(requests).toBe(1);
         });
       });
     });

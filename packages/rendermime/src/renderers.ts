@@ -2324,8 +2324,8 @@ namespace Private {
       const resolution = await resolver.resolvePath(path);
 
       if (!resolution) {
-        // Bail if the file does not exist
-        console.log('Path resolution bailing: does not exist');
+        // Not a file: the ordinary outcome for a path-like string, and an
+        // output can hold thousands, so it is not reported.
         return;
       }
 
