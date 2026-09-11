@@ -63,8 +63,9 @@ export interface IOutputAreaModel extends IDisposable {
    * #### Notes
    * The output bundle is copied.
    * Contiguous stream outputs of the same `name` are combined.
+   * The trust override applies only to the new output.
    */
-  add(output: nbformat.IOutput): number;
+  add(output: nbformat.IOutput, trusted?: boolean): number;
 
   /**
    * Remove an output at a given index.
@@ -275,15 +276,16 @@ export class OutputAreaModel implements IOutputAreaModel {
    * #### Notes
    * The output bundle is copied.
    * Contiguous stream outputs of the same `name` are combined.
+   * The trust override applies only to the new output.
    */
-  add(output: nbformat.IOutput): number {
+  add(output: nbformat.IOutput, trusted?: boolean): number {
     // If we received a delayed clear message, then clear now.
     if (this.clearNext) {
       this.clear();
       this.clearNext = false;
     }
 
-    return this._add(output);
+    return this._add(output, trusted);
   }
 
   /**
@@ -337,8 +339,7 @@ export class OutputAreaModel implements IOutputAreaModel {
    *
    * @returns The list length
    */
-  private _add(value: nbformat.IOutput): number {
-    const trusted = this._trusted;
+  private _add(value: nbformat.IOutput, trusted = this._trusted): number {
     value = JSONExt.deepCopy(value);
 
     // Normalize the value.

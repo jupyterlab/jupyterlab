@@ -140,6 +140,13 @@ describe('outputarea/model', () => {
         expect(model.length).toBe(1);
       });
 
+      it('should accept a trust override for an output', () => {
+        model = new OutputAreaModel({ trusted: true });
+        model.add(DEFAULT_OUTPUTS[0], false);
+        expect(model.trusted).toBe(true);
+        expect(model.get(0).trusted).toBe(false);
+      });
+
       it('should consolidate consecutive stream outputs of the same kind', () => {
         model.add(DEFAULT_OUTPUTS[0]);
         model.add(DEFAULT_OUTPUTS[1]);

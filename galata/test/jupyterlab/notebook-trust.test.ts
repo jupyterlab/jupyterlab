@@ -1,11 +1,45 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
 import { expect, test } from '@jupyterlab/galata';
 
 const fileName = 'trust.ipynb';
 const TRUSTED_SELECTOR = 'svg[data-icon="ui-components:trusted"]';
 const NOT_TRUSTED_SELECTOR = 'svg[data-icon="ui-components:not-trusted"]';
+const PAGER_SCRIPT_MARKER_CLASS = 'jp-pager-script-marker';
+
+type PagerWindow = Window & { __jpPagerScriptExecuted?: boolean };
+
+async function runPagerPayload(
+  page: IJupyterLabPageFixture,
+  html: string,
+  text = 'Pager plain text'
+): Promise<void> {
+  const source = [
+    'from IPython import get_ipython',
+    '',
+    'get_ipython().payload_manager.write_payload({',
+    '    "source": "page",',
+    '    "data": {',
+    `        "text/html": ${JSON.stringify(html)},`,
+    `        "text/plain": ${JSON.stringify(text)}`,
+    '    },',
+    '    "metadata": {}',
+    '})'
+  ].join('\n');
+
+  await page.notebook.setCell(0, 'code', source);
+  await page.notebook.runCell(0, true);
+}
+
+async function pagerScriptExecuted(
+  page: IJupyterLabPageFixture
+): Promise<boolean> {
+  return page.evaluate(() => {
+    return Boolean((window as PagerWindow).__jpPagerScriptExecuted);
+  });
+}
 
 test.describe('Notebook Trust', () => {
   test.beforeEach(async ({ page }) => {
@@ -77,5 +111,31 @@ test.describe('Notebook Trust', () => {
     // It should no longer be trusted
     await expect(page.locator(TRUSTED_SELECTOR)).toHaveCount(0);
     await expect(page.locator(NOT_TRUSTED_SELECTOR)).toHaveCount(1);
+  });
+
+  test('Pager HTML is sanitized before rendering as cell output', async ({
+    page
+  }) => {
+    await page.evaluate(() => {
+      delete (window as PagerWindow).__jpPagerScriptExecuted;
+    });
+
+    await runPagerPayload(
+      page,
+      [
+        `<div class="${PAGER_SCRIPT_MARKER_CLASS}">`,
+        '<strong>Pager cell output HTML</strong>',
+        '<script>window.__jpPagerScriptExecuted = true;</script>',
+        '</div>'
+      ].join('')
+    );
+
+    const output = page.locator('.jp-OutputArea').first();
+    await expect(output.locator(`.${PAGER_SCRIPT_MARKER_CLASS}`)).toContainText(
+      'Pager cell output HTML'
+    );
+    await expect(output.locator('script')).toHaveCount(0);
+    await expect(page.locator('.jp-HelpPanel')).toHaveCount(0);
+    expect(await pagerScriptExecuted(page)).toBe(false);
   });
 });

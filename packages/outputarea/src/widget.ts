@@ -838,7 +838,7 @@ export class OutputArea extends Widget {
       data: (page as any).data as nbformat.IMimeBundle,
       metadata: {}
     };
-    model.add(output);
+    model.add(output, false);
   };
 
   /**
