@@ -182,3 +182,37 @@ test.describe('Completer', () => {
     });
   });
 });
+
+test.describe('Tab with the completer shortcut disabled', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/shortcuts-extension:shortcuts': {
+        shortcuts: [
+          {
+            command: 'completer:invoke-notebook',
+            keys: ['Tab'],
+            selector:
+              '.jp-Notebook.jp-mod-editMode .jp-mod-completer-enabled:not(.jp-mod-at-line-beginning)',
+            disabled: true
+          }
+        ]
+      }
+    }
+  });
+
+  test('should insert a tab in a code cell', async ({ page }) => {
+    await page.notebook.createNew(fileName);
+    await page.notebook.setCell(0, 'code', 'option');
+    await page.notebook.enterCellEditingMode(0);
+    const editor = page.locator(
+      '.lm-Widget.jp-mod-active .jp-CodeMirrorEditor.jp-InputArea-editor'
+    );
+    await expect(editor).toHaveClass(/jp-mod-completer-enabled/);
+    await page.keyboard.press('End');
+    await page.keyboard.press('Tab');
+
+    expect(await page.notebook.getCellTextInput(0)).toBe('option\t');
+    await expect(page.locator(COMPLETER_SELECTOR)).toBeHidden();
+  });
+});
