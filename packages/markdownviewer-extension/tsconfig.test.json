@@ -18,6 +18,9 @@
       "path": "../docregistry"
     },
     {
+      "path": "../documentsearch"
+    },
+    {
       "path": "../fileeditor"
     },
     {

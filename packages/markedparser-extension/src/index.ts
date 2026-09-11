@@ -64,7 +64,7 @@ export interface IRenderOptions {
 export function createMarkdownParser(
   languages: IEditorLanguageRegistry,
   options?: IRenderOptions
-): IMarkdownParser {
+) {
   return {
     render: (content: string): Promise<string> => {
       return Private.render(content, languages, options);

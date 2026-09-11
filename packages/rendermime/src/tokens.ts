@@ -263,7 +263,8 @@ export interface IMarkdownBlockToken {
   raw: string;
 
   /**
-   * Markdown parser token type (e.g. `heading`, `paragraph`, `code`)
+   * Block type, using the marked lexer vocabulary (e.g. `heading`,
+   * `paragraph`, `code`, `list`, `table`, `html`, `space`)
    */
   type: string;
 }

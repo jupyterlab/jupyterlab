@@ -12,7 +12,6 @@ import type {
 import { ILayoutRestorer } from '@jupyterlab/application';
 import { Clipboard, ISanitizer, WidgetTracker } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 import type { MarkdownDocument } from '@jupyterlab/markdownviewer';
@@ -103,8 +102,6 @@ function activate(
     );
   }
 
-  // Synchronize scrolling between Markdown source editors and their previews.
-  // Only available when the file editor tracker is present.
   const scrollSync = editorTracker
     ? new MarkdownScrollSyncManager({
         editorTracker,
@@ -116,31 +113,28 @@ function activate(
     ...MarkdownViewer.defaultConfig
   };
 
-  // Default scroll sync state for newly opened previews.
+  // The setting only seeds new previews; the toolbar button overrides it per
+  // preview.
   let syncScrollingDefault = false;
 
   /**
    * Update the settings of a widget.
    */
   function updateWidget(widget: MarkdownViewer): void {
-    (
-      Object.keys(
-        MarkdownViewer.defaultConfig
-      ) as (keyof MarkdownViewer.IConfig)[]
-    ).forEach(k => {
+    Object.keys(config).forEach((k: keyof MarkdownViewer.IConfig) => {
       widget.setOption(k, config[k] ?? null);
     });
   }
 
   if (settingRegistry) {
     const updateSettings = (settings: ISettingRegistry.ISettings) => {
-      config = settings.composite as Partial<MarkdownViewer.IConfig>;
-      const syncScrolling = settings.composite['syncScrolling'] === true;
-      if (syncScrolling !== syncScrollingDefault) {
-        syncScrollingDefault = syncScrolling;
-        // Re-apply the new default to every open preview.
+      const { syncScrolling, ...viewerConfig } = settings.composite;
+      config = viewerConfig as Partial<MarkdownViewer.IConfig>;
+      const syncByDefault = syncScrolling === true;
+      if (syncByDefault !== syncScrollingDefault) {
+        syncScrollingDefault = syncByDefault;
         tracker.forEach(widget => {
-          scrollSync?.setEnabled(widget, syncScrolling);
+          scrollSync?.setEnabled(widget, syncByDefault);
         });
       }
       tracker.forEach(widget => {
@@ -162,19 +156,14 @@ function activate(
       });
   }
 
-  // Add a per-preview toolbar button to toggle scroll synchronization.
-  let toolbarFactory:
-    | ((widget: MarkdownDocument) => DocumentRegistry.IToolbarItem[])
-    | undefined;
-  if (scrollSync) {
-    const manager = scrollSync;
-    toolbarFactory = (widget: MarkdownDocument) => [
-      {
-        name: 'syncScrolling',
-        widget: createSyncScrollingButton(widget, manager, trans)
-      }
-    ];
-  }
+  const toolbarFactory = scrollSync
+    ? (widget: MarkdownDocument) => [
+        {
+          name: 'syncScrolling',
+          widget: createSyncScrollingButton(widget, scrollSync, trans)
+        }
+      ]
+    : undefined;
 
   // Register the MarkdownViewer factory.
   const factory = new MarkdownViewerFactory({
@@ -329,11 +318,8 @@ function activate(
 }
 
 /**
- * Create a toolbar button that toggles scroll synchronization for a single
- * Markdown preview.
- *
- * The button reflects and overrides the preview's synchronization state without
- * changing the global `syncScrolling` setting.
+ * Create a toolbar button toggling scroll synchronization for one preview,
+ * without changing the global `syncScrolling` setting.
  */
 function createSyncScrollingButton(
   preview: MarkdownDocument,
@@ -353,8 +339,7 @@ function createSyncScrollingButton(
     }
   });
 
-  // Keep the button in sync with the preview's state, including changes coming
-  // from the settings.
+  // The setting can toggle the preview too.
   const onEnabledChanged = () => {
     button.pressed = scrollSync.isEnabled(preview);
   };

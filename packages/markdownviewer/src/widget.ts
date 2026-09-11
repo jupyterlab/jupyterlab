@@ -39,7 +39,9 @@ export class MarkdownViewer extends Widget {
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this.renderer = options.renderer;
-    this.node.tabIndex = 0;
+    // Keyboard scrolling only reaches the focused node, which must be the
+    // scrollable rendered content rather than this widget.
+    this.renderer.node.tabIndex = 0;
     this.addClass(MARKDOWNVIEWER_CLASS);
 
     const layout = (this.layout = new StackedLayout());
@@ -74,15 +76,11 @@ export class MarkdownViewer extends Widget {
   }
 
   /**
-   * The markdown source last rendered by this widget and its offset in the
-   * model.
-   *
-   * #### Notes
-   * Rendering is throttled: the model may be ahead of the returned source
-   * until the next rendering pass.
+   * The source rendered by the last completed rendering pass and its line
+   * offset in the model; empty before the first pass.
    */
   get renderedSource(): MarkdownViewer.IRenderedSource {
-    return this._renderedSource ?? this._computeRenderedSource();
+    return this._renderedSource;
   }
 
   /**
@@ -162,17 +160,7 @@ export class MarkdownViewer extends Widget {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    this.node.focus();
-  }
-
-  /**
-   * The markdown source that a rendering pass started now would render.
-   */
-  private _computeRenderedSource(): MarkdownViewer.IRenderedSource {
-    const source = this.context.model.toString();
-    return this._config.hideFrontMatter
-      ? Private.removeFrontMatter(source)
-      : { source, lineOffset: 0 };
+    this.renderer.node.focus();
   }
 
   /**
@@ -193,8 +181,13 @@ export class MarkdownViewer extends Widget {
     // Set up for this rendering pass.
     this._renderRequested = false;
     const { context } = this;
-    const renderedSource = this._computeRenderedSource();
+    const { model } = context;
+    const source = model.toString();
     const data: JSONObject = {};
+    // If `hideFrontMatter`is true remove front matter.
+    const renderedSource = this._config.hideFrontMatter
+      ? Private.removeFrontMatter(source)
+      : { source, lineOffset: 0 };
     data[MIMETYPE] = renderedSource.source;
     const mimeModel = new MimeModel({
       data,
@@ -236,7 +229,10 @@ export class MarkdownViewer extends Widget {
   private _ready = new PromiseDelegate<void>();
   private _isRendering = false;
   private _renderRequested = false;
-  private _renderedSource: MarkdownViewer.IRenderedSource | null = null;
+  private _renderedSource: MarkdownViewer.IRenderedSource = {
+    source: '',
+    lineOffset: 0
+  };
   private _rendered = new Signal<MarkdownViewer, void>(this);
 }
 
