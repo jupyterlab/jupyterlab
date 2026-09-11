@@ -105,6 +105,9 @@ test('Filter input is cleared after navigating into a subdirectory', async ({
   await filterInput.fill('mydir');
   await expect(page.locator('.jp-DirListing-item')).toHaveCount(1);
 
+  // Navigating by hand is the behaviour under test here: `openDirectory` would
+  // return to the home directory first, which resets the filter on its own.
+  // eslint-disable-next-line jupyter/galata-prefer-filebrowser-helper
   await page.locator('.jp-DirListing-item:has-text("mydir")').dblclick();
 
   await expect(
