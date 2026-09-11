@@ -616,7 +616,7 @@ A special report will be generated in the folder `benchmark-results` that will c
 The reference, tagged _expected_, is stored in `lab-benchmark-expected.json`. It can be
 created using the `-u` option of Playwright; i.e. `jlpm test:benchmark -u`.
 
-Branch comparisons are run from the
+Branch comparisons can be run from the
 [jupyterlab/benchmarks](https://github.com/jupyterlab/benchmarks/#readme)
 repository, which runs the challenger and reference branches on the same CI
 hardware.
