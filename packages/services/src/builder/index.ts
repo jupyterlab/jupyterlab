@@ -96,21 +96,15 @@ export class BuildManager {
         );
       }
       if (response.status !== 200) {
-        const message = this._trans
-          ? this._trans.__(
-              `Build failed with %1.
-
-        If you are experiencing the build failure after installing an extension (or trying to include previously installed extension after updating JupyterLab) please check the extension repository for new installation instructions as many extensions migrated to the prebuilt extensions system which no longer requires rebuilding JupyterLab (but uses a different installation procedure, typically involving a package manager such as 'pip' or 'conda').
-
-        If you specifically intended to install a source extension, please run 'jupyter lab build' on the server for full output.`,
-              response.status
-            )
-          : `Build failed with ${response.status}.
+        const message = `Build failed with ${response.status}.
 
         If you are experiencing the build failure after installing an extension (or trying to include previously installed extension after updating JupyterLab) please check the extension repository for new installation instructions as many extensions migrated to the prebuilt extensions system which no longer requires rebuilding JupyterLab (but uses a different installation procedure, typically involving a package manager such as 'pip' or 'conda').
 
         If you specifically intended to install a source extension, please run 'jupyter lab build' on the server for full output.`;
-        throw new ServerConnection.ResponseError(response, message);
+        throw new ServerConnection.ResponseError(
+          response,
+          this._trans?.__('%1', message) ?? message
+        );
       }
     });
   }
