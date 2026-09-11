@@ -89,6 +89,51 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#kernelLock', () => {
+      it('should apply the `kernel_lock` metadata to the kernel preference on load', async () => {
+        const panel = utils.createNotebookPanel(context);
+        await context.initialize(true);
+        await context.ready;
+        panel.model!.setKernelLocked(true);
+        // The metadata change propagates into the kernel preference.
+        expect(context.sessionContext.kernelPreference.locked).toBe(true);
+      });
+
+      it('should propagate later `kernel_lock` metadata changes to the preference', async () => {
+        const panel = utils.createNotebookPanel(context);
+        await context.initialize(true);
+        await context.ready;
+        expect(context.sessionContext.kernelPreference.locked).toBeFalsy();
+
+        // Changing the metadata directly (e.g. from the Common Tools dropdown)
+        // must be reflected in the kernel preference.
+        panel.model!.setKernelLocked(true);
+        expect(context.sessionContext.kernelPreference.locked).toBe(true);
+
+        panel.model!.setKernelLocked(false);
+        expect(context.sessionContext.kernelPreference.locked).toBe(false);
+      });
+
+      it('should persist preference lock changes into the metadata', async () => {
+        const panel = utils.createNotebookPanel(context);
+        await context.initialize(true);
+        await context.ready;
+
+        // Locking through the kernel digalog must be written to the notebook metadata.
+        context.sessionContext.kernelPreference = {
+          ...context.sessionContext.kernelPreference,
+          locked: true
+        };
+        expect(panel.model!.kernelLocked).toBe(true);
+
+        context.sessionContext.kernelPreference = {
+          ...context.sessionContext.kernelPreference,
+          locked: false
+        };
+        expect(panel.model!.kernelLocked).toBe(false);
+      });
+    });
+
     describe('.ContentFactory', () => {
       describe('#constructor', () => {
         it('should create a new ContentFactory', () => {
