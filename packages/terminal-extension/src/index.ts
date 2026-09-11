@@ -45,6 +45,7 @@ import {
 } from '@jupyterlab/ui-components';
 import { VDomRenderer } from '@jupyterlab/ui-components';
 import { VDomModel } from '@jupyterlab/ui-components';
+import { Throttler } from '@lumino/polling';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import type { Title, Widget } from '@lumino/widgets';
@@ -487,6 +488,10 @@ class RunningTerminalSignaler {
     stateDB: IStateDB<TerminalTitleState> | null
   ) {
     this._stateDB = stateDB;
+    this._saveTitlesThrottler = new Throttler(() => this._saveTitlesNow(), {
+      limit: 1000,
+      edge: 'trailing'
+    });
     this._ready = this._loadTitles(manager).catch(reason => {
       console.warn('Failed to load terminal title state.', reason);
     });
@@ -593,6 +598,10 @@ class RunningTerminalSignaler {
   }
 
   private _saveTitles(): void {
+    void this._saveTitlesThrottler.invoke();
+  }
+
+  private _saveTitlesNow(): void {
     if (!this._stateDB) {
       return;
     }
@@ -615,6 +624,7 @@ class RunningTerminalSignaler {
 
   private _stateDB: IStateDB<TerminalTitleState> | null;
   private _ready: Promise<void>;
+  private _saveTitlesThrottler: Throttler;
   private _titles = new Map<string, string>();
   private _widgets = new Set<MainAreaWidget<ITerminal.ITerminal>>();
   private _runningChanged = new Signal<this, void>(this);
