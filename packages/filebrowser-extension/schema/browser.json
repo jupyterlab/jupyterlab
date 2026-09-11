@@ -215,37 +215,43 @@
       "type": "boolean",
       "title": "Show last modified column",
       "description": "Whether to show the last modified column",
-      "default": true
+      "default": true,
+      "tags": ["%UI%"]
     },
     "showDateCreatedColumn": {
       "type": "boolean",
       "title": "Show date created column",
       "description": "Whether to show the date created column",
-      "default": false
+      "default": false,
+      "tags": ["%UI%"]
     },
     "showFileSizeColumn": {
       "type": "boolean",
       "title": "Show file size column",
       "description": "Whether to show the file size column",
-      "default": false
+      "default": false,
+      "tags": ["%UI%"]
     },
     "showHiddenFiles": {
       "type": "boolean",
       "title": "Show hidden files",
       "description": "Whether to show hidden files. The server parameter `ContentsManager.allow_hidden` must be set to `True` to display hidden files.",
-      "default": false
+      "default": false,
+      "tags": ["%UI%"]
     },
     "showFileCheckboxes": {
       "type": "boolean",
       "title": "Use checkboxes to select items",
       "description": "Whether to show checkboxes next to files and folders",
-      "default": false
+      "default": false,
+      "tags": ["%UI%"]
     },
     "showFullPath": {
       "type": "boolean",
       "title": "Show full path in browser bread crumbs",
       "description": "Whether to show full path in browser bread crumbs",
-      "default": false
+      "default": false,
+      "tags": ["%UI%"]
     },
     "sortNotebooksFirst": {
       "type": "boolean",
@@ -306,13 +312,15 @@
           "default": 2,
           "minimum": 0
         }
-      }
+      },
+      "tags": ["%UI%"]
     },
     "showFileFilter": {
       "type": "boolean",
       "title": "Show Filter Bar by Default",
       "description": "Show the filter bar by default in the file browser.",
-      "default": false
+      "default": false,
+      "tags": ["%UI%"]
     },
     "clearFilterOnNavigation": {
       "type": "boolean",

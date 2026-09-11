@@ -158,11 +158,11 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
         // Pass filtered results to SettingsFormEditor to only display filtered fields.
         const filtered = filterPlugin
           ? filterPlugin(pluginSettings.plugin)
-          : null;
+          : 'all';
         // If filtered results are an array, only show if the array is non-empty.
         if (
           (activePluginId && activePluginId !== pluginSettings.id) ||
-          (filtered !== null && filtered.length === 0)
+          (Array.isArray(filtered) && filtered.length === 0)
         ) {
           return undefined;
         }
