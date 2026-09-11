@@ -415,8 +415,13 @@ export namespace JupyterFrontEnd {
     /**
      * The browser and file paths if the tree resolver encountered and handled
      * a tree URL or `null` if not. Empty string paths should be ignored.
+     * The optional factory should be used to open the file path.
      */
-    export type Paths = { browser: string; file: string } | null;
+    export type Paths = {
+      browser: string;
+      file: string;
+      factory?: string;
+    } | null;
   }
 }
 
