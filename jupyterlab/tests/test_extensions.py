@@ -1,8 +1,11 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import io
 import json
 import sys
+import tarfile
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -287,6 +290,52 @@ async def test_pypi_manager_install_blocks_policy_denial_before_pip():
 
     assert result == ActionResult(status="error", message="install is not allowed")
     run_mock.assert_not_called()
+
+
+async def test_pypi_manager_install_reads_package_json_from_sdist():
+    download_url = "https://example.com/test-extension-1.0.0.tar.gz"
+    package_json = {
+        "jupyterlab": {
+            "discovery": {
+                "kernel": True,
+                "server": True,
+            }
+        }
+    }
+    package_json_data = json.dumps(package_json).encode("utf-8")
+    sdist_content = io.BytesIO()
+    with tarfile.open(fileobj=sdist_content, mode="w:gz") as sdist:
+        package_json_info = tarfile.TarInfo(
+            "test-extension-1.0.0/share/jupyter/labextensions/test/package.json"
+        )
+        package_json_info.size = len(package_json_data)
+        sdist.addfile(package_json_info, io.BytesIO(package_json_data))
+
+    dry_run_report = {
+        "install": [
+            {
+                "metadata": {"name": "test-extension"},
+                "download_info": {"url": download_url},
+            }
+        ]
+    }
+
+    def run_side_effect(cmd, *args, **kwargs):
+        if "--dry-run" in cmd:
+            return SimpleNamespace(stdout=json.dumps(dry_run_report).encode("utf-8"))
+        return SimpleNamespace(returncode=0, stdout=b"", stderr=b"")
+
+    manager = PyPIExtensionManager()
+    manager.is_install_allowed = AsyncMock(return_value=True)
+    manager._httpx_client.get = AsyncMock(
+        return_value=SimpleNamespace(status_code=200, content=sdist_content.getvalue())
+    )
+
+    with patch("jupyterlab.extensions.pypi.run", side_effect=run_side_effect):
+        result = await manager.install("test-extension")
+
+    assert result == ActionResult(status="ok", needs_restart=["frontend", "kernel", "server"])
+    manager._httpx_client.get.assert_awaited_once_with(download_url)
 
 
 @patch("tornado.httpclient.AsyncHTTPClient", new_callable=fake_client_factory)

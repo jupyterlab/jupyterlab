@@ -589,7 +589,8 @@ must be delayed on minor or major versions.
 
 ## Performance Testing
 
-Benchmark of JupyterLab is done using Playwright. The actions measured are:
+JupyterLab performance benchmarks are implemented with Playwright. The actions
+measured are:
 
 - Opening a file
 - Switching from the file to a simple text file
@@ -598,15 +599,8 @@ Benchmark of JupyterLab is done using Playwright. The actions measured are:
 
 Two files are tested: a notebook with many code cells and another with many markdown cells.
 
-The test is run on the CI by comparing the result in the commit at which a PR branch started and the PR branch head on
-the same CI job to ensure using the same hardware.
-The benchmark job is triggered on:
-
-- Approved PR review
-- PR review that contains the sentence `please run benchmark`
-
-The tests are located in the subfolder `galata/test/benchmark`. And they can be
-executed with the following command:
+The tests are located in the subfolder `galata/test/benchmark`. They can be
+executed locally with the following command:
 
 ```bash
 jlpm test:benchmark
@@ -622,6 +616,19 @@ A special report will be generated in the folder `benchmark-results` that will c
 The reference, tagged _expected_, is stored in `lab-benchmark-expected.json`. It can be
 created using the `-u` option of Playwright; i.e. `jlpm test:benchmark -u`.
 
+Branch comparisons can be run from the
+[jupyterlab/benchmarks](https://github.com/jupyterlab/benchmarks/#readme)
+repository, which runs the challenger and reference branches on the same CI
+hardware.
+
+Memory leak regression tests live in the subfolder `galata/test/memory-leak`.
+They run in the Galata CI workflow as a Chromium-only project with one worker for
+deterministic object counts, and can be executed locally with:
+
+```bash
+jlpm test:memory-leak
+```
+
 ### Benchmark parameters
 
 The benchmark can be customized using the following environment variables:
@@ -629,9 +636,6 @@ The benchmark can be customized using the following environment variables:
 - `BENCHMARK_NUMBER_SAMPLES`: Number of samples to compute the execution time distribution; default 20.
 - `BENCHMARK_OUTPUTFILE`: Benchmark result output file; default `benchmark.json`. It is overridden in the `playwright-benchmark.config.js`.
 - `BENCHMARK_REFERENCE`: Reference name of the data; default is `actual` for current data and `expected` for the reference.
-
-More tests can be carried out manually on JupyterLab branches and run weekly on the default branch in
-[jupyterlab/benchmarks](https://github.com/jupyterlab/benchmarks/#readme) repository.
 
 ## Visual Regression and UI Tests
 

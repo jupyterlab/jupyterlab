@@ -74,6 +74,64 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#_updateSpec()', () => {
+      it('should preserve the previous display name when the spec is unavailable', async () => {
+        const panel = utils.createNotebookPanel(context);
+        context.model.setMetadata('kernelspec', {
+          name: 'python3',
+          display_name: 'Python 3 ML',
+          language: 'python'
+        });
+        const updateSpec = (
+          panel as unknown as {
+            _updateSpec: (kernel: {
+              name: string;
+              spec: Promise<undefined>;
+            }) => Promise<void>;
+          }
+        )._updateSpec;
+
+        await updateSpec.call(panel, {
+          name: 'python3',
+          spec: Promise.resolve(undefined)
+        });
+
+        expect(context.model.getMetadata('kernelspec')).toEqual({
+          name: 'python3',
+          display_name: 'Python 3 ML',
+          language: 'python'
+        });
+      });
+
+      it('should not preserve metadata from a different kernel', async () => {
+        const panel = utils.createNotebookPanel(context);
+        context.model.setMetadata('kernelspec', {
+          name: 'python3',
+          display_name: 'Python 3 ML',
+          language: 'python'
+        });
+        const updateSpec = (
+          panel as unknown as {
+            _updateSpec: (kernel: {
+              name: string;
+              spec: Promise<undefined>;
+            }) => Promise<void>;
+          }
+        )._updateSpec;
+
+        await updateSpec.call(panel, {
+          name: 'julia-1.10',
+          spec: Promise.resolve(undefined)
+        });
+
+        expect(context.model.getMetadata('kernelspec')).toEqual({
+          name: 'julia-1.10',
+          display_name: 'julia-1.10',
+          language: undefined
+        });
+      });
+    });
+
     describe('#dispose()', () => {
       it('should dispose of the resources used by the widget', () => {
         const panel = utils.createNotebookPanel(context);
