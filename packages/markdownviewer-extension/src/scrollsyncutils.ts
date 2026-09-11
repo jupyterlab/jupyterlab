@@ -80,10 +80,6 @@ export function buildBlockAnchors(
   return anchors;
 }
 
-/**
- * Find the index of the first element at or after `start` that matches the
- * token, or `-1`.
- */
 function findMatchingElement(
   token: IMarkdownBlockToken,
   elements: Element[],
@@ -97,9 +93,6 @@ function findMatchingElement(
   return -1;
 }
 
-/**
- * Whether the token renders at least one top-level element.
- */
 function rendersElement(token: IMarkdownBlockToken): boolean {
   if (token.type === 'space' || token.type === 'def' || token.type === 'text') {
     return false;
@@ -141,9 +134,6 @@ function matchesElement(token: IMarkdownBlockToken, element: Element): boolean {
   }
 }
 
-/**
- * The tag name of the first HTML element in a raw HTML block, or `null`.
- */
 function firstHtmlTag(raw: string): string | null {
   const match = raw.match(/^\s*<([a-z][\w:-]*)\b/i);
   return match ? match[1].toLowerCase() : null;
