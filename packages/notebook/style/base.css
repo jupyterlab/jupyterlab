@@ -516,6 +516,12 @@
   contain: layout style paint; /* Isolates layout, style, and paint for this element */
 }
 
+.jp-mod-view-only .jp-cell-toolbar,
+.jp-mod-view-only .jp-cell-menu,
+.jp-mod-view-only .jp-Notebook-footer {
+  display: none !important;
+}
+
 /*-----------------------------------------------------------------------------
 | Printing
 |----------------------------------------------------------------------------*/
