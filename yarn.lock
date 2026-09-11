@@ -4111,15 +4111,25 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/markdownviewer-extension@workspace:packages/markdownviewer-extension"
   dependencies:
+    "@codemirror/view": ^6.39.14
     "@jupyterlab/application": ^4.7.0-alpha.1
     "@jupyterlab/apputils": ^4.8.0-alpha.1
+    "@jupyterlab/codemirror": ^4.7.0-alpha.1
     "@jupyterlab/coreutils": ^6.7.0-alpha.1
+    "@jupyterlab/docregistry": ^4.7.0-alpha.1
     "@jupyterlab/documentsearch": ^4.7.0-alpha.1
+    "@jupyterlab/fileeditor": ^4.7.0-alpha.1
     "@jupyterlab/markdownviewer": ^4.7.0-alpha.1
     "@jupyterlab/rendermime": ^4.7.0-alpha.1
     "@jupyterlab/settingregistry": ^4.7.0-alpha.1
+    "@jupyterlab/testing": ^4.7.0-alpha.1
     "@jupyterlab/toc": ^6.7.0-alpha.1
     "@jupyterlab/translation": ^4.7.0-alpha.1
+    "@jupyterlab/ui-components": ^4.7.0-alpha.1
+    "@lumino/disposable": ^2.1.6
+    "@lumino/signaling": ^2.1.6
+    "@types/jest": ^29.2.0
+    jest: ^29.2.0
     rimraf: ~5.0.5
     typescript: ~5.9.3
   languageName: unknown
@@ -4153,8 +4163,11 @@ __metadata:
     "@jupyterlab/coreutils": ^6.7.0-alpha.1
     "@jupyterlab/mermaid": ^4.7.0-alpha.1
     "@jupyterlab/rendermime": ^4.7.0-alpha.1
+    "@jupyterlab/testing": ^4.7.0-alpha.1
     "@lumino/coreutils": ^2.2.3
     "@types/d3": ^7.4.0
+    "@types/jest": ^29.2.0
+    jest: ^29.2.0
     marked: ^17.0.6
     marked-gfm-heading-id: ^4.1.4
     marked-mangle: ^1.1.13

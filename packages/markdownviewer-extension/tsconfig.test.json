@@ -1,10 +1,6 @@
 {
-  "extends": "../../tsconfigbase",
-  "compilerOptions": {
-    "outDir": "lib",
-    "rootDir": "src"
-  },
-  "include": ["src/*"],
+  "extends": "../../tsconfigbase.test",
+  "include": ["src/*", "test/*"],
   "references": [
     {
       "path": "../application"
@@ -44,6 +40,12 @@
     },
     {
       "path": "../ui-components"
+    },
+    {
+      "path": "."
+    },
+    {
+      "path": "../testing"
     }
   ]
 }
