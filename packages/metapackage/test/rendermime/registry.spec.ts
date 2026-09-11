@@ -594,6 +594,35 @@ describe('rendermime/registry', () => {
           expect(fetchMock).toHaveBeenCalledTimes(1);
         });
 
+        it('should not remember a path the server failed to answer', async () => {
+          // A failed request does not show whether the file exists, unlike an
+          // answer of `resolved: []`.
+          const answers = [
+            () => Promise.reject(new TypeError('offline')),
+            () => Promise.resolve(new Response('', { status: 500 })),
+            () =>
+              Promise.resolve(
+                new Response(
+                  JSON.stringify({
+                    resolved: [{ scope: 'server', path: 'foo.py' }]
+                  }),
+                  { status: 200 }
+                )
+              )
+          ];
+          const { resolver, fetchMock } = resolverWithMockedServer({
+            respond: () => answers.shift()!()
+          });
+
+          expect(await resolver.resolvePath('/tmp/foo.py')).toBeNull();
+          expect(await resolver.resolvePath('/tmp/foo.py')).toBeNull();
+          expect(await resolver.resolvePath('/tmp/foo.py')).toEqual({
+            scope: 'server',
+            path: 'foo.py'
+          });
+          expect(fetchMock).toHaveBeenCalledTimes(3);
+        });
+
         it('should send one request for concurrent resolutions of a path', async () => {
           // A streamed output which prints a path-like string on every line
           // (see https://github.com/jupyterlab/jupyterlab/issues/19721) asks

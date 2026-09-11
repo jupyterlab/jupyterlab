@@ -498,10 +498,13 @@ export namespace RenderMimeRegistry {
           return result;
         },
         error => {
-          // Leave the entry expired so that the next caller asks again.
+          // A failed lookup does not show whether the file exists, so it is
+          // reported as unresolved and left expired: a server hiccup must not
+          // hide a link until the entry ages out.
+          console.warn(`Could not resolve location of ${path}`, error);
           entry.pending = false;
           entry.time = 0;
-          throw error;
+          return null;
         }
       );
       this._resolvePathCache.set(path, entry);
@@ -551,8 +554,7 @@ export namespace RenderMimeRegistry {
 
       let response = await this._makeResolvePathRequest(params);
       if (!response) {
-        console.warn(`Could not resolve location of ${path} using server API`);
-        return null;
+        throw new Error(`Could not reach the server to resolve ${path}`);
       }
 
       if (response.status === 404) {
@@ -560,8 +562,9 @@ export namespace RenderMimeRegistry {
         return undefined;
       }
       if (!response.ok) {
-        console.warn(`Could not resolve location of ${path} using server API`);
-        return null;
+        throw new Error(
+          `Server answered ${response.status} when resolving ${path}`
+        );
       }
       this._resolvePathApiAvailable = true;
 
@@ -587,8 +590,7 @@ export namespace RenderMimeRegistry {
         // Prefer server-scoped paths when both scopes are available.
         return resolved.find(item => item.scope === 'server') ?? resolved[0];
       } catch {
-        console.warn(`Could not resolve location of ${path} using server API`);
-        return null;
+        throw new Error(`Could not read the resolution of ${path}`);
       }
     }
 
@@ -626,10 +628,15 @@ export namespace RenderMimeRegistry {
             path: response.path,
             scope: 'server'
           };
-        } catch {
-          // The file seems like it should be on the server but is not.
-          console.warn(`Could not resolve location of ${path} on server`);
-          return null;
+        } catch (error) {
+          if (
+            error instanceof ServerConnection.ResponseError &&
+            error.response.status === 404
+          ) {
+            // The file seems like it should be on the server but is not.
+            return null;
+          }
+          throw error;
         }
       }
       // The file is not accessible from jupyter-server but maybe it is
