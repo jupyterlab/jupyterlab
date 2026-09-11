@@ -8,6 +8,8 @@ import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import type { IConnectionStatus } from '@jupyterlab/services';
 import { ConnectionStatus, ServiceManager } from '@jupyterlab/services';
 import { PromiseDelegate, Token } from '@lumino/coreutils';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import type { JupyterFrontEndPlugin } from './frontend';
 import { JupyterFrontEnd } from './frontend';
 import { createRendermimePlugins } from './mimerenderers';
@@ -321,6 +323,18 @@ export namespace JupyterLab {
      * Application connection status.
      */
     connectionStatus?: IConnectionStatus;
+
+    /**
+     * A signal announcing plugins which become known only after the
+     * application started, for example the plugins of disabled federated
+     * extensions, whose modules are loaded once the application is idle.
+     *
+     * On each emission, the plugins are appended to `info.availablePlugins`,
+     * the ids of the disabled ones are added to `info.disabled.matches`, and
+     * `info.availablePluginsChanged` is emitted. An emission before the
+     * application is constructed is not seen.
+     */
+    availablePluginsAdded?: ISignal<unknown, IPluginInfo[]>;
   }
 
   /**
@@ -361,6 +375,13 @@ export namespace JupyterLab {
     readonly availablePlugins: IPluginInfo[];
 
     /**
+     * A signal emitted when `availablePlugins` changes, for example once the
+     * plugins of disabled federated extensions, which are loaded after
+     * startup, are known.
+     */
+    readonly availablePluginsChanged?: ISignal<IInfo, void>;
+
+    /**
      * Whether files are cached on the server.
      */
     readonly filesCached: boolean;
@@ -384,12 +405,17 @@ export namespace JupyterLab {
   export class Info implements IInfo {
     constructor({
       connectionStatus,
+      availablePluginsAdded,
       ...options
-    }: Partial<IInfo> & { connectionStatus?: IConnectionStatus } = {}) {
+    }: Partial<IInfo> & {
+      connectionStatus?: IConnectionStatus;
+      availablePluginsAdded?: ISignal<unknown, IPluginInfo[]>;
+    } = {}) {
       this._connectionStatus = connectionStatus ?? new ConnectionStatus();
 
-      this._availablePlugins =
-        options.availablePlugins ?? JupyterLab.defaultInfo.availablePlugins;
+      this._availablePlugins = options.availablePlugins ?? [
+        ...JupyterLab.defaultInfo.availablePlugins
+      ];
       this._devMode = options.devMode ?? JupyterLab.defaultInfo.devMode;
       this._deferred = JSON.parse(
         JSON.stringify(options.deferred ?? JupyterLab.defaultInfo.deferred)
@@ -406,6 +432,8 @@ export namespace JupyterLab {
       );
       this.isConnected =
         options.isConnected ?? JupyterLab.defaultInfo.isConnected;
+
+      availablePluginsAdded?.connect(this._onAvailablePluginsAdded, this);
     }
 
     /**
@@ -413,6 +441,13 @@ export namespace JupyterLab {
      */
     get availablePlugins(): IPluginInfo[] {
       return this._availablePlugins;
+    }
+
+    /**
+     * A signal emitted when `availablePlugins` changes.
+     */
+    get availablePluginsChanged(): ISignal<IInfo, void> {
+      return this._availablePluginsChanged;
     }
 
     /**
@@ -467,11 +502,30 @@ export namespace JupyterLab {
       return this._mimeExtensions;
     }
 
+    /**
+     * Add the announced plugins to the available plugins.
+     */
+    private _onAvailablePluginsAdded(_: unknown, plugins: IPluginInfo[]): void {
+      if (plugins.length === 0) {
+        return;
+      }
+      const disabled = new Set(this._disabled.matches);
+      for (const plugin of plugins) {
+        this._availablePlugins.push(plugin);
+        if (!plugin.enabled && !disabled.has(plugin.id)) {
+          this._disabled.matches.push(plugin.id);
+          disabled.add(plugin.id);
+        }
+      }
+      this._availablePluginsChanged.emit();
+    }
+
     private _devMode: boolean;
     private _deferred: { patterns: string[]; matches: string[] };
     private _disabled: { patterns: string[]; matches: string[] };
     private _mimeExtensions: IRenderMime.IExtensionModule[];
     private _availablePlugins: IPluginInfo[];
+    private _availablePluginsChanged = new Signal<IInfo, void>(this);
     private _filesCached: boolean;
     private _connectionStatus: IConnectionStatus;
   }
