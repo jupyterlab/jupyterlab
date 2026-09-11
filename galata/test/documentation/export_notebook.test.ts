@@ -16,10 +16,7 @@ test.describe('Export Notebook', () => {
 
     await page.sidebar.setWidth();
 
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
-    await page.dblclick('text=Lorenz.ipynb');
+    await page.notebook.openByPath('notebooks/Lorenz.ipynb');
 
     await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
 
@@ -42,11 +39,7 @@ test.describe('Export Notebook', () => {
 
     await page.sidebar.setWidth();
 
-    await page
-      .locator('[aria-label="File Browser Section"]')
-      .getByText('notebooks')
-      .dblclick();
-    await page.getByText('Lorenz.ipynb').dblclick();
+    await page.notebook.openByPath('notebooks/Lorenz.ipynb');
 
     await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 
