@@ -230,7 +230,7 @@ test.describe('Workspace', () => {
     await page.goto();
     const workspaceSelector = page.locator('.jp-WorkspaceSelector-header');
     // Not visible by default
-    expect(await workspaceSelector.isVisible()).toBe(false);
+    await expect(workspaceSelector).toBeHidden();
 
     // Open custom workspace
     await page.goto('workspaces/foo');

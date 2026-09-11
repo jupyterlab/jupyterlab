@@ -154,7 +154,9 @@ export function ExecutionIndicatorComponent(
     return reactElement('busy', progressBar(percentage), [
       <span key={0}>
         {trans.__(
-          `Executed ${executedCellNumber}/${scheduledCellNumber} cells`
+          'Executed %1/%2 cells',
+          executedCellNumber,
+          scheduledCellNumber
         )}
       </span>,
       <span key={1}>
@@ -228,6 +230,22 @@ export class ExecutionIndicator extends VDomRenderer<ExecutionIndicator.Model> {
     super(new ExecutionIndicator.Model());
     this.translator = translator || nullTranslator;
     this.addClass('jp-mod-highlighted');
+  }
+
+  /**
+   * Dispose the widget and its model.
+   *
+   * `VDomRenderer.dispose` drops its reference to the model without
+   * disposing it; undisposed, the model stays connected to the session
+   * context (which outlives this widget) and its current notebook stays
+   * reachable. The model is owned here: it is created in the constructor.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this.model?.dispose();
+    super.dispose();
   }
 
   /**
@@ -378,13 +396,17 @@ export namespace ExecutionIndicator {
             this
           );
 
+          // The cleanup handlers are registered with this model as receiver:
+          // without one they would sit on the context until it is disposed,
+          // keeping the notebook captured by this scope reachable even after
+          // the model itself is disposed and cleared.
           context.disposed.connect(ctx => {
             ctx.connectionStatusChanged.disconnect(
               contextConnectionStatusChanged,
               this
             );
             ctx.statusChanged.disconnect(contextStatusChanged, this);
-          });
+          }, this);
           const handleKernelMsg = (
             sender: Kernel.IKernelConnection,
             msg: Kernel.IAnyMessageArgs
@@ -413,9 +435,10 @@ export namespace ExecutionIndicator {
               this._startTimer(nb);
             }
           };
-          context.session?.kernel?.anyMessage.connect(handleKernelMsg);
-          context.session?.kernel?.disposed.connect(kernel =>
-            kernel.anyMessage.disconnect(handleKernelMsg)
+          context.session?.kernel?.anyMessage.connect(handleKernelMsg, this);
+          context.session?.kernel?.disposed.connect(
+            kernel => kernel.anyMessage.disconnect(handleKernelMsg, this),
+            this
           );
           const kernelChangedSlot = (
             _: ISessionContext,
@@ -429,13 +452,14 @@ export namespace ExecutionIndicator {
               this._resetTime(state);
               this.stateChanged.emit(void 0);
               if (kernelData.newValue) {
-                kernelData.newValue.anyMessage.connect(handleKernelMsg);
+                kernelData.newValue.anyMessage.connect(handleKernelMsg, this);
               }
             }
           };
-          context.kernelChanged.connect(kernelChangedSlot);
-          context.disposed.connect(ctx =>
-            ctx.kernelChanged.disconnect(kernelChangedSlot)
+          context.kernelChanged.connect(kernelChangedSlot, this);
+          context.disposed.connect(
+            ctx => ctx.kernelChanged.disconnect(kernelChangedSlot, this),
+            this
           );
         }
       }
@@ -583,6 +607,15 @@ export namespace ExecutionIndicator {
      * @param  data - the state to be updated.
      */
     private _tick(data: IExecutionState): void {
+      if (this.isDisposed) {
+        // The slots that would clear this interval are disconnected when the
+        // model is disposed, so the interval has to terminate itself
+        // (`_notebookExecutionProgress` is a `WeakMap`, so `dispose` cannot
+        // enumerate the states to clear them there).
+        clearInterval(data.interval);
+        clearTimeout(data.timeout);
+        return;
+      }
       data.totalTime += 1;
       this.stateChanged.emit(void 0);
     }

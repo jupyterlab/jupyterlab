@@ -49,10 +49,14 @@ export async function addKernelRunningSessionManager(
   const { commands, contextMenu, serviceManager } = app;
   const { kernels, kernelspecs, sessions } = serviceManager;
   const { runningChanged, RunningKernel } = Private;
+  // This function is called from a plugin `activate`, so both throttlers live
+  // for the application session; there is no owner to hand them to.
+  // eslint-disable-next-line jupyter/require-disposable-ownership
   const throttler = new Throttler(() => runningChanged.emit(undefined), 100);
   const trans = translator.load('jupyterlab');
   const shutdownUnusedLabel = trans.__('Shut Down Unused');
   let shutdownUnusedEnabled = false;
+  // eslint-disable-next-line jupyter/require-disposable-ownership
   const shutdownUnusedThrottler = new Throttler(
     checkShutdownUnusedEnabled,
     10000

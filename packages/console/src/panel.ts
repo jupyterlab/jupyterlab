@@ -63,10 +63,11 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
     sessionContext = this._sessionContext =
       sessionContext ??
       new SessionContext({
+        driveName: manager.contents.driveName(path),
         kernelManager: manager.kernels,
         sessionManager: manager.sessions,
         specsManager: manager.kernelspecs,
-        path: manager.contents.localPath(path),
+        path,
         name: name || trans.__('Console %1', count),
         type: 'console',
         kernelPreference: options.kernelPreference,

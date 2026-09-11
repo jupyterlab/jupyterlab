@@ -80,10 +80,8 @@ test.describe('Code Folding Menu', () => {
     await cellEditor
       .locator('span[title="unfold"]')
       .waitFor({ state: 'visible', timeout: 5000 });
-    const unfoldCount = await cellEditor
-      .locator('span[title="unfold"]')
-      .count();
-    expect(unfoldCount).toBe(1);
+    const unfoldCount = cellEditor.locator('span[title="unfold"]');
+    await expect(unfoldCount).toHaveCount(1);
 
     // Verify that there are still multiple lines
     const currentLineCount = await cellEditor.locator('.cm-line').count();
@@ -95,12 +93,10 @@ test.describe('Code Folding Menu', () => {
     await cellEditor
       .locator('span[title="unfold"]')
       .waitFor({ state: 'detached', timeout: 5000 });
-    const unfoldCountAfter = await cellEditor
-      .locator('span[title="unfold"]')
-      .count();
-    expect(unfoldCountAfter).toBe(0);
-    const finalLineCount = await cellEditor.locator('.cm-line').count();
-    expect(finalLineCount).toBe(initialLineCount);
+    const unfoldCountAfter = cellEditor.locator('span[title="unfold"]');
+    await expect(unfoldCountAfter).toHaveCount(0);
+    const finalLineCount = cellEditor.locator('.cm-line');
+    await expect(finalLineCount).toHaveCount(initialLineCount);
   });
 
   test('Should fold and unfold all subregions', async ({ page }) => {
@@ -123,17 +119,13 @@ test.describe('Code Folding Menu', () => {
       .waitFor({ state: 'visible', timeout: 5000 });
 
     // Count unfold spans - 2 (if and else block)
-    const unfoldCount = await cellEditor
-      .locator('span[title="unfold"]')
-      .count();
-    expect(unfoldCount).toBe(2);
+    const unfoldCount = cellEditor.locator('span[title="unfold"]');
+    await expect(unfoldCount).toHaveCount(2);
 
     // Unfold all subregions
     await page.menu.clickMenuItem('View>Code Folding>Unfold All Subregions');
-    const unfoldCountAfter = await cellEditor
-      .locator('span[title="unfold"]')
-      .count();
-    expect(unfoldCountAfter).toBe(0);
+    const unfoldCountAfter = cellEditor.locator('span[title="unfold"]');
+    await expect(unfoldCountAfter).toHaveCount(0);
   });
 
   test('Should fold and unfold all Regions', async ({ page }) => {
@@ -153,21 +145,17 @@ test.describe('Code Folding Menu', () => {
       .waitFor({ state: 'visible', timeout: 5000 });
 
     // Verify only top regions (class names) are visible
-    const visibleLineCount = await cellEditor.locator('.cm-line').count();
-    expect(visibleLineCount).toBe(5);
+    const visibleLineCount = cellEditor.locator('.cm-line');
+    await expect(visibleLineCount).toHaveCount(5);
 
-    const unfoldCount = await cellEditor
-      .locator('span[title="unfold"]')
-      .count();
-    expect(unfoldCount).toBe(2);
+    const unfoldCount = cellEditor.locator('span[title="unfold"]');
+    await expect(unfoldCount).toHaveCount(2);
 
     // Unfold all
     await page.menu.clickMenuItem('View>Code Folding>Unfold All Regions');
-    const unfoldCountAfter = await cellEditor
-      .locator('span[title="unfold"]')
-      .count();
-    expect(unfoldCountAfter).toBe(0);
-    const finalLineCount = await cellEditor.locator('.cm-line').count();
-    expect(finalLineCount).toBe(initialLineCount);
+    const unfoldCountAfter = cellEditor.locator('span[title="unfold"]');
+    await expect(unfoldCountAfter).toHaveCount(0);
+    const finalLineCount = cellEditor.locator('.cm-line');
+    await expect(finalLineCount).toHaveCount(initialLineCount);
   });
 });

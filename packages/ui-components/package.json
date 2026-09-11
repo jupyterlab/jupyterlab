@@ -40,8 +40,8 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyter/react-components": "^0.16.6",
-    "@jupyter/web-components": "^0.16.6",
+    "@jupyter/react-components": "^0.17.1",
+    "@jupyter/web-components": "^0.17.1",
     "@jupyterlab/coreutils": "^6.7.0-alpha.1",
     "@jupyterlab/observables": "^5.7.0-alpha.1",
     "@jupyterlab/rendermime-interfaces": "^3.15.0-alpha.1",

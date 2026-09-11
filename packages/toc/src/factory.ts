@@ -95,7 +95,7 @@ export abstract class TableOfContentsFactory<
       });
 
     widget.disposed.connect(() => {
-      monitor.activityStopped.disconnect(updateHeadings);
+      monitor.dispose();
       context.pathChanged.disconnect(updateTitle);
     });
 

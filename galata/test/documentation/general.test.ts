@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import type { NotebookPanel } from '@jupyterlab/notebook';
 import path from 'path';
 import {
   ensureMathTypeset,
@@ -25,11 +26,21 @@ test.use({
       // once https://github.com/ipython/ipython/pull/15144 is released
       // we can use SOURCE_DATE_EPOCH env variable instead
       showBanner: false
+    },
+    // Comm messages go to a kernel subshell by default, so an ipywidgets
+    // callback can run on that thread while the main shell is still executing
+    // cells. Both then use matplotlib's global pyplot state, and the Lorenz
+    // figure is captured while it is still being drawn. Keeping comms on the
+    // main shell makes the output deterministic.
+    '@jupyterlab/apputils-extension:kernels-settings': {
+      commsOverSubshells: 'disabled'
     }
   }
 });
 
 test.describe('General', () => {
+  const COMMON_TOOLS_CELL_ID = 'right-sidebar-common-tools-cell';
+
   test('Welcome', async ({ page }) => {
     await galata.Mock.freezeContentLastModified(page, filterContent);
     await page.goto();
@@ -168,6 +179,37 @@ test.describe('General', () => {
     });
 
     await page.notebook.createNew();
+    // Give the initial cell a deterministic ID so the Common Tools
+    // property inspector metadata is stable in the screenshot.
+    await page.evaluate(cellId => {
+      const notebookPanel = window.galata.app.shell
+        .currentWidget as NotebookPanel;
+      const notebook = notebookPanel.content;
+      const activeCell = notebook.activeCell;
+      const activeCellIndex = notebook.activeCellIndex;
+
+      if (!notebookPanel.model || !activeCell || activeCellIndex < 0) {
+        throw new Error(
+          'No active cell available for Common Tools screenshot.'
+        );
+      }
+
+      const cellJSON = activeCell.model.toJSON();
+      const sharedModel = notebookPanel.model.sharedModel;
+      sharedModel.transact(() => {
+        sharedModel.deleteCell(activeCellIndex);
+        sharedModel.insertCell(activeCellIndex, {
+          ...cellJSON,
+          id: cellId
+        });
+      });
+      notebook.activeCellIndex = activeCellIndex;
+    }, COMMON_TOOLS_CELL_ID);
+    await page.waitForFunction(cellId => {
+      const notebookPanel = window.galata.app.shell
+        .currentWidget as NotebookPanel;
+      return notebookPanel.content.activeCell?.model.id === cellId;
+    }, COMMON_TOOLS_CELL_ID);
     await page.click('[title="Property Inspector"]');
     await page.sidebar.setWidth(251, 'right');
 
@@ -181,12 +223,16 @@ test.describe('General', () => {
 
     await page.click('.jp-PropertyInspector >> text=Common Tools');
 
-    // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18460
+    // Settling the kernel before the snapshot: `language_info` and `kernelspec`
+    // are written to the notebook metadata when it resolves, and each write
+    // rebuilds the form below.
     await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 
-    await expect(
-      page.locator('.jp-ActiveCellTool .jp-InputPrompt')
-    ).not.toBeEmpty();
+    // Asserted positively: `not.toBeEmpty()` also passes when the element is
+    // missing altogether.
+    await expect(page.locator('.jp-ActiveCellTool .jp-InputPrompt')).toHaveText(
+      '[ ]:'
+    );
     await expect(
       page.locator('.jp-ActiveCellTool .jp-InputPrompt')
     ).not.toHaveClass(/lm-mod-hidden/);
@@ -255,33 +301,31 @@ test.describe('General', () => {
     expect(newNotebookMetadata).toContain('"base_numbering":3');
 
     // Test the active cell widget
-    await expect(
-      page.locator('.jp-ActiveCellTool .jp-ActiveCellTool-Content pre')
-    ).toHaveText('Raw cell');
-    await expect(
-      page.locator('.jp-ActiveCellTool .jp-InputPrompt')
-    ).toHaveClass(/lm-mod-hidden/);
+    const activeCellPreview = page.locator(
+      '.jp-ActiveCellTool .jp-ActiveCellTool-Content pre'
+    );
+    const activeCellPrompt = page.locator('.jp-ActiveCellTool .jp-InputPrompt');
+
+    await expect(activeCellPreview).toHaveText('Raw cell');
+    await expect(activeCellPrompt).toHaveClass(/lm-mod-hidden/);
     await (await page.notebook.getCellInputLocator(1))?.click();
     await page.keyboard.type(' content');
-    await expect(
-      page.locator('.jp-ActiveCellTool .jp-ActiveCellTool-Content pre')
-    ).toHaveText('Raw cell content');
+    await expect(activeCellPreview).toHaveText('Raw cell content');
 
     await page.notebook.addCell('code', 'print("test")');
-    await expect(
-      page.locator('.jp-ActiveCellTool .jp-ActiveCellTool-Content pre')
-    ).toHaveText('print("test")');
-    await expect(
-      page.locator('.jp-ActiveCellTool .jp-InputPrompt')
-    ).not.toHaveClass(/lm-mod-hidden/);
-    await expect(page.locator('.jp-ActiveCellTool .jp-InputPrompt')).toHaveText(
-      '[ ]:'
-    );
+    await expect(activeCellPreview).toHaveText('print("test")');
+    await expect(activeCellPrompt).not.toHaveClass(/lm-mod-hidden/);
+    await expect(activeCellPrompt).toHaveText('[ ]:');
+
+    await page.notebook.selectCells(1);
+    await expect(activeCellPrompt).toHaveClass(/lm-mod-hidden/);
+
+    await page.notebook.selectCells(2);
+    await expect(activeCellPrompt).not.toHaveClass(/lm-mod-hidden/);
+    await expect(activeCellPrompt).toHaveText('[ ]:');
 
     await page.notebook.runCell(2, true);
-    await expect(page.locator('.jp-ActiveCellTool .jp-InputPrompt')).toHaveText(
-      '[1]:'
-    );
+    await expect(activeCellPrompt).toHaveText('[1]:');
   });
 
   test('File menu', async ({ page }) => {
@@ -485,6 +529,7 @@ test.describe('General', () => {
 
     if (testInfo.config.updateSnapshots !== 'none') {
       // Wait a bit for the map to load when updating the snapshots
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(300);
     }
 
@@ -607,6 +652,7 @@ test.describe('General', () => {
     await page.keyboard.press('Enter');
 
     // Wait for command answer
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(200);
 
     expect(await page.screenshot()).toMatchSnapshot('terminal_layout.png');
