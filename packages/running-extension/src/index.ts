@@ -30,7 +30,6 @@ import {
   launcherIcon,
   runningIcon
 } from '@jupyterlab/ui-components';
-import { addKernelRunningSessionManager } from './kernels';
 import { addOpenTabsSessionManager } from './opentabs';
 import { addRecentlyClosedSessionManager } from './recents';
 
@@ -67,10 +66,8 @@ const plugin: JupyterFrontEndPlugin<IRunningSessionManagers> = {
     if (labShell) {
       addOpenTabsSessionManager(runningSessionManagers, translator, labShell);
     }
-    void addKernelRunningSessionManager(
-      runningSessionManagers,
-      translator,
-      app
+    void import('./kernels').then(({ addKernelRunningSessionManager }) =>
+      addKernelRunningSessionManager(runningSessionManagers, translator, app)
     );
 
     return runningSessionManagers;

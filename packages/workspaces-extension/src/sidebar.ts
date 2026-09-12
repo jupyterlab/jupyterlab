@@ -13,7 +13,6 @@ import type { IRunningSessions } from '@jupyterlab/running';
 import { IRunningSessionManagers } from '@jupyterlab/running';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import type { Workspace } from '@jupyterlab/services';
-import { WORKSPACE_ITEM_CLASS } from './commands';
 import { blankIcon, checkIcon, deleteIcon } from '@jupyterlab/ui-components';
 
 /**
@@ -39,6 +38,7 @@ export const workspacesSidebar: JupyterFrontEndPlugin<void> = {
     translator: ITranslator | null
   ) => {
     const trans = (translator ?? nullTranslator).load('jupyterlab');
+    const { WORKSPACE_ITEM_CLASS } = await import('./commands');
 
     class WorkspaceItem implements IRunningSessions.IRunningItem {
       constructor(workspace: Workspace.IWorkspace) {

@@ -12,12 +12,9 @@ import { sleep } from '@jupyterlab/testing';
 import { nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { Token } from '@lumino/coreutils';
-import plugins from '../src/index';
 
 describe('@jupyterlab/apputils-extension', () => {
-  const statePlugin = plugins.find(
-    p => p.id === '@jupyterlab/apputils-extension:state'
-  ) as JupyterFrontEndPlugin<IStateDB>;
+  let statePlugin: JupyterFrontEndPlugin<IStateDB>;
 
   let commands: CommandRegistry;
   let navigateMock: jest.Mock;
@@ -27,6 +24,13 @@ describe('@jupyterlab/apputils-extension', () => {
   let workspacesMock: { fetch: jest.Mock; save: jest.Mock };
   let app: JupyterFrontEnd;
   let resolver: IWindowResolver;
+
+  beforeAll(async () => {
+    const { default: plugins } = await import('../src/index');
+    statePlugin = plugins.find(
+      p => p.id === '@jupyterlab/apputils-extension:state'
+    ) as JupyterFrontEndPlugin<IStateDB>;
+  });
 
   beforeEach(() => {
     commands = new CommandRegistry();

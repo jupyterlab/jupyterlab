@@ -32,14 +32,107 @@ import {
 } from '@jupyterlab/ui-components';
 import type { ReadonlyJSONValue } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
-import type { FieldProps } from '@rjsf/utils';
-import validatorAjv8 from '@rjsf/validator-ajv8';
+import type { FieldProps, ValidatorType } from '@rjsf/utils';
 import React from 'react';
 
 /**
  * CodeMirror settings plugin ID
  */
 const SETTINGS_ID = '@jupyterlab/codemirror-extension:plugin';
+
+interface IDefaultConfigFieldProps extends FieldProps {
+  /**
+   * CodeMirror editor extensions registry.
+   */
+  extensionRegistry: EditorExtensionRegistry;
+
+  /**
+   * Language translator.
+   */
+  translator: ITranslator | null;
+}
+
+function DefaultConfigField(
+  props: IDefaultConfigFieldProps
+): JSX.Element | null {
+  const { extensionRegistry, translator } = props;
+  const [validator, setValidator] = React.useState<ValidatorType | null>(null);
+  const properties = React.useMemo(
+    () => extensionRegistry.settingsSchema,
+    [extensionRegistry]
+  ) as any;
+
+  React.useEffect(() => {
+    let mounted = true;
+    void import('@rjsf/validator-ajv8').then(module => {
+      if (mounted) {
+        setValidator(() => module.default);
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  if (!validator) {
+    return null;
+  }
+
+  let defaultFormData: Record<string, any>;
+  if (props.name in props.formContext.defaultFormData) {
+    defaultFormData = props.formContext.defaultFormData[props.name];
+  } else {
+    defaultFormData = {};
+  }
+  // Only provide customizable options
+  for (const [key, value] of Object.entries(
+    extensionRegistry.defaultConfiguration
+  )) {
+    if (typeof properties[key] !== 'undefined' && !(key in defaultFormData)) {
+      defaultFormData[key] = value;
+    }
+  }
+
+  return (
+    <div className="jp-FormGroup-contentNormal">
+      <h3 className="jp-FormGroup-fieldLabel jp-FormGroup-contentItem">
+        {props.schema.title}
+      </h3>
+      {props.schema.description && (
+        <div className="jp-FormGroup-description">
+          {props.schema.description}
+        </div>
+      )}
+      <FormComponent
+        schema={{
+          title: props.schema.title,
+          description: props.schema.description,
+          type: 'object',
+          properties,
+          additionalProperties: false
+        }}
+        validator={validator}
+        formData={{ ...defaultFormData, ...props.formData }}
+        formContext={{ defaultFormData }}
+        liveValidate
+        onChange={e => {
+          // Only save non-default values
+          const nonDefault: Record<string, ReadonlyJSONValue> = {};
+          for (const [property, value] of Object.entries(e.formData ?? {})) {
+            const default_ = defaultFormData[property];
+            if (default_ === undefined || !JSONExt.deepEqual(value, default_)) {
+              nonDefault[property] = value;
+            }
+          }
+          props.onChange(nonDefault);
+        }}
+        tagName="div"
+        translator={translator ?? nullTranslator}
+        buttonStyle="icons"
+      />
+    </div>
+  );
+}
 
 /**
  * CodeMirror language registry provider.
@@ -151,71 +244,12 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
 
         formRegistry?.addRenderer(`${SETTINGS_ID}.defaultConfig`, {
           fieldRenderer: (props: FieldProps) => {
-            let defaultFormData: Record<string, any>;
-            const properties = React.useMemo(
-              () => registry.settingsSchema,
-              []
-            ) as any;
-            if (props.name in props.formContext.defaultFormData) {
-              defaultFormData = props.formContext.defaultFormData[props.name];
-            } else {
-              defaultFormData = {};
-            }
-            // Only provide customizable options
-            for (const [key, value] of Object.entries(
-              registry.defaultConfiguration
-            )) {
-              if (
-                typeof properties[key] !== 'undefined' &&
-                !(key in defaultFormData)
-              ) {
-                defaultFormData[key] = value;
-              }
-            }
-
             return (
-              <div className="jp-FormGroup-contentNormal">
-                <h3 className="jp-FormGroup-fieldLabel jp-FormGroup-contentItem">
-                  {props.schema.title}
-                </h3>
-                {props.schema.description && (
-                  <div className="jp-FormGroup-description">
-                    {props.schema.description}
-                  </div>
-                )}
-                <FormComponent
-                  schema={{
-                    title: props.schema.title,
-                    description: props.schema.description,
-                    type: 'object',
-                    properties,
-                    additionalProperties: false
-                  }}
-                  validator={validatorAjv8}
-                  formData={{ ...defaultFormData, ...props.formData }}
-                  formContext={{ defaultFormData }}
-                  liveValidate
-                  onChange={e => {
-                    // Only save non-default values
-                    const nonDefault: Record<string, ReadonlyJSONValue> = {};
-                    for (const [property, value] of Object.entries(
-                      e.formData ?? {}
-                    )) {
-                      const default_ = defaultFormData[property];
-                      if (
-                        default_ === undefined ||
-                        !JSONExt.deepEqual(value, default_)
-                      ) {
-                        nonDefault[property] = value;
-                      }
-                    }
-                    props.onChange(nonDefault);
-                  }}
-                  tagName="div"
-                  translator={translator ?? nullTranslator}
-                  buttonStyle="icons"
-                />
-              </div>
+              <DefaultConfigField
+                {...props}
+                extensionRegistry={registry}
+                translator={translator}
+              />
             );
           }
         });

@@ -146,10 +146,6 @@ import { CellBarExtension } from '@jupyterlab/cell-toolbar';
 import { cellExecutor } from './cellexecutor';
 import { logNotebookOutput } from './nboutput';
 import {
-  ActiveCellTool,
-  CellIdField
-} from './tool-widgets/activeCellToolWidget';
-import {
   CellMetadataField,
   NotebookMetadataField
 } from './tool-widgets/metadataEditorFields';
@@ -1373,7 +1369,7 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   requires: [INotebookTracker, IFormRendererRegistry, IEditorLanguageRegistry],
   optional: [ITranslator],
-  activate: (
+  activate: async (
     // Register the custom field.
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
@@ -1381,6 +1377,8 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
     languages: IEditorLanguageRegistry,
     translator?: ITranslator
   ) => {
+    const { ActiveCellTool, CellIdField } =
+      await import('./tool-widgets/activeCellToolWidget');
     // The field renderer is used by rjsf as a React component, so it runs on
     // every rebuild of the metadata form. The tool is created once and reused:
     // constructing one per render would rebuild the prompt and the preview from

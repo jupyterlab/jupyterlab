@@ -41,7 +41,6 @@ import {
 import { UUID } from '@lumino/coreutils';
 import type { DockLayout } from '@lumino/widgets';
 import * as React from 'react';
-import { LogConsoleStatus } from './status';
 
 const LOG_CONSOLE_FACTORY = 'LogConsole';
 const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';
@@ -79,7 +78,7 @@ const logConsolePlugin: JupyterFrontEndPlugin<ILoggerRegistry> = {
 /**
  * Activate the Log Console extension.
  */
-function activateLogConsole(
+async function activateLogConsole(
   app: JupyterFrontEnd,
   rendermime: IRenderMimeRegistry,
   translator: ITranslator,
@@ -89,10 +88,11 @@ function activateLogConsole(
   statusBar: IStatusBar | null,
   settingRegistry: ISettingRegistry | null,
   toolbarRegistry: IToolbarWidgetRegistry | null
-): ILoggerRegistry {
+): Promise<ILoggerRegistry> {
   const trans = translator.load('jupyterlab');
   let logConsoleWidget: MainAreaWidget<LogConsolePanel> | null = null;
   let logConsolePanel: LogConsolePanel | null = null;
+  const { LogConsoleStatus } = await import('./status');
 
   let toolbarFactory: ReturnType<typeof createToolbarFactory> | undefined;
   if (settingRegistry && toolbarRegistry) {

@@ -272,6 +272,7 @@ export default defineConfig([
       'jupyter/incorrect-translator-usage': 'error',
       'jupyter/no-untranslated-string': 'error',
       'jupyter/no-pageconfig-base-url': 'error',
+      'jupyter/prefer-lazy-imports': 'error',
       'jupyter/require-signal-cleanup': [
         'error',
         { longLivedTypes: LONG_LIVED_TYPES }
