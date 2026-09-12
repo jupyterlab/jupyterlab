@@ -88,6 +88,18 @@
   },
   "jupyter.lab.shortcuts": [
     {
+      "command": "console:replace-selection",
+      "keys": ["Alt -"],
+      "selector": "[data-jp-editor-language='r']",
+      "args": { "text": "<- " }
+    },
+    {
+      "command": "console:replace-selection",
+      "keys": ["Accel Shift M"],
+      "selector": "[data-jp-editor-language='r']",
+      "args": { "text": "%>% " }
+    },
+    {
       "command": "console:run-forced",
       "keys": ["Shift Enter"],
       "selector": ".jp-CodeConsole[data-jp-interaction-mode='notebook'] .jp-CodeConsole-promptCell"

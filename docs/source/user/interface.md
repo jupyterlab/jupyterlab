@@ -287,6 +287,53 @@ wish to run are passed in the `args` argument as a list of strings:
 In this example `docmanager:save` and `application:close` commands are mapped to `Accel T`.
 The commands are run in succession when you use the shortcut.
 
+### Shortcuts for R operators
+
+JupyterLab provides shortcuts for operators that are common in R when an editor
+using the R language is active. Press `Alt -` to insert `<-` or `Accel Shift M`
+to insert `%>%`. These shortcuts are scoped to R language editors, so they do
+not affect editors using another language.
+
+To customize these shortcuts, or to make them available for other commands,
+you can use the macro command in the Keyboard Shortcuts settings:
+
+```json
+{
+  "shortcuts": [
+    {
+      "command": "apputils:run-first-enabled",
+      "keys": ["Alt -"],
+      "args": {
+        "commands": [
+          "console:replace-selection",
+          "fileeditor:replace-selection",
+          "notebook:replace-selection"
+        ],
+        "args": {"text": "<- "}
+      },
+      "selector": "body"
+    },
+    {
+      "command": "apputils:run-first-enabled",
+      "keys": ["Accel Shift M"],
+      "args": {
+        "commands": [
+          "console:replace-selection",
+          "fileeditor:replace-selection",
+          "notebook:replace-selection"
+        ],
+        "args": {"text": "%>% "}
+      },
+      "selector": "body"
+    }
+  ]
+}
+```
+
+`run-first-enabled` sends the replacement to the first command that is
+available in the current context. On macOS, `Accel` is `Cmd`; on Windows and
+Linux, it is `Ctrl`.
+
 ### Markdown editing shortcuts
 
 When editing markdown cells, you can use {kbd}`Ctrl+B` ({kbd}`Cmd+B` on macOS) to toggle bold formatting.
