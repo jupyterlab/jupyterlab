@@ -545,10 +545,7 @@ export default defineConfig([
     files: ['galata/test/**/*.ts', 'galata/test/**/*.tsx'],
     plugins: { playwright: playwrightPlugin, jupyter: jupyterPlugin },
     rules: {
-      // A warning while the documentation and benchmark tests, which drive the
-      // file browser by hand to take their screenshots, are migrated to the
-      // helpers.
-      'jupyter/galata-prefer-filebrowser-helper': 'warn',
+      'jupyter/galata-prefer-filebrowser-helper': 'error',
       // Custom Galata guards not covered by eslint-plugin-playwright.
       'no-restricted-syntax': [
         'error',
