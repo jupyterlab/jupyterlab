@@ -24,9 +24,12 @@ import {
 } from '@jupyterlab/lsp';
 import { NotebookAdapter } from '@jupyterlab/notebook';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
+import type { SessionContext } from '@jupyterlab/apputils';
+import type { KernelMessage, Session } from '@jupyterlab/services';
 import { ServerConnection } from '@jupyterlab/services';
-import { signalToPromise } from '@jupyterlab/testing';
+import { signalToPromise, sleep } from '@jupyterlab/testing';
 import { PromiseDelegate } from '@lumino/coreutils';
+import type { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
 const spy = jest.spyOn(ServerConnection, 'makeRequest');
@@ -167,6 +170,107 @@ describe('@jupyterlab/lsp', () => {
 
       adapter1.dispose();
       adapter2.dispose();
+    });
+  });
+
+  describe('NotebookAdapter', () => {
+    let shell: LabShell;
+    let adapterTracker: WidgetLSPAdapterTracker;
+
+    beforeEach(() => {
+      shell = new LabShell({ waitForRestore: false });
+      adapterTracker = new WidgetLSPAdapterTracker({ shell });
+      Widget.attach(shell, document.body);
+    });
+
+    afterEach(() => {
+      shell.dispose();
+      adapterTracker.dispose();
+    });
+
+    it('should not initialize after disposal when the language server manager becomes ready later', async () => {
+      const { languageServerManager, options } = createManagers(adapterTracker);
+      const ready = new PromiseDelegate<void>();
+      const readySpy = jest
+        .spyOn(languageServerManager, 'ready', 'get')
+        .mockReturnValue(ready.promise);
+      const context = await NBTestUtils.createMockContext(false);
+      const panel = NBTestUtils.createNotebookPanel(context);
+      try {
+        const adapter = new NotebookAdapter(panel, options);
+        const isReadySpy = jest.spyOn(adapter, 'isReady');
+
+        adapter.dispose();
+        ready.resolve();
+        await sleep(0);
+
+        expect(isReadySpy).not.toHaveBeenCalled();
+      } finally {
+        readySpy.mockRestore();
+        panel.dispose();
+      }
+    });
+
+    it('should stop polling for readiness once disposed', async () => {
+      const { options } = createManagers(adapterTracker);
+      // Without a kernel, `isReady()` stays false and the adapter polls.
+      const context = await NBTestUtils.createMockContext(false);
+      const panel = NBTestUtils.createNotebookPanel(context);
+      try {
+        const adapter = new NotebookAdapter(panel, options);
+        const isReadySpy = jest.spyOn(adapter, 'isReady');
+        // The poll interval is 50 ms.
+        await sleep(150);
+        expect(isReadySpy.mock.calls.length).toBeGreaterThanOrEqual(2);
+
+        adapter.dispose();
+        const callsAtDisposal = isReadySpy.mock.calls.length;
+        await sleep(300);
+
+        expect(isReadySpy.mock.calls.length).toBe(callsAtDisposal);
+      } finally {
+        panel.dispose();
+      }
+    });
+
+    it('should not connect to the session after disposal when the kernel info arrives later', async () => {
+      const { options } = createManagers(adapterTracker);
+      const context = await NBTestUtils.createMockContext(true);
+      const panel = NBTestUtils.createNotebookPanel(context);
+      Widget.attach(panel, document.body);
+      try {
+        const kernel = context.sessionContext.session?.kernel;
+        if (!kernel) {
+          throw new Error('Expected the mock context to have a kernel.');
+        }
+        // Hold the kernel info reply back, as a kernel that is still
+        // starting does.
+        const originalInfo = kernel.info;
+        const info = new PromiseDelegate<KernelMessage.IInfoReply>();
+        Object.defineProperty(kernel, 'info', {
+          configurable: true,
+          value: info.promise
+        });
+
+        const adapter = new NotebookAdapter(panel, options);
+        const onKernelChangedSpy = jest.spyOn(adapter, 'onKernelChanged');
+        await sleep(0);
+
+        adapter.dispose();
+        info.resolve(await originalInfo);
+        await sleep(0);
+
+        expect(adapter.virtualDocument).toBeNull();
+        (
+          context.sessionContext.kernelChanged as Signal<
+            SessionContext,
+            Session.ISessionConnection.IKernelChangedArgs
+          >
+        ).emit({ name: 'kernel', oldValue: null, newValue: kernel });
+        expect(onKernelChangedSpy).not.toHaveBeenCalled();
+      } finally {
+        panel.dispose();
+      }
     });
   });
 
@@ -410,11 +514,10 @@ describe('@jupyterlab/lsp', () => {
   });
 });
 
-async function createAdapter(
-  adapterTracker: WidgetLSPAdapterTracker
-): Promise<NotebookAdapter> {
-  const featureManager = new FeatureManager();
-  const foreignCodeExtractorsManager = new CodeExtractorsManager();
+function createManagers(adapterTracker: WidgetLSPAdapterTracker): {
+  languageServerManager: LanguageServerManager;
+  options: IAdapterOptions;
+} {
   const languageServerManager = new LanguageServerManager({
     retries: 0,
     retriesInterval: 0
@@ -423,15 +526,23 @@ async function createAdapter(
     adapterTracker,
     languageServerManager
   });
+  return {
+    languageServerManager,
+    options: {
+      connectionManager,
+      featureManager: new FeatureManager(),
+      foreignCodeExtractorsManager: new CodeExtractorsManager()
+    }
+  };
+}
 
+async function createAdapter(
+  adapterTracker: WidgetLSPAdapterTracker
+): Promise<NotebookAdapter> {
+  const { languageServerManager, options } = createManagers(adapterTracker);
   const context = await NBTestUtils.createMockContext(false);
   const nb = NBTestUtils.createNotebookPanel(context);
-
-  const adapter = new NotebookAdapter(nb, {
-    connectionManager,
-    featureManager,
-    foreignCodeExtractorsManager
-  });
+  const adapter = new NotebookAdapter(nb, options);
 
   adapter.disposed.connect(() => {
     languageServerManager.dispose();
