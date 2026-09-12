@@ -29,6 +29,7 @@ import {
   SemanticCommand,
   SessionContextDialogs,
   showDialog,
+  showErrorMessage,
   Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
@@ -175,6 +176,8 @@ namespace CommandIDs {
   export const changeKernel = 'notebook:change-kernel';
 
   export const getKernel = 'notebook:get-kernel';
+
+  export const commitMetadataAndSave = 'notebook:commit-metadata-and-save';
 
   export const createConsole = 'notebook:create-console';
 
@@ -1323,6 +1326,7 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
     formRegistry: IFormRendererRegistry,
     translator?: ITranslator
   ) => {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     const editorFactory: CodeEditor.Factory = options =>
       editorServices.factoryService.newInlineEditor(options);
     // Register the custom fields. As with the active cell tool below, the
@@ -1345,7 +1349,6 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
       '@jupyterlab/notebook-extension:metadata-editor.cell-metadata',
       cellComponent
     );
-
     const notebookMetadataField = new NotebookMetadataField({
       editorFactory,
       tracker,
@@ -1357,10 +1360,41 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
         return notebookMetadataField.render(props);
       }
     };
-    formRegistry.addRenderer(
+        formRegistry.addRenderer(
       '@jupyterlab/notebook-extension:metadata-editor.notebook-metadata',
       notebookComponent
     );
+
+    app.commands.addCommand(CommandIDs.commitMetadataAndSave, {
+      label: trans.__('Commit Metadata and Save Notebook'),
+      caption: trans.__(
+        'Commit pending changes in the metadata editors, then save the notebook'
+      ),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: async () => {
+        for (const field of [cellMetadataField, notebookMetadataField]) {
+          const editor = field.editor;
+          if (editor.isDisposed) {
+            continue;
+          }
+          if (!editor.commit()) {
+            void showErrorMessage(
+              trans.__('Invalid Metadata'),
+              trans.__(
+                'The notebook was not saved because the metadata editor contains invalid JSON. Fix the metadata or revert the change, then save again.'
+              )
+            );
+            return;
+          }
+        }
+        return app.commands.execute('docmanager:save');
+      }
+    });
   }
 };
 
