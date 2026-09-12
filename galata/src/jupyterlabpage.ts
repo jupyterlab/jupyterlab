@@ -18,6 +18,7 @@ import {
   SidebarHelper,
   StatusBarHelper,
   StyleHelper,
+  TerminalHelper,
   ThemeHelper
 } from './helpers';
 import * as Utils from './utils';
@@ -86,6 +87,10 @@ export interface IJupyterLabPage {
    * JupyterLab style helpers
    */
   readonly style: StyleHelper;
+  /**
+   * JupyterLab terminal helpers
+   */
+  readonly terminal: TerminalHelper;
   /**
    * JupyterLab theme helpers
    */
@@ -306,6 +311,7 @@ export class JupyterLabPage implements IJupyterLabPage {
     this.statusbar = new StatusBarHelper(page, this.menu);
     this.sidebar = new SidebarHelper(page, this.menu);
     this.style = new StyleHelper(page);
+    this.terminal = new TerminalHelper(page);
     this.theme = new ThemeHelper(page);
     this.debugger = new DebuggerHelper(page, this.sidebar, this.notebook);
   }
@@ -371,6 +377,11 @@ export class JupyterLabPage implements IJupyterLabPage {
    * JupyterLab style helpers
    */
   readonly style: StyleHelper;
+
+  /**
+   * JupyterLab terminal helpers
+   */
+  readonly terminal: TerminalHelper;
 
   /**
    * JupyterLab theme helpers
