@@ -1469,6 +1469,10 @@ export namespace StaticNotebook {
      * notebook’s content to help with navigation.
      */
     showMinimap?: boolean;
+    /**
+     * Whether to auto scroll to the last cell when running all cells.
+     */
+    autoScroll?: boolean;
   }
 
   /**
@@ -1493,7 +1497,8 @@ export namespace StaticNotebook {
     windowingMode: 'contentVisibility',
     accessKernelHistory: false,
     showInputPlaceholder: true,
-    showMinimap: false
+    showMinimap: false,
+    autoScroll: true
   };
 
   /**
