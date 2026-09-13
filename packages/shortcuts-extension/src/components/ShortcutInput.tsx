@@ -24,8 +24,6 @@ type CapturePhase = 'capturing' | 'ready' | 'incompleteIdle';
 export interface IConflicts {
   keys: string[];
   conflictsWith: IShortcutTarget[];
-  overwrite: () => void;
-  cancel: () => void;
 }
 
 export interface IShortcutInputProps {
@@ -121,14 +119,7 @@ export class ShortcutInput extends React.Component<
     this.setState({ activeConflicts: conflicts });
     this.props.displayConflicts({
       conflictsWith: conflicts,
-      keys,
-      overwrite: async () => {
-        await this._overwriteConflicts(conflicts, keys);
-      },
-      cancel: () => {
-        // Hide the input
-        this.props.toggleInput();
-      }
+      keys
     });
   }
 
