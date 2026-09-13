@@ -3,10 +3,13 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+from __future__ import annotations
+
 import json
 import re
 from dataclasses import dataclass, field, fields, replace
 from pathlib import Path
+from typing import Any
 
 import tornado
 from jupyterlab_server.translation_utils import translator
@@ -43,7 +46,7 @@ def _build_check_info(app_options: AppOptions | dict | None) -> dict[str, list[s
     handler = _AppHandler(app_options)
     messages = handler.build_check(fast=True)
     # Decode the messages into a dict:
-    status = {"install": [], "uninstall": [], "update": []}
+    status: dict[str, list[str]] = {"install": [], "uninstall": [], "update": []}
     for msg in messages:
         for key, pattern in _message_map.items():
             match = pattern.match(msg)
@@ -91,7 +94,7 @@ class ExtensionPackage:
     install: dict | None = None
     installed: bool | None = None
     installed_version: str = ""
-    latest_version: str = ""
+    latest_version: str | None = ""
     status: str = "ok"
     author: str | None = None
     license: str | None = None
@@ -147,7 +150,7 @@ class ExtensionManagerOptions(PluginManagerOptions):
     allowed_extensions_uris: set[str] = field(default_factory=set)
     blocked_extensions_uris: set[str] = field(default_factory=set)
     listings_refresh_seconds: int = 60 * 60
-    listings_tornado_options: dict = field(default_factory=dict)
+    listings_tornado_options: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -216,7 +219,7 @@ class PluginManager(LoggingConfigurable):
             for option, value in (ext_options or {}).items()
             if option in plugin_options_field
         }
-        self.options = PluginManagerOptions(**plugin_options)
+        self.options: PluginManagerOptions = PluginManagerOptions(**plugin_options)
 
     async def plugin_locks(self) -> dict:
         """Get information about locks on plugin enabling/disabling"""
@@ -228,8 +231,8 @@ class PluginManager(LoggingConfigurable):
     def _find_locked(self, plugins_or_extensions: list[str]) -> frozenset[str]:
         """Find a subset of plugins (or extensions) which are locked"""
         if self.options.lock_all:
-            return set(plugins_or_extensions)
-        locked_subset = set()
+            return frozenset(plugins_or_extensions)
+        locked_subset: set[str] = set()
         extensions_with_locked_plugins = {
             plugin.split(":")[0] for plugin in self.options.lock_rules
         }
@@ -243,7 +246,7 @@ class PluginManager(LoggingConfigurable):
                 # this is an extension - we need to check for >any< plugin
                 # belonging to said extension
                 locked_subset.add(plugin)
-        return locked_subset
+        return frozenset(locked_subset)
 
     async def disable(self, plugins: str | list[str]) -> ActionResult:
         """Disable a set of plugins (or an extension).
@@ -302,7 +305,7 @@ class ExtensionManager(PluginManager):
     """Base abstract extension manager.
 
     Note:
-        Any concrete implementation will need to implement the five
+        Each concrete implementation will need to implement the five
         following abstract methods:
         - :ref:`metadata`
         - :ref:`get_latest_version`
@@ -336,9 +339,9 @@ class ExtensionManager(PluginManager):
         self.log = self.app_options.logger
         self.app_dir = Path(self.app_options.app_dir)
         self.core_config = self.app_options.core_config
-        self.options = ExtensionManagerOptions(**(ext_options or {}))
+        self.options: ExtensionManagerOptions = ExtensionManagerOptions(**(ext_options or {}))
         self._extensions_cache: dict[str | None, ExtensionsCache] = {}
-        self._listings_cache: dict | None = None
+        self._listings_cache: dict[str, dict[str, object]] | None = None
         self._listings_block_mode = True
         self._listing_fetch: tornado.ioloop.PeriodicCallback | None = None
 
@@ -476,7 +479,7 @@ class ExtensionManager(PluginManager):
 
         # filter using listings settings
         if self._listings_cache is None and self._listing_fetch is not None:
-            await self._listing_fetch.callback()
+            await self._fetch_listings()
 
         cache = self._extensions_cache[query].cache[page]
         if cache is None:
@@ -544,8 +547,12 @@ class ExtensionManager(PluginManager):
             return True
         if self._listings_cache is None:
             await self._fetch_listings()
+        listings_cache = self._listings_cache
+        if listings_cache is None:
+            msg = "Extensions listing cache is not initialized"
+            raise RuntimeError(msg)
         normalized = self._canonicalize_name(name)
-        normalized_cache = {self._canonicalize_name(k) for k in self._listings_cache}
+        normalized_cache = {self._canonicalize_name(k) for k in listings_cache}
         if self._listings_block_mode:
             return normalized not in normalized_cache
         else:
