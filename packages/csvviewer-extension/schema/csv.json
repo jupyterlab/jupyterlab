@@ -8,6 +8,14 @@
   },
   "jupyter.lab.transform": true,
   "properties": {
+    "delimiter": {
+      "title": "Default delimiter",
+      "description": "The default delimiter character for CSV files. Must be a single character.",
+      "type": "string",
+      "default": ",",
+      "minLength": 1,
+      "maxLength": 1
+    },
     "toolbar": {
       "title": "CSV viewer toolbar items",
       "description": "Note: To disable a toolbar item,\ncopy it to User Preferences and add the\n\"disabled\" key. The following example will disable the delimiter selector item:\n{\n  \"toolbar\": [\n    {\n      \"name\": \"delimiter\",\n      \"disabled\": true\n    }\n  ]\n}\n\nToolbar description:",
