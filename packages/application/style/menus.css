@@ -29,8 +29,6 @@
 
 .lm-MenuBar-menu.jp-ThemedContainer {
   top: calc(-2 * var(--jp-border-width));
-  scrollbar-width: none;
-  -ms-overflow-style: none;
   overflow: auto;
   background:
     linear-gradient(var(--jp-layout-color0) 30%, rgba(0, 0, 0, 0)) center top,
@@ -63,10 +61,6 @@
     100% 14px,
     100% 14px;
   background-attachment: local, local, scroll, scroll;
-}
-
-.lm-MenuBar-menu.jp-ThemedContainer::-webkit-scrollbar {
-  display: none;
 }
 
 .lm-MenuBar-item {
