@@ -15,6 +15,8 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import type { Workspace } from '@jupyterlab/services';
 import { blankIcon, checkIcon, deleteIcon } from '@jupyterlab/ui-components';
 
+const WORKSPACE_ITEM_CLASS = 'jp-mod-workspace';
+
 /**
  * The extension populating sidebar with workspaces list.
  */
@@ -29,7 +31,7 @@ export const workspacesSidebar: JupyterFrontEndPlugin<void> = {
   ],
   optional: [ITranslator],
   autoStart: true,
-  activate: async (
+  activate: (
     app: JupyterFrontEnd,
     commands: IWorkspaceCommands,
     model: IWorkspacesModel,
@@ -38,7 +40,6 @@ export const workspacesSidebar: JupyterFrontEndPlugin<void> = {
     translator: ITranslator | null
   ) => {
     const trans = (translator ?? nullTranslator).load('jupyterlab');
-    const { WORKSPACE_ITEM_CLASS } = await import('./commands');
 
     class WorkspaceItem implements IRunningSessions.IRunningItem {
       constructor(workspace: Workspace.IWorkspace) {

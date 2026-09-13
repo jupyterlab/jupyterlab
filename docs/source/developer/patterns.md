@@ -89,6 +89,10 @@ If an object instance should respond to DOM events, create a `handleEvent` metho
 
 We use Promises for asynchronous function calls, and a shim for browsers that do not support them. When handling a resolved or rejected Promise, make sure to check for the current state (typically by checking an `.isDisposed` property) before proceeding.
 
+## Lazy Imports
+
+Extension modules should keep startup imports light. Prefer loading heavy dependencies inside the plugin `activate()` method with `await import(...)`, or even later inside a command, renderer, or user-interaction callback when the dependency is not needed during activation. If activation registers callbacks, renderers, or other extension points that must be available immediately, register them synchronously and lazy-load the heavy implementation inside the callback instead. See the [`jupyter/prefer-lazy-imports`](https://eslint-plugin.readthedocs.io/en/latest/rules/prefer-lazy-imports/) rule for details.
+
 ## Server Requests
 
 To allow hot-swapping the Jupyter Server in custom applications based of JupyterLab components, the request URL should be composed using the base URL from the {ts:interface}`services.ServerConnection.ISettings` instance derived from the service manager, passed down via class constructors as needed. The {ts:function}`coreutils.PageConfig.getBaseUrl` should not be used directly. The following snippets demonstrate the best practice:

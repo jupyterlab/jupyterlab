@@ -67,7 +67,7 @@ const plugin: JupyterFrontEndPlugin<IRunningSessionManagers> = {
       addOpenTabsSessionManager(runningSessionManagers, translator, labShell);
     }
     const { addKernelRunningSessionManager } = await import('./kernels');
-    void addKernelRunningSessionManager(
+    await addKernelRunningSessionManager(
       runningSessionManagers,
       translator,
       app
