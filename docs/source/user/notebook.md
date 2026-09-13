@@ -84,6 +84,12 @@ Pressing {kbd}`Esc` exits Edit Mode, while pressing {kbd}`Enter` enters Edit Mod
 
 ## Working with Cells
 
+Open the Property Inspector from the View menu and expand Common Tools to view
+properties for the active cell. The Cell ID field shows the active cell's
+identifier and provides buttons to copy either the identifier or a direct link
+to that cell. These direct links use the `#cell-id=<cell-id>` syntax described
+in {ref}`urls`.
+
 (drag-drop)=
 
 Drag and drop cells to rearrange your notebook:

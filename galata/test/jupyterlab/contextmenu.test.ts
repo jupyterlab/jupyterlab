@@ -141,6 +141,18 @@ test.describe('Application Context Menu', () => {
     await image.click({ button: 'right' });
 
     expect(await page.menu.isAnyOpen()).toBe(true);
+    for (const action of [
+      'Zoom In',
+      'Zoom Out',
+      'Reset Image',
+      'Rotate Clockwise',
+      'Rotate Counterclockwise',
+      'Flip image horizontally',
+      'Flip image vertically',
+      'Invert Colors'
+    ]) {
+      await expect(page.getByRole('menuitem', { name: action })).toBeVisible();
+    }
     await expect(
       page.getByRole('menuitem', { name: 'Copy Image' })
     ).toBeVisible();
