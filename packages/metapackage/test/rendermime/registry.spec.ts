@@ -582,8 +582,8 @@ describe('rendermime/registry', () => {
         });
 
         it('should send one request for a path which is not a file', async () => {
-          // The reported case: the path-like text resolves to nothing, and
-          // that answer has to be remembered like any other.
+          // The reported case: the path-like text is not a file, and that
+          // answer has to be remembered like any other.
           const { resolver, fetchMock } = resolverWithMockedServer({
             respond: async () =>
               new Response(JSON.stringify({ resolved: [] }), { status: 200 })
@@ -721,6 +721,31 @@ describe('rendermime/registry', () => {
           // The last one is still remembered.
           await resolver.resolvePath('/tmp/foo500.py');
           expect(fetchMock).toHaveBeenCalledTimes(502);
+        });
+
+        it('should keep the other paths when refreshing an expired one in a full cache', async () => {
+          const { resolver, fetchMock } = resolverWithMockedServer();
+          const now = Date.now();
+          const clock = jest.spyOn(Date, 'now').mockReturnValue(now);
+          try {
+            await resolver.resolvePath('/tmp/foo0.py');
+            clock.mockReturnValue(now + 30 * 1000);
+            for (let path = 1; path < 500; path++) {
+              await resolver.resolvePath(`/tmp/foo${path}.py`);
+            }
+            expect(fetchMock).toHaveBeenCalledTimes(500);
+
+            // Only the first path has expired.
+            clock.mockReturnValue(now + 61 * 1000);
+            await resolver.resolvePath('/tmp/foo0.py');
+            expect(fetchMock).toHaveBeenCalledTimes(501);
+
+            // Refreshing it must not have evicted the oldest of the others.
+            await resolver.resolvePath('/tmp/foo1.py');
+            expect(fetchMock).toHaveBeenCalledTimes(501);
+          } finally {
+            clock.mockRestore();
+          }
         });
       });
 
