@@ -80,8 +80,12 @@ const UNUSED: Dict<string[]> = {
     '@plutojl/lang-julia'
   ],
   '@jupyterlab/codemirror-extension': [
+    // only imported asynchronously
+    '@codemirror/commands',
     '@codemirror/lang-markdown',
-    '@codemirror/legacy-modes'
+    '@codemirror/legacy-modes',
+    '@codemirror/search',
+    '@rjsf/validator-ajv8'
   ],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
@@ -93,6 +97,10 @@ const UNUSED: Dict<string[]> = {
     // only (but always) imported asynchronously
     'marked-gfm-heading-id',
     'marked-mangle'
+  ],
+  '@jupyterlab/settingeditor-extension': [
+    // only imported asynchronously
+    '@codemirror/commands'
   ],
   '@jupyterlab/services': ['ws'],
   '@jupyterlab/testing': [

@@ -56,18 +56,21 @@ const plugin: JupyterFrontEndPlugin<IRunningSessionManagers> = {
   requires: [ITranslator],
   optional: [ILabShell],
   autoStart: true,
-  activate: (
+  activate: async (
     app: JupyterFrontEnd,
     translator: ITranslator,
     labShell: ILabShell | null
-  ): IRunningSessionManagers => {
+  ): Promise<IRunningSessionManagers> => {
     const runningSessionManagers = new RunningSessionManagers();
 
     if (labShell) {
       addOpenTabsSessionManager(runningSessionManagers, translator, labShell);
     }
-    void import('./kernels').then(({ addKernelRunningSessionManager }) =>
-      addKernelRunningSessionManager(runningSessionManagers, translator, app)
+    const { addKernelRunningSessionManager } = await import('./kernels');
+    void addKernelRunningSessionManager(
+      runningSessionManagers,
+      translator,
+      app
     );
 
     return runningSessionManagers;

@@ -143,6 +143,7 @@ import { MessageLoop } from '@lumino/messaging';
 import type { ContextMenu, Menu, Widget } from '@lumino/widgets';
 import { Panel } from '@lumino/widgets';
 import { CellBarExtension } from '@jupyterlab/cell-toolbar';
+import React from 'react';
 import { cellExecutor } from './cellexecutor';
 import { logNotebookOutput } from './nboutput';
 import {
@@ -1363,13 +1364,46 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
 /**
  * Registering active cell field.
  */
+type ActiveCellToolRendererProps = FieldProps & {
+  tracker: INotebookTracker;
+  languages: IEditorLanguageRegistry;
+};
+
+type CellIdFieldRendererProps = FieldProps & {
+  tracker: INotebookTracker;
+  translator?: ITranslator;
+};
+
+const ActiveCellToolRenderer = React.lazy(async () => {
+  const { ActiveCellTool } =
+    await import('./tool-widgets/activeCellToolWidget');
+  let tool: InstanceType<typeof ActiveCellTool> | null = null;
+  return {
+    default: (props: ActiveCellToolRendererProps): React.ReactElement => {
+      tool ??= new ActiveCellTool({
+        tracker: props.tracker,
+        languages: props.languages
+      });
+      return tool.render(props);
+    }
+  };
+});
+
+const CellIdFieldRenderer = React.lazy(async () => {
+  const { CellIdField } = await import('./tool-widgets/activeCellToolWidget');
+  return {
+    default: (props: CellIdFieldRendererProps): React.ReactElement =>
+      CellIdField(props)
+  };
+});
+
 const activeCellTool: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:active-cell-tool',
   description: 'Adds active cell fields in the metadata editor tab.',
   autoStart: true,
   requires: [INotebookTracker, IFormRendererRegistry, IEditorLanguageRegistry],
   optional: [ITranslator],
-  activate: async (
+  activate: (
     // Register the custom field.
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
@@ -1377,20 +1411,20 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
     languages: IEditorLanguageRegistry,
     translator?: ITranslator
   ) => {
-    const { ActiveCellTool, CellIdField } =
-      await import('./tool-widgets/activeCellToolWidget');
     // The field renderer is used by rjsf as a React component, so it runs on
-    // every rebuild of the metadata form. The tool is created once and reused:
-    // constructing one per render would rebuild the prompt and the preview from
-    // scratch (showing them empty until the next update) and would leave a
-    // connection to the cell model behind for every abandoned instance.
-    const tool = new ActiveCellTool({
-      tracker,
-      languages
-    });
+    // every rebuild of the metadata form. The lazy renderer keeps one shared
+    // tool instance after the module is loaded.
     const component: IFormRenderer = {
       fieldRenderer: (props: FieldProps) => {
-        return tool.render(props);
+        return React.createElement(
+          React.Suspense,
+          { fallback: null },
+          React.createElement(ActiveCellToolRenderer, {
+            ...props,
+            tracker,
+            languages
+          })
+        );
       }
     };
     formRegistry.addRenderer(
@@ -1400,11 +1434,15 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
 
     const cellIdComponent: IFormRenderer = {
       fieldRenderer: (props: FieldProps) => {
-        return CellIdField({
-          ...props,
-          tracker,
-          translator
-        });
+        return React.createElement(
+          React.Suspense,
+          { fallback: null },
+          React.createElement(CellIdFieldRenderer, {
+            ...props,
+            tracker,
+            translator
+          })
+        );
       }
     };
     formRegistry.addRenderer(
