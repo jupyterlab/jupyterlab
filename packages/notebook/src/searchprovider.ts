@@ -66,10 +66,17 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
   private _onNotebookStateChanged(_: Notebook, args: IChangedArgs<unknown>) {
     if (args.name === 'mode') {
+      if (this._delayedModeChangeHandler !== null) {
+        // Only the most recent mode transition is of interest.
+        clearTimeout(this._delayedModeChangeHandler);
+      }
       // Delay the update to ensure that `document.activeElement` settled.
-      window.setTimeout(() => {
+      this._delayedModeChangeHandler = window.setTimeout(() => {
+        this._delayedModeChangeHandler = null;
+        // The mode can change again before this handler runs; check the
+        // current mode because this is what `_updateSelectionMode()` acts on.
         if (
-          args.newValue === 'command' &&
+          this.widget.content.mode === 'command' &&
           document.activeElement?.closest('.jp-DocumentSearch-overlay')
         ) {
           // Do not request updating mode when user switched focus to search overlay.
@@ -205,6 +212,11 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this
     );
     this._stopObservingLastCell();
+
+    if (this._delayedModeChangeHandler !== null) {
+      clearTimeout(this._delayedModeChangeHandler);
+      this._delayedModeChangeHandler = null;
+    }
 
     super.dispose();
 
@@ -931,6 +943,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   protected delayedActiveCellChangeHandlerReady: Promise<void>;
   private _currentProviderIndex: number | null = null;
   private _delayedActiveCellChangeHandler: number | null = null;
+  private _delayedModeChangeHandler: number | null = null;
   private _filters: IFilters | undefined;
   private _onSelection = false;
   private _selectedCells: number = 1;
