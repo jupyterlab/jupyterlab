@@ -620,7 +620,8 @@ describe('@jupyterlab/notebook', () => {
         expect(provider.getFilters().selection.title).toContain('Line');
 
         // The handler deferred on entering the edit mode has not run yet;
-        // it should not undo the line selection once it does run.
+        // switching to command mode now must not reset the filter to cell
+        // mode once the timers run.
         searchInput.focus();
         panel.content.mode = 'command';
         jest.advanceTimersByTime(0);
