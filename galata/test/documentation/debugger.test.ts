@@ -12,6 +12,16 @@ test.use({
   viewport: { height: 720, width: 1280 }
 });
 
+// Rendering a variable requires a round trip to the kernel, which can be slow
+// when several tests are running in parallel.
+const RENDER_TIMEOUT = 15000;
+
+// Default sizes of the Lumino data grid the variables table is built on, and
+// the position of the `values` variable in it.
+const COLUMN_HEADER_HEIGHT = 20;
+const ROW_HEIGHT = 20;
+const VALUES_ROW = 2;
+
 test.describe('Debugger', () => {
   test('Kernel capability', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
@@ -58,9 +68,6 @@ test.describe('Debugger', () => {
 
     await setBreakpoint(page);
 
-    // Wait for breakpoint to finish appearing
-    await page.waitForTimeout(150);
-
     const breakpointIcon = page
       .locator('.jp-NotebookPanel-notebook')
       .first()
@@ -69,6 +76,7 @@ test.describe('Debugger', () => {
       .nth(2)
       .locator('span.cm-breakpoint-icon');
 
+    // Wait for breakpoint to finish appearing
     await breakpointIcon.waitFor();
     expect(
       await page.screenshot({
@@ -269,6 +277,72 @@ test.describe('Debugger', () => {
     ).toMatchSnapshot('debugger_variables.png');
   });
 
+  test.describe('Variable inspector', () => {
+    test('Table view', async ({ page, tmpPath }) => {
+      await page.goto(`tree/${tmpPath}`);
+
+      await stopOnBreakpoint(page, tmpPath);
+      await page.locator('jp-button[title="Table View"]').click();
+
+      const variablesLocator = await page.debugger.getVariablesPanelLocator();
+      const bbox = (await variablesLocator.boundingBox())!;
+
+      expect(
+        await page.screenshot({
+          clip: { ...bbox, y: bbox.y - 35, height: bbox.height + 35 }
+        })
+      ).toMatchSnapshot('debugger_variables_table.png');
+
+      await page.click('jp-button[title^=Continue]');
+    });
+
+    test('Inspect a variable', async ({ page, tmpPath }) => {
+      await page.goto(`tree/${tmpPath}`);
+
+      await stopOnBreakpoint(page, tmpPath);
+      await page.locator('jp-button[title="Table View"]').click();
+
+      // The table is painted on a canvas, hence the double click on a computed
+      // position rather than on a locator.
+      const grid = page.locator('.jp-DebuggerVariables-grid');
+      const bbox = (await grid.boundingBox())!;
+      await page.mouse.dblclick(
+        bbox.x + bbox.width / 4,
+        bbox.y + COLUMN_HEADER_HEIGHT + ROW_HEIGHT * (VALUES_ROW + 0.5)
+      );
+
+      const inspector = page.locator('#jp-debugger-variable-values');
+      await inspector.waitFor();
+      await expect(inspector.locator('canvas')).not.toHaveCount(0);
+      // The table of the inspected variable is painted on the next frames.
+      // eslint-disable-next-line playwright/no-wait-for-timeout
+      await page.waitForTimeout(200);
+
+      expect(
+        await page.locator('#jp-main-dock-panel').screenshot()
+      ).toMatchSnapshot('debugger_variable_inspector.png');
+
+      await page.click('jp-button[title^=Continue]');
+    });
+
+    test('Render a variable', async ({ page, tmpPath }) => {
+      await page.goto(`tree/${tmpPath}`);
+
+      await stopOnBreakpoint(page, tmpPath);
+
+      await page.debugger.renderVariable('logo');
+      await page
+        .locator('.jp-DebuggerRichVariable img')
+        .waitFor({ timeout: RENDER_TIMEOUT });
+
+      expect(
+        await page.locator('#jp-main-dock-panel').screenshot()
+      ).toMatchSnapshot('debugger_variable_renderer.png');
+
+      await page.click('jp-button[title^=Continue]');
+    });
+  });
+
   test('Call Stack panel', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
 
@@ -430,6 +504,57 @@ async function createNotebook(page: IJupyterLabPageFixture) {
   await page.sidebar.setWidth();
 
   await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
+}
+
+/**
+ * Run a notebook defining variables of different kinds with the debugger
+ * enabled, until it stops in the body of its function.
+ */
+async function stopOnBreakpoint(page: IJupyterLabPageFixture, tmpPath: string) {
+  // The image is loaded from the working directory of the kernel.
+  await page.contents.uploadFile(
+    path.resolve(__dirname, './data/jupyter.png'),
+    `${tmpPath}/jupyter.png`
+  );
+
+  await createNotebook(page);
+
+  // Leave the notebook alone in the main area, as the screenshots taken of it
+  // would otherwise show the launcher opened on start-up as a background tab.
+  const launcher = page.activity.getTabLocator('Launcher');
+  await launcher.locator('.lm-TabBar-tabCloseIcon').click();
+  await launcher.waitFor({ state: 'detached' });
+
+  await page.debugger.switchOn();
+  await page.waitForCondition(() => page.debugger.isOpen());
+  await page.sidebar.setWidth(275, 'right');
+
+  await page.notebook.setCell(
+    0,
+    'code',
+    'from IPython.display import Image\n' +
+      'def summarize(values):\n' +
+      'logo = Image("jupyter.png")\n' +
+      'total = sum(values)\n' +
+      'return total'
+  );
+  await page.notebook.run();
+  await page.notebook.addCell(
+    'code',
+    'measurements = [3, 1, 4, 1, 5]\nsummarize(measurements)'
+  );
+
+  // Stop on the `return total` line.
+  await page.notebook.clickCellGutter(0, 5);
+
+  // Don't wait as it will be blocked
+  await page.notebook.runCell(1, { wait: false });
+
+  await page.debugger.waitForCallStack();
+  await page.debugger.waitForVariables();
+  await expect(page.locator('select[aria-label="Scope"]')).toHaveValue(
+    'Locals'
+  );
 }
 
 async function setBreakpoint(page: IJupyterLabPageFixture) {

@@ -29,7 +29,7 @@ test.describe('Console', () => {
     await executedCell.waitFor();
 
     const cellEditor = executedCell.locator(CELL_EDITOR_SELECTOR);
-    expect(await cellEditor.innerText()).toBe('2 + 2');
+    await expect(cellEditor).toHaveText('2 + 2');
 
     // Focus the editor
     await cellEditor.click();
@@ -42,7 +42,7 @@ test.describe('Console', () => {
     await cellEditor.pressSequentially('more text');
 
     // Expect the editor content to not change
-    expect(await cellEditor.innerText()).toBe('2 + 2');
+    await expect(cellEditor).toHaveText('2 + 2');
   });
 
   test('Should rename the console from the tab context menu', async ({
@@ -255,18 +255,21 @@ async function getStabilisedHeight(
   page: IJupyterLabPageFixture,
   element: Locator
 ) {
-  // Wait for the height to stabilize over 100ms
-  let lastBox: { height: number } | null = null;
-  let currentBox: { height: number } | null = null;
-  let attempts = 0;
-  do {
-    lastBox = currentBox;
-    await page.waitForTimeout(100);
-    currentBox = await element.boundingBox();
-    attempts += 1;
-    if (attempts >= 100) {
-      throw new Error('Height did not stabilize after 100 attempts');
+  // Poll the element's height until two consecutive reads match, i.e. it
+  // has stopped changing. There is no fixed target height to assert on
+  // (it depends on the content under test), so we rely on `toPass`'s
+  // built-in retry/backoff instead of a hand-rolled `waitForTimeout` loop.
+  let lastHeight: number | null = null;
+  let stableHeight: number | null = null;
+  await expect(async () => {
+    const box = await element.boundingBox();
+    const height = box?.height ?? null;
+    const isStable = height !== null && height === lastHeight;
+    lastHeight = height;
+    if (isStable) {
+      stableHeight = height;
     }
-  } while (!(currentBox && lastBox && currentBox.height === lastBox.height));
-  return currentBox.height;
+    expect(isStable).toBe(true);
+  }).toPass({ intervals: [100], timeout: 10000 });
+  return stableHeight!;
 }

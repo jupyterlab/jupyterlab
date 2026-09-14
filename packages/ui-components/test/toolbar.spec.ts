@@ -529,6 +529,65 @@ describe('@jupyterlab/ui-components', () => {
         }
         expect(stored).toEqual([1, 2, 0, 3]);
       });
+
+      it('should remove the entry and shift higher positions when a widget is disposed', () => {
+        toolbar.addItem('a', new Widget());
+        toolbar.addItem('b', new Widget());
+        toolbar.addItem('c', new Widget());
+        const positions = (toolbar as any)._widgetPositions;
+        expect(positions.get('a')).toEqual(0);
+        expect(positions.get('b')).toEqual(1);
+        expect(positions.get('c')).toEqual(2);
+
+        // Dispose 'b' — 'c' should shift down by one.
+        (toolbar.layout as PanelLayout).widgets
+          .find(w => w.node.dataset['jpItemName'] === 'b')!
+          .dispose();
+
+        expect(positions.has('b')).toBe(false);
+        expect(positions.get('a')).toEqual(0);
+        expect(positions.get('c')).toEqual(1);
+      });
+    });
+
+    describe('#insertBefore()', () => {
+      it('should insert before the target after intermediate items have been removed', () => {
+        // Reproduce the pattern used by SidePanelWidget: a permanent 'close'
+        // button is added last, then factory items are inserted before it.
+        toolbar.addItem('spacer', new Widget());
+        const closeBtn = new Widget();
+        toolbar.addItem('close', closeBtn);
+
+        const f1 = new Widget();
+        const f2 = new Widget();
+        toolbar.insertBefore('close', 'f1', f1);
+        toolbar.insertBefore('close', 'f2', f2);
+        expect(Array.from(toolbar.names())).toEqual([
+          'spacer',
+          'f1',
+          'f2',
+          'close',
+          'toolbar-popup-opener'
+        ]);
+
+        // Simulate a factory refresh: dispose old widgets and re-add new ones.
+        f1.dispose();
+        f2.dispose();
+
+        const newF1 = new Widget();
+        const newF2 = new Widget();
+        toolbar.insertBefore('close', 'f1', newF1);
+        toolbar.insertBefore('close', 'f2', newF2);
+
+        // Items must still appear before 'close' and in the original order.
+        expect(Array.from(toolbar.names())).toEqual([
+          'spacer',
+          'f1',
+          'f2',
+          'close',
+          'toolbar-popup-opener'
+        ]);
+      });
     });
   });
 

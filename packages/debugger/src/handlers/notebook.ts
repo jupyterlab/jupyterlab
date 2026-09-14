@@ -51,7 +51,7 @@ export class NotebookHandler implements IDisposable {
       } else if (event.event === 'continued' || event.event === 'terminated') {
         void this._pausedOverlay.hide();
       }
-    });
+    }, this);
 
     if (this._debuggerService.hasStoppedThreads() === true) {
       void this._pausedOverlay.show();
