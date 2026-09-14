@@ -85,6 +85,21 @@ export class SearchDocumentModel
   }
 
   /**
+   * Current state of the replace button.
+   */
+  get replaceEnabled(): boolean {
+    return this._replaceEnabled;
+  }
+
+  /**
+   * Sets the state of the replace button.
+   * @param v - True to enable, false to disable.
+   */
+  set replaceEnabled(v: boolean) {
+    this._replaceEnabled = v;
+  }
+
+  /**
    * Filter definitions for the current provider.
    */
   get filtersDefinition(): { [n: string]: IFilter } {
@@ -266,7 +281,9 @@ export class SearchDocumentModel
    * Highlight the next match.
    */
   async highlightNext(): Promise<void> {
-    await this.searchProvider.highlightNext();
+    const match = await this.searchProvider.highlightNext();
+    this.replaceEnabled = match ? !match.readonly : true;
+
     // Emit state change as the index needs to be updated
     this.stateChanged.emit();
   }
@@ -275,7 +292,9 @@ export class SearchDocumentModel
    * Highlight the previous match
    */
   async highlightPrevious(): Promise<void> {
-    await this.searchProvider.highlightPrevious();
+    const match = await this.searchProvider.highlightPrevious();
+    this.replaceEnabled = match ? !match.readonly : true;
+
     // Emit state change as the index needs to be updated
     this.stateChanged.emit();
   }
@@ -309,6 +328,10 @@ export class SearchDocumentModel
       preserveCase: this.preserveCase,
       regularExpression: this.useRegex
     });
+
+    const currMatch = this.searchProvider.getCurrentMatch?.();
+    this.replaceEnabled = currMatch ? !currMatch.readonly : true;
+
     // Emit state change as the index needs to be updated
     this.stateChanged.emit();
   }
@@ -353,6 +376,9 @@ export class SearchDocumentModel
       if (query) {
         this._searchActive = true;
         await this.searchProvider.startQuery(query, this._filters);
+        // Get the current match and update replaceEnabled state
+        const currMatch = this.searchProvider.getCurrentMatch?.();
+        this.replaceEnabled = currMatch ? !currMatch.readonly : true;
       } else {
         this._searchActive = false;
         await this.searchProvider.endQuery();
@@ -387,6 +413,7 @@ export class SearchDocumentModel
   private _searchExpression = '';
   private _useRegex = false;
   private _wholeWords = false;
+  private _replaceEnabled = true;
 }
 
 namespace Private {
