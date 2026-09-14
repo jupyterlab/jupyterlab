@@ -30,6 +30,10 @@ import {
   launcherIcon,
   runningIcon
 } from '@jupyterlab/ui-components';
+// The plugin activates at startup and registers the Kernels section at once,
+// so the module is needed before the application starts.
+// eslint-disable-next-line jupyter/prefer-lazy-imports
+import { addKernelRunningSessionManager } from './kernels';
 import { addOpenTabsSessionManager } from './opentabs';
 import { addRecentlyClosedSessionManager } from './recents';
 
@@ -56,18 +60,17 @@ const plugin: JupyterFrontEndPlugin<IRunningSessionManagers> = {
   requires: [ITranslator],
   optional: [ILabShell],
   autoStart: true,
-  activate: async (
+  activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
     labShell: ILabShell | null
-  ): Promise<IRunningSessionManagers> => {
+  ): IRunningSessionManagers => {
     const runningSessionManagers = new RunningSessionManagers();
 
     if (labShell) {
       addOpenTabsSessionManager(runningSessionManagers, translator, labShell);
     }
-    const { addKernelRunningSessionManager } = await import('./kernels');
-    await addKernelRunningSessionManager(
+    void addKernelRunningSessionManager(
       runningSessionManagers,
       translator,
       app
