@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { DockPanelSvg } from '@jupyterlab/ui-components';
 import type { Widget } from '@lumino/widgets';
 
