@@ -49,7 +49,7 @@ jobs:
           if [[ "$EVENT_NAME" == "pull_request_review" ]]; then
             echo "Skipping reaction for review body; GitHub does not expose a comment reaction endpoint for it."
           elif [[ "$EVENT_NAME" == "pull_request_review_comment" ]]; then
-            gh api "repos/${REPOSITORY}/pulls/comments/${COMMENT_ID}/reactions" --raw-field 'content=+1'
+            echo "Skipping reaction for review comment to avoid failing the workflow."
           else
             gh api "repos/${REPOSITORY}/issues/comments/${COMMENT_ID}/reactions" --raw-field 'content=+1'
           fi
