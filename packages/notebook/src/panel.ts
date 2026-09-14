@@ -6,6 +6,7 @@ import { isMarkdownCellModel } from '@jupyterlab/cells';
 import { PageConfig } from '@jupyterlab/coreutils';
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidget } from '@jupyterlab/docregistry';
+import type * as nbformat from '@jupyterlab/nbformat';
 import type { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 import type { ITranslator } from '@jupyterlab/translation';
 import { Token } from '@lumino/coreutils';
@@ -250,10 +251,15 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     if (this.isDisposed) {
       return;
     }
+    const oldSpec = this.model!.getMetadata(
+      'kernelspec'
+    ) as nbformat.IKernelspecMetadata;
+    const preserved = oldSpec?.name === kernel.name ? oldSpec : undefined;
     this.model!.setMetadata('kernelspec', {
       name: kernel.name,
-      display_name: spec?.display_name,
-      language: spec?.language
+      display_name:
+        spec?.display_name ?? preserved?.display_name ?? kernel.name,
+      language: spec?.language ?? preserved?.language
     });
   }
 
