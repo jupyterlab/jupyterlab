@@ -42,10 +42,12 @@ export class LruCache<T, U> {
   }
 
   /**
-   * Set a value in the cache, potentially evicting an old item.
+   * Set a value in the cache, potentially evicting the least recently used
+   * item. Replacing a key counts as using it and does not evict another.
    */
   set(key: T, value: U): void {
-    if (this._map.size >= this._maxSize) {
+    const replacing = this._map.delete(key);
+    if (!replacing && this._map.size >= this._maxSize) {
       // Map is non-empty since maxSize >= 1
       this._map.delete(this._map.keys().next().value!);
     }
