@@ -89,6 +89,10 @@ const UNUSED: Dict<string[]> = {
   ],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
+  '@jupyterlab/fileeditor-extension': [
+    // only imported asynchronously
+    '@codemirror/search'
+  ],
   '@jupyterlab/galata-extension': [
     '@fontsource/dejavu-mono',
     '@fontsource/dejavu-sans'
