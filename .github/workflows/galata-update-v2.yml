@@ -68,9 +68,11 @@ jobs:
 
       - name: Wait for galata-test-assets-merged artifact
         id: download
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_HEAD_REF: ${{ steps.get-pr-info.outputs.head-ref }}
         run: |
           PR_NUMBER=${{ github.event.issue.number || github.event.pull_request.number }}
-          PR_HEAD_REF=${{ steps.get-pr-info.outputs.head-ref }}
           ARTIFACT_NAME="galata-test-assets-merged"
           MAX_WAIT=1800  # 30 minutes
           ELAPSED=0
@@ -120,8 +122,6 @@ jobs:
 
           echo "::error::Timeout waiting for artifact after ${MAX_WAIT}s"
           exit 1
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   create-branch:
     name: Replace snapshots
@@ -142,7 +142,7 @@ jobs:
           git config --global user.name 'galata-snapshots-bot'
           git config --global user.email '263663552+galata-snapshots-bot@users.noreply.github.com'
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           ref: refs/pull/${{ github.event.issue.number || github.event.pull_request.number }}/head
           fetch-depth: 1
@@ -150,17 +150,19 @@ jobs:
           path: repo
 
       - name: Download test results
-        run: |
-          gh run download ${{ needs.get-snapshot-updates.outputs.assets-run-id }} --repo ${{ github.repository }} --name galata-test-assets-merged --dir ./test-assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ASSETS_RUN_ID: ${{ needs.get-snapshot-updates.outputs.assets-run-id }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          gh run download "$ASSETS_RUN_ID" --repo "$REPOSITORY" --name galata-test-assets-merged --dir ./test-assets
 
       - name: List tests assets
         run: |
           find ./test-assets -type f -name "*.json" -o -name "*.png"
 
       - name: Get script for unpacking screenshots
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           # we fetch it from main to avoid running code from forks
           ref: ${{ github.event.repository.default_branch }}
@@ -168,6 +170,7 @@ jobs:
           sparse-checkout: scripts/unpack_snapshots.py
           sparse-checkout-cone-mode: false
           path: tools
+          persist-credentials: false
 
       - name: Process JSON reports and unpack snapshots
         run: |
@@ -226,17 +229,20 @@ jobs:
 
       - name: Ensure fork exists
         if: steps.check-changes.outputs.has-changes == 'true'
-        run: |
-          gh repo fork --default-branch-only
-          git remote add bot https://@github.com/galata-snapshots-bot/${{ github.event.repository.name }}.git
-        working-directory: repo
         env:
           GH_TOKEN: ${{ secrets.BOT_USER_PAT }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          gh repo fork --default-branch-only
+          git remote add bot "https://@github.com/galata-snapshots-bot/${REPO_NAME}.git"
+        working-directory: repo
 
       - name: Push to bot fork
         if: steps.check-changes.outputs.has-changes == 'true'
+        env:
+          BRANCH_NAME: ${{ steps.create-branch.outputs.branch-name }}
         run: |
-          git push bot ${{ steps.create-branch.outputs.branch-name }} --force
+          git push bot "$BRANCH_NAME" --force
         working-directory: repo
 
   open-pr:
@@ -250,22 +256,25 @@ jobs:
       pr-action: ${{ steps.open-pr.outputs.pr-action }}
     steps:
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           ref: ${{ needs.create-branch.outputs.branch-name }}
           repository: galata-snapshots-bot/${{ github.event.repository.name }}
           fetch-depth: 1
           token: ${{ secrets.BOT_USER_PAT }}
+          persist-credentials: false
 
       - name: Open Pull Request
         id: open-pr
+        env:
+          GH_TOKEN: ${{ secrets.BOT_USER_PAT }}
+          BASE_REF: ${{ needs.get-snapshot-updates.outputs.pr-head-ref }}
+          TARGET_REPO: ${{ needs.get-snapshot-updates.outputs.pr-head-repo }}
+          HEAD_REF: ${{ needs.create-branch.outputs.branch-name }}
         run: |
           set -ex
 
           PR_NUMBER=${{ github.event.issue.number || github.event.pull_request.number }}
-          BASE_REF="${{ needs.get-snapshot-updates.outputs.pr-head-ref }}"
-          TARGET_REPO="${{ needs.get-snapshot-updates.outputs.pr-head-repo }}"
-          HEAD_REF="${{ needs.create-branch.outputs.branch-name }}"
 
           # Create PR title and body
           PR_TITLE="Update galata snapshots for PR #${PR_NUMBER}"
@@ -304,8 +313,6 @@ jobs:
           echo "pr-url=$PR_URL" >> $GITHUB_OUTPUT
           echo "pr-action=$PR_ACTION" >> $GITHUB_OUTPUT
           echo "Snapshot PR $PR_ACTION: $PR_URL"
-        env:
-          GH_TOKEN: ${{ secrets.BOT_USER_PAT }}
 
   comment-back:
     name: Comment back on the PR
@@ -316,29 +323,40 @@ jobs:
     steps:
       - name: Compose comment message
         id: compose-message
+        env:
+          SNAPSHOT_PR_URL: ${{ needs.open-pr.outputs.pr-url }}
+          SNAPSHOT_PR_ACTION: ${{ needs.open-pr.outputs.pr-action }}
+          SERVER_URL: ${{ github.server_url }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+          ASSETS_RUN_ID: ${{ needs.get-snapshot-updates.outputs.assets-run-id }}
+          CREATE_BRANCH_RESULT: ${{ needs.create-branch.result }}
+          HAS_CHANGES: ${{ needs.create-branch.outputs.has-changes }}
+          OPEN_PR_RESULT: ${{ needs.open-pr.result }}
         run: |
-          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          ASSETS_RUN_ID="${{ needs.get-snapshot-updates.outputs.assets-run-id }}"
-          ASSETS_RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${ASSETS_RUN_ID}"
+          RUN_URL="${SERVER_URL}/${REPOSITORY}/actions/runs/${RUN_ID}"
+          ASSETS_RUN_URL="${SERVER_URL}/${REPOSITORY}/actions/runs/${ASSETS_RUN_ID}"
 
-          if [ "${{ needs.create-branch.result }}" != "success" ]; then
+          if [ "$CREATE_BRANCH_RESULT" != "success" ]; then
             BODY="I failed to update snapshots while preparing/pushing the update branch. [Workflow run](${RUN_URL})"
-          elif [ "${{ needs.create-branch.outputs.has-changes }}" = "false" ]; then
+          elif [ "$HAS_CHANGES" = "false" ]; then
             BODY="I did not detect any snapshot changes. [Workflow run](${RUN_URL})"
-          elif [ "${{ needs.open-pr.result }}" != "success" ]; then
+          elif [ "$OPEN_PR_RESULT" != "success" ]; then
             BODY="I prepared snapshot changes, but opening the snapshot update PR failed. [Workflow run](${RUN_URL})"
-          elif [ "${{ needs.open-pr.outputs.pr-action }}" = "updated" ]; then
-            BODY="I updated the PR ${{ needs.open-pr.outputs.pr-url }} with the latest snapshots from [run ${ASSETS_RUN_ID}](${ASSETS_RUN_URL})."
+          elif [ "$SNAPSHOT_PR_ACTION" = "updated" ]; then
+            BODY="I updated the PR ${SNAPSHOT_PR_URL} with the latest snapshots from [run ${ASSETS_RUN_ID}](${ASSETS_RUN_URL})."
           else
-            BODY="I created the PR ${{ needs.open-pr.outputs.pr-url }} with snapshots from [run ${ASSETS_RUN_ID}](${ASSETS_RUN_URL})."
+            BODY="I created the PR ${SNAPSHOT_PR_URL} with snapshots from [run ${ASSETS_RUN_ID}](${ASSETS_RUN_URL})."
           fi
 
           echo "body=$BODY" >> $GITHUB_OUTPUT
 
       - name: Comment back on the PR
-        run: |
-          PR_NUMBER=${{ github.event.issue.number || github.event.pull_request.number }}
-          gh api repos/${{ github.repository }}/issues/${PR_NUMBER}/comments \
-            --raw-field "body=${{ steps.compose-message.outputs.body }}"
         env:
           GH_TOKEN: ${{ secrets.BOT_USER_PAT }}
+          COMMENT_BODY: ${{ steps.compose-message.outputs.body }}
+          PR_NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          gh api "repos/${REPOSITORY}/issues/${PR_NUMBER}/comments" \
+            --raw-field "body=$COMMENT_BODY"

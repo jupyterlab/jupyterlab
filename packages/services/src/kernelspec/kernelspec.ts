@@ -4,9 +4,9 @@
 import type { ISignal } from '@lumino/signaling';
 
 import type { IManager as IBaseManager } from '../basemanager';
-import { ISpecModel, ISpecModels } from './restapi';
+import type { ISpecModel, ISpecModels } from './restapi';
 import type { ServerConnection } from '..';
-export { ISpecModel, ISpecModels };
+export type { ISpecModel, ISpecModels };
 
 /**
  * Object which manages kernel instances for a given base url.

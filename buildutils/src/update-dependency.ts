@@ -17,6 +17,7 @@ const versionCache = new Map();
 /**
  * Matches a simple semver range, where the version number could be an npm tag.
  */
+// eslint-disable-next-line regexp/prefer-character-class
 const SEMVER_RANGE = /^(~|\^|=|<|>|<=|>=)?([\w\-.]*)$/;
 
 /**

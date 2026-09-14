@@ -85,16 +85,24 @@
 }
 
 .lm-MenuBar:focus-visible {
-  outline: 1px solid var(--jp-accept-color-active, var(--jp-brand-color1));
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-accept-color-active, var(--jp-focus-outline-color));
+  outline-style: solid;
   outline-offset: -1px;
 }
 
 .lm-MenuBar-menu:focus-visible,
-.lm-MenuBar-item:focus-visible,
 .lm-Menu-item:focus-visible {
   outline: unset;
   outline-offset: unset;
   -moz-outline-radius: unset;
+}
+
+.lm-MenuBar-item:focus-visible {
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
+  outline-offset: -2px;
 }
 
 .lm-MenuBar-item.lm-mod-active {

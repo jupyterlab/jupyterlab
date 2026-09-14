@@ -130,9 +130,22 @@ test.describe('General', () => {
       (document.activeElement as HTMLElement).blur();
     });
 
+    expect
+      .soft(
+        await page.screenshot({
+          clip: { y: 31, x: 0, width: 283, height: 400 }
+        })
+      )
+      .toMatchSnapshot('interface_left.png');
+
+    await page.click('[title="Running Terminals and Kernels"]');
+    await page.click('[aria-label="Open Tabs Section"]', {
+      button: 'right',
+      position: { x: 10, y: 10 }
+    });
     expect(
-      await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 400 } })
-    ).toMatchSnapshot('interface_left.png');
+      await page.screenshot({ clip: { y: 31, x: 0, width: 330, height: 400 } })
+    ).toMatchSnapshot('sidebar_context_menu.png');
   });
 
   test('Right Sidebar', async ({ page, tmpPath }) => {

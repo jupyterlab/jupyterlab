@@ -80,6 +80,12 @@ button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
   align-items: center;
 }
 
+.jp-ToolbarButtonComponent::part(control):focus-visible {
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
+}
+
 .jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-spacer {
   flex-grow: 1;
   flex-shrink: 1;

@@ -717,8 +717,8 @@ Developing a source extension is deprecated. {ref}`Developing prebuilt extension
 While authoring a source extension, you can use the command:
 
 ```bash
-jlpm install   # install npm package dependencies
-jlpm run build  # optional build step if using TypeScript, babel, etc.
+jlpm   # install npm package dependencies
+jlpm build  # optional build step if using TypeScript, babel, etc.
 jupyter labextension install  # install the current directory as an extension
 ```
 
@@ -740,7 +740,7 @@ jupyter lab --watch
 This will cause the application to incrementally rebuild when one of the
 linked packages changes. Note that only compiled JavaScript files (and
 the CSS files) are watched by the Rspack process. This means that if
-your extension is in TypeScript you'll have to run a `jlpm run build`
+your extension is in TypeScript you'll have to run a `jlpm build`
 before the changes will be reflected in JupyterLab. To avoid this step
 you can also watch the TypeScript sources in your extension which is
 usually assigned to the `tsc -w` shortcut. If Rspack doesn't seem to

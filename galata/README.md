@@ -605,7 +605,7 @@ The tests are located in the subfolder [test/benchmark](./test/benchmark). And t
 executed with the following command:
 
 ```bash
-jlpm run test:benchmark
+jlpm test:benchmark
 ```
 
 A special report will be generated in the folder `benchmark-results` that will contain 4 files:
@@ -616,7 +616,7 @@ A special report will be generated in the folder `benchmark-results` that will c
 - `lab-benchmark.vl.json`: The [_Vega-Lite_](https://vega.github.io/vega-lite) description used to produce the figure.
 
 The reference, tagged _expected_, is stored in `lab-benchmark-expected.json`. It can be
-created using the `-u` option of Playwright; i.e. `jlpm run test:benchmark -u`.
+created using the `-u` option of Playwright; i.e. `jlpm test:benchmark -u`.
 
 ### Benchmark parameters
 
@@ -636,13 +636,13 @@ Install dependencies and build
 ```
 cd galata
 jlpm
-jlpm run build
+jlpm build
 ```
 
 For tests to be run, a JupyterLab instance must be up and running. Launch it without credentials. Tests expect to connect JupyterLab from `localhost:8888` by default. If a different URL is to be used, it can be specified by defining `TARGET_URL` environment variable or setting the Playwright `baseURL` fixture.
 
 ```
-jlpm run start
+jlpm start
 ```
 
 > The JupyterLab root directory is randomly generated in the temporary folder (prefixed with _galata-test-_).
@@ -650,7 +650,7 @@ jlpm run start
 ### Running tests
 
 Tests are grouped in two projects: `galata` and `jupyterlab`. The first one is testing Galata helpers and fixtures when the other one is running all tests for Jupyterlab.
-By default, both projects will be executed when running `jlpm run test`. But you can select one project with the CLI option `--project <project-id>`.
+By default, both projects will be executed when running `jlpm test`. But you can select one project with the CLI option `--project <project-id>`.
 
 ## Configuration
 

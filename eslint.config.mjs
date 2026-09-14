@@ -8,6 +8,7 @@ import js from '@eslint/js';
 import globals from 'globals';
 import jestPlugin from 'eslint-plugin-jest';
 import reactPlugin from 'eslint-plugin-react';
+import regexpPlugin from 'eslint-plugin-regexp';
 import prettierPluginRecommended from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
 import * as jsoncParser from 'jsonc-eslint-parser';
@@ -51,7 +52,6 @@ export default defineConfig([
     'galata/playwright-report',
     'jupyterlab/chrome-test.js',
     'jupyterlab/geckodriver',
-    'jupyterlab/staging/yarn.js',
     'jupyterlab/staging/index.js',
     'jupyterlab/staging/webpack.config.js',
     'packages/codemirror/test/foo*.js',
@@ -196,7 +196,11 @@ export default defineConfig([
   },
   {
     files: ['**/*.ts', '**/*.tsx'],
-    extends: [js.configs.recommended, tseslint.configs.recommended],
+    extends: [
+      js.configs.recommended,
+      tseslint.configs.recommended,
+      regexpPlugin.configs.recommended
+    ],
 
     plugins: {
       '@typescript-eslint': tseslint.plugin,
