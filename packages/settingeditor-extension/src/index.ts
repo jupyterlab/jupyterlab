@@ -22,6 +22,7 @@ import {
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { IEditorServices } from '@jupyterlab/codeeditor';
+import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import {
   CommandToolbarButton,
   IFormRendererRegistry,
@@ -38,6 +39,7 @@ import type {
   JsonSettingEditor,
   SettingsEditor
 } from '@jupyterlab/settingeditor';
+import { SettingEditorSearchProvider } from '@jupyterlab/settingeditor';
 import { IPluginManager } from '@jupyterlab/pluginmanager';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -643,4 +645,17 @@ function activateJSON(
   return tracker;
 }
 
-export default [plugin, jsonPlugin];
+/**
+ * A plugin to search settings editor documents
+ */
+const searchProvider: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/settingeditor-extension:search',
+  description: 'Adds search capability to the settings editor.',
+  requires: [ISearchProviderRegistry],
+  autoStart: true,
+  activate: (app: JupyterFrontEnd, registry: ISearchProviderRegistry) => {
+    registry.add('jp-settingEditorSearchProvider', SettingEditorSearchProvider);
+  }
+};
+
+export default [plugin, jsonPlugin, searchProvider];

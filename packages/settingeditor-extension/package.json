@@ -42,6 +42,8 @@
     "@jupyterlab/application": "^4.7.0-alpha.1",
     "@jupyterlab/apputils": "^4.8.0-alpha.1",
     "@jupyterlab/codeeditor": "^4.7.0-alpha.1",
+    "@jupyterlab/codemirror": "^4.7.0-alpha.1",
+    "@jupyterlab/documentsearch": "^4.7.0-alpha.1",
     "@jupyterlab/pluginmanager": "^4.7.0-alpha.1",
     "@jupyterlab/rendermime": "^4.7.0-alpha.1",
     "@jupyterlab/settingeditor": "^4.7.0-alpha.1",
