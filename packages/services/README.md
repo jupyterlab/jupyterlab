@@ -2,7 +2,7 @@
 
 JavaScript client for the Jupyter services REST APIs
 
-[API Docs](https://jupyterlab.readthedocs.io/en/latest/api/)
+[API Docs](https://jupyterlab.readthedocs.io/en/latest/api/modules/services.html)
 
 [REST API Docs](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml)
 
@@ -28,7 +28,7 @@ conda install jupyter-server # jupyter-server 2.0+ is recommended
 
 **Prerequisites**
 
-See the [building instructions for JupyterLab](../../CONTRIBUTING.md), which
+See the [building instructions for JupyterLab](https://github.com/jupyterlab/jupyterlab/blob/main/CONTRIBUTING.md), which
 will build this module as part of the build process.
 
 **Rebuild**
@@ -91,13 +91,13 @@ jupyter lab
 
 Follow the package install instructions first.
 
-See `examples/browser` for an example of using Rspack to bundle the library.
+See [`examples/browser`](https://github.com/jupyterlab/jupyterlab/tree/main/packages/services/examples/browser) for an example of using Rspack to bundle the library.
 
 ## Usage from Node.js
 
 Follow the package install instructions first.
 
-See `examples/node` for an example of using an ES5 node script.
+See [`examples/node`](https://github.com/jupyterlab/jupyterlab/tree/main/packages/services/examples/node) for an example of using an ES5 node script.
 
 ## Usage Examples
 
@@ -105,12 +105,12 @@ See `examples/node` for an example of using an ES5 node script.
 TypeScript. Here are some examples of using parts of this package. See the
 other `examples` subdirectories for more examples.
 
-- [Comms](./examples/browser/src/comm.ts)
-- [Config](./examples/browser/src/config.ts)
-- [Contents](./examples/browser/src/contents.ts)
-- [Kernel](./examples/browser/src/kernel.ts)
-- [Session](./examples/browser/src/session.ts)
-- [Terminal](./examples/browser/src/terminal.ts)
+- [Comms](https://github.com/jupyterlab/jupyterlab/blob/main/packages/services/examples/browser/src/comm.ts)
+- [Config](https://github.com/jupyterlab/jupyterlab/blob/main/packages/services/examples/browser/src/config.ts)
+- [Contents](https://github.com/jupyterlab/jupyterlab/blob/main/packages/services/examples/browser/src/contents.ts)
+- [Kernel](https://github.com/jupyterlab/jupyterlab/blob/main/packages/services/examples/browser/src/kernel.ts)
+- [Session](https://github.com/jupyterlab/jupyterlab/blob/main/packages/services/examples/browser/src/session.ts)
+- [Terminal](https://github.com/jupyterlab/jupyterlab/blob/main/packages/services/examples/browser/src/terminal.ts)
 
 ## Overview
 
@@ -223,6 +223,6 @@ a user-friendly kernel name and status.
 
 Here is a diagram that provides an overview of the different components:
 
-![architecture-diagram](./architecture.png)
+![architecture-diagram](https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/packages/services/architecture.png)
 
-_The diagram can be edited on [diagrams.net](https://diagrams.net) by importing the [source](./architecture.xml)_.
+_The diagram can be edited on [diagrams.net](https://diagrams.net) by importing the [source](https://github.com/jupyterlab/jupyterlab/blob/main/packages/services/architecture.xml)_.
