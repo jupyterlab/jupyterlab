@@ -605,6 +605,16 @@ describe('docregistry/default', () => {
         expect(widget.title.label).toBe(path);
       });
 
+      it('should not rename the document when the title changes', async () => {
+        const rename = jest.spyOn(context, 'rename');
+
+        widget.title.label = 'Custom title';
+        await framePromise();
+
+        expect(rename).not.toHaveBeenCalled();
+        expect(context.localPath).not.toBe('Custom title');
+      });
+
       it('should add the dirty class when the model is dirty', async () => {
         context.model.dirty = true;
         expect(widget.title.className).toContain('jp-mod-dirty');
