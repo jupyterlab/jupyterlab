@@ -36,6 +36,7 @@ import {
 import { ITranslator } from '@jupyterlab/translation';
 import {
   copyIcon,
+  linkIcon,
   pasteIcon,
   refreshIcon,
   terminalIcon
@@ -51,6 +52,8 @@ import { TerminalSearchProvider } from './searchprovider';
  */
 namespace CommandIDs {
   export const copy = 'terminal:copy';
+
+  export const copyLink = 'terminal:copy-link';
 
   export const createNew = 'terminal:create-new';
 
@@ -658,6 +661,57 @@ function addCommands(
   });
 
   /**
+   * Get the terminal widget the context menu was opened over, falling back
+   * to the current terminal.
+   */
+  const contextMenuTerminal =
+    (): MainAreaWidget<ITerminal.ITerminal> | null => {
+      const hitNode = app.contextMenuHitTest(node =>
+        node.classList.contains('jp-Terminal')
+      );
+      if (hitNode) {
+        const widget = tracker.find(value => value.content.node === hitNode);
+        if (widget) {
+          return widget;
+        }
+      }
+      return tracker.currentWidget;
+    };
+
+  /**
+   * Get the URI of the link the context menu was opened over, or `null` if
+   * the context menu was not opened over a link.
+   */
+  const contextMenuLink = (): string | null => {
+    const content = contextMenuTerminal()?.content;
+    return content instanceof XTerm ? content.contextMenuLink : null;
+  };
+
+  /**
+   * Add copy link command
+   */
+  commands.addCommand(CommandIDs.copyLink, {
+    execute: () => {
+      const link = contextMenuLink();
+
+      if (link) {
+        Clipboard.copyToSystem(link);
+      }
+    },
+    isEnabled: () => Boolean(contextMenuLink()),
+    // Only show the command when the context menu was opened over a link.
+    isVisible: () => Boolean(contextMenuLink()),
+    icon: linkIcon.bindprops({ stylesheet: 'menuItem' }),
+    label: trans.__('Copy Link Address'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  /**
    * Add paste command
    */
   commands.addCommand(CommandIDs.paste, {
@@ -714,7 +768,7 @@ function addCommands(
     label: trans.__('Increase Terminal Font Size'),
     execute: async () => {
       const { fontSize } = options;
-      if (fontSize && fontSize < 72) {
+      if (fontSize !== undefined && fontSize < 72) {
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize + 1);
         } catch (err) {
@@ -734,7 +788,7 @@ function addCommands(
     label: trans.__('Decrease Terminal Font Size'),
     execute: async () => {
       const { fontSize } = options;
-      if (fontSize && fontSize > 9) {
+      if (fontSize !== undefined && fontSize > 9) {
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize - 1);
         } catch (err) {
@@ -766,7 +820,10 @@ function addCommands(
       const displayName =
         theme in themeDisplayedName
           ? themeDisplayedName[theme as keyof typeof themeDisplayedName]
-          : trans.__(rawTheme);
+          : // Fallback for themes outside `themeDisplayedName`, so there is no
+            // literal to extract.
+            // eslint-disable-next-line jupyter/no-dynamic-translation
+            trans.__(rawTheme);
       return args['isPalette']
         ? trans.__('Use Terminal Theme: %1', displayName)
         : displayName;

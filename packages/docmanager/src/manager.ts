@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ISessionContext } from '@jupyterlab/apputils';
 import { SessionContextDialogs } from '@jupyterlab/apputils';
@@ -27,6 +26,7 @@ import { SaveHandler } from './savehandler';
 import type {
   IDocumentManager,
   IDocumentManagerDialogs,
+  IDocumentManagerStateChange,
   IDocumentWidgetOpener,
   IRecentsManager
 } from './tokens';
@@ -216,7 +216,7 @@ export class DocumentManager implements IDocumentManager {
   /**
    * Signal triggered when an attribute changes.
    */
-  get stateChanged(): ISignal<IDocumentManager, IChangedArgs<any>> {
+  get stateChanged(): ISignal<IDocumentManager, IDocumentManagerStateChange> {
     return this._stateChanged;
   }
 
@@ -739,7 +739,7 @@ export class DocumentManager implements IDocumentManager {
 
   protected _onWidgetStateChanged(
     sender: DocumentWidgetManager,
-    args: IChangedArgs<any>
+    args: IChangedArgs<boolean, boolean, 'confirmClosingDocument'>
   ): void {
     if (args.name === 'confirmClosingDocument') {
       this._stateChanged.emit(args);
@@ -761,7 +761,10 @@ export class DocumentManager implements IDocumentManager {
   private _urlResolverFactory?: IUrlResolverFactory;
   private _dialogs: ISessionContext.IDialogs;
   private _isConnectedCallback: () => boolean;
-  private _stateChanged = new Signal<DocumentManager, IChangedArgs<any>>(this);
+  private _stateChanged = new Signal<
+    IDocumentManager,
+    IDocumentManagerStateChange
+  >(this);
   private _docManagerDialogs: IDocumentManagerDialogs;
 }
 

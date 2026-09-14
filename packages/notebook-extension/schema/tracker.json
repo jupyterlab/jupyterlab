@@ -841,12 +841,14 @@
       "title": "Side-by-side left margin override",
       "description": "Side-by-side left margin override.",
       "type": "string",
+      "pattern": "^-?(?:0|(?:[0-9]+|[0-9]*\\.[0-9]+)(?:px|em|rem|%|vw|vh|vmin|vmax|ch|ex|cm|mm|in|pt|pc))$",
       "default": "10px"
     },
     "sideBySideRightMarginOverride": {
       "title": "Side-by-side right margin override",
       "description": "Side-by-side right margin override.",
       "type": "string",
+      "pattern": "^-?(?:0|(?:[0-9]+|[0-9]*\\.[0-9]+)(?:px|em|rem|%|vw|vh|vmin|vmax|ch|ex|cm|mm|in|pt|pc))$",
       "default": "10px"
     },
     "sideBySideOutputRatio": {

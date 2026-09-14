@@ -7,14 +7,23 @@ Provides semantic roles for linking to TypeDoc-generated API documentation.
 """
 
 import os
+from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 from docutils import nodes
+from docutils.parsers.rst.states import Inliner
 from sphinx.application import Sphinx
 from sphinx.domains import Domain
+from sphinx.environment import BuildEnvironment
 from sphinx.util.docutils import SphinxRole
 
 SPELLING_BUILD_ENABLED = os.environ.get("JUPYTERLAB_SPELLING_BUILD") == "1"
+RoleResult = tuple[list[nodes.Node], list[nodes.system_message]]
+RoleFunction = Callable[
+    [str, str, str, int, Inliner, dict[str, Any] | None, list[str] | None],
+    RoleResult,
+]
 
 
 class TypeDocReference(SphinxRole):
@@ -93,11 +102,11 @@ class TypeScriptDomain(Domain):
     name = "ts"
     label = "TypeScript"
 
-    def __init__(self, env):
+    def __init__(self, env: BuildEnvironment):
         super().__init__(env)
 
         # Create role functions for each API type
-        self.roles = {}
+        self.roles: dict[str, RoleFunction] = {}
         for api_type in [
             "module",
             "interface",
@@ -109,10 +118,18 @@ class TypeScriptDomain(Domain):
         ]:
             self.roles[api_type] = self._create_role(api_type)
 
-    def _create_role(self, api_type: str):
+    def _create_role(self, api_type: str) -> RoleFunction:
         """Create a role function for a specific API type."""
 
-        def role_function(name, rawtext, text, lineno, inliner, options=None, content=None):
+        def role_function(
+            name: str,
+            rawtext: str,
+            text: str,
+            lineno: int,
+            inliner: Inliner,
+            options: dict[str, Any] | None = None,
+            content: list[str] | None = None,
+        ) -> RoleResult:
             role_instance = TypeDocReference(api_type)
             role_instance.rawtext = rawtext
             role_instance.text = text
@@ -121,7 +138,7 @@ class TypeScriptDomain(Domain):
 
         return role_function
 
-    def role(self, name: str):
+    def role(self, name: str) -> RoleFunction | None:
         """Return the role function for the given role name."""
         return self.roles.get(name)
 

@@ -1164,7 +1164,7 @@ Kernel subshells enable concurrent code execution within kernels that support th
 Subshells are supported by:
 
 - **ipykernel 7.0.0+** (Python kernels) - Kernels advertise support via `supported_features: ['kernel subshells']` in kernel info replies
-- Other kernels implementing [JEP 91](https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html)
+- Other kernels implementing [JEP 91](https://jupyter.org/enhancement-proposals/kernel-subshells/)
 
 **User Interface**
 
@@ -1209,7 +1209,7 @@ if (kernel.supportsSubshells) {
 }
 ```
 
-For detailed specifications, see [JEP 91](https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html).
+For detailed specifications, see [JEP 91](https://jupyter.org/enhancement-proposals/kernel-subshells/).
 
 ## LSP Features
 

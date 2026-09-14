@@ -378,6 +378,7 @@ export class SessionContext implements ISessionContext {
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this._path = options.path ?? UUID.uuid4();
+    this._driveName = options.driveName ?? '';
     this._type = options.type ?? '';
     this._name = options.name ?? '';
     this._setBusy = options.setBusy;
@@ -618,6 +619,10 @@ export class SessionContext implements ISessionContext {
 
     if (this._isRestarting) {
       return 'restarting';
+    }
+
+    if (this._isChangingKernel) {
+      return 'starting';
     }
 
     if (this._pendingKernelName === this.noKernelName) {
@@ -950,13 +955,18 @@ export class SessionContext implements ISessionContext {
 
     // If we already have a session, just change the kernel.
     if (this._session && !this._isTerminating) {
+      this._isChangingKernel = true;
+      this._statusChanged.emit('starting');
       try {
         await this._session.changeKernel(model);
-        return this._session.kernel;
       } catch (err) {
+        this._isChangingKernel = false;
         void this._handleSessionError(err);
         throw err;
       }
+      this._isChangingKernel = false;
+      this._statusChanged.emit(this._session?.kernel?.status || 'unknown');
+      return this._session.kernel;
     }
 
     // Use a UUID for the path to overcome a race condition on the server
@@ -964,7 +974,9 @@ export class SessionContext implements ISessionContext {
     // the kernel finishes starting.
     // We later switch to the real path below.
     // Use the correct directory so the kernel will be started in that directory.
-    const dirName = PathExt.dirname(this._path);
+    const dirName =
+      PathExt.dirname(this._path) ||
+      (this._driveName ? `${this._driveName}:` : '');
     const requestId = (this._pendingSessionRequest = PathExt.join(
       dirName,
       UUID.uuid4()
@@ -1229,6 +1241,7 @@ export class SessionContext implements ISessionContext {
   }
 
   private _path = '';
+  private _driveName = '';
   private _name = '';
   private _type = '';
   private _prevKernelName: string = '';
@@ -1243,6 +1256,7 @@ export class SessionContext implements ISessionContext {
   private _isReady = false;
   private _isTerminating = false;
   private _isRestarting = false;
+  private _isChangingKernel = false;
   private _kernelChanged = new Signal<
     this,
     Session.ISessionConnection.IKernelChangedArgs
@@ -1306,6 +1320,11 @@ export namespace SessionContext {
      * The initial path of the file.
      */
     path?: string;
+
+    /**
+     * The drive name for the path.
+     */
+    driveName?: string;
 
     /**
      * The name of the session.

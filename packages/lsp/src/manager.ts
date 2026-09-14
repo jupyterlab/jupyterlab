@@ -28,8 +28,8 @@ export class LanguageServerManager implements ILanguageServerManager {
   constructor(options: ILanguageServerManager.IOptions) {
     this._settings = options.settings || ServerConnection.makeSettings();
     this._baseUrlOverride = options.baseUrl;
-    this._retries = options.retries || 2;
-    this._retriesInterval = options.retriesInterval || 10000;
+    this._retries = options.retries ?? 2;
+    this._retriesInterval = options.retriesInterval ?? 10000;
     this._statusCode = -1;
     this._configuration = {};
 

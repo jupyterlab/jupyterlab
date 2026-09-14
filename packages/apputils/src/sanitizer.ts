@@ -591,6 +591,14 @@ export class Sanitizer implements IRenderMime.ISanitizer {
   }
 
   /**
+   * @returns Whether URLs are auto-linked incrementally (asynchronously,
+   * across animation frames) rather than in a single synchronous pass.
+   */
+  getIncrementalAutolink(): boolean {
+    return this._incrementalAutolink;
+  }
+
+  /**
    * @returns Whether to allow name and id attributes.
    */
   get allowNamedProperties(): boolean {
@@ -627,6 +635,19 @@ export class Sanitizer implements IRenderMime.ISanitizer {
   }
 
   /**
+   * Set whether URLs are auto-linked incrementally (asynchronously, across
+   * animation frames) rather than in a single synchronous pass.
+   *
+   * Disabling this also disables incremental rendering of the text output (it is
+   * rendered synchronously in a single blocking pass).
+   *
+   * @param incrementalAutolink Whether to auto-link incrementally.
+   */
+  setIncrementalAutolink(incrementalAutolink: boolean): void {
+    this._incrementalAutolink = incrementalAutolink;
+  }
+
+  /**
    * Set the whether to allow `name` and `id` attributes.
    */
   setAllowNamedProperties(allowNamedProperties: boolean): void {
@@ -645,6 +666,7 @@ export class Sanitizer implements IRenderMime.ISanitizer {
   }
 
   private _autolink: boolean = true;
+  private _incrementalAutolink: boolean = true;
   private _allowNamedProperties: boolean = false;
   private _allowCommandLinker: boolean = true;
   private _customAllowedSchemes: string[] | undefined;

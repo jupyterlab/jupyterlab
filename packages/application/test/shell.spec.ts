@@ -608,6 +608,37 @@ describe('LabShell', () => {
       shell.expandRight();
       expect(shell.rightCollapsed).toBe(false);
     });
+
+    it('should restore a horizontal right activity bar with no current widget', () => {
+      shell.updateConfig({ activityBarPosition: 'bottom' });
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'right');
+
+      const saved = shell.saveLayout().rightArea!;
+      const handler = (shell as any)._rightHandler;
+      expect(shell.rightCollapsed).toBe(true);
+      expect(handler.area.isHidden).toBe(false);
+      expect(saved.collapsed).toBe(false);
+
+      const restoredShell = new LabShell({ waitForRestore: false });
+      Widget.attach(restoredShell, document.body);
+      try {
+        restoredShell.updateConfig({ activityBarPosition: 'bottom' });
+        const restoredWidget = new Widget();
+        restoredWidget.id = 'foo';
+        restoredShell.add(restoredWidget, 'right');
+
+        const restoredHandler = (restoredShell as any)._rightHandler;
+        restoredHandler.rehydrate({ ...saved, widgets: [restoredWidget] });
+
+        expect(restoredShell.rightCollapsed).toBe(true);
+        expect(restoredHandler.area.isHidden).toBe(false);
+        expect(restoredHandler.sideBar.isHidden).toBe(false);
+      } finally {
+        restoredShell.dispose();
+      }
+    });
   });
 
   describe('#move()', () => {

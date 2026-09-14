@@ -25,6 +25,8 @@ config
 configs
 tokenize
 customizable
+addon
+addons
 allowlist
 allowlisted
 args
@@ -158,6 +160,8 @@ sanitization
 schemas
 screencast
 screencasts
+scrollable
+scrollbar
 Scrollbars
 semver
 SHA

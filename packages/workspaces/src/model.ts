@@ -20,7 +20,10 @@ const DEFAULT_REFRESH_INTERVAL = 10000;
 export class WorkspacesModel implements IWorkspacesModel {
   constructor(options: WorkspacesModel.IOptions) {
     this._manager = options.manager;
-    const refreshInterval = options.refreshInterval || DEFAULT_REFRESH_INTERVAL;
+    const refreshInterval =
+      options.refreshInterval === undefined || options.refreshInterval === 0
+        ? DEFAULT_REFRESH_INTERVAL
+        : options.refreshInterval;
     this._poll = new Poll({
       auto: options.auto ?? true,
       name: '@jupyterlab/workspaces:Model',

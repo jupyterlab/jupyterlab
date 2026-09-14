@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module console-extension
@@ -17,6 +16,7 @@ import {
   Dialog,
   ICommandPalette,
   IKernelStatusModel,
+  InputDialog,
   ISanitizer,
   ISessionContextDialogs,
   IToolbarWidgetRegistry,
@@ -25,6 +25,7 @@ import {
   SessionContextDialogs,
   setToolbar,
   showDialog,
+  showErrorMessage,
   Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
@@ -37,7 +38,10 @@ import {
   IConsoleCellExecutor,
   IConsoleTracker
 } from '@jupyterlab/console';
-import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
+import {
+  IDefaultFileBrowser,
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IPageHandler } from '@jupyterlab/outputarea';
@@ -107,6 +111,8 @@ namespace CommandIDs {
 
   export const redo = 'console:redo';
 
+  export const rename = 'console:rename';
+
   export const replaceSelection = 'console:replace-selection';
 
   export const shutdown = 'console:shutdown';
@@ -135,6 +141,7 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
   optional: [
     ILayoutRestorer,
     IDefaultFileBrowser,
+    IFileBrowserFactory,
     IMainMenu,
     ICommandPalette,
     ILauncher,
@@ -254,7 +261,7 @@ const completerPlugin: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as the default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<unknown>[] = [
   factory,
   tracker,
   foreign,
@@ -277,6 +284,7 @@ async function activateConsole(
   settingRegistry: ISettingRegistry,
   restorer: ILayoutRestorer | null,
   filebrowser: IDefaultFileBrowser | null,
+  filebrowserFactory: IFileBrowserFactory | null,
   mainMenu: IMainMenu | null,
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
@@ -477,6 +485,10 @@ async function activateConsole(
       setBusy: (status && (() => status.setBusy())) ?? undefined,
       ...(options as Partial<ConsolePanel.IOptions>)
     });
+    panel.title.dataset = {
+      type: 'console-title',
+      ...panel.title.dataset
+    };
 
     if (toolbarFactory) {
       setToolbar(panel, toolbarFactory);
@@ -814,10 +826,12 @@ async function activateConsole(
       }
     },
     execute: args => {
+      const currentBrowser =
+        filebrowserFactory?.tracker.currentWidget ?? filebrowser;
       const basePath =
         ((args['basePath'] as string) ||
           (args['cwd'] as string) ||
-          filebrowser?.model.path) ??
+          currentBrowser?.model.path) ??
         '';
       return createConsole({ basePath, ...args });
     }
@@ -836,6 +850,16 @@ async function activateConsole(
     return widget;
   }
 
+  // Get the console panel associated with the most recent context menu event.
+  function contextMenuConsole(): ConsolePanel | null {
+    const test = (node: HTMLElement) => !!node.dataset.id;
+    const node = app.contextMenuHitTest(test);
+    if (!node) {
+      return null;
+    }
+    return tracker.find(panel => panel.id === node.dataset.id) ?? null;
+  }
+
   /**
    * Create commands to change the position of the prompt cell.
    */
@@ -844,6 +868,14 @@ async function activateConsole(
     bottom: dockBottomIcon,
     right: dockRightIcon,
     left: dockLeftIcon
+  };
+  // Spelled out rather than built from `position` so that the labels are
+  // picked up by the translation string extractor.
+  const labelMap = {
+    top: trans.__('Prompt to top'),
+    bottom: trans.__('Prompt to bottom'),
+    right: trans.__('Prompt to right'),
+    left: trans.__('Prompt to left')
   };
   promptCellPositions.forEach((position: CodeConsole.PromptCellPosition) => {
     const command = `console:prompt-to-${position}`;
@@ -857,7 +889,7 @@ async function activateConsole(
       },
       isEnabled: () =>
         !!tracker.currentWidget && tracker.currentWidget.isVisible,
-      label: trans.__(`Prompt to ${position}`),
+      label: labelMap[position],
       icon: args => (args['isPalette'] ? undefined : iconMap[position]),
       describedBy: {
         args: {
@@ -1237,6 +1269,43 @@ async function activateConsole(
     }
   });
 
+  commands.addCommand(CommandIDs.rename, {
+    label: trans.__('Rename Console…'),
+    execute: async args => {
+      const current = contextMenuConsole() ?? getCurrent(args);
+      const session = current?.console.sessionContext.session;
+      if (!session) {
+        return;
+      }
+      const result = await InputDialog.getText({
+        title: trans.__('Rename Console'),
+        okLabel: trans.__('Rename'),
+        text: session.name,
+        required: true
+      });
+      if (session.isDisposed || !result.button.accept || !result.value) {
+        return;
+      }
+      try {
+        await session.setName(result.value);
+      } catch (error) {
+        void showErrorMessage(trans.__('Rename Error'), error);
+      }
+    },
+    isEnabled: () => contextMenuConsole() !== null || isEnabled(),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    }
+  });
+
   commands.addCommand(CommandIDs.inject, {
     label: trans.__('Inject some code in a console.'),
     describedBy: {
@@ -1515,7 +1584,10 @@ function activateConsoleCompleterService(
     keys: ['Enter'],
     selector: '.jp-ConsolePanel .jp-mod-completer-active'
   });
-  const updateCompleter = async (_: any, consolePanel: ConsolePanel) => {
+  const updateCompleter = async (
+    _: IConsoleTracker | undefined,
+    consolePanel: ConsolePanel
+  ) => {
     const completerContext = {
       editor: consolePanel.console.promptCell?.editor ?? null,
       session: consolePanel.console.sessionContext.session,
