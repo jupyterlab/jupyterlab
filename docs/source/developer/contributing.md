@@ -503,6 +503,7 @@ are built in the dev-installed Python package. This includes the core
 packages in `packages/`, so changes there only require rebuilding those
 assets (see `--watch` below); no extra flag is needed for them.
 
+:::{note}
 What dev mode does skip are the prebuilt extensions found in the
 `labextensions` search paths, that is third-party extensions installed with
 `pip`/`conda` or with `jupyter-builder develop` (`@jupyterlab/galata-extension`,
@@ -516,6 +517,7 @@ jupyter lab --dev-mode --extensions-in-dev-mode
 
 Refer to the {ref}`documentation on extension development <prebuilt-dev-workflow>`
 to know more.
+:::
 
 When running in dev mode, a red stripe will appear at the top of the
 page; this is to indicate running an unreleased version.
