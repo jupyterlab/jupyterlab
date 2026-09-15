@@ -500,7 +500,9 @@ export default defineConfig([
 
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/non-nullable-type-assertion-style': 'off'
+      '@typescript-eslint/non-nullable-type-assertion-style': 'off',
+      // Tests load their modules up front; there is no startup to protect.
+      'jupyter/prefer-lazy-imports': 'off'
     }
   },
   {
