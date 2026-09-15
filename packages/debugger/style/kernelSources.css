@@ -25,7 +25,6 @@
 .jp-DebuggerKernelSource-source {
   display: flex;
   align-items: center;
-  padding: 4px;
   cursor: pointer;
 }
 
@@ -33,9 +32,48 @@
   background-color: var(--jp-layout-color2);
 }
 
-.jp-DebuggerKernelSource-source > svg {
-  height: 16px;
-  width: 16px;
+.jp-DebuggerKernelSource-source .jp-Icon {
+  height: 12px;
+  width: 12px;
+}
+
+.jp-DebuggerKernelSource-dir {
+  cursor: pointer;
+  padding-left: 4px;
+}
+
+.jp-DebuggerKernelSource-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  cursor: pointer;
+  padding: 6px 10px;
+}
+
+.jp-DebuggerKernelSource-item:hover {
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-DebuggerKernelSource-label {
+  margin-left: 4px;
+}
+
+.jp-DebuggerKernelSource-children {
+  margin-left: 14px;
+}
+
+.jp-DebuggerKernelSource-itemSelected {
+  background: var(--jp-brand-color1);
+  color: var(--jp-ui-inverse-font-color1);
+}
+
+.jp-DebuggerKernelSource-itemSelected .jp-Icon path {
+  fill: var(--jp-ui-inverse-font-color1) !important;
+}
+
+.jp-DebuggerKernelSource-itemSelected:hover {
+  background: var(--jp-brand-color1);
+  color: var(--jp-ui-inverse-font-color1);
 }
 
 .jp-DebuggerKernelSources-header .jp-Toolbar-item[data-jp-item-name='filter'] {
