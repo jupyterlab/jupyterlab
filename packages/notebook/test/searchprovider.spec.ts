@@ -26,6 +26,15 @@ async function setSelections(
   await promise;
 }
 
+/**
+ * Run the handler debounced on the notebook mode change. The debouncer
+ * arms its timer one microtask after the mode changed.
+ */
+async function runDebouncedHandler() {
+  await Promise.resolve();
+  jest.advanceTimersByTime(0);
+}
+
 class TestProvider extends NotebookSearchProvider {
   get cellChangeHandled(): Promise<void> {
     // ensure `_delayedActiveCellChangeHandler` fired
@@ -624,7 +633,7 @@ describe('@jupyterlab/notebook', () => {
         // mode once the timers run.
         searchInput.focus();
         panel.content.mode = 'command';
-        jest.advanceTimersByTime(0);
+        await runDebouncedHandler();
 
         expect(provider.getFilters().selection.title).toContain('Line');
         expect(provider.getSelectionState()).toBe('single');
@@ -633,12 +642,12 @@ describe('@jupyterlab/notebook', () => {
       it('should switch to cell selection when leaving edit mode', async () => {
         await provider.startQuery(/test/, { selection: true });
         await selectFirstLine();
-        jest.advanceTimersByTime(0);
+        await runDebouncedHandler();
         expect(provider.getFilters().selection.title).toContain('Line');
 
         // Focus stays in the notebook, so this is a user leaving the edit mode.
         panel.content.mode = 'command';
-        jest.advanceTimersByTime(0);
+        await runDebouncedHandler();
 
         expect(provider.getFilters().selection.title).toContain('Cell');
         await provider.endQuery();
