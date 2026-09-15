@@ -14,8 +14,7 @@ import { IRunningSessionManagers } from '@jupyterlab/running';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import type { Workspace } from '@jupyterlab/services';
 import { blankIcon, checkIcon, deleteIcon } from '@jupyterlab/ui-components';
-
-const WORKSPACE_ITEM_CLASS = 'jp-mod-workspace';
+import { WORKSPACE_ITEM_CLASS } from './constants';
 
 /**
  * The extension populating sidebar with workspaces list.
