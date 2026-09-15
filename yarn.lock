@@ -2719,6 +2719,7 @@ __metadata:
   dependencies:
     "@codemirror/commands": ^6.10.2
     "@codemirror/lang-markdown": ^6.5.0
+    "@codemirror/lang-python": ^6.2.1
     "@codemirror/language": ^6.12.1
     "@codemirror/legacy-modes": ^6.5.2
     "@codemirror/search": ^6.6.0
@@ -3378,6 +3379,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-filebrowser@workspace:examples/filebrowser"
   dependencies:
+    "@codemirror/lang-markdown": ^6.5.0
     "@jupyter/web-components": ^0.17.1
     "@jupyterlab/application": ^4.7.0-alpha.1
     "@jupyterlab/apputils": ^4.8.0-alpha.1
@@ -3425,6 +3427,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-notebook@workspace:examples/notebook"
   dependencies:
+    "@codemirror/lang-markdown": ^6.5.0
     "@jupyter/web-components": ^0.17.1
     "@jupyter/ydoc": ^4.0.0
     "@jupyterlab/application": ^4.7.0-alpha.1
