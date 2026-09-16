@@ -91,7 +91,7 @@ We use Promises for asynchronous function calls, and a shim for browsers that do
 
 ## Lazy Imports
 
-Extension modules should keep startup imports light. Prefer loading heavy dependencies inside the plugin `activate()` method with `await import(...)`, or even later inside a command, renderer, or user-interaction callback when the dependency is not needed during activation. If activation registers callbacks, renderers, or other extension points that must be available immediately, register them synchronously and lazy-load the heavy implementation inside the callback instead. See the [`jupyter/prefer-lazy-imports`](https://eslint-plugin.readthedocs.io/en/latest/rules/prefer-lazy-imports/) rule for details.
+Extension modules should keep startup imports light. Load a heavy dependency with `await import(...)` in the command, renderer, or user-interaction callback that first uses it, and keep the plugin `activate()` method synchronous: the application attaches its shell only after every autostart plugin has activated, so an `await` in `activate()` delays the whole start. If activation registers callbacks, renderers, or other extension points that must be available immediately, register them synchronously and lazy-load the heavy implementation inside the callback instead. A package that another core package already loads at startup gains nothing from being deferred. The [`jupyter/prefer-lazy-imports`](https://eslint-plugin.readthedocs.io/en/latest/rules/prefer-lazy-imports/) rule reports imports that could be deferred and skips the packages the application shares with extensions.
 
 ## Server Requests
 
