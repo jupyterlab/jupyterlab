@@ -35,6 +35,7 @@ export type {
 } from '@jupyterlab/ui-components';
 
 export * from './clipboard';
+export * from './accessibleAnnouncer';
 export * from './commandlinker';
 export * from './commandpalette';
 export * from './dialog';
