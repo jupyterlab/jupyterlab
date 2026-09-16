@@ -15,6 +15,7 @@ import prettierPluginRecommended from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
 import * as jsoncParser from 'jsonc-eslint-parser';
 import jupyterPlugin from '@jupyter/eslint-plugin';
+import lazyImports from '@jupyter/eslint-plugin/lib/utils/lazy-imports.js';
 
 // Application-lifetime sender types for the signal lifetime rules. The
 // `longLivedTypes` option replaces the plugin's built-in list, so the twelve
@@ -272,7 +273,25 @@ export default defineConfig([
       'jupyter/incorrect-translator-usage': 'error',
       'jupyter/no-untranslated-string': 'error',
       'jupyter/no-pageconfig-base-url': 'error',
-      'jupyter/prefer-lazy-imports': 'error',
+      'jupyter/prefer-lazy-imports': [
+        'error',
+        {
+          allowedPackages: [
+            // Keep defaults
+            ...lazyImports.DEFAULT_ALLOWED_PACKAGES,
+            // Deferring these needs larger changes: an asynchronous editor
+            // creation path for `@codemirror/commands`, a copy of
+            // `closeBrackets` for `@codemirror/autocomplete` (the only part of
+            // that package in use, but the bundler keeps the whole module), and
+            // a lazily loaded `FormComponent` in ui-components for the rjsf
+            // packages.
+            '@codemirror/autocomplete',
+            '@codemirror/commands',
+            '@rjsf/core',
+            '@rjsf/utils'
+          ]
+        }
+      ],
       'jupyter/require-signal-cleanup': [
         'error',
         { longLivedTypes: LONG_LIVED_TYPES }
