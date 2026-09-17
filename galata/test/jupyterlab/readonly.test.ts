@@ -17,13 +17,6 @@ test.describe('test readonly status', () => {
     // which adds a semi-transparent layer above the notification.
     await page.notebook.open('notebook.ipynb', { noKernel: true });
 
-    await page.notebook.addCell('code', '');
-    const notSavedIndicator = page
-      .getByRole('main')
-      .getByRole('tablist')
-      .locator('.jp-mod-dirty');
-    await notSavedIndicator.waitFor();
-
     // The read-only indicator should show in the toolbar when a read-only
     // document is opened.
     const readOnlyIndicator = page
@@ -32,6 +25,24 @@ test.describe('test readonly status', () => {
     await expect(readOnlyIndicator).toBeVisible();
     await expect(readOnlyIndicator).toContainText('read-only');
 
+    const insertButton = await page.notebook.getToolbarItemLocator('insert');
+    if (insertButton) {
+      await expect(insertButton).not.toBeVisible();
+    }
+
+    // Typing into the cell editor should have no effect.
+    const originalSource = await page.notebook.getCellTextInput(0);
+    const cellInput = await page.notebook.getCellInputLocator(0);
+    await cellInput!.click();
+    await page.keyboard.type('this should not be inserted');
+    expect(await page.notebook.getCellTextInput(0)).toEqual(originalSource);
+
+    // Since nothing could be edited, the notebook never becomes dirty.
+    const dirtyIndicator = page
+      .getByRole('main')
+      .getByRole('tablist')
+      .locator('.jp-mod-dirty');
+    await expect(dirtyIndicator).toHaveCount(0);
     await page.keyboard.press('Control+s');
 
     const imageName = 'readonly.png';
