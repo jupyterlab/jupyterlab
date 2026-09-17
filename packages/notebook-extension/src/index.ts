@@ -3445,7 +3445,7 @@ function addCommands(
       }
       return { trusted: false };
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(shell, tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4791,7 +4791,7 @@ function addCommands(
         return sessionDialogs.selectKernel(current.context.sessionContext);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(shell, tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4981,7 +4981,7 @@ function addCommands(
         return NotebookActions.hideCode(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(shell, tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4998,7 +4998,7 @@ function addCommands(
         return NotebookActions.showCode(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(shell, tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -5015,7 +5015,7 @@ function addCommands(
         return NotebookActions.hideAllCode(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(shell, tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -5032,7 +5032,7 @@ function addCommands(
         return NotebookActions.showAllCode(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(shell, tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -5049,7 +5049,7 @@ function addCommands(
         return NotebookActions.hideOutput(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(shell, tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -5066,7 +5066,7 @@ function addCommands(
         return NotebookActions.showOutput(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(shell, tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -5083,7 +5083,7 @@ function addCommands(
         return NotebookActions.toggleOutput(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(shell, tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -5100,7 +5100,7 @@ function addCommands(
         return NotebookActions.hideAllOutputs(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(shell, tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -5153,7 +5153,7 @@ function addCommands(
         return NotebookActions.showAllOutputs(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(shell, tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -5170,7 +5170,7 @@ function addCommands(
         return NotebookActions.enableOutputScrolling(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(shell, tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -5187,7 +5187,7 @@ function addCommands(
         return NotebookActions.disableOutputScrolling(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(shell, tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -5211,7 +5211,7 @@ function addCommands(
         return NotebookActions.enableOutputScrolling(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(shell, tracker),
     isToggled: args => {
       const current = getCurrent(tracker, shell, { ...args, activate: false });
       if (current) {
@@ -5318,7 +5318,8 @@ function addCommands(
         return NotebookActions.toggleCurrentHeadingCollapse(current.content);
       }
     },
-    isEnabled: isEnabledAndHeadingSelected,
+    isEnabled: () =>
+      isEnabledAndHeadingSelected() && !Private.isViewOnly(shell, tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -5334,6 +5335,7 @@ function addCommands(
         return NotebookActions.collapseAllHeadings(current.content);
       }
     },
+    isEnabled: () => isEnabled() && !Private.isViewOnly(shell, tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -5349,6 +5351,7 @@ function addCommands(
         return NotebookActions.expandAllHeadings(current.content);
       }
     },
+    isEnabled: () => isEnabled() && !Private.isViewOnly(shell, tracker),
     describedBy: {
       args: {
         type: 'object',
