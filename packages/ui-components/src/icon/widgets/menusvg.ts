@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
@@ -15,6 +14,8 @@ import { caretRightIcon, checkIcon } from '../iconimports';
 const submenuIcon = caretRightIcon.bindprops({
   stylesheet: 'menuItem'
 });
+
+type WritableMenuRenderer = Menu & { renderer: Menu.IRenderer };
 
 /**
  * An object which implements a universal context menu.
@@ -135,7 +136,7 @@ export namespace MenuSvg {
     // override renderer, if needed
     if (menu.renderer === Menu.defaultRenderer) {
       // cast away readonly on menu.renderer
-      (menu as any).renderer = MenuSvg.defaultRenderer;
+      (menu as WritableMenuRenderer).renderer = MenuSvg.defaultRenderer;
     }
 
     // ensure correct renderer on any submenus that get added in the future
@@ -149,7 +150,7 @@ export namespace MenuSvg {
     };
 
     // recurse through submenus
-    for (const item of (menu as any)._items as Menu.IItem[]) {
+    for (const item of menu.items) {
       if (item.submenu) {
         overrideDefaultRenderer(item.submenu);
       }

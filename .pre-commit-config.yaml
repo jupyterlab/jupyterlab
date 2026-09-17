@@ -26,13 +26,13 @@ repos:
       - id: mixed-line-ending
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.37.4
+    rev: 0.38.0
     hooks:
       - id: check-github-workflows
 
   # Check zizmor version is aligned with the one in .github/workflows/zizmor.yml
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: 451b56af716f9f0d0c2b816503a3fd0cf8b036fa  # frozen: v1.29.0
+    rev: cef8b8350da46d8114c7e6b7272aebdccdf193ce  # frozen: v1.30.0
     hooks:
       - id: zizmor
         args: ["--offline"]
@@ -48,7 +48,7 @@ repos:
 
   # Check ruff version is aligned with the one in pyproject.toml
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.1
+    rev: v0.16.6
     hooks:
       - id: ruff
         args: ["--fix"]
