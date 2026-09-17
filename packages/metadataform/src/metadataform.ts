@@ -149,6 +149,7 @@ export class MetadataFormWidget
     if (this.notebookTools == undefined) return;
 
     const notebook = this.notebookTools.activeNotebookPanel;
+    if (notebook?.context.contentsModel?.writable === false) return;
 
     const cell = this.notebookTools.activeCell;
     if (cell == null) return;
