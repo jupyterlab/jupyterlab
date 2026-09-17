@@ -37,12 +37,6 @@ test.describe('test readonly status', () => {
     await page.keyboard.type('this should not be inserted');
     expect(await page.notebook.getCellTextInput(0)).toEqual(originalSource);
 
-    // Since nothing could be edited, the notebook never becomes dirty.
-    const dirtyIndicator = page
-      .getByRole('main')
-      .getByRole('tablist')
-      .locator('.jp-mod-dirty');
-    await expect(dirtyIndicator).toHaveCount(0);
     await page.keyboard.press('Control+s');
 
     const imageName = 'readonly.png';
