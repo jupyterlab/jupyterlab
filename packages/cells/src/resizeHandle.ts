@@ -105,12 +105,13 @@ export class ResizeHandle extends Widget {
   }
 
   private _resize(event: MouseEvent): void {
-    // Gate the output size ratio between {0.05, 50} as sensible defaults.
+    // Gate the output size ratio between {0.15, 6.0} to prevent input prompt overlap
+    // and maintain reasonable proportions in side-by-side mode (issue #14485).
     const { width, x } = this.targetNode.getBoundingClientRect();
     const position = event.clientX - x;
     const ratio = width / position - 1;
     if (0 < ratio) {
-      const normalized = Math.max(Math.min(Math.abs(ratio), 50), 0.05);
+      const normalized = Math.max(Math.min(Math.abs(ratio), 6.0), 0.15);
       document.documentElement.style.setProperty(
         '--jp-side-by-side-output-size',
         `${normalized}fr`
