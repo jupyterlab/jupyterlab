@@ -8,6 +8,11 @@ on:
         required: false
         default: 28
         type: number
+      days:
+        description: Number of days in the analysis window
+        required: false
+        default: 7
+        type: number
   schedule:
     - cron: '0 6 * * 1'
 
@@ -27,6 +32,7 @@ jobs:
       contents: read
     outputs:
       runs: ${{ steps.params.outputs.runs }}
+      days: ${{ steps.params.outputs.days }}
       window_start: ${{ steps.report.outputs.window_start }}
       window_end: ${{ steps.report.outputs.window_end }}
     steps:
@@ -34,6 +40,7 @@ jobs:
         id: params
         env:
           INPUT_RUNS: ${{ github.event.inputs.runs || '28' }}
+          INPUT_DAYS: ${{ github.event.inputs.days || '7' }}
         run: |
           set -euo pipefail
 
@@ -42,8 +49,14 @@ jobs:
             exit 1
           fi
 
+          if ! [[ "$INPUT_DAYS" =~ ^[1-9][0-9]*$ ]]; then
+            echo "Invalid days value: $INPUT_DAYS"
+            exit 1
+          fi
+
           {
             echo "runs=$INPUT_RUNS"
+            echo "days=$INPUT_DAYS"
           } >> "$GITHUB_OUTPUT"
 
       - name: Checkout
@@ -56,8 +69,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUNS: ${{ steps.params.outputs.runs }}
+          DAYS: ${{ steps.params.outputs.days }}
         run: |
           python scripts/analyze_flaky_tests.py "$RUNS" \
+            --days "$DAYS" \
             --markdown flake-report.md \
             --json flake-report.json \
             --github-output "$GITHUB_OUTPUT"
@@ -97,6 +112,7 @@ jobs:
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
           ANALYZE_RESULT: ${{ needs.analyze.result }}
+          DAYS_REQUESTED: ${{ needs.analyze.outputs.days }}
           RUNS_REQUESTED: ${{ needs.analyze.outputs.runs }}
           TRACKING_ISSUE_NUMBER: ${{ env.TRACKING_ISSUE_NUMBER }}
           TRACKING_REPOSITORY: ${{ env.TRACKING_REPOSITORY }}
@@ -129,6 +145,7 @@ jobs:
               `| Status | ${cell(status)} |`,
               `| Source | ${cell(sourceRepo)} |`,
               `| Branch | ${cell(branch)} |`,
+              `| Days requested | ${cell(process.env.DAYS_REQUESTED)} |`,
               `| Runs requested | ${cell(process.env.RUNS_REQUESTED)} |`,
               `| Window | ${cell(window)} |`,
               `| Workflow run | [Run ${context.runId}](${runUrl}) |`
