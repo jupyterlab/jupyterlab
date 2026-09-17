@@ -61,6 +61,11 @@ export class CellMetadataField extends NotebookTools.MetadataEditorTool {
   }
 
   private _onSourceChanged() {
+    if (
+      this._tracker.currentWidget?.context.contentsModel?.writable === false
+    ) {
+      return;
+    }
     const activeCell = this._tracker.activeCell?.model.sharedModel;
     if (activeCell && this.editor.source) {
       const metadataKeys = Object.keys(activeCell.metadata ?? {});
@@ -114,6 +119,11 @@ export class NotebookMetadataField extends NotebookTools.MetadataEditorTool {
   }
 
   private _onSourceChanged() {
+    if (
+      this._tracker.currentWidget?.context.contentsModel?.writable === false
+    ) {
+      return;
+    }
     if (this.editor.source) {
       this._tracker.currentWidget?.model?.sharedModel.setMetadata(
         this.editor.source.toJSON()
