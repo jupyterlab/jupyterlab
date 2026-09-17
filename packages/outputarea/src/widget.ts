@@ -297,10 +297,6 @@ export class OutputArea extends Widget {
       this._future.dispose();
       this._future = null!;
     }
-    // The DOM node can be retained past disposal (e.g. by design-token
-    // bindings on ancestor elements); without removing the listener, the
-    // retained node would keep this widget and everything it references
-    // reachable as well.
     if (this._promptOverlay) {
       this._promptOverlay.removeEventListener(
         'click',

@@ -145,7 +145,10 @@ import { Panel } from '@lumino/widgets';
 import { CellBarExtension } from '@jupyterlab/cell-toolbar';
 import { cellExecutor } from './cellexecutor';
 import { logNotebookOutput } from './nboutput';
-import { ActiveCellTool } from './tool-widgets/activeCellToolWidget';
+import {
+  ActiveCellTool,
+  CellIdField
+} from './tool-widgets/activeCellToolWidget';
 import {
   CellMetadataField,
   NotebookMetadataField
@@ -1366,15 +1369,17 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
  */
 const activeCellTool: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:active-cell-tool',
-  description: 'Adds active cell field in the metadata editor tab.',
+  description: 'Adds active cell fields in the metadata editor tab.',
   autoStart: true,
   requires: [INotebookTracker, IFormRendererRegistry, IEditorLanguageRegistry],
+  optional: [ITranslator],
   activate: (
     // Register the custom field.
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
     formRegistry: IFormRendererRegistry,
-    languages: IEditorLanguageRegistry
+    languages: IEditorLanguageRegistry,
+    translator?: ITranslator
   ) => {
     // The field renderer is used by rjsf as a React component, so it runs on
     // every rebuild of the metadata form. The tool is created once and reused:
@@ -1393,6 +1398,20 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
     formRegistry.addRenderer(
       '@jupyterlab/notebook-extension:active-cell-tool.renderer',
       component
+    );
+
+    const cellIdComponent: IFormRenderer = {
+      fieldRenderer: (props: FieldProps) => {
+        return CellIdField({
+          ...props,
+          tracker,
+          translator
+        });
+      }
+    };
+    formRegistry.addRenderer(
+      '@jupyterlab/notebook-extension:active-cell-tool.cell-id',
+      cellIdComponent
     );
   }
 };
@@ -1595,7 +1614,8 @@ function activatePageHandler(
 
       const mimeData = data as nbformat.IMimeBundle;
       const metadata = (payload['metadata'] ?? {}) as ReadonlyJSONObject;
-      const mimeType = rendermime.preferredMimeType(mimeData, 'any');
+      const trusted = false;
+      const mimeType = rendermime.preferredMimeType(mimeData, 'ensure');
       if (!mimeType) {
         return false;
       }
@@ -1615,7 +1635,7 @@ function activatePageHandler(
 
       const renderer = rendermime.createRenderer(mimeType);
       void renderer.renderModel(
-        new MimeModel({ data: mimeData, metadata, trusted: true })
+        new MimeModel({ data: mimeData, metadata, trusted })
       );
       content.addWidget(renderer);
 
