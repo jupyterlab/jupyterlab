@@ -334,6 +334,11 @@
         "rank": 21
       },
       {
+        "command": "notebook:clear-all-cell-outputs",
+        "selector": ".jp-Notebook[data-jp-context-menu-target=\"notebook\"]",
+        "rank": 22
+      },
+      {
         "type": "separator",
         "selector": ".jp-Notebook",
         "rank": 30
