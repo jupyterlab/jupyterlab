@@ -504,12 +504,12 @@ packages in `packages/`, so changes there only require rebuilding those
 assets (see `--watch` below); no extra flag is needed for them.
 
 :::{note}
-What dev mode does skip are the prebuilt extensions found in the
-`labextensions` search paths, that is third-party extensions installed with
-`pip`/`conda` or with `jupyter-builder develop` (`@jupyterlab/galata-extension`,
-used by the UI tests, is the only exception). To load them as well, for
-example when developing a prebuilt extension against the JupyterLab source
-repository, add `--extensions-in-dev-mode`:
+Dev mode skips the prebuilt extensions found in the `labextensions` search
+paths, that is third-party extensions installed with `pip`/`conda` or with
+`jupyter-builder develop` (`@jupyterlab/galata-extension`, used by the UI
+tests, is the only exception). To load them as well, for example when
+developing a prebuilt extension against the JupyterLab source repository,
+add `--extensions-in-dev-mode`:
 
 ```bash
 jupyter lab --dev-mode --extensions-in-dev-mode
