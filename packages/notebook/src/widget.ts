@@ -1821,7 +1821,21 @@ export class Notebook extends StaticNotebook {
     return this._viewOnly;
   }
   set viewOnly(value: boolean) {
+    if (this._viewOnly === value) {
+      return;
+    }
     this._viewOnly = value;
+    for (const cell of this.widgets) {
+      cell.viewOnly = value;
+    }
+    this._viewOnlyChanged.emit(value);
+  }
+
+  /**
+   * A signal emitted when the view-only state of the notebook changes.
+   */
+  get viewOnlyChanged(): ISignal<this, boolean> {
+    return this._viewOnlyChanged;
   }
 
   /**
@@ -2791,6 +2805,7 @@ export class Notebook extends StaticNotebook {
    * Handle a cell being inserted.
    */
   protected onCellInserted(index: number, cell: Cell): void {
+    cell.viewOnly = this._viewOnly;
     void cell.ready.then(() => {
       if (!cell.isDisposed) {
         cell.editor!.edgeRequested.connect(this._onEdgeRequest, this);
@@ -3822,6 +3837,7 @@ export class Notebook extends StaticNotebook {
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
   private _selectionChanged = new Signal<this, void>(this);
   private _cellsPasted = new Signal<this, Notebook.IPastedCells>(this);
+  private _viewOnlyChanged = new Signal<this, boolean>(this);
   private _localCopy: nbformat.IBaseCell[] = [];
   // Attributes for optimized cell refresh:
   private _cellLayoutStateCache?: { width: number };
