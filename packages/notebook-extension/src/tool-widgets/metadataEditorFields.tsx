@@ -61,9 +61,7 @@ export class CellMetadataField extends NotebookTools.MetadataEditorTool {
   }
 
   private _onSourceChanged() {
-    if (
-      this._tracker.currentWidget?.context.contentsModel?.writable === false
-    ) {
+    if (this._tracker.currentWidget?.viewOnly === true) {
       return;
     }
     const activeCell = this._tracker.activeCell?.model.sharedModel;
@@ -89,6 +87,13 @@ export class CellMetadataField extends NotebookTools.MetadataEditorTool {
       : null;
     previousSource?.dispose();
     this.editor.source?.changed.connect(this._onSourceChanged, this);
+    // The `source` setter above resets `readOnly` based only on whether a
+    // cell is selected, so it must be re-applied here to also account for
+    // view-only notebooks.
+    this.editor.editor.setOption(
+      'readOnly',
+      this._tracker.currentWidget?.viewOnly === true
+    );
 
     return (
       <div className={CELL_METADATA_EDITOR_CLASS}>
@@ -119,9 +124,7 @@ export class NotebookMetadataField extends NotebookTools.MetadataEditorTool {
   }
 
   private _onSourceChanged() {
-    if (
-      this._tracker.currentWidget?.context.contentsModel?.writable === false
-    ) {
+    if (this._tracker.currentWidget?.viewOnly === true) {
       return;
     }
     if (this.editor.source) {
@@ -140,6 +143,10 @@ export class NotebookMetadataField extends NotebookTools.MetadataEditorTool {
       : null;
     previousSource?.dispose();
     this.editor.source?.changed.connect(this._onSourceChanged, this);
+    // The `source` setter above resets `readOnly` based only on whether a
+    // notebook is active, so it must be re-applied here to also account for
+    // view-only notebooks.
+    this.editor.editor.setOption('readOnly', notebook?.viewOnly === true);
 
     return (
       <div className={NOTEBOOK_METADATA_EDITOR_CLASS}>
