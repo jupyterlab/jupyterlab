@@ -57,3 +57,8 @@
 .jp-CellTags-Empty {
   width: 4em;
 }
+
+.jp-CellTags.jp-mod-disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
