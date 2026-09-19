@@ -119,19 +119,22 @@
       "title": "Auto Collapse Debugger Sidebar",
       "description": "Collapse the debugger sidebar when disabling the debugger on a document.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "tags": ["%UI%"]
     },
     "showPausedOverlay": {
       "title": "Show Paused Overlay",
       "description": "Show an overlay on the editor or notebook when execution is paused in the debugger.",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "tags": ["%UI%"]
     },
     "showSourcesInMainArea": {
       "title": "Show Sources in Main Area",
       "description": "If true, open debugger sources in main area editors instead of the sources panel.",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "tags": ["%UI%"]
     }
   },
   "additionalProperties": false,
