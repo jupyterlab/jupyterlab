@@ -1614,7 +1614,8 @@ function activatePageHandler(
 
       const mimeData = data as nbformat.IMimeBundle;
       const metadata = (payload['metadata'] ?? {}) as ReadonlyJSONObject;
-      const mimeType = rendermime.preferredMimeType(mimeData, 'any');
+      const trusted = false;
+      const mimeType = rendermime.preferredMimeType(mimeData, 'ensure');
       if (!mimeType) {
         return false;
       }
@@ -1634,7 +1635,7 @@ function activatePageHandler(
 
       const renderer = rendermime.createRenderer(mimeType);
       void renderer.renderModel(
-        new MimeModel({ data: mimeData, metadata, trusted: true })
+        new MimeModel({ data: mimeData, metadata, trusted })
       );
       content.addWidget(renderer);
 

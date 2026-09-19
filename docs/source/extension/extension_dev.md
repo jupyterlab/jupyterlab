@@ -118,7 +118,9 @@ The `id` and `activate` fields are required and the other fields may be omitted.
   the extension, for example `my-extension:plugin`. JupyterLab treats the part
   before the first colon as the extension name when applying extension-level
   configuration such as enabling, disabling, deferring, or locking all plugins
-  in that extension.
+  in that extension. Disabling by package name is the exception: it disables
+  every plugin the package provides, including a plugin whose id does not
+  follow the convention.
   The `jupyter/token-format` rule from
   [`@jupyter/eslint-plugin`](https://eslint-plugin.readthedocs.io/en/latest/rules/token-format/)
   can enforce the related `<package>:<TokenSymbol>` convention for token IDs
