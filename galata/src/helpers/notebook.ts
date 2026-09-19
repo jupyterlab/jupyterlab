@@ -469,16 +469,27 @@ export class NotebookHelper {
    * @returns Whether the action succeeded or not.
    */
   async trust(): Promise<boolean> {
+    if (!(await this.isAnyActive())) {
+      return true;
+    }
+
+    await this.page.locator('.jp-StatusItem-trust [data-icon]').waitFor();
+
     if (
-      (await this.isAnyActive()) &&
       (await this.page
         .locator('[data-icon="ui-components:not-trusted"]')
         .count()) === 1
     ) {
-      await this.page.keyboard.press('Control+Shift+C');
-      await this.page.getByPlaceholder('SEARCH', { exact: true }).fill('trust');
-      await this.page.getByText('Trust Notebook').click();
-      await this.page.getByRole('button', { name: 'Trust' }).click();
+      await Promise.all([
+        this.page.evaluate(() =>
+          window.jupyterapp.commands.execute('notebook:trust')
+        ),
+        this.page
+          .getByRole('button', { name: 'Confirm Trusting this notebook' })
+          .click()
+      ]);
+
+      await this.page.locator('[data-icon="ui-components:trusted"]').waitFor();
 
       return (
         (await this.page
