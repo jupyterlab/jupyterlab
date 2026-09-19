@@ -378,13 +378,9 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     if (this.isDisposed) {
       return;
     }
+    this._disconnectContentVisibilityObserver();
     this._notebookModel = null;
     (this.layout as NotebookWindowedLayout).header?.dispose();
-    //  Disconnect the content-visibility observer
-    if (this._contentVisibilityObserver) {
-      this._contentVisibilityObserver.disconnect();
-      this._contentVisibilityObserver = null;
-    }
     super.dispose();
     // Dispose cells that windowing modes may have detached from the layout.
     for (const cell of this.cellsArray) {
@@ -395,11 +391,8 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   }
 
   protected onBeforeDetach(msg: Message): void {
-    //  Disconnect the content-visibility observer
-    if (this._contentVisibilityObserver) {
-      this._contentVisibilityObserver.disconnect();
-      this._contentVisibilityObserver = null;
-    }
+    // Disconnect the content-visibility observer and its model listener.
+    this._disconnectContentVisibilityObserver();
     super.onBeforeDetach(msg);
   }
 
@@ -596,6 +589,13 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     newValue: INotebookModel | null
   ): void {
     if (oldValue) {
+      oldValue.cells.changed.disconnect(
+        this._onContentVisibilityCellsChanged,
+        this
+      );
+      if (this._contentVisibilityModel === oldValue) {
+        this._contentVisibilityModel = null;
+      }
       oldValue.contentChanged.disconnect(this.onModelContentChanged, this);
       oldValue.metadataChanged.disconnect(this.onMetadataChanged, this);
       oldValue.cells.changed.disconnect(this._onCellsChanged, this);
@@ -630,6 +630,9 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     newValue.cells.changed.connect(this._onCellsChanged, this);
     newValue.metadataChanged.connect(this.onMetadataChanged, this);
     newValue.contentChanged.connect(this.onModelContentChanged, this);
+    if (this._notebookConfig.windowingMode === 'contentVisibility') {
+      this._setupContentVisibilityObserver();
+    }
   }
 
   /**
@@ -1148,11 +1151,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
         cell.node.style.removeProperty('contain');
       });
 
-      // Disconnect observer if it exists
-      if (this._contentVisibilityObserver) {
-        this._contentVisibilityObserver.disconnect();
-        this._contentVisibilityObserver = null;
-      }
+      this._disconnectContentVisibilityObserver();
     }
   }
 
@@ -1203,16 +1202,42 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       this._contentVisibilityObserver!.observe(cell.node)
     );
 
-    // Watch for newly added cells and set intrinsic size for them too
-    this.model?.cells.changed.connect(() => {
-      requestAnimationFrame(() => {
-        this.cellsArray.forEach((cell, i) => {
-          const estHeight = this._viewModel.estimateWidgetSize(i);
-          cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
-          this._contentVisibilityObserver!.observe(cell.node);
-        });
+    // Watch for newly added cells and set intrinsic size for them too. Keep a
+    // stable callback so repeated setup calls do not accumulate listeners.
+    const model = this.model;
+    if (model && this._contentVisibilityModel !== model) {
+      this._contentVisibilityModel?.cells.changed.disconnect(
+        this._onContentVisibilityCellsChanged,
+        this
+      );
+      model.cells.changed.connect(this._onContentVisibilityCellsChanged, this);
+      this._contentVisibilityModel = model;
+    }
+  }
+
+  private _onContentVisibilityCellsChanged = (): void => {
+    requestAnimationFrame(() => {
+      if (!this._contentVisibilityObserver || this.isDisposed) {
+        return;
+      }
+      this.cellsArray.forEach((cell, i) => {
+        const estHeight = this._viewModel.estimateWidgetSize(i);
+        cell.node.style.containIntrinsicSize = `auto ${estHeight}px`;
+        this._contentVisibilityObserver!.observe(cell.node);
       });
-    }, this);
+    });
+  };
+
+  private _disconnectContentVisibilityObserver(): void {
+    if (this._contentVisibilityObserver) {
+      this._contentVisibilityObserver.disconnect();
+      this._contentVisibilityObserver = null;
+    }
+    this._contentVisibilityModel?.cells.changed.disconnect(
+      this._onContentVisibilityCellsChanged,
+      this
+    );
+    this._contentVisibilityModel = null;
   }
 
   protected cellsArray: Array<Cell>;
@@ -1231,6 +1256,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   private _renderingLayout: RenderingLayout | undefined;
   private _renderingLayoutChanged = new Signal<this, RenderingLayout>(this);
   private _contentVisibilityObserver: IntersectionObserver | null = null;
+  private _contentVisibilityModel: INotebookModel | null = null;
   private _pageHandler: IPageHandler | undefined;
 }
 

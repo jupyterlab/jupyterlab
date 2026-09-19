@@ -875,6 +875,32 @@ describe('@jupyter/notebook', () => {
       });
     });
 
+    describe('content visibility setup', () => {
+      it('should not accumulate cell-list listeners', () => {
+        const widget = createWidget();
+        const model = widget.model!;
+        const connect = jest.spyOn(model.cells.changed, 'connect');
+
+        const contentVisibilityConfig = {
+          ...widget.notebookConfig,
+          windowingMode: 'contentVisibility' as const
+        };
+        widget.notebookConfig = contentVisibilityConfig;
+        widget.notebookConfig = contentVisibilityConfig;
+
+        expect(connect).toHaveBeenCalledTimes(1);
+
+        widget.notebookConfig = {
+          ...contentVisibilityConfig,
+          windowingMode: 'none'
+        };
+        widget.notebookConfig = contentVisibilityConfig;
+        expect(connect).toHaveBeenCalledTimes(2);
+
+        widget.dispose();
+      });
+    });
+
     describe('#onCellInserted()', () => {
       it('should be called when a cell is inserted', () => {
         const widget = createWidget();
