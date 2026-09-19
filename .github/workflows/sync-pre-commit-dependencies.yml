@@ -1,0 +1,139 @@
+name: Sync pre-commit dependencies
+
+#####
+# This workflow is triggered by pull_request_target event.
+# It checks out the base branch for the trusted sync script and treats the PR
+# checkout as data. DO NOT run local code from the PR checkout.
+#####
+
+on: # zizmor: ignore[dangerous-triggers] required to push dependency pin updates to same-repository PR branches
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+    paths:
+      - '.pre-commit-config.yaml'
+
+permissions: {}
+
+concurrency:
+  group: sync-pre-commit-dependencies-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  sync-pre-commit-dependencies:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout trusted base branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+          persist-credentials: false
+
+      - name: Checkout pull request branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          path: pr
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false
+
+      - name: Sync mirrored dependency pins
+        run: |
+          set -euo pipefail
+
+          python base/scripts/align_pre_commit_versions.py --repo pr --sync \
+            | tee /tmp/pre-commit-dependency-sync.log
+
+      - name: Stage allowed files and check for changes
+        id: changes
+        working-directory: pr
+        run: |
+          set -euo pipefail
+
+          git add -- pyproject.toml .github/workflows/zizmor.yml
+
+          if ! git diff --quiet; then
+            echo "::error::Unexpected unstaged changes detected"
+            git status --short
+            exit 1
+          fi
+
+          if git diff --cached --quiet; then
+            echo "has-changes=false" >> "$GITHUB_OUTPUT"
+            echo "No mirrored dependency pin changes detected"
+          else
+            echo "has-changes=true" >> "$GITHUB_OUTPUT"
+            git diff --cached --name-status
+          fi
+
+      - name: Commit mirrored dependency pin updates
+        if: steps.changes.outputs.has-changes == 'true'
+        working-directory: pr
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "Sync mirrored pre-commit dependency versions"
+
+      - name: Push changes
+        if: steps.changes.outputs.has-changes == 'true'
+        working-directory: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+
+          gh auth setup-git
+          git push origin "HEAD:${PR_BRANCH}"
+
+      - name: Comment on pull request
+        if: steps.changes.outputs.has-changes == 'true'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- jupyterlab-pre-commit-dependency-sync -->';
+            const summary = fs.readFileSync('/tmp/pre-commit-dependency-sync.log', 'utf8').trim();
+            const body = [
+              marker,
+              'Synced mirrored pre-commit dependency versions.',
+              '',
+              'This PR updated `.pre-commit-config.yaml`, so this workflow updated the matching dependency pins used outside pre-commit.',
+              '',
+              '```text',
+              summary,
+              '```'
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            const comment = comments.find(comment =>
+              comment.user.type === 'Bot' && comment.body?.includes(marker)
+            );
+
+            if (comment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: comment.id,
+                body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body
+              });
+            }
