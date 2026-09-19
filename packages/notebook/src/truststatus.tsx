@@ -311,9 +311,8 @@ export namespace NotebookTrustStatus {
     }
 
     private _addCells(index: number, cells: ICellModel[]): void {
-      let cellIndex = index;
+      this._cells.splice(index, 0, ...cells);
       for (const cell of cells) {
-        this._cells.splice(cellIndex++, 0, cell);
         cell.stateChanged.connect(this._onCellStateChanged, this);
         if (cell.type === 'code') {
           this._totalCells++;
