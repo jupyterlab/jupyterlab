@@ -62,37 +62,10 @@ const UNUSED: Dict<string[]> = {
   '@jupyterlab/apputils': ['@types/react'],
   '@jupyterlab/application': ['@fortawesome/fontawesome-free'],
   '@jupyterlab/buildutils': ['inquirer', 'verdaccio'],
-  '@jupyterlab/codemirror': [
-    '@codemirror/lang-cpp',
-    '@codemirror/lang-css',
-    '@codemirror/lang-html',
-    '@codemirror/lang-java',
-    '@codemirror/lang-javascript',
-    '@codemirror/lang-json',
-    '@codemirror/lang-markdown',
-    '@codemirror/lang-php',
-    '@codemirror/lang-python',
-    '@codemirror/lang-rust',
-    '@codemirror/lang-sql',
-    '@codemirror/lang-wast',
-    '@codemirror/lang-xml',
-    '@codemirror/legacy-modes',
-    '@plutojl/lang-julia'
-  ],
-  '@jupyterlab/codemirror-extension': [
-    '@codemirror/lang-markdown',
-    '@codemirror/legacy-modes'
-  ],
   '@jupyterlab/coreutils': ['path-browserify'],
-  '@jupyterlab/fileeditor': ['regexp-match-indices'],
   '@jupyterlab/galata-extension': [
     '@fontsource/dejavu-mono',
     '@fontsource/dejavu-sans'
-  ],
-  '@jupyterlab/markedparser-extension': [
-    // only (but always) imported asynchronously
-    'marked-gfm-heading-id',
-    'marked-mangle'
   ],
   '@jupyterlab/services': ['ws'],
   '@jupyterlab/testing': [
@@ -100,7 +73,6 @@ const UNUSED: Dict<string[]> = {
     '@babel/preset-env',
     'fs-extra',
     'identity-obj-proxy',
-    'jest-environment-jsdom',
     'jest-junit'
   ],
   '@jupyterlab/testutils': [

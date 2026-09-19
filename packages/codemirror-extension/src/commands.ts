@@ -5,12 +5,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
-  deleteLine,
-  toggleBlockComment,
-  toggleComment,
-  toggleTabFocusMode
-} from '@codemirror/commands';
-import {
   foldable,
   foldAll,
   foldCode,
@@ -22,7 +16,6 @@ import {
 } from '@codemirror/language';
 import { EditorSelection } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
-import { selectNextOccurrence } from '@codemirror/search';
 import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -49,7 +42,11 @@ namespace CommandIDs {
   export const unfoldAll = 'codemirror:unfold-all';
 }
 
-function toggleBlockCommentWithFallback(view: EditorView): boolean {
+async function toggleBlockCommentWithFallback(
+  view: EditorView
+): Promise<boolean> {
+  const { toggleBlockComment, toggleComment } =
+    await import('@codemirror/commands');
   return toggleBlockComment(view) || toggleComment(view);
 }
 
@@ -211,11 +208,12 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
           properties: {}
         }
       },
-      execute: () => {
+      execute: async () => {
         const view = findEditorView();
         if (!view) {
           return;
         }
+        const { deleteLine } = await import('@codemirror/commands');
         deleteLine(view);
       },
       isEnabled
@@ -232,12 +230,12 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
           properties: {}
         }
       },
-      execute: () => {
+      execute: async () => {
         const view = findEditorView();
         if (!view) {
           return;
         }
-        toggleBlockCommentWithFallback(view);
+        await toggleBlockCommentWithFallback(view);
       },
       isEnabled
     });
@@ -250,11 +248,12 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
           properties: {}
         }
       },
-      execute: () => {
+      execute: async () => {
         const view = findEditorView();
         if (!view) {
           return;
         }
+        const { toggleComment } = await import('@codemirror/commands');
         toggleComment(view);
       },
       isEnabled
@@ -271,11 +270,12 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
           properties: {}
         }
       },
-      execute: () => {
+      execute: async () => {
         const view = findEditorView();
         if (!view) {
           return;
         }
+        const { toggleTabFocusMode } = await import('@codemirror/commands');
         toggleTabFocusMode(view);
       },
       isEnabled
@@ -289,11 +289,12 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
           properties: {}
         }
       },
-      execute: () => {
+      execute: async () => {
         const view = findEditorView();
         if (!view) {
           return;
         }
+        const { selectNextOccurrence } = await import('@codemirror/search');
         selectNextOccurrence(view);
       },
       isEnabled
