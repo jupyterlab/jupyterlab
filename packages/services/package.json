@@ -48,6 +48,7 @@
     "@jupyter/ydoc": "^4.0.0",
     "@jupyterlab/coreutils": "^6.7.0-alpha.1",
     "@jupyterlab/nbformat": "^4.7.0-alpha.1",
+    "@jupyterlab/rendermime-interfaces": "^3.15.0-alpha.1",
     "@jupyterlab/settingregistry": "^4.7.0-alpha.1",
     "@jupyterlab/statedb": "^4.7.0-alpha.1",
     "@lumino/coreutils": "^2.2.3",
