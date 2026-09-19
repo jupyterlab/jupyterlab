@@ -17,6 +17,9 @@
       "path": "../nbformat"
     },
     {
+      "path": "../rendermime-interfaces"
+    },
+    {
       "path": "../settingregistry"
     },
     {
