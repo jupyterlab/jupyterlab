@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+import type { IDocumentWidget } from '@jupyterlab/docregistry';
+import type { FileEditor } from '@jupyterlab/fileeditor';
 import { galata, test } from '@jupyterlab/galata';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
@@ -62,6 +64,79 @@ test.describe('File Edit Operations', () => {
 });
 
 test.describe('Console Interactions', () => {
+  for (const shutdown of [false, true]) {
+    test(`Should disable Run All and Restart with ${shutdown ? 'a shut down' : 'no selected'} kernel`, async ({
+      page
+    }) => {
+      await page.locator('.jp-FileEditor').click({ button: 'right' });
+      await page
+        .getByRole('menuitem', { name: 'Create Console for Editor' })
+        .click();
+      await expect(page.getByRole('dialog')).toBeVisible();
+      if (shutdown) {
+        await page.getByRole('button', { name: 'Select Kernel' }).click();
+        await expect(
+          page.locator('.jp-ConsolePanel [title="Kernel Idle"]')
+        ).toBeVisible();
+        await page.menu.clickMenuItem('Kernel>Shut Down');
+      } else {
+        await page.getByRole('dialog').press('Escape');
+      }
+      await expect(
+        page.locator('.jp-ConsolePanel .jp-Toolbar-kernelName')
+      ).toHaveText('No Kernel');
+
+      await page.locator('.jp-FileEditor .cm-content').click();
+      const menu = await page.menu.openLocator('Run');
+      await expect(
+        menu!.getByRole('menuitem', { name: 'Run All Code', exact: true })
+      ).toBeDisabled();
+      await expect(
+        menu!.getByRole('menuitem', {
+          name: 'Restart Kernel and Run All Code',
+          exact: true
+        })
+      ).toBeDisabled();
+    });
+  }
+
+  test('Should queue code without changing the editor when no kernel is selected', async ({
+    page
+  }) => {
+    await page.locator('.jp-FileEditor .cm-content').fill('123');
+    await page.locator('.jp-FileEditor').click({ button: 'right' });
+    await page
+      .getByRole('menuitem', { name: 'Create Console for Editor' })
+      .click();
+    await page.getByRole('dialog').press('Escape');
+    await expect(
+      page.locator('.jp-ConsolePanel .jp-Toolbar-kernelName')
+    ).toHaveText('No Kernel');
+    await page.locator('.jp-FileEditor .cm-content').click();
+    const before = await getEditorState(page);
+
+    await page.keyboard.press('Shift+Enter');
+
+    expect(await getEditorState(page)).toEqual(before);
+    await expect(
+      page.locator('.jp-CodeConsole .jp-OutputArea-output')
+    ).toHaveCount(0);
+
+    await page.locator('.jp-ConsolePanel .jp-Toolbar-kernelName').click();
+    await page.getByRole('button', { name: 'Select Kernel' }).click();
+    await expect(
+      page.getByLabel('Code Cell Content with Output').locator('span')
+    ).toContainText('123');
+    await page.locator('.jp-FileEditor .cm-content').click();
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          window.jupyterapp.commands.isEnabled('runmenu:restart-and-run-all')
+        )
+      )
+      .toBe(true);
+  });
+
   test('Should send line to console on Shift + Enter before kernel starts', async ({
     page
   }) => {
@@ -114,6 +189,14 @@ test.describe('Console Interactions', () => {
 
     await page.getByText('123', { exact: true }).click();
 
+    expect(
+      await page.evaluate(() => ({
+        runAll: window.jupyterapp.commands.isEnabled('runmenu:run-all'),
+        restartAndRunAll: window.jupyterapp.commands.isEnabled(
+          'runmenu:restart-and-run-all'
+        )
+      }))
+    ).toEqual({ runAll: true, restartAndRunAll: false });
     await page.keyboard.press('Shift+Enter');
     releaseSessionStart();
 
@@ -122,6 +205,17 @@ test.describe('Console Interactions', () => {
     ).toContainText('123');
   });
 });
+
+async function getEditorState(page: Page) {
+  return page.evaluate(() => {
+    const widget = window.jupyterapp.shell
+      .currentWidget as IDocumentWidget<FileEditor>;
+    return {
+      source: widget.content.model.sharedModel.getSource(),
+      cursor: widget.content.editor.getCursorPosition()
+    };
+  });
+}
 
 async function getEditorText(page: Page): Promise<string> {
   await page.keyboard.press('Control+A');

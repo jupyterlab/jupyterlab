@@ -780,6 +780,18 @@ export namespace Commands {
       }
     });
 
+    const getConsoleForEditor = () => {
+      const current = tracker.currentWidget;
+      return (
+        current &&
+        consoleTracker?.find(
+          widget =>
+            widget.sessionContext.path === current.context.path ||
+            widget.sessionContext.session?.path === current.context.path
+        )
+      );
+    };
+
     /**
      * Restart the Console Kernel linked to the current Editor
      */
@@ -799,7 +811,14 @@ export namespace Commands {
         }
       },
       label: trans.__('Restart Kernel'),
-      isEnabled: () => consoleTracker !== null && isEnabled(),
+      isEnabled: () =>
+        isEnabled() &&
+        !!consoleTracker?.find(
+          widget =>
+            widget.sessionContext.session?.path ===
+              tracker.currentWidget?.context.path &&
+            !!widget.sessionContext.session?.kernel
+        ),
       describedBy: {
         args: {
           type: 'object',
@@ -850,18 +869,20 @@ export namespace Commands {
         if (!selected) {
           // no selection, submit whole line and advance
           code = editor.getLine(selection.start.line);
-          const cursor = editor.getCursorPosition();
-          const nextLine = editor.getLine(cursor.line + 1);
+          if (getConsoleForEditor()?.sessionContext.hasNoKernel === false) {
+            const cursor = editor.getCursorPosition();
+            const nextLine = editor.getLine(cursor.line + 1);
 
-          if (cursor.line + 1 === editor.lineCount) {
-            const text = editor.model.sharedModel.getSource();
-            editor.model.sharedModel.setSource(text + '\n');
+            if (cursor.line + 1 === editor.lineCount) {
+              const text = editor.model.sharedModel.getSource();
+              editor.model.sharedModel.setSource(text + '\n');
+            }
+
+            editor.setCursorPosition({
+              line: cursor.line + 1,
+              column: nextLine?.length ?? 0 // Place cursor at end of line if line has content else place at start of line
+            });
           }
-
-          editor.setCursorPosition({
-            line: cursor.line + 1,
-            column: nextLine?.length ?? 0 // Place cursor at end of line if line has content else place at start of line
-          });
         }
 
         const activate = false;
@@ -915,7 +936,9 @@ export namespace Commands {
           return Promise.resolve(void 0);
         }
       },
-      isEnabled,
+      isEnabled: () =>
+        isEnabled() &&
+        getConsoleForEditor()?.sessionContext.hasNoKernel === false,
       label: trans.__('Run All Code'),
       describedBy: {
         args: {
@@ -1695,15 +1718,9 @@ export namespace Commands {
           widget.sessionContext.path === current.context.path ||
           widget.sessionContext.session?.path === current.context.path
       );
-    const hasReadyConsoleForEditor = (current: IDocumentWidget<FileEditor>) =>
-      isEnabled() &&
-      current.context &&
-      !!consoleTracker.find(
-        widget => widget.sessionContext.session?.path === current.context.path
-      );
     menu.runMenu.codeRunners.restart.add({
       id: CommandIDs.restartConsole,
-      isEnabled: hasReadyConsoleForEditor
+      isEnabled: hasConsoleForEditor
     });
     menu.runMenu.codeRunners.run.add({
       id: CommandIDs.runCode,
