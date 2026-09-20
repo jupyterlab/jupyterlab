@@ -174,14 +174,15 @@ class Gettext {
     this._contextDelimiter =
       options.contextDelimiter || this._defaults.contextDelimiter;
     this._stringsPrefix = options.stringsPrefix || this._defaults.stringsPrefix;
-    this._pluralFuncs = {};
-    this._dictionary = {};
-    this._pluralForms = {};
+    this._pluralFuncs = Object.create(null);
+    this._dictionary = Object.create(null);
+    this._pluralForms = Object.create(null);
 
     if (options.messages) {
-      this._dictionary[this._domain] = {
-        [this._locale]: options.messages
-      };
+      const domainMessages: Record<string, TranslationMessages> =
+        Object.create(null);
+      domainMessages[this._locale] = options.messages;
+      this._dictionary[this._domain] = domainMessages;
     }
 
     if (options.pluralForms) {
@@ -696,7 +697,8 @@ class Gettext {
 
     if (pluralForms) this._pluralForms[locale] = pluralForms;
 
-    const domainMessages = (this._dictionary[domain] ??= {});
+    const domainMessages: Record<string, TranslationMessages> =
+      (this._dictionary[domain] ??= Object.create(null));
     domainMessages[locale] = messages;
   }
 
