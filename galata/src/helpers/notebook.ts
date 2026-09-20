@@ -475,11 +475,6 @@ export class NotebookHelper {
         .locator('[data-icon="ui-components:not-trusted"]')
         .count()) === 1
     ) {
-      // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18457
-      await this.page
-        .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
-        .waitFor();
-
       await this.page.keyboard.press('Control+Shift+C');
       await this.page.getByPlaceholder('SEARCH', { exact: true }).fill('trust');
       await this.page.getByText('Trust Notebook').click();
@@ -964,7 +959,13 @@ export class NotebookHelper {
     if (textOutputsNum > 0) {
       const outputs: string[] = [];
       for (let i = 0; i < textOutputsNum; i++) {
-        outputs.push((await textOutputs.nth(i).textContent()) ?? '');
+        const output = textOutputs.nth(i);
+        // Wait for incremental text rendering to populate the pre element
+        const renderedText = output.locator('.jp-RenderedText');
+        if ((await renderedText.count()) > 0) {
+          await renderedText.locator('pre').first().waitFor();
+        }
+        outputs.push((await output.textContent()) ?? '');
       }
 
       return outputs;
@@ -1497,6 +1498,8 @@ export class NotebookHelper {
     await this.page.evaluate(cellIdx => {
       window.galata.resetExecutionCount(cellIdx);
     }, cellIndex);
+
+    await this._waitUntilKernelReadyToScheduleExecution();
     await this.page.keyboard.press(
       inplace === true ? 'Control+Enter' : 'Shift+Enter'
     );

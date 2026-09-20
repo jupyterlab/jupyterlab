@@ -27,6 +27,7 @@ import {
   ICommandPalette,
   IWindowResolver,
   MenuFactory,
+  Notification,
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
@@ -79,6 +80,8 @@ namespace CommandIDs {
 
   export const closeRightTabs = 'application:close-right-tabs';
 
+  export const copyImage = 'application:copy-image';
+
   export const closeAll: string = 'application:close-all';
 
   export const setActivityBarPosition: string =
@@ -130,6 +133,7 @@ namespace CommandIDs {
 
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 3;
+const COPY_IMAGE_NOTIFICATION_AUTO_CLOSE = 5000;
 
 /**
  * A plugin to register the commands for the main application.
@@ -191,6 +195,65 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       const id = node.dataset.id;
       return id ? findWidgetById(id) : null;
+    };
+
+    const contextMenuImage = (): HTMLImageElement | undefined => {
+      const node = app.contextMenuHitTest(
+        node => node instanceof HTMLImageElement
+      );
+      return node instanceof HTMLImageElement ? node : undefined;
+    };
+
+    const imageToPngBlob = async (
+      image: HTMLImageElement,
+      errorMessage: string
+    ): Promise<Blob> => {
+      const canvasBlob = (): Promise<Blob> => {
+        const canvas = document.createElement('canvas');
+        canvas.width = image.naturalWidth || image.width;
+        canvas.height = image.naturalHeight || image.height;
+
+        const context = canvas.getContext('2d');
+        if (!context || !canvas.width || !canvas.height) {
+          return Promise.reject(new Error(errorMessage));
+        }
+
+        try {
+          context.drawImage(image, 0, 0);
+        } catch {
+          return Promise.reject(new Error(errorMessage));
+        }
+
+        return new Promise<Blob>((resolve, reject) => {
+          try {
+            canvas.toBlob(blob => {
+              if (blob) {
+                resolve(blob);
+              } else {
+                reject(new Error(errorMessage));
+              }
+            }, 'image/png');
+          } catch {
+            reject(new Error(errorMessage));
+          }
+        });
+      };
+
+      const src = image.currentSrc || image.src;
+      if (!src) {
+        return canvasBlob();
+      }
+
+      try {
+        const response = await fetch(src);
+        if (!response.ok) {
+          throw new Error(errorMessage);
+        }
+        const blob = await response.blob();
+        return blob.type === 'image/png' ? blob : canvasBlob();
+      } catch {
+        return canvasBlob();
+      }
     };
 
     // Closes an array of widgets.
@@ -369,6 +432,59 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           return;
         }
         closeWidgets(widgetsRightOf(widget));
+      }
+    });
+
+    commands.addCommand(CommandIDs.copyImage, {
+      label: trans.__('Copy Image'),
+      caption: trans.__('Copy image to clipboard'),
+      execute: async () => {
+        const image = contextMenuImage();
+        if (!image) {
+          return;
+        }
+
+        try {
+          if (
+            !navigator.clipboard?.write ||
+            typeof ClipboardItem === 'undefined'
+          ) {
+            throw new Error(
+              trans.__('Image copying is not supported in this browser.')
+            );
+          }
+
+          if (!image.complete) {
+            throw new Error(trans.__('Could not copy image.'));
+          }
+
+          const errorMessage = trans.__(
+            'Could not copy image. Browser security restrictions may prevent copying images loaded from another origin.'
+          );
+          const blob = await imageToPngBlob(image, errorMessage);
+
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': blob })
+          ]);
+        } catch (reason) {
+          const error =
+            reason instanceof Error
+              ? reason
+              : new Error(trans.__('Could not copy image.'));
+          Notification.error(error.message, {
+            autoClose: COPY_IMAGE_NOTIFICATION_AUTO_CLOSE
+          });
+        }
+      },
+      isEnabled: () =>
+        !!contextMenuImage() &&
+        !!navigator.clipboard?.write &&
+        typeof ClipboardItem !== 'undefined',
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
       }
     });
 
@@ -837,7 +953,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         return find(labShell.widgets('main'), w => w.id === id) ?? null;
       };
 
-      commands.addCommand('application:split-tab', {
+      commands.addCommand(CommandIDs.splitTab, {
         label: args => {
           const direction = args?.['direction'] as
             | 'left'
@@ -869,6 +985,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
                 type: 'string',
                 enum: ['left', 'right', 'top', 'bottom'],
                 description: trans.__('The direction to split the tab')
+              },
+              id: {
+                type: 'string',
+                description: trans.__(
+                  'The widget ID to split. Defaults to the context menu target.'
+                )
               }
             },
             required: ['direction']
@@ -899,7 +1021,16 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
             | 'top'
             | 'bottom';
 
-          const widget = contextMenuTabWidget();
+          // Get the widget from its id if provided.
+          let widget = args?.['id']
+            ? find(labShell.widgets('main'), value => value.id === args?.['id'])
+            : null;
+
+          // Get the widget from the context menu hit test.
+          if (!widget) {
+            widget = contextMenuTabWidget();
+          }
+
           if (widget && direction) {
             labShell.moveTab(widget, direction);
           }
@@ -1281,6 +1412,9 @@ const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
     function createMenu(options: ISettingRegistry.IMenu): RankedMenu {
       const menu = new RankedMenu({ ...options, commands: app.commands });
       if (options.label) {
+        // The label comes from the `jupyter.lab.menus` key of a settings
+        // schema, from which it is extracted by the schema selectors.
+        // eslint-disable-next-line jupyter/no-dynamic-translation
         menu.title.label = trans.__(options.label);
       }
       return menu;

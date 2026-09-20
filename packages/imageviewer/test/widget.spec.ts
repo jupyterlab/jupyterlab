@@ -5,7 +5,8 @@ import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import {
   Base64ModelFactory,
   Context,
-  DocumentWidget
+  DocumentWidget,
+  TextModelFactory
 } from '@jupyterlab/docregistry';
 import { createFileContext } from '@jupyterlab/docregistry/lib/testutils';
 import { ImageViewer, ImageViewerFactory } from '@jupyterlab/imageviewer';
@@ -32,9 +33,19 @@ class LogImage extends ImageViewer {
 
 // jsdom does not have createObjectURL and revokeObjectURL, so we define them.
 if (typeof window.URL.createObjectURL === 'undefined') {
-  const noOp = () => {};
-  Object.defineProperty(window.URL, 'createObjectURL', { value: noOp });
-  Object.defineProperty(window.URL, 'revokeObjectURL', { value: noOp });
+  Object.defineProperty(window.URL, 'createObjectURL', {
+    configurable: true,
+    value: () => '',
+    writable: true
+  });
+}
+
+if (typeof window.URL.revokeObjectURL === 'undefined') {
+  Object.defineProperty(window.URL, 'revokeObjectURL', {
+    configurable: true,
+    value: () => undefined,
+    writable: true
+  });
 }
 
 /**
@@ -46,6 +57,17 @@ const IMAGE: Partial<Contents.IModel> = {
   mimetype: 'image/png',
   content: 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
   format: 'base64'
+};
+
+/**
+ * The common SVG image model.
+ */
+const SVG: Partial<Contents.IModel> = {
+  path: UUID.uuid4() + '.svg',
+  type: 'file',
+  mimetype: 'image/svg+xml',
+  content: '<svg xmlns="http://www.w3.org/2000/svg"></svg>',
+  format: 'text'
 };
 
 /**
@@ -65,7 +87,8 @@ describe('ImageViewer', () => {
   beforeAll(async () => {
     manager = new ServiceManagerMock();
     await manager.ready;
-    return manager.contents.save(IMAGE.path!, IMAGE);
+    await manager.contents.save(IMAGE.path!, IMAGE);
+    await manager.contents.save(SVG.path!, SVG);
   });
 
   beforeEach(() => {
@@ -108,6 +131,46 @@ describe('ImageViewer', () => {
       MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
       const img = widget.node.querySelector('img') as HTMLImageElement;
       expect(img.src).toContain(OTHER);
+    });
+
+    it('should revoke object URLs after text images load', async () => {
+      const objectUrl = 'blob:http://localhost/imageviewer-test-svg';
+      const createObjectURL = jest
+        .spyOn(window.URL, 'createObjectURL')
+        .mockReturnValue(objectUrl);
+      const revokeObjectURL = jest
+        .spyOn(window.URL, 'revokeObjectURL')
+        .mockImplementation(() => undefined);
+      const svgContext = new Context({
+        manager,
+        factory: new TextModelFactory(),
+        path: SVG.path!
+      });
+      const svgWidget = new LogImage(svgContext);
+
+      try {
+        await svgContext.initialize(false);
+        await svgWidget.ready;
+
+        const img = svgWidget.node.querySelector('img') as HTMLImageElement;
+        expect(createObjectURL).toHaveBeenCalledTimes(1);
+        expect(svgWidget.hasClass('jp-mod-svg')).toBe(true);
+        expect(img.src).toBe(objectUrl);
+        expect(revokeObjectURL).not.toHaveBeenCalled();
+
+        img.dispatchEvent(new Event('load'));
+
+        expect(revokeObjectURL).toHaveBeenCalledTimes(1);
+        expect(revokeObjectURL).toHaveBeenCalledWith(objectUrl);
+
+        svgWidget.dispose();
+        expect(revokeObjectURL).toHaveBeenCalledTimes(1);
+      } finally {
+        svgWidget.dispose();
+        svgContext.dispose();
+        createObjectURL.mockRestore();
+        revokeObjectURL.mockRestore();
+      }
     });
   });
 

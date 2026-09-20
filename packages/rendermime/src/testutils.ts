@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Sanitizer } from '@jupyterlab/apputils';
 import type { IOutput } from '@jupyterlab/nbformat';
 import { standardRendererFactories } from './factories';
 import { RenderMimeRegistry } from './registry';
@@ -54,7 +55,14 @@ export function defaultRenderMime(): RenderMimeRegistry {
  * A namespace for private data.
  */
 namespace Private {
+  // Render textual outputs synchronously in tests so that assertions can observe
+  // the fully-rendered output without having to drive the incremental
+  // (animation-frame based) rendering pipeline. That pipeline is covered by
+  // rendermime's own tests (renderers.spec.ts, factories.spec.ts).
+  const sanitizer = new Sanitizer();
+  sanitizer.setIncrementalAutolink(false);
   export const rendermime = new RenderMimeRegistry({
-    initialFactories: standardRendererFactories
+    initialFactories: standardRendererFactories,
+    sanitizer
   });
 }

@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 
 import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
@@ -538,7 +536,7 @@ export namespace EditorHandler {
     const cmEditor = editor as CodeMirrorEditor;
     const linePos = cmEditor.doc.line(line).from;
 
-    const effects: StateEffect<any>[] = [
+    const effects: StateEffect<unknown>[] = [
       _highlightEffect.of({ pos: [linePos] })
     ];
 

@@ -3,7 +3,11 @@
 
 import type { SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
-import type { IOutputAreaModel, Stdin } from '@jupyterlab/outputarea';
+import type {
+  IOutputAreaModel,
+  IPageHandler,
+  Stdin
+} from '@jupyterlab/outputarea';
 import {
   OutputArea,
   OutputAreaModel,
@@ -16,6 +20,7 @@ import {
   DEFAULT_OUTPUTS,
   defaultRenderMime
 } from '@jupyterlab/rendermime/lib/testutils';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
@@ -412,6 +417,42 @@ describe('outputarea/widget', () => {
       });
     });
 
+    it('should delegate page payloads to an optional page handler', () => {
+      widget.dispose();
+      model.dispose();
+
+      model = new OutputAreaModel({ trusted: true });
+      const receivedPayloads: ReadonlyJSONObject[] = [];
+      const pageHandler: IPageHandler = {
+        handlePage: payload => {
+          receivedPayloads.push(payload);
+          return true;
+        }
+      };
+      widget = new LogOutputArea({ rendermime, model, pageHandler });
+
+      const message = {
+        content: {
+          status: 'ok',
+          payload: [
+            {
+              source: 'page',
+              data: { 'text/plain': 'pager output' }
+            }
+          ]
+        }
+      } as unknown as KernelMessage.IExecuteReplyMsg;
+
+      const testWidget = widget as unknown as {
+        _onExecuteReply: (msg: KernelMessage.IExecuteReplyMsg) => void;
+      };
+      testWidget._onExecuteReply(message);
+
+      expect(receivedPayloads).toHaveLength(1);
+      expect(receivedPayloads[0]['source']).toBe('page');
+      expect(model.length).toBe(0);
+    });
+
     describe('#onModelChanged()', () => {
       it('should handle an added output', () => {
         widget.model.clear();
@@ -433,7 +474,7 @@ describe('outputarea/widget', () => {
         expect(widget.widgets.length).toBe(0);
       });
 
-      it('should follow changes to initial stdout stream', () => {
+      it('should follow changes to initial stdout stream', async () => {
         model = new OutputAreaModel({
           values: [DEFAULT_OUTPUTS[0]],
           trusted: true
@@ -443,6 +484,9 @@ describe('outputarea/widget', () => {
         const streamOutput = 'nctvjd745fdk56';
         expect(widget.node.innerHTML).not.toContain(streamOutput);
         widget.model.appendStreamOutput(streamOutput);
+        // Rendering is asynchronous (the renderer defers work off the initial
+        // task), so wait for it to settle before inspecting the DOM.
+        await new Promise(resolve => setTimeout(resolve, 0));
         expect(widget.node.innerHTML).toContain(streamOutput);
       });
 

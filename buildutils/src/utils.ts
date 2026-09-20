@@ -262,7 +262,7 @@ ${diff}`
  * Post-bump.
  */
 export function postbump(commit = true): void {
-  run('jlpm integrity');
+  run('YARN_ENABLE_IMMUTABLE_INSTALLS=false jlpm integrity');
 
   // Commit changes.
   if (commit) {

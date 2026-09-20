@@ -9,6 +9,7 @@ import {
 } from '@jupyterlab/apputils';
 import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt, Time } from '@jupyterlab/coreutils';
+import type { IPageHandler } from '@jupyterlab/outputarea';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { ServiceManager } from '@jupyterlab/services';
@@ -47,6 +48,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       manager,
       modelFactory,
       sessionContext,
+      pageHandler,
       translator
     } = options;
     this.translator = translator ?? nullTranslator;
@@ -61,10 +63,11 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
     sessionContext = this._sessionContext =
       sessionContext ??
       new SessionContext({
+        driveName: manager.contents.driveName(path),
         kernelManager: manager.kernels,
         sessionManager: manager.sessions,
         specsManager: manager.kernelspecs,
-        path: manager.contents.localPath(path),
+        path,
         name: name || trans.__('Console %1', count),
         type: 'console',
         kernelPreference: options.kernelPreference,
@@ -85,6 +88,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       mimeTypeService,
       contentFactory,
       modelFactory,
+      pageHandler,
       translator
     });
     this.content.addWidget(this.console);
@@ -258,6 +262,11 @@ export namespace ConsolePanel {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * Optional handler for pager payloads (`source: page`).
+     */
+    pageHandler?: IPageHandler;
 
     /**
      * A function to call when the kernel is busy.

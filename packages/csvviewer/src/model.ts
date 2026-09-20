@@ -408,25 +408,12 @@ export class DSVModel extends DataModel implements IDisposable {
       return;
     }
 
-    // Compute the column count if we don't already have it.
-    if (this._columnCount === undefined) {
-      // Get number of columns in first row
-      this._columnCount = PARSERS[this._parser]({
-        data: this._rawData,
-        delimiter: this._delimiter,
-        rowDelimiter: this._rowDelimiter,
-        quote: this._quote,
-        columnOffsets: true,
-        maxRows: 1
-      }).ncols;
-    }
-
     // `reparse` is the number of rows we are requesting to parse over again.
     // We generally start at the beginning of the last row offset, so that the
     // first row offset returned is the same as the last row offset we already
     // have. We parse the data up to and including the requested row.
     const reparse = this._rowCount! > 0 ? 1 : 0;
-    const { nrows, offsets } = PARSERS[this._parser]({
+    const { nrows, offsets, maxNcols } = PARSERS[this._parser]({
       data: this._rawData,
       startIndex: this._rowOffsets[this._rowCount! - reparse] ?? 0,
       delimiter: this._delimiter,
@@ -452,6 +439,10 @@ export class DSVModel extends DataModel implements IDisposable {
     const duplicateRows = Math.min(nrows, reparse);
     this._rowCount = oldRowCount + nrows - duplicateRows;
 
+    const oldColumnCount = this._columnCount ?? 0;
+    this._columnCount = Math.max(oldColumnCount, maxNcols ?? 0);
+    const columnCountChanged = this._columnCount !== oldColumnCount;
+
     // If we didn't reach the requested row, we must be done.
     if (this._rowCount < endRow) {
       this._doneParsing = true;
@@ -473,10 +464,33 @@ export class DSVModel extends DataModel implements IDisposable {
     // 128*(2**20 bytes/M)/(4 bytes/entry) = 33554432 entries.
     const maxColumnOffsetsRows = Math.floor(33554432 / this._columnCount);
 
-    // We need to expand the column offset array if we were storing all column
-    // offsets before. Check to see if the previous size was small enough that
-    // we stored all column offsets.
-    if (oldRowCount <= maxColumnOffsetsRows) {
+    if (columnCountChanged) {
+      const columnOffsetRows =
+        this._rowCount <= maxColumnOffsetsRows
+          ? this._rowCount
+          : Math.min(this._maxCacheGet, maxColumnOffsetsRows);
+
+      this._columnOffsets = new Uint32Array(
+        columnOffsetRows * this._columnCount
+      );
+      this._columnOffsets.fill(0xffffffff);
+      this._columnOffsetsStartingRow = 0;
+
+      if (this._header.length > 0) {
+        for (let c = this._header.length; c < this._columnCount; c++) {
+          this._header.push(this._getField(0, c));
+        }
+      }
+
+      if (oldColumnCount > 0) {
+        this.emitChanged({
+          type: 'columns-inserted',
+          region: 'body',
+          index: oldColumnCount,
+          span: this._columnCount - oldColumnCount
+        });
+      }
+    } else if (oldRowCount <= maxColumnOffsetsRows) {
       // Check to see if the new column offsets array is small enough to still
       // store, or if we should cut over to a small cache.
       if (this._rowCount <= maxColumnOffsetsRows) {

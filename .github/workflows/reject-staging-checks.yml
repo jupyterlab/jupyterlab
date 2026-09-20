@@ -7,6 +7,9 @@ on:
     paths:
       - 'jupyterlab/staging/**'
 
+permissions:
+  contents: read
+
 jobs:
   staging-check:
     runs-on: ubuntu-latest

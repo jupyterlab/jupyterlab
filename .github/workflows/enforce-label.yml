@@ -5,7 +5,7 @@ name: Enforce PR label
 # Never checkout the PR and run ANY local code on it.
 #####
 
-on:
+on: # zizmor: ignore[dangerous-triggers] safe label enforcement; no checkout or code execution
   pull_request_target:
     types: [labeled, unlabeled, opened, edited, synchronize]
 jobs:

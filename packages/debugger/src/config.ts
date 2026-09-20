@@ -44,7 +44,9 @@ export class DebuggerConfig implements IDebugger.IConfig {
     }
     switch (method) {
       case 'Murmur2':
-        this._hashMethods.set(kernel, code => murmur2(code, seed).toString());
+        this._hashMethods.set(kernel, code =>
+          murmur2(code, Number(seed ?? 0)).toString()
+        );
         break;
       default:
         throw new Error(`Hash method (${method}) is not supported.`);
