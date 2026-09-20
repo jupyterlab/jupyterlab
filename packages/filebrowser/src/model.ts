@@ -635,7 +635,9 @@ export class FileBrowserModel implements IDisposable {
 
     const trackedOperations = promises.map(async promise => {
       try {
-        return await promise;
+        return { status: 'fulfilled' as const, value: await promise };
+      } catch (reason: unknown) {
+        return { status: 'rejected' as const, reason };
       } finally {
         completed += 1;
         const updatedProgress: IUploadModel = {
@@ -651,10 +653,8 @@ export class FileBrowserModel implements IDisposable {
       }
     });
 
-    const results = await Promise.allSettled(trackedOperations);
-    const rejection = results.find(
-      (result): result is PromiseRejectedResult => result.status === 'rejected'
-    );
+    const results = await Promise.all(trackedOperations);
+    const rejection = results.find(result => result.status === 'rejected');
 
     if (rejection) {
       this._uploadChanged.emit({
