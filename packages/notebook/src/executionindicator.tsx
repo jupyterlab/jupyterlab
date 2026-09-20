@@ -425,6 +425,12 @@ export namespace ExecutionIndicator {
               const parentId = (message.parent_header as KernelMessage.IHeader)
                 .msg_id;
               this._cellExecutedCallback(nb, parentId);
+            } else if (message.header.msg_type === 'execute_reply') {
+              // Kernels are not required to publish the idle status for requests
+              // they abort, but the protocol guarantees one reply per request.
+              const parentId = (message.parent_header as KernelMessage.IHeader)
+                .msg_id;
+              this._cellExecutedCallback(nb, parentId);
             } else if (
               KernelMessage.isStatusMsg(message) &&
               message.content.execution_state === 'restarting'
