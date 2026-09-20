@@ -53,13 +53,13 @@ function setEditorStyle(view: EditorView): Record<string, string> | null {
     view.state.facet(customThemeConfig);
 
   let style = '';
-  if (fontSize) {
+  if (fontSize !== null) {
     style += `font-size: ${fontSize}px !important;`;
   }
   if (fontFamily) {
     style += `font-family: ${fontFamily} !important;`;
   }
-  if (lineHeight) {
+  if (lineHeight !== null && lineHeight !== 0) {
     style += `line-height: ${lineHeight.toString()} !important`;
   }
 

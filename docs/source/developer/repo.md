@@ -77,7 +77,7 @@ in `dev-mode`, you are serving the application out of this directory.
 ### Documentation: `docs/`
 
 This directory contains the Sphinx project for this documentation.
-You can install the dependencies for building the documentation using `pip install .[docs]`,
+You can install the dependencies for building the documentation using `pip install . --group docs`,
 and you can build the documentation by running `make html`.
 The entry point to the built docs will then be in `docs/build/index.html`.
 

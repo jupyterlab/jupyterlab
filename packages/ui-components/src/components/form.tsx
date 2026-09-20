@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Button } from '@jupyter/react-components';
 import type { ITranslator } from '@jupyterlab/translation';
@@ -514,7 +515,7 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
           }`}
         >
           {!hasCustomField &&
-            (rawErrors?.length ? (
+            ((rawErrors?.length ?? 0) > 0 ? (
               // Shows a red indicator for fields that have validation errors
               <div className="jp-modifiedIndicator jp-errorIndicator" />
             ) : (

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 const data = require('./package.json');
-const Build = require('@jupyterlab/builder').Build;
+const Build = require('@jupyter/builder').Build;
 const miniSVGDataURI = require('mini-svg-data-uri');
 
 const names = Object.keys(data.dependencies).filter(function (name) {

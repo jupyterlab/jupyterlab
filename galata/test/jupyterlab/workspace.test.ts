@@ -230,7 +230,7 @@ test.describe('Workspace', () => {
     await page.goto();
     const workspaceSelector = page.locator('.jp-WorkspaceSelector-header');
     // Not visible by default
-    expect(await workspaceSelector.isVisible()).toBe(false);
+    await expect(workspaceSelector).toBeHidden();
 
     // Open custom workspace
     await page.goto('workspaces/foo');
@@ -390,7 +390,7 @@ test.describe('Workspace in doc mode', () => {
         );
       }),
       page.url() === `${baseURL}/lab`,
-      page.click('button.jp-switch[role="switch"]')
+      page.menu.clickMenuItem('View>Appearance>Simple Interface')
     ]);
 
     // Ensure that the document opened by URL is closed, and that the one from workspace file is restored.

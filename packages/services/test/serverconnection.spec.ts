@@ -91,6 +91,51 @@ describe('ServerConnection', () => {
     });
   });
 
+  describe('XSRF cookie handling', () => {
+    const originalToken = PageConfig.getOption('token');
+    let cookieDescriptor: PropertyDescriptor | undefined;
+
+    beforeEach(() => {
+      // Clear token so XSRF cookie is used for authentication
+      PageConfig.setOption('token', '');
+      // Save the original own-property descriptor on `document` itself.
+      // The test defines `cookie` as an instance-level override, so the
+      // same own-property must be restored (or removed) in afterEach —
+      // restoring only the prototype descriptor leaves the instance
+      // override in place and leaks the mock into later tests.
+      cookieDescriptor = Object.getOwnPropertyDescriptor(document, 'cookie');
+    });
+
+    afterEach(() => {
+      PageConfig.setOption('token', originalToken);
+      if (cookieDescriptor) {
+        Object.defineProperty(document, 'cookie', cookieDescriptor);
+      } else {
+        delete (document as { cookie?: string }).cookie;
+      }
+    });
+
+    it('should use the last matching cookie when duplicates exist', async () => {
+      // Simulate multiple _xsrf cookies with different paths.
+      // Per RFC 6265, document.cookie lists more-specific paths first.
+      // The server-side parser (SimpleCookie) keeps the last value,
+      // so the client should also return the last one.
+      Object.defineProperty(document, 'cookie', {
+        get: () => '_xsrf=specific_path_token; _xsrf=root_path_token',
+        configurable: true
+      });
+      let capturedHeaders: Headers | undefined;
+      const settings = ServerConnection.makeSettings({
+        fetch: (input: RequestInfo) => {
+          capturedHeaders = (input as Request).headers;
+          return Promise.resolve(new Response('{}', { status: 200 }));
+        }
+      });
+      await ServerConnection.makeRequest(settings.baseUrl, {}, settings);
+      expect(capturedHeaders?.get('X-XSRFToken')).toBe('root_path_token');
+    });
+  });
+
   describe('ResponseError', () => {
     describe('#create', () => {
       it.each([

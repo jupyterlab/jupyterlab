@@ -49,7 +49,12 @@ const ScopeSwitcherComponent = ({
     >
       {scopes.map(scope => (
         <option key={scope.name} value={scope.name}>
-          {trans.__(scope.name)}
+          {
+            // Scope names are chosen by the debug adapter, so there is no
+            // literal to extract here.
+            // eslint-disable-next-line jupyter/no-dynamic-translation
+            trans.__(scope.name)
+          }
         </option>
       ))}
     </HTMLSelect>

@@ -1,6 +1,6 @@
 # User Guide
 
-Use this page to navigate to in-depth guides, tutorials, and how-tos for using [JupyterLab](https://jupyterlab.readthedocs.io/en/latest/).
+Use this page to navigate to in-depth guides, tutorials, and how-to guides for using [JupyterLab](https://jupyterlab.readthedocs.io/en/latest/).
 
 ```{toctree}
 :maxdepth: 2

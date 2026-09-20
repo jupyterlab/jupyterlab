@@ -192,7 +192,8 @@ namespace Private {
     const renderer = new Renderer_();
     const originalCode = renderer.code;
 
-    renderer.code = ({ text, lang, escaped }) => {
+    renderer.code = token => {
+      const { text, lang } = token;
       // handle block renderers
       for (const block of _blocks) {
         if (lang && block.languages.includes(lang)) {
@@ -211,7 +212,7 @@ namespace Private {
       }
 
       // fall back to calling with the renderer as `this`
-      return originalCode.call(renderer, { text, lang, escaped });
+      return originalCode.call(renderer, token);
     };
 
     return renderer;
@@ -297,7 +298,7 @@ namespace Private {
     return headings;
   }
 
-  function containsHeadingTag(raw: any) {
+  function containsHeadingTag(raw: string) {
     return HEADING_TAG_REGEX.test(raw);
   }
 

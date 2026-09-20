@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
 import type { IDisposable } from '@lumino/disposable';
 import { DisposableDelegate } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
@@ -15,7 +14,7 @@ export class LabStatus implements ILabStatus {
   /**
    * Construct a new  status object.
    */
-  constructor(app: JupyterFrontEnd<any, any>) {
+  constructor(app: JupyterFrontEnd) {
     this._busySignal = new Signal(app);
     this._dirtySignal = new Signal(app);
   }

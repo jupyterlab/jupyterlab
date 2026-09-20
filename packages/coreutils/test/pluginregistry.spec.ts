@@ -23,7 +23,7 @@ describe('JupyterPluginRegistry', () => {
   });
 
   it('should log plugin activation time with dependant count', async () => {
-    const slowPluginToken = new Token<any>('slow-plugin-token');
+    const slowPluginToken = new Token<any>('Test:SlowPlugin');
     const mockPlugins: IPlugin<any, any>[] = [
       {
         id: 'slow-plugin',

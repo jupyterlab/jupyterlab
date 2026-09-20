@@ -16,10 +16,6 @@ import {
 import { sleep } from '@jupyterlab/testutils';
 import { generate, simulate } from 'simulate-event';
 
-const UP_ARROW = 38;
-
-const DOWN_ARROW = 40;
-
 class LogFileEditor extends CodeMirrorEditor {
   methods: string[] = [];
 
@@ -95,7 +91,7 @@ describe('CodeMirrorEditor', () => {
   describe('#edgeRequested', () => {
     it('should emit a signal when the top edge is requested', () => {
       let edge: CodeEditor.EdgeLocation | null = null;
-      const event = generate('keydown', { keyCode: UP_ARROW });
+      const event = generate('keydown', { key: 'ArrowUp' });
       const listener = (sender: any, args: CodeEditor.EdgeLocation) => {
         edge = args;
       };
@@ -107,7 +103,7 @@ describe('CodeMirrorEditor', () => {
 
     it('should emit a signal when the bottom edge is requested', () => {
       let edge: CodeEditor.EdgeLocation | null = null;
-      const event = generate('keydown', { keyCode: DOWN_ARROW });
+      const event = generate('keydown', { key: 'ArrowDown' });
       const listener = (sender: any, args: CodeEditor.EdgeLocation) => {
         edge = args;
       };
@@ -137,6 +133,21 @@ describe('CodeMirrorEditor', () => {
     it('should be the codemirror editor wrapped by the editor', () => {
       const cm = editor.editor;
       expect(cm.state.doc).toBe(editor.doc);
+    });
+
+    it('should warn when accessing the legacy cmView shim', () => {
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const content = editor.editor.contentDOM as HTMLElement & {
+        cmView?: { view: typeof editor.editor; dom: HTMLElement };
+      };
+
+      expect(content.cmView?.view).toBe(editor.editor);
+      expect(content.cmView?.dom).toBe(content);
+      expect(warn).toHaveBeenCalledWith(
+        'Accessing cmView is deprecated. Use the public API EditorView.findFromDOM() instead.'
+      );
+
+      warn.mockRestore();
     });
   });
 
@@ -446,7 +457,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#onKeydown()', () => {
     it('should run when there is a keydown event on the editor', () => {
-      const event = generate('keydown', { keyCode: UP_ARROW });
+      const event = generate('keydown', { key: 'ArrowUp' });
       expect(editor.methods).toEqual(expect.not.arrayContaining(['onKeydown']));
       editor.editor.contentDOM.dispatchEvent(event);
       expect(editor.methods).toEqual(expect.arrayContaining(['onKeydown']));
@@ -482,7 +493,7 @@ describe('CodeMirrorEditor', () => {
         value: 'import'
       });
     });
-    it('should return token of parent when erronous leaf is found', async () => {
+    it('should return token of parent when erroneous leaf is found', async () => {
       model.mimeType = 'text/x-python';
       model.sharedModel.setSource('a = "/home');
       // Needed to have the sharedModel content transferred to the editor document

@@ -79,3 +79,6 @@ class ReadOnlyExtensionManager(ExtensionManager):
         return ActionResult(
             status="error", message=trans.gettext("Extension removal not supported.")
         )
+
+    async def is_install_allowed(self, name: str, version: str | None = None) -> bool:
+        return False

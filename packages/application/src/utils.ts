@@ -198,7 +198,7 @@ export function createSemanticCommand(
         commandId => commandId !== null && commands.isEnabled(commandId)
       );
 
-      let result: any = null;
+      let result: unknown = null;
       if (toExecute.length > 0) {
         for (const commandId of toExecute) {
           const args = { [SemanticCommand.WIDGET]: widget!.id };
@@ -218,7 +218,7 @@ export function createSemanticCommand(
 
   function reduceAttribute(
     attribute: keyof CommandRegistry.ICommandOptions
-  ): any[] {
+  ): unknown[] {
     const widget = shell.currentWidget;
     const commandIds = commandList.map(cmd =>
       widget !== null ? cmd.getActiveCommandId(widget) : null

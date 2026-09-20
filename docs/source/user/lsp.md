@@ -12,7 +12,7 @@ As of JupyterLab 4.2, there is no user-facing integration of Language Server Pro
 
 JupyterLab ships with components enabling extensions to handle and communicate with language servers.
 
-The LSP service is disabled by default, it can be enabled by togging the _Activate_ option in the _Language Servers_ section of the setting page.
+The LSP service is disabled by default, it can be enabled by toggling the _Activate_ option in the _Language Servers_ section of the setting page.
 Enabling the service will not have any effect unless extensions providing integration with the editor (or other elements of JupyterLab UI) are installed.
 
 ## Requirements

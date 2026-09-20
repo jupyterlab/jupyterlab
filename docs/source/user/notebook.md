@@ -84,6 +84,12 @@ Pressing {kbd}`Esc` exits Edit Mode, while pressing {kbd}`Enter` enters Edit Mod
 
 ## Working with Cells
 
+Open the Property Inspector from the View menu and expand Common Tools to view
+properties for the active cell. The Cell ID field shows the active cell's
+identifier and provides buttons to copy either the identifier or a direct link
+to that cell. These direct links use the `#cell-id=<cell-id>` syntax described
+in {ref}`urls`.
+
 (drag-drop)=
 
 Drag and drop cells to rearrange your notebook:
@@ -252,7 +258,7 @@ For static plots in JupyterLab with IPython kernel, simply import and use your p
 import matplotlib.pyplot as plt
 
 plt.plot([1, 2, 3, 4])
-plt.ylabel('some numbers')
+plt.ylabel("some numbers")
 plt.show()
 ```
 
@@ -277,8 +283,90 @@ Interactive plots, widgets, or plotting with other kernels may require additiona
 
 - [ggplot2](https://ggplot2.tidyverse.org/) - Grammar of graphics for R
 
+### Mermaid diagrams
+
+JupyterLab includes built-in support for rendering Mermaid diagrams in Markdown cells.
+
+Mermaid diagrams can be added using fenced code blocks with the `mermaid` language identifier:
+
+````markdown
+```mermaid
+graph TD
+  A --> B
+```
+````
+
+which renders as:
+
+```mermaid
+graph TD
+  A --> B
+```
+
+Mermaid support is bundled with JupyterLab and does not require installing an additional extension.
+
+Mermaid diagrams are rendered automatically in Markdown cells in notebooks opened in JupyterLab. The diagram source remains visible when editing the Markdown cell.
+
 (paste-code-cells-without-output)=
 
 ## Paste code cells without output
 
 When **Paste code cells without output** is enabled in **Settings → JupyterLab Notebook** (or **Settings → Notebook**), pasting code cells inserts only the cell content, not the outputs. This is useful when you want pasted code to reflect only what was written, without carrying over previous run results.
+
+(metadata-editor)=
+
+## Metadata Editor (Property Inspector)
+
+The Property Inspector provides a metadata editor that allows you to view
+and modify the metadata of both the notebook and individual cells.
+
+### Opening the Metadata Editor
+
+To access the metadata editor, click the gear icon in the right sidebar
+of an open notebook. This opens the **Property Inspector** panel.
+
+The panel has two sections:
+
+- **Notebook Metadata**: displays the metadata for the entire notebook
+  (e.g., kernel information, language info).
+- **Cell Metadata**: displays the metadata for the currently selected cell
+  (e.g., tags, whether the cell can be edited or deleted).
+
+### Editing Metadata
+
+The metadata is displayed as JSON that you can edit directly. After making
+changes:
+
+```{image} ../images/interface-right-advanced.png
+:align: center
+:alt: The Property Inspector showing the commit and revert icons for editing cell metadata
+:class: jp-screenshot
+```
+
+- Click the **checkmark icon** to commit your changes. This icon appears only once your edits are valid JSON.
+- Click the **revert icon** to discard your changes and restore the
+  previous metadata.
+
+```{note}
+For [notebook format metadata](https://nbformat.readthedocs.io/en/latest/format_description.html#cell-metadata)
+fields such as `editable` and `deletable`, you can also use the toggle
+controls in the "Common tools" section of the Property Inspector for a
+more convenient editing experience.
+```
+
+### Common Metadata Fields
+
+Some commonly used cell metadata fields include:
+
+- `tags`: a list of string tags for the cell, often used by tools like
+  [nbconvert](https://nbconvert.readthedocs.io/) and
+  [papermill](https://papermill.readthedocs.io/) to control cell behavior
+  during export or parameterized execution.
+- `editable`: controls whether the cell content can be modified.
+- `deletable`: controls whether the cell can be deleted.
+
+```{tip}
+Be cautious when editing metadata directly, as incorrect values may
+affect notebook behavior. If something goes wrong, use the revert icon
+to undo your changes before committing them.
+```

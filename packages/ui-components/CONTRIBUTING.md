@@ -11,7 +11,7 @@ Design goals for JLIcon (already implemented):
   - to use an icon `fooIcon` outside of the file in which it is defined, the pattern will be to import `fooIcon`
   - this enables compile-time checking; helps to ensure that icons are specified correctly when used (as opposed to the old pattern of specifying icon via a `string` with name or className)
 - every icon is flexible
-  - can used in any context in which icons are used in jlab
+  - can be used in any context in which icons are used in jlab
     - every icon can be passed into Lumino
     - every icon can create a DOM node
     - every icon can create a React component
@@ -47,10 +47,10 @@ Design goals for JLIcon (partially implemented):
 Possible design patterns for JLIcon:
 
 1. each icon is a `class`. The icon is used by creating a new instance
-1. each icon is a function with methods (ie a callable instance). The icon is used by calling the appropriate method
+1. each icon is a function with methods (i.e. a callable instance). The icon is used by calling the appropriate method
 1. each icon is an instance of a well-defined `class`. The icon is used by calling the appropriate instance method
 
-Patterns 1) and 2) were both initially investigated (see [jupyterlab/jupyterlab#7299](https://github.com/jupyterlab/jupyterlab/pull/7299)). Pattern 3) was found to be easiest to reason about, and had a desirable set of tradeoffs relating to features like dynamic lookup and replaceability (eg you can replace the svg of an icon by just setting the `svgstr` field of the icon instance).
+Patterns 1) and 2) were both initially investigated (see [jupyterlab/jupyterlab#7299](https://github.com/jupyterlab/jupyterlab/pull/7299)). Pattern 3) was found to be easiest to reason about, and had a desirable set of trade-offs relating to features like dynamic lookup and replaceability (e.g. you can replace the svg of an icon by just setting the `svgstr` field of the icon instance).
 
 ## How icon resolution works
 

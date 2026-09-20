@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
 import { URLExt } from '@jupyterlab/coreutils';
 
 import type { JSONPrimitive } from '@lumino/coreutils';
@@ -314,11 +313,18 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
     });
   };
 
-  private _onWSClose = (event: CloseEvent) => {
-    console.warn(`Terminal websocket closed: ${event.code}`);
-    if (!this.isDisposed) {
-      this._reconnect();
+  private _onWSClose = (evt: CloseEvent) => {
+    console.warn(`Terminal websocket closed: ${evt.code}`);
+
+    if (this.isDisposed) {
+      return;
     }
+
+    if (evt.code === 1000 || evt.code === 1001) {
+      return;
+    }
+
+    this._reconnect();
   };
 
   /**
@@ -380,7 +386,7 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
   private _disposed = new Signal<this, void>(this);
   private _messageReceived = new Signal<this, Terminal.IMessage>(this);
   private _name: string;
-  private _reconnectTimeout: any = null;
+  private _reconnectTimeout: ReturnType<typeof setTimeout> | undefined;
   private _ws: WebSocket | null = null;
   private _noOp = () => {
     /* no-op */

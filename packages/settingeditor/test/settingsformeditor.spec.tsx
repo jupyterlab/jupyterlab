@@ -3,11 +3,36 @@
 import { nullTranslator } from '@jupyterlab/translation';
 import { SettingsFormEditor } from '../src/SettingsFormEditor';
 import React from 'react';
-import renderer from 'react-test-renderer';
+import renderer, { act } from 'react-test-renderer';
 import type { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { SettingRegistry } from '@jupyterlab/settingregistry';
 import { FormComponent } from '@jupyterlab/ui-components';
 import { TestConnector } from './utils';
+import type { IChangeEvent } from '@rjsf/core';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+
+class RecordingConnector extends TestConnector {
+  readonly saveRequests: string[] = [];
+
+  async save(id: string, raw: string): Promise<void> {
+    this.saveRequests.push(raw);
+    return super.save(id, raw);
+  }
+}
+
+function createChangeEvent(
+  formData: ReadonlyPartialJSONObject
+): IChangeEvent<ReadonlyPartialJSONObject> {
+  return {
+    errors: [],
+    formData
+  } as unknown as IChangeEvent<ReadonlyPartialJSONObject>;
+}
+
+async function flushPromises(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+}
 
 describe('@jupyterlab/settingeditor', () => {
   describe('SettingFormEditor', () => {
@@ -91,6 +116,75 @@ describe('@jupyterlab/settingeditor', () => {
       expect(Object.keys(form.props.schema.properties)).toEqual(
         Object.keys(form.props.formData)
       );
+    });
+
+    it('should preserve pending form data when settings change before save', async () => {
+      jest.useFakeTimers();
+
+      const id = 'alpha';
+      const field = 'settings';
+      const raceConnector = new RecordingConnector();
+      const raceRegistry = new SettingRegistry({ connector: raceConnector });
+      let component: renderer.ReactTestRenderer | null = null;
+
+      try {
+        raceConnector.schemas[id] = {
+          type: 'object',
+          properties: {
+            [field]: {
+              type: 'object',
+              properties: {
+                first: { type: 'boolean', default: false },
+                second: { type: 'boolean', default: false }
+              }
+            }
+          }
+        };
+        settings = (await raceRegistry.load(id)) as Settings;
+
+        component = renderer.create(
+          <SettingsFormEditor
+            filteredValues={null}
+            hasError={() => void 0}
+            onSelect={() => void 0}
+            renderers={{}}
+            settings={settings}
+            translator={nullTranslator}
+            updateDirtyState={() => void 0}
+          ></SettingsFormEditor>
+        );
+
+        const form = component.root.findByType(FormComponent);
+
+        await act(async () => {
+          form.props.onChange(
+            createChangeEvent({
+              [field]: { first: true, second: true }
+            })
+          );
+        });
+
+        await act(async () => {
+          await raceRegistry.upload(
+            id,
+            JSON.stringify({ [field]: { first: true } }, undefined, 4)
+          );
+        });
+
+        await act(async () => {
+          jest.advanceTimersByTime(500);
+          await flushPromises();
+        });
+
+        expect(raceConnector.saveRequests).toHaveLength(2);
+        expect(JSON.parse(raceConnector.saveRequests[1])).toEqual({
+          [field]: { first: true, second: true }
+        });
+      } finally {
+        component?.unmount();
+        await raceConnector.clear();
+        jest.useRealTimers();
+      }
     });
   });
 });

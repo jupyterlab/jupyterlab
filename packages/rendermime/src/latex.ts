@@ -9,12 +9,14 @@
 // Other minor modifications are also due to StackExchange and are used with
 // permission.
 
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+
 const inline = '$'; // the inline math delimiter
 
 // MATHSPLIT contains the pattern for math delimiters and special symbols
 // needed for searching for math in the text input.
 const MATHSPLIT =
-  /(\$\$?|\\(?:begin|end)\{[a-z]*\*?\}|\\[{}$]|[{}]|(?:\n\s*)+|@@\d+@@|\\\\(?:\(|\)|\[|\]))/i;
+  /(\$\$?|\\(?:begin|end)\{[a-z]*\*?\}|\\[{}$]|[{}]|(?:\n\s*)+|@@\d+@@|\\\\[()[\]])/i;
 
 /**
  *  Break up the text into its component parts and search
@@ -23,7 +25,13 @@ const MATHSPLIT =
  *  Don't allow math to pass through a double linebreak
  *    (which will be a paragraph).
  */
-export function removeMath(text: string): { text: string; math: string[] } {
+export function removeMath(
+  text: string,
+  options?: IRenderMime.ILatexTypesetter.IMathParseOptions
+): { text: string; math: string[] } {
+  // When `false`, a single `$` is left literal (e.g. currency) while `$$`
+  // display math and `\(...\)` / `\[...\]` delimiters keep working.
+  const dollarInlineMath = options?.dollarInlineMath ?? true;
   const math: string[] = []; // stores math strings for later
   let start: number | null = null;
   let end: string | null = null;
@@ -44,9 +52,11 @@ export function removeMath(text: string): { text: string; math: string[] } {
       // can be followed by an `info string` but this cannot include backticks,
       // see specification: https://spec.commonmark.org/0.30/#info-string
       .replace(
+        // eslint-disable-next-line regexp/no-unused-capturing-group, regexp/optimal-quantifier-concatenation
         /^(?<fence>`{3,}|(~T){3,})[^`\n]*\n([\s\S]*?)^\k<fence>`*$/gm,
         wholematch => wholematch.replace(/\$/g, '~D')
       )
+      // eslint-disable-next-line regexp/no-unused-capturing-group, regexp/no-super-linear-backtracking
       .replace(/(^|[^\\])(`+)([^\n]*?[^`\n])\2(?!`)/gm, wholematch =>
         wholematch.replace(/\$/g, '~D')
       );
@@ -106,7 +116,7 @@ export function removeMath(text: string): { text: string; math: string[] } {
       //  Look for math start delimiters and when
       //    found, set up the end delimiter.
       //
-      if (block === inline || block === '$$') {
+      if ((block === inline && dollarInlineMath) || block === '$$') {
         start = i;
         end = block;
         braces = 0;

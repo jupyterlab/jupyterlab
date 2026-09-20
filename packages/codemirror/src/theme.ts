@@ -138,15 +138,20 @@ export const jupyterHighlightStyle = HighlightStyle.define([
   { tag: t.atom, color: 'var(--jp-mirror-editor-atom-color)' },
   { tag: t.number, color: 'var(--jp-mirror-editor-number-color)' },
   {
-    tag: [t.definition(t.name), t.function(t.definition(t.variableName))],
+    tag: t.definition(t.name),
     color: 'var(--jp-mirror-editor-def-color)'
   },
   {
-    tag: t.standard(t.variableName),
+    tag: [t.standard(t.variableName), t.typeName],
     color: 'var(--jp-mirror-editor-builtin-color)'
   },
   {
-    tag: [t.special(t.variableName), t.self],
+    tag: t.definition(t.typeName),
+    color: 'var(--jp-mirror-editor-def-color)',
+    fontWeight: 'bold'
+  },
+  {
+    tag: [t.special(t.variableName), t.self, t.macroName],
     color: 'var(--jp-mirror-editor-variable-2-color)'
   },
   { tag: t.punctuation, color: 'var(--jp-mirror-editor-punctuation-color)' },

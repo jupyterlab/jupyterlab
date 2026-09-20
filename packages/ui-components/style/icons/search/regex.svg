@@ -1,9 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="16" viewBox="0 0 20 20">
-  <path fill="#414141" d="M2 2h16v16H2z" class="jp-icon2"/>
-  <g fill="#FFF" class="jp-icon-accent2">
-    <circle cx="5.5" cy="14.5" r="1.5"/>
-    <path d="M12 4h1v8h-1z"/>
-    <path d="m8.786 9.567 6.928-4 .5.866-6.928 4z"/>
-    <path d="m8.786 6.433.5-.866 6.928 4-.5.866z"/>
+<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <g fill="currentColor">
+    <circle cx="2.7" cy="13" r="1.7"/>
+    <path d="m10 1.1v3.6l-3.1-1.8-0.57 1 3.1 1.8-3.1 1.8 0.57 1 3.1-1.8v3.6h1.2v-3.6l3.1 1.8 0.58-1-3.1-1.8 3.1-1.8-0.57-1-3.1 1.8v-3.6z"/>
   </g>
 </svg>

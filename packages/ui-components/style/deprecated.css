@@ -75,6 +75,8 @@
   --jp-icon-inspector: url('icons/filetype/inspector.svg');
   --jp-icon-json: url('icons/filetype/json.svg');
   --jp-icon-julia: url('icons/filetype/julia.svg');
+  --jp-icon-jump-back: url('icons/toolbar/jump-back.svg');
+  --jp-icon-jump-forward: url('icons/toolbar/jump-forward.svg');
   --jp-icon-jupyter-favicon: url('icons/jupyter/jupyter-favicon.svg');
   --jp-icon-jupyter: url('icons/jupyter/jupyter.svg');
   --jp-icon-jupyterlab-wordmark: url('icons/jupyter/jupyterlab-wordmark.svg');
@@ -106,6 +108,7 @@
   --jp-icon-redo: url('icons/toolbar/redo.svg');
   --jp-icon-refresh: url('icons/toolbar/refresh.svg');
   --jp-icon-regex: url('icons/search/regex.svg');
+  --jp-icon-restore: url('icons/toolbar/restore.svg');
   --jp-icon-run: url('icons/toolbar/run.svg');
   --jp-icon-running: url('icons/sidebar/running.svg');
   --jp-icon-save: url('icons/toolbar/save.svg');
@@ -391,6 +394,14 @@
   background-image: var(--jp-icon-julia);
 }
 
+.jp-JumpBackIcon {
+  background-image: var(--jp-icon-jump-back);
+}
+
+.jp-JumpForwardIcon {
+  background-image: var(--jp-icon-jump-forward);
+}
+
 .jp-JupyterFaviconIcon {
   background-image: var(--jp-icon-jupyter-favicon);
 }
@@ -513,6 +524,10 @@
 
 .jp-RegexIcon {
   background-image: var(--jp-icon-regex);
+}
+
+.jp-RestoreIcon {
+  background-image: var(--jp-icon-restore);
 }
 
 .jp-RunIcon {

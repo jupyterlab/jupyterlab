@@ -20,7 +20,7 @@ import tempfile
 here = osp.abspath(osp.dirname(__file__))
 
 
-def header(path):
+def header(path: str):
     test_name = osp.basename(path)
     print(
         "\n".join(("\n", "*" * 40, f"Starting {test_name} test in {path}", "*" * 40)),
@@ -57,7 +57,7 @@ def main():
                     runner = osp.join(here, "example_check.py")
                     subprocess.check_call([sys.executable, runner, path], cwd=cwd)  # noqa S603
                     count += 1
-        except subprocess.CalledProcessError:
+        except subprocess.CalledProcessError:  # noqa: PERF203
             failed.append(path)
 
     if failed:

@@ -4,10 +4,10 @@
 const path = require('path');
 const fs = require('fs-extra');
 const Handlebars = require('handlebars');
-const Build = require('@jupyterlab/builder').Build;
+const Build = require('@jupyter/builder').Build;
 const rspack = require('@rspack/core');
 const merge = require('webpack-merge').default;
-const baseConfig = require('@jupyterlab/builder/lib/webpack.config.base');
+const baseConfig = require('@jupyter/builder/lib/webpack.config.base');
 const { ModuleFederationPlugin } = rspack.container;
 
 const packageData = require('./package.json');

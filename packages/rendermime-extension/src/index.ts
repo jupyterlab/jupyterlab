@@ -126,6 +126,14 @@ function activate(
   }
   return new RenderMimeRegistry({
     initialFactories: standardRendererFactories,
+    trustHandler: {
+      markTrusted: (node: HTMLElement) => {
+        app.commandLinker.markTrusted(node);
+      },
+      unmarkTrusted: (node: HTMLElement) => {
+        app.commandLinker.unmarkTrusted(node);
+      }
+    },
     linkHandler: !docManager
       ? undefined
       : {
@@ -135,9 +143,9 @@ function activate(
             if (node.tagName === 'A' && node.hasAttribute('download')) {
               return;
             }
-            app.commandLinker.connectNode(node, CommandIDs.handleLink, {
-              path,
-              id
+            node.addEventListener('click', (event: MouseEvent) => {
+              event.preventDefault();
+              void app.commands.execute(CommandIDs.handleLink, { path, id });
             });
           },
           handlePath: (
@@ -146,10 +154,13 @@ function activate(
             scope: 'kernel' | 'server',
             id?: string
           ) => {
-            app.commandLinker.connectNode(node, CommandIDs.handleLink, {
-              path,
-              id,
-              scope
+            node.addEventListener('click', (event: MouseEvent) => {
+              event.preventDefault();
+              void app.commands.execute(CommandIDs.handleLink, {
+                path,
+                id,
+                scope
+              });
             });
           }
         },

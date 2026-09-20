@@ -39,7 +39,7 @@ installing the development version of JupyterLab. To build the examples,
 enter from the `jupyterlab` repo root directory:
 
 ```
-jlpm run build:examples
+jlpm build:examples
 ```
 
 To run a particular example, navigate to the example's subdirectory in

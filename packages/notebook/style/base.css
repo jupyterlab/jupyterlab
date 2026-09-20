@@ -151,7 +151,7 @@
   outline: none;
   border: none;
   border-radius: 2px;
-  box-shadow: 0 0 0 1px var(--jp-brand-color1);
+  box-shadow: 0 0 0 1px var(--jp-focus-outline-color);
   z-index: 1;
 }
 
@@ -281,6 +281,42 @@
   white-space: normal;
 }
 
+.jp-CellIdField {
+  padding: 12px 0;
+}
+
+.jp-CellIdField label {
+  display: block;
+  line-height: 1.4;
+}
+
+.jp-CellIdField-row {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.jp-CellIdField .jp-CellIdField-input {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  font-family: var(--jp-code-font-family);
+  font-size: var(--jp-code-font-size);
+}
+
+.jp-CellIdField .jp-CellIdField-button {
+  flex: 0 0 28px;
+  width: 28px;
+  padding: 2px;
+  margin: 0;
+  color: var(--jp-ui-font-color2);
+  transition: color 120ms ease;
+}
+
+.jp-CellIdField .jp-CellIdField-button.jp-mod-copied {
+  color: var(--jp-success-color1);
+}
+
 .jp-MetadataEditorTool {
   flex-direction: column;
   padding: 12px 0;
@@ -401,85 +437,6 @@
 }
 
 /*-----------------------------------------------------------------------------
-| Placeholder
-|----------------------------------------------------------------------------*/
-
-.jp-Cell-Placeholder {
-  padding-left: 55px;
-}
-
-.jp-Cell-Placeholder-wrapper {
-  background: #fff;
-  border: 1px solid;
-  border-color: #e5e6e9 #dfe0e4 #d0d1d5;
-  border-radius: 4px;
-  -webkit-border-radius: 4px;
-  margin: 10px 15px;
-}
-
-.jp-Cell-Placeholder-wrapper-inner {
-  padding: 15px;
-  position: relative;
-}
-
-.jp-Cell-Placeholder-wrapper-body {
-  background-repeat: repeat;
-  background-size: 50% auto;
-}
-
-.jp-Cell-Placeholder-wrapper-body div {
-  background: #f6f7f8;
-  background-image: -webkit-linear-gradient(
-    left,
-    #f6f7f8 0%,
-    #edeef1 20%,
-    #f6f7f8 40%,
-    #f6f7f8 100%
-  );
-  background-repeat: no-repeat;
-  background-size: 800px 104px;
-  height: 104px;
-  position: absolute;
-  right: 15px;
-  left: 15px;
-  top: 15px;
-}
-
-div.jp-Cell-Placeholder-h1 {
-  top: 20px;
-  height: 20px;
-  left: 15px;
-  width: 150px;
-}
-
-div.jp-Cell-Placeholder-h2 {
-  left: 15px;
-  top: 50px;
-  height: 10px;
-  width: 100px;
-}
-
-div.jp-Cell-Placeholder-content-1,
-div.jp-Cell-Placeholder-content-2,
-div.jp-Cell-Placeholder-content-3 {
-  left: 15px;
-  right: 15px;
-  height: 10px;
-}
-
-div.jp-Cell-Placeholder-content-1 {
-  top: 100px;
-}
-
-div.jp-Cell-Placeholder-content-2 {
-  top: 120px;
-}
-
-div.jp-Cell-Placeholder-content-3 {
-  top: 140px;
-}
-
-/*-----------------------------------------------------------------------------
 | Virtual scrollbar
 |----------------------------------------------------------------------------*/
 
@@ -534,6 +491,7 @@ div.jp-Cell-Placeholder-content-3 {
 
 .jp-Notebook .jp-scrollbarItem-source {
   display: inline-block;
+  /* stylelint-disable-next-line declaration-property-value-allowed-list */
   font-size: 3px;
   vertical-align: middle;
   max-height: 10em;

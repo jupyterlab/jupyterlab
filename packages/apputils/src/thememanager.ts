@@ -26,6 +26,9 @@ const REQUEST_THRESHOLD = 20;
 
 type Dict<T> = { [key: string]: T };
 type ThemedProp<T> = { light: T; dark: T };
+type ThemeManagerSchemaDefinitions = {
+  cssOverrides: { properties: Record<string, unknown> };
+};
 
 /**
  * A class that provides theme management.
@@ -378,7 +381,7 @@ export class ThemeManager implements IThemeManager {
    */
   private _incrFontSize(key: string, add: boolean = true): Promise<void> {
     // get the numeric and unit parts of the current font size
-    const parts = (this.getCSS(key) ?? '13px').split(/([a-zA-Z]+)/);
+    const parts = (this.getCSS(key) ?? '13px').split(/([a-z]+)/i);
 
     // determine the increment
     const incr = (add ? 1 : -1) * (parts[1] === 'em' ? 0.1 : 1);
@@ -391,7 +394,8 @@ export class ThemeManager implements IThemeManager {
    * Initialize the key -> property dict for the overrides
    */
   private _initOverrideProps(): void {
-    const definitions = this._settings.schema.definitions as any;
+    const definitions = this._settings.schema
+      .definitions as ThemeManagerSchemaDefinitions;
     const overidesSchema = definitions.cssOverrides.properties;
 
     Object.keys(overidesSchema).forEach(key => {
@@ -579,7 +583,7 @@ export class ThemeManager implements IThemeManager {
   /**
    * Handle a theme error.
    */
-  private _onError(reason: any): void {
+  private _onError(reason: unknown): void {
     void showDialog({
       title: this._trans.__('Error Loading Theme'),
       body: String(reason),

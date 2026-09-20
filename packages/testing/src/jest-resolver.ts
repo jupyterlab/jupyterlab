@@ -2,21 +2,44 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-
 // ws workaround suggested in https://github.com/websockets/ws/issues/2171#issuecomment-1792147402
 // Mentioned solution license is:
 //    Copyright (c) Microsoft Corporation. All rights reserved.
 //    Licensed under the MIT License.
 
-module.exports = (path: string, options: any) => {
+type IResolverPackage = {
+  name?: string;
+  exports?: Record<string, unknown>;
+  [key: string]: unknown;
+};
+
+type IResolverOptions = {
+  defaultResolver: (
+    path: string,
+    options: IResolverOptions & {
+      packageFilter?: (pkg: IResolverPackage) => IResolverPackage;
+    }
+  ) => string;
+  [key: string]: unknown;
+};
+
+module.exports = (path: string, options: IResolverOptions) => {
   // Call the defaultResolver, so we leverage its cache, error handling, etc.
   return options.defaultResolver(path, {
     ...options,
     // Use packageFilter to process parsed `package.json` before the resolution (see https://www.npmjs.com/package/resolve#resolveid-opts-cb)
-    packageFilter: (pkg: any) => {
+    packageFilter: (pkg: IResolverPackage) => {
       // This is a workaround for https://github.com/websockets/ws/pull/2118
       if (pkg.name === 'ws') {
-        delete pkg['exports']['.']['browser'];
+        const exportsField = pkg.exports;
+        if (exportsField && typeof exportsField === 'object') {
+          const exportRoot = (exportsField as Record<string, unknown>)['.'];
+          if (exportRoot && typeof exportRoot === 'object') {
+            if ('browser' in exportRoot) {
+              delete (exportRoot as Record<string, unknown>).browser;
+            }
+          }
+        }
       }
       return pkg;
     }

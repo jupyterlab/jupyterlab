@@ -58,6 +58,7 @@ export class Router implements IRouter {
    * If a matching rule's command resolves with the `stop` token during routing,
    * no further matches will execute.
    */
+  // eslint-disable-next-line jupyter/token-format
   readonly stop = new Token<void>('@jupyterlab/application:Router#stop');
 
   /**

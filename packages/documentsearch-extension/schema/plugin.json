@@ -80,7 +80,11 @@
       "title": "Search in selection automatically",
       "description": "When starting search, the 'search in selection' mode will be enabled if `any` text/cell is selected, or when `multiple` lines or cells are selected, or `never`.",
       "type": "string",
-      "enum": ["never", "multiple-selected", "any-selected"],
+      "oneOf": [
+        { "const": "never", "title": "Never" },
+        { "const": "multiple-selected", "title": "Multiple selected" },
+        { "const": "any-selected", "title": "Any selected" }
+      ],
       "default": "never"
     }
   },

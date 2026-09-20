@@ -56,6 +56,11 @@ right-clicking on the code console and selecting “Clear Console Cells”:
 </div>
 ```
 
+(rename-console)=
+
+Rename a code console by right-clicking on its tab and selecting “Rename
+Console…”.
+
 (log-inspect)=
 
 Creating a code console from the {ref}`file menu <menu-bar>` lets you select an existing

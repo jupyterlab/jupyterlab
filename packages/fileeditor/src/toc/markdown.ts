@@ -84,9 +84,9 @@ export class MarkdownTableOfContentsFactory extends EditorTableOfContentsFactory
   isApplicable(widget: Widget): boolean {
     const isApplicable = super.isApplicable(widget);
 
-    if (isApplicable) {
-      let mime = (widget as any).content?.model?.mimeType;
-      return mime && TableOfContentsUtils.Markdown.isMarkdown(mime);
+    if (isApplicable && Private.isFileEditorWidget(widget)) {
+      let mime = widget.content.model.mimeType;
+      return Boolean(mime && TableOfContentsUtils.Markdown.isMarkdown(mime));
     }
     return false;
   }
@@ -103,5 +103,13 @@ export class MarkdownTableOfContentsFactory extends EditorTableOfContentsFactory
     configuration?: TableOfContents.IConfig
   ): MarkdownTableOfContentsModel {
     return new MarkdownTableOfContentsModel(widget, configuration, this.parser);
+  }
+}
+
+namespace Private {
+  export function isFileEditorWidget(
+    widget: Widget
+  ): widget is IDocumentWidget<FileEditor, DocumentRegistry.IModel> {
+    return 'content' in widget;
   }
 }

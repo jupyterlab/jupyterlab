@@ -1,0 +1,21 @@
+name: Update PR comment with UI test report
+
+on: # zizmor: ignore[dangerous-triggers] required to post report from workflow_run artifact to PR comment
+  workflow_run:
+    workflows: ["UI Tests"]
+    types: [completed]
+
+jobs:
+  update-preview-comment:
+    name: Add report link to preview comment
+    if: ${{ github.event.workflow_run.event == 'pull_request' }}
+    runs-on: ubuntu-22.04
+    permissions:
+      actions: read
+      pull-requests: write
+    steps:
+      - uses: jupyterlab/maintainer-tools/.github/actions/ui-test-report-comment@1139fd4ebe0dff50be32fa160d445d5fb80ee4d6
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          run_id: ${{ github.event.workflow_run.id }}
+          report_line_prefix: "View the integration tests report in the browser: "

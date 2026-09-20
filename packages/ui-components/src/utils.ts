@@ -3,11 +3,13 @@
 
 import { Text } from '@jupyterlab/coreutils';
 
+type ClassNameMapping = { [className: string]: unknown };
+
 /**
  * Inner works of class combining functions
  */
 function _classes(
-  classes: (string | false | undefined | null | { [className: string]: any })[]
+  classes: (string | false | undefined | null | ClassNameMapping)[]
 ): string[] {
   return classes
     .map(c =>
@@ -29,13 +31,7 @@ function _classes(
  * @returns A single string with the combined className
  */
 export function classes(
-  ...classes: (
-    | string
-    | false
-    | undefined
-    | null
-    | { [className: string]: any }
-  )[]
+  ...classes: (string | false | undefined | null | ClassNameMapping)[]
 ): string {
   return _classes(classes).join(' ');
 }
@@ -48,13 +44,7 @@ export function classes(
  * @returns A single string with the combined className
  */
 export function classesDedupe(
-  ...classes: (
-    | string
-    | false
-    | undefined
-    | null
-    | { [className: string]: any }
-  )[]
+  ...classes: (string | false | undefined | null | ClassNameMapping)[]
 ): string {
   return [...new Set(_classes(classes))].join(' ');
 }

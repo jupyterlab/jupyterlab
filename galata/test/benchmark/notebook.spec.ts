@@ -5,6 +5,11 @@ import { expect, test } from '@playwright/test';
 import { benchmark, galata } from '@jupyterlab/galata';
 import path from 'path';
 
+// The benchmarks run on the plain Playwright fixture, which does not provide
+// `page.filebrowser`, and the timed blocks must contain the interaction being
+// measured and nothing else.
+/* eslint-disable jupyter/galata-prefer-filebrowser-helper */
+
 const tmpPath = 'test-performance-open';
 const codeNotebook = 'large_code_notebook.ipynb';
 const mdNotebook = 'large_md_notebook.ipynb';
@@ -136,9 +141,9 @@ test.describe('Benchmark', () => {
         ).toBeVisible();
       }
 
-      expect(await document.screenshot()).toMatchSnapshot(
-        `${file.replace('.', '-')}.png`
-      );
+      expect
+        .soft(await document.screenshot())
+        .toMatchSnapshot(`${file.replace('.', '-')}.png`);
 
       testInfo.attachments.push(
         benchmark.addAttachment({
