@@ -7,6 +7,8 @@ import type { Poll } from '@lumino/polling';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+
 import type { Builder } from './builder';
 import { BuildManager } from './builder';
 
@@ -68,7 +70,9 @@ export class ServiceManager implements ServiceManager.IManager {
       });
     this.settings = options.settings || new SettingManager(normalized);
     this.terminals = options.terminals || new TerminalManager(normalized);
-    this.builder = options.builder || new BuildManager(normalized);
+    this.builder =
+      options.builder ||
+      new BuildManager({ serverSettings, translator: options.translator });
     this.workspaces = options.workspaces || new WorkspaceManager(normalized);
     this.nbconvert = options.nbconvert || new NbConvertManager(normalized);
     this.kernelspecs = options.kernelspecs || new KernelSpecManager(normalized);
@@ -236,6 +240,11 @@ export namespace ServiceManager {
      * The default drive for the contents manager.
      */
     readonly defaultDrive: Contents.IDrive;
+
+    /**
+     * The application language translator.
+     */
+    readonly translator?: IRenderMime.ITranslator;
 
     /**
      * When the manager stops polling the API. Defaults to `when-hidden`.

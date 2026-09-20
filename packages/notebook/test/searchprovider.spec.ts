@@ -26,6 +26,15 @@ async function setSelections(
   await promise;
 }
 
+/**
+ * Run the handler debounced on the notebook mode change. The debouncer
+ * arms its timer one microtask after the mode changed.
+ */
+async function runDebouncedHandler() {
+  await Promise.resolve();
+  jest.advanceTimersByTime(0);
+}
+
 class TestProvider extends NotebookSearchProvider {
   get cellChangeHandled(): Promise<void> {
     // ensure `_delayedActiveCellChangeHandler` fired
@@ -578,6 +587,70 @@ describe('@jupyterlab/notebook', () => {
         source = panel.model!.cells.get(1).sharedModel.getSource();
         expect(source).toBe('a=123+1\nb=234+1');
         expect(provider.currentMatchIndex).toBe(null);
+      });
+    });
+
+    describe('#getFilters()', () => {
+      let overlay: HTMLDivElement;
+      let searchInput: HTMLTextAreaElement;
+
+      beforeEach(() => {
+        // Stand-in for the search overlay which takes focus on Ctrl+F.
+        overlay = document.createElement('div');
+        overlay.className = 'jp-DocumentSearch-overlay';
+        searchInput = document.createElement('textarea');
+        overlay.appendChild(searchInput);
+        document.body.appendChild(overlay);
+
+        panel.model!.sharedModel.deleteCellRange(0, 2);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1\ntest2\ntest3' }
+        ]);
+      });
+
+      afterEach(() => {
+        overlay.remove();
+      });
+
+      async function selectFirstLine() {
+        panel.content.activeCellIndex = 0;
+        panel.content.mode = 'edit';
+        await setSelections(panel.content.activeCell!.editor!, [
+          {
+            uuid: 'main-selection',
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 5 }
+          }
+        ]);
+      }
+
+      it('should keep line selection when search overlay takes focus', async () => {
+        await selectFirstLine();
+        expect(provider.getFilters().selection.title).toContain('Line');
+
+        // The handler deferred on entering the edit mode has not run yet;
+        // switching to command mode now must not reset the filter to cell
+        // mode once the timers run.
+        searchInput.focus();
+        panel.content.mode = 'command';
+        await runDebouncedHandler();
+
+        expect(provider.getFilters().selection.title).toContain('Line');
+        expect(provider.getSelectionState()).toBe('single');
+      });
+
+      it('should switch to cell selection when leaving edit mode', async () => {
+        await provider.startQuery(/test/, { selection: true });
+        await selectFirstLine();
+        await runDebouncedHandler();
+        expect(provider.getFilters().selection.title).toContain('Line');
+
+        // Focus stays in the notebook, so this is a user leaving the edit mode.
+        panel.content.mode = 'command';
+        await runDebouncedHandler();
+
+        expect(provider.getFilters().selection.title).toContain('Cell');
+        await provider.endQuery();
       });
     });
 

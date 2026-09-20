@@ -87,6 +87,7 @@ const translator: JupyterFrontEndPlugin<ITranslator> = {
     }
 
     Dialog.translator = translationManager;
+    app.serviceManager.builder.translator = translationManager;
 
     return translationManager;
   }
