@@ -16,6 +16,7 @@ import { ILabShell, ILayoutRestorer, IRouter } from '@jupyterlab/application';
 import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   Clipboard,
+  CommandLinker,
   createToolbarFactory,
   Dialog,
   ICommandPalette,
@@ -2987,8 +2988,14 @@ function addCommands(
   commands.addCommand(CommandIDs.trust, {
     label: () => trans.__('Trust Notebook'),
     execute: async args => {
-      const current = getCurrent(tracker, shell, args);
-      if (current) {
+      const trustBoundaryId = args[CommandLinker.TRUST_BOUNDARY_ID_ARG];
+      const current =
+        typeof trustBoundaryId === 'string'
+          ? (tracker.find(
+              widget => widget.content.node.id === trustBoundaryId
+            ) ?? null)
+          : getCurrent(tracker, shell, args);
+      if (current && !current.isDisposed) {
         const { context, content } = current;
         const trustResult = await NotebookActions.trust(content);
         if (trustResult.trusted) {
@@ -3002,7 +3009,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [CommandLinker.TRUST_BOUNDARY_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The notebook trust boundary ID')
+          }
+        }
       }
     }
   });

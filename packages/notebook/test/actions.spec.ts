@@ -10,7 +10,14 @@ import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import type { ICodeCellModel } from '@jupyterlab/cells';
 import { Cell, CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
-import type { CellType, IMimeBundle } from '@jupyterlab/nbformat';
+import type {
+  CellType,
+  ICell,
+  ICodeCell,
+  IDisplayData,
+  IExecuteResult,
+  IMimeBundle
+} from '@jupyterlab/nbformat';
 import {
   KernelError,
   Notebook,
@@ -30,10 +37,17 @@ import {
   sleep,
   waitForDialog
 } from '@jupyterlab/testing';
-import type { JSONArray, JSONObject } from '@lumino/coreutils';
+import type { JSONArray, JSONObject, MimeData } from '@lumino/coreutils';
 import { UUID } from '@lumino/coreutils';
 import * as utils from './utils';
 import uncoalescedOp from './uncoalesced_op.json';
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  interface Window {
+    __clipboardTrustPoc?: number;
+  }
+}
 
 const ERROR_INPUT = 'a = foo';
 const READ_ONLY_SPLIT_ERROR = 'The cell is read-only and cannot be split.';
@@ -42,6 +56,45 @@ const READ_ONLY_NOTIFICATION_AUTO_CLOSE = 5000;
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 const STDOUT_TYPE = 'application/vnd.jupyter.stdout';
+const SCRIPTED_HTML =
+  '<pre><script>window.__clipboardTrustPoc=1;</script></pre>';
+
+type ScriptedHTMLOutputType = 'display_data' | 'execute_result';
+
+function createScriptedHTMLCodeCell(
+  outputType: ScriptedHTMLOutputType,
+  trusted: boolean
+): ICodeCell {
+  const output: IDisplayData | IExecuteResult =
+    outputType === 'display_data'
+      ? {
+          output_type: outputType,
+          data: { 'text/html': SCRIPTED_HTML },
+          metadata: {}
+        }
+      : {
+          output_type: outputType,
+          execution_count: 7,
+          data: { 'text/html': SCRIPTED_HTML },
+          metadata: {}
+        };
+
+  return {
+    cell_type: 'code',
+    execution_count: 7,
+    metadata: { trusted },
+    outputs: [output],
+    source: ''
+  };
+}
+
+function setExternalSystemClipboardData(mime: string, data: unknown): void {
+  const clipboard = utils.systemClipboard as typeof utils.systemClipboard & {
+    fallback: MimeData;
+  };
+  clipboard.clear();
+  clipboard.fallback.setData(mime, data);
+}
 
 const server = new JupyterServer();
 
@@ -149,6 +202,8 @@ describe('@jupyterlab/notebook', () => {
       widget.model?.dispose();
       widget.dispose();
       utils.clipboard.clear();
+      utils.systemClipboard.clear();
+      delete window.__clipboardTrustPoc;
     });
 
     afterAll(async () => {
@@ -2083,6 +2138,19 @@ describe('@jupyterlab/notebook', () => {
         );
       });
 
+      it('should preserve trusted outputs pasted from the application clipboard', () => {
+        utils.clipboard.setData(JUPYTER_CELL_MIME, [
+          createScriptedHTMLCodeCell('display_data', true)
+        ]);
+
+        NotebookActions.paste(widget);
+
+        const pastedCell = widget.widgets[1] as CodeCell;
+        expect(pastedCell).toBeInstanceOf(CodeCell);
+        expect(pastedCell.model.trusted).toBe(true);
+        expect(pastedCell.model.outputs.get(0).trusted).toBe(true);
+      });
+
       it('should emit a signal with cut action', async () => {
         let signals: Notebook.IPastedCells[] = [];
         widget.cellsPasted.connect(
@@ -2204,6 +2272,153 @@ describe('@jupyterlab/notebook', () => {
         await NotebookActions.pasteFromSystemClipboard(widget);
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count - 2);
+      });
+
+      it.each<ScriptedHTMLOutputType>(['display_data', 'execute_result'])(
+        'should not trust %s outputs pasted from a system clipboard',
+        async outputType => {
+          window.__clipboardTrustPoc = 0;
+          setExternalSystemClipboardData(JUPYTER_CELL_MIME, [
+            createScriptedHTMLCodeCell(outputType, true)
+          ]);
+
+          await NotebookActions.pasteFromSystemClipboard(widget);
+          await sleep();
+
+          const pastedCell = widget.widgets[1] as CodeCell;
+          expect(pastedCell).toBeInstanceOf(CodeCell);
+          expect(pastedCell.model.trusted).toBe(false);
+          expect(pastedCell.model.getMetadata('trusted')).toBe(false);
+          expect(pastedCell.model.outputs.get(0).trusted).toBe(false);
+          expect(
+            pastedCell.node.querySelector('.jp-RenderedHTML script')
+          ).toBeNull();
+          expect(window.__clipboardTrustPoc).toBe(0);
+        }
+      );
+
+      it('should preserve trusted outputs pasted from another local notebook', async () => {
+        const widget2 = new Notebook({
+          rendermime,
+          contentFactory: utils.createNotebookFactory(),
+          mimeTypeService: utils.mimeTypeService,
+          notebookConfig: {
+            ...StaticNotebook.defaultNotebookConfig,
+            windowingMode: 'none'
+          }
+        });
+        const model2 = new NotebookModel();
+        model2.fromJSON({
+          cells: [createScriptedHTMLCodeCell('display_data', true)],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 1
+        });
+        widget2.model = model2;
+        model2.sharedModel.clearUndoHistory();
+
+        try {
+          widget2.activeCellIndex = 0;
+          await NotebookActions.copyToSystemClipboard(widget2);
+          await NotebookActions.pasteFromSystemClipboard(widget);
+
+          const pastedCell = widget.widgets[1] as CodeCell;
+          expect(pastedCell).toBeInstanceOf(CodeCell);
+          expect(pastedCell.model.trusted).toBe(true);
+          expect(pastedCell.model.getMetadata('trusted')).toBe(true);
+          expect(pastedCell.model.outputs.get(0).trusted).toBe(true);
+        } finally {
+          model2.dispose();
+          widget2.dispose();
+        }
+      });
+
+      it('should keep untrusted code cells pasted from a system clipboard untrusted', async () => {
+        window.__clipboardTrustPoc = 0;
+        setExternalSystemClipboardData(JUPYTER_CELL_MIME, [
+          createScriptedHTMLCodeCell('display_data', false)
+        ]);
+
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        await sleep();
+
+        const pastedCell = widget.widgets[1] as CodeCell;
+        expect(pastedCell).toBeInstanceOf(CodeCell);
+        expect(pastedCell.model.trusted).toBe(false);
+        expect(pastedCell.model.getMetadata('trusted')).toBe(false);
+        expect(pastedCell.model.outputs.get(0).trusted).toBe(false);
+        expect(window.__clipboardTrustPoc).toBe(0);
+      });
+
+      it('should normalize trust metadata on every cell pasted from a system clipboard', async () => {
+        window.__clipboardTrustPoc = 0;
+        const markdownCell: ICell = {
+          cell_type: 'markdown',
+          metadata: { trusted: true },
+          source: 'markdown'
+        };
+        const rawCell: ICell = {
+          cell_type: 'raw',
+          metadata: { trusted: true },
+          source: 'raw'
+        };
+        setExternalSystemClipboardData(JUPYTER_CELL_MIME, [
+          createScriptedHTMLCodeCell('display_data', true),
+          markdownCell,
+          rawCell
+        ]);
+
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        await sleep();
+
+        const pastedCodeCell = widget.widgets[1] as CodeCell;
+        const pastedMarkdownCell = widget.widgets[2] as MarkdownCell;
+        const pastedRawCell = widget.widgets[3] as RawCell;
+        expect(pastedCodeCell).toBeInstanceOf(CodeCell);
+        expect(pastedCodeCell.model.trusted).toBe(false);
+        expect(pastedCodeCell.model.getMetadata('trusted')).toBe(false);
+        expect(pastedMarkdownCell).toBeInstanceOf(MarkdownCell);
+        expect(pastedMarkdownCell.model.getMetadata('trusted')).toBeUndefined();
+        expect(pastedRawCell).toBeInstanceOf(RawCell);
+        expect(pastedRawCell.model.getMetadata('trusted')).toBeUndefined();
+        expect(window.__clipboardTrustPoc).toBe(0);
+      });
+
+      it('should normalize missing trust metadata on code cells pasted from a system clipboard', async () => {
+        const codeCell = createScriptedHTMLCodeCell(
+          'display_data',
+          true
+        ) as Partial<ICodeCell>;
+        delete codeCell.metadata;
+        setExternalSystemClipboardData(JUPYTER_CELL_MIME, [
+          codeCell as ICodeCell
+        ]);
+
+        await NotebookActions.pasteFromSystemClipboard(widget);
+
+        const pastedCell = widget.widgets[1] as CodeCell;
+        expect(pastedCell).toBeInstanceOf(CodeCell);
+        expect(pastedCell.model.trusted).toBe(false);
+        expect(pastedCell.model.getMetadata('trusted')).toBe(false);
+      });
+
+      it('should strip code outputs without preserving trust from a system clipboard', async () => {
+        window.__clipboardTrustPoc = 0;
+        setExternalSystemClipboardData(JUPYTER_CELL_MIME, [
+          createScriptedHTMLCodeCell('execute_result', true)
+        ]);
+
+        await NotebookActions.pasteFromSystemClipboard(widget, 'below', {
+          stripOutputs: true
+        });
+
+        const pastedCell = widget.widgets[1] as CodeCell;
+        expect(pastedCell).toBeInstanceOf(CodeCell);
+        expect(pastedCell.model.trusted).toBe(false);
+        expect(pastedCell.model.getMetadata('trusted')).toBe(false);
+        expect(pastedCell.model.outputs.length).toBe(0);
+        expect(pastedCell.model.executionCount).toBeNull();
+        expect(window.__clipboardTrustPoc).toBe(0);
       });
     });
 
