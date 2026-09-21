@@ -618,7 +618,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     for (const cell of cells) {
       this._insertCell(++index, cell);
     }
-    this._syncMarkdownCellTrust();
+    this._syncCellTrust();
     newValue.cells.changed.connect(this._onCellsChanged, this);
     newValue.metadataChanged.connect(this.onMetadataChanged, this);
     newValue.contentChanged.connect(this.onModelContentChanged, this);
@@ -680,7 +680,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       this.addHeader();
     }
 
-    this._syncMarkdownCellTrust();
+    this._syncCellTrust();
     this.update();
   }
 
@@ -708,7 +708,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     widget.addClass(NB_CELL_CLASS);
 
     ArrayExt.insert(this.cellsArray, index, widget);
-    this._syncMarkdownCellTrust(widget);
+    this._syncCellTrust(widget);
     this.onCellInserted(index, widget);
 
     this._scheduleCellRenderOnIdle();
@@ -818,8 +818,8 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     widget.dispose();
   }
 
-  private _shouldTrustMarkdown(): boolean {
-    // Note: this returns false in a notebook without trsuted code cells;
+  private _shouldTrustCell(): boolean {
+    // Note: this returns false in a notebook without trusted code cells;
     // This is intended since only Code cells carry trust status on disk.
     if (!this._notebookModel) {
       return false;
@@ -836,11 +836,17 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     return hasCodeCell;
   }
 
-  private _syncMarkdownCellTrust(cell?: Cell): void {
-    const trusted = this._shouldTrustMarkdown();
+  private _syncCellTrust(cell?: Cell): void {
+    const trusted = this._shouldTrustCell();
     const trustHandler = this.rendermime.trustHandler;
     if (!trustHandler) {
       return;
+    }
+
+    if (trusted) {
+      trustHandler.markTrusted(this.node);
+    } else {
+      trustHandler.unmarkTrusted(this.node);
     }
 
     const cells = cell ? [cell] : this.widgets;
@@ -861,7 +867,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     args: IChangedArgs<any>
   ): void {
     if (args.name === 'trusted') {
-      this._syncMarkdownCellTrust();
+      this._syncCellTrust();
     }
   }
 
