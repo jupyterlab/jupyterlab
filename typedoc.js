@@ -119,7 +119,7 @@ module.exports = {
       ISharedMarkdownCell:
         'https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedMarkdownCell.html',
       ISharedNotebook:
-        'https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedNotebook-1.html',
+        'https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedNotebook.html',
       ISharedRawCell:
         'https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedRawCell.html',
       ISharedText:
@@ -133,7 +133,7 @@ module.exports = {
       YCodeCell:
         'https://jupyter-ydoc.readthedocs.io/en/latest/api/classes/YCodeCell.html',
       YDocument:
-        'https://jupyter-ydoc.readthedocs.io/en/latest/api/classes/YDocument-1.html',
+        'https://jupyter-ydoc.readthedocs.io/en/latest/api/classes/YDocument.html',
       YFile:
         'https://jupyter-ydoc.readthedocs.io/en/latest/api/classes/YFile.html',
       YNotebook:
