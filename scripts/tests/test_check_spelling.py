@@ -78,9 +78,10 @@ def spelling_backend():
         enchant = importlib.import_module("enchant")
     except ImportError:
         pytest.skip("The native Enchant backend is required")
+    else:
+        if not enchant.dict_exists("en_US"):
+            pytest.skip("An English Enchant dictionary is required")
     pytest.importorskip("sphinxcontrib.spelling")
-    if not enchant.dict_exists("en_US"):
-        pytest.skip("An English Enchant dictionary is required")
 
 
 @pytest.mark.parametrize("location", ["0", "None", "3"])
