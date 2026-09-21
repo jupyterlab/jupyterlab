@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/mermaid-extension",
-  "version": "4.5.10",
+  "version": "4.5.11",
   "description": "JupyterLab - Mermaid Viewer",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,11 +36,11 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.5.10",
-    "@jupyterlab/apputils": "^4.6.10",
-    "@jupyterlab/mermaid": "^4.5.10",
-    "@jupyterlab/rendermime-interfaces": "^3.13.10",
-    "@jupyterlab/translation": "^4.5.10"
+    "@jupyterlab/application": "^4.5.11",
+    "@jupyterlab/apputils": "^4.6.11",
+    "@jupyterlab/mermaid": "^4.5.11",
+    "@jupyterlab/rendermime-interfaces": "^3.13.11",
+    "@jupyterlab/translation": "^4.5.11"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",
