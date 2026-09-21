@@ -178,13 +178,12 @@ class PyPIExtensionManager(ExtensionManager):
 
     @override
     async def is_install_allowed(self, name: str, version: Union[str, None] = None) -> bool:
+        if not self._is_valid_package_name(name):
+            return False
+
         try:
-            canonicalize_name(name, validate=True)
             if version is not None:
                 parse_version(version)
-        except InvalidName:
-            self.log.warning(f"Invalid extension name: {name!r}")
-            return False
         except InvalidVersion:
             self.log.warning(f"Version {version!r} does not comply with PEP 440")
             return False
@@ -193,6 +192,18 @@ class PyPIExtensionManager(ExtensionManager):
         if not allowed:
             self.log.warning(f"Installation denied by allowlist/blocklist for {name}")
         return allowed
+
+    @override
+    async def is_uninstall_allowed(self, name: str) -> bool:
+        return self._is_valid_package_name(name)
+
+    def _is_valid_package_name(self, name: str) -> bool:
+        try:
+            canonicalize_name(name, validate=True)
+        except InvalidName:
+            self.log.warning(f"Invalid extension name: {name!r}")
+            return False
+        return True
 
     @override
     def _canonicalize_name(self, name: str) -> str:
@@ -537,6 +548,9 @@ class PyPIExtensionManager(ExtensionManager):
         Returns:
             The action result
         """
+        if not await self.is_uninstall_allowed(extension):
+            return ActionResult(status="error", message="uninstall is not allowed")
+
         current_loop = tornado.ioloop.IOLoop.current()
         cmdline = [
             sys.executable,
@@ -545,6 +559,7 @@ class PyPIExtensionManager(ExtensionManager):
             "uninstall",
             "--yes",
             "--no-input",
+            "--",
             extension,
         ]
 

@@ -2,6 +2,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 import json
+from subprocess import CompletedProcess
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -554,6 +555,7 @@ async def test_PluginManager_default_level():
         ("git+https://github.com/attacker/malicious.git", False),
         ("/tmp/local-pkg", False),  # noqa: S108
         ("http://evil.com/pkg.tar.gz", False),
+        ("-r/tmp/requirements.txt", False),
     ],
 )
 async def test_pypi_manager_is_install_allowed_rejects_non_pypi_names(name, expected):
@@ -583,6 +585,45 @@ async def test_pypi_manager_install_blocks_when_policy_denies():
     current_loop.assert_not_called()
 
 
+@pytest.mark.parametrize(
+    "name,expected",
+    [
+        ("jupyterlab-git", True),
+        ("JupyterLab.Git", True),
+        ("my_extension.pkg", True),
+        ("-r/tmp/requirements.txt", False),
+        ("-rrequirements.txt", False),
+        ("--requirement=/tmp/requirements.txt", False),
+        ("--help", False),
+    ],
+)
+async def test_pypi_manager_is_uninstall_allowed_rejects_non_pypi_names(name, expected):
+    manager = PyPIExtensionManager()
+    assert await manager.is_uninstall_allowed(name) is expected
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "-r/tmp/requirements.txt",
+        "-rrequirements.txt",
+        "--requirement=/tmp/requirements.txt",
+        "--help",
+    ],
+)
+async def test_pypi_manager_uninstall_blocks_invalid_name_before_pip(name):
+    manager = PyPIExtensionManager()
+    completed = CompletedProcess(args=[], returncode=0, stdout=b"", stderr=b"")
+
+    with patch("jupyterlab.extensions.pypi.tornado.ioloop.IOLoop.current") as current_loop:
+        current_loop.return_value.run_in_executor = AsyncMock(return_value=completed)
+        result = await manager.uninstall(name)
+
+    assert result == ActionResult(status="error", message="uninstall is not allowed")
+    current_loop.assert_not_called()
+    current_loop.return_value.run_in_executor.assert_not_called()
+
+
 async def test_handler_blocks_install_when_policy_denies():
     handler = Mock()
     handler.current_user = "user"
@@ -595,3 +636,22 @@ async def test_handler_blocks_install_when_policy_denies():
     assert "was blocked" in exc_info.value.log_message
     handler.manager.is_install_allowed.assert_called_once_with("jupyterlab-evil", None)
     handler.manager.install.assert_not_called()
+
+
+async def test_handler_blocks_uninstall_when_name_is_not_allowed():
+    handler = Mock()
+    handler.current_user = "user"
+    handler.get_json_body.return_value = {
+        "cmd": "uninstall",
+        "extension_name": "-r/tmp/requirements.txt",
+    }
+    handler.manager.is_uninstall_allowed = AsyncMock(return_value=False)
+    handler.manager.uninstall = AsyncMock(return_value=ActionResult(status="ok", needs_restart=[]))
+
+    with pytest.raises(web.HTTPError) as exc_info:
+        await ExtensionHandler.post(handler)
+
+    assert exc_info.value.status_code == 422
+    assert "was blocked" in exc_info.value.log_message
+    handler.manager.is_uninstall_allowed.assert_awaited_once_with("-r/tmp/requirements.txt")
+    handler.manager.uninstall.assert_not_called()
