@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 import shutil
@@ -37,6 +38,7 @@ SPELLING_WORDLIST = DOCS_SOURCE / "spelling_wordlist.txt"
 
 HUNK_RE = re.compile(r"^@@ -\d+(?:,\d+)? \+(?P<start>\d+)(?:,(?P<count>\d+))? @@")
 SPELLING_RE = re.compile(r"^(?P<source>.*):(?P<line>\d+|None):(?P<rest>.*)$")
+SPELLING_CONTEXT_RE = re.compile(r"^\s*\([^)]+\) (?P<context>.*)$")
 
 
 def git_output(args: list[str]) -> str:
@@ -319,17 +321,48 @@ def path_from_source(source: str, source_dir: Path) -> str | None:
     return relative.as_posix()
 
 
+def spelling_line_from_context(source_dir: Path, path: str, report: str) -> int | None:
+    """Recover a missing location only when its context matches one source line."""
+    match = SPELLING_CONTEXT_RE.match(report)
+    if match is None:
+        return None
+
+    context = match.group("context")
+    if context.startswith("["):
+        try:
+            _, end = json.JSONDecoder().raw_decode(context)
+        except ValueError:
+            return None
+        context = context[end:]
+    context = context.strip()
+    source = (source_dir / path).resolve()
+    if not context or not source.is_relative_to(source_dir.resolve()):
+        return None
+
+    try:
+        lines = source.read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeError):
+        return None
+
+    matches = [number for number, text in enumerate(lines, 1) if context in text]
+    return matches[0] if len(matches) == 1 else None
+
+
 def parse_spelling_line(source_dir: Path, line: str) -> tuple[str, int, str] | None:
     """Parse one line from a Sphinx spelling report."""
     match = SPELLING_RE.match(line)
-    if not match or match.group("line") == "None":
+    if not match:
         return None
 
     path = path_from_source(match.group("source"), source_dir)
     if path is None:
         return None
 
-    line_number = int(match.group("line"))
+    line_number = int(match.group("line")) if match.group("line") != "None" else 0
+    if line_number == 0:
+        line_number = spelling_line_from_context(source_dir, path, match.group("rest"))
+        if line_number is None:
+            return None
     return path, line_number, f"{path}:{line_number}:{match.group('rest')}"
 
 
@@ -456,8 +489,8 @@ def main() -> int:
     report_spelling_scope(changed_paths, support_paths)
 
     with TemporaryDirectory() as source, TemporaryDirectory() as build:
-        source_dir = Path(source)
-        build_dir = Path(build)
+        source_dir = Path(source).resolve()
+        build_dir = Path(build).resolve()
         spelling_docs = write_spelling_source(
             source_dir,
             spelling_paths,

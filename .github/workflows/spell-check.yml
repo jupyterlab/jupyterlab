@@ -10,6 +10,7 @@ on:
       - 'docs/source/spelling_wordlist.txt'
       - 'pyproject.toml'
       - 'scripts/check_spelling.py'
+      - 'scripts/tests/test_check_spelling.py'
       - '.github/workflows/spell-check.yml'
 
 permissions:
@@ -40,6 +41,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install --group docs pyenchant
+
+      - name: Test spelling script
+        run: python -m pytest --confcutdir=scripts/tests scripts/tests/test_check_spelling.py
 
       - name: Run Sphinx spelling builder
         run: |
