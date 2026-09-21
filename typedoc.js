@@ -84,6 +84,10 @@ const entryPoints = packages
 module.exports = {
   entryPoints,
   entryPointStrategy: 'packages',
+  packageOptions: {
+    // JSON schema constraints emitted by json-schema-to-typescript.
+    blockTags: [...OptionDefaults.blockTags, '@minItems']
+  },
   treatValidationWarningsAsErrors: process.env.CI === 'true',
   treatWarningsAsErrors: process.env.CI === 'true',
   includeVersion: false,

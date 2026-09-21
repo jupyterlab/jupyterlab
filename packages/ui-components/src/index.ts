@@ -11,3 +11,5 @@ export * from './hoverbox';
 export * from './tokens';
 export * from './utils';
 export * from './FormRendererRegistry';
+
+export type { LabIconStyle } from './style';

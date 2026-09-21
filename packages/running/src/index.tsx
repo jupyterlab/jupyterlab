@@ -342,7 +342,7 @@ function List(props: {
   );
 }
 
-interface IFilterProvider {
+export interface IFilterProvider {
   filter(item: IRunningSessions.IRunningItem): Partial<IScore> | null;
   filterChanged: ISignal<IFilterProvider, void>;
 }

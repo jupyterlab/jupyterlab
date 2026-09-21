@@ -149,7 +149,7 @@ type AnyMethodType =
   | typeof Method.ClientNotification
   | typeof Method.ClientRequest
   | typeof Method.ServerRequest;
-type AnyMethod =
+export type AnyMethod =
   | Method.ServerNotification
   | Method.ClientNotification
   | Method.ClientRequest
@@ -178,10 +178,12 @@ enum MessageKind {
   responseForServer
 }
 
-interface IMessageLog<T extends AnyMethod = AnyMethod> {
+export interface IMessageLog<T extends AnyMethod = AnyMethod> {
   method: T;
   message: any;
 }
+
+export type { MessageKind };
 
 interface ICancellationDisposable {
   dispose(): void;

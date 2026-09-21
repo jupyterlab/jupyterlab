@@ -251,7 +251,7 @@ export const ISanitizer = new Token<IRenderMime.ISanitizer>(
 );
 
 /**
- * @deprecated since v4 use {@link IRenderMime.ISanitizer}
+ * @deprecated since v4 use {@link "rendermime-interfaces".IRenderMime.ISanitizer}
  */
 export type ISanitizer = IRenderMime.ISanitizer;
 
@@ -259,7 +259,7 @@ export namespace ISanitizer {
   /**
    * The options used to sanitize.
    *
-   * @deprecated in v4 use {@link IRenderMime.ISanitizerOptions}
+   * @deprecated in v4 use {@link "rendermime-interfaces".IRenderMime.ISanitizerOptions}
    */
   export type IOptions = IRenderMime.ISanitizerOptions;
 }
