@@ -799,6 +799,12 @@
       "type": "boolean",
       "default": true
     },
+    "showLockForReadOnlyCells": {
+      "title": "Show lock icon for read-only cells",
+      "description": "Should a lock icon be shown for read-only cells",
+      "type": "boolean",
+      "default": false
+    },
     "showEditorForReadOnlyMarkdown": {
       "title": "Show editor for read-only Markdown cells",
       "description": "Should an editor be shown for read-only markdown",
