@@ -242,7 +242,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Inject an extension into the editor
    *
    * @alpha
-   * @experimental
    * @param ext CodeMirror 6 extension
    */
   injectExtension(ext: Extension): void {

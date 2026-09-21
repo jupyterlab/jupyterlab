@@ -76,9 +76,6 @@ export interface IMainMenu {
   readonly tabsMenu: ITabsMenu;
 }
 
-/**
- * The namespace for IMainMenu attached interfaces.
- */
 export namespace IMainMenu {
   /**
    * The options used to add a menu to the main menu.

@@ -748,7 +748,7 @@ export class Section extends PanelWithToolbar {
 /**
  * Statics for Section.
  */
-namespace Section {
+export namespace Section {
   /**
    * Initialisation options for section.
    */
@@ -1328,3 +1328,5 @@ export namespace IRunningSessions {
     detail?: () => string;
   }
 }
+
+export type { FilterWidget };

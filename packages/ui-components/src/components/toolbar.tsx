@@ -1469,3 +1469,5 @@ namespace Private {
     }
   }
 }
+
+export type { ToolbarPopupOpener, ToolbarPopup };

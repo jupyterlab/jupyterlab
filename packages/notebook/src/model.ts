@@ -519,7 +519,6 @@ export namespace NotebookModel {
      *
      * Default: true
      *
-     * @experimental
      * @alpha
      */
     disableDocumentWideUndoRedo?: boolean;

@@ -154,7 +154,7 @@ const MAXIMUM_TIME_REMAINING = 50;
 /*
  * The rendering mode for the notebook.
  */
-type RenderingLayout = 'default' | 'side-by-side';
+export type RenderingLayout = 'default' | 'side-by-side';
 
 /**
  * The class attached to the heading collapser button

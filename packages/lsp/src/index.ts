@@ -15,3 +15,13 @@ export * from './positioning';
 export * from './tokens';
 export * from './utils';
 export * from './virtual/document';
+
+export type { LSPConnection } from './connection';
+export type { AnyCompletion, AnyLocation } from './lsp';
+export type {
+  LanguageServerSession,
+  LanguageServerSpec,
+  LanguageServerSpecsMap,
+  ServerSpecProperties,
+  Sessions
+} from './schema';
