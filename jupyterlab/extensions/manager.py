@@ -553,6 +553,9 @@ class ExtensionManager(PluginManager):
     async def is_install_allowed(self, name: str, _version: str | None = None) -> bool:
         return await self._is_allowed_by_listing(name)
 
+    async def is_uninstall_allowed(self, _name: str) -> bool:
+        return True
+
     async def _get_installed_extensions(
         self, get_latest_version=True
     ) -> dict[str, ExtensionPackage]:
