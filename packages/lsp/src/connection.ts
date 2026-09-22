@@ -169,7 +169,7 @@ function createMethodMap<T, H, U extends keyof T = keyof T>(
   return result as T;
 }
 
-enum MessageKind {
+export enum MessageKind {
   clientNotifiedServer,
   serverNotifiedClient,
   serverRequested,
@@ -182,8 +182,6 @@ export interface IMessageLog<T extends AnyMethod = AnyMethod> {
   method: T;
   message: any;
 }
-
-export type { MessageKind };
 
 interface ICancellationDisposable {
   dispose(): void;

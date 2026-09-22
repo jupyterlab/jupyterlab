@@ -16,12 +16,8 @@ export * from './tokens';
 export * from './utils';
 export * from './virtual/document';
 
-export type {
-  AnyMethod,
-  IMessageLog,
-  LSPConnection,
-  MessageKind
-} from './connection';
+export { MessageKind } from './connection';
+export type { AnyMethod, IMessageLog, LSPConnection } from './connection';
 export type { AnyCompletion, AnyLocation } from './lsp';
 export type {
   ClientConfigurationSchema,
