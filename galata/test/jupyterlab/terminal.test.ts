@@ -143,12 +143,52 @@ test.describe('Terminal', () => {
       ).toHaveCount(1);
       await titleSaved;
 
+      // Simulate a title sequence that has left the server's replay buffer.
+      await page.routeWebSocket(/\/terminals\/websocket\//, socket => {
+        const server = socket.connectToServer();
+        server.onMessage(data => {
+          if (typeof data === 'string') {
+            const message: unknown = JSON.parse(data);
+            if (
+              Array.isArray(message) &&
+              message[0] === 'stdout' &&
+              typeof message[1] === 'string'
+            ) {
+              message[1] = message[1].replaceAll(
+                `\x1b]2;${terminalTitle}\x07`,
+                ''
+              );
+              socket.send(JSON.stringify(message));
+              return;
+            }
+          }
+          socket.send(data);
+        });
+      });
+
       await page.reload();
       await page.sidebar.openTab('jp-running-sessions');
 
       await expect(
         runningLabels.filter({ hasText: terminalTitle })
       ).toHaveCount(1);
+
+      await runningLabels.filter({ hasText: terminalTitle }).click();
+      await expect(
+        page.locator(TERMINAL_TAB_LABEL_SELECTOR, { hasText: terminalTitle })
+      ).toBeVisible();
+      await expect(
+        runningLabels.filter({ hasText: terminalTitle })
+      ).toHaveCount(2);
+
+      await page.reload();
+      await page.sidebar.openTab('jp-running-sessions');
+      await expect(
+        page.locator(TERMINAL_TAB_LABEL_SELECTOR, { hasText: terminalTitle })
+      ).toBeVisible();
+      await expect(
+        runningLabels.filter({ hasText: terminalTitle })
+      ).toHaveCount(2);
     });
 
     test('should update the running sidebar when the terminal title resets', async ({

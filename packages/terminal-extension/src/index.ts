@@ -306,7 +306,10 @@ function activate(
     });
   });
 
-  addCommands(app, tracker, settingRegistry, translator, options);
+  const signaler = runningSessionManagers
+    ? new RunningTerminalSignaler(serviceManager.terminals, tracker, stateDB)
+    : null;
+  addCommands(app, tracker, settingRegistry, translator, options, signaler);
 
   tracker.widgetAdded.connect((_, widget) => {
     widget.content.escapeHintRequested.connect(() => {
@@ -414,14 +417,8 @@ function activate(
   }
 
   // Add a sessions manager if the running extension is available
-  if (runningSessionManagers) {
-    addRunningSessionManager(
-      runningSessionManagers,
-      app,
-      tracker,
-      translator,
-      stateDB
-    );
+  if (runningSessionManagers && signaler) {
+    addRunningSessionManager(runningSessionManagers, app, translator, signaler);
   }
 
   if (searchRegistry) {
@@ -437,13 +434,11 @@ function activate(
 function addRunningSessionManager(
   managers: IRunningSessionManagers,
   app: JupyterFrontEnd,
-  tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>,
   translator: ITranslator,
-  stateDB: IStateDB<TerminalTitleState> | null
+  signaler: RunningTerminalSignaler
 ) {
   const trans = translator.load('jupyterlab');
   const manager = app.serviceManager.terminals;
-  const signaler = new RunningTerminalSignaler(manager, tracker, stateDB);
 
   class RunningTerminal implements IRunningSessions.IRunningItem {
     constructor(model: Terminal.IModel) {
@@ -509,6 +504,11 @@ class RunningTerminalSignaler {
 
   label(name: string): string {
     return this._titles.get(name) ?? `terminals/${name}`;
+  }
+
+  async title(name: string): Promise<string | undefined> {
+    await this._ready;
+    return this._titles.get(name);
   }
 
   private _watchWidget(widget: MainAreaWidget<ITerminal.ITerminal>): void {
@@ -638,7 +638,8 @@ function addCommands(
   tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>,
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
-  options: Partial<ITerminal.IOptions>
+  options: Partial<ITerminal.IOptions>,
+  signaler: RunningTerminalSignaler | null
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands, serviceManager } = app;
@@ -661,6 +662,7 @@ function addCommands(
         : undefined;
 
       let session;
+      let initialTitle: string | undefined;
       if (name) {
         const models = await TerminalAPI.listRunning(
           serviceManager.serverSettings
@@ -668,6 +670,7 @@ function addCommands(
         if (models.map(d => d.name).includes(name)) {
           // we are restoring a terminal widget and the corresponding terminal exists
           // let's connect to it
+          initialTitle = await signaler?.title(name);
           session = serviceManager.terminals.connectTo({ model: { name } });
         } else {
           // we are restoring a terminal widget but the corresponding terminal was closed
@@ -683,11 +686,10 @@ function addCommands(
         session = await serviceManager.terminals.startNew({ cwd: localPath });
       }
 
-      const term = new XTerm(session, options, translator);
+      const term = new XTerm(session, { ...options, initialTitle }, translator);
 
       term.title.icon = terminalIcon;
-      // eslint-disable-next-line jupyter/no-untranslated-string
-      term.title.label = '...';
+      term.title.label = initialTitle ?? '...';
 
       const main = new MainAreaWidget({ content: term, reveal: term.ready });
       app.shell.add(main, 'main', { type: 'Terminal' });
