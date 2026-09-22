@@ -20,6 +20,31 @@ async function waitForTerminal(page: Page) {
   await terminalTabLabel.filter({ hasText: /^Terminal \d+$/ }).waitFor();
 }
 
+async function waitForTerminalLayoutSaved(
+  page: Page,
+  name: string,
+  open: boolean
+): Promise<void> {
+  await page.waitForResponse(response => {
+    if (
+      !response.ok() ||
+      response.request().method() !== 'PUT' ||
+      !/\/api\/workspaces\//.test(response.url())
+    ) {
+      return false;
+    }
+    const data = response.request().postDataJSON().data;
+    const widgets: unknown =
+      data?.['layout-restorer:data']?.main?.dock?.widgets;
+    const key = `terminal:${name}`;
+    return (
+      Array.isArray(widgets) &&
+      widgets.includes(key) === open &&
+      (data[key] !== undefined) === open
+    );
+  });
+}
+
 /**
  * Get the viewport position of the beginning of the terminal row matching
  * `rowText`.
@@ -112,7 +137,8 @@ test.describe('Terminal', () => {
     });
 
     test('should reuse terminal tab title in the running sidebar', async ({
-      page
+      page,
+      terminals
     }) => {
       const terminalTitle = 'Galata terminal title';
       const terminal = page.locator(TERMINAL_SELECTOR);
@@ -136,12 +162,19 @@ test.describe('Terminal', () => {
         runningLabels.filter({ hasText: terminalTitle })
       ).toHaveCount(2);
 
+      const terminalName = terminals!.keys().next().value!;
+      const closedLayoutSaved = waitForTerminalLayoutSaved(
+        page,
+        terminalName,
+        false
+      );
       await page.activity.closePanel(terminalTitle);
 
       await expect(
         runningLabels.filter({ hasText: terminalTitle })
       ).toHaveCount(1);
       await titleSaved;
+      await closedLayoutSaved;
 
       // Simulate a title sequence that has left the server's replay buffer.
       await page.routeWebSocket(/\/terminals\/websocket\//, socket => {
@@ -173,6 +206,7 @@ test.describe('Terminal', () => {
         runningLabels.filter({ hasText: terminalTitle })
       ).toHaveCount(1);
 
+      const layoutSaved = waitForTerminalLayoutSaved(page, terminalName, true);
       await runningLabels.filter({ hasText: terminalTitle }).click();
       await expect(
         page.locator(TERMINAL_TAB_LABEL_SELECTOR, { hasText: terminalTitle })
@@ -181,7 +215,10 @@ test.describe('Terminal', () => {
         runningLabels.filter({ hasText: terminalTitle })
       ).toHaveCount(2);
 
-      await page.reload();
+      await layoutSaved;
+      await page.reload({ waitForIsReady: false });
+      await page.evaluate(() => window.jupyterapp.restored);
+      await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
       await page.sidebar.openTab('jp-running-sessions');
       await expect(
         page.locator(TERMINAL_TAB_LABEL_SELECTOR, { hasText: terminalTitle })

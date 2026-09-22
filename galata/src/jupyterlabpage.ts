@@ -27,12 +27,17 @@ import * as Utils from './utils';
  * JupyterLab page interface
  */
 export interface IJupyterLabPageFixture
-  extends Omit<Page, 'goto'>, IJupyterLabPage {}
+  extends Omit<Page, 'goto' | 'reload'>, IJupyterLabPage {}
 
 /**
  * JupyterLab specific helpers interface
  */
 export interface IJupyterLabPage {
+  /**
+   * Reload the application, optionally skipping the default readiness check.
+   */
+  reload: JupyterLabPage['reload'];
+
   /**
    * Application URL path fragment
    */
