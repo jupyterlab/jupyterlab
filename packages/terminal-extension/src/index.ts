@@ -28,6 +28,7 @@ import type { Terminal } from '@jupyterlab/services';
 import { TerminalAPI } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
+import { IStateDB } from '@jupyterlab/statedb';
 import {
   ITerminal,
   ITerminalTracker,
@@ -39,11 +40,15 @@ import {
   linkIcon,
   pasteIcon,
   refreshIcon,
+  TabBarSvg,
   terminalIcon
 } from '@jupyterlab/ui-components';
 import { VDomRenderer } from '@jupyterlab/ui-components';
 import { VDomModel } from '@jupyterlab/ui-components';
-import type { Widget } from '@lumino/widgets';
+import { Throttler } from '@lumino/polling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Title, Widget } from '@lumino/widgets';
 import { Menu } from '@lumino/widgets';
 import { TerminalSearchProvider } from './searchprovider';
 
@@ -79,6 +84,10 @@ namespace CommandIDs {
  */
 const ESCAPE_HINT_DISPLAY_MS = 1500;
 
+const TERMINAL_TITLES_STATE_DB_ID = '@jupyterlab/terminal-extension:titles';
+
+type TerminalTitleState = Record<string, string>;
+
 const TERMINAL_OPTION_KEYS = new Set<string>(
   Object.keys(ITerminal.defaultOptions)
 );
@@ -93,6 +102,7 @@ const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
   provides: ITerminalTracker,
   requires: [ISettingRegistry, ITranslator],
   optional: [
+    IStateDB,
     ICommandPalette,
     ILauncher,
     ILayoutRestorer,
@@ -180,6 +190,7 @@ function activate(
   app: JupyterFrontEnd,
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
+  stateDB: IStateDB<TerminalTitleState> | null,
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
   restorer: ILayoutRestorer | null,
@@ -295,7 +306,10 @@ function activate(
     });
   });
 
-  addCommands(app, tracker, settingRegistry, translator, options);
+  const signaler = runningSessionManagers
+    ? new RunningTerminalSignaler(serviceManager.terminals, tracker, stateDB)
+    : null;
+  addCommands(app, tracker, settingRegistry, translator, options, signaler);
 
   tracker.widgetAdded.connect((_, widget) => {
     widget.content.escapeHintRequested.connect(() => {
@@ -403,8 +417,8 @@ function activate(
   }
 
   // Add a sessions manager if the running extension is available
-  if (runningSessionManagers) {
-    addRunningSessionManager(runningSessionManagers, app, translator);
+  if (runningSessionManagers && signaler) {
+    addRunningSessionManager(runningSessionManagers, app, translator, signaler);
   }
 
   if (searchRegistry) {
@@ -420,7 +434,8 @@ function activate(
 function addRunningSessionManager(
   managers: IRunningSessionManagers,
   app: JupyterFrontEnd,
-  translator: ITranslator
+  translator: ITranslator,
+  signaler: RunningTerminalSignaler
 ) {
   const trans = translator.load('jupyterlab');
   const manager = app.serviceManager.terminals;
@@ -436,7 +451,7 @@ function addRunningSessionManager(
       return terminalIcon;
     }
     label() {
-      return `terminals/${this._model.name}`;
+      return signaler.label(this._model.name);
     }
     shutdown() {
       return manager.shutdown(this._model.name);
@@ -452,13 +467,167 @@ function addRunningSessionManager(
       Array.from(manager.running()).map(model => new RunningTerminal(model)),
     shutdownAll: () => manager.shutdownAll(),
     refreshRunning: () => manager.refreshRunning(),
-    runningChanged: manager.runningChanged,
+    runningChanged: signaler.runningChanged,
     shutdownLabel: trans.__('Shut Down'),
     shutdownAllLabel: trans.__('Shut Down All'),
     shutdownAllConfirmationText: trans.__(
       'Are you sure you want to permanently shut down all running terminals?'
     )
   });
+}
+
+class RunningTerminalSignaler {
+  constructor(
+    manager: Terminal.IManager,
+    tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>,
+    stateDB: IStateDB<TerminalTitleState> | null
+  ) {
+    this._stateDB = stateDB;
+    this._saveTitlesThrottler = new Throttler(() => this._saveTitlesNow(), {
+      limit: 1000,
+      edge: 'trailing'
+    });
+    this._ready = this._loadTitles(manager).catch(reason => {
+      console.warn('Failed to load terminal title state.', reason);
+    });
+    manager.runningChanged.connect(this._onRunningChanged, this);
+    tracker.widgetAdded.connect((_, widget) => {
+      this._watchWidget(widget);
+      this._emitRunningChanged();
+    });
+    tracker.forEach(widget => this._watchWidget(widget));
+  }
+
+  get runningChanged(): ISignal<this, void> {
+    return this._runningChanged;
+  }
+
+  label(name: string): string {
+    return this._titles.get(name) ?? `terminals/${name}`;
+  }
+
+  async title(name: string): Promise<string | undefined> {
+    await this._ready;
+    return this._titles.get(name);
+  }
+
+  private _watchWidget(widget: MainAreaWidget<ITerminal.ITerminal>): void {
+    if (this._widgets.has(widget)) {
+      return;
+    }
+
+    this._widgets.add(widget);
+    widget.title.changed.connect(this._syncWidgetTitle, this);
+    widget.disposed.connect(this._unwatchWidget, this);
+    this._syncWidgetTitle(widget.title);
+  }
+
+  private _unwatchWidget(widget: MainAreaWidget<ITerminal.ITerminal>): void {
+    widget.title.changed.disconnect(this._syncWidgetTitle, this);
+    widget.disposed.disconnect(this._unwatchWidget, this);
+    this._widgets.delete(widget);
+    this._emitRunningChanged();
+  }
+
+  private _syncWidgetTitle(title: Title<Widget>): void {
+    void this._ready.then(() => {
+      const widget = Array.from(this._widgets).find(
+        widget => widget === title.owner
+      );
+      if (!widget || widget.isDisposed) {
+        return;
+      }
+
+      const name = widget.content.session.name;
+      const label = TabBarSvg.titleLabel(widget.title);
+      if (label === '...' || this._titles.get(name) === label) {
+        return;
+      }
+
+      this._titles.set(name, label);
+      this._saveTitles();
+      this._emitRunningChanged();
+    });
+  }
+
+  private _onRunningChanged(
+    manager: Terminal.IManager,
+    _models: Terminal.IModel[]
+  ): void {
+    void this._ready.then(() => {
+      if (this._pruneTitles(manager.running())) {
+        this._saveTitles();
+      }
+      this._emitRunningChanged();
+    });
+  }
+
+  private async _loadTitles(manager: Terminal.IManager): Promise<void> {
+    if (!this._stateDB) {
+      return;
+    }
+
+    const saved = await this._stateDB.fetch(TERMINAL_TITLES_STATE_DB_ID);
+    const savedTitles = Private.terminalTitleEntries(saved);
+    if (savedTitles.length === 0) {
+      return;
+    }
+
+    for (const [name, label] of savedTitles) {
+      if (!this._titles.has(name)) {
+        this._titles.set(name, label);
+      }
+    }
+    await manager.ready;
+    if (this._pruneTitles(manager.running())) {
+      this._saveTitles();
+    }
+    this._emitRunningChanged();
+  }
+
+  private _pruneTitles(models: Iterable<Terminal.IModel>): boolean {
+    const names = new Set(Array.from(models, model => model.name));
+    let changed = false;
+    for (const name of this._titles.keys()) {
+      if (!names.has(name)) {
+        this._titles.delete(name);
+        changed = true;
+      }
+    }
+    return changed;
+  }
+
+  private _saveTitles(): void {
+    void this._saveTitlesThrottler.invoke();
+  }
+
+  private _saveTitlesNow(): void {
+    if (!this._stateDB) {
+      return;
+    }
+
+    const titles: TerminalTitleState = {};
+    for (const [name, label] of this._titles) {
+      titles[name] = label;
+    }
+
+    void this._stateDB
+      .save(TERMINAL_TITLES_STATE_DB_ID, titles)
+      .catch(reason => {
+        console.warn('Failed to save terminal title state.', reason);
+      });
+  }
+
+  private _emitRunningChanged(): void {
+    this._runningChanged.emit(void 0);
+  }
+
+  private _stateDB: IStateDB<TerminalTitleState> | null;
+  private _ready: Promise<void>;
+  private _saveTitlesThrottler: Throttler;
+  private _titles = new Map<string, string>();
+  private _widgets = new Set<MainAreaWidget<ITerminal.ITerminal>>();
+  private _runningChanged = new Signal<this, void>(this);
 }
 
 /**
@@ -469,7 +638,8 @@ function addCommands(
   tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>,
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
-  options: Partial<ITerminal.IOptions>
+  options: Partial<ITerminal.IOptions>,
+  signaler: RunningTerminalSignaler | null
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands, serviceManager } = app;
@@ -492,6 +662,7 @@ function addCommands(
         : undefined;
 
       let session;
+      let initialTitle: string | undefined;
       if (name) {
         const models = await TerminalAPI.listRunning(
           serviceManager.serverSettings
@@ -499,6 +670,7 @@ function addCommands(
         if (models.map(d => d.name).includes(name)) {
           // we are restoring a terminal widget and the corresponding terminal exists
           // let's connect to it
+          initialTitle = await signaler?.title(name);
           session = serviceManager.terminals.connectTo({ model: { name } });
         } else {
           // we are restoring a terminal widget but the corresponding terminal was closed
@@ -514,11 +686,10 @@ function addCommands(
         session = await serviceManager.terminals.startNew({ cwd: localPath });
       }
 
-      const term = new XTerm(session, options, translator);
+      const term = new XTerm(session, { ...options, initialTitle }, translator);
 
       term.title.icon = terminalIcon;
-      // eslint-disable-next-line jupyter/no-untranslated-string
-      term.title.label = '...';
+      term.title.label = initialTitle ?? '...';
 
       const main = new MainAreaWidget({ content: term, reveal: term.ready });
       app.shell.add(main, 'main', { type: 'Terminal' });
@@ -888,6 +1059,19 @@ namespace Private {
     key: string
   ): key is keyof ITerminal.IOptions {
     return TERMINAL_OPTION_KEYS.has(key);
+  }
+
+  /**
+   * Get valid terminal title entries from persisted state.
+   */
+  export function terminalTitleEntries(state: unknown): [string, string][] {
+    if (typeof state !== 'object' || state === null || Array.isArray(state)) {
+      return [];
+    }
+
+    return Object.entries(state).filter(
+      (entry): entry is [string, string] => typeof entry[1] === 'string'
+    );
   }
 
   /**

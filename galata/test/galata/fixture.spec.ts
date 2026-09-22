@@ -103,6 +103,35 @@ test.describe('mockState', () => {
       )
     ).toBeTruthy();
   });
+
+  test('should remove state omitted from a workspace save', async ({
+    context,
+    baseURL
+  }) => {
+    const page = await context.newPage();
+    await page.route('**/mock-state-test', route =>
+      route.fulfill({ contentType: 'text/html', body: '' })
+    );
+    await galata.Mock.mockState(page, {
+      metadata: { id: 'default' },
+      data: { 'terminal:1': { name: '1' }, retained: true }
+    });
+    await page.goto(`${baseURL}/mock-state-test`);
+    const saved = await page.evaluate(async () => {
+      const url = '/api/workspaces/default';
+      await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          metadata: { id: 'default' },
+          data: { retained: true }
+        })
+      });
+      return (await fetch(url)).json();
+    });
+    expect(saved.data).toEqual({ retained: true });
+    await page.close();
+  });
 });
 
 test.describe('kernels', () => {
