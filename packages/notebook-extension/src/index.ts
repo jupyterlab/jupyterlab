@@ -1321,6 +1321,7 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
     formRegistry: IFormRendererRegistry,
     translator?: ITranslator
   ) => {
+    const trans = (translator || nullTranslator).load('jupyterlab');
     const editorFactory: CodeEditor.Factory = options =>
       editorServices.factoryService.newInlineEditor(options);
     // Register the custom fields. As with the active cell tool below, the
@@ -1331,7 +1332,7 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
     const cellMetadataField = new CellMetadataField({
       editorFactory,
       tracker,
-      label: 'Cell metadata',
+      label: trans.__('Cell metadata'),
       translator: translator
     });
     const cellComponent: IFormRenderer = {
@@ -1347,7 +1348,7 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
     const notebookMetadataField = new NotebookMetadataField({
       editorFactory,
       tracker,
-      label: 'Notebook metadata',
+      label: trans.__('Notebook metadata'),
       translator: translator
     });
     const notebookComponent: IFormRenderer = {

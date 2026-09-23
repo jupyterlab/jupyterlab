@@ -276,6 +276,20 @@ export default defineConfig([
       'jupyter/prefer-lazy-imports': [
         'error',
         {
+          deferredPackages: [
+            ...lazyImports.DEFAULT_DEFERRED_PACKAGES,
+            // Keep JupyterLab's other on-demand dependencies out of startup.
+            '@mermaid-js/layout-elk',
+            '@plutojl/lang-julia',
+            '@xterm/xterm',
+            '@xterm/addon-*',
+            'marked',
+            'marked-gfm-heading-id',
+            'marked-mangle',
+            'mathjax-full',
+            'regexp-match-indices',
+            'vega-embed'
+          ],
           allowedPackages: [
             // Keep defaults
             ...lazyImports.DEFAULT_ALLOWED_PACKAGES,

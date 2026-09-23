@@ -231,11 +231,13 @@ namespace Private {
 
     // Get schema content.
     const schema = {
+      // eslint-disable-next-line jupyter/no-untranslated-string -- Test settings schema.
       title: 'Theme',
       description: 'Theme manager settings.',
       properties: {
         theme: {
           type: 'string',
+          // eslint-disable-next-line jupyter/no-untranslated-string -- Test settings schema.
           title: 'Selected Theme',
           default: 'JupyterLab Light'
         }

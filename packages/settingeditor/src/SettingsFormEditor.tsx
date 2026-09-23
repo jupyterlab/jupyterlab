@@ -18,6 +18,8 @@ import type {
 import { JSONExt } from '@lumino/coreutils';
 import { Debouncer } from '@lumino/polling';
 import type { IChangeEvent } from '@rjsf/core';
+// The settings editor is loaded on demand and needs the validator to render.
+// eslint-disable-next-line jupyter/prefer-lazy-imports
 import validatorAjv8 from '@rjsf/validator-ajv8';
 import type { Field, UiSchema } from '@rjsf/utils';
 import type { JSONSchema7 } from 'json-schema';
