@@ -53,7 +53,7 @@ export class MarkdownViewer extends Widget {
         signal: this.context.model.contentChanged,
         timeout: this._config.renderTimeout
       });
-      this._monitor.activityStopped.connect(this.update, this);
+      this._monitor.activityStopped.connect(this._requestRender, this);
 
       this._ready.resolve(undefined);
     });
@@ -78,7 +78,7 @@ export class MarkdownViewer extends Widget {
    */
   setFragment(fragment: string): void {
     this._fragment = fragment;
-    this.update();
+    this._requestRender();
   }
 
   /**
@@ -101,7 +101,7 @@ export class MarkdownViewer extends Widget {
         style.setProperty('font-size', value ? value + 'px' : null);
         break;
       case 'hideFrontMatter':
-        this.update();
+        this._requestRender();
         break;
       case 'lineHeight':
         style.setProperty('line-height', value ? value.toString() : null);
@@ -140,7 +140,8 @@ export class MarkdownViewer extends Widget {
    * Handle an `update-request` message to the widget.
    */
   protected onUpdateRequest(msg: Message): void {
-    if (this.context.isReady && !this.isDisposed) {
+    if (this._renderPending && this.context.isReady && !this.isDisposed) {
+      this._renderPending = false;
       void this._render();
       this._fragment = '';
     }
@@ -151,6 +152,14 @@ export class MarkdownViewer extends Widget {
    */
   protected onActivateRequest(msg: Message): void {
     this.node.focus();
+  }
+
+  /**
+   * Request that the markdown content be rendered.
+   */
+  private _requestRender(): void {
+    this._renderPending = true;
+    this.update();
   }
 
   /**
@@ -215,6 +224,7 @@ export class MarkdownViewer extends Widget {
   private _fragment = '';
   private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null;
   private _ready = new PromiseDelegate<void>();
+  private _renderPending = false;
   private _isRendering = false;
   private _renderRequested = false;
   private _rendered = new Signal<MarkdownViewer, void>(this);
