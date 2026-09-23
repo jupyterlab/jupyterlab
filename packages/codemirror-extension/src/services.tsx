@@ -14,6 +14,7 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 import {
   CodeMirrorEditorFactory,
   CodeMirrorMimeTypeService,
+  commandRegistry,
   EditorExtensionRegistry,
   EditorLanguageRegistry,
   EditorThemeRegistry,
@@ -227,6 +228,13 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
       )) {
         registry.addExtension(extensionFactory);
       }
+      registry.addExtension({
+        name: 'commandRegistry',
+        factory: () =>
+          EditorExtensionRegistry.createImmutableExtension(
+            commandRegistry(app.commands)
+          )
+      });
 
       if (settingRegistry) {
         const updateSettings = (settings: ISettingRegistry.ISettings) => {
