@@ -4979,6 +4979,7 @@ __metadata:
   resolution: "@jupyterlab/statusbar@workspace:packages/statusbar"
   dependencies:
     "@jupyterlab/testing": ^4.7.0-alpha.2
+    "@jupyterlab/translation": ^4.7.0-alpha.2
     "@jupyterlab/ui-components": ^4.7.0-alpha.2
     "@lumino/algorithm": ^2.0.5
     "@lumino/coreutils": ^2.2.3
