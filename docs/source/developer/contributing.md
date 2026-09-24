@@ -20,6 +20,7 @@ You can help make it better by:
 - [proposing new features](https://github.com/jupyterlab/jupyterlab/issues/new?assignees=&labels=enhancement%2C+status%3ANeeds+Triage&template=feature_request.md),
 - [translating the application](https://crowdin.com/project/jupyterlab),
 - [improving the documentation](https://jupyterlab.readthedocs.io/en/latest),
+- becoming a [code owner](https://github.com/jupyterlab/jupyterlab/blob/main/.github/CODEOWNERS)
 - improving the code base and fixing bug (see below)
 
 We have labeled some issues as [good first

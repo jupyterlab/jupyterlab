@@ -1,0 +1,31 @@
+# Thank you for your interest in becoming a Code Owner!
+#
+# We are delighted to welcome more contributors who take responsibility
+# for review of the incoming patches and new features. Feel welcome
+# to add yourself as a reviewer for any set packages.
+#
+# Being a code owner is a commitment but not an obligation; code owners
+# are not required to review all PRs on which their review is requested
+# but are expected to respond to a number of PRs proportional to the number
+# of reviewers available. The response would ideally be a full review,
+# but leaving just a short note on your judgment/sentiment on the change
+# and suggesting another reviewer is entirely acceptable.
+#
+# To coordinate the reviews, we kindly ask code owners to:
+# - communicate availability early, e.g.
+#   - by setting status to "busy" on GitHub when taking a longer leave of absence, or
+#   - by declining request for review via GitHub UI (this is possible from the "Reviewers" dropdown)
+#   - by leaving a comment
+# - remove themselves from the list once they are no longer able to review PRs
+
+# Add yourself below to be a code owner of a single package
+# If a package is listed, add yourself at the end of line; if it does not add a new line
+/packages/completer @krassowski
+/packages/completer-extension @krassowski
+/packages/lsp @krassowski
+/packages/filebrowser @MUFFANUJ
+/packages/filebrowser-extension @MUFFANUJ
+
+# Add yourself in both (or only one) line below if you would like to review docs PRs
+/docs/ @krassowski @MUFFANUJ
+*.md @krassowski @MUFFANUJ
