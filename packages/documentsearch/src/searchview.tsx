@@ -260,13 +260,21 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       </div>
       <button
         className={REPLACE_BUTTON_WRAPPER_CLASS}
-        disabled={!props.replaceEnabled}
+        disabled={props.replaceEnabled === false}
         onClick={() => props.onReplaceCurrent()}
         title={
-          !props.replaceEnabled
-            ? 'Cannot replace: match is in output or read-only cell'
-            : 'Replace'
+          props.replaceEnabled === false
+            ? trans.__('Cannot replace: match is in output or read-only cell')
+            : trans.__('Replace')
         }
+      >
+        <span
+          className={
+            props.replaceEnabled === false
+              ? `${REPLACE_BUTTON_CLASS} ${REPLACE_BUTTON_DISABLED_CLASS} ${BUTTON_CONTENT_CLASS}`
+              : `${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`
+          }
+        >
         tabIndex={0}
       >
         <span
