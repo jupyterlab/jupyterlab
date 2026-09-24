@@ -220,6 +220,18 @@
   flex: 0 0 auto;
 }
 
+.jp-CommandPalette-recentBadge {
+  flex: 0 0 auto;
+  align-self: center;
+  padding: 0 4px;
+  color: var(--jp-brand-color1);
+  font-size: var(--jp-ui-font-size0);
+}
+
+.lm-CommandPalette-item.lm-mod-active .jp-CommandPalette-recentBadge {
+  color: var(--jp-ui-inverse-font-color1);
+}
+
 .lm-CommandPalette-itemCaption {
   display: none;
 }
