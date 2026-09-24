@@ -536,6 +536,31 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    commands.addCommand(CommandIDs.toggleFullscreenMode, {
+      label: trans.__('Fullscreen Mode'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: () => {
+        if (
+          document.fullscreenElement === null ||
+          document.fullscreenElement === undefined
+        ) {
+          document.documentElement.requestFullscreen().catch(reason => {
+            console.error('Failed to enter fullscreen mode.', reason);
+          });
+        } else if (document.fullscreenElement !== null) {
+          document.exitFullscreen().catch(reason => {
+            console.error('Failed to exit fullscreen mode.', reason);
+          });
+        }
+      },
+      isToggled: () => document.fullscreenElement !== null
+    });
+
     shell.currentChanged?.connect(() => {
       [
         CommandIDs.close,
@@ -802,31 +827,6 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         },
         isToggled: () => labShell.presentationMode,
         isVisible: () => true
-      });
-
-      commands.addCommand(CommandIDs.toggleFullscreenMode, {
-        label: trans.__('Fullscreen Mode'),
-        describedBy: {
-          args: {
-            type: 'object',
-            properties: {}
-          }
-        },
-        execute: () => {
-          if (
-            document.fullscreenElement === null ||
-            document.fullscreenElement === undefined
-          ) {
-            document.documentElement.requestFullscreen().catch(reason => {
-              console.error('Failed to enter fullscreen mode.', reason);
-            });
-          } else if (document.fullscreenElement !== null) {
-            document.exitFullscreen().catch(reason => {
-              console.error('Failed to exit fullscreen mode.', reason);
-            });
-          }
-        },
-        isToggled: () => document.fullscreenElement !== null
       });
 
       commands.addCommand(CommandIDs.setMode, {
