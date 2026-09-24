@@ -324,6 +324,12 @@ export class SearchDocumentModel
    * Replace the current match.
    */
   async replaceCurrentMatch(): Promise<void> {
+    if (this.searchProvider.getCurrentMatch?.()?.readonly) {
+      this.replaceEnabled = false;
+      this.stateChanged.emit();
+      return;
+    }
+
     await this.searchProvider.replaceCurrentMatch(this._replaceText, true, {
       preserveCase: this.preserveCase,
       regularExpression: this.useRegex

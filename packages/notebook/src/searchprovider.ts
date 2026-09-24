@@ -700,13 +700,18 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     do {
       let searchEngine = this._searchProviders[this._currentProviderIndex];
 
-      while (options?.skipReadOnly && searchEngine.isReadOnlyProvider()) {
-        if (this._currentProviderIndex + 1 < this._searchProviders.length)
-          this._currentProviderIndex += 1;
-        else {
-          this._currentProviderIndex = 0;
+      if (options?.skipReadOnly) {
+        const startProviderIndex: number = this._currentProviderIndex;
+        while (searchEngine.isReadOnlyProvider()) {
+          this._currentProviderIndex =
+            (this._currentProviderIndex + 1) % this._searchProviders.length;
+          if (this._currentProviderIndex === startProviderIndex) {
+            this._currentProviderIndex = null;
+            return null;
+          }
+
+          searchEngine = this._searchProviders[this._currentProviderIndex];
         }
-        searchEngine = this._searchProviders[this._currentProviderIndex];
       }
 
       const match = reverse

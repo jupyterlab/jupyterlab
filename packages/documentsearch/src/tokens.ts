@@ -177,7 +177,7 @@ export interface ISearchMatch {
   position: number;
 
   /**
-   * Indicates whether the match belongs to a read-only cell.
+   * Indicates whether the match belongs to a cell output or non-editable cell.
    */
   readonly?: boolean;
 }
@@ -401,7 +401,7 @@ export interface ISearchProvider extends IBaseSearchProvider {
   getSelectionState?(): SelectionState;
 
   /**
-   *
+   * Gets the currently highlighted match, if any.
    */
   getCurrentMatch?(): ISearchMatch | undefined;
 }
