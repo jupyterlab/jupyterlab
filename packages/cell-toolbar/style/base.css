@@ -28,6 +28,7 @@
   background-color: transparent;
   border-bottom: inherit;
   box-shadow: none;
+  animation: jp-cell-toolbar-fade-in 200ms ease-in-out;
 }
 
 /* Overrides for mobile view hiding cell toolbar */
@@ -69,4 +70,16 @@
 
 .jp-mod-active .jp-MarkdownOutput {
   border-color: var(--jp-cell-editor-border-color);
+}
+
+@keyframes jp-cell-toolbar-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(50%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
