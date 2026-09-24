@@ -77,9 +77,12 @@ export class CellMetadataField extends NotebookTools.MetadataEditorTool {
 
   render(props: FieldProps): JSX.Element {
     const cell = this._tracker.activeCell;
+    // Replace and dispose the source created for the previous render.
+    const previousSource = this.editor.source;
     this.editor.source = cell
       ? new ObservableJSON({ values: cell.model.metadata as JSONObject })
       : null;
+    previousSource?.dispose();
     this.editor.source?.changed.connect(this._onSourceChanged, this);
 
     return (
@@ -120,9 +123,12 @@ export class NotebookMetadataField extends NotebookTools.MetadataEditorTool {
 
   render(props: FieldProps): JSX.Element {
     const notebook = this._tracker.currentWidget;
+    // Replace and dispose the source created for the previous render.
+    const previousSource = this.editor.source;
     this.editor.source = notebook
       ? new ObservableJSON({ values: notebook.model?.metadata as JSONObject })
       : null;
+    previousSource?.dispose();
     this.editor.source?.changed.connect(this._onSourceChanged, this);
 
     return (

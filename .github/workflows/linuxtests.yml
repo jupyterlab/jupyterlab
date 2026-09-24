@@ -68,7 +68,7 @@ jobs:
         id: pw-version
         run: |
           set -e
-          PW_VERSION=$(grep -m1 "playwright@" yarn.lock)
+          PW_VERSION=$(grep -m1 '^"playwright@npm:' yarn.lock)
           echo "Playwright version: $PW_VERSION"
           echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
 

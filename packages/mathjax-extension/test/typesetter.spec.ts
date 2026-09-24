@@ -83,6 +83,47 @@ describe('@jupyterlab/mathjax-extension', () => {
       });
     });
 
+    describe('#withParseOptions()', () => {
+      it('should return a new typesetter with the given options', () => {
+        const configured = typesetter.withParseOptions({
+          dollarInlineMath: false
+        });
+        expect(configured).not.toBe(typesetter);
+        expect(configured.mathParseOptions?.dollarInlineMath).toBe(false);
+      });
+
+      it('should leave the original typesetter unchanged', () => {
+        typesetter.withParseOptions({ dollarInlineMath: false });
+        expect(typesetter.mathParseOptions?.dollarInlineMath).toBe(true);
+      });
+
+      it('should inherit options which were not given', () => {
+        const configured = new MathJaxTypesetter({
+          dollarInlineMath: false
+        }).withParseOptions({});
+        expect(configured.mathParseOptions?.dollarInlineMath).toBe(false);
+      });
+
+      it('should inherit options which were given as `undefined`', () => {
+        const configured = new MathJaxTypesetter({
+          dollarInlineMath: false
+        }).withParseOptions({ dollarInlineMath: undefined });
+        expect(configured.mathParseOptions?.dollarInlineMath).toBe(false);
+      });
+
+      it('should not typeset `$...$` when dollar inline math is disabled', async () => {
+        const configured = typesetter.withParseOptions({
+          dollarInlineMath: false
+        });
+        const host = document.createElement('div');
+        host.innerHTML = '$1 + 1$';
+        document.body.appendChild(host);
+        await configured.typeset(host);
+        expect(host.innerHTML).toContain('$1 + 1$');
+        expect(host.innerHTML).not.toContain('<mn>1</mn>');
+      });
+    });
+
     describe('#mathDocument()', () => {
       it('should share a MathDocument between typesetters with equal options', async () => {
         const a = new MathJaxTypesetter();

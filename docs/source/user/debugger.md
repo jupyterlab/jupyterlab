@@ -64,8 +64,8 @@ Let's define a function that adds two elements:
 
 ```python
 def add(a, b):
-   res = a + b
-   return res
+    res = a + b
+    return res
 ```
 
 We can call the function and print the result:
@@ -106,11 +106,52 @@ The sidebar may also include a source preview if "Show Sources in Main Area" set
 
 **Variables**
 
-Variables can be explored using a tree view and a table view:
+The variables panel lists the variables defined in the frame selected in the call
+stack. The drop down of its toolbar switches between the _Locals_ of that frame and
+the _Globals_ of the module it belongs to.
+
+Variables can be explored using a tree view and a table view, which are toggled with
+the two buttons on the right of the toolbar. The tree view shows the value of each
+variable, and expanding an entry reveals the variables it contains:
 
 ```{image} ../images/debugger-variables.png
-
+:alt: The variables panel in tree view, listing two variables and their values.
 ```
+
+The table view shows the type of each variable next to its value:
+
+```{image} ../images/debugger-variables-table.png
+:alt: The variables panel in table view, with a Name, a Type and a Value column.
+```
+
+In the table view, double-clicking a variable which contains other variables -
+or choosing _Inspect Variable_ in its context menu - opens its contents as a
+table of their own in the main area:
+
+```{image} ../images/debugger-variable-inspector.png
+:alt: A notebook stopped on a breakpoint, with the items of a list shown in a table below it.
+```
+
+Variables whose value is too large to read in the panel can be opened on their own.
+When the kernel supports it, hovering over a variable in the tree view reveals a
+magnifying glass button which renders the variable in the main area, using the same
+renderers as notebook outputs - so an image is displayed as an image, and a data
+frame as a table:
+
+```{image} ../images/debugger-variable-renderer.png
+:alt: A notebook stopped on a breakpoint, with the value of an image variable rendered in a panel below it.
+```
+
+The panel refreshes as you step through the code, and is closed together with the
+document it was opened from. The same command is available as _Render Variable_ in
+the context menu of the variables panel, together with _Copy to Clipboard_, which
+copies the text representation of the value, and _Copy Variable to Globals_, which
+copies a local variable to the global scope of the kernel, where it remains
+reachable once the execution has resumed.
+
+Kernels expose internal variables which are rarely of interest. The variables listed
+for the kernel in use in the **Variable filter** setting of the Debugger section of
+the Settings Editor are hidden from both views.
 
 **Call stack**
 

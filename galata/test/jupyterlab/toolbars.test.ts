@@ -52,13 +52,10 @@ test.describe('Toolbar Button', () => {
   test('Render Switch Kernel ToolbarButton in default theme', async ({
     page
   }) => {
-    const label = await page.$(
+    const label = page.locator(
       'jp-button.jp-Toolbar-kernelName .jp-ToolbarButtonComponent-label'
     );
-    const labelColor = await page.evaluate(
-      el => getComputedStyle(el).color,
-      label
-    );
+    const labelColor = await label.evaluate(el => getComputedStyle(el).color);
 
     const color = await page.evaluate(() =>
       getComputedStyle(document.body)
@@ -71,13 +68,10 @@ test.describe('Toolbar Button', () => {
 
   test('Render Switch Kernel ToolbarButton in dark theme', async ({ page }) => {
     await page.theme.setDarkTheme();
-    const label = await page.$(
+    const label = page.locator(
       'jp-button.jp-Toolbar-kernelName .jp-ToolbarButtonComponent-label'
     );
-    const labelColor = await page.evaluate(
-      el => getComputedStyle(el).color,
-      label
-    );
+    const labelColor = await label.evaluate(el => getComputedStyle(el).color);
 
     const color = await page.evaluate(() =>
       getComputedStyle(document.body)

@@ -87,14 +87,12 @@ test.describe('General Tests', () => {
     await page.menu.openLocator('File>Save and Export Notebook As');
     const exportMenu = await page.menu.getOpenMenuLocator();
     expect(exportMenu).toBeDefined();
-    expect(
-      await exportMenu!
-        .getByRole('menuitem', {
-          name: 'Enable notebook exports'
-        })
-        .count()
-    ).toBe(1);
-    expect(await exportMenu!.getByRole('menuitem').count()).toBe(1);
+    await expect(
+      exportMenu!.getByRole('menuitem', {
+        name: 'Enable notebook exports'
+      })
+    ).toHaveCount(1);
+    await expect(exportMenu!.getByRole('menuitem')).toHaveCount(1);
   });
 });
 

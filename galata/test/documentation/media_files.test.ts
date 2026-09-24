@@ -20,10 +20,7 @@ test.describe('Media Files', () => {
       }`
     });
 
-    await page.dblclick('[aria-label="File Browser Section"] >> text=data');
-
-    await page.locator('text=rocket.wav').waitFor();
-    await page.dblclick('text=rocket.wav');
+    await page.filebrowser.open('data/rocket.wav');
 
     await page.locator('.jp-AudioViewer').waitFor();
 
@@ -44,10 +41,7 @@ test.describe('Media Files', () => {
       }`
     });
 
-    await page.dblclick('[aria-label="File Browser Section"] >> text=data');
-
-    await page.locator('text=jupiter.mp4').waitFor();
-    await page.dblclick('text=jupiter.mp4');
+    await page.filebrowser.open('data/jupiter.mp4');
 
     await page.locator('.jp-VideoViewer').waitFor();
 
