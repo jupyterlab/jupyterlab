@@ -99,9 +99,11 @@ function updateCoreMode(skipAssets: boolean = false): void {
     lock: path.join(staging, 'yarn.lock'),
     cwd: staging
   });
-  utils.run('jlpm dlx yarn-berry-deduplicate --strategy fewerHighest', {
-    cwd: staging
-  });
+  // Pin @yarnpkg/core: 4.9.2 fails to install (yarnpkg/berry#7249)
+  utils.run(
+    'npx -y -p yarn-berry-deduplicate@6.1.3 -p @yarnpkg/core@4.9.1 yarn-berry-deduplicate --strategy fewerHighest',
+    { cwd: staging }
+  );
   utils.run('jlpm', { cwd: staging });
 
   // Build the core assets.
