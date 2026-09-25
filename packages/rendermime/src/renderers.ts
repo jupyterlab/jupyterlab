@@ -5,7 +5,7 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import type { ITranslator } from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import escape from 'lodash.escape';
 import { LiveText, mergeNodes } from './livetext';
@@ -80,7 +80,7 @@ export async function renderHTML(options: renderHTML.IOptions): Promise<void> {
   }
 
   // Handle default behavior of nodes.
-  Private.handleDefaults(host);
+  Private.handleDefaults(host, trans);
 
   if (shouldTypeset && latexTypesetter) {
     const maybePromise = latexTypesetter.typeset(host);
@@ -450,8 +450,10 @@ export async function renderSVG(
 
   // Display a message if the source is not trusted.
   if (!trusted) {
-    host.textContent =
-      'Cannot display an untrusted SVG. Maybe you need to run the cell?';
+    const trans = (options.translator || nullTranslator).load('jupyterlab');
+    host.textContent = trans.__(
+      'Cannot display an untrusted SVG. Maybe you need to run the cell?'
+    );
     return;
   }
 
@@ -2084,12 +2086,15 @@ namespace Private {
   /**
    * Handle the default behavior of nodes.
    */
-  export function handleDefaults(node: HTMLElement): void {
+  export function handleDefaults(
+    node: HTMLElement,
+    trans: TranslationBundle
+  ): void {
     // Handle image elements.
     const imgs = node.getElementsByTagName('img');
     for (let i = 0; i < imgs.length; i++) {
       if (!imgs[i].alt) {
-        imgs[i].alt = 'Image';
+        imgs[i].alt = trans.__('Image');
       }
     }
   }

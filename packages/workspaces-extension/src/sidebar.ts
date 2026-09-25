@@ -13,8 +13,8 @@ import type { IRunningSessions } from '@jupyterlab/running';
 import { IRunningSessionManagers } from '@jupyterlab/running';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import type { Workspace } from '@jupyterlab/services';
-import { WORKSPACE_ITEM_CLASS } from './commands';
 import { blankIcon, checkIcon, deleteIcon } from '@jupyterlab/ui-components';
+import { WORKSPACE_ITEM_CLASS } from './constants';
 
 /**
  * The extension populating sidebar with workspaces list.
@@ -30,7 +30,7 @@ export const workspacesSidebar: JupyterFrontEndPlugin<void> = {
   ],
   optional: [ITranslator],
   autoStart: true,
-  activate: async (
+  activate: (
     app: JupyterFrontEnd,
     commands: IWorkspaceCommands,
     model: IWorkspacesModel,

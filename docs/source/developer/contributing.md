@@ -1055,7 +1055,7 @@ The key utility is `jlpm integrity`, which ensures the integrity
 of the packages in the repo. It will:
 
 - Ensure the core package version dependencies match everywhere.
-- Ensure imported packages match dependencies.
+- Ensure imported packages match dependencies, counting dynamic `import()` calls as imports.
 - Ensure a consistent version of all packages.
 - Manage the meta package.
 
