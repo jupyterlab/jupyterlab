@@ -24,9 +24,7 @@ test('Move down a cell', async ({ page }) => {
   const content = await page
     .locator(`${cellSelector} >> nth=2`)
     .allTextContents();
-  await page
-    .locator(`${cellSelector} >> nth=2 >> .jp-InputArea-prompt`)
-    .click();
+  await page.notebook.selectCells(2);
 
   await page.keyboard.press('Control+Shift+ArrowDown');
 
@@ -40,9 +38,7 @@ test('Move up a cell', async ({ page }) => {
   const content = await page
     .locator(`${cellSelector} >> nth=2`)
     .allTextContents();
-  await page
-    .locator(`${cellSelector} >> nth=2 >> .jp-InputArea-prompt`)
-    .click();
+  await page.notebook.selectCells(2);
   await page.keyboard.press('Control+Shift+ArrowUp');
 
   await expect(page.locator(`${cellSelector} >> nth=1`)).toHaveClass(
@@ -59,9 +55,7 @@ test('Move down two cells with first active', async ({ page }) => {
     .locator(`${cellSelector} >> nth=3`)
     .allTextContents();
 
-  await page
-    .locator(`${cellSelector} >> nth=3 >> .jp-InputArea-prompt`)
-    .click();
+  await page.notebook.selectCells(3);
 
   await page.keyboard.press('Shift+ArrowUp');
   await page.keyboard.press('Control+Shift+ArrowDown');
@@ -84,9 +78,7 @@ test('Move up two cells with first active', async ({ page }) => {
     .locator(`${cellSelector} >> nth=3`)
     .allTextContents();
 
-  await page
-    .locator(`${cellSelector} >> nth=3 >> .jp-InputArea-prompt`)
-    .click();
+  await page.notebook.selectCells(3);
 
   await page.keyboard.press('Shift+ArrowUp');
   await page.keyboard.press('Control+Shift+ArrowUp');
@@ -109,9 +101,7 @@ test('Move down two cells with last active', async ({ page }) => {
     .locator(`${cellSelector} >> nth=3`)
     .allTextContents();
 
-  await page
-    .locator(`${cellSelector} >> nth=2 >> .jp-InputArea-prompt`)
-    .click();
+  await page.notebook.selectCells(2);
   await page.keyboard.press('Shift+ArrowDown');
   await page.keyboard.press('Control+Shift+ArrowDown');
 
@@ -132,9 +122,7 @@ test('Move up two cells with last active', async ({ page }) => {
   const content2 = await page
     .locator(`${cellSelector} >> nth=3`)
     .allTextContents();
-  await page
-    .locator(`${cellSelector} >> nth=2 >> .jp-InputArea-prompt`)
-    .click();
+  await page.notebook.selectCells(2);
 
   await page.keyboard.press('Shift+ArrowDown');
   await page.keyboard.press('Control+Shift+ArrowDown');

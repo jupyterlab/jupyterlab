@@ -22,7 +22,7 @@ test.describe('Overview', () => {
   test('Open tabs', async ({ page }) => {
     await openOverview(page);
 
-    await page.click('[title="Running Terminals and Kernels"]');
+    await page.sidebar.openTab('jp-running-sessions');
 
     // Close all other sections
     const otherSession = page.locator(
@@ -41,7 +41,7 @@ test.describe('Overview', () => {
     await galata.Mock.freezeContentLastModified(page, filterContent);
     await openOverview(page);
 
-    await page.click('text="Tabs"');
+    await page.menu.openLocator('Tabs');
 
     expect(
       await page.screenshot({ clip: { y: 0, x: 210, width: 700, height: 350 } })
@@ -63,12 +63,7 @@ async function openOverview(page: IJupyterLabPageFixture) {
   await page.notebook.openByPath('notebooks/Data.ipynb');
 
   // Open jupyterlab.md
-  await page.filebrowser.openDirectory('narrative');
-  await page.click('text=jupyterlab.md', {
-    button: 'right'
-  });
-  await page.click('text=Open With');
-  await page.click('text=Markdown Preview');
+  await page.filebrowser.open('narrative/jupyterlab.md', 'Markdown Preview');
 
   // Open bar.vl.json
   await page.filebrowser.open('data/bar.vl.json');
@@ -78,7 +73,7 @@ async function openOverview(page: IJupyterLabPageFixture) {
 
   // Move notebook panel
   const notebookHandle = page.locator('div[role="main"] >> text=Data.ipynb');
-  await notebookHandle.click();
+  await page.activity.activateTab('Data.ipynb');
   const notebookBBox = await notebookHandle.boundingBox();
 
   await page.mouse.move(
@@ -91,7 +86,7 @@ async function openOverview(page: IJupyterLabPageFixture) {
 
   // Move md panel
   const mdHandle = page.locator('div[role="main"] >> text=jupyterlab.md');
-  await mdHandle.click();
+  await page.activity.activateTab('jupyterlab.md');
   const mdBBox = await mdHandle.boundingBox();
   const panelHandle = await page.activity.getPanelLocator();
   const panelBBox = await panelHandle.boundingBox();
