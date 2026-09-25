@@ -94,6 +94,10 @@ const UNUSED: Dict<string[]> = {
     'marked-gfm-heading-id',
     'marked-mangle'
   ],
+  '@jupyterlab/mathjax-extension': [
+    // Imported asynchronously and referenced by the bundled font CSS.
+    '@mathjax/mathjax-tex-font'
+  ],
   '@jupyterlab/services': ['ws'],
   '@jupyterlab/testing': [
     '@babel/core',
