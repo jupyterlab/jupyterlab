@@ -10,7 +10,8 @@
         { "const": "json", "title": "JSON" },
         { "const": "ui", "title": "UI" }
       ],
-      "default": "ui"
+      "default": "ui",
+      "tags": ["%UI%"]
     },
     "toSkip": {
       "title": "Additional plugins to skip in settings editor",
@@ -21,7 +22,8 @@
         "title": "Plugin ID",
         "description": "Plugin ID to skip"
       },
-      "default": []
+      "default": [],
+      "tags": ["%UI%"]
     }
   },
   "additionalProperties": false,
