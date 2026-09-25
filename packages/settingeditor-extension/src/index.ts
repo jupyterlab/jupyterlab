@@ -54,6 +54,7 @@ import {
   ImportSettingsDialogBodyWidget,
   ImportSettingsWidget
 } from './importSettingsWidget';
+import { history, historyKeymap } from '@codemirror/commands';
 import { keymap } from '@codemirror/view';
 
 const HARDCODED_TO_SKIP = [
@@ -356,7 +357,6 @@ function activateJSON(
       const when = app.restored;
 
       const { JsonSettingEditor } = await import('@jupyterlab/settingeditor');
-      const { history, historyKeymap } = await import('@codemirror/commands');
 
       const editor = new JsonSettingEditor({
         commands: {

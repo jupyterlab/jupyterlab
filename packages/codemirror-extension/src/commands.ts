@@ -5,6 +5,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
+  deleteLine,
+  toggleBlockComment,
+  toggleComment,
+  toggleTabFocusMode
+} from '@codemirror/commands';
+import {
   foldable,
   foldAll,
   foldCode,
@@ -42,11 +48,7 @@ namespace CommandIDs {
   export const unfoldAll = 'codemirror:unfold-all';
 }
 
-async function toggleBlockCommentWithFallback(
-  view: EditorView
-): Promise<boolean> {
-  const { toggleBlockComment, toggleComment } =
-    await import('@codemirror/commands');
+function toggleBlockCommentWithFallback(view: EditorView): boolean {
   return toggleBlockComment(view) || toggleComment(view);
 }
 
@@ -208,12 +210,11 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
           properties: {}
         }
       },
-      execute: async () => {
+      execute: () => {
         const view = findEditorView();
         if (!view) {
           return;
         }
-        const { deleteLine } = await import('@codemirror/commands');
         deleteLine(view);
       },
       isEnabled
@@ -230,12 +231,12 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
           properties: {}
         }
       },
-      execute: async () => {
+      execute: () => {
         const view = findEditorView();
         if (!view) {
           return;
         }
-        await toggleBlockCommentWithFallback(view);
+        toggleBlockCommentWithFallback(view);
       },
       isEnabled
     });
@@ -248,12 +249,11 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
           properties: {}
         }
       },
-      execute: async () => {
+      execute: () => {
         const view = findEditorView();
         if (!view) {
           return;
         }
-        const { toggleComment } = await import('@codemirror/commands');
         toggleComment(view);
       },
       isEnabled
@@ -270,12 +270,11 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
           properties: {}
         }
       },
-      execute: async () => {
+      execute: () => {
         const view = findEditorView();
         if (!view) {
           return;
         }
-        const { toggleTabFocusMode } = await import('@codemirror/commands');
         toggleTabFocusMode(view);
       },
       isEnabled
