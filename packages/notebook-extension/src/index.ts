@@ -1363,9 +1363,6 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
   }
 };
 
-/**
- * Registering active cell field.
- */
 type ActiveCellToolRendererProps = FieldProps & {
   tracker: INotebookTracker;
   languages: IEditorLanguageRegistry;
@@ -1399,6 +1396,9 @@ const CellIdFieldRenderer = React.lazy(async () => {
   };
 });
 
+/**
+ * Registering active cell field.
+ */
 const activeCellTool: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:active-cell-tool',
   description: 'Adds active cell fields in the metadata editor tab.',
