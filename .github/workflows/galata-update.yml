@@ -62,13 +62,10 @@ jobs:
       contents: write
       pull-requests: write
 
-    # Python version is frozen through strategy.matrix.python-version
-    # Python dependencies are frozen in the installation step
-    # Note: IPython is among the frozen package
+    # Python minor version is fixed through strategy.matrix.python-version
     strategy:
       matrix:
-        # Freeze Python version because it appears in console header
-        python-version: ['3.10.6']
+        python-version: ['3.12']
 
     steps:
       - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots-checkout@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
