@@ -5225,6 +5225,16 @@
     }
   },
   {
+    "id": "notebook:toggle-toolbar",
+    "label": "Show Toolbar",
+    "caption": "Show or hide the notebook toolbar",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "notebook:toggle-virtual-scrollbar",
     "label": "Show Minimap",
     "caption": "Show Minimap",
@@ -6048,6 +6058,16 @@
     "id": "viewmenu:show-minimap",
     "label": "Show Minimap",
     "caption": "Show Minimap",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "viewmenu:show-toolbar",
+    "label": "Show Toolbar",
+    "caption": "",
     "shortcuts": [],
     "args": {
       "type": "object",
