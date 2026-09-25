@@ -73,6 +73,38 @@ describe('kernel', () => {
       const promise = KernelAPI.listRunning(settings);
       await expect(promise).rejects.toThrow();
     });
+
+    it('should include no_track_activity=1 when noTrackActivity is true', async () => {
+      let capturedUrl = '';
+      const customFetch = (info: RequestInfo, init?: RequestInit) => {
+        capturedUrl = typeof info === 'string' ? info : info.url;
+        return Promise.resolve(
+          new Response(JSON.stringify([]), { status: 200 })
+        );
+      };
+      const serverSettings = ServerConnection.makeSettings({
+        fetch: customFetch
+      });
+      await KernelAPI.listRunning(serverSettings, true);
+      const url = new URL(capturedUrl);
+      expect(url.searchParams.get('no_track_activity')).toBe('1');
+    });
+
+    it('should not include no_track_activity when noTrackActivity is false', async () => {
+      let capturedUrl = '';
+      const customFetch = (info: RequestInfo, init?: RequestInit) => {
+        capturedUrl = typeof info === 'string' ? info : info.url;
+        return Promise.resolve(
+          new Response(JSON.stringify([]), { status: 200 })
+        );
+      };
+      const serverSettings = ServerConnection.makeSettings({
+        fetch: customFetch
+      });
+      await KernelAPI.listRunning(serverSettings, false);
+      const url = new URL(capturedUrl);
+      expect(url.searchParams.get('no_track_activity')).toBeNull();
+    });
   });
 
   describe('KernelAPI.startNew()', () => {

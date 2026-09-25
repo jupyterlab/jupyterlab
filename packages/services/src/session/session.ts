@@ -415,6 +415,8 @@ export interface ISessionAPIClient {
   /**
    * List the running sessions.
    *
+   * @param noTrackActivity - Whether to exclude this request from activity tracking.
+   *
    * @returns A promise that resolves with the list of running session models.
    *
    * #### Notes
@@ -422,7 +424,7 @@ export interface ISessionAPIClient {
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
-  listRunning(): Promise<IModel[]>;
+  listRunning(noTrackActivity?: boolean): Promise<IModel[]>;
 
   /**
    * Get a session model.

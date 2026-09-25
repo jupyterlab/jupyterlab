@@ -253,9 +253,11 @@ export interface ITerminalAPIClient {
   /**
    * List the running terminal sessions.
    *
+   * @param noTrackActivity - Whether to exclude this request from activity tracking.
+   *
    * @returns A promise that resolves with the list of running session models.
    */
-  listRunning(): Promise<IModel[]>;
+  listRunning(noTrackActivity?: boolean): Promise<IModel[]>;
 
   /**
    * Shut down a terminal session by name.
