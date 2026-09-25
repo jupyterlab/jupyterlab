@@ -126,10 +126,13 @@ export namespace URLExt {
       .split('&')
       .reduce(
         (acc, val) => {
-          const [key, value] = val.split('=');
+          // Only the first '=' separates the pair; a value may contain more.
+          const i = val.indexOf('=');
+          const key = i === -1 ? val : val.slice(0, i);
+          const value = i === -1 ? '' : val.slice(i + 1);
 
           if (key.length > 0) {
-            acc[key] = decodeURIComponent(value || '');
+            acc[key] = decodeURIComponent(value);
           }
 
           return acc;
