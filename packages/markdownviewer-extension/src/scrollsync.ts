@@ -216,12 +216,7 @@ namespace Private {
       this._previewWidget.content.rendered.connect(this._onRendered, this);
       this._editorWidget.disposed.connect(this.dispose, this);
       this._previewWidget.disposed.connect(this.dispose, this);
-
-      void this._previewWidget.content.ready.then(() => {
-        if (!this._isDisposed) {
-          void this._rebuildAnchors();
-        }
-      });
+      void this._rebuildAnchors();
     }
 
     /**
