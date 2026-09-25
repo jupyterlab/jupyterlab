@@ -11,10 +11,18 @@
 ### Behavior updates
 
 - Listing an extension package name in `disabledExtensions` now disables every plugin that
-  package provides. Before, a plugin whose id did not start with the package name stayed
-  enabled, so a package not following the plugin id convention could not be disabled as a
-  whole. Each such plugin is named in a browser console warning. To keep it enabled, list
-  the plugin ids to disable in `disabledExtensions` instead of the package name.
+  package provides. Before, only a plugin whose id started with the package name was
+  disabled, so an extension breaking the
+  {ref}`plugin id convention <plugin-id-convention>` was left partly running, or could not
+  be disabled by name at all. Each plugin the disable list does not name itself is reported
+  in a browser console warning. To disable part of such an extension, list the plugin ids
+  instead of the package name.
+- A prebuilt extension is no longer loaded during the initial page load when every plugin
+  it provides is disabled. Acting on a disable by plugin id needs the ids recorded in
+  `jupyterlab._build.plugins` of the built `package.json`, which jupyter-builder 1.X and
+  later write. Without them only a disable by package name is acted on. The extension is
+  loaded once the application has started, so its plugins keep appearing in the Advanced
+  Plugin Manager and can be enabled again from there.
 
 ### API updates
 
