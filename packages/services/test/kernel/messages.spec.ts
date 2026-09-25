@@ -74,6 +74,47 @@ describe('kernel/messages', () => {
     });
   });
 
+  describe('KernelMessage.IExecuteReplyMsg', () => {
+    it('should only omit an execution count for aborted replies', () => {
+      const replies: KernelMessage.IExecuteReplyMsg['content'][] = [
+        { status: 'abort' },
+        { status: 'aborted' },
+        { status: 'abort', execution_count: 1 },
+        { status: 'aborted', execution_count: 1 },
+        {
+          status: 'error',
+          execution_count: 1,
+          ename: 'Error',
+          evalue: 'failed',
+          traceback: []
+        },
+        {
+          status: 'ok',
+          execution_count: 1,
+          user_expressions: {}
+        }
+      ];
+
+      // @ts-expect-error execution_count is required for successful replies
+      const invalidReply: KernelMessage.IExecuteReplyMsg['content'] = {
+        status: 'ok',
+        user_expressions: {}
+      };
+
+      // @ts-expect-error execution_count is required for error replies
+      const invalidError: KernelMessage.IExecuteReplyMsg['content'] = {
+        status: 'error',
+        ename: 'Error',
+        evalue: 'failed',
+        traceback: []
+      };
+
+      expect(replies).toHaveLength(6);
+      expect(invalidReply.status).toBe('ok');
+      expect(invalidError.status).toBe('error');
+    });
+  });
+
   describe('KernelMessage.isStatusMsg()', () => {
     it('should check for a status message type', () => {
       const msg = KernelMessage.createMessage({
