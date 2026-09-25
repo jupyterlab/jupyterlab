@@ -235,6 +235,8 @@ namespace CommandIDs {
 
   export const clearOutputs = 'notebook:clear-cell-output';
 
+  export const showNonEditable = 'notebook:not-editable';
+
   export const deleteCell = 'notebook:delete-cell';
 
   export const insertAbove = 'notebook:insert-cell-above';
@@ -2466,6 +2468,8 @@ function activateNotebookHandler(
         | 'global'
         | 'session',
       maxNumberOutputs: settings.get('maxNumberOutputs').composite as number,
+      showLockForReadOnlyCells: settings.get('showLockForReadOnlyCells')
+        .composite as boolean,
       showEditorForReadOnlyMarkdown: settings.get(
         'showEditorForReadOnlyMarkdown'
       ).composite as boolean,
@@ -2944,6 +2948,7 @@ function addCommands(
 
   tracker.selectionChanged.connect(() => {
     commands.notifyCommandChanged(CommandIDs.duplicateBelow);
+    commands.notifyCommandChanged(CommandIDs.showNonEditable);
     commands.notifyCommandChanged(CommandIDs.deleteCell);
     commands.notifyCommandChanged(CommandIDs.copySelectedtext);
     commands.notifyCommandChanged(CommandIDs.pasteText);
@@ -3803,6 +3808,43 @@ function addCommands(
       }
     }
   });
+
+  commands.addCommand(CommandIDs.showNonEditable, {
+    label: trans.__('Not editable Cell'),
+    caption: trans.__('Not editable cell'),
+    execute: async args => {
+      await showDialog({
+        title: trans.__('Not editable Cell'),
+        body: trans.__('This cell is not editable'),
+        buttons: [Dialog.cancelButton()]
+      });
+    },
+    isVisible: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (!current) {
+        return false;
+      }
+      const noteditable =
+        (current.content.activeCell?.model.getMetadata(
+          'editable'
+        ) as unknown as boolean) !== true;
+      const visible = settings?.get('showLockForReadOnlyCells')
+        .composite as boolean;
+      return noteditable && visible;
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether the cell is editable or not')
+          }
+        }
+      }
+    }
+  });
+
   commands.addCommand(CommandIDs.deleteCell, {
     label: args => {
       const current = getCurrent(tracker, shell, { ...args, activate: false });
