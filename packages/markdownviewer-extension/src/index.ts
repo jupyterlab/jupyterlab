@@ -18,6 +18,7 @@ import {
 } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
+import { IEditorTracker } from '@jupyterlab/fileeditor';
 import type { MarkdownDocument } from '@jupyterlab/markdownviewer';
 import {
   IMarkdownViewerTracker,
@@ -32,7 +33,9 @@ import {
 } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITableOfContentsRegistry } from '@jupyterlab/toc';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, type TranslationBundle } from '@jupyterlab/translation';
+import { linkIcon, ToolbarButton } from '@jupyterlab/ui-components';
+import { MarkdownScrollSyncManager } from './scrollsync';
 
 import { markdownViewerSearchProviderFactory } from './searchprovider';
 
@@ -65,7 +68,8 @@ const plugin: JupyterFrontEndPlugin<IMarkdownViewerTracker> = {
     ISettingRegistry,
     ITableOfContentsRegistry,
     ISearchProviderRegistry,
-    ISanitizer
+    ISanitizer,
+    IEditorTracker
   ],
   autoStart: true
 };
@@ -81,7 +85,8 @@ function activate(
   settingRegistry: ISettingRegistry | null,
   tocRegistry: ITableOfContentsRegistry | null,
   searchRegistry: ISearchProviderRegistry | null,
-  sanitizer: IRenderMime.ISanitizer | null
+  sanitizer: IRenderMime.ISanitizer | null,
+  editorTracker: IEditorTracker | null
 ): IMarkdownViewerTracker {
   const trans = translator.load('jupyterlab');
   const { commands, docRegistry } = app;
@@ -102,9 +107,20 @@ function activate(
     );
   }
 
+  const scrollSync = editorTracker
+    ? new MarkdownScrollSyncManager({
+        editorTracker,
+        rendermime
+      })
+    : null;
+
   let config: Partial<MarkdownViewer.IConfig> = {
     ...MarkdownViewer.defaultConfig
   };
+
+  // The setting only seeds new previews; the toolbar button overrides it per
+  // preview.
+  let syncScrollingDefault = false;
 
   /**
    * Update the settings of a widget.
@@ -117,7 +133,15 @@ function activate(
 
   if (settingRegistry) {
     const updateSettings = (settings: ISettingRegistry.ISettings) => {
-      config = settings.composite as Partial<MarkdownViewer.IConfig>;
+      const { syncScrolling, ...viewerConfig } = settings.composite;
+      config = viewerConfig as Partial<MarkdownViewer.IConfig>;
+      const syncByDefault = syncScrolling === true;
+      if (syncByDefault !== syncScrollingDefault) {
+        syncScrollingDefault = syncByDefault;
+        tracker.forEach(widget => {
+          scrollSync?.setEnabled(widget, syncByDefault);
+        });
+      }
       tracker.forEach(widget => {
         updateWidget(widget.content);
       });
@@ -137,6 +161,15 @@ function activate(
       });
   }
 
+  const toolbarFactory = scrollSync
+    ? (widget: MarkdownDocument) => [
+        {
+          name: 'syncScrolling',
+          widget: createSyncScrollingButton(widget, scrollSync, trans)
+        }
+      ]
+    : undefined;
+
   // Register the MarkdownViewer factory.
   const factory = new MarkdownViewerFactory({
     rendermime,
@@ -144,7 +177,8 @@ function activate(
     label: trans.__('Markdown Preview'),
     primaryFileType: docRegistry.getFileType('markdown'),
     fileTypes: ['markdown'],
-    defaultRendered: ['markdown']
+    defaultRendered: ['markdown'],
+    toolbarFactory
   });
   factory.widgetCreated.connect((sender, widget) => {
     // Notify the widget tracker if restore data needs to update.
@@ -153,6 +187,7 @@ function activate(
     });
     // Handle the settings of new widgets.
     updateWidget(widget.content);
+    scrollSync?.setEnabled(widget, syncScrollingDefault);
     // Set data-trust-command attribute
     widget.content.node.setAttribute('data-trust-command', CommandIDs.trust);
     void tracker.add(widget);
@@ -296,6 +331,40 @@ function activate(
   }
 
   return tracker;
+}
+
+/**
+ * Create a toolbar button toggling scroll synchronization for one preview,
+ * without changing the global `syncScrolling` setting.
+ */
+function createSyncScrollingButton(
+  preview: MarkdownDocument,
+  scrollSync: MarkdownScrollSyncManager,
+  trans: TranslationBundle
+): ToolbarButton {
+  const button = new ToolbarButton({
+    icon: linkIcon,
+    className: 'jp-MarkdownViewer-syncButton',
+    pressed: scrollSync.isEnabled(preview),
+    tooltip: trans.__('Synchronize scrolling with the Markdown editor'),
+    pressedTooltip: trans.__(
+      'Stop synchronizing scrolling with the Markdown editor'
+    ),
+    onClick: () => {
+      scrollSync.setEnabled(preview, !scrollSync.isEnabled(preview));
+    }
+  });
+
+  // The setting can toggle the preview too.
+  const onEnabledChanged = () => {
+    button.pressed = scrollSync.isEnabled(preview);
+  };
+  scrollSync.enabledChanged.connect(onEnabledChanged);
+  button.disposed.connect(() => {
+    scrollSync.enabledChanged.disconnect(onEnabledChanged);
+  });
+
+  return button;
 }
 
 /**
