@@ -41,7 +41,7 @@ if [[ $GROUP == python ]]; then
     YARN_ENABLE_IMMUTABLE_INSTALLS=1 jupyter lab build --debug --minimize=False
 
     # Run the python tests
-    python -m pytest -n 3
+    python -m pytest -n 3 --dist loadgroup
 fi
 
 
@@ -75,10 +75,9 @@ if [[ $GROUP == integrity ]]; then
     jlpm integrity --force
     # Validate the project
     jlpm --immutable  --immutable-cache
-    jlpm dlx yarn-berry-deduplicate --strategy fewerHighest
     # Here we should not be stringent as yarn may clean
     # output of `yarn-berry-deduplicate`
-    jlpm
+    jlpm deduplicate
     if [[ "$(git status --porcelain | wc -l | sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//")" != "0" ]]; then
         git status
         git diff
