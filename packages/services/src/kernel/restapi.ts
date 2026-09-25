@@ -59,6 +59,8 @@ export const KERNEL_SERVICE_URL = 'api/kernels';
  *
  * @param settings - The optional server settings.
  *
+ * @param noTrackActivity - Whether to exclude this request from activity tracking.
+ *
  * @returns A promise that resolves with the list of running kernels.
  *
  * #### Notes
@@ -67,9 +69,13 @@ export const KERNEL_SERVICE_URL = 'api/kernels';
  * The promise is fulfilled on a valid response and rejected otherwise.
  */
 export async function listRunning(
-  settings: ServerConnection.ISettings = ServerConnection.makeSettings()
+  settings: ServerConnection.ISettings = ServerConnection.makeSettings(),
+  noTrackActivity = false
 ): Promise<IModel[]> {
-  const url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL);
+  let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL);
+  if (noTrackActivity) {
+    url += URLExt.objectToQueryString({ no_track_activity: '1' });
+  }
   const response = await ServerConnection.makeRequest(url, {}, settings);
   if (response.status !== 200) {
     const err = await ServerConnection.ResponseError.create(response);
@@ -262,6 +268,8 @@ export class KernelAPIClient implements IKernelAPIClient {
   /**
    * List the running kernels.
    *
+   * @param noTrackActivity - Whether to exclude this request from activity tracking.
+   *
    * @returns A promise that resolves with the list of running kernel models.
    *
    * #### Notes
@@ -269,8 +277,8 @@ export class KernelAPIClient implements IKernelAPIClient {
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
-  async listRunning(): Promise<IModel[]> {
-    return listRunning(this.serverSettings);
+  async listRunning(noTrackActivity = false): Promise<IModel[]> {
+    return listRunning(this.serverSettings, noTrackActivity);
   }
 
   /**

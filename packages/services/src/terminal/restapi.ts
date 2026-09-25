@@ -66,13 +66,19 @@ export async function startNew(
  *
  * @param settings - The server settings to use.
  *
+ * @param noTrackActivity - Whether to exclude this request from activity tracking.
+ *
  * @returns A promise that resolves with the list of running session models.
  */
 export async function listRunning(
-  settings: ServerConnection.ISettings = ServerConnection.makeSettings()
+  settings: ServerConnection.ISettings = ServerConnection.makeSettings(),
+  noTrackActivity = false
 ): Promise<IModel[]> {
   Private.errorIfNotAvailable();
-  const url = URLExt.join(settings.baseUrl, TERMINAL_SERVICE_URL);
+  let url = URLExt.join(settings.baseUrl, TERMINAL_SERVICE_URL);
+  if (noTrackActivity) {
+    url += URLExt.objectToQueryString({ no_track_activity: '1' });
+  }
   const response = await ServerConnection.makeRequest(url, {}, settings);
   if (response.status !== 200) {
     const err = await ServerConnection.ResponseError.create(response);
@@ -164,10 +170,12 @@ export class TerminalAPIClient implements ITerminalAPIClient {
   /**
    * List the running terminal sessions.
    *
+   * @param noTrackActivity - Whether to exclude this request from activity tracking.
+   *
    * @returns A promise that resolves with the list of running session models.
    */
-  async listRunning(): Promise<IModel[]> {
-    return listRunning(this.serverSettings);
+  async listRunning(noTrackActivity = false): Promise<IModel[]> {
+    return listRunning(this.serverSettings, noTrackActivity);
   }
 
   /**

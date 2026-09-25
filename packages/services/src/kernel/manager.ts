@@ -283,7 +283,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   protected async requestRunning(): Promise<void> {
     let models: Kernel.IModel[];
     try {
-      models = await this._kernelAPIClient.listRunning();
+      models = await this._kernelAPIClient.listRunning(true);
     } catch (err) {
       // Handle network errors, as well as cases where we are on a
       // JupyterHub and the server is not running. JupyterHub returns a

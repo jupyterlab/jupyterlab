@@ -4,7 +4,7 @@
 import { JupyterServer } from '@jupyterlab/testing';
 import { UUID } from '@lumino/coreutils';
 import type { Session } from '../../src';
-import { SessionAPI } from '../../src';
+import { ServerConnection, SessionAPI } from '../../src';
 import { createSessionModel, getRequestHandler, makeSettings } from '../utils';
 
 describe('session', () => {
@@ -60,6 +60,38 @@ describe('session', () => {
     it('should fail for error response status', async () => {
       const serverSettings = getRequestHandler(500, {});
       await expect(SessionAPI.listRunning(serverSettings)).rejects.toThrow();
+    });
+
+    it('should include no_track_activity=1 when noTrackActivity is true', async () => {
+      let capturedUrl = '';
+      const customFetch = (info: RequestInfo, init?: RequestInit) => {
+        capturedUrl = typeof info === 'string' ? info : info.url;
+        return Promise.resolve(
+          new Response(JSON.stringify([]), { status: 200 })
+        );
+      };
+      const serverSettings = ServerConnection.makeSettings({
+        fetch: customFetch
+      });
+      await SessionAPI.listRunning(serverSettings, true);
+      const url = new URL(capturedUrl);
+      expect(url.searchParams.get('no_track_activity')).toBe('1');
+    });
+
+    it('should not include no_track_activity when noTrackActivity is false', async () => {
+      let capturedUrl = '';
+      const customFetch = (info: RequestInfo, init?: RequestInit) => {
+        capturedUrl = typeof info === 'string' ? info : info.url;
+        return Promise.resolve(
+          new Response(JSON.stringify([]), { status: 200 })
+        );
+      };
+      const serverSettings = ServerConnection.makeSettings({
+        fetch: customFetch
+      });
+      await SessionAPI.listRunning(serverSettings, false);
+      const url = new URL(capturedUrl);
+      expect(url.searchParams.get('no_track_activity')).toBeNull();
     });
   });
 
