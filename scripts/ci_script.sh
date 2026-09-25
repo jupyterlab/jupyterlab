@@ -75,7 +75,8 @@ if [[ $GROUP == integrity ]]; then
     jlpm integrity --force
     # Validate the project
     jlpm --immutable  --immutable-cache
-    jlpm dlx yarn-berry-deduplicate --strategy fewerHighest
+    # Pin @yarnpkg/core: 4.9.2 fails to install (yarnpkg/berry#7249)
+    npx -y -p yarn-berry-deduplicate@6.1.3 -p @yarnpkg/core@4.9.1 yarn-berry-deduplicate --strategy fewerHighest
     # Here we should not be stringent as yarn may clean
     # output of `yarn-berry-deduplicate`
     jlpm
