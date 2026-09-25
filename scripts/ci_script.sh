@@ -41,7 +41,7 @@ if [[ $GROUP == python ]]; then
     YARN_ENABLE_IMMUTABLE_INSTALLS=1 jupyter lab build --debug --minimize=False
 
     # Run the python tests
-    python -m pytest -n 3
+    python -m pytest -n 3 --dist loadgroup
 fi
 
 
