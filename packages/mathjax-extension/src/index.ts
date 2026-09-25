@@ -17,7 +17,7 @@ import type { IRenderMime } from '@jupyterlab/rendermime';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
-import type { MathDocument } from 'mathjax-full/js/core/MathDocument';
+import type { MathDocument } from '@mathjax/src/mjs/core/MathDocument.js';
 
 namespace CommandIDs {
   /**
@@ -107,17 +107,19 @@ export class MathJaxTypesetter implements ILatexTypesetter {
       return;
     }
 
-    this._mathDocument.options.elements = [node];
-    // `clear()` empties the document's math list before rendering, so that
-    // memory retained per math expression (most notably the compiled internal
-    // MathML tree) is bounded by the last typeset call rather than growing
-    // with the total amount of math on the page.
-    // This is also why we need to store the sources manually -
-    // we cannot extract them from MathJax state after `clear()`.
-    this._mathDocument.clear().render();
-    delete this._mathDocument.options.elements;
-    Private.recordTexSources(this._mathDocument);
-    Private.hardenAnchorLinks(node);
+    await this._mathDocument.whenReady(async () => {
+      this._mathDocument.options.elements = [node];
+      // Keep only the most recently rendered math items; sources for earlier
+      // expressions are retained separately for the copy command.
+      this._mathDocument.clear();
+      try {
+        await this._mathDocument.renderPromise();
+        Private.recordTexSources(this._mathDocument);
+        Private.hardenAnchorLinks(node);
+      } finally {
+        delete this._mathDocument.options.elements;
+      }
+    });
   }
 
   protected _initialized: boolean = false;
@@ -184,16 +186,18 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
         // the scale so that documents created later inherit it too.
         Private.setScale(scale);
         for (const md of await Private.getMathDocuments()) {
-          md.outputJax.options.scale = scale;
-          md.rerender();
+          await md.whenReady(async () => {
+            md.outputJax.options.scale = scale;
+            await md.rerenderPromise();
+            Private.recordTexSources(md);
 
-          // Harden only the re-rendered anchors
-          for (const math of md.math) {
-            const root = math.typesetRoot as HTMLElement | null;
-            if (root) {
-              Private.hardenAnchorLinks(root);
+            for (const math of md.math) {
+              const root = math.typesetRoot as HTMLElement | null;
+              if (root) {
+                Private.hardenAnchorLinks(root);
+              }
             }
-          }
+          });
         }
       },
       label: args =>
@@ -265,35 +269,45 @@ namespace Private {
    * inferred so no MathJax types need to be imported explicitly.
    */
   async function loadModules() {
-    void import('mathjax-full/js/input/tex/require/RequireConfiguration');
-
     const [
       { mathjax },
       { CHTML },
       { TeX },
-      { TeXFont },
-      { AllPackages },
+      { MathJaxTexFont },
+      { TEX_PACKAGES },
       { SafeHandler },
       { HTMLHandler },
       { browserAdaptor },
       { AssistiveMmlHandler }
     ] = await Promise.all([
-      import('mathjax-full/js/mathjax'),
-      import('mathjax-full/js/output/chtml'),
-      import('mathjax-full/js/input/tex'),
-      import('mathjax-full/js/output/chtml/fonts/tex'),
-      import('mathjax-full/js/input/tex/AllPackages'),
-      import('mathjax-full/js/ui/safe/SafeHandler'),
-      import('mathjax-full/js/handlers/html/HTMLHandler'),
-      import('mathjax-full/js/adaptors/browserAdaptor'),
-      import('mathjax-full/js/a11y/assistive-mml')
+      import('@mathjax/src/mjs/mathjax.js'),
+      import('@mathjax/src/mjs/output/chtml.js'),
+      import('@mathjax/src/mjs/input/tex.js'),
+      import('@mathjax/mathjax-tex-font/mjs/chtml.js'),
+      import('./tex'),
+      import('@mathjax/src/mjs/ui/safe/SafeHandler.js'),
+      import('@mathjax/src/mjs/handlers/html/HTMLHandler.js'),
+      import('@mathjax/src/mjs/adaptors/browserAdaptor.js'),
+      import('@mathjax/src/mjs/a11y/assistive-mml.js')
     ]);
 
     mathjax.handlers.register(
       AssistiveMmlHandler(SafeHandler(new HTMLHandler(browserAdaptor())))
     );
 
-    return { mathjax, CHTML, TeX, TeXFont, AllPackages };
+    class LocalFont extends MathJaxTexFont {
+      static addFontURLs(): void {
+        // Font faces are bundled through fonts.css.
+      }
+    }
+
+    // Share the output jax so delimiter configurations use the same stylesheet.
+    const chtml = new CHTML({ fontData: new LocalFont() });
+    if (_scale !== null) {
+      chtml.options.scale = _scale;
+    }
+
+    return { mathjax, chtml, TeX, TEX_PACKAGES };
   }
 
   let _loading: ReturnType<typeof loadModules> | null = null;
@@ -388,23 +402,10 @@ namespace Private {
   async function createMathDocument(
     inlineMath: [string, string][]
   ): Promise<MathDocument<any, any, any>> {
-    const { mathjax, CHTML, TeX, TeXFont, AllPackages } =
-      await ensureMathModules();
-
-    class EmptyFont extends TeXFont {
-      protected static defaultFonts = {} as any;
-    }
-
-    const chtml = new CHTML({
-      // Override dynamically generated fonts in favor of our font css
-      font: new EmptyFont()
-    });
-    if (_scale !== null) {
-      chtml.options.scale = _scale;
-    }
+    const { mathjax, chtml, TeX, TEX_PACKAGES } = await ensureMathModules();
 
     const tex = new TeX({
-      packages: AllPackages.concat('require'),
+      packages: TEX_PACKAGES,
       inlineMath,
       displayMath: [
         ['$$', '$$'],
