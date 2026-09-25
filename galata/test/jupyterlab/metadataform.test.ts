@@ -746,7 +746,7 @@ test.describe('Advanced tools', () => {
       .click();
 
     // Close the sidebar
-    await page.locator('[title="Property Inspector"]').click();
+    await page.sidebar.close('right');
     // Reopen the sidebar
     await activatePropertyInspector(page);
 

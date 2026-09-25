@@ -130,6 +130,7 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     }
   },
   {
+    // eslint-disable-next-line jupyter/plugin-id-convention -- Preserve the published ID used by plugin-level configuration.
     id: '@jupyterlab/json-lines-extension:factory',
     description: 'Adds renderer for JSONLines content.',
     rendererFactory,
