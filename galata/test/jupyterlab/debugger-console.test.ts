@@ -16,43 +16,55 @@ async function setupDebuggerConsole(
   tmpPath: string
 ) {
   // Open a notebook which has code setting variables to debug
-  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+  expect(
+    await page.contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${fileName}`),
+      `${tmpPath}/${fileName}`
+    )
+  ).toBe(true);
+  expect(await page.notebook.openByPath(`${tmpPath}/${fileName}`)).toBe(true);
+  expect(await page.notebook.activate(fileName)).toBe(true);
 
   // Wait for kernel to be ready
   await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 
-  // Enable debugger
-  await page.debugger.switchOn();
-  await page.waitForCondition(() => page.debugger.isOpen());
+  // Enable debugger for the opened notebook
+  await page.debugger.switchOn(fileName);
+  await page.sidebar.openTab('jp-debugger-sidebar');
+  expect(await page.notebook.activate(fileName)).toBe(true);
 
-  // Set a breakpoint on line 2 (the x = 42 line)
-  await page.notebook.waitForCellGutter(0);
-  await page.notebook.clickCellGutter(0, 5);
+  // Set a breakpoint after local variables are initialized.
+  await page.notebook.waitForCellGutter(0, fileName);
+  expect(await page.notebook.clickCellGutter(0, 5, fileName)).toBe(true);
 
   // Wait for breakpoint to be set
   await page.debugger.waitForBreakPoints();
 
   // Run the cell (non-blocking) to hit the breakpoint
-  await page.notebook.runCell(0, { wait: false });
+  expect(await page.notebook.runCell(0, { inplace: true, wait: false })).toBe(
+    true
+  );
 
   // Wait for the debugger to stop at the breakpoint
   await page.debugger.waitForCallStack();
 
-  // Try to wait for variables, but don't fail if they don't appear
-  try {
-    await page.debugger.waitForVariables();
-  } catch (error) {
-    console.warn('Variables not loaded, continuing with test:', error);
-  }
+  await page.debugger.waitForVariables();
+  await page.getByLabel('Scope').selectOption('Locals');
+  await page
+    .getByRole('treeitem', { name: 'user_count:' })
+    .waitFor({ state: 'visible' });
 
   // Click the evaluate button in the callstack toolbar to open the debug console
   const evaluateButton = page.locator('jp-button[title*="Evaluate"]');
   await evaluateButton.click();
   await page.locator(DEBUG_CONSOLE_SELECTOR).waitFor({ state: 'visible' });
+  await page
+    .locator(DEBUG_CONSOLE_WIDGET_SELECTOR)
+    .locator('.jp-CodeConsole-promptCell')
+    .waitFor({ state: 'visible' });
 }
 
-test.describe('Debugger Console', () => {
-  test.use({ tmpPath: 'test-debugger-console' });
+test.describe.serial('Debugger Console', () => {
   test.use({
     mockSettings: {
       ...galata.DEFAULT_SETTINGS,
@@ -62,14 +74,6 @@ test.describe('Debugger Console', () => {
         providerTimeout: 60000
       }
     }
-  });
-
-  test.beforeAll(async ({ tmpPath, request }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.uploadFile(
-      path.resolve(__dirname, `./notebooks/${fileName}`),
-      `${tmpPath}/${fileName}`
-    );
   });
 
   test.beforeEach(async ({ page, tmpPath }) => {
@@ -87,10 +91,20 @@ test.describe('Debugger Console', () => {
       await button!.locator('[aria-pressed="true"]').waitFor();
     }
 
+    await page.evaluate(async () => {
+      const debuggerService = await window.galata.getPlugin(
+        '@jupyterlab/debugger-extension:service'
+      );
+      if (debuggerService?.hasStoppedThreads()) {
+        await debuggerService.continue();
+      }
+    });
+
     try {
       // Try to switch off debugger if it's still active
-      if (await page.debugger.isOn()) {
-        await page.debugger.switchOff();
+      if (await page.debugger.isOn(fileName)) {
+        expect(await page.notebook.activate(fileName)).toBe(true);
+        await page.debugger.switchOff(fileName);
         // eslint-disable-next-line playwright/no-wait-for-timeout
         await page.waitForTimeout(500);
       }
@@ -121,9 +135,7 @@ test.describe('Debugger Console', () => {
 
     // Click the evaluate button to close the console
     await evaluateButton.click();
-
-    // Verify the console is now closed
-    await expect(debugConsole).not.toBeVisible();
+    await expect(debugConsole).toBeHidden();
 
     // Click the evaluate button again to reopen the console
     await evaluateButton.click();
