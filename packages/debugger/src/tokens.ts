@@ -237,9 +237,6 @@ export interface IDebugger {
   restoreDebuggerState(state: IDebugger.State): Promise<boolean>;
 }
 
-/**
- * A namespace for visual debugger types.
- */
 export namespace IDebugger {
   /**
    * The type for a source file.

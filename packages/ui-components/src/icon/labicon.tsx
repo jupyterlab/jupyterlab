@@ -91,17 +91,17 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * If both icon and iconClass are undefined, this function will return
    * an empty div.
    *
-   * @param icon - optional, either a string with the name of an existing icon
-   * or an object with \{name: string, svgstr: string\} fields
+   * @param options - The icon and rendering options. Additional properties are
+   * passed through to the element method of the resolved icon on render.
    *
-   * @param iconClass - optional, if the icon arg is not set, the iconClass arg
-   * should be a CSS class associated with an existing CSS background-image
+   * - `icon`: optional, either a string with the name of an existing icon
+   *   or an object with \{name: string, svgstr: string\} fields
    *
-   * @param fallback - DEPRECATED, optional, a LabIcon instance that will
-   * be used if neither icon nor iconClass are defined
+   * - `iconClass`: optional, if the icon arg is not set, the iconClass arg
+   *   should be a CSS class associated with an existing CSS background-image
    *
-   * @param props - any additional args are passed though to the element method
-   * of the resolved icon on render
+   * - `fallback`: DEPRECATED, optional, a LabIcon instance that will
+   *   be used if neither icon nor iconClass are defined
    *
    * @returns a DOM node with the resolved icon rendered into it
    */
@@ -133,17 +133,17 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * If both icon and iconClass are undefined, the returned component
    * will simply render an empty div.
    *
-   * @param icon - optional, either a string with the name of an existing icon
-   * or an object with \{name: string, svgstr: string\} fields
+   * @param options - The icon and rendering options. Additional properties are
+   * passed through to the React component of the resolved icon on render.
    *
-   * @param iconClass - optional, if the icon arg is not set, the iconClass arg
-   * should be a CSS class associated with an existing CSS background-image
+   * - `icon`: optional, either a string with the name of an existing icon
+   *   or an object with \{name: string, svgstr: string\} fields
    *
-   * @param fallback - DEPRECATED, optional, a LabIcon instance that will
-   * be used if neither icon nor iconClass are defined
+   * - `iconClass`: optional, if the icon arg is not set, the iconClass arg
+   *   should be a CSS class associated with an existing CSS background-image
    *
-   * @param props - any additional args are passed though to the React component
-   * of the resolved icon on render
+   * - `fallback`: DEPRECATED, optional, a LabIcon instance that will
+   *   be used if neither icon nor iconClass are defined
    *
    * @returns a React component that will render the resolved icon
    */
@@ -267,7 +267,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   /**
    * Get a view of this icon that is bound to the specified icon/style props
    *
-   * @param optional icon/style props (same as args for .element
+   * @param props - Optional icon/style props (same as args for .element
    * and .react methods). These will be bound to the resulting view
    *
    * @returns a view of this LabIcon instance
@@ -282,35 +282,35 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   /**
    * Create an icon as a DOM element
    *
-   * @param className - a string that will be used as the class
-   * of the container element. Overrides any existing class
+   * @param props - The icon and style properties. Additional CSS properties
+   * override the styles applied to the inner SVG element.
    *
-   * @param container - a preexisting DOM element that
-   * will be used as the container for the svg element
+   * - `className`: a string that will be used as the class
+   *   of the container element. Overrides any existing class
    *
-   * @param label - text that will be displayed adjacent
-   * to the icon
+   * - `container`: a preexisting DOM element that
+   *   will be used as the container for the svg element
    *
-   * @param title - a tooltip for the icon
+   * - `label`: text that will be displayed adjacent
+   *   to the icon
    *
-   * @param tag - if container is not explicitly
-   * provided, this tag will be used when creating the container
+   * - `title`: a tooltip for the icon
    *
-   * @param stylesheet - optional string naming a builtin icon
-   * stylesheet, for example 'menuItem' or `statusBar`. Can also be an
-   * object defining a custom icon stylesheet, or a list of builtin
-   * stylesheet names and/or custom stylesheet objects. If array,
-   * the given stylesheets will be merged.
+   * - `tag`: if container is not explicitly
+   *   provided, this tag will be used when creating the container
    *
-   *   See @jupyterlab/ui-components/src/style/icon.ts for details
+   * - `stylesheet`: optional string naming a builtin icon
+   *   stylesheet, for example 'menuItem' or `statusBar`. Can also be an
+   *   object defining a custom icon stylesheet, or a list of builtin
+   *   stylesheet names and/or custom stylesheet objects. If array,
+   *   the given stylesheets will be merged.
    *
-   * @param elementPosition - optional position for the inner svg element
+   *     See `@jupyterlab/ui-components/src/style/icon.ts` for details
    *
-   * @param elementSize - optional size for the inner svg element.
-   * Set to 'normal' to get a standard 16px x 16px icon
+   * - `elementPosition`: optional position for the inner svg element
    *
-   * @param ...elementCSS - all additional args are treated as
-   * overrides for the CSS props applied to the inner svg element
+   * - `elementSize`: optional size for the inner svg element.
+   *   Set to 'normal' to get a standard 16px x 16px icon
    *
    * @returns A DOM element that contains an (inline) svg element
    * that displays an icon

@@ -1064,7 +1064,7 @@ export namespace Completer {
      * Resolving item by index will be deprecated in
      * the next major release.
      *
-     * @return Return `undefined` if the completion item with {@link activeIndex} index can not be found.
+     * @return Return `undefined` if the completion item with `activeIndex` index can not be found.
      *  Return a promise of `null` if another {@link resolveItem} is called. Otherwise return the
      * promise of resolved completion item.
      */

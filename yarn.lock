@@ -1843,14 +1843,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gerrit0/mini-shiki@npm:^1.24.0":
-  version: 1.24.2
-  resolution: "@gerrit0/mini-shiki@npm:1.24.2"
+"@gerrit0/mini-shiki@npm:^3.23.0":
+  version: 3.23.0
+  resolution: "@gerrit0/mini-shiki@npm:3.23.0"
   dependencies:
-    "@shikijs/engine-oniguruma": ^1.24.1
-    "@shikijs/types": ^1.24.1
-    "@shikijs/vscode-textmate": ^9.3.0
-  checksum: a37a11113da6e00f52339b153f818fbae7c1f0bb1a732ccbb7a039b0372905ab794d5be5a61a47e7aac3abbd476d3c59e0b4681f0645261277c03aba293d7653
+    "@shikijs/engine-oniguruma": ^3.23.0
+    "@shikijs/langs": ^3.23.0
+    "@shikijs/themes": ^3.23.0
+    "@shikijs/types": ^3.23.0
+    "@shikijs/vscode-textmate": ^10.0.2
+  checksum: 197d54e0699f205ac9a7169bb3887c749bbc5d77a2bfc91ad4ace77ed6a1276feb281623713d2e6df5aed1946b1ff4cbacc1ed392d2a6d3e8abc8e381a75bb86
   languageName: node
   linkType: hard
 
@@ -4733,8 +4735,8 @@ __metadata:
     stylelint-csstree-validator: ^4.0.0
     stylelint-declaration-strict-value: ^1.11.1
     stylelint-prettier: ^5.0.3
-    typedoc: ~0.27.4
-    typedoc-plugin-mdn-links: ^4.0.4
+    typedoc: ~0.28.13
+    typedoc-plugin-mdn-links: ^5.1.1
     typescript-eslint: ^8.0.0
   languageName: unknown
   linkType: soft
@@ -6642,30 +6644,48 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@shikijs/engine-oniguruma@npm:^1.24.1":
-  version: 1.24.2
-  resolution: "@shikijs/engine-oniguruma@npm:1.24.2"
+"@shikijs/engine-oniguruma@npm:^3.23.0":
+  version: 3.23.0
+  resolution: "@shikijs/engine-oniguruma@npm:3.23.0"
   dependencies:
-    "@shikijs/types": 1.24.2
-    "@shikijs/vscode-textmate": ^9.3.0
-  checksum: 5345cd2580a8c124ba3bf4decf31d0a176074902302f9b0d3d16dd2732d15105dbb213d152868cea803a855e777ad6d64e821e0ea76d1eb6bc7922a076535b89
+    "@shikijs/types": 3.23.0
+    "@shikijs/vscode-textmate": ^10.0.2
+  checksum: 5aa631ab41149241118262e28f2deb9d37c3384d32251ecef868cd71a03f5e6b85103c31ac331741ecb24734d20329487cba40a3af8bd22485b3f696770d6226
   languageName: node
   linkType: hard
 
-"@shikijs/types@npm:1.24.2, @shikijs/types@npm:^1.24.1":
-  version: 1.24.2
-  resolution: "@shikijs/types@npm:1.24.2"
+"@shikijs/langs@npm:^3.23.0":
+  version: 3.23.0
+  resolution: "@shikijs/langs@npm:3.23.0"
   dependencies:
-    "@shikijs/vscode-textmate": ^9.3.0
+    "@shikijs/types": 3.23.0
+  checksum: 0b96f5c7c5760fad5f9be6250a9d2fcca4c9dc5f406c6c05bc620869b73467ab1bfd93e7c0ed7c0ad9d51e5b57238f73cfbcb5c6eb9ea064b4f38112dd490696
+  languageName: node
+  linkType: hard
+
+"@shikijs/themes@npm:^3.23.0":
+  version: 3.23.0
+  resolution: "@shikijs/themes@npm:3.23.0"
+  dependencies:
+    "@shikijs/types": 3.23.0
+  checksum: 997ad314204386b59362c82004c43656af4d4190ee0811710f7bdce5b6387e30b449193fc6a3e0d1c72b0b09b1ec5a03d0aeb7edacb834bee133125edc2d714f
+  languageName: node
+  linkType: hard
+
+"@shikijs/types@npm:3.23.0, @shikijs/types@npm:^3.23.0":
+  version: 3.23.0
+  resolution: "@shikijs/types@npm:3.23.0"
+  dependencies:
+    "@shikijs/vscode-textmate": ^10.0.2
     "@types/hast": ^3.0.4
-  checksum: 1fd1c5bd97f19ff0b10aab3a55dcdd8fa8ef49ec50cdb9b2d62d4bf5c8cb69bd64b6bc55289340625019b5601a27c932b70d8ec2a0d842e09ca939c5942ba6b1
+  checksum: 261a2c0b815f640f89e8e312e3ed1044c8c693053ef2096966b5c682ff0fd0694099006e9b6c245971ada4bdb720f610ca393074f5e1ee74de6fc8b2b6f91ff2
   languageName: node
   linkType: hard
 
-"@shikijs/vscode-textmate@npm:^9.3.0":
-  version: 9.3.0
-  resolution: "@shikijs/vscode-textmate@npm:9.3.0"
-  checksum: 6635b4f41f958db502545d7c55cb51b803986cff38402963404cfd725449dc6ad760b6c342e916fc620f998b67baa23bea52299d379f20837fc47af9271d601d
+"@shikijs/vscode-textmate@npm:^10.0.2":
+  version: 10.0.2
+  resolution: "@shikijs/vscode-textmate@npm:10.0.2"
+  checksum: e68f27a3dc1584d7414b8acafb9c177a2181eb0b06ef178d8609142f49d28d85fd10ab129affde40a45a7d9238997e457ce47931b3a3815980e2b98b2d26724c
   languageName: node
   linkType: hard
 
@@ -9289,12 +9309,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"brace-expansion@npm:^5.0.2":
-  version: 5.0.6
-  resolution: "brace-expansion@npm:5.0.6"
+"brace-expansion@npm:^5.0.8":
+  version: 5.0.12
+  resolution: "brace-expansion@npm:5.0.12"
   dependencies:
     balanced-match: ^4.0.2
-  checksum: b5a0e54a5d5f66d0acb88f297e1f3e74732f9c8a35ab6c87b96bd60f6e390697f099b747dd053b9017bd1a38225ff3f60632de09a723a99f2144740b7fbda66b
+  checksum: eed95008709cb43e41945d4a4c0427a859ddaa798880bdd36497a719b1487fd9481afaa14f202c232a594a27c21f5c0de196a37994a6e6eed4f680913d5363d3
   languageName: node
   linkType: hard
 
@@ -11682,10 +11702,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"entities@npm:^4.2.0, entities@npm:^4.3.0, entities@npm:^4.4.0":
-  version: 4.4.0
-  resolution: "entities@npm:4.4.0"
-  checksum: 84d250329f4b56b40fa93ed067b194db21e8815e4eb9b59f43a086f0ecd342814f6bc483de8a77da5d64e0f626033192b1b4f1792232a7ea6b970ebe0f3187c2
+"entities@npm:^4.2.0, entities@npm:^4.3.0, entities@npm:^4.4.0, entities@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "entities@npm:4.5.0"
+  checksum: 853f8ebd5b425d350bffa97dd6958143179a5938352ccae092c62d1267c4e392a039be1bae7d51b6e4ffad25f51f9617531fedf5237f15df302ccfb452cbf2d7
   languageName: node
   linkType: hard
 
@@ -15575,7 +15595,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"linkify-it@npm:^5.0.1":
+"linkify-it@npm:^5.0.2":
   version: 5.0.2
   resolution: "linkify-it@npm:5.0.2"
   dependencies:
@@ -15970,19 +15990,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"markdown-it@npm:^14.1.0":
-  version: 14.2.0
-  resolution: "markdown-it@npm:14.2.0"
+"markdown-it@npm:^14.3.0":
+  version: 14.3.2
+  resolution: "markdown-it@npm:14.3.2"
   dependencies:
     argparse: ^2.0.1
-    entities: ^4.4.0
-    linkify-it: ^5.0.1
+    entities: ^4.5.0
+    linkify-it: ^5.0.2
     mdurl: ^2.0.0
     punycode.js: ^2.3.1
     uc.micro: ^2.1.0
   bin:
     markdown-it: bin/markdown-it.mjs
-  checksum: 693269ccf502a461f13ffed54f6d47c05e1a2ceb0c31bfb0edcba5e54cb1e6000444b712fab1857493e43cfdded5d5d91f05dcb63a4db7a6990788340266b749
+  checksum: 50e9de12e1dea0c108a85c51fc049324fbbc434a0f1bad916b701430917a91b68bd2420942797154cad8e27bc79ea38168beab727e70361da80b97013b0d75e0
   languageName: node
   linkType: hard
 
@@ -16281,12 +16301,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:^10.2.2":
-  version: 10.2.4
-  resolution: "minimatch@npm:10.2.4"
+"minimatch@npm:^10.2.2, minimatch@npm:^10.2.5":
+  version: 10.2.6
+  resolution: "minimatch@npm:10.2.6"
   dependencies:
-    brace-expansion: ^5.0.2
-  checksum: 56dce6b04c6b30b500d81d7a29822c108b7d58c46696ec7332d04a2bd104a5cb69e5c7ce93e1783dc66d61400d831e6e226ca101ac23665aff32ca303619dc3d
+    brace-expansion: ^5.0.8
+  checksum: 6f3d0ba7654a6d667dc1787a3684192d65e130cbcf02c1b0cf0d0b2f7f69ab41703d4d255dc171632dc25994527a35fb6ea7d44cc6132e4d93de5a2efb210bd1
   languageName: node
   linkType: hard
 
@@ -16317,7 +16337,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:^9.0.0, minimatch@npm:^9.0.1, minimatch@npm:^9.0.5":
+"minimatch@npm:^9.0.0, minimatch@npm:^9.0.1":
   version: 9.0.5
   resolution: "minimatch@npm:9.0.5"
   dependencies:
@@ -20583,29 +20603,29 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typedoc-plugin-mdn-links@npm:^4.0.4":
-  version: 4.0.4
-  resolution: "typedoc-plugin-mdn-links@npm:4.0.4"
+"typedoc-plugin-mdn-links@npm:^5.1.1":
+  version: 5.1.1
+  resolution: "typedoc-plugin-mdn-links@npm:5.1.1"
   peerDependencies:
-    typedoc: 0.26.x || 0.27.x
-  checksum: e0d9120c1fd620a6970fbd4598ef8af3a7664621ba59e82c94538f8725624a0df04cd6d88c1a7f96f0f2fc1fdbae411a9bfd9795b98db423a51f24c39aa3abdb
+    typedoc: 0.27.x || 0.28.x
+  checksum: b41e35a126633c00154c6bda03fb8db4e15a8d1a5eceed122586c420fbe426e81a59ba12b2c9eae82aeb0c2f54bb2b1609745da0e8e3a16aa54abf62aa9e5505
   languageName: node
   linkType: hard
 
-"typedoc@npm:~0.27.4":
-  version: 0.27.4
-  resolution: "typedoc@npm:0.27.4"
+"typedoc@npm:~0.28.13":
+  version: 0.28.20
+  resolution: "typedoc@npm:0.28.20"
   dependencies:
-    "@gerrit0/mini-shiki": ^1.24.0
+    "@gerrit0/mini-shiki": ^3.23.0
     lunr: ^2.3.9
-    markdown-it: ^14.1.0
-    minimatch: ^9.0.5
-    yaml: ^2.6.1
+    markdown-it: ^14.3.0
+    minimatch: ^10.2.5
+    yaml: ^2.9.0
   peerDependencies:
-    typescript: 5.0.x || 5.1.x || 5.2.x || 5.3.x || 5.4.x || 5.5.x || 5.6.x || 5.7.x
+    typescript: 5.0.x || 5.1.x || 5.2.x || 5.3.x || 5.4.x || 5.5.x || 5.6.x || 5.7.x || 5.8.x || 5.9.x || 6.0.x
   bin:
     typedoc: bin/typedoc
-  checksum: d95fce13f35394eef23cefa37cd70901415e85fc9f6ebffc7d4682ad9c9f1125074305d856849c9b631782144f977a4818e6ab77236c86dce3643a5a621d92c5
+  checksum: d9f6b5d0427963615aef78f4687b7aa89002438ecd945c3977b4373f383aebca0c90f76c83fb2904c94f5d21b08ecc3b3f9521bd0553d533cb687d26b2ff969b
   languageName: node
   linkType: hard
 
@@ -22043,12 +22063,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yaml@npm:^2.6.1":
-  version: 2.6.1
-  resolution: "yaml@npm:2.6.1"
+"yaml@npm:^2.9.0":
+  version: 2.9.1
+  resolution: "yaml@npm:2.9.1"
   bin:
     yaml: bin.mjs
-  checksum: 5cf2627f121dcf04ccdebce8e6cbac7c9983d465c4eab314f6fbdc13cda8a07f4e8f9c2252a382b30bcabe05ee3c683647293afd52eb37cbcefbdc7b6ebde9ee
+  checksum: 583253ce0075cc1b7a4328116380ae2a97d6feb62677ba5d52f7cb774de6e34f1d9e655aaa536347ced55fcaede020253212d1c60c98fc672d43be23ebfcd862
   languageName: node
   linkType: hard
 

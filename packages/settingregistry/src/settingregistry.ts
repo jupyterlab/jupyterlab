@@ -98,28 +98,28 @@ export namespace ISchemaValidator {
     schemaPath: string;
 
     /**
-     * @todo handle new fields from ajv8
-     **/
+     * The schema value for the failing keyword, when verbose errors are enabled.
+     */
     schema?: unknown;
 
     /**
-     * @todo handle new fields from ajv8
-     **/
+     * The JSON pointer to the part of the data that failed validation.
+     */
     instancePath: string;
 
     /**
-     * @todo handle new fields from ajv8
-     **/
+     * The property name that failed the `propertyNames` keyword.
+     */
     propertyName?: string;
 
     /**
-     * @todo handle new fields from ajv8
-     **/
+     * The data that failed validation, when verbose errors are enabled.
+     */
     data?: unknown;
 
     /**
-     * @todo handle new fields from ajv8
-     **/
+     * The schema containing the failing keyword, when verbose errors are enabled.
+     */
     parentSchema?: unknown;
   }
 }

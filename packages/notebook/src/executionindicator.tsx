@@ -193,7 +193,7 @@ export function ExecutionIndicatorComponent(
 /**
  * A namespace for ExecutionIndicatorComponent statics.
  */
-namespace ExecutionIndicatorComponent {
+export namespace ExecutionIndicatorComponent {
   /**
    * Props for the execution status component.
    */
@@ -201,7 +201,7 @@ namespace ExecutionIndicatorComponent {
     /**
      * Display option for progress bar and elapsed time.
      */
-    displayOption: Private.DisplayOption;
+    displayOption: ExecutionIndicator.DisplayOption;
 
     /**
      * Execution state of selected notebook.
@@ -285,6 +285,24 @@ export class ExecutionIndicator extends VDomRenderer<ExecutionIndicator.Model> {
  * A namespace for ExecutionIndicator statics.
  */
 export namespace ExecutionIndicator {
+  export type DisplayOption = {
+    /**
+     * The option to show the indicator on status bar or toolbar.
+     */
+    showOnToolBar: boolean;
+
+    /**
+     * The option to show the execution progress inside kernel
+     * status circle.
+     */
+    showProgress: boolean;
+    /**
+     * The option to show the jump to most recently executed/executing cell button
+     * inside the tooltip
+     */
+    showJumpToCell: boolean;
+  };
+
   /**
    * Execution state of a notebook.
    */
@@ -475,7 +493,7 @@ export namespace ExecutionIndicator {
     /**
      * The display options for progress bar and elapsed time.
      */
-    get displayOption(): Private.DisplayOption {
+    get displayOption(): ExecutionIndicator.DisplayOption {
       return this._displayOption;
     }
 
@@ -484,7 +502,7 @@ export namespace ExecutionIndicator {
      *
      * @param options - Options to be used
      */
-    set displayOption(options: Private.DisplayOption) {
+    set displayOption(options: ExecutionIndicator.DisplayOption) {
       this._displayOption = options;
     }
 
@@ -659,7 +677,7 @@ export namespace ExecutionIndicator {
     /**
      * The option to show the indicator on status bar or toolbar.
      */
-    private _displayOption: Private.DisplayOption;
+    private _displayOption: ExecutionIndicator.DisplayOption;
 
     /**
      * Current activated notebook.
@@ -747,27 +765,4 @@ export namespace ExecutionIndicator {
 
     return { showOnToolBar, showProgress, showJumpToCell };
   }
-}
-
-/**
- * A namespace for module-private data.
- */
-namespace Private {
-  export type DisplayOption = {
-    /**
-     * The option to show the indicator on status bar or toolbar.
-     */
-    showOnToolBar: boolean;
-
-    /**
-     * The option to show the execution progress inside kernel
-     * status circle.
-     */
-    showProgress: boolean;
-    /**
-     * The option to show the jump to most recently executed/executing cell button
-     * inside the tooltip
-     */
-    showJumpToCell: boolean;
-  };
 }

@@ -8,7 +8,7 @@ import type { Widget } from '@lumino/widgets';
 /**
  * Options when add a command to a semantic group.
  */
-interface ISemanticCommand {
+export interface ISemanticCommand {
   /**
    * Command id
    */

@@ -23,9 +23,6 @@ export interface IInspector {
   source: IInspector.IInspectable | null;
 }
 
-/**
- * A namespace for inspector interfaces.
- */
 export namespace IInspector {
   /**
    * The definition of an inspectable source.

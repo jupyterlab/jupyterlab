@@ -309,9 +309,6 @@ export interface IInlineCompleterFactory {
   factory(options: IInlineCompleterFactory.IOptions): InlineCompleter;
 }
 
-/**
- * A namespace for inline completer factory statics.
- */
 export namespace IInlineCompleterFactory {
   /**
    * The subset of inline completer widget initialization options provided to the factory.
