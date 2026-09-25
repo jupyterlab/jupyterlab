@@ -108,6 +108,22 @@ export namespace ServerConnection {
      * Serializer used to serialize/deserialize kernel messages.
      */
     readonly serializer: ISerializer;
+
+    /**
+     * Additional HTTP headers to include in every request to the server.
+     *
+     * #### Notes
+     * These headers are merged into each request before the automatic
+     * `Authorization` and `X-XSRFToken` headers are applied.  If a key
+     * in `requestHeaders` conflicts with one of those two auth headers,
+     * the value in `requestHeaders` wins and the automatic injection is
+     * skipped (consistent with the existing guard-clause behaviour on
+     * lines 318 / 326).
+     *
+     * Custom headers supplied at the call-site via the `init` argument
+     * of `makeRequest` take precedence over `requestHeaders`.
+     */
+    readonly requestHeaders?: Record<string, string>;
   }
 
   /**
@@ -268,6 +284,7 @@ namespace Private {
       appUrl: PageConfig.getOption('appUrl'),
       appendToken,
       serializer: { serialize, deserialize },
+      requestHeaders: {},
       ...options,
       baseUrl,
       wsUrl
@@ -307,18 +324,36 @@ namespace Private {
 
     const request = new settings.Request(url, { ...settings.init, ...init });
 
+    // Apply any custom headers configured on the settings object before
+    // the automatic auth headers so that callers can still override them
+    // via the per-request `init` argument (#5333).
+    if (settings.requestHeaders) {
+      for (const [key, value] of Object.entries(settings.requestHeaders)) {
+        if (!request.headers.has(key)) {
+          request.headers.set(key, value);
+        }
+      }
+    }
+
     // Handle authentication. Authentication can be overdetermined by
     // settings token and XSRF token.
+    // Only inject these if the caller has not already supplied a value,
+    // so that custom headers (e.g. a bearer token from an external
+    // identity provider) are not overwritten or duplicated (#5333).
     let authenticated = false;
     if (settings.token) {
       authenticated = true;
-      request.headers.append('Authorization', `token ${settings.token}`);
+      if (!request.headers.has('Authorization')) {
+        request.headers.append('Authorization', `token ${settings.token}`);
+      }
     }
     if (typeof document !== 'undefined') {
       const xsrfToken = getCookie('_xsrf');
       if (xsrfToken !== undefined) {
         authenticated = true;
-        request.headers.append('X-XSRFToken', xsrfToken);
+        if (!request.headers.has('X-XSRFToken')) {
+          request.headers.append('X-XSRFToken', xsrfToken);
+        }
       }
     }
 
