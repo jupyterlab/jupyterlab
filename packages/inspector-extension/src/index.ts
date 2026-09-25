@@ -272,8 +272,11 @@ const consoles: JupyterFrontEndPlugin<void> = {
 
     // Keep track of console instances and set inspector source.
     const setSource = (widget: Widget | null): void => {
-      if (widget && consoles.has(widget) && handlers[widget.id]) {
-        manager.source = handlers[widget.id];
+      if (widget && consoles.has(widget)) {
+        const handler = handlers[widget.id];
+        if (handler) {
+          manager.source = handler;
+        }
       }
     };
     app.shell.currentChanged?.connect((_, args) => setSource(args.newValue));
@@ -330,8 +333,11 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 
     // Keep track of notebook instances and set inspector source.
     const setSource = (widget: Widget | null): void => {
-      if (widget && notebooks.has(widget) && handlers[widget.id]) {
-        manager.source = handlers[widget.id];
+      if (widget && notebooks.has(widget)) {
+        const handler = handlers[widget.id];
+        if (handler) {
+          manager.source = handler;
+        }
       }
     };
     app.shell.currentChanged?.connect((_, args) => setSource(args.newValue));

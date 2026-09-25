@@ -503,13 +503,17 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
         ) {
           return;
         }
+        const firstDirectory = result.value[0];
+        if (firstDirectory === undefined) {
+          return;
+        }
         if (result.value.length > 1) {
           console.warn(
             'More than one directory was selected; the workspace will be exported to the first directory only'
           );
         }
         const exportPath =
-          result.value[0].path + '/' + workspaceId + WORKSPACE_EXT;
+          firstDirectory.path + '/' + workspaceId + WORKSPACE_EXT;
 
         if (exportPath) {
           await Private.save(exportPath, contents, data, state, false);

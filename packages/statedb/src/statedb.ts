@@ -150,7 +150,10 @@ export class StateDB<
 
     return values.reduce(
       (acc, val, idx) => {
-        acc[ids[idx]] = val;
+        const id = ids[idx];
+        if (id !== undefined) {
+          acc[id] = val;
+        }
         return acc;
       },
       {} as { [id: string]: T }
@@ -295,7 +298,7 @@ export namespace StateDB {
     /**
      * Retrieve an item from the data connector.
      */
-    async fetch(id: string): Promise<string> {
+    async fetch(id: string): Promise<string | undefined> {
       return this._storage[id];
     }
 
@@ -308,9 +311,15 @@ export namespace StateDB {
     async list(namespace = ''): Promise<{ ids: string[]; values: string[] }> {
       return Object.keys(this._storage).reduce(
         (acc, val) => {
-          if (namespace === '' ? true : namespace === val.split(':')[0]) {
+          const separator = val.indexOf(':');
+          const idNamespace = separator === -1 ? val : val.slice(0, separator);
+          const stored = this._storage[val];
+          if (
+            stored !== undefined &&
+            (namespace === '' ? true : namespace === idNamespace)
+          ) {
             acc.ids.push(val);
-            acc.values.push(this._storage[val]);
+            acc.values.push(stored);
           }
           return acc;
         },

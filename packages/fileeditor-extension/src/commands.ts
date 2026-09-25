@@ -1452,13 +1452,14 @@ export namespace Commands {
     const disposables = new DisposableSet();
 
     for (const filetype of availableKernelFileTypes) {
+      const fileExt = filetype.extensions[0] ?? 'txt';
       disposables.add(
         launcher.add({
           command: CommandIDs.createNew,
           category: trans.__('Other'),
           rank: 3,
           args: {
-            fileExt: filetype.extensions[0],
+            fileExt,
             iconName: filetype.icon?.toString() ?? '',
             launcherLabel: trans.__('%1 File', filetype.displayName),
             paletteLabel: trans.__('New %1 File', filetype.displayName),
@@ -1585,11 +1586,12 @@ export namespace Commands {
     const paletteCategory = trans.__('Text Editor');
 
     for (const filetype of availableKernelFileTypes) {
+      const fileExt = filetype.extensions[0] ?? 'txt';
       disposables.add(
         palette.addItem({
           command: CommandIDs.createNew,
           args: {
-            fileExt: filetype.extensions[0],
+            fileExt,
             iconName: filetype.icon?.toString() ?? '',
             launcherLabel: trans.__('%1 File', filetype.displayName),
             paletteLabel: trans.__('New %1 File', filetype.displayName),
@@ -1661,11 +1663,12 @@ export namespace Commands {
     const disposables = new DisposableSet();
 
     for (const filetype of availableKernelFileTypes) {
+      const fileExt = filetype.extensions[0] ?? 'txt';
       disposables.add(
         menu.fileMenu.newMenu.addItem({
           command: CommandIDs.createNew,
           args: {
-            fileExt: filetype.extensions[0],
+            fileExt,
             iconName: filetype.icon?.toString() ?? '',
             launcherLabel: trans.__('%1 File', filetype.displayName),
             paletteLabel: trans.__('New %1 File', filetype.displayName),

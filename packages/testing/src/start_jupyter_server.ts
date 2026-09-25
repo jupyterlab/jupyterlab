@@ -262,7 +262,10 @@ namespace Private {
 
     if (options.pageConfig) {
       Object.keys(options.pageConfig).forEach(key => {
-        PageConfig.setOption(key, options.pageConfig![key]);
+        const value = options.pageConfig![key];
+        if (value !== undefined) {
+          PageConfig.setOption(key, value);
+        }
       });
     }
 
@@ -332,7 +335,10 @@ namespace Private {
 
     if (options.additionalKernelSpecs) {
       Object.keys(options.additionalKernelSpecs).forEach(key => {
-        installSpec(dataDir, key, options.additionalKernelSpecs![key]);
+        const spec = options.additionalKernelSpecs![key];
+        if (spec !== undefined) {
+          installSpec(dataDir, key, spec);
+        }
       });
     }
     return dataDir;
@@ -350,9 +356,10 @@ namespace Private {
     console.debug('Parsing Jupyter server output for URL:', output);
     output.split('\n').forEach(line => {
       const baseUrlMatch = line.match(/(http:\/\/localhost:\d+\/[^?]*)/);
-      if (baseUrlMatch) {
-        console.debug('Found URL match:', baseUrlMatch[1]);
-        baseUrl = baseUrlMatch[1].replace('/lab', '');
+      const matchedUrl = baseUrlMatch?.[1];
+      if (matchedUrl) {
+        console.debug('Found URL match:', matchedUrl);
+        baseUrl = matchedUrl.replace('/lab', '');
         console.debug('Setting baseUrl to:', baseUrl);
         PageConfig.setOption('baseUrl', baseUrl);
       }

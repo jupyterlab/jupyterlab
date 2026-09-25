@@ -98,10 +98,11 @@ export class TranslationManager implements ITranslator {
             locale: this._currentLocale,
             stringsPrefix: this._stringsPrefix
           });
-          if (domain in this._domainData) {
-            const metadata = this._domainData[domain][''];
+          const domainData = this._domainData[domain];
+          if (domainData !== undefined) {
+            const metadata = domainData[''];
             const harmonizedData = {
-              ...this._domainData[domain],
+              ...domainData,
               '': {
                 ...metadata,
                 pluralForms: metadata.plural_forms
@@ -111,7 +112,7 @@ export class TranslationManager implements ITranslator {
           }
           this._translationBundles[domain] = translationBundle;
         }
-        return this._translationBundles[domain];
+        return this._translationBundles[domain]!;
       }
     } else {
       return this._englishBundle;

@@ -253,7 +253,7 @@ export class RestorablePool<
 
     this._restore = options;
 
-    const [saved] = await Promise.all(promises);
+    const saved = (await Promise.all(promises))[0]!;
     const values = await Promise.all(
       saved.ids.map(async (id, index) => {
         const value = saved.values[index];

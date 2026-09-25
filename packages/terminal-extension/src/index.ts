@@ -816,7 +816,7 @@ function addCommands(
         return trans.__('Set terminal theme to the provided `theme`.');
       }
       const theme = args['theme'] as string;
-      const rawTheme = theme[0].toLocaleUpperCase() + theme.slice(1);
+      const rawTheme = theme.charAt(0).toLocaleUpperCase() + theme.slice(1);
       const displayName =
         theme in themeDisplayedName
           ? themeDisplayedName[theme as keyof typeof themeDisplayedName]

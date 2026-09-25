@@ -219,6 +219,9 @@ export class MetadataFormWidget
 
       let intermediateMetadataKeys = nestedKey.slice(1, -1);
       let finalMetadataKey = nestedKey[nestedKey.length - 1];
+      if (finalMetadataKey === undefined) {
+        continue;
+      }
 
       // Deep copy of the metadata if not already done.
       if (!(baseMetadataKey in metadataObject)) {
