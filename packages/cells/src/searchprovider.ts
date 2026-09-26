@@ -55,6 +55,31 @@ export class CellSearchProvider
   protected get model() {
     return this.cell.model;
   }
+
+  /**
+   * Adds readonly flag to the match based on cell editability.
+   *
+   * @param match - The search match.
+   * @param fromHTML - True if match is from rendered HTML, else false.
+   */
+  protected _applyReadonlyState(
+    match: ISearchMatch | undefined,
+    fromHTML: boolean
+  ): ISearchMatch | undefined {
+    if (!match) {
+      return undefined;
+    }
+    if (fromHTML) {
+      return { ...match, readonly: true };
+    }
+    const isEditable = this.model.getMetadata('editable') !== false;
+    return { ...match, readonly: !isEditable };
+  }
+
+  public isReadOnlyProvider(): boolean {
+    const isEditable = this.model.getMetadata('editable') !== false;
+    return !isEditable;
+  }
 }
 
 /**
@@ -123,13 +148,20 @@ class CodeCellSearchProvider extends CellSearchProvider {
     this.outputsProvider.length = 0;
   }
 
+  /**
+   * Returns the current active search match.
+   */
   getCurrentMatch(): ISearchMatch | undefined {
     if (this.currentProviderIndex === -1) {
-      return super.getCurrentMatch();
+      const match = super.getCurrentMatch();
+      return this._applyReadonlyState(match, false);
     } else if (this.currentProviderIndex < this.outputsProvider.length) {
       const provider = this.outputsProvider[this.currentProviderIndex];
-      return provider.currentMatch ?? undefined;
+      const match = provider.currentMatch ?? undefined;
+      return this._applyReadonlyState(match, true);
     }
+
+    return undefined;
   }
 
   /**
@@ -157,28 +189,31 @@ class CodeCellSearchProvider extends CellSearchProvider {
         const match = await super.highlightNext(loop, options);
         if (match) {
           this.currentIndex = this.cmHandler.currentIndex;
-          return match;
+          return this._applyReadonlyState(match, false);
         } else {
           this.currentProviderIndex = 0;
         }
       }
 
-      while (this.currentProviderIndex < this.outputsProvider.length) {
-        const provider = this.outputsProvider[this.currentProviderIndex];
-        const match = await provider.highlightNext(false);
-        if (match) {
-          this.currentIndex =
-            super.matchesCount +
-            this.outputsProvider
-              .slice(0, this.currentProviderIndex)
-              .reduce(
-                (sum, provider) => (sum += provider.matchesCount ?? 0),
-                0
-              ) +
-            provider.currentMatchIndex!;
-          return match;
-        } else {
-          this.currentProviderIndex += 1;
+      if (!options?.skipReadOnly) {
+        while (this.currentProviderIndex < this.outputsProvider.length) {
+          const provider = this.outputsProvider[this.currentProviderIndex];
+          const match = await provider.highlightNext(false);
+          if (match) {
+            this.currentIndex =
+              super.matchesCount +
+              this.outputsProvider
+                .slice(0, this.currentProviderIndex)
+                .reduce(
+                  (sum, provider) => (sum += provider.matchesCount ?? 0),
+                  0
+                ) +
+              provider.currentMatchIndex!;
+            // Cell output is always read-only
+            return this._applyReadonlyState(match, true);
+          } else {
+            this.currentProviderIndex += 1;
+          }
         }
       }
 
@@ -193,7 +228,10 @@ class CodeCellSearchProvider extends CellSearchProvider {
    *
    * @returns The previous match if there is one.
    */
-  async highlightPrevious(): Promise<ISearchMatch | undefined> {
+  async highlightPrevious(
+    loop?: boolean,
+    options?: IHighlightAdjacentMatchOptions
+  ): Promise<ISearchMatch | undefined> {
     if (this.matchesCount === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
@@ -201,30 +239,33 @@ class CodeCellSearchProvider extends CellSearchProvider {
         this.currentProviderIndex = this.outputsProvider.length - 1;
       }
 
-      while (this.currentProviderIndex >= 0) {
-        const provider = this.outputsProvider[this.currentProviderIndex];
+      if (!options?.skipReadOnly) {
+        while (this.currentProviderIndex >= 0) {
+          const provider = this.outputsProvider[this.currentProviderIndex];
 
-        const match = await provider.highlightPrevious(false);
-        if (match) {
-          this.currentIndex =
-            super.matchesCount +
-            this.outputsProvider
-              .slice(0, this.currentProviderIndex)
-              .reduce(
-                (sum, provider) => (sum += provider.matchesCount ?? 0),
-                0
-              ) +
-            provider.currentMatchIndex!;
-          return match;
-        } else {
-          this.currentProviderIndex -= 1;
+          const match = await provider.highlightPrevious(false);
+          if (match) {
+            this.currentIndex =
+              super.matchesCount +
+              this.outputsProvider
+                .slice(0, this.currentProviderIndex)
+                .reduce(
+                  (sum, provider) => (sum += provider.matchesCount ?? 0),
+                  0
+                ) +
+              provider.currentMatchIndex!;
+            // Cell output is always read-only
+            return this._applyReadonlyState(match, true);
+          } else {
+            this.currentProviderIndex -= 1;
+          }
         }
       }
 
       const match = await super.highlightPrevious();
       if (match) {
         this.currentIndex = this.cmHandler.currentIndex;
-        return match;
+        return this._applyReadonlyState(match, false);
       } else {
         this.currentIndex = null;
         return undefined;
@@ -392,7 +433,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
 
     match = await super.highlightNext(loop, options);
 
-    return match;
+    return this._applyReadonlyState(match, false);
   }
 
   /**
@@ -412,8 +453,15 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     }
 
     match = await super.highlightPrevious();
+    return this._applyReadonlyState(match, false);
+  }
 
-    return match;
+  /**
+   * Returns the current active search match.
+   */
+  getCurrentMatch(): ISearchMatch | undefined {
+    const match = super.getCurrentMatch();
+    return this._applyReadonlyState(match, false);
   }
 
   /**
