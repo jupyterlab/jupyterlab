@@ -44,8 +44,6 @@ const SEARCH_OPTIONS_CLASS = 'jp-DocumentSearch-search-options';
 const SEARCH_FILTER_DISABLED_CLASS = 'jp-DocumentSearch-search-filter-disabled';
 const SEARCH_FILTER_CLASS = 'jp-DocumentSearch-search-filter';
 const REPLACE_BUTTON_CLASS = 'jp-DocumentSearch-replace-button';
-const REPLACE_BUTTON_DISABLED_CLASS =
-  'jp-DocumentSearch-replace-button-disabled';
 const REPLACE_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-replace-button-wrapper';
 const REPLACE_WRAPPER_CLASS = 'jp-DocumentSearch-replace-wrapper-class';
 const REPLACE_TOGGLE_CLASS = 'jp-DocumentSearch-replace-toggle';
@@ -269,13 +267,7 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
         }
         tabIndex={0}
       >
-        <span
-          className={
-            props.replaceEnabled === false
-              ? `${REPLACE_BUTTON_CLASS} ${REPLACE_BUTTON_DISABLED_CLASS} ${BUTTON_CONTENT_CLASS}`
-              : `${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`
-          }
-        >
+        <span className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}>
           {trans.__('Replace')}
         </span>
       </button>
