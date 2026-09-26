@@ -15,7 +15,11 @@ import type {
 } from '@jupyterlab/application';
 import { LruCache } from '@jupyterlab/coreutils';
 import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
-import { IMarkdownParser } from '@jupyterlab/rendermime';
+import {
+  IMarkdownParser,
+  removeMath,
+  replaceMath
+} from '@jupyterlab/rendermime';
 import type { IMarkdownHeadingToken } from '@jupyterlab/rendermime';
 import { IMermaidMarkdown } from '@jupyterlab/mermaid';
 
@@ -273,7 +277,8 @@ namespace Private {
       _marked = await initializeMarked(options);
     }
     const headings = new Array<IMarkdownHeadingToken>();
-    const tokens = _marked.lexer(content);
+    const { text, math } = maskMath(content);
+    const tokens = _marked.lexer(text);
 
     // Extract heading tokens and compute line numbers
     // Include three token types that may contain headings:
@@ -288,7 +293,7 @@ namespace Private {
         (token.type === 'paragraph' && containsInlineHeading(token))
       ) {
         headings.push({
-          raw: token.raw,
+          raw: replaceMath(token.raw, math),
           line: currentLine
         });
       }
@@ -296,6 +301,23 @@ namespace Private {
     }
 
     return headings;
+  }
+
+  /**
+   * Hide math from the lexer, as `renderMarkdown` does, while keeping the
+   * source's line count so heading line numbers stay correct.
+   */
+  function maskMath(content: string): { text: string; math: string[] } {
+    const { text, math } = removeMath(content);
+    // `removeMath` collapses each block to one line; restore the lines it spanned.
+    return {
+      text: text.replace(
+        /@@(\d+)@@/g,
+        (placeholder: string, index: string) =>
+          placeholder + '\n'.repeat(math[Number(index)].split('\n').length - 1)
+      ),
+      math
+    };
   }
 
   function containsHeadingTag(raw: string) {
