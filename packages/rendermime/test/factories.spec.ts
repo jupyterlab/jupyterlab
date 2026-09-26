@@ -14,8 +14,10 @@ import {
   latexRendererFactory,
   markdownRendererFactory,
   MimeModel,
+  RenderedURIList,
   svgRendererFactory,
-  textRendererFactory
+  textRendererFactory,
+  uriListRendererFactory
 } from '@jupyterlab/rendermime';
 import type { JSONObject, JSONValue } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
@@ -994,6 +996,129 @@ describe('rendermime/factories', () => {
         expect(el.src).toBe('data:image/gif;base64,' + source);
         expect(el.localName).toBe('img');
         expect(el.innerHTML).toBe('');
+      });
+    });
+  });
+
+  describe('uriListRendererFactory', () => {
+    describe('#mimeTypes', () => {
+      it('should have the text/uri-list mimeType', () => {
+        expect(uriListRendererFactory.mimeTypes).toEqual(['text/uri-list']);
+      });
+    });
+
+    describe('#safe', () => {
+      it('should be safe', () => {
+        expect(uriListRendererFactory.safe).toBe(true);
+      });
+    });
+
+    describe('#createRenderer()', () => {
+      it('should return a RenderedURIList instance', () => {
+        const mimeType = 'text/uri-list';
+        const w = uriListRendererFactory.createRenderer({
+          mimeType,
+          ...defaultOptions
+        });
+        expect(w).toBeInstanceOf(RenderedURIList);
+      });
+
+      it('should render an audio element for audio data URIs', async () => {
+        const f = uriListRendererFactory;
+        const mimeType = 'text/uri-list';
+        const source = 'data:audio/mp3;base64,SUQzBAAAAAAA';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+
+        await w.renderModel(model);
+
+        const audioEl = w.node.querySelector('audio');
+        expect(audioEl).not.toBeNull();
+        expect(audioEl?.src).toBe(source);
+        expect(audioEl?.controls).toBe(true);
+      });
+
+      it('should render a video element for video data URIs', async () => {
+        const f = uriListRendererFactory;
+        const mimeType = 'text/uri-list';
+        const source = 'data:video/mp4;base64,AAAAIGZ0eXA=';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+
+        await w.renderModel(model);
+
+        const videoEl = w.node.querySelector('video');
+        expect(videoEl).not.toBeNull();
+        expect(videoEl?.src).toBe(source);
+        expect(videoEl?.controls).toBe(true);
+      });
+
+      it('should render audio elements based on file extension', async () => {
+        const f = uriListRendererFactory;
+        const mimeType = 'text/uri-list';
+        const source = 'sample.mp3';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+
+        await w.renderModel(model);
+
+        const audioEl = w.node.querySelector('audio');
+        expect(audioEl).not.toBeNull();
+      });
+
+      it('should skip comment lines in text/uri-list per RFC 2483', async () => {
+        const f = uriListRendererFactory;
+        const mimeType = 'text/uri-list';
+        const source = '# Comment line\n# Secondary comment\nsample_video.mp4';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+
+        await w.renderModel(model);
+
+        const videoEl = w.node.querySelector('video');
+        expect(videoEl).not.toBeNull();
+      });
+
+      it('should accept array inputs for multi-line cell formats', async () => {
+        const f = uriListRendererFactory;
+        const mimeType = 'text/uri-list';
+        const source = ['# Comment\n', 'sample.wav\n'];
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+
+        await w.renderModel(model);
+
+        const audioEl = w.node.querySelector('audio');
+        expect(audioEl).not.toBeNull();
+      });
+
+      it('should handle re-rendering cleanly', async () => {
+        const f = uriListRendererFactory;
+        const mimeType = 'text/uri-list';
+        const source = 'data:audio/wav;base64,UklGRiQAAABXQVZF';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+
+        await w.renderModel(model);
+        await w.renderModel(model);
+
+        const audioElements = w.node.querySelectorAll('audio');
+        expect(audioElements.length).toBe(1);
+      });
+
+      it('should render a fallback link for unrecognized file types', async () => {
+        const f = uriListRendererFactory;
+        const mimeType = 'text/uri-list';
+        const source = 'document.pdf';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+
+        await w.renderModel(model);
+
+        const anchorEl = w.node.querySelector('a');
+        expect(anchorEl).not.toBeNull();
+        expect(anchorEl?.href).toContain(source);
+        expect(anchorEl?.textContent).toBe(source);
       });
     });
   });
