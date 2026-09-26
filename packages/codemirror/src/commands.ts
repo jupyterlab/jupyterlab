@@ -17,6 +17,10 @@ import {
   COMPLETER_ENABLED_CLASS,
   COMPLETER_LINE_BEGINNING_CLASS
 } from '@jupyterlab/codeeditor';
+import {
+  commandRegistryFacet,
+  hasKeyBinding
+} from './extensions/commandRegistry';
 
 /**
  * Selector for a widget that can run code.
@@ -41,21 +45,49 @@ const ACTIVE_CELL_IN_EDIT_MODE_SELECTOR =
   '.jp-mod-editMode .jp-Cell.jp-mod-active';
 
 /**
+ * Whether a keyboard shortcut should get the `Tab` key instead of the editor.
+ *
+ * Without a command registry, an editor that could complete is assumed
+ * to have a shortcut invoking the completer.
+ */
+function isTabClaimed(target: {
+  dom: HTMLElement;
+  contentDOM?: HTMLElement;
+  state: EditorState;
+}): boolean {
+  if (target.state.facet(commandRegistryFacet)) {
+    return hasKeyBinding(
+      { state: target.state, contentDOM: target.contentDOM ?? target.dom },
+      'Tab'
+    );
+  }
+  const classList = target.dom.parentElement?.classList;
+  if (!classList) {
+    return false;
+  }
+  return (
+    classList.contains(COMPLETER_ENABLED_CLASS) &&
+    !classList.contains(COMPLETER_LINE_BEGINNING_CLASS)
+  );
+}
+
+/**
  * CodeMirror commands namespace
  */
 export namespace StateCommands {
   /**
    * Indent or insert a tab as appropriate.
+   *
+   * Declines the key when a keyboard shortcut claims it, so that
+   * the command registry gets to handle it.
    */
   export function indentMoreOrInsertTab(target: {
     dom: HTMLElement;
+    contentDOM?: HTMLElement;
     state: EditorState;
     dispatch: (transaction: Transaction) => void;
   }): boolean {
-    let classList = target.dom.parentElement?.classList;
-    let completerEnabled = classList?.contains(COMPLETER_ENABLED_CLASS);
-    let lineBeggining = classList?.contains(COMPLETER_LINE_BEGINNING_CLASS);
-    if (completerEnabled && !lineBeggining) {
+    if (isTabClaimed(target)) {
       return false;
     }
 
