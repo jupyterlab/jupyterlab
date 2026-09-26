@@ -4,6 +4,7 @@
 |----------------------------------------------------------------------------*/
 import { URLExt } from '@jupyterlab/coreutils';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import escape from 'lodash.escape';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type {
@@ -335,7 +336,7 @@ export class RenderedURIList extends RenderedCommon {
   constructor(options: IRenderMime.IRendererOptions) {
     super(options);
     this.addClass('jp-RenderedHTML');
-    // this.addClass('jp-RenderedURIList');
+    this.addClass('jp-RenderedURIList');
   }
 
   /**
@@ -347,24 +348,39 @@ export class RenderedURIList extends RenderedCommon {
    */
   async render(model: IRenderMime.IMimeModel): Promise<void> {
     this._clearMediaElement();
+    this.node.textContent = '';
+    const renderId = ++this._renderId;
 
     const source = Private.getFirstURI(model.data[this.mimeType]);
+    if (!source) {
+      return;
+    }
+
     const mediaType = Private.getMediaType(source);
 
     if (!mediaType) {
       // Render a clean fallback link for PDF, TXT, ZIP, etc.
-      const anchor = document.createElement('a');
-      anchor.href = source;
-      anchor.target = '_blank';
-      anchor.rel = 'noopener noreferrer';
-      anchor.textContent = source;
-      this.node.appendChild(anchor);
+      const safeSource = escape(source);
+      await renderers.renderHTML({
+        host: this.node,
+        source: `<a href="${safeSource}">${safeSource}</a>`,
+        trusted: model.trusted,
+        sanitizer: this.sanitizer,
+        resolver: this.resolver,
+        linkHandler: this.linkHandler,
+        shouldTypeset: false,
+        latexTypesetter: this.latexTypesetter,
+        translator: this.translator
+      });
+      if (this.isDisposed || renderId !== this._renderId) {
+        return;
+      }
       return;
     }
 
     const url = await Private.resolveSource(source, mediaType, this.resolver);
 
-    if (this.isDisposed) {
+    if (this.isDisposed || renderId !== this._renderId) {
       return;
     }
 
@@ -382,6 +398,7 @@ export class RenderedURIList extends RenderedCommon {
     if (this.isDisposed) {
       return;
     }
+    this._renderId++;
     this._clearMediaElement();
     super.dispose();
   }
@@ -397,6 +414,7 @@ export class RenderedURIList extends RenderedCommon {
   }
 
   private _mediaElement: HTMLAudioElement | HTMLVideoElement | null = null;
+  private _renderId = 0;
 }
 
 /**
