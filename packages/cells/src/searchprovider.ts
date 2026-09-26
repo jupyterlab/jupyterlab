@@ -195,25 +195,29 @@ class CodeCellSearchProvider extends CellSearchProvider {
         }
       }
 
-      if (!options?.skipReadOnly) {
-        while (this.currentProviderIndex < this.outputsProvider.length) {
-          const provider = this.outputsProvider[this.currentProviderIndex];
-          const match = await provider.highlightNext(false);
-          if (match) {
-            this.currentIndex =
-              super.matchesCount +
-              this.outputsProvider
-                .slice(0, this.currentProviderIndex)
-                .reduce(
-                  (sum, provider) => (sum += provider.matchesCount ?? 0),
-                  0
-                ) +
-              provider.currentMatchIndex!;
-            // Cell output is always read-only
-            return this._applyReadonlyState(match, true);
-          } else {
-            this.currentProviderIndex += 1;
-          }
+      if (options?.skipReadOnly) {
+        // Output matches cannot be replaced, skip all of them
+        await this.outputsProvider[this.currentProviderIndex]?.clearHighlight();
+        this.currentProviderIndex = this.outputsProvider.length;
+      }
+
+      while (this.currentProviderIndex < this.outputsProvider.length) {
+        const provider = this.outputsProvider[this.currentProviderIndex];
+        const match = await provider.highlightNext(false);
+        if (match) {
+          this.currentIndex =
+            super.matchesCount +
+            this.outputsProvider
+              .slice(0, this.currentProviderIndex)
+              .reduce(
+                (sum, provider) => (sum += provider.matchesCount ?? 0),
+                0
+              ) +
+            provider.currentMatchIndex!;
+          // Cell output is always read-only
+          return this._applyReadonlyState(match, true);
+        } else {
+          this.currentProviderIndex += 1;
         }
       }
 
@@ -239,26 +243,30 @@ class CodeCellSearchProvider extends CellSearchProvider {
         this.currentProviderIndex = this.outputsProvider.length - 1;
       }
 
-      if (!options?.skipReadOnly) {
-        while (this.currentProviderIndex >= 0) {
-          const provider = this.outputsProvider[this.currentProviderIndex];
+      if (options?.skipReadOnly) {
+        // Output matches cannot be replaced, skip all of them
+        await this.outputsProvider[this.currentProviderIndex]?.clearHighlight();
+        this.currentProviderIndex = -1;
+      }
 
-          const match = await provider.highlightPrevious(false);
-          if (match) {
-            this.currentIndex =
-              super.matchesCount +
-              this.outputsProvider
-                .slice(0, this.currentProviderIndex)
-                .reduce(
-                  (sum, provider) => (sum += provider.matchesCount ?? 0),
-                  0
-                ) +
-              provider.currentMatchIndex!;
-            // Cell output is always read-only
-            return this._applyReadonlyState(match, true);
-          } else {
-            this.currentProviderIndex -= 1;
-          }
+      while (this.currentProviderIndex >= 0) {
+        const provider = this.outputsProvider[this.currentProviderIndex];
+
+        const match = await provider.highlightPrevious(false);
+        if (match) {
+          this.currentIndex =
+            super.matchesCount +
+            this.outputsProvider
+              .slice(0, this.currentProviderIndex)
+              .reduce(
+                (sum, provider) => (sum += provider.matchesCount ?? 0),
+                0
+              ) +
+            provider.currentMatchIndex!;
+          // Cell output is always read-only
+          return this._applyReadonlyState(match, true);
+        } else {
+          this.currentProviderIndex -= 1;
         }
       }
 

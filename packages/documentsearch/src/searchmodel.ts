@@ -85,18 +85,10 @@ export class SearchDocumentModel
   }
 
   /**
-   * Current state of the replace button.
+   * Whether the current match can be replaced.
    */
   get replaceEnabled(): boolean {
-    return this._replaceEnabled;
-  }
-
-  /**
-   * Sets the state of the replace button.
-   * @param v - True to enable, false to disable.
-   */
-  set replaceEnabled(v: boolean) {
-    this._replaceEnabled = v;
+    return !this.searchProvider.getCurrentMatch?.()?.readonly;
   }
 
   /**
@@ -281,9 +273,7 @@ export class SearchDocumentModel
    * Highlight the next match.
    */
   async highlightNext(): Promise<void> {
-    const match = await this.searchProvider.highlightNext();
-    this.replaceEnabled = match ? !match.readonly : true;
-
+    await this.searchProvider.highlightNext();
     // Emit state change as the index needs to be updated
     this.stateChanged.emit();
   }
@@ -292,9 +282,7 @@ export class SearchDocumentModel
    * Highlight the previous match
    */
   async highlightPrevious(): Promise<void> {
-    const match = await this.searchProvider.highlightPrevious();
-    this.replaceEnabled = match ? !match.readonly : true;
-
+    await this.searchProvider.highlightPrevious();
     // Emit state change as the index needs to be updated
     this.stateChanged.emit();
   }
@@ -324,20 +312,13 @@ export class SearchDocumentModel
    * Replace the current match.
    */
   async replaceCurrentMatch(): Promise<void> {
-    if (this.searchProvider.getCurrentMatch?.()?.readonly) {
-      this.replaceEnabled = false;
-      this.stateChanged.emit();
+    if (!this.replaceEnabled) {
       return;
     }
-
     await this.searchProvider.replaceCurrentMatch(this._replaceText, true, {
       preserveCase: this.preserveCase,
       regularExpression: this.useRegex
     });
-
-    const currMatch = this.searchProvider.getCurrentMatch?.();
-    this.replaceEnabled = currMatch ? !currMatch.readonly : true;
-
     // Emit state change as the index needs to be updated
     this.stateChanged.emit();
   }
@@ -382,9 +363,6 @@ export class SearchDocumentModel
       if (query) {
         this._searchActive = true;
         await this.searchProvider.startQuery(query, this._filters);
-        // Get the current match and update replaceEnabled state
-        const currMatch = this.searchProvider.getCurrentMatch?.();
-        this.replaceEnabled = currMatch ? !currMatch.readonly : true;
       } else {
         this._searchActive = false;
         await this.searchProvider.endQuery();
@@ -419,7 +397,6 @@ export class SearchDocumentModel
   private _searchExpression = '';
   private _useRegex = false;
   private _wholeWords = false;
-  private _replaceEnabled = true;
 }
 
 namespace Private {

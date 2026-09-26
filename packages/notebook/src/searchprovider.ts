@@ -412,13 +412,16 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._currentProviderIndex = null;
   }
 
+  /**
+   * Get the current match, if any.
+   */
   getCurrentMatch(): ISearchMatch | undefined {
-    if (this._currentProviderIndex != null) {
-      const searchEngine = this._searchProviders[this._currentProviderIndex];
-      const match = searchEngine.getCurrentMatch();
-      return match;
+    if (this._currentProviderIndex === null) {
+      return undefined;
     }
-    return undefined;
+    // The index points past the last cell after cells are deleted, until the
+    // search restarts.
+    return this._searchProviders[this._currentProviderIndex]?.getCurrentMatch();
   }
 
   /**
@@ -646,6 +649,18 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this._selectionLock = false;
     };
 
+    const highlightInCell = async (
+      searchEngine: CellSearchProvider
+    ): Promise<ISearchMatch | undefined> => {
+      if (options?.skipReadOnly && searchEngine.isReadOnlyProvider()) {
+        // Treat it as a cell without matches, so the loop below still ends
+        return undefined;
+      }
+      return reverse
+        ? searchEngine.highlightPrevious(false, options)
+        : searchEngine.highlightNext(false, options);
+    };
+
     if (this._currentProviderIndex === null) {
       this._currentProviderIndex = this.widget.content.activeCellIndex;
     }
@@ -691,32 +706,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     } else {
       this._currentProviderIndex += atEndOfCurrentCell ? 1 : 0;
     }
-    const visitedProviders = new Set<number>();
     do {
-      let searchEngine = this._searchProviders[this._currentProviderIndex];
+      const searchEngine = this._searchProviders[this._currentProviderIndex];
 
-      if (options?.skipReadOnly) {
-        const startProviderIndex: number = this._currentProviderIndex;
-        while (searchEngine.isReadOnlyProvider()) {
-          this._currentProviderIndex =
-            (this._currentProviderIndex + 1) % this._searchProviders.length;
-          if (this._currentProviderIndex === startProviderIndex) {
-            this._currentProviderIndex = null;
-            return null;
-          }
-
-          searchEngine = this._searchProviders[this._currentProviderIndex];
-        }
-      }
-
-      if (visitedProviders.has(this._currentProviderIndex)) {
-        break;
-      }
-      visitedProviders.add(this._currentProviderIndex);
-
-      const match = reverse
-        ? await searchEngine.highlightPrevious(false, options)
-        : await searchEngine.highlightNext(false, options);
+      const match = await highlightInCell(searchEngine);
 
       if (match) {
         await activateNewMatch(match);
@@ -741,10 +734,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
     if (loop) {
       // try the first provider again
-      const searchEngine = this._searchProviders[startIndex];
-      const match = reverse
-        ? await searchEngine.highlightPrevious(false, options)
-        : await searchEngine.highlightNext(false, options);
+      const match = await highlightInCell(this._searchProviders[startIndex]);
       if (match) {
         await activateNewMatch(match);
         return match;

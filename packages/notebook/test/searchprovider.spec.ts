@@ -9,7 +9,8 @@ import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { signalToPromise } from '@jupyterlab/testing';
 import * as utils from './utils';
 import type { IReplaceOptions } from '@jupyterlab/documentsearch';
-import type { CodeCellModel } from '@jupyterlab/cells';
+import type { CodeCell, CodeCellModel } from '@jupyterlab/cells';
+import { CellSearchProvider } from '@jupyterlab/cells';
 
 /**
  * To avoid relying on ydoc passing the selections via server
@@ -33,6 +34,24 @@ async function setSelections(
 async function runDebouncedHandler() {
   await Promise.resolve();
   jest.advanceTimersByTime(0);
+}
+
+/**
+ * Make a search that keeps checking cells throw instead of hanging: the loop
+ * only awaits resolved promises, so the jest timeout cannot fire.
+ */
+function limitReadOnlyChecks(limit = 100): jest.SpyInstance {
+  const isReadOnlyProvider = CellSearchProvider.prototype.isReadOnlyProvider;
+  let calls = 0;
+  return jest
+    .spyOn(CellSearchProvider.prototype, 'isReadOnlyProvider')
+    .mockImplementation(function (this: CellSearchProvider) {
+      calls += 1;
+      if (calls > limit) {
+        throw new Error(`Checked ${limit} cells without finishing the search`);
+      }
+      return isReadOnlyProvider.call(this);
+    });
 }
 
 class TestProvider extends NotebookSearchProvider {
@@ -216,6 +235,16 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#highlightPrevious()', () => {
+      let readOnlyChecks: jest.SpyInstance;
+
+      beforeEach(() => {
+        readOnlyChecks = limitReadOnlyChecks();
+      });
+
+      afterEach(() => {
+        readOnlyChecks.mockRestore();
+      });
+
       it('should highlight previous match', async () => {
         panel.content.activeCellIndex = 1;
         await provider.startQuery(/tes/, undefined);
@@ -246,6 +275,78 @@ describe('@jupyterlab/notebook', () => {
         expect(panel.content.activeCellIndex).toBe(1);
         await provider.highlightPrevious();
         expect(panel.content.activeCellIndex).toBe(0);
+        await provider.endQuery();
+      });
+
+      it('should skip read-only cells with `skipReadOnly`', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1' },
+          { cell_type: 'code', source: 'test2', metadata: { editable: false } },
+          { cell_type: 'code', source: 'test3' }
+        ]);
+        panel.content.activeCellIndex = 2;
+        await provider.startQuery(/test\d/, undefined);
+        expect(provider.currentMatchIndex).toBe(2);
+
+        await provider.highlightPrevious(true, { skipReadOnly: true });
+        expect(panel.content.activeCellIndex).toBe(0);
+        expect(provider.currentMatchIndex).toBe(0);
+        await provider.endQuery();
+      });
+
+      it('should skip output matches with `skipReadOnly`', async () => {
+        const codeCell = panel.model!.cells.get(1) as CodeCellModel;
+        codeCell.sharedModel.setSource('print("test3")');
+        codeCell.outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['test4 test5']
+        });
+        panel.content.activeCellIndex = 1;
+        await provider.startQuery(/test\d/, { output: true });
+        await provider.highlightNext();
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(4);
+        expect(provider.getCurrentMatch()?.readonly).toBe(true);
+
+        await provider.highlightPrevious(true, { skipReadOnly: true });
+        expect(provider.currentMatchIndex).toBe(2);
+        expect(provider.getCurrentMatch()?.readonly).toBe(false);
+        const outputArea = (panel.content.widgets[1] as CodeCell).outputArea;
+        expect(outputArea.node.querySelector('.jp-current-match')).toBeNull();
+        await provider.endQuery();
+      });
+    });
+
+    describe('#getCurrentMatch()', () => {
+      it('should return the current match with its read-only flag', async () => {
+        panel.model!.cells.get(1).setMetadata('editable', false);
+        await provider.startQuery(/test\d/, undefined);
+        expect(provider.getCurrentMatch()).toMatchObject({
+          text: 'test1',
+          readonly: false
+        });
+        await provider.highlightNext();
+        await provider.highlightNext();
+        expect(provider.getCurrentMatch()).toMatchObject({
+          text: 'test3',
+          readonly: true
+        });
+        await provider.endQuery();
+      });
+
+      it('should not fail after the cell with the current match is deleted', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1' },
+          { cell_type: 'code', source: 'test2' }
+        ]);
+        panel.content.activeCellIndex = 1;
+        await provider.startQuery(/test\d/, undefined);
+        expect(provider.getCurrentMatch()?.text).toBe('test2');
+        panel.model!.sharedModel.deleteCell(1);
+        expect(provider.getCurrentMatch()).toBeUndefined();
         await provider.endQuery();
       });
     });
@@ -414,6 +515,16 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#replaceCurrentMatch()', () => {
+      let readOnlyChecks: jest.SpyInstance;
+
+      beforeEach(() => {
+        readOnlyChecks = limitReadOnlyChecks();
+      });
+
+      afterEach(() => {
+        readOnlyChecks.mockRestore();
+      });
+
       it('should replace with a shorter text and highlight next', async () => {
         await provider.startQuery(/test\d/, undefined);
         expect(provider.currentMatchIndex).toBe(0);
@@ -562,6 +673,93 @@ describe('@jupyterlab/notebook', () => {
           .model!.cells.get(1)
           .sharedModel.getSource();
         expect(readonlySource).toBe('test3');
+      });
+
+      it('should not freeze when the only match left is in a read-only cell above', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1', metadata: { editable: false } },
+          { cell_type: 'code', source: 'test2' }
+        ]);
+        panel.content.activeCellIndex = 1;
+        await provider.startQuery(/test\d/, undefined);
+        expect(provider.currentMatchIndex).toBe(1);
+
+        const replaced = await provider.replaceCurrentMatch('bar');
+        expect(replaced).toBe(true);
+        expect(provider.currentMatchIndex).toBe(null);
+        const source = panel.model!.cells.get(0).sharedModel.getSource();
+        expect(source).toBe('test1');
+      });
+
+      it('should not freeze when replacing after only read-only matches are left', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1' },
+          { cell_type: 'code', source: 'test2', metadata: { editable: false } }
+        ]);
+        panel.content.activeCellIndex = 0;
+        await provider.startQuery(/test\d/, undefined);
+        await provider.replaceAllMatches('bar');
+
+        const replaced = await provider.replaceCurrentMatch('bar');
+        expect(replaced).toBe(false);
+        const source = panel.model!.cells.get(1).sharedModel.getSource();
+        expect(source).toBe('test2');
+      });
+
+      it('should move past read-only cells to the next match', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1' },
+          { cell_type: 'code', source: 'test2', metadata: { editable: false } },
+          { cell_type: 'code', source: 'test3' }
+        ]);
+        panel.content.activeCellIndex = 0;
+        await provider.startQuery(/test\d/, undefined);
+
+        await provider.replaceCurrentMatch('bar');
+        expect(panel.content.activeCellIndex).toBe(2);
+        expect(provider.currentMatchIndex).toBe(1);
+        expect(provider.getCurrentMatch()?.readonly).toBe(false);
+      });
+
+      it('should move past output matches to the next match', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1' },
+          { cell_type: 'code', source: 'x = 1' },
+          { cell_type: 'code', source: 'test3' }
+        ]);
+        (panel.model!.cells.get(1) as CodeCellModel).outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['test2']
+        });
+        panel.content.activeCellIndex = 0;
+        await provider.startQuery(/test\d/, { output: true });
+        expect(provider.matchesCount).toBe(3);
+
+        await provider.replaceCurrentMatch('bar');
+        expect(panel.content.activeCellIndex).toBe(2);
+        expect(provider.currentMatchIndex).toBe(1);
+        expect(provider.getCurrentMatch()?.readonly).toBe(false);
+      });
+
+      it('should not wrap to the first cell when looping is disabled', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1' },
+          { cell_type: 'code', source: 'test2' },
+          { cell_type: 'code', source: 'test3', metadata: { editable: false } }
+        ]);
+        panel.content.activeCellIndex = 1;
+        await provider.startQuery(/test\d/, undefined);
+        expect(provider.currentMatchIndex).toBe(1);
+
+        await provider.replaceCurrentMatch('bar', false);
+        expect(provider.currentMatchIndex).toBe(null);
+        expect(panel.content.activeCellIndex).toBe(1);
       });
     });
 

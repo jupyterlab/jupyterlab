@@ -402,6 +402,8 @@ export interface ISearchProvider extends IBaseSearchProvider {
 
   /**
    * Gets the currently highlighted match, if any.
+   *
+   * The search box disables Replace while this match is read-only.
    */
   getCurrentMatch?(): ISearchMatch | undefined;
 }
