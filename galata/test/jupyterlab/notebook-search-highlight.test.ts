@@ -43,7 +43,7 @@ test('Open and close Search dialog, then add new code cell', async ({
   await page.keyboard.press('Escape');
 
   // expect the highlights to have gone
-  expect(await page.locator(HIGHLIGHTS_LOCATOR).count()).toEqual(0);
+  await expect(page.locator(HIGHLIGHTS_LOCATOR)).toHaveCount(0);
 
   // insert a new code cell
   await page.evaluate(async () =>
@@ -54,5 +54,5 @@ test('Open and close Search dialog, then add new code cell', async ({
   // and expect the highlights to be still gone
   // regression-testing against #14871
   await new Promise(resolve => setTimeout(resolve, 1000));
-  expect(await page.locator(HIGHLIGHTS_LOCATOR).count()).toEqual(0);
+  await expect(page.locator(HIGHLIGHTS_LOCATOR)).toHaveCount(0);
 });

@@ -46,6 +46,7 @@ for (const mode of windowingModes) {
 
       do {
         // Small delay to allow next batch of cells to render
+        // eslint-disable-next-line playwright/no-wait-for-timeout
         await page.waitForTimeout(100);
         current = await locator.count();
         counts.push(current);

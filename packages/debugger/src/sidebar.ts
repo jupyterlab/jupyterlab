@@ -90,7 +90,7 @@ export class DebuggerSidebar extends SidePanel {
     this.header.addWidget(header);
     model.titleChanged.connect((_, title) => {
       header.title.label = title;
-    });
+    }, this);
 
     this.content.addClass('jp-DebuggerSidebar-body');
 
