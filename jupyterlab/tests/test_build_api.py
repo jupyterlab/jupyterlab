@@ -62,6 +62,8 @@ class BuildAPITester:
 
 
 @pytest.mark.slow
+# Tests here need to run in serial (same group) as they share the same build dir
+@pytest.mark.xdist_group("build")
 class TestBuildAPI:
     def tempdir(self):
         td = TemporaryDirectory()
