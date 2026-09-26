@@ -644,8 +644,15 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       }
 
       await activeCell.ready;
-      const editor = activeCell.editor!;
-      editor.revealPosition(editor.getPositionAt(match.position)!);
+      // Matches in the cell source come from `EditorSearchProvider` as plain
+      // `ISearchMatch` objects, without `node`. Output matches come from
+      // `GenericSearchProvider` as `IHTMLSearchMatch` objects: `node` is the
+      // text node holding the match, `position` counts from the start of that
+      // node, and that provider already scrolled the match into view.
+      if (!('node' in match)) {
+        const editor = activeCell.editor!;
+        editor.revealPosition(editor.getPositionAt(match.position)!);
+      }
       this._selectionLock = false;
     };
 

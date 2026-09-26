@@ -297,7 +297,6 @@ describe('@jupyterlab/notebook', () => {
 
       it('should skip output matches with `skipReadOnly`', async () => {
         const codeCell = panel.model!.cells.get(1) as CodeCellModel;
-        codeCell.sharedModel.setSource('print("test3")');
         codeCell.outputs.add({
           name: 'stdout',
           output_type: 'stream',
@@ -510,6 +509,35 @@ describe('@jupyterlab/notebook', () => {
         await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(null);
 
+        await provider.endQuery();
+      });
+
+      it('should highlight output matches past the end of the cell source', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1' }
+        ]);
+        (panel.model!.cells.get(0) as CodeCellModel).outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['test2 test3']
+        });
+        panel.content.activeCellIndex = 0;
+        await provider.startQuery(/test\d/, { output: true });
+        expect(provider.currentMatchIndex).toBe(0);
+
+        await provider.highlightNext();
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(2);
+        expect(provider.getCurrentMatch()).toMatchObject({
+          text: 'test3',
+          position: 6
+        });
+
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(0);
+        await provider.highlightPrevious();
+        expect(provider.currentMatchIndex).toBe(2);
         await provider.endQuery();
       });
     });
