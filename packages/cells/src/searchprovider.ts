@@ -80,6 +80,72 @@ export class CellSearchProvider
     const isEditable = this.model.getMetadata('editable') !== false;
     return !isEditable;
   }
+
+  /**
+   * Get the current match if it exists.
+   */
+  getCurrentMatch(): ISearchMatch | undefined {
+    return this._applyReadonlyState(super.getCurrentMatch(), false);
+  }
+
+  /**
+   * Highlight the next match.
+   *
+   * @returns The next match if there is one.
+   */
+  async highlightNext(
+    loop?: boolean,
+    options?: IHighlightAdjacentMatchOptions
+  ): Promise<ISearchMatch | undefined> {
+    const match = await super.highlightNext(loop, options);
+    return this._applyReadonlyState(match, false);
+  }
+
+  /**
+   * Highlight the previous match.
+   *
+   * @returns The previous match if there is one.
+   */
+  async highlightPrevious(
+    loop?: boolean,
+    options?: IHighlightAdjacentMatchOptions
+  ): Promise<ISearchMatch | undefined> {
+    const match = await super.highlightPrevious(loop, options);
+    return this._applyReadonlyState(match, false);
+  }
+
+  /**
+   * Replace the currently selected match with the provided text, unless the
+   * cell is read-only.
+   *
+   * @returns Whether a replace occurred.
+   */
+  async replaceCurrentMatch(
+    newText: string,
+    loop?: boolean,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
+    if (this.isReadOnlyProvider()) {
+      return false;
+    }
+    return super.replaceCurrentMatch(newText, loop, options);
+  }
+
+  /**
+   * Replace all matches in the cell source with the provided text, unless
+   * the cell is read-only.
+   *
+   * @returns Whether a replace occurred.
+   */
+  async replaceAllMatches(
+    newText: string,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
+    if (this.isReadOnlyProvider()) {
+      return false;
+    }
+    return super.replaceAllMatches(newText, options);
+  }
 }
 
 /**
@@ -153,8 +219,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
    */
   getCurrentMatch(): ISearchMatch | undefined {
     if (this.currentProviderIndex === -1) {
-      const match = super.getCurrentMatch();
-      return this._applyReadonlyState(match, false);
+      return super.getCurrentMatch();
     } else if (this.currentProviderIndex < this.outputsProvider.length) {
       const provider = this.outputsProvider[this.currentProviderIndex];
       const match = provider.currentMatch ?? undefined;
@@ -189,7 +254,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
         const match = await super.highlightNext(loop, options);
         if (match) {
           this.currentIndex = this.cmHandler.currentIndex;
-          return this._applyReadonlyState(match, false);
+          return match;
         } else {
           this.currentProviderIndex = 0;
         }
@@ -273,7 +338,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
       const match = await super.highlightPrevious();
       if (match) {
         this.currentIndex = this.cmHandler.currentIndex;
-        return this._applyReadonlyState(match, false);
+        return match;
       } else {
         this.currentIndex = null;
         return undefined;
@@ -441,7 +506,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
 
     match = await super.highlightNext(loop, options);
 
-    return this._applyReadonlyState(match, false);
+    return match;
   }
 
   /**
@@ -461,15 +526,8 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     }
 
     match = await super.highlightPrevious();
-    return this._applyReadonlyState(match, false);
-  }
 
-  /**
-   * Returns the current active search match.
-   */
-  getCurrentMatch(): ISearchMatch | undefined {
-    const match = super.getCurrentMatch();
-    return this._applyReadonlyState(match, false);
+    return match;
   }
 
   /**

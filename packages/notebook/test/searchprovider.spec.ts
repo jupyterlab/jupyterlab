@@ -348,6 +348,23 @@ describe('@jupyterlab/notebook', () => {
         expect(provider.getCurrentMatch()).toBeUndefined();
         await provider.endQuery();
       });
+
+      it('should flag matches in a read-only raw cell', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'raw', source: 'test1', metadata: { editable: false } },
+          { cell_type: 'raw', source: 'test2' }
+        ]);
+        panel.content.activeCellIndex = 0;
+        await provider.startQuery(/test\d/, undefined);
+        expect(provider.getCurrentMatch()).toMatchObject({
+          text: 'test1',
+          readonly: true
+        });
+        const match = await provider.highlightNext();
+        expect(match).toMatchObject({ text: 'test2', readonly: false });
+        await provider.endQuery();
+      });
     });
 
     describe('#searchOnCellOutputs', () => {
@@ -789,6 +806,20 @@ describe('@jupyterlab/notebook', () => {
         expect(provider.currentMatchIndex).toBe(null);
         expect(panel.content.activeCellIndex).toBe(1);
       });
+
+      it('should not replace the current match in a read-only raw cell', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'raw', source: 'test1', metadata: { editable: false } }
+        ]);
+        panel.content.activeCellIndex = 0;
+        await provider.startQuery(/test\d/, undefined);
+
+        const replaced = await provider.replaceCurrentMatch('bar');
+        expect(replaced).toBe(false);
+        const source = panel.model!.cells.get(0).sharedModel.getSource();
+        expect(source).toBe('test1');
+      });
     });
 
     describe('#replaceAllMatches()', () => {
@@ -882,6 +913,26 @@ describe('@jupyterlab/notebook', () => {
         source = panel.model!.cells.get(3).sharedModel.getSource();
         expect(source).toBe('test1 test2 test3');
         expect(provider.currentMatchIndex).toBe(null);
+      });
+
+      it('should not replace all matches in a read-only raw cell', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          {
+            cell_type: 'raw',
+            source: 'test1 test2',
+            metadata: { editable: false }
+          },
+          { cell_type: 'raw', source: 'test3' }
+        ]);
+        await provider.startQuery(/test\d/, undefined);
+
+        const replaced = await provider.replaceAllMatches('bar');
+        expect(replaced).toBe(true);
+        let source = panel.model!.cells.get(0).sharedModel.getSource();
+        expect(source).toBe('test1 test2');
+        source = panel.model!.cells.get(1).sharedModel.getSource();
+        expect(source).toBe('bar');
       });
 
       it('should replace all matches using regex', async () => {
