@@ -76,6 +76,7 @@ function updateCoreMode(skipAssets: boolean = false): void {
     'bootstrap.js',
     'publicpath.js',
     'webpack.config.js',
+    'process-shim.js',
     'webpack.prod.config.js',
     'webpack.prod.minimize.config.js',
     'webpack.prod.release.config.js',
