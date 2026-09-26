@@ -691,6 +691,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     } else {
       this._currentProviderIndex += atEndOfCurrentCell ? 1 : 0;
     }
+    const visitedProviders = new Set<number>();
     do {
       let searchEngine = this._searchProviders[this._currentProviderIndex];
 
@@ -707,6 +708,11 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
           searchEngine = this._searchProviders[this._currentProviderIndex];
         }
       }
+
+      if (visitedProviders.has(this._currentProviderIndex)) {
+        break;
+      }
+      visitedProviders.add(this._currentProviderIndex);
 
       const match = reverse
         ? await searchEngine.highlightPrevious(false, options)

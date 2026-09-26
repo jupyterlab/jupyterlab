@@ -530,6 +530,39 @@ describe('@jupyterlab/notebook', () => {
         const source2 = panel.model!.cells.get(2).sharedModel.getSource();
         expect(source2).toBe('bar test2');
       });
+
+      it('should not freeze when cycling replace with a read-only last cell', async () => {
+        // Setup: clear default cells and add editable cell + readonly cell
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1 test2' },
+          {
+            cell_type: 'code',
+            source: 'test3',
+            metadata: { editable: false }
+          }
+        ]);
+
+        await provider.startQuery(/test\d/, undefined);
+        expect(provider.matchesCount).toBe(3);
+        expect(provider.currentMatchIndex).toBe(0);
+
+        // Replace first match in editable cell
+        let replaced = await provider.replaceCurrentMatch('bar');
+        expect(replaced).toBe(true);
+        expect(provider.currentMatchIndex).toBe(0);
+
+        // Replace second match in editable cell - this should not hang
+        // even though the next cell is readonly and looping is enabled
+        replaced = await provider.replaceCurrentMatch('bar');
+        expect(replaced).toBe(true);
+
+        // The readonly cell's source should be unchanged
+        const readonlySource = panel
+          .model!.cells.get(1)
+          .sharedModel.getSource();
+        expect(readonlySource).toBe('test3');
+      });
     });
 
     describe('#replaceAllMatches()', () => {

@@ -195,23 +195,25 @@ class CodeCellSearchProvider extends CellSearchProvider {
         }
       }
 
-      while (this.currentProviderIndex < this.outputsProvider.length) {
-        const provider = this.outputsProvider[this.currentProviderIndex];
-        const match = await provider.highlightNext(false);
-        if (match) {
-          this.currentIndex =
-            super.matchesCount +
-            this.outputsProvider
-              .slice(0, this.currentProviderIndex)
-              .reduce(
-                (sum, provider) => (sum += provider.matchesCount ?? 0),
-                0
-              ) +
-            provider.currentMatchIndex!;
-          // Cell output is always read-only
-          return this._applyReadonlyState(match, true);
-        } else {
-          this.currentProviderIndex += 1;
+      if (!options?.skipReadOnly) {
+        while (this.currentProviderIndex < this.outputsProvider.length) {
+          const provider = this.outputsProvider[this.currentProviderIndex];
+          const match = await provider.highlightNext(false);
+          if (match) {
+            this.currentIndex =
+              super.matchesCount +
+              this.outputsProvider
+                .slice(0, this.currentProviderIndex)
+                .reduce(
+                  (sum, provider) => (sum += provider.matchesCount ?? 0),
+                  0
+                ) +
+              provider.currentMatchIndex!;
+            // Cell output is always read-only
+            return this._applyReadonlyState(match, true);
+          } else {
+            this.currentProviderIndex += 1;
+          }
         }
       }
 
@@ -226,7 +228,10 @@ class CodeCellSearchProvider extends CellSearchProvider {
    *
    * @returns The previous match if there is one.
    */
-  async highlightPrevious(): Promise<ISearchMatch | undefined> {
+  async highlightPrevious(
+    loop?: boolean,
+    options?: IHighlightAdjacentMatchOptions
+  ): Promise<ISearchMatch | undefined> {
     if (this.matchesCount === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
@@ -234,24 +239,26 @@ class CodeCellSearchProvider extends CellSearchProvider {
         this.currentProviderIndex = this.outputsProvider.length - 1;
       }
 
-      while (this.currentProviderIndex >= 0) {
-        const provider = this.outputsProvider[this.currentProviderIndex];
+      if (!options?.skipReadOnly) {
+        while (this.currentProviderIndex >= 0) {
+          const provider = this.outputsProvider[this.currentProviderIndex];
 
-        const match = await provider.highlightPrevious(false);
-        if (match) {
-          this.currentIndex =
-            super.matchesCount +
-            this.outputsProvider
-              .slice(0, this.currentProviderIndex)
-              .reduce(
-                (sum, provider) => (sum += provider.matchesCount ?? 0),
-                0
-              ) +
-            provider.currentMatchIndex!;
-          // Cell output is always read-only
-          return this._applyReadonlyState(match, true);
-        } else {
-          this.currentProviderIndex -= 1;
+          const match = await provider.highlightPrevious(false);
+          if (match) {
+            this.currentIndex =
+              super.matchesCount +
+              this.outputsProvider
+                .slice(0, this.currentProviderIndex)
+                .reduce(
+                  (sum, provider) => (sum += provider.matchesCount ?? 0),
+                  0
+                ) +
+              provider.currentMatchIndex!;
+            // Cell output is always read-only
+            return this._applyReadonlyState(match, true);
+          } else {
+            this.currentProviderIndex -= 1;
+          }
         }
       }
 
