@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { selectAll } from '@codemirror/commands';
-import { findNext, gotoLine } from '@codemirror/search';
 import type { JupyterFrontEnd } from '@jupyterlab/application';
 import type {
   ICommandPalette,
@@ -623,12 +622,13 @@ export namespace Commands {
 
     commands.addCommand(CommandIDs.find, {
       label: trans.__('Find…'),
-      execute: () => {
+      execute: async () => {
         const widget = tracker.currentWidget;
         if (!widget) {
           return;
         }
         const editor = widget.content.editor as CodeMirrorEditor;
+        const { findNext } = await import('@codemirror/search');
         editor.execCommand(findNext);
       },
       isEnabled,
@@ -642,7 +642,7 @@ export namespace Commands {
 
     commands.addCommand(CommandIDs.goToLine, {
       label: trans.__('Go to Line…'),
-      execute: args => {
+      execute: async args => {
         const widget = tracker.currentWidget;
         if (!widget) {
           return;
@@ -657,6 +657,7 @@ export namespace Commands {
             column: (column ?? 1) - 1
           });
         } else {
+          const { gotoLine } = await import('@codemirror/search');
           editor.execCommand(gotoLine);
         }
       },

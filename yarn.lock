@@ -2261,16 +2261,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyter/eslint-plugin@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@jupyter/eslint-plugin@npm:1.1.0"
+"@jupyter/eslint-plugin@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "@jupyter/eslint-plugin@npm:1.3.0"
   dependencies:
     "@typescript-eslint/utils": ^8.54.0
     "@typescript-eslint/visitor-keys": ^8.54.0
     jsonc-eslint-parser: ^2.4.0
   peerDependencies:
     eslint: ">=9.0.0"
-  checksum: 38d5c9fd45e43eaecbae5a58f2e23d8f5c3798a6da0301017400d5cb3050d8b15332fb1b65cbdb0dbd6aa01a28a0565f780d9b81a91fe42962ad44d27192896b
+  checksum: f95bea57e6341c37ead3d7d6e480d867e9cfcf9cae7c53871514a6437502bef34b269d65986cb777404ebbbac30eb91ab185d6ebc3aa5d1eb4e1a9e227d54a12
   languageName: node
   linkType: hard
 
@@ -2719,6 +2719,7 @@ __metadata:
   dependencies:
     "@codemirror/commands": ^6.10.2
     "@codemirror/lang-markdown": ^6.5.0
+    "@codemirror/lang-python": ^6.2.1
     "@codemirror/language": ^6.12.1
     "@codemirror/legacy-modes": ^6.5.2
     "@codemirror/search": ^6.6.0
@@ -3379,6 +3380,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-filebrowser@workspace:examples/filebrowser"
   dependencies:
+    "@codemirror/lang-markdown": ^6.5.0
     "@jupyter/web-components": ^0.17.1
     "@jupyterlab/application": ^4.7.0-alpha.2
     "@jupyterlab/apputils": ^4.8.0-alpha.2
@@ -3426,6 +3428,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-notebook@workspace:examples/notebook"
   dependencies:
+    "@codemirror/lang-markdown": ^6.5.0
     "@jupyter/web-components": ^0.17.1
     "@jupyter/ydoc": ^4.0.0
     "@jupyterlab/application": ^4.7.0-alpha.2
@@ -4716,7 +4719,7 @@ __metadata:
   resolution: "@jupyterlab/repo-top@workspace:."
   dependencies:
     "@eslint/js": ^10.0.1
-    "@jupyter/eslint-plugin": ^1.1.0
+    "@jupyter/eslint-plugin": ^1.3.0
     eslint: ^9.26.0
     eslint-config-prettier: ^10.0.0
     eslint-plugin-jest: ^28.0.0
@@ -4976,6 +4979,7 @@ __metadata:
   resolution: "@jupyterlab/statusbar@workspace:packages/statusbar"
   dependencies:
     "@jupyterlab/testing": ^4.7.0-alpha.2
+    "@jupyterlab/translation": ^4.7.0-alpha.2
     "@jupyterlab/ui-components": ^4.7.0-alpha.2
     "@lumino/algorithm": ^2.0.5
     "@lumino/coreutils": ^2.2.3
