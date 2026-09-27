@@ -1135,7 +1135,13 @@ export class CommandToolbarButton extends ReactWidget {
     addCommandToolbarButtonClass(this);
     this.setCommandAttributes(commands, id, args);
     commands.commandChanged.connect((_, change) => {
-      if (change.id === props.id) {
+      // Also handle 'many-changed' (emitted when notifyCommandChanged() is
+      // called without a specific command id). Without this condition, a
+      // broad visibility change via notifyCommandChanged() with no argument
+      // would leave the parent widget's lm-mod-hidden class stale even though
+      // the child CommandToolbarButtonComponent already re-renders correctly.
+      // See: https://github.com/jupyterlab/jupyterlab/issues/17697
+      if (change.id === props.id || change.type === 'many-changed') {
         this.setCommandAttributes(commands, id, args);
       }
     }, this);
