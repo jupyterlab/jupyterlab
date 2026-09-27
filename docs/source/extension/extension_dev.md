@@ -168,6 +168,46 @@ A service provided by a plugin is identified by a _token_, i.e., a concrete inst
 
 Consumer plugins import the token (for example, from the provider plugin's extension JavaScript package, or from a third package exporting the token for both the provider and consumer) and list the token in their plugin metadata `requires` or `optional` fields. When JupyterLab instantiates the consumer plugin by calling its `activate` function, it will pass in the service associated with the token as an argument. If the service is not available (i.e., the token has not been registered with JupyterLab), then JupyterLab will either throw an error and not activate the consumer (if the token was listed in `requires`), or will set the corresponding `activate` argument to `null` (if the token was listed in `optional`). JupyterLab orders plugin activation to ensure that a provider of a service is activated before its consumers. A token can only be registered with the system once.
 
+A TypeScript interface extending the interface associated with `TokenA` does not make a service provided with `TokenB` available to consumers that require `TokenA`. JupyterLab matches services by token identity. If consumers of both tokens should receive the same implementation, provide it through one plugin for each token. The `TokenA` provider can require `TokenB` and return that service:
+
+```typescript
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
+import { Token } from '@lumino/coreutils';
+
+interface IServiceA {
+  run(): void;
+}
+const IServiceA = new Token<IServiceA>('example-extension:IServiceA');
+
+interface IServiceB extends IServiceA {
+  describe(): string;
+}
+const IServiceB = new Token<IServiceB>('example-extension:IServiceB');
+
+class ServiceB implements IServiceB {
+  run(): void {}
+
+  describe(): string {
+    return 'service B';
+  }
+}
+
+const serviceBPlugin: JupyterFrontEndPlugin<IServiceB> = {
+  id: 'example-extension:service-b',
+  provides: IServiceB,
+  activate: () => new ServiceB()
+};
+
+const serviceAPlugin: JupyterFrontEndPlugin<IServiceA> = {
+  id: 'example-extension:service-a',
+  requires: [IServiceB],
+  provides: IServiceA,
+  activate: (_app, serviceB) => serviceB
+};
+```
+
+The two plugin objects register the same service instance under different tokens. In an extension, export each token from a package that its providers and consumers import.
+
 A consumer might list a token as `optional` when the service it identifies is not critical to the consumer, but would be nice to have if the service is available. For example, a consumer might list the status bar service as optional so that it can add an indicator to the status bar if it is available, but still make it possible for users running a customized JupyterLab distribution without a status bar to use the consumer plugin.
 
 A token defined in TypeScript can also define a TypeScript interface for the service associated with the token. If a package using the token uses TypeScript, the service will be type-checked against this interface when the package is compiled to JavaScript.
