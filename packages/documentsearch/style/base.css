@@ -224,10 +224,6 @@ button:not(:disabled) > .jp-DocumentSearch-up-down-button:active {
   justify-items: stretch;
 }
 
-.jp-DocumentSearch-search-filter-disabled {
-  color: var(--jp-ui-font-color2);
-}
-
 .jp-DocumentSearch-search-filter {
   display: flex;
   align-items: center;

@@ -31,6 +31,9 @@ export interface IFilter {
   description: string;
   /**
    * Filter description to be used when the filter is disabled in replace mode.
+   *
+   * @deprecated since 4.7.0, will be removed in 5.0. Filters are no longer
+   * disabled in replace mode.
    */
   disabledDescription?: string;
   /**
@@ -39,7 +42,10 @@ export interface IFilter {
   default: boolean;
   /**
    * Does the filter support replace?
-   * @deprecated
+   *
+   * @deprecated since 4.7.0, will be removed in 5.0. Filters are no longer
+   * disabled in replace mode; the search box disables Replace for matches
+   * which cannot be replaced.
    */
   supportReplace?: boolean;
 }

@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { IFilter } from '@jupyterlab/documentsearch';
 import {
   SearchDocumentModel,
   SearchDocumentView
@@ -16,6 +17,23 @@ async function rendered(view: SearchDocumentView): Promise<void> {
   await framePromise();
   await view.renderPromise;
   await framePromise();
+}
+
+/**
+ * Provider with a filter which declares that it does not support replace.
+ */
+class NoReplaceFilterProvider extends MatchListProvider {
+  getFilters(): { [key: string]: IFilter } {
+    return {
+      output: {
+        title: 'Search Outputs',
+        description: 'Search in the outputs.',
+        disabledDescription: 'Not available in replace mode.',
+        default: false,
+        supportReplace: false
+      }
+    };
+  }
 }
 
 describe('documentsearch/searchview', () => {
@@ -98,6 +116,32 @@ describe('documentsearch/searchview', () => {
         );
         view.model.dispose();
         readOnly.dispose();
+      });
+    });
+
+    describe('filters', () => {
+      it('should show a filter without replace support as usual in replace mode', async () => {
+        const noReplace = new NoReplaceFilterProvider([
+          { text: 'query', position: 0 }
+        ]);
+        view.model = new SearchDocumentModel(noReplace, 0);
+        view.model.searchExpression = 'query';
+        await signalToPromise(view.model.stateChanged);
+        await rendered(view);
+        view.node
+          .querySelector<HTMLButtonElement>(
+            'button[title="Show Search Filters"]'
+          )!
+          .click();
+        await rendered(view);
+
+        const filter = view.node.querySelector<HTMLLabelElement>(
+          '.jp-DocumentSearch-search-filter'
+        )!;
+        expect(filter.title).toBe('Search in the outputs.');
+        expect(filter.querySelector('input')!.disabled).toBe(false);
+        view.model.dispose();
+        noReplace.dispose();
       });
     });
   });

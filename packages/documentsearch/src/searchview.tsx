@@ -41,7 +41,6 @@ const FILTER_BUTTON_CLASS = 'jp-DocumentSearch-filter-button';
 const FILTER_BUTTON_ENABLED_CLASS = 'jp-DocumentSearch-filter-button-enabled';
 const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
 const SEARCH_OPTIONS_CLASS = 'jp-DocumentSearch-search-options';
-const SEARCH_FILTER_DISABLED_CLASS = 'jp-DocumentSearch-search-filter-disabled';
 const SEARCH_FILTER_CLASS = 'jp-DocumentSearch-search-filter';
 const REPLACE_BUTTON_CLASS = 'jp-DocumentSearch-replace-button';
 const REPLACE_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-replace-button-wrapper';
@@ -404,24 +403,15 @@ interface IFilterSelectionProps {
   title: string;
   description: string;
   value: boolean;
-  isEnabled: boolean;
   onToggle: () => void;
 }
 
 function FilterSelection(props: IFilterSelectionProps): JSX.Element {
   return (
-    <label
-      className={
-        props.isEnabled
-          ? SEARCH_FILTER_CLASS
-          : `${SEARCH_FILTER_CLASS} ${SEARCH_FILTER_DISABLED_CLASS}`
-      }
-      title={props.description}
-    >
+    <label className={SEARCH_FILTER_CLASS} title={props.description}>
       <input
         type="checkbox"
         className="jp-mod-styled"
-        disabled={!props.isEnabled}
         checked={props.value}
         onChange={props.onToggle}
       />
@@ -662,20 +652,14 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
       <div className={SEARCH_OPTIONS_CLASS}>
         {Object.keys(filters).map(name => {
           const filter = filters[name];
-
-          const isEnabled = !showReplace || filter.supportReplace;
-          // Show an alternate description, if one exists, when a filter is disabled in replace mode.
-          const description = isEnabled
-            ? filter.description
-            : (filter.disabledDescription ?? filter.description);
           return (
             <FilterSelection
               key={name}
               title={filter.title}
               description={
-                description + (name == 'selection' ? selectionKeyHint : '')
+                filter.description +
+                (name == 'selection' ? selectionKeyHint : '')
               }
-              isEnabled={true}
               onToggle={async () => {
                 await this.props.onFilterChanged(
                   name,
