@@ -202,7 +202,7 @@ const serviceAPlugin: JupyterFrontEndPlugin<IServiceA> = {
   id: 'example-extension:service-a',
   requires: [IServiceB],
   provides: IServiceA,
-  activate: (_app, serviceB) => serviceB
+  activate: (_app, serviceB: IServiceB) => serviceB
 };
 ```
 
