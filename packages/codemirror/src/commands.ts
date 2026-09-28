@@ -11,12 +11,15 @@ import {
   insertTab,
   simplifySelection
 } from '@codemirror/commands';
+import type * as CodeMirrorSearch from '@codemirror/search';
 import type { EditorState, Transaction } from '@codemirror/state';
+import type { Command, EditorView } from '@codemirror/view';
 import {
   COMPLETER_ACTIVE_CLASS,
   COMPLETER_ENABLED_CLASS,
   COMPLETER_LINE_BEGINNING_CLASS
 } from '@jupyterlab/codeeditor';
+import { PromiseDelegate } from '@lumino/coreutils';
 import {
   commandRegistryFacet,
   hasKeyBinding
@@ -189,5 +192,89 @@ export namespace StateCommands {
       return false;
     }
     return indentLess(target);
+  }
+
+  /**
+   * Select all occurrences of the current selection.
+   */
+  export function selectSelectionMatches(view: EditorView): boolean {
+    return Private.runSearchCommand(
+      view,
+      search => search.selectSelectionMatches
+    );
+  }
+
+  /**
+   * Open the CodeMirror search panel.
+   */
+  export function openSearchPanel(view: EditorView): boolean {
+    return Private.runSearchCommand(view, search => search.openSearchPanel);
+  }
+
+  /**
+   * Close the CodeMirror search panel.
+   */
+  export function closeSearchPanel(view: EditorView): boolean {
+    return Private.runSearchCommand(view, search => search.closeSearchPanel);
+  }
+
+  /**
+   * Select the next match of the current search query.
+   */
+  export function findNext(view: EditorView): boolean {
+    return Private.runSearchCommand(view, search => search.findNext);
+  }
+
+  /**
+   * Select the previous match of the current search query.
+   */
+  export function findPrevious(view: EditorView): boolean {
+    return Private.runSearchCommand(view, search => search.findPrevious);
+  }
+}
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  let searchLoaded: PromiseDelegate<typeof CodeMirrorSearch> | null = null;
+
+  /**
+   * The search module once it has loaded, for the synchronous path of the
+   * key bindings, which must report whether they handled the key.
+   */
+  let search: typeof CodeMirrorSearch | null = null;
+
+  /**
+   * Lazily load the search module when the first search command runs.
+   */
+  export async function ensureSearch(): Promise<typeof CodeMirrorSearch> {
+    if (searchLoaded == null) {
+      searchLoaded = new PromiseDelegate();
+      searchLoaded.resolve(await import('@codemirror/search'));
+    }
+    return searchLoaded.promise;
+  }
+
+  /**
+   * Run a search command, loading the module on first use.
+   *
+   * The key press that triggers the load is reported as handled and the
+   * command runs once the module has arrived.
+   */
+  export function runSearchCommand(
+    view: EditorView,
+    pick: (search: typeof CodeMirrorSearch) => Command
+  ): boolean {
+    if (search !== null) {
+      return pick(search)(view);
+    }
+    void ensureSearch().then(module => {
+      search = module;
+      if (view.dom.isConnected) {
+        pick(module)(view);
+      }
+    });
+    return true;
   }
 }
