@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+import type { ISearchMatch } from '@jupyterlab/documentsearch';
 import {
   GenericSearchProvider,
   SearchDocumentModel
@@ -235,6 +236,42 @@ describe('documentsearch/searchmodel', () => {
         await replaceModel.highlightNext();
         await replaceModel.replaceCurrentMatch();
         expect(matchList.replaced).toEqual([0]);
+      });
+    });
+
+    describe('#replaceAllEnabled', () => {
+      const search = async (matches: ISearchMatch[]) => {
+        const replaceModel = new SearchDocumentModel(
+          new MatchListProvider(matches),
+          0
+        );
+        replaceModel.searchExpression = 'query';
+        await signalToPromise(replaceModel.stateChanged);
+        return replaceModel;
+      };
+
+      it('should be true when one match can be replaced', async () => {
+        const replaceModel = await search([
+          { text: 'query', position: 0, readonly: true },
+          { text: 'query', position: 10 }
+        ]);
+        expect(replaceModel.replaceAllEnabled).toEqual(true);
+        replaceModel.dispose();
+      });
+
+      it('should be false when no match can be replaced', async () => {
+        const replaceModel = await search([
+          { text: 'query', position: 0, readonly: true },
+          { text: 'query', position: 10, readonly: true }
+        ]);
+        expect(replaceModel.replaceAllEnabled).toEqual(false);
+        replaceModel.dispose();
+      });
+
+      it('should be true when there are no matches', async () => {
+        const replaceModel = await search([]);
+        expect(replaceModel.replaceAllEnabled).toEqual(true);
+        replaceModel.dispose();
       });
     });
   });

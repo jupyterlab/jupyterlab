@@ -82,6 +82,13 @@ export class CellSearchProvider
   }
 
   /**
+   * The number of matches in the cell source which can be replaced.
+   */
+  get replaceableMatchesCount(): number {
+    return this.isReadOnlyProvider() ? 0 : super.matchesCount;
+  }
+
+  /**
    * Get the current match if it exists.
    */
   getCurrentMatch(): ISearchMatch | undefined {

@@ -9,6 +9,7 @@ import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { signalToPromise } from '@jupyterlab/testing';
 import * as utils from './utils';
 import type { IReplaceOptions } from '@jupyterlab/documentsearch';
+import { SearchDocumentModel } from '@jupyterlab/documentsearch';
 import type { CodeCell, CodeCellModel } from '@jupyterlab/cells';
 import { CellSearchProvider } from '@jupyterlab/cells';
 
@@ -117,6 +118,26 @@ describe('@jupyterlab/notebook', () => {
           }
         ]);
         expect(provider.matchesCount).toBe(2);
+        await provider.endQuery();
+      });
+    });
+
+    describe('#replaceableMatchesCount', () => {
+      it('should count only matches which can be replaced', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1 test2' },
+          { cell_type: 'code', source: 'test3', metadata: { editable: false } },
+          { cell_type: 'code', source: 'x = 1' }
+        ]);
+        (panel.model!.cells.get(2) as CodeCellModel).outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['test4']
+        });
+        await provider.startQuery(/test\d/, { output: true });
+        expect(provider.matchesCount).toBe(4);
+        expect(provider.replaceableMatchesCount).toBe(2);
         await provider.endQuery();
       });
     });
@@ -363,6 +384,39 @@ describe('@jupyterlab/notebook', () => {
         });
         const match = await provider.highlightNext();
         expect(match).toMatchObject({ text: 'test2', readonly: false });
+        await provider.endQuery();
+      });
+
+      it('should update replace availability when the selected cell changes', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'x = 1' },
+          { cell_type: 'code', source: 'test2' }
+        ]);
+        (panel.model!.cells.get(0) as CodeCellModel).outputs.add({
+          name: 'stdout',
+          output_type: 'stream',
+          text: ['test1']
+        });
+        panel.content.mode = 'command';
+        panel.content.activeCellIndex = 0;
+        await provider.cellChangeHandled;
+        const model = new SearchDocumentModel(provider, 0);
+        await provider.startQuery(/test\d/, { output: true, selection: true });
+        await model.highlightNext();
+        expect(provider.getCurrentMatch()?.text).toBe('test1');
+        expect(model.replaceEnabled).toBe(false);
+
+        panel.content.activeCellIndex = 1;
+        await provider.cellChangeHandled;
+        expect(provider.getCurrentMatch()?.text).toBe('test2');
+        expect(model.replaceEnabled).toBe(true);
+
+        panel.content.activeCellIndex = 0;
+        await provider.cellChangeHandled;
+        expect(provider.getCurrentMatch()?.text).toBe('test1');
+        expect(model.replaceEnabled).toBe(false);
+        model.dispose();
         await provider.endQuery();
       });
     });

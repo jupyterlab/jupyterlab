@@ -28,6 +28,10 @@ export class MatchListProvider extends SearchProvider {
     return this.matches.length;
   }
 
+  get replaceableMatchesCount(): number | null {
+    return this.matches.filter(match => !match.readonly).length;
+  }
+
   getCurrentMatch(): ISearchMatch | undefined {
     return this.matches[this._index];
   }

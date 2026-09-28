@@ -92,6 +92,18 @@ export class SearchDocumentModel
   }
 
   /**
+   * Whether Replace All has a match to replace.
+   *
+   * It stays enabled when there are no matches, and when the provider does
+   * not count the matches which can be replaced.
+   */
+  get replaceAllEnabled(): boolean {
+    return (
+      !this.totalMatches || this.searchProvider.replaceableMatchesCount !== 0
+    );
+  }
+
+  /**
    * Filter definitions for the current provider.
    */
   get filtersDefinition(): { [n: string]: IFilter } {

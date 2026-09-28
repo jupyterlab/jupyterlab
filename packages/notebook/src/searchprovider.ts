@@ -138,6 +138,16 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   /**
+   * The number of matches which can be replaced.
+   */
+  get replaceableMatchesCount(): number {
+    return this._searchProviders.reduce(
+      (sum, provider) => sum + provider.replaceableMatchesCount,
+      0
+    );
+  }
+
+  /**
    * Set to true if the widget under search is read-only, false
    * if it is editable. Will be used to determine whether to show
    * the replace option.

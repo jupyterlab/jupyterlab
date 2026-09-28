@@ -221,6 +221,7 @@ interface IReplaceEntryProps {
   replaceText: string;
   translator?: ITranslator;
   replaceEnabled?: boolean;
+  replaceAllEnabled?: boolean;
 }
 
 function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
@@ -273,7 +274,15 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       </button>
       <button
         className={REPLACE_BUTTON_WRAPPER_CLASS}
+        disabled={props.replaceAllEnabled === false}
         onClick={() => props.onReplaceAll()}
+        title={
+          props.replaceAllEnabled === false
+            ? trans.__(
+                'Cannot replace: all matches are in outputs or read-only cells'
+              )
+            : trans.__('Replace All')
+        }
       >
         <span className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}>
           {trans.__('Replace All')}
@@ -495,9 +504,13 @@ interface ISearchOverlayProps {
    */
   wholeWords: boolean;
   /**
-   * Whether the replace button is disabled.
-   * */
+   * Whether the replace button is enabled.
+   */
   replaceEnabled?: boolean;
+  /**
+   * Whether the replace all button is enabled.
+   */
+  replaceAllEnabled?: boolean;
   /**
    * Callback on case sensitive toggled.
    */
@@ -773,6 +786,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
                 preserveCase={this.props.preserveCase}
                 translator={this.translator}
                 replaceEnabled={this.props.replaceEnabled}
+                replaceAllEnabled={this.props.replaceAllEnabled}
               />
               <div className={SPACER_CLASS}></div>
             </>
@@ -910,6 +924,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         initialSearchText={this.model.initialQuery}
         lastSearchText={this.model.searchExpression}
         replaceEnabled={this.model.replaceEnabled}
+        replaceAllEnabled={this.model.replaceAllEnabled}
         searchInputRef={
           this._searchInput as React.RefObject<HTMLTextAreaElement>
         }

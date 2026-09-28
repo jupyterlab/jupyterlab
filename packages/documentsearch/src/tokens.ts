@@ -406,4 +406,12 @@ export interface ISearchProvider extends IBaseSearchProvider {
    * The search box disables Replace while this match is read-only.
    */
   getCurrentMatch?(): ISearchMatch | undefined;
+
+  /**
+   * The number of matches which can be replaced, if known.
+   *
+   * The search box disables Replace All when there are matches but none of
+   * them can be replaced.
+   */
+  readonly replaceableMatchesCount?: number | null;
 }

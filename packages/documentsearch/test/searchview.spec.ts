@@ -72,5 +72,33 @@ describe('documentsearch/searchview', () => {
         expect(replaceButton().disabled).toBe(false);
       });
     });
+
+    describe('replace all button', () => {
+      const replaceAllButton = () =>
+        view.node.querySelectorAll<HTMLButtonElement>(
+          '.jp-DocumentSearch-replace-button-wrapper'
+        )[1];
+
+      it('should be enabled when one match can be replaced', () => {
+        expect(replaceAllButton().disabled).toBe(false);
+        expect(replaceAllButton().title).toBe('Replace All');
+      });
+
+      it('should be disabled when no match can be replaced', async () => {
+        const readOnly = new MatchListProvider([
+          { text: 'query', position: 0, readonly: true }
+        ]);
+        view.model = new SearchDocumentModel(readOnly, 0);
+        view.model.searchExpression = 'query';
+        await signalToPromise(view.model.stateChanged);
+        await rendered(view);
+        expect(replaceAllButton().disabled).toBe(true);
+        expect(replaceAllButton().title).toBe(
+          'Cannot replace: all matches are in outputs or read-only cells'
+        );
+        view.model.dispose();
+        readOnly.dispose();
+      });
+    });
   });
 });
