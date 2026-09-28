@@ -144,12 +144,9 @@ import { MessageLoop } from '@lumino/messaging';
 import type { ContextMenu, Menu, Widget } from '@lumino/widgets';
 import { Panel } from '@lumino/widgets';
 import { CellBarExtension } from '@jupyterlab/cell-toolbar';
+import React from 'react';
 import { cellExecutor } from './cellexecutor';
 import { logNotebookOutput } from './nboutput';
-import {
-  ActiveCellTool,
-  CellIdField
-} from './tool-widgets/activeCellToolWidget';
 import {
   CellMetadataField,
   NotebookMetadataField
@@ -1324,6 +1321,7 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
     formRegistry: IFormRendererRegistry,
     translator?: ITranslator
   ) => {
+    const trans = (translator || nullTranslator).load('jupyterlab');
     const editorFactory: CodeEditor.Factory = options =>
       editorServices.factoryService.newInlineEditor(options);
     // Register the custom fields. As with the active cell tool below, the
@@ -1334,7 +1332,7 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
     const cellMetadataField = new CellMetadataField({
       editorFactory,
       tracker,
-      label: 'Cell metadata',
+      label: trans.__('Cell metadata'),
       translator: translator
     });
     const cellComponent: IFormRenderer = {
@@ -1350,7 +1348,7 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
     const notebookMetadataField = new NotebookMetadataField({
       editorFactory,
       tracker,
-      label: 'Notebook metadata',
+      label: trans.__('Notebook metadata'),
       translator: translator
     });
     const notebookComponent: IFormRenderer = {
@@ -1364,6 +1362,39 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
     );
   }
 };
+
+type ActiveCellToolRendererProps = FieldProps & {
+  tracker: INotebookTracker;
+  languages: IEditorLanguageRegistry;
+};
+
+type CellIdFieldRendererProps = FieldProps & {
+  tracker: INotebookTracker;
+  translator?: ITranslator;
+};
+
+const ActiveCellToolRenderer = React.lazy(async () => {
+  const { ActiveCellTool } =
+    await import('./tool-widgets/activeCellToolWidget');
+  let tool: InstanceType<typeof ActiveCellTool> | null = null;
+  return {
+    default: (props: ActiveCellToolRendererProps): React.ReactElement => {
+      tool ??= new ActiveCellTool({
+        tracker: props.tracker,
+        languages: props.languages
+      });
+      return tool.render(props);
+    }
+  };
+});
+
+const CellIdFieldRenderer = React.lazy(async () => {
+  const { CellIdField } = await import('./tool-widgets/activeCellToolWidget');
+  return {
+    default: (props: CellIdFieldRendererProps): React.ReactElement =>
+      CellIdField(props)
+  };
+});
 
 /**
  * Registering active cell field.
@@ -1383,17 +1414,19 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
     translator?: ITranslator
   ) => {
     // The field renderer is used by rjsf as a React component, so it runs on
-    // every rebuild of the metadata form. The tool is created once and reused:
-    // constructing one per render would rebuild the prompt and the preview from
-    // scratch (showing them empty until the next update) and would leave a
-    // connection to the cell model behind for every abandoned instance.
-    const tool = new ActiveCellTool({
-      tracker,
-      languages
-    });
+    // every rebuild of the metadata form. The lazy renderer keeps one shared
+    // tool instance after the module is loaded.
     const component: IFormRenderer = {
       fieldRenderer: (props: FieldProps) => {
-        return tool.render(props);
+        return React.createElement(
+          React.Suspense,
+          { fallback: null },
+          React.createElement(ActiveCellToolRenderer, {
+            ...props,
+            tracker,
+            languages
+          })
+        );
       }
     };
     formRegistry.addRenderer(
@@ -1403,11 +1436,15 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
 
     const cellIdComponent: IFormRenderer = {
       fieldRenderer: (props: FieldProps) => {
-        return CellIdField({
-          ...props,
-          tracker,
-          translator
-        });
+        return React.createElement(
+          React.Suspense,
+          { fallback: null },
+          React.createElement(CellIdFieldRenderer, {
+            ...props,
+            tracker,
+            translator
+          })
+        );
       }
     };
     formRegistry.addRenderer(
