@@ -113,7 +113,10 @@ export class HistoryInlineCompletionProvider implements IInlineCompletionProvide
         output: false,
         raw: true,
         hist_access_type: 'search',
-        pattern: linePrefix + '*' + (suffix ? suffix + '*' : ''),
+        pattern:
+          escapeGlob(linePrefix) +
+          '*' +
+          (suffix ? escapeGlob(suffix) + '*' : ''),
         unique: true,
         n: this._maxSuggestions
       };
@@ -155,4 +158,11 @@ export namespace HistoryInlineCompletionProvider {
   export interface IOptions {
     translator?: ITranslator;
   }
+}
+
+/**
+ * Quote literal characters with special meaning in history search patterns.
+ */
+function escapeGlob(text: string): string {
+  return text.replace(/[?*[]/g, character => `[${character}]`);
 }
