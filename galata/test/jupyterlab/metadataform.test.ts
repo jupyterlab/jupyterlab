@@ -117,6 +117,7 @@ async function getNotebookMetadata(
 test.describe('Required metadata', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
@@ -219,6 +220,7 @@ test.describe('Required metadata', () => {
 test.describe('Nested metadata', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
@@ -310,6 +312,7 @@ test.describe('Nested metadata', () => {
 test.describe('Default metadata without "showModified" flag', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
@@ -407,6 +410,7 @@ test.describe('Default metadata without "showModified" flag', () => {
 test.describe('Default metadata with "showModified" flag', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
@@ -457,6 +461,7 @@ test.describe('Default metadata with "showModified" flag', () => {
 test.describe('Notebook level and cell type metadata', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
@@ -569,6 +574,7 @@ test.describe('Notebook level and cell type metadata', () => {
 test.describe('Conditional metadata', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
@@ -643,6 +649,7 @@ test.describe('Conditional metadata', () => {
 test.describe('UISchema', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {

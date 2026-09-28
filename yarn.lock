@@ -2719,6 +2719,7 @@ __metadata:
   dependencies:
     "@codemirror/commands": ^6.10.2
     "@codemirror/lang-markdown": ^6.5.0
+    "@codemirror/lang-python": ^6.2.1
     "@codemirror/language": ^6.12.1
     "@codemirror/legacy-modes": ^6.5.2
     "@codemirror/search": ^6.6.0
@@ -3379,6 +3380,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-filebrowser@workspace:examples/filebrowser"
   dependencies:
+    "@codemirror/lang-markdown": ^6.5.0
     "@jupyter/web-components": ^0.17.1
     "@jupyterlab/application": ^4.7.0-alpha.2
     "@jupyterlab/apputils": ^4.8.0-alpha.2
@@ -3426,6 +3428,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-notebook@workspace:examples/notebook"
   dependencies:
+    "@codemirror/lang-markdown": ^6.5.0
     "@jupyter/web-components": ^0.17.1
     "@jupyter/ydoc": ^4.0.0
     "@jupyterlab/application": ^4.7.0-alpha.2
@@ -9177,11 +9180,11 @@ __metadata:
   linkType: hard
 
 "baseline-browser-mapping@npm:^2.10.12":
-  version: 2.10.37
-  resolution: "baseline-browser-mapping@npm:2.10.37"
+  version: 2.11.22
+  resolution: "baseline-browser-mapping@npm:2.11.22"
   bin:
     baseline-browser-mapping: dist/cli.cjs
-  checksum: c46873f68400f5eddc8e888f3f040e858763ea8868d68d9d0347a8936563d141a774b2f1c614c7fc4714034be42ed011b310a9ee25c2f68b2112c7db91d09135
+  checksum: fcea838ca33592b1f60cf936a95006f9ff8da7a7fb13218f46b32d7b39669907aad06adf4b52d9a83e5daa56558a7004c14af138c0542bdeda1b68fff2085bb2
   languageName: node
   linkType: hard
 
@@ -20020,8 +20023,8 @@ __metadata:
   linkType: hard
 
 "svgo@npm:^3.3.2":
-  version: 3.3.4
-  resolution: "svgo@npm:3.3.4"
+  version: 3.3.5
+  resolution: "svgo@npm:3.3.5"
   dependencies:
     commander: ^7.2.0
     css-select: ^5.1.0
@@ -20031,8 +20034,8 @@ __metadata:
     picocolors: ^1.0.0
     sax: ^1.5.0
   bin:
-    svgo: ./bin/svgo
-  checksum: 7828e76b42bb58867703a21aa80f2cd1a8c1828df2500a5ac58a30cca483d9c7862d07c9060a4cdf24bbb8ac3d2148ed27e42dc2794738d097fae0ce05dabd81
+    svgo: bin/svgo
+  checksum: ea18071747812aed65439e1e3bdfcfd527f8c51c459c94f6aeb539653bb3f6ea4f2a75451427d2fde2fb1da578b704df8406b7de30382cca878594ec1d45be84
   languageName: node
   linkType: hard
 
