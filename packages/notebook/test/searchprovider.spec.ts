@@ -242,14 +242,14 @@ describe('@jupyterlab/notebook', () => {
         expect(provider.currentMatchIndex).toBe(0);
 
         let match = await provider.highlightNext();
-        expect(match?.readonly).toBe(true);
+        expect(match?.readOnly).toBe(true);
 
         match = await provider.highlightNext();
-        expect(match?.readonly).toBe(true);
+        expect(match?.readOnly).toBe(true);
 
         // Loop back
         match = await provider.highlightNext();
-        expect(match?.readonly).toBe(true);
+        expect(match?.readOnly).toBe(true);
 
         await provider.endQuery();
       });
@@ -328,11 +328,11 @@ describe('@jupyterlab/notebook', () => {
         await provider.highlightNext();
         await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(4);
-        expect(provider.getCurrentMatch()?.readonly).toBe(true);
+        expect(provider.getCurrentMatch()?.readOnly).toBe(true);
 
         await provider.highlightPrevious(true, { skipReadOnly: true });
         expect(provider.currentMatchIndex).toBe(2);
-        expect(provider.getCurrentMatch()?.readonly).toBe(false);
+        expect(provider.getCurrentMatch()?.readOnly).toBe(false);
         const outputArea = (panel.content.widgets[1] as CodeCell).outputArea;
         expect(outputArea.node.querySelector('.jp-current-match')).toBeNull();
         await provider.endQuery();
@@ -345,13 +345,13 @@ describe('@jupyterlab/notebook', () => {
         await provider.startQuery(/test\d/, undefined);
         expect(provider.getCurrentMatch()).toMatchObject({
           text: 'test1',
-          readonly: false
+          readOnly: false
         });
         await provider.highlightNext();
         await provider.highlightNext();
         expect(provider.getCurrentMatch()).toMatchObject({
           text: 'test3',
-          readonly: true
+          readOnly: true
         });
         await provider.endQuery();
       });
@@ -380,10 +380,10 @@ describe('@jupyterlab/notebook', () => {
         await provider.startQuery(/test\d/, undefined);
         expect(provider.getCurrentMatch()).toMatchObject({
           text: 'test1',
-          readonly: true
+          readOnly: true
         });
         const match = await provider.highlightNext();
-        expect(match).toMatchObject({ text: 'test2', readonly: false });
+        expect(match).toMatchObject({ text: 'test2', readOnly: false });
         await provider.endQuery();
       });
 
@@ -439,7 +439,7 @@ describe('@jupyterlab/notebook', () => {
         for (let i = 1; i < 4; i++) {
           const match = await provider.highlightNext();
           expect(provider.currentMatchIndex).toBe(i);
-          expect(match?.readonly).toBeTruthy();
+          expect(match?.readOnly).toBeTruthy();
         }
 
         await provider.highlightNext();
@@ -448,7 +448,7 @@ describe('@jupyterlab/notebook', () => {
         for (let i = 3; i > 0; i--) {
           const match = await provider.highlightPrevious();
           expect(provider.currentMatchIndex).toBe(i);
-          expect(match?.readonly).toBeTruthy();
+          expect(match?.readOnly).toBeTruthy();
         }
 
         await provider.endQuery();
@@ -534,28 +534,28 @@ describe('@jupyterlab/notebook', () => {
         for (let i = 1; i < 2; i++) {
           const match = await provider.highlightNext();
           expect(provider.currentMatchIndex).toBe(i);
-          expect(match?.readonly).toBeFalsy();
+          expect(match?.readOnly).toBeFalsy();
         }
 
         //First cell output
         for (let i = 2; i < 4; i++) {
           const match = await provider.highlightNext();
           expect(provider.currentMatchIndex).toBe(i);
-          expect(match?.readonly).toBeTruthy();
+          expect(match?.readOnly).toBeTruthy();
         }
 
         //Second cell and its output
         for (let i = 4; i < 8; i++) {
           const match = await provider.highlightNext();
           expect(provider.currentMatchIndex).toBe(i);
-          expect(match?.readonly).toBeTruthy();
+          expect(match?.readOnly).toBeTruthy();
         }
 
         //Markdown cell
         for (let i = 8; i < 10; i++) {
           const match = await provider.highlightNext();
           expect(provider.currentMatchIndex).toBe(i);
-          expect(match?.readonly).toBeFalsy();
+          expect(match?.readOnly).toBeFalsy();
         }
 
         await provider.highlightNext();
@@ -820,7 +820,7 @@ describe('@jupyterlab/notebook', () => {
         await provider.replaceCurrentMatch('bar');
         expect(panel.content.activeCellIndex).toBe(2);
         expect(provider.currentMatchIndex).toBe(1);
-        expect(provider.getCurrentMatch()?.readonly).toBe(false);
+        expect(provider.getCurrentMatch()?.readOnly).toBe(false);
       });
 
       it('should move past output matches to the next match', async () => {
@@ -842,7 +842,7 @@ describe('@jupyterlab/notebook', () => {
         await provider.replaceCurrentMatch('bar');
         expect(panel.content.activeCellIndex).toBe(2);
         expect(provider.currentMatchIndex).toBe(1);
-        expect(provider.getCurrentMatch()?.readonly).toBe(false);
+        expect(provider.getCurrentMatch()?.readOnly).toBe(false);
       });
 
       it('should not wrap to the first cell when looping is disabled', async () => {

@@ -185,7 +185,7 @@ export interface ISearchMatch {
   /**
    * Indicates whether the match belongs to a cell output or non-editable cell.
    */
-  readonly?: boolean;
+  readOnly?: boolean;
 }
 
 /**

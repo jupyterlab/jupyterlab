@@ -45,7 +45,7 @@ describe('documentsearch/searchview', () => {
     beforeEach(async () => {
       provider = new MatchListProvider([
         { text: 'query', position: 0 },
-        { text: 'query', position: 10, readonly: true }
+        { text: 'query', position: 10, readOnly: true }
       ]);
       model = new SearchDocumentModel(provider, 0);
       view = new SearchDocumentView(model);
@@ -104,7 +104,7 @@ describe('documentsearch/searchview', () => {
 
       it('should be disabled when no match can be replaced', async () => {
         const readOnly = new MatchListProvider([
-          { text: 'query', position: 0, readonly: true }
+          { text: 'query', position: 0, readOnly: true }
         ]);
         view.model = new SearchDocumentModel(readOnly, 0);
         view.model.searchExpression = 'query';

@@ -88,7 +88,7 @@ export class SearchDocumentModel
    * Whether the current match can be replaced.
    */
   get replaceEnabled(): boolean {
-    return !this.searchProvider.getCurrentMatch?.()?.readonly;
+    return !this.searchProvider.getCurrentMatch?.()?.readOnly;
   }
 
   /**

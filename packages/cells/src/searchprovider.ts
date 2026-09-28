@@ -57,12 +57,12 @@ export class CellSearchProvider
   }
 
   /**
-   * Adds readonly flag to the match based on cell editability.
+   * Adds the `readOnly` flag to the match based on cell editability.
    *
    * @param match - The search match.
    * @param fromHTML - True if match is from rendered HTML, else false.
    */
-  protected _applyReadonlyState(
+  protected _applyReadOnlyState(
     match: ISearchMatch | undefined,
     fromHTML: boolean
   ): ISearchMatch | undefined {
@@ -70,12 +70,16 @@ export class CellSearchProvider
       return undefined;
     }
     if (fromHTML) {
-      return { ...match, readonly: true };
+      return { ...match, readOnly: true };
     }
     const isEditable = this.model.getMetadata('editable') !== false;
-    return { ...match, readonly: !isEditable };
+    return { ...match, readOnly: !isEditable };
   }
 
+  /**
+   * Whether the cell is read-only: its `editable` metadata is `false`.
+   * No match in a read-only cell can be replaced.
+   */
   public isReadOnlyProvider(): boolean {
     const isEditable = this.model.getMetadata('editable') !== false;
     return !isEditable;
@@ -92,7 +96,7 @@ export class CellSearchProvider
    * Get the current match if it exists.
    */
   getCurrentMatch(): ISearchMatch | undefined {
-    return this._applyReadonlyState(super.getCurrentMatch(), false);
+    return this._applyReadOnlyState(super.getCurrentMatch(), false);
   }
 
   /**
@@ -105,7 +109,7 @@ export class CellSearchProvider
     options?: IHighlightAdjacentMatchOptions
   ): Promise<ISearchMatch | undefined> {
     const match = await super.highlightNext(loop, options);
-    return this._applyReadonlyState(match, false);
+    return this._applyReadOnlyState(match, false);
   }
 
   /**
@@ -118,7 +122,7 @@ export class CellSearchProvider
     options?: IHighlightAdjacentMatchOptions
   ): Promise<ISearchMatch | undefined> {
     const match = await super.highlightPrevious(loop, options);
-    return this._applyReadonlyState(match, false);
+    return this._applyReadOnlyState(match, false);
   }
 
   /**
@@ -230,7 +234,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
     } else if (this.currentProviderIndex < this.outputsProvider.length) {
       const provider = this.outputsProvider[this.currentProviderIndex];
       const match = provider.currentMatch ?? undefined;
-      return this._applyReadonlyState(match, true);
+      return this._applyReadOnlyState(match, true);
     }
 
     return undefined;
@@ -287,7 +291,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
               ) +
             provider.currentMatchIndex!;
           // Cell output is always read-only
-          return this._applyReadonlyState(match, true);
+          return this._applyReadOnlyState(match, true);
         } else {
           this.currentProviderIndex += 1;
         }
@@ -336,7 +340,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
               ) +
             provider.currentMatchIndex!;
           // Cell output is always read-only
-          return this._applyReadonlyState(match, true);
+          return this._applyReadOnlyState(match, true);
         } else {
           this.currentProviderIndex -= 1;
         }

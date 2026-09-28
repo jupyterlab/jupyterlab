@@ -29,7 +29,7 @@ export class MatchListProvider extends SearchProvider {
   }
 
   get replaceableMatchesCount(): number | null {
-    return this.matches.filter(match => !match.readonly).length;
+    return this.matches.filter(match => !match.readOnly).length;
   }
 
   getCurrentMatch(): ISearchMatch | undefined {

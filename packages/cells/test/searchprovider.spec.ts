@@ -45,8 +45,8 @@ describe('cells/searchprovider', () => {
       await provider.startQuery(/test\d/, {});
 
       const match = await provider.highlightNext();
-      expect(match).toMatchObject({ text: 'test1', readonly: true });
-      expect(provider.getCurrentMatch()?.readonly).toBe(true);
+      expect(match).toMatchObject({ text: 'test1', readOnly: true });
+      expect(provider.getCurrentMatch()?.readOnly).toBe(true);
       provider.dispose();
     });
 
@@ -68,7 +68,7 @@ describe('cells/searchprovider', () => {
       await provider.startQuery(/test\d/, {});
       await provider.highlightNext();
 
-      expect(provider.getCurrentMatch()?.readonly).toBe(false);
+      expect(provider.getCurrentMatch()?.readOnly).toBe(false);
       expect(await provider.replaceAllMatches('bar')).toBe(true);
       expect(cell.model.sharedModel.getSource()).toBe('bar bar');
       provider.dispose();

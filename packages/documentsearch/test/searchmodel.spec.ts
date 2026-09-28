@@ -198,7 +198,7 @@ describe('documentsearch/searchmodel', () => {
       beforeEach(async () => {
         matchList = new MatchListProvider([
           { text: 'query', position: 0 },
-          { text: 'query', position: 10, readonly: true }
+          { text: 'query', position: 10, readOnly: true }
         ]);
         replaceModel = new SearchDocumentModel(matchList, 0);
         replaceModel.searchExpression = 'query';
@@ -252,7 +252,7 @@ describe('documentsearch/searchmodel', () => {
 
       it('should be true when one match can be replaced', async () => {
         const replaceModel = await search([
-          { text: 'query', position: 0, readonly: true },
+          { text: 'query', position: 0, readOnly: true },
           { text: 'query', position: 10 }
         ]);
         expect(replaceModel.replaceAllEnabled).toEqual(true);
@@ -261,8 +261,8 @@ describe('documentsearch/searchmodel', () => {
 
       it('should be false when no match can be replaced', async () => {
         const replaceModel = await search([
-          { text: 'query', position: 0, readonly: true },
-          { text: 'query', position: 10, readonly: true }
+          { text: 'query', position: 0, readOnly: true },
+          { text: 'query', position: 10, readOnly: true }
         ]);
         expect(replaceModel.replaceAllEnabled).toEqual(false);
         replaceModel.dispose();
