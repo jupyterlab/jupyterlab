@@ -220,12 +220,31 @@
   flex: 0 0 auto;
 }
 
+.lm-CommandPalette-itemContent.jp-mod-recent {
+  display: flex;
+}
+
+.lm-CommandPalette-itemContent.jp-mod-recent .lm-CommandPalette-itemLabel {
+  flex: 1 1 auto;
+}
+
 .jp-CommandPalette-recentBadge {
   flex: 0 0 auto;
   align-self: center;
   padding: 0 4px;
   color: var(--jp-brand-color1);
   font-size: var(--jp-ui-font-size0);
+}
+
+/*
+ * The brand color lacks contrast on the hover background.
+ */
+.lm-CommandPalette-item:hover .jp-CommandPalette-recentBadge {
+  color: var(--jp-ui-font-color1);
+}
+
+.lm-CommandPalette-item.lm-mod-disabled .jp-CommandPalette-recentBadge {
+  color: var(--jp-ui-font-color2);
 }
 
 .lm-CommandPalette-item.lm-mod-active .jp-CommandPalette-recentBadge {

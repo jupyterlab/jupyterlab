@@ -11,13 +11,15 @@ import {
 } from '@jupyterlab/apputils';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { IStateDB } from '@jupyterlab/statedb';
-import type { ITranslator } from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import type { IDisposable } from '@lumino/disposable';
 import { DisposableDelegate } from '@lumino/disposable';
+import type { VirtualElement } from '@lumino/virtualdom';
+import { h } from '@lumino/virtualdom';
 import type { CommandPalette } from '@lumino/widgets';
 
 /**
@@ -32,7 +34,7 @@ namespace CommandIDs {
 const PALETTE_PLUGIN_ID = '@jupyterlab/apputils-extension:palette';
 
 /**
- * The key used to store the recently executed commands in the state database.
+ * The state database key of the recent commands.
  */
 const RECENTS_STATE_KEY = 'command-palette:recents';
 
@@ -101,8 +103,7 @@ export namespace Palette {
   export function activate(
     app: JupyterFrontEnd,
     translator: ITranslator,
-    settingRegistry: ISettingRegistry | null,
-    state: IStateDB | null = null
+    settingRegistry: ISettingRegistry | null
   ): ICommandPalette {
     const { commands, shell } = app;
     const trans = translator.load('jupyterlab');
@@ -125,7 +126,6 @@ export namespace Palette {
       trans.__('Command Palette Section')
     );
     shell.add(palette, 'left', { rank: 300, type: 'Command Palette' });
-    let settingsApplied: Promise<void> = Promise.resolve();
     if (settingRegistry) {
       const loadSettings = settingRegistry.load(PALETTE_PLUGIN_ID);
       const updateSettings = (settings: ISettingRegistry.ISettings): void => {
@@ -145,7 +145,7 @@ export namespace Palette {
           .composite as number;
       };
 
-      settingsApplied = Promise.all([loadSettings, app.restored])
+      Promise.all([loadSettings, app.restored])
         .then(([settings]) => {
           updateSettings(settings);
           settings.changed.connect(settings => {
@@ -155,43 +155,6 @@ export namespace Palette {
         .catch((reason: Error) => {
           console.error(reason.message);
         });
-    }
-
-    if (state) {
-      // Restore the recently executed commands once the settings have been
-      // applied, so that the restored history is not truncated by a
-      // `maxRecentCommands` limit which is about to change.
-      const restored = settingsApplied
-        .then(() => state.fetch(RECENTS_STATE_KEY))
-        .then(value => {
-          const saved = (
-            value as
-              | { commands?: RecentsCommandPalette.IRecentCommand[] }
-              | undefined
-          )?.commands;
-          if (Array.isArray(saved)) {
-            // List the commands executed during this session first.
-            palette.recentCommands = [...palette.recentCommands, ...saved];
-          }
-        })
-        .catch((reason: Error) => {
-          console.error(
-            'Failed to restore the recently used commands.',
-            reason
-          );
-        });
-
-      // Save the history when it changes, once the restoration has completed
-      // so that an early save cannot overwrite the stored history.
-      palette.recentsChanged.connect(() => {
-        void restored
-          .then(() =>
-            state.save(RECENTS_STATE_KEY, { commands: palette.recentCommands })
-          )
-          .catch((reason: Error) => {
-            console.warn('Failed to save the recently used commands.', reason);
-          });
-      });
     }
 
     // Show the current palette shortcut in its title.
@@ -264,13 +227,56 @@ export namespace Palette {
   export function restore(
     app: JupyterFrontEnd,
     restorer: ILayoutRestorer,
-    translator: ITranslator
+    translator: ITranslator,
+    state: IStateDB,
+    settingRegistry: ISettingRegistry | null
   ): void {
     const palette = Private.createPalette(app, translator);
     // Let the application restorer track the command palette for restoration of
     // application state (e.g. setting the command palette as the current side bar
     // widget).
     restorer.add(palette, 'command-palette');
+
+    // Apply the limit first, so that the default limit does not truncate the
+    // restored history.
+    const limitApplied = settingRegistry
+      ? settingRegistry.load(PALETTE_PLUGIN_ID).then(settings => {
+          palette.maxRecentCommands = settings.get('maxRecentCommands')
+            .composite as number;
+        })
+      : Promise.resolve();
+    const restored = limitApplied
+      .then(() => state.fetch(RECENTS_STATE_KEY))
+      .then(async value => {
+        const saved = (
+          value as
+            | { commands?: RecentsCommandPalette.IRecentCommand[] }
+            | undefined
+        )?.commands;
+        if (!Array.isArray(saved)) {
+          return;
+        }
+        if (palette.maxRecentCommands === 0) {
+          await state.remove(RECENTS_STATE_KEY);
+        } else {
+          palette.recentCommands = [...palette.recentCommands, ...saved];
+        }
+      })
+      .catch((reason: Error) => {
+        console.error('Failed to restore the recently used commands.', reason);
+      });
+
+    // Wait for the restoration, so that an early save does not overwrite
+    // the stored history.
+    palette.recentsChanged.connect(() => {
+      void restored
+        .then(() =>
+          state.save(RECENTS_STATE_KEY, { commands: palette.recentCommands })
+        )
+        .catch((reason: Error) => {
+          console.warn('Failed to save the recently used commands.', reason);
+        });
+    });
   }
 }
 
@@ -284,6 +290,44 @@ namespace Private {
   let palette: RecentsCommandPalette;
 
   /**
+   * A command palette renderer which adds a badge to the recent commands.
+   */
+  class Renderer extends CommandPaletteSvg.Renderer {
+    /**
+     * Construct a new renderer.
+     */
+    constructor(
+      translator: ITranslator,
+      isRecent: (item: CommandPalette.IItem) => boolean
+    ) {
+      super();
+      this._isRecent = isRecent;
+      this._trans = translator.load('jupyterlab');
+    }
+
+    /**
+     * Render the content for a command palette item.
+     */
+    renderItemContent(data: CommandPalette.IItemRenderData): VirtualElement {
+      if (!this._isRecent(data.item)) {
+        return super.renderItemContent(data);
+      }
+      return h.div(
+        { className: 'lm-CommandPalette-itemContent jp-mod-recent' },
+        this.renderItemLabel(data),
+        this.renderItemCaption(data),
+        h.div(
+          { className: 'jp-CommandPalette-recentBadge' },
+          this._trans.__('recently used')
+        )
+      );
+    }
+
+    private _isRecent: (item: CommandPalette.IItem) => boolean;
+    private _trans: TranslationBundle;
+  }
+
+  /**
    * Create the application-wide command palette.
    */
   export function createPalette(
@@ -292,13 +336,10 @@ namespace Private {
   ): RecentsCommandPalette {
     if (!palette) {
       // use a renderer tweaked to use inline svg icons and to display a
-      // badge for the recently executed commands
+      // badge for the recent commands
       palette = new RecentsCommandPalette({
         commands: app.commands,
-        renderer: new CommandPaletteSvg.Renderer({
-          translator,
-          isRecent: item => palette.isRecent(item)
-        })
+        renderer: new Renderer(translator, item => palette.isRecent(item))
       });
       palette.id = 'command-palette';
       palette.title.icon = paletteIcon;
