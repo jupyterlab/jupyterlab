@@ -507,6 +507,16 @@
     }
   },
   {
+    "id": "apputils:clear-recent-commands",
+    "label": "Clear Recently Used Commands",
+    "caption": "Clear the list of recently used commands.",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "apputils:decr-font-size",
     "label": "Decrease Font Size",
     "caption": "",

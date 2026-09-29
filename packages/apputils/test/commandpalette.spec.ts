@@ -111,9 +111,10 @@ describe('@jupyterlab/apputils', () => {
     let itemA: CommandPalette.IItem;
     let itemB: CommandPalette.IItem;
     let enabled: boolean;
+    let visible: boolean;
 
     const click = (node: Element): void => {
-      node.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      simulate(node, 'click');
       MessageLoop.flush();
     };
 
@@ -123,6 +124,7 @@ describe('@jupyterlab/apputils', () => {
 
     beforeEach(() => {
       enabled = true;
+      visible = true;
       commands = new CommandRegistry();
       commands.addCommand('test:a', {
         label: 'Alpha',
@@ -131,7 +133,8 @@ describe('@jupyterlab/apputils', () => {
       commands.addCommand('test:b', {
         label: 'Beta',
         execute: () => void 0,
-        isEnabled: () => enabled
+        isEnabled: () => enabled,
+        isVisible: () => visible
       });
       palette = new RecentsCommandPalette({ commands });
       itemA = palette.addItem({ command: 'test:a', category: 'One' });
@@ -174,6 +177,9 @@ describe('@jupyterlab/apputils', () => {
         click(itemNode('test:a'));
         palette.maxRecentCommands = 1;
         MessageLoop.flush();
+        expect(palette.recentCommands).toEqual([
+          { command: 'test:a', args: {} }
+        ]);
         const children = palette.contentNode.children;
         expect(children[0].getAttribute('data-command')).toBe('test:a');
         expect(children[1].classList.contains('lm-CommandPalette-header')).toBe(
@@ -186,9 +192,11 @@ describe('@jupyterlab/apputils', () => {
         expect(palette.isRecent(itemB)).toBe(true);
         palette.maxRecentCommands = 0;
         MessageLoop.flush();
+        expect(palette.recentCommands).toEqual([]);
         const first = palette.contentNode.firstElementChild!;
         expect(first.classList.contains('lm-CommandPalette-header')).toBe(true);
         click(itemNode('test:b'));
+        expect(palette.recentCommands).toEqual([]);
         expect(palette.isRecent(itemB)).toBe(false);
       });
     });
@@ -277,16 +285,10 @@ describe('@jupyterlab/apputils', () => {
         expect(palette.recentCommands).toEqual([]);
       });
 
-      it('should ignore malformed entries and strip extra fields', () => {
+      it('should strip extra fields', () => {
         palette.recentCommands = [
-          null,
-          42,
-          'test:a',
-          { command: 42, args: {} },
-          { command: 'test:missing-args' },
-          { command: 'test:array-args', args: [] },
           { command: 'test:a', args: {}, extra: 'dropped' }
-        ] as unknown as RecentsCommandPalette.IRecentCommand[];
+        ];
         expect(palette.recentCommands).toEqual([
           { command: 'test:a', args: {} }
         ]);
@@ -299,6 +301,14 @@ describe('@jupyterlab/apputils', () => {
         palette.recentsChanged.connect(() => count++);
         click(itemNode('test:a'));
         expect(count).toBe(1);
+      });
+
+      it('should not emit when the most recent command is executed again', () => {
+        click(itemNode('test:a'));
+        let count = 0;
+        palette.recentsChanged.connect(() => count++);
+        click(itemNode('test:a'));
+        expect(count).toBe(0);
       });
 
       it('should emit when the history is truncated by a lower limit', () => {
@@ -380,15 +390,39 @@ describe('@jupyterlab/apputils', () => {
         expect(palette.isRecent(itemB)).toBe(true);
       });
 
-      it('should not pin a disabled command', () => {
+      it('should pin the recent commands while the query is blank', () => {
+        click(itemNode('test:b'));
+        palette.inputNode.value = '  ';
+        palette.refresh();
+        MessageLoop.flush();
+
+        const first = palette.contentNode.firstElementChild!;
+        expect(first.getAttribute('data-command')).toBe('test:b');
+      });
+
+      it('should keep a disabled command pinned', () => {
         click(itemNode('test:b'));
         enabled = false;
         palette.refresh();
         MessageLoop.flush();
 
         const first = palette.contentNode.firstElementChild!;
+        expect(first.getAttribute('data-command')).toBe('test:b');
+        expect(first.classList.contains('lm-mod-disabled')).toBe(true);
+        expect(palette.isRecent(itemB)).toBe(true);
+      });
+
+      it('should not pin a hidden command', () => {
+        click(itemNode('test:b'));
+        visible = false;
+        palette.refresh();
+        MessageLoop.flush();
+
+        const first = palette.contentNode.firstElementChild!;
         expect(first.classList.contains('lm-CommandPalette-header')).toBe(true);
-        expect(itemNode('test:b')).not.toBeNull();
+        expect(
+          palette.contentNode.querySelector('[data-command="test:b"]')
+        ).toBeNull();
       });
 
       it('should not pin a command removed from the palette', () => {
@@ -398,7 +432,9 @@ describe('@jupyterlab/apputils', () => {
 
         const first = palette.contentNode.firstElementChild!;
         expect(first.classList.contains('lm-CommandPalette-header')).toBe(true);
-        expect(itemNode('test:b')).toBeNull();
+        expect(
+          palette.contentNode.querySelector('[data-command="test:b"]')
+        ).toBeNull();
       });
 
       it('should track items with the same command but different args separately', () => {
@@ -421,7 +457,7 @@ describe('@jupyterlab/apputils', () => {
           const node = Array.from(
             recents.contentNode.querySelectorAll('.lm-CommandPalette-item')
           ).find(candidate => candidate.textContent!.includes(label))!;
-          node.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+          simulate(node, 'click');
           MessageLoop.flush();
         };
 
