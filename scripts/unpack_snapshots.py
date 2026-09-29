@@ -15,11 +15,20 @@ Format:
 
 import argparse
 import json
+import re
 import shutil
 import sys
 from pathlib import Path
 
 SNAPSHOT_EXTENSIONS = (".png", ".json")
+
+# Reports are produced by pull request code, so a report can ask for any
+# destination. Only these are accepted; keep in sync with the pathspec
+# allowlist in .github/workflows/galata-update-v2.yml.
+ALLOWED_DESTINATIONS = (
+    re.compile(r"galata/.+\.(png|json)"),
+    re.compile(r"examples/.+-snapshots/.+\.png"),
+)
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -133,6 +142,25 @@ def to_destination_path(
     return report_repo_dir / Path(*parts)
 
 
+def resolve_within(base: Path, candidate: Path) -> Path | None:
+    """Resolve ``candidate`` and return it only if it stays inside ``base``.
+
+    Symlinks are resolved before the check, so a link committed to the branch
+    cannot redirect a copy out of the checkout.
+    """
+    resolved = candidate.resolve()
+    if not resolved.is_relative_to(base.resolve()):
+        return None
+    return resolved
+
+
+def is_allowed_destination(relative_path: Path) -> bool:
+    """Return True for the snapshot paths the unpacker is allowed to overwrite."""
+    posix_path = relative_path.as_posix()
+    # fullmatch, because `$` would also accept a trailing newline in the name.
+    return any(pattern.fullmatch(posix_path) for pattern in ALLOWED_DESTINATIONS)
+
+
 def collect_snapshot_attachments(
     attachments: list[dict],
 ) -> tuple[dict[str, dict], dict[str, dict]]:
@@ -184,15 +212,32 @@ def process_result(
             continue
 
         source_relative = to_repo_relative(actual["path"], root_dir)
-        source_path = to_artifact_source_path(source_relative, artifact_dir, report_dir)
+        source_path = resolve_within(
+            artifact_dir, to_artifact_source_path(source_relative, artifact_dir, report_dir)
+        )
+        if source_path is None:
+            sys.stderr.write(
+                f"Refusing to read outside of the artifact directory: {actual['path']}\n"
+            )
+            continue
         if not source_path.exists():
             sys.stderr.write(
                 f"Warning: Could not locate actual snapshot in artifact: {actual['path']}\n"
             )
             continue
 
-        dest_relative = to_destination_path(expected["path"], root_dir, report_repo_dir)
-        dest_path = Path.cwd() / dest_relative
+        repo_root = Path.cwd().resolve()
+        dest_path = resolve_within(
+            repo_root, repo_root / to_destination_path(expected["path"], root_dir, report_repo_dir)
+        )
+        if dest_path is None:
+            sys.stderr.write(f"Refusing to write outside of the repository: {expected['path']}\n")
+            continue
+
+        dest_relative = dest_path.relative_to(repo_root)
+        if not is_allowed_destination(dest_relative):
+            sys.stderr.write(f"Refusing to write outside of the snapshots: {expected['path']}\n")
+            continue
 
         if dry_run:
             sys.stdout.write(f"Would copy: {source_path} -> {dest_relative}\n")
