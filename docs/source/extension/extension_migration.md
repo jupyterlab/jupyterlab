@@ -18,6 +18,17 @@
 
 ### API updates
 
+- Jest and `jest-environment-jsdom` have been upgraded to 30, with jsdom 26.
+  Extensions using `@jupyterlab/testing` or `@jupyterlab/testutils` should update
+  `jest` and `@types/jest` to 30 and `ts-jest` to a version supporting Jest 30
+  (29.4.14 or later). TypeScript 5.4 or later is required. See the
+  [Jest 30 migration guide](https://jestjs.io/docs/upgrading-to-jest30) for changes
+  to matchers, CLI options and DOM behavior. Jest's disposable mock types expose
+  incompatible iterator declarations in `vscode-jsonrpc` 8. Projects that use both
+  can enable TypeScript's `skipLibCheck` until those upstream declarations are
+  updated. JupyterLab applies this workaround to its test configurations and the
+  notebook package, which includes Jest-based test utilities.
+
 - Xterm.js, used by `@jupyterlab/terminal`, was upgraded from 5.x to 6.x, along with the
   `@xterm/addon-fit`, `@xterm/addon-search`, `@xterm/addon-web-links` and `@xterm/addon-webgl`
   addons. Notable changes for extensions that interact with the terminal:
