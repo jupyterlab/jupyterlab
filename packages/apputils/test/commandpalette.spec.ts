@@ -471,5 +471,62 @@ describe('@jupyterlab/apputils', () => {
         recents.dispose();
       });
     });
+
+    describe('#initialActiveIndex()', () => {
+      const active = (): string | null => {
+        const node = palette.contentNode.querySelector('.lm-mod-active');
+        return node ? node.getAttribute('data-command') : null;
+      };
+
+      const pressEnter = (): void => {
+        simulate(palette.node, 'keydown', { keyCode: 13 });
+        MessageLoop.flush();
+      };
+
+      it('should activate the most recent command while the query is empty', () => {
+        click(itemNode('test:b'));
+        click(itemNode('test:a'));
+        expect(active()).toBe('test:a');
+      });
+
+      it('should run the most recent command when Enter is pressed', () => {
+        click(itemNode('test:b'));
+        const executed: string[] = [];
+        commands.commandExecuted.connect((sender, args) => {
+          executed.push(args.id);
+        });
+        pressEnter();
+        expect(executed).toEqual(['test:b']);
+      });
+
+      it('should skip a disabled recent command', () => {
+        click(itemNode('test:a'));
+        click(itemNode('test:b'));
+        enabled = false;
+        palette.refresh();
+        MessageLoop.flush();
+        expect(active()).toBe('test:a');
+      });
+
+      it('should not activate a command which is not recent', () => {
+        click(itemNode('test:b'));
+        enabled = false;
+        palette.refresh();
+        MessageLoop.flush();
+        expect(active()).toBeNull();
+      });
+
+      it('should not activate a command without recent commands', () => {
+        expect(active()).toBeNull();
+      });
+
+      it('should activate the first match while searching', () => {
+        click(itemNode('test:b'));
+        palette.inputNode.value = 'a';
+        palette.refresh();
+        MessageLoop.flush();
+        expect(active()).toBe('test:a');
+      });
+    });
   });
 });
