@@ -323,6 +323,26 @@ export class RecentsCommandPalette extends CommandPalette {
   }
 
   /**
+   * Get the index of the result to activate for new search results.
+   *
+   * #### Notes
+   * While the recent commands are pinned, the first enabled one is active,
+   * so that `Enter` runs it.
+   */
+  protected initialActiveIndex(
+    query: string,
+    results: ReadonlyArray<CommandPalette.SearchResult>
+  ): number {
+    const pinned = query.trim() ? 0 : this._resolveRecentItems().length;
+    if (pinned === 0) {
+      return super.initialActiveIndex(query, results);
+    }
+    return results
+      .slice(0, pinned)
+      .findIndex(result => result.type === 'item' && result.item.isEnabled);
+  }
+
+  /**
    * Resolve the recent commands to the visible palette items.
    *
    * #### Notes

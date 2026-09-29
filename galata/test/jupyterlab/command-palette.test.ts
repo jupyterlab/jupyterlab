@@ -34,5 +34,15 @@ test.describe('Command Palette', () => {
     await page.keyboard.press('ControlOrMeta+Shift+C');
     await expect(firstItem).toContainText('New Launcher');
     await expect(firstItem).toContainText('recently used');
+
+    // Enter runs the most recent command.
+    const launchers = page.locator('#jp-main-dock-panel .lm-TabBar-tab', {
+      hasText: 'Launcher'
+    });
+    const count = await launchers.count();
+    await expect(firstItem).toHaveClass(/lm-mod-active/);
+    await page.keyboard.press('Enter');
+    await expect(palette).toBeHidden();
+    await expect(launchers).toHaveCount(count + 1);
   });
 });
