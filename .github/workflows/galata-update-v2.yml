@@ -108,26 +108,24 @@ jobs:
           while [ $ELAPSED -lt $MAX_WAIT ]; do
             echo "Checking for artifact... (elapsed: ${ELAPSED}s)"
 
-            # Get recent workflow runs and try the most relevant candidates first.
+            # Ask for this commit's runs rather than filtering the most recent
+            # ones here, which missed the run once twenty galata.yml runs had
+            # completed after it.
             RUNS=$(gh run list \
               --repo "$REPOSITORY" \
               --workflow galata.yml \
+              --commit "$PR_HEAD_SHA" \
               --status completed \
-              --json databaseId,event,headBranch,headSha,conclusion,createdAt \
+              --json databaseId,event,headBranch,conclusion,createdAt \
               --limit 20)
 
             if [ -z "$RUNS" ] || [ "$RUNS" = "[]" ]; then
-              echo "No completed galata.yml runs found yet"
+              echo "No completed galata.yml run for $PR_HEAD_SHA yet"
             else
-              echo "Recent galata.yml runs (up to 20):"
-              echo "$RUNS" | jq -r '.[] | "  id=\(.databaseId) event=\(.event) branch=\(.headBranch) sha=\(.headSha) conclusion=\(.conclusion) created=\(.createdAt)"'
+              echo "Completed galata.yml runs for this commit:"
+              echo "$RUNS" | jq -r '.[] | "  id=\(.databaseId) event=\(.event) branch=\(.headBranch) conclusion=\(.conclusion) created=\(.createdAt)"'
 
-              RUN_IDS=$(echo "$RUNS" | jq -r --arg sha "$PR_HEAD_SHA" '[.[] | select(.headSha == $sha) | .databaseId] | .[]')
-              if [ -z "$RUN_IDS" ]; then
-                echo "No runs matched head sha '$PR_HEAD_SHA'"
-              fi
-
-              for RUN_ID in $RUN_IDS; do
+              for RUN_ID in $(echo "$RUNS" | jq -r '.[].databaseId'); do
                 echo "Trying artifact download from run $RUN_ID"
                 rm -rf ./artifact
                 if gh run download "$RUN_ID" \
