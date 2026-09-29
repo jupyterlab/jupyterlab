@@ -555,14 +555,14 @@ test.describe('Notebook level and cell type metadata', () => {
       .poll(async () => (await getCellMetadata(page, 0))['cell-metadata'])
       .toBe('Cell input');
     await expect
-      .poll(async () => (await getCellMetadata(page, 0))['nb-nested'])
-      .toBeUndefined();
-    await expect
       .poll(
         async () =>
           (await getNotebookMetadata(page))['nb-nested']?.['nb-metadata']
       )
       .toBe('Notebook input');
+    await expect
+      .poll(async () => (await getCellMetadata(page, 0))['nb-nested'])
+      .toBeUndefined();
     await expect
       .poll(async () => (await getNotebookMetadata(page))['cell-metadata'])
       .toBeUndefined();
