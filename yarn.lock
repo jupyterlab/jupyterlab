@@ -1854,20 +1854,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@humanfs/core@npm:^0.19.1":
-  version: 0.19.1
-  resolution: "@humanfs/core@npm:0.19.1"
-  checksum: 611e0545146f55ddfdd5c20239cfb7911f9d0e28258787c4fc1a1f6214250830c9367aaaeace0096ed90b6739bee1e9c52ad5ba8adaf74ab8b449119303babfe
+"@humanfs/core@npm:^0.19.2":
+  version: 0.19.2
+  resolution: "@humanfs/core@npm:0.19.2"
+  dependencies:
+    "@humanfs/types": ^0.15.0
+  checksum: cfcf57302dafe41eadd900b30da5e10f8b4e51fac635c834c03ae11933d1911c131ef3cfa3ff14c47b17dd23524180c69f50cfe0b68c152034c2f6ba0ec2ccae
   languageName: node
   linkType: hard
 
 "@humanfs/node@npm:^0.16.6":
-  version: 0.16.7
-  resolution: "@humanfs/node@npm:0.16.7"
+  version: 0.16.8
+  resolution: "@humanfs/node@npm:0.16.8"
   dependencies:
-    "@humanfs/core": ^0.19.1
+    "@humanfs/core": ^0.19.2
+    "@humanfs/types": ^0.15.0
     "@humanwhocodes/retry": ^0.4.0
-  checksum: 7d2a396a94d80158ce320c0fd7df9aebb82edb8b667e5aaf8f87f4ca50518d0941ca494e0cd68e06b061e777ce5f7d26c45f93ac3fa9f7b11fd1ff26e3cd1440
+  checksum: 179d1dae12c5d1330c262b79b037e4db3e98d870f4827a56c1eb8a6bc32a6d2b4c32603a5b13c4f2e11882239276ed2a559cf465dfba33a3ac37bc7d9f5c1e9b
+  languageName: node
+  linkType: hard
+
+"@humanfs/types@npm:^0.15.0":
+  version: 0.15.0
+  resolution: "@humanfs/types@npm:0.15.0"
+  checksum: fe8abe73e36ded7bf854addd48a5a7defe3aa77af9e92a95195bc6abd7d2a22c193bbac38d47982c198e2683e5108acba691cd859c4e1104b94d76651139e2da
   languageName: node
   linkType: hard
 
@@ -2261,16 +2271,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyter/eslint-plugin@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@jupyter/eslint-plugin@npm:1.1.0"
+"@jupyter/eslint-plugin@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "@jupyter/eslint-plugin@npm:1.3.0"
   dependencies:
     "@typescript-eslint/utils": ^8.54.0
     "@typescript-eslint/visitor-keys": ^8.54.0
     jsonc-eslint-parser: ^2.4.0
   peerDependencies:
     eslint: ">=9.0.0"
-  checksum: 38d5c9fd45e43eaecbae5a58f2e23d8f5c3798a6da0301017400d5cb3050d8b15332fb1b65cbdb0dbd6aa01a28a0565f780d9b81a91fe42962ad44d27192896b
+  checksum: f95bea57e6341c37ead3d7d6e480d867e9cfcf9cae7c53871514a6437502bef34b269d65986cb777404ebbbac30eb91ab185d6ebc3aa5d1eb4e1a9e227d54a12
   languageName: node
   linkType: hard
 
@@ -2719,6 +2729,7 @@ __metadata:
   dependencies:
     "@codemirror/commands": ^6.10.2
     "@codemirror/lang-markdown": ^6.5.0
+    "@codemirror/lang-python": ^6.2.1
     "@codemirror/language": ^6.12.1
     "@codemirror/legacy-modes": ^6.5.2
     "@codemirror/search": ^6.6.0
@@ -3379,6 +3390,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-filebrowser@workspace:examples/filebrowser"
   dependencies:
+    "@codemirror/lang-markdown": ^6.5.0
     "@jupyter/web-components": ^0.17.1
     "@jupyterlab/application": ^4.7.0-alpha.2
     "@jupyterlab/apputils": ^4.8.0-alpha.2
@@ -3426,6 +3438,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-notebook@workspace:examples/notebook"
   dependencies:
+    "@codemirror/lang-markdown": ^6.5.0
     "@jupyter/web-components": ^0.17.1
     "@jupyter/ydoc": ^4.0.0
     "@jupyterlab/application": ^4.7.0-alpha.2
@@ -4716,7 +4729,7 @@ __metadata:
   resolution: "@jupyterlab/repo-top@workspace:."
   dependencies:
     "@eslint/js": ^10.0.1
-    "@jupyter/eslint-plugin": ^1.1.0
+    "@jupyter/eslint-plugin": ^1.3.0
     eslint: ^9.26.0
     eslint-config-prettier: ^10.0.0
     eslint-plugin-jest: ^28.0.0
@@ -4976,6 +4989,7 @@ __metadata:
   resolution: "@jupyterlab/statusbar@workspace:packages/statusbar"
   dependencies:
     "@jupyterlab/testing": ^4.7.0-alpha.2
+    "@jupyterlab/translation": ^4.7.0-alpha.2
     "@jupyterlab/ui-components": ^4.7.0-alpha.2
     "@lumino/algorithm": ^2.0.5
     "@lumino/coreutils": ^2.2.3
@@ -9176,11 +9190,11 @@ __metadata:
   linkType: hard
 
 "baseline-browser-mapping@npm:^2.10.12":
-  version: 2.10.37
-  resolution: "baseline-browser-mapping@npm:2.10.37"
+  version: 2.11.22
+  resolution: "baseline-browser-mapping@npm:2.11.22"
   bin:
     baseline-browser-mapping: dist/cli.cjs
-  checksum: c46873f68400f5eddc8e888f3f040e858763ea8868d68d9d0347a8936563d141a774b2f1c614c7fc4714034be42ed011b310a9ee25c2f68b2112c7db91d09135
+  checksum: fcea838ca33592b1f60cf936a95006f9ff8da7a7fb13218f46b32d7b39669907aad06adf4b52d9a83e5daa56558a7004c14af138c0542bdeda1b68fff2085bb2
   languageName: node
   linkType: hard
 
@@ -9957,9 +9971,9 @@ __metadata:
   linkType: hard
 
 "colord@npm:^2.9.3":
-  version: 2.9.3
-  resolution: "colord@npm:2.9.3"
-  checksum: 95d909bfbcfd8d5605cbb5af56f2d1ce2b323990258fd7c0d2eb0e6d3bb177254d7fb8213758db56bb4ede708964f78c6b992b326615f81a18a6aaf11d64c650
+  version: 2.10.0
+  resolution: "colord@npm:2.10.0"
+  checksum: 7bd2fca99b61bf7a9e8b76114a4c57010a5dfabff36bd030ecfe57ff7f43e84c0038c3f96d204ae7edec918b74169401caf22999e04777fa2a3fd1ed89117fab
   languageName: node
   linkType: hard
 
@@ -20019,8 +20033,8 @@ __metadata:
   linkType: hard
 
 "svgo@npm:^3.3.2":
-  version: 3.3.4
-  resolution: "svgo@npm:3.3.4"
+  version: 3.3.5
+  resolution: "svgo@npm:3.3.5"
   dependencies:
     commander: ^7.2.0
     css-select: ^5.1.0
@@ -20030,8 +20044,8 @@ __metadata:
     picocolors: ^1.0.0
     sax: ^1.5.0
   bin:
-    svgo: ./bin/svgo
-  checksum: 7828e76b42bb58867703a21aa80f2cd1a8c1828df2500a5ac58a30cca483d9c7862d07c9060a4cdf24bbb8ac3d2148ed27e42dc2794738d097fae0ce05dabd81
+    svgo: bin/svgo
+  checksum: ea18071747812aed65439e1e3bdfcfd527f8c51c459c94f6aeb539653bb3f6ea4f2a75451427d2fde2fb1da578b704df8406b7de30382cca878594ec1d45be84
   languageName: node
   linkType: hard
 
