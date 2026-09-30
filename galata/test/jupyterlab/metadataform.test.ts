@@ -28,6 +28,19 @@ test.beforeAll(async ({ request, tmpPath }) => {
 });
 
 /**
+ * Open the test notebook without a kernel, and wait for its content.
+ *
+ * A kernel writes `language_info` when it connects, and loading the file
+ * replaces the cells and the metadata. Both rebuild the metadata form.
+ */
+async function openNotebook(page: IJupyterLabPageFixture, tmpPath: string) {
+  await page.filebrowser.open(`${tmpPath}/${nbFile}`, 'Notebook (no kernel)');
+  await page.evaluate(
+    () => window.jupyterapp.shell.currentWidget.context.ready
+  );
+}
+
+/**
  * Activate notebook tools side bar.
  */
 async function activatePropertyInspector(page: IJupyterLabPageFixture) {
@@ -81,12 +94,13 @@ async function openForm(
  */
 async function getFormGroup(page: IJupyterLabPageFixture) {
   const form = await openForm(page);
-  return {
-    form: form,
-    formGroup: form.locator(
-      '.jp-Collapse-contents .jp-MetadataForm fieldset > .form-group'
-    )
-  };
+  const formGroup = form.locator(
+    '.jp-Collapse-contents .jp-MetadataForm fieldset > .form-group'
+  );
+  // The fields render, and the default values are written, once the
+  // validator has loaded.
+  await formGroup.first().waitFor();
+  return { form, formGroup };
 }
 
 /*
@@ -143,7 +157,7 @@ test.describe('Required metadata', () => {
   test('should display the form', async ({ page, baseURL, tmpPath }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Activate the property inspector.
     await activatePropertyInspector(page);
@@ -189,7 +203,7 @@ test.describe('Required metadata', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { form, formGroup } = await getFormGroup(page);
@@ -201,17 +215,15 @@ test.describe('Required metadata', () => {
       .toMatchSnapshot('metadata-required-missing.png');
 
     // Relevant metadata should be empty.
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['basic-metadata'])
-      .toBeUndefined();
+    let cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['basic-metadata']).toBeUndefined();
 
     // Filling the form.
     await formGroup.locator('input').fill('abc');
 
     // Metadata should be filled, and error not displayed anymore.
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['basic-metadata'])
-      .toBe('abc');
+    cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['basic-metadata']).toBe('abc');
     await expect(formGroup.locator('.validationErrors')).toBeEmpty();
     expect(await form.screenshot()).toMatchSnapshot(
       'metadata-required-filled.png'
@@ -254,31 +266,25 @@ test.describe('Nested metadata', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
 
     // Metadata should be empty.
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['level1'])
-      .toBeUndefined();
+    let cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['level1']).toBeUndefined();
 
     // Replace the default value by 0, should write in metadata.
     await formGroup.locator('input').last().fill('0');
 
-    await expect
-      .poll(
-        async () =>
-          (await getCellMetadata(page, 0))['level1']?.['level2']?.['nested']
-      )
-      .toBe(0);
+    cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['level1']['level2']['nested']).toBe(0);
 
     // Empty the field, should remove the metadata tree.
     await formGroup.locator('input').last().fill('');
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['level1'])
-      .toBeUndefined();
+    cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['level1']).toBeUndefined();
   });
 
   test('should remove only the empty metadata', async ({
@@ -288,43 +294,32 @@ test.describe('Nested metadata', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
 
     // Metadata should be empty.
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['level1'])
-      .toBeUndefined();
+    let cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['level1']).toBeUndefined();
 
     // Set the first level nested metadata.
     await formGroup.locator('input').first().fill('1');
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['level1']?.['nested'])
-      .toBe(1);
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['level1']?.['level2'])
-      .toBeUndefined();
+    cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['level1']['nested']).toBe(1);
+    expect(cellMetadata['level1']['level2']).toBeUndefined();
 
     // Set the second level nested metadata.
     await formGroup.locator('input').last().fill('1');
 
-    await expect
-      .poll(
-        async () =>
-          (await getCellMetadata(page, 0))['level1']?.['level2']?.['nested']
-      )
-      .toBe(1);
+    cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['level1']['level2']['nested']).toBe(1);
 
     // If the value of level2 is deleted, only the level2 metadata should be removed.
     await formGroup.locator('input').last().fill('');
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['level1']?.['level2'])
-      .toBeUndefined();
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['level1']?.['nested'])
-      .toBe(1);
+    cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['level1']['nested']).toBe(1);
+    expect(cellMetadata['level1']['level2']).toBeUndefined();
   });
 });
 
@@ -370,40 +365,35 @@ test.describe('Default metadata without "showModified" flag', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
 
     // Metadata should contains written default value.
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['default-written'])
-      .toBe(1);
+    let cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['default-written']).toBe(1);
 
     // Empty value should remove the metadata.
     await formGroup.locator('input').first().fill('');
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['default-written'])
-      .toBeUndefined();
+    cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['default-written']).toBeUndefined();
 
     // Fill the first one with default should be written in metadata.
     await formGroup.locator('input').first().fill('1');
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['default-written'])
-      .toBe(1);
+    cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['default-written']).toBe(1);
 
     // Fill the second one with non default value should write metadata.
     await formGroup.locator('input').last().fill('0');
 
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['default-not-written'])
-      .toBe(0);
+    cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['default-not-written']).toBe(0);
 
     // Fill the second one with default value should remove the metadata.
     await formGroup.locator('input').last().fill('1');
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['default-not-written'])
-      .toBeUndefined();
+    cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['default-not-written']).toBeUndefined();
   });
 
   test('should not display the modified field', async ({
@@ -413,21 +403,19 @@ test.describe('Default metadata without "showModified" flag', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
 
     // Metadata should contains written default value.
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['default-written'])
-      .toBe(1);
+    let cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['default-written']).toBe(1);
 
     // Fill the first one with default should be written in metadata.
     await formGroup.locator('input').first().fill('2');
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['default-written'])
-      .toBe(2);
+    cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['default-written']).toBe(2);
 
     await expect(formGroup.locator('.jp-FormGroup-default')).toHaveCount(0);
   });
@@ -466,21 +454,19 @@ test.describe('Default metadata with "showModified" flag', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
 
     // Metadata should contains the default value.
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['value-with-default'])
-      .toBe(1);
+    let cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['value-with-default']).toBe(1);
 
     // Fill the field with non default value should display that value is different from default.
     await formGroup.locator('input').first().fill('2');
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['value-with-default'])
-      .toBe(2);
+    cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['value-with-default']).toBe(2);
     await expect(formGroup.locator('.jp-FormGroup-default')).toHaveCount(1);
     await expect(formGroup.locator('.jp-FormGroup-default')).toContainText('1');
   });
@@ -529,7 +515,7 @@ test.describe('Notebook level and cell type metadata', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM
     const { form, formGroup } = await getFormGroup(page);
@@ -539,33 +525,22 @@ test.describe('Notebook level and cell type metadata', () => {
     expect.soft(await form.screenshot()).toMatchSnapshot('metadata-level.png');
 
     // Metadata should be empty.
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['cell-metadata'])
-      .toBeUndefined();
-    await expect
-      .poll(async () => (await getNotebookMetadata(page))['nb-nested'])
-      .toBeUndefined();
+    let cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['cell-metadata']).toBeUndefined();
+    let nbMetadata = await getNotebookMetadata(page);
+    expect(nbMetadata['nb-nested']).toBeUndefined();
 
     // Fill the first level nested metadata.
     await formGroup.locator('input').first().fill('Cell input');
     await formGroup.locator('input').last().fill('Notebook input');
 
     // Metadata should be filled at their correct level.
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['cell-metadata'])
-      .toBe('Cell input');
-    await expect
-      .poll(
-        async () =>
-          (await getNotebookMetadata(page))['nb-nested']?.['nb-metadata']
-      )
-      .toBe('Notebook input');
-    await expect
-      .poll(async () => (await getCellMetadata(page, 0))['nb-nested'])
-      .toBeUndefined();
-    await expect
-      .poll(async () => (await getNotebookMetadata(page))['cell-metadata'])
-      .toBeUndefined();
+    cellMetadata = await getCellMetadata(page, 0);
+    expect(cellMetadata['cell-metadata']).toBe('Cell input');
+    expect(cellMetadata['nb-nested']).toBeUndefined();
+    nbMetadata = await getNotebookMetadata(page);
+    expect(nbMetadata['nb-nested']['nb-metadata']).toBe('Notebook input');
+    expect(nbMetadata['cell-metadata']).toBeUndefined();
   });
 
   test('should not display field for non relevant cell type', async ({
@@ -576,7 +551,7 @@ test.describe('Notebook level and cell type metadata', () => {
     let form, formGroup;
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Close the sidebar to avoid clicking on the cell toolbar when expecting
     // clicking in the cell editor.
@@ -657,7 +632,7 @@ test.describe('Conditional metadata', () => {
   test('display conditional field', async ({ page, baseURL, tmpPath }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM
     const { form, formGroup } = await getFormGroup(page);
@@ -725,7 +700,7 @@ test.describe('UISchema', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { form, formGroup } = await getFormGroup(page);
@@ -764,7 +739,7 @@ test.describe('Advanced tools', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Activate the property inspector.
     await activatePropertyInspector(page);
