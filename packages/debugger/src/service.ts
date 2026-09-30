@@ -418,7 +418,8 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   private _applyKernelSources(): void {
-    if (this._pendingKernelSources) {
+    // The debugger may have stopped, and cleared the model, since the request.
+    if (this._pendingKernelSources && this.session?.isStarted) {
       this._model.kernelSources.kernelSources = this._pendingKernelSources;
     }
   }

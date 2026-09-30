@@ -14,6 +14,7 @@ import {
   acceptDialog,
   JupyterServer,
   signalToPromise,
+  sleep,
   testEmission
 } from '@jupyterlab/testing';
 
@@ -281,6 +282,14 @@ describe('DebuggerService', () => {
         expect(sendRequest).toHaveBeenCalledWith('modules', {});
         const [, kernelSources] = await kernelSourcesChanged;
         expect(kernelSources?.length).toBeGreaterThan(0);
+      });
+
+      it('should not display the modules once the debugger is stopped', async () => {
+        await service.displayModules();
+        await service.stop();
+        // Wait past the debounce of the display.
+        await sleep(1000);
+        expect(service.model.kernelSources.kernelSources).toEqual([]);
       });
     });
 
