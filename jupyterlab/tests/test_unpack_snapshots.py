@@ -38,6 +38,9 @@ def workspace(tmp_path, monkeypatch):
     artifact.mkdir()
     (tmp_path / "outside").mkdir()
     (tmp_path / "outside" / "secret.txt").write_text("secret\n")
+    # Named like a snapshot, so reaching it has to be stopped by containment
+    # rather than by the extension allowlist.
+    (tmp_path / "outside" / "secret-linux.png").write_bytes(b"secret")
     (repo / ".git").mkdir()
     (repo / ".git" / "config").write_text("[core]\n")
     monkeypatch.chdir(repo)
@@ -148,7 +151,9 @@ def test_symlinked_snapshot_directory_is_refused(unpack_snapshots, workspace, mo
     snapshots.parent.mkdir(parents=True)
     snapshots.symlink_to(workspace / "outside")
     write_report(
-        workspace / "test-assets", "galata/test/demo.test.ts-snapshots/secret.txt", "actual.png"
+        workspace / "test-assets",
+        "galata/test/demo.test.ts-snapshots/secret-linux.png",
+        "actual.png",
     )
 
     before = tree_state(workspace)

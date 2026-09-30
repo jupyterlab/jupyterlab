@@ -16,8 +16,17 @@ permissions: {}
 
 # Repeated requests on one pull request replace the run in flight. Each pull
 # request is its own group, so this is a per-PR limit and not a repository-wide one.
+# The group is decided before the job condition below runs, so a comment that is
+# not a request has to get a group of its own, or it would cancel an update in
+# flight. Both words appear in every phrase below, so a phrase that lost one of
+# them would only ever get its own group, never cancel somebody else's run.
 concurrency:
-  group: galata-update-${{ github.event.issue.number || github.event.pull_request.number }}
+  group: >-
+    galata-update-${{
+    contains(github.event.comment.body || github.event.review.body || '', 'update')
+    && contains(github.event.comment.body || github.event.review.body || '', 'snapshots')
+    && (github.event.issue.number || github.event.pull_request.number)
+    || github.run_id }}
   cancel-in-progress: true
 
 jobs:
