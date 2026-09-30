@@ -18,13 +18,14 @@ permissions: {}
 # request is its own group, so this is a per-PR limit and not a repository-wide one.
 # The group is decided before the job condition below runs, so a comment that is
 # not a request has to get a group of its own, or it would cancel an update in
-# flight. Both words appear in every phrase below, so a phrase that lost one of
-# them would only ever get its own group, never cancel somebody else's run.
+# flight. The bot's own replies start runs too and contain "update" and
+# "snapshots", so the key matches the two openings every phrase below starts with.
+# A phrase with another opening would only get its own group.
 concurrency:
   group: >-
     galata-update-${{
-    contains(github.event.comment.body || github.event.review.body || '', 'update')
-    && contains(github.event.comment.body || github.event.review.body || '', 'snapshots')
+    (contains(github.event.comment.body || github.event.review.body || '', 'would you be so kind as to update')
+    || contains(github.event.comment.body || github.event.review.body || '', 'please open PR to update'))
     && (github.event.issue.number || github.event.pull_request.number)
     || github.run_id }}
   cancel-in-progress: true
@@ -332,11 +333,12 @@ jobs:
               galata/*-snapshots/*.png | galata/*-snapshots/*.json | examples/*-snapshots/*.png) ;;
               *) echo "::error::Refusing to apply $FILE"; exit 1 ;;
             esac
-            # A symbolic link committed to the branch must not redirect the copy.
-            case "$(realpath -m -- "$CHECKOUT/$FILE")" in
-              "$CHECKOUT"/*) ;;
-              *) echo "::error::Refusing to write outside the checkout: $FILE"; exit 1 ;;
-            esac
+            # A symbolic link committed to the branch must not redirect the copy, so the
+            # resolved path has to be the allowlisted one.
+            if [[ "$(realpath -m -- "$CHECKOUT/$FILE")" != "$CHECKOUT/$FILE" ]]; then
+              echo "::error::Refusing to write through a symbolic link: $FILE"
+              exit 1
+            fi
             mkdir -p "$CHECKOUT/$(dirname "$FILE")"
             cp --remove-destination -- "$PATH_IN_ARTIFACT" "$CHECKOUT/$FILE"
           done
@@ -462,7 +464,9 @@ jobs:
     name: Comment back on the PR
     runs-on: ubuntu-slim
     needs: [start-work, get-snapshot-updates, prepare-snapshots, open-pr, create-branch]
-    if: needs.start-work.result == 'success' && always()
+    # A run cancelled by a newer request does not reply, so it asks for no
+    # approval and posts no failure; the newer run replies instead.
+    if: needs.start-work.result == 'success' && !cancelled()
     environment: update-snapshots
     steps:
       - name: Compose comment message
