@@ -26,8 +26,8 @@ SNAPSHOT_EXTENSIONS = (".png", ".json")
 # destination. Only these are accepted; keep in sync with the pathspec
 # allowlist in .github/workflows/galata-update-v2.yml.
 ALLOWED_DESTINATIONS = (
-    re.compile(r"galata/.+\.(png|json)"),
-    re.compile(r"examples/.+-snapshots/.+\.png"),
+    re.compile(r"galata/.+-snapshots/[^/]+\.(png|json)"),
+    re.compile(r"examples/.+-snapshots/[^/]+\.png"),
 )
 
 

@@ -124,6 +124,10 @@ def test_snapshot_is_unpacked(unpack_snapshots, workspace, monkeypatch, expected
         "galata/../.gitattributes",
         # A trailing newline is accepted by `$` but not by a full match.
         "galata/test/demo.test.ts-snapshots/trailing-linux.png\n",
+        # Real files under galata/ that are not snapshots.
+        "galata/package.json",
+        "galata/test/documentation/data/extensions.json",
+        "galata/test/galata/upload/upload_image.png",
     ],
 )
 def test_destination_outside_snapshots_is_refused(

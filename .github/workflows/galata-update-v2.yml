@@ -115,6 +115,7 @@ jobs:
               --repo "$REPOSITORY" \
               --workflow galata.yml \
               --commit "$PR_HEAD_SHA" \
+              --event pull_request \
               --status completed \
               --json databaseId,event,headBranch,conclusion,createdAt \
               --limit 20)
@@ -224,8 +225,8 @@ jobs:
           echo "head-sha=$(git -C repo rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
           git -C repo ls-files -z --exclude-standard -mo -- \
-            ':(glob)galata/**/*.png' \
-            ':(glob)galata/**/*.json' \
+            ':(glob)galata/**/*-snapshots/*.png' \
+            ':(glob)galata/**/*-snapshots/*.json' \
             ':(glob)examples/**/*-snapshots/*.png' \
             > snapshot-files
 
@@ -233,7 +234,7 @@ jobs:
           COUNT=0
           while IFS= read -r -d '' FILE; do
             case "$FILE" in
-              galata/*.png | galata/*.json | examples/*-snapshots/*.png) ;;
+              galata/*-snapshots/*.png | galata/*-snapshots/*.json | examples/*-snapshots/*.png) ;;
               *) echo "::error::Unexpected snapshot path: $FILE"; exit 1 ;;
             esac
             if [[ -L "repo/$FILE" ]]; then
@@ -319,7 +320,7 @@ jobs:
           find updates -type f -print0 | while IFS= read -r -d '' PATH_IN_ARTIFACT; do
             FILE="${PATH_IN_ARTIFACT#updates/}"
             case "$FILE" in
-              galata/*.png | galata/*.json | examples/*-snapshots/*.png) ;;
+              galata/*-snapshots/*.png | galata/*-snapshots/*.json | examples/*-snapshots/*.png) ;;
               *) echo "::error::Refusing to apply $FILE"; exit 1 ;;
             esac
             # A symbolic link committed to the branch must not redirect the copy.
@@ -342,8 +343,8 @@ jobs:
           git checkout -b "$BRANCH_NAME"
 
           git ls-files -z --exclude-standard -mo -- \
-            ':(glob)galata/**/*.png' \
-            ':(glob)galata/**/*.json' \
+            ':(glob)galata/**/*-snapshots/*.png' \
+            ':(glob)galata/**/*-snapshots/*.json' \
             ':(glob)examples/**/*-snapshots/*.png' \
             > /tmp/snapshot-files
 
@@ -351,8 +352,8 @@ jobs:
             git add --pathspec-from-file=/tmp/snapshot-files --pathspec-file-nul
           fi
 
-          if git diff --cached --name-only | grep -Ev '^(galata/.*\.(png|json)|examples/.*-snapshots/.*\.png)$' >/dev/null; then
-            echo "::error::Only galata/*.png, galata/*.json, and examples/*-snapshots/*.png files are allowed in this update"
+          if git diff --cached --name-only | grep -Ev '^(galata/.*-snapshots/[^/]*\.(png|json)|examples/.*-snapshots/[^/]*\.png)$' >/dev/null; then
+            echo "::error::Only files inside galata/**/*-snapshots and examples/**/*-snapshots are allowed in this update"
             git diff --cached --name-only
             exit 1
           fi
@@ -416,15 +417,20 @@ jobs:
           )
 
           # Reuse an existing matching PR when present, otherwise create one.
-          EXISTING_PR_URL=$(gh api "repos/$TARGET_REPO/pulls" \
+          EXISTING_PR=$(gh api "repos/$TARGET_REPO/pulls" \
             --method GET \
             --raw-field "state=open" \
             --raw-field "head=galata-snapshots-bot:$HEAD_REF" \
             --raw-field "base=$BASE_REF" \
-            --jq '.[0].html_url // ""')
+            --jq '.[0] | select(.) | "\(.number) \(.html_url)"')
 
-          if [ -n "$EXISTING_PR_URL" ]; then
-            PR_URL="$EXISTING_PR_URL"
+          if [ -n "$EXISTING_PR" ]; then
+            PR_URL="${EXISTING_PR#* }"
+            # The branch moved, so the body has to name the new commit.
+            gh api "repos/$TARGET_REPO/pulls/${EXISTING_PR%% *}" \
+              --method PATCH \
+              --raw-field "title=$PR_TITLE" \
+              --raw-field "body=$PR_BODY" > /dev/null
             PR_ACTION="updated"
           else
             PR_URL=$(gh api "repos/$TARGET_REPO/pulls" \
