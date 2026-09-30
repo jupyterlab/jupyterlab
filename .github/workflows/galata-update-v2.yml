@@ -52,6 +52,7 @@ jobs:
         contains(github.event.comment.body || github.event.review.body || '', 'please open PR to update snapshots')
       )
     runs-on: ubuntu-slim
+    timeout-minutes: 15
     environment: update-snapshots
     steps:
       - name: React positively to the triggering comment
@@ -395,6 +396,7 @@ jobs:
   open-pr:
     name: Open a new PR with updates
     runs-on: ubuntu-slim
+    timeout-minutes: 15
     needs: [get-snapshot-updates, create-branch]
     if: needs.create-branch.result == 'success'
     environment: update-snapshots
@@ -463,6 +465,7 @@ jobs:
   comment-back:
     name: Comment back on the PR
     runs-on: ubuntu-slim
+    timeout-minutes: 15
     needs: [start-work, get-snapshot-updates, prepare-snapshots, open-pr, create-branch]
     # A run cancelled by a newer request does not reply, so it asks for no
     # approval and posts no failure; the newer run replies instead.
