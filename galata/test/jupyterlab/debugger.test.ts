@@ -46,6 +46,45 @@ test('Open Debugger on right', async ({ page }) => {
   expect(await page.sidebar.isTabOpen('jp-debugger-sidebar')).toBeTruthy();
 });
 
+test.describe('Kernel without debugger support', () => {
+  test.use({ autoGoto: false });
+
+  test('Running a cell should not raise an error', async ({
+    page,
+    tmpPath
+  }) => {
+    let kernelspecsMocked = false;
+    await page.route(/\/api\/kernelspecs(\?.*)?$/, async route => {
+      const response = await route.fetch();
+      const json = await response.json();
+      const kernelspecs: Record<
+        string,
+        { spec: { metadata?: Record<string, unknown> } }
+      > = json.kernelspecs;
+      for (const kernelspec of Object.values(kernelspecs)) {
+        kernelspec.spec.metadata = {
+          ...kernelspec.spec.metadata,
+          debugger: false
+        };
+      }
+      await route.fulfill({ response, json });
+      kernelspecsMocked = true;
+    });
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push(error.message));
+
+    await page.goto(`tree/${tmpPath}`);
+    await createNotebook(page);
+    expect(kernelspecsMocked).toBe(true);
+
+    await page.notebook.setCell(0, 'code', '1 + 1');
+    await page.notebook.runCell(0);
+    await expect(page.locator('.jp-OutputArea-output')).toHaveText('2');
+
+    expect(errors).toEqual([]);
+  });
+});
+
 /* Parametrized tests : tests depending on showSourcesInMainArea setting */
 for (const c of showSourcesCases) {
   test.describe(`Debugger – ${c.name}`, () => {
