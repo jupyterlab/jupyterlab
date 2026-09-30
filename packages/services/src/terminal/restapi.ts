@@ -4,6 +4,9 @@
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '../serverconnection';
 import type { ITerminal, ITerminalAPIClient } from './terminal';
+import { validateModel, validateModels } from './validate';
+
+export { validateModel, validateModels };
 
 /**
  * The url for the terminal service.
@@ -57,7 +60,7 @@ export async function startNew(
     throw err;
   }
   const data = await response.json();
-  // TODO: Validate model
+  validateModel(data);
   return data;
 }
 
@@ -79,12 +82,7 @@ export async function listRunning(
     throw err;
   }
   const data = await response.json();
-
-  if (!Array.isArray(data)) {
-    throw new Error('Invalid terminal list');
-  }
-
-  // TODO: validate each model
+  validateModels(data);
   return data;
 }
 
