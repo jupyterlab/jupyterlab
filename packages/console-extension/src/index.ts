@@ -1497,7 +1497,7 @@ async function activateConsole(
   commands.addCommand(CommandIDs.interactionMode, {
     label: args =>
       runShortcutTitles[args['interactionMode'] as string] ??
-      'Set the console interaction mode.',
+      trans.__('Set the console interaction mode.'),
     execute: async args => {
       const key = 'keyMap';
       try {
