@@ -41,6 +41,10 @@ concurrency:
 jobs:
   start-work:
     name: Start work
+    # Act only on pull requests. A review-triggered run is limited to
+    # same-repository pull requests: pull_request_review(_comment) on a fork
+    # receive no secrets, so BOT_USER_PAT would be empty and the run would fail
+    # (#18889). issue_comment runs with secrets, so it still works on forks.
     if: >
       (
         github.event.issue.pull_request ||
