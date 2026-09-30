@@ -419,7 +419,7 @@ export class DebuggerService implements IDebugger, IDisposable {
 
   private _applyKernelSources(): void {
     // The debugger may have stopped, and cleared the model, since the request.
-    if (this._pendingKernelSources && this.session?.isStarted) {
+    if (this._pendingKernelSources && this.isStarted) {
       this._model.kernelSources.kernelSources = this._pendingKernelSources;
     }
   }
@@ -579,6 +579,8 @@ export class DebuggerService implements IDebugger, IDisposable {
       throw new Error('No active debugger session');
     }
     await this.session.stop();
+    // A kernel sources display still pending belongs to the stopped session.
+    void this._displayModulesDebouncer.stop();
     if (this._model) {
       this._model.clear();
     }

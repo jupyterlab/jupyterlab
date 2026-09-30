@@ -286,8 +286,42 @@ describe('DebuggerService', () => {
 
       it('should not display the modules once the debugger is stopped', async () => {
         await service.displayModules();
+        // Answer the disconnect request at once, so the display is still pending
+        // when the debugger stops.
+        jest
+          .spyOn(service.session!, 'sendRequest')
+          .mockImplementation(async () => ({}) as never);
         await service.stop();
         // Wait past the debounce of the display.
+        await sleep(1000);
+        expect(service.model.kernelSources.kernelSources).toEqual([]);
+      });
+
+      it('should not display a modules reply received after the debugger stopped', async () => {
+        const displayed = service.displayModules();
+        jest
+          .spyOn(service.session!, 'sendRequest')
+          .mockImplementation(async () => ({}) as never);
+        await service.stop();
+        await displayed;
+        await sleep(1000);
+        expect(service.model.kernelSources.kernelSources).toEqual([]);
+      });
+
+      it('should not display the modules of a stopped session after a restart', async () => {
+        await service.displayModules();
+        // Answer the stop and start requests at once, so the display of the
+        // previous session is still pending when the debugger starts again.
+        jest
+          .spyOn(service.session!, 'sendRequest')
+          .mockImplementation(
+            async command =>
+              (command === 'initialize'
+                ? { success: true, body: {} }
+                : {}) as never
+          );
+        await service.stop();
+        await service.start();
         await sleep(1000);
         expect(service.model.kernelSources.kernelSources).toEqual([]);
       });
