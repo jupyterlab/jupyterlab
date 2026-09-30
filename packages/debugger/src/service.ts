@@ -404,8 +404,8 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   async displayModules(): Promise<void> {
-    if (!this.session) {
-      throw new Error('No active debugger session');
+    if (!this.session?.isStarted) {
+      return;
     }
 
     const modules = await this.session.sendRequest('modules', {});
