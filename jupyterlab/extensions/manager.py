@@ -486,18 +486,18 @@ class ExtensionManager(PluginManager):
             cache = {}
         extensions = list(cache.values())
         if query is not None and self._listings_cache is not None:
-            listing = list(self._listings_cache)
+            listing = {self._canonicalize_name(k) for k in self._listings_cache}
             extensions = []
             if self._listings_block_mode:
                 for name, ext in cache.items():
-                    if name not in listing:
+                    if self._canonicalize_name(name) not in listing:
                         extensions.append(ext)
                     elif ext.installed_version:
                         self.log.warning(f"Blocked extension '{name}' is installed.")
                         extensions.append(replace(ext, allowed=False))
             else:
                 for name, ext in cache.items():
-                    if name in listing:
+                    if self._canonicalize_name(name) in listing:
                         extensions.append(ext)
                     elif ext.installed_version:
                         self.log.warning(f"Not allowed extension '{name}' is installed.")

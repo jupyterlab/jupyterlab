@@ -241,6 +241,33 @@ async def test_pypi_manager_allows_canonical_package_name_allowlist_matches(name
     assert await manager.is_install_allowed("jupyterlab-evil") is False
 
 
+@pytest.mark.parametrize(
+    "listed_name",
+    ["jupyterlab-git", "JupyterLab-Git", "JupyterLab.Git", "jupyterlab_git"],
+)
+@pytest.mark.parametrize("block_mode", [True, False])
+async def test_pypi_manager_list_extensions_uses_canonical_listing_names(listed_name, block_mode):
+    uris_key = "blocked_extensions_uris" if block_mode else "allowed_extensions_uris"
+    manager = PyPIExtensionManager(ext_options={uris_key: {"http://dummy-listing"}})
+    manager._listings_cache = {listed_name: {"name": listed_name}}
+    if manager._listing_fetch is not None:
+        manager._listing_fetch.stop()
+
+    git = ExtensionPackage("jupyterlab-git", "", "", "prebuilt")
+    other = ExtensionPackage("jupyterlab-other", "", "", "prebuilt")
+
+    async def mock_list(*args, **kwargs):
+        return {"jupyterlab-git": git, "jupyterlab-other": other}, None
+
+    manager.list_packages = mock_list
+
+    extensions, _ = await manager.list_extensions("jupyterlab")
+
+    # Search results must agree with the install policy check
+    assert extensions == ([other] if block_mode else [git])
+    assert await manager.is_install_allowed("jupyterlab-git") is (not block_mode)
+
+
 @patch("tornado.httpclient.AsyncHTTPClient", new_callable=fake_client_factory)
 async def test_ExtensionManager_is_install_allowed_blocklist(mock_client):
     mock_client.body = json.dumps({"blocked_extensions": [{"name": "jupyterlab-evil"}]}).encode()
