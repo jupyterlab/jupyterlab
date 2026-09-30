@@ -9,6 +9,7 @@ import { JSONExt } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import type { ElementDataset } from '@lumino/virtualdom';
 import { Dialog } from './dialog';
+import { DOMUtils } from './domutils';
 import { showCommandLinkerTrustDialog } from './commandlinkertrustdialog';
 
 /**
@@ -31,6 +32,11 @@ const TRUST_COMMAND_ATTR = 'trust-command';
  * execute registered commands with pre-populated arguments.
  */
 export class CommandLinker implements IDisposable {
+  /**
+   * The `args` key for a trust command's source DOM boundary ID.
+   */
+  static readonly TRUST_BOUNDARY_ID_ARG = 'commandLinkerTrustBoundaryId';
+
   /**
    * Instantiate a new command linker.
    */
@@ -221,17 +227,27 @@ export class CommandLinker implements IDisposable {
             args,
             command,
             label,
-            trustCommand
+            trustCommand: trustCommand?.command ?? null
           });
           if (trustAction === 'cancel') {
             return;
           }
           if (trustAction === 'trust' && trustCommand) {
             try {
-              const trustResult = await this._commands.execute(trustCommand);
+              if (!trustCommand.boundary.id) {
+                trustCommand.boundary.id = DOMUtils.createDomID();
+              }
+              const trustResult = await this._commands.execute(
+                trustCommand.command,
+                {
+                  [CommandLinker.TRUST_BOUNDARY_ID_ARG]:
+                    trustCommand.boundary.id
+                }
+              );
               if (
                 !Private.isTrustCommandResult(trustResult) ||
-                !trustResult.trusted
+                !trustResult.trusted ||
+                !this._isTrusted(trustCommand.boundary)
               ) {
                 return;
               }
@@ -261,11 +277,15 @@ export class CommandLinker implements IDisposable {
     return false;
   }
 
-  private _findTrustCommand(target: HTMLElement): string | null {
+  private _findTrustCommand(target: HTMLElement): Private.ITrustCommand | null {
     const trustNode = target.parentElement?.closest(
       `[data-${TRUST_COMMAND_ATTR}]`
     );
-    return trustNode?.getAttribute(`data-${TRUST_COMMAND_ATTR}`) ?? null;
+    const command = trustNode?.getAttribute(`data-${TRUST_COMMAND_ATTR}`);
+    if (!command || !(trustNode instanceof HTMLElement)) {
+      return null;
+    }
+    return { boundary: trustNode, command };
   }
 
   private async _requestTrust(
@@ -359,6 +379,21 @@ namespace Private {
      * The command used to trust the parent context.
      */
     trustCommand: string | null;
+  }
+
+  /**
+   * Trust command and DOM boundary captured for a command-link click.
+   */
+  export interface ITrustCommand {
+    /**
+     * The DOM boundary that must become trusted.
+     */
+    boundary: HTMLElement;
+
+    /**
+     * The command used to trust the boundary.
+     */
+    command: string;
   }
 
   /**
