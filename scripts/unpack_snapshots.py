@@ -23,11 +23,15 @@ from pathlib import Path
 SNAPSHOT_EXTENSIONS = (".png", ".json")
 
 # Reports are produced by pull request code, so a report can ask for any
-# destination. Only these are accepted; keep in sync with the pathspec
-# allowlist in .github/workflows/galata-update-v2.yml.
+# destination. Only these are accepted, and each path segment is limited to the
+# characters snapshot names use; keep in sync with SNAPSHOT_PATH_REGEX in
+# .github/workflows/galata-update-v2.yml.
+PATH_SEGMENT = r"[A-Za-z0-9_-][A-Za-z0-9._-]*"
 ALLOWED_DESTINATIONS = (
-    re.compile(r"galata/.+-snapshots/[^/]+\.(png|json)"),
-    re.compile(r"examples/.+-snapshots/[^/]+\.png"),
+    re.compile(
+        rf"galata/(?:{PATH_SEGMENT}/)*{PATH_SEGMENT}-snapshots/{PATH_SEGMENT}\.(?:png|json)"
+    ),
+    re.compile(rf"examples/(?:{PATH_SEGMENT}/)*{PATH_SEGMENT}-snapshots/{PATH_SEGMENT}\.png"),
 )
 
 

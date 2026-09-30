@@ -15,6 +15,7 @@ from pathlib import Path
 import pytest
 
 SCRIPT = Path(__file__).parents[2] / "scripts" / "unpack_snapshots.py"
+ROOT_DIR = "/home/runner/work/jupyterlab/jupyterlab/core/galata"
 
 pytestmark = pytest.mark.skipif(
     not SCRIPT.exists(), reason="unpack_snapshots.py is only present in a source checkout"
@@ -50,7 +51,7 @@ def workspace(tmp_path, monkeypatch):
 def write_report(artifact_dir, expected_path, actual_path, actual_bytes=b"new-snapshot"):
     (artifact_dir / actual_path).write_bytes(actual_bytes)
     report = {
-        "config": {"rootDir": "/home/runner/work/jupyterlab/jupyterlab/core/galata"},
+        "config": {"rootDir": ROOT_DIR},
         "suites": [
             {
                 "specs": [
@@ -121,10 +122,17 @@ def test_snapshot_is_unpacked(unpack_snapshots, workspace, monkeypatch, expected
         "../repo/.git/hooks/post-commit",
         # Traversal that leaves the checkout entirely.
         "../outside/secret.txt",
-        "/tmp/escaped.png",  # noqa: S108
+        f"{ROOT_DIR}/../../outside/secret-linux.png",
         # Inside the checkout but not a snapshot.
         "scripts/unpack_snapshots.py",
         "galata/../.gitattributes",
+        # An absolute path without a galata part is reduced to its file name.
+        "/tmp/escaped.png",  # noqa: S108
+        # Characters that snapshot names do not use.
+        "galata/test/demo.test.ts-snapshots/two words-linux.png",
+        "galata/test/demo.test.ts-snapshots/two\nlines-linux.png",
+        "galata/test/demo.test.ts-snapshots/[glob]-linux.png",
+        "galata/test/demo.test.ts-snapshots/.hidden-linux.png",
         # A trailing newline is accepted by `$` but not by a full match.
         "galata/test/demo.test.ts-snapshots/trailing-linux.png\n",
         # Real files under galata/ that are not snapshots.
@@ -142,7 +150,6 @@ def test_destination_outside_snapshots_is_refused(
     run_unpacker(unpack_snapshots, monkeypatch)
 
     assert tree_state(workspace) == before
-    assert not Path("/tmp/escaped.png").exists()  # noqa: S108
 
 
 def test_symlinked_snapshot_directory_is_refused(unpack_snapshots, workspace, monkeypatch):
