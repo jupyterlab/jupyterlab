@@ -170,6 +170,11 @@ const HEADING_COLLAPSER_VISBILITY_CONTROL_CLASS =
 const SIDE_BY_SIDE_CLASS = 'jp-mod-sideBySide';
 
 /**
+ * The class name added to a notebook in view-only mode.
+ */
+const VIEW_ONLY_CLASS = 'jp-mod-view-only';
+
+/**
  * The interactivity modes for the notebook.
  */
 export type NotebookMode = 'command' | 'edit';
@@ -1825,6 +1830,7 @@ export class Notebook extends StaticNotebook {
       return;
     }
     this._viewOnly = value;
+    this.toggleClass(VIEW_ONLY_CLASS, value);
     for (const cell of this.widgets) {
       cell.viewOnly = value;
     }

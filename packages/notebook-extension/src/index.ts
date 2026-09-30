@@ -2437,20 +2437,12 @@ function activateNotebookHandler(
     panel: NotebookPanel,
     viewOnly: boolean
   ): void {
-    const editItemNames = [
-      'save',
-      'insert',
-      'cut',
-      'paste',
-      'run',
-      'interrupt',
-      'split',
-      'merge',
-      'delete',
-      'cellType',
-      'restart',
-      'restart-and-run'
-    ];
+    // Every other editing-related toolbar item is now hidden by its own
+    // command's `isVisible`. These three can't be handled that way: `save`
+    // belongs to `docmanager:save` (a different plugin, not view-only-aware),
+    // `interrupt` is never gated by view-only, and `cellType` isn't backed
+    // by a command at all (`ToolbarItems.createCellTypeItem`).
+    const editItemNames = ['save', 'interrupt', 'cellType'];
 
     for (const name of editItemNames) {
       const el = panel.toolbar.node.querySelector(
@@ -2461,8 +2453,8 @@ function activateNotebookHandler(
         el.style.display = viewOnly ? 'none' : '';
       }
     }
-
-    panel.content.node.classList.toggle('jp-mod-view-only', viewOnly);
+    // The `jp-mod-view-only` class is toggled by `Notebook.viewOnly`'s own
+    // setter, so it doesn't need to be set here.
   }
 
   factory.widgetCreated.connect((sender, widget) => {
@@ -2490,6 +2482,10 @@ function activateNotebookHandler(
     applyNotebookViewOnlyUI(widget, widget.viewOnly);
     widget.content.viewOnlyChanged.connect((_, viewOnly) => {
       applyNotebookViewOnlyUI(widget, viewOnly);
+      // Toolbar buttons only re-check a command's `isEnabled`/`isVisible`
+      // when notified; they don't poll. Without this, buttons rendered
+      // before the view-only state was known would never update.
+      commands.notifyCommandChanged();
     }, widget);
 
     // Intercept kernel start for view-only notebooks opened read-only
@@ -3099,8 +3095,8 @@ function addCommands(
       }
     },
     isEnabled: args =>
-      args.toolbar ? true : isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: args => (args.toolbar ? true : !Private.isViewOnly(tracker)),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     icon: args => (args.toolbar ? runIcon : undefined),
     describedBy: {
       args: {
@@ -3320,8 +3316,8 @@ function addCommands(
       }
     },
     isEnabled: args =>
-      args.toolbar ? true : isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: args => (args.toolbar ? true : !Private.isViewOnly(tracker)),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     icon: args => (args.toolbar ? refreshIcon : undefined),
     describedBy: {
       args: {
@@ -3507,8 +3503,8 @@ function addCommands(
       }
     },
     isEnabled: args =>
-      args.toolbar ? true : isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: args => (args.toolbar ? true : !Private.isViewOnly(tracker)),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     icon: args => (args.toolbar ? fastForwardIcon : undefined),
     describedBy: {
       args: {
@@ -3693,8 +3689,8 @@ function addCommands(
     },
     icon: args => (args.toolbar ? cutIcon : undefined),
     isEnabled: args =>
-      args.toolbar ? true : isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: args => (args.toolbar ? true : !Private.isViewOnly(tracker)),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3787,8 +3783,8 @@ function addCommands(
     },
     icon: args => (args.toolbar ? pasteIcon : undefined),
     isEnabled: args =>
-      args.toolbar ? true : isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: args => (args.toolbar ? true : !Private.isViewOnly(tracker)),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3873,8 +3869,8 @@ function addCommands(
     },
     icon: args => (args.toolbar ? duplicateIcon : undefined),
     isEnabled: args =>
-      args.toolbar ? true : isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: args => (args.toolbar ? true : !Private.isViewOnly(tracker)),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4256,8 +4252,8 @@ function addCommands(
     },
     icon: args => (args.toolbar ? addAboveIcon : undefined),
     isEnabled: args =>
-      args.toolbar ? true : isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: args => (args.toolbar ? true : !Private.isViewOnly(tracker)),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4283,8 +4279,8 @@ function addCommands(
     },
     icon: args => (args.toolbar ? addBelowIcon : undefined),
     isEnabled: args =>
-      args.toolbar ? true : isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: args => (args.toolbar ? true : !Private.isViewOnly(tracker)),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
