@@ -28,6 +28,19 @@ test.beforeAll(async ({ request, tmpPath }) => {
 });
 
 /**
+ * Open the test notebook without a kernel, and wait for its content.
+ *
+ * A kernel writes `language_info` when it connects, and loading the file
+ * replaces the cells and the metadata. Both rebuild the metadata form.
+ */
+async function openNotebook(page: IJupyterLabPageFixture, tmpPath: string) {
+  await page.filebrowser.open(`${tmpPath}/${nbFile}`, 'Notebook (no kernel)');
+  await page.evaluate(
+    () => window.jupyterapp.shell.currentWidget.context.ready
+  );
+}
+
+/**
  * Activate notebook tools side bar.
  */
 async function activatePropertyInspector(page: IJupyterLabPageFixture) {
@@ -81,12 +94,13 @@ async function openForm(
  */
 async function getFormGroup(page: IJupyterLabPageFixture) {
   const form = await openForm(page);
-  return {
-    form: form,
-    formGroup: form.locator(
-      '.jp-Collapse-contents .jp-MetadataForm fieldset > .form-group'
-    )
-  };
+  const formGroup = form.locator(
+    '.jp-Collapse-contents .jp-MetadataForm fieldset > .form-group'
+  );
+  // The fields render, and the default values are written, once the
+  // validator has loaded.
+  await formGroup.first().waitFor();
+  return { form, formGroup };
 }
 
 /*
@@ -143,7 +157,7 @@ test.describe('Required metadata', () => {
   test('should display the form', async ({ page, baseURL, tmpPath }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Activate the property inspector.
     await activatePropertyInspector(page);
@@ -189,7 +203,7 @@ test.describe('Required metadata', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { form, formGroup } = await getFormGroup(page);
@@ -252,7 +266,7 @@ test.describe('Nested metadata', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
@@ -280,7 +294,7 @@ test.describe('Nested metadata', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
@@ -351,7 +365,7 @@ test.describe('Default metadata without "showModified" flag', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
@@ -389,7 +403,7 @@ test.describe('Default metadata without "showModified" flag', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
@@ -440,7 +454,7 @@ test.describe('Default metadata with "showModified" flag', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
@@ -501,7 +515,7 @@ test.describe('Notebook level and cell type metadata', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM
     const { form, formGroup } = await getFormGroup(page);
@@ -537,7 +551,7 @@ test.describe('Notebook level and cell type metadata', () => {
     let form, formGroup;
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Close the sidebar to avoid clicking on the cell toolbar when expecting
     // clicking in the cell editor.
@@ -618,7 +632,7 @@ test.describe('Conditional metadata', () => {
   test('display conditional field', async ({ page, baseURL, tmpPath }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM
     const { form, formGroup } = await getFormGroup(page);
@@ -686,7 +700,7 @@ test.describe('UISchema', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { form, formGroup } = await getFormGroup(page);
@@ -725,7 +739,7 @@ test.describe('Advanced tools', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Activate the property inspector.
     await activatePropertyInspector(page);
