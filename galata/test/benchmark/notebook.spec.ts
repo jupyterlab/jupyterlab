@@ -5,11 +5,6 @@ import { expect, test } from '@playwright/test';
 import { benchmark, galata } from '@jupyterlab/galata';
 import path from 'path';
 
-// The benchmarks run on the plain Playwright fixture, which does not provide
-// `page.filebrowser`, and the timed blocks must contain the interaction being
-// measured and nothing else.
-/* eslint-disable jupyter/galata-prefer-filebrowser-helper */
-
 const tmpPath = 'test-performance-open';
 const codeNotebook = 'large_code_notebook.ipynb';
 const mdNotebook = 'large_md_notebook.ipynb';
@@ -154,7 +149,10 @@ test.describe('Benchmark', () => {
       );
 
       // Shutdown the kernel to be sure it does not get in our way (especially for the close action)
-      await page.menu.clickMenuItem('Kernel>Shut Down All Kernels…');
+      await page.click('li[role="menuitem"]:has-text("Kernel")');
+      await page.click(
+        '.lm-Menu ul[role="menu"] >> text=Shut Down All Kernels…'
+      );
       await page.click('button:has-text("Shut Down All") >> nth=-1'); // Click on the last matched button.
 
       // Open text file
@@ -203,10 +201,9 @@ test.describe('Benchmark', () => {
       );
 
       // Close notebook
-      await page.menu.openLocator('File');
-      const closeTab = (await page.menu.getMenuItemLocator('File>Close Tab'))!;
+      await page.click('li[role="menuitem"]:has-text("File")');
       const closeTime = await perf.measure(async () => {
-        await closeTab.click();
+        await page.click('.lm-Menu ul[role="menu"] >> text=Close Tab');
         // Revert changes so we don't measure saving
         const dimissButton = page.locator('button:has-text("Discard")');
         if (await dimissButton.isVisible({ timeout: 50 })) {

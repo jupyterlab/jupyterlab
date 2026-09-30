@@ -582,13 +582,20 @@ export default defineConfig([
   },
   {
     files: ['galata/test/**/*.ts', 'galata/test/**/*.tsx'],
-    plugins: { playwright: playwrightPlugin, jupyter: jupyterPlugin },
+    // Benchmarks use plain Playwright fixtures without Galata page helpers.
+    ignores: ['galata/test/benchmark/**'],
     rules: {
       'jupyter/galata-prefer-context-menu-helper': 'error',
       'jupyter/galata-prefer-filebrowser-helper': 'error',
       'jupyter/galata-prefer-menu-helper': 'error',
       'jupyter/galata-prefer-notebook-cell-helper': 'error',
-      'jupyter/galata-prefer-sidebar-activity-helper': 'error',
+      'jupyter/galata-prefer-sidebar-activity-helper': 'error'
+    }
+  },
+  {
+    files: ['galata/test/**/*.ts', 'galata/test/**/*.tsx'],
+    plugins: { playwright: playwrightPlugin, jupyter: jupyterPlugin },
+    rules: {
       // Custom Galata guards not covered by eslint-plugin-playwright.
       'no-restricted-syntax': [
         'error',
