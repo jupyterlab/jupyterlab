@@ -24,11 +24,11 @@ env:
 
 # Repeated requests on one pull request replace the run in flight. Each pull
 # request is its own group, so this is a per-PR limit and not a repository-wide one.
-# The group is decided before the job condition below runs, so a comment that is
-# not a request has to get a group of its own, or it would cancel an update in
-# flight. The bot's own replies start runs too and contain "update" and
-# "snapshots", so the key matches the two openings every phrase below starts with.
-# A phrase with another opening would only get its own group.
+# The group is decided before the job condition below runs. The bot's own replies
+# start runs too and contain "update" and "snapshots", so the key matches only the
+# two openings every phrase below starts with. A comment with an opening but no
+# full phrase, or a request in a review on a fork, still cancels the run in flight
+# without starting an update. A phrase with another opening would only get its own group.
 concurrency:
   group: >-
     galata-update-${{
@@ -194,6 +194,8 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
+          # The current head can be newer than the commit the UI tests ran on.
+          # That is intended: a push during the wait rarely touches the UI.
           ref: refs/pull/${{ github.event.issue.number || github.event.pull_request.number }}/head
           fetch-depth: 1
           path: repo
