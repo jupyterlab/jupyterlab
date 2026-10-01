@@ -362,12 +362,6 @@ describe('@jupyterlab/ui-components', () => {
       });
 
       it('should update widget visibility on many-changed signal (GH-17697)', async () => {
-        // Regression test: CommandToolbarButton (the Lumino parent widget) must
-        // also react to the 'many-changed' signal emitted when
-        // notifyCommandChanged() is called without a specific id.
-        // Previously, only `change.id === props.id` was checked, so calling
-        // notifyCommandChanged() with no argument left the parent widget's
-        // lm-mod-hidden class stale. See #17697.
         const button = new CommandToolbarButton({
           commands,
           id: testLogCommandId
