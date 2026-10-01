@@ -55,12 +55,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
           persist-credentials: false
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@21b1cac622018fd37ec13a1c8081da814e10d94e # v1
         with:
           python_package_manager: "uv pip"
 
@@ -74,7 +74,7 @@ jobs:
 
       - name: Restore Playwright browsers cache
         if: ${{ github.event_name != 'release' }}
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # zizmor: ignore[cache-poisoning] v5 cache is disabled for release-triggered runs
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # zizmor: ignore[cache-poisoning] v5 cache is disabled for release-triggered runs
         id: playwright-cache
         with:
           path: /home/runner/pw-browsers
@@ -82,7 +82,7 @@ jobs:
 
       - name: Restore ${{ matrix.group }} cache
         if: ${{ matrix.cache-path && github.event_name != 'release' }}
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # zizmor: ignore[cache-poisoning] v5 cache is disabled for release-triggered runs
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # zizmor: ignore[cache-poisoning] v5 cache is disabled for release-triggered runs
         with:
           path: ${{ matrix.cache-path }}
           key: |-
@@ -103,7 +103,7 @@ jobs:
 
       - name: Upload ${{ matrix.group }} results
         if: ${{ matrix.upload-output && always() }}
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ matrix.group }} ${{ github.run_number }}
           path: |
@@ -114,11 +114,11 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
           persist-credentials: false
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@21b1cac622018fd37ec13a1c8081da814e10d94e # v1
         with:
           python_version: "3.10"
           dependency_type: minimum
@@ -134,11 +134,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
           persist-credentials: false
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@21b1cac622018fd37ec13a1c8081da814e10d94e # v1
         with:
           python_package_manager: "uv pip"
       - name: Install dependencies
@@ -148,7 +148,7 @@ jobs:
         run: |
           pip install build
           python -m build --sdist
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: "sdist"
           path: dist/*.tar.gz
@@ -160,9 +160,9 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@21b1cac622018fd37ec13a1c8081da814e10d94e # v1
       - name: Download sdist
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: "sdist"
           path: "sdist"
@@ -184,16 +184,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
           persist-credentials: false
-      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@21b1cac622018fd37ec13a1c8081da814e10d94e # v1
       - run: |
           pip install -vv --group builder
           jlpm
           jlpm build:packages
           jlpm docs
-      - uses: jupyterlab/maintainer-tools/.github/actions/check-links@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+      - uses: jupyterlab/maintainer-tools/.github/actions/check-links@21b1cac622018fd37ec13a1c8081da814e10d94e # v1
         with:
           ignore_glob: "docs/api packages/ui-components/docs/source/ui_components.rst images"
           ignore_links: "https?://.* .*/images/[\\w-]+.png"
