@@ -208,7 +208,7 @@ describe('@jupyterlab/observables', () => {
         expect(list.length).toBe(4);
       });
 
-      it('should undo a move', () => {
+      it('should redo a move', () => {
         const items = [
           serializer.fromJSON(value),
           serializer.fromJSON(value),
@@ -220,6 +220,78 @@ describe('@jupyterlab/observables', () => {
         list.undo();
         list.redo();
         expect((list.get(2) as any)['count']).toBe((items[1] as any)['count']);
+      });
+
+      it('should redo a set', () => {
+        const list = new ObservableUndoableList(serializer);
+        const item1 = serializer.fromJSON(value);
+        const item2 = serializer.fromJSON(value);
+        const item3 = serializer.fromJSON(value);
+        list.pushAll([item1, item2]);
+        list.set(1, item3);
+        expect((list.get(1) as any)['count']).toBe((item3 as any)['count']);
+        list.undo();
+        expect((list.get(1) as any)['count']).toBe((item2 as any)['count']);
+        list.redo();
+        expect((list.get(1) as any)['count']).toBe((item3 as any)['count']);
+      });
+
+      it('should not mutate change index in undo stack when redoing a set multiple times', () => {
+        const list = new ObservableUndoableList(serializer);
+        const item1 = serializer.fromJSON(value);
+        const item2 = serializer.fromJSON(value);
+        const item3 = serializer.fromJSON(value);
+        list.pushAll([item1, item2]);
+        list.set(0, item3);
+
+        // Cycle through undo/redo multiple times
+        list.undo();
+        expect((list.get(0) as any)['count']).toBe((item1 as any)['count']);
+        list.redo();
+        expect((list.get(0) as any)['count']).toBe((item3 as any)['count']);
+
+        list.undo();
+        expect((list.get(0) as any)['count']).toBe((item1 as any)['count']);
+        list.redo();
+        expect((list.get(0) as any)['count']).toBe((item3 as any)['count']);
+
+        list.undo();
+        expect((list.get(0) as any)['count']).toBe((item1 as any)['count']);
+        list.redo();
+        expect((list.get(0) as any)['count']).toBe((item3 as any)['count']);
+      });
+
+      it('should preserve compound operation order across multiple undo/redo cycles', () => {
+        const list = new ObservableUndoableList(serializer);
+        const item1 = serializer.fromJSON(value);
+        const item2 = serializer.fromJSON(value);
+        const item3 = serializer.fromJSON(value);
+        list.push(item1);
+
+        list.beginCompoundOperation();
+        list.push(item2);
+        list.push(item3);
+        list.endCompoundOperation();
+
+        expect(list.length).toBe(3);
+        expect((list.get(1) as any)['count']).toBe((item2 as any)['count']);
+        expect((list.get(2) as any)['count']).toBe((item3 as any)['count']);
+
+        // First undo/redo cycle
+        list.undo();
+        expect(list.length).toBe(1);
+        list.redo();
+        expect(list.length).toBe(3);
+        expect((list.get(1) as any)['count']).toBe((item2 as any)['count']);
+        expect((list.get(2) as any)['count']).toBe((item3 as any)['count']);
+
+        // Second undo/redo cycle (verifies that undo does not mutate stack in-place)
+        list.undo();
+        expect(list.length).toBe(1);
+        list.redo();
+        expect(list.length).toBe(3);
+        expect((list.get(1) as any)['count']).toBe((item2 as any)['count']);
+        expect((list.get(2) as any)['count']).toBe((item3 as any)['count']);
       });
     });
 
