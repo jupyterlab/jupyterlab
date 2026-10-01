@@ -2437,11 +2437,6 @@ function activateNotebookHandler(
     panel: NotebookPanel,
     viewOnly: boolean
   ): void {
-    // Every other editing-related toolbar item is now hidden by its own
-    // command's `isVisible`. These three can't be handled that way: `save`
-    // belongs to `docmanager:save` (a different plugin, not view-only-aware),
-    // `interrupt` is never gated by view-only, and `cellType` isn't backed
-    // by a command at all (`ToolbarItems.createCellTypeItem`).
     const editItemNames = ['save', 'interrupt', 'cellType'];
 
     for (const name of editItemNames) {
@@ -2453,8 +2448,6 @@ function activateNotebookHandler(
         el.style.display = viewOnly ? 'none' : '';
       }
     }
-    // The `jp-mod-view-only` class is toggled by `Notebook.viewOnly`'s own
-    // setter, so it doesn't need to be set here.
   }
 
   factory.widgetCreated.connect((sender, widget) => {
@@ -2483,9 +2476,11 @@ function activateNotebookHandler(
     widget.content.viewOnlyChanged.connect((_, viewOnly) => {
       applyNotebookViewOnlyUI(widget, viewOnly);
       // Toolbar buttons only re-check a command's `isEnabled`/`isVisible`
-      // when notified; they don't poll. Without this, buttons rendered
-      // before the view-only state was known would never update.
-      commands.notifyCommandChanged();
+      // when notified for that specific id
+      const skip = [CommandIDs.createNew, CommandIDs.createOutputView];
+      Object.values(CommandIDs)
+        .filter(id => !skip.includes(id) && commands.hasCommand(id))
+        .forEach(id => commands.notifyCommandChanged(id));
     }, widget);
 
     // Intercept kernel start for view-only notebooks opened read-only
