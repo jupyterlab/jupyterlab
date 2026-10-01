@@ -174,6 +174,9 @@ describe('console/panel', () => {
         void panel.console.execute(true);
         await promise;
         expect(panel.title.caption).not.toEqual(caption);
+        expect(panel.title.caption).toContain('Last Execution:');
+        expect(panel.title.caption).not.toContain('Last Execution: undefined');
+        expect(panel.title.caption).not.toContain('Last Execution: %1');
       });
 
       it('Should not update the caption on session change', async () => {

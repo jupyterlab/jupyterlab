@@ -337,7 +337,6 @@ namespace Private {
 
     const sessionContext = panel.console.sessionContext.session;
     if (sessionContext) {
-      // FIXME:
       let caption =
         trans.__('Name: %1\n', sessionContext.name) +
         trans.__('Directory: %1\n', PathExt.dirname(sessionContext.path)) +
@@ -351,7 +350,10 @@ namespace Private {
       }
 
       if (executed) {
-        caption += trans.__('\nLast Execution: %1');
+        caption += trans.__(
+          '\nLast Execution: %1',
+          Time.format(executed.toISOString())
+        );
       }
       panel.title.label = sessionContext.name;
       panel.title.caption = caption;
