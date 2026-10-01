@@ -386,22 +386,11 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       this._contentVisibilityObserver = null;
     }
     super.dispose();
-    // In the windowing modes that detach out-of-viewport cells from the
-    // layout ('full' and 'defer'), `Widget.dispose()` above only disposes
-    // the layout children, so the remaining cells have to be disposed
-    // explicitly: otherwise their connections to the shared model (which
-    // outlives this view) keep every one of them reachable. In the default
-    // 'contentVisibility' mode all cells are layout children and this is a
-    // no-op safety net. Running after `super.dispose()` lets the in-layout
-    // cells take the disposed-parent fast path instead of a full detach.
+    // Dispose cells that windowing modes may have detached from the layout.
     for (const cell of this.cellsArray) {
       cell.dispose();
     }
     this.cellsArray.length = 0;
-    // The view model is created by this class; `WindowedList` does not take
-    // ownership of the model it is handed. Disposing it clears its
-    // connection to the cell list of the shared model, which outlives this
-    // view.
     this.viewModel.dispose();
   }
 
@@ -637,7 +626,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     for (const cell of cells) {
       this._insertCell(++index, cell);
     }
-    this._syncMarkdownCellTrust();
+    this._syncCellTrust();
     newValue.cells.changed.connect(this._onCellsChanged, this);
     newValue.metadataChanged.connect(this.onMetadataChanged, this);
     newValue.contentChanged.connect(this.onModelContentChanged, this);
@@ -699,7 +688,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       this.addHeader();
     }
 
-    this._syncMarkdownCellTrust();
+    this._syncCellTrust();
     this.update();
   }
 
@@ -727,7 +716,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     widget.addClass(NB_CELL_CLASS);
 
     ArrayExt.insert(this.cellsArray, index, widget);
-    this._syncMarkdownCellTrust(widget);
+    this._syncCellTrust(widget);
     this.onCellInserted(index, widget);
 
     this._scheduleCellRenderOnIdle();
@@ -838,8 +827,8 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     widget.dispose();
   }
 
-  private _shouldTrustMarkdown(): boolean {
-    // Note: this returns false in a notebook without trsuted code cells;
+  private _shouldTrustCell(): boolean {
+    // Note: this returns false in a notebook without trusted code cells;
     // This is intended since only Code cells carry trust status on disk.
     if (!this._notebookModel) {
       return false;
@@ -856,11 +845,17 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     return hasCodeCell;
   }
 
-  private _syncMarkdownCellTrust(cell?: Cell): void {
-    const trusted = this._shouldTrustMarkdown();
+  private _syncCellTrust(cell?: Cell): void {
+    const trusted = this._shouldTrustCell();
     const trustHandler = this.rendermime.trustHandler;
     if (!trustHandler) {
       return;
+    }
+
+    if (trusted) {
+      trustHandler.markTrusted(this.node);
+    } else {
+      trustHandler.unmarkTrusted(this.node);
     }
 
     const cells = cell ? [cell] : this.widgets;
@@ -881,7 +876,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     args: IChangedArgs<any>
   ): void {
     if (args.name === 'trusted') {
-      this._syncMarkdownCellTrust();
+      this._syncCellTrust();
     }
   }
 
