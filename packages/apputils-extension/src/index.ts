@@ -120,9 +120,16 @@ const paletteRestorer: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:palette-restorer',
   description: 'Restores the command palette.',
   autoStart: true,
-  requires: [ILayoutRestorer],
-  activate: (app: JupyterFrontEnd, restorer: ILayoutRestorer) => {
-    Palette.restore(app, restorer);
+  requires: [ILayoutRestorer, ITranslator, IStateDB],
+  optional: [ISettingRegistry],
+  activate: (
+    app: JupyterFrontEnd,
+    restorer: ILayoutRestorer,
+    translator: ITranslator,
+    state: IStateDB,
+    settingRegistry: ISettingRegistry | null
+  ) => {
+    Palette.restore(app, restorer, translator, state, settingRegistry);
   }
 };
 

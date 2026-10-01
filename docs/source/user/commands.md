@@ -47,6 +47,17 @@ The command palette can be accessed from the View menu or using the keyboard sho
 
 The command palette can be displayed in the sidebar by adding `'modal': false` to the Settings.
 
+While the search input is empty, the commands recently run from the command palette are
+displayed at the top of the palette with a `recently used` badge. When searching, the
+results are ordered by relevance, and the recently used commands keep their badge.
+Commands run from menus or keyboard shortcuts are not recorded.
+
+The `'maxRecentCommands'` setting controls how many commands are remembered (5 by
+default). Setting it to `0` disables the feature and clears the history. The history is
+saved in the current {ref}`workspace <workspaces>`, so it is kept when the page is
+reloaded. To clear it, run the `Clear Recently Used Commands` command from the command
+palette.
+
 (commands-list)=
 
 ## Commands List
