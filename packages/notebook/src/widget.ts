@@ -1438,6 +1438,11 @@ export namespace StaticNotebook {
     showHiddenCellsButton: boolean;
 
     /**
+     * Should a lock icon be shown for read-only cells
+     */
+    showLockForReadOnlyCells?: boolean;
+
+    /**
      * Should an editor be shown for read-only markdown
      */
     showEditorForReadOnlyMarkdown?: boolean;
@@ -1488,6 +1493,7 @@ export namespace StaticNotebook {
     recordTiming: false,
     inputHistoryScope: 'global',
     maxNumberOutputs: 50,
+    showLockForReadOnlyCells: false,
     showEditorForReadOnlyMarkdown: true,
     disableDocumentWideUndoRedo: true,
     autoRenderMarkdownCells: false,
