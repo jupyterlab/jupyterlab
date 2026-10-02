@@ -300,6 +300,32 @@ describe('filebrowser/model', () => {
       });
     });
 
+    describe('#sessions() with a custom drive', () => {
+      it('should include sessions for notebooks on a named drive', async () => {
+        await state.clear();
+        const driveName = 'RTC';
+        const modelWithName = new FileBrowserModel({
+          manager,
+          state,
+          driveName
+        });
+
+        const contents = await manager.newUntitled({ type: 'notebook' });
+        const sessionPath = `${driveName}:${contents.path}`;
+        const session = await serviceManager.sessions.startNew({
+          name: '',
+          path: sessionPath,
+          type: 'test'
+        });
+
+        await modelWithName.cd();
+        expect(!modelWithName.sessions().next().done).toBe(true);
+
+        await session.shutdown();
+        modelWithName.dispose();
+      });
+    });
+
     describe('#dispose()', () => {
       it('should dispose of the resources held by the model', () => {
         model.dispose();
