@@ -4,11 +4,12 @@
 |----------------------------------------------------------------------------*/
 
 /*-----------------------------------------------------------------------------
-| Private CSS variables
+| CSS variables
 |----------------------------------------------------------------------------*/
 
 :root {
   --jp-private-cell-scrolling-output-offset: 5px;
+  --jp-cell-scrolled-output-max-height: 24em;
 }
 
 /*-----------------------------------------------------------------------------
@@ -71,7 +72,7 @@
 
 .jp-CodeCell.jp-mod-outputsScrolled .jp-Cell-outputArea {
   overflow-y: auto;
-  max-height: 24em;
+  max-height: var(--jp-cell-scrolled-output-max-height);
   margin-left: var(--jp-private-cell-scrolling-output-offset);
   resize: vertical;
 }
