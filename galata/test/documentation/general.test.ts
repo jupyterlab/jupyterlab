@@ -53,11 +53,7 @@ test.describe('General', () => {
     await page.sidebar.setWidth();
 
     // README.md in preview
-    await page.click('text=README.md', {
-      button: 'right'
-    });
-    await page.click('text=Open With');
-    await page.click('text=Markdown Preview');
+    await page.filebrowser.open('README.md', 'Markdown Preview');
 
     await page.notebook.openByPath('notebooks/Lorenz.ipynb');
 
@@ -68,21 +64,17 @@ test.describe('General', () => {
     await ensureMathTypeset(page);
 
     await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
-    await page.click('text=File');
-    await page.click('.lm-Menu ul[role="menu"] >> text=New');
-    await page.click('#jp-mainmenu-file-new >> text=Terminal');
+    await page.menu.clickMenuItem('File>New>Terminal');
     await setTerminalTitle(page, 'Terminal 1');
 
-    await page.click('text=File');
-    await page.click('.lm-Menu ul[role="menu"] >> text=New');
-    await page.click('#jp-mainmenu-file-new >> text=Console');
+    await page.menu.clickMenuItem('File>New>Console');
     await page.click('button:has-text("Select")');
 
     await page.notebook.open('Data.ipynb');
 
     await page.filebrowser.open('lorenz.py');
 
-    await page.click('div[role="main"] >> text=Lorenz.ipynb');
+    await page.activity.activateTab('Lorenz.ipynb');
 
     // Wait for the debugger bug icon to settle.
     // This needs to be before running any cells/switching to a different panel.
@@ -116,7 +108,7 @@ test.describe('General', () => {
     const viewerHandle = page.locator(
       '.lm-TabBar-tabLabel:text-is("lorenz.py")'
     );
-    await viewerHandle.click();
+    await page.activity.activateTab('lorenz.py');
     const viewerBBox = await viewerHandle.boundingBox();
 
     await page.mouse.move(
@@ -157,7 +149,7 @@ test.describe('General', () => {
       )
       .toMatchSnapshot('interface_left.png');
 
-    await page.click('[title="Running Terminals and Kernels"]');
+    await page.sidebar.openTab('jp-running-sessions');
     await page.click('[aria-label="Open Tabs Section"]', {
       button: 'right',
       position: { x: 10, y: 10 }
@@ -207,7 +199,7 @@ test.describe('General', () => {
         .currentWidget as NotebookPanel;
       return notebookPanel.content.activeCell?.model.id === cellId;
     }, COMMON_TOOLS_CELL_ID);
-    await page.click('[title="Property Inspector"]');
+    await page.sidebar.openTab('jp-property-inspector');
     await page.sidebar.setWidth(251, 'right');
 
     expect
@@ -355,7 +347,7 @@ test.describe('General', () => {
     });
 
     // Hide file browser
-    await page.click('[title^="File Browser"]');
+    await page.sidebar.close('left');
 
     // Inject arrow
     await page.evaluate(
@@ -379,15 +371,12 @@ test.describe('General', () => {
     });
 
     // Hide file browser
-    await page.click('[title^="File Browser"]');
+    await page.sidebar.close('left');
 
-    await page.click('text=File');
-    await page.mouse.move(70, 40);
-    const fileMenuNewItem = page
-      .locator('.lm-Menu ul[role="menu"]')
-      .getByText('New', { exact: true });
-    await fileMenuNewItem.waitFor();
-    await fileMenuNewItem.click();
+    await page.menu.openLocator('File>New');
+    const fileMenuNewItem = (await page.menu.getMenuItemLocator(
+      'File>New'
+    ))!.locator('.lm-Menu-itemLabel');
 
     // Inject mouse
     await page.evaluate(
@@ -448,11 +437,9 @@ test.describe('General', () => {
     });
 
     // Hide file browser
-    await page.click('[title^="File Browser"]');
+    await page.sidebar.close('left');
 
-    await page.click('text=File');
-    await page.mouse.move(70, 40);
-    await page.click('.lm-Menu ul[role="menu"] >> text=New');
+    await page.menu.openLocator('File>New');
     await page.hover('.lm-Menu ul[role="menu"] >> text=Text File');
 
     // Inject mouse
@@ -480,7 +467,7 @@ test.describe('General', () => {
     await page.filebrowser.open('narrative/jupyterlab.md');
 
     // Hide file browser
-    await page.click('[title^="File Browser"]');
+    await page.sidebar.close('left');
 
     expect(await page.screenshot()).toMatchSnapshot('file_editor_overview.png');
   });
@@ -498,10 +485,7 @@ test.describe('General', () => {
     // Open jupyterlab.md
     await page.filebrowser.open('narrative/jupyterlab.md');
 
-    await page.click('text=Settings');
-    await page.click(
-      '.lm-Menu ul[role="menu"] >> text=Text Editor Indentation'
-    );
+    await page.menu.openLocator('Settings>Text Editor Indentation');
 
     expect(
       await page.screenshot({ clip: { y: 0, x: 260, width: 600, height: 450 } })
@@ -636,9 +620,7 @@ test.describe('General', () => {
 
     // Open a terminal
     await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
-    await page.click('text=File');
-    await page.click('.lm-Menu ul[role="menu"] >> text=New');
-    await page.click('#jp-mainmenu-file-new >> text=Terminal');
+    await page.menu.clickMenuItem('File>New>Terminal');
 
     // Wait for the xterm.js element to be added in the DOM
     await page.locator('.jp-Terminal-body').waitFor();
@@ -667,16 +649,14 @@ test.describe('General', () => {
     await page.sidebar.setWidth();
 
     // Open a terminal
-    await page.click('text=File');
-    await page.click('.lm-Menu ul[role="menu"] >> text=New');
-    await page.click('#jp-mainmenu-file-new >> text=Terminal');
+    await page.menu.clickMenuItem('File>New>Terminal');
 
     await setTerminalTitle(page, 'Terminal 1');
 
     await page.notebook.openByPath('notebooks/Data.ipynb');
     await page.notebook.open('Julia.ipynb');
 
-    await page.click('[title="Running Terminals and Kernels"]');
+    await page.sidebar.openTab('jp-running-sessions');
 
     // Wait up to 5s for both kernels to startup
     await expect
@@ -790,7 +770,7 @@ test.describe('General', () => {
     await page.goto(`tree/${tmpPath}`);
 
     // Hide file browser
-    await page.click('[title^="File Browser"]');
+    await page.sidebar.close('left');
 
     await page.notebook.createNew();
     await page.notebook.setCell(
@@ -801,10 +781,7 @@ test.describe('General', () => {
 
     await page.notebook.run();
 
-    await page.click('text=File');
-    await page.click(
-      '.lm-Menu ul[role="menu"] >> text=New Console for Notebook'
-    );
+    await page.menu.clickMenuItem('File>New Console for Notebook');
 
     await page.click('.jp-CodeConsole-input >> .cm-content');
     await page.keyboard.type(
@@ -823,7 +800,7 @@ test.describe('General', () => {
     await page.goto(`tree/${tmpPath}`);
 
     // Hide file browser
-    await page.click('[title^="File Browser"]');
+    await page.sidebar.close('left');
 
     await page.notebook.createNew();
     await page.notebook.setCell(

@@ -36,8 +36,6 @@ test.describe('mockSettings', () => {
   });
 
   test('should not return mocked settings after save', async ({ page }) => {
-    await page.click('text=Settings');
-    await page.click('.lm-Menu ul[role="menu"] >> text=Theme');
     const [response] = await Promise.all([
       page.waitForResponse(
         response =>
@@ -45,7 +43,7 @@ test.describe('mockSettings', () => {
             response.url()
           ) && response.request().method() === 'GET'
       ),
-      page.click('.lm-Menu ul[role="menu"] >> text=JupyterLab Light')
+      page.menu.clickMenuItem('Settings>Theme>JupyterLab Light')
     ]);
 
     await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
@@ -110,9 +108,7 @@ test.describe('kernels', () => {
     await page.notebook.createNew();
     await page.locator('text= | Idle').waitFor();
 
-    await page
-      .getByRole('tab', { name: 'Running Terminals and Kernels' })
-      .click();
+    await page.sidebar.openTab('jp-running-sessions');
 
     await Promise.all([
       page.waitForResponse(

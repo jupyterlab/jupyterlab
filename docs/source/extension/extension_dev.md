@@ -121,6 +121,8 @@ The `id` and `activate` fields are required and the other fields may be omitted.
   in that extension. Disabling by package name is the exception: it disables
   every plugin the package provides, including a plugin whose id does not
   follow the convention.
+  The `jupyter/plugin-id-convention` rule enforces the package prefix for
+  plugin IDs in this repository, excluding mock plugins in tests.
   The `jupyter/token-format` rule from
   [`@jupyter/eslint-plugin`](https://eslint-plugin.readthedocs.io/en/latest/rules/token-format/)
   can enforce the related `<package>:<TokenSymbol>` convention for token IDs

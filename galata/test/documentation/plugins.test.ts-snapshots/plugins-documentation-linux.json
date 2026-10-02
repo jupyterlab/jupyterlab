@@ -129,7 +129,7 @@
   "@jupyterlab/inspector-extension:notebooks": "Adds code introspection to notebooks.",
   "@jupyterlab/javascript-extension:factory": "Adds renderer for JavaScript content.",
   "@jupyterlab/json-extension:factory": "Adds renderer for JSON content.",
-  "@jupyterlab/json-lines-extension:factory": "Adds renderer for JSONLines content.",
+  "@jupyterlab/json-extension:json-lines-factory": "Adds renderer for JSONLines content.",
   "@jupyterlab/launcher-extension:plugin": "Provides the launcher tab service.",
   "@jupyterlab/logconsole-extension:plugin": "Provides the logger registry.",
   "@jupyterlab/lsp-extension:code-extractor-manager": "Provides the code extractor manager.",

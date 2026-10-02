@@ -229,7 +229,7 @@ test.describe('Debugger', () => {
 
     const sidebar = page.locator('[data-id="jp-debugger-sidebar"]');
     await sidebar.waitFor();
-    await sidebar.click();
+    await page.sidebar.openTab('jp-debugger-sidebar');
     await page.sidebar.setWidth(251, 'right');
 
     // Inject mouse pointer
