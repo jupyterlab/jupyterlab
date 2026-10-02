@@ -2437,16 +2437,12 @@ function activateNotebookHandler(
     panel: NotebookPanel,
     viewOnly: boolean
   ): void {
-    const editItemNames = ['save', 'interrupt', 'cellType'];
+    const el = panel.toolbar.node.querySelector(
+      '[data-jp-item-name="save"]'
+    ) as HTMLElement | null;
 
-    for (const name of editItemNames) {
-      const el = panel.toolbar.node.querySelector(
-        `[data-jp-item-name="${name}"]`
-      ) as HTMLElement | null;
-
-      if (el) {
-        el.style.display = viewOnly ? 'none' : '';
-      }
+    if (el) {
+      el.style.display = viewOnly ? 'none' : '';
     }
   }
 
@@ -3574,7 +3570,9 @@ function addCommands(
         return kernel.interrupt();
       }
     },
-    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    isEnabled: args =>
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     icon: args => (args.toolbar ? stopIcon : undefined),
     describedBy: {
       args: {
