@@ -38,6 +38,8 @@ module.exports = function (baseDir: string) {
       'cjs'
     ],
     moduleNameMapper: {
+      // MathJax's ESM loader uses import.meta; use its CommonJS build in Jest.
+      '^@mathjax/(.*)/mjs/(.*)$': '@mathjax/$1/cjs/$2',
       '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
       '\\.(gif|ttf|eot)$': '@jupyterlab/testing/lib/jest-file-mock.js'
     },

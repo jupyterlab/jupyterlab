@@ -15,7 +15,117 @@ describe('@jupyterlab/mathjax-extension', () => {
         host.innerHTML = '$1 + 1$';
         document.body.appendChild(host);
         await typesetter.typeset(host);
-        expect(host.innerHTML).toContain('<mn>1</mn><mo>+</mo><mn>1</mn>');
+        expect(host.querySelector('mjx-assistive-mml math')?.textContent).toBe(
+          '1+1'
+        );
+      });
+
+      it('should use the bundled TeX font', async () => {
+        const host = document.createElement('div');
+        host.textContent = '$x$';
+        document.body.appendChild(host);
+        await typesetter.typeset(host);
+        expect(
+          host.querySelector('mjx-math')?.classList.contains('TEX-N')
+        ).toBe(true);
+      });
+
+      it('should typeset concurrent requests sharing a document', async () => {
+        const hosts = ['1', '2', '3'].map(value => {
+          const host = document.createElement('div');
+          host.textContent = `$${value}$`;
+          document.body.appendChild(host);
+          return host;
+        });
+        await Promise.all(
+          hosts.map(host => new MathJaxTypesetter().typeset(host))
+        );
+        expect(
+          hosts.map(
+            host => host.querySelector('mjx-assistive-mml math')?.textContent
+          )
+        ).toEqual(['1', '2', '3']);
+      });
+
+      it('should typeset concurrent requests with different delimiters', async () => {
+        const other = new MathJaxTypesetter({ dollarInlineMath: false });
+        const hosts = Array.from({ length: 6 }, (_, index) => {
+          const host = document.createElement('div');
+          host.textContent =
+            index % 2 === 0
+              ? `$\\require{physics}\\bra{${index}}$`
+              : `\\(\\require{physics}\\bra{${index}}\\)`;
+          document.body.appendChild(host);
+          return host;
+        });
+        await Promise.all(
+          hosts.map((host, index) =>
+            (index % 2 === 0 ? typesetter : other).typeset(host)
+          )
+        );
+        expect(
+          hosts.map(
+            host => host.querySelector('mjx-assistive-mml math')?.textContent
+          )
+        ).toEqual(['⟨0|', '⟨1|', '⟨2|', '⟨3|', '⟨4|', '⟨5|']);
+      });
+
+      it('should recover after a rendering failure', async () => {
+        const host = document.createElement('div');
+        host.textContent = '$1$';
+        document.body.appendChild(host);
+        const mathDocument = await typesetter.mathDocument();
+        const render = jest
+          .spyOn(mathDocument, 'renderPromise')
+          .mockRejectedValueOnce(new Error('Rendering failed'));
+        try {
+          await expect(typesetter.typeset(host)).rejects.toThrow(
+            'Rendering failed'
+          );
+          expect(mathDocument.options.elements).toBeUndefined();
+          await typesetter.typeset(host);
+          expect(
+            host.querySelector('mjx-assistive-mml math')?.textContent
+          ).toBe('1');
+        } finally {
+          render.mockRestore();
+        }
+      });
+
+      it('should load a bundled optional TeX package with require', async () => {
+        const host = document.createElement('div');
+        host.textContent = '$\\require{physics}\\bra{x}$';
+        document.body.appendChild(host);
+        await typesetter.typeset(host);
+        expect(host.querySelector('mjx-container')).not.toBeNull();
+        expect(host.querySelector('[data-mjx-error], merror')).toBeNull();
+        expect(host.querySelector('mjx-assistive-mml math')?.textContent).toBe(
+          '⟨x|'
+        );
+      });
+
+      it('should share output styles across delimiter configurations', async () => {
+        const other = new MathJaxTypesetter({ dollarInlineMath: false });
+
+        for (const [renderer, source] of [
+          [typesetter, '$U$'],
+          [other, '\\(V\\)'],
+          [typesetter, '$W$']
+        ] as const) {
+          const host = document.createElement('div');
+          host.textContent = source;
+          document.body.appendChild(host);
+          await renderer.typeset(host);
+        }
+        const style =
+          document.querySelector<HTMLStyleElement>('#MJX-CHTML-styles');
+        const rules = Array.from(
+          style?.sheet?.cssRules ?? [],
+          rule => rule.cssText
+        ).join('');
+        expect(rules).toContain('mjx-c1D448');
+        expect(rules).toContain('mjx-c1D449');
+        expect(rules).toContain('mjx-c1D44A');
       });
 
       it('should typeset block equations', async () => {
@@ -23,7 +133,9 @@ describe('@jupyterlab/mathjax-extension', () => {
         host.innerHTML = '$$1 + 1$$';
         document.body.appendChild(host);
         await typesetter.typeset(host);
-        expect(host.innerHTML).toContain('<mn>1</mn><mo>+</mo><mn>1</mn>');
+        expect(host.querySelector('mjx-assistive-mml math')?.textContent).toBe(
+          '1+1'
+        );
       });
 
       it.each([
@@ -70,7 +182,7 @@ describe('@jupyterlab/mathjax-extension', () => {
         document.body.appendChild(host);
         await configured.typeset(host);
         expect(host.innerHTML).toContain('$1 + 1$');
-        expect(host.innerHTML).not.toContain('<mn>1</mn>');
+        expect(host.querySelector('mjx-container')).toBeNull();
       });
 
       it('should still typeset `\\(...\\)` when dollar inline math is disabled', async () => {
@@ -79,7 +191,9 @@ describe('@jupyterlab/mathjax-extension', () => {
         host.innerHTML = '\\(1 + 1\\)';
         document.body.appendChild(host);
         await configured.typeset(host);
-        expect(host.innerHTML).toContain('<mn>1</mn><mo>+</mo><mn>1</mn>');
+        expect(host.querySelector('mjx-assistive-mml math')?.textContent).toBe(
+          '1+1'
+        );
       });
     });
 
@@ -120,7 +234,7 @@ describe('@jupyterlab/mathjax-extension', () => {
         document.body.appendChild(host);
         await configured.typeset(host);
         expect(host.innerHTML).toContain('$1 + 1$');
-        expect(host.innerHTML).not.toContain('<mn>1</mn>');
+        expect(host.querySelector('mjx-container')).toBeNull();
       });
     });
 

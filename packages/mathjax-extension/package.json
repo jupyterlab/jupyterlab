@@ -51,7 +51,8 @@
     "@jupyterlab/application": "^4.7.0-alpha.2",
     "@jupyterlab/rendermime": "^4.7.0-alpha.2",
     "@jupyterlab/translation": "^4.7.0-alpha.2",
-    "mathjax-full": "^3.2.2"
+    "@mathjax/mathjax-tex-font": "^4.1.1",
+    "@mathjax/src": "^4.1.1"
   },
   "devDependencies": {
     "@jupyterlab/testing": "^4.7.0-alpha.2",
