@@ -121,6 +121,27 @@ describe('terminal', () => {
         const running = Array.from(manager.running());
         expect(running.length).toBeGreaterThan(0);
       });
+
+      it('should include no_track_activity=1 in background polling', async () => {
+        let capturedUrl = '';
+        const customFetch = (info: RequestInfo, init?: RequestInit) => {
+          capturedUrl = typeof info === 'string' ? info : info.url;
+          return Promise.resolve(
+            new Response(JSON.stringify([]), { status: 200 })
+          );
+        };
+        const serverSettings = ServerConnection.makeSettings({
+          fetch: customFetch
+        });
+        const terminalManager = new TerminalManager({
+          serverSettings,
+          standby: 'never'
+        });
+        await terminalManager.refreshRunning();
+        const url = new URL(capturedUrl);
+        expect(url.searchParams.get('no_track_activity')).toBe('1');
+        terminalManager.dispose();
+      });
     });
 
     describe('#startNew()', () => {
