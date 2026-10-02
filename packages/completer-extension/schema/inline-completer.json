@@ -49,19 +49,22 @@
         { "const": "onHover", "title": "On hover" },
         { "const": "never", "title": "Never" }
       ],
-      "default": "onHover"
+      "default": "onHover",
+      "tags": ["%UI%"]
     },
     "showShortcuts": {
       "title": "Show shortcuts in the widget",
       "description": "Whether to show shortcuts in the inline completer widget.",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "tags": ["%UI%"]
     },
     "suppressIfTabCompleterActive": {
       "title": "Suppress when the tab completer is active",
       "description": "Whether to suppress the inline completer when the tab completer suggestions are shown.",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "tags": ["%UI%"]
     },
     "streamingAnimation": {
       "title": "Streaming animation",
@@ -71,27 +74,31 @@
         { "const": "none", "title": "None" },
         { "const": "uncover", "title": "Uncover" }
       ],
-      "default": "uncover"
+      "default": "uncover",
+      "tags": ["%UI%"]
     },
     "minLines": {
       "title": "Reserve lines for inline completion",
       "description": "Number of lines to reserve for the ghost text with inline completion suggestion.",
       "type": "number",
       "default": 0,
-      "minimum": 0
+      "minimum": 0,
+      "tags": ["%UI%"]
     },
     "maxLines": {
       "title": "Limit inline completion lines",
       "description": "Number of lines of inline completion to show before collapsing. Setting zero disables the limit.",
       "type": "number",
       "default": 0,
-      "minimum": 0
+      "minimum": 0,
+      "tags": ["%UI%"]
     },
     "reserveSpaceForLongest": {
       "title": "Reserve space for the longest candidate",
       "description": "When multiple completions are returned, reserve blank space for up to as many lines as in the longest completion candidate to avoid resizing editor when cycling between the suggestions.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "tags": ["%UI%"]
     },
     "editorResizeDelay": {
       "title": "Editor resize delay",
@@ -104,7 +111,8 @@
       "title": "Syntax Highlighting for Ghost Text",
       "description": "If enabled, ghost text suggestions will use the language's syntax highlighting instead of being a low-opacity gray.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "tags": ["%UI%"]
     }
   },
   "additionalProperties": false,
