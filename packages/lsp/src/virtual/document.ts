@@ -21,11 +21,9 @@ import type {
 } from '../positioning';
 import { DefaultMap, untilReady } from '../utils';
 
-type IRange = CodeEditor.IRange;
-
 type language = string;
 
-interface IVirtualLine {
+export interface IVirtualLine {
   /**
    * Inspections for which document should be skipped for this virtual line?
    */
@@ -42,9 +40,12 @@ interface IVirtualLine {
   editor: Document.IEditor;
 }
 
-export type ForeignDocumentsMap = Map<IRange, Document.IVirtualDocumentBlock>;
+export type ForeignDocumentsMap = Map<
+  CodeEditor.IRange,
+  Document.IVirtualDocumentBlock
+>;
 
-interface ISourceLine {
+export interface ISourceLine {
   /**
    * Line corresponding to the block in the entire foreign document
    */

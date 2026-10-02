@@ -179,9 +179,6 @@ export interface ISettingRegistry {
   upload(plugin: string, raw: string): Promise<void>;
 }
 
-/**
- * A namespace for setting registry interfaces.
- */
 export namespace ISettingRegistry {
   /**
    * The primitive types available in a JSON schema.

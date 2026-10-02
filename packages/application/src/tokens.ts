@@ -156,9 +156,6 @@ export interface IRouter {
   route(url: string): void;
 }
 
-/**
- * A namespace for the `IRouter` specification.
- */
 export namespace IRouter {
   /**
    * The parsed location currently being routed.

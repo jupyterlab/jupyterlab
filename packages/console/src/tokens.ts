@@ -22,9 +22,6 @@ export const IConsoleTracker = new Token<IConsoleTracker>(
  */
 export interface IConsoleTracker extends IWidgetTracker<ConsolePanel> {}
 
-/**
- * Console cell executor namespace
- */
 export namespace IConsoleCellExecutor {
   /**
    * Execution options for console cell executor.

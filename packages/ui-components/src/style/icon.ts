@@ -23,7 +23,7 @@ export namespace LabIconStyle {
    * - statusBar: The icons in the status bar
    * - toolbarButton: The icon shown on a toolbar button
    */
-  type IBuiltin =
+  export type IBuiltin =
     | 'breadCrumb'
     | 'commandPaletteHeader'
     | 'commandPaletteItem'
@@ -41,7 +41,7 @@ export namespace LabIconStyle {
     | 'statusBar'
     | 'toolbarButton';
 
-  type IPosition =
+  export type IPosition =
     | 'center'
     | 'top'
     | 'right'
@@ -52,14 +52,14 @@ export namespace LabIconStyle {
     | 'bottom left'
     | 'top left';
 
-  type ISize = 'small' | 'normal' | 'large' | 'xlarge';
+  export type ISize = 'small' | 'normal' | 'large' | 'xlarge';
 
   /**
    * Options that function as a shorthand for compound CSS properties,
    * such as the set of props required to center an svg inside
    * of a parent node
    */
-  interface ISheetOptions {
+  export interface ISheetOptions {
     /**
      * How to position the inner svg element,
      * relative to the outer container
@@ -86,7 +86,7 @@ export namespace LabIconStyle {
    * Stylesheet with a collection of CSS props for each node
    * in an icon, plus some custom options
    */
-  interface ISheet {
+  export interface ISheet {
     /**
      * CSS properties that will be applied to the outer container
      * element via a typestyle class
@@ -118,7 +118,7 @@ export namespace LabIconStyle {
    * ISheet can be resolved to a "pure" stylesheet by processing and
    * removing any options
    */
-  interface ISheetPure extends ISheet {
+  export interface ISheetPure extends ISheet {
     /**
      * Options are disallowed
      */
@@ -128,7 +128,7 @@ export namespace LabIconStyle {
   /**
    * Type to help with resolving a stylesheet that might be a string
    */
-  type ISheetResolvable = ISheet | IBuiltin;
+  export type ISheetResolvable = ISheet | IBuiltin;
 
   export interface IProps extends NestedCSSProperties, ISheetOptions {
     /**

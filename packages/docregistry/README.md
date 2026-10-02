@@ -4,6 +4,6 @@ A JupyterLab package which tracks the different types of documents that the appl
 This includes notebooks, text files, and base64 encoded documents.
 
 Extensions may register new document types with the document registry to allow them to be opened with JupyterLab.
-An example of this may be found in the [@jupyterlab/notebook](../notebook) package.
+An example of this may be found in the [@jupyterlab/notebook](https://github.com/jupyterlab/jupyterlab/tree/main/packages/notebook) package.
 
-The document registry is a singleton on the [application](../application).
+The document registry is a singleton on the [application](https://github.com/jupyterlab/jupyterlab/tree/main/packages/application).

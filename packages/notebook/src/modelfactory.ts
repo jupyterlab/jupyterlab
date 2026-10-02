@@ -23,7 +23,6 @@ export class NotebookModelFactory implements DocumentRegistry.IModelFactory<INot
   /**
    * Define the disableDocumentWideUndoRedo property.
    *
-   * @experimental
    * @alpha
    */
   get disableDocumentWideUndoRedo(): boolean {
@@ -126,7 +125,6 @@ export namespace NotebookModelFactory {
      *
      * Default: true
      *
-     * @experimental
      * @alpha
      */
     disableDocumentWideUndoRedo?: boolean;

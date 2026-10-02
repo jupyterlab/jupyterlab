@@ -67,7 +67,7 @@ export async function getHeadingId(
 /**
  * Parses the provided string and returns a list of headings.
  *
- * @param text - Markdown text
+ * @param markdownText - Markdown text
  * @param parser - A Markdown parser instance used to render the content to HTML.
  * @returns List of headings
  *

@@ -16,11 +16,11 @@ import type { FocusTracker, Widget } from '@lumino/widgets';
 /**
  * The type for all JupyterFrontEnd application plugins.
  *
- * @typeparam T - The type that the plugin `provides` upon being activated.
+ * @typeParam T - The type that the plugin `provides` upon being activated.
  *
- * @typeparam U - The type of the application shell.
+ * @typeParam U - The type of the application shell.
  *
- * @typeparam V - The type that defines the application formats.
+ * @typeParam V - The type that defines the application formats.
  */
 export type JupyterFrontEndPlugin<
   T,
@@ -31,11 +31,11 @@ export type JupyterFrontEndPlugin<
 /**
  * The base Jupyter front-end application class.
  *
- * @typeparam `T` - The `shell` type. Defaults to `JupyterFrontEnd.IShell`.
+ * @typeParam T - The `shell` type. Defaults to `JupyterFrontEnd.IShell`.
  *
- * @typeparam `U` - The type for supported format names. Defaults to `string`.
+ * @typeParam U - The type for supported format names. Defaults to `'desktop' | 'mobile'`.
  *
- * #### Notes
+ * @remarks
  * This type is useful as a generic application against which front-end plugins
  * can be authored. It inherits from the Lumino `Application`.
  */
@@ -408,9 +408,6 @@ export namespace JupyterFrontEnd {
     readonly paths: Promise<ITreeResolver.Paths>;
   }
 
-  /**
-   * A namespace for tree resolver types.
-   */
   export namespace ITreeResolver {
     /**
      * The browser and file paths if the tree resolver encountered and handled

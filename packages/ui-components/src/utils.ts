@@ -3,7 +3,7 @@
 
 import { Text } from '@jupyterlab/coreutils';
 
-type ClassNameMapping = { [className: string]: unknown };
+export type ClassNameMapping = { [className: string]: unknown };
 
 /**
  * Inner works of class combining functions

@@ -68,7 +68,7 @@ export class TextForeignCodeExtractor implements IForeignCodeExtractor {
   }
 }
 
-namespace TextForeignCodeExtractor {
+export namespace TextForeignCodeExtractor {
   export interface IOptions {
     /**
      * The foreign language.

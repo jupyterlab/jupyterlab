@@ -18,7 +18,7 @@ export const DEFAULT_LANGUAGE_CODE = 'en';
 /**
  * Metadata describing translation domain.
  */
-interface IDomainMetadata {
+export interface IDomainMetadata {
   /**
    * Domain name, e.g. jupyterlab-git.
    */

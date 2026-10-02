@@ -25,9 +25,6 @@ export interface ITooltipManager {
   invoke(options: ITooltipManager.IOptions): void;
 }
 
-/**
- * A namespace for `ITooltipManager` interface specifications.
- */
 export namespace ITooltipManager {
   /**
    * An interface for tooltip-compatible objects.
