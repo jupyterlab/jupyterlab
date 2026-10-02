@@ -135,6 +135,14 @@ export class HTMLViewer
   }
 
   /**
+   * Force the HTML document to be rendered again.
+   */
+  refresh(): void {
+    this._forceRender = true;
+    this.update();
+  }
+
+  /**
    * Dispose of resources held by the html viewer.
    */
   dispose(): void {
@@ -155,16 +163,23 @@ export class HTMLViewer
     if (this._renderPending) {
       return;
     }
+    const force = this._forceRender;
+    this._forceRender = false;
     this._renderPending = true;
-    void this._renderModel().then(() => (this._renderPending = false));
+    void this._renderModel(force).then(() => (this._renderPending = false));
   }
 
   /**
    * Render HTML in IFrame into this widget's node.
    */
-  private async _renderModel(): Promise<void> {
+  private async _renderModel(force = false): Promise<void> {
     let data = this.context.model.toString();
     data = await this._setupDocument(data);
+
+    if (!force && data === this._renderedData) {
+      return;
+    }
+    this._renderedData = data;
 
     // Set the new iframe url.
     const blob = new Blob([data], { type: 'text/html' });
@@ -217,7 +232,9 @@ export class HTMLViewer
   }
 
   protected translator: ITranslator;
+  private _forceRender = false;
   private _renderPending = false;
+  private _renderedData: string | null = null;
   private _parser = new DOMParser();
   private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null =
     null;
@@ -278,7 +295,7 @@ export namespace ToolbarItems {
       onClick: async () => {
         if (!widget.context.model.dirty) {
           await widget.context.revert();
-          widget.update();
+          widget.refresh();
         }
       },
       tooltip: trans.__('Rerender HTML Document')

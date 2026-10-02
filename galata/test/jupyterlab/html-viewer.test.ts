@@ -8,6 +8,7 @@ import type { Frame, Page } from '@playwright/test';
 import * as path from 'path';
 
 const fileName = 'test.html';
+const secondFileName = 'test-2.html';
 
 test.describe('HTML Viewer', () => {
   test.use({ tmpPath: 'test-html-viewer' });
@@ -17,6 +18,10 @@ test.describe('HTML Viewer', () => {
     await contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${fileName}`),
       `${tmpPath}/${fileName}`
+    );
+    await contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${fileName}`),
+      `${tmpPath}/${secondFileName}`
     );
   });
 
@@ -68,6 +73,24 @@ test.describe('HTML Viewer', () => {
     });
 
     expect(warningCount).toEqual(0);
+  });
+
+  test('should not reload when switching tabs', async ({ page }) => {
+    const firstIframe = page.locator('.jp-HTMLViewer iframe').first();
+    const initialUrl = await firstIframe.getAttribute('src');
+    expect(initialUrl).toMatch(/^blob:/);
+
+    await page.getByRole('listitem', { name: secondFileName }).dblclick();
+
+    const secondIframe = page.locator('.jp-HTMLViewer iframe').nth(1);
+    await expect(secondIframe).toHaveAttribute('src', /^blob:/);
+
+    await page.getByRole('tab', { name: fileName }).click();
+    await expect(firstIframe).toBeVisible();
+
+    // Give any update request posted while showing the tab time to run.
+    await page.waitForTimeout(250);
+    await expect(firstIframe).toHaveAttribute('src', initialUrl!);
   });
 });
 
