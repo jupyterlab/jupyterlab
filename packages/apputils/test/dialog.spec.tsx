@@ -625,6 +625,46 @@ describe('@jupyterlab/apputils', () => {
       document.body.removeChild(node);
     });
 
+    it('should accept a skipQueue option', async () => {
+      const node1 = document.createElement('div');
+      const node2 = document.createElement('div');
+      document.body.appendChild(node1);
+      document.body.appendChild(node2);
+
+      const prompt1 = showDialog({
+        title: 'foo1',
+        body: 'Hello 1',
+        host: node1,
+        buttons: [Dialog.cancelButton(), Dialog.okButton()]
+      });
+
+      await waitForDialog(node1);
+
+      const prompt2 = showDialog({
+        title: 'foo2',
+        body: 'Hello 2',
+        host: node2,
+        buttons: [Dialog.cancelButton(), Dialog.okButton()],
+        skipQueue: true
+      });
+
+      await waitForDialog(node2);
+
+      expect(node1.children.length).toBe(1);
+      expect(node2.children.length).toBe(1);
+
+      await acceptDialog(node2);
+      const result2 = await prompt2;
+      expect(result2.button.accept).toBe(true);
+
+      await acceptDialog(node1);
+      const result1 = await prompt1;
+      expect(result1.button.accept).toBe(true);
+
+      document.body.removeChild(node1);
+      document.body.removeChild(node2);
+    });
+
     it('should accept a virtualdom body', async () => {
       const body = (
         <div>
