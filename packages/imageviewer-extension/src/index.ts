@@ -110,10 +110,11 @@ function activate(
 
     const types = app.docRegistry.getFileTypesForPath(widget.context.path);
 
-    if (types.length > 0) {
-      widget.title.icon = types[0].icon!;
-      widget.title.iconClass = types[0].iconClass ?? '';
-      widget.title.iconLabel = types[0].iconLabel ?? '';
+    const fileType = types[0];
+    if (fileType !== undefined) {
+      widget.title.icon = fileType.icon!;
+      widget.title.iconClass = fileType.iconClass ?? '';
+      widget.title.iconLabel = fileType.iconLabel ?? '';
     }
   }
 

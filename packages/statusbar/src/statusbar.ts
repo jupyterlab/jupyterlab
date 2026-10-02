@@ -140,6 +140,9 @@ export class StatusBar extends Widget implements IStatusBar {
 
   private _refreshItem(id: string) {
     const statusItem = this._statusItems[id];
+    if (statusItem === undefined) {
+      return;
+    }
     if (
       statusItem.isActive() &&
       !(statusItem.priority === 0 && this._isWindowNarrow())

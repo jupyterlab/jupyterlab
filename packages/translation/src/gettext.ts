@@ -174,13 +174,15 @@ class Gettext {
     this._contextDelimiter =
       options.contextDelimiter || this._defaults.contextDelimiter;
     this._stringsPrefix = options.stringsPrefix || this._defaults.stringsPrefix;
-    this._pluralFuncs = {};
-    this._dictionary = {};
-    this._pluralForms = {};
+    this._pluralFuncs = Object.create(null);
+    this._dictionary = Object.create(null);
+    this._pluralForms = Object.create(null);
 
     if (options.messages) {
-      this._dictionary[this._domain] = {};
-      this._dictionary[this._domain][this._locale] = options.messages;
+      const domainMessages: Record<string, TranslationMessages> =
+        Object.create(null);
+      domainMessages[this._locale] = options.messages;
+      this._dictionary[this._domain] = domainMessages;
     }
 
     if (options.pluralForms) {
@@ -494,24 +496,19 @@ class Gettext {
       ? msgctxt + this._contextDelimiter + msgid
       : msgid;
     let options: ITOptions = { pluralForm: false };
-    let exist: boolean = false;
     let locales = this.expandLocale(this._locale);
 
-    for (let i in locales) {
-      const locale = locales[i];
+    for (const locale of locales) {
       const message = this.getMessage(domain, locale, key);
 
       // check condition are valid (.length)
       // because it's not possible to define both a singular and a plural form of the same msgid,
       // we need to check that the stored form is the same as the expected one.
       // if not, we'll just ignore the translation and consider it as not translated.
-      if (msgid_plural) {
-        exist = !!message && message.length > 1;
-      } else {
-        exist = !!message && message.length == 1;
-      }
-
-      if (exist) {
+      if (
+        message &&
+        (msgid_plural ? message.length > 1 : message.length == 1)
+      ) {
         // This ensures that a variation is used.
         foundTranslation = message;
         options.locale = locale;
@@ -519,11 +516,11 @@ class Gettext {
       }
     }
 
-    if (!exist) {
+    if (!foundTranslation) {
       translation = [msgid];
       options.pluralFunc = this._defaults.pluralFunc;
     } else {
-      translation = foundTranslation!;
+      translation = foundTranslation;
     }
 
     // Singular form
@@ -533,7 +530,9 @@ class Gettext {
 
     // Plural one
     options.pluralForm = true;
-    let value: Array<string> = exist ? translation : [msgid, msgid_plural];
+    let value: Array<string> = foundTranslation
+      ? translation
+      : [msgid, msgid_plural];
     return this.t(value, n, options, ...args);
   }
 
@@ -610,8 +609,8 @@ class Gettext {
   private removeContext(str: string): string {
     // if there is context, remove it
     if (str.indexOf(this._contextDelimiter) !== -1) {
-      let parts = str.split(this._contextDelimiter);
-      return parts[1];
+      const [, value] = str.split(this._contextDelimiter);
+      return value ?? '';
     }
     return str;
   }
@@ -636,28 +635,28 @@ class Gettext {
     ...args: unknown[]
   ): string {
     // Singular is very easy, just pass dictionary message through strfmt
+    const singular = messages[0] ?? '';
     if (!options.pluralForm)
       return (
         this._stringsPrefix +
-        Gettext.strfmt(this.removeContext(messages[0]), ...args)
+        Gettext.strfmt(this.removeContext(singular), ...args)
       );
 
     let plural: IPluralResult;
+    const locale = options.locale || '';
 
     // if a plural func is given, use that one
     if (options.pluralFunc) {
       plural = options.pluralFunc(n);
 
       // if plural form never interpreted before, do it now and store it
-    } else if (!this._pluralFuncs[options.locale || '']) {
-      this._pluralFuncs[options.locale || ''] = this.getPluralFunc(
-        this._pluralForms[options.locale || '']
-      );
-      plural = this._pluralFuncs[options.locale || ''](n);
-
-      // we have the plural function, compute the plural result
     } else {
-      plural = this._pluralFuncs[options.locale || ''](n);
+      let pluralFunc = this._pluralFuncs[locale];
+      if (!pluralFunc) {
+        pluralFunc = this.getPluralFunc(this._pluralForms[locale]!);
+        this._pluralFuncs[locale] = pluralFunc;
+      }
+      plural = pluralFunc(n);
     }
 
     // If there is a problem with plurals, fallback to singular one
@@ -671,7 +670,7 @@ class Gettext {
     return (
       this._stringsPrefix +
       Gettext.strfmt(
-        this.removeContext(messages[plural.plural]),
+        this.removeContext(messages[plural.plural] ?? singular),
         ...[n, ...args]
       )
     );
@@ -698,9 +697,9 @@ class Gettext {
 
     if (pluralForms) this._pluralForms[locale] = pluralForms;
 
-    if (!this._dictionary[domain]) this._dictionary[domain] = {};
-
-    this._dictionary[domain][locale] = messages;
+    const domainMessages: Record<string, TranslationMessages> =
+      (this._dictionary[domain] ??= Object.create(null));
+    domainMessages[locale] = messages;
   }
 
   private _stringsPrefix: string;

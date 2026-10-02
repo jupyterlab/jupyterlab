@@ -377,7 +377,8 @@ namespace Private {
       return (
         spec.resources['logo-svg'] ||
         spec.resources['logo-64x64'] ||
-        spec.resources['logo-32x32']
+        spec.resources['logo-32x32'] ||
+        jupyterIcon
       );
     }
 
@@ -504,14 +505,15 @@ namespace Private {
 
     private get _summary(): string {
       const children = this.children;
-      if (children.length === 0) {
+      const firstChild = children[0];
+      if (firstChild === undefined) {
         return this.trans.__('No sessions connected');
       } else if (children.length == 1) {
-        return children[0].name();
+        return firstChild.name();
       } else {
         return this.trans.__(
           '%1 and %2 more',
-          children[0].name(),
+          firstChild.name(),
           children.length - 1
         );
       }

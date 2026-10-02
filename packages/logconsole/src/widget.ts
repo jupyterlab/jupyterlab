@@ -25,7 +25,9 @@ import type {
 } from './tokens';
 
 function toTitleCase(value: string) {
-  return value.length === 0 ? value : value[0].toUpperCase() + value.slice(1);
+  return value.length === 0
+    ? value
+    : value.charAt(0).toUpperCase() + value.slice(1);
 }
 
 /**
@@ -192,6 +194,9 @@ export class ScrollingWidget<T extends Widget> extends Widget {
   }
 
   private _handleScroll([entry]: IntersectionObserverEntry[]) {
+    if (entry === undefined) {
+      return;
+    }
     if (entry.isIntersecting) {
       this._tracking = true;
     } else if (this.isVisible) {

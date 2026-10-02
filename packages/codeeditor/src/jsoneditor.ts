@@ -280,8 +280,12 @@ export class JSONEditor extends Widget {
 
     // If it is in user and has changed from old, set in new.
     for (const key in user) {
-      if (!JSONExt.deepEqual(user[key], old[key] || null)) {
-        source.set(key, user[key]);
+      const userValue = user[key];
+      if (
+        userValue !== undefined &&
+        !JSONExt.deepEqual(userValue, old[key] || null)
+      ) {
+        source.set(key, userValue);
       }
     }
 

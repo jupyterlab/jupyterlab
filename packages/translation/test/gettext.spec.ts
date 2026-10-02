@@ -33,6 +33,57 @@ describe('@jupyterlab/translation', () => {
   trans.loadJSON(JSON_TEST_DATA_VARIATION, 'jupyterlab');
 
   describe('Gettext', () => {
+    describe('#loadJSON', () => {
+      it.each<[string, object]>([
+        ['__proto__', Object.prototype],
+        ['constructor', Object],
+        ['toString', Object.prototype.toString]
+      ])(
+        'should isolate translations for the %s domain',
+        (domain, prototype) => {
+          const locale = 'x-gettext-test';
+          const bundle = new Gettext({ domain, locale });
+          try {
+            bundle.loadJSON(
+              {
+                ...JSON_TEST_DATA,
+                '': { ...JSON_TEST_DATA[''], language: locale }
+              },
+              domain
+            );
+
+            expect(
+              Object.prototype.hasOwnProperty.call(prototype, locale)
+            ).toBe(false);
+            expect(bundle.gettext('Welcome')).toBe('Bienvenido');
+            expect(new Gettext({ domain, locale }).gettext('Welcome')).toBe(
+              'Welcome'
+            );
+          } finally {
+            Reflect.deleteProperty(prototype, locale);
+          }
+        }
+      );
+
+      it.each(['constructor', 'toString'])(
+        'should handle %s as a locale without inherited plural functions',
+        locale => {
+          const bundle = new Gettext({ domain: 'jupyterlab', locale });
+          bundle.loadJSON(
+            {
+              ...JSON_TEST_DATA,
+              '': { ...JSON_TEST_DATA[''], language: locale }
+            },
+            'jupyterlab'
+          );
+
+          expect(
+            bundle.ngettext('There is %1 apple', 'There are %1 apples', 2)
+          ).toBe('Hay 2 manzanas');
+        }
+      );
+    });
+
     describe('#gettext', () => {
       it('should test whether the gettext bundle gettext/__ works', () => {
         // Shorthand method
