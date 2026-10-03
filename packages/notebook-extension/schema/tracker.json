@@ -900,6 +900,12 @@
       "type": "boolean",
       "default": false
     },
+    "preserveCellMetadataForCopiedCells": {
+      "title": "Preserve cell metadata of copied cells",
+      "description": "When enabled, the copied and pasted cells will preserve all their cell metadata.",
+      "type": "boolean",
+      "default": false
+    },
     "helpInBottomPanel": {
       "title": "Show Help in Bottom Panel",
       "description": "Whether to display help output (e.g. pager output from 'source: page' payloads) in a bottom panel inspector instead of inlining it.",
