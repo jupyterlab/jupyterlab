@@ -33,6 +33,18 @@ class Serializer implements ISerializer<Test> {
 const serializer = new Serializer();
 const value: JSONObject = { name: 'foo' };
 
+class Item {
+  constructor(readonly value: JSONObject) {}
+}
+
+const ser: ISerializer<Item> = {
+  fromJSON: (v: JSONObject) => new Item({ ...v }),
+  toJSON: (i: Item) => i.value
+};
+
+const ids = (l: ObservableUndoableList<Item>) =>
+  Array.from({ length: l.length }, (_, i) => l.get(i).value['id']).join('');
+
 describe('@jupyterlab/observables', () => {
   describe('ObservableUndoableList', () => {
     describe('#constructor', () => {
@@ -223,75 +235,52 @@ describe('@jupyterlab/observables', () => {
       });
 
       it('should redo a set', () => {
-        const list = new ObservableUndoableList(serializer);
-        const item1 = serializer.fromJSON(value);
-        const item2 = serializer.fromJSON(value);
-        const item3 = serializer.fromJSON(value);
-        list.pushAll([item1, item2]);
-        list.set(1, item3);
-        expect((list.get(1) as any)['count']).toBe((item3 as any)['count']);
+        const list = new ObservableUndoableList(ser);
+        list.pushAll([new Item({ id: 'a' }), new Item({ id: 'b' })]);
+        list.set(1, new Item({ id: 'c' }));
+        expect(ids(list)).toBe('ac');
         list.undo();
-        expect((list.get(1) as any)['count']).toBe((item2 as any)['count']);
+        expect(ids(list)).toBe('ab');
         list.redo();
-        expect((list.get(1) as any)['count']).toBe((item3 as any)['count']);
+        expect(ids(list)).toBe('ac');
       });
 
       it('should not mutate change index in undo stack when redoing a set multiple times', () => {
-        const list = new ObservableUndoableList(serializer);
-        const item1 = serializer.fromJSON(value);
-        const item2 = serializer.fromJSON(value);
-        const item3 = serializer.fromJSON(value);
-        list.pushAll([item1, item2]);
-        list.set(0, item3);
-
-        // Cycle through undo/redo multiple times
-        list.undo();
-        expect((list.get(0) as any)['count']).toBe((item1 as any)['count']);
-        list.redo();
-        expect((list.get(0) as any)['count']).toBe((item3 as any)['count']);
-
-        list.undo();
-        expect((list.get(0) as any)['count']).toBe((item1 as any)['count']);
-        list.redo();
-        expect((list.get(0) as any)['count']).toBe((item3 as any)['count']);
-
-        list.undo();
-        expect((list.get(0) as any)['count']).toBe((item1 as any)['count']);
-        list.redo();
-        expect((list.get(0) as any)['count']).toBe((item3 as any)['count']);
+        const list = new ObservableUndoableList(ser);
+        list.pushAll([new Item({ id: 'a' }), new Item({ id: 'b' })]);
+        list.set(0, new Item({ id: 'c' }));
+        const seen: string[] = [ids(list)];
+        for (let k = 0; k < 2; k++) {
+          list.undo();
+          seen.push(ids(list));
+          list.redo();
+          seen.push(ids(list));
+        }
+        expect(seen.join(' ')).toBe('cb ab cb ab cb');
       });
 
       it('should preserve compound operation order across multiple undo/redo cycles', () => {
-        const list = new ObservableUndoableList(serializer);
-        const item1 = serializer.fromJSON(value);
-        const item2 = serializer.fromJSON(value);
-        const item3 = serializer.fromJSON(value);
-        list.push(item1);
+        const list = new ObservableUndoableList(ser);
+        list.push(new Item({ id: 'a' }));
 
         list.beginCompoundOperation();
-        list.push(item2);
-        list.push(item3);
+        list.push(new Item({ id: 'b' }));
+        list.push(new Item({ id: 'c' }));
         list.endCompoundOperation();
 
-        expect(list.length).toBe(3);
-        expect((list.get(1) as any)['count']).toBe((item2 as any)['count']);
-        expect((list.get(2) as any)['count']).toBe((item3 as any)['count']);
+        expect(ids(list)).toBe('abc');
 
         // First undo/redo cycle
         list.undo();
-        expect(list.length).toBe(1);
+        expect(ids(list)).toBe('a');
         list.redo();
-        expect(list.length).toBe(3);
-        expect((list.get(1) as any)['count']).toBe((item2 as any)['count']);
-        expect((list.get(2) as any)['count']).toBe((item3 as any)['count']);
+        expect(ids(list)).toBe('abc');
 
         // Second undo/redo cycle (verifies that undo does not mutate stack in-place)
         list.undo();
-        expect(list.length).toBe(1);
+        expect(ids(list)).toBe('a');
         list.redo();
-        expect(list.length).toBe(3);
-        expect((list.get(1) as any)['count']).toBe((item2 as any)['count']);
-        expect((list.get(2) as any)['count']).toBe((item3 as any)['count']);
+        expect(ids(list)).toBe('abc');
       });
     });
 
