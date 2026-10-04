@@ -46,7 +46,13 @@ export class HistoryInlineCompletionProvider implements IInlineCompletionProvide
       default: {
         // make this provider opt-in
         enabled: false,
-        maxSuggestions: 100
+        maxSuggestions: 100,
+        // Each fetch sends a `history_request` to the kernel, so wait for a
+        // short pause instead of querying on every key press. The delay is
+        // also a window in which `inline-completer:accept` has nothing to
+        // accept yet, so it is kept close to the 100 ms that still reads as
+        // an immediate response.
+        debouncerDelay: 100
       }
     };
   }
@@ -113,7 +119,10 @@ export class HistoryInlineCompletionProvider implements IInlineCompletionProvide
         output: false,
         raw: true,
         hist_access_type: 'search',
-        pattern: linePrefix + '*' + (suffix ? suffix + '*' : ''),
+        pattern:
+          escapeGlob(linePrefix) +
+          '*' +
+          (suffix ? escapeGlob(suffix) + '*' : ''),
         unique: true,
         n: this._maxSuggestions
       };
@@ -155,4 +164,11 @@ export namespace HistoryInlineCompletionProvider {
   export interface IOptions {
     translator?: ITranslator;
   }
+}
+
+/**
+ * Quote literal characters with special meaning in history search patterns.
+ */
+function escapeGlob(text: string): string {
+  return text.replace(/[?*[]/g, character => `[${character}]`);
 }
