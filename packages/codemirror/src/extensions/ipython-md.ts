@@ -8,6 +8,7 @@ import type {
   BlockContext,
   DelimiterType,
   InlineContext,
+  LeafBlock,
   Line,
   MarkdownConfig,
   NodeSpec
@@ -97,7 +98,11 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
           cx.addElement(cx.elt(BLOCK_MATH_DOLLAR, from, to, marks));
           return true;
         },
-        endLeaf: (cx: BlockContext, line: Line) => opensMathBlock(line)
+        // A `$$` line that closes inline math opened earlier in the paragraph
+        // must not start a new block.
+        endLeaf: (cx: BlockContext, line: Line, leaf: LeafBlock) =>
+          opensMathBlock(line) &&
+          leaf.content.split(/(?<!\\)\$\$/).length % 2 === 1
       }
     ],
     parseInline: [

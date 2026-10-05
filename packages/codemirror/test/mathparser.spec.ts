@@ -322,6 +322,16 @@ a}
 `
 );
 
+test(
+  'Block math $$ closing inline math opened in a paragraph',
+  `
+{P:The energy is {MaBD:{maBD:$$}
+E = mc^2
+{maBD:$$}}
+where {Em:{e:*}m{e:*}} is the mass.}
+`
+);
+
 // Block math \\[ \\]
 
 test(
