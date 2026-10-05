@@ -585,7 +585,7 @@ export class PluginList extends ReactWidget {
           tag => tag.toLowerCase() === query.toLowerCase()
         )
       ) {
-        acc.push(subProps.title as string);
+        acc.push((subProps.title as string) ?? value);
       }
 
       // Finally, recurse on the properties left.
