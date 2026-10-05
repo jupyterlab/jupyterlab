@@ -345,7 +345,7 @@ export class ListModel extends VDomModel {
    *
    * Setting its value triggers a new search.
    *
-   * ### Note
+   * #### Notes
    * First page is 1.
    */
   get page(): number {
