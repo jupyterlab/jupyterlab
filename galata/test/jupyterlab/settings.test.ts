@@ -58,10 +58,12 @@ async function injectTag(
 ): Promise<void> {
   await page.evaluate(
     async ({ id, t }) => {
-      const app = (window as any).jupyterapp;
-      const registry = app.pluginRegistry._plugins.get(
+      const registry = await window.galata.getPlugin(
         '@jupyterlab/apputils-extension:settings'
-      ).service;
+      );
+      if (!registry) {
+        throw new Error('Settings registry plugin is unavailable');
+      }
       const settings = await registry.load(id);
       settings.plugin.schema.tags = [t];
     },
