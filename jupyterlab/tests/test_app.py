@@ -18,10 +18,13 @@ from unittest.mock import patch
 
 import jupyter_core
 import jupyterlab_server
+import pytest
 from ipykernel.kernelspec import write_kernel_spec
 from jupyter_server.serverapp import ServerApp
 from jupyterlab_server.process_app import ProcessApp
 from traitlets import default
+
+from jupyterlab.labapp import LabApp
 
 HERE = osp.realpath(osp.dirname(__file__))
 
@@ -225,3 +228,11 @@ class RootedServerApp(ServerApp):
         os.chmod(readonly_filepath, S_IRUSR | S_IRGRP | S_IROTH)
         atexit.register(lambda: shutil.rmtree(root_dir, True))
         return root_dir
+
+
+def test_invalid_config_file_fails(monkeypatch, tmp_path):
+    monkeypatch.setenv("JUPYTER_CONFIG_DIR", str(tmp_path))
+    (tmp_path / "jupyter_lab_config.py").write_text("raise RuntimeError('bad config')\n")
+
+    with pytest.raises(RuntimeError, match="bad config"):
+        LabApp().load_config_file()

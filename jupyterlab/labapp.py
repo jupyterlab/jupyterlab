@@ -424,6 +424,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
     name = "lab"
     app_name = "JupyterLab"
+    raise_config_file_errors = True
 
     # Should your extension expose other server extensions when launched directly?
     load_other_extensions = True
