@@ -217,6 +217,7 @@ export namespace NotebookActions {
     const index = notebook.activeCellIndex;
     const editor = child.editor;
     if (!editor) {
+      // TODO
       return;
     }
     const selections = editor.getSelections();
