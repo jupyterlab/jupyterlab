@@ -197,6 +197,10 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
+    const child = notebook.activeCell;
+    const wasRendered =
+      child instanceof MarkdownCell && (child as MarkdownCell).rendered;
+
     // We force the notebook back in edit mode as splitting a cell
     // requires using the cursor position within a cell (aka it was recently in edit mode)
     // However the focus may be stolen if the action is triggered
@@ -205,12 +209,14 @@ export namespace NotebookActions {
 
     notebook.deselectAll();
 
+    if (wasRendered) {
+      return;
+    }
+
     const nbModel = notebook.model;
     const index = notebook.activeCellIndex;
-    const child = notebook.widgets[index];
     const editor = child.editor;
     if (!editor) {
-      // TODO
       return;
     }
     const selections = editor.getSelections();

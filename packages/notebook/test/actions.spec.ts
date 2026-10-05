@@ -423,6 +423,71 @@ describe('@jupyterlab/notebook', () => {
         expect(secondCell.id).toBe(originalCellId);
         expect(firstCell.id).not.toBe(originalCellId);
       });
+
+      it('should unrender a rendered markdown heading cell into edit mode without splitting', () => {
+        NotebookActions.changeCellType(widget, 'markdown');
+        const cell = widget.activeCell as MarkdownCell;
+        const source = '# Heading 1\nSecond line of markdown';
+        cell.model.sharedModel.setSource(source);
+        cell.rendered = true;
+        widget.mode = 'command';
+
+        const originalCellCount = widget.model!.cells.length;
+        NotebookActions.splitCell(widget);
+
+        expect(widget.mode).toBe('edit');
+        expect(cell.rendered).toBe(false);
+        expect(widget.model!.cells.length).toBe(originalCellCount);
+        expect(cell.model.sharedModel.getSource()).toBe(source);
+      });
+
+      it('should unrender a plain rendered markdown cell into edit mode without splitting', () => {
+        NotebookActions.changeCellType(widget, 'markdown');
+        const cell = widget.activeCell as MarkdownCell;
+        const source = 'First line of plain markdown\nSecond line of text';
+        cell.model.sharedModel.setSource(source);
+        cell.rendered = true;
+        widget.mode = 'command';
+
+        const originalCellCount = widget.model!.cells.length;
+        NotebookActions.splitCell(widget);
+
+        expect(widget.mode).toBe('edit');
+        expect(cell.rendered).toBe(false);
+        expect(widget.model!.cells.length).toBe(originalCellCount);
+        expect(cell.model.sharedModel.getSource()).toBe(source);
+      });
+
+      it('should split a markdown cell on a second split action after unrendering and setting cursor', () => {
+        NotebookActions.changeCellType(widget, 'markdown');
+        const cell = widget.activeCell as MarkdownCell;
+        const line1 = '# Heading 1';
+        const line2 = 'Second line of text';
+        const source = `${line1}\n${line2}`;
+        cell.model.sharedModel.setSource(source);
+        cell.rendered = true;
+        widget.mode = 'command';
+
+        const originalCellCount = widget.model!.cells.length;
+
+        // First splitCell: transitions to edit mode and unrenders without splitting
+        NotebookActions.splitCell(widget);
+        expect(widget.mode).toBe('edit');
+        expect(cell.rendered).toBe(false);
+        expect(widget.model!.cells.length).toBe(originalCellCount);
+
+        // User now positions cursor at line2
+        const editor = cell.editor as CodeEditor.IEditor;
+        editor.setCursorPosition(editor.getPositionAt(line1.length + 1)!);
+
+        // Second splitCell: splits at cursor position
+        NotebookActions.splitCell(widget);
+        expect(widget.model!.cells.length).toBe(originalCellCount + 1);
+        const firstCell = widget.model!.cells.get(0);
+        const secondCell = widget.model!.cells.get(1);
+        expect(firstCell.sharedModel.getSource()).toBe(line1);
+        expect(secondCell.sharedModel.getSource()).toBe(line2);
+      });
     });
 
     it('should clear execution metadata when splitting a running cell', () => {
