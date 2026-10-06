@@ -7,6 +7,7 @@
 import * as path from 'path';
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import { UUID } from '@lumino/coreutils';
 
 test.describe('Notebook Tests', () => {
   test('Create New Notebook', async ({ page, tmpPath }) => {
@@ -136,7 +137,8 @@ test.describe('Notebook Tests', () => {
     page,
     tmpPath
   }) => {
-    const filePath = `${tmpPath}/untrusted.ipynb`;
+    const fileName = 'untrusted.ipynb';
+    const filePath = `${tmpPath}/${fileName}`;
     const notebook = galata.Notebook.generateNotebook(
       1,
       'code',
@@ -149,12 +151,15 @@ test.describe('Notebook Tests', () => {
         }
       ]
     );
+    // Notebook signatures are shared across tests on the same server.
+    notebook.cells[0].id = UUID.uuid4();
     await page.contents.uploadContent(
       JSON.stringify(notebook),
       'text',
       filePath
     );
-    await page.notebook.openByPath(filePath);
+    await page.filebrowser.refresh();
+    await page.notebook.open(fileName);
 
     expect(await page.notebook.trust()).toBe(true);
     await expect(
@@ -163,7 +168,8 @@ test.describe('Notebook Tests', () => {
     expect(await page.notebook.trust()).toBe(true);
 
     await page.notebook.close(false);
-    await page.notebook.openByPath(filePath);
+    await expect(page.activity.getTabLocator(fileName)).toHaveCount(0);
+    await page.notebook.open(fileName);
     await expect(
       page.locator('[data-icon="ui-components:trusted"]')
     ).toBeVisible();
