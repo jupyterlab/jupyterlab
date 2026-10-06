@@ -415,6 +415,16 @@ export class DocumentManager implements IDocumentManager {
         }
       }
     }
+
+    if (widgetName === null) {
+      for (const context of this._contextsForPath(newPath)) {
+        const widget = this._widgetManager.findWidget(context, null);
+        if (widget) {
+          return widget;
+        }
+      }
+    }
+
     return undefined;
   }
 

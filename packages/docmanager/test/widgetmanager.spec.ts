@@ -162,6 +162,13 @@ describe('@jupyterlab/docmanager', () => {
         expect(manager.findWidget(context, 'test')).toBe(widget);
       });
 
+      it('should find a registered widget when widgetName is null or omitted', () => {
+        const widget = manager.createWidget(widgetFactory, context);
+
+        expect(manager.findWidget(context, null)).toBe(widget);
+        expect(manager.findWidget(context)).toBe(widget);
+      });
+
       it('should return undefined if not found', () => {
         expect(manager.findWidget(context, 'test')).toBeUndefined();
       });
