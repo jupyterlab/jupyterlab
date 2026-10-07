@@ -5,8 +5,9 @@
 
 import React from 'react';
 import type { FieldProps } from '@rjsf/utils';
-import type { INotebookTracker } from '@jupyterlab/notebook';
+import type { INotebookModel, INotebookTracker } from '@jupyterlab/notebook';
 import { NotebookTools } from '@jupyterlab/notebook';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import type { ITranslator } from '@jupyterlab/translation';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { ObservableJSON } from '@jupyterlab/observables';
@@ -75,8 +76,24 @@ export class CellMetadataField extends NotebookTools.MetadataEditorTool {
     }
   }
 
+  private _onSaveStateChanged(
+    sender: DocumentRegistry.IContext<INotebookModel>,
+    state: DocumentRegistry.SaveState
+  ): void {
+    if (
+      state === 'started' &&
+      sender === this._tracker.currentWidget?.context
+    ) {
+      this.editor.commit();
+    }
+  }
+
   render(props: FieldProps): JSX.Element {
     const cell = this._tracker.activeCell;
+    this._context?.saveState.disconnect(this._onSaveStateChanged, this);
+    this._context = this._tracker.currentWidget?.context ?? null;
+    this._context?.saveState.connect(this._onSaveStateChanged, this);
+
     // Replace and dispose the source created for the previous render.
     const previousSource = this.editor.source;
     this.editor.source = cell
@@ -92,6 +109,7 @@ export class CellMetadataField extends NotebookTools.MetadataEditorTool {
     );
   }
 
+  private _context: DocumentRegistry.IContext<INotebookModel> | null = null;
   private _tracker: INotebookTracker;
 }
 
