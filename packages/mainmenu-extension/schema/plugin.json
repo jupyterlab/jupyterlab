@@ -94,6 +94,10 @@
                   "rank": 50
                 },
                 {
+                  "command": "viewmenu:show-toolbar",
+                  "rank": 50
+                },
+                {
                   "type": "separator",
                   "rank": 50
                 }
