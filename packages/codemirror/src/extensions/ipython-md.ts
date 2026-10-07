@@ -9,6 +9,7 @@ import type {
   DelimiterType,
   InlineContext,
   LeafBlock,
+  LeafBlockParser,
   Line,
   MarkdownConfig,
   NodeSpec
@@ -53,6 +54,13 @@ function opensMathBlock(line: Line): boolean {
 }
 
 /**
+ * Whether text has a `$$` that it does not close, ignoring escaped `\$$`.
+ */
+function hasOpenMath(text: string): boolean {
+  return text.split(/(?<!\\)\$\$/).length % 2 === 0;
+}
+
+/**
  * Define an IPython mathematical expression parser for Markdown.
  *
  * @param latexParser CodeMirror parser for LaTeX mathematical expression
@@ -84,25 +92,55 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
           const from = cx.lineStart + line.pos;
           const marks = [cx.elt(mark, from, from + 2)];
           let to = cx.lineStart + line.text.length;
+          let rest = '';
           // Like the renderer, do not let math run past a blank line.
           while (cx.nextLine() && line.next != -1) {
             const close = line.text.indexOf('$$', line.pos);
             if (close >= 0) {
               to = cx.lineStart + close + 2;
               marks.push(cx.elt(mark, to - 2, to));
+              rest = line.text.slice(close + 2);
               cx.nextLine();
               break;
             }
             to = cx.lineStart + line.text.length;
           }
           cx.addElement(cx.elt(BLOCK_MATH_DOLLAR, from, to, marks));
+          const text = rest.replace(/^\s+/, '');
+          if (text) {
+            const start = to + rest.length - text.length;
+            cx.addElement(
+              cx.elt('Paragraph', start, start + text.length, [
+                ...cx.parser.parseInline(text, start)
+              ])
+            );
+          }
           return true;
+        },
+        // Lines inside open `$$` math are LaTeX, so hold back the other leaf
+        // parsers, which would read a line of `=` as a setext underline.
+        before: 'SetextHeading',
+        leaf: (): LeafBlockParser => {
+          let held: LeafBlockParser[] | null = null;
+          const parser: LeafBlockParser = {
+            nextLine(cx: BlockContext, line: Line, leaf: LeafBlock) {
+              if (hasOpenMath(leaf.content)) {
+                held ??= leaf.parsers.filter(p => p !== parser);
+                leaf.parsers = [parser];
+              } else if (held) {
+                leaf.parsers.push(...held);
+                held = null;
+              }
+              return false;
+            },
+            finish: () => false
+          };
+          return parser;
         },
         // A `$$` line that closes inline math opened earlier in the paragraph
         // must not start a new block.
         endLeaf: (cx: BlockContext, line: Line, leaf: LeafBlock) =>
-          opensMathBlock(line) &&
-          leaf.content.split(/(?<!\\)\$\$/).length % 2 === 1
+          opensMathBlock(line) && !hasOpenMath(leaf.content)
       }
     ],
     parseInline: [

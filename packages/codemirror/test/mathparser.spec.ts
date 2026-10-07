@@ -332,6 +332,26 @@ where {Em:{e:*}m{e:*}} is the mass.}
 `
 );
 
+test(
+  'Block math $$ opened mid-line containing a setext = underline',
+  `
+{P:Some text {MaBD:{maBD:$$}
+a
+=
+{maBD:$$}}
+where {Em:{e:*}m{e:*}} is the mass.}
+`
+);
+
+test(
+  'Block math $$ followed by text on the closing line',
+  `
+{MaBD:{maBD:$$}
+a
+{maBD:$$}} {P:and more {Em:{e:*}text{e:*}}}
+`
+);
+
 // Block math \\[ \\]
 
 test(
