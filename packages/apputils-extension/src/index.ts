@@ -42,6 +42,9 @@ import type { Widget } from '@lumino/widgets';
 import { announcements } from './announcements';
 import { licensesClient, licensesPlugin } from './licensesplugin';
 import { notificationPlugin } from './notificationplugin';
+// The plugins create the command palette at activation, so the module is
+// needed before the application starts.
+// eslint-disable-next-line jupyter/prefer-lazy-imports
 import { Palette } from './palette';
 import { settingsConnector, settingsPlugin } from './settingsplugin';
 import { kernelStatus, runningSessionsStatus } from './statusbarplugin';
