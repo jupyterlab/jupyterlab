@@ -16,6 +16,9 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import type { IFormRenderer } from '@jupyterlab/ui-components';
 import { IFormRendererRegistry } from '@jupyterlab/ui-components';
 
+// eslint-disable-next-line jupyter/prefer-lazy-imports
+import { CellTagField } from './celltag';
+
 /**
  * Registering cell tag field.
  */
@@ -25,15 +28,13 @@ const customCellTag: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   requires: [INotebookTracker],
   optional: [IFormRendererRegistry],
-  activate: async (
+  activate: (
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
     formRegistry?: IFormRendererRegistry
   ) => {
     // Register the custom field
     if (formRegistry) {
-      const { CellTagField } = await import('./celltag');
-
       const component: IFormRenderer = {
         fieldRenderer: (props: FieldProps) => {
           return new CellTagField(tracker).render(props);
