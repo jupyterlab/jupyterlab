@@ -220,17 +220,6 @@ export class RecentsCommandPalette extends CommandPalette {
   }
 
   /**
-   * Dispose of the resources held by the widget.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this._recentCommands = [];
-    super.dispose();
-  }
-
-  /**
    * The maximum number of recent commands.
    *
    * #### Notes
