@@ -1107,7 +1107,7 @@ function addCommands(
         return isWritable();
       }
     },
-    isVisible: () => isWritable(),
+    isVisible: args => !args.toolbar || isWritable(),
     describedBy: {
       args: {
         type: 'object',
