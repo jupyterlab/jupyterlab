@@ -55,7 +55,7 @@
     "@lumino/properties": "^2.0.5",
     "@lumino/signaling": "^2.1.6",
     "@lumino/virtualdom": "^2.0.5",
-    "@lumino/widgets": "^2.9.0",
+    "@lumino/widgets": "^2.10.0",
     "@rjsf/core": "^5.13.4",
     "@rjsf/utils": "^5.13.4",
     "react": "^18.2.0",
