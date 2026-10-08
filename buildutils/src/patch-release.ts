@@ -2,10 +2,14 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { program as commander } from 'commander';
 import * as utils from './utils';
+
+interface IPatchReleaseOptions {
+  all?: boolean;
+  force?: boolean;
+  skipCommit?: boolean;
+}
 
 // Specify the program signature.
 commander
@@ -13,7 +17,7 @@ commander
   .option('--force', 'Force the upgrade')
   .option('--all', 'Patch all JS packages instead of the changed ones')
   .option('--skip-commit', 'Whether to skip commit changes')
-  .action((options: any) => {
+  .action((options: IPatchReleaseOptions) => {
     utils.exitOnUncaughtException();
 
     // Make sure we can patch release.

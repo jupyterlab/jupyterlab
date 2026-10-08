@@ -34,7 +34,7 @@ please assume that no one else is working on it (even if someone previously
 volunteered) and open a pull request with proposed implementation.
 If you are not certain about the implementation, using draft pull requests is encouraged.
 
-If you believe you’ve found a security vulnerability in JupyterLab or
+If you believe you've found a security vulnerability in JupyterLab or
 any Jupyter project, please report it to [security@ipython.org](mailto:security@ipython.org). If you
 prefer to encrypt your security reports, you can use [this PGP public
 key](https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipython_security.asc).
@@ -125,6 +125,12 @@ pre-commit run
 
 which should run any autoformatting on your code
 and tell you about any errors it couldn't fix automatically.
+To run the GitHub Actions security analysis locally before pushing, use
+`pre-commit run zizmor --files .github/workflows/<workflow>.yml` or
+`pre-commit run zizmor --all-files`.
+
+The local hook is pinned and kept aligned with the CI `zizmor` version.
+For day-to-day development, prefer targeted runs with `--files`.
 You may also install [ruff integration](https://docs.astral.sh/ruff/integrations)
 into your text editor to format code automatically.
 
@@ -500,12 +506,17 @@ dev mode, extensions will not be activated by default - refer
 When running in dev mode, a red stripe will appear at the top of the
 page; this is to indicate running an unreleased version.
 
-If you want to change the TypeScript code and rebuild on the fly
-(needs page refresh after each rebuild):
+If you want to change the TypeScript code in the core packages and
+rebuild on the fly (needs page refresh after each rebuild):
 
 ```bash
 jupyter lab --dev-mode --watch
 ```
+
+The watch mode rebuilds TypeScript sources in the JupyterLab repository.
+When developing a separate extension, run that extension's build or watch
+command as well so its TypeScript changes are compiled before refreshing
+JupyterLab.
 
 ### Build and Run the Tests
 
@@ -578,7 +589,8 @@ must be delayed on minor or major versions.
 
 ## Performance Testing
 
-Benchmark of JupyterLab is done using Playwright. The actions measured are:
+JupyterLab performance benchmarks are implemented with Playwright. The actions
+measured are:
 
 - Opening a file
 - Switching from the file to a simple text file
@@ -587,15 +599,8 @@ Benchmark of JupyterLab is done using Playwright. The actions measured are:
 
 Two files are tested: a notebook with many code cells and another with many markdown cells.
 
-The test is run on the CI by comparing the result in the commit at which a PR branch started and the PR branch head on
-the same CI job to ensure using the same hardware.
-The benchmark job is triggered on:
-
-- Approved PR review
-- PR review that contains the sentence `please run benchmark`
-
-The tests are located in the subfolder `galata/test/benchmark`. And they can be
-executed with the following command:
+The tests are located in the subfolder `galata/test/benchmark`. They can be
+executed locally with the following command:
 
 ```bash
 jlpm test:benchmark
@@ -611,6 +616,19 @@ A special report will be generated in the folder `benchmark-results` that will c
 The reference, tagged _expected_, is stored in `lab-benchmark-expected.json`. It can be
 created using the `-u` option of Playwright; i.e. `jlpm test:benchmark -u`.
 
+Branch comparisons can be run from the
+[jupyterlab/benchmarks](https://github.com/jupyterlab/benchmarks/#readme)
+repository, which runs the challenger and reference branches on the same CI
+hardware.
+
+Memory leak regression tests live in the subfolder `galata/test/memory-leak`.
+They run in the Galata CI workflow as a Chromium-only project with one worker for
+deterministic object counts, and can be executed locally with:
+
+```bash
+jlpm test:memory-leak
+```
+
 ### Benchmark parameters
 
 The benchmark can be customized using the following environment variables:
@@ -618,9 +636,6 @@ The benchmark can be customized using the following environment variables:
 - `BENCHMARK_NUMBER_SAMPLES`: Number of samples to compute the execution time distribution; default 20.
 - `BENCHMARK_OUTPUTFILE`: Benchmark result output file; default `benchmark.json`. It is overridden in the `playwright-benchmark.config.js`.
 - `BENCHMARK_REFERENCE`: Reference name of the data; default is `actual` for current data and `expected` for the reference.
-
-More tests can be carried out manually on JupyterLab branches and run weekly on the default branch in
-[jupyterlab/benchmarks](https://github.com/jupyterlab/benchmarks/#readme) repository.
 
 ## Visual Regression and UI Tests
 
@@ -635,7 +650,7 @@ Galata generates a user friendly test result report which can be used to inspect
 UI tests. Result report shows the failure reason, call-stack up to the failure and
 detailed information on visual regression issues. For visual regression errors, reference
 image and test capture image, along with diff image generated during comparison are
-provided in the report. You can use these information to debug failing tests. Galata test
+provided in the report. You can use this information to debug failing tests. Galata test
 report can be downloaded from GitHub Actions page for a UI test run. Test artifact is
 named `galata-report` and once you extract it, you can access the report by launching
 a server to serve the files `python -m http.server -d <path-to-extracted-report>`.
@@ -656,7 +671,7 @@ Main reasons for UI test failures are:
 
    If your code change is introducing an update to UI which causes existing UI Tests to
    fail, then you will need to update reference image(s) (and/or JSON snapshots) for the failing tests.
-   In order to do that, you can post a comment on your PR with the following content:
+   In order to do that, you can post a top-level comment on your PR with the following content:
    - (bot) `please open PR to update snapshots` - A bot will open a PR updating all snapshots
      generated in the most recent run of CI from your branch.
 
@@ -703,6 +718,8 @@ Here are some good practices to follow when writing integration tests:
 - Do not use `waitForTimeout()` as this slows down tests and makes them flaky when CI runs slower than expected.
 - If your change introduces subpixel change to dozens of snapshots, consider if it is necessary;
   such a change often requires many extensions to update their snapshots too, leading to significant cost downstream.
+- When testing the notebook UI without executing code, open the notebook without the kernel to preserve resources
+  (starting hundreds of kernels slows down the test suite)
 
 ## Contributing to the debugger front-end
 
@@ -871,7 +888,7 @@ Documentation is written in Markdown. To ensure that the Read the Docs page buil
 need to install the documentation dependencies with `pip`:
 
 ```bash
-pip install -e ".[docs]"
+pip install -e . --group docs
 ```
 
 To test the docs run:
@@ -1038,7 +1055,7 @@ The key utility is `jlpm integrity`, which ensures the integrity
 of the packages in the repo. It will:
 
 - Ensure the core package version dependencies match everywhere.
-- Ensure imported packages match dependencies.
+- Ensure imported packages match dependencies, counting dynamic `import()` calls as imports.
 - Ensure a consistent version of all packages.
 - Manage the meta package.
 

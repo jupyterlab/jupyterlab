@@ -4,9 +4,7 @@ on:
   issue_comment:
     types: [created, edited]
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: {}
 
 jobs:
   update-galata-snapshots:
@@ -17,6 +15,9 @@ jobs:
       )
     timeout-minutes: 80
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
       - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots-checkout@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
@@ -57,6 +58,9 @@ jobs:
       )
     timeout-minutes: 80
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      pull-requests: write
 
     # Python version is frozen through strategy.matrix.python-version
     # Python dependencies are frozen in the installation step

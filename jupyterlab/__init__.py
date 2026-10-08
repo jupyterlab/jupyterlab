@@ -12,11 +12,11 @@ from .handlers.announcements import (
 )
 
 
-def _jupyter_server_extension_paths():
+def _jupyter_server_extension_paths() -> list[dict[str, str]]:
     return [{"module": "jupyterlab"}]
 
 
-def _jupyter_server_extension_points():
+def _jupyter_server_extension_points() -> list[dict[str, str | type]]:
     from .labapp import LabApp  # noqa: PLC0415
 
     return [{"module": "jupyterlab", "app": LabApp}]

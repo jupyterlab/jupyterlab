@@ -8,7 +8,7 @@ import type { JSONObject } from '@lumino/coreutils';
 import type { CompletionHandler } from '../handler';
 import type { ICompletionContext, ICompletionProvider } from '../tokens';
 import type { Completer } from '../widget';
-import { isHintableMimeType } from '../utils';
+import { isContinuousHintingChange, isHintableMimeType } from '../utils';
 
 export const KERNEL_PROVIDER_ID = 'CompletionProvider:kernel';
 /**
@@ -122,8 +122,8 @@ export class KernelCompleterProvider implements ICompletionProvider {
   }
 
   /**
-   * Kernel provider will activate the completer in continuous mode after
-   * the `.` character.
+   * Kernel provider will activate the completer in continuous mode after an
+   * identifier character.
    */
   shouldShowContinuousHint(
     visible: boolean,
@@ -135,19 +135,6 @@ export class KernelCompleterProvider implements ICompletionProvider {
       return false;
     }
 
-    const sourceChange = changed.sourceChange;
-    if (sourceChange == null) {
-      return true;
-    }
-
-    if (sourceChange.some(delta => delta.delete != null)) {
-      return false;
-    }
-
-    return sourceChange.some(
-      delta =>
-        delta.insert != null &&
-        (delta.insert === '.' || (!visible && delta.insert.trim().length > 0))
-    );
+    return !visible && isContinuousHintingChange(changed);
   }
 }

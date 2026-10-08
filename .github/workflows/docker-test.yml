@@ -8,10 +8,13 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   docker:
     name: Docker Dev Container
-    if: ${{ github.event_name == 'schedule' }} || contains( github.event.pull_request.title, '[docker]')
+    if: ${{ github.event_name == 'schedule' || (github.event_name == 'pull_request' && contains(github.event.pull_request.title, '[docker]')) }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

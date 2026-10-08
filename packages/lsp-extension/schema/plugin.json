@@ -39,6 +39,7 @@
     "activate": {
       "title": "Activate",
       "description": "Enable or disable the language server services.",
+      "type": "string",
       "oneOf": [
         { "const": "off", "title": "Off" },
         { "const": "on", "title": "On" }
@@ -58,6 +59,7 @@
     },
     "setTrace": {
       "title": "Ask servers to send trace notifications",
+      "type": "string",
       "oneOf": [
         { "const": "off", "title": "Off" },
         { "const": "messages", "title": "Messages" },

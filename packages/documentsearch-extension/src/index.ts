@@ -31,6 +31,11 @@ const SEARCHABLE_CLASS = 'jp-mod-searchable';
  * Class added to widgets with open search view (not necessarily focused).
  */
 const SEARCH_ACTIVE_CLASS = 'jp-mod-search-active';
+/**
+ * CSS anchor name used to position the search overlay below the content header
+ * of a `MainAreaWidget`.
+ */
+const CONTENT_HEADER_ANCHOR = '--jp-documentsearch-content-header';
 
 namespace CommandIDs {
   /**
@@ -308,12 +313,20 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         Widget.attach(searchView, widget.node);
         widget.addClass(SEARCH_ACTIVE_CLASS);
         if (widget instanceof MainAreaWidget) {
-          // Offset the position of the search widget to not cover the toolbar nor the content header.
-          // TODO this does not update once the search widget is displayed.
-          searchView.node.style.top = `${
-            widget.toolbar.node.getBoundingClientRect().height +
-            widget.contentHeader.node.getBoundingClientRect().height
-          }px`;
+          // Offset the search overlay so it does not cover the toolbar nor the
+          // content header. The content header sits directly below the toolbar
+          // in the widget's box layout, so anchoring the overlay's top to the
+          // content header's bottom edge reproduces "toolbar + header height"
+          // and tracks their size automatically (e.g. when toolbar gets
+          // populated after the search box was already opened).
+          widget.contentHeader.node.style.setProperty(
+            'anchor-name',
+            CONTENT_HEADER_ANCHOR
+          );
+          // Scope the anchor name to this widget so that concurrently open
+          // documents do not resolve one another's anchors.
+          widget.node.style.setProperty('anchor-scope', CONTENT_HEADER_ANCHOR);
+          searchView.node.style.top = `anchor(${CONTENT_HEADER_ANCHOR} bottom)`;
         }
         if (searchView.model.searchExpression) {
           searchView.model.refresh();

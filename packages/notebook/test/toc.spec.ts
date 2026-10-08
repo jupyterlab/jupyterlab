@@ -1,26 +1,56 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
-import { NotebookToCModel } from '@jupyterlab/notebook';
-import type { Context } from '@jupyterlab/docregistry';
-import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 import { Sanitizer } from '@jupyterlab/apputils';
+import type { Cell } from '@jupyterlab/cells';
+import type { Context } from '@jupyterlab/docregistry';
+import type {
+  INotebookModel,
+  KernelError,
+  NotebookPanel
+} from '@jupyterlab/notebook';
+import { NotebookToCModel, RunningStatus } from '@jupyterlab/notebook';
+import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 import { signalToPromise } from '@jupyterlab/testing';
 import * as utils from './utils';
+
+class TestKernelError extends Error {
+  readonly errorName = 'ZeroDivisionError';
+  readonly errorValue = 'division by zero';
+  readonly traceback: string[] = [];
+}
+
+class TestNotebookToCModel extends NotebookToCModel {
+  scheduleExecution(cell: Cell): void {
+    this.onExecutionScheduled(null, { notebook: this.widget.content, cell });
+  }
+
+  finishExecution(
+    cell: Cell,
+    success: boolean,
+    error: KernelError | null
+  ): void {
+    this.onExecuted(null, {
+      notebook: this.widget.content,
+      cell,
+      success,
+      error
+    });
+  }
+}
 
 describe('@jupyterlab/notebook', () => {
   describe('NotebookToCModel', () => {
     let context: Context<INotebookModel>;
     let panel: NotebookPanel;
-    let model: NotebookToCModel;
+    let model: TestNotebookToCModel;
     const sanitizer = new Sanitizer();
     const initialCells = [{ cell_type: 'markdown', source: '# heading' }];
 
     beforeEach(async () => {
       context = await NBTestUtils.createMockContext(false);
       panel = utils.createNotebookPanel(context);
-      model = new NotebookToCModel(panel, null, sanitizer);
+      model = new TestNotebookToCModel(panel, null, sanitizer);
       panel.model!.sharedModel.insertCells(0, initialCells);
     });
 
@@ -70,6 +100,70 @@ describe('@jupyterlab/notebook', () => {
         promise = signalToPromise(model.headingsChanged);
         await model.refresh();
         await promise;
+      });
+    });
+
+    describe('#refresh', () => {
+      it('should clear error status when an errored cell is deleted', async () => {
+        panel.model!.sharedModel.insertCells(1, [
+          { cell_type: 'code', source: '1 / 2' },
+          { cell_type: 'code', source: '1 / 0' },
+          { cell_type: 'code', source: '1 / 2' }
+        ]);
+
+        await model.refresh();
+
+        const erroredCell = panel.content.widgets[2];
+        model.scheduleExecution(erroredCell);
+        model.finishExecution(erroredCell, false, new TestKernelError());
+
+        expect(model.headings[0].isRunning).toBe(RunningStatus.Error);
+
+        panel.model!.sharedModel.deleteCell(2);
+        expect(panel.content.widgets).not.toContain(erroredCell);
+        await model.refresh();
+
+        expect(model.headings[0].isRunning).toBe(RunningStatus.Idle);
+        expect(model.headings[0].dataset!['data-running']).toBe(
+          RunningStatus.Idle.toString()
+        );
+      });
+
+      it('should preserve execution status updates during heading refresh', async () => {
+        panel.model!.sharedModel.insertCells(1, [
+          { cell_type: 'code', source: '1 / 0' }
+        ]);
+
+        await model.refresh();
+
+        const headingCell = panel.content.widgets[0];
+        const erroredCell = panel.content.widgets[1];
+        const getHeadings = headingCell.getHeadings.bind(headingCell);
+        let resumeRefresh: (() => void) | undefined;
+        const refreshGate = new Promise<void>(resolve => {
+          resumeRefresh = resolve;
+        });
+        const getHeadingsSpy = jest
+          .spyOn(headingCell, 'getHeadings')
+          .mockImplementation(async () => {
+            await refreshGate;
+            return getHeadings();
+          });
+
+        const refresh = model.refresh();
+        await Promise.resolve();
+
+        model.scheduleExecution(erroredCell);
+        model.finishExecution(erroredCell, false, new TestKernelError());
+
+        resumeRefresh!();
+        await refresh;
+        getHeadingsSpy.mockRestore();
+
+        expect(model.headings[0].isRunning).toBe(RunningStatus.Error);
+        expect(model.headings[0].dataset!['data-running']).toBe(
+          RunningStatus.Error.toString()
+        );
       });
     });
   });

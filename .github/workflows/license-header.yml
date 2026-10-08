@@ -1,6 +1,6 @@
 name: Fix License Headers
 
-on:
+on: # zizmor: ignore[dangerous-triggers] required to push header fixes back to PR branches
   pull_request_target:
 
 jobs:

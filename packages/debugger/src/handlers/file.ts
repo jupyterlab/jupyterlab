@@ -63,7 +63,7 @@ export class FileHandler implements IDisposable {
       } else if (event.event === 'continued' || event.event === 'terminated') {
         void this._pausedOverlay.hide();
       }
-    });
+    }, this);
 
     if (this._debuggerService.hasStoppedThreads()) {
       void this._pausedOverlay.show();

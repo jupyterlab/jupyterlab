@@ -121,6 +121,11 @@ class ExtensionHandler(APIHandler):
                 422,
                 f"Install of {name!r} was blocked, check the logs.",
             )
+        if cmd == "uninstall" and not await self.manager.is_uninstall_allowed(name):
+            raise web.HTTPError(
+                422,
+                f"Uninstall of {name!r} was blocked, check the logs.",
+            )
 
         ret_value = None
         try:

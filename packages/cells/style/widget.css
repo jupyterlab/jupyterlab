@@ -110,7 +110,16 @@
 }
 
 .jp-CodeCell.jp-mod-outputsScrolled .jp-OutputArea-promptOverlay {
-  left: calc(-1 * var(--jp-private-cell-scrolling-output-offset));
+  position: fixed;
+  top: anchor(top);
+  bottom: anchor(bottom);
+  left: anchor(left);
+  position-anchor: --jp-output-area;
+  height: unset;
+  width: calc(
+    var(--jp-cell-prompt-width) - 1 *
+      var(--jp-private-cell-scrolling-output-offset)
+  );
 }
 
 /*-----------------------------------------------------------------------------
@@ -131,6 +140,15 @@
 
 .jp-MarkdownOutput.jp-RenderedHTMLCommon {
   overflow: auto;
+}
+
+.jp-MarkdownCell.jp-mod-emptyMarkdownPlaceholder .jp-MarkdownOutput {
+  color: var(--jp-content-font-color2);
+  font-style: italic;
+}
+
+.jp-MarkdownCell .cm-editor:not(.cm-focused) .cm-placeholder {
+  display: none;
 }
 
 /* collapseHeadingButton (show always if hiddenCellsButton is _not_ shown) */

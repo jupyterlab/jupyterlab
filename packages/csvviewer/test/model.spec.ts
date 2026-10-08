@@ -84,6 +84,81 @@ const CSV_TEST_FILES = [
 
 describe('csvviewer/model', () => {
   describe('DSVModel', () => {
+    it('uses the widest row as the column count', () => {
+      const d = new DSVModel({
+        data: 'a,b\n1,2,3\n4,5,6,7',
+        delimiter: ',',
+        rowDelimiter: '\n'
+      });
+
+      expect(d.columnCount('body')).toBe(4);
+      expect([0, 1, 2, 3].map(i => d.data('column-header', 0, i))).toEqual([
+        'a',
+        'b',
+        '',
+        ''
+      ]);
+      expect([0, 1, 2, 3].map(i => d.data('body', 0, i))).toEqual([
+        '1',
+        '2',
+        '3',
+        ''
+      ]);
+      expect([0, 1, 2, 3].map(i => d.data('body', 1, i))).toEqual([
+        '4',
+        '5',
+        '6',
+        '7'
+      ]);
+    });
+
+    it('does not count delimiters inside quoted fields when detecting columns', () => {
+      const d = new DSVModel({
+        data: 'city,population\n"New York, USA",8000000,extra',
+        delimiter: ',',
+        rowDelimiter: '\n'
+      });
+
+      expect(d.columnCount('body')).toBe(3);
+      expect([0, 1, 2].map(i => d.data('column-header', 0, i))).toEqual([
+        'city',
+        'population',
+        ''
+      ]);
+      expect([0, 1, 2].map(i => d.data('body', 0, i))).toEqual([
+        'New York, USA',
+        '8000000',
+        'extra'
+      ]);
+    });
+
+    it('updates the column count when the widest row is parsed asynchronously', async () => {
+      const d = new DSVModel({
+        data: 'a,b\n1,2\n3,4\n5,6,7,8',
+        delimiter: ',',
+        rowDelimiter: '\n',
+        initialRows: 2
+      });
+
+      expect(d.columnCount('body')).toBe(2);
+
+      await d.ready;
+
+      expect(d.columnCount('body')).toBe(4);
+      expect([0, 1, 2, 3].map(i => d.data('column-header', 0, i))).toEqual([
+        'a',
+        'b',
+        '',
+        ''
+      ]);
+      expect([0, 1, 2, 3].map(i => d.data('body', 2, i))).toEqual([
+        '5',
+        '6',
+        '7',
+        '8'
+      ]);
+    });
+
     describe('#constructor()', () => {
       it('should instantiate a `DSVModel`', () => {
         const d = new DSVModel({ data: 'a,b,c\nd,e,f\n', delimiter: ',' });
@@ -283,18 +358,28 @@ describe('csvviewer/model', () => {
       expect(d.rowCount('column-header')).toBe(1);
       expect(d.rowCount('body')).toBe(2);
       expect(d.columnCount('row-header')).toBe(1);
-      expect(d.columnCount('body')).toBe(3);
-      expect([0, 1, 2].map(i => d.data('column-header', 0, i))).toEqual([
+      expect(d.columnCount('body')).toBe(5);
+      expect([0, 1, 2, 3, 4].map(i => d.data('column-header', 0, i))).toEqual([
         'a',
         'b',
-        'c'
+        'c',
+        '',
+        ''
       ]);
-      expect([0, 1, 2].map(i => d.data('body', 0, i))).toEqual([
+      expect([0, 1, 2, 3, 4].map(i => d.data('body', 0, i))).toEqual([
         '',
         'c',
-        'd,e,f'
+        'd',
+        'e',
+        'f'
       ]);
-      expect([0, 1, 2].map(i => d.data('body', 1, i))).toEqual(['g', 'h', '']);
+      expect([0, 1, 2, 3, 4].map(i => d.data('body', 1, i))).toEqual([
+        'g',
+        'h',
+        '',
+        '',
+        ''
+      ]);
     });
 
     it('handles delayed parsing of rows past the initial rows', async () => {

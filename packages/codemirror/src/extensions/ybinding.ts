@@ -247,6 +247,8 @@ export const ySync = ViewPlugin.fromClass(
           adj += insertText.length - (toA - fromA);
         });
         // Set the configuration as origin to not loop when synchronizing
+        const ystate = ytext.doc!.getMap('state');
+        ystate.set('dirty', true);
       }, this.conf);
     }
 

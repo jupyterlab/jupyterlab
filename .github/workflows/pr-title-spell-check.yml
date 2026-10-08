@@ -1,0 +1,39 @@
+name: PR Title Spell Check
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  pr-title-spelling:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout spelling configuration
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          repository: jupyterlab/jupyterlab
+          ref: main
+          persist-credentials: false
+          fetch-depth: 1
+          sparse-checkout: .codespellignore
+          sparse-checkout-cone-mode: false
+
+      - name: Setup Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.11'
+
+      - name: Check PR title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -euo pipefail
+
+          title_file="${RUNNER_TEMP}/pr-title.txt"
+          printf '%s\n' "${PR_TITLE}" > "${title_file}"
+
+          python -m pip install codespell==2.4.1
+          codespell --ignore-words=.codespellignore "${title_file}"

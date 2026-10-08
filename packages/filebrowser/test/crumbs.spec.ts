@@ -93,6 +93,7 @@ describe('filebrowser/model', () => {
     // Remove leading '/' from preferredPath (as done by jupyter server)
     const preferredPath = path.startsWith('/') ? path.slice(1) : path;
     PageConfig.setOption('preferredPath', preferredPath);
+    PageConfig.setOption('preferredPathIsHome', 'false');
     crumbs = new LogCrumbs({ model });
   });
 
@@ -119,6 +120,44 @@ describe('filebrowser/model', () => {
 
       it('should add the jp-BreadCrumbs class', () => {
         expect(crumbs.hasClass('jp-BreadCrumbs')).toBe(true);
+      });
+
+      it('should use the home icon only when the preferred path is home', () => {
+        PageConfig.setOption('preferredPathIsHome', 'true');
+        const bread = new BreadCrumbs({ model });
+        Widget.attach(bread, document.body);
+        MessageLoop.sendMessage(bread, Widget.Msg.UpdateRequest);
+
+        const rootIcon = bread.node.querySelector(
+          `.${BREADCRUMB_ROOT_CLASS} svg`
+        );
+        const preferredHomeIcon = bread.node.querySelector(
+          `.${BREADCRUMB_PREFERRED_CLASS} svg`
+        );
+        expect(rootIcon?.getAttribute('data-icon')).toBe(
+          'ui-components:folder'
+        );
+        expect(preferredHomeIcon?.getAttribute('data-icon')).toBe(
+          'ui-components:home'
+        );
+
+        Widget.detach(bread);
+        bread.dispose();
+
+        PageConfig.setOption('preferredPathIsHome', 'false');
+        const nonHomeBread = new BreadCrumbs({ model });
+        Widget.attach(nonHomeBread, document.body);
+        MessageLoop.sendMessage(nonHomeBread, Widget.Msg.UpdateRequest);
+
+        const preferredIcon = nonHomeBread.node.querySelector(
+          `.${BREADCRUMB_PREFERRED_CLASS} svg`
+        );
+        expect(preferredIcon?.getAttribute('data-icon')).toBe(
+          'ui-components:folder-favorite'
+        );
+
+        Widget.detach(nonHomeBread);
+        nonHomeBread.dispose();
       });
     });
 

@@ -1,6 +1,50 @@
 {
   "title": "Image Viewer",
   "description": "Image viewer settings.",
+  "jupyter.lab.menus": {
+    "context": [
+      {
+        "command": "imageviewer:zoom-in",
+        "selector": ".jp-ImageViewer",
+        "rank": 1
+      },
+      {
+        "command": "imageviewer:zoom-out",
+        "selector": ".jp-ImageViewer",
+        "rank": 2
+      },
+      {
+        "command": "imageviewer:reset-image",
+        "selector": ".jp-ImageViewer",
+        "rank": 3
+      },
+      {
+        "command": "imageviewer:rotate-clockwise",
+        "selector": ".jp-ImageViewer",
+        "rank": 4
+      },
+      {
+        "command": "imageviewer:rotate-counterclockwise",
+        "selector": ".jp-ImageViewer",
+        "rank": 5
+      },
+      {
+        "command": "imageviewer:flip-horizontal",
+        "selector": ".jp-ImageViewer",
+        "rank": 6
+      },
+      {
+        "command": "imageviewer:flip-vertical",
+        "selector": ".jp-ImageViewer",
+        "rank": 7
+      },
+      {
+        "command": "imageviewer:invert-colors",
+        "selector": ".jp-ImageViewer",
+        "rank": 8
+      }
+    ]
+  },
   "jupyter.lab.shortcuts": [
     {
       "command": "imageviewer:flip-horizontal",
