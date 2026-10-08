@@ -12,7 +12,7 @@ import re
 import sys
 from collections import Counter
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.error import HTTPError
 from urllib.parse import urlencode
@@ -23,6 +23,7 @@ GITHUB_API_VERSION = "2022-11-28"
 PER_PAGE = 100
 REQUEST_TIMEOUT = 60
 TOP_LIMIT = 20
+DEFAULT_WINDOW_DAYS = 7
 SOURCE_OWNER = "jupyterlab"
 SOURCE_REPO_NAME = "jupyterlab"
 SOURCE_REPOSITORY = f"{SOURCE_OWNER}/{SOURCE_REPO_NAME}"
@@ -148,6 +149,12 @@ def parse_args() -> argparse.Namespace:
         default=30,
         help="Number of completed workflow runs to analyze.",
     )
+    parser.add_argument(
+        "--days",
+        type=int,
+        default=DEFAULT_WINDOW_DAYS,
+        help="Number of days in the completed workflow run window.",
+    )
     parser.add_argument("--json", dest="json_path", help="Write structured JSON to this path.")
     parser.add_argument("--markdown", help="Write Markdown report to this path.")
     parser.add_argument(
@@ -157,6 +164,8 @@ def parse_args() -> argparse.Namespace:
     args = parser.parse_args()
     if args.num_runs < 1:
         parser.error("num_runs must be a positive integer.")
+    if args.days < 1:
+        parser.error("days must be a positive integer.")
     return args
 
 
@@ -165,9 +174,34 @@ def parse_github_datetime(value: str) -> datetime:
     return datetime.fromisoformat(value.replace("Z", "+00:00"))
 
 
+def format_github_datetime(value: datetime) -> str:
+    """Format a timestamp for GitHub API date filters."""
+    return value.astimezone(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def format_created_filter(window_start: datetime, window_end: datetime) -> str:
+    """Format a GitHub created range for workflow run queries."""
+    return f"{format_github_datetime(window_start)}..{format_github_datetime(window_end)}"
+
+
 def workflow_run_sort_key(run: dict) -> tuple[datetime, int]:
     """Return a stable newest-first sort key for workflow runs."""
     return parse_github_datetime(str(run["created_at"])), int(run["id"])
+
+
+def workflow_run_in_window(run: dict, *, window_start: datetime, window_end: datetime) -> bool:
+    """Return whether a workflow run was created inside the analysis window."""
+    created_at = parse_github_datetime(str(run["created_at"]))
+    return window_start <= created_at <= window_end
+
+
+def log_selected_runs(runs: list[dict], *, created_filter: str) -> None:
+    """Print selected workflow runs for debugging scheduled reports."""
+    sys.stderr.write(f"Selected {len(runs)} workflow runs for created={created_filter}\n")
+    for run in runs:
+        sys.stderr.write(
+            f"  {run['id']} {run['created_at']} {run.get('conclusion')} {run.get('html_url')}\n"
+        )
 
 
 def normalize_test_name(value: str) -> str:
@@ -217,11 +251,14 @@ def get_workflow_runs(
     client: GitHubClient,
     *,
     num_runs: int,
+    window_start: datetime,
+    window_end: datetime,
 ) -> list[dict]:
     """Fetch recent completed workflow runs matching the requested filters."""
     runs: list[dict] = []
     page = 1
     path = f"/repos/{SOURCE_OWNER}/{SOURCE_REPO_NAME}/actions/workflows/{SOURCE_WORKFLOW}/runs"
+    created_filter = format_created_filter(window_start, window_end)
 
     while len(runs) < num_runs:
         params = {
@@ -230,6 +267,7 @@ def get_workflow_runs(
             "page": page,
             "branch": SOURCE_BRANCH,
             "event": SOURCE_EVENT,
+            "created": created_filter,
         }
         data = client.get_json(path, params)
         page_runs = sorted(data.get("workflow_runs", []), key=workflow_run_sort_key, reverse=True)
@@ -239,6 +277,8 @@ def get_workflow_runs(
         for run in page_runs:
             if run.get("conclusion") not in COMPLETED_CONCLUSIONS:
                 continue
+            if not workflow_run_in_window(run, window_start=window_start, window_end=window_end):
+                continue
             runs.append(run)
             if len(runs) >= num_runs:
                 break
@@ -247,7 +287,9 @@ def get_workflow_runs(
             break
         page += 1
 
-    return sorted(runs, key=workflow_run_sort_key, reverse=True)[:num_runs]
+    selected_runs = sorted(runs, key=workflow_run_sort_key, reverse=True)[:num_runs]
+    log_selected_runs(selected_runs, created_filter=created_filter)
+    return selected_runs
 
 
 def get_playwright_summary(
@@ -395,6 +437,8 @@ def build_report(
     runs: list[RunResult],
     hard_failures: list[TestSummary],
     flaky_tests: list[TestSummary],
+    *,
+    created_filter: str,
 ) -> str:
     """Build the Markdown report."""
     total_runs = len(runs)
@@ -411,6 +455,7 @@ def build_report(
         f"Repository: `{SOURCE_REPOSITORY}`",
         f"Workflow: `{SOURCE_WORKFLOW}`",
         f"Filters: branch `{SOURCE_BRANCH}`, event `{SOURCE_EVENT}`",
+        f"Created: {created_filter}",
         f"Window: {window}",
         "",
         "## Summary",
@@ -440,6 +485,8 @@ def build_json_payload(
     runs: list[RunResult],
     hard_failures: list[TestSummary],
     flaky_tests: list[TestSummary],
+    *,
+    created_filter: str,
 ) -> dict:
     """Build structured report data."""
     affected_tests = {item.name for item in hard_failures} | {item.name for item in flaky_tests}
@@ -459,6 +506,7 @@ def build_json_payload(
             "workflow": SOURCE_WORKFLOW,
             "branch": SOURCE_BRANCH,
             "event": SOURCE_EVENT,
+            "created": created_filter,
             "analyzed_runs": len(runs),
             "window_start": window_start,
             "window_end": window_end,
@@ -512,11 +560,22 @@ def main() -> int:
     args = parse_args()
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     client = GitHubClient(token)
+    window_end = datetime.now(timezone.utc)
+    window_start = window_end - timedelta(days=args.days)
+    created_filter = format_created_filter(window_start, window_end)
 
     runs = get_workflow_runs(
         client,
         num_runs=args.num_runs,
+        window_start=window_start,
+        window_end=window_end,
     )
+    if not runs:
+        msg = (
+            "No completed workflow runs matched "
+            f"{SOURCE_WORKFLOW} on {SOURCE_BRANCH} for the last {args.days} days."
+        )
+        raise RuntimeError(msg)
     results = analyze_runs(client, runs)
     hard_failures = summarize_tests(results, "failed")
     flaky_tests = summarize_tests(results, "flaky")
@@ -525,11 +584,13 @@ def main() -> int:
         results,
         hard_failures,
         flaky_tests,
+        created_filter=created_filter,
     )
     payload = build_json_payload(
         results,
         hard_failures,
         flaky_tests,
+        created_filter=created_filter,
     )
 
     if args.markdown:

@@ -13,9 +13,11 @@ import type {
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 
-import { CellTagField } from './celltag';
 import type { IFormRenderer } from '@jupyterlab/ui-components';
 import { IFormRendererRegistry } from '@jupyterlab/ui-components';
+
+// eslint-disable-next-line jupyter/prefer-lazy-imports
+import { CellTagField } from './celltag';
 
 /**
  * Registering cell tag field.
