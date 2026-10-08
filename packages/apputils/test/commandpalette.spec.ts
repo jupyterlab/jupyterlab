@@ -170,6 +170,19 @@ describe('@jupyterlab/apputils', () => {
         expect(palette.maxRecentCommands).toBe(2);
         palette.maxRecentCommands = NaN;
         expect(palette.maxRecentCommands).toBe(0);
+        palette.maxRecentCommands = -Infinity;
+        expect(palette.maxRecentCommands).toBe(0);
+      });
+
+      it('should remove the limit when set to Infinity', () => {
+        palette.maxRecentCommands = Infinity;
+        expect(palette.maxRecentCommands).toBe(Infinity);
+        const recents = Array.from({ length: 10 }, (_, n) => ({
+          command: 'test:a',
+          args: { n }
+        }));
+        palette.recentCommands = recents;
+        expect(palette.recentCommands).toEqual(recents);
       });
 
       it('should drop the oldest commands which exceed the new limit', () => {

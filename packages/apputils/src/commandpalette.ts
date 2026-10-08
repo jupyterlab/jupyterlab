@@ -224,7 +224,7 @@ export class RecentsCommandPalette extends CommandPalette {
    *
    * #### Notes
    * Setting the limit to `0` disables the tracking and clears the history.
-   * The default value is `5`.
+   * Setting it to `Infinity` removes the limit. The default value is `5`.
    */
   get maxRecentCommands(): number {
     return this._maxRecentCommands;
