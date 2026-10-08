@@ -13,12 +13,15 @@ test.describe('Command Palette', () => {
 
     await page.keyboard.press('ControlOrMeta+Shift+C');
     await input.fill('new launcher');
-    const saved = page.waitForRequest(
-      request =>
+    const saved = page.waitForResponse(response => {
+      const request = response.request();
+      return (
         request.method() === 'PUT' &&
         request.url().includes('api/workspaces') &&
-        !!request.postDataJSON()?.data?.['command-palette:recents']
-    );
+        !!request.postDataJSON()?.data?.['command-palette:recents'] &&
+        response.ok()
+      );
+    });
     await input.press('Enter');
     await expect(palette).toBeHidden();
 
