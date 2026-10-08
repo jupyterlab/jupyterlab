@@ -13,16 +13,16 @@ test.describe('Command Palette', () => {
 
     await page.keyboard.press('ControlOrMeta+Shift+C');
     await input.fill('new launcher');
-    const saved = page.waitForResponse(response => {
-      const request = response.request();
-      return (
-        request.method() === 'PUT' &&
-        request.url().includes('api/workspaces') &&
-        !!request.postDataJSON()?.data?.['command-palette:recents'] &&
-        response.ok()
-      );
-    });
-    await input.press('Enter');
+    await Promise.all([
+      // Wait for the workspace to be saved
+      page.waitForResponse(
+        response =>
+          response.request().method() === 'PUT' &&
+          /api\/workspaces/.test(response.request().url()) &&
+          response.request().postDataJSON().data['command-palette:recents']
+      ),
+      input.press('Enter')
+    ]);
     await expect(palette).toBeHidden();
 
     await page.keyboard.press('ControlOrMeta+Shift+C');
@@ -31,7 +31,6 @@ test.describe('Command Palette', () => {
     await page.keyboard.press('Escape');
 
     // The history is saved in the workspace, which is kept on reload.
-    await saved;
     await page.reload();
 
     await page.keyboard.press('ControlOrMeta+Shift+C');
@@ -39,9 +38,7 @@ test.describe('Command Palette', () => {
     await expect(firstItem).toContainText('recently used');
 
     // Enter runs the most recent command.
-    const launchers = page.locator('#jp-main-dock-panel .lm-TabBar-tab', {
-      hasText: 'Launcher'
-    });
+    const launchers = page.activity.getTabLocator('Launcher');
     const count = await launchers.count();
     await expect(firstItem).toHaveClass(/lm-mod-active/);
     await page.keyboard.press('Enter');
