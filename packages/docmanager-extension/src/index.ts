@@ -1107,6 +1107,7 @@ function addCommands(
         return isWritable();
       }
     },
+    isVisible: () => isWritable(),
     describedBy: {
       args: {
         type: 'object',
