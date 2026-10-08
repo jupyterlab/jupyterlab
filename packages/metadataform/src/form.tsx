@@ -52,7 +52,17 @@ export class FormWidget extends ReactWidget {
     }
     const formContext = {
       defaultFormData: this._props.settings.default(),
-      updateMetadata: this._props.metadataFormWidget.updateMetadata
+      // Bind custom-field updates to the cell this form was built for,
+      // the same guard the onChange path below applies.
+      updateMetadata: (
+        formData: ReadonlyPartialJSONObject,
+        reload?: boolean
+      ) =>
+        this._props.metadataFormWidget.updateMetadata(
+          formData,
+          reload,
+          this._sourceCell
+        )
     };
     return (
       <FormComponent
