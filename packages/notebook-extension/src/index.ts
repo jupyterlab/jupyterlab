@@ -2491,19 +2491,6 @@ function activateNotebookHandler(
 
   const ft = app.docRegistry.getFileType('notebook');
 
-  function applyNotebookViewOnlyUI(
-    panel: NotebookPanel,
-    viewOnly: boolean
-  ): void {
-    const el = panel.toolbar.node.querySelector(
-      '[data-jp-item-name="save"]'
-    ) as HTMLElement | null;
-
-    if (el) {
-      el.style.display = viewOnly ? 'none' : '';
-    }
-  }
-
   factory.widgetCreated.connect((sender, widget) => {
     // If the notebook panel does not have an ID, assign it one.
     widget.id = widget.id || `notebook-${++id}`;
@@ -2526,9 +2513,7 @@ function activateNotebookHandler(
     // Add the notebook panel to the tracker.
     void tracker.add(widget);
 
-    applyNotebookViewOnlyUI(widget, widget.viewOnly);
     widget.content.viewOnlyChanged.connect((_, viewOnly) => {
-      applyNotebookViewOnlyUI(widget, viewOnly);
       // Commands of other extensions can also depend on the view-only state.
       // Extensions notify their commands when the current widget changes, but
       // a notebook can become view-only while it stays current, so notify all
