@@ -73,12 +73,12 @@ def update_extension(  # noqa
     # Pull in the relevant config
     # Pull in the Python parts if possible
     # Pull in the scripts if possible
-    target = Path(target).resolve()
-    package_file = target / "package.json"
-    pyproject_file = target / "pyproject.toml"
-    setup_file = target / "setup.py"
+    target_path = Path(target).resolve()
+    package_file = target_path / "package.json"
+    pyproject_file = target_path / "pyproject.toml"
+    setup_file = target_path / "setup.py"
     if not package_file.exists():
-        msg = f"No package.json exists in {target!s}"
+        msg = f"No package.json exists in {target_path!s}"
         raise RuntimeError(msg)
 
     # Infer the options from the current directory
@@ -95,7 +95,7 @@ def update_extension(  # noqa
             python_name = (
                 subprocess.check_output(
                     [sys.executable, "setup.py", "--name"],
-                    cwd=target,
+                    cwd=target_path,
                 )
                 .decode("utf8")
                 .strip()
@@ -107,7 +107,7 @@ def update_extension(  # noqa
             # Clean up the name to be valid package module name
         python_name = python_name.replace("/", "_").replace("-", "_")
 
-    output_dir = target / "_temp_extension"
+    output_dir = target_path / "_temp_extension"
     if output_dir.exists():
         shutil.rmtree(output_dir)
 
@@ -121,15 +121,15 @@ def update_extension(  # noqa
         author_name = author
 
     kind = "frontend"
-    if (target / "jupyter-config").exists():
+    if (target_path / "jupyter-config").exists():
         kind = "server"
     elif data.get("jupyterlab", {}).get("themePath", ""):
         kind = "theme"
 
     has_test = (
-        (target / "conftest.py").exists()
-        or (target / "jest.config.js").exists()
-        or (target / "ui-tests").exists()
+        (target_path / "conftest.py").exists()
+        or (target_path / "jest.config.js").exists()
+        or (target_path / "ui-tests").exists()
     )
 
     extra_context = {
@@ -140,7 +140,7 @@ def update_extension(  # noqa
         "python_name": python_name,
         "project_short_description": data.get("description", "<description>"),
         "has_settings": bool(data.get("jupyterlab", {}).get("schemaDir", "")),
-        "has_binder": bool((target / "binder").exists()),
+        "has_binder": bool((target_path / "binder").exists()),
         "test": bool(has_test),
         "repository": data.get("repository", {}).get("url", "<repository"),
     }
@@ -194,7 +194,7 @@ def update_extension(  # noqa
         if key in temp_data:
             data[key] = temp_data[key]
 
-            linter_file = target / file
+            linter_file = target_path / file
             if linter_file.exists():
                 linter_file.unlink()
                 warnings.append(f"DELETED {file}")
@@ -238,7 +238,7 @@ def update_extension(  # noqa
             continue
         if p.is_dir():
             continue
-        file_target = target / relpath
+        file_target = target_path / relpath
         if not file_target.exists():
             file_target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(p, file_target)
@@ -263,7 +263,7 @@ def update_extension(  # noqa
                 warnings.append(f"skipped _temp_extension/{relpath!s}")
 
     if override_pyproject:
-        if (target / "setup.cfg").exists():
+        if (target_path / "setup.cfg").exists():
             try:
                 import tomli_w  # noqa: PLC0415
             except ImportError:
@@ -271,10 +271,10 @@ def update_extension(  # noqa
                 print(msg)
             else:
                 config = configparser.ConfigParser()
-                with (target / "setup.cfg").open() as setup_cfg_file:
+                with (target_path / "setup.cfg").open() as setup_cfg_file:
                     config.read_file(setup_cfg_file)
 
-                pyproject_file = target / "pyproject.toml"
+                pyproject_file = target_path / "pyproject.toml"
                 pyproject = tomllib.loads(pyproject_file.read_text())
 
                 # Backport requirements
@@ -304,10 +304,10 @@ def update_extension(  # noqa
                         pyproject["project"]["optional-dependencies"][extra] = deps
 
                 pyproject_file.write_text(tomli_w.dumps(pyproject))
-                (target / "setup.cfg").unlink()
+                (target_path / "setup.cfg").unlink()
                 warnings.append("DELETED setup.cfg")
 
-        manifest_in = target / "MANIFEST.in"
+        manifest_in = target_path / "MANIFEST.in"
         if manifest_in.exists():
             manifest_in.unlink()
             warnings.append("DELETED MANIFEST.in")

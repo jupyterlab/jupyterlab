@@ -37,6 +37,11 @@ test.describe('Kernel', () => {
         .soft(page.getByTitle('Switch kernel'))
         .toHaveText('No Kernel');
 
+      // Save notebook via galata (otherwise we would need
+      // to save and wait until dirty icon goes away to avoid
+      // another dialog showing up randomly on close due to race).
+      await page.notebook.save();
+
       await Promise.all([
         page
           .getByRole('tab', { name: 'Untitled.ipynb' })
@@ -234,11 +239,15 @@ test.describe('Kernel', () => {
       .locator('.jp-Dialog-button.jp-mod-accept:has-text("select")')
       .click();
 
-    // Add long running script to first cell
+    // Add long running script to first cell. The loop has to outlast the
+    // creation of the second notebook below, including the start of its
+    // kernel, otherwise the first kernel goes idle before we switch back
+    // and the final assertion sees "Idle". The cell is never awaited, so a
+    // long loop does not slow the test down.
     await page.notebook.setCell(
       0,
       'code',
-      'import time\nfor i in range(5):\n    print(f"Step {i}")\n    time.sleep(1)'
+      'import time\nfor i in range(120):\n    print(f"Step {i}")\n    time.sleep(1)'
     );
     await statusBar.getByText('Idle').waitFor();
 
@@ -255,7 +264,7 @@ test.describe('Kernel', () => {
     // Switch back to running notebook
     await page.notebook.activate('Untitled.ipynb');
     // The status bar should show Busy since the long running script is still executing
-    await page.waitForTimeout(500);
+    await statusBar.getByText('Busy').waitFor();
 
     const statusText = await statusBar.textContent();
     expect(statusText).toContain('Busy');

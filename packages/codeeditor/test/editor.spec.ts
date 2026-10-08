@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import type { ISharedText, SourceChange } from '@jupyter/ydoc';
+import type { ISharedFile, SourceChange } from '@jupyter/ydoc';
 import { YFile } from '@jupyter/ydoc';
 
 describe('CodeEditor.Model', () => {
@@ -63,7 +63,7 @@ describe('CodeEditor.Model', () => {
   describe('#value', () => {
     it('should be the observable value of the model', () => {
       let called = false;
-      const handler = (sender: ISharedText, args: SourceChange) => {
+      const handler = (sender: ISharedFile, args: SourceChange) => {
         expect(sender).toBe(model.sharedModel);
         expect(args.sourceChange).toEqual([{ insert: 'foo' }]);
         called = true;
@@ -76,7 +76,7 @@ describe('CodeEditor.Model', () => {
 
     it('should handle an insert', () => {
       let called = false;
-      const handler = (sender: ISharedText, args: SourceChange) => {
+      const handler = (sender: ISharedFile, args: SourceChange) => {
         expect(args.sourceChange).toEqual([{ insert: 'foo' }]);
         called = true;
       };
@@ -89,7 +89,7 @@ describe('CodeEditor.Model', () => {
     it('should handle a remove', () => {
       let called = false;
       model.sharedModel.setSource('foo');
-      const handler = (sender: ISharedText, args: SourceChange) => {
+      const handler = (sender: ISharedFile, args: SourceChange) => {
         expect(args.sourceChange).toEqual([{ delete: 1 }]);
         called = true;
       };

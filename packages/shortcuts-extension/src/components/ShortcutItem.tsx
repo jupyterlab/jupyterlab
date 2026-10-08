@@ -3,19 +3,21 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { Button } from '@jupyter/react-components';
 import type { TranslationBundle } from '@jupyterlab/translation';
 import {
+  addIcon,
   checkIcon,
+  deleteIcon,
   editIcon,
   HTMLSelect,
-  infoIcon
+  infoIcon,
+  restoreIcon
 } from '@jupyterlab/ui-components';
 import { Platform } from '@lumino/domutils';
 import * as React from 'react';
 import { CustomOptionsDialog } from './ShortcutCustomOptions';
 import type { IConflicts } from './ShortcutInput';
-import { CONFLICT_CONTAINER_CLASS, ShortcutInput } from './ShortcutInput';
+import { ShortcutInput } from './ShortcutInput';
 import { ShortcutRegistry } from '../registry';
 import type {
   IKeybinding,
@@ -29,7 +31,8 @@ const MAC_SYMBOLS: Record<string, string> = {
   Ctrl: '⌃',
   Alt: '⌥',
   Shift: '⇧',
-  Accel: '⌘'
+  Accel: '⌘',
+  Cmd: '⌘'
 };
 
 /** Props for ShortcutItem component */
@@ -82,6 +85,31 @@ export class ShortcutItem extends React.Component<
       this._onActionRequested,
       this
     );
+  }
+
+  componentDidUpdate(): void {
+    if (this._pendingFocusAddButton) {
+      this._pendingFocusAddButton = false;
+      requestAnimationFrame(() => {
+        (
+          this._shortcutCellRef.current?.querySelector(
+            '.jp-Shortcuts-Plus'
+          ) as HTMLElement | null
+        )?.focus();
+      });
+      return;
+    }
+    if (this._pendingFocusKeybindingIndex === null) {
+      return;
+    }
+    const index =
+      this._pendingFocusKeybindingIndex === -1
+        ? this._nonEmptyBindings.length - 1
+        : this._pendingFocusKeybindingIndex;
+    this._pendingFocusKeybindingIndex = null;
+    if (index >= 0) {
+      this._focusShortcutContainer(index);
+    }
   }
 
   private async _onActionRequested(
@@ -175,15 +203,24 @@ export class ShortcutItem extends React.Component<
   }
 
   getResetShortCutLink(): JSX.Element {
+    const isDelete = this.props.shortcut.userDefined;
+    const label = isDelete
+      ? this._trans.__('Delete shortcut')
+      : this._trans.__('Reset to default');
     return (
-      <a
-        className="jp-Shortcuts-Reset"
+      <button
+        type="button"
+        className="jp-Button jp-mod-styled jp-mod-warn jp-Shortcuts-Reset jp-Shortcuts-Icon"
         onClick={() => this.props.resetKeybindings(this.props.shortcut)}
+        title={label}
+        aria-label={label}
       >
-        {this.props.shortcut.userDefined
-          ? this._trans.__('Delete')
-          : this._trans.__('Reset')}
-      </a>
+        {isDelete ? (
+          <deleteIcon.react tag={null} />
+        ) : (
+          <restoreIcon.react tag={null} />
+        )}
+      </button>
     );
   }
 
@@ -195,7 +232,7 @@ export class ShortcutItem extends React.Component<
       this.props.shortcut.userDefined || !!this.props.newShortcutUtils;
     const showOptionsButtonTitle = editable
       ? this._trans.__('Custom options')
-      : this._trans.__('Show options');
+      : this._trans.__('Shortcut details');
 
     return (
       <div className="jp-Shortcuts-Cell">
@@ -206,8 +243,9 @@ export class ShortcutItem extends React.Component<
         )}
         {!allDefault ? this.getResetShortCutLink() : ''}
         {this.props.external.editorFactory && (
-          <Button
-            className="jp-mod-styled jp-mod-reject jp-Shortcuts-CustomOptions"
+          <button
+            type="button"
+            className="jp-Button jp-mod-styled jp-mod-reject jp-Shortcuts-CustomOptions jp-Shortcuts-Icon"
             onClick={async () => {
               if (!this.props.external.editorFactory) {
                 console.error('Cannot build the custom options form');
@@ -230,23 +268,29 @@ export class ShortcutItem extends React.Component<
             }}
             title={showOptionsButtonTitle}
             aria-label={showOptionsButtonTitle}
-            appearance={'neutral'}
           >
             {editable ? (
               <editIcon.react tag={null} />
             ) : (
               <infoIcon.react tag={null} />
             )}
-          </Button>
+          </button>
         )}
         {!!this.props.newShortcutUtils && (
           <>
-            <Button
-              className="jp-mod-styled jp-mod-accept jp-Shortcuts-SaveNew"
+            <button
+              type="button"
+              className="jp-Button jp-mod-styled jp-mod-accept jp-Shortcuts-SaveNew jp-Shortcuts-Icon"
               onClick={this.props.newShortcutUtils?.saveShortcut}
               title={this._trans.__('Save shortcut')}
-              aria-label={this._trans.__('Save shortcut')}
-              appearance="neutral"
+              aria-label={this._trans.__(
+                'Save shortcut %1 for %2',
+                this.props.shortcut.keybindings
+                  .map(binding => this.toSymbols(binding.keys.join(', ')))
+                  .filter(keys => keys.length > 0)
+                  .join('; '),
+                this.props.shortcut.label ?? this.props.shortcut.command
+              )}
               disabled={
                 !this.props.shortcut.command ||
                 !this.props.shortcut.keybindings.length ||
@@ -256,7 +300,7 @@ export class ShortcutItem extends React.Component<
               }
             >
               <checkIcon.react tag={null} />
-            </Button>
+            </button>
           </>
         )}
       </div>
@@ -323,6 +367,13 @@ export class ShortcutItem extends React.Component<
           conflicts.set(binding, data);
           this.setState({ conflicts });
         }}
+        clearConflict={() => this._clearConflictForBinding(binding)}
+        onCloseAfterSubmit={() =>
+          this._scheduleFocusShortcutContainer(location)
+        }
+        onCloseAfterCancel={() =>
+          this._scheduleFocusShortcutContainer(location)
+        }
         toSymbols={this.toSymbols}
         displayInput={this.getDisplayReplaceInput(location)}
         placeholder={this.toSymbols(binding.keys.join(', '))}
@@ -331,24 +382,28 @@ export class ShortcutItem extends React.Component<
     );
   }
 
-  getShortCutForDisplayOnly(binding: IKeybinding): JSX.Element[] {
-    return binding.keys.map((keyboardKey: string, index: number) => (
-      <div className="jp-Shortcuts-ShortcutKeysContainer" key={index}>
-        <div className="jp-Shortcuts-ShortcutKeys">
-          {this.toSymbols(keyboardKey)
-            .split(' ')
-            .map((keyPart, keyPartIndex, keyParts) => (
-              <React.Fragment key={`${index}-${keyPart}-${keyPartIndex}`}>
-                <span className="jp-ContextualShortcut-Key">{keyPart}</span>
-                {keyPartIndex + 1 < keyParts.length ? ' + ' : null}
-              </React.Fragment>
-            ))}
-        </div>
-        {index + 1 < binding.keys.length ? (
-          <div className="jp-Shortcuts-Comma">,</div>
-        ) : null}
-      </div>
-    ));
+  getShortCutForDisplayOnly(binding: IKeybinding): JSX.Element {
+    return (
+      <>
+        {binding.keys.map((keyboardKey: string, index: number) => (
+          <React.Fragment key={index}>
+            <div className="jp-Shortcuts-ShortcutKeys">
+              {this.toSymbols(keyboardKey)
+                .split(' ')
+                .map((keyPart, keyPartIndex, keyParts) => (
+                  <React.Fragment key={`${index}-${keyPart}-${keyPartIndex}`}>
+                    <span className="jp-ContextualShortcut-Key">{keyPart}</span>
+                    {keyPartIndex + 1 < keyParts.length ? ' + ' : null}
+                  </React.Fragment>
+                ))}
+            </div>
+            {index + 1 < binding.keys.length ? (
+              <div className="jp-Shortcuts-Comma">,</div>
+            ) : null}
+          </React.Fragment>
+        ))}
+      </>
+    );
   }
 
   isLocationBeingEdited(location: number): boolean {
@@ -360,36 +415,66 @@ export class ShortcutItem extends React.Component<
     binding: IKeybinding,
     nonEmptyBindings: IKeybinding[]
   ): JSX.Element {
+    // Hide "or" after the last keybinding while any binding is being replaced.
+    // Otherwise show it between keybindings (forced) and before Add (on hover).
+    const showOr = !(
+      index === this._nonEmptyBindings.length - 1 &&
+      Object.values(this.state.displayReplaceInput).some(Boolean)
+    );
+
     return (
-      <div
-        className="jp-Shortcuts-ShortcutContainer"
-        key={this.props.shortcut.id + '_' + index}
-        data-keybinding={index}
-        data-shortcut={this.props.shortcut.id}
-        onClick={() => this.toggleInputReplaceMethod(index)}
-      >
-        {this.isLocationBeingEdited(index)
-          ? this.getShortCutAsInput(binding, index)
-          : this.getShortCutForDisplayOnly(binding)}
-        {!(
-          index === this._nonEmptyBindings.length - 1 &&
-          Object.values(this.state.displayReplaceInput).some(Boolean)
-        ) &&
-          this.getOrDisplayIfNeeded(index < this._nonEmptyBindings.length - 1)}
-      </div>
+      <React.Fragment key={this.props.shortcut.id + '_' + index}>
+        <div
+          className="jp-Shortcuts-ShortcutContainer"
+          role="button"
+          aria-label={this._trans.__(
+            'Edit keybinding %1 for %2',
+            this.toSymbols(binding.keys.join(', ')),
+            this.props.shortcut.label ?? this.props.shortcut.command
+          )}
+          data-keybinding={index}
+          data-shortcut={this.props.shortcut.id}
+          tabIndex={this.isLocationBeingEdited(index) ? -1 : 0}
+          onClick={() => {
+            if (!this.isLocationBeingEdited(index)) {
+              this.toggleInputReplaceMethod(index);
+            }
+          }}
+          onKeyDown={event => {
+            if (this.isLocationBeingEdited(index)) {
+              return;
+            }
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              this.toggleInputReplaceMethod(index);
+            }
+          }}
+        >
+          {this.isLocationBeingEdited(index)
+            ? this.getShortCutAsInput(binding, index)
+            : this.getShortCutForDisplayOnly(binding)}
+        </div>
+        {showOr
+          ? this.getOrDisplayIfNeeded(index < this._nonEmptyBindings.length - 1)
+          : null}
+      </React.Fragment>
     );
   }
 
   getAddLink(): JSX.Element {
+    const label = this._trans.__('Add keybinding');
     return (
-      <a
-        className={!this.state.displayNewInput ? 'jp-Shortcuts-Plus' : ''}
+      <button
+        type="button"
+        className="jp-Button jp-mod-styled jp-mod-accept jp-Shortcuts-Plus jp-Shortcuts-Icon"
         onClick={() => {
           this.toggleInputNew();
         }}
+        title={label}
+        aria-label={label}
       >
-        {this._trans.__('Add')}
-      </a>
+        <addIcon.react tag={null} />
+      </button>
     );
   }
 
@@ -407,6 +492,9 @@ export class ShortcutItem extends React.Component<
           conflicts.set(null, data);
           this.setState({ conflicts });
         }}
+        clearConflict={() => this._clearConflictForBinding(null)}
+        onCloseAfterSubmit={() => this._scheduleFocusNewKeybinding()}
+        onCloseAfterCancel={() => this._scheduleFocusAddButton()}
         toSymbols={this.toSymbols}
         displayInput={this.state.displayNewInput}
         placeholder={''}
@@ -420,7 +508,10 @@ export class ShortcutItem extends React.Component<
   getShortCutsCell(nonEmptyBindings: IKeybinding[]): JSX.Element {
     return (
       <div className="jp-Shortcuts-Cell">
-        <div className={this.getClassNameForShortCuts(nonEmptyBindings)}>
+        <div
+          className={this.getClassNameForShortCuts(nonEmptyBindings)}
+          ref={this._shortcutCellRef}
+        >
           {nonEmptyBindings.map((key, index) =>
             this.getDivForKey(index, key, nonEmptyBindings)
           )}
@@ -446,7 +537,7 @@ export class ShortcutItem extends React.Component<
     }
     return (
       <div className="jp-Shortcuts-Row jp-Shortcuts-RowWithConflict">
-        <div className={CONFLICT_CONTAINER_CLASS}>
+        <div className="jp-Shortcuts-ConflictContainer">
           {conflicts.map(conflict => {
             const key =
               conflict.keys.join(' ') +
@@ -456,32 +547,11 @@ export class ShortcutItem extends React.Component<
               <div className="jp-Shortcuts-Conflict" key={key}>
                 <div className="jp-Shortcuts-ErrorMessage">
                   {this._trans.__(
-                    'Shortcut already in use by %1. Overwrite it?',
+                    'Shortcut already in use by %1.',
                     conflict.conflictsWith
                       .map(target => target.label ?? target.command)
                       .join(', ')
                   )}
-                </div>
-                <div className="jp-Shortcuts-ErrorButton">
-                  <button
-                    className="jp-Button jp-mod-reject jp-mod-styled"
-                    onClick={() => {
-                      this._clearConflict(conflict);
-                      conflict.cancel();
-                    }}
-                  >
-                    {this._trans.__('Cancel')}
-                  </button>
-                  <button
-                    className="jp-Button jp-mod-warn jp-mod-styled"
-                    onClick={() => {
-                      // Clear the conflict first to prevent user from accidentally clicking this button twice
-                      this._clearConflict(conflict);
-                      conflict.overwrite();
-                    }}
-                  >
-                    {this._trans.__('Overwrite')}
-                  </button>
                 </div>
               </div>
             );
@@ -491,29 +561,10 @@ export class ShortcutItem extends React.Component<
     );
   }
 
-  /**
-   * Mark conflict as resolved.
-   */
-  private _clearConflict(conflictToClear: IConflicts) {
-    const conflicts = new Map();
-    const idToSkip = this._conflictId(conflictToClear);
-    for (const [binding, conflict] of this.state.conflicts.entries()) {
-      if (this._conflictId(conflict) !== idToSkip) {
-        conflicts.set(binding, conflict);
-      }
-    }
+  private _clearConflictForBinding(binding: IKeybinding | null): void {
+    const conflicts = new Map(this.state.conflicts);
+    conflicts.delete(binding);
     this.setState({ conflicts });
-  }
-
-  /**
-   * Create a unique conflict identifier.
-   */
-  private _conflictId(conflict: IConflicts): string {
-    return (
-      conflict.keys.join(' ') +
-      '_' +
-      conflict.conflictsWith.map(target => target.id).join('')
-    );
   }
 
   private _getFilteredCommands(): IShortcutTarget[] {
@@ -548,6 +599,31 @@ export class ShortcutItem extends React.Component<
       binding => binding.keys.filter(k => k != '').length !== 0
     );
   }
+
+  private _focusShortcutContainer(keybindingIndex: number): void {
+    requestAnimationFrame(() => {
+      const container = this._shortcutCellRef.current?.querySelector(
+        `.jp-Shortcuts-ShortcutContainer[data-keybinding="${keybindingIndex}"]`
+      ) as HTMLElement | null;
+      container?.focus();
+    });
+  }
+
+  private _scheduleFocusShortcutContainer(keybindingIndex: number): void {
+    this._focusShortcutContainer(keybindingIndex);
+  }
+
+  private _scheduleFocusNewKeybinding(): void {
+    this._pendingFocusKeybindingIndex = -1;
+  }
+
+  private _scheduleFocusAddButton(): void {
+    this._pendingFocusAddButton = true;
+  }
+
+  private _shortcutCellRef = React.createRef<HTMLDivElement>();
+  private _pendingFocusKeybindingIndex: number | null = null;
+  private _pendingFocusAddButton = false;
 
   render(): JSX.Element {
     return (

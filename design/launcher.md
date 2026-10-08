@@ -6,7 +6,7 @@ This document describes the design of the launcher plugin. This document illustr
 
 ### William Shar
 
-William Shar is a high school student who has learned to code in his own time through taking codeschool classes. He was told about JupyterLab from his older brother and decided to try it out.
+William Shar is a high school student who has learned to code in his own time through taking code school classes. He was told about JupyterLab from his older brother and decided to try it out.
 
 **Goal:** Utilize launcher as the main way to open new documents
 

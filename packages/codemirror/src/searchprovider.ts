@@ -364,7 +364,7 @@ export abstract class EditorSearchProvider<
                 match!.position + insertText.length;
               let nextMatchFound = false;
               for (
-                let matchIdx = this.currentIndex || 0;
+                let matchIdx = this.currentIndex ?? 0;
                 matchIdx < allMatches.length;
                 matchIdx++
               ) {

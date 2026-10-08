@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module debugger-extension
@@ -126,6 +125,8 @@ const consoles: JupyterFrontEndPlugin<void> = {
       translator: translator
     });
 
+    handler.executionDone.connect(debug.displayModules.bind(debug));
+
     const updateHandlerAndCommands = async (
       widget: ConsolePanel
     ): Promise<void> => {
@@ -231,6 +232,8 @@ const files: JupyterFrontEndPlugin<void> = {
       translator: translator
     });
 
+    handler.executionDone.connect(debug.displayModules.bind(debug));
+
     const activeSessions: {
       [id: string]: Session.ISessionConnection;
     } = {};
@@ -335,6 +338,8 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
       translator: translator
     });
 
+    handler.executionDone.connect(service.displayModules.bind(service));
+
     const trans = translator.load('jupyterlab');
     app.commands.addCommand(Debugger.CommandIDs.restartDebug, {
       label: trans.__('Restart Kernel and Debug…'),
@@ -404,7 +409,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
 
     if (palette) {
       palette.addItem({
-        category: 'Notebook Operations',
+        category: trans.__('Notebook Operations'),
         command: Debugger.CommandIDs.restartDebug
       });
     }
@@ -593,7 +598,7 @@ const variables: JupyterFrontEndPlugin<void> = {
           name?: string;
         };
 
-        if (!variableReference) {
+        if (variableReference === undefined) {
           variableReference =
             service.model.variables.selectedVariable?.variablesReference;
         }
@@ -604,7 +609,8 @@ const variables: JupyterFrontEndPlugin<void> = {
         const id = `jp-debugger-variable-${name}`;
         if (
           !name ||
-          !variableReference ||
+          variableReference === undefined ||
+          variableReference <= 0 ||
           tracker.find(widget => widget.id === id)
         ) {
           return;
@@ -675,7 +681,7 @@ const variables: JupyterFrontEndPlugin<void> = {
         if (!name) {
           name = service.model.variables.selectedVariable?.name;
         }
-        if (!frameId) {
+        if (frameId === undefined) {
           frameId = service.model.callstack.frame?.id;
         }
 
@@ -696,7 +702,7 @@ const variables: JupyterFrontEndPlugin<void> = {
         if (
           !name || // Name is mandatory
           trackerMime.find(widget => widget.id === id) || // Widget already exists
-          (!frameId && service.hasStoppedThreads()) // frame id missing on breakpoint
+          (frameId === undefined && service.hasStoppedThreads()) // frame id missing on breakpoint
         ) {
           return;
         }
@@ -1260,7 +1266,8 @@ const main: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.pauseOnExceptions, {
-      label: args => (args.filter as string) || 'Breakpoints on exception',
+      label: args =>
+        (args.filter as string) || trans.__('Breakpoints on exception'),
       caption: args => (args.description as string) ?? '',
       isToggled: args =>
         service.session?.isPausingOnException(args.filter as string) || false,
@@ -1681,7 +1688,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<unknown>[] = [
   service,
   displayRegistry,
   consoles,

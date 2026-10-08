@@ -11,15 +11,20 @@ import subprocess
 import textwrap
 from pathlib import Path
 from shutil import which
+from typing import TYPE_CHECKING
 
 from docutils import nodes
-from sphinx.application import Sphinx
 from sphinx.builders import Builder
 from sphinx.errors import SphinxError
 from sphinx.locale import __
 from sphinx.util import logging
 
+if TYPE_CHECKING:
+    from sphinx.application import Sphinx
+    from sphinx.environment import BuildEnvironment
+
 LOGGER = logging.getLogger(__name__)
+
 
 _LANGUAGE_TO_SHELL = {
     "bash": "bash",
@@ -39,7 +44,7 @@ class ShellcheckBuilder(Builder):
     format = "shellcheck"
     epilog = __("Look for any errors in the above output or in %(outdir)s/output.txt")
 
-    def __init__(self, app: Sphinx, env) -> None:
+    def __init__(self, app: Sphinx, env: BuildEnvironment):
         super().__init__(app, env)
         self._executable = app.config.shellcheck_executable
         self._prompt = app.config.shellcheck_prompt
@@ -56,13 +61,13 @@ class ShellcheckBuilder(Builder):
     def get_target_uri(self, docname: str, typ: str | None = None) -> str:
         return ""
 
-    def get_outdated_docs(self):
+    def get_outdated_docs(self) -> set[str]:
         return self.env.found_docs
 
-    def prepare_writing(self, docnames) -> None:
+    def prepare_writing(self, docnames: set[str]):
         return
 
-    def write_doc(self, docname: str, doctree) -> None:
+    def write_doc(self, docname: str, doctree: nodes.document):
         source_path = self.env.doc2path(docname, None)
 
         for node in doctree.findall(nodes.literal_block):
@@ -147,7 +152,7 @@ class ShellcheckBuilder(Builder):
                 stripped = line.lstrip()
                 if stripped.startswith(self._prompt):
                     command = stripped[len(self._prompt) :]
-                    script_lines.append(command[1:] if command.startswith(" ") else command)
+                    script_lines.append(command.removeprefix(" "))
                 else:
                     script_lines.append("# output")
             return "\n".join(script_lines) + "\n"

@@ -1,0 +1,83 @@
+name: External Link Audit
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  should_audit_external_links:
+    name: Check for external link changes
+    runs-on: ubuntu-latest
+    outputs:
+      run_audit: ${{ steps.audit-decision.outputs.run_audit }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        if: github.event_name == 'pull_request'
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - id: audit-decision
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$GITHUB_EVENT_NAME" != "pull_request" ]]; then
+            echo "run_audit=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          base_sha="$BASE_SHA"
+          head_sha="$HEAD_SHA"
+
+          if ! git cat-file -e "${base_sha}^{commit}" || ! git cat-file -e "${head_sha}^{commit}"; then
+            if git cat-file -e "HEAD^1^{commit}" && git cat-file -e "HEAD^2^{commit}"; then
+              base_sha="HEAD^1"
+              head_sha="HEAD^2"
+            else
+              echo "Unable to inspect PR commits; running audit conservatively."
+              echo "run_audit=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+
+          if git diff --quiet --no-ext-diff --diff-filter=ACMRT -G'https?://' "$base_sha" "$head_sha"; then
+            echo "run_audit=false" >> "$GITHUB_OUTPUT"
+          else
+            status=$?
+            if [[ "$status" != "1" ]]; then
+              exit "$status"
+            fi
+            echo "run_audit=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  external_link_audit:
+    name: Audit external links
+    needs: should_audit_external_links
+    if: needs.should_audit_external_links.outputs.run_audit == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+      - run: |
+          pip install -vv --group builder
+          jlpm
+          jlpm build:packages
+          jlpm docs
+      - uses: jupyterlab/maintainer-tools/.github/actions/check-links@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        with:
+          ignore_glob: 'docs/api packages/ui-components/docs/source/ui_components.rst images'
+          ignore_links: ".*/images/[\\w-]+.png https://docs.github.com/en/.* https://jupyterlab.github.io https://mybinder.org/v2/gh/jupyterlab/.* https://github.com/[^/]+/?$ https://blog.jupyter.org/.* https://pypi.org/.* https://code.visualstudio.com/.* https://github.com/.* https://www.npmjs.com.* https://webpack.js.org/.* https://docs.conda.io/* https://conda.io/*"

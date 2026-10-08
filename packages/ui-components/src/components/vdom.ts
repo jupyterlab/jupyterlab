@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IDisposable } from '@lumino/disposable';
 import type { Message } from '@lumino/messaging';
@@ -12,9 +11,7 @@ import * as React from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 
-type ReactRenderElement =
-  | Array<React.ReactElement<any>>
-  | React.ReactElement<any>;
+type ReactRenderElement = Array<React.ReactElement> | React.ReactElement;
 
 /**
  * An abstract class for a Lumino widget which renders a React component.
@@ -72,6 +69,23 @@ export abstract class ReactWidget extends Widget {
       this._rootDOM.unmount();
       this._rootDOM = null;
     }
+  }
+
+  /**
+   * Dispose the widget.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    // `onBeforeDetach` unmounts on a normal detach, but a widget disposed
+    // while already detached would keep its React root mounted forever,
+    // along with every subscription made by the rendered components.
+    if (this._rootDOM !== null) {
+      this._rootDOM.unmount();
+      this._rootDOM = null;
+    }
+    super.dispose();
   }
 
   /**

@@ -7,6 +7,27 @@ const OUTER_SELECTOR = '.jp-WindowedPanel-outer';
 const DRAGGABLE_AREA = '.jp-InputArea-prompt';
 
 /**
+ * Wait for visible launcher card images to load before taking screenshots.
+ */
+export async function waitForLauncherIcons(
+  page: IJupyterLabPageFixture
+): Promise<void> {
+  const launcher = page.locator('.jp-Launcher:visible');
+  await launcher.locator('.jp-LauncherCard').first().waitFor();
+  await page.waitForCondition(() =>
+    launcher.locator('.jp-Launcher-kernelIcon').evaluateAll(images =>
+      images.every(image => {
+        return (
+          image instanceof HTMLImageElement &&
+          image.complete &&
+          image.naturalWidth > 0
+        );
+      })
+    )
+  );
+}
+
+/**
  * Measure how much of the **notebook** viewport does a cell take up.
  */
 export async function notebookViewportRatio(

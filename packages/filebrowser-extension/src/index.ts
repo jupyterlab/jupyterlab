@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module filebrowser-extension
@@ -133,12 +132,17 @@ namespace CommandIDs {
   // For main browser only.
   export const copyPath = 'filebrowser:copy-path';
 
-  export const showBrowser = 'filebrowser:activate';
+  export const openDirectory = 'filebrowser:open-directory';
 
   export const shutdown = 'filebrowser:shutdown';
 
   // For main browser only.
-  export const toggleBrowser = 'filebrowser:toggle-main';
+  export const showPanel = 'filebrowser:show-panel';
+
+  /**
+   * @deprecated Use `filebrowser:open-directory` instead.
+   */
+  export const activate = 'filebrowser:activate';
 
   export const toggleFileFilter = 'filebrowser:toggle-file-filter';
 
@@ -163,6 +167,11 @@ namespace CommandIDs {
   export const toggleFileCheckboxes = 'filebrowser:toggle-file-checkboxes';
 
   export const editPath = 'filebrowser:edit-path';
+
+  /**
+   * @deprecated Use `filebrowser:show-panel` instead.
+   */
+  export const toggleMain = 'filebrowser:toggle-main';
 }
 
 /**
@@ -422,7 +431,7 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
     // Show the current file browser shortcut in its title.
     const updateBrowserTitle = () => {
       const binding = app.commands.keyBindings.find(
-        b => b.command === CommandIDs.toggleBrowser
+        b => b.command === CommandIDs.showPanel
       );
       if (binding) {
         const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
@@ -669,7 +678,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
 
     labShell.add(browser, 'left', { rank: 100, type: 'File Browser' });
 
-    commands.addCommand(CommandIDs.toggleBrowser, {
+    commands.addCommand(CommandIDs.showPanel, {
       label: trans.__('File Browser'),
       describedBy: {
         args: {
@@ -678,15 +687,40 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
         }
       },
       execute: () => {
-        if (browser.isHidden) {
-          return commands.execute(CommandIDs.showBrowser, void 0);
-        }
-
-        return commands.execute(CommandIDs.hideBrowser, void 0);
+        labShell.activateById(browser.id);
       }
     });
 
-    commands.addCommand(CommandIDs.showBrowser, {
+    // Backward-compatible alias for older command ID.
+    commands.addCommand(CommandIDs.activate, {
+      label: trans.__('Open the file browser for the provided `path`.'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            path: {
+              type: 'string',
+              description: trans.__('The path to open in the file browser')
+            }
+          }
+        }
+      },
+      execute: args => commands.execute(CommandIDs.openDirectory, args)
+    });
+
+    // Backward-compatible alias for older command ID.
+    commands.addCommand(CommandIDs.toggleMain, {
+      label: trans.__('File Browser'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: args => commands.execute(CommandIDs.showPanel, args)
+    });
+
+    commands.addCommand(CommandIDs.openDirectory, {
       label: trans.__('Open the file browser for the provided `path`.'),
       describedBy: {
         args: {
@@ -776,7 +810,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     // mode, open file browser.
     void labShell.restored.then(layout => {
       if (layout.fresh && labShell.mode !== 'single-document') {
-        void commands.execute(CommandIDs.showBrowser, void 0);
+        void commands.execute(CommandIDs.openDirectory, void 0);
       }
     });
 
@@ -1068,7 +1102,7 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
             (
               await InputDialog.getText({
                 label: trans.__('URL'),
-                placeholder: 'https://example.com/path/to/file',
+                placeholder: trans.__('https://example.com/path/to/file'),
                 title: trans.__('Open URL'),
                 okLabel: trans.__('Open')
               })
@@ -1190,7 +1224,8 @@ const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
           const file = models[0];
           if (
             autoOpen &&
-            file.size &&
+            file.size !== null &&
+            file.size !== undefined &&
             file.size <= maxSize &&
             isAllowedFileType
           ) {
@@ -1206,7 +1241,9 @@ const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
               trans.__(
                 'Uploaded %1%2',
                 file.name,
-                file.size ? ` (${formatFileSize(file.size, 1, 1024)})` : ''
+                file.size !== null && file.size !== undefined
+                  ? ` (${formatFileSize(file.size, 1, 1024)})`
+                  : ''
               ),
               'info',
               {
@@ -1388,7 +1425,7 @@ function addCommands(
     },
     execute: async args => {
       const path = (args.path as string) || '';
-      const showBrowser = !(args?.dontShowBrowser ?? false);
+      const openDirectory = !(args?.dontShowBrowser ?? false);
       try {
         const item = await Private.navigateToPath(
           path,
@@ -1396,7 +1433,7 @@ function addCommands(
           factory,
           translator
         );
-        if (item.type !== 'directory' && showBrowser) {
+        if (item.type !== 'directory' && openDirectory) {
           const browserForPath = Private.getBrowserForPath(
             path,
             browser,
@@ -1414,8 +1451,8 @@ function addCommands(
       } catch (reason) {
         console.warn(`${CommandIDs.goToPath} failed to go to: ${path}`, reason);
       }
-      if (showBrowser) {
-        return commands.execute(CommandIDs.showBrowser, { path });
+      if (openDirectory) {
+        return commands.execute(CommandIDs.openDirectory, { path });
       }
     }
   });
@@ -1453,7 +1490,7 @@ function addCommands(
           (
             await InputDialog.getText({
               label: trans.__('Path'),
-              placeholder: '/path/relative/to/jlab/root',
+              placeholder: trans.__('/path/relative/to/jlab/root'),
               title: trans.__('Open Path'),
               okLabel: trans.__('Open')
             })
@@ -1630,7 +1667,14 @@ function addCommands(
         : textEditorIcon.bindprops({ stylesheet: 'menuItem' });
     },
     label: (args: { ext: string; label: string }) => {
-      return trans.__(args.label ?? 'New File');
+      if (args.label === undefined || args.label === null) {
+        return trans.__('New File');
+      }
+      // The label is supplied by the caller, most often from the
+      // `jupyter.lab.menus` key of a settings schema, from which it is
+      // extracted by the schema selectors.
+      // eslint-disable-next-line jupyter/no-dynamic-translation
+      return trans.__(args.label);
     },
     describedBy: {
       args: {
@@ -1991,7 +2035,7 @@ function addCommands(
         );
         return;
       }
-      await commands.execute(CommandIDs.showBrowser);
+      await commands.execute(CommandIDs.openDirectory);
       const targetBrowser = tracker.currentWidget ?? browser;
       targetBrowser.editPath();
     },
@@ -2016,7 +2060,7 @@ function addCommands(
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<unknown>[] = [
   factory,
   defaultFileBrowser,
   browser,

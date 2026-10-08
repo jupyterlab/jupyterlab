@@ -9,7 +9,7 @@
 JupyterLab allows you to export your jupyter notebook files (`.ipynb`)
 into other file formats such as:
 
-- Asciidoc `.asciidoc`
+- AsciiDoc `.asciidoc`
 - HTML `.html`
 - LaTeX `.tex`
 - Markdown `.md`

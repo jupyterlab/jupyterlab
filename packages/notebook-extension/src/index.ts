@@ -16,6 +16,7 @@ import { ILabShell, ILayoutRestorer, IRouter } from '@jupyterlab/application';
 import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   Clipboard,
+  CommandLinker,
   createToolbarFactory,
   Dialog,
   ICommandPalette,
@@ -90,9 +91,14 @@ import {
   ToolbarItems
 } from '@jupyterlab/notebook';
 import type { IObservableList } from '@jupyterlab/observables';
+import { IPageHandler } from '@jupyterlab/outputarea';
 import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
+import {
+  IMarkdownParser,
+  IRenderMimeRegistry,
+  MimeModel
+} from '@jupyterlab/rendermime';
 import type { IRenderMime } from '@jupyterlab/rendermime';
-import { IMarkdownParser, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { NbConvert } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -113,6 +119,7 @@ import {
   duplicateIcon,
   fastForwardIcon,
   IFormRendererRegistry,
+  infoIcon,
   moveDownIcon,
   moveUpIcon,
   notebookIcon,
@@ -125,10 +132,11 @@ import { ArrayExt } from '@lumino/algorithm';
 import type { CommandRegistry } from '@lumino/commands';
 import type {
   JSONObject,
+  ReadonlyJSONObject,
   ReadonlyJSONValue,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-import { JSONExt, UUID } from '@lumino/coreutils';
+import { JSONExt, Token, UUID } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import { DisposableSet } from '@lumino/disposable';
 import type { Message } from '@lumino/messaging';
@@ -136,9 +144,9 @@ import { MessageLoop } from '@lumino/messaging';
 import type { ContextMenu, Menu, Widget } from '@lumino/widgets';
 import { Panel } from '@lumino/widgets';
 import { CellBarExtension } from '@jupyterlab/cell-toolbar';
+import React from 'react';
 import { cellExecutor } from './cellexecutor';
 import { logNotebookOutput } from './nboutput';
-import { ActiveCellTool } from './tool-widgets/activeCellToolWidget';
 import {
   CellMetadataField,
   NotebookMetadataField
@@ -181,6 +189,8 @@ namespace CommandIDs {
   export const trust = 'notebook:trust';
 
   export const exportToFormat = 'notebook:export-to-format';
+
+  export const showExportGuidance = 'notebook:show-export-guidance';
 
   export const run = 'notebook:run-cell';
 
@@ -364,6 +374,30 @@ const FACTORY = 'Notebook';
  * (returned from nbconvert's export list)
  */
 const FORMAT_EXCLUDE = ['notebook', 'python', 'custom'];
+
+/**
+ * Documentation page describing notebook export support.
+ */
+const NOTEBOOK_EXPORT_DOCS_URL =
+  'https://jupyterlab.readthedocs.io/en/stable/user/export.html';
+
+/**
+ * An interface describing how export guidance is presented to users.
+ */
+export interface INotebookExportGuidance {
+  /**
+   * Show guidance for enabling notebook exports.
+   */
+  showExportHelp(): Promise<void>;
+}
+
+/**
+ * A token describing a service for showing notebook export guidance.
+ */
+export const INotebookExportGuidance = new Token<INotebookExportGuidance>(
+  '@jupyterlab/notebook-extension:INotebookExportGuidance',
+  'A service for showing notebook export guidance.'
+);
 
 /**
  * Setting Id storing the customized toolbar definition.
@@ -641,13 +675,14 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
   description: 'Adds the export notebook commands.',
   autoStart: true,
   requires: [ITranslator, INotebookTracker],
-  optional: [IMainMenu, ICommandPalette],
+  optional: [IMainMenu, ICommandPalette, INotebookExportGuidance],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
     tracker: INotebookTracker,
     mainMenu: IMainMenu | null,
-    palette: ICommandPalette | null
+    palette: ICommandPalette | null,
+    exportGuidance: INotebookExportGuidance | null
   ) => {
     const trans = translator.load('jupyterlab');
     const { commands, shell } = app;
@@ -738,21 +773,91 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    commands.addCommand(CommandIDs.showExportGuidance, {
+      label: trans.__('Enable notebook exports'),
+      execute: () => {
+        if (exportGuidance) {
+          return exportGuidance.showExportHelp();
+        }
+        window.open(NOTEBOOK_EXPORT_DOCS_URL, '_blank', 'noopener,noreferrer');
+        return undefined;
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
     // Add a notebook group to the File menu.
-    let exportTo: Menu | null | undefined;
-    if (mainMenu) {
-      exportTo = mainMenu.fileMenu.items.find(
-        item =>
-          item.type === 'submenu' &&
-          item.submenu?.id === 'jp-mainmenu-file-notebookexport'
-      )?.submenu;
-    }
+    const fileMenu = mainMenu?.fileMenu as Menu | undefined;
+
+    const getExportMenu = (): Menu | undefined => {
+      return (
+        fileMenu?.items.find(
+          item =>
+            item.type === 'submenu' &&
+            item.submenu?.id === 'jp-mainmenu-file-notebookexport'
+        )?.submenu ?? undefined
+      );
+    };
 
     let formatsInitialized = false;
+    let paletteInitialized = false;
+    let exportFormats: Array<{ format: string; label: string }> | null = null;
+
+    const updateExportMenu = () => {
+      const exportTo = getExportMenu();
+      if (!exportTo || !exportFormats) {
+        return;
+      }
+
+      exportTo.clearItems();
+
+      if (exportFormats.length === 0) {
+        exportTo.addItem({
+          command: CommandIDs.showExportGuidance
+        });
+        return;
+      }
+
+      exportFormats.forEach(({ format, label }) => {
+        exportTo.addItem({
+          command: CommandIDs.exportToFormat,
+          args: {
+            format,
+            label,
+            isPalette: false
+          }
+        });
+      });
+
+      if (palette && !paletteInitialized) {
+        const category = trans.__('Notebook Operations');
+        exportFormats.forEach(({ format, label }) => {
+          palette.addItem({
+            command: CommandIDs.exportToFormat,
+            category,
+            args: {
+              format,
+              label,
+              isPalette: true
+            }
+          });
+        });
+        paletteInitialized = true;
+      }
+    };
 
     /** Request formats only when a notebook might use them. */
     const maybeInitializeFormats = async () => {
       if (formatsInitialized) {
+        updateExportMenu();
+        return;
+      }
+
+      if (tracker.size === 0) {
         return;
       }
 
@@ -760,52 +865,98 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
 
       formatsInitialized = true;
 
-      const response = await services.nbconvert.getExportFormats(false);
-
-      if (!response) {
-        return;
+      let response: NbConvert.IExportFormats | null = null;
+      try {
+        response = await services.nbconvert.getExportFormats(false);
+      } catch {
+        // Ignore fetch errors and fallback to export guidance.
       }
 
-      const formatLabels: any = Private.getFormatLabels(translator);
+      const formatLabels = Private.getFormatLabels(translator);
 
-      // Convert export list to palette and menu items.
-      const formatList = Object.keys(response);
-      formatList.forEach(function (key) {
-        const formattedKey = key[0].toLocaleUpperCase() + key.slice(1);
-        const capCaseKey = trans.__(formattedKey);
-        const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
-        let args = {
-          format: key,
-          label: labelStr,
-          isPalette: false
-        };
-        if (FORMAT_EXCLUDE.indexOf(key) === -1) {
-          if (exportTo) {
-            exportTo.addItem({
-              command: CommandIDs.exportToFormat,
-              args: args
-            });
-          }
-          if (palette) {
-            args = {
-              format: key,
-              label: labelStr,
-              isPalette: true
-            };
-            const category = trans.__('Notebook Operations');
-            palette.addItem({
-              command: CommandIDs.exportToFormat,
-              category,
-              args
-            });
-          }
-        }
-      });
+      // Convert export list to menu and palette items.
+      exportFormats = Object.keys(response ?? {})
+        .filter(key => !FORMAT_EXCLUDE.includes(key))
+        .map(key => {
+          const formattedKey = key[0].toLocaleUpperCase() + key.slice(1);
+          // Fallback for export formats the server offers but `formatLabels`
+          // does not know about, so there is no literal to extract.
+          // eslint-disable-next-line jupyter/no-dynamic-translation
+          const capCaseKey = trans.__(formattedKey);
+          const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
+          return {
+            format: key,
+            label: labelStr
+          };
+        });
+
+      updateExportMenu();
     };
 
     tracker.widgetAdded.connect(maybeInitializeFormats);
+    if (tracker.size > 0) {
+      void maybeInitializeFormats();
+    }
+    void app.restored.then(() => {
+      void maybeInitializeFormats();
+    });
   }
 };
+
+/**
+ * A plugin providing the default notebook export guidance service.
+ */
+export const exportGuidanceDialogPlugin: JupyterFrontEndPlugin<INotebookExportGuidance> =
+  {
+    id: '@jupyterlab/notebook-extension:export-guidance-dialog',
+    description:
+      'Provides the default notebook export guidance shown when no exporters are available.',
+    provides: INotebookExportGuidance,
+    autoStart: true,
+    requires: [ITranslator],
+    activate: (
+      app: JupyterFrontEnd,
+      translator: ITranslator
+    ): INotebookExportGuidance => {
+      const trans = translator.load('jupyterlab');
+      const { commands } = app;
+
+      const openExportDocs = (url: string, docsLabel: string) => {
+        if (commands.hasCommand('help:open')) {
+          return commands.execute('help:open', {
+            url,
+            text: docsLabel,
+            newBrowserTab: true
+          });
+        }
+
+        window.open(url, '_blank', 'noopener,noreferrer');
+        return undefined;
+      };
+
+      return {
+        showExportHelp: async () => {
+          const result = await showDialog({
+            title: trans.__('Notebook exports are unavailable'),
+            body: trans.__(
+              'No notebook export formats are currently available. To enable exports, install nbconvert in the server environment or use another exporter supported by your deployment.'
+            ),
+            buttons: [
+              Dialog.cancelButton({ label: trans.__('Close') }),
+              Dialog.okButton({ label: trans.__('Open Documentation') })
+            ]
+          });
+
+          if (result.button.accept) {
+            void openExportDocs(
+              NOTEBOOK_EXPORT_DOCS_URL,
+              trans.__('Notebook Export Documentation')
+            );
+          }
+        }
+      };
+    }
+  };
 
 /**
  * A plugin that adds a notebook trust status item to the status bar.
@@ -864,10 +1015,28 @@ const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory>
       IRenderMimeRegistry,
       IToolbarWidgetRegistry
     ],
-    optional: [ISettingRegistry, ISessionContextDialogs, ITranslator],
+    optional: [
+      ISettingRegistry,
+      ISessionContextDialogs,
+      ITranslator,
+      IPageHandler
+    ],
     activate: activateWidgetFactory,
     autoStart: true
   };
+
+/**
+ * The pager output handler provider.
+ */
+const pageHandlerPlugin: JupyterFrontEndPlugin<IPageHandler> = {
+  id: '@jupyterlab/notebook-extension:page-handler',
+  description: 'Provides a handler for pager output payloads.',
+  autoStart: true,
+  provides: IPageHandler,
+  requires: [IRenderMimeRegistry],
+  optional: [ISettingRegistry, ITranslator],
+  activate: activatePageHandler
+};
 
 /**
  * The cloned output provider.
@@ -1114,6 +1283,9 @@ const updateRawMimetype: JupyterFrontEndPlugin<void> = {
           ).length > 0;
         if (!mimetypeExists) {
           const formattedKey = key[0].toLocaleUpperCase() + key.slice(1);
+          // Fallback for export formats the server offers but `formatLabels`
+          // does not know about, so there is no literal to extract.
+          // eslint-disable-next-line jupyter/no-dynamic-translation
           const altOption = trans.__(formattedKey);
           const option = formatLabels[key] ? formatLabels[key] : altOption;
           const mimeTypeValue = response[key].output_mimetype;
@@ -1149,17 +1321,23 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
     formRegistry: IFormRendererRegistry,
     translator?: ITranslator
   ) => {
+    const trans = (translator || nullTranslator).load('jupyterlab');
     const editorFactory: CodeEditor.Factory = options =>
       editorServices.factoryService.newInlineEditor(options);
-    // Register the custom fields.
+    // Register the custom fields. As with the active cell tool below, the
+    // field renderers are used by rjsf as React components, so they run on
+    // every rebuild of the metadata form. Each field is created once and
+    // reused: constructing one per render abandons an editor, its host node
+    // and its listeners on every keystroke that rebuilds the form.
+    const cellMetadataField = new CellMetadataField({
+      editorFactory,
+      tracker,
+      label: trans.__('Cell metadata'),
+      translator: translator
+    });
     const cellComponent: IFormRenderer = {
       fieldRenderer: (props: FieldProps) => {
-        return new CellMetadataField({
-          editorFactory,
-          tracker,
-          label: 'Cell metadata',
-          translator: translator
-        }).render(props);
+        return cellMetadataField.render(props);
       }
     };
     formRegistry.addRenderer(
@@ -1167,14 +1345,15 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
       cellComponent
     );
 
+    const notebookMetadataField = new NotebookMetadataField({
+      editorFactory,
+      tracker,
+      label: trans.__('Notebook metadata'),
+      translator: translator
+    });
     const notebookComponent: IFormRenderer = {
       fieldRenderer: (props: FieldProps) => {
-        return new NotebookMetadataField({
-          editorFactory,
-          tracker,
-          label: 'Notebook metadata',
-          translator: translator
-        }).render(props);
+        return notebookMetadataField.render(props);
       }
     };
     formRegistry.addRenderer(
@@ -1184,32 +1363,93 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
   }
 };
 
+type ActiveCellToolRendererProps = FieldProps & {
+  tracker: INotebookTracker;
+  languages: IEditorLanguageRegistry;
+};
+
+type CellIdFieldRendererProps = FieldProps & {
+  tracker: INotebookTracker;
+  translator?: ITranslator;
+};
+
+const ActiveCellToolRenderer = React.lazy(async () => {
+  const { ActiveCellTool } =
+    await import('./tool-widgets/activeCellToolWidget');
+  let tool: InstanceType<typeof ActiveCellTool> | null = null;
+  return {
+    default: (props: ActiveCellToolRendererProps): React.ReactElement => {
+      tool ??= new ActiveCellTool({
+        tracker: props.tracker,
+        languages: props.languages
+      });
+      return tool.render(props);
+    }
+  };
+});
+
+const CellIdFieldRenderer = React.lazy(async () => {
+  const { CellIdField } = await import('./tool-widgets/activeCellToolWidget');
+  return {
+    default: (props: CellIdFieldRendererProps): React.ReactElement =>
+      CellIdField(props)
+  };
+});
+
 /**
  * Registering active cell field.
  */
 const activeCellTool: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:active-cell-tool',
-  description: 'Adds active cell field in the metadata editor tab.',
+  description: 'Adds active cell fields in the metadata editor tab.',
   autoStart: true,
   requires: [INotebookTracker, IFormRendererRegistry, IEditorLanguageRegistry],
+  optional: [ITranslator],
   activate: (
     // Register the custom field.
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
     formRegistry: IFormRendererRegistry,
-    languages: IEditorLanguageRegistry
+    languages: IEditorLanguageRegistry,
+    translator?: ITranslator
   ) => {
+    // The field renderer is used by rjsf as a React component, so it runs on
+    // every rebuild of the metadata form. The lazy renderer keeps one shared
+    // tool instance after the module is loaded.
     const component: IFormRenderer = {
       fieldRenderer: (props: FieldProps) => {
-        return new ActiveCellTool({
-          tracker,
-          languages
-        }).render(props);
+        return React.createElement(
+          React.Suspense,
+          { fallback: null },
+          React.createElement(ActiveCellToolRenderer, {
+            ...props,
+            tracker,
+            languages
+          })
+        );
       }
     };
     formRegistry.addRenderer(
       '@jupyterlab/notebook-extension:active-cell-tool.renderer',
       component
+    );
+
+    const cellIdComponent: IFormRenderer = {
+      fieldRenderer: (props: FieldProps) => {
+        return React.createElement(
+          React.Suspense,
+          { fallback: null },
+          React.createElement(CellIdFieldRenderer, {
+            ...props,
+            tracker,
+            translator
+          })
+        );
+      }
+    };
+    formRegistry.addRenderer(
+      '@jupyterlab/notebook-extension:active-cell-tool.cell-id',
+      cellIdComponent
     );
   }
 };
@@ -1268,7 +1508,8 @@ const openWithNoKernelPlugin: JupyterFrontEndPlugin<void> = {
               label: trans.__('Notebook (no kernel)'),
               factory: FACTORY,
               kernelPreference: {
-                shouldStart: false
+                shouldStart: false,
+                shouldReuse: false
               }
             }
           })
@@ -1287,7 +1528,9 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   cellExecutor,
   factory,
   trackerPlugin,
+  pageHandlerPlugin,
   executionIndicator,
+  exportGuidanceDialogPlugin,
   exportPlugin,
   tools,
   cellCounterItem,
@@ -1363,6 +1606,87 @@ function activateNotebookTools(
 }
 
 /**
+ * Activate the pager output handler provider.
+ */
+function activatePageHandler(
+  app: JupyterFrontEnd,
+  rendermime: IRenderMimeRegistry,
+  settingRegistry: ISettingRegistry | null,
+  translator_: ITranslator | null
+): IPageHandler {
+  const translator = translator_ ?? nullTranslator;
+  const trans = translator.load('jupyterlab');
+
+  let helpInBottomPanel = false;
+  let helpWidget: MainAreaWidget<Panel> | null = null;
+
+  const fetchSettings = settingRegistry
+    ? settingRegistry.load(trackerPlugin.id)
+    : Promise.reject(new Error(`No setting registry for ${trackerPlugin.id}`));
+
+  const updateConfig = (settings: ISettingRegistry.ISettings): void => {
+    helpInBottomPanel = settings.get('helpInBottomPanel').composite as boolean;
+  };
+
+  void fetchSettings
+    .then(settings => {
+      updateConfig(settings);
+      settings.changed.connect(() => {
+        updateConfig(settings);
+      });
+    })
+    .catch((reason: Error) => {
+      console.warn(reason.message);
+    });
+
+  return {
+    handlePage: payload => {
+      if (!helpInBottomPanel) {
+        return false;
+      }
+
+      const data = payload['data'];
+      if (!data || typeof data !== 'object') {
+        return false;
+      }
+
+      const mimeData = data as nbformat.IMimeBundle;
+      const metadata = (payload['metadata'] ?? {}) as ReadonlyJSONObject;
+      const trusted = false;
+      const mimeType = rendermime.preferredMimeType(mimeData, 'ensure');
+      if (!mimeType) {
+        return false;
+      }
+
+      if (!helpWidget || helpWidget.isDisposed) {
+        const content = new Panel();
+        content.addClass('jp-HelpPanel');
+        helpWidget = new MainAreaWidget({ content });
+        helpWidget.id = 'jp-help-panel';
+        helpWidget.title.label = trans.__('Help');
+        helpWidget.title.icon = infoIcon;
+        helpWidget.title.closable = true;
+      }
+
+      const content = helpWidget.content;
+      content.widgets.forEach(widget => widget.dispose());
+
+      const renderer = rendermime.createRenderer(mimeType);
+      void renderer.renderModel(
+        new MimeModel({ data: mimeData, metadata, trusted })
+      );
+      content.addWidget(renderer);
+
+      if (!helpWidget.isAttached) {
+        app.shell.add(helpWidget, 'down');
+      }
+      app.shell.activateById(helpWidget.id);
+      return true;
+    }
+  };
+}
+
+/**
  * Activate the notebook widget factory.
  */
 function activateWidgetFactory(
@@ -1373,7 +1697,8 @@ function activateWidgetFactory(
   toolbarRegistry: IToolbarWidgetRegistry,
   settingRegistry: ISettingRegistry | null,
   sessionContextDialogs_: ISessionContextDialogs | null,
-  translator_: ITranslator | null
+  translator_: ITranslator | null,
+  pageHandler: IPageHandler | null
 ): NotebookWidgetFactory.IFactory {
   const translator = translator_ ?? nullTranslator;
   const sessionContextDialogs =
@@ -1454,6 +1779,7 @@ function activateWidgetFactory(
     contentFactory,
     editorConfig: StaticNotebook.defaultEditorConfig,
     notebookConfig: StaticNotebook.defaultNotebookConfig,
+    pageHandler: pageHandler ?? undefined,
     mimeTypeService: editorServices.mimeTypeService,
     toolbarFactory,
     translator
@@ -1920,6 +2246,7 @@ function activateNotebookHandler(
   fetchSettings
     .then(settings => {
       updateConfig(settings);
+
       settings.changed.connect(() => {
         updateConfig(settings);
         commands.notifyCommandChanged(CommandIDs.virtualScrollbar);
@@ -2022,8 +2349,12 @@ function activateNotebookHandler(
             value: settings.get('sideBySideOutputRatio').composite as number
           })
             .then(result => {
-              setSideBySideOutputRatio(result.value!);
-              if (result.value) {
+              if (
+                result.value !== null &&
+                Number.isFinite(result.value) &&
+                result.value >= 0
+              ) {
+                setSideBySideOutputRatio(result.value);
                 void settings.set('sideBySideOutputRatio', result.value);
               }
             })
@@ -2102,6 +2433,19 @@ function activateNotebookHandler(
 
   const ft = app.docRegistry.getFileType('notebook');
 
+  function applyNotebookViewOnlyUI(
+    panel: NotebookPanel,
+    viewOnly: boolean
+  ): void {
+    const el = panel.toolbar.node.querySelector(
+      '[data-jp-item-name="save"]'
+    ) as HTMLElement | null;
+
+    if (el) {
+      el.style.display = viewOnly ? 'none' : '';
+    }
+  }
+
   factory.widgetCreated.connect((sender, widget) => {
     // If the notebook panel does not have an ID, assign it one.
     widget.id = widget.id || `notebook-${++id}`;
@@ -2114,12 +2458,43 @@ function activateNotebookHandler(
     widget.title.iconLabel = ft?.iconLabel ?? '';
     widget.content.scrollbar = factory.notebookConfig.showMinimap ?? false;
 
-    // Notify the widget tracker if restore data needs to update.
+    // Notify the widget tracker if restore data needs to update. The context
+    // outlives this panel when other views of the document stay open, so the
+    // connection is made with the panel as receiver: `Widget.dispose()` calls
+    // `Signal.clearData(this)`, which removes it when the panel is closed.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);
-    });
+    }, widget);
     // Add the notebook panel to the tracker.
     void tracker.add(widget);
+
+    applyNotebookViewOnlyUI(widget, widget.viewOnly);
+    widget.content.viewOnlyChanged.connect((_, viewOnly) => {
+      applyNotebookViewOnlyUI(widget, viewOnly);
+      // Toolbar buttons only re-check a command's `isEnabled`/`isVisible`
+      // when notified for that specific id
+      const skip = [CommandIDs.createNew, CommandIDs.createOutputView];
+      Object.values(CommandIDs)
+        .filter(id => !skip.includes(id) && commands.hasCommand(id))
+        .forEach(id => commands.notifyCommandChanged(id));
+    }, widget);
+
+    // Intercept kernel start for view-only notebooks opened read-only
+    void widget.context.ready.then(() => {
+      if (widget.viewOnly) {
+        const sessionContext = widget.context.sessionContext;
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          shouldStart: false,
+          canStart: false,
+          autoStartDefault: false
+        };
+        // Safety net in case a kernel started already
+        if (sessionContext.session?.kernel) {
+          void sessionContext.shutdown();
+        }
+      }
+    });
   });
 
   /**
@@ -2196,15 +2571,16 @@ function activateNotebookHandler(
     setSideBySideOutputRatio(factory.notebookConfig.sideBySideOutputRatio);
     const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
       margin-left: ${factory.notebookConfig.sideBySideLeftMarginOverride} !important;
-      margin-right: ${factory.notebookConfig.sideBySideRightMarginOverride} !important;`;
+      margin-right: ${factory.notebookConfig.sideBySideRightMarginOverride} !important;
+    }`;
     const sideBySideMarginTag = document.getElementById(SIDE_BY_SIDE_STYLE_ID);
     if (sideBySideMarginTag) {
-      sideBySideMarginTag.innerText = sideBySideMarginStyle;
+      sideBySideMarginTag.textContent = sideBySideMarginStyle;
     } else {
-      document.head.insertAdjacentHTML(
-        'beforeend',
-        `<style id="${SIDE_BY_SIDE_STYLE_ID}">${sideBySideMarginStyle}}</style>`
-      );
+      const style = document.createElement('style');
+      style.id = SIDE_BY_SIDE_STYLE_ID;
+      style.textContent = sideBySideMarginStyle;
+      document.head.appendChild(style);
     }
     factory.autoStartDefault = settings.get('autoStartDefaultKernel')
       .composite as boolean;
@@ -2422,6 +2798,7 @@ function activateNotebookCompleterService(
     keys: ['Enter'],
     selector: '.jp-Notebook .jp-mod-completer-active'
   });
+  const completerConnected = new WeakSet<NotebookPanel>();
   const updateCompleter = async (
     _: INotebookTracker | undefined,
     notebook: NotebookPanel
@@ -2433,6 +2810,15 @@ function activateNotebookCompleterService(
       sanitizer: sanitizer
     };
     await manager.updateCompleter(completerContext);
+    // `updateCompleter` also runs for every panel on `activeProvidersChanged`
+    // below; connect the listeners only on the first call for a panel so
+    // they do not accumulate per settings change. The disposal check covers
+    // a panel closed while `updateCompleter` was pending: connections made
+    // then would outlive the disposal cleanup that has already run.
+    if (notebook.isDisposed || completerConnected.has(notebook)) {
+      return;
+    }
+    completerConnected.add(notebook);
     notebook.content.activeCellChanged.connect((_, cell) => {
       // Ensure the editor will exist on the cell before adding the completer
       cell?.ready
@@ -2447,6 +2833,10 @@ function activateNotebookCompleterService(
         })
         .catch(console.error);
     });
+    // The session context outlives this panel when other views of the
+    // document stay open, so the connection is made with the panel as
+    // receiver: `Widget.dispose()` calls `Signal.clearData(this)`, which
+    // removes it when the panel is closed.
     notebook.sessionContext.sessionChanged.connect(() => {
       // Ensure the editor will exist on the cell before adding the completer
       notebook.content.activeCell?.ready
@@ -2459,7 +2849,7 @@ function activateNotebookCompleterService(
           return manager.updateCompleter(newCompleterContext);
         })
         .catch(console.error);
-    });
+    }, notebook);
   };
   notebooks.widgetAdded.connect(updateCompleter);
   manager.activeProvidersChanged.connect(() => {
@@ -2599,18 +2989,28 @@ function addCommands(
     }
   };
 
-  // Set up signal handler to keep the collapse state consistent
+  // Set up signal handler to keep the collapse state consistent. The
+  // connections are made once per panel: `currentChanged` fires repeatedly
+  // for the same panel, and reconnecting each time would pile up duplicate
+  // handlers for as long as the panel lives.
+  const collapseSynchronized = new WeakSet<NotebookPanel>();
   tracker.currentChanged.connect(
     (sender: INotebookTracker, panel: NotebookPanel) => {
-      if (!panel?.content?.model?.cells) {
+      if (!panel?.content?.model?.cells || collapseSynchronized.has(panel)) {
         return;
       }
+      collapseSynchronized.add(panel);
+      // The cell list belongs to the model, which outlives this view when
+      // other views of the document stay open, so the connection is made
+      // with the notebook as receiver: `Widget.dispose()` calls
+      // `Signal.clearData(this)`, which removes it when the view is closed.
       panel.content.model.cells.changed.connect(
         (list: any, args: IObservableList.IChangedArgs<ICellModel>) => {
           // Might be overkill to refresh this every time, but
           // it helps to keep the collapse state consistent.
           refreshCellCollapsed(panel.content);
-        }
+        },
+        panel.content
       );
       panel.content.activeCellChanged.connect(
         (notebook: Notebook, cell: Cell) => {
@@ -2685,7 +3085,9 @@ function addCommands(
         );
       }
     },
-    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    isEnabled: args =>
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     icon: args => (args.toolbar ? runIcon : undefined),
     describedBy: {
       args: {
@@ -2729,7 +3131,8 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -2767,7 +3170,8 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -2798,7 +3202,8 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -2826,10 +3231,12 @@ function addCommands(
       // Can't run above if there are multiple cells selected,
       // or if we are at the top of the notebook.
       return (
+        !Private.isViewOnly(tracker) &&
         isEnabledAndSingleSelected() &&
         tracker.currentWidget!.content.activeCellIndex !== 0
       );
     },
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -2857,12 +3264,14 @@ function addCommands(
       // Can't run below if there are multiple cells selected,
       // or if we are at the bottom of the notebook.
       return (
+        !Private.isViewOnly(tracker) &&
         isEnabledAndSingleSelected() &&
         (tracker.currentWidget!.content.widgets.length === 1 ||
           tracker.currentWidget!.content.activeCellIndex !==
             tracker.currentWidget!.content.widgets.length - 1)
       );
     },
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -2897,7 +3306,9 @@ function addCommands(
         return sessionDialogs.restart(current.sessionContext);
       }
     },
-    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    isEnabled: args =>
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     icon: args => (args.toolbar ? refreshIcon : undefined),
     describedBy: {
       args: {
@@ -2923,7 +3334,8 @@ function addCommands(
 
       return current.context.sessionContext.shutdown();
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -2967,8 +3379,14 @@ function addCommands(
   commands.addCommand(CommandIDs.trust, {
     label: () => trans.__('Trust Notebook'),
     execute: async args => {
-      const current = getCurrent(tracker, shell, args);
-      if (current) {
+      const trustBoundaryId = args[CommandLinker.TRUST_BOUNDARY_ID_ARG];
+      const current =
+        typeof trustBoundaryId === 'string'
+          ? (tracker.find(
+              widget => widget.content.node.id === trustBoundaryId
+            ) ?? null)
+          : getCurrent(tracker, shell, args);
+      if (current && !current.isDisposed) {
         const { context, content } = current;
         const trustResult = await NotebookActions.trust(content);
         if (trustResult.trusted) {
@@ -2978,11 +3396,17 @@ function addCommands(
       }
       return { trusted: false };
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [CommandLinker.TRUST_BOUNDARY_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The notebook trust boundary ID')
+          }
+        }
       }
     }
   });
@@ -2997,7 +3421,8 @@ function addCommands(
         await commands.execute(CommandIDs.clearAllOutputs);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3027,7 +3452,9 @@ function addCommands(
         );
       }
     },
-    isEnabled: isEnabledAndSingleSelected,
+    isEnabled: () =>
+      !Private.isViewOnly(tracker) && isEnabledAndSingleSelected(),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3066,7 +3493,9 @@ function addCommands(
         );
       }
     },
-    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    isEnabled: args =>
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     icon: args => (args.toolbar ? fastForwardIcon : undefined),
     describedBy: {
       args: {
@@ -3097,7 +3526,8 @@ function addCommands(
         return NotebookActions.clearAllOutputs(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3115,7 +3545,8 @@ function addCommands(
         return NotebookActions.clearOutputs(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3139,7 +3570,9 @@ function addCommands(
         return kernel.interrupt();
       }
     },
-    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    isEnabled: args =>
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     icon: args => (args.toolbar ? stopIcon : undefined),
     describedBy: {
       args: {
@@ -3167,7 +3600,8 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3188,7 +3622,8 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3209,7 +3644,8 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3245,7 +3681,9 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? cutIcon : undefined),
-    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    isEnabled: args =>
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3337,7 +3775,9 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? pasteIcon : undefined),
-    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    isEnabled: args =>
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3380,7 +3820,8 @@ function addCommands(
         return executePaste(current.content, 'above');
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3420,7 +3861,9 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? duplicateIcon : undefined),
-    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    isEnabled: args =>
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3455,7 +3898,8 @@ function addCommands(
         return executePaste(current.content, 'replace');
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3505,8 +3949,9 @@ function addCommands(
         (current.content.activeCell?.model.getMetadata(
           'deletable'
         ) as unknown as boolean) !== false;
-      return deletable;
+      return deletable && !Private.isViewOnly(tracker);
     },
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3624,8 +4069,9 @@ function addCommands(
       const hasEditorSelection =
         selection.start.line !== selection.end.line ||
         selection.start.column !== selection.end.column;
-      return hasEditorSelection;
+      return hasEditorSelection && !Private.isViewOnly(tracker);
     },
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3666,8 +4112,11 @@ function addCommands(
       if (!current) {
         return false;
       }
-      return !!current.content.activeCell?.editor;
+      return (
+        !!current.content.activeCell?.editor && !Private.isViewOnly(tracker)
+      );
     },
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3685,7 +4134,8 @@ function addCommands(
         return NotebookActions.splitCell(current.content, translator);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3711,6 +4161,9 @@ function addCommands(
       }
     },
     isVisible: args => {
+      if (Private.isViewOnly(tracker)) {
+        return false;
+      }
       const current = getCurrent(tracker, shell, { ...args, activate: false });
       if (!current) {
         return false;
@@ -3720,6 +4173,7 @@ function addCommands(
       const notebook = current.content;
       return notebook && notebook.selectedCells.length > 1;
     },
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3744,7 +4198,8 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3769,7 +4224,8 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3788,7 +4244,9 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? addAboveIcon : undefined),
-    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    isEnabled: args =>
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3813,7 +4271,9 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? addBelowIcon : undefined),
-    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    isEnabled: args =>
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3869,7 +4329,8 @@ function addCommands(
         return NotebookActions.insertSameLevelHeadingAbove(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3886,7 +4347,8 @@ function addCommands(
         return NotebookActions.insertSameLevelHeadingBelow(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3905,7 +4367,8 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -3924,7 +4387,8 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4067,8 +4531,11 @@ function addCommands(
       if (!current) {
         return false;
       }
-      return current.content.activeCellIndex >= 1;
+      return (
+        !Private.isViewOnly(tracker) && current.content.activeCellIndex >= 1
+      );
     },
+    isVisible: () => !Private.isViewOnly(tracker),
     icon: args => (args.toolbar ? moveUpIcon : undefined),
     describedBy: {
       args: {
@@ -4124,8 +4591,12 @@ function addCommands(
       }
 
       const length = current.content.model.cells.length;
-      return current.content.activeCellIndex < length - 1;
+      return (
+        !Private.isViewOnly(tracker) &&
+        current.content.activeCellIndex < length - 1
+      );
     },
+    isVisible: () => !Private.isViewOnly(tracker),
     icon: args => (args.toolbar ? moveDownIcon : undefined),
     describedBy: {
       args: {
@@ -4226,7 +4697,8 @@ function addCommands(
         return NotebookActions.undo(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4243,7 +4715,8 @@ function addCommands(
         return NotebookActions.redo(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4264,6 +4737,8 @@ function addCommands(
         }
       }
     },
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4284,6 +4759,8 @@ function addCommands(
         }
       }
     },
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4300,7 +4777,8 @@ function addCommands(
         return sessionDialogs.selectKernel(current.context.sessionContext);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4368,7 +4846,8 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4389,7 +4868,8 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4410,7 +4890,8 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4431,7 +4912,8 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4452,7 +4934,8 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4473,7 +4956,8 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4490,7 +4974,8 @@ function addCommands(
         return NotebookActions.hideCode(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4507,7 +4992,8 @@ function addCommands(
         return NotebookActions.showCode(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4524,7 +5010,8 @@ function addCommands(
         return NotebookActions.hideAllCode(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4541,7 +5028,8 @@ function addCommands(
         return NotebookActions.showAllCode(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4558,7 +5046,8 @@ function addCommands(
         return NotebookActions.hideOutput(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4575,7 +5064,8 @@ function addCommands(
         return NotebookActions.showOutput(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4592,7 +5082,8 @@ function addCommands(
         return NotebookActions.toggleOutput(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4609,7 +5100,8 @@ function addCommands(
         return NotebookActions.hideAllOutputs(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4662,7 +5154,8 @@ function addCommands(
         return NotebookActions.showAllOutputs(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4679,7 +5172,8 @@ function addCommands(
         return NotebookActions.enableOutputScrolling(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4696,7 +5190,8 @@ function addCommands(
         return NotebookActions.disableOutputScrolling(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4720,7 +5215,8 @@ function addCommands(
         return NotebookActions.enableOutputScrolling(current.content);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     isToggled: args => {
       const current = getCurrent(tracker, shell, { ...args, activate: false });
       if (current) {
@@ -4805,7 +5301,8 @@ function addCommands(
         return NotebookActions.replaceSelection(current.content, text);
       }
     },
-    isEnabled,
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4827,7 +5324,9 @@ function addCommands(
         return NotebookActions.toggleCurrentHeadingCollapse(current.content);
       }
     },
-    isEnabled: isEnabledAndHeadingSelected,
+    isEnabled: () =>
+      isEnabledAndHeadingSelected() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4843,6 +5342,8 @@ function addCommands(
         return NotebookActions.collapseAllHeadings(current.content);
       }
     },
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4858,6 +5359,8 @@ function addCommands(
         return NotebookActions.expandAllHeadings(current.content);
       }
     },
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4905,6 +5408,8 @@ function addCommands(
         translator
       );
     },
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4927,6 +5432,8 @@ function addCommands(
         return await NotebookActions.accessPreviousHistory(current.content);
       }
     },
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -4942,6 +5449,8 @@ function addCommands(
         return await NotebookActions.accessNextHistory(current.content);
       }
     },
+    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
         type: 'object',
@@ -5234,6 +5743,13 @@ namespace Private {
       tracker.currentWidget !== null &&
       tracker.currentWidget === shell.currentWidget
     );
+  }
+
+  /**
+   * Whether the current notebook is view-only (declared read-only by the server).
+   */
+  export function isViewOnly(tracker: INotebookTracker): boolean {
+    return tracker.currentWidget?.viewOnly === true;
   }
 
   /**

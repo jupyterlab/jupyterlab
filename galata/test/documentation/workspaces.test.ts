@@ -31,11 +31,14 @@ test.describe('Workspaces sidebar', () => {
   });
 
   test('Workspaces context menu', async ({ page }) => {
-    // Load the test workspace
+    // Load the test workspace. `filebrowser.open` cannot be used because a
+    // workspace file does not open a document tab for the helper to wait on.
+    // eslint-disable-next-line jupyter/galata-prefer-filebrowser-helper
     await page.dblclick(
       `.jp-DirListing-item span:has-text("${testWorkspace}")`
     );
-    // This is flaky for unknown reasons - a timeout is used to retry sooner than later
+    // Opening the workspace file triggers a hard page navigation (full reload);
+    // allow extra time for JupyterLab to restart and the workspace treeitem to appear.
     await page
       .getByRole('treeitem', { name: workspaceName })
       .waitFor({ timeout: 15000 });
