@@ -292,7 +292,8 @@ export class RecentsCommandPalette extends CommandPalette {
    *
    * #### Notes
    * While the query is empty, the recent commands are pinned to the top,
-   * without a header. Otherwise, the default results are returned.
+   * without a header, and any other item for a pinned command is dropped
+   * from the results. Otherwise, the default results are returned.
    */
   protected search(query: string): CommandPalette.SearchResult[] {
     const recents = this._resolveRecentItems();
@@ -307,7 +308,9 @@ export class RecentsCommandPalette extends CommandPalette {
         indices: null
       })
     );
-    const others = this.items.filter(item => !recents.includes(item));
+    const others = this.items.filter(
+      item => !recents.some(recent => Private.isSameCommand(recent, item))
+    );
     return [...pinned, ...CommandPalette.search(others, query)];
   }
 

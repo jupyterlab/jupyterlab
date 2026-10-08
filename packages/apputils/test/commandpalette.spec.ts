@@ -361,6 +361,21 @@ describe('@jupyterlab/apputils', () => {
         ).toBe(1);
       });
 
+      it('should pin a command added to several categories only once', () => {
+        palette.addItem({ command: 'test:a', category: 'Two' });
+        MessageLoop.flush();
+        const count = () =>
+          palette.contentNode.querySelectorAll('[data-command="test:a"]')
+            .length;
+        expect(count()).toBe(2);
+
+        click(itemNode('test:a'));
+
+        const first = palette.contentNode.firstElementChild!;
+        expect(first.getAttribute('data-command')).toBe('test:a');
+        expect(count()).toBe(1);
+      });
+
       it('should move the most recently executed command to the front', () => {
         click(itemNode('test:b'));
         click(itemNode('test:a'));
