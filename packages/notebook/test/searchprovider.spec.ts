@@ -102,6 +102,54 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('cell selection changes', () => {
+      beforeEach(() => {
+        panel.model!.sharedModel.deleteCellRange(0, 2);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test' },
+          { cell_type: 'code', source: 'test' },
+          { cell_type: 'code', source: 'test' }
+        ]);
+        panel.content.activeCellIndex = 0;
+        panel.content.mode = 'command';
+      });
+
+      it.each([0, 1, 2])(
+        'should notify with the current match after collapsing selection to cell %i',
+        async cellIndex => {
+          await provider.startQuery(/test/, { selection: true });
+          const selected = signalToPromise(provider.filtersChanged);
+          panel.content.extendContiguousSelectionTo(2);
+          await selected;
+          expect(provider.matchesCount).toBe(3);
+
+          const observed: { current: number | null; count: number | null }[] =
+            [];
+          provider.filtersChanged.connect(() => {
+            observed.push({
+              current: provider.currentMatchIndex,
+              count: provider.matchesCount
+            });
+          });
+
+          // Prompt clicks collapse the selection before changing the active cell.
+          const collapsed = signalToPromise(provider.filtersChanged);
+          panel.content.deselectAll();
+          panel.content.activeCellIndex = cellIndex;
+          await collapsed;
+          await provider.cellChangeHandled;
+
+          expect(provider.currentMatchIndex).toBe(0);
+          expect(observed.at(-1)).toEqual({ current: 0, count: 1 });
+          expect(await provider.replaceCurrentMatch('replaced')).toBe(true);
+          expect(
+            panel.model!.cells.get(cellIndex).sharedModel.getSource()
+          ).toBe('replaced');
+          await provider.endQuery();
+        }
+      );
+    });
+
     describe('#highlightNext()', () => {
       it('should highlight next match', async () => {
         await provider.startQuery(/test/, undefined);

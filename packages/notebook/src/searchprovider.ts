@@ -774,6 +774,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     }
 
     await this._ensureCurrentMatch();
+    this._filtersChanged.emit();
   }
 
   /**
@@ -886,6 +887,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       clearTimeout(this._delayedActiveCellChangeHandler);
       this._delayedActiveCellChangeHandler = null;
     }
+    // Selection can change before the active cell changes in the same event.
+    await Promise.resolve();
     await this._updateCellSelection();
     if (this._currentProviderIndex === null) {
       // For consistency we set the first cell in selection as current provider.
@@ -895,6 +898,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this._currentProviderIndex = firstSelectedCellIndex;
     }
     await this._ensureCurrentMatch();
+    this._filtersChanged.emit();
   }
 
   private async _updateCellSelection() {
@@ -917,8 +921,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this._selectedCells = selectedCells;
       this._updateSelectionMode();
     }
-
-    this._filtersChanged.emit();
   }
 
   // used for testing only
