@@ -67,6 +67,20 @@ test.describe('Notebook Search', () => {
     await expect(page.locator('[placeholder="Find"]')).toHaveValue('1234');
   });
 
+  test('Typing in replace box', async ({ page }) => {
+    // Replace shares SearchInput with Find, but must not select() on each
+    // replaceText update or typed characters get overwritten.
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Replace"]');
+
+    await page.fill('[placeholder="Replace"]', '14');
+    await page.press('[placeholder="Replace"]', 'ArrowLeft');
+    await page.locator('[placeholder="Replace"]').pressSequentially('2');
+    await page.locator('[placeholder="Replace"]').pressSequentially('3');
+
+    await expect(page.locator('[placeholder="Replace"]')).toHaveValue('1234');
+  });
+
   test('Consecutive searches in the search box', async ({ page }) => {
     await page.keyboard.press('Control+f');
 
@@ -109,6 +123,24 @@ test.describe('Notebook Search', () => {
 
     const overlay = page.locator('.jp-DocumentSearch-overlay');
     expect(await overlay.screenshot()).toMatchSnapshot('multi-line-search.png');
+  });
+
+  test('Tab from Find focuses Replace when replace is shown', async ({
+    page
+  }) => {
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Replace"]');
+
+    await page.getByPlaceholder('Find').focus();
+    await page.keyboard.press('Tab');
+    await expect(page.getByPlaceholder('Replace')).toBeFocused();
+
+    await page.keyboard.press('Shift+Tab');
+    await expect(page.getByPlaceholder('Find')).toBeFocused();
+
+    await page.getByRole('button', { name: 'Replace All' }).focus();
+    await page.keyboard.press('Tab');
+    await expect(page.getByTitle('Match Case')).toBeFocused();
   });
 
   test('Populate search box with selected text', async ({ page }) => {
