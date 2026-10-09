@@ -235,6 +235,22 @@
       "description": "Whether to show hidden files. The server parameter `ContentsManager.allow_hidden` must be set to `True` to display hidden files.",
       "default": false
     },
+    "timestampFormat": {
+      "type": "string",
+      "title": "Timestamp format",
+      "description": "Display format for file timestamps",
+      "default": "relative",
+      "oneOf": [
+        {
+          "const": "relative",
+          "title": "Relative (e.g. 2 days ago)"
+        },
+        {
+          "const": "absolute",
+          "title": "Absolute (e.g. 2026-02-19 14:32)"
+        }
+      ]
+    },
     "showFileCheckboxes": {
       "type": "boolean",
       "title": "Use checkboxes to select items",
