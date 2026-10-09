@@ -13,18 +13,15 @@ import type {
 import { ILabShell, ILabStatus, JupyterLab } from '@jupyterlab/application';
 import type { ISessionContext } from '@jupyterlab/apputils';
 import {
-  addCommandToolbarButtonClass,
-  CommandToolbarButtonComponent,
+  CommandToolbarButton,
   Dialog,
   ICommandPalette,
   InputDialog,
   ISessionContextDialogs,
   Notification,
-  ReactWidget,
   SessionContextDialogs,
   showDialog,
-  showErrorMessage,
-  UseSignal
+  showErrorMessage
 } from '@jupyterlab/apputils';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PathExt, Time } from '@jupyterlab/coreutils';
@@ -57,7 +54,6 @@ import type { IDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import * as React from 'react';
 import { recentsManagerPlugin } from './recents';
 
 /**
@@ -649,20 +645,13 @@ export namespace ToolbarItems {
     commands: CommandRegistry,
     fileChanged: ISignal<any, Omit<Contents.IModel, 'content'>>
   ): Widget {
-    return addCommandToolbarButtonClass(
-      ReactWidget.create(
-        <UseSignal signal={fileChanged}>
-          {() => (
-            <CommandToolbarButtonComponent
-              commands={commands}
-              id={CommandIDs.save}
-              label={''}
-              args={{ toolbar: true }}
-            />
-          )}
-        </UseSignal>
-      )
-    );
+    return new CommandToolbarButton({
+      commands,
+      id: CommandIDs.save,
+      label: '',
+      args: { toolbar: true },
+      additionalSignals: [fileChanged]
+    });
   }
 }
 
@@ -1061,9 +1050,10 @@ function addCommands(
         if (!targetCheckpoint) {
           return;
         }
+        const body = new RevertConfirmWidget(targetCheckpoint, trans, type);
         return showDialog({
           title: trans.__('Revert %1 to checkpoint', type),
-          body: new RevertConfirmWidget(targetCheckpoint, trans, type),
+          body,
           buttons: [
             Dialog.cancelButton(),
             Dialog.warnButton({
@@ -1072,6 +1062,7 @@ function addCommands(
             })
           ]
         }).then(result => {
+          body.dispose();
           if (context.isDisposed) {
             return;
           }
@@ -1116,6 +1107,7 @@ function addCommands(
         return isWritable();
       }
     },
+    isVisible: args => !args.toolbar || isWritable(),
     describedBy: {
       args: {
         type: 'object',

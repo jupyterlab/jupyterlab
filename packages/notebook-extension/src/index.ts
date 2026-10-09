@@ -2433,19 +2433,6 @@ function activateNotebookHandler(
 
   const ft = app.docRegistry.getFileType('notebook');
 
-  function applyNotebookViewOnlyUI(
-    panel: NotebookPanel,
-    viewOnly: boolean
-  ): void {
-    const el = panel.toolbar.node.querySelector(
-      '[data-jp-item-name="save"]'
-    ) as HTMLElement | null;
-
-    if (el) {
-      el.style.display = viewOnly ? 'none' : '';
-    }
-  }
-
   factory.widgetCreated.connect((sender, widget) => {
     // If the notebook panel does not have an ID, assign it one.
     widget.id = widget.id || `notebook-${++id}`;
@@ -2468,13 +2455,11 @@ function activateNotebookHandler(
     // Add the notebook panel to the tracker.
     void tracker.add(widget);
 
-    applyNotebookViewOnlyUI(widget, widget.viewOnly);
     widget.content.viewOnlyChanged.connect((_, viewOnly) => {
-      applyNotebookViewOnlyUI(widget, viewOnly);
       // Toolbar buttons only re-check a command's `isEnabled`/`isVisible`
       // when notified for that specific id
       const skip = [CommandIDs.createNew, CommandIDs.createOutputView];
-      Object.values(CommandIDs)
+      Object.values({ ...CommandIDs, ...{ save: 'docmanager:save' } })
         .filter(id => !skip.includes(id) && commands.hasCommand(id))
         .forEach(id => commands.notifyCommandChanged(id));
     }, widget);
