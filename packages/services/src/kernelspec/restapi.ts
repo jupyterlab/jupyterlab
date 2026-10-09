@@ -18,15 +18,21 @@ const KERNELSPEC_SERVICE_URL = 'api/kernelspecs';
  *
  * @param settings - The optional server settings.
  *
+ * @param noTrackActivity - Whether to exclude this request from activity tracking.
+ *
  * @returns A promise that resolves with the kernel specs.
  *
  * #### Notes
  * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernelspecs).
  */
 export async function getSpecs(
-  settings: ServerConnection.ISettings = ServerConnection.makeSettings()
+  settings: ServerConnection.ISettings = ServerConnection.makeSettings(),
+  noTrackActivity = false
 ): Promise<ISpecModels> {
-  const url = URLExt.join(settings.baseUrl, KERNELSPEC_SERVICE_URL);
+  let url = URLExt.join(settings.baseUrl, KERNELSPEC_SERVICE_URL);
+  if (noTrackActivity) {
+    url += URLExt.objectToQueryString({ no_track_activity: '1' });
+  }
   const response = await ServerConnection.makeRequest(url, {}, settings);
   if (response.status !== 200) {
     const err = await ServerConnection.ResponseError.create(response);
@@ -62,13 +68,15 @@ export class KernelSpecAPIClient implements IKernelSpecAPIClient {
   /**
    * Fetch all of the kernel specs.
    *
+   * @param noTrackActivity - Whether to exclude this request from activity tracking.
+   *
    * @returns A promise that resolves with the kernel specs.
    *
    * #### Notes
    * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernelspecs).
    */
-  async get(): Promise<ISpecModels> {
-    return getSpecs(this.serverSettings);
+  async get(noTrackActivity = false): Promise<ISpecModels> {
+    return getSpecs(this.serverSettings, noTrackActivity);
   }
 }
 

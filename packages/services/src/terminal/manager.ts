@@ -217,7 +217,7 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
   protected async requestRunning(): Promise<void> {
     let models: Terminal.IModel[];
     try {
-      models = await this._terminalAPIClient.listRunning();
+      models = await this._terminalAPIClient.listRunning(true);
     } catch (err) {
       // Handle network errors, as well as cases where we are on a
       // JupyterHub and the server is not running. JupyterHub returns a

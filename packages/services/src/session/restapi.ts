@@ -18,11 +18,19 @@ export const SESSION_SERVICE_URL = 'api/sessions';
 
 /**
  * List the running sessions.
+ *
+ * @param settings - The server settings to use.
+ *
+ * @param noTrackActivity - Whether to exclude this request from activity tracking.
  */
 export async function listRunning(
-  settings: ServerConnection.ISettings = ServerConnection.makeSettings()
+  settings: ServerConnection.ISettings = ServerConnection.makeSettings(),
+  noTrackActivity = false
 ): Promise<Session.IModel[]> {
-  const url = URLExt.join(settings.baseUrl, SESSION_SERVICE_URL);
+  let url = URLExt.join(settings.baseUrl, SESSION_SERVICE_URL);
+  if (noTrackActivity) {
+    url += URLExt.objectToQueryString({ no_track_activity: '1' });
+  }
   const response = await ServerConnection.makeRequest(url, {}, settings);
   if (response.status !== 200) {
     const err = await ServerConnection.ResponseError.create(response);
@@ -170,6 +178,8 @@ export class SessionAPIClient implements ISessionAPIClient {
   /**
    * List the running sessions.
    *
+   * @param noTrackActivity - Whether to exclude this request from activity tracking.
+   *
    * @returns A promise that resolves with the list of running session models.
    *
    * #### Notes
@@ -177,8 +187,8 @@ export class SessionAPIClient implements ISessionAPIClient {
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
-  async listRunning(): Promise<Session.IModel[]> {
-    return listRunning(this.serverSettings);
+  async listRunning(noTrackActivity = false): Promise<Session.IModel[]> {
+    return listRunning(this.serverSettings, noTrackActivity);
   }
 
   /**

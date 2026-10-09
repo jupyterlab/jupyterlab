@@ -1078,9 +1078,11 @@ export interface IKernelAPIClient {
   /**
    * List the running kernels.
    *
+   * @param noTrackActivity - Whether to exclude this request from activity tracking.
+   *
    * @returns A promise that resolves with the list of running kernel models.
    */
-  listRunning(): Promise<IModel[]>;
+  listRunning(noTrackActivity?: boolean): Promise<IModel[]>;
 
   /**
    * Get a kernel model.
