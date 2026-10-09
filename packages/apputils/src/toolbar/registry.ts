@@ -151,7 +151,7 @@ export function createDefaultFactory(
           icon: tIcon
         } = toolbarItem;
         const id = tId ?? '';
-        const args = { toolbar: true, ...tArgs };
+        const args = { toolbar: true, widgetId: widget.id, ...tArgs };
         const icon = tIcon ? LabIcon.resolve({ icon: tIcon }) : undefined;
 
         const toolbar = (widget as IWidgetWithToolbar).toolbar;
