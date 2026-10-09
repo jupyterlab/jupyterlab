@@ -7,6 +7,8 @@ import { SemanticCommand } from '@jupyterlab/apputils';
 import type { TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { CommandRegistry } from '@lumino/commands';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import type { Widget } from '@lumino/widgets';
 import type { JupyterFrontEnd } from './frontend';
 
 export interface ISemanticCommandDefault {
@@ -166,26 +168,35 @@ export function createSemanticCommand(
   return {
     label: concatenateTexts('label'),
     caption: concatenateTexts('caption'),
-    isEnabled: () => {
-      const isEnabled = reduceAttribute('isEnabled');
+    isEnabled: args => {
+      const isEnabled = reduceAttribute('isEnabled', args);
       return isEnabled.length > 0
         ? !isEnabled.some(enabled => enabled === false)
         : (defaultValues.isEnabled ?? false);
     },
-    isToggled: () => {
-      const isToggled = reduceAttribute('isToggled');
+    isToggled: args => {
+      const isToggled = reduceAttribute('isToggled', args);
       return isToggled.length > 0
         ? isToggled.some(enabled => enabled === true)
         : (defaultValues.isToggled ?? false);
     },
-    isVisible: () => {
-      const isVisible = reduceAttribute('isVisible');
+    isVisible: args => {
+      let isVisible: unknown[];
+      if (args?.[SemanticCommand.WIDGET] || args?.['widgetId']) {
+        // When a specific widget is identified, bypass getActiveCommandId (which
+        // relies on global focus state) and let each command's own isVisible decide.
+        isVisible = commandList
+          .reduce<string[]>((acc, cmd) => acc.concat(cmd.ids), [])
+          .map(id => commands.isVisible(id, args as never));
+      } else {
+        isVisible = reduceAttribute('isVisible', args);
+      }
       return isVisible.length > 0
         ? !isVisible.some(visible => visible === false)
         : (defaultValues.isVisible ?? true);
     },
-    execute: async () => {
-      const widget = shell.currentWidget;
+    execute: async args => {
+      const widget = getWidget(args);
       const commandIds = commandList.map(cmd =>
         widget !== null ? cmd.getActiveCommandId(widget) : null
       );
@@ -196,8 +207,8 @@ export function createSemanticCommand(
       let result: unknown = null;
       if (toExecute.length > 0) {
         for (const commandId of toExecute) {
-          const args = { [SemanticCommand.WIDGET]: widget!.id };
-          result = await commands.execute(commandId!, args);
+          const widgetArgs = { [SemanticCommand.WIDGET]: widget!.id };
+          result = await commands.execute(commandId!, widgetArgs);
           if (typeof result === 'boolean' && result === false) {
             // If a command returns a boolean, assume it is the execution success status
             // So break if it is false.
@@ -211,17 +222,31 @@ export function createSemanticCommand(
     }
   };
 
+  function getWidget(args?: ReadonlyPartialJSONObject): Widget | null {
+    const widgetId =
+      (args?.[SemanticCommand.WIDGET] as string | undefined) ??
+      (args?.['widgetId'] as string | undefined);
+    if (widgetId) {
+      for (const widget of shell.widgets()) {
+        if (widget.id === widgetId) {
+          return widget;
+        }
+      }
+    }
+    return shell.currentWidget;
+  }
+
   function reduceAttribute(
-    attribute: keyof CommandRegistry.ICommandOptions
+    attribute: keyof CommandRegistry.ICommandOptions,
+    args?: ReadonlyPartialJSONObject
   ): unknown[] {
-    const widget = shell.currentWidget;
+    const widget = getWidget(args);
     const commandIds = commandList.map(cmd =>
       widget !== null ? cmd.getActiveCommandId(widget) : null
     );
-    const attributes = commandIds
+    return commandIds
       .filter(commandId => commandId !== null)
-      .map(commandId => commands[attribute](commandId!));
-    return attributes;
+      .map(commandId => commands[attribute](commandId!, args as never));
   }
 
   function concatenateTexts(
