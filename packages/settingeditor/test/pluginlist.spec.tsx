@@ -202,4 +202,65 @@ describe('@jupyterlab/settingeditor', () => {
       });
     });
   });
+
+  describe('PluginList', () => {
+    let connector: TestConnector;
+    let registry: TestRegistry;
+
+    const IDS = ['plugin-alpha', 'plugin-beta', 'plugin-gamma'];
+    const mkSchema = (title: string): ISettingRegistry.ISchema => ({
+      type: 'object',
+      title,
+      properties: { value: { type: 'string', default: 'x' } }
+    });
+
+    beforeAll(() => {
+      connector = new TestConnector();
+    });
+
+    beforeEach(async () => {
+      registry = new TestRegistry({ connector });
+      connector.schemas = {
+        [IDS[0]]: mkSchema('Alpha'),
+        [IDS[1]]: mkSchema('Beta'),
+        [IDS[2]]: mkSchema('Gamma')
+      };
+      await Promise.all(IDS.map(id => registry.load(id)));
+    });
+
+    afterEach(async () => {
+      connector.schemas = {};
+      await connector.clear();
+    });
+
+    describe('#getFilterString()', () => {
+      it('should match properties nested inside an object setting', () => {
+        const props = {
+          properties: {
+            breadcrumbs: {
+              title: 'Breadcrumbs',
+              type: 'object',
+              properties: {
+                minimumLeftItems: {
+                  title: 'Minimum breadcrumbs left items',
+                  type: 'number'
+                }
+              }
+            }
+          }
+        } as unknown as ISettingRegistry.IProperty;
+        const filter = (item: string) =>
+          item.toLowerCase().includes('left') ? {} : null;
+        const matches = PluginList.prototype.getFilterString.call(
+          PluginList.prototype,
+          filter,
+          props
+        );
+        expect(matches).toEqual([
+          'Minimum breadcrumbs left items',
+          'minimumLeftItems'
+        ]);
+      });
+    });
+  });
 });
