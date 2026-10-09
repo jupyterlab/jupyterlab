@@ -269,13 +269,66 @@ test(
 test(
   'Block math $$ on multilines',
   `
-{P:{MaBD:{maBD:$$}
+{MaBD:{maBD:$$}
 \\begin{aligned}
-\\dot{x} & = \\sigma(y-x) {Esc:\\\\}
-\\dot{y} & = \\rho x - y - xz {Esc:\\\\}
+\\dot{x} & = \\sigma(y-x) \\\\
+\\dot{y} & = \\rho x - y - xz \\\\
 \\dot{z} & = -\\beta z + xy
 \\end{aligned}
-{maBD:$$}}}
+{maBD:$$}}
+`
+);
+
+test(
+  'Block math $$ containing a setext = underline',
+  `
+{MaBD:{maBD:$$}
+\\text{This}
+=
+\\text{broken.}
+{maBD:$$}}
+`
+);
+
+test(
+  'Block math $$ containing a setext - underline',
+  `
+{MaBD:{maBD:$$}
+Title
+---
+{maBD:$$}}
+`
+);
+
+test(
+  'Block math $$ interrupting a paragraph',
+  `
+{P:Some text}
+{MaBD:{maBD:$$}
+a
+=
+{maBD:$$}}
+`
+);
+
+test(
+  'Unclosed block math $$ stops at a blank line',
+  `
+{MaBD:{maBD:$$}
+a}
+
+{SH1:b
+{h:=}}
+`
+);
+
+test(
+  'Block math $$ closing inline math opened in a paragraph',
+  `
+{P:The energy is {MaBD:{maBD:$$}
+E = mc^2
+{maBD:$$}}
+where {Em:{e:*}m{e:*}} is the mass.}
 `
 );
 
