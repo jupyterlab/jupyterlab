@@ -112,3 +112,39 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Drag-to-reorder handle shown on accordion section titles */
+.jp-SidePanel-dragHandle {
+  display: inline-flex;
+  align-items: center;
+  cursor: grab;
+  padding: 0 4px;
+  opacity: 0.4;
+  flex-shrink: 0;
+}
+
+.jp-SidePanel-dragHandle::before {
+  content: '⣿';
+  line-height: 1;
+}
+
+.jp-SidePanel-dragHandle:hover {
+  opacity: 0.8;
+}
+
+/* Drop position indicator line */
+.jp-SidePanel-dropIndicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--jp-brand-color1);
+  pointer-events: none;
+  z-index: 1000;
+  border-radius: 1px;
+}
+
+/* Dim sections while dragging */
+.jp-SidePanel-content.jp-mod-dragging .jp-AccordionPanel-title {
+  opacity: 0.6;
+}
