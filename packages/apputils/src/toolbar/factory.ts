@@ -249,7 +249,9 @@ async function setToolbarItems(
  * @param pluginId Settings plugin id
  * @param translator Translator
  * @param propertyId Toolbar definition key in the settings plugin
- * @returns List of toolbar widgets factory
+ * @returns List of toolbar widgets factory; its optional `commandArgs` are
+ *   added to the arguments of every item, e.g. to name the widget a command
+ *   targets.
  */
 export function createToolbarFactory(
   toolbarRegistry: IToolbarWidgetRegistry,
@@ -258,7 +260,10 @@ export function createToolbarFactory(
   pluginId: string,
   translator: ITranslator,
   propertyId: string = 'toolbar'
-): (widget: Widget) => IObservableList<ToolbarRegistry.IToolbarItem> {
+): (
+  widget: Widget,
+  commandArgs?: PartialJSONObject
+) => IObservableList<ToolbarRegistry.IToolbarItem> {
   const items = new ObservableList<ISettingRegistry.IToolbarItem>({
     itemCmp: (a, b) =>
       JSONExt.deepEqual(a as PartialJSONObject, b as PartialJSONObject)
@@ -279,7 +284,14 @@ export function createToolbarFactory(
     );
   });
 
-  return (widget: Widget) => {
+  return (widget: Widget, commandArgs?: PartialJSONObject) => {
+    const createWidget = (item: ToolbarRegistry.IWidget) =>
+      toolbarRegistry.createWidget(
+        factoryName,
+        widget,
+        commandArgs ? { ...item, args: { ...item.args, ...commandArgs } } : item
+      );
+
     const updateToolbar = (
       list: IObservableList<ToolbarRegistry.IWidget>,
       change: IObservableList.IChangedArgs<ToolbarRegistry.IWidget>
@@ -292,7 +304,7 @@ export function createToolbarFactory(
           change.newValues.forEach(item =>
             toolbar.push({
               name: item.name,
-              widget: toolbarRegistry.createWidget(factoryName, widget, item)
+              widget: createWidget(item)
             })
           );
           break;
@@ -303,7 +315,7 @@ export function createToolbarFactory(
           change.newValues.forEach(item =>
             toolbar.set(change.newIndex, {
               name: item.name,
-              widget: toolbarRegistry.createWidget(factoryName, widget, item)
+              widget: createWidget(item)
             })
           );
           break;
@@ -323,11 +335,7 @@ export function createToolbarFactory(
       if (itemIndex >= 0) {
         toolbar.set(itemIndex, {
           name: itemName,
-          widget: toolbarRegistry.createWidget(
-            factoryName,
-            widget,
-            items.get(itemIndex)
-          )
+          widget: createWidget(items.get(itemIndex))
         });
       }
     };
@@ -336,7 +344,7 @@ export function createToolbarFactory(
       values: Array.from(items).map(item => {
         return {
           name: item.name,
-          widget: toolbarRegistry.createWidget(factoryName, widget, item)
+          widget: createWidget(item)
         };
       })
     });

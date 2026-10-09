@@ -320,6 +320,109 @@ describe('@jupyterlab/apputils', () => {
       expect(items.get(2).name).toEqual('spacer');
     });
 
+    it('should add the command arguments to every item', async () => {
+      const factoryName = 'dummyFactory';
+      const pluginId = 'test-plugin:settings';
+      const defaultFactory = jest.fn().mockImplementation(() => new Widget());
+      const toolbarRegistry = new ToolbarWidgetRegistry({ defaultFactory });
+
+      const bar: ISettingRegistry.IPlugin = {
+        data: {
+          composite: {},
+          user: {}
+        },
+        id: pluginId,
+        raw: '{}',
+        schema: {
+          'jupyter.lab.toolbars': {
+            dummyFactory: [
+              {
+                name: 'insert',
+                command: 'notebook:insert-cell-below',
+                args: { kind: 'code', widgetId: 'from-settings' },
+                rank: 20
+              },
+              { name: 'cut', command: 'notebook:cut-cell', rank: 21 }
+            ]
+          },
+          'jupyter.lab.transform': true,
+          properties: {
+            toolbar: {
+              type: 'array'
+            }
+          },
+          type: 'object'
+        },
+        version: 'test'
+      };
+
+      const connector: IDataConnector<
+        ISettingRegistry.IPlugin,
+        string,
+        string,
+        string
+      > = {
+        fetch: jest.fn().mockImplementation((id: string) => {
+          switch (id) {
+            case bar.id:
+              return bar;
+            default:
+              return {};
+          }
+        }),
+        list: jest.fn(),
+        save: jest.fn(),
+        remove: jest.fn()
+      };
+
+      const settingRegistry = new SettingRegistry({
+        connector
+      });
+
+      const translator: ITranslator = {
+        languageCode: DEFAULT_LANGUAGE_CODE,
+        load: jest.fn()
+      };
+
+      const factory = createToolbarFactory(
+        toolbarRegistry,
+        settingRegistry,
+        factoryName,
+        pluginId,
+        translator
+      );
+
+      const argsOf = (widget: Widget, name: string) =>
+        defaultFactory.mock.calls.find(
+          ([, w, item]: [string, Widget, ToolbarRegistry.IWidget]) =>
+            w === widget && item.name === name
+        )[2].args;
+
+      // Created before the settings load: items arrive as list changes.
+      const early = new Widget();
+      factory(early, { widgetId: 'notebook-0' });
+
+      await settingRegistry.load(bar.id);
+
+      const withArgs = new Widget();
+      factory(withArgs, { widgetId: 'notebook-1' });
+      const withoutArgs = new Widget();
+      factory(withoutArgs);
+
+      expect(argsOf(early, 'cut')).toEqual({ widgetId: 'notebook-0' });
+      // The caller's arguments win over those from the settings.
+      expect(argsOf(withArgs, 'insert')).toEqual({
+        kind: 'code',
+        widgetId: 'notebook-1'
+      });
+      expect(argsOf(withArgs, 'cut')).toEqual({ widgetId: 'notebook-1' });
+      expect(argsOf(withoutArgs, 'insert')).toEqual({
+        kind: 'code',
+        widgetId: 'from-settings'
+      });
+      expect(argsOf(withoutArgs, 'cut')).toBeUndefined();
+    });
+
     it('should update the toolbar items with late settings load', async () => {
       const factoryName = 'dummyFactory';
       const pluginId = 'test-plugin:settings';

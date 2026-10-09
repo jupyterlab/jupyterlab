@@ -48,4 +48,93 @@ test.describe('test readonly status', () => {
 
     expect(await toast.screenshot()).toMatchSnapshot(imageName);
   });
+
+  test('toolbars follow their own notebook', async ({ page, tmpPath }) => {
+    const notebook = JSON.stringify({
+      cells: [{ cell_type: 'code', metadata: {}, source: '1', outputs: [] }],
+      metadata: {},
+      nbformat: 4,
+      nbformat_minor: 5
+    });
+    await page.contents.uploadContent(
+      notebook,
+      'text',
+      `${tmpPath}/writable.ipynb`
+    );
+    await page.contents.uploadContent(
+      notebook,
+      'text',
+      `${tmpPath}/readonly.ipynb`
+    );
+    await page.contents.uploadContent('text', 'text', `${tmpPath}/other.txt`);
+
+    // Only `readonly.ipynb` is reported as not writable.
+    await page.route(/\/api\/contents\/.*readonly\.ipynb/, async route => {
+      if (route.request().method() !== 'GET') {
+        return route.fallback();
+      }
+      const response = await route.fetch();
+      const json = await response.json();
+      await route.fulfill({ response, json: { ...json, writable: false } });
+    });
+
+    // Open the notebooks side by side, and a text file below them.
+    await page.evaluate(async tmpPath => {
+      const open = (path: string, mode?: string, factory?: string) =>
+        window.jupyterapp.commands.execute('docmanager:open', {
+          path: `${tmpPath}/${path}`,
+          factory,
+          kernelPreference: { shouldStart: false, shouldReuse: false },
+          options: mode ? { mode } : undefined
+        });
+      await open('writable.ipynb', undefined, 'Notebook');
+      await open('readonly.ipynb', 'split-right', 'Notebook');
+      await open('other.txt', 'split-bottom');
+    }, tmpPath);
+
+    const panel = async (name: string) => {
+      const id = await page.evaluate(name => {
+        for (const widget of window.jupyterapp.shell.widgets('main')) {
+          if ((widget as any).context?.path.endsWith(name)) {
+            return widget.id;
+          }
+        }
+        return null;
+      }, name);
+      return page.locator(`[id="${id}"]`);
+    };
+    const readonly = await panel('/readonly.ipynb');
+    const writable = await panel('/writable.ipynb');
+    await expect(
+      readonly.locator('[data-jp-item-name="read-only-indicator"]')
+    ).toBeVisible();
+
+    const check = async () => {
+      for (const name of ['insert', 'cut', 'run', 'restart']) {
+        await expect(
+          writable.locator(
+            `.jp-NotebookPanel-toolbar [data-jp-item-name="${name}"]`
+          )
+        ).toBeVisible();
+        await expect(
+          readonly.locator(
+            `.jp-NotebookPanel-toolbar [data-jp-item-name="${name}"]`
+          )
+        ).toBeHidden();
+      }
+      // The cell toolbar of the writable notebook keeps its buttons too (the
+      // toolbar itself only shows in the active notebook).
+      await expect(
+        writable.locator(
+          '.jp-cell-toolbar [data-jp-item-name="insert-cell-below"]'
+        )
+      ).not.toHaveClass(/lm-mod-hidden/);
+    };
+
+    // Focus each notebook in turn, then a document that is not a notebook.
+    for (const name of ['readonly.ipynb', 'writable.ipynb', 'other.txt']) {
+      await page.activity.activateTab(name);
+      await check();
+    }
+  });
 });
