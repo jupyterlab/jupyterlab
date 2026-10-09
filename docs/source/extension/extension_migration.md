@@ -18,6 +18,12 @@
 
 ### API updates
 
+- `@jupyterlab/mathjax-extension` now uses MathJax 4.1 through `@mathjax/src`
+  and `@mathjax/mathjax-tex-font`. The `mathDocument()` method returns a MathJax 4
+  document. Extensions that use it directly should use the promise-based rendering
+  methods and follow the [MathJax 4 migration guide](https://docs.mathjax.org/en/latest/upgrading/whats-new-4.0.html).
+  JupyterLab continues to bundle the TeX font and the previously enabled TeX packages.
+
 - Xterm.js, used by `@jupyterlab/terminal`, was upgraded from 5.x to 6.x, along with the
   `@xterm/addon-fit`, `@xterm/addon-search`, `@xterm/addon-web-links` and `@xterm/addon-webgl`
   addons. Notable changes for extensions that interact with the terminal:

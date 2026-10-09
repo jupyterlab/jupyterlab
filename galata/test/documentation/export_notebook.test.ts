@@ -25,9 +25,8 @@ test.describe('Export Notebook', () => {
       '.lm-Menu ul[role="menu"] >> text=Save and Export Notebook As'
     );
 
-    // Wait for Latex renderer
-    // note: requires the a11y/assistive-mml MathJax extension
-    await page.locator('text=(σ, β, ρ)').waitFor();
+    // Wait for the Lorenz equations to be typeset.
+    await page.locator('mjx-container[display="true"]').waitFor();
 
     expect(
       await page.screenshot({ clip: { y: 5, x: 0, width: 700, height: 700 } })
@@ -60,8 +59,7 @@ test.describe('Export Notebook', () => {
     );
     await slideType.selectOption({ label: 'Slide' });
 
-    // Wait for Latex renderer
-    await page.getByText('(σ, β, ρ)').waitFor();
+    await page.locator('mjx-container[display="true"]').waitFor();
 
     const slideTypeBox = await slideType.boundingBox();
     if (!slideTypeBox) {
