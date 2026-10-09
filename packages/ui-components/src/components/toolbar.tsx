@@ -1135,7 +1135,7 @@ export class CommandToolbarButton extends ReactWidget {
     addCommandToolbarButtonClass(this);
     this.setCommandAttributes(commands, id, args);
     commands.commandChanged.connect((_, change) => {
-      if (change.id === props.id) {
+      if (change.id === props.id || change.type === 'many-changed') {
         this.setCommandAttributes(commands, id, args);
       }
     }, this);
