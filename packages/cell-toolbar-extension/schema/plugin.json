@@ -5,6 +5,11 @@
   "jupyter.lab.toolbars": {
     "Cell": [
       {
+        "name": "non-editable-cell",
+        "command": "notebook:not-editable",
+        "icon": "ui-components:lock"
+      },
+      {
         "name": "duplicate-cell",
         "command": "notebook:duplicate-below"
       },
