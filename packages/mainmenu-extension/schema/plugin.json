@@ -294,7 +294,7 @@
     },
     {
       "command": "filemenu:close-and-cleanup",
-      "keys": ["Ctrl Shift Q"],
+      "keys": [""],
       "selector": ".jp-Activity"
     },
     {
