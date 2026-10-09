@@ -54,6 +54,7 @@ import { displayShortcuts } from './shortcuts';
 import type { Kernel } from '@jupyterlab/services';
 import { IKernelManager } from '@jupyterlab/services';
 import { moveSectionsPlugin } from './movesectionsplugin';
+import { accessibleAnnouncerPlugin } from './accessibleAnnouncer';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -928,6 +929,7 @@ const movableSectionRegistry: JupyterFrontEndPlugin<IMovableSectionRegistry> = {
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   kernelSettings,
+  accessibleAnnouncerPlugin,
   announcements,
   kernelStatus,
   licensesClient,
