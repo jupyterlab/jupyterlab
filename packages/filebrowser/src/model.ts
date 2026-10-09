@@ -578,7 +578,7 @@ export class FileBrowserModel implements IDisposable {
         currentModel = await uploadInner(file.slice(start, end), chunk);
       } catch (err) {
         ArrayExt.removeFirstWhere(this._uploads, uploadIndex => {
-          return file.name === uploadIndex.path;
+          return path === uploadIndex.path;
         });
 
         this._uploadChanged.emit({

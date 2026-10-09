@@ -575,6 +575,25 @@ describe('filebrowser/model', () => {
           await uploaded;
         });
 
+        it('should stop tracking a failed upload in a subdirectory', async () => {
+          await model.cd(subDir);
+          const error = new Error('save failed');
+          const save = jest
+            .spyOn(model.manager.services.contents, 'save')
+            .mockRejectedValueOnce(error);
+          const file = new File(
+            [new ArrayBuffer(CHUNK_SIZE + 1)],
+            UUID.uuid4() + '.txt'
+          );
+
+          try {
+            await expect(model.upload(file)).rejects.toBe(error);
+            expect(Array.from(model.uploads())).toEqual([]);
+          } finally {
+            save.mockRestore();
+          }
+        });
+
         afterAll(() => {
           PageConfig.setOption('notebookVersion', prevNotebookVersion);
         });
