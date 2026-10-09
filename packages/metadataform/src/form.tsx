@@ -6,6 +6,7 @@
  */
 
 import { ReactWidget } from '@jupyterlab/apputils';
+import type { NotebookTools } from '@jupyterlab/notebook';
 import { FormComponent } from '@jupyterlab/ui-components';
 import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { PromiseDelegate } from '@lumino/coreutils';
@@ -27,6 +28,10 @@ export class FormWidget extends ReactWidget {
     super();
     this.addClass('jp-FormWidget');
     this._props = props;
+    // The cell this form is built for. Captured at construction time so a
+    // stale form can be recognized later.
+    this._sourceCell =
+      props.metadataFormWidget.notebookTools?.activeCell ?? null;
     if (Private.getValidator() === null) {
       void Private.ensureValidator().then(() => {
         if (!this.isDisposed) {
@@ -47,7 +52,17 @@ export class FormWidget extends ReactWidget {
     }
     const formContext = {
       defaultFormData: this._props.settings.default(),
-      updateMetadata: this._props.metadataFormWidget.updateMetadata
+      // Bind custom-field updates to the cell this form was built for,
+      // the same guard the onChange path below applies.
+      updateMetadata: (
+        formData: ReadonlyPartialJSONObject,
+        reload?: boolean
+      ) =>
+        this._props.metadataFormWidget.updateMetadata(
+          formData,
+          reload,
+          this._sourceCell
+        )
     };
     return (
       <FormComponent
@@ -59,7 +74,11 @@ export class FormWidget extends ReactWidget {
         liveValidate
         idPrefix={`jp-MetadataForm-${this._props.pluginId}`}
         onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
-          this._props.metadataFormWidget.updateMetadata(e.formData || {});
+          this._props.metadataFormWidget.updateMetadata(
+            e.formData || {},
+            undefined,
+            this._sourceCell
+          );
         }}
         compact={true}
         showModifiedFromDefault={this._props.showModified}
@@ -70,6 +89,7 @@ export class FormWidget extends ReactWidget {
   }
 
   private _props: MetadataForm.IProps;
+  private _sourceCell: NotebookTools['activeCell'] = null;
 }
 
 /**
