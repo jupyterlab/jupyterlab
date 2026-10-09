@@ -1,0 +1,300 @@
+name: Close likely duplicate pull requests
+
+#####
+# This workflow is triggered by pull_request_target event.
+# Never checkout the PR and run ANY local code on it.
+#####
+
+on:
+  # zizmor: ignore[dangerous-triggers] -- pull_request_target is required to close duplicate PRs from forks; this workflow never checks out or executes PR code
+  pull_request_target:
+    types: [opened, reopened, edited, ready_for_review]
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  close-duplicate-prs:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: close-duplicate-prs-${{ github.event.pull_request.number }}
+    steps:
+      - name: Detect and close likely duplicate pull requests
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const MAX_ACCOUNT_AGE_DAYS = 365;
+            const MAX_EXISTING_PR_AGE_DAYS = 90;
+            const SAFE_AUTHOR_ASSOCIATIONS = new Set([
+              'COLLABORATOR',
+              'CONTRIBUTOR',
+              'MEMBER',
+              'OWNER'
+            ]);
+
+            const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
+            const pr = context.payload.pull_request;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const currentRepository = `${owner}/${repo}`.toLowerCase();
+            const prBody = pr?.body ?? '';
+            const prBodyLower = prBody.toLowerCase();
+
+            if (!pr || !pr.user?.login) {
+              console.warn('Missing pull request payload details; skipping.');
+              return;
+            }
+
+            if (pr.draft) {
+              console.log(`Skipping PR #${pr.number}: draft pull request.`);
+              return;
+            }
+
+            const authorAssociation = pr.author_association ?? 'NONE';
+            if (SAFE_AUTHOR_ASSOCIATIONS.has(authorAssociation)) {
+              console.log(
+                `Skipping PR #${pr.number}: author association ${authorAssociation} is exempt.`
+              );
+              return;
+            }
+
+            if (context.payload.action === 'reopened' && context.payload.sender?.login) {
+              try {
+                const senderAssociation = context.payload.sender.author_association;
+                const timelineEvents = await github.paginate(
+                  github.rest.issues.listEventsForTimeline,
+                  {
+                    owner,
+                    repo,
+                    issue_number: pr.number
+                  }
+                );
+
+                const reopenedEvent = timelineEvents
+                  .filter(
+                    event =>
+                      event.event === 'reopened' &&
+                      event.actor?.login === context.payload.sender.login
+                  )
+                  .pop();
+
+                const reopenerAssociation =
+                  senderAssociation ?? reopenedEvent?.author_association ?? 'NONE';
+                if (SAFE_AUTHOR_ASSOCIATIONS.has(reopenerAssociation)) {
+                  console.log(
+                    `Skipping PR #${pr.number}: reopened by @${context.payload.sender.login} with author association ${reopenerAssociation}.`
+                  );
+                  return;
+                }
+              } catch (error) {
+                console.warn(
+                  `Could not verify reopener association for @${context.payload.sender.login}; skipping duplicate auto-close.`
+                );
+                console.warn(String(error));
+                return;
+              }
+            }
+
+            const { data: author } = await github.rest.users.getByUsername({
+              username: pr.user.login
+            });
+
+            const authorCreatedAt = Date.parse(author.created_at);
+            if (!Number.isFinite(authorCreatedAt)) {
+              console.warn(
+                `Could not parse creation date for @${pr.user.login}; skipping duplicate auto-close.`
+              );
+              return;
+            }
+
+            const now = Date.now();
+            const accountAgeDays = Math.floor((now - authorCreatedAt) / MILLISECONDS_PER_DAY);
+            if (accountAgeDays > MAX_ACCOUNT_AGE_DAYS) {
+              console.log(
+                `Skipping PR #${pr.number}: account age is ${accountAgeDays} days (> ${MAX_ACCOUNT_AGE_DAYS}).`
+              );
+              return;
+            }
+
+            const recentThreshold = now - MAX_EXISTING_PR_AGE_DAYS * MILLISECONDS_PER_DAY;
+            const duplicateCandidates = [];
+            let linkedIssueNumbers = [];
+
+            try {
+              const linkedIssuesResult = await github.graphql(
+                `
+                  query($owner: String!, $repo: String!, $prNumber: Int!) {
+                    repository(owner: $owner, name: $repo) {
+                      pullRequest(number: $prNumber) {
+                        closingIssuesReferences(first: 20) {
+                          nodes {
+                            number
+                            repository {
+                              nameWithOwner
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                `,
+                {
+                  owner,
+                  repo,
+                  prNumber: pr.number
+                }
+              );
+
+              const linkedIssues =
+                linkedIssuesResult.repository.pullRequest?.closingIssuesReferences.nodes ?? [];
+              linkedIssueNumbers = [
+                ...new Set(
+                  linkedIssues
+                    .filter(
+                      issue =>
+                        issue.repository?.nameWithOwner?.toLowerCase() === currentRepository
+                    )
+                    .map(issue => issue.number)
+                )
+              ];
+            } catch (error) {
+              console.warn(
+                `Failed to resolve linked issues for PR #${pr.number}; skipping duplicate auto-close.`
+              );
+              console.warn(String(error));
+              return;
+            }
+
+            if (linkedIssueNumbers.length === 0) {
+              console.log(
+                `Skipping PR #${pr.number}: no linked issue references were found.`
+              );
+              return;
+            }
+
+            for (const issueNumber of linkedIssueNumbers) {
+              try {
+                const duplicateSearchResult = await github.graphql(
+                  `
+                    query($owner: String!, $repo: String!, $issueNumber: Int!) {
+                      repository(owner: $owner, name: $repo) {
+                        issue(number: $issueNumber) {
+                          closedByPullRequestsReferences(first: 50) {
+                            nodes {
+                              number
+                              url
+                              createdAt
+                              state
+                            }
+                          }
+                        }
+                      }
+                    }
+                  `,
+                  {
+                    owner,
+                    repo,
+                    issueNumber
+                  }
+                );
+
+                const linkedPrs =
+                  duplicateSearchResult.repository.issue?.closedByPullRequestsReferences.nodes ??
+                  [];
+
+                for (const linkedPr of linkedPrs) {
+                  if (linkedPr.number === pr.number) {
+                    continue;
+                  }
+
+                  if (linkedPr.state !== 'OPEN') {
+                    continue;
+                  }
+
+                  const linkedPrCreatedAt = Date.parse(linkedPr.createdAt);
+                  if (
+                    !Number.isFinite(linkedPrCreatedAt) ||
+                    linkedPrCreatedAt < recentThreshold
+                  ) {
+                    continue;
+                  }
+
+                  duplicateCandidates.push({
+                    issueNumber,
+                    prNumber: linkedPr.number,
+                    url: linkedPr.url,
+                    createdAt: linkedPr.createdAt
+                  });
+                }
+              } catch (error) {
+                console.warn(
+                  `Failed while searching duplicate PRs for issue #${issueNumber}; continuing.`
+                );
+                console.warn(String(error));
+              }
+            }
+
+            if (duplicateCandidates.length === 0) {
+              console.log(
+                `No recent duplicate candidates found for PR #${pr.number}; leaving it open.`
+              );
+              return;
+            }
+
+            const referencedDuplicate = duplicateCandidates.find(candidate => {
+              const prNumberReference = new RegExp(
+                `(?:^|[^\\w/])#${candidate.prNumber}(?:\\b|$)`
+              );
+              const fullUrlReference = candidate.url
+                ? prBodyLower.includes(candidate.url.toLowerCase())
+                : false;
+              const shortRepoReference = prBodyLower.includes(
+                `${currentRepository}#${candidate.prNumber}`
+              );
+              return (
+                prNumberReference.test(prBody) || fullUrlReference || shortRepoReference
+              );
+            });
+
+            if (referencedDuplicate) {
+              console.log(
+                `Skipping PR #${pr.number}: body references existing PR #${referencedDuplicate.prNumber}, likely intentional follow-up work.`
+              );
+              return;
+            }
+
+            duplicateCandidates.sort(
+              (left, right) => Date.parse(left.createdAt) - Date.parse(right.createdAt)
+            );
+            const duplicate = duplicateCandidates[0];
+
+            const commentBody = [
+              `Thanks for the contribution, @${pr.user.login}.`,
+              '',
+              `This pull request links to issue #${duplicate.issueNumber}, which already has an open pull request: #${duplicate.prNumber} (${duplicate.url}).`,
+              '',
+              'To keep review load manageable, we keep one active pull request per issue for first-time/new contributors.',
+              `Because your account is at most ${MAX_ACCOUNT_AGE_DAYS} days old and the existing linked pull request is recent, this pull request is being closed as a likely duplicate.`,
+              '',
+              'If you think this was closed in error, please leave a comment and a maintainer can take another look.'
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: pr.number,
+              body: commentBody
+            });
+
+            await github.rest.pulls.update({
+              owner,
+              repo,
+              pull_number: pr.number,
+              state: 'closed'
+            });
+
+            console.log(
+              `Closed PR #${pr.number} as likely duplicate of #${duplicate.prNumber} for issue #${duplicate.issueNumber}.`
+            );
