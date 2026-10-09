@@ -31,13 +31,15 @@
       "title": "Show cell toolbar",
       "description": "Show a toolbar inside the active cell, if there is enough room for one",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "tags": ["%UI%"]
     },
     "askCellDeleteConfirmation": {
       "title": "Delete confirmation",
       "description": "Whether to ask for confirmation when deleting a cell via the toolbar.",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "tags": ["%UI%"]
     },
     "toolbar": {
       "title": "List of toolbar items",
@@ -46,7 +48,8 @@
       "items": {
         "$ref": "#/definitions/toolbarItem"
       },
-      "default": []
+      "default": [],
+      "tags": ["%UI%"]
     }
   },
   "additionalProperties": false,

@@ -50,7 +50,8 @@
       "type": "boolean",
       "title": "Status Bar Item flash",
       "description": "Whether to flash on new log message or not",
-      "default": true
+      "default": true,
+      "tags": ["%UI%"]
     },
     "defaultLogLevel": {
       "type": "string",
@@ -72,7 +73,8 @@
         "$ref": "#/definitions/toolbarItem"
       },
       "type": "array",
-      "default": []
+      "default": [],
+      "tags": ["%UI%"]
     }
   },
   "additionalProperties": false,
