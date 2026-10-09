@@ -490,7 +490,8 @@ export class FileBrowserModel implements IDisposable {
       buttons: [
         Dialog.cancelButton({ label: this._trans.__('Cancel') }),
         Dialog.warnButton({ label: this._trans.__('Upload') })
-      ]
+      ],
+      skipQueue: true
     });
     return button.accept;
   }

@@ -98,6 +98,7 @@ export class Dialog<T> extends Widget {
     this._host = normalized.host;
     this._defaultButton = normalized.defaultButton;
     this._buttons = normalized.buttons;
+    this._skipQueue = normalized.skipQueue;
     this._hasClose = normalized.hasClose;
     this._buttonNodes = this._buttons.map(b => renderer.createButtonNode(b));
     this._checkboxNode = null;
@@ -179,6 +180,13 @@ export class Dialog<T> extends Widget {
       return this._promise.promise;
     }
     const promise = (this._promise = new PromiseDelegate<Dialog.IResult<T>>());
+
+    if (this._skipQueue) {
+      Private.launchQueue.push(this._promise.promise);
+      Widget.attach(this, this._host);
+      return promise.promise;
+    }
+
     const promises = Promise.all(Private.launchQueue);
     Private.launchQueue.push(this._promise.promise);
     return promises.then(() => {
@@ -269,6 +277,7 @@ export class Dialog<T> extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     const node = this.node;
+    Private.openDialogs.push(this);
     node.addEventListener('keydown', this, true);
     node.addEventListener('contextmenu', this, true);
     node.addEventListener('click', this, true);
@@ -312,6 +321,7 @@ export class Dialog<T> extends Widget {
    */
   protected onAfterDetach(msg: Message): void {
     const node = this.node;
+    ArrayExt.removeFirstOf(Private.openDialogs, this);
     node.removeEventListener('keydown', this, true);
     node.removeEventListener('contextmenu', this, true);
     node.removeEventListener('click', this, true);
@@ -469,6 +479,10 @@ export class Dialog<T> extends Widget {
    * @param event - The DOM event sent to the widget
    */
   protected _evtFocus(event: FocusEvent): void {
+    // Only the most recently attached dialog traps the focus.
+    if (Private.openDialogs[Private.openDialogs.length - 1] !== this) {
+      return;
+    }
     const target = event.target as HTMLElement;
     if (!this.node.contains(target as HTMLElement)) {
       event.stopPropagation();
@@ -541,6 +555,7 @@ export class Dialog<T> extends Widget {
   private _promise: PromiseDelegate<Dialog.IResult<T>> | null;
   private _defaultButton: number;
   private _host: HTMLElement;
+  private _skipQueue: boolean;
   private _hasClose: boolean;
   private _body: Dialog.Body<T>;
   private _lastMouseDownInDialog: boolean;
@@ -710,6 +725,13 @@ export namespace Dialog {
      * focus.
      */
     focusNodeSelector: string;
+
+    /**
+     * Whether the dialog should bypass the launch queue and attach immediately.
+     * Useful for nested dialogs (such as confirmation prompts) that must appear
+     * on top of an already open dialog.
+     */
+    skipQueue: boolean;
 
     /**
      * When "false", disallows user from dismissing the dialog by clicking outside it
@@ -1138,6 +1160,11 @@ namespace Private {
    */
   export const launchQueue: Promise<Dialog.IResult<any>>[] = [];
 
+  /**
+   * The attached dialogs, in the order they were attached.
+   */
+  export const openDialogs: Dialog<any>[] = [];
+
   export const errorMessagePromiseCache: Map<string, Promise<void>> = new Map();
 
   /**
@@ -1163,6 +1190,7 @@ namespace Private {
       defaultButton: options.defaultButton ?? buttons.length - 1,
       renderer: options.renderer ?? Dialog.defaultRenderer,
       focusNodeSelector: options.focusNodeSelector ?? '',
+      skipQueue: options.skipQueue ?? false,
       hasClose: options.hasClose ?? true
     };
   }
