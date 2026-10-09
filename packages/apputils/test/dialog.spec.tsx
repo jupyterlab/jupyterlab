@@ -665,6 +665,86 @@ describe('@jupyterlab/apputils', () => {
       document.body.removeChild(node2);
     });
 
+    it('should keep trapping focus in an open dialog while another is queued behind it', async () => {
+      const host = document.createElement('div');
+      document.body.appendChild(host);
+      const outside = document.createElement('div');
+      outside.tabIndex = 0;
+      document.body.appendChild(outside);
+
+      const prompt1 = showDialog({ title: 'first', host });
+      await waitForDialog(host);
+
+      // Queued behind the first dialog; not yet attached.
+      const prompt2 = showDialog({ title: 'second', host });
+
+      expect(host.getElementsByClassName('jp-Dialog').length).toBe(1);
+
+      outside.focus();
+      simulate(outside, 'focus');
+      expect(document.activeElement).not.toBe(outside);
+      expect(
+        host
+          .getElementsByClassName('jp-Dialog')[0]
+          .contains(document.activeElement)
+      ).toBe(true);
+
+      await acceptDialog(host);
+      await prompt1;
+      await waitForDialog(host);
+      await acceptDialog(host);
+      await prompt2;
+
+      document.body.removeChild(outside);
+      document.body.removeChild(host);
+    });
+
+    it('should restore the focus trap on the remaining dialog after a skipQueue confirmation closes, even while another dialog is queued', async () => {
+      const host = document.createElement('div');
+      document.body.appendChild(host);
+      const outside = document.createElement('div');
+      outside.tabIndex = 0;
+      document.body.appendChild(outside);
+
+      const prompt1 = showDialog({ title: 'picker', host });
+      await waitForDialog(host);
+
+      const prompt2 = showDialog({ title: 'confirm', host, skipQueue: true });
+      await waitForDialog(host);
+
+      // Queued behind the picker; not yet attached.
+      const prompt3 = showDialog({ title: 'third', host });
+
+      let dialogNodes = host.getElementsByClassName('jp-Dialog');
+      expect(dialogNodes.length).toBe(2);
+      const confirmNode = dialogNodes[1] as HTMLElement;
+
+      outside.focus();
+      simulate(outside, 'focus');
+      expect(confirmNode.contains(document.activeElement)).toBe(true);
+
+      // Escape dismisses only the topmost (confirmation) dialog.
+      simulate(confirmNode, 'keydown', { key: 'Escape' });
+      await prompt2;
+
+      dialogNodes = host.getElementsByClassName('jp-Dialog');
+      expect(dialogNodes.length).toBe(1);
+      const pickerNode = dialogNodes[0] as HTMLElement;
+
+      outside.focus();
+      simulate(outside, 'focus');
+      expect(pickerNode.contains(document.activeElement)).toBe(true);
+
+      await acceptDialog(host);
+      await prompt1;
+      await waitForDialog(host);
+      await acceptDialog(host);
+      await prompt3;
+
+      document.body.removeChild(outside);
+      document.body.removeChild(host);
+    });
+
     it('should accept a virtualdom body', async () => {
       const body = (
         <div>

@@ -277,6 +277,7 @@ export class Dialog<T> extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     const node = this.node;
+    Private.openDialogs.push(this);
     node.addEventListener('keydown', this, true);
     node.addEventListener('contextmenu', this, true);
     node.addEventListener('click', this, true);
@@ -320,6 +321,7 @@ export class Dialog<T> extends Widget {
    */
   protected onAfterDetach(msg: Message): void {
     const node = this.node;
+    ArrayExt.removeFirstOf(Private.openDialogs, this);
     node.removeEventListener('keydown', this, true);
     node.removeEventListener('contextmenu', this, true);
     node.removeEventListener('click', this, true);
@@ -477,11 +479,9 @@ export class Dialog<T> extends Widget {
    * @param event - The DOM event sent to the widget
    */
   protected _evtFocus(event: FocusEvent): void {
-    if (this._promise) {
-      const activePromise = Private.launchQueue[Private.launchQueue.length - 1];
-      if (activePromise && activePromise !== this._promise.promise) {
-        return;
-      }
+    // Only the most recently attached dialog traps the focus.
+    if (Private.openDialogs[Private.openDialogs.length - 1] !== this) {
+      return;
     }
     const target = event.target as HTMLElement;
     if (!this.node.contains(target as HTMLElement)) {
@@ -1159,6 +1159,11 @@ namespace Private {
    * The queue for launching dialogs.
    */
   export const launchQueue: Promise<Dialog.IResult<any>>[] = [];
+
+  /**
+   * The attached dialogs, in the order they were attached.
+   */
+  export const openDialogs: Dialog<any>[] = [];
 
   export const errorMessagePromiseCache: Map<string, Promise<void>> = new Map();
 
