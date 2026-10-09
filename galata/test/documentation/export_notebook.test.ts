@@ -20,10 +20,7 @@ test.describe('Export Notebook', () => {
 
     await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
 
-    await page.click('text=File');
-    await page.click(
-      '.lm-Menu ul[role="menu"] >> text=Save and Export Notebook As'
-    );
+    await page.menu.openLocator('File>Save and Export Notebook As');
 
     // Wait for Latex renderer
     // note: requires the a11y/assistive-mml MathJax extension
@@ -43,7 +40,7 @@ test.describe('Export Notebook', () => {
 
     await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 
-    await page.getByTitle('Property Inspector').click();
+    await page.sidebar.openTab('jp-property-inspector');
 
     await page
       .locator('.jp-PropertyInspector')

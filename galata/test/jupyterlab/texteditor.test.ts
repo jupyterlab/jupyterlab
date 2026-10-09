@@ -125,8 +125,7 @@ ut elit.`
       page: IJupyterLabPageFixture,
       menuOption: string
     ) => {
-      await page.click('text=Settings');
-      await page.click(`.lm-Menu ul[role="menu"] >> text="${menuOption}"`);
+      await page.menu.clickMenuItem(`Settings>${menuOption}`);
     };
 
     test('Should increase a text editor font-size', async ({ page }) => {
