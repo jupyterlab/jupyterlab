@@ -140,6 +140,19 @@ export class JSONEditor extends Widget {
   }
 
   /**
+   * Commit valid changes to the source.
+   */
+  commit(): void {
+    if (!this._inputDirty || !this.source || this.hasClass(ERROR_CLASS)) {
+      return;
+    }
+    this._changeGuard = true;
+    this._mergeContent();
+    this._changeGuard = false;
+    this._setValue();
+  }
+
+  /**
    * Dispose of the editor.
    */
   dispose(): void {
@@ -255,11 +268,8 @@ export class JSONEditor extends Widget {
     if (this.revertButtonNode.contains(target)) {
       this._setValue();
     } else if (this.commitButtonNode.contains(target)) {
-      if (!this.commitButtonNode.hidden && !this.hasClass(ERROR_CLASS)) {
-        this._changeGuard = true;
-        this._mergeContent();
-        this._changeGuard = false;
-        this._setValue();
+      if (!this.commitButtonNode.hidden) {
+        this.commit();
       }
     } else if (this.editorHostNode.contains(target)) {
       this.editor.focus();
