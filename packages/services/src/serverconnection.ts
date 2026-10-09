@@ -330,6 +330,9 @@ namespace Private {
 
     // Use `call` to avoid a `TypeError` in the browser.
     return settings.fetch.call(null, request).catch((e: TypeError) => {
+      if (e.name == 'AbortError') {
+        throw e; // Let abort errors pass through unwrapped
+      }
       // Convert the TypeError into a more specific error.
       throw new ServerConnection.NetworkError(e);
     });

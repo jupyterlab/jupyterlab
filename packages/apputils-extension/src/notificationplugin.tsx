@@ -660,6 +660,8 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
           {
             const toast = await Private.toast();
             const actions = options.actions;
+            const hasProgress =
+              type === 'in-progress' && typeof options.progress === 'number';
 
             const autoClose =
               options.autoClose ??
@@ -677,6 +679,8 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
                 type: type === 'in-progress' ? null : type,
                 isLoading: type === 'in-progress',
                 autoClose: autoClose,
+                hideProgressBar: !hasProgress,
+                progress: hasProgress ? options.progress : undefined,
                 render: Private.createContent(
                   message,
                   closeToast,
@@ -1069,6 +1073,8 @@ namespace Private {
   ): Promise<Id> {
     const { actions, autoClose, data } = options;
     const t = await toast();
+    const hasProgress =
+      type === 'in-progress' && typeof options.progress === 'number';
     const toastOptions = {
       autoClose:
         autoClose ?? (actions && actions.length > 0 ? false : undefined),
@@ -1076,7 +1082,9 @@ namespace Private {
       className: `jp-Notification-Toast-${type}`,
       toastId,
       type: type === 'in-progress' ? null : type,
-      isLoading: type === 'in-progress'
+      isLoading: type === 'in-progress',
+      progress: hasProgress ? options.progress : undefined,
+      hideProgressBar: !hasProgress
     } as any;
 
     return t(
