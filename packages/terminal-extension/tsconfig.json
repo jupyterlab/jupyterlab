@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfigbase",
   "compilerOptions": {
+    "noUncheckedIndexedAccess": true,
     "outDir": "lib",
     "rootDir": "src",
     "types": ["webpack-env"]

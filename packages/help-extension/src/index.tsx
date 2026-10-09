@@ -456,6 +456,7 @@ const resources: JupyterFrontEndPlugin<void> = {
       }
       const sessionModel = sessions[sessions.length - 1];
       if (
+        sessionModel === undefined ||
         !sessionModel.kernel ||
         kernelInfoCache.has(sessionModel.kernel.name)
       ) {

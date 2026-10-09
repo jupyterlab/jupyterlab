@@ -300,14 +300,18 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
       const overrides: { [ft: string]: string } = {};
       // Filter the defaultViewers and file types for existing ones.
       Object.keys(defaultViewers).forEach(ft => {
+        const widgetFactory = defaultViewers[ft];
+        if (widgetFactory === undefined) {
+          return;
+        }
         if (!registry.getFileType(ft)) {
           console.warn(`File Type ${ft} not found`);
           return;
         }
-        if (!registry.getWidgetFactory(defaultViewers[ft])) {
-          console.warn(`Document viewer ${defaultViewers[ft]} not found`);
+        if (!registry.getWidgetFactory(widgetFactory)) {
+          console.warn(`Document viewer ${widgetFactory} not found`);
         }
-        overrides[ft] = defaultViewers[ft];
+        overrides[ft] = widgetFactory;
       });
       // Set the default factory overrides. If not provided, this has the
       // effect of unsetting any previous overrides.
@@ -392,7 +396,10 @@ Available file types:
           fileTypes
         );
         const schema = JSONExt.deepCopy(plugin.schema);
-        schema.properties!.defaultViewers.description = description;
+        const defaultViewersProperty = schema.properties?.defaultViewers;
+        if (defaultViewersProperty) {
+          defaultViewersProperty.description = description;
+        }
         return { ...plugin, schema };
       }
     });
@@ -692,7 +699,8 @@ function fileType(widget: Widget | null, docManager: IDocumentManager): string {
     return '';
   }
   const fts = docManager.registry.getFileTypesForPath(context.path);
-  return fts.length && fts[0].displayName ? fts[0].displayName : 'File';
+  const fileType = fts[0];
+  return fileType?.displayName ?? 'File';
 }
 
 /**
@@ -1381,8 +1389,9 @@ function addLabCommands(
     const node = app.contextMenuHitTest(test);
 
     const pathMatch = node?.['title'].match(pathRe);
+    const path = pathMatch?.[1];
     return (
-      (pathMatch && docManager.findWidget(pathMatch[1], null)) ??
+      (path ? docManager.findWidget(path, null) : null) ??
       // Fall back to active doc widget if path cannot be obtained from event.
       labShell.currentWidget
     );
@@ -1647,6 +1656,9 @@ namespace Private {
       return;
     }
     const selectedIndex = selectedItem.split(indexSeparator, 1)[0];
+    if (selectedIndex === undefined) {
+      return;
+    }
     return checkpoints[parseInt(selectedIndex, 10)];
   }
 }

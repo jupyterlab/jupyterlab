@@ -1066,6 +1066,10 @@ namespace Private {
      * Populate the plugin's schema defaults.
      */
     function populate(schema: ISettingRegistry.ISchema) {
+      const menuProperty = schema.properties?.menus;
+      if (menuProperty === undefined) {
+        throw new Error('Menu settings schema is missing the menus property.');
+      }
       loaded = {};
       const pluginDefaults = Object.keys(registry.plugins)
         .map(plugin => {
@@ -1077,15 +1081,15 @@ namespace Private {
         .concat([schema['jupyter.lab.menus']?.main ?? []])
         .reduceRight(
           (acc, val) => SettingRegistry.reconcileMenus(acc, val, true),
-          schema.properties!.menus.default as any[]
+          menuProperty.default as any[]
         );
 
       // Apply default value as last step to take into account overrides.json
       // The standard default being [] as the plugin must use `jupyter.lab.menus.main`
       // to define their default value.
-      schema.properties!.menus.default = SettingRegistry.reconcileMenus(
+      menuProperty.default = SettingRegistry.reconcileMenus(
         pluginDefaults,
-        schema.properties!.menus.default as any[],
+        menuProperty.default as any[],
         true
       )
         // flatten one level

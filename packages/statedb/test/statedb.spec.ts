@@ -20,7 +20,7 @@ describe('StateDB', () => {
 
       expect(await connector.fetch(key)).toBeUndefined();
       await connector.save(key, `{ "v": "${incorrect}"}`);
-      expect(JSON.parse(await connector.fetch(key)).v).toBe(incorrect);
+      expect(JSON.parse((await connector.fetch(key))!).v).toBe(incorrect);
 
       const transform = new PromiseDelegate<StateDB.DataTransform>();
       const db = new StateDB({ connector, transform: transform.promise });
@@ -32,7 +32,7 @@ describe('StateDB', () => {
       transform.resolve(transformation);
       await transform.promise;
       expect(await db.fetch(key)).toBe(correct);
-      expect(JSON.parse(await connector.fetch(key)).v).toBe(correct);
+      expect(JSON.parse((await connector.fetch(key))!).v).toBe(correct);
     });
 
     it('should allow a merge data transformation', async () => {
@@ -45,7 +45,7 @@ describe('StateDB', () => {
       expect(await connector.fetch(k1)).toBeUndefined();
       expect(await connector.fetch(k2)).toBeUndefined();
       await connector.save(k1, `{ "v": "${v1}"}`);
-      expect(JSON.parse(await connector.fetch(k1)).v).toBe(v1);
+      expect(JSON.parse((await connector.fetch(k1))!).v).toBe(v1);
 
       const transform = new PromiseDelegate<StateDB.DataTransform>();
       const db = new StateDB({ connector, transform: transform.promise });

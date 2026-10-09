@@ -321,7 +321,7 @@ function Card(
             />
           ) : (
             <div className="jp-LauncherCard-noKernelIcon">
-              {label[0].toUpperCase()}
+              {label.charAt(0).toUpperCase()}
             </div>
           )
         ) : (

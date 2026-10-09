@@ -456,9 +456,14 @@ export class CellToolbarTracker implements IDisposable {
       return false; // No lines present
     }
 
-    let lineRight = codeMirrorLines[0].getBoundingClientRect().left;
+    const firstLine = codeMirrorLines[0];
+    if (firstLine === undefined) {
+      return false;
+    }
+
+    let lineRight = firstLine.getBoundingClientRect().left;
     const range = document.createRange();
-    range.selectNodeContents(codeMirrorLines[0]);
+    range.selectNodeContents(firstLine);
     lineRight += range.getBoundingClientRect().width;
 
     const toolbarLeft = this._cellToolbarLeft(activeCell);
