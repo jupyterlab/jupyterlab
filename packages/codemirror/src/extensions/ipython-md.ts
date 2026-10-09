@@ -5,8 +5,12 @@ import type { Parser } from '@lezer/common';
 import { parseMixed } from '@lezer/common';
 import { tags } from '@lezer/highlight';
 import type {
+  BlockContext,
   DelimiterType,
   InlineContext,
+  LeafBlock,
+  LeafBlockParser,
+  Line,
   MarkdownConfig,
   NodeSpec
 } from '@lezer/markdown';
@@ -39,6 +43,24 @@ const DELIMITERS = Object.keys(DELIMITER_LENGTH).reduce<
 }, {});
 
 /**
+ * Whether a line opens `$$` display math that it does not also close.
+ */
+function opensMathBlock(line: Line): boolean {
+  return (
+    line.indent - line.baseIndent < 4 &&
+    line.text.startsWith('$$', line.pos) &&
+    !line.text.includes('$$', line.pos + 2)
+  );
+}
+
+/**
+ * Whether text has a `$$` that it does not close, ignoring escaped `\$$`.
+ */
+function hasOpenMath(text: string): boolean {
+  return text.split(/(?<!\\)\$\$/).length % 2 === 0;
+}
+
+/**
  * Define an IPython mathematical expression parser for Markdown.
  *
  * @param latexParser CodeMirror parser for LaTeX mathematical expression
@@ -57,6 +79,70 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
   });
   return {
     defineNodes,
+    // Multiline `$$` math must be a block, otherwise its lines are parsed as
+    // Markdown and a line of `=` or `-` becomes a setext heading underline.
+    parseBlock: [
+      {
+        name: BLOCK_MATH_DOLLAR,
+        parse(cx: BlockContext, line: Line): boolean {
+          if (!opensMathBlock(line)) {
+            return false;
+          }
+          const mark = `${BLOCK_MATH_DOLLAR}Mark`;
+          const from = cx.lineStart + line.pos;
+          const marks = [cx.elt(mark, from, from + 2)];
+          let to = cx.lineStart + line.text.length;
+          let rest = '';
+          // Like the renderer, do not let math run past a blank line.
+          while (cx.nextLine() && line.next != -1) {
+            const close = line.text.indexOf('$$', line.pos);
+            if (close >= 0) {
+              to = cx.lineStart + close + 2;
+              marks.push(cx.elt(mark, to - 2, to));
+              rest = line.text.slice(close + 2);
+              cx.nextLine();
+              break;
+            }
+            to = cx.lineStart + line.text.length;
+          }
+          cx.addElement(cx.elt(BLOCK_MATH_DOLLAR, from, to, marks));
+          const text = rest.replace(/^\s+/, '');
+          if (text) {
+            const start = to + rest.length - text.length;
+            cx.addElement(
+              cx.elt('Paragraph', start, start + text.length, [
+                ...cx.parser.parseInline(text, start)
+              ])
+            );
+          }
+          return true;
+        },
+        // Lines inside open `$$` math are LaTeX, so hold back the other leaf
+        // parsers, which would read a line of `=` as a setext underline.
+        before: 'SetextHeading',
+        leaf: (): LeafBlockParser => {
+          let held: LeafBlockParser[] | null = null;
+          const parser: LeafBlockParser = {
+            nextLine(cx: BlockContext, line: Line, leaf: LeafBlock) {
+              if (hasOpenMath(leaf.content)) {
+                held ??= leaf.parsers.filter(p => p !== parser);
+                leaf.parsers = [parser];
+              } else if (held) {
+                leaf.parsers.push(...held);
+                held = null;
+              }
+              return false;
+            },
+            finish: () => false
+          };
+          return parser;
+        },
+        // A `$$` line that closes inline math opened earlier in the paragraph
+        // must not start a new block.
+        endLeaf: (cx: BlockContext, line: Line, leaf: LeafBlock) =>
+          opensMathBlock(line) && !hasOpenMath(leaf.content)
+      }
+    ],
     parseInline: [
       {
         name: BLOCK_MATH_DOLLAR,
@@ -141,7 +227,10 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
           const delimiterLength = DELIMITER_LENGTH[node.type.name];
           if (delimiterLength) {
             const contentFrom = node.from + delimiterLength;
-            const contentTo = node.to - delimiterLength;
+            // A math block cut short by a blank line has no closing mark.
+            const closed =
+              node.node.getChildren(`${node.type.name}Mark`).length > 1;
+            const contentTo = closed ? node.to - delimiterLength : node.to;
             if (contentTo - contentFrom > 0) {
               return {
                 parser: latexParser,
