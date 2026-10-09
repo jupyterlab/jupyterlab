@@ -192,7 +192,7 @@ jobs:
       GIT_CONFIG_VALUE_0: /dev/null
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
           # The current head can be newer than the commit the UI tests ran on.
           # That is intended: a push during the wait rarely touches the UI.
@@ -214,7 +214,7 @@ jobs:
           find ./test-assets -type f -name "*.json" -o -name "*.png"
 
       - name: Get script for unpacking screenshots
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
           # we fetch it from main to avoid running code from forks
           ref: ${{ github.event.repository.default_branch }}
@@ -285,7 +285,7 @@ jobs:
 
       - name: Upload the updated snapshots
         if: steps.collect.outputs.has-changes == 'true'
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: galata-snapshot-updates
           path: updates
@@ -313,7 +313,7 @@ jobs:
       # The artifact is unpacked before the checkout exists, so an archive entry
       # reaching outside of its directory has nothing here to overwrite.
       - name: Download the updated snapshots
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: galata-snapshot-updates
           path: updates
@@ -331,7 +331,7 @@ jobs:
           git config --global user.name 'galata-snapshots-bot'
           git config --global user.email '263663552+galata-snapshots-bot@users.noreply.github.com'
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
           # The commit the previous job unpacked against, so the snapshots are
           # staged on the tree they were compared with.
