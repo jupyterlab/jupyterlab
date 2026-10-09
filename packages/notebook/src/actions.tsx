@@ -337,11 +337,34 @@ export namespace NotebookActions {
    * The widget mode will be preserved.
    * If only one cell is selected and `mergeAbove` is true, the above cell will be selected.
    * If only one cell is selected and `mergeAbove` is false, the below cell will be selected.
-   * If the active cell is a code cell, its outputs will be cleared.
+   * If the active cell is a code cell, cell outputs and execution counts are merged and preserved.
    * This action can be undone.
    * The final cell will have the same type as the active cell.
    * If the active cell is a markdown cell, it will be unrendered.
    */
+  function normalizeText(text: string | string[]): string {
+    return Array.isArray(text) ? text.join('') : text;
+  }
+
+  function consolidateOutputs(outputs: nbformat.IOutput[]): nbformat.IOutput[] {
+    const result: nbformat.IOutput[] = [];
+    for (const raw of outputs) {
+      const output = JSONExt.deepCopy(raw) as nbformat.IOutput;
+      const last = result[result.length - 1];
+      if (
+        last &&
+        nbformat.isStream(last) &&
+        nbformat.isStream(output) &&
+        last.name === output.name
+      ) {
+        last.text = normalizeText(last.text) + normalizeText(output.text);
+      } else {
+        result.push(output);
+      }
+    }
+    return result;
+  }
+
   export function mergeCells(
     notebook: Notebook,
     mergeAbove: boolean = false,
@@ -355,6 +378,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
     const toMerge: string[] = [];
     const toDelete: number[] = [];
+    const contributingIndices: number[] = [];
     const model = notebook.model;
     const cells = model.cells;
     const primary = notebook.activeCell;
@@ -370,6 +394,7 @@ export namespace NotebookActions {
           return;
         }
         toMerge.push(child.model.sharedModel.getSource());
+        contributingIndices.push(index);
         if (index !== active) {
           toDelete.push(index);
         }
@@ -407,6 +432,7 @@ export namespace NotebookActions {
 
         toMerge.unshift(cellModel.sharedModel.getSource());
         toDelete.push(active - 1);
+        contributingIndices.unshift(active - 1);
       } else if (mergeAbove === false) {
         // Bail if it is the last cell.
         if (active === cells.length - 1) {
@@ -423,6 +449,7 @@ export namespace NotebookActions {
 
         toMerge.push(cellModel.sharedModel.getSource());
         toDelete.push(active + 1);
+        contributingIndices.push(active + 1);
       }
     }
 
@@ -430,11 +457,38 @@ export namespace NotebookActions {
 
     const primaryModel = primary.model.sharedModel;
     const { cell_type, metadata } = primaryModel.toJSON();
+    let mergedOutputs: nbformat.IOutput[] | undefined;
+    let maxExecutionCount: number | null | undefined;
+
+    // Collate code cell outputs, execution counts, and trust (Issue #19119)
     if (primaryModel.cell_type === 'code') {
-      // We can trust this cell because the outputs will be removed.
-      metadata.trusted = true;
+      const contributingCodeCells = contributingIndices
+        .map(i => notebook.widgets[i])
+        .filter((c): c is CodeCell => c instanceof CodeCell);
+
+      const rawOutputs: nbformat.IOutput[] = [];
+      for (const cell of contributingCodeCells) {
+        rawOutputs.push(...cell.model.outputs.toJSON());
+      }
+      mergedOutputs = consolidateOutputs(rawOutputs);
+
+      const validExecutionCounts = contributingCodeCells
+        .map(c => c.model.executionCount)
+        .filter(
+          (c): c is number => typeof c === 'number' && !isNaN(c) && c !== null
+        );
+      maxExecutionCount =
+        validExecutionCounts.length > 0
+          ? Math.max(...validExecutionCounts)
+          : null;
+
+      const allContributingTrusted = contributingCodeCells.every(
+        c => c.model.trusted
+      );
+      metadata.trusted = mergedOutputs.length === 0 || allContributingTrusted;
+      delete (metadata as any).execution;
     }
-    const newModel = {
+    const newModel: any = {
       cell_type,
       metadata,
       source: toMerge.join(addExtraLine ? '\n\n' : '\n'),
@@ -442,7 +496,10 @@ export namespace NotebookActions {
         primaryModel.cell_type === 'markdown' ||
         primaryModel.cell_type === 'raw'
           ? attachments
-          : undefined
+          : undefined,
+      outputs: primaryModel.cell_type === 'code' ? mergedOutputs : undefined,
+      execution_count:
+        primaryModel.cell_type === 'code' ? maxExecutionCount : undefined
     };
 
     // Detach kernel futures from cells about to be deleted so OutputArea.dispose()
@@ -462,9 +519,10 @@ export namespace NotebookActions {
     });
 
     // Make the changes while preserving history.
+    let insertedCell: any;
     model.sharedModel.transact(() => {
       model.sharedModel.deleteCell(active);
-      model.sharedModel.insertCell(active, newModel);
+      insertedCell = model.sharedModel.insertCell(active, newModel);
       toDelete
         .sort((a, b) => b - a)
         .forEach(index => {
@@ -477,6 +535,112 @@ export namespace NotebookActions {
       const undoManager = (model.sharedModel as YNotebook).undoManager;
       const lastItem = undoManager.undoStack[undoManager.undoStack.length - 1];
       lastItem?.meta.set(Private.CELL_EXECUTION_META_KEY, storedExecutions);
+    }
+
+    // Synchronize merged cell widget state and forward in-flight executions (Issue #19119)
+    const mergedCellWidget =
+      notebook.widgets.find(w => w.model.id === insertedCell.getId()) ??
+      notebook.activeCell;
+    if (mergedCellWidget instanceof CodeCell) {
+      if (
+        mergedCellWidget.model.outputs.length > 0 &&
+        mergedCellWidget.model instanceof CodeCellModel
+      ) {
+        mergedCellWidget.model.isDirty = true;
+      }
+      const runningExecutions = storedExecutions.filter(e => !e.isDone());
+      if (runningExecutions.length > 0) {
+        mergedCellWidget.model.executionState = 'running';
+        const cellRef = mergedCellWidget;
+        void Promise.all(
+          runningExecutions.map(e => e.future.done.catch(() => undefined))
+        ).then(() => {
+          if (cellRef.isDisposed) {
+            return;
+          }
+          const currentFuture = cellRef.outputArea.future;
+          const isOurFuture = runningExecutions.some(
+            e => e.future === currentFuture
+          );
+          if (!currentFuture || isOurFuture) {
+            if (runningExecutions.every(e => e.isDone())) {
+              cellRef.model.executionState = 'idle';
+            }
+          }
+        });
+        runningExecutions.forEach(exec => {
+          void exec.future.done.then(
+            reply => {
+              if (cellRef.isDisposed) {
+                return;
+              }
+              if (reply.content.execution_count != null) {
+                const currentCount = cellRef.model.executionCount;
+                cellRef.model.executionCount =
+                  currentCount !== null
+                    ? Math.max(currentCount, reply.content.execution_count)
+                    : reply.content.execution_count;
+              }
+            },
+            () => {
+              // Abort handled by allSettled
+            }
+          );
+          const originalOnIOPub = exec.future.onIOPub;
+          exec.future.onIOPub = (msg: KernelMessage.IIOPubMessage) => {
+            originalOnIOPub?.(msg);
+            if (cellRef.isDisposed) {
+              return;
+            }
+            const msgType = msg.header.msg_type;
+            // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+            switch (msgType) {
+              case 'execute_result':
+              case 'display_data':
+              case 'stream':
+              case 'error': {
+                const output = {
+                  ...msg.content,
+                  output_type: msgType
+                } as nbformat.IOutput;
+                cellRef.model.outputs.add(output);
+                break;
+              }
+              case 'update_display_data': {
+                const output = {
+                  ...msg.content,
+                  output_type: 'display_data'
+                } as nbformat.IOutput;
+                const displayId = (msg.content as any)?.transient?.display_id;
+                if (displayId) {
+                  let updated = false;
+                  for (let i = 0; i < cellRef.model.outputs.length; i++) {
+                    const item = cellRef.model.outputs.get(i);
+                    const itemDisplayId =
+                      (item.data as any)?.transient?.display_id ||
+                      (item.metadata as any)?.transient?.display_id;
+                    if (itemDisplayId === displayId) {
+                      cellRef.model.outputs.set(i, output);
+                      updated = true;
+                      break;
+                    }
+                  }
+                  if (!updated) {
+                    cellRef.model.outputs.add(output);
+                  }
+                }
+                break;
+              }
+              case 'clear_output': {
+                cellRef.model.outputs.clear((msg.content as any).wait);
+                break;
+              }
+              default:
+                break;
+            }
+          };
+        });
+      }
     }
 
     // If the original cell is a markdown cell, make sure
@@ -506,9 +670,9 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     Private.deleteCells(notebook);
+
     void Private.handleState(notebook, state, true);
   }
-
   /**
    * Insert a new code cell above the active cell or in index 0 if the notebook is empty.
    *
