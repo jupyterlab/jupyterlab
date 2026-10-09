@@ -53,6 +53,9 @@ const ERROR_INPUT = 'a = foo';
 const READ_ONLY_SPLIT_ERROR = 'The cell is read-only and cannot be split.';
 const READ_ONLY_MERGE_ERROR = 'The cell is read-only and cannot be merged.';
 const READ_ONLY_NOTIFICATION_AUTO_CLOSE = 5000;
+const RENDERED_MARKDOWN_SPLIT_INFO =
+  'Markdown cell unrendered into edit mode. Place cursor and split again.';
+const RENDERED_MARKDOWN_NOTIFICATION_AUTO_CLOSE = 3500;
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 const STDOUT_TYPE = 'application/vnd.jupyter.stdout';
@@ -110,6 +113,21 @@ function withNotificationError(action: () => void, message: string): void {
     });
   } finally {
     notificationError.mockRestore();
+  }
+}
+
+function withNotificationInfo(action: () => void, message: string): void {
+  const notificationInfo = jest
+    .spyOn(Notification, 'info')
+    .mockImplementation(() => '');
+  try {
+    action();
+    expect(notificationInfo).toHaveBeenCalledTimes(1);
+    expect(notificationInfo).toHaveBeenCalledWith(message, {
+      autoClose: RENDERED_MARKDOWN_NOTIFICATION_AUTO_CLOSE
+    });
+  } finally {
+    notificationInfo.mockRestore();
   }
 }
 
@@ -433,7 +451,10 @@ describe('@jupyterlab/notebook', () => {
         widget.mode = 'command';
 
         const originalCellCount = widget.model!.cells.length;
-        NotebookActions.splitCell(widget);
+        withNotificationInfo(
+          () => NotebookActions.splitCell(widget),
+          RENDERED_MARKDOWN_SPLIT_INFO
+        );
 
         expect(widget.mode).toBe('edit');
         expect(cell.rendered).toBe(false);
@@ -450,7 +471,10 @@ describe('@jupyterlab/notebook', () => {
         widget.mode = 'command';
 
         const originalCellCount = widget.model!.cells.length;
-        NotebookActions.splitCell(widget);
+        withNotificationInfo(
+          () => NotebookActions.splitCell(widget),
+          RENDERED_MARKDOWN_SPLIT_INFO
+        );
 
         expect(widget.mode).toBe('edit');
         expect(cell.rendered).toBe(false);
@@ -470,8 +494,11 @@ describe('@jupyterlab/notebook', () => {
 
         const originalCellCount = widget.model!.cells.length;
 
-        // First splitCell: transitions to edit mode and unrenders without splitting
-        NotebookActions.splitCell(widget);
+        // First splitCell: transitions to edit mode and unrenders without splitting, displaying notification
+        withNotificationInfo(
+          () => NotebookActions.splitCell(widget),
+          RENDERED_MARKDOWN_SPLIT_INFO
+        );
         expect(widget.mode).toBe('edit');
         expect(cell.rendered).toBe(false);
         expect(widget.model!.cells.length).toBe(originalCellCount);

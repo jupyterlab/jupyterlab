@@ -145,12 +145,25 @@ export class NotebookActions {
  */
 export namespace NotebookActions {
   const READ_ONLY_ACTION_AUTO_CLOSE = 5000;
+  const RENDERED_MARKDOWN_ACTION_AUTO_CLOSE = 3500;
 
   function notifySplitReadOnlyAction(translator?: ITranslator): void {
     const trans = (translator ?? nullTranslator).load('jupyterlab');
     Notification.error(trans.__('The cell is read-only and cannot be split.'), {
       autoClose: READ_ONLY_ACTION_AUTO_CLOSE
     });
+  }
+
+  function notifySplitRenderedMarkdownAction(translator?: ITranslator): void {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+    Notification.info(
+      trans.__(
+        'Markdown cell unrendered into edit mode. Place cursor and split again.'
+      ),
+      {
+        autoClose: RENDERED_MARKDOWN_ACTION_AUTO_CLOSE
+      }
+    );
   }
 
   function notifyMergeReadOnlyAction(translator?: ITranslator): void {
@@ -210,6 +223,7 @@ export namespace NotebookActions {
     notebook.deselectAll();
 
     if (wasRendered) {
+      notifySplitRenderedMarkdownAction(translator);
       return;
     }
 
