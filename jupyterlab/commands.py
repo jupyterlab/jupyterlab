@@ -2295,8 +2295,13 @@ def _ensure_logger(logger: logging.Logger | None = None) -> logging.Logger:
 def _normalize_path(extension: str | os.PathLike[str]) -> str:
     """Normalize a given extension if it is a path."""
     extension = osp.expanduser(extension)
-    if osp.exists(extension):
-        extension = osp.abspath(extension)
+
+    if osp.exists(extension) and (
+        (osp.isfile(extension) and extension.endswith(".tgz"))
+        or (osp.isdir(extension) and osp.exists(osp.join(extension, "package.json")))
+    ):
+        return osp.abspath(extension)
+
     return extension
 
 
