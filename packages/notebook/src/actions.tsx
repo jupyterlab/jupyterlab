@@ -145,12 +145,25 @@ export class NotebookActions {
  */
 export namespace NotebookActions {
   const READ_ONLY_ACTION_AUTO_CLOSE = 5000;
+  const RENDERED_MARKDOWN_ACTION_AUTO_CLOSE = 3500;
 
   function notifySplitReadOnlyAction(translator?: ITranslator): void {
     const trans = (translator ?? nullTranslator).load('jupyterlab');
     Notification.error(trans.__('The cell is read-only and cannot be split.'), {
       autoClose: READ_ONLY_ACTION_AUTO_CLOSE
     });
+  }
+
+  function notifySplitRenderedMarkdownAction(translator?: ITranslator): void {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+    Notification.info(
+      trans.__(
+        'Markdown cell unrendered into edit mode. Place cursor and split again.'
+      ),
+      {
+        autoClose: RENDERED_MARKDOWN_ACTION_AUTO_CLOSE
+      }
+    );
   }
 
   function notifyMergeReadOnlyAction(translator?: ITranslator): void {
@@ -197,6 +210,10 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
+    const child = notebook.activeCell;
+    const wasRendered =
+      child instanceof MarkdownCell && (child as MarkdownCell).rendered;
+
     // We force the notebook back in edit mode as splitting a cell
     // requires using the cursor position within a cell (aka it was recently in edit mode)
     // However the focus may be stolen if the action is triggered
@@ -205,9 +222,13 @@ export namespace NotebookActions {
 
     notebook.deselectAll();
 
+    if (wasRendered) {
+      notifySplitRenderedMarkdownAction(translator);
+      return;
+    }
+
     const nbModel = notebook.model;
     const index = notebook.activeCellIndex;
-    const child = notebook.widgets[index];
     const editor = child.editor;
     if (!editor) {
       // TODO
