@@ -1756,13 +1756,19 @@ function activateWidgetFactory(
 
   if (settingRegistry) {
     // Create the factory
-    toolbarFactory = createToolbarFactory(
+    const panelToolbarFactory = createToolbarFactory(
       toolbarRegistry,
       settingRegistry,
       FACTORY,
       PANEL_SETTINGS,
       translator
     );
+    // Commands evaluate their state against the toolbar's own notebook, not
+    // whichever notebook has focus.
+    toolbarFactory = (panel: NotebookPanel) =>
+      panelToolbarFactory(panel, {
+        [CellBarExtension.WIDGET_ID_ARG]: panel.id
+      });
   }
 
   const trans = translator.load('jupyterlab');
@@ -2886,20 +2892,7 @@ function getCurrent(
   shell: JupyterFrontEnd.IShell,
   args: ReadonlyPartialJSONObject
 ): NotebookPanel | null {
-  let widget: NotebookPanel | null = null;
-
-  // Check for panelId in args (used by cell toolbars)
-  if (args[CellBarExtension.WIDGET_ID_ARG]) {
-    widget =
-      tracker.find(
-        panel => panel.id === args[CellBarExtension.WIDGET_ID_ARG]
-      ) ?? null;
-  } else if (args[SemanticCommand.WIDGET]) {
-    widget =
-      tracker.find(panel => panel.id === args[SemanticCommand.WIDGET]) ?? null;
-  } else {
-    widget = tracker.currentWidget;
-  }
+  const widget = Private.findNotebook(tracker, args);
 
   const activate = args['activate'] !== false;
 
@@ -3086,8 +3079,8 @@ function addCommands(
       }
     },
     isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     icon: args => (args.toolbar ? runIcon : undefined),
     describedBy: {
       args: {
@@ -3131,8 +3124,8 @@ function addCommands(
         );
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3170,8 +3163,8 @@ function addCommands(
         );
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3202,8 +3195,8 @@ function addCommands(
         );
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3227,16 +3220,16 @@ function addCommands(
         );
       }
     },
-    isEnabled: () => {
+    isEnabled: args => {
       // Can't run above if there are multiple cells selected,
       // or if we are at the top of the notebook.
       return (
-        !Private.isViewOnly(tracker) &&
+        !Private.isViewOnly(tracker, args) &&
         isEnabledAndSingleSelected() &&
         tracker.currentWidget!.content.activeCellIndex !== 0
       );
     },
-    isVisible: () => !Private.isViewOnly(tracker),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3260,18 +3253,18 @@ function addCommands(
         );
       }
     },
-    isEnabled: () => {
+    isEnabled: args => {
       // Can't run below if there are multiple cells selected,
       // or if we are at the bottom of the notebook.
       return (
-        !Private.isViewOnly(tracker) &&
+        !Private.isViewOnly(tracker, args) &&
         isEnabledAndSingleSelected() &&
         (tracker.currentWidget!.content.widgets.length === 1 ||
           tracker.currentWidget!.content.activeCellIndex !==
             tracker.currentWidget!.content.widgets.length - 1)
       );
     },
-    isVisible: () => !Private.isViewOnly(tracker),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3307,8 +3300,8 @@ function addCommands(
       }
     },
     isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     icon: args => (args.toolbar ? refreshIcon : undefined),
     describedBy: {
       args: {
@@ -3334,8 +3327,8 @@ function addCommands(
 
       return current.context.sessionContext.shutdown();
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3396,8 +3389,8 @@ function addCommands(
       }
       return { trusted: false };
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3421,8 +3414,8 @@ function addCommands(
         await commands.execute(CommandIDs.clearAllOutputs);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3452,9 +3445,9 @@ function addCommands(
         );
       }
     },
-    isEnabled: () =>
-      !Private.isViewOnly(tracker) && isEnabledAndSingleSelected(),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args =>
+      !Private.isViewOnly(tracker, args) && isEnabledAndSingleSelected(),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3494,8 +3487,8 @@ function addCommands(
       }
     },
     isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     icon: args => (args.toolbar ? fastForwardIcon : undefined),
     describedBy: {
       args: {
@@ -3526,8 +3519,8 @@ function addCommands(
         return NotebookActions.clearAllOutputs(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3545,8 +3538,8 @@ function addCommands(
         return NotebookActions.clearOutputs(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3571,8 +3564,8 @@ function addCommands(
       }
     },
     isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     icon: args => (args.toolbar ? stopIcon : undefined),
     describedBy: {
       args: {
@@ -3600,8 +3593,8 @@ function addCommands(
         );
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3622,8 +3615,8 @@ function addCommands(
         );
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3644,8 +3637,8 @@ function addCommands(
         );
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3682,8 +3675,8 @@ function addCommands(
     },
     icon: args => (args.toolbar ? cutIcon : undefined),
     isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3776,8 +3769,8 @@ function addCommands(
     },
     icon: args => (args.toolbar ? pasteIcon : undefined),
     isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3820,8 +3813,8 @@ function addCommands(
         return executePaste(current.content, 'above');
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3862,8 +3855,8 @@ function addCommands(
     },
     icon: args => (args.toolbar ? duplicateIcon : undefined),
     isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3898,8 +3891,8 @@ function addCommands(
         return executePaste(current.content, 'replace');
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3949,9 +3942,9 @@ function addCommands(
         (current.content.activeCell?.model.getMetadata(
           'deletable'
         ) as unknown as boolean) !== false;
-      return deletable && !Private.isViewOnly(tracker);
+      return deletable && !Private.isViewOnly(tracker, args);
     },
-    isVisible: () => !Private.isViewOnly(tracker),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4069,9 +4062,9 @@ function addCommands(
       const hasEditorSelection =
         selection.start.line !== selection.end.line ||
         selection.start.column !== selection.end.column;
-      return hasEditorSelection && !Private.isViewOnly(tracker);
+      return hasEditorSelection && !Private.isViewOnly(tracker, args);
     },
-    isVisible: () => !Private.isViewOnly(tracker),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4113,10 +4106,11 @@ function addCommands(
         return false;
       }
       return (
-        !!current.content.activeCell?.editor && !Private.isViewOnly(tracker)
+        !!current.content.activeCell?.editor &&
+        !Private.isViewOnly(tracker, args)
       );
     },
-    isVisible: () => !Private.isViewOnly(tracker),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4134,8 +4128,8 @@ function addCommands(
         return NotebookActions.splitCell(current.content, translator);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4161,7 +4155,7 @@ function addCommands(
       }
     },
     isVisible: args => {
-      if (Private.isViewOnly(tracker)) {
+      if (Private.isViewOnly(tracker, args)) {
         return false;
       }
       const current = getCurrent(tracker, shell, { ...args, activate: false });
@@ -4173,7 +4167,7 @@ function addCommands(
       const notebook = current.content;
       return notebook && notebook.selectedCells.length > 1;
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4198,8 +4192,8 @@ function addCommands(
         );
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4224,8 +4218,8 @@ function addCommands(
         );
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4245,8 +4239,8 @@ function addCommands(
     },
     icon: args => (args.toolbar ? addAboveIcon : undefined),
     isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4272,8 +4266,8 @@ function addCommands(
     },
     icon: args => (args.toolbar ? addBelowIcon : undefined),
     isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4329,8 +4323,8 @@ function addCommands(
         return NotebookActions.insertSameLevelHeadingAbove(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4347,8 +4341,8 @@ function addCommands(
         return NotebookActions.insertSameLevelHeadingBelow(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4367,8 +4361,8 @@ function addCommands(
         );
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4387,8 +4381,8 @@ function addCommands(
         );
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4532,10 +4526,11 @@ function addCommands(
         return false;
       }
       return (
-        !Private.isViewOnly(tracker) && current.content.activeCellIndex >= 1
+        !Private.isViewOnly(tracker, args) &&
+        current.content.activeCellIndex >= 1
       );
     },
-    isVisible: () => !Private.isViewOnly(tracker),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     icon: args => (args.toolbar ? moveUpIcon : undefined),
     describedBy: {
       args: {
@@ -4592,11 +4587,11 @@ function addCommands(
 
       const length = current.content.model.cells.length;
       return (
-        !Private.isViewOnly(tracker) &&
+        !Private.isViewOnly(tracker, args) &&
         current.content.activeCellIndex < length - 1
       );
     },
-    isVisible: () => !Private.isViewOnly(tracker),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     icon: args => (args.toolbar ? moveDownIcon : undefined),
     describedBy: {
       args: {
@@ -4697,8 +4692,8 @@ function addCommands(
         return NotebookActions.undo(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4715,8 +4710,8 @@ function addCommands(
         return NotebookActions.redo(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4737,8 +4732,8 @@ function addCommands(
         }
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4759,8 +4754,8 @@ function addCommands(
         }
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4777,8 +4772,8 @@ function addCommands(
         return sessionDialogs.selectKernel(current.context.sessionContext);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4846,8 +4841,8 @@ function addCommands(
         );
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4868,8 +4863,8 @@ function addCommands(
         );
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4890,8 +4885,8 @@ function addCommands(
         );
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4912,8 +4907,8 @@ function addCommands(
         );
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4934,8 +4929,8 @@ function addCommands(
         );
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4956,8 +4951,8 @@ function addCommands(
         );
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4974,8 +4969,8 @@ function addCommands(
         return NotebookActions.hideCode(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4992,8 +4987,8 @@ function addCommands(
         return NotebookActions.showCode(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -5010,8 +5005,8 @@ function addCommands(
         return NotebookActions.hideAllCode(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -5028,8 +5023,8 @@ function addCommands(
         return NotebookActions.showAllCode(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -5046,8 +5041,8 @@ function addCommands(
         return NotebookActions.hideOutput(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -5064,8 +5059,8 @@ function addCommands(
         return NotebookActions.showOutput(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -5082,8 +5077,8 @@ function addCommands(
         return NotebookActions.toggleOutput(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -5100,8 +5095,8 @@ function addCommands(
         return NotebookActions.hideAllOutputs(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -5154,8 +5149,8 @@ function addCommands(
         return NotebookActions.showAllOutputs(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -5172,8 +5167,8 @@ function addCommands(
         return NotebookActions.enableOutputScrolling(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -5190,8 +5185,8 @@ function addCommands(
         return NotebookActions.disableOutputScrolling(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -5215,8 +5210,8 @@ function addCommands(
         return NotebookActions.enableOutputScrolling(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     isToggled: args => {
       const current = getCurrent(tracker, shell, { ...args, activate: false });
       if (current) {
@@ -5301,8 +5296,8 @@ function addCommands(
         return NotebookActions.replaceSelection(current.content, text);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -5324,9 +5319,9 @@ function addCommands(
         return NotebookActions.toggleCurrentHeadingCollapse(current.content);
       }
     },
-    isEnabled: () =>
-      isEnabledAndHeadingSelected() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args =>
+      isEnabledAndHeadingSelected() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -5342,8 +5337,8 @@ function addCommands(
         return NotebookActions.collapseAllHeadings(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -5359,8 +5354,8 @@ function addCommands(
         return NotebookActions.expandAllHeadings(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -5408,8 +5403,8 @@ function addCommands(
         translator
       );
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -5432,8 +5427,8 @@ function addCommands(
         return await NotebookActions.accessPreviousHistory(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -5449,8 +5444,8 @@ function addCommands(
         return await NotebookActions.accessNextHistory(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -5746,10 +5741,29 @@ namespace Private {
   }
 
   /**
-   * Whether the current notebook is view-only (declared read-only by the server).
+   * Find the notebook a command targets: the one named in its arguments, as
+   * passed by toolbars, or else the current notebook.
    */
-  export function isViewOnly(tracker: INotebookTracker): boolean {
-    return tracker.currentWidget?.viewOnly === true;
+  export function findNotebook(
+    tracker: INotebookTracker,
+    args: ReadonlyPartialJSONObject
+  ): NotebookPanel | null {
+    const id =
+      args[CellBarExtension.WIDGET_ID_ARG] || args[SemanticCommand.WIDGET];
+    return id
+      ? (tracker.find(panel => panel.id === id) ?? null)
+      : tracker.currentWidget;
+  }
+
+  /**
+   * Whether the notebook a command targets is view-only (declared read-only
+   * by the server).
+   */
+  export function isViewOnly(
+    tracker: INotebookTracker,
+    args: ReadonlyPartialJSONObject = {}
+  ): boolean {
+    return findNotebook(tracker, args)?.viewOnly === true;
   }
 
   /**
