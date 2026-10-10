@@ -55,6 +55,108 @@ export class CellSearchProvider
   protected get model() {
     return this.cell.model;
   }
+
+  /**
+   * Adds the `readOnly` flag to the match based on cell editability.
+   *
+   * @param match - The search match.
+   * @param fromHTML - True if match is from rendered HTML, else false.
+   */
+  protected _applyReadOnlyState(
+    match: ISearchMatch | undefined,
+    fromHTML: boolean
+  ): ISearchMatch | undefined {
+    if (!match) {
+      return undefined;
+    }
+    if (fromHTML) {
+      return { ...match, readOnly: true };
+    }
+    const isEditable = this.model.getMetadata('editable') !== false;
+    return { ...match, readOnly: !isEditable };
+  }
+
+  /**
+   * Whether the cell is read-only: its `editable` metadata is `false`.
+   * No match in a read-only cell can be replaced.
+   */
+  public isReadOnlyProvider(): boolean {
+    const isEditable = this.model.getMetadata('editable') !== false;
+    return !isEditable;
+  }
+
+  /**
+   * The number of matches in the cell source which can be replaced.
+   */
+  get replaceableMatchesCount(): number {
+    return this.isReadOnlyProvider() ? 0 : super.matchesCount;
+  }
+
+  /**
+   * Get the current match if it exists.
+   */
+  getCurrentMatch(): ISearchMatch | undefined {
+    return this._applyReadOnlyState(super.getCurrentMatch(), false);
+  }
+
+  /**
+   * Highlight the next match.
+   *
+   * @returns The next match if there is one.
+   */
+  async highlightNext(
+    loop?: boolean,
+    options?: IHighlightAdjacentMatchOptions
+  ): Promise<ISearchMatch | undefined> {
+    const match = await super.highlightNext(loop, options);
+    return this._applyReadOnlyState(match, false);
+  }
+
+  /**
+   * Highlight the previous match.
+   *
+   * @returns The previous match if there is one.
+   */
+  async highlightPrevious(
+    loop?: boolean,
+    options?: IHighlightAdjacentMatchOptions
+  ): Promise<ISearchMatch | undefined> {
+    const match = await super.highlightPrevious(loop, options);
+    return this._applyReadOnlyState(match, false);
+  }
+
+  /**
+   * Replace the currently selected match with the provided text, unless the
+   * cell is read-only.
+   *
+   * @returns Whether a replace occurred.
+   */
+  async replaceCurrentMatch(
+    newText: string,
+    loop?: boolean,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
+    if (this.isReadOnlyProvider()) {
+      return false;
+    }
+    return super.replaceCurrentMatch(newText, loop, options);
+  }
+
+  /**
+   * Replace all matches in the cell source with the provided text, unless
+   * the cell is read-only.
+   *
+   * @returns Whether a replace occurred.
+   */
+  async replaceAllMatches(
+    newText: string,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
+    if (this.isReadOnlyProvider()) {
+      return false;
+    }
+    return super.replaceAllMatches(newText, options);
+  }
 }
 
 /**
@@ -123,13 +225,19 @@ class CodeCellSearchProvider extends CellSearchProvider {
     this.outputsProvider.length = 0;
   }
 
+  /**
+   * Returns the current active search match.
+   */
   getCurrentMatch(): ISearchMatch | undefined {
     if (this.currentProviderIndex === -1) {
       return super.getCurrentMatch();
     } else if (this.currentProviderIndex < this.outputsProvider.length) {
       const provider = this.outputsProvider[this.currentProviderIndex];
-      return provider.currentMatch ?? undefined;
+      const match = provider.currentMatch ?? undefined;
+      return this._applyReadOnlyState(match, true);
     }
+
+    return undefined;
   }
 
   /**
@@ -163,6 +271,12 @@ class CodeCellSearchProvider extends CellSearchProvider {
         }
       }
 
+      if (options?.skipReadOnly) {
+        // Output matches cannot be replaced, skip all of them
+        await this.outputsProvider[this.currentProviderIndex]?.clearHighlight();
+        this.currentProviderIndex = this.outputsProvider.length;
+      }
+
       while (this.currentProviderIndex < this.outputsProvider.length) {
         const provider = this.outputsProvider[this.currentProviderIndex];
         const match = await provider.highlightNext(false);
@@ -176,7 +290,8 @@ class CodeCellSearchProvider extends CellSearchProvider {
                 0
               ) +
             provider.currentMatchIndex!;
-          return match;
+          // Cell output is always read-only
+          return this._applyReadOnlyState(match, true);
         } else {
           this.currentProviderIndex += 1;
         }
@@ -193,12 +308,21 @@ class CodeCellSearchProvider extends CellSearchProvider {
    *
    * @returns The previous match if there is one.
    */
-  async highlightPrevious(): Promise<ISearchMatch | undefined> {
+  async highlightPrevious(
+    loop?: boolean,
+    options?: IHighlightAdjacentMatchOptions
+  ): Promise<ISearchMatch | undefined> {
     if (this.matchesCount === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
       if (this.currentIndex === null) {
         this.currentProviderIndex = this.outputsProvider.length - 1;
+      }
+
+      if (options?.skipReadOnly) {
+        // Output matches cannot be replaced, skip all of them
+        await this.outputsProvider[this.currentProviderIndex]?.clearHighlight();
+        this.currentProviderIndex = -1;
       }
 
       while (this.currentProviderIndex >= 0) {
@@ -215,7 +339,8 @@ class CodeCellSearchProvider extends CellSearchProvider {
                 0
               ) +
             provider.currentMatchIndex!;
-          return match;
+          // Cell output is always read-only
+          return this._applyReadOnlyState(match, true);
         } else {
           this.currentProviderIndex -= 1;
         }
