@@ -689,6 +689,7 @@ function addCommands(
       const term = new XTerm(session, { ...options, initialTitle }, translator);
 
       term.title.icon = terminalIcon;
+
       term.title.label = initialTitle ?? '...';
 
       const main = new MainAreaWidget({ content: term, reveal: term.ready });
