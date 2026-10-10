@@ -30,6 +30,9 @@ import {
   launcherIcon,
   runningIcon
 } from '@jupyterlab/ui-components';
+// The plugin activates at startup and registers the Kernels section at once,
+// so the module is needed before the application starts.
+// eslint-disable-next-line jupyter/prefer-lazy-imports
 import { addKernelRunningSessionManager } from './kernels';
 import { addOpenTabsSessionManager } from './opentabs';
 import { addRecentlyClosedSessionManager } from './recents';

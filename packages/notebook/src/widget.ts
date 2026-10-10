@@ -170,6 +170,11 @@ const HEADING_COLLAPSER_VISBILITY_CONTROL_CLASS =
 const SIDE_BY_SIDE_CLASS = 'jp-mod-sideBySide';
 
 /**
+ * The class name added to a notebook in view-only mode.
+ */
+const VIEW_ONLY_CLASS = 'jp-mod-view-only';
+
+/**
  * The interactivity modes for the notebook.
  */
 export type NotebookMode = 'command' | 'edit';
@@ -1815,6 +1820,31 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
+   * Whether the notebook is displayed in view-only mode.
+   */
+  get viewOnly(): boolean {
+    return this._viewOnly;
+  }
+  set viewOnly(value: boolean) {
+    if (this._viewOnly === value) {
+      return;
+    }
+    this._viewOnly = value;
+    this.toggleClass(VIEW_ONLY_CLASS, value);
+    for (const cell of this.widgets) {
+      cell.viewOnly = value;
+    }
+    this._viewOnlyChanged.emit(value);
+  }
+
+  /**
+   * A signal emitted when the view-only state of the notebook changes.
+   */
+  get viewOnlyChanged(): ISignal<this, boolean> {
+    return this._viewOnlyChanged;
+  }
+
+  /**
    * Adds a footer to the notebook.
    */
   protected addFooter(): void {
@@ -2781,6 +2811,7 @@ export class Notebook extends StaticNotebook {
    * Handle a cell being inserted.
    */
   protected onCellInserted(index: number, cell: Cell): void {
+    cell.viewOnly = this._viewOnly;
     void cell.ready.then(() => {
       if (!cell.isDisposed) {
         cell.editor!.edgeRequested.connect(this._onEdgeRequest, this);
@@ -3282,7 +3313,7 @@ export class Notebook extends StaticNotebook {
         document.addEventListener('mousemove', this, true);
       } else if (button === 0 && !shiftKey) {
         // Prepare to start a drag if we are on the drag region.
-        if (targetArea === 'prompt') {
+        if (targetArea === 'prompt' && !this._viewOnly) {
           // Prepare for a drag start
           this._dragData = {
             pressX: event.clientX,
@@ -3395,7 +3426,7 @@ export class Notebook extends StaticNotebook {
    * Handle the `'lm-dragenter'` event for the widget.
    */
   private _evtDragEnter(event: Drag.Event): void {
-    if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
+    if (this._viewOnly || !event.mimeData.hasData(JUPYTER_CELL_MIME)) {
       return;
     }
     event.preventDefault();
@@ -3429,7 +3460,7 @@ export class Notebook extends StaticNotebook {
    * Handle the `'lm-dragover'` event for the widget.
    */
   private _evtDragOver(event: Drag.Event): void {
-    if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
+    if (this._viewOnly || !event.mimeData.hasData(JUPYTER_CELL_MIME)) {
       return;
     }
     event.preventDefault();
@@ -3457,7 +3488,7 @@ export class Notebook extends StaticNotebook {
     }
     event.preventDefault();
     event.stopPropagation();
-    if (event.proposedAction === 'none') {
+    if (event.proposedAction === 'none' || this._viewOnly) {
       event.dropAction = 'none';
       return;
     }
@@ -3807,10 +3838,12 @@ export class Notebook extends StaticNotebook {
     startingCellIndex: number;
   } | null = null;
   private _mouseMode: 'select' | 'couldDrag' | null = null;
+  private _viewOnly = false;
   private _activeCellChanged = new Signal<this, Cell | null>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
   private _selectionChanged = new Signal<this, void>(this);
   private _cellsPasted = new Signal<this, Notebook.IPastedCells>(this);
+  private _viewOnlyChanged = new Signal<this, boolean>(this);
   private _localCopy: nbformat.IBaseCell[] = [];
   // Attributes for optimized cell refresh:
   private _cellLayoutStateCache?: { width: number };
