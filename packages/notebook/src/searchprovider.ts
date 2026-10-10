@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+import type { IMapChange } from '@jupyter/ydoc';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import type {
   CellSearchProvider,
@@ -366,6 +367,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._searchProviders = await Promise.all(
       cells.map(async (cell, index) => {
         const cellSearchProvider = createCellSearchProvider(cell);
+        cell.model.metadataChanged.connect(this._onCellMetadataChanged, this);
 
         await cellSearchProvider.setIsActive(
           !this._filters!.selection ||
@@ -550,6 +552,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   private _addCellProvider(index: number) {
     const cell = this.widget.content.widgets[index];
     const cellSearchProvider = createCellSearchProvider(cell);
+    cell.model.metadataChanged.connect(this._onCellMetadataChanged, this);
 
     ArrayExt.insert(this._searchProviders, index, cellSearchProvider);
 
@@ -609,6 +612,13 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         break;
     }
     this._stateChanged.emit();
+  }
+
+  private _onCellMetadataChanged(_: ICellModel, change: IMapChange): void {
+    if (change.key === 'editable') {
+      // The search box disables Replace for matches in read-only cells
+      this._stateChanged.emit();
+    }
   }
 
   private async _stepNext(

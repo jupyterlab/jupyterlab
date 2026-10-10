@@ -6,12 +6,16 @@ import { NotebookSearchProvider } from '@jupyterlab/notebook';
 import type { Context } from '@jupyterlab/docregistry';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
-import { signalToPromise } from '@jupyterlab/testing';
+import { framePromise, signalToPromise } from '@jupyterlab/testing';
 import * as utils from './utils';
 import type { IReplaceOptions } from '@jupyterlab/documentsearch';
-import { SearchDocumentModel } from '@jupyterlab/documentsearch';
+import {
+  SearchDocumentModel,
+  SearchDocumentView
+} from '@jupyterlab/documentsearch';
 import type { CodeCell, CodeCellModel } from '@jupyterlab/cells';
 import { CellSearchProvider } from '@jupyterlab/cells';
+import { Widget } from '@lumino/widgets';
 
 /**
  * To avoid relying on ydoc passing the selections via server
@@ -35,6 +39,15 @@ async function setSelections(
 async function runDebouncedHandler() {
   await Promise.resolve();
   jest.advanceTimersByTime(0);
+}
+
+/**
+ * Wait until the view shows the current state of its model.
+ */
+async function rendered(view: SearchDocumentView): Promise<void> {
+  await framePromise();
+  await view.renderPromise;
+  await framePromise();
 }
 
 /**
@@ -1130,6 +1143,59 @@ describe('@jupyterlab/notebook', () => {
         ]);
         state = provider.getSelectionState();
         expect(state).toBe('single');
+      });
+    });
+
+    describe('#stateChanged', () => {
+      let model: SearchDocumentModel;
+      let view: SearchDocumentView;
+
+      /**
+       * Whether the Replace and Replace All buttons are disabled.
+       */
+      const disabledButtons = () =>
+        Array.from(
+          view.node.querySelectorAll<HTMLButtonElement>(
+            '.jp-DocumentSearch-replace-button-wrapper'
+          ),
+          button => button.disabled
+        );
+
+      beforeEach(async () => {
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1 test2' }
+        ]);
+        // The search box debounces the search and renders on timers
+        jest.useRealTimers();
+        model = new SearchDocumentModel(provider, 0);
+        view = new SearchDocumentView(model);
+        Widget.attach(view, document.body);
+        view.showReplace();
+        model.searchExpression = 'test';
+        await signalToPromise(model.stateChanged);
+        await rendered(view);
+      });
+
+      afterEach(() => {
+        view.dispose();
+        model.dispose();
+        jest.useFakeTimers();
+      });
+
+      it('should update the replace buttons when a cell becomes read-only or editable', async () => {
+        const cell = panel.model!.cells.get(0);
+        expect(disabledButtons()).toEqual([false, false]);
+
+        cell.setMetadata('editable', false);
+        await signalToPromise(model.stateChanged);
+        await rendered(view);
+        expect(disabledButtons()).toEqual([true, true]);
+
+        cell.deleteMetadata('editable');
+        await signalToPromise(model.stateChanged);
+        await rendered(view);
+        expect(disabledButtons()).toEqual([false, false]);
       });
     });
   });
