@@ -3216,6 +3216,56 @@ describe('@jupyterlab/notebook', () => {
         }
       });
 
+      it('should dispose a pending output future when the restored cell is rerun', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        const cellId = cell.model.id;
+        cell.model.sharedModel.setSource(
+          "from IPython.display import display\nimport time\nrerun_display = display('before', display_id=True)\ntime.sleep(1)\nrerun_display.update('after')"
+        );
+        const execution = NotebookActions.run(widget, ipySessionContext);
+        for (let i = 0; i < 100 && cell.model.outputs.length === 0; i++) {
+          await sleep(20);
+        }
+        expect(cell.model.outputs.get(0).data['text/plain']).toBe("'before'");
+        const future = cell.outputArea.future;
+        NotebookActions.deleteCells(widget);
+        await execution;
+        await future.done;
+        NotebookActions.undo(widget);
+        const restored = widget.widgets.find(
+          w => w.model.id === cellId
+        ) as CodeCell;
+        expect(restored.model.outputs.get(0).data['text/plain']).toBe(
+          "'before'"
+        );
+        const notification = Notification.manager.notifications.find(n =>
+          n.options.actions?.some(a => a.label === 'Show new outputs')
+        );
+        expect(notification).toBeDefined();
+        const originalHandler = future.onIOPub;
+        const oldHandler = jest.fn(originalHandler);
+        try {
+          restored.model.sharedModel.setSource("print('rerun')");
+          widget.activeCellIndex = widget.widgets.indexOf(restored);
+          await NotebookActions.run(widget, ipySessionContext);
+          expect(future.isDisposed).toBe(true);
+          expect(Notification.manager.notifications).not.toContain(
+            notification
+          );
+          notification!.options.actions![0].callback(new MouseEvent('click'));
+          expect(restored.model.outputs.get(0).data[STDOUT_TYPE]).toBe(
+            'rerun\n'
+          );
+          future.onIOPub = oldHandler;
+          await ipySessionContext.session!.kernel!.requestExecute({
+            code: "rerun_display.update('later')"
+          }).done;
+          expect(oldHandler).not.toHaveBeenCalled();
+        } finally {
+          future.dispose();
+        }
+      });
+
       it('should reconnect future output when the newer-output notification expires', async () => {
         const cell = widget.widgets[0] as CodeCell;
         const cellId = cell.model.id;
@@ -3246,9 +3296,9 @@ describe('@jupyterlab/notebook', () => {
         }
       });
 
-      it.each([false, true])(
-        'should preserve pending output through a move (undo move: %s)',
-        async undoMove => {
+      it.each([0, 1, 2, 3])(
+        'should preserve pending output through a move and %s undo/redo actions',
+        async historyActions => {
           const cell = widget.widgets[0] as CodeCell;
           const cellId = cell.model.id;
           const future = createResolvedFuture();
@@ -3265,8 +3315,12 @@ describe('@jupyterlab/notebook', () => {
             NotebookActions.undo(widget);
             const oldAction = notificationInfo.mock.calls[0][1]!.actions![0];
             NotebookActions.moveCells(widget, 0, 2);
-            if (undoMove) {
-              NotebookActions.undo(widget);
+            for (let i = 0; i < historyActions; i++) {
+              if (i % 2 === 0) {
+                NotebookActions.undo(widget);
+              } else {
+                NotebookActions.redo(widget);
+              }
             }
             const restored = widget.widgets.find(
               w => w.model.id === cellId
@@ -3275,7 +3329,7 @@ describe('@jupyterlab/notebook', () => {
             expect(restored.model.outputs.get(0).data[STDOUT_TYPE]).toBe(
               'before'
             );
-            expect(notificationInfo).toHaveBeenCalledTimes(undoMove ? 3 : 2);
+            expect(notificationInfo).toHaveBeenCalledTimes(historyActions + 2);
             const calls = notificationInfo.mock.calls;
             calls[calls.length - 1][1]!.actions![0].callback(
               new MouseEvent('click')
@@ -3401,7 +3455,7 @@ describe('@jupyterlab/notebook', () => {
         await future.done;
       });
 
-      it('should preserve execution state and output after undoing a move of a running cell', async () => {
+      it('should preserve execution state and output through move undo/redo of a running cell', async () => {
         const finalOutput = '0\n1\n2\n3\n4\n';
         const cell = widget.widgets[0] as CodeCell;
         widget.activeCellIndex = 0;
@@ -3448,14 +3502,22 @@ describe('@jupyterlab/notebook', () => {
         expect(cellAfterUndo.model.executionState).toBe('running');
         expect(cellAfterUndo.model.executionCount).toBe(null);
 
+        NotebookActions.redo(widget);
+        const cellAfterRedo = widget.widgets[1] as CodeCell;
+        expect(cellAfterRedo.model.id).toBe(cellId);
+        expect(cellAfterRedo.outputArea.model.get(0).data[STDOUT_TYPE]).toBe(
+          outputAfterMove
+        );
+        expect(cellAfterRedo.model.executionState).toBe('running');
+
         // Wait for execution to complete; the final output must be intact.
-        const inIdleState = waitForExecutionState(cellAfterUndo, 'idle');
+        const inIdleState = waitForExecutionState(cellAfterRedo, 'idle');
         await Promise.all([inIdleState, executionCompleted]);
-        expect(cellAfterUndo.outputArea.model.get(0).data[STDOUT_TYPE]).toBe(
+        expect(cellAfterRedo.outputArea.model.get(0).data[STDOUT_TYPE]).toBe(
           finalOutput
         );
-        expect(cellAfterUndo.model.executionState).toBe('idle');
-        expect(cellAfterUndo.model.executionCount).not.toBe(null);
+        expect(cellAfterRedo.model.executionState).toBe('idle');
+        expect(cellAfterRedo.model.executionCount).not.toBe(null);
       }, 20000);
     });
 

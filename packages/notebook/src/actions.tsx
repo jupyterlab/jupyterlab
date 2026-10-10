@@ -672,6 +672,7 @@ export namespace NotebookActions {
       const undoManager = (notebook.model.sharedModel as YNotebook).undoManager;
       const lastItem = undoManager.undoStack[undoManager.undoStack.length - 1];
       lastItem?.meta.set(Private.CELL_EXECUTION_META_KEY, storedExecutions);
+      lastItem?.meta.set(Private.CELL_EXECUTION_SOURCE_META_KEY, 'move');
     }
   }
 
@@ -1805,13 +1806,25 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
     const redoExecutions = Private.captureRedoExecutions(notebook);
     const undoManager = (notebook.model.sharedModel as YNotebook).undoManager;
+    const redoItem = undoManager.redoStack[undoManager.redoStack.length - 1];
+    const executionCaptureSource = redoItem?.meta.get(
+      Private.CELL_EXECUTION_SOURCE_META_KEY
+    );
 
     notebook.mode = 'command';
     notebook.model.sharedModel.redo();
     if (redoExecutions) {
+      if (executionCaptureSource === 'move') {
+        redoExecutions.forEach(execution => {
+          Private.restoreExecution(notebook, execution);
+        });
+      }
       const undoItem = undoManager.undoStack[undoManager.undoStack.length - 1];
       undoItem?.meta.set(Private.CELL_EXECUTION_META_KEY, redoExecutions);
-      undoItem?.meta.set(Private.CELL_EXECUTION_SOURCE_META_KEY, 'delete');
+      undoItem?.meta.set(
+        Private.CELL_EXECUTION_SOURCE_META_KEY,
+        executionCaptureSource
+      );
     }
     notebook.deselectAll();
     void Private.handleState(notebook, state);
@@ -2701,7 +2714,11 @@ namespace Private {
   export const CELL_EXECUTION_SOURCE_META_KEY = Symbol('cellExecutionSource');
   export const NEW_OUTPUTS_NOTIFICATION_AUTO_CLOSE = 10000;
 
-  export type IExecutionCaptureSource = 'delete' | 'merge' | 'change-cell-type';
+  export type IExecutionCaptureSource =
+    | 'delete'
+    | 'merge'
+    | 'change-cell-type'
+    | 'move';
 
   /**
    * A kernel message that arrived while the future was detached, tagged with
@@ -2839,7 +2856,7 @@ namespace Private {
   }
 
   /**
-   * Recapture a running cell before redoing its deletion.
+   * Recapture cell execution before redoing a deletion or move.
    */
   export function captureRedoExecutions(
     notebook: Notebook
@@ -2849,7 +2866,8 @@ namespace Private {
     }
     const undoManager = (notebook.model.sharedModel as YNotebook).undoManager;
     const stackItem = undoManager.redoStack[undoManager.redoStack.length - 1];
-    if (stackItem?.meta.get(CELL_EXECUTION_SOURCE_META_KEY) !== 'delete') {
+    const source = stackItem?.meta.get(CELL_EXECUTION_SOURCE_META_KEY);
+    if (source !== 'delete' && source !== 'move') {
       return null;
     }
     const storedExecutions = stackItem.meta.get(CELL_EXECUTION_META_KEY) as
@@ -2982,14 +3000,24 @@ namespace Private {
     }
 
     pendingOutputExecutions.set(cell, storedExecution);
+    const model = cell.model;
     let notificationId = '';
     let dismissTimeout = 0;
     const dismiss = () => {
       window.clearTimeout(dismissTimeout);
       cell.disposed.disconnect(dismiss);
+      model.stateChanged.disconnect(onStateChanged);
       pendingOutputExecutions.delete(cell);
       if (notificationId) {
         Notification.dismiss(notificationId);
+      }
+    };
+    const onStateChanged = () => {
+      if (model.executionState === 'running') {
+        dismiss();
+        storedExecution.pendingOutputs = false;
+        storedExecution.buffered.length = 0;
+        future.dispose();
       }
     };
     const canRestore = () =>
@@ -2997,6 +3025,7 @@ namespace Private {
       pendingOutputExecutions.get(cell) === storedExecution &&
       (!cell.outputArea.future || cell.outputArea.future === future);
     cell.disposed.connect(dismiss);
+    model.stateChanged.connect(onStateChanged);
     notificationId = Notification.info(
       trans.__('A restored cell has newer outputs available.'),
       {
