@@ -54,6 +54,37 @@ test.describe('Workspace', () => {
     ).toBeVisible();
   });
 
+  test('should open a file from `tree` url with `open-with` query', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.goto(`tree/${tmpPath}/${nbFile}?open-with=txt`);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-FileEditor')
+    ).toHaveCount(1);
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-Notebook')
+    ).toHaveCount(0);
+  });
+
+  test('should open a file from `tree` url with JSON viewer query', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.goto(`tree/${tmpPath}/${nbFile}?open-with=json`);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-RenderedJSON')
+    ).toHaveCount(1);
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-FileEditor')
+    ).toHaveCount(0);
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-Notebook')
+    ).toHaveCount(0);
+  });
+
   test('should open a file from `tree` url if workspace is not empty', async ({
     page,
     tmpPath
