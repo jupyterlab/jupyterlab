@@ -136,11 +136,11 @@ test.describe('Terminal', () => {
       ).toHaveCount(2);
     });
 
-    test('should reuse terminal tab title in the running sidebar', async ({
+    test('should preserve a literal ellipsis terminal title in the running sidebar', async ({
       page,
       terminals
     }) => {
-      const terminalTitle = 'Galata terminal title';
+      const terminalTitle = '...';
       const terminal = page.locator(TERMINAL_SELECTOR);
       await waitForTerminal(page);
 

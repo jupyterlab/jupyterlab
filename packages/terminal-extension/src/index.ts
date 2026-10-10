@@ -517,9 +517,19 @@ class RunningTerminalSignaler {
     }
 
     this._widgets.add(widget);
-    widget.title.changed.connect(this._syncWidgetTitle, this);
     widget.disposed.connect(this._unwatchWidget, this);
-    this._syncWidgetTitle(widget.title);
+    void widget.revealed.then(
+      () => {
+        if (widget.isDisposed) {
+          return;
+        }
+        widget.title.changed.connect(this._syncWidgetTitle, this);
+        this._syncWidgetTitle(widget.title);
+      },
+      () => {
+        // MainAreaWidget displays terminal initialization errors.
+      }
+    );
   }
 
   private _unwatchWidget(widget: MainAreaWidget<ITerminal.ITerminal>): void {
@@ -540,7 +550,7 @@ class RunningTerminalSignaler {
 
       const name = widget.content.session.name;
       const label = TabBarSvg.titleLabel(widget.title);
-      if (label === '...' || this._titles.get(name) === label) {
+      if (this._titles.get(name) === label) {
         return;
       }
 
