@@ -9,6 +9,8 @@
 // Other minor modifications are also due to StackExchange and are used with
 // permission.
 
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+
 const inline = '$'; // the inline math delimiter
 
 // MATHSPLIT contains the pattern for math delimiters and special symbols
@@ -23,7 +25,13 @@ const MATHSPLIT =
  *  Don't allow math to pass through a double linebreak
  *    (which will be a paragraph).
  */
-export function removeMath(text: string): { text: string; math: string[] } {
+export function removeMath(
+  text: string,
+  options?: IRenderMime.ILatexTypesetter.IMathParseOptions
+): { text: string; math: string[] } {
+  // When `false`, a single `$` is left literal (e.g. currency) while `$$`
+  // display math and `\(...\)` / `\[...\]` delimiters keep working.
+  const dollarInlineMath = options?.dollarInlineMath ?? true;
   const math: string[] = []; // stores math strings for later
   let start: number | null = null;
   let end: string | null = null;
@@ -108,7 +116,7 @@ export function removeMath(text: string): { text: string; math: string[] } {
       //  Look for math start delimiters and when
       //    found, set up the end delimiter.
       //
-      if (block === inline || block === '$$') {
+      if ((block === inline && dollarInlineMath) || block === '$$') {
         start = i;
         end = block;
         braces = 0;

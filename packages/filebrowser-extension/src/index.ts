@@ -1099,7 +1099,7 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
             (
               await InputDialog.getText({
                 label: trans.__('URL'),
-                placeholder: 'https://example.com/path/to/file',
+                placeholder: trans.__('https://example.com/path/to/file'),
                 title: trans.__('Open URL'),
                 okLabel: trans.__('Open')
               })
@@ -1221,7 +1221,8 @@ const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
           const file = models[0];
           if (
             autoOpen &&
-            file.size &&
+            file.size !== null &&
+            file.size !== undefined &&
             file.size <= maxSize &&
             isAllowedFileType
           ) {
@@ -1237,7 +1238,9 @@ const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
               trans.__(
                 'Uploaded %1%2',
                 file.name,
-                file.size ? ` (${formatFileSize(file.size, 1, 1024)})` : ''
+                file.size !== null && file.size !== undefined
+                  ? ` (${formatFileSize(file.size, 1, 1024)})`
+                  : ''
               ),
               'info',
               {
@@ -1484,7 +1487,7 @@ function addCommands(
           (
             await InputDialog.getText({
               label: trans.__('Path'),
-              placeholder: '/path/relative/to/jlab/root',
+              placeholder: trans.__('/path/relative/to/jlab/root'),
               title: trans.__('Open Path'),
               okLabel: trans.__('Open')
             })
@@ -1661,7 +1664,14 @@ function addCommands(
         : textEditorIcon.bindprops({ stylesheet: 'menuItem' });
     },
     label: (args: { ext: string; label: string }) => {
-      return trans.__(args.label ?? 'New File');
+      if (args.label === undefined || args.label === null) {
+        return trans.__('New File');
+      }
+      // The label is supplied by the caller, most often from the
+      // `jupyter.lab.menus` key of a settings schema, from which it is
+      // extracted by the schema selectors.
+      // eslint-disable-next-line jupyter/no-dynamic-translation
+      return trans.__(args.label);
     },
     describedBy: {
       args: {

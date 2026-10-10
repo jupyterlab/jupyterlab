@@ -186,7 +186,7 @@ describe('docregistry/savehandler', () => {
           const buttons = dialog.getElementsByTagName('button');
 
           for (let i = 0; i < buttons.length; i++) {
-            if (buttons[i].textContent === 'Revert') {
+            if (buttons[i].textContent === 'Reload from Disk') {
               buttons[i].click();
               return;
             }

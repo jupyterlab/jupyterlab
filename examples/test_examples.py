@@ -20,7 +20,7 @@ import tempfile
 here = osp.abspath(osp.dirname(__file__))
 
 
-def header(path):
+def header(path: str):
     test_name = osp.basename(path)
     print(
         "\n".join(("\n", "*" * 40, f"Starting {test_name} test in {path}", "*" * 40)),

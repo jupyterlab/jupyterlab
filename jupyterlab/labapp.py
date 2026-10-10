@@ -3,15 +3,18 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+from __future__ import annotations
+
 import dataclasses
 import json
 import os
 import sys
+from typing import TYPE_CHECKING, cast
 
 from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_flags
 from jupyter_server._version import version_info as jpserver_version_info
 from jupyter_server.serverapp import flags
-from jupyter_server.utils import to_os_path
+from jupyter_server.utils import ApiPath, to_os_path
 from jupyter_server.utils import url_path_join as ujoin
 from jupyterlab_server import (
     LabServerApp,
@@ -59,6 +62,9 @@ from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import ExtensionHandler, extensions_handler_path
 from .handlers.plugin_manager_handler import PluginHandler, plugins_handler_path
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -160,7 +166,7 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
 
     name = Unicode("JupyterLab", config=True, help="The name of the built application")
 
-    version = Unicode("", config=True, help="The version of the built application")
+    version = cast("str", Unicode("", config=True, help="The version of the built application"))
 
     dev_build = Bool(
         None,
@@ -308,7 +314,7 @@ class LabWorkspaceExportApp(WorkspaceExportApp):
     version = version
 
     @default("workspaces_dir")
-    def _default_workspaces_dir(self):
+    def _default_workspaces_dir(self) -> str:
         return get_workspaces_dir()
 
 
@@ -316,7 +322,7 @@ class LabWorkspaceImportApp(WorkspaceImportApp):
     version = version
 
     @default("workspaces_dir")
-    def _default_workspaces_dir(self):
+    def _default_workspaces_dir(self) -> str:
         return get_workspaces_dir()
 
 
@@ -324,7 +330,7 @@ class LabWorkspaceListApp(WorkspaceListApp):
     version = version
 
     @default("workspaces_dir")
-    def _default_workspaces_dir(self):
+    def _default_workspaces_dir(self) -> str:
         return get_workspaces_dir()
 
 
@@ -389,11 +395,11 @@ class LabLicensesApp(LicensesApp):
     }
 
     @default("app_dir")
-    def _default_app_dir(self):
+    def _default_app_dir(self) -> str:
         return get_app_dir()
 
     @default("static_dir")
-    def _default_static_dir(self):
+    def _default_static_dir(self) -> str:
         return pjoin(self.app_dir, "static")
 
 
@@ -520,7 +526,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         help=("The override url for static lab theme assets, typically a CDN."),
     )
 
-    app_dir = Unicode(None, config=True, help="The app directory to launch JupyterLab from.")
+    app_dir = Unicode("", config=True, help="The app directory to launch JupyterLab from.")
 
     user_settings_dir = Unicode(
         get_user_settings_dir(), config=True, help="The directory for user settings."
@@ -623,7 +629,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     )
 
     @default("app_dir")
-    def _default_app_dir(self):
+    def _default_app_dir(self) -> str:
         app_dir = get_app_dir()
         if self.core_mode:
             app_dir = HERE
@@ -632,45 +638,49 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         return app_dir
 
     @default("app_settings_dir")
-    def _default_app_settings_dir(self):
+    def _default_app_settings_dir(self) -> str:
         return pjoin(self.app_dir, "settings")
 
     @default("app_version")
-    def _default_app_version(self):
+    def _default_app_version(self) -> str:
         return app_version
 
     @default("cache_files")
-    def _default_cache_files(self):
+    def _default_cache_files(self) -> bool:
         return False
 
     @default("schemas_dir")
-    def _default_schemas_dir(self):
+    def _default_schemas_dir(self) -> str:
         return pjoin(self.app_dir, "schemas")
 
     @default("templates_dir")
-    def _default_templates_dir(self):
+    def _default_templates_dir(self) -> str:
         return pjoin(self.app_dir, "static")
 
     @default("themes_dir")
-    def _default_themes_dir(self):
+    def _default_themes_dir(self) -> str:
         if self.override_theme_url:
             return ""
         return pjoin(self.app_dir, "themes")
 
     @default("static_dir")
-    def _default_static_dir(self):
+    def _default_static_dir(self) -> str:
         return pjoin(self.app_dir, "static")
 
     @default("static_url_prefix")
-    def _default_static_url_prefix(self):
+    def _default_static_url_prefix(self) -> str:
         if self.override_static_url:
             return self.override_static_url
         else:
+            serverapp = self.serverapp
+            if serverapp is None:
+                msg = "LabApp requires a linked server application"
+                raise RuntimeError(msg)
             static_url = f"/static/{self.name}/"
-            return ujoin(self.serverapp.base_url, static_url)
+            return ujoin(serverapp.base_url, static_url)
 
     @default("theme_url")
-    def _default_theme_url(self):
+    def _default_theme_url(self) -> str:
         if self.override_theme_url:
             return self.override_theme_url
         return ""
@@ -725,11 +735,16 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         super()._prepare_templates()
         self.jinja2_env.globals.update(custom_css=self.custom_css)
 
-    def _preferred_path_is_home(self):
+    def _preferred_path_is_home(self) -> bool:
         """Whether the preferred path resolves to the user's home directory."""
+        if self.serverapp is None:
+            return False
         try:
             contents_manager = self.serverapp.contents_manager
-            preferred_dir = to_os_path(contents_manager.preferred_dir, contents_manager.root_dir)
+            preferred_dir = to_os_path(
+                ApiPath(contents_manager.preferred_dir),
+                contents_manager.root_dir,
+            )
             return os.path.samefile(preferred_dir, os.path.expanduser("~"))
         except (AttributeError, OSError):
             return False
@@ -931,7 +946,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         self.handlers.extend(handlers)
         super().initialize_handlers()
 
-    def initialize(self, argv=None):
+    def initialize(self, argv: Sequence[str] | None = None):
         """Subclass because the ExtensionApp.initialize() method does not take arguments"""
         super().initialize()
         if self.collaborative:

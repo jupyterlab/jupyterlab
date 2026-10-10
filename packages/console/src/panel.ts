@@ -63,10 +63,11 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
     sessionContext = this._sessionContext =
       sessionContext ??
       new SessionContext({
+        driveName: manager.contents.driveName(path),
         kernelManager: manager.kernels,
         sessionManager: manager.sessions,
         specsManager: manager.kernelspecs,
-        path: manager.contents.localPath(path),
+        path,
         name: name || trans.__('Console %1', count),
         type: 'console',
         kernelPreference: options.kernelPreference,
@@ -345,7 +346,6 @@ namespace Private {
 
     const sessionContext = panel.console.sessionContext.session;
     if (sessionContext) {
-      // FIXME:
       let caption =
         trans.__('Name: %1\n', sessionContext.name) +
         trans.__('Directory: %1\n', PathExt.dirname(sessionContext.path)) +
@@ -359,7 +359,10 @@ namespace Private {
       }
 
       if (executed) {
-        caption += trans.__('\nLast Execution: %1');
+        caption += trans.__(
+          '\nLast Execution: %1',
+          Time.format(executed.toISOString())
+        );
       }
       panel.title.label = sessionContext.name;
       panel.title.caption = caption;

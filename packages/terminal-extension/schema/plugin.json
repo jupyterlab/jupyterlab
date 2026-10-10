@@ -4,6 +4,11 @@
   "jupyter.lab.menus": {
     "context": [
       {
+        "command": "terminal:copy-link",
+        "selector": ".jp-Terminal",
+        "rank": 0
+      },
+      {
         "command": "terminal:copy",
         "selector": ".jp-Terminal",
         "rank": 1

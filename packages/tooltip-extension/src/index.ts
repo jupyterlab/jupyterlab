@@ -348,7 +348,7 @@ namespace Private {
     const contents: KernelMessage.IInspectRequestMsg['content'] = {
       code,
       cursor_pos: offset,
-      detail_level: detail || 0
+      detail_level: detail ?? 0
     };
     const current = ++pending;
 

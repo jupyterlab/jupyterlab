@@ -1,10 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import { Token } from '@lumino/coreutils';
+import { Signal } from '@lumino/signaling';
 import { simulate } from 'simulate-event';
 import type { JupyterLab } from '@jupyterlab/application';
 import { PluginListModel } from '@jupyterlab/pluginmanager';
-import { dismissDialog, waitForDialog } from '@jupyterlab/testing';
+import {
+  dismissDialog,
+  signalToPromises,
+  waitForDialog
+} from '@jupyterlab/testing';
 
 import { ServerConnection } from '@jupyterlab/services';
 
@@ -185,6 +190,54 @@ describe('@jupyterlab/pluginmanager', () => {
     });
 
     describe('#available', () => {
+      it('should refresh when available plugin metadata changes', async () => {
+        const availablePlugins = [providerPlugin];
+        const availablePluginsChanged = new Signal<unknown, void>({});
+        const model = new PluginListModel({
+          pluginData: {
+            availablePlugins,
+            availablePluginsChanged
+          }
+        });
+        await model.ready;
+        expect(model.available.map(plugin => plugin.id)).toEqual([
+          providerPlugin.id
+        ]);
+
+        const [, refreshed] = signalToPromises(model.stateChanged, 2);
+        availablePlugins.push(optionalUserPlugin);
+        availablePluginsChanged.emit(void 0);
+        await refreshed;
+
+        expect(model.available.map(plugin => plugin.id)).toEqual([
+          providerPlugin.id,
+          optionalUserPlugin.id
+        ]);
+      });
+
+      it('should not refresh once disposed', async () => {
+        const availablePlugins = [providerPlugin];
+        const availablePluginsChanged = new Signal<unknown, void>({});
+        const model = new PluginListModel({
+          pluginData: {
+            availablePlugins,
+            availablePluginsChanged
+          }
+        });
+        await model.ready;
+        const callsBefore = spy.mock.calls.length;
+
+        model.dispose();
+        availablePlugins.push(optionalUserPlugin);
+        availablePluginsChanged.emit(void 0);
+        await Promise.resolve();
+
+        expect(spy).toHaveBeenCalledTimes(callsBefore);
+        expect(model.available.map(plugin => plugin.id)).toEqual([
+          providerPlugin.id
+        ]);
+      });
+
       it('should mark plugins as locked if server has all plugins locked', async () => {
         spy.mockImplementation((..._) => {
           return Promise.resolve({

@@ -659,10 +659,10 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    * The execution count of the cell.
    */
   get executionCount(): nbformat.ExecutionCount {
-    return this.sharedModel.execution_count || null;
+    return this.sharedModel.execution_count ?? null;
   }
   set executionCount(newValue: nbformat.ExecutionCount) {
-    this.sharedModel.execution_count = newValue || null;
+    this.sharedModel.execution_count = newValue ?? null;
   }
 
   /**

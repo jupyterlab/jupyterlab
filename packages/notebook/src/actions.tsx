@@ -1510,12 +1510,18 @@ export namespace NotebookActions {
       return;
     }
 
-    let values = stored as nbformat.IBaseCell[];
+    const storedCells = stored as nbformat.IBaseCell[];
+    const isLocal = clipboard.matchesLastWrite(JUPYTER_CELL_MIME, stored);
+    let values = isLocal
+      ? (JSONExt.deepCopy(storedCells) as nbformat.IBaseCell[])
+      : Private.untrustSystemClipboardCells(storedCells);
+    let interactionValues = storedCells;
     if (options?.stripOutputs) {
       values = Private.stripCodeCellOutputs(values);
+      interactionValues = Private.stripCodeCellOutputs(storedCells);
     }
 
-    addCells(notebook, mode, values, true);
+    addCells(notebook, mode, values, true, interactionValues);
     void focusActiveCell(notebook);
   }
 
@@ -1563,6 +1569,8 @@ export namespace NotebookActions {
    *
    * @param cellsFromClipboard — True if the cells were sourced from the clipboard.
    *
+   * @param clipboardInteractionValues — The cells to use for clipboard signal comparison.
+   *
    * #### Notes
    * The last added cell becomes the active cell.
    * This is a no-op if values is an empty array.
@@ -1573,7 +1581,8 @@ export namespace NotebookActions {
     notebook: Notebook,
     mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below',
     values: nbformat.IBaseCell[],
-    cellsFromClipboard: boolean = false
+    cellsFromClipboard: boolean = false,
+    clipboardInteractionValues: nbformat.IBaseCell[] = values
   ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
@@ -1680,7 +1689,10 @@ export namespace NotebookActions {
     notebook.activeCellIndex = prevActiveCellIndex + values.length;
     notebook.deselectAll();
     if (cellsFromClipboard) {
-      notebook.recordCellClipboardInteraction('paste', values);
+      notebook.recordCellClipboardInteraction(
+        'paste',
+        clipboardInteractionValues
+      );
     }
     void Private.handleState(notebook, state, true);
   }
@@ -2941,7 +2953,9 @@ namespace Private {
           const trans = translator.load('jupyterlab');
           Notification.emit(
             trans.__(
-              `Kernel '${sessionContext.kernelDisplayName}' for '${sessionContext.path}' is still initializing. You can run code cells when the kernel has initialized.`
+              "Kernel '%1' for '%2' is still initializing. You can run code cells when the kernel has initialized.",
+              sessionContext.kernelDisplayName,
+              sessionContext.path
             ),
             'warning',
             { autoClose: false }
@@ -3088,6 +3102,32 @@ namespace Private {
       if (copy && nbformat.isCode(copy)) {
         copy.outputs = [];
         copy.execution_count = null;
+      }
+      return copy;
+    });
+  }
+
+  /**
+   * Return a deep copy of cells with trust removed for system clipboard paste.
+   *
+   * System clipboard data is plain text and has no authenticated JupyterLab
+   * provenance, so it must not confer trusted-output authority.
+   *
+   * @param cells - The cells to process.
+   * @returns New cell objects.
+   */
+  export function untrustSystemClipboardCells(
+    cells: nbformat.IBaseCell[]
+  ): nbformat.IBaseCell[] {
+    return cells.map(cell => {
+      const copy = JSONExt.deepCopy(cell) as nbformat.ICell;
+      copy.metadata =
+        copy.metadata && JSONExt.isObject(copy.metadata) ? copy.metadata : {};
+
+      if (nbformat.isCode(copy)) {
+        copy.metadata.trusted = false;
+      } else {
+        delete copy.metadata.trusted;
       }
       return copy;
     });

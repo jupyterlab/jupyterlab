@@ -228,7 +228,7 @@ function Item(props: {
   const children = runningItem.children;
 
   // Manage collapsed state. Use the shutdown flag in lieu of `stopPropagation`.
-  const collapsible = !!children?.length;
+  const collapsible = (children?.length ?? 0) > 0;
   const onClick = useCallback(
     (event: React.MouseEvent) => {
       if (shuttingDown.current) {

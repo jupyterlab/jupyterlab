@@ -141,6 +141,19 @@ describe('terminal/index', () => {
       });
     });
 
+    describe('#contextMenuLink', () => {
+      it('should be null by default', () => {
+        expect(widget.contextMenuLink).toBeNull();
+      });
+
+      it('should stay null when the context menu is opened away from a link', () => {
+        widget.node.dispatchEvent(
+          new MouseEvent('contextmenu', { bubbles: true })
+        );
+        expect(widget.contextMenuLink).toBeNull();
+      });
+    });
+
     describe('#processMessage()', () => {
       it('should handle fit requests', () => {
         widget.processMessage(Widget.Msg.FitRequest);

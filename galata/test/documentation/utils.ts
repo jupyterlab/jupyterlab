@@ -107,6 +107,56 @@ export async function positionMouseOver(
   });
 }
 
+/**
+ * A rectangle usable as the `clip` option of `page.screenshot()`.
+ */
+export interface IClip {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * Compute the smallest rectangle enclosing all the given elements.
+ *
+ * Useful to screenshot a widget together with the element it relates to
+ * (for example a completer and the cell it completes) without hard-coding
+ * pixel coordinates.
+ *
+ * @param page The page the elements belong to
+ * @param elements The elements to enclose
+ * @param padding Margin added on each side (default: 8 pixels)
+ * @returns The enclosing rectangle, clipped to the viewport
+ */
+export async function boundsAround(
+  page: Page,
+  elements: Locator[],
+  padding: number = 8
+): Promise<IClip> {
+  const boxes = await Promise.all(
+    elements.map(element => element.boundingBox())
+  );
+  const found = boxes.filter(box => box !== null);
+  if (found.length === 0) {
+    throw new Error('None of the given elements is visible');
+  }
+
+  const viewport = page.viewportSize()!;
+  const left = Math.max(0, Math.min(...found.map(box => box.x)) - padding);
+  const top = Math.max(0, Math.min(...found.map(box => box.y)) - padding);
+  const right = Math.min(
+    viewport.width,
+    Math.max(...found.map(box => box.x + box.width)) + padding
+  );
+  const bottom = Math.min(
+    viewport.height,
+    Math.max(...found.map(box => box.y + box.height)) + padding
+  );
+
+  return { x: left, y: top, width: right - left, height: bottom - top };
+}
+
 export async function stubGitHubUserIcons(page: Page): Promise<void> {
   // stub out github user icons
   // only first and last icon for now

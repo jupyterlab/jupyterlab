@@ -18,7 +18,10 @@ export class SaveHandler implements IDisposable {
   constructor(options: SaveHandler.IOptions) {
     this._context = options.context;
     this._isConnectedCallback = options.isConnectedCallback || (() => true);
-    const interval = options.saveInterval || 120;
+    const interval =
+      options.saveInterval === undefined || options.saveInterval === 0
+        ? 120
+        : options.saveInterval;
     this._minInterval = interval * 1000;
     this._interval = this._minInterval;
     // Restart the timer when the contents model is updated.
