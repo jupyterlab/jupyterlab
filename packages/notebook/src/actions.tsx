@@ -2734,6 +2734,8 @@ namespace Private {
     outputs: nbformat.IOutput[];
     /** Display id targets from the output area when execution was detached. */
     displayIdMap: ReadonlyMap<string, readonly number[]>;
+    /** Whether newer outputs are waiting for the user to accept them. */
+    pendingOutputs?: boolean;
   }
 
   const pendingOutputExecutions = new WeakMap<CodeCell, IStoredCellExecution>();
@@ -2798,13 +2800,14 @@ namespace Private {
     const pending = pendingOutputExecutions.get(cell);
     if (pending && !cell.outputArea.future) {
       pending.outputs = cell.model.outputs.toJSON();
+      pending.displayIdMap = cell.outputArea.displayIdMap;
       return pending;
     }
-    const detachedFuture = cell.outputArea.detachFuture();
-    if (!detachedFuture) {
+    const future = cell.outputArea.detachFuture();
+    if (!future) {
       return null;
     }
-    const { future, displayIdMap } = detachedFuture;
+    const displayIdMap = cell.outputArea.displayIdMap;
     const outputs = cell.model.outputs.toJSON();
     let done = false;
     void future.done.then(
@@ -2873,15 +2876,18 @@ namespace Private {
    */
   export function restoreExecution(
     notebook: Notebook,
-    {
-      cellId,
-      future,
-      isDone,
-      buffered,
-      outputs,
-      displayIdMap
-    }: IStoredCellExecution
+    storedExecution: IStoredCellExecution
   ): void {
+    if (storedExecution.pendingOutputs) {
+      restoreFinishedDeleteExecution(
+        notebook,
+        storedExecution,
+        notebook.translator.load('jupyterlab')
+      );
+      return;
+    }
+    const { cellId, future, isDone, buffered, outputs, displayIdMap } =
+      storedExecution;
     const cell = notebook.widgets.find(w => w.model.id === cellId);
     if (!(cell instanceof CodeCell)) {
       return;
@@ -2961,6 +2967,7 @@ namespace Private {
     ) {
       cell.model.outputs.fromJSON(storedExecution.outputs);
     }
+    cell.outputArea.displayIdMap = storedExecution.displayIdMap;
     cell.model.executionState = 'idle';
     syncExecutionStateWithFuture(cell, future);
     const hasOutputChanges = storedExecution.buffered.some(
@@ -2968,6 +2975,7 @@ namespace Private {
         buffered.channel === 'iopub' &&
         isOutputChangingIOPubMessage(buffered.msg)
     );
+    storedExecution.pendingOutputs = hasOutputChanges;
     if (!hasOutputChanges) {
       restoreExecution(notebook, storedExecution);
       return;
@@ -3001,6 +3009,7 @@ namespace Private {
               const restore = canRestore();
               dismiss();
               if (restore) {
+                storedExecution.pendingOutputs = false;
                 restoreExecution(notebook, storedExecution);
               }
             }
@@ -3012,8 +3021,9 @@ namespace Private {
       const restore = canRestore();
       dismiss();
       if (restore) {
+        storedExecution.pendingOutputs = false;
         storedExecution.buffered.length = 0;
-        cell.outputArea.reattachFuture(future, storedExecution.displayIdMap);
+        cell.outputArea.reattachFuture(future);
       }
     }, NEW_OUTPUTS_NOTIFICATION_AUTO_CLOSE);
   }

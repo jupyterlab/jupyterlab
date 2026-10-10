@@ -493,8 +493,8 @@ describe('outputarea/widget', () => {
         if (!detachedFuture) {
           throw new Error('Expected a detached future.');
         }
-        expect(detachedFuture.future).toBe(future);
-        widget.reattachFuture(future);
+        expect(detachedFuture).toBe(future);
+        widget.reattachFuture(detachedFuture);
         void future.onIOPub(
           createUpdateDisplayDataMessage(updatedData, displayId)
         );
@@ -512,12 +512,13 @@ describe('outputarea/widget', () => {
         widget.future = future;
         void future.onIOPub(createDisplayDataMessage(initialData, displayId));
         const restoredOutputs = model.toJSON();
+        const displayIdMap = widget.displayIdMap;
         const detachedFuture = widget.detachFuture();
         expect(detachedFuture).not.toBeNull();
         if (!detachedFuture) {
           throw new Error('Expected a detached future.');
         }
-        expect(detachedFuture.future).toBe(future);
+        expect(detachedFuture).toBe(future);
 
         widget.dispose();
         model.dispose();
@@ -525,12 +526,28 @@ describe('outputarea/widget', () => {
         widget = new LogOutputArea({ rendermime, model });
         model.fromJSON(restoredOutputs);
 
-        widget.reattachFuture(future, detachedFuture.displayIdMap);
+        widget.reattachFuture(detachedFuture, displayIdMap);
         void future.onIOPub(
           createUpdateDisplayDataMessage(updatedData, displayId)
         );
 
         expect(model.get(0).data).toEqual(updatedData);
+      });
+    });
+
+    describe('#displayIdMap', () => {
+      it('should copy display id targets on get and set', () => {
+        const targets = [0];
+        const displayIdMap = new Map([['display-id', targets]]);
+        widget.displayIdMap = displayIdMap;
+        const captured = widget.displayIdMap;
+
+        targets.push(1);
+        displayIdMap.clear();
+        expect(widget.displayIdMap.get('display-id')).toEqual([0]);
+
+        widget.displayIdMap = new Map();
+        expect(captured.get('display-id')).toEqual([0]);
       });
     });
 

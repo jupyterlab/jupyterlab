@@ -3246,6 +3246,119 @@ describe('@jupyterlab/notebook', () => {
         }
       });
 
+      it.each([false, true])(
+        'should preserve pending output through a move (undo move: %s)',
+        async undoMove => {
+          const cell = widget.widgets[0] as CodeCell;
+          const cellId = cell.model.id;
+          const future = createResolvedFuture();
+          cell.outputArea.future = future;
+          void future.onIOPub(createStreamMessage('before'));
+          NotebookActions.deleteCells(widget);
+          void future.onIOPub(createClearOutputMessage());
+          void future.onIOPub(createStreamMessage('after'));
+          await future.done;
+          const notificationInfo = jest
+            .spyOn(Notification, 'info')
+            .mockImplementation(() => '');
+          try {
+            NotebookActions.undo(widget);
+            const oldAction = notificationInfo.mock.calls[0][1]!.actions![0];
+            NotebookActions.moveCells(widget, 0, 2);
+            if (undoMove) {
+              NotebookActions.undo(widget);
+            }
+            const restored = widget.widgets.find(
+              w => w.model.id === cellId
+            ) as CodeCell;
+            oldAction.callback(new MouseEvent('click'));
+            expect(restored.model.outputs.get(0).data[STDOUT_TYPE]).toBe(
+              'before'
+            );
+            expect(notificationInfo).toHaveBeenCalledTimes(undoMove ? 3 : 2);
+            const calls = notificationInfo.mock.calls;
+            calls[calls.length - 1][1]!.actions![0].callback(
+              new MouseEvent('click')
+            );
+            expect(restored.model.outputs.get(0).data[STDOUT_TYPE]).toBe(
+              'after'
+            );
+            expect(restored.outputArea.future).toBe(future);
+          } finally {
+            notificationInfo.mockRestore();
+          }
+        }
+      );
+
+      it.each(['clear', 'remove'])(
+        'should update pending display targets when outputs change (%s)',
+        async action => {
+          const cell = widget.widgets[0] as CodeCell;
+          const cellId = cell.model.id;
+          const future = createResolvedFuture();
+          cell.outputArea.future = future;
+          for (const displayId of ['first', 'second']) {
+            void future.onIOPub(
+              KernelMessage.createMessage<KernelMessage.IDisplayDataMsg>({
+                channel: 'iopub',
+                msgType: 'display_data',
+                session: UUID.uuid4(),
+                content: {
+                  data: { 'text/plain': displayId },
+                  metadata: {},
+                  transient: { display_id: displayId }
+                }
+              })
+            );
+          }
+          NotebookActions.deleteCells(widget);
+          void future.onIOPub(createStreamMessage('after'));
+          await future.done;
+          const notificationInfo = jest
+            .spyOn(Notification, 'info')
+            .mockImplementation(() => '');
+          jest.useFakeTimers();
+          try {
+            NotebookActions.undo(widget);
+            const restored = widget.widgets.find(
+              w => w.model.id === cellId
+            ) as CodeCell;
+            if (action === 'clear') {
+              widget.activeCellIndex = widget.widgets.indexOf(restored);
+              NotebookActions.clearOutputs(widget);
+            } else {
+              restored.model.outputs.remove(0);
+            }
+            jest.advanceTimersByTime(10000);
+            for (const displayId of ['first', 'second']) {
+              void future.onIOPub(
+                KernelMessage.createMessage<KernelMessage.IUpdateDisplayDataMsg>(
+                  {
+                    channel: 'iopub',
+                    msgType: 'update_display_data',
+                    session: UUID.uuid4(),
+                    content: {
+                      data: { 'text/plain': `${displayId} updated` },
+                      metadata: {},
+                      transient: { display_id: displayId }
+                    }
+                  }
+                )
+              );
+            }
+            expect(restored.model.outputs.length).toBe(
+              action === 'clear' ? 0 : 1
+            );
+            expect(restored.model.outputs.get(0)?.data['text/plain']).toBe(
+              action === 'clear' ? undefined : 'second updated'
+            );
+          } finally {
+            jest.useRealTimers();
+            notificationInfo.mockRestore();
+          }
+        }
+      );
+
       it('should keep stream output contiguous across repeated deletion undo', async () => {
         const initialVisibleOutput = '0\n1\n2\n3\n4\n5\n';
         const firstBufferedOutput = '6\n7\n8\n9\n10\n';

@@ -314,21 +314,33 @@ export class OutputArea extends Widget {
    *
    * Clears the message handlers on the future so this output area can be
    * safely disposed without terminating the in-flight execution. The returned
-   * future and display id targets can be passed to `reattachFuture`.
+   * future can be re-attached to a new output area via `reattachFuture` method.
    *
    * Returns `null` if no future is currently attached.
    */
-  detachFuture(): OutputArea.IDetachedFuture | null {
+  detachFuture(): Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  > | null {
     const future = this._future;
     if (!future) {
       return null;
     }
-    const displayIdMap = Private.cloneDisplayIdMap(this._displayIdMap);
     future.onIOPub = () => undefined;
     future.onReply = () => undefined;
     future.onStdin = () => undefined;
     this._future = null!;
-    return { future, displayIdMap };
+    return future;
+  }
+
+  /**
+   * Display id targets for the current outputs, copied on get and set.
+   */
+  get displayIdMap(): ReadonlyMap<string, readonly number[]> {
+    return Private.cloneDisplayIdMap(this._displayIdMap);
+  }
+  set displayIdMap(value: ReadonlyMap<string, readonly number[]>) {
+    this._displayIdMap = Private.cloneDisplayIdMap(value);
   }
 
   /**
@@ -345,7 +357,7 @@ export class OutputArea extends Widget {
     displayIdMap?: ReadonlyMap<string, readonly number[]>
   ) {
     if (displayIdMap) {
-      this._setDisplayIdMap(displayIdMap);
+      this.displayIdMap = displayIdMap;
     }
     this._setFuture(future, false);
   }
@@ -490,15 +502,6 @@ export class OutputArea extends Widget {
         }
       }
     });
-  }
-
-  /**
-   * Set display id indices from a captured map.
-   */
-  private _setDisplayIdMap(
-    displayIdMap: ReadonlyMap<string, readonly number[]>
-  ): void {
-    this._displayIdMap = Private.cloneDisplayIdMap(displayIdMap);
   }
 
   /**
@@ -991,24 +994,6 @@ export class SimplifiedOutputArea extends OutputArea {
  * A namespace for OutputArea statics.
  */
 export namespace OutputArea {
-  /**
-   * A detached future with the display id targets for the current outputs.
-   */
-  export interface IDetachedFuture {
-    /**
-     * The kernel future detached from the output area.
-     */
-    future: Kernel.IShellFuture<
-      KernelMessage.IExecuteRequestMsg,
-      KernelMessage.IExecuteReplyMsg
-    >;
-
-    /**
-     * Display id targets captured when the future was detached.
-     */
-    displayIdMap: ReadonlyMap<string, readonly number[]>;
-  }
-
   /**
    * The options to create an `OutputArea`.
    */
