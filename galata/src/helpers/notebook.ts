@@ -469,25 +469,32 @@ export class NotebookHelper {
    * @returns Whether the action succeeded or not.
    */
   async trust(): Promise<boolean> {
-    if (
-      (await this.isAnyActive()) &&
-      (await this.page
-        .locator('[data-icon="ui-components:not-trusted"]')
-        .count()) === 1
-    ) {
-      await this.page.keyboard.press('Control+Shift+C');
-      await this.page.getByPlaceholder('SEARCH', { exact: true }).fill('trust');
-      await this.page.getByText('Trust Notebook').click();
-      await this.page.getByRole('button', { name: 'Trust' }).click();
-
-      return (
-        (await this.page
-          .locator('[data-icon="ui-components:trusted"]')
-          .count()) === 1
-      );
+    if (!(await this.isAnyActive())) {
+      return true;
     }
 
-    return true;
+    const trusted = await this.page.evaluate(async () => {
+      const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+      await panel.context.ready;
+      return Array.from(panel.content.model!.cells).every(cell => cell.trusted);
+    });
+    if (trusted) {
+      return true;
+    }
+
+    // The command resolves after confirmation and saving the notebook.
+    const [result] = await Promise.all([
+      this.page.evaluate<{ trusted: boolean }>(() =>
+        window.jupyterapp.commands.execute('notebook:trust')
+      ),
+      this.page
+        .getByRole('button', {
+          name: 'Confirm Trusting this notebook',
+          exact: true
+        })
+        .click()
+    ]);
+    return result.trusted;
   }
 
   /**

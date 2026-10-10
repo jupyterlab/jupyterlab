@@ -2,6 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PromiseDelegate } from '@lumino/coreutils';
+// The viewer loads this model on demand; its base class must be available then.
+// eslint-disable-next-line jupyter/prefer-lazy-imports
 import { DataModel } from '@lumino/datagrid';
 import type { IDisposable } from '@lumino/disposable';
 import type { IParser } from './parse';

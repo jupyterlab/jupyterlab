@@ -36,10 +36,21 @@ import type { IFormRenderer, LabIcon } from '@jupyterlab/ui-components';
 import { IFormRendererRegistry, pythonIcon } from '@jupyterlab/ui-components';
 import type { PartialJSONObject } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
-
-import { renderServerSetting } from './renderer';
+import React from 'react';
 
 import type { FieldProps } from '@rjsf/utils';
+
+type ServerSettingRendererProps = FieldProps & {
+  translator: ITranslator;
+};
+
+const ServerSettingRenderer = React.lazy(async () => {
+  const { renderServerSetting } = await import('./renderer');
+  return {
+    default: (props: ServerSettingRendererProps): React.ReactElement =>
+      renderServerSetting(props, props.translator)
+  };
+});
 
 const plugin: JupyterFrontEndPlugin<ILSPDocumentConnectionManager> = {
   activate,
@@ -218,7 +229,11 @@ function activateSettings(
   if (settingRendererRegistry) {
     const renderer: IFormRenderer = {
       fieldRenderer: (props: FieldProps) => {
-        return renderServerSetting(props, translator);
+        return React.createElement(
+          React.Suspense,
+          { fallback: null },
+          React.createElement(ServerSettingRenderer, { ...props, translator })
+        );
       }
     };
     settingRendererRegistry.addRenderer(
