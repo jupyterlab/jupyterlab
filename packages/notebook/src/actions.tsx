@@ -1780,8 +1780,6 @@ export namespace NotebookActions {
       const execution = preCaptured.get(stored.cellId) ?? stored;
       if (execution.isDone() && executionCaptureSource === 'delete') {
         Private.restoreFinishedDeleteExecution(notebook, execution, trans);
-      } else if (execution.isDone() && executionCaptureSource) {
-        Private.restoreFinishedExecutionSnapshot(notebook, execution);
       } else {
         Private.restoreExecution(notebook, execution);
       }
@@ -2738,6 +2736,8 @@ namespace Private {
     displayIdMap: ReadonlyMap<string, readonly number[]>;
   }
 
+  const pendingOutputExecutions = new WeakMap<CodeCell, IStoredCellExecution>();
+
   function isOutputChangingIOPubMessage(
     msg: KernelMessage.IIOPubMessage
   ): boolean {
@@ -2753,51 +2753,6 @@ namespace Private {
       default:
         return false;
     }
-  }
-
-  export function takeBufferedOutputChanges(
-    storedExecution: IStoredCellExecution
-  ): KernelMessage.IIOPubMessage[] {
-    const outputChanges: KernelMessage.IIOPubMessage[] = [];
-    for (const buffered of storedExecution.buffered) {
-      if (
-        buffered.channel === 'iopub' &&
-        isOutputChangingIOPubMessage(buffered.msg)
-      ) {
-        outputChanges.push(buffered.msg);
-      }
-    }
-    storedExecution.buffered.length = 0;
-    return outputChanges;
-  }
-
-  /**
-   * Reattach a future and replay buffered IOPub messages on a cell.
-   *
-   * Returns whether the replay was applied to the cell.
-   */
-  export function replayBufferedOutput(
-    cell: CodeCell,
-    future: Kernel.IShellFuture<
-      KernelMessage.IExecuteRequestMsg,
-      KernelMessage.IExecuteReplyMsg
-    >,
-    buffered: KernelMessage.IIOPubMessage[],
-    displayIdMap?: ReadonlyMap<string, readonly number[]>
-  ): boolean {
-    const currentFuture = cell.outputArea.future;
-    if (currentFuture && currentFuture !== future) {
-      return false;
-    }
-
-    cell.outputArea.reattachFuture(future, displayIdMap);
-    // Replay any IOPub messages that arrived while the future was detached.
-    // After reattachFuture, future.onIOPub routes to the new output area.
-    for (const msg of buffered) {
-      void future.onIOPub(msg);
-    }
-    buffered.length = 0;
-    return true;
   }
 
   /**
@@ -2840,6 +2795,11 @@ namespace Private {
   export function captureExecution(
     cell: CodeCell
   ): IStoredCellExecution | null {
+    const pending = pendingOutputExecutions.get(cell);
+    if (pending && !cell.outputArea.future) {
+      pending.outputs = cell.model.outputs.toJSON();
+      return pending;
+    }
     const detachedFuture = cell.outputArea.detachFuture();
     if (!detachedFuture) {
       return null;
@@ -3003,13 +2963,32 @@ namespace Private {
     }
     cell.model.executionState = 'idle';
     syncExecutionStateWithFuture(cell, future);
-    const bufferedOutputChanges = takeBufferedOutputChanges(storedExecution);
-    if (bufferedOutputChanges.length === 0) {
+    const hasOutputChanges = storedExecution.buffered.some(
+      buffered =>
+        buffered.channel === 'iopub' &&
+        isOutputChangingIOPubMessage(buffered.msg)
+    );
+    if (!hasOutputChanges) {
+      restoreExecution(notebook, storedExecution);
       return;
     }
 
+    pendingOutputExecutions.set(cell, storedExecution);
     let notificationId = '';
     let dismissTimeout = 0;
+    const dismiss = () => {
+      window.clearTimeout(dismissTimeout);
+      cell.disposed.disconnect(dismiss);
+      pendingOutputExecutions.delete(cell);
+      if (notificationId) {
+        Notification.dismiss(notificationId);
+      }
+    };
+    const canRestore = () =>
+      !cell.isDisposed &&
+      pendingOutputExecutions.get(cell) === storedExecution &&
+      (!cell.outputArea.future || cell.outputArea.future === future);
+    cell.disposed.connect(dismiss);
     notificationId = Notification.info(
       trans.__('A restored cell has newer outputs available.'),
       {
@@ -3019,24 +2998,10 @@ namespace Private {
             label: trans.__('Show new outputs'),
             displayType: 'accent',
             callback: () => {
-              if (dismissTimeout) {
-                window.clearTimeout(dismissTimeout);
-                dismissTimeout = 0;
-              }
-              if (
-                !replayBufferedOutput(
-                  cell,
-                  future,
-                  bufferedOutputChanges,
-                  storedExecution.displayIdMap
-                )
-              ) {
-                return;
-              }
-              syncExecutionStateWithFuture(cell, future);
-              bufferedOutputChanges.length = 0;
-              if (notificationId) {
-                Notification.dismiss(notificationId);
+              const restore = canRestore();
+              dismiss();
+              if (restore) {
+                restoreExecution(notebook, storedExecution);
               }
             }
           }
@@ -3044,33 +3009,13 @@ namespace Private {
       }
     );
     dismissTimeout = window.setTimeout(() => {
-      bufferedOutputChanges.length = 0;
-      if (notificationId) {
-        Notification.dismiss(notificationId);
+      const restore = canRestore();
+      dismiss();
+      if (restore) {
+        storedExecution.buffered.length = 0;
+        cell.outputArea.reattachFuture(future, storedExecution.displayIdMap);
       }
     }, NEW_OUTPUTS_NOTIFICATION_AUTO_CLOSE);
-  }
-
-  /**
-   * Restore a finished non-delete execution without applying detached output.
-   */
-  export function restoreFinishedExecutionSnapshot(
-    notebook: Notebook,
-    storedExecution: IStoredCellExecution
-  ): void {
-    const { cellId, future } = storedExecution;
-    const cell = notebook.widgets.find(w => w.model.id === cellId);
-    if (!(cell instanceof CodeCell)) {
-      return;
-    }
-    if (
-      !JSONExt.deepEqual(storedExecution.outputs, cell.model.outputs.toJSON())
-    ) {
-      cell.model.outputs.fromJSON(storedExecution.outputs);
-    }
-    cell.model.executionState = 'idle';
-    storedExecution.buffered.length = 0;
-    syncExecutionStateWithFuture(cell, future);
   }
 
   /**

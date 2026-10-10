@@ -2944,42 +2944,49 @@ describe('@jupyterlab/notebook', () => {
         expect(cellAfterUndo.model.executionCount).not.toBe(null);
       }, 20000);
 
-      it('should not show newer-output notification after undoing a cell type change', async () => {
-        const initialVisibleOutput = 'before\n';
-        const finalOutput = 'after\n';
-        const cell = widget.widgets[0] as CodeCell;
-        widget.activeCellIndex = 0;
-        cell.model.outputs.clear();
-        cell.model.outputs.add({
-          output_type: 'stream',
-          name: 'stdout',
-          text: initialVisibleOutput
-        });
-        const future = createResolvedFuture(1);
-        cell.outputArea.reattachFuture(future);
-        NotebookActions.changeCellType(widget, 'markdown');
+      it.each(['type change', 'merge'])(
+        'should restore finished output without a notification after undoing a %s',
+        async action => {
+          const initialVisibleOutput = 'before\n';
+          const finalOutput = 'after\n';
+          const cell = widget.widgets[0] as CodeCell;
+          widget.activeCellIndex = 0;
+          cell.model.outputs.clear();
+          cell.model.outputs.add({
+            output_type: 'stream',
+            name: 'stdout',
+            text: initialVisibleOutput
+          });
+          const future = createResolvedFuture(1);
+          cell.outputArea.reattachFuture(future);
+          if (action === 'merge') {
+            NotebookActions.mergeCells(widget);
+          } else {
+            NotebookActions.changeCellType(widget, 'markdown');
+          }
 
-        // Simulate output that arrived while the cell widget was replaced.
-        void future.onIOPub(createClearOutputMessage());
-        void future.onIOPub(createStreamMessage(finalOutput));
-        await Promise.resolve();
+          // Simulate output that arrived while the cell widget was replaced.
+          void future.onIOPub(createClearOutputMessage());
+          void future.onIOPub(createStreamMessage(finalOutput));
+          await Promise.resolve();
 
-        const notificationInfo = jest
-          .spyOn(Notification, 'info')
-          .mockImplementation(() => '');
-        try {
-          NotebookActions.undo(widget);
-          expect(notificationInfo).not.toHaveBeenCalled();
+          const notificationInfo = jest
+            .spyOn(Notification, 'info')
+            .mockImplementation(() => '');
+          try {
+            NotebookActions.undo(widget);
+            expect(notificationInfo).not.toHaveBeenCalled();
 
-          const cellAfterUndo = widget.widgets[0] as CodeCell;
-          expect(cellAfterUndo).toBeInstanceOf(CodeCell);
-          expect(cellAfterUndo.outputArea.model.get(0).data[STDOUT_TYPE]).toBe(
-            initialVisibleOutput
-          );
-        } finally {
-          notificationInfo.mockRestore();
+            const cellAfterUndo = widget.widgets[0] as CodeCell;
+            expect(cellAfterUndo).toBeInstanceOf(CodeCell);
+            expect(
+              cellAfterUndo.outputArea.model.get(0).data[STDOUT_TYPE]
+            ).toBe(finalOutput);
+          } finally {
+            notificationInfo.mockRestore();
+          }
         }
-      });
+      );
 
       it('should preserve execution state and output after undoing a cell deletion', async () => {
         const finalOutput = '0\n1\n2\n3\n4\n';
@@ -3074,6 +3081,167 @@ describe('@jupyterlab/notebook', () => {
           );
           expect(cellAfterUndo.model.executionCount).toBe(2);
         } finally {
+          notificationInfo.mockRestore();
+        }
+      });
+
+      it.each(['stream', 'display'])(
+        'should reconnect a finished deleted cell for later %s output',
+        async outputType => {
+          const cell = widget.widgets[0] as CodeCell;
+          const cellId = cell.model.id;
+          const future = createResolvedFuture();
+          cell.outputArea.future = future;
+          const displayMessage = (update: boolean) => {
+            const content = {
+              data: { 'text/plain': update ? 'after' : 'before' },
+              metadata: {},
+              transient: { display_id: 'restored-display' }
+            };
+            return update
+              ? KernelMessage.createMessage<KernelMessage.IUpdateDisplayDataMsg>(
+                  {
+                    channel: 'iopub',
+                    msgType: 'update_display_data',
+                    session: UUID.uuid4(),
+                    content
+                  }
+                )
+              : KernelMessage.createMessage<KernelMessage.IDisplayDataMsg>({
+                  channel: 'iopub',
+                  msgType: 'display_data',
+                  session: UUID.uuid4(),
+                  content
+                });
+          };
+          if (outputType === 'display') {
+            void future.onIOPub(displayMessage(false));
+          } else {
+            void future.onIOPub(createStreamMessage('before'));
+          }
+          NotebookActions.deleteCells(widget);
+          await future.done;
+          NotebookActions.undo(widget);
+
+          const restored = widget.widgets.find(
+            w => w.model.id === cellId
+          ) as CodeCell;
+          expect(restored.outputArea.future).toBe(future);
+          void future.onIOPub(
+            outputType === 'display'
+              ? displayMessage(true)
+              : createStreamMessage('after')
+          );
+          expect(
+            restored.model.outputs.get(0).data[
+              outputType === 'display' ? 'text/plain' : STDOUT_TYPE
+            ]
+          ).toBe(outputType === 'display' ? 'after' : 'beforeafter');
+        }
+      );
+
+      it.each(['redo', 'delete'])(
+        'should preserve pending finished output through another %s and undo',
+        async action => {
+          const cell = widget.widgets[0] as CodeCell;
+          const cellId = cell.model.id;
+          const future = createResolvedFuture();
+          cell.outputArea.future = future;
+          void future.onIOPub(createStreamMessage('before'));
+          NotebookActions.deleteCells(widget);
+          void future.onIOPub(createStreamMessage('after'));
+          await future.done;
+
+          const notificationInfo = jest
+            .spyOn(Notification, 'info')
+            .mockImplementation(() => '');
+          try {
+            NotebookActions.undo(widget);
+            const oldAction = notificationInfo.mock.calls[0][1]!.actions![0];
+            if (action === 'redo') {
+              NotebookActions.redo(widget);
+            } else {
+              widget.activeCellIndex = widget.widgets.findIndex(
+                w => w.model.id === cellId
+              );
+              NotebookActions.deleteCells(widget);
+            }
+            void future.onIOPub(createStreamMessage('later'));
+            NotebookActions.undo(widget);
+            expect(notificationInfo).toHaveBeenCalledTimes(2);
+            expect(() =>
+              oldAction.callback(new MouseEvent('click'))
+            ).not.toThrow();
+
+            const restored = widget.widgets.find(
+              w => w.model.id === cellId
+            ) as CodeCell;
+            expect(restored.model.outputs.get(0).data[STDOUT_TYPE]).toBe(
+              'before'
+            );
+            notificationInfo.mock.calls[1][1]!.actions![0].callback(
+              new MouseEvent('click')
+            );
+            expect(restored.model.outputs.get(0).data[STDOUT_TYPE]).toBe(
+              'beforeafterlater'
+            );
+          } finally {
+            notificationInfo.mockRestore();
+          }
+        }
+      );
+
+      it('should dismiss a pending output notification when its cell is disposed', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        const future = createResolvedFuture();
+        cell.outputArea.future = future;
+        NotebookActions.deleteCells(widget);
+        void future.onIOPub(createStreamMessage('after'));
+        await future.done;
+        const notificationInfo = jest
+          .spyOn(Notification, 'info')
+          .mockImplementation(() => 'pending-output');
+        const notificationDismiss = jest
+          .spyOn(Notification, 'dismiss')
+          .mockImplementation(() => undefined);
+        try {
+          NotebookActions.undo(widget);
+          const action = notificationInfo.mock.calls[0][1]!.actions![0];
+          widget.dispose();
+          expect(notificationDismiss).toHaveBeenCalledWith('pending-output');
+          expect(() => action.callback(new MouseEvent('click'))).not.toThrow();
+        } finally {
+          notificationInfo.mockRestore();
+          notificationDismiss.mockRestore();
+        }
+      });
+
+      it('should reconnect future output when the newer-output notification expires', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        const cellId = cell.model.id;
+        const future = createResolvedFuture();
+        cell.outputArea.future = future;
+        void future.onIOPub(createStreamMessage('before'));
+        NotebookActions.deleteCells(widget);
+        void future.onIOPub(createStreamMessage('after'));
+        await future.done;
+        const notificationInfo = jest
+          .spyOn(Notification, 'info')
+          .mockImplementation(() => '');
+        jest.useFakeTimers();
+        try {
+          NotebookActions.undo(widget);
+          jest.advanceTimersByTime(10000);
+          const restored = widget.widgets.find(
+            w => w.model.id === cellId
+          ) as CodeCell;
+          expect(restored.outputArea.future).toBe(future);
+          void future.onIOPub(createStreamMessage('later'));
+          expect(restored.model.outputs.get(0).data[STDOUT_TYPE]).toBe(
+            'beforelater'
+          );
+        } finally {
+          jest.useRealTimers();
           notificationInfo.mockRestore();
         }
       });
