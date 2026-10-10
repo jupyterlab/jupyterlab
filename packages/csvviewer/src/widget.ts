@@ -110,7 +110,54 @@ export class GridSearchService {
     this._query = null;
     this._row = 0;
     this._column = -1;
+    this._hasMatch = false;
+    this._matchesCount = null;
     this._changed.emit(undefined);
+  }
+
+  /**
+   * The number of cells matching the current query, or `null` without a query.
+   */
+  get matchesCount(): number | null {
+    const query = this._query;
+    const model = this._grid.dataModel;
+    if (!query || !model) {
+      return null;
+    }
+    const rowCount = model.rowCount('body');
+    const columnCount = model.columnCount('body');
+    const cache = this._matchesCount;
+    if (
+      cache?.query === query &&
+      cache.model === model &&
+      cache.rowCount === rowCount &&
+      cache.columnCount === columnCount
+    ) {
+      return cache.count;
+    }
+    const count = this._countMatches(query, rowCount, columnCount);
+    this._matchesCount = { query, model, rowCount, columnCount, count };
+    return count;
+  }
+
+  /**
+   * The index of the current match, or `null` if there is none.
+   */
+  get currentMatchIndex(): number | null {
+    const query = this._query;
+    const model = this._grid.dataModel;
+    if (!query || !model || !this._hasMatch) {
+      return null;
+    }
+    const columnCount = model.columnCount('body');
+    if (
+      this._row >= model.rowCount('body') ||
+      this._column < 0 ||
+      this._column >= columnCount
+    ) {
+      return null;
+    }
+    return this._countMatches(query, this._row + 1, columnCount, this._column);
   }
 
   /**
@@ -127,6 +174,7 @@ export class GridSearchService {
       this._column = -1;
     }
     this._query = query;
+    this._hasMatch = false;
 
     // check if the match is in current viewport
 
@@ -173,6 +221,7 @@ export class GridSearchService {
           }
           this._row = row;
           this._column = col;
+          this._hasMatch = true;
           return true;
         }
       }
@@ -217,10 +266,35 @@ export class GridSearchService {
     return this._query;
   }
 
+  /**
+   * Count the matching cells in the first `rowCount` rows, stopping before
+   * `stopColumn` in the last row if given.
+   */
+  private _countMatches(
+    query: RegExp,
+    rowCount: number,
+    columnCount: number,
+    stopColumn = columnCount
+  ): number {
+    const model = this._grid.dataModel!;
+    let count = 0;
+    for (let row = 0; row < rowCount; row++) {
+      const lastColumn = row === rowCount - 1 ? stopColumn : columnCount;
+      for (let column = 0; column < lastColumn; column++) {
+        if ((model.data('body', row, column) as string).match(query)) {
+          count++;
+        }
+      }
+    }
+    return count;
+  }
+
   private _grid: DataGridModule.DataGrid;
   private _query: RegExp | null;
   private _row: number;
   private _column: number;
+  private _hasMatch = false;
+  private _matchesCount: Private.IMatchesCount | null = null;
   private _looping = true;
   private _changed = new Signal<GridSearchService, void>(this);
 }
@@ -551,6 +625,17 @@ export class TSVViewerFactory extends CSVViewerFactory {
 namespace Private {
   let gridLoaded: PromiseDelegate<typeof DataGridModule> | null = null;
   let modelLoaded: PromiseDelegate<typeof DSVModelModule> | null = null;
+
+  /**
+   * The cached number of matches of a query in a grid data model.
+   */
+  export interface IMatchesCount {
+    query: RegExp;
+    model: DataGridModule.DataModel;
+    rowCount: number;
+    columnCount: number;
+    count: number;
+  }
 
   /**
    * Lazily load the datagrid module when the first grid is requested.
