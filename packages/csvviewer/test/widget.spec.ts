@@ -108,5 +108,34 @@ describe('csvviewer/widget', () => {
       expect(fakeRenderCell(0, 1)).toBe('anotherMatch');
       expect(fakeRenderCell(1, 1)).toBe('currentMatch');
     });
+
+    it('reports the number of matches and the current match index', () => {
+      const model = createModel();
+      const searchService = createGridSearchService(model);
+      expect(searchService.matchesCount).toBeNull();
+      expect(searchService.currentMatchIndex).toBeNull();
+
+      const query = /match/;
+      searchService.find(query);
+      expect(searchService.matchesCount).toBe(2);
+      expect(searchService.currentMatchIndex).toBe(0);
+
+      searchService.find(query);
+      expect(searchService.currentMatchIndex).toBe(1);
+
+      searchService.find(query, true);
+      expect(searchService.currentMatchIndex).toBe(0);
+
+      searchService.clear();
+      expect(searchService.matchesCount).toBeNull();
+      expect(searchService.currentMatchIndex).toBeNull();
+    });
+
+    it('reports no current match when nothing matches', () => {
+      const searchService = createGridSearchService(createModel());
+      searchService.find(/missing/);
+      expect(searchService.matchesCount).toBe(0);
+      expect(searchService.currentMatchIndex).toBeNull();
+    });
   });
 });

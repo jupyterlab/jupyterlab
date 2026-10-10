@@ -52,6 +52,20 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
   readonly isReadOnly = true;
 
   /**
+   * The current index of the selected match.
+   */
+  get currentMatchIndex(): number | null {
+    return this.widget.content.searchService?.currentMatchIndex ?? null;
+  }
+
+  /**
+   * The number of matches.
+   */
+  get matchesCount(): number | null {
+    return this.widget.content.searchService?.matchesCount ?? null;
+  }
+
+  /**
    * Clear currently highlighted match.
    */
   clearHighlight(): Promise<void> {
