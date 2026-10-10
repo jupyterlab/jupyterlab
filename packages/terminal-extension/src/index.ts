@@ -517,7 +517,7 @@ function addCommands(
       const term = new XTerm(session, options, translator);
 
       term.title.icon = terminalIcon;
-      // eslint-disable-next-line jupyter/no-untranslated-string
+
       term.title.label = '...';
 
       const main = new MainAreaWidget({ content: term, reveal: term.ready });

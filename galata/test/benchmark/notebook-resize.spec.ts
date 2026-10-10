@@ -5,6 +5,11 @@ import { expect, test } from '@playwright/test';
 import { benchmark, galata } from '@jupyterlab/galata';
 import type * as nbformat from '@jupyterlab/nbformat';
 
+// The benchmarks run on the plain Playwright fixture, which does not provide
+// `page.filebrowser`, and the timed blocks must contain the interaction being
+// measured and nothing else.
+/* eslint-disable jupyter/galata-prefer-filebrowser-helper */
+
 const tmpPath = 'test-performance-resize';
 const printNotebook = 'print_output_notebook.ipynb';
 const displayNotebook = 'display_output_notebook.ipynb';
@@ -12,6 +17,17 @@ const displayNotebook = 'display_output_notebook.ipynb';
 const N_OUTPUTS = 10_000;
 
 const SHELL_PLUGIN = '@jupyterlab/application-extension:shell';
+const TRACKER_PLUGIN = '@jupyterlab/notebook-extension:tracker';
+
+/**
+ * Outputs to render from the display output notebook.
+ *
+ * #### Notes
+ * The default cap of 50 leaves the output area under the threshold the dock
+ * panel treats as heavy, so without raising it this scenario only measures
+ * the single large text node of the print output notebook.
+ */
+const MAX_RENDERED_OUTPUTS = 500;
 
 const modes: Record<string, boolean> = {
   optimized: true,
@@ -92,7 +108,11 @@ test.describe('Benchmark - Notebook Resize', () => {
       // Override the shell setting for this mode before page loads.
       await galata.Mock.mockSettings(page, [], {
         ...galata.DEFAULT_SETTINGS,
-        [SHELL_PLUGIN]: { optimizeResize }
+        [SHELL_PLUGIN]: { optimizeResize },
+        [TRACKER_PLUGIN]: {
+          ...galata.DEFAULT_SETTINGS[TRACKER_PLUGIN],
+          maxNumberOutputs: MAX_RENDERED_OUTPUTS
+        }
       });
 
       const attachmentCommon = {

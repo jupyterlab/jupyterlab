@@ -49,9 +49,9 @@ test.describe('Notebook Run Vega', () => {
     await page.notebook.run();
     await page.locator('.vega-embed').waitFor();
 
-    const nbPanel = await page.notebook.getNotebookInPanelLocator();
+    const cell = await page.notebook.getCellLocator(0);
 
-    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
+    expect(await cell!.screenshot()).toMatchSnapshot(imageName);
     expect(await nbDiskContent(page, nbPath)).toContain(PNG_MIME_TYPE);
   });
 
@@ -71,9 +71,9 @@ test.describe('Notebook Run Vega', () => {
     await page.notebook.run();
     await page.locator('.vega-embed').waitFor();
 
-    const nbPanel = await page.notebook.getNotebookInPanelLocator();
+    const cell = await page.notebook.getCellLocator(0);
 
-    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
+    expect(await cell!.screenshot()).toMatchSnapshot(imageName);
     expect(await nbDiskContent(page, nbPath)).toContain(PNG_MIME_TYPE);
   });
 });

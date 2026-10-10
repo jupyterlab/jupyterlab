@@ -31,6 +31,14 @@ This file provides guidance to AI agents when working with code in this reposito
 - **Don't**: Use the `any` type; prefer `unknown` with type guards
 - **Do**: Prefer type guards over type casts
 
+### Code Comments
+
+- **Do**: Match the comment density of the surrounding code; most files have few inline comments
+- **Do**: Keep docstrings short (1-4 lines): what it is, plus a non-obvious "why" if there is one
+- **Do**: Inside function bodies, comment only constraints or non-obvious reasons the code cannot express
+- **Don't**: Describe what the code was before the change or how a bug was found
+- **Don't**: Restate what the code already says
+
 ### Import Paths
 
 - **Do**: Import from package entry points: `import { Widget } from '@lumino/widgets'`
