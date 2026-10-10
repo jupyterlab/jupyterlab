@@ -749,6 +749,48 @@ test.describe('General', () => {
     ).toMatchSnapshot('command_palette.png');
   });
 
+  test('Command Palette Recently Used', async ({ page }) => {
+    await page.goto();
+
+    const palette = page.locator('#modal-command-palette');
+    const input = palette.locator('.lm-CommandPalette-input');
+    const items = palette
+      .locator('.lm-CommandPalette-item')
+      .filter({ visible: true });
+
+    // Only the commands run from the palette are recorded.
+    for (const label of [
+      'Show Status Bar',
+      'Show Log Console',
+      'Settings Editor'
+    ]) {
+      await page.keyboard.press('Control+Shift+C');
+      await input.fill(label);
+      await expect(items.first()).toContainText(label);
+      await input.press('Enter');
+      await expect(palette).toBeHidden();
+    }
+
+    await page.keyboard.press('Control+Shift+C');
+    await expect(palette.locator('.jp-CommandPalette-recentBadge')).toHaveCount(
+      3
+    );
+
+    // Crop below the recent commands, keeping two other commands.
+    const paletteBox = (await palette.boundingBox())!;
+    const lastBox = (await items.nth(4).boundingBox())!;
+    expect(
+      await page.screenshot({
+        clip: {
+          x: paletteBox.x,
+          y: paletteBox.y,
+          width: paletteBox.width,
+          height: lastBox.y + lastBox.height - paletteBox.y
+        }
+      })
+    ).toMatchSnapshot('command_palette_recently_used.png');
+  });
+
   test('Keyboard Shortcuts Help', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
 
