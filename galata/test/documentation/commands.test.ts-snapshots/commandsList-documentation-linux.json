@@ -3932,7 +3932,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "commandLinkerTrustBoundaryId": {
+          "type": "string",
+          "description": "The Markdown preview trust boundary ID"
+        }
+      }
     }
   },
   {
@@ -5240,7 +5245,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "commandLinkerTrustBoundaryId": {
+          "type": "string",
+          "description": "The notebook trust boundary ID"
+        }
+      }
     }
   },
   {
