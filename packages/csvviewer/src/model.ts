@@ -82,14 +82,6 @@ export class DSVModel extends DataModel implements IDisposable {
     }
     this._parser = quoteParser ? 'quotes' : 'noquotes';
 
-    const firstDataRow = this._getFirstDataRow();
-    this._columnCount = firstDataRow.ncols;
-    this._preferredColumnCount = firstDataRow.ncols;
-    if (header === true) {
-      this._headerRow = firstDataRow.row;
-      this._initialRows = Math.max(this._initialRows, this._headerRow + 1);
-    }
-
     // Parse the data.
     this.parseAsync();
 
@@ -313,6 +305,7 @@ export class DSVModel extends DataModel implements IDisposable {
         delimiter: this._delimiter,
         rowDelimiter: this._rowDelimiter,
         quote: this._quote,
+        comment: this._comment,
         columnOffsets: true,
         maxRows: maxRows,
         ncols: ncols,
@@ -415,6 +408,16 @@ export class DSVModel extends DataModel implements IDisposable {
    * parsed again.
    */
   private _computeRowOffsets(endRow = 4294967295): void {
+    if (this._columnCount === undefined && this._comment) {
+      const firstDataRow = this._getFirstDataRow();
+      this._preferredColumnCount = firstDataRow.ncols;
+      if (this._hasHeader) {
+        this._headerRow = firstDataRow.row;
+        // The next row offset bounds the last header field.
+        endRow = Math.max(endRow, this._headerRow + 2);
+      }
+    }
+
     // If we've already parsed up to endRow, or if we've already parsed the
     // entire data set, return early.
     if (this._rowCount! >= endRow || this._doneParsing === true) {
@@ -432,6 +435,7 @@ export class DSVModel extends DataModel implements IDisposable {
       delimiter: this._delimiter,
       rowDelimiter: this._rowDelimiter,
       quote: this._quote,
+      comment: this._comment,
       columnOffsets: false,
       maxRows: endRow - this._rowCount! + reparse
     });
@@ -607,7 +611,10 @@ export class DSVModel extends DataModel implements IDisposable {
     }
 
     // Check to see if the field begins with a quote. If it does, trim a quote on either side.
-    if (this._rawData[index] === this._quote) {
+    if (
+      this._rawData[index] === this._quote &&
+      this._rawData[this._rowOffsets[row]] !== this._comment
+    ) {
       trimLeft += 1;
       trimRight += 1;
     }
@@ -631,18 +638,6 @@ export class DSVModel extends DataModel implements IDisposable {
   private _getFirstDataRow(): { row: number; ncols: number } {
     const comment = this._comment;
     const parser = PARSERS[this._parser];
-
-    if (!comment) {
-      const { ncols } = parser({
-        data: this._rawData,
-        delimiter: this._delimiter,
-        rowDelimiter: this._rowDelimiter,
-        quote: this._quote,
-        columnOffsets: true,
-        maxRows: 1
-      });
-      return { row: 0, ncols };
-    }
 
     let row = 0;
     let startIndex = 0;
@@ -672,6 +667,7 @@ export class DSVModel extends DataModel implements IDisposable {
       delimiter: this._delimiter,
       rowDelimiter: this._rowDelimiter,
       quote: this._quote,
+      comment: this._comment,
       columnOffsets: true,
       maxRows: 1
     });
@@ -731,7 +727,7 @@ export class DSVModel extends DataModel implements IDisposable {
   private _rawData: string;
   private _rowCount: number | undefined = 0;
   private _columnCount: number | undefined;
-  private _preferredColumnCount: number;
+  private _preferredColumnCount = 0;
 
   // Cache information
   /**

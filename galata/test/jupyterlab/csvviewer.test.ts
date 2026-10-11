@@ -79,94 +79,112 @@ test.describe('CSV Viewer', () => {
   });
 });
 
-test.describe('CSV Viewer - comment character', () => {
-  const csvFileName = 'test-data-comments.csv';
+for (const extension of ['csv', 'tsv']) {
+  test.describe(`${extension.toUpperCase()} Viewer - comment character`, () => {
+    const csvFileName = `test-data-comments.${extension}`;
 
-  let tempFilePath: string;
+    let tempFilePath: string;
 
-  test.beforeEach(async ({ page, tmpPath }) => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'csv-comment-test-'));
-    tempFilePath = path.join(tempDir, csvFileName);
+    test.beforeEach(async ({ page, tmpPath }) => {
+      const tempDir = fs.mkdtempSync(
+        path.join(os.tmpdir(), 'csv-comment-test-')
+      );
+      tempFilePath = path.join(tempDir, csvFileName);
 
-    fs.writeFileSync(tempFilePath, testDataWithComments);
-    await page.contents.uploadFile(tempFilePath, `${tmpPath}/${csvFileName}`);
+      fs.writeFileSync(
+        tempFilePath,
+        extension === 'tsv'
+          ? testDataWithComments.split(',').join('\t')
+          : testDataWithComments
+      );
+      await page.contents.uploadFile(tempFilePath, `${tmpPath}/${csvFileName}`);
+    });
+
+    test('should show the Comment toolbar control', async ({ page }) => {
+      await page.filebrowser.open(csvFileName);
+
+      // The select is wrapped by Styling.wrapSelect inside the jp-CSVComment-dropdown div
+      const commentDropdown = page.locator('.jp-CSVComment-dropdown select');
+      await expect(commentDropdown).toBeVisible();
+
+      // Default value should be empty string (none)
+      await expect(commentDropdown).toHaveValue('');
+    });
+
+    test('should render differently with and without comment char set', async ({
+      page
+    }) => {
+      await page.filebrowser.open(csvFileName);
+
+      const csvLocator = page.locator('.jp-CSVViewer');
+      await expect(csvLocator).toBeVisible();
+
+      await page.evaluate(
+        () => window.jupyterapp.shell.currentWidget.content.ready
+      );
+      const screenshotWithoutComment = await csvLocator.screenshot();
+
+      const commentDropdown = page.locator('.jp-CSVComment-dropdown select');
+      await commentDropdown.selectOption('#');
+      await expect(commentDropdown).toHaveValue('#');
+
+      await expect
+        .poll(async () =>
+          Buffer.compare(
+            await csvLocator.screenshot(),
+            screenshotWithoutComment
+          )
+        )
+        .not.toBe(0);
+    });
+
+    test('should revert to raw rendering when comment char is cleared', async ({
+      page
+    }) => {
+      await page.filebrowser.open(csvFileName);
+
+      const csvLocator = page.locator('.jp-CSVViewer');
+      await expect(csvLocator).toBeVisible();
+      await page.evaluate(
+        () => window.jupyterapp.shell.currentWidget.content.ready
+      );
+      const screenshotWithoutComment = await csvLocator.screenshot();
+
+      const commentDropdown = page.locator('.jp-CSVComment-dropdown select');
+      await commentDropdown.selectOption('#');
+      await expect
+        .poll(async () =>
+          Buffer.compare(
+            await csvLocator.screenshot(),
+            screenshotWithoutComment
+          )
+        )
+        .not.toBe(0);
+
+      await commentDropdown.selectOption('');
+      await expect
+        .poll(async () =>
+          Buffer.compare(
+            await csvLocator.screenshot(),
+            screenshotWithoutComment
+          )
+        )
+        .toBe(0);
+    });
+
+    test.afterEach(async ({ page }) => {
+      try {
+        await page.contents.deleteFile(csvFileName);
+      } catch (e) {
+        console.error(`Error deleting file ${csvFileName}: ${e}`);
+      }
+
+      try {
+        fs.unlinkSync(tempFilePath);
+        fs.rmdirSync(path.dirname(tempFilePath));
+      } catch (e) {
+        console.error(`Error cleaning up temp file: ${e}`);
+      }
+    });
   });
-
-  test('should show the Comment toolbar control', async ({ page }) => {
-    await page.filebrowser.open(csvFileName);
-
-    // The select is wrapped by Styling.wrapSelect inside the jp-CSVComment-dropdown div
-    const commentDropdown = page.locator('.jp-CSVComment-dropdown select');
-    await expect(commentDropdown).toBeVisible();
-
-    // Default value should be empty string (none)
-    await expect(commentDropdown).toHaveValue('');
-  });
-
-  test('should render differently with and without comment char set', async ({
-    page
-  }) => {
-    await page.filebrowser.open(csvFileName);
-
-    const csvLocator = page.locator('.jp-CSVViewer');
-    await expect(csvLocator).toBeVisible();
-
-    await page.evaluate(
-      () => window.jupyterapp.shell.currentWidget.content.ready
-    );
-    const screenshotWithoutComment = await csvLocator.screenshot();
-
-    const commentDropdown = page.locator('.jp-CSVComment-dropdown select');
-    await commentDropdown.selectOption('#');
-    await expect(commentDropdown).toHaveValue('#');
-
-    await expect
-      .poll(async () =>
-        Buffer.compare(await csvLocator.screenshot(), screenshotWithoutComment)
-      )
-      .not.toBe(0);
-  });
-
-  test('should revert to raw rendering when comment char is cleared', async ({
-    page
-  }) => {
-    await page.filebrowser.open(csvFileName);
-
-    const csvLocator = page.locator('.jp-CSVViewer');
-    await expect(csvLocator).toBeVisible();
-    await page.evaluate(
-      () => window.jupyterapp.shell.currentWidget.content.ready
-    );
-    const screenshotWithoutComment = await csvLocator.screenshot();
-
-    const commentDropdown = page.locator('.jp-CSVComment-dropdown select');
-    await commentDropdown.selectOption('#');
-    await expect
-      .poll(async () =>
-        Buffer.compare(await csvLocator.screenshot(), screenshotWithoutComment)
-      )
-      .not.toBe(0);
-
-    await commentDropdown.selectOption('');
-    await expect
-      .poll(async () =>
-        Buffer.compare(await csvLocator.screenshot(), screenshotWithoutComment)
-      )
-      .toBe(0);
-  });
-
-  test.afterEach(async ({ page }) => {
-    try {
-      await page.contents.deleteFile(csvFileName);
-    } catch (e) {
-      console.error(`Error deleting file ${csvFileName}: ${e}`);
-    }
-
-    try {
-      fs.unlinkSync(tempFilePath);
-      fs.rmdirSync(path.dirname(tempFilePath));
-    } catch (e) {
-      console.error(`Error cleaning up temp file: ${e}`);
-    }
-  });
-});
+}

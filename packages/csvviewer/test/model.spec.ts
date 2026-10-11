@@ -416,6 +416,81 @@ describe('csvviewer/model', () => {
       ]);
     });
 
+    it.each([undefined, '#'])(
+      'falls back when the initial delimiter is wrong with comment %s',
+      comment => {
+        const warning = jest
+          .spyOn(console, 'warn')
+          .mockImplementation(() => {});
+        try {
+          const d = new DSVModel({
+            data: `${comment ? '# metadata\n' : ''}"name";"value"\n"Alice";"1"\n`,
+            delimiter: ',',
+            comment
+          });
+          expect(d.header).toEqual(['name";"value']);
+          expect(d.columnCount('body')).toBe(1);
+          expect(warning).toHaveBeenCalledTimes(1);
+          d.dispose();
+        } finally {
+          warning.mockRestore();
+        }
+      }
+    );
+
+    it.each(['\n', '\r\n', '\r'])(
+      'preserves quoted data and literal comments with row delimiter %j',
+      async rowDelimiter => {
+        const d = new DSVModel({
+          data: [
+            '# metadata,"unfinished',
+            'name,id',
+            '"Doe, Jane",1',
+            '# note,"literal"',
+            '"first line' + rowDelimiter + '# still data",2'
+          ].join(rowDelimiter),
+          delimiter: ',',
+          comment: '#',
+          initialRows: 1
+        });
+        expect(d.header).toEqual(['name', 'id']);
+        await d.ready;
+        expect(d.rowCount('body')).toBe(4);
+        expect([0, 1].map(c => d.data('body', 0, c))).toEqual([
+          '# metadata',
+          '"unfinished'
+        ]);
+        expect([0, 1].map(c => d.data('body', 1, c))).toEqual([
+          'Doe, Jane',
+          '1'
+        ]);
+        expect([0, 1].map(c => d.data('body', 2, c))).toEqual([
+          '# note',
+          '"literal"'
+        ]);
+        expect([0, 1].map(c => d.data('body', 3, c))).toEqual([
+          'first line' + rowDelimiter + '# still data',
+          '2'
+        ]);
+        d.dispose();
+      }
+    );
+
+    it('renders files containing only comments with literal quotes', () => {
+      const d = new DSVModel({
+        data: '# first,"unfinished\n# second,"literal"',
+        delimiter: ',',
+        comment: '#',
+        header: false
+      });
+      expect(d.rowCount('body')).toBe(2);
+      expect([0, 1].map(c => d.data('body', 1, c))).toEqual([
+        '# second',
+        '"literal"'
+      ]);
+      d.dispose();
+    });
+
     it('handles delayed parsing of rows past the initial rows', async () => {
       const d = new DSVModel({
         data: `a,b,c\nc,d,e\nf,g,h\ni,j,k`,

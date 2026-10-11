@@ -5,7 +5,6 @@
 Possible options to add to the parser:
 
 - Optional offsets array to modify, so we don't need to create a new offsets list (we would need to be careful not to overwrite things if a row needs to be truncated.)
-- Comment character at the start of the line
 - Skip empty whitespace lines
 - Skip rows with empty columns
 - Logging an error for too many or too few fields on a line
@@ -54,6 +53,11 @@ export namespace IParser {
      * The delimiter to use. Defaults to ','.
      */
     delimiter?: string;
+
+    /**
+     * Optional comment character. Quotes in matching rows are treated literally.
+     */
+    comment?: string;
 
     /**
      * The row delimiter to use. Defaults to '\r\n'.
@@ -165,7 +169,8 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
     startIndex = 0,
     maxRows = 0xffffffff,
     rowDelimiter = '\r\n',
-    quote = '"'
+    quote = '"',
+    comment
   } = options;
 
   // ncols will be set automatically if it is undefined.
@@ -208,6 +213,7 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
   // We initialize to 0 just in case we are asked to parse past the end of the
   // string. In that case, we want the number of columns to be 0.
   let col = 0;
+  let isComment = false;
 
   // Declare some useful temporaries
   let char;
@@ -224,6 +230,7 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
       // Start a new row and reset the column counter.
       offsets.push(i);
       col = 1;
+      isComment = data[i] === comment;
     }
 
     // Below, we handle this character, modify the parser state and increment the index to be consistent.
@@ -243,7 +250,7 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
         switch (char) {
           // If we have a quote, we are starting an escaped field.
           case CH_QUOTE:
-            state = QUOTED_FIELD;
+            state = isComment ? UNQUOTED_FIELD : QUOTED_FIELD;
             break;
 
           // A field delimiter means we are starting a new field.
