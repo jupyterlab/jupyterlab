@@ -113,7 +113,7 @@ export namespace IParser {
     ncols: number;
 
     /**
-     * The maximum number of columns observed while parsing.
+     * The maximum number of columns observed in non-comment rows while parsing.
      */
     maxNcols?: number;
     /**
@@ -413,7 +413,9 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
     switch (state) {
       case NEW_ROW:
         nrows++;
-        maxNcols = Math.max(maxNcols, col);
+        if (!isComment) {
+          maxNcols = Math.max(maxNcols, col);
+        }
 
         // If ncols is undefined, set it to the number of columns in this row (first row implied).
         if (ncols === undefined) {
@@ -464,7 +466,9 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
   // defined.
   if (state !== NEW_ROW) {
     nrows++;
-    maxNcols = Math.max(maxNcols, col);
+    if (!isComment) {
+      maxNcols = Math.max(maxNcols, col);
+    }
     if (columnOffsets === true) {
       // If ncols is *still* undefined, then we only parsed one row and didn't
       // have a newline, so set it to the number of columns we found.
@@ -508,7 +512,8 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
     delimiter = ',',
     rowDelimiter = '\r\n',
     startIndex = 0,
-    maxRows = 0xffffffff
+    maxRows = 0xffffffff,
+    comment
   } = options;
 
   // ncols will be set automatically if it is undefined.
@@ -560,7 +565,9 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
       col++;
     }
 
-    maxNcols = Math.max(maxNcols, col);
+    if (data[currRow] !== comment) {
+      maxNcols = Math.max(maxNcols, col);
+    }
 
     if (ncols === undefined) {
       // Set ncols to the number of fields we found.

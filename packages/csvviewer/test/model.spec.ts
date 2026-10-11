@@ -416,6 +416,84 @@ describe('csvviewer/model', () => {
       ]);
     });
 
+    it.each([false, true])(
+      'detects wider data rows with comments and quoteParser=%s',
+      async quoteParser => {
+        for (const initialRows of [3, 500]) {
+          for (const trailingNewline of ['', '\n']) {
+            const d = new DSVModel({
+              data:
+                '# metadata,extra,columns,ignored\na,b\n1,2\n3,4,5\n# trailing,extra,columns,ignored' +
+                trailingNewline,
+              delimiter: ',',
+              comment: '#',
+              quoteParser,
+              initialRows
+            });
+            expect(d.columnCount('body')).toBe(initialRows === 3 ? 2 : 3);
+            await d.ready;
+            expect(d.columnCount('body')).toBe(3);
+            expect(d.header).toEqual(['a', 'b', '']);
+            expect([0, 1, 2].map(c => d.data('body', 2, c))).toEqual([
+              '3',
+              '4',
+              '5'
+            ]);
+            expect(d.rowCount('body')).toBe(4);
+            d.dispose();
+          }
+        }
+      }
+    );
+
+    it.each([undefined, '#'])(
+      'preserves quoted wider rows with comment %s',
+      comment => {
+        const d = new DSVModel({
+          data: 'name,id\n"Doe, Jane",1,"extra"',
+          delimiter: ',',
+          comment
+        });
+        expect(d.columnCount('body')).toBe(3);
+        expect([0, 1, 2].map(c => d.data('body', 0, c))).toEqual([
+          'Doe, Jane',
+          '1',
+          'extra'
+        ]);
+        d.dispose();
+      }
+    );
+
+    it.each([undefined, '#'])(
+      'updates header state through the setter with comment %s',
+      comment => {
+        const d = new DSVModel({
+          data: `${comment ? '# metadata\n' : ''}a,b\n1,2`,
+          delimiter: ',',
+          comment,
+          header: false
+        });
+        const headerRow = comment ? 1 : 0;
+        d.header = ['A', 'B'];
+        expect(d.rowCount('body')).toBe(headerRow + 1);
+        expect([0, 1].map(c => d.data('column-header', 0, c))).toEqual([
+          'A',
+          'B'
+        ]);
+        expect(d.data('body', headerRow, 0)).toBe('1');
+
+        d.header = [];
+        expect(d.rowCount('body')).toBe(headerRow + 2);
+        expect([0, 1].map(c => d.data('column-header', 0, c))).toEqual([
+          '1',
+          '2'
+        ]);
+        expect(d.data('body', headerRow, 0)).toBe('a');
+        expect(d.data('body', 0, 0)).toBe(comment ? '# metadata' : 'a');
+        d.dispose();
+      }
+    );
+
     it.each([undefined, '#'])(
       'falls back when the initial delimiter is wrong with comment %s',
       comment => {

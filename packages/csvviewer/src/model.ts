@@ -141,6 +141,7 @@ export class DSVModel extends DataModel implements IDisposable {
   }
   set header(value: string[]) {
     this._header = value;
+    this._hasHeader = value.length > 0;
   }
 
   /**
@@ -411,8 +412,8 @@ export class DSVModel extends DataModel implements IDisposable {
     if (this._columnCount === undefined && this._comment) {
       const firstDataRow = this._getFirstDataRow();
       this._preferredColumnCount = firstDataRow.ncols;
+      this._headerRow = firstDataRow.row;
       if (this._hasHeader) {
-        this._headerRow = firstDataRow.row;
         // The next row offset bounds the last header field.
         endRow = Math.max(endRow, this._headerRow + 2);
       }
@@ -457,9 +458,11 @@ export class DSVModel extends DataModel implements IDisposable {
     this._rowCount = oldRowCount + nrows - duplicateRows;
 
     const oldColumnCount = this._columnCount ?? 0;
-    this._columnCount = this._comment
-      ? this._preferredColumnCount
-      : Math.max(oldColumnCount, maxNcols ?? 0);
+    this._columnCount = Math.max(
+      oldColumnCount,
+      maxNcols ?? 0,
+      this._preferredColumnCount
+    );
     const columnCountChanged = this._columnCount !== oldColumnCount;
 
     // If we didn't reach the requested row, we must be done.
@@ -497,7 +500,7 @@ export class DSVModel extends DataModel implements IDisposable {
 
       if (this._header.length > 0) {
         for (let c = this._header.length; c < this._columnCount; c++) {
-          this._header.push(this._getField(0, c));
+          this._header.push(this._getField(this._headerRow, c));
         }
       }
 
