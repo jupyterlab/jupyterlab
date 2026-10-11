@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 // We explicitly reference the jest typings since the jest.d.ts file shipped
 // with jest 26 masks the @types/jest typings

@@ -9,7 +9,7 @@
 JupyterLab allows you to export your jupyter notebook files (`.ipynb`)
 into other file formats such as:
 
-- Asciidoc `.asciidoc`
+- AsciiDoc `.asciidoc`
 - HTML `.html`
 - LaTeX `.tex`
 - Markdown `.md`
@@ -24,6 +24,9 @@ To access these options, while a notebook is open, browse the File menu:
 :align: center
 :class: jp-screenshot
 ```
+
+When exporting to HTML, a dialog will prompt you to choose whether to sanitize
+the HTML output, i.e. escape tags. This sends a `sanitize_html` param to nbconvert.
 
 Note: The exporting options depend on your nbconvert configuration. For more
 information visit the

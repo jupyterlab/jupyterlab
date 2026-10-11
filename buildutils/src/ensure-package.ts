@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as fs from 'fs-extra';
 import * as glob from 'glob';
@@ -952,6 +953,16 @@ function getImports(sourceFile: ts.SourceFile): string[] {
         break;
       case ts.SyntaxKind.ImportEqualsDeclaration:
         imports.push(node.moduleReference.expression.text);
+        break;
+      case ts.SyntaxKind.CallExpression:
+        // A dynamic `import('...')` with a literal specifier.
+        if (
+          node.expression.kind === ts.SyntaxKind.ImportKeyword &&
+          node.arguments.length > 0 &&
+          ts.isStringLiteral(node.arguments[0])
+        ) {
+          imports.push(node.arguments[0].text);
+        }
         break;
       default:
       // no-op

@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type * as SQLModule from '@codemirror/lang-sql';
 import type { StreamParser } from '@codemirror/language';
@@ -1059,8 +1060,8 @@ export namespace EditorLanguageRegistry {
         mime: 'text/x-julia',
         extensions: ['jl'],
         async load() {
-          const m = await import('@codemirror/legacy-modes/mode/julia');
-          return legacy(m.julia);
+          const m = await import('@plutojl/lang-julia');
+          return m.julia();
         }
       },
       {

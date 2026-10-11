@@ -54,7 +54,7 @@ test.describe('CSV Viewer', () => {
     await expect(csvLocator).toBeVisible();
 
     const screenshotName = 'csv-dark-theme.png';
-    expect(await csvLocator.screenshot()).toMatchSnapshot(screenshotName);
+    expect.soft(await csvLocator.screenshot()).toMatchSnapshot(screenshotName);
 
     // change to light theme and back to dark theme
     await page.theme.setLightTheme();
@@ -111,26 +111,20 @@ test.describe('CSV Viewer - comment character', () => {
     const csvLocator = page.locator('.jp-CSVViewer');
     await expect(csvLocator).toBeVisible();
 
-    // The DataGrid is canvas-based — no DOM cell elements exist.
-    // Wait for initial render (RENDER_TIMEOUT in widget is 1000 ms)
-    await page.waitForTimeout(1500);
-
-    // Take a screenshot with no comment char (# lines treated as data rows).
+    await page.evaluate(
+      () => window.jupyterapp.shell.currentWidget.content.ready
+    );
     const screenshotWithoutComment = await csvLocator.screenshot();
 
-    // Now set '#' as the comment character
     const commentDropdown = page.locator('.jp-CSVComment-dropdown select');
     await commentDropdown.selectOption('#');
     await expect(commentDropdown).toHaveValue('#');
 
-    // Wait for the grid to re-render (RENDER_TIMEOUT in widget is 1000 ms)
-    await page.waitForTimeout(1500);
-
-    // Take screenshot after setting comment char (# lines are now skipped)
-    const screenshotWithComment = await csvLocator.screenshot();
-
-    // The two renders must differ — the comment lines affect the data layout
-    expect(Buffer.compare(screenshotWithComment, screenshotWithoutComment)).not.toBe(0);
+    await expect
+      .poll(async () =>
+        Buffer.compare(await csvLocator.screenshot(), screenshotWithoutComment)
+      )
+      .not.toBe(0);
   });
 
   test('should revert to raw rendering when comment char is cleared', async ({
@@ -140,26 +134,25 @@ test.describe('CSV Viewer - comment character', () => {
 
     const csvLocator = page.locator('.jp-CSVViewer');
     await expect(csvLocator).toBeVisible();
-
-    // Wait for initial render (RENDER_TIMEOUT in widget is 1000 ms)
-    await page.waitForTimeout(1500);
+    await page.evaluate(
+      () => window.jupyterapp.shell.currentWidget.content.ready
+    );
+    const screenshotWithoutComment = await csvLocator.screenshot();
 
     const commentDropdown = page.locator('.jp-CSVComment-dropdown select');
-
-    // Enable comment char — grid should re-render without comment rows
     await commentDropdown.selectOption('#');
-    await page.waitForTimeout(1500);
+    await expect
+      .poll(async () =>
+        Buffer.compare(await csvLocator.screenshot(), screenshotWithoutComment)
+      )
+      .not.toBe(0);
 
-    const withCommentScreenshot = await csvLocator.screenshot();
-
-    // Revert to none — grid should re-render including comment rows as data
     await commentDropdown.selectOption('');
-    await page.waitForTimeout(1500);
-
-    const withoutCommentScreenshot = await csvLocator.screenshot();
-
-    // The two states must produce different renders
-    expect(Buffer.compare(withCommentScreenshot, withoutCommentScreenshot)).not.toBe(0);
+    await expect
+      .poll(async () =>
+        Buffer.compare(await csvLocator.screenshot(), screenshotWithoutComment)
+      )
+      .toBe(0);
   });
 
   test.afterEach(async ({ page }) => {

@@ -88,11 +88,11 @@
 
 .jp-Licenses-Bundles .lm-TabBar-tab.lm-mod-current {
   background-color: var(--jp-brand-color1);
-  color: #fff;
+  color: white;
 }
 
 .jp-Licenses-Bundles .lm-TabBar-tab.lm-mod-current label {
-  background-color: #fff;
+  background-color: white;
   color: var(--jp-brand-color1);
 }
 
@@ -142,11 +142,11 @@
 
 .jp-Licenses-Grid.jp-RenderedHTMLCommon tr.jp-mod-selected {
   background-color: var(--jp-brand-color1);
-  color: #fff;
+  color: white;
 }
 
 .jp-Licenses-Grid.jp-RenderedHTMLCommon .jp-mod-selected code {
-  color: #fff;
+  color: white;
 }
 
 /* license text */

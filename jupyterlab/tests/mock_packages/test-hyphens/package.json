@@ -7,14 +7,14 @@
     "index.js"
   ],
   "scripts": {
-    "build:labextension": "jupyter labextension build .",
+    "build:labextension": "jupyter-builder build .",
     "clean": "rimraf ./test_hyphens/labextension"
   },
   "dependencies": {
     "@jupyterlab/launcher": "^4.0.0-alpha.21"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^4.0.0-alpha.21",
+    "@jupyter/builder": "^1.0.0-beta.1",
     "rimraf": "~3.0.0"
   },
   "jupyterlab": {

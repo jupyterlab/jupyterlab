@@ -34,18 +34,18 @@ export class CSVDelimiter extends Widget {
    * Construct a new csv table widget.
    */
   constructor(options: CSVToolbar.IOptions) {
+    const trans = (options.translator || nullTranslator).load('jupyterlab');
     super({
       node: Private.createNode({
         selected: options.widget.delimiter,
-        label: 'Delimiter: ',
+        label: trans.__('Delimiter: '),
         labelClassName: CSV_DELIMITER_LABEL_CLASS,
         dropdownClassName: CSV_DELIMITER_DROPDOWN_CLASS,
-        translator: options.translator,
         values: [
           [',', ','],
           [';', ';'],
-          ['\t', 'tab'],
-          ['|', 'pipe'],
+          ['\t', trans.__('tab')],
+          ['|', trans.__('pipe')],
           ['#', '#']
         ]
       })
@@ -106,16 +106,16 @@ export class CSVComment extends Widget {
    * Construct a new csv comment widget.
    */
   constructor(options: CSVToolbar.IOptions) {
+    const trans = (options.translator || nullTranslator).load('jupyterlab');
     super({
       node: Private.createNode({
         selected: options.widget.comment ?? '',
-        label: 'Comment: ',
+        label: trans.__('Comment: '),
         labelClassName: CSV_COMMENT_LABEL_CLASS,
         dropdownClassName: CSV_COMMENT_DROPDOWN_CLASS,
-        translator: options.translator,
         values: [
-          ['', 'none'],
-          ['#', 'hash']
+          ['', trans.__('none')],
+          ['#', trans.__('hash')]
         ]
       })
     });
@@ -189,7 +189,6 @@ namespace Private {
     label: string;
     labelClassName: string;
     dropdownClassName: string;
-    translator?: ITranslator;
     values: Array<[string, string]>;
   }
 
@@ -197,25 +196,18 @@ namespace Private {
    * Create the node for a CSV toolbar select.
    */
   export function createNode(options: ICreateNodeOptions): HTMLElement {
-    const {
-      selected,
-      label,
-      labelClassName,
-      dropdownClassName,
-      translator,
-      values
-    } = options;
-    const trans = (translator || nullTranslator).load('jupyterlab');
+    const { selected, label, labelClassName, dropdownClassName, values } =
+      options;
 
     const div = document.createElement('div');
     const labelNode = document.createElement('span');
     const select = document.createElement('select');
-    labelNode.textContent = trans.__(label);
+    labelNode.textContent = label;
     labelNode.className = labelClassName;
     for (const [value, optionLabel] of values) {
       const option = document.createElement('option');
       option.value = value;
-      option.textContent = trans.__(optionLabel);
+      option.textContent = optionLabel;
       if (value === selected) {
         option.selected = true;
       }

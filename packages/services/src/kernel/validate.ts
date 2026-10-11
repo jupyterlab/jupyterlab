@@ -7,6 +7,8 @@ import type { IModel } from './restapi';
 
 import { validateProperty } from '../validate';
 
+type PropertyValidation = string | [string, unknown[]];
+
 /**
  * Required fields for `IKernelHeader`.
  */
@@ -16,7 +18,9 @@ const HEADER_FIELDS = ['username', 'version', 'session', 'msg_id', 'msg_type'];
  * Required fields and types for contents of various types of `kernel.IMessage`
  * messages on the iopub channel.
  */
-const IOPUB_CONTENT_FIELDS: { [key: string]: any } = {
+const IOPUB_CONTENT_FIELDS: {
+  [key: string]: { [key: string]: PropertyValidation };
+} = {
   stream: { name: 'string', text: 'string' },
   display_data: { data: 'object', metadata: 'object' },
   execute_input: { code: 'string', execution_count: 'number' },
@@ -80,11 +84,12 @@ function validateIOPubContent(
     const names = Object.keys(fields);
     const content = msg.content;
     for (let i = 0; i < names.length; i++) {
-      let args = fields[names[i]];
-      if (!Array.isArray(args)) {
-        args = [args];
+      const args = fields[names[i]];
+      if (Array.isArray(args)) {
+        validateProperty(content, names[i], args[0], args[1]);
+      } else {
+        validateProperty(content, names[i], args);
       }
-      validateProperty(content, names[i], ...args);
     }
   }
 }
@@ -92,7 +97,7 @@ function validateIOPubContent(
 /**
  * Validate a `Kernel.IModel` object.
  */
-export function validateModel(model: IModel): asserts model is IModel {
+export function validateModel(model: unknown): asserts model is IModel {
   validateProperty(model, 'name', 'string');
   validateProperty(model, 'id', 'string');
 }
@@ -100,7 +105,7 @@ export function validateModel(model: IModel): asserts model is IModel {
 /**
  * Validate an array of `IModel` objects.
  */
-export function validateModels(models: IModel[]): asserts models is IModel[] {
+export function validateModels(models: unknown): asserts models is IModel[] {
   if (!Array.isArray(models)) {
     throw new Error('Invalid kernel list');
   }

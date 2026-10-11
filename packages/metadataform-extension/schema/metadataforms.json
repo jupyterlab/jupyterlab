@@ -80,14 +80,21 @@
         },
         "metadataLevel": {
           "type": "string",
-          "enum": ["cell", "notebook"],
+          "oneOf": [
+            { "const": "cell", "title": "Cell" },
+            { "const": "notebook", "title": "Notebook" }
+          ],
           "default": "cell"
         },
         "cellTypes": {
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["code", "markdown", "raw"]
+            "oneOf": [
+              { "const": "code", "title": "Code" },
+              { "const": "markdown", "title": "Markdown" },
+              { "const": "raw", "title": "Raw" }
+            ]
           }
         },
         "writeDefault": {

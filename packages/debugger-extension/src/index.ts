@@ -51,7 +51,6 @@ import {
 } from '@jupyterlab/rendermime';
 import type { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import type { NullTranslator } from '@jupyterlab/translation';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import type { CommandRegistry } from '@lumino/commands';
@@ -100,9 +99,12 @@ const consoles: JupyterFrontEndPlugin<void> = {
     consoleTracker: IConsoleTracker,
     labShell: ILabShell | null,
     settingRegistry: ISettingRegistry | null,
-    translator: ITranslator | NullTranslator,
+    translator: ITranslator | null,
     displayRegistry: IDebuggerDisplayRegistry | null
   ) => {
+    if (!translator) {
+      translator = nullTranslator;
+    }
     if (settingRegistry) {
       const settings = await settingRegistry?.load(main.id);
 
@@ -122,6 +124,8 @@ const consoles: JupyterFrontEndPlugin<void> = {
       service: debug,
       translator: translator
     });
+
+    handler.executionDone.connect(debug.displayModules.bind(debug));
 
     const updateHandlerAndCommands = async (
       widget: ConsolePanel
@@ -203,8 +207,11 @@ const files: JupyterFrontEndPlugin<void> = {
     editorTracker: IEditorTracker,
     labShell: ILabShell | null,
     settingRegistry: ISettingRegistry | null,
-    translator: ITranslator | NullTranslator
+    translator: ITranslator | null
   ) => {
+    if (!translator) {
+      translator = nullTranslator;
+    }
     if (settingRegistry) {
       const settings = await settingRegistry?.load(main.id);
 
@@ -224,6 +231,8 @@ const files: JupyterFrontEndPlugin<void> = {
       service: debug,
       translator: translator
     });
+
+    handler.executionDone.connect(debug.displayModules.bind(debug));
 
     const activeSessions: {
       [id: string]: Session.ISessionConnection;
@@ -329,6 +338,8 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
       translator: translator
     });
 
+    handler.executionDone.connect(service.displayModules.bind(service));
+
     const trans = translator.load('jupyterlab');
     app.commands.addCommand(Debugger.CommandIDs.restartDebug, {
       label: trans.__('Restart Kernel and Debug…'),
@@ -398,7 +409,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
 
     if (palette) {
       palette.addItem({
-        category: 'Notebook Operations',
+        category: trans.__('Notebook Operations'),
         command: Debugger.CommandIDs.restartDebug
       });
     }
@@ -540,7 +551,7 @@ const variables: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     service: IDebugger,
-    handler: Debugger.Handler,
+    handler: IDebugger.IHandler,
     translator: ITranslator,
     themeManager: IThemeManager | null,
     rendermime: IRenderMimeRegistry | null
@@ -587,7 +598,7 @@ const variables: JupyterFrontEndPlugin<void> = {
           name?: string;
         };
 
-        if (!variableReference) {
+        if (variableReference === undefined) {
           variableReference =
             service.model.variables.selectedVariable?.variablesReference;
         }
@@ -598,7 +609,8 @@ const variables: JupyterFrontEndPlugin<void> = {
         const id = `jp-debugger-variable-${name}`;
         if (
           !name ||
-          !variableReference ||
+          variableReference === undefined ||
+          variableReference <= 0 ||
           tracker.find(widget => widget.id === id)
         ) {
           return;
@@ -669,7 +681,7 @@ const variables: JupyterFrontEndPlugin<void> = {
         if (!name) {
           name = service.model.variables.selectedVariable?.name;
         }
-        if (!frameId) {
+        if (frameId === undefined) {
           frameId = service.model.callstack.frame?.id;
         }
 
@@ -690,7 +702,7 @@ const variables: JupyterFrontEndPlugin<void> = {
         if (
           !name || // Name is mandatory
           trackerMime.find(widget => widget.id === id) || // Widget already exists
-          (!frameId && service.hasStoppedThreads()) // frame id missing on breakpoint
+          (frameId === undefined && service.hasStoppedThreads()) // frame id missing on breakpoint
         ) {
           return;
         }
@@ -950,32 +962,33 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         return;
       }
       const { content, mimeType, path } = source;
-      if (breakpointOrFrame && typeof breakpointOrFrame.line !== 'undefined') {
-        const results = debuggerSources.find({
-          focus: true,
-          kernel: service.session?.connection?.kernel?.name ?? '',
-          path: service.session?.connection?.path ?? '',
-          source: breakpointOrFrame?.source?.path ?? ''
-        });
-
-        if (results.length > 0) {
-          results.forEach(editor => {
-            void editor.reveal().then(() => {
-              const edit = editor.get();
-              if (edit) {
-                edit.revealPosition({
-                  line: (breakpointOrFrame.line as number) - 1,
-                  column: breakpointOrFrame.column ?? 0
-                });
-                Debugger.EditorHandler.showCurrentLine(
-                  edit,
-                  breakpointOrFrame.line as number
-                );
-              }
-            });
+      const results = debuggerSources.find({
+        focus: true,
+        kernel: service.session?.connection?.kernel?.name ?? '',
+        path: service.session?.connection?.path ?? '',
+        source: breakpointOrFrame?.source?.path ?? path
+      });
+      if (results.length > 0) {
+        results.forEach(editor => {
+          void editor.reveal().then(() => {
+            const edit = editor.get();
+            if (
+              edit &&
+              breakpointOrFrame &&
+              typeof breakpointOrFrame.line !== 'undefined'
+            ) {
+              edit.revealPosition({
+                line: breakpointOrFrame.line - 1,
+                column: breakpointOrFrame.column ?? 0
+              });
+              Debugger.EditorHandler.showCurrentLine(
+                edit,
+                breakpointOrFrame.line
+              );
+            }
           });
-          return;
-        }
+        });
+        return;
       }
       // Auto-close previously auto-opened read-only editor
       if (breakpointOrFrame) {
@@ -1028,14 +1041,15 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         }
       }
 
-      const frame = service.model.callstack.frame;
-      if (frame) {
+      if (breakpointOrFrame && typeof breakpointOrFrame.line !== 'undefined') {
+        const line = breakpointOrFrame.line;
+        const column = breakpointOrFrame.column ?? 0;
         requestAnimationFrame(() => {
           editor.revealPosition({
-            line: frame.line - 1,
-            column: frame.column
+            line: line - 1,
+            column
           });
-          Debugger.EditorHandler.showCurrentLine(editor, frame.line, 'start');
+          Debugger.EditorHandler.showCurrentLine(editor, line, 'start');
         });
       }
     };
@@ -1252,7 +1266,8 @@ const main: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.pauseOnExceptions, {
-      label: args => (args.filter as string) || 'Breakpoints on exception',
+      label: args =>
+        (args.filter as string) || trans.__('Breakpoints on exception'),
       caption: args => (args.description as string) ?? '',
       isToggled: args =>
         service.session?.isPausingOnException(args.filter as string) || false,
@@ -1334,6 +1349,10 @@ const main: JupyterFrontEndPlugin<void> = {
     sidebar.node.setAttribute('role', 'region');
     sidebar.node.setAttribute('aria-label', trans.__('Debugger section'));
 
+    sidebar.title.dataset = {
+      ...sidebar.title.dataset,
+      jpTabLabel: trans.__('Debugger')
+    };
     sidebar.title.caption = trans.__('Debugger');
 
     shell.add(sidebar, 'right', { type: 'Debugger' });
@@ -1669,7 +1688,7 @@ const debugConsole: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<unknown>[] = [
   service,
   displayRegistry,
   consoles,

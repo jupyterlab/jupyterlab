@@ -44,6 +44,12 @@ class ValueWidget extends Widget {
   }
 }
 
+class ThrowingValueWidget extends Widget {
+  getValue(): string {
+    throw new Error('getValue() failed');
+  }
+}
+
 describe('@jupyterlab/apputils', () => {
   describe('Dialog', () => {
     let dialog: TestDialog;
@@ -317,6 +323,49 @@ describe('@jupyterlab/apputils', () => {
           dialog.resolve();
           await prompt;
           dialog.dispose();
+        });
+
+        it('should focus the primary element when focus leaves the dialog', async () => {
+          // Reproduces the case where a dialog with an input (e.g.
+          // "Open from Path…") is opened from the Command Palette: the palette
+          // steals focus back, and the dialog must redirect focus to the input,
+          // not the default accept button.
+          const host = document.createElement('div');
+          const target = document.createElement('div');
+          target.tabIndex = 0;
+          const body = (
+            <div>
+              <input type={'text'} />
+            </div>
+          );
+          const dialog = new TestDialog({
+            host,
+            body,
+            focusNodeSelector: 'input'
+          });
+
+          document.body.appendChild(target);
+          document.body.appendChild(host);
+          target.focus();
+          expect(document.activeElement).toBe(target);
+
+          const prompt = dialog.launch();
+
+          await waitForDialog();
+          await dialog.ready;
+          expect(document.activeElement!.localName).toBe('input');
+
+          simulate(target, 'focus');
+          expect(document.activeElement).not.toBe(target);
+          expect(document.activeElement!.localName).toBe('input');
+          expect(document.activeElement!.className).not.toContain(
+            'jp-mod-accept'
+          );
+          dialog.resolve();
+          await prompt;
+          dialog.dispose();
+          document.body.removeChild(target);
+          document.body.removeChild(host);
         });
       });
     });
@@ -613,6 +662,17 @@ describe('@jupyterlab/apputils', () => {
 
       expect(result.button.accept).toBe(true);
       expect(result.value).toBe('foo');
+    });
+
+    it('should reject the promise when getValue() throws', async () => {
+      const prompt = showDialog({ body: new ThrowingValueWidget() });
+
+      await waitForDialog();
+
+      // Click the accept button, which will trigger _resolve → getValue() → throws
+      await acceptDialog();
+
+      await expect(prompt).rejects.toThrow('getValue() failed');
     });
 
     it('should not create a close button by default', async () => {

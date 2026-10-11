@@ -8,6 +8,9 @@ import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import type { ElementDataset } from '@lumino/virtualdom';
+import { Dialog } from './dialog';
+import { DOMUtils } from './domutils';
+import { showCommandLinkerTrustDialog } from './commandlinkertrustdialog';
 
 /**
  * The command data attribute added to nodes that are connected.
@@ -20,10 +23,20 @@ const COMMAND_ATTR = 'commandlinker-command';
 const ARGS_ATTR = 'commandlinker-args';
 
 /**
+ * The trust command data attribute added to nodes that are connected.
+ */
+const TRUST_COMMAND_ATTR = 'trust-command';
+
+/**
  * A static class that provides helper methods to generate clickable nodes that
  * execute registered commands with pre-populated arguments.
  */
 export class CommandLinker implements IDisposable {
+  /**
+   * The `args` key for a trust command's source DOM boundary ID.
+   */
+  static readonly TRUST_BOUNDARY_ID_ARG = 'commandLinkerTrustBoundaryId';
+
   /**
    * Instantiate a new command linker.
    */
@@ -81,6 +94,29 @@ export class CommandLinker implements IDisposable {
   }
 
   /**
+   * Mark a node as trusted for command execution.
+   *
+   * #### Notes
+   * This trust marker is kept in-memory and cannot be forged from untrusted
+   * DOM content. The mark applies to the node and all of its descendants.
+   */
+  markTrusted(node: HTMLElement): HTMLElement {
+    this._trustedBoundaries.set(node, true);
+    return node;
+  }
+
+  /**
+   * Remove the trusted boundary marker from a node.
+   *
+   * #### Notes
+   * This method is safe to call on nodes that were never marked as trusted.
+   */
+  unmarkTrusted(node: HTMLElement): HTMLElement {
+    this._trustedBoundaries.delete(node);
+    return node;
+  }
+
+  /**
    * Disconnect a node that has been connected to execute a command on click.
    *
    * @param node - The node being disconnected.
@@ -114,7 +150,7 @@ export class CommandLinker implements IDisposable {
   handleEvent(event: Event): void {
     switch (event.type) {
       case 'click':
-        this._evtClick(event as MouseEvent);
+        this._evtClick(event as MouseEvent).catch(console.warn);
         break;
       default:
         return;
@@ -169,7 +205,7 @@ export class CommandLinker implements IDisposable {
    * The global click handler that deploys commands/argument pairs that are
    * attached to the node being clicked.
    */
-  private _evtClick(event: MouseEvent): void {
+  private async _evtClick(event: MouseEvent): Promise<void> {
     let target = event.target as HTMLElement;
     while (target && target.parentElement) {
       if (target.hasAttribute(`data-${COMMAND_ATTR}`)) {
@@ -183,6 +219,45 @@ export class CommandLinker implements IDisposable {
         if (argsValue) {
           args = JSON.parse(argsValue);
         }
+
+        if (!this._isTrusted(target)) {
+          const label = this._commands.label(command, args) || command;
+          const trustCommand = this._findTrustCommand(target);
+          const trustAction = await this._requestTrust({
+            args,
+            command,
+            label,
+            trustCommand: trustCommand?.command ?? null
+          });
+          if (trustAction === 'cancel') {
+            return;
+          }
+          if (trustAction === 'trust' && trustCommand) {
+            try {
+              if (!trustCommand.boundary.id) {
+                trustCommand.boundary.id = DOMUtils.createDomID();
+              }
+              const trustResult = await this._commands.execute(
+                trustCommand.command,
+                {
+                  [CommandLinker.TRUST_BOUNDARY_ID_ARG]:
+                    trustCommand.boundary.id
+                }
+              );
+              if (
+                !Private.isTrustCommandResult(trustResult) ||
+                !trustResult.trusted ||
+                !this._isTrusted(trustCommand.boundary)
+              ) {
+                return;
+              }
+            } catch (error) {
+              console.error('Failed to execute trust command', error);
+              return;
+            }
+          }
+        }
+
         void this._commands.execute(command, args);
         return;
       }
@@ -190,8 +265,71 @@ export class CommandLinker implements IDisposable {
     }
   }
 
+  private _isTrusted(target: HTMLElement): boolean {
+    let node: HTMLElement | null = target;
+    while (node) {
+      if (this._trustedBoundaries.has(node)) {
+        return true;
+      }
+      node = node.parentElement;
+    }
+
+    return false;
+  }
+
+  private _findTrustCommand(target: HTMLElement): Private.ITrustCommand | null {
+    const trustNode = target.parentElement?.closest(
+      `[data-${TRUST_COMMAND_ATTR}]`
+    );
+    const command = trustNode?.getAttribute(`data-${TRUST_COMMAND_ATTR}`);
+    if (!command || !(trustNode instanceof HTMLElement)) {
+      return null;
+    }
+    return { boundary: trustNode, command };
+  }
+
+  private async _requestTrust(
+    request: Private.ITrustRequest
+  ): Promise<Private.TrustAction> {
+    const trans = Dialog.translator.load('jupyterlab');
+    const args = JSON.stringify(request.args, null, 2);
+    const buttons = [
+      Dialog.cancelButton({ label: trans.__('Cancel') }),
+      Dialog.okButton({
+        label: request.trustCommand ? trans.__('Run Once') : trans.__('Run'),
+        actions: ['run']
+      })
+    ];
+    if (request.trustCommand) {
+      buttons.push(
+        Dialog.warnButton({
+          label: trans.__('Trust'),
+          accept: false,
+          actions: ['trust']
+        })
+      );
+    }
+    const result = await showCommandLinkerTrustDialog({
+      args,
+      buttons,
+      command: request.command,
+      commandLabel: request.label,
+      hasTrustCommand: !!request.trustCommand,
+      defaultButton: 0,
+      title: trans.__('Run Command?')
+    });
+    if (result.button.actions.includes('trust')) {
+      return 'trust';
+    }
+    if (result.button.actions.includes('run') || result.button.accept) {
+      return 'run';
+    }
+    return 'cancel';
+  }
+
   private _commands: CommandRegistry;
   private _isDisposed = false;
+  private _trustedBoundaries = new WeakMap<HTMLElement, true>();
 }
 
 /**
@@ -206,5 +344,79 @@ export namespace CommandLinker {
      * The command registry instance that all linked commands will use.
      */
     commands: CommandRegistry;
+  }
+}
+
+/**
+ * A namespace for Private command linker statics.
+ */
+namespace Private {
+  /**
+   * Action returned from trust permission request.
+   */
+  export type TrustAction = 'cancel' | 'run' | 'trust';
+
+  /**
+   * Input for trust permission request.
+   */
+  export interface ITrustRequest {
+    /**
+     * The arguments for the command being requested.
+     */
+    args: ReadonlyPartialJSONObject;
+
+    /**
+     * The command being requested.
+     */
+    command: string;
+
+    /**
+     * The label for the command being requested.
+     */
+    label: string;
+
+    /**
+     * The command used to trust the parent context.
+     */
+    trustCommand: string | null;
+  }
+
+  /**
+   * Trust command and DOM boundary captured for a command-link click.
+   */
+  export interface ITrustCommand {
+    /**
+     * The DOM boundary that must become trusted.
+     */
+    boundary: HTMLElement;
+
+    /**
+     * The command used to trust the boundary.
+     */
+    command: string;
+  }
+
+  /**
+   * Result returned from a trust command.
+   */
+  export interface ITrustCommandResult {
+    /**
+     * Whether content ended up trusted.
+     */
+    trusted: boolean;
+  }
+
+  /**
+   * Type guard for trust command results.
+   */
+  export function isTrustCommandResult(
+    result: unknown
+  ): result is ITrustCommandResult {
+    return (
+      typeof result === 'object' &&
+      result !== null &&
+      'trusted' in result &&
+      typeof (result as { trusted: unknown }).trusted === 'boolean'
+    );
   }
 }

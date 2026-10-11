@@ -31,6 +31,7 @@ export abstract class RenderedCommon
     this.sanitizer = options.sanitizer;
     this.resolver = options.resolver;
     this.linkHandler = options.linkHandler;
+    this.trustHandler = options.trustHandler ?? null;
     this.translator = options.translator ?? nullTranslator;
     this.latexTypesetter = options.latexTypesetter;
     this.markdownParser = options.markdownParser ?? null;
@@ -56,6 +57,11 @@ export abstract class RenderedCommon
    * The link handler.
    */
   readonly linkHandler: IRenderMime.ILinkHandler | null;
+
+  /**
+   * The trust handler.
+   */
+  readonly trustHandler: IRenderMime.ITrustHandler | null;
 
   /**
    * The latexTypesetter.
@@ -93,8 +99,11 @@ export abstract class RenderedCommon
   ): Promise<void> {
     // TODO compare model against old model for early bail?
 
-    // Empty any existing content in the node from previous renders
-    if (!keepExisting) {
+    // Empty any existing content in the node from previous renders. An
+    // explicit `keepExisting` argument wins; when it is omitted the class
+    // default (`this.keepExisting`, e.g. `true` for streamed text) applies.
+    const keep = keepExisting ?? this.keepExisting;
+    if (!keep) {
       while (this.node.firstChild) {
         this.node.removeChild(this.node.firstChild);
       }
@@ -102,6 +111,11 @@ export abstract class RenderedCommon
 
     // Toggle the trusted class on the widget.
     this.toggleClass('jp-mod-trusted', model.trusted);
+    if (model.trusted) {
+      this.trustHandler?.markTrusted(this.node);
+    } else {
+      this.trustHandler?.unmarkTrusted(this.node);
+    }
 
     // Render the actual content.
     await this.render(model);
@@ -121,6 +135,11 @@ export abstract class RenderedCommon
    * @returns A promise which resolves when rendering is complete.
    */
   abstract render(model: IRenderMime.IMimeModel): Promise<void>;
+
+  /**
+   * Whether to keep the existing rendering by default.
+   */
+  readonly keepExisting?: boolean = false;
 
   /**
    * Set the URI fragment identifier.
@@ -426,6 +445,11 @@ export class RenderedSVG extends RenderedCommon {
  */
 export class RenderedText extends RenderedCommon {
   /**
+   * Keep existing node as `renderText` supports reuse of the existing nodes on streaming.
+   */
+  readonly keepExisting = true;
+
+  /**
    * Construct a new rendered text widget.
    *
    * @param options - The options for initializing the widget.
@@ -433,6 +457,7 @@ export class RenderedText extends RenderedCommon {
   constructor(options: IRenderMime.IRendererOptions) {
     super(options);
     this.addClass('jp-RenderedText');
+    this.node.style.contain = 'style layout';
   }
 
   /**
@@ -442,7 +467,7 @@ export class RenderedText extends RenderedCommon {
    *
    * @returns A promise which resolves when rendering is complete.
    */
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+  async render(model: IRenderMime.IMimeModel): Promise<void> {
     return renderers.renderText({
       host: this.node,
       sanitizer: this.sanitizer,
@@ -452,13 +477,8 @@ export class RenderedText extends RenderedCommon {
   }
 }
 
-export class RenderedError extends RenderedCommon {
-  constructor(options: IRenderMime.IRendererOptions) {
-    super(options);
-    this.addClass('jp-RenderedText');
-  }
-
-  render(model: IRenderMime.IMimeModel): Promise<void> {
+export class RenderedError extends RenderedText {
+  async render(model: IRenderMime.IMimeModel): Promise<void> {
     return renderers.renderError({
       host: this.node,
       sanitizer: this.sanitizer,

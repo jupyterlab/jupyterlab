@@ -20,11 +20,23 @@
       "description": "Whether to replace URLs with links or not.",
       "default": true
     },
+    "incrementalAutolink": {
+      "type": "boolean",
+      "title": "Incremental autolinking",
+      "description": "Whether to autolink URLs incrementally (asynchronously, across animation frames) as large textual outputs (e.g. streamed cell outputs) are rendered. When enabled (the default), the text is shown first and links appear shortly after, keeping the UI responsive. Disable to autolink synchronously so links appear together with the text at first paint; note this also disables incremental rendering, so large outputs are rendered in a single blocking pass (legacy behavior).",
+      "default": true
+    },
     "allowNamedProperties": {
       "type": "boolean",
       "title": "Allow named properties",
       "description": "Whether to allow untrusted elements to include `name` and `id` attributes. These attributes are stripped by default to prevent DOM clobbering attacks.",
       "default": false
+    },
+    "allowCommandLinker": {
+      "type": "boolean",
+      "title": "Allow command linker",
+      "description": "Whether to allow untrusted elements to use `data-commandlinker-command` and `data-commandlinker-args` attributes. These attributes enable triggering JupyterLab commands.",
+      "default": true
     }
   },
   "type": "object"

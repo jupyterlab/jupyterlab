@@ -1,7 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { CommandRegistry } from '@lumino/commands';
+// This module is loaded on demand by the variables grid.
+// eslint-disable-next-line jupyter/prefer-lazy-imports
 import {
   BasicKeyHandler,
   BasicMouseHandler,

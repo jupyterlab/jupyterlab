@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ReactWidget } from './vdom';
 import { StringExt } from '@lumino/algorithm';
 import React, { useCallback, useEffect, useRef, useState } from 'react';

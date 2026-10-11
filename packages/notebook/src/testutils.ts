@@ -1,9 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   Clipboard,
+  Sanitizer,
   SessionContextDialogs,
   SystemClipboard
 } from '@jupyterlab/apputils';
@@ -201,10 +203,17 @@ export namespace NBTestUtils {
           kernelHistory: new NotebookHistory({ sessionContext: sessionContext })
         }
       : {};
+    // Render textual outputs synchronously in tests: the incremental
+    // (animation-frame based) pipeline bails out immediately for hosts that
+    // are not attached to the document, which is the norm in unit tests that
+    // never call `Widget.attach`.
+    const sanitizer = new Sanitizer();
+    sanitizer.setIncrementalAutolink(false);
     return new Notebook({
       rendermime: new RenderMimeRegistry({
         markdownParser: parser,
-        initialFactories: standardRendererFactories
+        initialFactories: standardRendererFactories,
+        sanitizer
       }),
       contentFactory: createNotebookFactory(),
       mimeTypeService,

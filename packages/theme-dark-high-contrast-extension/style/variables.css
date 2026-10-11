@@ -92,15 +92,6 @@ all of MD as it is not optimized for dense, information rich UIs.
     0 24px 38px 3px var(--jp-shadow-penumbra-color),
     0 9px 46px 8px var(--jp-shadow-ambient-color);
 
-  /* shortcut buttons
-   *
-   * The following css variables are used to specify the visual
-   * styling of the keyboard shortcut buttons
-   */
-
-  --jp-shortcuts-button-background: var(--jp-brand-color1);
-  --jp-shortcuts-button-hover-background: var(--jp-brand-color0);
-
   /* Borders
    *
    * The following variables, specify the visual styling of borders in JupyterLab.
@@ -422,9 +413,6 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* Search-related styles */
 
-  --jp-search-toggle-off-opacity: 0.6;
-  --jp-search-toggle-hover-opacity: 0.8;
-  --jp-search-toggle-on-opacity: 1;
   --jp-search-selected-match-background-color: rgb(255, 225, 0);
   --jp-search-selected-match-color: black;
   --jp-search-unselected-match-background-color: var(
@@ -438,7 +426,7 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   --jp-scrollbar-background-color: #000;
   --jp-scrollbar-thumb-color:
-    88, 96, 97; /* need to specify thumb color as an RGB triplet */
+    140, 148, 150; /* need to specify thumb color as an RGB triplet */
 
   --jp-scrollbar-endpad: 3px; /* the minimum gap between the thumb and the ends of a scrollbar */
 
@@ -454,15 +442,21 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-icon-contrast-color3: var(--md-blue-600);
 
   /* Button colors */
-  --jp-accept-color-normal: var(--md-blue-700);
-  --jp-accept-color-hover: var(--md-blue-800);
+  --jp-accept-color-normal: var(--md-blue-800);
+  --jp-accept-color-hover: var(--md-blue-700);
   --jp-accept-color-active: var(--md-blue-900);
+  --jp-accept-color-foreground: white;
+  --jp-accept-outline-color: #2796f1;
   --jp-warn-color-normal: var(--md-red-700);
   --jp-warn-color-hover: var(--md-red-800);
   --jp-warn-color-active: var(--md-red-900);
-  --jp-reject-color-normal: var(--md-grey-600);
+  --jp-warn-color-foreground: white;
+  --jp-warn-outline-color: var(--md-red-800);
+  --jp-reject-color-normal: var(--md-grey-800);
   --jp-reject-color-hover: var(--md-grey-700);
-  --jp-reject-color-active: var(--md-grey-800);
+  --jp-reject-color-active: var(--md-grey-600);
+  --jp-reject-color-foreground: white;
+  --jp-reject-outline-color: var(--md-grey-700);
 
   /* File or activity icons and switch semantic variables */
   --jp-jupyter-icon-color: #f37626;
@@ -476,6 +470,14 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-inspector-icon-color: var(--md-grey-200);
   --jp-switch-color: var(--md-grey-400);
   --jp-switch-true-position-color: var(--md-orange-700);
+
+  /* Outline styles for focus-visible states needed for keyboard navigation.
+      2px is the minimum size required for accessibility.
+      This color is slightly darker than --jp-brand-color1 to ensure there is
+      enough contrast with the white borders.
+  */
+  --jp-focus-outline-color: #2796f1;
+  --jp-focus-outline-width: 2px;
 }
 
 /* Completer specific styles */
@@ -492,4 +494,20 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-completer-type-background8: #7f7f7f;
   --jp-completer-type-background9: #bcbd22;
   --jp-completer-type-background10: #17becf;
+}
+
+/* Thicker focus outline for the console, tabs, and launcher cards so that
+    they are more visible against the white borders.
+*/
+.jp-CodeConsole-input:focus-visible,
+.jp-CodeConsole-content:focus-visible,
+.lm-DockPanel-tabBar .lm-TabBar-tab:focus-visible,
+.lm-DockPanel-tabBar .lm-TabBar-addButton:focus-visible,
+.lm-TabPanel-tabBar .lm-TabBar-tab:focus-visible {
+  outline-width: 3px;
+  outline-offset: -3px;
+}
+
+.jp-LauncherCard:focus-visible {
+  outline-width: 3px;
 }

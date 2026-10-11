@@ -378,7 +378,7 @@ function FilterToggle(props: IFilterToggleProps): JSX.Element {
           : props.trans.__('Show Search Filters')
       }
     >
-      <icon.react className={className} tag="span" height="20px" width="20px" />
+      <icon.react className={className} tag="span" />
     </button>
   );
 }

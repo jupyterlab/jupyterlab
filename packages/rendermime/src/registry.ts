@@ -3,14 +3,36 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import { Sanitizer } from '@jupyterlab/apputils';
-import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
+import { LruCache, PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import { ServerConnection } from '@jupyterlab/services';
 import type { Contents } from '@jupyterlab/services';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { MimeModel } from './mimemodel';
 import type { IRenderMimeRegistry } from './tokens';
+
+/**
+ * How long the result of a path resolution stays usable, in milliseconds.
+ *
+ * A file named in an output may be created after it was rendered.
+ */
+const RESOLVE_PATH_CACHE_TTL = 60 * 1000;
+
+/**
+ * How many resolved paths one resolver keeps.
+ */
+const RESOLVE_PATH_CACHE_SIZE = 500;
+
+/**
+ * How many path resolutions one resolver runs at a time.
+ *
+ * Browsers allow about six connections per host, and an output can hold
+ * thousands of distinct path-like strings; leaving connections free keeps such
+ * an output from delaying the rest of the application.
+ */
+const RESOLVE_PATH_LANES = 4;
 
 /**
  * An object which manages mime renderer factories.
@@ -33,6 +55,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
     this.translator = options.translator ?? nullTranslator;
     this.resolver = options.resolver ?? null;
     this.linkHandler = options.linkHandler ?? null;
+    this.trustHandler = options.trustHandler ?? null;
     this.latexTypesetter = options.latexTypesetter ?? null;
     this.markdownParser = options.markdownParser ?? null;
     this.sanitizer = options.sanitizer ?? new Sanitizer();
@@ -59,6 +82,11 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
    * The object used to handle path opening links.
    */
   readonly linkHandler: IRenderMime.ILinkHandler | null;
+
+  /**
+   * The object used to register trusted render boundaries.
+   */
+  readonly trustHandler: IRenderMime.ITrustHandler | null;
 
   /**
    * The LaTeX typesetter for the rendermime.
@@ -142,6 +170,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
       resolver: this.resolver,
       sanitizer: this.sanitizer,
       linkHandler: this.linkHandler,
+      trustHandler: this.trustHandler,
       latexTypesetter: this.latexTypesetter,
       markdownParser: this.markdownParser,
       translator: this.translator
@@ -172,6 +201,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
       resolver: options.resolver ?? this.resolver ?? undefined,
       sanitizer: options.sanitizer ?? this.sanitizer ?? undefined,
       linkHandler: options.linkHandler ?? this.linkHandler ?? undefined,
+      trustHandler: options.trustHandler ?? this.trustHandler ?? undefined,
       latexTypesetter:
         options.latexTypesetter ?? this.latexTypesetter ?? undefined,
       markdownParser:
@@ -308,6 +338,11 @@ export namespace RenderMimeRegistry {
     linkHandler?: IRenderMime.ILinkHandler;
 
     /**
+     * An optional trust handler.
+     */
+    trustHandler?: IRenderMime.ITrustHandler;
+
+    /**
      * An optional LaTeX typesetter.
      */
     latexTypesetter?: IRenderMime.ILatexTypesetter;
@@ -340,6 +375,7 @@ export namespace RenderMimeRegistry {
     constructor(options: IUrlResolverOptions) {
       this._path = options.path;
       this._contents = options.contents;
+      this._getKernelId = options.getKernelId;
     }
 
     /**
@@ -405,45 +441,28 @@ export namespace RenderMimeRegistry {
      * - path understood and known by kernel (if such a path exists).
      * Returns `null` if there is no file matching provided path in neither
      * kernel nor jupyter-server contents manager.
+     *
+     * #### Notes
+     * Results are cached: resolution asks the server, and an output can hold
+     * thousands of path-like strings.
      */
     async resolvePath(
       path: string
     ): Promise<IRenderMime.IResolvedLocation | null> {
-      // TODO: a clean implementation would be server-side and depends on:
-      // https://github.com/jupyter-server/jupyter_server/issues/1280
-
-      const rootDir = PageConfig.getOption('rootUri').replace('file://', '');
-      // Workaround: expand `~` path using root dir (if it matches).
-      if (path.startsWith('~/') && rootDir.startsWith('/home/')) {
-        // For now we assume that kernel is in root dir.
-        path = rootDir.split('/').slice(0, 3).join('/') + path.substring(1);
+      const kernelId = this._getKernelId?.() ?? '';
+      if (kernelId !== this._resolvePathCacheKernelId) {
+        // A path can resolve to a file which only the kernel can see.
+        this._resolvePathCache.clear();
+        this._resolvePathCacheKernelId = kernelId;
       }
-      if (path.startsWith(rootDir) || path.startsWith('./')) {
-        try {
-          const relativePath = path.replace(rootDir, '');
-          // If file exists on the server we have guessed right
-          const response = await this._contents.get(relativePath, {
-            content: false
-          });
-          return {
-            path: response.path,
-            scope: 'server'
-          };
-        } catch (error) {
-          // The file seems like should be on the server but is not.
-          console.warn(`Could not resolve location of ${path} on server`);
-          return null;
-        }
+      const cached = this._resolvePathCache.get(path);
+      if (
+        cached &&
+        (cached.pending || Date.now() - cached.time < RESOLVE_PATH_CACHE_TTL)
+      ) {
+        return cached.result;
       }
-      // The file is not accessible from jupyter-server but maybe it is
-      // available from DAP `source`; we assume the path is available
-      // from kernel because currently we have no way of checking this
-      // without introducing a cycle (unless we were to set the debugger
-      // service instance on the resolver later).
-      return {
-        path: path,
-        scope: 'kernel'
-      };
+      return this._resolveAndRememberPath(path);
     }
 
     /**
@@ -461,8 +480,190 @@ export namespace RenderMimeRegistry {
       }
     }
 
+    /**
+     * Resolve a path and keep the result for the callers which follow.
+     */
+    private _resolveAndRememberPath(
+      path: string
+    ): Promise<IRenderMime.IResolvedLocation | null> {
+      const entry: Private.IResolvePathCacheEntry = {
+        pending: true,
+        time: Date.now(),
+        result: this._resolveInLane(path)
+      };
+      entry.result = entry.result.then(
+        result => {
+          entry.pending = false;
+          entry.time = Date.now();
+          return result;
+        },
+        error => {
+          // A failed lookup does not show whether the file exists, so it is
+          // reported as unresolved and left expired: a server hiccup must not
+          // hide a link until the entry ages out.
+          console.warn(`Could not resolve location of ${path}`, error);
+          entry.pending = false;
+          entry.time = 0;
+          return null;
+        }
+      );
+      this._resolvePathCache.set(path, entry);
+      return entry.result;
+    }
+
+    /**
+     * Resolve a path in one of the lanes, each of which runs the resolutions
+     * given to it one after another.
+     */
+    private _resolveInLane(
+      path: string
+    ): Promise<IRenderMime.IResolvedLocation | null> {
+      const lane = (this._resolvePathLane + 1) % RESOLVE_PATH_LANES;
+      this._resolvePathLane = lane;
+      const result = this._resolvePathLanes[lane].then(() =>
+        this._resolveUncachedPath(path)
+      );
+      // A rejection must not stop the lane from taking the next resolution.
+      this._resolvePathLanes[lane] = result.catch(() => undefined);
+      return result;
+    }
+
+    private async _resolveUncachedPath(
+      path: string
+    ): Promise<IRenderMime.IResolvedLocation | null> {
+      const resolved = await this._resolvePathUsingServerApi(path);
+      if (resolved !== undefined) {
+        return resolved;
+      }
+      return this._resolvePathUsingLegacyHeuristics(path);
+    }
+
+    private async _resolvePathUsingServerApi(
+      path: string
+    ): Promise<IRenderMime.IResolvedLocation | null | undefined> {
+      if (this._resolvePathApiAvailable === false) {
+        return undefined;
+      }
+
+      const params: Private.IResolvePathQuery = { path };
+      const kernelId = this._getKernelId?.();
+      if (kernelId) {
+        // `kernel` is expected by jupyter-server resolvePath handler.
+        params.kernel = kernelId;
+      }
+
+      let response = await this._makeResolvePathRequest(params);
+      if (!response) {
+        throw new Error(`Could not reach the server to resolve ${path}`);
+      }
+
+      if (response.status === 404) {
+        this._resolvePathApiAvailable = false;
+        return undefined;
+      }
+      if (!response.ok) {
+        throw new Error(
+          `Server answered ${response.status} when resolving ${path}`
+        );
+      }
+      this._resolvePathApiAvailable = true;
+
+      try {
+        const data =
+          (await response.json()) as Private.IResolvePathResponse | null;
+        const resolved =
+          data?.resolved?.filter(Private.isResolvedLocation) ?? [];
+        const hasUnresolvedKernelScope =
+          data?.unresolved?.some(
+            item =>
+              !!item &&
+              typeof item === 'object' &&
+              (item as { scope?: unknown }).scope === 'kernel'
+          ) ?? false;
+        if (!resolved.length) {
+          if (hasUnresolvedKernelScope) {
+            return null;
+          }
+          return null;
+        }
+
+        // Prefer server-scoped paths when both scopes are available.
+        return resolved.find(item => item.scope === 'server') ?? resolved[0];
+      } catch {
+        throw new Error(`Could not read the resolution of ${path}`);
+      }
+    }
+
+    private async _makeResolvePathRequest(
+      params: Private.IResolvePathQuery
+    ): Promise<Response | null> {
+      const serverSettings = this._contents.serverSettings;
+      const url =
+        URLExt.join(serverSettings.baseUrl, 'api', 'resolvePath') +
+        URLExt.objectToQueryString(params);
+      try {
+        return await ServerConnection.makeRequest(url, {}, serverSettings);
+      } catch {
+        return null;
+      }
+    }
+
+    private async _resolvePathUsingLegacyHeuristics(
+      path: string
+    ): Promise<IRenderMime.IResolvedLocation | null> {
+      const rootDir = PageConfig.getOption('rootUri').replace('file://', '');
+      // Workaround: expand `~` path using root dir (if it matches).
+      if (path.startsWith('~/') && rootDir.startsWith('/home/')) {
+        // For now we assume that kernel is in root dir.
+        path = rootDir.split('/').slice(0, 3).join('/') + path.substring(1);
+      }
+      if (path.startsWith(rootDir) || path.startsWith('./')) {
+        try {
+          const relativePath = path.replace(rootDir, '');
+          // If file exists on the server we have guessed right.
+          const response = await this._contents.get(relativePath, {
+            content: false
+          });
+          return {
+            path: response.path,
+            scope: 'server'
+          };
+        } catch (error) {
+          if (
+            error instanceof ServerConnection.ResponseError &&
+            error.response.status === 404
+          ) {
+            // The file seems like it should be on the server but is not.
+            return null;
+          }
+          throw error;
+        }
+      }
+      // The file is not accessible from jupyter-server but maybe it is
+      // available from DAP `source`; we assume the path is available
+      // from kernel because currently we have no way of checking this
+      // without introducing a cycle (unless we were to set the debugger
+      // service instance on the resolver later).
+      return {
+        path: path,
+        scope: 'kernel'
+      };
+    }
+
     private _path: string;
     private _contents: Contents.IManager;
+    private _getKernelId?: () => string | null | undefined;
+    private _resolvePathApiAvailable: boolean | null = null;
+    private _resolvePathCache = new LruCache<
+      string,
+      Private.IResolvePathCacheEntry
+    >({ maxSize: RESOLVE_PATH_CACHE_SIZE });
+    private _resolvePathCacheKernelId = '';
+    private _resolvePathLanes: Promise<unknown>[] = Array.from(
+      { length: RESOLVE_PATH_LANES },
+      () => Promise.resolve()
+    );
+    private _resolvePathLane = 0;
   }
 
   /**
@@ -481,6 +682,11 @@ export namespace RenderMimeRegistry {
      * The contents manager used by the resolver.
      */
     contents: Contents.IManager;
+
+    /**
+     * Get the current kernel id used by the `resolvePath` endpoint.
+     */
+    getKernelId?: () => string | null | undefined;
   }
 
   /**
@@ -500,6 +706,48 @@ export namespace RenderMimeRegistry {
  * The namespace for the module implementation details.
  */
 namespace Private {
+  export interface IResolvePathQuery {
+    [key: string]: string | undefined;
+    path: string;
+    kernel?: string;
+  }
+
+  export interface IResolvePathResponse {
+    resolved?: unknown[];
+    unresolved?: unknown[];
+  }
+
+  /**
+   * A remembered path resolution.
+   */
+  export interface IResolvePathCacheEntry {
+    /**
+     * The resolution, shared by every caller asking for the same path.
+     */
+    result: Promise<IRenderMime.IResolvedLocation | null>;
+    /**
+     * When the request finished, or when it started while it is pending.
+     */
+    time: number;
+    /**
+     * Whether the request is still in flight; a pending entry never expires.
+     */
+    pending: boolean;
+  }
+
+  export function isResolvedLocation(
+    item: unknown
+  ): item is IRenderMime.IResolvedLocation {
+    if (!item || typeof item !== 'object') {
+      return false;
+    }
+    const candidate = item as Partial<IRenderMime.IResolvedLocation>;
+    return (
+      typeof candidate.path === 'string' &&
+      (candidate.scope === 'server' || candidate.scope === 'kernel')
+    );
+  }
+
   /**
    * A type alias for a mime rank and tie-breaking id.
    */

@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import { IRouter, JupyterFrontEnd } from '@jupyterlab/application';
@@ -18,6 +19,7 @@ import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ICommandPalette } from '@jupyterlab/apputils';
 import { IWorkspaceCommands, IWorkspacesModel } from '@jupyterlab/workspaces';
+import { WORKSPACE_ITEM_CLASS } from './constants';
 
 namespace CommandIDs {
   /**
@@ -65,8 +67,6 @@ namespace CommandIDs {
 const WORKSPACE_NAME = 'jupyterlab-workspace';
 const WORKSPACE_EXT = '.' + WORKSPACE_NAME;
 const LAST_SAVE_ID = 'workspace-ui:lastSave';
-
-export const WORKSPACE_ITEM_CLASS = 'jp-mod-workspace';
 
 /**
  * The workspace commands

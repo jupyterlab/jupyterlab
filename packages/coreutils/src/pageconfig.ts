@@ -3,13 +3,17 @@
 
 import { JSONExt } from '@lumino/coreutils';
 import minimist from 'minimist';
+import type * as Path from 'path';
 import { URLExt } from './url';
 
 /**
  * Declare stubs for the node variables.
  */
-declare let process: any;
-declare let require: any;
+declare const process: {
+  argv?: string[];
+  env: Record<string, string | undefined>;
+};
+declare const require: (module: string) => unknown;
 
 /**
  * The namespace for `PageConfig` functions.
@@ -55,12 +59,15 @@ export namespace PageConfig {
     if (!found && typeof process !== 'undefined' && process.argv) {
       try {
         const cli = minimist(process.argv.slice(2));
-        const path: any = require('path');
+        const path = require('path') as typeof Path;
         let fullPath = '';
         if ('jupyter-config-data' in cli) {
           fullPath = path.resolve(cli['jupyter-config-data']);
         } else if ('JUPYTER_CONFIG_DATA' in process.env) {
-          fullPath = path.resolve(process.env['JUPYTER_CONFIG_DATA']);
+          const configPath = process.env['JUPYTER_CONFIG_DATA'];
+          if (configPath) {
+            fullPath = path.resolve(configPath);
+          }
         }
         if (fullPath) {
           // Force Rspack to ignore this require and not treat it as requiring a package.
@@ -145,11 +152,7 @@ export namespace PageConfig {
     const labOrDoc = mode === 'single-document' ? 'doc' : 'lab';
     path = URLExt.join(path, labOrDoc);
     if (workspace !== defaultWorkspace) {
-      path = URLExt.join(
-        path,
-        'workspaces',
-        encodeURIComponent(getOption('workspace') ?? defaultWorkspace)
-      );
+      path = URLExt.join(path, 'workspaces', encodeURIComponent(workspace));
     }
     const treePath = options.treePath ?? getOption('treePath');
     if (treePath) {
@@ -332,4 +335,19 @@ export namespace PageConfig {
       return disabled.some(val => val === id || (extName && val === extName));
     }
   }
+}
+
+/**
+ * Compare two version tuples element-by-element.
+ */
+export function compareVersions(
+  a: [number, number, number],
+  b: [number, number, number]
+): number {
+  for (let index = 0; index < 3; index++) {
+    if (a[index] !== b[index]) {
+      return a[index] - b[index];
+    }
+  }
+  return 0;
 }

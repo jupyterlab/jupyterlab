@@ -35,6 +35,9 @@
       "path": "../settingregistry"
     },
     {
+      "path": "../statusbar"
+    },
+    {
       "path": "../terminal"
     },
     {

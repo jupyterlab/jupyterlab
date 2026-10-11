@@ -3,6 +3,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as path from 'path';
 import * as utils from './utils';
@@ -47,4 +48,4 @@ function handlePackage(packagePath: string): void {
 }
 
 // Update the core jupyterlab build dependencies.
-utils.run('jlpm run integrity');
+utils.run('jlpm integrity');

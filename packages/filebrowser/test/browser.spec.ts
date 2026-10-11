@@ -4,7 +4,9 @@
  */
 
 import expect from 'expect';
+import { MessageLoop } from '@lumino/messaging';
 import { Signal } from '@lumino/signaling';
+import type { PanelLayout } from '@lumino/widgets';
 import { Widget } from '@lumino/widgets';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentManager } from '@jupyterlab/docmanager';
@@ -14,6 +16,7 @@ import { signalToPromise } from '@jupyterlab/testing';
 import { Drive } from '@jupyterlab/services';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
+import { ReactWidget } from '@jupyterlab/ui-components';
 import { simulate } from 'simulate-event';
 import { DirListing, FileBrowser, FilterFileBrowserModel } from '../src';
 
@@ -27,6 +30,29 @@ class TestFileBrowser extends FileBrowser {
     // Allows us to spy on onUpdateRequest.
     this.renameCalled.emit();
     return result;
+  }
+
+  get fileFilterInput(): HTMLInputElement | null {
+    return (this as any)._fileFilterRef.current;
+  }
+
+  async waitForFileFilterInput(): Promise<HTMLInputElement> {
+    const filterWidget = (
+      this.filterToolbar.layout as PanelLayout
+    ).widgets.find(widget => {
+      return widget.node.dataset.jpItemName === 'fileNameSearcher';
+    });
+
+    if (filterWidget instanceof ReactWidget) {
+      MessageLoop.sendMessage(filterWidget, Widget.Msg.UpdateRequest);
+      await filterWidget.renderPromise;
+    }
+
+    const input = this.fileFilterInput;
+    if (!input) {
+      throw new Error('File filter input not rendered');
+    }
+    return input;
   }
 }
 
@@ -68,6 +94,10 @@ describe('filebrowser/browser', () => {
       };
       fileBrowser = new TestFileBrowser(options);
       Widget.attach(fileBrowser, document.body);
+    });
+
+    afterEach(() => {
+      fileBrowser.dispose();
     });
 
     describe('#constructor', () => {
@@ -233,6 +263,50 @@ describe('filebrowser/browser', () => {
         });
         await created;
         expect(itemNode.contains(document.activeElement)).toBe(true);
+      });
+    });
+
+    describe('#clearFilterOnNavigation', () => {
+      let dirName: string;
+
+      beforeEach(async () => {
+        const items = Array.from(model.items());
+        const dir = items.find(item => item.type === 'directory');
+        dirName = dir!.name;
+      });
+
+      afterEach(async () => {
+        model.setFilter(() => ({}));
+        await model.cd('/');
+      });
+
+      it('should clear the filter when navigating to a new directory', async () => {
+        fileBrowser.showFileFilter = true;
+
+        const input = await fileBrowser.waitForFileFilterInput();
+        input.value = 'notebook';
+
+        model.setFilter(value => (value.type === 'notebook' ? {} : null));
+        await model.cd(dirName);
+        await model.cd('/');
+
+        const items = Array.from(model.items());
+        expect(items.some(item => item.type !== 'notebook')).toBe(true);
+      });
+
+      it('should not clear the filter when clearFilterOnNavigation is false', async () => {
+        fileBrowser.clearFilterOnNavigation = false;
+        fileBrowser.showFileFilter = true;
+
+        const input = await fileBrowser.waitForFileFilterInput();
+        input.value = 'notebook';
+
+        model.setFilter(value => (value.type === 'notebook' ? {} : null));
+        await model.cd(dirName);
+        await model.cd('/');
+
+        const items = Array.from(model.items());
+        expect(items.every(item => item.type === 'notebook')).toBe(true);
       });
     });
   });

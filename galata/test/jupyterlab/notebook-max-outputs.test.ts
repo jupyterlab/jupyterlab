@@ -34,7 +34,7 @@ for i in range(10):
   );
 });
 
-test("Don't limit cell outputs if input is requested", async ({ page }) => {
+test('Limit cell outputs even when input is requested', async ({ page }) => {
   await page.notebook.createNew();
 
   await page.locator(
@@ -47,10 +47,12 @@ for i in range(10):
 input('Your age:')
 `);
 
+  await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
   await page.menu.clickMenuItem('Run>Run All Cells');
   await page.locator('.jp-Stdin >> text=Your age:').waitFor();
-  expect(await page.locator('.jp-RenderedMarkdown').count()).toBeGreaterThan(
-    MAX_OUTPUTS
+  await expect(page.locator('.jp-RenderedMarkdown')).toHaveCount(MAX_OUTPUTS);
+  await expect(page.locator('.jp-TrimmedOutputs')).toHaveText(
+    'Show more outputs'
   );
 
   await page.keyboard.press('Enter');
@@ -72,6 +74,7 @@ for i in range(10):
     display(Markdown('_Markdown_ **text**'))
 `);
 
+  await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
   await page.menu.clickMenuItem('Run>Run All Cells');
   await page.locator('.jp-Stdin >> text=Your age:').waitFor();
 

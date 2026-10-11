@@ -119,7 +119,10 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
     const loader = vega.vega.loader({
       http: { credentials: 'same-origin' }
     });
-    const sanitize = async (uri: string, options: any) => {
+    const sanitize = async (
+      uri: string,
+      options: Parameters<typeof loader.sanitize>[1]
+    ) => {
       // Use the resolver for any URIs it wants to handle
       const resolver = this._resolver;
       if (resolver?.isLocal && resolver.isLocal(uri)) {
@@ -142,13 +145,10 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
     }
 
     // Add png representation of vega chart to output
+    const scaleFactor = embedOptions.scaleFactor;
     const imageURL = await this._result.view.toImageURL(
       'png',
-      typeof embedOptions.scaleFactor === 'number'
-        ? embedOptions.scaleFactor
-        : embedOptions.scaleFactor
-          ? (embedOptions.scaleFactor as any).png
-          : embedOptions.scaleFactor
+      typeof scaleFactor === 'number' ? scaleFactor : scaleFactor?.png
     );
     model.setData({
       data: { ...model.data, 'image/png': imageURL.split(',')[1] }

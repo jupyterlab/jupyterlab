@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as KernelMessage from './messages';
 
@@ -202,7 +203,7 @@ namespace Private {
     msg: KernelMessage.IMessage
   ): string | ArrayBuffer {
     let value: string | ArrayBuffer;
-    if (msg.buffers?.length) {
+    if ((msg.buffers?.length ?? 0) > 0) {
       value = serializeBinary(msg);
     } else {
       value = JSON.stringify(msg);

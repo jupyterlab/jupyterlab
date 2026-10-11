@@ -34,7 +34,7 @@ const LATEX_LEVELS: { [label: string]: number } = {
 /**
  * Regular expression to create the outline
  */
-const SECTIONS = /^\s*\\(section|subsection|subsubsection){(.+)}/;
+const SECTIONS = /^\s*\\(section|subsection|subsubsection)\{(.+)\}/;
 
 /**
  * Table of content model for LaTeX files.
@@ -123,9 +123,11 @@ export class LaTeXTableOfContentsFactory extends EditorTableOfContentsFactory {
   isApplicable(widget: Widget): boolean {
     const isApplicable = super.isApplicable(widget);
 
-    if (isApplicable) {
-      let mime = (widget as any).content?.model?.mimeType;
-      return mime && (mime === 'text/x-latex' || mime === 'text/x-stex');
+    if (isApplicable && Private.isFileEditorWidget(widget)) {
+      let mime = widget.content.model.mimeType;
+      return Boolean(
+        mime && (mime === 'text/x-latex' || mime === 'text/x-stex')
+      );
     }
     return false;
   }
@@ -142,5 +144,13 @@ export class LaTeXTableOfContentsFactory extends EditorTableOfContentsFactory {
     configuration?: TableOfContents.IConfig
   ): LaTeXTableOfContentsModel {
     return new LaTeXTableOfContentsModel(widget, configuration);
+  }
+}
+
+namespace Private {
+  export function isFileEditorWidget(
+    widget: Widget
+  ): widget is IDocumentWidget<FileEditor, DocumentRegistry.IModel> {
+    return 'content' in widget;
   }
 }
