@@ -28,12 +28,24 @@ import { DisposableSet } from '@lumino/disposable';
 import { Platform } from '@lumino/domutils';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
+import React from 'react';
 
-import { renderShortCut } from './renderer';
 import type { IShortcutsSettingsLayout, IShortcutUI } from './types';
 import { CommandIDs } from './types';
 
 const SHORTCUT_PLUGIN_ID = '@jupyterlab/shortcuts-extension:shortcuts';
+
+type ShortcutRendererProps = {
+  external: IShortcutUI.IExternalBundle;
+};
+
+const ShortcutRenderer = React.lazy(async () => {
+  const { renderShortCut } = await import('./renderer');
+  return {
+    default: (props: ShortcutRendererProps): React.ReactElement =>
+      renderShortCut(props)
+  };
+});
 
 function getExternalForJupyterLab(
   settingRegistry: ISettingRegistry,
@@ -219,16 +231,19 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
 
       const component: IFormRenderer = {
         fieldRenderer: (props: any) => {
-          return renderShortCut({
-            external: getExternalForJupyterLab(
-              registry,
-              app,
-              translator_,
-              actionRequested,
-              editorFactory
-            ),
-            ...props
-          });
+          return React.createElement(
+            React.Suspense,
+            { fallback: null },
+            React.createElement(ShortcutRenderer, {
+              external: getExternalForJupyterLab(
+                registry,
+                app,
+                translator_,
+                actionRequested,
+                editorFactory
+              )
+            })
+          );
         }
       };
       editorRegistry.addRenderer(`${shortcuts.id}.shortcuts`, component);
