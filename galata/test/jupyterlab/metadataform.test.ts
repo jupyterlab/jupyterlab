@@ -732,47 +732,55 @@ test.describe('UISchema', () => {
 });
 
 test.describe('Advanced tools', () => {
-  test('should preserve both metadata drafts when saving invalid notebook metadata', async ({
-    page,
-    baseURL,
-    tmpPath
-  }) => {
-    await page.goto(baseURL);
-    await openNotebook(page, tmpPath);
-    await openForm(page, 'Advanced Tools');
+  for (const notebookDraft of [
+    '{"draft":',
+    'null',
+    'true',
+    '42',
+    '"text"',
+    '[]'
+  ]) {
+    test(`should preserve both metadata drafts when saving ${notebookDraft} as notebook metadata`, async ({
+      page,
+      baseURL,
+      tmpPath
+    }) => {
+      await page.goto(baseURL);
+      await openNotebook(page, tmpPath);
+      await openForm(page, 'Advanced Tools');
 
-    const cellEditor = page.locator('.jp-CellMetadataEditor .cm-content');
-    const notebookEditor = page.locator(
-      '.jp-NotebookMetadataEditor .cm-content'
-    );
-    const cellMetadata = await getCellMetadata(page);
-    const notebookMetadata = await getNotebookMetadata(page);
-    const cellDraft = JSON.stringify({ ...cellMetadata, draft: 'cell' });
-    const notebookDraft = '{"draft":';
+      const cellEditor = page.locator('.jp-CellMetadataEditor .cm-content');
+      const notebookEditor = page.locator(
+        '.jp-NotebookMetadataEditor .cm-content'
+      );
+      const cellMetadata = await getCellMetadata(page);
+      const notebookMetadata = await getNotebookMetadata(page);
+      const cellDraft = JSON.stringify({ ...cellMetadata, draft: 'cell' });
 
-    await cellEditor.fill(cellDraft);
-    await notebookEditor.fill(notebookDraft);
-    await notebookEditor.press('ControlOrMeta+s');
+      await cellEditor.fill(cellDraft);
+      await notebookEditor.fill(notebookDraft);
+      await notebookEditor.press('ControlOrMeta+s');
 
-    const dialog = page.getByRole('dialog', { name: 'Invalid Metadata' });
-    await expect(dialog).toBeVisible();
-    await dialog.getByRole('button', { name: 'Close', exact: true }).click();
-    await expect(cellEditor).toHaveText(cellDraft);
-    await expect(notebookEditor).toHaveText(notebookDraft);
-    expect(await getCellMetadata(page)).toEqual(cellMetadata);
-    expect(await getNotebookMetadata(page)).toEqual(notebookMetadata);
+      const dialog = page.getByRole('dialog', { name: 'Invalid Metadata' });
+      await expect(dialog).toBeVisible();
+      await dialog.getByRole('button', { name: 'Close', exact: true }).click();
+      await expect(cellEditor).toHaveText(cellDraft);
+      await expect(notebookEditor).toHaveText(notebookDraft);
+      expect(await getCellMetadata(page)).toEqual(cellMetadata);
+      expect(await getNotebookMetadata(page)).toEqual(notebookMetadata);
 
-    await notebookEditor.fill(
-      JSON.stringify({ ...notebookMetadata, draft: 'notebook' })
-    );
-    await notebookEditor.press('ControlOrMeta+s');
-    await expect
-      .poll(() => getCellMetadata(page))
-      .toEqual({ ...cellMetadata, draft: 'cell' });
-    await expect
-      .poll(() => getNotebookMetadata(page))
-      .toEqual({ ...notebookMetadata, draft: 'notebook' });
-  });
+      await notebookEditor.fill(
+        JSON.stringify({ ...notebookMetadata, draft: 'notebook' })
+      );
+      await notebookEditor.press('ControlOrMeta+s');
+      await expect
+        .poll(() => getCellMetadata(page))
+        .toEqual({ ...cellMetadata, draft: 'cell' });
+      await expect
+        .poll(() => getNotebookMetadata(page))
+        .toEqual({ ...notebookMetadata, draft: 'notebook' });
+    });
+  }
 
   test('should remove a field from cellMedata and verify it is updated', async ({
     page,

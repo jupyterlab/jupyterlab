@@ -140,7 +140,7 @@ export class JSONEditor extends Widget {
   }
 
   /**
-   * Get whether the current editor content is valid JSON.
+   * Get whether the current editor content is a valid JSON object.
    */
   get isValid(): boolean {
     return !this.hasClass(ERROR_CLASS);
@@ -152,7 +152,7 @@ export class JSONEditor extends Widget {
    * @returns `true` if the editor content is in sync with the source after
    * the call, i.e. the content was committed or there was nothing to
    * commit; `false` if the content could not be committed because it is
-   * not valid JSON.
+   * not a valid JSON object.
    *
    * #### Notes
    * This is a no-op if the editor content has no uncommitted change.
@@ -253,17 +253,19 @@ export class JSONEditor extends Widget {
    */
   private _onModelChanged(model: ISharedFile, change: SourceChange): void {
     if (change.sourceChange) {
-      let valid = true;
+      let valid: boolean;
       try {
         const value = JSON.parse(this.editor.model.sharedModel.getSource());
-        this.removeClass(ERROR_CLASS);
+        valid = JSONExt.isObject(value);
         this._inputDirty =
-          !this._changeGuard && !JSONExt.deepEqual(value, this._originalValue);
-      } catch (err) {
-        this.addClass(ERROR_CLASS);
+          !valid ||
+          (!this._changeGuard &&
+            !JSONExt.deepEqual(value, this._originalValue));
+      } catch {
         this._inputDirty = true;
         valid = false;
       }
+      this.toggleClass(ERROR_CLASS, !valid);
       this.revertButtonNode.hidden = !this._inputDirty;
       this.commitButtonNode.hidden = !valid || !this._inputDirty;
     }

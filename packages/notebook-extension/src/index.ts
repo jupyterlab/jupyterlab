@@ -1382,7 +1382,7 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
           void showErrorMessage(
             trans.__('Invalid Metadata'),
             trans.__(
-              'The notebook was not saved because the metadata editor contains invalid JSON. Fix the metadata or revert the change, then save again.'
+              'The notebook was not saved because metadata must be a JSON object. Fix the metadata or revert the change, then save again.'
             )
           );
           return;

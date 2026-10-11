@@ -186,16 +186,22 @@ describe('codeeditor', () => {
         expect(editor.isDirty).toBe(false);
       });
 
-      it('should return false and leave the source unchanged for invalid JSON', () => {
-        const source = new ObservableJSON();
-        source.set('foo', 1);
-        editor.source = source;
-        Widget.attach(editor, document.body);
-        editor.model.sharedModel.setSource('{"foo":');
-        expect(editor.commit()).toBe(false);
-        expect(source.get('foo')).toBe(1);
-        expect(editor.isDirty).toBe(true);
-      });
+      it.each(['{"foo":', 'null', 'true', '42', '"text"', '[]', '[{}]'])(
+        'should reject %s and preserve the source and draft',
+        draft => {
+          const source = new ObservableJSON();
+          source.set('foo', 1);
+          editor.source = source;
+          Widget.attach(editor, document.body);
+          editor.model.sharedModel.setSource(draft);
+          expect(editor.isValid).toBe(false);
+          expect(editor.commitButtonNode.hidden).toBe(true);
+          expect(editor.commit()).toBe(false);
+          expect(source.toJSON()).toEqual({ foo: 1 });
+          expect(editor.model.sharedModel.getSource()).toBe(draft);
+          expect(editor.isDirty).toBe(true);
+        }
+      );
     });
 
     describe('model.value.changed', () => {
