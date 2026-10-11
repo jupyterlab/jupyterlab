@@ -745,6 +745,54 @@ describe('@jupyterlab/apputils', () => {
       document.body.removeChild(host);
     });
 
+    it('should keep a skipQueue dialog on top of a normal dialog launched immediately before it', async () => {
+      const host = document.createElement('div');
+      document.body.appendChild(host);
+      const outside = document.createElement('div');
+      outside.tabIndex = 0;
+      document.body.appendChild(outside);
+
+      // The normal dialog attaches from a pending promise callback, while the
+      // confirmation attaches synchronously.
+      const prompt1 = showDialog({
+        title: 'picker',
+        body: 'picker body',
+        host
+      });
+      const prompt2 = showDialog({
+        title: 'confirm',
+        body: 'confirm body',
+        host,
+        skipQueue: true
+      });
+
+      await waitForDialog(host);
+
+      let dialogNodes = host.getElementsByClassName('jp-Dialog');
+      expect(dialogNodes.length).toBe(1);
+      const confirmNode = dialogNodes[0] as HTMLElement;
+      expect(confirmNode.textContent).toContain('confirm body');
+
+      outside.focus();
+      simulate(outside, 'focus');
+      expect(confirmNode.contains(document.activeElement)).toBe(true);
+
+      simulate(confirmNode, 'keydown', { key: 'Escape' });
+      await prompt2;
+
+      // The queued dialog is only shown once the confirmation is closed.
+      await waitForDialog(host);
+      dialogNodes = host.getElementsByClassName('jp-Dialog');
+      expect(dialogNodes.length).toBe(1);
+      expect(dialogNodes[0].textContent).toContain('picker body');
+
+      await acceptDialog(host);
+      await prompt1;
+
+      document.body.removeChild(outside);
+      document.body.removeChild(host);
+    });
+
     it('should accept a virtualdom body', async () => {
       const body = (
         <div>

@@ -189,14 +189,17 @@ export class Dialog<T> extends Widget {
 
     const promises = Promise.all(Private.launchQueue);
     Private.launchQueue.push(this._promise.promise);
-    return promises.then(() => {
+    return promises.then(async () => {
+      // A dialog that skipped the queue may have attached while this launch was
+      // pending; it must stay on top, so wait for it to close.
+      await this._waitForSkippingDialogs();
       // Do not show Dialog if it was disposed of before it was at the front of the launch queue
       if (!this._promise) {
-        return Promise.resolve({
+        return {
           button: Dialog.cancelButton(),
           isChecked: null,
           value: null
-        });
+        };
       }
       Widget.attach(this, this._host);
       return promise.promise;
@@ -501,6 +504,25 @@ export class Dialog<T> extends Widget {
     )[0] as HTMLElement;
     const target = event.target as HTMLElement;
     this._lastMouseDownInDialog = content.contains(target as HTMLElement);
+  }
+
+  /**
+   * Wait until no attached dialog has skipped the launch queue.
+   */
+  private async _waitForSkippingDialogs(): Promise<void> {
+    for (;;) {
+      const pending: Promise<unknown>[] = [];
+      for (const dialog of Private.openDialogs) {
+        if (dialog._skipQueue && dialog._promise) {
+          // Disposal rejects the promise; only its settling matters here.
+          pending.push(dialog._promise.promise.catch(() => undefined));
+        }
+      }
+      if (pending.length === 0) {
+        return;
+      }
+      await Promise.all(pending);
+    }
   }
 
   /**
