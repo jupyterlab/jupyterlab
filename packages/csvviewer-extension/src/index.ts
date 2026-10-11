@@ -17,12 +17,12 @@ import {
   IToolbarWidgetRegistry,
   WidgetTracker
 } from '@jupyterlab/apputils';
+// The package root also loads the model and its datagrid dependency.
+import { CSVComment, CSVDelimiter } from '@jupyterlab/csvviewer/lib/toolbar';
 import {
-  CSVComment,
-  CSVDelimiter,
   CSVViewerFactory,
   TSVViewerFactory
-} from '@jupyterlab/csvviewer';
+} from '@jupyterlab/csvviewer/lib/widget';
 import type { CSVViewer } from '@jupyterlab/csvviewer';
 import type { TextRenderConfig } from '@jupyterlab/csvviewer';
 import type {
