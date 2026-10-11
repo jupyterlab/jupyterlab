@@ -478,9 +478,9 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
 
       if (col < ncols) {
         // We didn't have enough columns, so add some more column offsets that
-        // point to just before the row delimiter we just saw.
+        // point to the end of the data.
         for (; col < ncols; col++) {
-          offsets.push(i - (rowDelimiterLength - 1));
+          offsets.push(endIndex);
         }
       } else if (col > ncols) {
         // We had too many columns, so truncate them.

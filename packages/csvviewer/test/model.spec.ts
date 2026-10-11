@@ -554,6 +554,17 @@ describe('csvviewer/model', () => {
       }
     );
 
+    it('preserves a short final row in CRLF files with literal comment quotes', () => {
+      const d = new DSVModel({
+        data: '# metadata,"unfinished\r\na,b,c\r\n1,2',
+        delimiter: ',',
+        comment: '#'
+      });
+      expect(d.header).toEqual(['a', 'b', 'c']);
+      expect([0, 1, 2].map(c => d.data('body', 1, c))).toEqual(['1', '2', '']);
+      d.dispose();
+    });
+
     it('renders files containing only comments with literal quotes', () => {
       const d = new DSVModel({
         data: '# first,"unfinished\n# second,"literal"',
