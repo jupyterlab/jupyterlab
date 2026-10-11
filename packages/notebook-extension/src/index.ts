@@ -1375,20 +1375,20 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
         }
       },
       execute: async () => {
-        for (const field of [cellMetadataField, notebookMetadataField]) {
-          const editor = field.editor;
-          if (editor.isDisposed) {
-            continue;
-          }
-          if (!editor.commit()) {
-            void showErrorMessage(
-              trans.__('Invalid Metadata'),
-              trans.__(
-                'The notebook was not saved because the metadata editor contains invalid JSON. Fix the metadata or revert the change, then save again.'
-              )
-            );
-            return;
-          }
+        const editors = [cellMetadataField, notebookMetadataField]
+          .map(field => field.editor)
+          .filter(editor => !editor.isDisposed);
+        if (editors.some(editor => !editor.isValid)) {
+          void showErrorMessage(
+            trans.__('Invalid Metadata'),
+            trans.__(
+              'The notebook was not saved because the metadata editor contains invalid JSON. Fix the metadata or revert the change, then save again.'
+            )
+          );
+          return;
+        }
+        for (const editor of editors) {
+          editor.commit();
         }
         return app.commands.execute('docmanager:save');
       }
