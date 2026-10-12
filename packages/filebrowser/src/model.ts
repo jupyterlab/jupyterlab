@@ -564,7 +564,7 @@ export class FileBrowserModel implements IDisposable {
       const chunk = lastChunk ? -1 : end / CHUNK_SIZE;
 
       const newUpload = { path, progress: start / file.size };
-      this._uploads.splice(this._uploads.indexOf(upload));
+      ArrayExt.removeFirstOf(this._uploads, upload);
       this._uploads.push(newUpload);
       this._uploadChanged.emit({
         name: 'update',
@@ -595,7 +595,7 @@ export class FileBrowserModel implements IDisposable {
       }
     }
 
-    this._uploads.splice(this._uploads.indexOf(upload));
+    ArrayExt.removeFirstOf(this._uploads, upload);
     this._uploadChanged.emit({
       name: 'finish',
       newValue: null,

@@ -575,6 +575,26 @@ describe('filebrowser/model', () => {
           await uploaded;
         });
 
+        it('should keep concurrent large uploads in the upload list', async () => {
+          const names = [UUID.uuid4() + '.txt', UUID.uuid4() + '.txt'];
+          const snapshots: string[][] = [];
+          const record = () => {
+            snapshots.push(Array.from(model.uploads(), u => u.path).sort());
+          };
+          model.uploadChanged.connect(record);
+          try {
+            await Promise.all(
+              names.map(name =>
+                model.upload(new File([new ArrayBuffer(2 * CHUNK_SIZE)], name))
+              )
+            );
+          } finally {
+            model.uploadChanged.disconnect(record);
+          }
+          expect(snapshots).toContainEqual([...names].sort());
+          expect(Array.from(model.uploads())).toEqual([]);
+        });
+
         afterAll(() => {
           PageConfig.setOption('notebookVersion', prevNotebookVersion);
         });
