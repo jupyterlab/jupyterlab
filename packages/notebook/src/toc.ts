@@ -640,7 +640,13 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
             return;
           }
 
-          const el = headingToElement.get(heading);
+          let el = headingToElement.get(heading);
+          if (!el || !heading.cellRef.node.contains(el)) {
+            // A rendered Markdown cell can replace its heading elements without
+            // changing the ToC entry. Refresh the mapping before scrolling.
+            await findHeadingElement(cell);
+            el = headingToElement.get(heading);
+          }
           if (el) {
             // We generally want to scroll to particular heading
             // because any cell can have multiple headings...
