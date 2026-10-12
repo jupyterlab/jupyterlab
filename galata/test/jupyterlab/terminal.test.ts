@@ -274,7 +274,7 @@ test.describe('Terminal', () => {
       // independently of the renderer; once the output arrives the terminal
       // is scrolled to the bottom, so the slider moves away from the top.
       const slider = terminal.locator(
-        '.xterm-scrollable-element > .scrollbar.vertical > .slider'
+        '.xterm-scrollable-element > .xterm-scrollbar.xterm-vertical > .xterm-slider'
       );
       const sliderTop = () =>
         slider.evaluate(element => parseFloat(element.style.top || '0'));
