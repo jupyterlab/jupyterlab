@@ -145,10 +145,7 @@ test.describe('Notebook toolbar visibility with read-only and writable notebooks
 
     // Focus the writable notebook and open a console from it (opens split-bottom).
     await page.activity.activateTab(writableNotebook);
-    await page.click('text=File');
-    await page.click(
-      '.lm-Menu ul[role="menu"] >> text=New Console for Notebook'
-    );
+    await page.menu.clickMenuItem('File>New Console for Notebook');
 
     // Wait for the console to be ready.
     await page
