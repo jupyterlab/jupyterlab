@@ -33,8 +33,7 @@ test.describe('Internationalization', () => {
     await page.sidebar.setWidth();
 
     // Check menu
-    await page.click('text=Settings');
-    await page.click('.lm-Menu ul[role="menu"] >> text=Language');
+    const languageMenu = (await page.menu.openLocator('Settings>Language'))!;
 
     expect
       .soft(
@@ -45,7 +44,7 @@ test.describe('Internationalization', () => {
       .toMatchSnapshot('language_settings.png');
 
     // Prompt user confirmation
-    await page.click('#jp-mainmenu-settings-language >> text=Chinese');
+    await languageMenu.getByText('Chinese').click();
 
     expect
       .soft(
