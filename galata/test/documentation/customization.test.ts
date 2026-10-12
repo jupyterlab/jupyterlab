@@ -58,12 +58,7 @@ test.describe('Default', () => {
 
     await page.sidebar.setWidth();
 
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
-    await page.dblclick('text=Lorenz.ipynb');
-
-    await page.locator('div[role="main"] >> text=Lorenz.ipynb').waitFor();
+    await page.notebook.openByPath('notebooks/Lorenz.ipynb');
 
     // Wait for kernel to settle on idle
     await page
@@ -121,9 +116,7 @@ test.describe('Default', () => {
 
     await page.sidebar.setWidth();
 
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
+    await page.filebrowser.openDirectory('notebooks');
     await page.click('text=Lorenz.ipynb', { button: 'right' });
 
     await page.hover('ul[role="menu"] >> text=New File');
@@ -247,12 +240,7 @@ test.describe('Customized', () => {
 
     await page.sidebar.setWidth();
 
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
-    await page.dblclick('text=Lorenz.ipynb');
-
-    await page.locator('div[role="main"] >> text=Lorenz.ipynb').waitFor();
+    await page.notebook.openByPath('notebooks/Lorenz.ipynb');
 
     await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
     const debuggerActive = page.locator(
@@ -307,9 +295,7 @@ test.describe('Customized', () => {
 
     await page.sidebar.setWidth();
 
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
+    await page.filebrowser.openDirectory('notebooks');
     await page.click('text=Lorenz.ipynb', { button: 'right' });
 
     await page.hover('ul[role="menu"] >> text=New File');
@@ -341,8 +327,7 @@ test.describe('Customized', () => {
 
     await page.sidebar.setWidth();
 
-    await page.locator('text=custom-markdown.css').waitFor();
-    await page.dblclick('text=custom-markdown.css');
+    await page.filebrowser.open('custom-markdown.css');
     await expect(
       page
         .locator('#jp-main-dock-panel .lm-TabBar-tab')
