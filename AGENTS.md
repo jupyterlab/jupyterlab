@@ -97,6 +97,7 @@ For Lumino patterns (disposables, signals, commands, etc.), see `docs/source/dev
 
 - Maintainers review first the pull requests that fix bugs, user-visible pain points or frequent requests. A pull request for an edge case that code analysis found, and that users have little or no chance to hit, may wait for review until all higher-priority pull requests are merged
 - New features, settings, UI changes and public API changes need a maintainer's agreement on the issue first. Do not open a pull request for an issue labelled `status:Needs Discussion` or `status:Needs Triage`. A comment on such an issue can be a good contribution, and it needs the same high quality as a pull request
+- Without commit rights, add a label to an issue or a pull request with a comment, as described in "Tagging Issues with Labels" in `docs/source/developer/contributing.md`
 - Look for open pull requests on the same issue: `gh pr list --repo jupyterlab/jupyterlab --search <issue number>`. Open another one only when it differs in a way that matters, and say how under "References"
 - Report a security vulnerability as described in the [security policy](https://github.com/jupyterlab/jupyterlab/security/policy), instead of opening an issue or a pull request
 
