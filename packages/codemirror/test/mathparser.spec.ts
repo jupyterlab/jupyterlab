@@ -352,6 +352,25 @@ a
 `
 );
 
+test(
+  'Block math $$ opened on a line with an escaped \\$$',
+  `
+{MaBD:{maBD:$$} x \\$$
+a
+{maBD:$$}}
+`
+);
+
+test(
+  'Math $$ closed after an escaped backslash before a setext underline',
+  '\n{SH1:a {MaBD:{maBD:$$} x {Esc:\\\\}{maBD:$$}}\nb\n{h:===}}\n'
+);
+
+test(
+  'Code span containing $$ before a setext underline',
+  '\n{SH1:a {C:{c:`}$${c:`}} b\nc\n{h:===}}\n'
+);
+
 // Block math \\[ \\]
 
 test(

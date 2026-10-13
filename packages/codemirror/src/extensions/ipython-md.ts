@@ -43,21 +43,58 @@ const DELIMITERS = Object.keys(DELIMITER_LENGTH).reduce<
 }, {});
 
 /**
- * Whether a line opens `$$` display math that it does not also close.
+ * Length of the run of backticks starting at `pos`.
  */
-function opensMathBlock(line: Line): boolean {
-  return (
-    line.indent - line.baseIndent < 4 &&
-    line.text.startsWith('$$', line.pos) &&
-    !line.text.includes('$$', line.pos + 2)
-  );
+function backtickRun(text: string, pos: number): number {
+  let end = pos;
+  while (text[end] === '`') {
+    end++;
+  }
+  return end - pos;
 }
 
 /**
- * Whether text has a `$$` that it does not close, ignoring escaped `\$$`.
+ * Positions of the `$$` delimiters in text, skipping backslash escapes and
+ * code spans as the inline parser does.
+ */
+function mathDelimiters(text: string, from = 0): number[] {
+  const found: number[] = [];
+  for (let i = from; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '\\') {
+      i++;
+    } else if (ch === '`') {
+      const ticks = backtickRun(text, i);
+      // A code span closes with a run of exactly as many backticks.
+      let close = text.indexOf('`', i + ticks);
+      while (close >= 0 && backtickRun(text, close) !== ticks) {
+        close = text.indexOf('`', close + backtickRun(text, close));
+      }
+      i = (close >= 0 ? close : i) + ticks - 1;
+    } else if (ch === '$' && text[i + 1] === '$') {
+      found.push(i);
+      i++;
+    }
+  }
+  return found;
+}
+
+/**
+ * Whether a line opens `$$` display math that it does not also close.
+ */
+function opensMathBlock(line: Line): boolean {
+  if (line.indent - line.baseIndent >= 4) {
+    return false;
+  }
+  const delimiters = mathDelimiters(line.text, line.pos);
+  return delimiters.length === 1 && delimiters[0] === line.pos;
+}
+
+/**
+ * Whether text has a `$$` that it does not close.
  */
 function hasOpenMath(text: string): boolean {
-  return text.split(/(?<!\\)\$\$/).length % 2 === 0;
+  return mathDelimiters(text).length % 2 === 1;
 }
 
 /**
@@ -95,7 +132,7 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
           let rest = '';
           // Like the renderer, do not let math run past a blank line.
           while (cx.nextLine() && line.next != -1) {
-            const close = line.text.indexOf('$$', line.pos);
+            const close = mathDelimiters(line.text, line.pos)[0] ?? -1;
             if (close >= 0) {
               to = cx.lineStart + close + 2;
               marks.push(cx.elt(mark, to - 2, to));
