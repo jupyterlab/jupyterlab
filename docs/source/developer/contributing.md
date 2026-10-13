@@ -711,8 +711,10 @@ Here are some good practices to follow when writing integration tests:
 
 - Don't compare multiple screenshots in the same test, unless using `expect.soft`;
   if the first comparison breaks, it will require multiple re-runs of CI workflow to update all snapshots.
-- Don't include more UI elements than necessary, as that increases review burden when elements other than
-  the one tested change - reviewing hundreds of unrelated snapshots is exhausting and error-prone.
+- Crop the screenshot to the smallest area that still shows a reviewer the change in context.
+  Each extra UI element makes the test fail when that element changes, and reviewing hundreds of
+  unrelated snapshots is exhausting and error-prone. A crop that is too tight leaves the reviewer
+  unable to tell what the image shows or where it is in the interface.
 - When cropping snapshots, prefer retrieving the required dimensions programmatically over hard-coding them.
 - Always use `toMatchSnapshot()` for comparing snapshots; do not implement custom logic reading/writing snapshots.
 - Do not use `waitForTimeout()` as this slows down tests and makes them flaky when CI runs slower than expected.
