@@ -17,7 +17,7 @@ https://github.com/jupyterlab/jupyterlab/blob/main/CONTRIBUTING.md
 
 ## User-facing changes
 
-<!-- Describe what users saw before and what they see now. -->
+<!-- Describe any visual or user interaction changes and how they address the issue. -->
 
 <!-- For visual changes, include before and after screenshots. For interaction changes, include a video or GIF. -->
 
