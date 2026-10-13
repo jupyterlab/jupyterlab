@@ -78,18 +78,32 @@ test.describe('test readonly status', () => {
       await route.fulfill({ response, json: { ...json, writable: false } });
     });
 
-    // Open the notebooks side by side, and a text file below them.
+    // As in #20015: the writable notebook with a kernel and its console, the
+    // read-only notebook next to it, and a text file below that.
     await page.evaluate(async tmpPath => {
-      const open = (path: string, mode?: string, factory?: string) =>
-        window.jupyterapp.commands.execute('docmanager:open', {
-          path: `${tmpPath}/${path}`,
-          factory,
-          kernelPreference: { shouldStart: false, shouldReuse: false },
-          options: mode ? { mode } : undefined
-        });
-      await open('writable.ipynb', undefined, 'Notebook');
-      await open('readonly.ipynb', 'split-right', 'Notebook');
-      await open('other.txt', 'split-bottom');
+      const { commands } = window.jupyterapp;
+      const writable = await commands.execute('docmanager:open', {
+        path: `${tmpPath}/writable.ipynb`,
+        factory: 'Notebook',
+        kernel: { name: 'python3' }
+      });
+      await writable.sessionContext.ready;
+      await commands.execute('docmanager:open', {
+        path: `${tmpPath}/readonly.ipynb`,
+        factory: 'Notebook',
+        kernelPreference: { shouldStart: false, shouldReuse: false },
+        options: { mode: 'split-right' }
+      });
+      await commands.execute('docmanager:open', {
+        path: `${tmpPath}/other.txt`,
+        options: { mode: 'split-bottom' }
+      });
+      await commands.execute('console:create', {
+        path: writable.context.path,
+        ref: writable.id,
+        insertMode: 'split-bottom',
+        kernelPreference: { id: writable.sessionContext.session.kernel.id }
+      });
     }, tmpPath);
 
     const panel = async (name: string) => {
@@ -110,7 +124,15 @@ test.describe('test readonly status', () => {
     ).toBeVisible();
 
     const check = async () => {
-      for (const name of ['insert', 'cut', 'run', 'restart']) {
+      for (const name of [
+        'insert',
+        'cut',
+        'paste',
+        'run',
+        'interrupt',
+        'restart',
+        'restart-and-run'
+      ]) {
         await expect(
           writable.locator(
             `.jp-NotebookPanel-toolbar [data-jp-item-name="${name}"]`
@@ -131,8 +153,14 @@ test.describe('test readonly status', () => {
       ).not.toHaveClass(/lm-mod-hidden/);
     };
 
-    // Focus each notebook in turn, then a document that is not a notebook.
-    for (const name of ['readonly.ipynb', 'writable.ipynb', 'other.txt']) {
+    // Focus each notebook in turn, then documents that are not notebooks.
+    for (const name of [
+      'readonly.ipynb',
+      'writable.ipynb',
+      'other.txt',
+      /^Console/,
+      'readonly.ipynb'
+    ]) {
       await page.activity.activateTab(name);
       await check();
     }
