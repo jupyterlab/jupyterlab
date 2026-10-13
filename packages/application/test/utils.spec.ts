@@ -402,5 +402,65 @@ describe('@jupyterlab/application', () => {
         );
       }
     );
+
+    describe('with a target widget in the arguments', () => {
+      const focused = new Widget();
+      focused.id = 'focused';
+      const other = new Widget();
+      other.id = 'other';
+      const target = (widgetId: string, extra = {}) => ({
+        [SemanticCommand.WIDGET]: widgetId,
+        ...extra
+      });
+
+      beforeEach(() => {
+        shell = {
+          currentWidget: focused,
+          widgets: () => [focused, other][Symbol.iterator]()
+        } as unknown as JupyterFrontEnd.IShell;
+        // Only active for `other`, and its state depends on its arguments.
+        semanticCommands.add({
+          id: 'command-other',
+          isEnabled: widget => widget === other
+        });
+        commands.addCommand('command-other', {
+          label: args => `label ${args[SemanticCommand.WIDGET]}`,
+          execute: args => `run ${args[SemanticCommand.WIDGET]}`,
+          isEnabled: args => args.toolbar === true,
+          isVisible: args => args[SemanticCommand.WIDGET] === 'other'
+        });
+        addSemanticCommand({
+          id,
+          commands,
+          shell,
+          semanticCommands,
+          default: { isVisible: false, label: 'default' }
+        });
+      });
+
+      it('should use the current widget without one', async () => {
+        expect(commands.isVisible(id)).toBe(false);
+        expect(commands.label(id)).toBe('default');
+        expect(await commands.execute(id)).toBeNull();
+      });
+
+      it('should use the target widget and forward the arguments', async () => {
+        expect(commands.isVisible(id, target('other'))).toBe(true);
+        expect(commands.label(id, target('other'))).toBe('label other');
+        expect(commands.isEnabled(id, target('other'))).toBe(false);
+        expect(commands.isEnabled(id, target('other', { toolbar: true }))).toBe(
+          true
+        );
+        expect(
+          await commands.execute(id, target('other', { toolbar: true }))
+        ).toBe('run other');
+      });
+
+      it('should fall back to the defaults for an unknown widget', async () => {
+        expect(commands.isVisible(id, target('closed'))).toBe(false);
+        expect(commands.label(id, target('closed'))).toBe('default');
+        expect(await commands.execute(id, target('closed'))).toBeNull();
+      });
+    });
   });
 });

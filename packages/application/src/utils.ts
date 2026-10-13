@@ -7,6 +7,8 @@ import { SemanticCommand } from '@jupyterlab/apputils';
 import type { TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { CommandRegistry } from '@lumino/commands';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import type { Widget } from '@lumino/widgets';
 import type { JupyterFrontEnd } from './frontend';
 
 export interface ISemanticCommandDefault {
@@ -166,31 +168,36 @@ export function createSemanticCommand(
   return {
     label: concatenateTexts('label'),
     caption: concatenateTexts('caption'),
-    isEnabled: () => {
-      const isEnabled = reduceAttribute('isEnabled');
+    isEnabled: args => {
+      const isEnabled = reduceAttribute('isEnabled', args);
       return isEnabled.length > 0
         ? !isEnabled.some(enabled => enabled === false)
         : (defaultValues.isEnabled ?? false);
     },
-    isToggled: () => {
-      const isToggled = reduceAttribute('isToggled');
+    isToggled: args => {
+      const isToggled = reduceAttribute('isToggled', args);
       return isToggled.length > 0
         ? isToggled.some(enabled => enabled === true)
         : (defaultValues.isToggled ?? false);
     },
-    isVisible: () => {
-      const isVisible = reduceAttribute('isVisible');
+    isVisible: args => {
+      const isVisible = reduceAttribute('isVisible', args);
       return isVisible.length > 0
         ? !isVisible.some(visible => visible === false)
         : (defaultValues.isVisible ?? true);
     },
-    execute: async () => {
-      const widget = shell.currentWidget;
+    execute: async args => {
+      const widget = getWidget(args);
       const commandIds = commandList.map(cmd =>
         widget !== null ? cmd.getActiveCommandId(widget) : null
       );
       const toExecute = commandIds.filter(
-        commandId => commandId !== null && commands.isEnabled(commandId)
+        commandId =>
+          commandId !== null &&
+          commands.isEnabled(commandId, {
+            ...args,
+            [SemanticCommand.WIDGET]: widget!.id
+          })
       );
 
       let result: unknown = null;
@@ -211,24 +218,45 @@ export function createSemanticCommand(
     }
   };
 
+  /**
+   * The widget a command targets: the one named in its arguments, as passed
+   * by toolbars, or else the current widget.
+   */
+  function getWidget(args?: ReadonlyPartialJSONObject): Widget | null {
+    const id = args?.[SemanticCommand.WIDGET];
+    if (!id) {
+      return shell.currentWidget;
+    }
+    for (const widget of shell.widgets()) {
+      if (widget.id === id) {
+        return widget;
+      }
+    }
+    return null;
+  }
+
   function reduceAttribute(
-    attribute: keyof CommandRegistry.ICommandOptions
+    attribute: 'label' | 'caption' | 'isEnabled' | 'isToggled' | 'isVisible',
+    args?: ReadonlyPartialJSONObject
   ): unknown[] {
-    const widget = shell.currentWidget;
-    const commandIds = commandList.map(cmd =>
-      widget !== null ? cmd.getActiveCommandId(widget) : null
-    );
-    const attributes = commandIds
+    const widget = getWidget(args);
+    if (widget === null) {
+      return [];
+    }
+    const commandArgs = widget
+      ? { ...args, [SemanticCommand.WIDGET]: widget.id }
+      : { ...args };
+    return commandList
+      .map(cmd => cmd.getActiveCommandId(widget))
       .filter(commandId => commandId !== null)
-      .map(commandId => commands[attribute](commandId!));
-    return attributes;
+      .map(commandId => commands[attribute](commandId!, commandArgs));
   }
 
   function concatenateTexts(
     attribute: 'label' | 'caption'
   ): string | CommandRegistry.CommandFunc<string> | undefined {
-    return () => {
-      const texts = (reduceAttribute(attribute) as string[]).map(
+    return args => {
+      const texts = (reduceAttribute(attribute, args) as string[]).map(
         (text, textIndex) =>
           attribute == 'caption' && textIndex > 0
             ? text.toLocaleLowerCase()

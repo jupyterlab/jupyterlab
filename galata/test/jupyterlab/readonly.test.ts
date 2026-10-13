@@ -48,6 +48,29 @@ test.describe('test readonly status', () => {
 
     expect(await toast.screenshot()).toMatchSnapshot(imageName);
   });
+});
+
+test.describe('toolbars of read-only and writable notebooks', () => {
+  // Semantic commands (`runmenu:run`, ...) are added to check that they also
+  // resolve to the toolbar's own notebook.
+  test.use({
+    // Wide enough for both notebook toolbars to show all their items.
+    viewport: { width: 2400, height: 1000 },
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:panel': {
+        toolbar: [
+          { name: 'semantic-run', command: 'runmenu:run', rank: 34 },
+          {
+            name: 'semantic-interrupt',
+            command: 'kernelmenu:interrupt',
+            rank: 35
+          },
+          { name: 'semantic-restart', command: 'kernelmenu:restart', rank: 36 }
+        ]
+      }
+    }
+  });
 
   test('toolbars follow their own notebook', async ({ page, tmpPath }) => {
     const notebook = JSON.stringify({
@@ -131,7 +154,10 @@ test.describe('test readonly status', () => {
         'run',
         'interrupt',
         'restart',
-        'restart-and-run'
+        'restart-and-run',
+        'semantic-run',
+        'semantic-interrupt',
+        'semantic-restart'
       ]) {
         await expect(
           writable.locator(

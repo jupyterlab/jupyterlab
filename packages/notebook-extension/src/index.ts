@@ -1767,7 +1767,7 @@ function activateWidgetFactory(
     // whichever notebook has focus.
     toolbarFactory = (panel: NotebookPanel) =>
       panelToolbarFactory(panel, {
-        [CellBarExtension.WIDGET_ID_ARG]: panel.id
+        [SemanticCommand.WIDGET]: panel.id
       });
   }
 
@@ -2607,7 +2607,9 @@ function activateNotebookHandler(
 
   // Add main menu notebook menu.
   if (mainMenu) {
-    populateMenus(mainMenu, isEnabled);
+    // Menu items and toolbar buttons using semantic commands ask about a given
+    // widget, which is not necessarily the current one.
+    populateMenus(mainMenu, widget => tracker.has(widget));
   }
 
   // Utility function to create a new notebook.
@@ -5608,7 +5610,10 @@ function populatePalette(
 /**
  * Populates the application menus for the notebook.
  */
-function populateMenus(mainMenu: IMainMenu, isEnabled: () => boolean): void {
+function populateMenus(
+  mainMenu: IMainMenu,
+  isEnabled: (widget: Widget) => boolean
+): void {
   // Add undo/redo hooks to the edit menu.
   mainMenu.editMenu.undoers.redo.add({
     id: CommandIDs.redo,
