@@ -43,6 +43,11 @@ const DELIMITERS = Object.keys(DELIMITER_LENGTH).reduce<
 }, {});
 
 /**
+ * Text that could start a block if it began a line.
+ */
+const STARTS_BLOCK = /^(?:[#>*+\-=_~`<|\d]|\$\$)/;
+
+/**
  * Length of the run of backticks starting at `pos`.
  */
 function backtickRun(text: string, pos: number): number {
@@ -129,29 +134,47 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
           const from = cx.lineStart + line.pos;
           const marks = [cx.elt(mark, from, from + 2)];
           let to = cx.lineStart + line.text.length;
-          let rest = '';
           // Like the renderer, do not let math run past a blank line.
           while (cx.nextLine() && line.next != -1) {
             const close = mathDelimiters(line.text, line.pos)[0] ?? -1;
-            if (close >= 0) {
-              to = cx.lineStart + close + 2;
-              marks.push(cx.elt(mark, to - 2, to));
-              rest = line.text.slice(close + 2);
-              cx.nextLine();
-              break;
+            if (close < 0) {
+              to = cx.lineStart + line.text.length;
+              continue;
             }
-            to = cx.lineStart + line.text.length;
+            to = cx.lineStart + close + 2;
+            marks.push(cx.elt(mark, to - 2, to));
+            cx.addElement(cx.elt(BLOCK_MATH_DOLLAR, from, to, marks));
+            const rest = line.skipSpace(close + 2);
+            if (rest === line.text.length) {
+              cx.nextLine();
+            } else if (STARTS_BLOCK.test(line.text.slice(rest))) {
+              // Block syntax only counts at the start of a line, so keep this
+              // text out of the block parsers.
+              cx.addElement(
+                cx.elt(
+                  'Paragraph',
+                  cx.lineStart + rest,
+                  cx.lineStart + line.text.length,
+                  [
+                    ...cx.parser.parseInline(
+                      line.text.slice(rest),
+                      cx.lineStart + rest
+                    )
+                  ]
+                )
+              );
+              cx.nextLine();
+            } else {
+              // Hand the rest of the line back to the parser, so that it starts
+              // a paragraph which can continue or become a setext heading.
+              line.moveBase(rest);
+              line.indent = line.countIndent(rest, line.pos, line.indent);
+              line.pos = rest;
+              line.next = line.text.charCodeAt(rest);
+            }
+            return true;
           }
           cx.addElement(cx.elt(BLOCK_MATH_DOLLAR, from, to, marks));
-          const text = rest.replace(/^\s+/, '');
-          if (text) {
-            const start = to + rest.length - text.length;
-            cx.addElement(
-              cx.elt('Paragraph', start, start + text.length, [
-                ...cx.parser.parseInline(text, start)
-              ])
-            );
-          }
           return true;
         },
         // Lines inside open `$$` math are LaTeX, so hold back the other leaf

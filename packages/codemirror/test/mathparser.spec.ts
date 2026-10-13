@@ -7,7 +7,7 @@
 // Copyright (C) 2020 by Marijn Haverbeke <marijnh@gmail.com> and others
 
 import { parseMathIPython } from '@jupyterlab/codemirror';
-import { Tree } from '@lezer/common';
+import { Tree, TreeFragment } from '@lezer/common';
 import type { MarkdownParser } from '@lezer/markdown';
 import { parser } from '@lezer/markdown';
 import { StreamLanguage } from '@codemirror/language';
@@ -353,6 +353,35 @@ a
 );
 
 test(
+  'Block math $$ followed by a setext heading on the closing line',
+  `
+{MaBD:{maBD:$$}
+a
+{maBD:$$}} {SH1:title
+{h:===}}
+`
+);
+
+test(
+  'Block math $$ followed by a paragraph continuing past the closing line',
+  `
+{MaBD:{maBD:$$}
+a
+{maBD:$$}} {P:and
+more}
+`
+);
+
+test(
+  'Block math $$ followed by block syntax on the closing line',
+  `
+{MaBD:{maBD:$$}
+a
+{maBD:$$}} {P:# not a heading}
+`
+);
+
+test(
   'Block math $$ opened on a line with an escaped \\$$',
   `
 {MaBD:{maBD:$$} x \\$$
@@ -394,6 +423,36 @@ test(
 );
 
 describe('markdown parser', () => {
+  it('should parse incrementally as from scratch around math blocks', () => {
+    const docs = [
+      '$$\na\n$$ title\n===\n\ntext',
+      'Some text $$\na\n=\n$$\nwhere *m* is\n\n$$\nb\n$$ and more\nlines',
+      '- $$\n  a\n  $$ item\n- next'
+    ];
+    for (const doc of docs) {
+      for (let pos = 0; pos <= doc.length; pos++) {
+        for (const insert of ['', 'x', '$$', '\n', '=']) {
+          const removed = insert || pos === doc.length ? 0 : 1;
+          const edited = doc.slice(0, pos) + insert + doc.slice(pos + removed);
+          const fragments = TreeFragment.applyChanges(
+            TreeFragment.addTree(ipythonParser.parse(doc)),
+            [
+              {
+                fromA: pos,
+                toA: pos + removed,
+                fromB: pos,
+                toB: pos + insert.length
+              }
+            ]
+          );
+          expect(ipythonParser.parse(edited, fragments).toString()).toEqual(
+            ipythonParser.parse(edited).toString()
+          );
+        }
+      }
+    }
+  });
+
   it('should parse empty math block $$$$ without error', () => {
     const inputText = '$$$$';
     expect(() => mixedParser.parse(inputText)).not.toThrow();
