@@ -267,6 +267,7 @@ export default defineConfig([
       'jupyter/command-described-by': 'error',
       'jupyter/plugin-activation-args': 'error',
       'jupyter/plugin-description': 'error',
+      'jupyter/plugin-id-convention': 'error',
       'jupyter/token-format': 'error',
       'jupyter/no-translation-concatenation': 'error',
       'jupyter/no-dynamic-translation': 'error',
@@ -534,6 +535,8 @@ export default defineConfig([
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/non-nullable-type-assertion-style': 'off',
+      // Mock plugins do not participate in extension-level configuration.
+      'jupyter/plugin-id-convention': 'off',
       // Tests load their modules up front; there is no startup to protect.
       'jupyter/prefer-lazy-imports': 'off'
     }
@@ -579,9 +582,20 @@ export default defineConfig([
   },
   {
     files: ['galata/test/**/*.ts', 'galata/test/**/*.tsx'],
+    // Benchmarks use plain Playwright fixtures without Galata page helpers.
+    ignores: ['galata/test/benchmark/**'],
+    rules: {
+      'jupyter/galata-prefer-context-menu-helper': 'error',
+      'jupyter/galata-prefer-filebrowser-helper': 'error',
+      'jupyter/galata-prefer-menu-helper': 'error',
+      'jupyter/galata-prefer-notebook-cell-helper': 'error',
+      'jupyter/galata-prefer-sidebar-activity-helper': 'error'
+    }
+  },
+  {
+    files: ['galata/test/**/*.ts', 'galata/test/**/*.tsx'],
     plugins: { playwright: playwrightPlugin, jupyter: jupyterPlugin },
     rules: {
-      'jupyter/galata-prefer-filebrowser-helper': 'error',
       // Custom Galata guards not covered by eslint-plugin-playwright.
       'no-restricted-syntax': [
         'error',
