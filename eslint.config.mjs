@@ -57,6 +57,7 @@ const cleanGlobals = globalsObj => {
 
 export default defineConfig([
   globalIgnores([
+    'Practice_files/*',
     '**/node_modules',
     '**/build',
     '**/lib',
@@ -265,6 +266,7 @@ export default defineConfig([
 
     rules: {
       'jupyter/command-described-by': 'error',
+      'jupyter/command-id-convention': 'error',
       'jupyter/plugin-activation-args': 'error',
       'jupyter/plugin-description': 'error',
       'jupyter/plugin-id-convention': 'error',
