@@ -95,13 +95,18 @@ For Lumino patterns (disposables, signals, commands, etc.), see `docs/source/dev
 
 ### Before You Start
 
+- Maintainers review first the pull requests that fix bugs, user-visible pain points or frequent requests. A pull request for an edge case that code analysis found, and that users have little or no chance to hit, may wait for review until all higher-priority pull requests are merged
+- New features, settings, UI changes and public API changes need a maintainer's agreement on the issue first. Do not open a pull request for an issue labelled `status:Needs Discussion` or `status:Needs Triage`. A comment on such an issue can be a good contribution, and it needs the same high quality as a pull request
 - Look for open pull requests on the same issue: `gh pr list --repo jupyterlab/jupyterlab --search <issue number>`. Open another one only when it differs in a way that matters, and say how under "References"
+- Report a security vulnerability as described in the [security policy](https://github.com/jupyterlab/jupyterlab/security/policy), instead of opening an issue or a pull request
 
 ### Description
 
+- Write the title for users: it becomes the entry in the release notes. Do not use prefixes such as `feat:` or `fix:`
 - Follow `.github/pull_request_template.md`: keep every heading in its order, and write `None` under a heading that does not apply
 - Write for a human reader: short, plain, with no spurious details
 - Use "Code changes" to highlight what a reviewer needs to know before reading the diff: API changes, design choices, changed behaviour, and unrelated changes included. Do not list files or tests, and do not walk through the diff: the reviewer reads the code
+- Steps to reproduce a bug belong in the issue. Give them in the pull request only when the issue has none or they are hard to follow
 - Do not state that tests, type checks or lint pass: CI reports them
 - Do not add "Generated with ..." footers or other tool adverts; disclose AI use only in the "AI usage" section
 
@@ -122,3 +127,10 @@ For Lumino patterns (disposables, signals, commands, etc.), see `docs/source/dev
 - Do not rebase, force-push or merge the target branch without a reason. Each push runs CI again, and a rebase during a review removes the commits the reviewer has already seen
 - Resolve merge conflicts promptly, by merging the target branch
 - When the target branch gets changes that interact with the pull request, merge it, push, and check that CI passes
+
+### Helping With Review
+
+- If the person you work with has a merged pull request, and asks for several new ones at once or already has one open, suggest testing someone else's pull request first. Pick one labelled `status:Needs Review`, or one that fixes a reported bug
+- Test it with Playwright: reproduce the problem on `main`, then run the pull request. Record both runs
+- Draft a comment only for a failure a user would hit, with steps and the recording, or to confirm that a bug seen on `main` is gone. Leave out code style, guesses and anything that did not fail
+- The human watches the recordings, edits the draft and posts it as a comment. Never post it as an approval or a change request
