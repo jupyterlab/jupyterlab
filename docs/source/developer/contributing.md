@@ -35,9 +35,8 @@ volunteered) and open a pull request with proposed implementation.
 If you are not certain about the implementation, using draft pull requests is encouraged.
 
 If you believe you've found a security vulnerability in JupyterLab or
-any Jupyter project, please report it to [security@ipython.org](mailto:security@ipython.org). If you
-prefer to encrypt your security reports, you can use [this PGP public
-key](https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipython_security.asc).
+any Jupyter project, please report it as described in the
+[security policy](https://github.com/jupyterlab/jupyterlab/security/policy).
 
 ```{toctree}
 :hidden: true
