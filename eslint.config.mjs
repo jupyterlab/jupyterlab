@@ -57,7 +57,6 @@ const cleanGlobals = globalsObj => {
 
 export default defineConfig([
   globalIgnores([
-    'Practice_files/*',
     '**/node_modules',
     '**/build',
     '**/lib',
