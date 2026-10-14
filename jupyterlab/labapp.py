@@ -534,6 +534,12 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
     workspaces_dir = Unicode(get_workspaces_dir(), config=True, help="The directory for workspaces")
 
+    raise_config_file_errors = Bool(
+        True,
+        config=True,
+        help="Whether to fail fast when config files have errors.",
+    )
+
     core_mode = Bool(
         False,
         config=True,
