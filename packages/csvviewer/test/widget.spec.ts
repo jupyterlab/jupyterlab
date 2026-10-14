@@ -378,6 +378,31 @@ describe('csvviewer/widget', () => {
       ).toBe('current');
     });
 
+    it('reports no current match after the grid hides the header that holds it', () => {
+      const grid = new DataGrid();
+      const model = new DSVModel({ data: FRUITS, delimiter: ',' });
+      grid.dataModel = model;
+      const searchService = new GridSearchService(grid);
+      // Every cell matches, so the first match is `fruit` in the header.
+      const query = createQuery('^');
+      searchService.find(query);
+      expect(searchService.currentMatchIndex).toBe(0);
+
+      // The search box reads the current match before the number of matches.
+      grid.headerVisibility = 'row';
+      expect(searchService.currentMatchIndex).toBeNull();
+      expect(searchService.matchesCount).toBe(15);
+      expect(renderBackground(searchService, model, 'body', 0, 0)).toBe(
+        'match'
+      );
+
+      searchService.find(query);
+      expect(searchService.currentMatchIndex).toBe(0);
+      expect(renderBackground(searchService, model, 'body', 0, 0)).toBe(
+        'current'
+      );
+    });
+
     it('accepts data models with values other than strings', () => {
       const model = new JSONModel({
         data: [

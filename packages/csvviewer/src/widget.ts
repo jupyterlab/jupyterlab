@@ -156,10 +156,14 @@ export class GridSearchService {
    */
   get currentMatchIndex(): number | null {
     const model = this._grid.dataModel;
-    if (!this._query || !model || !this._hasMatch) {
+    if (!this._query || !model) {
       return null;
     }
+    // The current match is lost when the grid hides the header that holds it.
     const headerRows = this._syncWithGrid(model);
+    if (!this._hasMatch) {
+      return null;
+    }
     if (this._currentMatchIndex === null) {
       // The data changed after the last step, so count the matches again.
       if (
