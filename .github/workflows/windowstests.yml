@@ -45,8 +45,6 @@ jobs:
           # which is the global cache only when this is set before base-setup runs
           "YARN_ENABLE_GLOBAL_CACHE=1" >> $Env:GITHUB_ENV
           "UV_CACHE_DIR=$(Join-Path $Env:RUNNER_TEMP uv-cache)" >> $Env:GITHUB_ENV
-          # uv cannot hardlink from D: into the Python install on C:
-          "UV_LINK_MODE=copy" >> $Env:GITHUB_ENV
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
