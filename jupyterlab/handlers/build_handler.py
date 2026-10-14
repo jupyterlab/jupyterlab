@@ -9,6 +9,7 @@ from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor
 from threading import Event
 
+from jupyter_server.auth.decorator import authorized
 from jupyter_server.base.handlers import APIHandler
 from jupyter_server.extension.handler import ExtensionHandlerMixin
 from tornado import gen, web
@@ -16,6 +17,8 @@ from tornado.concurrent import run_on_executor
 
 from jupyterlab.commands import AppOptions, _ensure_options, build, build_check, clean
 from jupyterlab.coreconfig import CoreConfig
+
+AUTH_RESOURCE = "build"
 
 
 class Builder:
@@ -149,6 +152,8 @@ class Builder:
 
 
 class BuildHandler(ExtensionHandlerMixin, APIHandler):
+    auth_resource = AUTH_RESOURCE
+
     def initialize(
         self,
         name: str = "",
@@ -162,28 +167,30 @@ class BuildHandler(ExtensionHandlerMixin, APIHandler):
             raise ValueError(msg)
         self.builder = builder
 
+    # `authorized` awaits coroutines but not Tornado futures, so these are
+    # `async` rather than `gen.coroutine` methods.
     @web.authenticated
-    @gen.coroutine
-    def get(self) -> Generator[object, dict[str, str], None]:
-        data = yield self.builder.get_status()
+    @authorized
+    async def get(self) -> None:
+        data = await self.builder.get_status()
         self.finish(json.dumps(data))
 
     @web.authenticated
-    @gen.coroutine
-    def delete(self) -> Generator[object, object, None]:
+    @authorized
+    async def delete(self) -> None:
         self.log.warning("Canceling build")
         try:
-            yield self.builder.cancel()
+            await self.builder.cancel()
         except Exception as e:
             raise web.HTTPError(500, str(e)) from None
         self.set_status(204)
 
     @web.authenticated
-    @gen.coroutine
-    def post(self) -> Generator[object, object, None]:
+    @authorized
+    async def post(self) -> None:
         self.log.debug("Starting build")
         try:
-            yield self.builder.build()
+            await self.builder.build()
         except Exception as e:
             raise web.HTTPError(500, str(e)) from None
 

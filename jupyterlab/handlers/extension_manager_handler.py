@@ -7,18 +7,24 @@ import dataclasses
 import json
 from urllib.parse import urlencode, urlunparse
 
+from jupyter_server.auth.decorator import authorized
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
 from jupyterlab.extensions.manager import ExtensionManager
 
+AUTH_RESOURCE = "extensions"
+
 
 class ExtensionHandler(APIHandler):
+    auth_resource = AUTH_RESOURCE
+
     def initialize(self, manager: ExtensionManager):
         super().initialize()
         self.manager = manager
 
     @web.authenticated
+    @authorized
     async def get(self):
         """GET query returns info on extensions
 
@@ -96,6 +102,7 @@ class ExtensionHandler(APIHandler):
         self.finish(json.dumps(list(map(dataclasses.asdict, extensions))))
 
     @web.authenticated
+    @authorized
     async def post(self):
         """POST query performs an action on a specific extension
 

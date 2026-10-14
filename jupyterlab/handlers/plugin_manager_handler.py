@@ -6,18 +6,24 @@
 import dataclasses
 import json
 
+from jupyter_server.auth.decorator import authorized
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
 from jupyterlab.extensions.manager import PluginManager
 
+AUTH_RESOURCE = "plugins"
+
 
 class PluginHandler(APIHandler):
+    auth_resource = AUTH_RESOURCE
+
     def initialize(self, manager: PluginManager):
         super().initialize()
         self.manager = manager
 
     @web.authenticated
+    @authorized
     async def get(self):
         """GET query returns info on plugins locks"""
         # note: this is informative only - validation is server-side
@@ -26,6 +32,7 @@ class PluginHandler(APIHandler):
         self.finish(json.dumps(locks))
 
     @web.authenticated
+    @authorized
     async def post(self):
         """POST query performs an action on a specific plugin
 

@@ -266,6 +266,9 @@ async def test_handler_blocks_pypi_canonical_package_name_blocklist_matches(name
 
     handler = Mock()
     handler.current_user = "user"
+    handler.request.method = "POST"
+    handler.auth_resource = ExtensionHandler.auth_resource
+    handler.authorizer.is_authorized.return_value = True
     handler.get_json_body.return_value = {"cmd": "install", "extension_name": name}
     handler.manager = manager
     handler.set_status = Mock()
@@ -744,6 +747,9 @@ async def test_pypi_manager_uninstall_blocks_invalid_name_before_pip(name):
 async def test_handler_blocks_install_when_policy_denies():
     handler = Mock()
     handler.current_user = "user"
+    handler.request.method = "POST"
+    handler.auth_resource = ExtensionHandler.auth_resource
+    handler.authorizer.is_authorized.return_value = True
     handler.get_json_body.return_value = {"cmd": "install", "extension_name": "jupyterlab-evil"}
     handler.manager.is_install_allowed = AsyncMock(return_value=False)
 
@@ -758,6 +764,9 @@ async def test_handler_blocks_install_when_policy_denies():
 async def test_handler_blocks_uninstall_when_name_is_not_allowed():
     handler = Mock()
     handler.current_user = "user"
+    handler.request.method = "POST"
+    handler.auth_resource = ExtensionHandler.auth_resource
+    handler.authorizer.is_authorized.return_value = True
     handler.get_json_body.return_value = {
         "cmd": "uninstall",
         "extension_name": "-r/tmp/requirements.txt",
