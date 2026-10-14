@@ -15,6 +15,16 @@ export type CSVDocumentWidget = DocumentWidget<CSVViewer>;
  */
 export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
   /**
+   * Construct a CSV viewer search provider.
+   *
+   * @param widget - The widget to search on
+   */
+  constructor(widget: CSVDocumentWidget) {
+    super(widget);
+    widget.content.dataChanged.connect(this._onDataChanged, this);
+  }
+
+  /**
    * Instantiate a search provider for the widget.
    *
    * #### Notes
@@ -143,6 +153,13 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
     this.widget.content.searchService.clear();
 
     return Promise.resolve();
+  }
+
+  /**
+   * Run the search again on the new data, as the matches may have changed.
+   */
+  private _onDataChanged(): void {
+    this._stateChanged.emit();
   }
 
   private _query: RegExp;
