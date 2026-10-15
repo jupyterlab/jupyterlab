@@ -528,6 +528,7 @@ export class Context<
     const mod = this._contentsModel?.last_modified ?? null;
     const hash = this._contentsModel?.hash ?? null;
     this._contentsModel = newModel;
+    this._model.readOnly = newModel.writable === false;
     if (
       // If neither modification date nor hash available, assume the file has changed
       (!mod && !hash) ||

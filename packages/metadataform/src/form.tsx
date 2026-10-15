@@ -64,6 +64,7 @@ export class FormWidget extends ReactWidget {
         compact={true}
         showModifiedFromDefault={this._props.showModified}
         translator={this._props.translator}
+        disabled={this._props.disabled}
       />
     );
   }

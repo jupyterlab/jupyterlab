@@ -139,6 +139,7 @@ async def run_browser(url: str):
     current_env = os.environ.copy()
     current_env["BASE_URL"] = url
     current_env["EXAMPLE_NAME"] = example_dir.name
+    current_env["REPO_ROOT"] = str(here.parent)
     current_env["TEST_SNAPSHOT"] = "1" if has_snapshot else "0"
 
     try:
