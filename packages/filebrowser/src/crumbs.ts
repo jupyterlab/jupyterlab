@@ -646,7 +646,7 @@ export class BreadCrumbs extends Widget {
       const newPath = PathExt.join(destinationPath, name);
       promises.push(renameFile(manager, oldPath, newPath));
     }
-    void Promise.all(promises).catch(err => {
+    void model.runFileOperations(promises).catch(err => {
       return showErrorMessage(this._trans.__('Move Error'), err);
     });
   }
