@@ -47,13 +47,6 @@ import type {
   IEditorThemeRegistry,
   IExtensionsHandler
 } from './token';
-import {
-  closeSearchPanel,
-  findNext,
-  findPrevious,
-  openSearchPanel,
-  selectSelectionMatches
-} from '@codemirror/search';
 
 /**
  * The class name added to read only editor widgets.
@@ -868,7 +861,7 @@ export namespace EditorExtensionRegistry {
             keymap.of([
               {
                 key: 'Mod-Shift-l',
-                run: selectSelectionMatches,
+                run: StateCommands.selectSelectionMatches,
                 preventDefault: true
               }
             ])
@@ -883,26 +876,26 @@ export namespace EditorExtensionRegistry {
             keymap.of([
               {
                 key: 'Mod-f',
-                run: openSearchPanel,
+                run: StateCommands.openSearchPanel,
                 scope: 'editor search-panel'
               },
               {
                 key: 'F3',
-                run: findNext,
-                shift: findPrevious,
+                run: StateCommands.findNext,
+                shift: StateCommands.findPrevious,
                 scope: 'editor search-panel',
                 preventDefault: true
               },
               {
                 key: 'Mod-g',
-                run: findNext,
-                shift: findPrevious,
+                run: StateCommands.findNext,
+                shift: StateCommands.findPrevious,
                 scope: 'editor search-panel',
                 preventDefault: true
               },
               {
                 key: 'Escape',
-                run: closeSearchPanel,
+                run: StateCommands.closeSearchPanel,
                 scope: 'editor search-panel'
               }
             ])

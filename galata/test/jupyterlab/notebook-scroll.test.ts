@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import type { Page } from '@playwright/test';
 import * as path from 'path';
 
 import {
@@ -12,6 +13,18 @@ import {
 
 const fileName = 'scroll.ipynb';
 const longOutputsNb = 'long_outputs.ipynb';
+
+async function waitForNotebookLayout(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    return new Promise<void>(resolve => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          resolve();
+        });
+      });
+    });
+  });
+}
 
 test.use({
   mockSettings: {
@@ -248,6 +261,7 @@ test.describe('Notebook scroll on execution (with windowing)', () => {
     await page.evaluate(() => {
       return window.jupyterapp.commands.execute('notebook:clear-cell-output');
     });
+    await waitForNotebookLayout(page);
 
     // The cell should scroll if less than one line of code is visible,
     // this is the height of the top cell margin + editor line height,
@@ -296,13 +310,14 @@ test.describe('Notebook scroll on execution (with windowing)', () => {
       // In the `full` windowing mode the anchoring will be in effect for 3 seconds
       // after the most recent scroll event. In other windowing modes the browser
       // will anchor the active cell at all times, without time limits.
-      'from time import sleep\nsleep(2)\nfor i in range(100):\nprint(i)\nsleep(0.05)'
+      'from time import sleep\nsleep(2)\nfor i in range(100):\n    print(i)\n    sleep(0.05)\n'
     );
 
     // Clear output of the second cell
     await page.evaluate(() => {
       return window.jupyterapp.commands.execute('notebook:clear-cell-output');
     });
+    await waitForNotebookLayout(page);
 
     // Select third cell to make sure it is visible
     await page.notebook.selectCells(2);
@@ -311,6 +326,7 @@ test.describe('Notebook scroll on execution (with windowing)', () => {
     await page.evaluate(() => {
       return window.jupyterapp.commands.execute('notebook:clear-cell-output');
     });
+    await waitForNotebookLayout(page);
 
     // Make the third cell fully visible
     await positionCellPartiallyBelowViewport(page, notebook!, thirdCell!, 1);
@@ -442,8 +458,10 @@ test.describe('Notebook scroll over long outputs (with windowing)', () => {
     // Scroll piece by piece checking that there is no jump
     while (previousOffset > 75) {
       await page.mouse.wheel(0, -100);
-      // Explicit wait because mouse wheel does not wait for scrolling.
-      await page.waitForTimeout(150);
+      // poll until the scroll triggered by the wheel event has been applied.
+      await expect
+        .poll(() => outer.evaluate(node => node.scrollTop))
+        .not.toBe(previousOffset);
       const offset = await outer.evaluate(node => node.scrollTop);
       const diff = previousOffset - offset;
       // The scroll should be by about 100px, but because wheel event

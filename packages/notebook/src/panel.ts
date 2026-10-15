@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { ISessionContext } from '@jupyterlab/apputils';
 import { Dialog, Printing, showDialog } from '@jupyterlab/apputils';
 import { isMarkdownCellModel } from '@jupyterlab/cells';
@@ -9,6 +7,7 @@ import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PageConfig } from '@jupyterlab/coreutils';
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidget } from '@jupyterlab/docregistry';
+import type * as nbformat from '@jupyterlab/nbformat';
 import type { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 import type { ITranslator } from '@jupyterlab/translation';
 import type { IMapChange } from '@jupyter/ydoc';
@@ -48,6 +47,11 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
 
     // Set up things related to the context
     this.content.model = this.context.model;
+    this.context.model.stateChanged.connect(
+      this._onNotebookModelStateChanged,
+      this
+    );
+    this._updateViewOnly();
     this.context.sessionContext.kernelChanged.connect(
       this._onKernelChanged,
       this
@@ -91,6 +95,25 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   }
 
   /**
+   * Handle a change to the document model state.
+   */
+  private _onNotebookModelStateChanged(
+    sender: INotebookModel,
+    args: IChangedArgs<unknown>
+  ): void {
+    if (args.name === 'readOnly') {
+      this._updateViewOnly();
+    }
+  }
+
+  /**
+   * Sync the content's view-only state from the document model.
+   */
+  private _updateViewOnly(): void {
+    this.content.viewOnly = this.context.model.readOnly;
+  }
+
+  /**
    * Handle a change to the document registry save state.
    *
    * @param sender The document registry context
@@ -126,6 +149,13 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    */
   get model(): INotebookModel | null {
     return this.content.model;
+  }
+
+  /**
+   * Whether the notebook is displayed in view-only mode.
+   */
+  get viewOnly(): boolean {
+    return this.content.viewOnly;
   }
 
   /**
@@ -206,7 +236,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * Handle a change in the kernel by updating the document metadata.
    */
   private _onKernelChanged(
-    sender: any,
+    sender: ISessionContext,
     args: Session.ISessionConnection.IKernelChangedArgs
   ): void {
     if (!this.model || !args.newValue) {
@@ -267,10 +297,15 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     if (this.isDisposed) {
       return;
     }
+    const oldSpec = this.model!.getMetadata(
+      'kernelspec'
+    ) as nbformat.IKernelspecMetadata;
+    const preserved = oldSpec?.name === kernel.name ? oldSpec : undefined;
     this.model!.setMetadata('kernelspec', {
       name: kernel.name,
-      display_name: spec?.display_name,
-      language: spec?.language
+      display_name:
+        spec?.display_name ?? preserved?.display_name ?? kernel.name,
+      language: spec?.language ?? preserved?.language
     });
   }
 

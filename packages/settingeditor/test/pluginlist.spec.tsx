@@ -310,5 +310,35 @@ describe('@jupyterlab/settingeditor', () => {
       expect(pluginId).toBe(IDS[1]);
       expect(list.selection).toBe(IDS[1]);
     });
+
+    describe('#getFilterString()', () => {
+      it('should match properties nested inside an object setting', () => {
+        const props = {
+          properties: {
+            breadcrumbs: {
+              title: 'Breadcrumbs',
+              type: 'object',
+              properties: {
+                minimumLeftItems: {
+                  title: 'Minimum breadcrumbs left items',
+                  type: 'number'
+                }
+              }
+            }
+          }
+        } as unknown as ISettingRegistry.IProperty;
+        const filter = (item: string) =>
+          item.toLowerCase().includes('left') ? {} : null;
+        const matches = PluginList.prototype.getFilterString.call(
+          PluginList.prototype,
+          filter,
+          props
+        );
+        expect(matches).toEqual([
+          'Minimum breadcrumbs left items',
+          'minimumLeftItems'
+        ]);
+      });
+    });
   });
 });

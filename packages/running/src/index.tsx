@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module running
@@ -229,7 +228,7 @@ function Item(props: {
   const children = runningItem.children;
 
   // Manage collapsed state. Use the shutdown flag in lieu of `stopPropagation`.
-  const collapsible = !!children?.length;
+  const collapsible = (children?.length ?? 0) > 0;
   const onClick = useCallback(
     (event: React.MouseEvent) => {
       if (shuttingDown.current) {
@@ -1242,7 +1241,7 @@ export namespace IRunningSessions {
     /**
      * A signal that should be emitted when the item list has changed.
      */
-    runningChanged: ISignal<any, any>;
+    runningChanged: ISignal<unknown, unknown>;
 
     /**
      * A string used to describe the shutdown action.

@@ -241,6 +241,7 @@ test('Check codemirror settings can all be set at the same time.', async ({
     let locator = page.getByLabel(selectText);
     await locator.click();
     // Workaround for bug https://github.com/jupyterlab/jupyterlab/issues/18458
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(50);
     locators.push(locator);
   }
@@ -275,7 +276,7 @@ test('Opening Keyboard Shortcuts settings does not mangle user shortcuts', async
   expect(userPanelLines).toBeLessThan(10);
 });
 
-test('Keyboard Shortcuts: overwriting a shortcut can be cancelled', async ({
+test('Keyboard Shortcuts: overwriting a shortcut can be dismissed', async ({
   page
 }) => {
   // Settings are wide, hide the sidebar to increase available space
@@ -304,12 +305,18 @@ test('Keyboard Shortcuts: overwriting a shortcut can be cancelled', async ({
 
   await expect(conflict).toHaveCount(1);
 
-  expect(await conflict.screenshot()).toMatchSnapshot(
+  // Wait for the capture idle timer (2s) so the progress bar is not mid-animation.
+  // eslint-disable-next-line playwright/no-wait-for-timeout
+  await page.waitForTimeout(2100);
+
+  const shortcutList = shortcutsForm.locator('.jp-Shortcuts-ShortcutList');
+  expect(await shortcutList.screenshot()).toMatchSnapshot(
     'settings-shortcuts-conflict.png'
   );
-  const cancelButton = conflict.locator('button >> text=Cancel');
-  await cancelButton.click();
+  // Cancel by dismissing the input (blur closes the editor and clears conflicts).
+  await filterInput.click();
 
+  await expect(newShortcutInput).toHaveCount(0);
   await expect(conflict).toHaveCount(0);
 });
 
@@ -333,6 +340,8 @@ test('Keyboard Shortcuts: validate "Or" button behavior when editing shortcuts',
 
   const shortcutKey = firstRow.locator('.jp-Shortcuts-ShortcutKeys').first();
   await shortcutKey.click();
+  // settle wait for CSS slide-in animation before screenshot
+  // eslint-disable-next-line playwright/no-wait-for-timeout
   await page.waitForTimeout(300);
   await firstRow.hover();
   expect(await firstRow.screenshot()).toMatchSnapshot(
@@ -359,11 +368,11 @@ test('Keyboard Shortcuts: should show/hide the add shortcut row', async ({
   await expect(addShortcutRow).not.toBeAttached();
 
   // Show the add shortcut row.
-  await shortcutsForm.getByTitle('Tool for adding shortcuts').click();
+  await shortcutsForm.getByTitle('Add shortcut').click();
   await expect(addShortcutRow).toBeAttached();
 
   // Hide the add shortcut row
-  await shortcutsForm.getByTitle('Tool for adding shortcuts').click();
+  await shortcutsForm.getByTitle('Collapse new shortcut row').click();
   await expect(addShortcutRow).not.toBeAttached();
 });
 
@@ -385,7 +394,7 @@ test('Keyboard Shortcuts: should filter commands in add shortcut row', async ({
   );
 
   // Show the add shortcut row and count initial commands.
-  await shortcutsForm.getByTitle('Tool for adding shortcuts').click();
+  await shortcutsForm.getByTitle('Add shortcut').click();
   const initialCount = await commandOptions.count();
 
   // Filtering on notebook should reduce the count.
@@ -395,7 +404,7 @@ test('Keyboard Shortcuts: should filter commands in add shortcut row', async ({
 
   // Filtering on a specific command should keep only one command.
   await filterInput.locator('input').fill('restart kernel and run all cells');
-  expect(await commandOptions.count()).toBe(1);
+  await expect(commandOptions).toHaveCount(1);
 });
 
 test('Keyboard Shortcuts: should add a new shortcut', async ({ page }) => {
@@ -428,7 +437,7 @@ test('Keyboard Shortcuts: should add a new shortcut', async ({ page }) => {
   const addShortcutRow = shortcutsForm.locator('.jp-Shortcuts-Row-newShortcut');
 
   // Show the add shortcut row.
-  await shortcutsForm.getByTitle('Tool for adding shortcuts').click();
+  await shortcutsForm.getByTitle('Add shortcut').click();
 
   // Select the command.
   await addShortcutRow
@@ -436,7 +445,7 @@ test('Keyboard Shortcuts: should add a new shortcut', async ({ page }) => {
     .selectOption('notebook: Restart Kernel and Run All Cells…');
   // Display the shortcut input and add a shortcut.
   await addShortcutRow.locator('.jp-Shortcuts-EmptyCell').first().hover();
-  await addShortcutRow.locator('.jp-Shortcuts-EmptyCell a').click();
+  await addShortcutRow.locator('.jp-Shortcuts-Plus').click();
   const shortcutKey = addShortcutRow.locator('.jp-Shortcuts-Input').first();
   await shortcutKey.press('Control+r');
   await addShortcutRow.locator('.jp-Shortcuts-Submit').click();
@@ -457,7 +466,7 @@ test('Keyboard Shortcuts: should add a new shortcut', async ({ page }) => {
   await dialog.waitFor({ state: 'detached' });
 
   // Save the new shortcut.
-  await addShortcutRow.getByTitle('Save shortcut').click();
+  await addShortcutRow.locator('.jp-Shortcuts-SaveNew').click();
   await addShortcutRow.waitFor({ state: 'detached' });
 
   // The shortcut should now be listed with the correct selector and args.
@@ -481,6 +490,7 @@ test('Settings Export: Clicking the export button triggers a download and matche
     )
     .click();
   // Wait for the settings to be loaded
+  // eslint-disable-next-line playwright/no-wait-for-timeout
   await page.waitForTimeout(500);
 
   const downloadPromise = page.waitForEvent('download', { timeout: 5000 });

@@ -8,6 +8,9 @@
   "include": ["src/*"],
   "references": [
     {
+      "path": "../coreutils"
+    },
+    {
       "path": "../nbformat"
     },
     {

@@ -91,6 +91,7 @@ test.describe('Debugger Console', () => {
       // Try to switch off debugger if it's still active
       if (await page.debugger.isOn()) {
         await page.debugger.switchOff();
+        // eslint-disable-next-line playwright/no-wait-for-timeout
         await page.waitForTimeout(500);
       }
     } catch (error) {
@@ -120,14 +121,12 @@ test.describe('Debugger Console', () => {
 
     // Click the evaluate button to close the console
     await evaluateButton.click();
-    await page.waitForTimeout(500);
 
     // Verify the console is now closed
     await expect(debugConsole).not.toBeVisible();
 
     // Click the evaluate button again to reopen the console
     await evaluateButton.click();
-    await page.waitForTimeout(500);
 
     // Verify the console is open again
     await expect(debugConsole).toBeVisible();

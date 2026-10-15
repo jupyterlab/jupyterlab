@@ -9,6 +9,9 @@ on:
         description: "The branch to target"
         required: false
 
+permissions:
+  contents: read
+
 jobs:
   publish_changelog:
     runs-on: ubuntu-latest
@@ -26,7 +29,7 @@ jobs:
 
       - name: Publish changelog
         id: publish-changelog
-        uses: jupyter-server/jupyter_releaser/.github/actions/publish-changelog@634ac751f8a58d3d4a19b63f58aad138e6355cc8 # v2
+        uses: jupyter-server/jupyter_releaser/.github/actions/publish-changelog@70e58c50c736ad496cca11fe4f2446033b68b027 # v2
         with:
           token: ${{ steps.app-token.outputs.token }}
           branch: ${{ github.event.inputs.branch }}
