@@ -124,7 +124,7 @@ export class KernelSpecManager
    * Execute a request to the server to poll specs and update state.
    */
   protected async requestSpecs(): Promise<void> {
-    const specs = await this._kernelSpecAPIClient.get();
+    const specs = await this._kernelSpecAPIClient.get(true);
     if (this.isDisposed) {
       return;
     }

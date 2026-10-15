@@ -249,7 +249,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
   protected async requestRunning(): Promise<void> {
     let models: Session.IModel[];
     try {
-      models = await this._sessionAPIClient.listRunning();
+      models = await this._sessionAPIClient.listRunning(true);
     } catch (err) {
       // Handle network errors, as well as cases where we are on a
       // JupyterHub and the server is not running. JupyterHub returns a
