@@ -22,7 +22,7 @@ const COLUMN_HEADER_HEIGHT = 20;
 const ROW_HEIGHT = 20;
 const VALUES_ROW = 2;
 
-test.describe.serial('Debugger', () => {
+test.describe('Debugger', () => {
   test('Kernel capability', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
 

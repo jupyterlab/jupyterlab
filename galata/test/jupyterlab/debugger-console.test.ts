@@ -64,7 +64,7 @@ async function setupDebuggerConsole(
     .waitFor({ state: 'visible' });
 }
 
-test.describe.serial('Debugger Console', () => {
+test.describe('Debugger Console', () => {
   test.use({
     mockSettings: {
       ...galata.DEFAULT_SETTINGS,

@@ -4,7 +4,6 @@
  */
 
 import type { ElementHandle, Locator, Page } from '@playwright/test';
-import type { NotebookPanel } from '@jupyterlab/notebook';
 import type { SidebarHelper } from './sidebar';
 import type { NotebookHelper } from './notebook';
 import { waitForCondition } from '../utils';
@@ -49,50 +48,30 @@ export class DebuggerHelper {
       return;
     }
     const button = toolbar.locator('.jp-DebuggerBugButton');
-    await button.waitFor();
     await toolbar
       .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
       .waitFor();
 
-    const isNotebookPanel =
-      (await panel.locator('.jp-NotebookPanel-notebook').count()) > 0;
-    const panelId = isNotebookPanel ? await panel.getAttribute('id') : null;
-    const isDebugging = async () =>
-      isNotebookPanel
-        ? (await panel.getAttribute('data-jp-debugger')) === 'true'
-        : await this.isOn(name);
-
-    if (isNotebookPanel && panelId && !(await isDebugging())) {
-      await this.page.evaluate(async panelId => {
-        const widgets = window.jupyterapp.shell.widgets('main');
-        const widget = Array.from(widgets).find(
-          widget => widget.id === panelId
-        );
-        if (widget) {
-          const notebookPanel = widget as NotebookPanel;
-          window.jupyterapp.shell.activateById(notebookPanel.id);
-          await notebookPanel.sessionContext.ready;
-          await notebookPanel.sessionContext.session?.kernel?.info;
-          window.jupyterapp.shell.activateById(notebookPanel.id);
-        }
-      }, panelId);
-    }
-
-    if (!(await isDebugging())) {
-      await button!.click();
-    }
-    await toolbar
-      .locator('.jp-DebuggerBugButton[aria-pressed="true"]')
-      .waitFor();
-
-    if (isNotebookPanel) {
-      if (!panelId) {
-        throw new Error('Notebook panel id not found.');
+    // The handler marks the panel once the debugger is started. The button
+    // shows as pressed as soon as it is clicked, and the handler drops a
+    // click that comes while it is still updating the panel, so click again
+    // when the mark does not appear and the debugger is not started.
+    const started = panel.and(this.page.locator('[data-jp-debugger="true"]'));
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (
+        (await started.count()) === 0 &&
+        (attempt === 0 || !(await this._isStarted()))
+      ) {
+        await button.click();
       }
-      await this.page
-        .locator(`[id="${panelId}"][data-jp-debugger="true"]`)
-        .waitFor({ state: 'attached' });
+      try {
+        await started.waitFor({ state: 'attached', timeout: 10000 });
+        return;
+      } catch {
+        // Check again whether the click was dropped.
+      }
     }
+    await started.waitFor({ state: 'attached' });
   }
 
   /**
@@ -238,5 +217,14 @@ export class DebuggerHelper {
   private async _getPanel(selector: string): Promise<Locator> {
     const panel = this.sidebar.getContentPanelLocator('right');
     return panel.locator(selector);
+  }
+
+  private async _isStarted(): Promise<boolean> {
+    return this.page.evaluate(async () => {
+      const service = await window.galata.getPlugin(
+        '@jupyterlab/debugger-extension:service'
+      );
+      return service?.isStarted ?? false;
+    });
   }
 }
