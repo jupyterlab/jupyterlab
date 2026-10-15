@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfigbase",
   "compilerOptions": {
+    "noUncheckedIndexedAccess": true,
     "outDir": "lib",
     "rootDir": "src",
     "lib": ["DOM", "DOM.Iterable", "ES2020", "ES2020.Intl"]

@@ -150,7 +150,10 @@ export function signalToPromises<T, U>(
 
   let current = 0;
   function slot(sender: T, args: U) {
-    resolvers[current++]([sender, args]);
+    const resolver = resolvers[current++];
+    if (resolver) {
+      resolver([sender, args]);
+    }
     if (current === numberValues) {
       cleanup();
     }
@@ -171,7 +174,7 @@ export function signalToPromises<T, U>(
  * @returns a Promise that resolves with a `(sender, args)` pair.
  */
 export function signalToPromise<T, U>(signal: ISignal<T, U>): Promise<[T, U]> {
-  return signalToPromises(signal, 1)[0];
+  return signalToPromises(signal, 1)[0]!;
 }
 
 /**

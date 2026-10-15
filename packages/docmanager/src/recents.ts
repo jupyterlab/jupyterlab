@@ -65,7 +65,7 @@ export class RecentsManager implements IRecentsManager {
   set maximalRecentsLength(value: number) {
     this._maxRecentsLength = Math.round(Math.max(1, value));
     let changed = false;
-    for (const type of ['opened', 'closed']) {
+    for (const type of ['opened', 'closed'] as const) {
       if (this._recents[type].length > this._maxRecentsLength) {
         this._recents[type].length = this._maxRecentsLength;
         changed = true;
@@ -151,7 +151,10 @@ export class RecentsManager implements IRecentsManager {
   /**
    * Remove a path from both lists (opened and closed).
    */
-  private _removeRecent(path: string, lists = ['opened', 'closed']): void {
+  private _removeRecent(
+    path: string,
+    lists: ReadonlyArray<'opened' | 'closed'> = ['opened', 'closed']
+  ): void {
     let changed = false;
     for (const type of lists) {
       const recents = this._recents[type];
@@ -213,10 +216,10 @@ export class RecentsManager implements IRecentsManager {
     const allRecents = [...recents.opened, ...recents.closed];
     const invalidPaths = new Set(await this._getInvalidPaths(allRecents));
 
-    for (const type of ['opened', 'closed']) {
+    for (const type of ['opened', 'closed'] as const) {
       this._setRecents(
         recents[type].filter(r => !invalidPaths.has(r.path)),
-        type as 'opened' | 'closed'
+        type
       );
     }
     this._recentsChanged.emit(undefined);
