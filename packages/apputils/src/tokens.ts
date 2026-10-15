@@ -21,6 +21,54 @@ export const ICommandPalette = new Token<ICommandPalette>(
 );
 
 /**
+ * An accessibility service for announcing messages to screen readers.
+ */
+export const IAccessibleAnnouncer = new Token<IAccessibleAnnouncer>(
+  '@jupyterlab/apputils:IAccessibleAnnouncer',
+  'A service for announcing application messages to screen readers.'
+);
+
+/**
+ * A service for announcing messages to screen readers.
+ */
+export interface IAccessibleAnnouncer {
+  /**
+   * Announce a message.
+   *
+   * @param message - The message to announce.
+   * @param options - Announcement options.
+   */
+  announce(message: string, options?: IAccessibleAnnouncer.IOptions): void;
+
+  /**
+   * Clear the current announcement.
+   */
+  clear(): void;
+}
+
+export namespace IAccessibleAnnouncer {
+  /**
+   * Options for an accessibility announcement.
+   */
+  export interface IOptions {
+    /**
+     * Whether to announce the message assertively.
+     *
+     * Defaults to `false`.
+     */
+    assertive?: boolean;
+
+    /**
+     * Time in milliseconds after which to clear the message.
+     *
+     * A value of `0` keeps the message until the next announcement or an
+     * explicit call to `clear`.
+     */
+    clearTimeout?: number;
+  }
+}
+
+/**
  * The options for creating a command palette item.
  */
 export interface IPaletteItem extends CommandPalette.IItemOptions {}
