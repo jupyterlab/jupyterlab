@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module lsp-extension
@@ -37,10 +36,21 @@ import type { IFormRenderer, LabIcon } from '@jupyterlab/ui-components';
 import { IFormRendererRegistry, pythonIcon } from '@jupyterlab/ui-components';
 import type { PartialJSONObject } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
-
-import { renderServerSetting } from './renderer';
+import React from 'react';
 
 import type { FieldProps } from '@rjsf/utils';
+
+type ServerSettingRendererProps = FieldProps & {
+  translator: ITranslator;
+};
+
+const ServerSettingRenderer = React.lazy(async () => {
+  const { renderServerSetting } = await import('./renderer');
+  return {
+    default: (props: ServerSettingRendererProps): React.ReactElement =>
+      renderServerSetting(props, props.translator)
+  };
+});
 
 const plugin: JupyterFrontEndPlugin<ILSPDocumentConnectionManager> = {
   activate,
@@ -161,12 +171,12 @@ function activateSettings(
   settingRegistry.transform(plugin.id, {
     fetch: plugin => {
       const schema = plugin.schema.properties!;
-      const defaultValue: { [key: string]: any } = {};
+      const defaultValue: PartialJSONObject = {};
       languageServerManager.sessions.forEach((_, key) => {
         defaultValue[key] = { rank: 50, configuration: {} };
       });
 
-      schema[LANGUAGE_SERVERS]['default'] = defaultValue;
+      schema[LANGUAGE_SERVERS].default = defaultValue;
       return plugin;
     },
     compose: plugin => {
@@ -183,7 +193,7 @@ function activateSettings(
       if (serverUserSettings) {
         serverComposite = { ...serverComposite, ...serverUserSettings };
       }
-      const composite: { [key: string]: any } = {
+      const composite: PartialJSONObject = {
         [LANGUAGE_SERVERS]: serverComposite
       };
       Object.entries(properties).forEach(([key, value]) => {
@@ -219,7 +229,11 @@ function activateSettings(
   if (settingRendererRegistry) {
     const renderer: IFormRenderer = {
       fieldRenderer: (props: FieldProps) => {
-        return renderServerSetting(props, translator);
+        return React.createElement(
+          React.Suspense,
+          { fallback: null },
+          React.createElement(ServerSettingRenderer, { ...props, translator })
+        );
       }
     };
     settingRendererRegistry.addRenderer(
@@ -275,7 +289,10 @@ function addRunningSessionManager(
   translator: ITranslator
 ) {
   const trans = translator.load('jupyterlab');
-  const signal = new Signal<any, any>(lsManager);
+  const signal = new Signal<
+    ILSPDocumentConnectionManager,
+    ILSPDocumentConnectionManager
+  >(lsManager);
   lsManager.connected.connect(() => signal.emit(lsManager));
   lsManager.disconnected.connect(() => signal.emit(lsManager));
   lsManager.closed.connect(() => signal.emit(lsManager));

@@ -232,6 +232,7 @@ the Outputs notebook and verify everything runs properly. Also add a cell with t
 
 ```python
 from ipywidgets import IntSlider
+
 IntSlider()
 ```
 

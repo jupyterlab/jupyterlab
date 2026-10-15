@@ -11,11 +11,13 @@ IPython
 Jupyverse
 Quansight
 Yjs
+hatchling
 
 # Common technical terms in docs
 frontend
 frontends
 backend
+backends
 filesystem
 websocket
 json
@@ -23,6 +25,8 @@ config
 configs
 tokenize
 customizable
+addon
+addons
 allowlist
 allowlisted
 args
@@ -156,6 +160,8 @@ sanitization
 schemas
 screencast
 screencasts
+scrollable
+scrollbar
 Scrollbars
 semver
 SHA

@@ -6,13 +6,47 @@
 
 # Extension Migration Guide
 
-## JupyterLab 4.5 to 4.6 (not released yet)
+## JupyterLab 4.6 to 4.7 (not released yet)
+
+### Behavior updates
+
+- Listing an extension package name in `disabledExtensions` now disables every plugin that
+  package provides. Before, a plugin whose id did not start with the package name stayed
+  enabled, so a package not following the plugin id convention could not be disabled as a
+  whole. Each such plugin is named in a browser console warning. To keep it enabled, list
+  the plugin ids to disable in `disabledExtensions` instead of the package name.
+
+### API updates
+
+- The JSON Lines renderer plugin was renamed from `@jupyterlab/json-lines-extension:factory`
+  to `@jupyterlab/json-extension:json-lines-factory` to match its owning package.
+  Update references to the old plugin id in configuration, such as `disabledExtensions`,
+  `deferredExtensions` and `lockedExtensions`. The plugin has no settings to migrate.
+
+- Xterm.js, used by `@jupyterlab/terminal`, was upgraded from 5.x to 6.x, along with the
+  `@xterm/addon-fit`, `@xterm/addon-search`, `@xterm/addon-web-links` and `@xterm/addon-webgl`
+  addons. Notable changes for extensions that interact with the terminal:
+  - `@xterm/addon-canvas` was removed upstream; when WebGL is not available the terminal now
+    falls back to the built-in DOM renderer, so the terminal may not contain a `<canvas>`
+    element anymore.
+  - The search addon no longer applies the `xterm-find-active-result-decoration` CSS class;
+    the active match is distinguished by its colors instead.
+  - The scrollbar is now rendered by a custom scrollable element instead of a native
+    `overflow-y: scroll` viewport; extensions styling or querying `.xterm-viewport` may need
+    updating.
+  - Extensions depending on `@xterm/*` packages themselves, for example to type against the
+    `Terminal.searchAddon` getter of `@jupyterlab/terminal`, should update them to the
+    versions used by `@jupyterlab/terminal` (`@xterm/xterm` 6.x and the matching addons).
+
+## JupyterLab 4.5 to 4.6
 
 ### Migrating to `jupyter-builder`
 
 JupyterLab's build tooling has moved out of the JupyterLab repository into a standalone package: [`jupyter-builder`](https://pypi.org/project/jupyter-builder/) (PyPI) and [`@jupyter/builder`](https://www.npmjs.com/package/@jupyter/builder) (npm). Existing extensions continue to work, but we recommend migrating so your build no longer depends on a full JupyterLab installation.
 
-The migration is two small changes.
+JupyterLab 4.6 also no longer depends on `setuptools` at runtime. If your extension uses `setuptools`-based packaging or build hooks, add `setuptools` to your own package requirements explicitly, or migrate to a PEP 517/518 build backend in [`pyproject.toml`](https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html).
+
+The migration to `jupyter-builder` is two small changes:
 
 #### 1. Update `pyproject.toml`
 
@@ -850,6 +884,7 @@ configuration by adding the following line:
 
 ```python
 import jupyterlab
+
 c.LabApp.extra_labextensions_path = str(Path(jupyterlab.__file__).parent / "galata")
 ```
 

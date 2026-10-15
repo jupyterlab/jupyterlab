@@ -38,6 +38,10 @@ import type { DebuggerModel } from '../src/model';
 
 import type { SourcesBody } from '../src/panels/sources/body';
 
+import type * as GridPanel from '../src/panels/variables/gridpanel';
+
+import { VariablesModel } from '../src/panels/variables/model';
+
 import type { IYText } from '@jupyter/ydoc';
 import type { IDebugger } from '../src/tokens';
 import { DebuggerDisplayRegistry } from '../src';
@@ -472,6 +476,88 @@ describe('Debugger', () => {
       const children = Array.from(body.children());
       const editor = children[0] as CodeEditorWrapper;
       expect(editor.model.sharedModel.getSource()).toEqual(code);
+    });
+  });
+
+  describe('VariablesGrid', () => {
+    const inspected: IDebugger.IScope[] = [
+      {
+        name: 'measurements',
+        variables: [
+          { name: '0', value: '3', type: 'int', variablesReference: 0 },
+          { name: '1', value: '1', type: 'int', variablesReference: 0 }
+        ]
+      }
+    ];
+    const locals: IDebugger.IScope[] = [
+      {
+        name: 'Locals',
+        variables: [
+          { name: 'total', value: '4', type: 'int', variablesReference: 0 }
+        ]
+      }
+    ];
+    let variables: VariablesModel;
+    let grid: Debugger.VariablesGrid;
+
+    beforeEach(() => {
+      variables = new VariablesModel();
+    });
+
+    afterEach(() => {
+      grid.dispose();
+    });
+
+    /**
+     * Attach the grid and let it load the data grid module it needs.
+     */
+    const attach = async (): Promise<GridPanel.GridModel> => {
+      Widget.attach(grid, document.body);
+      await new Promise(resolve => setTimeout(resolve, 0));
+      MessageLoop.sendMessage(grid, Widget.Msg.UpdateRequest);
+      return (grid.widgets[0] as GridPanel.Grid).dataModel;
+    };
+
+    it('should display the scopes it was given once attached', async () => {
+      // The grid opened by `debugger:inspect-variable` is visible as soon as
+      // it is attached, hence it never receives a `before-show` message.
+      grid = new Debugger.VariablesGrid({
+        model: variables,
+        commands: registry,
+        scopes: inspected
+      });
+
+      const dataModel = await attach();
+
+      expect(grid.node.querySelectorAll('canvas').length).toBeGreaterThan(0);
+      expect(dataModel.rowCount('body')).toEqual(inspected[0].variables.length);
+    });
+
+    it('should display the scopes of the model when it changes', async () => {
+      grid = new Debugger.VariablesGrid({
+        model: variables,
+        commands: registry,
+        scopes: inspected
+      });
+
+      const dataModel = await attach();
+      variables.scopes = locals;
+      MessageLoop.sendMessage(grid, Widget.Msg.UpdateRequest);
+
+      expect(dataModel.rowCount('body')).toEqual(1);
+      expect(dataModel.data('row-header', 0, 0)).toEqual('total');
+    });
+
+    it('should display the scopes of the model when given none', async () => {
+      grid = new Debugger.VariablesGrid({
+        model: variables,
+        commands: registry
+      });
+      variables.scopes = locals;
+
+      const dataModel = await attach();
+
+      expect(dataModel.data('row-header', 0, 0)).toEqual('total');
     });
   });
 });

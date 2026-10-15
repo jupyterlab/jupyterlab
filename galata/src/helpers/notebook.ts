@@ -469,30 +469,32 @@ export class NotebookHelper {
    * @returns Whether the action succeeded or not.
    */
   async trust(): Promise<boolean> {
-    if (
-      (await this.isAnyActive()) &&
-      (await this.page
-        .locator('[data-icon="ui-components:not-trusted"]')
-        .count()) === 1
-    ) {
-      // Workaround for https://github.com/jupyterlab/jupyterlab/issues/18457
-      await this.page
-        .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
-        .waitFor();
-
-      await this.page.keyboard.press('Control+Shift+C');
-      await this.page.getByPlaceholder('SEARCH', { exact: true }).fill('trust');
-      await this.page.getByText('Trust Notebook').click();
-      await this.page.getByRole('button', { name: 'Trust' }).click();
-
-      return (
-        (await this.page
-          .locator('[data-icon="ui-components:trusted"]')
-          .count()) === 1
-      );
+    if (!(await this.isAnyActive())) {
+      return true;
     }
 
-    return true;
+    const trusted = await this.page.evaluate(async () => {
+      const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+      await panel.context.ready;
+      return Array.from(panel.content.model!.cells).every(cell => cell.trusted);
+    });
+    if (trusted) {
+      return true;
+    }
+
+    // The command resolves after confirmation and saving the notebook.
+    const [result] = await Promise.all([
+      this.page.evaluate<{ trusted: boolean }>(() =>
+        window.jupyterapp.commands.execute('notebook:trust')
+      ),
+      this.page
+        .getByRole('button', {
+          name: 'Confirm Trusting this notebook',
+          exact: true
+        })
+        .click()
+    ]);
+    return result.trusted;
   }
 
   /**
@@ -964,7 +966,13 @@ export class NotebookHelper {
     if (textOutputsNum > 0) {
       const outputs: string[] = [];
       for (let i = 0; i < textOutputsNum; i++) {
-        outputs.push((await textOutputs.nth(i).textContent()) ?? '');
+        const output = textOutputs.nth(i);
+        // Wait for incremental text rendering to populate the pre element
+        const renderedText = output.locator('.jp-RenderedText');
+        if ((await renderedText.count()) > 0) {
+          await renderedText.locator('pre').first().waitFor();
+        }
+        outputs.push((await output.textContent()) ?? '');
       }
 
       return outputs;
@@ -1497,6 +1505,8 @@ export class NotebookHelper {
     await this.page.evaluate(cellIdx => {
       window.galata.resetExecutionCount(cellIdx);
     }, cellIndex);
+
+    await this._waitUntilKernelReadyToScheduleExecution();
     await this.page.keyboard.press(
       inplace === true ? 'Control+Enter' : 'Shift+Enter'
     );

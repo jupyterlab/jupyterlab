@@ -47,41 +47,25 @@ const MISSING: Dict<string[]> = {
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
 
+// Library packages that are deliberately not singletons.
+const NOT_SINGLETON: string[] = [
+  // Not an importable JavaScript module at all
+  '@jupyterlab/core-meta',
+  // Stylesheet-only package.
+  '@jupyterlab/nbconvert-css',
+  // Aggregation shell package
+  '@jupyterlab/metapackage'
+];
+
 const UNUSED: Dict<string[]> = {
   // url is a polyfill for sanitize-html
   '@jupyterlab/apputils': ['@types/react'],
   '@jupyterlab/application': ['@fortawesome/fontawesome-free'],
   '@jupyterlab/buildutils': ['inquirer', 'verdaccio'],
-  '@jupyterlab/codemirror': [
-    '@codemirror/lang-cpp',
-    '@codemirror/lang-css',
-    '@codemirror/lang-html',
-    '@codemirror/lang-java',
-    '@codemirror/lang-javascript',
-    '@codemirror/lang-json',
-    '@codemirror/lang-markdown',
-    '@codemirror/lang-php',
-    '@codemirror/lang-python',
-    '@codemirror/lang-rust',
-    '@codemirror/lang-sql',
-    '@codemirror/lang-wast',
-    '@codemirror/lang-xml',
-    '@codemirror/legacy-modes'
-  ],
-  '@jupyterlab/codemirror-extension': [
-    '@codemirror/lang-markdown',
-    '@codemirror/legacy-modes'
-  ],
   '@jupyterlab/coreutils': ['path-browserify'],
-  '@jupyterlab/fileeditor': ['regexp-match-indices'],
   '@jupyterlab/galata-extension': [
     '@fontsource/dejavu-mono',
     '@fontsource/dejavu-sans'
-  ],
-  '@jupyterlab/markedparser-extension': [
-    // only (but always) imported asynchronously
-    'marked-gfm-heading-id',
-    'marked-mangle'
   ],
   '@jupyterlab/services': ['ws'],
   '@jupyterlab/testing': [
@@ -89,7 +73,6 @@ const UNUSED: Dict<string[]> = {
     '@babel/preset-env',
     'fs-extra',
     'identity-obj-proxy',
-    'jest-environment-jsdom',
     'jest-junit'
   ],
   '@jupyterlab/testutils': [
@@ -348,6 +331,21 @@ function ensureBranch(): string[] {
       }
     }
 
+    if (filePath === 'packages/notebook-extension/src/index.ts') {
+      // Runtime help links should point users to stable documentation.
+      const runtimeHelpLinks = [
+        'https://jupyterlab.readthedocs.io/en/stable/user/export.html'
+      ];
+      runtimeHelpLinks.forEach(stableLink => {
+        const versionedLink = stableLink.replace('/stable/', `/${rtdVersion}/`);
+        if (stableLink !== versionedLink) {
+          while (newData.indexOf(versionedLink) !== -1) {
+            newData = newData.replace(versionedLink, stableLink);
+          }
+        }
+      });
+    }
+
     if (newData !== oldData) {
       messages.push(`Overwriting ${filePath}`);
       fs.writeFileSync(filePath, newData, 'utf-8');
@@ -469,11 +467,13 @@ function ensureCorePackage(corePackage: any, corePaths: string[]) {
       return;
     }
 
-    // If the package has a tokens.ts file, make sure it is noted as a singleton
-    if (
-      fs.existsSync(path.join(pkgPath, 'src', 'tokens.ts')) &&
-      !singletonPackages.includes(data.name)
-    ) {
+    // Every library package is a singleton unless it opts out: they either
+    // declare tokens, whose identity must be unique to resolve, or export
+    // classes that third-party extensions may use in `instanceof` checks.
+    const isSingleton =
+      !data.name.endsWith('-extension') && !NOT_SINGLETON.includes(data.name);
+
+    if (isSingleton && !singletonPackages.includes(data.name)) {
       singletonPackages.push(data.name);
     }
   });

@@ -142,6 +142,15 @@
   overflow: auto;
 }
 
+.jp-MarkdownCell.jp-mod-emptyMarkdownPlaceholder .jp-MarkdownOutput {
+  color: var(--jp-content-font-color2);
+  font-style: italic;
+}
+
+.jp-MarkdownCell .cm-editor:not(.cm-focused) .cm-placeholder {
+  display: none;
+}
+
 /* collapseHeadingButton (show always if hiddenCellsButton is _not_ shown) */
 .jp-collapseHeadingButton {
   display: flex;

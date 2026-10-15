@@ -74,7 +74,7 @@ export class ConsoleHandler implements IDisposable {
       } else if (event.event === 'continued' || event.event === 'terminated') {
         void this._pausedOverlay.hide();
       }
-    });
+    }, this);
 
     // If already paused when initialized
     if (this._debuggerService.hasStoppedThreads()) {

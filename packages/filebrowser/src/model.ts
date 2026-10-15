@@ -76,7 +76,10 @@ export class FileBrowserModel implements IDisposable {
       format: 'text'
     };
     this._state = options.state || null;
-    const refreshInterval = options.refreshInterval || DEFAULT_REFRESH_INTERVAL;
+    const refreshInterval =
+      options.refreshInterval === undefined || options.refreshInterval === 0
+        ? DEFAULT_REFRESH_INTERVAL
+        : options.refreshInterval;
 
     const { services } = options.manager;
     services.contents.fileChanged.connect(this.onFileChanged, this);
