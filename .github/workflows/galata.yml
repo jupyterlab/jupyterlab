@@ -374,6 +374,8 @@ jobs:
         run: |
           set -ex
           bash ./scripts/ci_install.sh
+          # Includes the shell-channel fix from ipython/ipykernel#1529.
+          uv pip install --system "ipykernel>=7.4.0"
         working-directory: core
 
       - name: Test examples
