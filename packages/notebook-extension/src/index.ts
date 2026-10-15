@@ -3700,7 +3700,9 @@ function addCommands(
       ) {
         return false;
       }
-      return (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker);
+      return (
+        (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker)
+      );
     },
     isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
@@ -3897,7 +3899,9 @@ function addCommands(
       ) {
         return false;
       }
-      return (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker);
+      return (
+        (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker)
+      );
     },
     isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
