@@ -133,6 +133,25 @@ test.describe('Terminal', () => {
     });
   });
 
+  test.describe('Platform detection', () => {
+    test('should not be mistaken for Node.js by xterm.js', async ({ page }) => {
+      await waitForTerminal(page);
+      // xterm.js skips `navigator.platform` (leaving `isMac`, `isWindows`
+      // and `isLinux` unset) when it sees a `process` object with a `title`;
+      // that would turn off the platform specific keyboard handling.
+      const isNode = await page.evaluate(() => {
+        for (const widget of (window as any).jupyterapp.shell.widgets('main')) {
+          const term = (widget.content ?? widget)._term;
+          if (term) {
+            return term._core.browser.isNode as boolean;
+          }
+        }
+        throw new Error('No terminal found');
+      });
+      expect(isNode).toBe(false);
+    });
+  });
+
   test.describe('Theme', () => {
     test('Light theme terminal inherit', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
