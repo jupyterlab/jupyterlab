@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { UUID } from '@lumino/coreutils';
@@ -348,7 +347,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
       container = document.createElement(tag);
     }
 
-    const svgElement = this.svgElement.cloneNode(true) as HTMLElement;
+    const svgElement = Private.cloneSvgElement(this.svgElement);
     if (!container) {
       if (label) {
         console.warn();
@@ -395,34 +394,6 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     return this._svgElement;
   }
 
-  protected get svgInnerHTML(): string | null {
-    if (this._svgInnerHTML === undefined) {
-      if (this.svgElement === null) {
-        // the svg element resolved to null, mark this null too
-        this._svgInnerHTML = null;
-      } else {
-        this._svgInnerHTML = this.svgElement.innerHTML;
-      }
-    }
-
-    return this._svgInnerHTML;
-  }
-
-  protected get svgReactAttrs(): any | null {
-    if (this._svgReactAttrs === undefined) {
-      if (this.svgElement === null) {
-        // the svg element resolved to null, mark this null too
-        this._svgReactAttrs = null;
-      } else {
-        this._svgReactAttrs = getReactAttrs(this.svgElement, {
-          ignore: ['data-icon-id']
-        });
-      }
-    }
-
-    return this._svgReactAttrs;
-  }
-
   get svgstr(): string {
     return this._svgstr;
   }
@@ -437,15 +408,13 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
 
     // empty the svg parsing intermediates cache
     this._svgElement = undefined;
-    this._svgInnerHTML = undefined;
-    this._svgReactAttrs = undefined;
 
     // update icon elements created using .element method
     document
       .querySelectorAll(`[data-icon-id="${uuidOld}"]`)
       .forEach(oldSvgElement => {
         if (this.svgElement) {
-          oldSvgElement.replaceWith(this.svgElement.cloneNode(true));
+          oldSvgElement.replaceWith(Private.cloneSvgElement(this.svgElement));
         }
       });
 
@@ -469,7 +438,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
         }: LabIcon.IProps = { ...this._props, ...props };
 
         // set up component state via useState hook
-        const [, setId] = React.useState(this._uuid);
+        const [id, setId] = React.useState(this._uuid);
 
         // subscribe to svg replacement via useEffect hook
         React.useEffect(() => {
@@ -483,18 +452,33 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
           return () => {
             this._svgReplaced.disconnect(onSvgReplaced);
           };
-        });
+        }, []);
 
         // make it so that tag can be used as a jsx component
         const Tag = tag ?? React.Fragment;
 
-        // ensure that svg html is valid
-        if (!(this.svgInnerHTML && this.svgReactAttrs)) {
-          // bail if failing silently
+        const svgData = React.useMemo(() => {
+          // ensure that svg html is valid
+          if (!this.svgElement) {
+            // bail if failing silently
+            return null;
+          }
+
+          const svgElement = Private.cloneSvgElement(this.svgElement);
+          const svgReactAttrs = getReactAttrs(svgElement, {
+            ignore: ['data-icon-id']
+          });
+          return {
+            svgReactAttrs,
+            svgInnerHTML: svgElement.innerHTML
+          };
+        }, [id]);
+        if (!svgData) {
           return <></>;
         }
+        const { svgReactAttrs, svgInnerHTML } = svgData;
 
-        const svgProps = { ...this.svgReactAttrs };
+        const svgProps = { ...svgReactAttrs };
         if (!tag) {
           Object.assign(svgProps, {
             className:
@@ -509,9 +493,8 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
         const svgComponent = (
           <svg
             {...svgProps}
-            {...this.svgReactAttrs}
-            dangerouslySetInnerHTML={{ __html: this.svgInnerHTML }}
-            ref={ref}
+            dangerouslySetInnerHTML={{ __html: svgInnerHTML }}
+            ref={ref as React.Ref<SVGSVGElement>}
           />
         );
 
@@ -648,8 +631,6 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    *   - null: a valid, but empty, value
    */
   protected _svgElement: HTMLElement | null | undefined = undefined;
-  protected _svgInnerHTML: string | null | undefined = undefined;
-  protected _svgReactAttrs: any | null | undefined = undefined;
 }
 
 /**
@@ -768,6 +749,18 @@ export namespace LabIcon {
 }
 
 namespace Private {
+  const URL_ID_REFERENCE = /url\(\s*(['"]?)#([^\s'")]+)\1\s*\)/g;
+  const URL_ID_CANDIDATE = 'url(';
+  const ID_SELECTOR_REFERENCE_TEMPLATE = (id: string) =>
+    new RegExp(`(^|[\\s>+~,(])#${escapeRegExp(id)}(?=[\\s>+~,.:\\[{)])`, 'gm');
+  let idSuffixCounter = 0;
+
+  export function cloneSvgElement(svgElement: HTMLElement): HTMLElement {
+    const clone = svgElement.cloneNode(true) as HTMLElement;
+    uniquifySvgIds(clone);
+    return clone;
+  }
+
   export function blankElement({
     className = '',
     container,
@@ -883,6 +876,144 @@ namespace Private {
       const titleNode = document.createElement('title');
       titleNode.textContent = title;
       svgNode.appendChild(titleNode);
+    }
+  }
+
+  function uniquifySvgIds(svgNode: HTMLElement): void {
+    const idMap = new Map<string, string>();
+    idSuffixCounter =
+      idSuffixCounter >= Number.MAX_SAFE_INTEGER ? 1 : idSuffixCounter + 1;
+    const suffix = idSuffixCounter.toString(36);
+    let hasId = false;
+
+    walkSvgElements(svgNode, node => {
+      if (!node.hasAttribute('id')) {
+        return;
+      }
+      const id = node.getAttribute('id');
+      if (!id) {
+        return;
+      }
+      hasId = true;
+      let mapped = idMap.get(id);
+      if (!mapped) {
+        mapped = `${id}-${suffix}`;
+        idMap.set(id, mapped);
+      }
+      node.setAttribute('id', mapped);
+    });
+
+    if (!hasId) {
+      return;
+    }
+
+    walkSvgElements(svgNode, node => {
+      rewriteIdReferences(node, idMap);
+    });
+  }
+
+  function rewriteIdReferences(
+    node: Element,
+    idMap: Map<string, string>
+  ): void {
+    const attrs = node.attributes;
+    for (let i = 0; i < attrs.length; i++) {
+      const attr = attrs[i];
+      const name = attr.name;
+      const value = attr.value;
+
+      if (name === 'href' || name === 'xlink:href') {
+        if (value.startsWith('#')) {
+          const mapped = idMap.get(value.slice(1));
+          if (mapped) {
+            node.setAttribute(name, `#${mapped}`);
+          }
+        }
+        continue;
+      }
+
+      if (name === 'aria-labelledby' || name === 'aria-describedby') {
+        const nextValue = value
+          .split(/\s+/)
+          .filter(Boolean)
+          .map(id => idMap.get(id) ?? id)
+          .join(' ');
+        if (nextValue !== value) {
+          node.setAttribute(name, nextValue);
+        }
+        continue;
+      }
+
+      if (!value.includes(URL_ID_CANDIDATE)) {
+        continue;
+      }
+
+      const nextValue = replaceUrlIdReferences(value, idMap);
+
+      if (nextValue !== value) {
+        node.setAttribute(name, nextValue);
+      }
+    }
+
+    if (node.tagName.toLowerCase() === 'style') {
+      const styleText = node.textContent;
+      if (!styleText) {
+        return;
+      }
+
+      let nextStyleText = styleText;
+      if (styleText.includes(URL_ID_CANDIDATE)) {
+        nextStyleText = replaceUrlIdReferences(nextStyleText, idMap);
+      }
+      if (nextStyleText.includes('#')) {
+        nextStyleText = replaceStyleIdSelectors(nextStyleText, idMap);
+      }
+
+      if (nextStyleText !== styleText) {
+        node.textContent = nextStyleText;
+      }
+    }
+  }
+
+  function replaceUrlIdReferences(
+    text: string,
+    idMap: Map<string, string>
+  ): string {
+    return text.replace(URL_ID_REFERENCE, (full, quote, id) => {
+      const mapped = idMap.get(id);
+      return mapped ? `url(${quote}#${mapped}${quote})` : full;
+    });
+  }
+
+  function replaceStyleIdSelectors(
+    styleText: string,
+    idMap: Map<string, string>
+  ): string {
+    let nextStyleText = styleText;
+    idMap.forEach((mapped, id) => {
+      nextStyleText = nextStyleText.replace(
+        ID_SELECTOR_REFERENCE_TEMPLATE(id),
+        `$1#${mapped}`
+      );
+    });
+    return nextStyleText;
+  }
+
+  function escapeRegExp(text: string): string {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function walkSvgElements(
+    svgNode: HTMLElement,
+    onElement: (node: Element) => void
+  ): void {
+    onElement(svgNode);
+
+    const walker = document.createTreeWalker(svgNode, NodeFilter.SHOW_ELEMENT);
+    let node = walker.nextNode();
+    while (node) {
+      onElement(node as Element);
+      node = walker.nextNode();
     }
   }
 
