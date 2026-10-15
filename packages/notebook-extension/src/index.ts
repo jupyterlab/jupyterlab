@@ -4787,7 +4787,8 @@ function addCommands(
         return sessionDialogs.selectKernel(current.context.sessionContext);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker) && !isKernelLocked(),
+    isEnabled: () =>
+      isEnabled() && !Private.isViewOnly(tracker) && !isKernelLocked(),
     isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
