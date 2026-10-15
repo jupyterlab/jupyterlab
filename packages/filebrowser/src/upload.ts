@@ -61,6 +61,9 @@ export class Uploader extends ToolbarButton {
         this._filesUploaded.emit(models);
       })
       .catch(error => {
+        if (error?.name === 'UploadCancelledError') {
+          return;
+        }
         void showErrorMessage(
           this._trans._p('showErrorMessage', 'Upload Error'),
           error
