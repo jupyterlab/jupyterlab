@@ -7,6 +7,10 @@
 
 export { Debugger } from './debugger';
 
+export { DebuggerCompletionProvider } from './completionprovider';
+
+export { DebuggerIPythonCompletionProvider } from './ipythoncompletionprovider';
+
 export { DebuggerDisplayRegistry } from './displayregistry';
 
 export {
