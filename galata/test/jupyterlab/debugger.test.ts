@@ -336,6 +336,9 @@ test.describe.serial('Debugger', () => {
 
         await page.debugger.waitForVariables();
         const variablesPanel = await page.debugger.getVariablesPanelLocator();
+        // The panel shows the variables defined before the run until those
+        // of the stopped frame, which include `a`, are loaded.
+        await variablesPanel.getByRole('treeitem', { name: `a:` }).waitFor();
         const variablesBox = await variablesPanel.boundingBox();
 
         if (!c.expectSourcesPanel) {
