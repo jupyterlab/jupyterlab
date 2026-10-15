@@ -76,10 +76,8 @@ Pypi = "https://pypi.org/project/jupyterlab"
 [project.optional-dependencies]
 docs-screenshots = [
     # Freeze the packages to ensure consistent look and feel
-    # IPython is frozen because its version is displayed in
-    # the console header
     "altair==6.0.0",
-    "ipython==8.16.1",
+    "ipython>=9.11",
     "ipywidgets==8.1.5",
     "jupyterlab-geojson==3.4.0",
     "jupyterlab-language-pack-zh-CN==4.3.post1",
