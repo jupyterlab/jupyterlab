@@ -2710,6 +2710,9 @@ describe('@jupyterlab/notebook', () => {
           );
           await executionStarted;
 
+          // The cell is marked running before the kernel receives the request.
+          await waitForStreamOutput(cell, 1);
+
           // Split the first cell
           const editor = cell.editor as CodeEditor.IEditor;
           widget.activeCellIndex = 0;
@@ -2742,10 +2745,8 @@ describe('@jupyterlab/notebook', () => {
           expect(kernel).toBeTruthy();
 
           if (interrupt) {
-            const statusChanged = signalToPromise(kernel!.statusChanged);
             await kernel!.interrupt();
-            await statusChanged;
-            await executionCompleted.catch(() => false);
+            expect(await executionCompleted).toBe(false);
             expect(mergedCell.model.sharedModel.executionState).toBe('idle');
           }
 
@@ -2767,7 +2768,14 @@ describe('@jupyterlab/notebook', () => {
           if (!interrupt) {
             const secondCellAfterUndo = widget.widgets[1] as CodeCell;
             // Verify output keeps arriving in the reconnected cell.
-            await signalToPromise(secondCellAfterUndo.outputArea.model.changed);
+            const previousOutput =
+              (secondCellAfterUndo.outputArea.model.get(0)?.data[
+                STDOUT_TYPE
+              ] as string) ?? '';
+            await waitForStreamOutput(
+              secondCellAfterUndo,
+              previousOutput.length + 1
+            );
             const output = secondCellAfterUndo.outputArea.model.get(0);
 
             const finalOutput = '0\n1\n2\n3\n4\n';
