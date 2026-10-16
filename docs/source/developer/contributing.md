@@ -1159,21 +1159,6 @@ preparing them:
   resolution, non-hidpi) and use a screen capture utility of your
   choice to capture just the browser viewport.
 
-  The Code Consoles creation video can be regenerated with Galata. After
-  [setting up and starting the UI test server](https://github.com/jupyterlab/jupyterlab/blob/main/galata/README.md#launch-jupyterlab),
-  run the following from the `galata` directory, choosing an output folder
-  outside the checkout:
-
-  ```bash
-  GALATA_SCREENCAST_DIR=/path/to/videos jlpm test test/documentation/code_console.test.ts --project=documentation --workers=1
-  ```
-
-  This writes `code_console_create.webm` at 1280x720 with a visible cursor
-  and captions. The test also checks that the console is ready to accept
-  input. Omit `GALATA_SCREENCAST_DIR` to run these checks without recording.
-  Keep the movie outside `galata/test-results`, where passing test output
-  is deleted, and publish it using the movie instructions below.
-
 - For PNGs, reduce their size using `pngquant --speed 1 <filename>`.
   The resulting filename will have `-fs8` appended, so make sure to
   rename it and use the resulting file. Commit the optimized png file
