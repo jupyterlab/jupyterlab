@@ -3,6 +3,7 @@
 
 import type { SessionContext, ToolbarRegistry } from '@jupyterlab/apputils';
 import {
+  createDefaultFactory,
   createToolbarFactory,
   SessionContextDialogs,
   Toolbar,
@@ -13,6 +14,7 @@ import { SettingRegistry } from '@jupyterlab/settingregistry';
 import type { IDataConnector } from '@jupyterlab/statedb';
 import { framePromise, JupyterServer } from '@jupyterlab/testing';
 import type { ITranslator } from '@jupyterlab/translation';
+import { CommandRegistry } from '@lumino/commands';
 import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
@@ -627,6 +629,59 @@ describe('@jupyterlab/apputils', () => {
       toolbarRegistry.addFactory(factoryName, 'test', itemFactory);
       expect(toolbar).toHaveLength(1);
       expect(toolbar.get(0).widget.node.textContent).toContain(textContent);
+    });
+  });
+
+  describe('createDefaultFactory', () => {
+    it('includes widgetId in command toolbar button args', () => {
+      const commands = new CommandRegistry();
+      commands.addCommand('my-cmd', { execute: () => null });
+
+      const widget = new Widget();
+      widget.id = 'my-widget-id';
+
+      // CommandToolbarButton calls commands.isVisible(id, args) in its
+      // constructor, so spying lets us verify the args it was given.
+      const isVisibleSpy = jest.spyOn(commands, 'isVisible');
+
+      const factory = createDefaultFactory(commands);
+      factory('factoryName', widget, {
+        name: 'my-item',
+        type: 'command',
+        command: 'my-cmd'
+      });
+
+      expect(isVisibleSpy).toHaveBeenCalledWith(
+        'my-cmd',
+        expect.objectContaining({ toolbar: true, widgetId: 'my-widget-id' })
+      );
+    });
+
+    it('merges extra toolbarItem args while preserving toolbar and widgetId', () => {
+      const commands = new CommandRegistry();
+      commands.addCommand('my-cmd', { execute: () => null });
+
+      const widget = new Widget();
+      widget.id = 'my-widget-id';
+
+      const isVisibleSpy = jest.spyOn(commands, 'isVisible');
+
+      const factory = createDefaultFactory(commands);
+      factory('factoryName', widget, {
+        name: 'my-item',
+        type: 'command',
+        command: 'my-cmd',
+        args: { extra: 'value' }
+      });
+
+      expect(isVisibleSpy).toHaveBeenCalledWith(
+        'my-cmd',
+        expect.objectContaining({
+          toolbar: true,
+          widgetId: 'my-widget-id',
+          extra: 'value'
+        })
+      );
     });
   });
 });
