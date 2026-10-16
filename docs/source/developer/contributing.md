@@ -35,9 +35,8 @@ volunteered) and open a pull request with proposed implementation.
 If you are not certain about the implementation, using draft pull requests is encouraged.
 
 If you believe you've found a security vulnerability in JupyterLab or
-any Jupyter project, please report it to [security@ipython.org](mailto:security@ipython.org). If you
-prefer to encrypt your security reports, you can use [this PGP public
-key](https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipython_security.asc).
+any Jupyter project, please report it as described in the
+[security policy](https://github.com/jupyterlab/jupyterlab/security/policy).
 
 ```{toctree}
 :hidden: true
@@ -589,7 +588,8 @@ must be delayed on minor or major versions.
 
 ## Performance Testing
 
-Benchmark of JupyterLab is done using Playwright. The actions measured are:
+JupyterLab performance benchmarks are implemented with Playwright. The actions
+measured are:
 
 - Opening a file
 - Switching from the file to a simple text file
@@ -598,15 +598,8 @@ Benchmark of JupyterLab is done using Playwright. The actions measured are:
 
 Two files are tested: a notebook with many code cells and another with many markdown cells.
 
-The test is run on the CI by comparing the result in the commit at which a PR branch started and the PR branch head on
-the same CI job to ensure using the same hardware.
-The benchmark job is triggered on:
-
-- Approved PR review
-- PR review that contains the sentence `please run benchmark`
-
-The tests are located in the subfolder `galata/test/benchmark`. And they can be
-executed with the following command:
+The tests are located in the subfolder `galata/test/benchmark`. They can be
+executed locally with the following command:
 
 ```bash
 jlpm test:benchmark
@@ -622,6 +615,19 @@ A special report will be generated in the folder `benchmark-results` that will c
 The reference, tagged _expected_, is stored in `lab-benchmark-expected.json`. It can be
 created using the `-u` option of Playwright; i.e. `jlpm test:benchmark -u`.
 
+Branch comparisons can be run from the
+[jupyterlab/benchmarks](https://github.com/jupyterlab/benchmarks/#readme)
+repository, which runs the challenger and reference branches on the same CI
+hardware.
+
+Memory leak regression tests live in the subfolder `galata/test/memory-leak`.
+They run in the Galata CI workflow as a Chromium-only project with one worker for
+deterministic object counts, and can be executed locally with:
+
+```bash
+jlpm test:memory-leak
+```
+
 ### Benchmark parameters
 
 The benchmark can be customized using the following environment variables:
@@ -629,9 +635,6 @@ The benchmark can be customized using the following environment variables:
 - `BENCHMARK_NUMBER_SAMPLES`: Number of samples to compute the execution time distribution; default 20.
 - `BENCHMARK_OUTPUTFILE`: Benchmark result output file; default `benchmark.json`. It is overridden in the `playwright-benchmark.config.js`.
 - `BENCHMARK_REFERENCE`: Reference name of the data; default is `actual` for current data and `expected` for the reference.
-
-More tests can be carried out manually on JupyterLab branches and run weekly on the default branch in
-[jupyterlab/benchmarks](https://github.com/jupyterlab/benchmarks/#readme) repository.
 
 ## Visual Regression and UI Tests
 
@@ -667,7 +670,7 @@ Main reasons for UI test failures are:
 
    If your code change is introducing an update to UI which causes existing UI Tests to
    fail, then you will need to update reference image(s) (and/or JSON snapshots) for the failing tests.
-   In order to do that, you can post a comment on your PR with the following content:
+   In order to do that, you can post a top-level comment on your PR with the following content:
    - (bot) `please open PR to update snapshots` - A bot will open a PR updating all snapshots
      generated in the most recent run of CI from your branch.
 
@@ -707,8 +710,10 @@ Here are some good practices to follow when writing integration tests:
 
 - Don't compare multiple screenshots in the same test, unless using `expect.soft`;
   if the first comparison breaks, it will require multiple re-runs of CI workflow to update all snapshots.
-- Don't include more UI elements than necessary, as that increases review burden when elements other than
-  the one tested change - reviewing hundreds of unrelated snapshots is exhausting and error-prone.
+- Crop the screenshot to the smallest area that still shows a reviewer the tested element in context.
+  Each extra UI element makes the test fail when that element changes. Reviewing hundreds of
+  unrelated snapshots is exhausting and error-prone. If the crop is too tight, the reviewer cannot
+  tell what the screenshot shows, or where the tested element is in the interface.
 - When cropping snapshots, prefer retrieving the required dimensions programmatically over hard-coding them.
 - Always use `toMatchSnapshot()` for comparing snapshots; do not implement custom logic reading/writing snapshots.
 - Do not use `waitForTimeout()` as this slows down tests and makes them flaky when CI runs slower than expected.
@@ -1051,7 +1056,7 @@ The key utility is `jlpm integrity`, which ensures the integrity
 of the packages in the repo. It will:
 
 - Ensure the core package version dependencies match everywhere.
-- Ensure imported packages match dependencies.
+- Ensure imported packages match dependencies, counting dynamic `import()` calls as imports.
 - Ensure a consistent version of all packages.
 - Manage the meta package.
 

@@ -65,7 +65,7 @@ and `deleteMetadata` (see {ts:class}`notebook.NotebookModel`
 and {ts:class}`cells.CellModel`).
 You can listen for changes in the metadata through the `sharedModel.metadataChanged` attribute
 (see [cell shared model](https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedBaseCell.html#metadataChanged)
-and [notebook shared model](https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedNotebook-1.html#metadataChanged)).
+and [notebook shared model](https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedNotebook.html#metadataChanged)).
 
 ### Notebook widget
 
