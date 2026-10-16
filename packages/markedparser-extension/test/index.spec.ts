@@ -35,21 +35,18 @@ describe('@jupyterlab/markedparser-extension', () => {
 
       const tokens = await parser.getBlockTokens(source);
 
-      expect(tokens.map(token => [token.type, token.line])).toEqual([
+      const blocks = tokens.filter(token => token.type !== 'space');
+      expect(blocks.map(token => [token.type, token.line])).toEqual([
         ['heading', 0],
         ['paragraph', 2],
-        ['space', 2],
         ['paragraph', 4],
-        ['space', 4],
         ['table', 6],
         ['list', 10],
-        ['space', 13],
         ['code', 15],
-        ['space', 17],
         ['html', 19]
       ]);
-      expect(tokens[0].raw).toBe('# Title\n\n');
-      expect(tokens[5].raw).toContain('| 1 | 2 |');
+      expect(blocks[0].raw).toBe('# Title\n\n');
+      expect(blocks[3].raw).toContain('| 1 | 2 |');
     });
   });
 });

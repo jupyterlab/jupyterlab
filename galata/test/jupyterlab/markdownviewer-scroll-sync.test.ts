@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, test } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
 import type { JSHandle, Page } from '@playwright/test';
 
 const MARKDOWN_FILE = 'markdown-scroll-sync.md';
@@ -25,10 +25,11 @@ interface IEditor {
     state: {
       doc: {
         length: number;
-        line(n: number): { from: number };
+        line(n: number): { from: number; to: number };
         lineAt(pos: number): { number: number };
       };
     };
+    dispatch(spec: { changes: { from: number; insert: string } }): void;
     lineBlockAt(pos: number): { top: number; bottom: number; height: number };
     lineBlockAtHeight(height: number): {
       from: number;
@@ -40,17 +41,7 @@ interface IEditor {
 
 test.describe('Markdown preview scroll sync', () => {
   test.beforeEach(async ({ page, tmpPath }) => {
-    await page.contents.uploadContent(
-      tallSvg(),
-      'text',
-      `${tmpPath}/${TALL_IMAGE_FILE}`
-    );
-    await page.contents.uploadContent(
-      markdownSource(),
-      'text',
-      `${tmpPath}/${MARKDOWN_FILE}`
-    );
-    await openEditorAndPreview(page, `${tmpPath}/${MARKDOWN_FILE}`);
+    await openEditorAndPreview(page, tmpPath);
 
     const syncButton = page.locator(SYNC_BUTTON_SELECTOR);
     await syncButton.click();
@@ -106,9 +97,114 @@ test.describe('Markdown preview scroll sync', () => {
       .poll(() => editorLastLineBottomOffset(page, path))
       .toBeCloseTo(0, -1);
   });
+
+  test('keeps the editor in place when the preview re-renders', async ({
+    page,
+    tmpPath
+  }) => {
+    const path = `${tmpPath}/${MARKDOWN_FILE}`;
+    // Near the end, so that the shorter render clamps the preview offset.
+    const line = lineOf('Filler paragraph 60.');
+    await scrollEditorToLine(page, path, line);
+    const editor = await fileEditor(page, path);
+    await editor.evaluate(({ editor: view }, line) => {
+      const { to } = view.state.doc.line(line + 1);
+      view.dispatch({ changes: { from: to, insert: ' Edited.' } });
+    }, line);
+    // The render reloads the image, which has no height until it is loaded.
+    await page.locator(PREVIEW_SELECTOR).getByText('Edited.').waitFor();
+    await waitForImage(page);
+    await nextFrames(page);
+    expect(await editorTopLine(page, path)).toBeCloseTo(line, 1);
+  });
+
+  test('keeps the editor in place when the preview is shown again', async ({
+    page,
+    tmpPath
+  }) => {
+    const path = `${tmpPath}/${MARKDOWN_FILE}`;
+    // Below the image, so that scroll anchoring would shift the preview.
+    await scrollEditorToLine(page, path, lineOf(AFTER_TABLE));
+    await expectPreviewBlockAtTop(page, AFTER_TABLE);
+    // Hide the preview behind another tab while the editor scrolls.
+    const previewId = await page.evaluate(async image => {
+      const app = window.jupyterapp;
+      const preview = Array.from(app.shell.widgets('main')).find(widget =>
+        widget.node.querySelector('.jp-MarkdownViewer')
+      )!;
+      await app.commands.execute('docmanager:open', {
+        path: image,
+        factory: 'Image',
+        options: { mode: 'tab-after', ref: preview.id }
+      });
+      return preview.id;
+    }, `${tmpPath}/${TALL_IMAGE_FILE}`);
+    await expect(page.locator(PREVIEW_SELECTOR)).toBeHidden();
+    await scrollEditorToLine(page, path, lineOf(AFTER_IMAGE));
+
+    await page.evaluate(
+      id => window.jupyterapp.shell.activateById(id),
+      previewId
+    );
+    await expect(page.locator(PREVIEW_SELECTOR)).toBeVisible();
+    await nextFrames(page);
+    expect(await editorTopLine(page, path)).toBeCloseTo(lineOf(AFTER_IMAGE), 1);
+  });
+
+  test('stops following the editor once turned off', async ({
+    page,
+    tmpPath
+  }) => {
+    const syncButton = page.locator(SYNC_BUTTON_SELECTOR);
+    await syncButton.click();
+    await expect(syncButton).toHaveAttribute('aria-pressed', 'false');
+    const path = `${tmpPath}/${MARKDOWN_FILE}`;
+    await scrollEditorToLine(page, path, lineOf(AFTER_TABLE));
+    expect(await previewScrollTop(page)).toBe(0);
+    await expect(page.locator(PREVIEW_SELECTOR)).toHaveCSS(
+      'overflow-anchor',
+      'auto'
+    );
+  });
 });
 
-async function openEditorAndPreview(page: Page, path: string): Promise<void> {
+test.describe('Markdown preview scroll sync setting', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/markdownviewer-extension:plugin': { syncScrolling: true }
+    }
+  });
+
+  test('synchronizes new previews', async ({ page, tmpPath }) => {
+    await openEditorAndPreview(page, tmpPath);
+    await expect(page.locator(SYNC_BUTTON_SELECTOR)).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    const path = `${tmpPath}/${MARKDOWN_FILE}`;
+    await scrollEditorToLine(page, path, lineOf(AFTER_TABLE));
+    await expectPreviewBlockAtTop(page, AFTER_TABLE);
+  });
+});
+
+/**
+ * Upload the test files and open the editor with its preview on the right.
+ */
+async function openEditorAndPreview(
+  page: Page,
+  tmpPath: string
+): Promise<void> {
+  await page.contents.uploadContent(
+    tallSvg(),
+    'text',
+    `${tmpPath}/${TALL_IMAGE_FILE}`
+  );
+  await page.contents.uploadContent(
+    markdownSource(),
+    'text',
+    `${tmpPath}/${MARKDOWN_FILE}`
+  );
   await page.evaluate(async path => {
     const app = window.jupyterapp;
     await app.commands.execute('docmanager:open', {
@@ -122,15 +218,32 @@ async function openEditorAndPreview(page: Page, path: string): Promise<void> {
         mode: 'split-right'
       }
     });
-  }, path);
+  }, `${tmpPath}/${MARKDOWN_FILE}`);
 
   await page.locator('.jp-FileEditor .cm-scroller').waitFor();
   await page.locator(PREVIEW_SELECTOR).getByText(AFTER_TABLE).waitFor();
-  // The image only gets its height once loaded.
+  await waitForImage(page);
+}
+
+/**
+ * Wait for the image of the preview to be loaded, which gives it its height.
+ */
+async function waitForImage(page: Page): Promise<void> {
   await page.waitForFunction(selector => {
     const image = document.querySelector<HTMLImageElement>(`${selector} img`);
     return image?.complete && image.naturalHeight > 0;
   }, PREVIEW_SELECTOR);
+}
+
+/**
+ * Wait for the pending scroll events to be handled.
+ */
+async function nextFrames(page: Page): Promise<void> {
+  for (let i = 0; i < 5; i++) {
+    await page.evaluate(
+      () => new Promise(resolve => requestAnimationFrame(resolve))
+    );
+  }
 }
 
 /**
@@ -171,9 +284,8 @@ async function scrollEditorToLine(
   line: number
 ): Promise<void> {
   const editor = await fileEditor(page, path);
-  // Reveal the line first so that CodeMirror measures it, then remove the
-  // small margin it leaves above the line, until CodeMirror stops adjusting
-  // the scroll position.
+  // Reveal the line so that CodeMirror measures it, then remove the small
+  // margin it leaves above the line.
   await editor.evaluate((editor, line) => {
     editor.revealPosition({ line, column: 0 }, { block: 'start' });
   }, line);
@@ -187,9 +299,7 @@ async function scrollEditorToLine(
           block.top -
           view.scrollDOM.getBoundingClientRect().top;
       }, line);
-      await page.evaluate(
-        () => new Promise(resolve => requestAnimationFrame(resolve))
-      );
+      await nextFrames(page);
       return editorTopLine(page, path);
     })
     .toBeCloseTo(line, 1);
@@ -253,11 +363,9 @@ async function scrollPreviewToBlock(page: Page, text: string): Promise<void> {
 }
 
 /**
- * Expect a rendered paragraph to be aligned with the top of the preview.
- *
- * The editor scroll offset is a whole number of pixels, so the source line at
- * its top is off by up to a few hundredths of a line, which the tall image
- * block amplifies to a few pixels.
+ * Expect a rendered paragraph at the top of the preview. The editor offset is
+ * a whole number of pixels, so its top line can be off by a few hundredths of
+ * a line, which the tall image block amplifies to a few pixels.
  */
 async function expectPreviewBlockAtTop(
   page: Page,
@@ -297,6 +405,9 @@ function markdownSource(): string {
   ).join('\n\n');
 
   return [
+    '---',
+    'title: Scroll sync',
+    '---',
     '# Start',
     '',
     'Intro paragraph.',

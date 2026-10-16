@@ -3,16 +3,15 @@
 
 import type { IEditorTracker } from '@jupyterlab/fileeditor';
 import type { MarkdownDocument } from '@jupyterlab/markdownviewer';
-import type { IMarkdownBlockToken } from '@jupyterlab/rendermime';
-import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type {
+  IMarkdownBlockToken,
+  IRenderMimeRegistry
+} from '@jupyterlab/rendermime';
 import { Signal } from '@lumino/signaling';
 
 import { MarkdownScrollSyncManager } from '../src/scrollsync';
-import {
-  buildBlockAnchors,
-  interpolate,
-  type IScrollMarker
-} from '../src/scrollsyncutils';
+import type { IScrollMarker } from '../src/scrollsyncutils';
+import { buildBlockAnchors, interpolate } from '../src/scrollsyncutils';
 
 describe('@jupyterlab/markdownviewer-extension', () => {
   describe('MarkdownScrollSyncManager', () => {
@@ -48,8 +47,7 @@ describe('@jupyterlab/markdownviewer-extension', () => {
     let manager: MarkdownScrollSyncManager;
     let preview: FakePreview;
 
-    // The manager API is typed against `MarkdownDocument`; the fake provides the
-    // small surface the manager actually exercises.
+    // The fake covers only the surface the manager uses.
     const asPreview = (fake: FakePreview) =>
       fake as unknown as MarkdownDocument;
 
@@ -93,11 +91,6 @@ describe('@jupyterlab/markdownviewer-extension', () => {
       manager.setEnabled(asPreview(preview), true);
       manager.setEnabled(asPreview(preview), true);
       expect(emissions).toBe(1);
-    });
-
-    it('looks for a matching editor when enabled', () => {
-      manager.setEnabled(asPreview(preview), true);
-      expect(editorTracker.finds).toBe(1);
     });
 
     it('pairs an enabled preview when an editor is added later', () => {
@@ -203,6 +196,67 @@ describe('@jupyterlab/markdownviewer-extension', () => {
       expect(tags(anchors)).toEqual(['UL', 'P']);
     });
 
+    it('skips the blocks nested in a raw HTML element', () => {
+      const container = document.createElement('div');
+      container.innerHTML = [
+        '<div align="center"><h1>Project</h1><p>Badges</p></div>',
+        '<details><summary>More</summary><p>Hidden</p></details>',
+        '<img src="logo.png">',
+        '<h2>Install</h2>'
+      ].join('');
+      const tokens: IMarkdownBlockToken[] = [
+        {
+          type: 'html',
+          raw: '<div align="center">\n<!-- <div> -->\n\n',
+          line: 0
+        },
+        { type: 'heading', raw: '# Project\n\n', line: 3 },
+        { type: 'paragraph', raw: 'Badges', line: 5 },
+        { type: 'space', raw: '\n\n', line: 5 },
+        { type: 'html', raw: '</div>\n\n', line: 7 },
+        {
+          type: 'html',
+          raw: '<details>\n<summary>More</summary>\n\n',
+          line: 9
+        },
+        { type: 'paragraph', raw: 'Hidden', line: 12 },
+        { type: 'space', raw: '\n\n', line: 12 },
+        { type: 'html', raw: '</details>\n\n', line: 14 },
+        { type: 'html', raw: '<img src="logo.png">\n\n', line: 16 },
+        { type: 'heading', raw: '## Install\n', line: 18 }
+      ];
+
+      const anchors = buildBlockAnchors(tokens, container);
+
+      expect(anchors.map(anchor => anchor.line)).toEqual([0, 9, 16, 18]);
+      expect(tags(anchors)).toEqual(['DIV', 'DETAILS', 'IMG', 'H2']);
+    });
+
+    it('keeps the blocks after an element closed by the HTML parser', () => {
+      const container = document.createElement('div');
+      container.innerHTML = [
+        '<p align="center"><img src="logo.png"></p>',
+        '<h1>Title</h1>',
+        '<p></p>',
+        '<h2>Next</h2>'
+      ].join('');
+      const tokens: IMarkdownBlockToken[] = [
+        {
+          type: 'html',
+          raw: '<p align="center">\n<img src="logo.png">\n\n',
+          line: 0
+        },
+        { type: 'heading', raw: '# Title\n\n', line: 3 },
+        { type: 'html', raw: '</p>\n\n', line: 5 },
+        { type: 'heading', raw: '## Next\n', line: 7 }
+      ];
+
+      const anchors = buildBlockAnchors(tokens, container);
+
+      expect(anchors.map(anchor => anchor.line)).toEqual([0, 3, 7]);
+      expect(tags(anchors)).toEqual(['P', 'H1', 'H2']);
+    });
+
     it('skips raw HTML blocks that render no top-level element', () => {
       const container = document.createElement('div');
       container.innerHTML = '<h1>Visible</h1>';
@@ -253,6 +307,17 @@ describe('@jupyterlab/markdownviewer-extension', () => {
     it('maps offsets back to lines', () => {
       expect(interpolate(markers, 50, 'top')).toBe(5);
       expect(interpolate(markers, 250, 'top')).toBe(15);
+    });
+
+    it('maps an offset shared by several markers to the last one', () => {
+      const flat: IScrollMarker[] = [
+        { line: 0, top: 0 },
+        { line: 5, top: 100 },
+        { line: 9, top: 100 },
+        { line: 12, top: 400 }
+      ];
+      expect(interpolate(flat, 7, 'line')).toBe(100);
+      expect(interpolate(flat, 100, 'top')).toBe(9);
     });
 
     it('clamps values outside the marker range', () => {

@@ -3,7 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-/* Accent the scroll synchronization button while it is active. */
 .jp-MarkdownViewer-syncButton[aria-pressed='true'] .jp-icon3[fill] {
   fill: var(--jp-brand-color1);
 }

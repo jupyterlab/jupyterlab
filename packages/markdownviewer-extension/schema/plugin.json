@@ -80,7 +80,7 @@
     },
     "syncScrolling": {
       "title": "Synchronize Scrolling",
-      "description": "Whether to synchronize scrolling between a Markdown source editor and its preview.\nWhen enabled, scrolling either the editor or the preview scrolls the other to the matching location.\nThis is the default for newly opened previews; use the toolbar button in a preview to toggle synchronization for that preview without changing this setting.",
+      "description": "Whether a Markdown preview scrolls in sync with its source editor.\nThe sync button in the toolbar of a preview toggles this for that preview only.",
       "$ref": "#/definitions/syncScrolling",
       "default": false
     }

@@ -33,10 +33,11 @@ import {
 } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITableOfContentsRegistry } from '@jupyterlab/toc';
-import { ITranslator, type TranslationBundle } from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator } from '@jupyterlab/translation';
 import { linkIcon, ToolbarButton } from '@jupyterlab/ui-components';
-import { MarkdownScrollSyncManager } from './scrollsync';
 
+import { MarkdownScrollSyncManager } from './scrollsync';
 import { markdownViewerSearchProviderFactory } from './searchprovider';
 
 /**
@@ -108,18 +109,13 @@ function activate(
   }
 
   const scrollSync = editorTracker
-    ? new MarkdownScrollSyncManager({
-        editorTracker,
-        rendermime
-      })
+    ? new MarkdownScrollSyncManager({ editorTracker, rendermime })
     : null;
 
   let config: Partial<MarkdownViewer.IConfig> = {
     ...MarkdownViewer.defaultConfig
   };
 
-  // The setting only seeds new previews; the toolbar button overrides it per
-  // preview.
   let syncScrollingDefault = false;
 
   /**
@@ -356,13 +352,9 @@ function createSyncScrollingButton(
   });
 
   // The setting can toggle the preview too.
-  const onEnabledChanged = () => {
+  scrollSync.enabledChanged.connect(() => {
     button.pressed = scrollSync.isEnabled(preview);
-  };
-  scrollSync.enabledChanged.connect(onEnabledChanged);
-  button.disposed.connect(() => {
-    scrollSync.enabledChanged.disconnect(onEnabledChanged);
-  });
+  }, button);
 
   return button;
 }

@@ -39,8 +39,7 @@ export class MarkdownViewer extends Widget {
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this.renderer = options.renderer;
-    // Keyboard scrolling only reaches the focused node, which must be the
-    // scrollable rendered content rather than this widget.
+    // Keyboard scrolling needs the focus on the scrolling node itself.
     this.renderer.node.tabIndex = 0;
     this.addClass(MARKDOWNVIEWER_CLASS);
 

@@ -4,7 +4,7 @@
 import { EditorView } from '@codemirror/view';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import type { IDocumentWidget } from '@jupyterlab/docregistry';
-import type { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
+import type { IEditorTracker } from '@jupyterlab/fileeditor';
 import type { MarkdownDocument } from '@jupyterlab/markdownviewer';
 import type {
   IMarkdownParser,
@@ -13,12 +13,9 @@ import type {
 import type { IDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
-import {
-  buildBlockAnchors,
-  type IAnchor,
-  interpolate,
-  type IScrollMarker
-} from './scrollsyncutils';
+
+import type { IAnchor, IScrollMarker } from './scrollsyncutils';
+import { buildBlockAnchors, interpolate } from './scrollsyncutils';
 
 /**
  * Time (in milliseconds) during which the pane being driven cannot take over
@@ -89,7 +86,6 @@ export class MarkdownScrollSyncManager implements IDisposable {
       return;
     }
     this._isDisposed = true;
-    this._editorTracker.widgetAdded.disconnect(this._pairUnlinked, this);
     for (const preview of Array.from(this._links.keys())) {
       this._disable(preview);
     }
@@ -117,7 +113,7 @@ export class MarkdownScrollSyncManager implements IDisposable {
       return;
     }
     const pair = new Private.ScrollSyncPair({
-      editor,
+      view: editor.editor,
       editorWidget,
       previewWidget: preview,
       rendermime: this._rendermime
@@ -179,8 +175,8 @@ namespace Private {
    * The options used to initialize a `ScrollSyncPair`.
    */
   export interface IPairOptions {
-    editor: CodeMirrorEditor;
-    editorWidget: IDocumentWidget<FileEditor>;
+    view: EditorView;
+    editorWidget: IDocumentWidget;
     previewWidget: MarkdownDocument;
     rendermime: IRenderMimeRegistry;
   }
@@ -200,20 +196,31 @@ namespace Private {
      * Construct a new scroll sync pair.
      */
     constructor(options: IPairOptions) {
+      this._view = options.view;
       this._editorWidget = options.editorWidget;
       this._previewWidget = options.previewWidget;
       this._rendermime = options.rendermime;
-      this._editor = options.editor;
-      this._editorScroller = this._editor.editor.scrollDOM;
+      this._editorScroller = this._view.scrollDOM;
       this._previewScroller = this._previewWidget.content.renderer.node;
       this._expectedTop = {
         editor: this._editorScroller.scrollTop,
         preview: this._previewScroller.scrollTop
       };
 
+      // Scroll anchoring would turn preview layout shifts, such as images
+      // reloading after a render, into scroll events.
+      this._previewScroller.style.overflowAnchor = 'none';
+      this._previewObserver = new MutationObserver(() =>
+        this._onPreviewReplaced()
+      );
+      this._previewObserver.observe(this._previewScroller, {
+        childList: true,
+        subtree: true
+      });
+
       this._editorScroller.addEventListener('scroll', this);
       this._previewScroller.addEventListener('scroll', this);
-      this._previewWidget.content.rendered.connect(this._onRendered, this);
+      this._previewWidget.content.rendered.connect(this._rebuildAnchors, this);
       this._editorWidget.disposed.connect(this.dispose, this);
       this._previewWidget.disposed.connect(this.dispose, this);
       void this._rebuildAnchors();
@@ -243,9 +250,8 @@ namespace Private {
       this._isDisposed = true;
       this._editorScroller.removeEventListener('scroll', this);
       this._previewScroller.removeEventListener('scroll', this);
-      this._previewWidget.content.rendered.disconnect(this._onRendered, this);
-      this._editorWidget.disposed.disconnect(this.dispose, this);
-      this._previewWidget.disposed.disconnect(this.dispose, this);
+      this._previewScroller.style.overflowAnchor = '';
+      this._previewObserver.disconnect();
       window.clearTimeout(this._releaseTimer);
       this._disposed.emit();
       Signal.clearData(this);
@@ -256,31 +262,17 @@ namespace Private {
      */
     handleEvent(event: Event): void {
       // A hidden pane has no usable geometry.
-      if (
-        this._isDisposed ||
-        event.type !== 'scroll' ||
-        !this._editorWidget.isVisible ||
-        !this._previewWidget.isVisible
-      ) {
-        return;
+      if (this._editorWidget.isVisible && this._previewWidget.isVisible) {
+        this._onScroll(
+          event.currentTarget === this._editorScroller ? 'editor' : 'preview'
+        );
       }
-      if (event.currentTarget === this._editorScroller) {
-        this._onScroll('editor');
-      } else if (event.currentTarget === this._previewScroller) {
-        this._onScroll('preview');
-      }
-    }
-
-    private _onRendered(): void {
-      void this._rebuildAnchors();
     }
 
     /**
-     * Drive the other pane to match the pane that scrolled.
-     *
-     * Scrolls that merely restore a pane to its expected offset are ignored:
-     * this discards both the feedback from a sync we just performed and the
-     * offset restored by the browser when a hidden pane is shown again.
+     * Drive the other pane to match the pane that scrolled. A scroll to the
+     * expected offset is ignored: it is the echo of a sync, a pane shown again,
+     * or a preview offset clamped by a render.
      */
     private _onScroll(source: Pane): void {
       const scroller =
@@ -297,6 +289,21 @@ namespace Private {
         this._scrollPreviewToEditor();
       } else {
         this._scrollEditorToPreview();
+      }
+    }
+
+    /**
+     * Expect the preview offset when a render clamps it, such as while images
+     * have no height or math is typeset: that scroll is not a user scroll.
+     */
+    private _onPreviewReplaced(): void {
+      const { scrollTop, scrollHeight, clientHeight } = this._previewScroller;
+      if (
+        this._previewWidget.isVisible &&
+        scrollTop < this._expectedTop.preview &&
+        scrollTop >= scrollHeight - clientHeight - 1
+      ) {
+        this._expectedTop.preview = scrollTop;
       }
     }
 
@@ -321,8 +328,7 @@ namespace Private {
      * source blocks.
      */
     private async _rebuildAnchors(): Promise<void> {
-      // Anchors hold rendered elements, so a stale rebuild finishing late must
-      // not overwrite the anchors of a newer rendering pass.
+      // Tokens of an older source must not be paired with newer elements.
       const generation = ++this._anchorsGeneration;
       // The registry exposes the base parser type, without `getBlockTokens`.
       const parser: IMarkdownParser | null = this._rendermime.markdownParser;
@@ -351,7 +357,7 @@ namespace Private {
      * viewport when the editor scroller is at `scrollTop`.
      */
     private _editorLineAt(scrollTop: number): number {
-      const view = this._editor.editor;
+      const view = this._view;
       const scroller = this._editorScroller;
       // Translate the scroller offset into the document coordinate space used
       // by the CodeMirror height map.
@@ -363,34 +369,30 @@ namespace Private {
       const line = view.state.doc.lineAt(block.from).number - 1;
       const fraction =
         block.height > 0
-          ? Math.min(Math.max((docHeight - block.top) / block.height, 0), 0.999)
+          ? Math.min(Math.max((docHeight - block.top) / block.height, 0), 1)
           : 0;
       return line + fraction;
     }
 
     /**
-     * The gaps between a line block and the text box that `scrollIntoView`
-     * aligns, measured on a rendered line.
+     * The gap between a line block and the text box that `scrollIntoView`
+     * aligns, measured on a rendered line. The text box is centered in each
+     * row, so the gap below the last row is the same, give or take a pixel.
      */
-    private _textInset(): { top: number; bottom: number } {
-      const view = this._editor.editor;
+    private _textInset(): number {
+      const view = this._view;
       const pos = view.viewport.from;
       const coords = view.coordsAtPos(pos);
-      if (!coords) {
-        return { top: 0, bottom: 0 };
-      }
-      const block = view.lineBlockAt(pos);
-      const top = view.documentTop + block.top;
-      return {
-        top: coords.top - top,
-        bottom: top + block.height - coords.bottom
-      };
+      return coords
+        ? coords.top - view.documentTop - view.lineBlockAt(pos).top
+        : 0;
     }
 
     /**
-     * The strictly increasing scroll markers mapping source lines to preview
-     * offsets: the current anchors, bracketed by the start and end of both
-     * scroll ranges so that the panes reach their bottoms together.
+     * The scroll markers mapping source lines to preview offsets: the current
+     * anchors, bracketed by the start and end of both scroll ranges so that
+     * the panes reach their bottoms together. Lines strictly increase and
+     * offsets never decrease.
      */
     private _markers(): IScrollMarker[] {
       const editor = this._editorScroller;
@@ -398,12 +400,11 @@ namespace Private {
       const previewTop =
         preview.getBoundingClientRect().top - preview.scrollTop;
       const maxTop = Math.max(preview.scrollHeight - preview.clientHeight, 0);
-      // The editor may scroll past its last line (`scrollPastEnd` padding);
-      // both panes reach the end of their content together instead.
+      // Leave out the `scrollPastEnd` padding of the editor.
       const editorEnd =
         editor.scrollHeight -
         editor.clientHeight -
-        this._editor.editor.documentPadding.bottom;
+        this._view.documentPadding.bottom;
       const end: IScrollMarker = {
         line: this._editorLineAt(Math.max(editorEnd, 0)),
         top: maxTop
@@ -411,14 +412,16 @@ namespace Private {
       const markers: IScrollMarker[] = [{ line: 0, top: 0 }];
       for (const { line, element } of this._anchors) {
         const last = markers[markers.length - 1];
-        // Elements replaced by a newer rendering pass are skipped until the
-        // anchors are rebuilt.
-        if (!element.isConnected || line <= last.line || line >= end.line) {
+        // Elements without a layout box are hidden, or were replaced by a
+        // newer render.
+        if (
+          line <= last.line ||
+          line >= end.line ||
+          !element.getClientRects().length
+        ) {
           continue;
         }
         const top = element.getBoundingClientRect().top - previewTop;
-        // Keep offsets monotonic so that scrolling one pane never drives the
-        // other backwards.
         markers.push({ line, top: Math.min(Math.max(top, last.top), maxTop) });
       }
       if (end.line > markers[markers.length - 1].line) {
@@ -437,42 +440,46 @@ namespace Private {
       this._expectedTop.preview = this._previewScroller.scrollTop;
     }
 
+    /**
+     * Scroll the editor through CodeMirror, which measures the target lines
+     * first: lines far from the viewport only have estimated heights. It
+     * scrolls asynchronously, so the owner lock absorbs the echo.
+     */
     private _scrollEditorToPreview(): void {
       const markers = this._markers();
       if (markers.length < 2) {
         return;
       }
       const line = interpolate(markers, this._previewScroller.scrollTop, 'top');
-      const view = this._editor.editor;
+      const view = this._view;
       const doc = view.state.doc;
-      // Scrolling through CodeMirror lets it measure the target lines first;
-      // lines far from the viewport only have estimated heights. The end of the
-      // source is aligned with the bottom of the viewport, since the end marker
-      // line itself comes from those estimates.
+      const inset = this._textInset();
       let target;
+      // The end marker line is an estimate too, so the end of the source is
+      // aligned with the bottom of the viewport instead.
       if (line >= markers[markers.length - 1].line) {
         target = EditorView.scrollIntoView(doc.length, {
           y: 'end',
-          yMargin: this._textInset().bottom
+          yMargin: inset
         });
       } else {
-        const index = Math.min(Math.max(Math.floor(line), 0), doc.lines - 1);
+        const index = Math.min(Math.floor(line), doc.lines - 1);
         const block = view.lineBlockAt(doc.line(index + 1).from);
-        const fraction = Math.min(Math.max(line - index, 0), 1);
         target = EditorView.scrollIntoView(block.from, {
           y: 'start',
-          yMargin: this._textInset().top - fraction * block.height
+          yMargin: inset - (line - index) * block.height
         });
       }
       view.dispatch({ effects: target });
     }
 
-    private _editorWidget: IDocumentWidget<FileEditor>;
+    private _view: EditorView;
+    private _editorWidget: IDocumentWidget;
     private _previewWidget: MarkdownDocument;
     private _rendermime: IRenderMimeRegistry;
-    private _editor: CodeMirrorEditor;
     private _editorScroller: HTMLElement;
     private _previewScroller: HTMLElement;
+    private _previewObserver: MutationObserver;
     private _anchors: IAnchor[] = [];
     private _anchorsGeneration = 0;
     private _owner: Pane | null = null;

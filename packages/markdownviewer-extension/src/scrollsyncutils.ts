@@ -39,9 +39,7 @@ export function interpolate(
     const a = markers[i];
     const b = markers[i + 1];
     if (value < b[by]) {
-      const span = b[by] - a[by];
-      const fraction = span === 0 ? 0 : (value - a[by]) / span;
-      return a[to] + fraction * (b[to] - a[to]);
+      return a[to] + ((value - a[by]) / (b[by] - a[by])) * (b[to] - a[to]);
     }
   }
   return markers[markers.length - 1][to];
@@ -60,37 +58,67 @@ export function buildBlockAnchors(
   const anchors: IAnchor[] = [];
   let elementIndex = 0;
 
-  for (const token of tokens) {
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
     if (!rendersElement(token)) {
       continue;
     }
-
-    const index = findMatchingElement(token, elements, elementIndex);
-    if (index === -1) {
+    let index = elementIndex;
+    while (index < elements.length && !matchesElement(token, elements[index])) {
+      index++;
+    }
+    if (index === elements.length) {
       continue;
     }
-
-    anchors.push({
-      line: token.line + lineOffset,
-      element: elements[index]
-    });
+    anchors.push({ line: token.line + lineOffset, element: elements[index] });
     elementIndex = index + 1;
+    if (token.type === 'html') {
+      i = lastNestedToken(tokens, i, elements[index]);
+    }
   }
 
   return anchors;
 }
 
-function findMatchingElement(
-  token: IMarkdownBlockToken,
-  elements: Element[],
-  start: number
+/**
+ * The index of the last token nested in `element`, which renders the raw HTML
+ * block `tokens[start]`, or `start` if the next block is not nested in it or
+ * no html token closes it.
+ */
+function lastNestedToken(
+  tokens: IMarkdownBlockToken[],
+  start: number,
+  element: Element
 ): number {
-  for (let i = start; i < elements.length; i++) {
-    if (matchesElement(token, elements[i])) {
-      return i;
+  let next = start + 1;
+  while (next < tokens.length && !rendersElement(tokens[next])) {
+    next++;
+  }
+  // The HTML parser closes some elements, such as `<p>`, at the next
+  // block-level element.
+  if (
+    next === tokens.length ||
+    !Array.from(element.children).some(child =>
+      matchesElement(tokens[next], child)
+    )
+  ) {
+    return start;
+  }
+  const tag = element.tagName.toLowerCase();
+  const open = new RegExp(`<${tag}\\b`, 'gi');
+  const close = new RegExp(`</${tag}\\s*>`, 'gi');
+  let depth = 0;
+  for (let i = start; i < tokens.length; i++) {
+    if (tokens[i].type === 'html') {
+      const html = tokens[i].raw.replace(/<!--[\s\S]*?-->/g, '');
+      depth +=
+        (html.match(open)?.length ?? 0) - (html.match(close)?.length ?? 0);
+      if (depth <= 0) {
+        return i;
+      }
     }
   }
-  return -1;
+  return start;
 }
 
 function rendersElement(token: IMarkdownBlockToken): boolean {
@@ -111,8 +139,7 @@ function matchesElement(token: IMarkdownBlockToken, element: Element): boolean {
     case 'blockquote':
       return element.tagName === 'BLOCKQUOTE';
     case 'code':
-      // Fenced blocks are usually rendered as `<pre>`, but some languages are
-      // rendered by dedicated renderers, such as mermaid diagrams.
+      // Some languages have dedicated renderers, such as mermaid.
       return (
         element.tagName === 'PRE' ||
         element.classList.contains('jp-RenderedMermaid')
