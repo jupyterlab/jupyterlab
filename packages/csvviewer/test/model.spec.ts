@@ -382,6 +382,204 @@ describe('csvviewer/model', () => {
       ]);
     });
 
+    it('ignores leading comment rows when determining headers and columns', () => {
+      const d = new DSVModel({
+        data: `# metadata\n# units,date,lon,lat,value\ndate,lon,lat,value\n2020-01-01,-97.0,40,5.00\n`,
+        delimiter: ',',
+        comment: '#'
+      });
+      expect(d.rowCount('body')).toBe(3);
+      expect(d.columnCount('body')).toBe(4);
+      expect([0, 1, 2, 3].map(i => d.data('column-header', 0, i))).toEqual([
+        'date',
+        'lon',
+        'lat',
+        'value'
+      ]);
+      expect([0, 1, 2, 3].map(i => d.data('body', 0, i))).toEqual([
+        '# metadata',
+        '',
+        '',
+        ''
+      ]);
+      expect([0, 1, 2, 3].map(i => d.data('body', 1, i))).toEqual([
+        '# units',
+        'date',
+        'lon',
+        'lat,value'
+      ]);
+      expect([0, 1, 2, 3].map(i => d.data('body', 2, i))).toEqual([
+        '2020-01-01',
+        '-97.0',
+        '40',
+        '5.00'
+      ]);
+    });
+
+    it.each([false, true])(
+      'detects wider data rows with comments and quoteParser=%s',
+      async quoteParser => {
+        for (const initialRows of [3, 500]) {
+          for (const trailingNewline of ['', '\n']) {
+            const d = new DSVModel({
+              data:
+                '# metadata,extra,columns,ignored\na,b\n1,2\n3,4,5\n# trailing,extra,columns,ignored' +
+                trailingNewline,
+              delimiter: ',',
+              comment: '#',
+              quoteParser,
+              initialRows
+            });
+            expect(d.columnCount('body')).toBe(initialRows === 3 ? 2 : 3);
+            await d.ready;
+            expect(d.columnCount('body')).toBe(3);
+            expect(d.header).toEqual(['a', 'b', '']);
+            expect([0, 1, 2].map(c => d.data('body', 2, c))).toEqual([
+              '3',
+              '4',
+              '5'
+            ]);
+            expect(d.rowCount('body')).toBe(4);
+            d.dispose();
+          }
+        }
+      }
+    );
+
+    it.each([undefined, '#'])(
+      'preserves quoted wider rows with comment %s',
+      comment => {
+        const d = new DSVModel({
+          data: 'name,id\n"Doe, Jane",1,"extra"',
+          delimiter: ',',
+          comment
+        });
+        expect(d.columnCount('body')).toBe(3);
+        expect([0, 1, 2].map(c => d.data('body', 0, c))).toEqual([
+          'Doe, Jane',
+          '1',
+          'extra'
+        ]);
+        d.dispose();
+      }
+    );
+
+    it.each([undefined, '#'])(
+      'updates header state through the setter with comment %s',
+      comment => {
+        const d = new DSVModel({
+          data: `${comment ? '# metadata\n' : ''}a,b\n1,2`,
+          delimiter: ',',
+          comment,
+          header: false
+        });
+        const headerRow = comment ? 1 : 0;
+        d.header = ['A', 'B'];
+        expect(d.rowCount('body')).toBe(headerRow + 1);
+        expect([0, 1].map(c => d.data('column-header', 0, c))).toEqual([
+          'A',
+          'B'
+        ]);
+        expect(d.data('body', headerRow, 0)).toBe('1');
+
+        d.header = [];
+        expect(d.rowCount('body')).toBe(headerRow + 2);
+        expect([0, 1].map(c => d.data('column-header', 0, c))).toEqual([
+          '1',
+          '2'
+        ]);
+        expect(d.data('body', headerRow, 0)).toBe('a');
+        expect(d.data('body', 0, 0)).toBe(comment ? '# metadata' : 'a');
+        d.dispose();
+      }
+    );
+
+    it.each([undefined, '#'])(
+      'falls back when the initial delimiter is wrong with comment %s',
+      comment => {
+        const warning = jest
+          .spyOn(console, 'warn')
+          .mockImplementation(() => {});
+        try {
+          const d = new DSVModel({
+            data: `${comment ? '# metadata\n' : ''}"name";"value"\n"Alice";"1"\n`,
+            delimiter: ',',
+            comment
+          });
+          expect(d.header).toEqual(['name";"value']);
+          expect(d.columnCount('body')).toBe(1);
+          expect(warning).toHaveBeenCalledTimes(1);
+          d.dispose();
+        } finally {
+          warning.mockRestore();
+        }
+      }
+    );
+
+    it.each(['\n', '\r\n', '\r'])(
+      'preserves quoted data and literal comments with row delimiter %j',
+      async rowDelimiter => {
+        const d = new DSVModel({
+          data: [
+            '# metadata,"unfinished',
+            'name,id',
+            '"Doe, Jane",1',
+            '# note,"literal"',
+            '"first line' + rowDelimiter + '# still data",2'
+          ].join(rowDelimiter),
+          delimiter: ',',
+          comment: '#',
+          initialRows: 1
+        });
+        expect(d.header).toEqual(['name', 'id']);
+        await d.ready;
+        expect(d.rowCount('body')).toBe(4);
+        expect([0, 1].map(c => d.data('body', 0, c))).toEqual([
+          '# metadata',
+          '"unfinished'
+        ]);
+        expect([0, 1].map(c => d.data('body', 1, c))).toEqual([
+          'Doe, Jane',
+          '1'
+        ]);
+        expect([0, 1].map(c => d.data('body', 2, c))).toEqual([
+          '# note',
+          '"literal"'
+        ]);
+        expect([0, 1].map(c => d.data('body', 3, c))).toEqual([
+          'first line' + rowDelimiter + '# still data',
+          '2'
+        ]);
+        d.dispose();
+      }
+    );
+
+    it('preserves a short final row in CRLF files with literal comment quotes', () => {
+      const d = new DSVModel({
+        data: '# metadata,"unfinished\r\na,b,c\r\n1,2',
+        delimiter: ',',
+        comment: '#'
+      });
+      expect(d.header).toEqual(['a', 'b', 'c']);
+      expect([0, 1, 2].map(c => d.data('body', 1, c))).toEqual(['1', '2', '']);
+      d.dispose();
+    });
+
+    it('renders files containing only comments with literal quotes', () => {
+      const d = new DSVModel({
+        data: '# first,"unfinished\n# second,"literal"',
+        delimiter: ',',
+        comment: '#',
+        header: false
+      });
+      expect(d.rowCount('body')).toBe(2);
+      expect([0, 1].map(c => d.data('body', 1, c))).toEqual([
+        '# second',
+        '"literal"'
+      ]);
+      d.dispose();
+    });
+
     it('handles delayed parsing of rows past the initial rows', async () => {
       const d = new DSVModel({
         data: `a,b,c\nc,d,e\nf,g,h\ni,j,k`,

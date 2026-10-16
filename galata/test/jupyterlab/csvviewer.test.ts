@@ -21,6 +21,17 @@ const testData = `id,name,ip_address,userid
 10,Stephanie Turner,206.103.246.83,sturner9
 `;
 
+// CSV data with leading comment lines prefixed with '#'
+const testDataWithComments = `# This file was exported on 2024-01-01
+# Source: internal database
+id,name,ip_address,userid
+1,Juan King,51.223.215.102,jking0
+2,Janet Robertson,94.135.163.124,jrobertson1
+3,Charles Howard,49.71.100.63,choward2
+4,Beverly Johnson,95.201.11.104,bjohnson3
+5,Robin Fowler,244.18.23.69,rfowler4
+`;
+
 test.describe('CSV Viewer', () => {
   const csvFileName = 'test-data.csv';
 
@@ -112,3 +123,113 @@ test.describe('CSV Viewer', () => {
     }
   });
 });
+
+for (const extension of ['csv', 'tsv']) {
+  test.describe(`${extension.toUpperCase()} Viewer - comment character`, () => {
+    const csvFileName = `test-data-comments.${extension}`;
+
+    let tempFilePath: string;
+
+    test.beforeEach(async ({ page, tmpPath }) => {
+      const tempDir = fs.mkdtempSync(
+        path.join(os.tmpdir(), 'csv-comment-test-')
+      );
+      tempFilePath = path.join(tempDir, csvFileName);
+
+      fs.writeFileSync(
+        tempFilePath,
+        extension === 'tsv'
+          ? testDataWithComments.split(',').join('\t')
+          : testDataWithComments
+      );
+      await page.contents.uploadFile(tempFilePath, `${tmpPath}/${csvFileName}`);
+    });
+
+    test('should show the Comment toolbar control', async ({ page }) => {
+      await page.filebrowser.open(csvFileName);
+
+      // The select is wrapped by Styling.wrapSelect inside the jp-CSVComment-dropdown div
+      const commentDropdown = page.locator('.jp-CSVComment-dropdown select');
+      await expect(commentDropdown).toBeVisible();
+
+      // Default value should be empty string (none)
+      await expect(commentDropdown).toHaveValue('');
+    });
+
+    test('should render differently with and without comment char set', async ({
+      page
+    }) => {
+      await page.filebrowser.open(csvFileName);
+
+      const csvLocator = page.locator('.jp-CSVViewer');
+      await expect(csvLocator).toBeVisible();
+
+      await page.evaluate(
+        () => window.jupyterapp.shell.currentWidget.content.ready
+      );
+      const screenshotWithoutComment = await csvLocator.screenshot();
+
+      const commentDropdown = page.locator('.jp-CSVComment-dropdown select');
+      await commentDropdown.selectOption('#');
+      await expect(commentDropdown).toHaveValue('#');
+
+      await expect
+        .poll(async () =>
+          Buffer.compare(
+            await csvLocator.screenshot(),
+            screenshotWithoutComment
+          )
+        )
+        .not.toBe(0);
+    });
+
+    test('should revert to raw rendering when comment char is cleared', async ({
+      page
+    }) => {
+      await page.filebrowser.open(csvFileName);
+
+      const csvLocator = page.locator('.jp-CSVViewer');
+      await expect(csvLocator).toBeVisible();
+      await page.evaluate(
+        () => window.jupyterapp.shell.currentWidget.content.ready
+      );
+      const screenshotWithoutComment = await csvLocator.screenshot();
+
+      const commentDropdown = page.locator('.jp-CSVComment-dropdown select');
+      await commentDropdown.selectOption('#');
+      await expect
+        .poll(async () =>
+          Buffer.compare(
+            await csvLocator.screenshot(),
+            screenshotWithoutComment
+          )
+        )
+        .not.toBe(0);
+
+      await commentDropdown.selectOption('');
+      await expect
+        .poll(async () =>
+          Buffer.compare(
+            await csvLocator.screenshot(),
+            screenshotWithoutComment
+          )
+        )
+        .toBe(0);
+    });
+
+    test.afterEach(async ({ page }) => {
+      try {
+        await page.contents.deleteFile(csvFileName);
+      } catch (e) {
+        console.error(`Error deleting file ${csvFileName}: ${e}`);
+      }
+
+      try {
+        fs.unlinkSync(tempFilePath);
+        fs.rmdirSync(path.dirname(tempFilePath));
+      } catch (e) {
+        console.error(`Error cleaning up temp file: ${e}`);
+      }
+    });
+  });
+}
