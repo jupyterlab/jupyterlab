@@ -104,15 +104,19 @@ function lastNestedToken(
   ) {
     return start;
   }
-  const tag = element.tagName.toLowerCase();
-  const open = new RegExp(`<${tag}\\b`, 'gi');
-  const close = new RegExp(`</${tag}\\s*>`, 'gi');
+  // Comments are matched too, so that the tags inside them are skipped.
+  const tags = new RegExp(
+    `<!--[\\s\\S]*?-->|<(/?)${element.tagName.toLowerCase()}\\b`,
+    'gi'
+  );
   let depth = 0;
   for (let i = start; i < tokens.length; i++) {
     if (tokens[i].type === 'html') {
-      const html = tokens[i].raw.replace(/<!--[\s\S]*?-->/g, '');
-      depth +=
-        (html.match(open)?.length ?? 0) - (html.match(close)?.length ?? 0);
+      for (const [match, slash] of tokens[i].raw.matchAll(tags)) {
+        if (!match.startsWith('<!--')) {
+          depth += slash ? -1 : 1;
+        }
+      }
       if (depth <= 0) {
         return i;
       }
