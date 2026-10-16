@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { IWidgetTracker } from '@jupyterlab/apputils';
 import { Sanitizer } from '@jupyterlab/apputils';
 import type { Cell } from '@jupyterlab/cells';
 import type { Context } from '@jupyterlab/docregistry';
@@ -9,7 +10,11 @@ import type {
   KernelError,
   NotebookPanel
 } from '@jupyterlab/notebook';
-import { NotebookToCModel, RunningStatus } from '@jupyterlab/notebook';
+import {
+  NotebookToCFactory,
+  NotebookToCModel,
+  RunningStatus
+} from '@jupyterlab/notebook';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 import { signalToPromise } from '@jupyterlab/testing';
 import * as utils from './utils';
@@ -165,6 +170,45 @@ describe('@jupyterlab/notebook', () => {
           RunningStatus.Error.toString()
         );
       });
+    });
+  });
+
+  describe('NotebookToCFactory', () => {
+    it('refreshes the heading element after a cell is re-rendered', async () => {
+      const context = await NBTestUtils.createMockContext(false);
+      const panel = utils.createNotebookPanel(context);
+      panel.model!.sharedModel.insertCells(0, [
+        { cell_type: 'markdown', source: '# heading' }
+      ]);
+
+      const cell = panel.content.widgets[0];
+      cell.inViewport = true;
+
+      const rendermime = utils.defaultRenderMime();
+      const factory = new NotebookToCFactory(
+        { has: () => true } as unknown as IWidgetTracker<NotebookPanel>,
+        rendermime.markdownParser,
+        sanitizer,
+        undefined
+      );
+      const model = factory.createNew(panel);
+      await model.refresh();
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      const heading = model.headings[0];
+      const initialHeading = cell.node.querySelector('h1');
+      expect(initialHeading).not.toBeNull();
+      const currentHeading = initialHeading!.cloneNode(true) as HTMLElement;
+      initialHeading!.replaceWith(currentHeading);
+      const scrollIntoView = jest
+        .spyOn(currentHeading, 'scrollIntoView')
+        .mockImplementation(() => undefined);
+
+      model.setActiveHeading(heading);
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      expect(scrollIntoView).toHaveBeenCalledWith({ block: 'start' });
+      context.dispose();
     });
   });
 });
