@@ -50,19 +50,17 @@ export class FormWidget extends ReactWidget {
     if (validator === null) {
       return null;
     }
+    const updateMetadata = (
+      formData: ReadonlyPartialJSONObject,
+      reload?: boolean
+    ): void => {
+      const owner = this._props.metadataFormWidget;
+      if (owner.isDisposed || owner.form !== this) return;
+      owner.updateMetadata(formData, reload, this._sourceCell);
+    };
     const formContext = {
       defaultFormData: this._props.settings.default(),
-      // Bind custom-field updates to the cell this form was built for,
-      // the same guard the onChange path below applies.
-      updateMetadata: (
-        formData: ReadonlyPartialJSONObject,
-        reload?: boolean
-      ) =>
-        this._props.metadataFormWidget.updateMetadata(
-          formData,
-          reload,
-          this._sourceCell
-        )
+      updateMetadata
     };
     return (
       <FormComponent
@@ -74,11 +72,7 @@ export class FormWidget extends ReactWidget {
         liveValidate
         idPrefix={`jp-MetadataForm-${this._props.pluginId}`}
         onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
-          this._props.metadataFormWidget.updateMetadata(
-            e.formData || {},
-            undefined,
-            this._sourceCell
-          );
+          updateMetadata(e.formData || {});
         }}
         compact={true}
         showModifiedFromDefault={this._props.showModified}
