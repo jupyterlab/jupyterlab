@@ -793,6 +793,50 @@ describe('@jupyterlab/apputils', () => {
       document.body.removeChild(host);
     });
 
+    it('should keep a skipQueue dialog on top of a normal dialog launched a microtask earlier', async () => {
+      const host = document.createElement('div');
+      document.body.appendChild(host);
+      const outside = document.createElement('div');
+      outside.tabIndex = 0;
+      document.body.appendChild(outside);
+
+      const prompt1 = showDialog({
+        title: 'picker',
+        body: 'picker body',
+        host
+      });
+      // The normal dialog attaches from a microtask continuation, so a
+      // confirmation launched in between must still stack above it.
+      await Promise.resolve();
+      const prompt2 = showDialog({
+        title: 'confirm',
+        body: 'confirm body',
+        host,
+        skipQueue: true
+      });
+
+      await waitForDialog(host);
+
+      const dialogNodes = host.getElementsByClassName('jp-Dialog');
+      expect(dialogNodes.length).toBe(2);
+      expect(dialogNodes[0].textContent).toContain('picker body');
+      expect(dialogNodes[1].textContent).toContain('confirm body');
+
+      const confirmNode = dialogNodes[1] as HTMLElement;
+      outside.focus();
+      simulate(outside, 'focus');
+      expect(confirmNode.contains(document.activeElement)).toBe(true);
+
+      simulate(confirmNode, 'keydown', { key: 'Escape' });
+      await prompt2;
+
+      await acceptDialog(host);
+      await prompt1;
+
+      document.body.removeChild(outside);
+      document.body.removeChild(host);
+    });
+
     it('should accept a virtualdom body', async () => {
       const body = (
         <div>

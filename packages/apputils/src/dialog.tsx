@@ -191,8 +191,15 @@ export class Dialog<T> extends Widget {
     Private.launchQueue.push(this._promise.promise);
     return promises.then(async () => {
       // A dialog that skipped the queue may have attached while this launch was
-      // pending; it must stay on top, so wait for it to close.
-      await this._waitForSkippingDialogs();
+      // pending; it must stay on top, so wait for it to close. Collecting the
+      // promises synchronously keeps this free of an `await` when none is open,
+      // so a dialog launched a microtask later still attaches on top.
+      let pending = this._skipQueuePromises();
+      while (pending.length > 0) {
+        await Promise.all(pending);
+        // Another one may have opened while we were waiting.
+        pending = this._skipQueuePromises();
+      }
       // Do not show Dialog if it was disposed of before it was at the front of the launch queue
       if (!this._promise) {
         return {
@@ -507,22 +514,17 @@ export class Dialog<T> extends Widget {
   }
 
   /**
-   * Wait until no attached dialog has skipped the launch queue.
+   * The promises of the attached dialogs which skipped the launch queue.
    */
-  private async _waitForSkippingDialogs(): Promise<void> {
-    for (;;) {
-      const pending: Promise<unknown>[] = [];
-      for (const dialog of Private.openDialogs) {
-        if (dialog._skipQueue && dialog._promise) {
-          // Disposal rejects the promise; only its settling matters here.
-          pending.push(dialog._promise.promise.catch(() => undefined));
-        }
+  private _skipQueuePromises(): Promise<unknown>[] {
+    const pending: Promise<unknown>[] = [];
+    for (const dialog of Private.openDialogs) {
+      if (dialog._skipQueue && dialog._promise) {
+        // Disposal rejects the promise; only its settling matters here.
+        pending.push(dialog._promise.promise.catch(() => undefined));
       }
-      if (pending.length === 0) {
-        return;
-      }
-      await Promise.all(pending);
     }
+    return pending;
   }
 
   /**
