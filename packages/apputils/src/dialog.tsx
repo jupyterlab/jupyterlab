@@ -753,7 +753,8 @@ export namespace Dialog {
     /**
      * Whether the dialog should bypass the launch queue and attach immediately.
      * Useful for nested dialogs (such as confirmation prompts) that must appear
-     * on top of an already open dialog.
+     * on top of an already open dialog. Such dialogs do not wait for each
+     * other, so a caller that opens several at once should show one at a time.
      */
     skipQueue: boolean;
 
