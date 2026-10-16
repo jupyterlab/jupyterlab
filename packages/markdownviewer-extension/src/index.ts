@@ -37,6 +37,9 @@ import type { TranslationBundle } from '@jupyterlab/translation';
 import { ITranslator } from '@jupyterlab/translation';
 import { linkIcon, ToolbarButton } from '@jupyterlab/ui-components';
 
+// The plugin activates at startup and creates the scroll sync manager at once,
+// so the module is needed before the application starts.
+// eslint-disable-next-line jupyter/prefer-lazy-imports
 import { MarkdownScrollSyncManager } from './scrollsync';
 import { markdownViewerSearchProviderFactory } from './searchprovider';
 

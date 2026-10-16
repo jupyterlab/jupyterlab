@@ -68,14 +68,10 @@ test.describe('Markdown preview scroll sync', () => {
   }) => {
     const path = `${tmpPath}/${MARKDOWN_FILE}`;
     await scrollPreviewToBlock(page, AFTER_TABLE);
-    await expect
-      .poll(() => editorTopLine(page, path))
-      .toBeCloseTo(lineOf(AFTER_TABLE), 1);
+    await expectEditorLineAtTop(page, path, lineOf(AFTER_TABLE));
 
     await scrollPreviewToBlock(page, AFTER_IMAGE);
-    await expect
-      .poll(() => editorTopLine(page, path))
-      .toBeCloseTo(lineOf(AFTER_IMAGE), 1);
+    await expectEditorLineAtTop(page, path, lineOf(AFTER_IMAGE));
   });
 
   test('scrolls the preview with the keyboard', async ({ page, tmpPath }) => {
@@ -320,6 +316,20 @@ async function editorTopLine(page: Page, path: string): Promise<number> {
       (height - block.top) / block.height
     );
   });
+}
+
+/**
+ * Expect a source line at the top of the editor. Both scroll offsets are whole
+ * numbers of pixels, and one pixel of a short block is up to about 0.06 lines.
+ */
+async function expectEditorLineAtTop(
+  page: Page,
+  path: string,
+  line: number
+): Promise<void> {
+  await expect
+    .poll(async () => Math.abs((await editorTopLine(page, path)) - line))
+    .toBeLessThan(0.15);
 }
 
 /**
