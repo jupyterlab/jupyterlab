@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import { expect, galata, test } from '@jupyterlab/galata';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import type { NotebookPanel } from '@jupyterlab/notebook';
 import type { Locator } from '@playwright/test';
 import * as path from 'path';
 
@@ -292,20 +294,6 @@ test.describe('Scrolling on keyboard interaction when active editor is above the
       for (let i = 0; i < testCase.times; i++) {
         await page.keyboard.press(testCase.key);
         // Allow for small delay between pressing keys
-        if (i === 0 && testCase.key === 'PageDown' && testCase.times === 10) {
-          // TODO: for some reason the notebook scrolls back to the selected cell after a few seconds.
-          // The exact mechanism is not clear but it is easily reproducible with the test case
-          // "Show neither cell on pressing PageDown 10 times" by commenting out the timeout below,
-          // and decreasing the timeout for each iteration (say down to 10ms).
-          // It might be unrelated to this test, but instead a different bug in the windowing
-          // logic where some stale request remains beyond its intended lifetime
-          // (i.e. when user requested a different scroll).
-          // This could be related related to the scrollback logic; PR #18973 demonstrated
-          // a potential fix, however it made the scrollback test for full windowing flaky
-          // ("should keep active cell when a cell above generates a lot of output").
-          // eslint-disable-next-line playwright/no-wait-for-timeout
-          await page.waitForTimeout(3000);
-        }
         // eslint-disable-next-line playwright/no-wait-for-timeout
         await page.waitForTimeout(100);
       }
@@ -324,6 +312,281 @@ test.describe('Scrolling on keyboard interaction when active editor is above the
       }
     });
   }
+});
+
+test.describe('Scrollback cancellation on user scrolling', () => {
+  for (const [atBoundary, overscrollBehaviorY] of [
+    [false, 'auto'],
+    [true, 'auto'],
+    [true, 'contain'],
+    [true, 'none']
+  ] as const) {
+    const cancels = atBoundary && overscrollBehaviorY === 'auto';
+    test(`should ${cancels ? 'cancel' : 'preserve'} scrollback when wheeling ${atBoundary ? 'at the output boundary' : 'inside an output'} (overscroll=${overscrollBehaviorY})`, async ({
+      page,
+      tmpPath,
+      browserName
+    }) => {
+      test.skip(
+        browserName === 'firefox' && overscrollBehaviorY !== 'auto',
+        'Firefox synthetic wheel events ignore overscroll-behavior.'
+      );
+      const outputNotebook = 'output_scrolling.ipynb';
+      await page.contents.uploadFile(
+        path.resolve(__dirname, `notebooks/${outputNotebook}`),
+        `${tmpPath}/${outputNotebook}`
+      );
+      await page.notebook.openByPath(`${tmpPath}/${outputNotebook}`);
+      await page.notebook.selectCells(0, 1);
+      await page.evaluate(() =>
+        window.jupyterapp.commands.execute('notebook:enable-output-scrolling')
+      );
+      await page.evaluate(() => {
+        const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+        panel.content.model!.sharedModel.insertCell(2, {
+          cell_type: 'raw',
+          source: 'Trailing content\n'.repeat(100)
+        });
+      });
+      const notebook = await page.notebook.getNotebookInPanelLocator();
+      const outer = notebook.locator('.jp-WindowedPanel-outer');
+      const firstCell = notebook.locator('[data-windowed-list-index="0"]');
+      const secondCell = notebook.locator('[data-windowed-list-index="1"]');
+      const output = firstCell.locator('.jp-Cell-outputArea');
+      await notebook.locator('.jp-Cell-outputArea').evaluateAll(nodes => {
+        for (const node of nodes) {
+          (node as HTMLElement).style.height = '120px';
+        }
+      });
+      await expect(secondCell).toBeInViewport();
+      await output.evaluate((node, atBoundary) => {
+        node.scrollTop = atBoundary
+          ? node.scrollHeight - node.clientHeight
+          : 100;
+      }, atBoundary);
+      await output.evaluate((node, overscrollBehaviorY) => {
+        node.style.overscrollBehaviorY = overscrollBehaviorY;
+        node.addEventListener('wheel', () => (node.dataset.wheeled = 'true'), {
+          once: true
+        });
+      }, overscrollBehaviorY);
+      await output.hover();
+      await page.evaluate(async () => {
+        const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+        await panel.content.scrollToItem(1);
+      });
+      const initialOuterTop = await outer.evaluate(node => node.scrollTop);
+      const initialOutputTop = await output.evaluate(node => node.scrollTop);
+      await page.mouse.wheel(0, 100);
+      await expect(output).toHaveAttribute('data-wheeled', 'true');
+      if (cancels) {
+        await expect
+          .poll(() => outer.evaluate(node => node.scrollTop))
+          .toBeGreaterThan(initialOuterTop);
+      } else {
+        if (!atBoundary) {
+          await expect
+            .poll(() => output.evaluate(node => node.scrollTop))
+            .toBeGreaterThan(initialOutputTop);
+        }
+        expect(await outer.evaluate(node => node.scrollTop)).toBe(
+          initialOuterTop
+        );
+      }
+
+      // A cell growing above the followed cell must still keep it in view
+      // unless the user has scrolled the notebook itself.
+      await firstCell.evaluate(node => {
+        (node as HTMLElement).style.minHeight = '1500px';
+      });
+      if (cancels) {
+        // Cover the delayed scrollback paths, including the scrollend fallback.
+        // eslint-disable-next-line playwright/no-wait-for-timeout
+        await page.waitForTimeout(1000);
+        await expect(secondCell).not.toBeInViewport();
+      } else {
+        await expect
+          .poll(() => outer.evaluate(node => node.scrollTop))
+          .toBeGreaterThan(initialOuterTop);
+        await expect(secondCell).toBeInViewport();
+      }
+    });
+  }
+
+  /**
+   * Arm the scrollback anchor: type into the active editor which is above
+   * the viewport, which scrolls back to the active cell and keeps the
+   * scrollback target armed for the next few seconds (renewed on cell
+   * resizes, e.g. those caused by re-rendering of windowed cells).
+   */
+  const armScrollback = async (
+    page: IJupyterLabPageFixture,
+    tmpPath: string
+  ) => {
+    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+
+    await page.notebook.selectCells(0);
+    await page.notebook.enterCellEditingMode(0);
+    const notebook = (await page.notebook.getNotebookInPanelLocator())!;
+    const firstCell = notebook.locator(
+      '.jp-Cell[data-windowed-list-index="0"]'
+    );
+    const secondCell = notebook.locator(
+      '.jp-Cell[data-windowed-list-index="1"]'
+    );
+    await firstCell.waitFor();
+    await secondCell.waitFor();
+
+    // Position the mouse in the bounding box to allow for scrolling with mouse wheel
+    const bbox = (await notebook.boundingBox())!;
+    await page.mouse.move(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
+
+    await scrollAwayWithWheel(page, firstCell, secondCell);
+
+    // Typing scrolls back to the active cell and arms the scrollback anchor.
+    await page.keyboard.type('T');
+    await firstCell.waitFor({ state: 'visible' });
+
+    return { notebook, firstCell, secondCell };
+  };
+
+  /**
+   * Scroll down with the wheel until the first and second cell get hidden:
+   * the scroll distance performed for a wheel event differs between browsers.
+   */
+  const scrollAwayWithWheel = async (
+    page: IJupyterLabPageFixture,
+    firstCell: Locator,
+    secondCell: Locator
+  ) => {
+    await Promise.all([
+      firstCell.waitFor({ state: 'hidden' }),
+      secondCell.waitFor({ state: 'hidden' }),
+      (async () => {
+        for (let i = 0; i < 8; i++) {
+          await page.mouse.wheel(0, 1200);
+          // eslint-disable-next-line playwright/no-wait-for-timeout
+          await page.waitForTimeout(150);
+          if ((await firstCell.isHidden()) && (await secondCell.isHidden())) {
+            return;
+          }
+        }
+      })()
+    ]);
+  };
+
+  /**
+   * Force a resize of a stably rendered cell: this is what triggers the
+   * scrollback (an armed anchor scrolls the view back to the active cell
+   * on any cell resize, as happens when a cell above streams output).
+   */
+  const forceCellResize = async (
+    page: IJupyterLabPageFixture,
+    notebook: Locator
+  ) => {
+    // Let the windowed rendering settle so the resized cell stays observed.
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await page.waitForTimeout(400);
+    await notebook.locator('.jp-WindowedPanel-outer').evaluate(node => {
+      const cells = node.querySelectorAll(
+        '.jp-WindowedPanel-viewport .jp-Cell'
+      );
+      const mid = cells[Math.floor(cells.length / 2)] as HTMLElement;
+      mid.style.minHeight = `${mid.clientHeight + 300}px`;
+    });
+  };
+
+  /**
+   * Check that the view does not scroll back to the active cell,
+   * waiting long enough to cover the delayed scrollback paths
+   * (`scrollend` events and their 750 ms fallback timer).
+   */
+  const expectNoScrollback = async (
+    page: IJupyterLabPageFixture,
+    firstCell: Locator,
+    secondCell: Locator
+  ) => {
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await page.waitForTimeout(1000);
+    await expect(firstCell).toBeHidden();
+    await expect(secondCell).toBeHidden();
+  };
+
+  test('should not scroll back to the active cell after scrolling away with the wheel', async ({
+    page,
+    tmpPath
+  }) => {
+    const { notebook, firstCell, secondCell } = await armScrollback(
+      page,
+      tmpPath
+    );
+
+    // Scroll away with the wheel; this should cancel the scrollback.
+    await scrollAwayWithWheel(page, firstCell, secondCell);
+
+    await forceCellResize(page, notebook);
+    await expectNoScrollback(page, firstCell, secondCell);
+  });
+
+  test('should not scroll back to the active cell after pressing the middle mouse button', async ({
+    page,
+    tmpPath
+  }) => {
+    const { notebook, firstCell, secondCell } = await armScrollback(
+      page,
+      tmpPath
+    );
+
+    // Press the middle button (which can start browser autoscroll) over
+    // the cell prompt area; this should cancel the scrollback. Synthetic
+    // input cannot trigger the actual browser autoscroll, so the scrolling
+    // it would cause is emulated by setting `scrollTop`.
+    const bbox = (await notebook.boundingBox())!;
+    await page.mouse.move(bbox.x + 30, bbox.y + bbox.height / 2);
+    await page.mouse.down({ button: 'middle' });
+    await page.mouse.up({ button: 'middle' });
+
+    const outer = notebook.locator('.jp-WindowedPanel-outer');
+    await Promise.all([
+      firstCell.waitFor({ state: 'hidden' }),
+      secondCell.waitFor({ state: 'hidden' }),
+      outer.evaluate(node => {
+        node.scrollTop += 1200;
+      })
+    ]);
+
+    await forceCellResize(page, notebook);
+    await expectNoScrollback(page, firstCell, secondCell);
+  });
+
+  test('should scroll back to the active cell when the scroll was not caused by user input', async ({
+    page,
+    tmpPath
+  }) => {
+    const { notebook, firstCell } = await armScrollback(page, tmpPath);
+
+    // Scroll away programmatically, without any user input event: the
+    // scrollback must NOT be cancelled (in particular, cancellation must
+    // not be keyed on `scroll` events: programmatic scrolling fires them
+    // too and cancelling on them proved flaky, see #18973).
+    const outer = notebook.locator('.jp-WindowedPanel-outer');
+    const scrolled = await outer.evaluate(node => {
+      node.scrollTop += 1200;
+      return node.scrollTop;
+    });
+    expect(scrolled).toBeGreaterThan(1000);
+
+    // Force a cell resize in case the scroll alone did not produce size
+    // corrections (the scrollback may fire at different points of the
+    // scroll handling depending on the browser).
+    await forceCellResize(page, notebook);
+
+    // The armed scrollback should bring the view back to the active cell.
+    await expect
+      .poll(() => outer.evaluate(node => Math.round(node.scrollTop)))
+      .toBeLessThan(500);
+    await expect(firstCell).toBeVisible();
+  });
 });
 
 test('should detach a markdown code cell when scrolling out of the viewport', async ({
