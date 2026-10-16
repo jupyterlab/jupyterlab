@@ -7,7 +7,7 @@
 // Copyright (C) 2020 by Marijn Haverbeke <marijnh@gmail.com> and others
 
 import { parseMathIPython } from '@jupyterlab/codemirror';
-import { Tree } from '@lezer/common';
+import { Tree, TreeFragment } from '@lezer/common';
 import type { MarkdownParser } from '@lezer/markdown';
 import { parser } from '@lezer/markdown';
 import { StreamLanguage } from '@codemirror/language';
@@ -269,14 +269,135 @@ test(
 test(
   'Block math $$ on multilines',
   `
-{P:{MaBD:{maBD:$$}
+{MaBD:{maBD:$$}
 \\begin{aligned}
-\\dot{x} & = \\sigma(y-x) {Esc:\\\\}
-\\dot{y} & = \\rho x - y - xz {Esc:\\\\}
+\\dot{x} & = \\sigma(y-x) \\\\
+\\dot{y} & = \\rho x - y - xz \\\\
 \\dot{z} & = -\\beta z + xy
 \\end{aligned}
-{maBD:$$}}}
+{maBD:$$}}
 `
+);
+
+test(
+  'Block math $$ containing a setext = underline',
+  `
+{MaBD:{maBD:$$}
+\\text{This}
+=
+\\text{broken.}
+{maBD:$$}}
+`
+);
+
+test(
+  'Block math $$ containing a setext - underline',
+  `
+{MaBD:{maBD:$$}
+Title
+---
+{maBD:$$}}
+`
+);
+
+test(
+  'Block math $$ interrupting a paragraph',
+  `
+{P:Some text}
+{MaBD:{maBD:$$}
+a
+=
+{maBD:$$}}
+`
+);
+
+test(
+  'Unclosed block math $$ stops at a blank line',
+  `
+{MaBD:{maBD:$$}
+a}
+
+{SH1:b
+{h:=}}
+`
+);
+
+test(
+  'Block math $$ closing inline math opened in a paragraph',
+  `
+{P:The energy is {MaBD:{maBD:$$}
+E = mc^2
+{maBD:$$}}
+where {Em:{e:*}m{e:*}} is the mass.}
+`
+);
+
+test(
+  'Block math $$ opened mid-line containing a setext = underline',
+  `
+{P:Some text {MaBD:{maBD:$$}
+a
+=
+{maBD:$$}}
+where {Em:{e:*}m{e:*}} is the mass.}
+`
+);
+
+test(
+  'Block math $$ followed by text on the closing line',
+  `
+{MaBD:{maBD:$$}
+a
+{maBD:$$}} {P:and more {Em:{e:*}text{e:*}}}
+`
+);
+
+test(
+  'Block math $$ followed by a setext heading on the closing line',
+  `
+{MaBD:{maBD:$$}
+a
+{maBD:$$}} {SH1:title
+{h:===}}
+`
+);
+
+test(
+  'Block math $$ followed by a paragraph continuing past the closing line',
+  `
+{MaBD:{maBD:$$}
+a
+{maBD:$$}} {P:and
+more}
+`
+);
+
+test(
+  'Block math $$ followed by block syntax on the closing line',
+  `
+{MaBD:{maBD:$$}
+a
+{maBD:$$}} {P:# not a heading}
+`
+);
+
+test(
+  'Block math $$ opened on a line with an escaped \\$$',
+  `
+{MaBD:{maBD:$$} x \\$$
+a
+{maBD:$$}}
+`
+);
+
+test(
+  'Math $$ closed after an escaped backslash before a setext underline',
+  '\n{SH1:a {MaBD:{maBD:$$} x {Esc:\\\\}{maBD:$$}}\nb\n{h:===}}\n'
+);
+
+test(
+  'Code span containing $$ before a setext underline',
+  '\n{SH1:a {C:{c:`}$${c:`}} b\nc\n{h:===}}\n'
 );
 
 // Block math \\[ \\]
@@ -302,6 +423,36 @@ test(
 );
 
 describe('markdown parser', () => {
+  it('should parse incrementally as from scratch around math blocks', () => {
+    const docs = [
+      '$$\na\n$$ title\n===\n\ntext',
+      'Some text $$\na\n=\n$$\nwhere *m* is\n\n$$\nb\n$$ and more\nlines',
+      '- $$\n  a\n  $$ item\n- next'
+    ];
+    for (const doc of docs) {
+      for (let pos = 0; pos <= doc.length; pos++) {
+        for (const insert of ['', 'x', '$$', '\n', '=']) {
+          const removed = insert || pos === doc.length ? 0 : 1;
+          const edited = doc.slice(0, pos) + insert + doc.slice(pos + removed);
+          const fragments = TreeFragment.applyChanges(
+            TreeFragment.addTree(ipythonParser.parse(doc)),
+            [
+              {
+                fromA: pos,
+                toA: pos + removed,
+                fromB: pos,
+                toB: pos + insert.length
+              }
+            ]
+          );
+          expect(ipythonParser.parse(edited, fragments).toString()).toEqual(
+            ipythonParser.parse(edited).toString()
+          );
+        }
+      }
+    }
+  });
+
   it('should parse empty math block $$$$ without error', () => {
     const inputText = '$$$$';
     expect(() => mixedParser.parse(inputText)).not.toThrow();
