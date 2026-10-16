@@ -443,6 +443,10 @@ const resources: JupyterFrontEndPlugin<void> = {
       string,
       KernelMessage.IInfoReplyMsg['content']
     >();
+    // Kernels whose info is being fetched. Reserved before the request, as
+    // concurrent extra connections to a kernel can break the connection of
+    // the notebook using it.
+    const pendingKernels = new Set<string>();
 
     const onSessionRunningChanged = (
       m: Session.IManager,
@@ -455,29 +459,28 @@ const resources: JupyterFrontEndPlugin<void> = {
         return;
       }
       const sessionModel = sessions[sessions.length - 1];
-      if (
-        !sessionModel.kernel ||
-        kernelInfoCache.has(sessionModel.kernel.name)
-      ) {
+      if (!sessionModel.kernel) {
         return;
       }
+      const name = sessionModel.kernel.name;
+      if (kernelInfoCache.has(name) || pendingKernels.has(name)) {
+        return;
+      }
+      pendingKernels.add(name);
       const session = serviceManager.sessions.connectTo({
         model: sessionModel,
         kernelConnectionOptions: { handleComms: false }
       });
+      const done = () => {
+        pendingKernels.delete(name);
+        // Dispose of the session object since we no longer need it.
+        session.dispose();
+      };
 
-      void session.kernel?.info
+      void Promise.resolve(session.kernel?.info)
         .then(kernelInfo => {
-          const name = session.kernel!.name;
-
-          // Check the cache second time so that, if two callbacks get scheduled,
-          // they don't try to add the same commands.
-          if (kernelInfoCache.has(name)) {
-            return;
-          }
-
           const spec = serviceManager.kernelspecs?.specs?.kernelspecs[name];
-          if (!spec) {
+          if (!kernelInfo || !spec) {
             return;
           }
 
@@ -569,9 +572,9 @@ const resources: JupyterFrontEndPlugin<void> = {
           });
           helpMenu.addGroup(kernelGroup, 21);
         })
-        .then(() => {
-          // Dispose of the session object since we no longer need it.
-          session.dispose();
+        .then(done, reason => {
+          console.warn(`Failed to get the info of kernel ${name}.`, reason);
+          done();
         });
     };
 
