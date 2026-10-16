@@ -191,6 +191,8 @@ export namespace MetadataForm {
      *
      * @param formData the cell metadata set in the form.
      * @param reload whether to update the form after updating the metadata.
+     * @param sourceCell - the cell the form data belongs to. When provided,
+     * the update is skipped if that cell is no longer the active one.
      *
      * ## Notes
      * Metadata are updated from root only. If some metadata is nested,
@@ -198,7 +200,11 @@ export namespace MetadataForm {
      * This function build an object with all the root object to update
      * in metadata before performing update.
      */
-    updateMetadata(formData: ReadonlyJSONObject, reload?: boolean): void;
+    updateMetadata(
+      formData: ReadonlyJSONObject,
+      reload?: boolean,
+      sourceCell?: NotebookTools['activeCell']
+    ): void;
   }
 }
 
