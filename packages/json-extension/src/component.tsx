@@ -7,7 +7,7 @@ import { nullTranslator } from '@jupyterlab/translation';
 import { InputGroup } from '@jupyterlab/ui-components';
 import type { Tag } from '@lezer/highlight';
 import { tags } from '@lezer/highlight';
-import type { JSONArray, JSONObject, JSONValue } from '@lumino/coreutils';
+import type { JSONObject, JSONValue } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
 import * as React from 'react';
 import Highlighter from 'react-highlight-words';
@@ -70,9 +70,10 @@ export class Component extends React.Component<IProps, IState> {
 
     const { data, metadata, forwardedRef } = this.props;
     const root = metadata && metadata.root ? (metadata.root as string) : 'root';
-    const keyPaths = this.state.filter
-      ? filterPaths(data, this.state.filter, [root])
-      : [root];
+    const keyPaths = new Set<string>([
+      root,
+      ...(this.state.filter ? filterPaths(data, this.state.filter, [root]) : [])
+    ]);
     return (
       <div className="container" ref={forwardedRef}>
         <InputGroup
@@ -84,6 +85,7 @@ export class Component extends React.Component<IProps, IState> {
           rightIcon="ui-components:search"
         />
         <JSONTree
+          key={this.state.filter}
           data={data}
           collectionLimit={100}
           theme={{
@@ -111,6 +113,7 @@ export class Component extends React.Component<IProps, IState> {
             return (
               <span className={getStyle(tags.keyword)}>
                 <Highlighter
+                  autoEscape={true}
                   searchWords={[this.state.filter]}
                   textToHighlight={`${label}`}
                   highlightClassName="jp-mod-selected"
@@ -129,6 +132,7 @@ export class Component extends React.Component<IProps, IState> {
             return (
               <span className={className}>
                 <Highlighter
+                  autoEscape={true}
                   searchWords={[this.state.filter]}
                   textToHighlight={`${raw}`}
                   highlightClassName="jp-mod-selected"
@@ -139,7 +143,7 @@ export class Component extends React.Component<IProps, IState> {
           shouldExpandNodeInitially={(keyPath, data, level) =>
             metadata && metadata.expanded
               ? true
-              : keyPaths.join(',').includes(keyPath.join(','))
+              : keyPaths.has(keyPath.join(','))
           }
         />
       </div>
@@ -177,10 +181,10 @@ function objectIncludes(data: JSONValue, query: string): boolean {
 function filterPaths(
   data: NonNullable<JSONValue>,
   query: string,
-  parent: JSONArray = ['root']
-): JSONArray {
+  parent: (string | number)[] = ['root']
+): string[] {
   if (JSONExt.isArray(data)) {
-    return data.reduce((result: JSONArray, item: JSONValue, index: number) => {
+    return data.reduce<string[]>((result, item, index) => {
       if (item && typeof item === 'object' && objectIncludes(item, query)) {
         return [
           ...result,
@@ -189,10 +193,10 @@ function filterPaths(
         ];
       }
       return result;
-    }, []) as JSONArray;
+    }, []);
   }
   if (JSONExt.isObject(data)) {
-    return Object.keys(data).reduce((result: JSONArray, key: string) => {
+    return Object.keys(data).reduce<string[]>((result, key) => {
       const item = data[key];
       if (
         item &&
