@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 from dataclasses import dataclass, field, fields, replace
@@ -607,9 +608,6 @@ class ExtensionManager(PluginManager):
                 repository_url=data.get("repository", {}).get("url", data.get("repository")),
             )
 
-            if get_latest_version:
-                pkg = replace(pkg, latest_version=await self.get_latest_version(pkg.name))
-
             extensions[normalized_name] = pkg
 
         for name, data in info["extensions"].items():
@@ -642,15 +640,37 @@ class ExtensionManager(PluginManager):
                 bug_tracker_url=data.get("bugs", {}).get("url"),
                 repository_url=data.get("repository", {}).get("url", data.get("repository")),
             )
-            if get_latest_version:
-                pkg = replace(pkg, latest_version=await self.get_latest_version(pkg.name))
             extensions[normalized_name] = pkg
 
-        for name in build_check_info["uninstall"]:
+        extensions.update(self._get_scheduled_uninstall_packages(build_check_info["uninstall"]))
+
+        if get_latest_version:
+            installed_pkgs = [pkg for pkg in extensions.values() if pkg.installed]
+            results = await asyncio.gather(
+                *(self.get_latest_version(pkg.name) for pkg in installed_pkgs),
+                return_exceptions=True,
+            )
+            for pkg, result in zip(installed_pkgs, results, strict=True):
+                if isinstance(result, BaseException):
+                    self.log.info(
+                        "Failed to fetch latest version for %s: %s",
+                        pkg.name,
+                        result,
+                    )
+                elif result is not None:
+                    extensions[pkg.name] = replace(pkg, latest_version=result)
+
+        return extensions
+
+    def _get_scheduled_uninstall_packages(
+        self, uninstall_names: list[str]
+    ) -> dict[str, ExtensionPackage]:
+        packages = {}
+        for name in uninstall_names:
             data = self._get_scheduled_uninstall_info(name)
             if data is not None:
                 normalized_name = self._normalize_name(name)
-                pkg = ExtensionPackage(
+                packages[normalized_name] = ExtensionPackage(
                     name=normalized_name,
                     description=data.get("description", ""),
                     homepage_url=data.get("homepage", ""),
@@ -666,9 +686,7 @@ class ExtensionManager(PluginManager):
                     bug_tracker_url=data.get("bugs", {}).get("url"),
                     repository_url=data.get("repository", {}).get("url", data.get("repository")),
                 )
-                extensions[normalized_name] = pkg
-
-        return extensions
+        return packages
 
     def _get_companion(self, data: dict) -> str | None:
         companion = None
