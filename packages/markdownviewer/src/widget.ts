@@ -178,6 +178,7 @@ export class MarkdownViewer extends Widget {
     }
 
     // Set up for this rendering pass.
+    this._renderPending = false;
     this._renderRequested = false;
     const { context } = this;
     const { model } = context;

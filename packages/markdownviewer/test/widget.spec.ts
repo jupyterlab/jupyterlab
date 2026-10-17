@@ -3,10 +3,11 @@
 
 import type { Context, DocumentRegistry } from '@jupyterlab/docregistry';
 import { createFileContextWithMockedServices } from '@jupyterlab/docregistry/lib/testutils';
-import { MarkdownViewer } from '@jupyterlab/markdownviewer';
 import type { IRenderMime } from '@jupyterlab/rendermime';
+import { PromiseDelegate } from '@lumino/coreutils';
 import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
+import { MarkdownViewer } from '../src';
 
 class TestRenderer extends Widget implements IRenderMime.IRenderer {
   renderCount = 0;
@@ -53,5 +54,51 @@ describe('MarkdownViewer', () => {
     await Promise.resolve();
 
     expect(renderer.renderCount).toBe(2);
+  });
+
+  it('should not repeat the initial render for options set before readiness', async () => {
+    viewer.dispose();
+    const ready = new PromiseDelegate<void>();
+    const readySpy = jest.spyOn(context, 'ready', 'get');
+    readySpy.mockReturnValue(ready.promise);
+    const isReadySpy = jest.spyOn(context, 'isReady', 'get');
+    isReadySpy.mockReturnValue(false);
+    renderer = new TestRenderer();
+    viewer = new MarkdownViewer({ context, renderer });
+    Widget.attach(viewer, document.body);
+    viewer.setOption('hideFrontMatter', false);
+    MessageLoop.flush();
+    expect(renderer.renderCount).toBe(0);
+
+    isReadySpy.mockReturnValue(true);
+    ready.resolve(undefined);
+    await viewer.ready;
+    MessageLoop.sendMessage(viewer, Widget.Msg.UpdateRequest);
+    expect(renderer.renderCount).toBe(1);
+    readySpy.mockRestore();
+    isReadySpy.mockRestore();
+  });
+
+  it('should retain option changes made during the initial render', async () => {
+    viewer.dispose();
+    renderer = new TestRenderer();
+    const rendering = new PromiseDelegate<void>();
+    const renderSpy = jest.spyOn(renderer, 'renderModel');
+    renderSpy.mockImplementationOnce(async () => {
+      renderer.renderCount += 1;
+      await rendering.promise;
+    });
+    viewer = new MarkdownViewer({ context, renderer });
+    Widget.attach(viewer, document.body);
+    await Promise.resolve();
+    expect(renderer.renderCount).toBe(1);
+    viewer.setOption('hideFrontMatter', false);
+    MessageLoop.flush();
+    rendering.resolve(undefined);
+    await viewer.ready;
+    expect(renderer.renderCount).toBe(2);
+    MessageLoop.sendMessage(viewer, Widget.Msg.UpdateRequest);
+    expect(renderer.renderCount).toBe(2);
+    renderSpy.mockRestore();
   });
 });
