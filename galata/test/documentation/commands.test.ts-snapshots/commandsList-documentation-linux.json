@@ -48,6 +48,26 @@
     }
   },
   {
+    "id": "application:activate-tab-index",
+    "label": "Activate Tab by Index",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Alt 1"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "number",
+          "description": "The index of the tab to activate (1-8, or 9 for last)"
+        }
+      },
+      "required": [
+        "index"
+      ]
+    }
+  },
+  {
     "id": "application:close",
     "label": "Close Tab",
     "caption": "",
