@@ -22,14 +22,14 @@ from jupyterlab.handlers.plugin_manager_handler import PluginHandler, plugins_ha
 
 
 class RecordingAuthorizer(Authorizer):
-    """Records the authorization requests and allows them if `allow` is set."""
+    """Records the authorization requests and denies the actions in `denied`."""
 
-    allow = True
+    denied: ClassVar[set[str]] = set()
     requests: ClassVar[list[tuple[str, str]]] = []
 
     def is_authorized(self, handler, user, action, resource):
         RecordingAuthorizer.requests.append((action, resource))
-        return RecordingAuthorizer.allow
+        return action not in RecordingAuthorizer.denied
 
 
 @pytest.fixture
@@ -78,57 +78,36 @@ def labapp(jp_serverapp, make_labserver_extension_app, managers):
     )
     app.initialize()
     RecordingAuthorizer.requests = []
-    return app
+    RecordingAuthorizer.denied = set()
+    yield app
+    RecordingAuthorizer.denied = set()
 
 
+def extension(cmd):
+    return {"cmd": cmd, "extension_name": "my-extension"}
+
+
+def plugin(cmd):
+    return {"cmd": cmd, "plugin_name": "my-extension:plugin"}
+
+
+EXTENSIONS = "jupyterlab:extensions"
+PLUGINS = "jupyterlab:plugins"
+BUILD = "jupyterlab:build"
+
+# Method, path, body, and the actions checked on the resource
 REQUESTS = [
-    ("GET", extensions_handler_path, None, "read", "extensions"),
-    (
-        "POST",
-        extensions_handler_path,
-        {"cmd": "install", "extension_name": "my-extension"},
-        "write",
-        "extensions",
-    ),
-    (
-        "POST",
-        extensions_handler_path,
-        {"cmd": "uninstall", "extension_name": "my-extension"},
-        "write",
-        "extensions",
-    ),
-    (
-        "POST",
-        extensions_handler_path,
-        {"cmd": "enable", "extension_name": "my-extension"},
-        "write",
-        "extensions",
-    ),
-    (
-        "POST",
-        extensions_handler_path,
-        {"cmd": "disable", "extension_name": "my-extension"},
-        "write",
-        "extensions",
-    ),
-    ("GET", plugins_handler_path, None, "read", "plugins"),
-    (
-        "POST",
-        plugins_handler_path,
-        {"cmd": "enable", "plugin_name": "my-extension:plugin"},
-        "write",
-        "plugins",
-    ),
-    (
-        "POST",
-        plugins_handler_path,
-        {"cmd": "disable", "plugin_name": "my-extension:plugin"},
-        "write",
-        "plugins",
-    ),
-    ("GET", build_path, None, "read", "build"),
-    ("POST", build_path, {}, "write", "build"),
-    ("DELETE", build_path, None, "write", "build"),
+    ("GET", extensions_handler_path, None, {"read"}, EXTENSIONS),
+    ("POST", extensions_handler_path, extension("install"), {"write", "execute"}, EXTENSIONS),
+    ("POST", extensions_handler_path, extension("uninstall"), {"write"}, EXTENSIONS),
+    ("POST", extensions_handler_path, extension("enable"), {"write"}, EXTENSIONS),
+    ("POST", extensions_handler_path, extension("disable"), {"write"}, EXTENSIONS),
+    ("GET", plugins_handler_path, None, {"read"}, PLUGINS),
+    ("POST", plugins_handler_path, plugin("enable"), {"write"}, PLUGINS),
+    ("POST", plugins_handler_path, plugin("disable"), {"write"}, PLUGINS),
+    ("GET", build_path, None, {"read"}, BUILD),
+    ("POST", build_path, {}, {"write"}, BUILD),
+    ("DELETE", build_path, None, {"write"}, BUILD),
 ]
 
 
@@ -150,26 +129,28 @@ def calls(managers):
     )
 
 
-@pytest.mark.parametrize("method, path, body, action, resource", REQUESTS)
-async def test_denied_requests_do_nothing(
-    labapp, jp_fetch, managers, method, path, body, action, resource
-):
-    RecordingAuthorizer.allow = False
-    try:
-        with pytest.raises(HTTPClientError) as e:
-            await fetch(jp_fetch, method, path, body)
-    finally:
-        RecordingAuthorizer.allow = True
-    assert e.value.code == 403
-    assert (action, resource) in RecordingAuthorizer.requests
-    assert calls(managers) == 0
-
-
-@pytest.mark.parametrize("method, path, body, action, resource", REQUESTS)
+@pytest.mark.parametrize("method, path, body, actions, resource", REQUESTS)
 async def test_allowed_requests_are_authorized(
-    labapp, jp_fetch, managers, method, path, body, action, resource
+    labapp, jp_fetch, managers, method, path, body, actions, resource
 ):
     response = await fetch(jp_fetch, method, path, body)
     assert response.code in (200, 201, 204)
-    assert (action, resource) in RecordingAuthorizer.requests
+    assert set(RecordingAuthorizer.requests) == {(action, resource) for action in actions}
     assert calls(managers) > 0
+
+
+@pytest.mark.parametrize("denied", ["read", "write", "execute"])
+@pytest.mark.parametrize("method, path, body, actions, resource", REQUESTS)
+async def test_denied_requests_do_nothing(
+    labapp, jp_fetch, managers, denied, method, path, body, actions, resource
+):
+    RecordingAuthorizer.denied = {denied}
+    if denied not in actions:
+        response = await fetch(jp_fetch, method, path, body)
+        assert response.code in (200, 201, 204)
+        return
+    with pytest.raises(HTTPClientError) as e:
+        await fetch(jp_fetch, method, path, body)
+    assert e.value.code == 403
+    assert (denied, resource) in RecordingAuthorizer.requests
+    assert calls(managers) == 0

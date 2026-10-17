@@ -195,6 +195,21 @@ The following environment variables are respected
 2. `HTTP_PROXY`
 3. `ALL_PROXY`
 
+#### Authorization
+
+The extension manager, the plugin manager and the build API check the
+[authorizer](https://jupyter-server.readthedocs.io/en/stable/operators/security.html#authentication-and-authorization)
+configured in Jupyter Server, so that a custom authorizer can restrict who may
+change the installed extensions. They use these resources and actions:
+
+| Resource                | Actions                                                                                                           |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `jupyterlab:extensions` | `read` to list extensions; `write` to install, uninstall, enable or disable one; `execute` as well to install one |
+| `jupyterlab:plugins`    | `read` to list plugin locks; `write` to enable or disable a plugin                                                |
+| `jupyterlab:build`      | `read` to get the build status; `write` to start or cancel a build                                                |
+
+The default authorizer allows every request.
+
 ### Extension manager implementations
 
 By default, there are two extension managers provided by JupyterLab:

@@ -12,7 +12,7 @@ from tornado import web
 
 from jupyterlab.extensions.manager import PluginManager
 
-AUTH_RESOURCE = "plugins"
+AUTH_RESOURCE = "jupyterlab:plugins"
 
 
 class PluginHandler(APIHandler):

@@ -6,7 +6,7 @@ import json
 import sys
 import tarfile
 from subprocess import CompletedProcess
-from types import SimpleNamespace
+from types import MethodType, SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -269,6 +269,7 @@ async def test_handler_blocks_pypi_canonical_package_name_blocklist_matches(name
     handler.request.method = "POST"
     handler.auth_resource = ExtensionHandler.auth_resource
     handler.authorizer.is_authorized.return_value = True
+    handler._check_install = MethodType(ExtensionHandler._check_install, handler)
     handler.get_json_body.return_value = {"cmd": "install", "extension_name": name}
     handler.manager = manager
     handler.set_status = Mock()
@@ -750,6 +751,7 @@ async def test_handler_blocks_install_when_policy_denies():
     handler.request.method = "POST"
     handler.auth_resource = ExtensionHandler.auth_resource
     handler.authorizer.is_authorized.return_value = True
+    handler._check_install = MethodType(ExtensionHandler._check_install, handler)
     handler.get_json_body.return_value = {"cmd": "install", "extension_name": "jupyterlab-evil"}
     handler.manager.is_install_allowed = AsyncMock(return_value=False)
 
@@ -767,6 +769,7 @@ async def test_handler_blocks_uninstall_when_name_is_not_allowed():
     handler.request.method = "POST"
     handler.auth_resource = ExtensionHandler.auth_resource
     handler.authorizer.is_authorized.return_value = True
+    handler._check_install = MethodType(ExtensionHandler._check_install, handler)
     handler.get_json_body.return_value = {
         "cmd": "uninstall",
         "extension_name": "-r/tmp/requirements.txt",

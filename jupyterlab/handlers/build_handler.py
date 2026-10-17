@@ -18,7 +18,7 @@ from tornado.concurrent import run_on_executor
 from jupyterlab.commands import AppOptions, _ensure_options, build, build_check, clean
 from jupyterlab.coreconfig import CoreConfig
 
-AUTH_RESOURCE = "build"
+AUTH_RESOURCE = "jupyterlab:build"
 
 
 class Builder:
