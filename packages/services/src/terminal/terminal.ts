@@ -12,9 +12,9 @@ import type { ServerConnection } from '..';
 import type { IManager as IBaseManager } from '../basemanager';
 
 import type { IModel } from './restapi';
-import { isAvailable } from './restapi';
+import { isAvailable, validateModel, validateModels } from './restapi';
 export type { IModel };
-export { isAvailable };
+export { isAvailable, validateModel, validateModels };
 
 export namespace ITerminal {
   /**
