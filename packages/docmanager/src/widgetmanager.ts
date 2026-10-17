@@ -171,6 +171,8 @@ export class DocumentWidgetManager implements IDisposable {
    *
    * @param context - The document context object.
    *
+   * @param widgetName - The name of the widget factory to use. If not specified or null, any widget is matched.
+   *
    * @returns The found widget, or `undefined`.
    *
    * #### Notes
@@ -179,11 +181,14 @@ export class DocumentWidgetManager implements IDisposable {
    */
   findWidget(
     context: DocumentRegistry.Context,
-    widgetName: string
+    widgetName?: string | null
   ): IDocumentWidget | undefined {
     const widgets = Private.widgetsProperty.get(context);
-    if (!widgets) {
+    if (!widgets || widgets.length === 0) {
       return undefined;
+    }
+    if (!widgetName) {
+      return widgets[0];
     }
     return find(widgets, widget => {
       const factory = Private.factoryProperty.get(widget);
@@ -192,6 +197,18 @@ export class DocumentWidgetManager implements IDisposable {
       }
       return factory.name === widgetName;
     });
+  }
+
+  /**
+   * Get the widgets associated with a given context.
+   *
+   * @param context - The document context object.
+   *
+   * @returns An array of widgets associated with the context.
+   */
+  getWidgets(context: DocumentRegistry.Context): IDocumentWidget[] {
+    const widgets = Private.widgetsProperty.get(context);
+    return widgets ? [...widgets] : [];
   }
 
   /**
