@@ -5811,23 +5811,23 @@ namespace Private {
    * Resolve once the open notebooks have loaded or closed.
    *
    * The first `/api/nbconvert` request imports nbconvert on the server event
-   * loop, which delays the requests that load the restored notebooks.
+   * loop, which delays the requests that load the notebooks.
    */
   export async function notebooksLoaded(
     app: JupyterFrontEnd,
     tracker: INotebookTracker
   ): Promise<void> {
     await app.restored;
-    await Promise.all(
-      tracker
-        .filter(() => true)
-        .map(async panel => {
-          await Promise.race([
-            panel.context.ready,
-            signalToPromise(panel.disposed)
-          ]).catch(() => undefined);
-        })
-    );
+    const loading: Promise<unknown>[] = [];
+    tracker.forEach(panel => {
+      loading.push(
+        Promise.race([
+          panel.context.ready,
+          signalToPromise(panel.disposed)
+        ]).catch(() => undefined)
+      );
+    });
+    await Promise.all(loading);
   }
 
   /**
