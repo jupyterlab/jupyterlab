@@ -389,19 +389,51 @@ export class CSVViewer extends Widget {
    * Create the model for the grid.
    */
   private async _updateGrid(): Promise<void> {
+    const updateId = ++this._updateId;
     const { BasicSelectionModel } = await Private.ensureDataGrid();
     const { DSVModel } = await Private.ensureDSVModel();
+    if (updateId !== this._updateId) {
+      return;
+    }
     const data: string = this._context.model.toString();
     const delimiter = this._delimiter;
     const oldModel = this._grid.dataModel as DSVModelModule.DSVModel;
+    // Replacing the data model clears the grid's column sizes.
+    for (let i = 0; i < this._grid.columnCount('body'); i++) {
+      this._columnWidths[i] = this._grid.columnSize('body', i);
+    }
     const dataModel = (this._grid.dataModel = new DSVModel({
       data,
       delimiter,
       comment: this._comment ?? undefined
     }));
+    const columnCount = Math.min(
+      dataModel.columnCount('body'),
+      this._columnWidths.length
+    );
+    for (let i = 0; i < columnCount; i++) {
+      this._grid.resizeColumn('body', i, this._columnWidths[i]);
+    }
+    dataModel.changed.connect(this._onDataModelChanged, this);
     this._grid.selectionModel = new BasicSelectionModel({ dataModel });
     if (oldModel) {
+      oldModel.changed.disconnect(this._onDataModelChanged, this);
       oldModel.dispose();
+    }
+  }
+
+  /**
+   * Restore widths of columns discovered during delayed parsing.
+   */
+  private _onDataModelChanged(
+    sender: DSVModelModule.DSVModel,
+    args: DataGridModule.DataModel.ChangedArgs
+  ): void {
+    if (args.type === 'columns-inserted' && args.region === 'body') {
+      const end = Math.min(args.index + args.span, this._columnWidths.length);
+      for (let i = args.index; i < end; i++) {
+        this._grid.resizeColumn('body', i, this._columnWidths[i]);
+      }
     }
   }
 
@@ -437,6 +469,8 @@ export class CSVViewer extends Widget {
     null;
   private _delimiter = ',';
   private _comment: string | null = null;
+  private _columnWidths: number[] = [];
+  private _updateId = 0;
   private _revealed = new PromiseDelegate<void>();
   private _baseRenderer: TextRenderConfig | null = null;
   private _ready: Promise<void>;

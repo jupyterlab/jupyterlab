@@ -4,9 +4,12 @@
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Context, TextModelFactory } from '@jupyterlab/docregistry';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
+import { framePromise } from '@jupyterlab/testing';
 import { UUID } from '@lumino/coreutils';
 import type { CellRenderer } from '@lumino/datagrid';
 import { DataGrid, JSONModel } from '@lumino/datagrid';
+import { MessageLoop } from '@lumino/messaging';
+import type { DSVModel } from '../src';
 import { CSVViewer, GridSearchService } from '../src';
 
 function createContext(): Context<DocumentRegistry.IModel> {
@@ -32,6 +35,125 @@ describe('csvviewer/widget', () => {
       it('should be the context for the file', () => {
         const widget = new CSVViewer({ context });
         expect(widget.context).toBe(context);
+      });
+    });
+
+    describe('column sizes', () => {
+      let viewerContext: Context<DocumentRegistry.IModel>;
+      let widget: CSVViewer;
+      let grid: DataGrid;
+
+      beforeEach(async () => {
+        viewerContext = createContext();
+        await viewerContext.initialize(true);
+        viewerContext.model.fromString(
+          '# export\nid,name;label,value\n1,Alice;Bob,42'
+        );
+        widget = new CSVViewer({ context: viewerContext });
+        await widget.ready;
+        grid = Array.from(widget.children())[0] as DataGrid;
+        grid.resizeColumn('body', 0, 240);
+        grid.resizeColumn('body', 1, 320);
+        MessageLoop.flush();
+      });
+
+      afterEach(() => {
+        widget.dispose();
+        viewerContext.dispose();
+        jest.useRealTimers();
+      });
+
+      it.each(['comment', 'delimiter'] as const)(
+        'should preserve resized columns when changing the %s',
+        async option => {
+          expect(grid.columnSize('body', 0)).toBe(240);
+          expect(grid.columnSize('body', 1)).toBe(320);
+          const oldModel = grid.dataModel;
+          widget[option] = option === 'comment' ? '#' : ';';
+          await framePromise();
+          MessageLoop.flush();
+
+          expect(grid.dataModel).not.toBe(oldModel);
+          expect(grid.dataModel!.columnCount('body')).toBe(
+            option === 'comment' ? 3 : 2
+          );
+          expect(grid.dataModel!.data('column-header', 0, 0)).toBe(
+            option === 'comment' ? 'id' : '# export'
+          );
+          expect(grid.columnSize('body', 0)).toBe(240);
+          expect(grid.columnSize('body', 1)).toBe(320);
+        }
+      );
+
+      it('should restore widths when columns return after a delimiter change', async () => {
+        widget.delimiter = '|';
+        await framePromise();
+        MessageLoop.flush();
+        expect(grid.columnCount('body')).toBe(1);
+        expect(grid.columnSize('body', 0)).toBe(240);
+
+        widget.delimiter = ',';
+        await framePromise();
+        MessageLoop.flush();
+        expect(grid.columnCount('body')).toBe(3);
+        expect(grid.columnSize('body', 0)).toBe(240);
+        expect(grid.columnSize('body', 1)).toBe(320);
+        expect(grid.columnSize('body', 2)).toBe(grid.defaultSizes.columnWidth);
+      });
+
+      it('should preserve widths when changing both options together', async () => {
+        widget.delimiter = ';';
+        widget.comment = '#';
+        await framePromise();
+        MessageLoop.flush();
+        expect(grid.dataModel!.data('column-header', 0, 0)).toBe('id,name');
+        expect(grid.columnSize('body', 0)).toBe(240);
+        expect(grid.columnSize('body', 1)).toBe(320);
+      });
+
+      it('should preserve widths when changing options before pending resizes finish', async () => {
+        const oldModel = grid.dataModel;
+        widget.delimiter = ';';
+        for (let i = 0; i < 20 && grid.dataModel === oldModel; i++) {
+          await Promise.resolve();
+        }
+        expect(grid.dataModel).not.toBe(oldModel);
+        widget.comment = '#';
+        await framePromise();
+        MessageLoop.flush();
+        expect(grid.dataModel!.data('column-header', 0, 0)).toBe('id,name');
+        expect(grid.columnSize('body', 0)).toBe(240);
+        expect(grid.columnSize('body', 1)).toBe(320);
+      });
+
+      it('should preserve widths of columns discovered during delayed parsing', async () => {
+        widget.dispose();
+        viewerContext.model.fromString(
+          '# export\nid,name\n' + '1,Alice\n'.repeat(500) + '2,Bob,extra'
+        );
+        widget = new CSVViewer({ context: viewerContext });
+        await widget.ready;
+        grid = Array.from(widget.children())[0] as DataGrid;
+        await (grid.dataModel as DSVModel).ready;
+        grid.resizeColumn('body', 0, 240);
+        grid.resizeColumn('body', 2, 320);
+        MessageLoop.flush();
+        expect(grid.columnSize('body', 2)).toBe(320);
+
+        jest.useFakeTimers({ doNotFake: ['requestAnimationFrame'] });
+        widget.comment = '#';
+        await framePromise();
+        MessageLoop.flush();
+        expect(grid.columnCount('body')).toBe(2);
+        grid.resizeColumn('body', 0, 280);
+        MessageLoop.flush();
+        jest.runOnlyPendingTimers();
+        await (grid.dataModel as DSVModel).ready;
+        MessageLoop.flush();
+
+        expect(grid.columnCount('body')).toBe(3);
+        expect(grid.columnSize('body', 0)).toBe(280);
+        expect(grid.columnSize('body', 2)).toBe(320);
       });
     });
 
