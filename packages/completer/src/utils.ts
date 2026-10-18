@@ -6,9 +6,9 @@ import type { SourceChange } from '@jupyter/ydoc';
 /**
  * Whether a source change should trigger continuous completion.
  *
- * Continuous completion is limited to a single identifier character so that
- * punctuation, whitespace, and multi-character edits such as pastes do not
- * open the completer.
+ * Continuous completion is limited to a single identifier or member-access
+ * character so that other punctuation, whitespace, and multi-character edits
+ * such as pastes do not open the completer.
  */
 export function isContinuousHintingChange(changed: SourceChange): boolean {
   const sourceChange = changed.sourceChange;
@@ -20,7 +20,7 @@ export function isContinuousHintingChange(changed: SourceChange): boolean {
   }
 
   const inserted = sourceChange.map(delta => delta.insert ?? '').join('');
-  return /^[\p{L}\p{N}\p{M}_$]$/u.test(inserted);
+  return /^[\p{L}\p{N}\p{M}_$.]$/u.test(inserted);
 }
 
 /**
