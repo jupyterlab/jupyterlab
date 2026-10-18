@@ -14,6 +14,7 @@ import {
 import { framePromise, JupyterServer } from '@jupyterlab/testing';
 import { CommandRegistry } from '@lumino/commands';
 import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { Signal } from '@lumino/signaling';
 import type { PanelLayout } from '@lumino/widgets';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
@@ -358,6 +359,60 @@ describe('@jupyterlab/ui-components', () => {
         expect(buttonNode.classList.contains('lm-mod-hidden')).toBe(false);
         enabled = false;
         visible = false;
+        button.dispose();
+      });
+
+      it('should update state classes when an additional signal fires', async () => {
+        visible = false;
+        const emitter = {};
+        const signal = new Signal<typeof emitter, void>(emitter);
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId,
+          additionalSignals: [signal]
+        });
+        await render(button);
+        expect(button.hasClass('lm-mod-hidden')).toBe(true);
+        visible = true;
+        signal.emit();
+        await framePromise();
+        await button.renderPromise;
+        expect(button.hasClass('lm-mod-hidden')).toBe(false);
+        visible = false;
+        button.dispose();
+      });
+
+      it('should re-render when an additional signal fires', async () => {
+        enabled = true;
+        visible = true;
+        let iconClassValue = 'initial-icon-class';
+        const id = 'test:additional-signal-rerender';
+        const cmd = commands.addCommand(id, {
+          execute: () => {
+            /* no op */
+          },
+          iconClass: () => iconClassValue
+        });
+        const emitter = {};
+        const signal = new Signal<typeof emitter, void>(emitter);
+        const button = new CommandToolbarButton({
+          commands,
+          id,
+          additionalSignals: [signal]
+        });
+        await render(button);
+        const buttonNode = button.node.firstChild as HTMLButtonElement;
+        const iconNode = buttonNode.firstChild as HTMLElement;
+        expect(iconNode.classList.contains('initial-icon-class')).toBe(true);
+        iconClassValue = 'updated-icon-class';
+        signal.emit();
+        await framePromise();
+        await button.renderPromise;
+        const updatedIconNode = buttonNode.firstChild as HTMLElement;
+        expect(updatedIconNode.classList.contains('updated-icon-class')).toBe(
+          true
+        );
+        cmd.dispose();
         button.dispose();
       });
 
