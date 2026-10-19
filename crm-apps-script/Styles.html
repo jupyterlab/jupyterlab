@@ -338,6 +338,12 @@
   .form-panel > .field, .alloc-box { min-width: 0; }
   .dual { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 16px; }
   @media (max-width: 1400px) { .dual { grid-template-columns: minmax(0, 1fr); } }
+  .brand-logo { width: auto; max-width: 120px; height: 38px; object-fit: contain; border-radius: 6px; background: #fff; padding: 2px; flex: 0 0 auto; }
+  .login-card .brand-logo { height: 46px; max-width: 160px; }
+  .logo-box { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; padding: 12px; border: 1px dashed var(--border); border-radius: 8px; background: var(--page); }
+  .logo-preview { width: 180px; height: 80px; display: grid; place-items: center; border-radius: 6px; background: #fff; color: #999; }
+  .logo-preview img { max-width: 170px; max-height: 72px; object-fit: contain; }
+  .logo-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; flex: 1; min-width: 200px; }
   .method-bars { display: grid; gap: 10px; padding: 16px; border-bottom: 1px solid var(--border); }
   .mrow { display: grid; grid-template-columns: 110px minmax(0, 1fr) 110px 40px; align-items: center; gap: 10px; font-size: 11px; color: var(--muted); }
   .mrow .meter { margin-top: 0; height: 8px; }

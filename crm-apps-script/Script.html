@@ -2,7 +2,7 @@
 /* ═══════════════════════════ CRM Console — client ═══════════════════════════ */
 
 /** Must match APP_VERSION in Code.gs. */
-const CLIENT_VERSION = '6';
+const CLIENT_VERSION = '7';
 
 // ───────── Translations (Arabic default, English toggle) ─────────
 const I18N = {
@@ -93,6 +93,9 @@ const I18N = {
     passwordHint: 'اتركها فارغة للإبقاء على كلمة المرور الحالية', pagesN: '{n} صفحة', day: 'يوم',
     settingsSaved: 'تم حفظ الإعدادات',
     err_OUTDATED: 'ملف Code.gs في Apps Script غير محدّث: استبدله بالنسخة الجديدة كاملة، احفظ (Ctrl+S)، ثم Deploy ← Manage deployments ← تعديل ← New version.',
+    editReceipt: 'تعديل سند التحصيل', CompanyLogo: 'شعار الشركة', uploadLogo: 'رفع شعار', removeLogo: 'إزالة الشعار',
+    logoHint: 'PNG أو JPG أو SVG — يُصغَّر تلقائياً ويظهر في القائمة وشاشة الدخول وكل المطبوعات وكشوف الحساب',
+    logoSaved: 'تم حفظ الشعار', err_LOGO_INVALID: 'الصورة غير مدعومة أو كبيرة جداً، جرّب صورة أبسط',
     mtdByMethod: 'التحصيل هذا الشهر حسب الطريقة', mtdPerformance: 'أداء المحصلين هذا الشهر',
     p_collections: 'تقرير التحصيل', s_collections: 'المبالغ المحصّلة خلال الفترة حسب طريقة الدفع والمحصّل.',
     p_performance: 'أداء المحصلين', s_performance: 'لكل مسؤول تحصيل: عدد الشركات، المبالغ المستحقة، المحصّل، المتبقي ونسبة التحصيل خلال الفترة.',
@@ -220,6 +223,9 @@ const I18N = {
     passwordHint: 'Leave empty to keep the current password', pagesN: '{n} pages', day: 'days',
     settingsSaved: 'Settings saved',
     err_OUTDATED: 'Code.gs in Apps Script is out of date: replace it with the new version, save (Ctrl+S), then Deploy → Manage deployments → Edit → New version.',
+    editReceipt: 'Edit collection receipt', CompanyLogo: 'Company logo', uploadLogo: 'Upload logo', removeLogo: 'Remove logo',
+    logoHint: 'PNG, JPG or SVG — resized automatically; shown in the menu, sign-in screen, all printouts and statements',
+    logoSaved: 'Logo saved', err_LOGO_INVALID: 'Image not supported or too large, try a simpler one',
     mtdByMethod: 'Collections this month by method', mtdPerformance: 'Collector performance this month',
     p_collections: 'Collections report', s_collections: 'Amounts collected in the period by payment method and collector.',
     p_performance: 'Collector performance', s_performance: 'Per collector: companies, amounts due, collected, remaining and collection rate for the period.',
@@ -473,7 +479,7 @@ function renderLogin(err) {
   $('#root').innerHTML = `
     <div class="login">
       <form class="panel login-card form-panel" id="loginForm">
-        <div class="brand"><div class="brand-mark">↗</div><div><p class="brand-name">${esc(t('app'))}</p><p class="brand-caption">${esc(t('caption'))}</p></div></div>
+        <div class="brand">${brandMark(S.branding)}<div><p class="brand-name">${esc((S.branding && S.branding.AppName) || t('app'))}</p><p class="brand-caption">${esc((S.branding && S.branding.CompanyName) || t('caption'))}</p></div></div>
         <div><h1>${t('welcome')}</h1><p class="subtitle">${t('loginHint')}</p></div>
         <label class="field">${t('f_username')}<input name="u" autocomplete="username" required></label>
         <label class="field">${t('f_password')}<input name="p" type="password" autocomplete="current-password" required></label>
@@ -492,6 +498,46 @@ async function checkVersion() {
   try { S.serverVersion = await run('getVersion'); } catch (e) { S.serverVersion = 'missing'; }
   S.outdated = S.serverVersion !== CLIENT_VERSION;
   showOutdated();
+  if (!S.outdated) { // logo / names on the sign-in screen
+    try { S.branding = await run('getBranding'); if (!S.user && $('#loginForm')) renderLogin(); } catch (e) {}
+  }
+}
+const brandMark = st => st && st.CompanyLogo ? `<img class="brand-logo" src="${esc(st.CompanyLogo)}" alt="">` : '<div class="brand-mark">↗</div>';
+
+/** Shrinks an uploaded image so the data URL fits in one Google Sheets cell (< 48 KB). */
+function logoDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('LOGO_INVALID'));
+      img.onload = () => {
+        let w = img.naturalWidth || 400, h = img.naturalHeight || 160;
+        const k = Math.min(1, 400 / w, 160 / h);
+        w = Math.max(1, Math.round(w * k)); h = Math.max(1, Math.round(h * k));
+        for (let step = 0; step < 6; step++) {
+          const c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          let url = c.toDataURL('image/png');
+          if (url.length > 48000) url = c.toDataURL('image/webp', .85);
+          if (url.length > 48000) url = c.toDataURL('image/jpeg', .85);
+          if (url.length <= 48000) return resolve(url);
+          w = Math.round(w * .75); h = Math.round(h * .75);
+        }
+        reject(new Error('LOGO_INVALID'));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+async function saveLogo(url) {
+  S.settings = await call('saveSettings', { CompanyLogo: url });
+  S.branding = Object.assign(S.branding || {}, { CompanyLogo: url });
+  toast(t('logoSaved'));
+  renderShell(); go('users');
 }
 function showOutdated() {
   if (!S.outdated) return;
@@ -539,7 +585,7 @@ function renderShell() {
   $('#root').innerHTML = `
   <div class="app ${store.get('crm_sidebar') === 'hidden' ? 'collapsed' : ''}" id="app">
     <aside class="sidebar" id="sidebar">
-      <div class="brand"><div class="brand-mark">↗</div><div><p class="brand-name">${esc(S.settings.AppName || t('app'))}</p><p class="brand-caption">${esc(S.settings.CompanyName || t('caption'))}</p></div></div>
+      <div class="brand">${brandMark(S.settings)}<div><p class="brand-name">${esc(S.settings.AppName || t('app'))}</p><p class="brand-caption">${esc(S.settings.CompanyName || t('caption'))}</p></div></div>
       ${nav('workspace')}${nav('reports')}${nav('admin')}
       <div class="profile"><div class="avatar">${esc((u.fullName || u.username)[0].toUpperCase())}</div>
         <div><p class="profile-name">${esc(u.fullName || u.username)}</p><p class="profile-role">${esc(t(u.role))}</p></div>
@@ -723,7 +769,7 @@ const LISTS = {
     select: r => can('post') && r.postStatus === 'Draft',
     actions: r => {
       const draft = r.postStatus === 'Draft';
-      return (draft && can('edit') ? `<button data-act="rowEdit" title="${t('edit')}">✎</button>` : '') +
+      return (draft && can('edit') && (!r.payMethod || hasPage('receipts')) ? `<button data-act="rowEdit" title="${t('edit')}">✎</button>` : '') +
         (draft && can('post') ? `<button data-act="rowPost" title="${t('post')}">⇪</button>` : '') +
         (!draft && S.user.isAdmin ? `<button data-act="rowUnpost" title="${t('unpost')}">↺</button>` : '') +
         ((draft || S.user.isAdmin) && can('delete') ? `<button data-act="rowDelete" title="${t('del')}">🗑</button>` : '');
@@ -745,7 +791,8 @@ const LISTS = {
     select: r => can('post') && r.postStatus === 'Draft',
     actions: r => {
       const draft = r.postStatus === 'Draft';
-      return (r.payMethod ? `<button data-act="rowReceipt" title="${t('printReceipt')}">🖨</button>` : '') +
+      return (draft && r.payMethod && can('edit') ? `<button data-act="rowEdit" title="${t('edit')}">✎</button>` : '') +
+        (r.payMethod ? `<button data-act="rowReceipt" title="${t('printReceipt')}">🖨</button>` : '') +
         (draft && can('post') ? `<button data-act="rowPost" title="${t('post')}">⇪</button>` : '') +
         (!draft && S.user.isAdmin ? `<button data-act="rowUnpost" title="${t('unpost')}">↺</button>` : '') +
         ((draft || S.user.isAdmin) && can('delete') ? `<button data-act="rowDelete" title="${t('del')}">🗑</button>` : '');
@@ -1184,7 +1231,12 @@ const VIEWS = {
         <h2 class="section-title">${t('settings')}</h2>
         <div class="form-grid">${SETTING_INPUTS.map(k =>
           `<label class="field">${t(k)}<input name="${k}" value="${esc(st[k] || '')}" ${k === 'SessionMinutes' ? 'type="number" min="5" max="360"' : ''}></label>`).join('')}
-          ${SETTING_TEXTS.map(k => `<label class="field span2">${t(k)}<textarea name="${k}">${esc(st[k] || '')}</textarea></label>`).join('')}</div>
+          ${SETTING_TEXTS.map(k => `<label class="field span2">${t(k)}<textarea name="${k}">${esc(st[k] || '')}</textarea></label>`).join('')}
+          <div class="field span2">${t('CompanyLogo')}<div class="logo-box">
+            <div class="logo-preview">${st.CompanyLogo ? `<img src="${esc(st.CompanyLogo)}" alt="">` : '<span>—</span>'}</div>
+            <div class="logo-actions"><label class="button-ghost link-btn" style="cursor:pointer">⇪ ${t('uploadLogo')}<input type="file" id="logoFile" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif" hidden></label>
+              ${st.CompanyLogo ? btn('removeLogo', t('removeLogo'), 'button-danger') : ''}
+              <span class="field-hint">${t('logoHint')}</span></div></div></div></div>
         <div style="display:flex;justify-content:end"><button class="button-primary" type="submit">${t('save')}</button></div>
       </form>`);
     loadList('users');
@@ -1644,6 +1696,7 @@ const DOC_CSS = `
 .doc table.sign span{display:block;border-top:1px solid #333;padding-top:4px}
 .doc .note{border:1px dashed #9ca3af;padding:6px 8px;margin-top:10px;font-size:8.3pt;white-space:pre-line}
 .doc .filt{margin:0 0 6px}
+.doc img.doc-logo{display:block;max-height:60px;max-width:200px;margin-bottom:6px}
 .doc .stamp{display:inline-block;border:2px solid #b45309;color:#b45309;padding:2px 10px;font-weight:bold;transform:rotate(-4deg)}
 .doc .big{font-size:13pt;font-weight:bold;direction:ltr;display:inline-block}
 .doc.landscape .grid td,.doc.landscape .grid th{font-size:7.6pt}
@@ -1655,7 +1708,7 @@ const methodName = m => m ? t(m) : t('OtherMethod');
 
 function companyHeader(title, pairs) {
   const st = docSettings();
-  return `<table class="hdr"><tr><td><h1>${esc(st.CompanyName || st.AppName || t('app'))}</h1>
+  return `<table class="hdr"><tr><td>${st.CompanyLogo ? `<img class="doc-logo" src="${esc(st.CompanyLogo)}" alt="">` : ''}<h1>${esc(st.CompanyName || st.AppName || t('app'))}</h1>
     <div class="muted">${esc(st.CompanyAddress || '')}${st.CompanyAddress ? '<br>' : ''}${esc([st.CompanyPhone, st.CompanyEmail].filter(Boolean).join(' · '))}</div></td>
     <td class="hdr-r"><div class="doc-title">${esc(title)}</div>${pairs.filter(p => p[1] !== '' && p[1] != null).map(p =>
       `<div><span class="muted">${esc(p[0])}:</span> <b>${esc(p[1])}</b></div>`).join('')}</td></tr></table>`;
@@ -1798,25 +1851,29 @@ function closeModal() { $('#modal').hidden = true; $('#modalCard').innerHTML = '
 
 // ───────── Collection receipt form (invoice-linked) ─────────
 const payOpts = () => (S.lookups.payMethods || ['Cash', 'Cheque', 'Transfer']).map(m => [m, t(m)]);
-function openCollect(account) {
+/** New collection, or edit of an unposted receipt when rc (from getReceipt) is given. */
+function openCollect(account, rc) {
   S.rcOpen = [];
+  S.rcEdit = rc || null;
+  const x = rc ? rc.tx : {};
+  if (rc) account = x.account;
   openDrawer(`
-    <div class="drawer-head"><h2>⊕ ${t('collect')}</h2><button class="icon-button" data-act="closeDrawer" aria-label="${t('close')}">×</button></div>
+    <div class="drawer-head"><h2>${rc ? '✎ ' + t('editReceipt') + ' — ' + esc(x.voucher) : '⊕ ' + t('collect')}</h2><button class="icon-button" data-act="closeDrawer" aria-label="${t('close')}">×</button></div>
     <form class="form-panel" id="rcForm" style="padding:16px 0 0">
       <div class="form-grid">
         <label class="field span2">${t('f_account')} <span class="req">*</span><select name="account" required><option value=""></option>${opts(customerOpts(), account)}</select></label>
-        <label class="field">${t('f_date')} <span class="req">*</span><input type="date" name="date" value="${today()}" required></label>
-        <label class="field">${t('receiptNo')}<input name="voucher" placeholder="${t('autoNo')}"></label>
-        <label class="field">${t('f_payMethod')} <span class="req">*</span><select name="payMethod">${opts(payOpts(), 'Cash')}</select></label>
-        <label class="field">${t('f_currency')}<select name="currency">${opts(currencyOpts(), localCur())}</select></label>
-        <label class="field" data-m="Cheque">${t('f_chequeNo')} <span class="req">*</span><input name="chequeNo"></label>
-        <label class="field" data-m="Cheque">${t('f_chequeDate')}<input type="date" name="chequeDate"></label>
-        <label class="field" data-m="Cheque Transfer">${t('f_bankName')}<input name="bankName"></label>
-        <label class="field" data-m="Transfer">${t('f_payRef')}<input name="payRef"></label>
-        <label class="field">${t('f_exchange')}<input name="exchange" type="text" inputmode="decimal" data-num value="1"></label>
+        <label class="field">${t('f_date')} <span class="req">*</span><input type="date" name="date" value="${esc(x.date || today())}" required></label>
+        <label class="field">${t('receiptNo')}<input name="voucher" value="${esc(x.voucher || '')}" placeholder="${t('autoNo')}"></label>
+        <label class="field">${t('f_payMethod')} <span class="req">*</span><select name="payMethod">${opts(payOpts(), x.payMethod || 'Cash')}</select></label>
+        <label class="field">${t('f_currency')}<select name="currency">${opts(currencyOpts(x.currency ? [String(x.currency).toUpperCase()] : []), (x.currency || localCur()).toUpperCase())}</select></label>
+        <label class="field" data-m="Cheque">${t('f_chequeNo')} <span class="req">*</span><input name="chequeNo" value="${esc(x.chequeNo || '')}"></label>
+        <label class="field" data-m="Cheque">${t('f_chequeDate')}<input type="date" name="chequeDate" value="${esc(x.chequeDate || '')}"></label>
+        <label class="field" data-m="Cheque Transfer">${t('f_bankName')}<input name="bankName" value="${esc(x.bankName || '')}"></label>
+        <label class="field" data-m="Transfer">${t('f_payRef')}<input name="payRef" value="${esc(x.payRef || '')}"></label>
+        <label class="field">${t('f_exchange')}<input name="exchange" type="text" inputmode="decimal" data-num value="${esc(fmtInputNum(x.exchange || 1))}"></label>
       </div>
       <div class="field">${t('pickInvoices')} <span class="req">*</span><div id="allocBox" class="alloc-box"><div class="empty">${t('chooseCustomer')}</div></div></div>
-      <label class="field">${t('f_description')}<textarea name="description"></textarea></label>
+      <label class="field">${t('f_description')}<textarea name="description">${esc(/^Collection - (Cash|Cheque|Transfer)$/.test(x.description || '') ? '' : (x.description || ''))}</textarea></label>
       ${can('post') ? `<label class="check"><input type="checkbox" name="post">${t('postNow')}</label>` : ''}
       <div class="form-actions"><button type="button" class="button-ghost" data-act="closeDrawer">${t('cancel')}</button><button class="button-primary" type="submit">${t('save')}</button></div>
     </form>`, true);
@@ -1832,7 +1889,8 @@ async function loadAlloc(account) {
   const box = $('#allocBox');
   if (!account) { box.innerHTML = `<div class="empty">${t('chooseCustomer')}</div>`; return; }
   box.innerHTML = `<div class="skeleton">${t('loading')}</div>`;
-  const r = await call('getOpenInvoices', account);
+  const ed = S.rcEdit && S.rcEdit.tx.account === account ? S.rcEdit : null;
+  const r = await call('getOpenInvoices', account, ed ? ed.tx.rowId : '');
   S.rcOpen = r.invoices;
   const lc = r.currency;
   box.innerHTML = r.invoices.length ? `
@@ -1844,6 +1902,25 @@ async function loadAlloc(account) {
         <td class="num"><input class="alloc-amt" type="text" inputmode="decimal" data-num data-aamt="${k}"></td></tr>`).join('')}</tbody>
       <tfoot><tr><td colspan="6">${t('allocated')}</td><td class="num"><b id="rcSum">0.00</b> <small class="cur">${esc(lc)}</small></td></tr></tfoot></table></div>`
     : `<div class="empty">${t('noOpenInvoices')}</div><label class="field">${t('onAccount')} (${esc(lc)})<input name="onAccount" type="text" inputmode="decimal" data-num></label>`;
+  if (ed) { // put back the amounts this receipt already pays
+    const left = {};
+    ed.allocations.forEach(a => { left[a.invoiceVoucher] = (left[a.invoiceVoucher] || 0) + a.amount; });
+    $$('[data-aamt]', box).forEach(el => {
+      const inv = S.rcOpen[+el.dataset.aamt], v = Math.min(left[inv.voucher] || 0, inv.remaining);
+      if (v > 0) { el.value = groupDigits(String(Math.round(v * 100) / 100)); left[inv.voucher] -= v; }
+    });
+    const onAcc = $('[name=onAccount]', box);
+    if (onAcc) {
+      const total = (+ed.tx.creditMST || 0) - (+ed.tx.debitMST || 0) - ed.allocations.reduce((s, a) => s + a.amount, 0);
+      if (total > 0) onAcc.value = groupDigits(String(Math.round(total * 100) / 100));
+    }
+    rcSum();
+  }
+}
+async function editReceipt(rowId) {
+  const rc = await call('getReceipt', rowId);
+  if (rc.tx.postStatus !== 'Draft') { toast(t('err_POSTED_LOCKED'), 'error'); return; }
+  openCollect(rc.tx.account, rc);
 }
 function rcSum() {
   let s = 0;
@@ -1875,6 +1952,7 @@ async function submitReceipt(form) {
   const b = form.querySelector('button[type=submit]'); b.disabled = true;
   try {
     const r = await call('saveReceipt', {
+      rowId: S.rcEdit ? S.rcEdit.tx.rowId : '',
       account: E.account.value, date: E.date.value, voucher: E.voucher.value.trim(), payMethod: E.payMethod.value,
       chequeNo: E.chequeNo.value.trim(), chequeDate: E.chequeDate.value, bankName: E.bankName.value.trim(), payRef: E.payRef.value.trim(),
       currency: E.currency.value, exchange: parseNum(E.exchange.value) || 1, description: E.description.value.trim(),
@@ -2066,6 +2144,7 @@ const ACT = {
   msgTab(el) { S.msgBox = el.dataset.tab; VIEWS.messages(); },
   async markAll() { await call('markMessagesRead', 'ALL'); pollUnread(); VIEWS.messages(); },
   async msgDelete(el) { if (!confirm(t('confirmDelete'))) return; await call('deleteMessage', el.dataset.id); closeDrawer(); toast(t('deleted')); VIEWS.messages(); },
+  removeLogo() { if (confirm(t('confirmDelete'))) saveLogo(''); },
   newReceipt(el) { openCollect((el && el.dataset.acc) || ''); },
   rowReceipt(el) { printReceipt(rowOf(el).row.rowId); },
   runReport,
@@ -2081,7 +2160,11 @@ const ACT = {
     call('listRecords', 'Customers', { filters: { account: el.dataset.acc }, pageSize: 5 }).then(r => r.rows[0] && openForm('Customers', r.rows[0], false));
   },
   stmtApply() { const tl = $('#stmtTools'); const v = readTools(tl); openCustomer(tl.dataset.acc, v.from, v.to, true, v.currency); },
-  rowEdit(el) { const { view, row } = rowOf(el); openForm(LISTS[view].entity, row, false); },
+  rowEdit(el) {
+    const { view, row } = rowOf(el);
+    if (LISTS[view].entity === 'Transactions' && row.payMethod) editReceipt(row.rowId); // receipts keep their invoice links
+    else openForm(LISTS[view].entity, row, false);
+  },
   async rowDelete(el) {
     const { view, row } = rowOf(el);
     if (!confirm(t('confirmDelete'))) return;
@@ -2209,6 +2292,7 @@ document.addEventListener('change', e => {
     s.pageSize = +e.target.value; s.page = 1; loadList(v); return;
   }
   if (e.target.id === 'impFile' && e.target.files[0]) readImportFile(e.target.files[0]);
+  if (e.target.id === 'logoFile' && e.target.files[0]) logoDataUrl(e.target.files[0]).then(saveLogo).catch(() => toast(t('err_LOGO_INVALID'), 'error'));
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { if (!$('#modal').hidden) closeModal(); else closeDrawer(); }

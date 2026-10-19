@@ -74,8 +74,13 @@ const PAY_METHODS = ['Cash', 'Cheque', 'Transfer'];
 const ENTITY_PAGE = { Customers: 'customers', Transactions: 'transactions', CustomerGroups: 'groups', FollowUps: 'followup', Users: 'users', Currencies: 'currencies' };
 
 /** Must match CLIENT_VERSION in Script.html — a mismatch means Code.gs was not updated/deployed. */
-const APP_VERSION = '6';
+const APP_VERSION = '7';
 function getVersion() { return APP_VERSION; }
+/** Public branding for the sign-in screen (no login needed, nothing sensitive). */
+function getBranding() {
+  const s = getSettings_();
+  return { AppName: s.AppName || '', CompanyName: s.CompanyName || '', CompanyLogo: s.CompanyLogo || '' };
+}
 
 // Per-execution read cache: every server call re-reads the sheet once at most.
 const MEMO = {};
@@ -793,6 +798,10 @@ function getTemplateHeaders(token, entity) {
 function saveSettings(token, values) {
   const user = auth_(token, 'users');
   if (!user.isAdmin) throw new Error('NO_PERMISSION');
+  if (values.CompanyLogo !== undefined) { // small data:image URL that fits in one sheet cell
+    const v = String(values.CompanyLogo || '');
+    if (v && (!/^data:image\/(png|jpeg|webp|gif|svg\+xml);base64,/.test(v) || v.length > 49000)) throw new Error('LOGO_INVALID');
+  }
   return withLock_(function () {
     const rows = readTable('Settings');
     Object.keys(values).forEach(function (k) {
@@ -910,11 +919,11 @@ function allocationsByPayment_() {
 }
 
 /** Open (unpaid) invoices of a customer in local currency, minus amounts held by draft receipts. */
-function openInvoices_(user, account) {
+function openInvoices_(user, account, excludeRowId) {
   const L = ledger_(user, '9999-12-31', getSettings_().LocalCurrency);
   const drafts = {};
   readTable('Transactions').forEach(function (t) {
-    if (t.account === account && !t.isDeleted && t.postStatus === 'Draft') drafts[t.rowId] = true;
+    if (t.account === account && !t.isDeleted && t.postStatus === 'Draft' && t.rowId !== excludeRowId) drafts[t.rowId] = true;
   });
   const pending = {};
   readTable('Allocations').forEach(function (a) {
@@ -932,10 +941,25 @@ function openInvoices_(user, account) {
   return { invoices: rows, currency: L.fx.local, customer: L.cmap[account] };
 }
 
-function getOpenInvoices(token, account) {
+function getOpenInvoices(token, account, excludeRowId) {
   const user = auth_(token, 'receipts');
   assertCustomerVisible_(user, account);
-  return openInvoices_(user, account);
+  return openInvoices_(user, account, excludeRowId || '');
+}
+
+/** Removes the invoice links of a receipt (used when the receipt is edited). */
+function deleteAllocations_(rowId) {
+  const sh = sheet_('Allocations');
+  const last = sh.getLastRow();
+  if (last < 2) return;
+  const hm = headerMap_(sh), idx = fieldIndex_('Allocations', hm);
+  const range = sh.getRange(2, 1, last - 1, hm.headers.length);
+  const values = range.getValues();
+  const keep = values.filter(function (row) { return String(row[idx.paymentRowId]) !== String(rowId); });
+  if (keep.length === values.length) return;
+  invalidate_();
+  range.clearContent();
+  if (keep.length) sh.getRange(2, 1, keep.length, hm.headers.length).setValues(keep);
 }
 
 function nextReceiptNo_() {
@@ -953,7 +977,8 @@ function nextReceiptNo_() {
  */
 function saveReceipt(token, r) {
   const user = auth_(token, 'receipts');
-  requireAction_(user, 'add');
+  const editing = !!r.rowId;
+  requireAction_(user, editing ? 'edit' : 'add');
   assertCustomerVisible_(user, r.account);
   if (PAY_METHODS.indexOf(r.payMethod) === -1) throw new Error('REQUIRED_FIELDS');
   if (r.payMethod === 'Cheque' && !String(r.chequeNo || '').trim()) throw new Error('CHEQUE_REQUIRED');
@@ -962,7 +987,14 @@ function saveReceipt(token, r) {
     .filter(function (a) { return a.voucher && a.amount > 0; });
   const onAccount = round2_(Math.max(0, toNum_(r.onAccount)));
   return withLock_(function () {
-    const open = openInvoices_(user, r.account);
+    let existing = null;
+    if (editing) { // only unposted receipts can be changed
+      existing = getById_('Transactions', r.rowId);
+      if (existing.isDeleted || !existing.payMethod) throw new Error('NOT_FOUND');
+      if (existing.postStatus !== 'Draft') throw new Error('POSTED_LOCKED');
+      assertCustomerVisible_(user, existing.account);
+    }
+    const open = openInvoices_(user, r.account, editing ? r.rowId : '');
     if (!allocs.length && !(onAccount > 0 && !open.invoices.length)) throw new Error('INVOICE_REQUIRED');
     const left = {};
     open.invoices.forEach(function (i) { left[i.voucher] = round2_((left[i.voucher] || 0) + i.remaining); });
@@ -971,8 +1003,8 @@ function saveReceipt(token, r) {
       left[a.voucher] = round2_(left[a.voucher] - a.amount);
     });
     const total = round2_(allocs.reduce(function (s, a) { return s + a.amount; }, 0) + onAccount);
-    const voucher = String(r.voucher || '').trim() || nextReceiptNo_();
-    if (readTable('Transactions').some(function (t) { return !t.isDeleted && t.payMethod && String(t.voucher) === voucher; })) throw new Error('DUPLICATE_ID');
+    const voucher = String(r.voucher || '').trim() || (existing ? existing.voucher : nextReceiptNo_());
+    if (readTable('Transactions').some(function (t) { return !t.isDeleted && t.payMethod && String(t.voucher) === voucher && t.rowId !== r.rowId; })) throw new Error('DUPLICATE_ID');
     const now = new Date(), who = user.fullName || user.username;
     const exchange = toNum_(r.exchange) || 1;
     const post = !!r.post && (user.isAdmin || user.canPost);
@@ -985,12 +1017,18 @@ function saveReceipt(token, r) {
       payMethod: r.payMethod, chequeNo: r.chequeNo || '', chequeDate: r.chequeDate || '', bankName: r.bankName || '',
       payRef: r.payRef || '', collectedBy: user.username
     };
-    appendRows('Transactions', [tx]);
+    if (existing) { // keep identity and audit fields, replace the rest and the invoice links
+      ['rowId', 'userAdd', 'createdById', 'createdByName', 'createdAt', 'collectedBy'].forEach(function (k) { tx[k] = existing[k]; });
+      updateRow_('Transactions', existing._row, tx);
+      deleteAllocations_(tx.rowId);
+    } else {
+      appendRows('Transactions', [tx]);
+    }
     appendRows('Allocations', allocs.map(function (a) {
       return { id: Utilities.getUuid(), paymentRowId: tx.rowId, paymentVoucher: voucher, account: r.account,
         invoiceVoucher: a.voucher, amount: a.amount, date: r.date, createdBy: who, createdAt: now };
     }));
-    if (!post) {
+    if (!post && !existing) {
       const posters = readTable('Users').filter(function (u) {
         return u.active && u.username !== user.username && (u.role === 'Admin' || u.canPost);
       }).map(function (u) { return u.username; });
@@ -1013,7 +1051,7 @@ function publicSettings_() {
   const s = getSettings_();
   const out = {};
   ['AppName', 'CompanyName', 'CompanyAddress', 'CompanyPhone', 'CompanyEmail', 'BankDetails', 'StatementNote',
-    'WhatsAppCountryCode', 'LocalCurrency', 'ReportCurrency'].forEach(function (k) { out[k] = s[k] || ''; });
+    'WhatsAppCountryCode', 'LocalCurrency', 'ReportCurrency', 'CompanyLogo'].forEach(function (k) { out[k] = s[k] || ''; });
   return out;
 }
 
