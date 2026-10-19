@@ -3043,12 +3043,17 @@ function addCommands(
     commands.notifyCommandChanged(CommandIDs.runAndAdvance);
     commands.notifyCommandChanged(CommandIDs.runAndInsert);
   });
-  tracker.activeCellChanged.connect(() => {
-    commands.notifyCommandChanged(CommandIDs.deleteCell);
+  tracker.activeCellChanged.connect((_, cell) => {
     commands.notifyCommandChanged(CommandIDs.moveUp);
     commands.notifyCommandChanged(CommandIDs.moveDown);
     commands.notifyCommandChanged(CommandIDs.selectLastModifiedCell);
     commands.notifyCommandChanged(CommandIDs.selectNextModifiedCell);
+    if (cell) {
+      cell.model.metadataChanged.connect(() => {
+        commands.notifyCommandChanged(CommandIDs.deleteCell);
+        commands.notifyCommandChanged(CommandIDs.showNonEditable);
+      });
+    }
   });
   tracker.widgetAdded.connect((_, panel) => {
     panel.content.stateChanged.connect((_, args) => {
@@ -3941,6 +3946,7 @@ function addCommands(
         ) as unknown as boolean) !== true;
       const visible = settings?.get('showLockForReadOnlyCells')
         .composite as boolean;
+      console.warn('[read-only cell] isVisible check fired ', noteditable);
       return noteditable && visible;
     },
     describedBy: {
@@ -3991,6 +3997,7 @@ function addCommands(
         (current.content.activeCell?.model.getMetadata(
           'deletable'
         ) as unknown as boolean) !== false;
+      console.warn('[deletable cell] isEnable check fired ', deletable);
       return deletable && !Private.isViewOnly(tracker);
     },
     isVisible: () => !Private.isViewOnly(tracker),
