@@ -315,7 +315,7 @@ async function activateConsole(
     args: ReadonlyPartialJSONObject
   ) => {
     let newArgs = { ...args };
-    let kernelConfigurarion: PartialJSONObject = {};
+    let kernelConfiguration: PartialJSONObject = {};
     let label = trans.__('Cancel');
     const buttons = [
       Dialog.cancelButton({
@@ -331,9 +331,9 @@ async function activateConsole(
       title: trans.__('Select Kernel'),
       body: new DialogWidget(
         parameters,
-        kernelConfigurarion,
+        kernelConfiguration,
         formData => {
-          kernelConfigurarion = formData as PartialJSONObject;
+          kernelConfiguration = formData as PartialJSONObject;
         },
         trans
       ),
@@ -346,13 +346,13 @@ async function activateConsole(
       return;
     }
     if (result.value) {
-      if (kernelConfigurarion) {
+      if (kernelConfiguration) {
         if (args.kernelPreference) {
           let kernelPreference =
             args.kernelPreference as ReadonlyPartialJSONObject;
           newArgs.kernelPreference = {
             ...kernelPreference,
-            customKernelSpecs: kernelConfigurarion
+            customKernelSpecs: kernelConfiguration
           };
         }
       }

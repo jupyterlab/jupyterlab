@@ -656,7 +656,11 @@ export class DocumentRegistry implements IDisposable {
       shouldStart: widgetFactory.preferKernel,
       canStart: widgetFactory.canStartKernel,
       shutdownOnDispose: widgetFactory.shutdownOnClose,
-      autoStartDefault: widgetFactory.autoStartDefault
+      autoStartDefault: widgetFactory.autoStartDefault,
+      customKernelSpecs:
+        kernel && kernel.custom_kernel_specs
+          ? { ...kernel.custom_kernel_specs }
+          : undefined
     };
   }
 

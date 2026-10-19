@@ -2515,7 +2515,7 @@ function activateNotebookHandler(
     kernelId: string,
     kernelName: string
   ) => {
-    let kernelConfigurarion: PartialJSONObject = {};
+    let kernelConfiguration: PartialJSONObject = {};
     let label = trans.__('Cancel');
     const buttons = [
       Dialog.cancelButton({
@@ -2533,9 +2533,9 @@ function activateNotebookHandler(
       title: trans.__('Select Kernel'),
       body: new DialogWidget(
         parameters,
-        kernelConfigurarion,
+        kernelConfiguration,
         formData => {
-          kernelConfigurarion = formData as PartialJSONObject;
+          kernelConfiguration = formData as PartialJSONObject;
         },
         trans
       ),
@@ -2549,8 +2549,8 @@ function activateNotebookHandler(
     }
     if (result.value) {
       let customKernelSpecs = undefined;
-      if (kernelConfigurarion && Object.keys(kernelConfigurarion).length) {
-        customKernelSpecs = kernelConfigurarion;
+      if (kernelConfiguration && Object.keys(kernelConfiguration).length) {
+        customKernelSpecs = kernelConfiguration;
       }
 
       createNew(cwd, kernelId, kernelName, customKernelSpecs);
@@ -2705,21 +2705,35 @@ function activateNotebookHandler(
       const kernelName = (args['kernelName'] as string) || '';
 
       const metadata = args['metadata'] as ReadonlyJSONObject;
-      const allowInsecureKernelspecParams =
+      let allowInsecureKernelspecParams =
         PageConfig.getOption('allow_insecure_kernelspec_params') === 'true'
           ? true
           : false;
+      console.log(
+        'allowInsecureKernelspecParams',
+        allowInsecureKernelspecParams
+      );
+      console.log('metadata', metadata);
+      allowInsecureKernelspecParams = true;
       if (metadata?.is_secure) {
         if (!metadata?.parameters) {
           return createNew(cwd, kernelId, kernelName);
         } else {
           let schema = metadata.parameters as RJSFSchema;
-          showKernelSpecDialog(schema, cwd, kernelId, kernelName);
+          if (schema) {
+            showKernelSpecDialog(schema, cwd, kernelId, kernelName);
+          } else {
+            return createNew(cwd, kernelId, kernelName);
+          }
         }
       } else {
         if (allowInsecureKernelspecParams) {
           let schema = metadata.parameters as RJSFSchema;
-          showKernelSpecDialog(schema, cwd, kernelId, kernelName);
+          if (schema) {
+            showKernelSpecDialog(schema, cwd, kernelId, kernelName);
+          } else {
+            return createNew(cwd, kernelId, kernelName);
+          }
         } else {
           return createNew(cwd, kernelId, kernelName);
         }

@@ -28,6 +28,10 @@ const FormComponentWrapper = (props: {
   const [isUpdate, setUpdate] = React.useState(0);
 
   const [validator, setValidator] = React.useState<ValidatorType | null>(null);
+  const formRef =
+    React.useRef<Form<ReadonlyJSONObject, RJSFSchema, Record<string, unknown>>>(
+      null
+    );
 
   React.useEffect(() => {
     let mounted = true;
@@ -44,11 +48,6 @@ const FormComponentWrapper = (props: {
   if (!validator) {
     return null;
   }
-  const formRef =
-    React.useRef<Form<ReadonlyJSONObject, RJSFSchema, Record<string, unknown>>>(
-      null
-    );
-
   const uiSchema: UiSchema = {
     'ui:options': {
       submitButtonOptions: {
