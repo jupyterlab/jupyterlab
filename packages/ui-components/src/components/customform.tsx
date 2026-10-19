@@ -4,12 +4,7 @@ import { type IChangeEvent } from '@rjsf/core';
 
 import { ReactWidget } from './vdom';
 import type { RJSFSchema, UiSchema, ValidatorType } from '@rjsf/utils';
-import type {
-  JSONObject,
-  JSONValue,
-  PartialJSONObject,
-  ReadonlyJSONObject
-} from '@lumino/coreutils';
+import type { PartialJSONObject, ReadonlyJSONObject } from '@lumino/coreutils';
 import { FormComponent } from './form';
 
 import type { TranslationBundle } from '@jupyterlab/translation';

@@ -1907,7 +1907,7 @@ namespace Private {
       const selectorKernelSpecs = selector.getAttribute('data-kernel-spec');
       let kernelData = JSON.parse(selector.value) as Kernel.IModel;
       if (selectorKernelSpecs) {
-        kernelData['custom_kernel_specs'] = JSON.parse(selectorKernelSpecs);
+        kernelData.custom_kernel_specs = JSON.parse(selectorKernelSpecs);
       }
       return kernelData;
     }
@@ -1924,7 +1924,7 @@ namespace Private {
     let kernelSpecsContainer = document.querySelector<HTMLElement>(
       '#js-kernel-specs-select-container'
     )!;
-
+    console.log('kernelSpecsContainer', kernelSpecsContainer);
     if (!kernelSpecsContainer && kernelSpeccSelectorContainer) {
       kernelSpecsContainer = kernelSpeccSelectorContainer;
     }
@@ -2039,27 +2039,17 @@ namespace Private {
         const option = document.createElement('option');
         if (selected) {
           option.selected = true;
-          let val = JSON.parse(value);
-          let id = val && val.id ? val.id : '';
+          const val = JSON.parse(value);
+          const id = val && val.id ? val.id : '';
           if (!id) {
             select.setAttribute('data-kernel-spec', '');
-            checkCustomKernelSpecs(sessionContext, select, trans);
-          }
-
-          if (selected) {
-            option.selected = true;
-            const val = JSON.parse(value);
-            const id = val && val.id ? val.id : '';
-            if (!id) {
-              select.setAttribute('data-kernel-spec', '');
-              activeWidgetDisposable =
-                checkCustomKernelSpecs(
-                  sessionContext,
-                  select,
-                  trans,
-                  kernelSpecsContainer
-                ) || null;
-            }
+            activeWidgetDisposable =
+              checkCustomKernelSpecs(
+                sessionContext,
+                select,
+                trans,
+                kernelSpecsContainer
+              ) || null;
           }
         }
         if (title) option.title = title;
