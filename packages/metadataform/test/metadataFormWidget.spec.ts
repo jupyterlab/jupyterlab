@@ -327,3 +327,104 @@ describe('metadataform/form conditional', () => {
     expect(metadataForm.metadataKeys).toEqual(['/condition', '/then', '/else']);
   });
 });
+
+describe('metadataform/form defaults', () => {
+  let notebookTools: NotebookTools;
+  let tracker: NotebookTracker;
+  let context: Context<INotebookModel>;
+  let panel: NotebookPanel;
+  let schema: MetadataForm.IMetadataSchema;
+
+  beforeEach(async () => {
+    schema = {
+      type: 'object',
+      properties: {
+        '/editable': {
+          type: 'boolean',
+          default: true
+        },
+        '/slideshow/slide_type': {
+          type: 'string',
+          default: ''
+        },
+        '/tags': {
+          type: 'array',
+          default: [],
+          items: {
+            type: 'string'
+          }
+        }
+      }
+    };
+
+    context = await initNotebookContext();
+    panel = NBTestUtils.createNotebookPanel(context);
+    NBTestUtils.populateNotebook(panel.content);
+
+    tracker = new NotebookTracker({ namespace: 'notebook' });
+    await tracker.add(panel);
+    notebookTools = new NotebookTools({ tracker });
+
+    // Give the posted messages a chance to be handled.
+    await sleep();
+
+    tracker.activeCell!.model.deleteMetadata('tags');
+  });
+
+  afterEach(() => {
+    notebookTools.dispose();
+    panel.dispose();
+    context.dispose();
+  });
+
+  async function buildForm(): Promise<MetadataFormWidget> {
+    const metadataForm = new MetadataFormWidget({
+      metadataSchema: JSONExt.deepCopy(schema),
+      metaInformation: {},
+      pluginId: 'test-plugin'
+    });
+    // add the metadataForm in a section of the notebookTools.
+    notebookTools.addSection({ sectionName: 'testSchema', tool: metadataForm });
+    // associate notebook to metadataForm.
+    metadataForm.notebookTools = notebookTools;
+    // Fake update metadata to force build.
+    metadataForm.updateMetadata({}, true);
+    // Manually update the form (force render).
+    metadataForm.form?.update();
+    // Wait for the message to be received, and the promise to be updated.
+    await sleep(100);
+    // Wait for the rendering to be over.
+    await metadataForm.form?.renderPromise;
+
+    return metadataForm;
+  }
+
+  it('should not write the default values when building the form', async () => {
+    await buildForm();
+    const model = tracker.activeCell!.model;
+    expect(model.getMetadata('editable')).toBeUndefined();
+    expect(model.getMetadata('slideshow')).toBeUndefined();
+    expect(model.getMetadata('tags')).toBeUndefined();
+  });
+
+  it('should not write the default values of the unchanged fields', async () => {
+    const metadataForm = await buildForm();
+    metadataForm.updateMetadata({
+      '/editable': true,
+      '/slideshow/slide_type': 'slide',
+      '/tags': []
+    });
+    const model = tracker.activeCell!.model;
+    expect(model.getMetadata('slideshow')).toEqual({ slide_type: 'slide' });
+    expect(model.getMetadata('editable')).toBeUndefined();
+    expect(model.getMetadata('tags')).toBeUndefined();
+  });
+
+  it('should write a default value over an existing value', async () => {
+    const model = tracker.activeCell!.model;
+    model.setMetadata('slideshow', { slide_type: 'slide' });
+    const metadataForm = await buildForm();
+    metadataForm.updateMetadata({ '/slideshow/slide_type': '' });
+    expect(model.getMetadata('slideshow')).toEqual({ slide_type: '' });
+  });
+});
