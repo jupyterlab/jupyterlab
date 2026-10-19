@@ -205,6 +205,16 @@ export class MetadataFormWidget
       let baseMetadataKey = nestedKey[0];
       if (baseMetadataKey == undefined) continue;
 
+      // The form fills in the default of missing metadata, which is not a change to write.
+      const defaultValue = this._getDefault(metadataKey);
+      if (
+        value !== undefined &&
+        defaultValue !== undefined &&
+        JSONExt.deepEqual(value, defaultValue) &&
+        !Private.hasNestedKey(currentMetadata, nestedKey)
+      )
+        continue;
+
       let writeFinalData =
         value !== undefined &&
         ((this._metaInformation[metadataKey]?.writeDefault ?? true) ||
@@ -437,6 +447,29 @@ export class MetadataFormWidget
     });
   }
 
+  /**
+   * Get the default value of a metadataKey from the schema, including the conditional schemas.
+   */
+  private _getDefault(
+    metadataKey: string
+  ): ReadonlyPartialJSONValue | undefined {
+    const properties: PartialJSONObject[] = [this._metadataSchema.properties];
+    this._metadataSchema.allOf?.forEach(conditional => {
+      for (const branch of [conditional.then, conditional.else]) {
+        const branchProperties = (branch as PartialJSONObject | undefined)
+          ?.properties;
+        if (branchProperties !== undefined)
+          properties.push(branchProperties as PartialJSONObject);
+      }
+    });
+    for (const property of properties) {
+      const defaultValue = (property[metadataKey] as PartialJSONObject)
+        ?.default;
+      if (defaultValue !== undefined) return defaultValue;
+    }
+    return undefined;
+  }
+
   protected translator: ITranslator;
   private _form: FormWidget | undefined;
   private _metadataSchema: MetadataForm.IMetadataSchema;
@@ -481,5 +514,25 @@ namespace Private {
         delete metadataObject[metadataKey];
     }
     return metadataObject;
+  }
+
+  /**
+   * Whether the metadata has a value at the nested key.
+   */
+  export function hasNestedKey(
+    metadata: PartialJSONObject,
+    nestedKey: Array<string>
+  ): boolean {
+    let workingObject: PartialJSONValue | undefined = metadata;
+    for (let key of nestedKey) {
+      if (
+        workingObject === undefined ||
+        !JSONExt.isObject(workingObject) ||
+        !(key in workingObject)
+      )
+        return false;
+      workingObject = workingObject[key];
+    }
+    return true;
   }
 }
