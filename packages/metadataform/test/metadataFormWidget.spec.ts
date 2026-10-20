@@ -428,3 +428,127 @@ describe('metadataform/form defaults', () => {
     expect(model.getMetadata('slideshow')).toEqual({ slide_type: '' });
   });
 });
+
+describe('metadataform/form conditional defaults', () => {
+  let notebookTools: NotebookTools;
+  let tracker: NotebookTracker;
+  let context: Context<INotebookModel>;
+  let panel: NotebookPanel;
+
+  beforeEach(async () => {
+    context = await initNotebookContext();
+    panel = NBTestUtils.createNotebookPanel(context);
+    NBTestUtils.populateNotebook(panel.content);
+
+    tracker = new NotebookTracker({ namespace: 'notebook' });
+    await tracker.add(panel);
+    notebookTools = new NotebookTools({ tracker });
+
+    // Give the posted messages a chance to be handled.
+    await sleep();
+  });
+
+  afterEach(() => {
+    notebookTools.dispose();
+    panel.dispose();
+    context.dispose();
+  });
+
+  async function buildForm(elseHasDefault = true): Promise<MetadataFormWidget> {
+    const schema: MetadataForm.IMetadataSchema = {
+      type: 'object',
+      properties: {
+        '/condition': { type: 'boolean' }
+      },
+      allOf: [
+        {
+          if: {
+            properties: { '/condition': { const: true } },
+            required: ['/condition']
+          },
+          then: {
+            properties: {
+              '/choice': { type: 'string', default: 'then-default' }
+            }
+          },
+          else: {
+            properties: {
+              '/choice': elseHasDefault
+                ? { type: 'string', default: 'else-default' }
+                : { type: 'string', enum: ['then-default', 'another-value'] }
+            }
+          }
+        }
+      ]
+    };
+    const metadataForm = new MetadataFormWidget({
+      metadataSchema: schema,
+      metaInformation: {},
+      pluginId: 'test-plugin'
+    });
+    // add the metadataForm in a section of the notebookTools.
+    notebookTools.addSection({ sectionName: 'testSchema', tool: metadataForm });
+    // associate notebook to metadataForm.
+    metadataForm.notebookTools = notebookTools;
+    // Fake update metadata to force build.
+    metadataForm.updateMetadata({}, true);
+    // Manually update the form (force render).
+    metadataForm.form?.update();
+    // Wait for the message to be received, and the promise to be updated.
+    await sleep(100);
+    // Wait for the rendering to be over.
+    await metadataForm.form?.renderPromise;
+
+    return metadataForm;
+  }
+
+  it('should not write the default of the active then branch', async () => {
+    const model = tracker.activeCell!.model;
+    model.setMetadata('condition', true);
+    const metadataForm = await buildForm();
+
+    const choice =
+      metadataForm.node.querySelector<HTMLInputElement>('input[type="text"]');
+    expect(choice?.value).toBe('then-default');
+    expect(model.getMetadata('choice')).toBeUndefined();
+  });
+
+  it('should not write the default of the active else branch', async () => {
+    const model = tracker.activeCell!.model;
+    model.setMetadata('condition', false);
+    const metadataForm = await buildForm();
+
+    const choice =
+      metadataForm.node.querySelector<HTMLInputElement>('input[type="text"]');
+    expect(choice?.value).toBe('else-default');
+    expect(model.getMetadata('choice')).toBeUndefined();
+  });
+
+  it('should write a value that is only the default of the inactive branch', async () => {
+    const model = tracker.activeCell!.model;
+    model.setMetadata('condition', false);
+    const metadataForm = await buildForm(false);
+    expect(model.getMetadata('choice')).toBeUndefined();
+
+    metadataForm.updateMetadata({
+      '/condition': false,
+      '/choice': 'then-default'
+    });
+
+    expect(model.getMetadata('choice')).toBe('then-default');
+  });
+
+  it('should write the default of the active branch over an existing value', async () => {
+    const model = tracker.activeCell!.model;
+    model.setMetadata('condition', false);
+    model.setMetadata('choice', 'custom-value');
+    const metadataForm = await buildForm();
+
+    metadataForm.updateMetadata({
+      '/condition': false,
+      '/choice': 'else-default'
+    });
+
+    expect(model.getMetadata('choice')).toBe('else-default');
+  });
+});
