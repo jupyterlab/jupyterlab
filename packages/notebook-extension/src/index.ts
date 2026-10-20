@@ -3929,11 +3929,23 @@ function addCommands(
     label: trans.__('Not editable Cell'),
     caption: trans.__('Not editable cell'),
     execute: async args => {
-      await showDialog({
-        title: trans.__('Not editable Cell'),
-        body: trans.__('This cell is not editable'),
-        buttons: [Dialog.cancelButton()]
-      });
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (current) {
+        const cell = current.content.activeCell;
+        if (cell) {
+          const editable =
+            (cell.model.getMetadata('editable') as unknown as boolean) !==
+            false;
+          const result = await InputDialog.getBoolean({
+            title: trans.__('Set Cell Editable'),
+            label: trans.__('Is this cell editable?'),
+            value: editable
+          });
+          if (result.button.accept) {
+            cell.model.setMetadata('editable', result.value);
+          }
+        }
+      }
     },
     isVisible: args => {
       const current = getCurrent(tracker, shell, { ...args, activate: false });
@@ -3946,7 +3958,6 @@ function addCommands(
         ) as unknown as boolean) !== true;
       const visible = settings?.get('showLockForReadOnlyCells')
         .composite as boolean;
-      console.warn('[read-only cell] isVisible check fired ', noteditable);
       return noteditable && visible;
     },
     describedBy: {
@@ -3997,7 +4008,7 @@ function addCommands(
         (current.content.activeCell?.model.getMetadata(
           'deletable'
         ) as unknown as boolean) !== false;
-      console.warn('[deletable cell] isEnable check fired ', deletable);
+      console.warn('[deletable cell] isEnabled check fired ', deletable);
       return deletable && !Private.isViewOnly(tracker);
     },
     isVisible: () => !Private.isViewOnly(tracker),
