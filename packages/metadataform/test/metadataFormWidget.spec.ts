@@ -538,11 +538,24 @@ describe('metadataform/form conditional defaults', () => {
     expect(model.getMetadata('choice')).toBe('then-default');
   });
 
+  it('should show and keep the current value of a conditional key', async () => {
+    const model = tracker.activeCell!.model;
+    model.setMetadata('condition', false);
+    model.setMetadata('choice', 'custom-value');
+    const metadataForm = await buildForm();
+
+    const choice =
+      metadataForm.node.querySelector<HTMLInputElement>('input[type="text"]');
+    expect(choice?.value).toBe('custom-value');
+    expect(model.getMetadata('choice')).toBe('custom-value');
+  });
+
   it('should write the default of the active branch over an existing value', async () => {
     const model = tracker.activeCell!.model;
     model.setMetadata('condition', false);
     model.setMetadata('choice', 'custom-value');
     const metadataForm = await buildForm();
+    expect(model.getMetadata('choice')).toBe('custom-value');
 
     metadataForm.updateMetadata({
       '/condition': false,

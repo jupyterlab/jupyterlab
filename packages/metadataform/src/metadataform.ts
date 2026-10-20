@@ -379,9 +379,9 @@ export class MetadataFormWidget
 
     const formData = {} as JSONObject;
 
-    for (let metadataKey of Object.keys(
-      this._metadataSchema.properties || JSONExt.emptyObject
-    )) {
+    // Include the keys of the conditional branches, so that the form shows
+    // their current values instead of their defaults.
+    for (let metadataKey of this.metadataKeys) {
       // Do not display the field if it's Notebook metadata and the notebook model is null.
       if (
         this._metaInformation[metadataKey]?.level === 'notebook' &&
