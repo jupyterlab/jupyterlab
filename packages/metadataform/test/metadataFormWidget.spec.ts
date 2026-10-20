@@ -454,11 +454,17 @@ describe('metadataform/form conditional defaults', () => {
     context.dispose();
   });
 
-  async function buildForm(elseHasDefault = true): Promise<MetadataFormWidget> {
+  async function buildForm(
+    elseHasDefault = true,
+    conditionDefault?: boolean
+  ): Promise<MetadataFormWidget> {
     const schema: MetadataForm.IMetadataSchema = {
       type: 'object',
       properties: {
-        '/condition': { type: 'boolean' }
+        '/condition':
+          conditionDefault === undefined
+            ? { type: 'boolean' }
+            : { type: 'boolean', default: conditionDefault }
       },
       allOf: [
         {
@@ -564,4 +570,65 @@ describe('metadataform/form conditional defaults', () => {
 
     expect(model.getMetadata('choice')).toBe('else-default');
   });
+
+  it('should write a partial update with the default of the inactive branch', async () => {
+    const model = tracker.activeCell!.model;
+    model.setMetadata('condition', true);
+    const metadataForm = await buildForm();
+
+    // A custom field sends only its own key.
+    metadataForm.updateMetadata({ '/choice': 'else-default' });
+
+    expect(model.getMetadata('choice')).toBe('else-default');
+  });
+
+  it('should not write a partial update with the default of the active branch', async () => {
+    const model = tracker.activeCell!.model;
+    model.setMetadata('condition', true);
+    const metadataForm = await buildForm();
+
+    // A custom field sends only its own key.
+    metadataForm.updateMetadata({ '/choice': 'then-default' });
+
+    expect(model.getMetadata('choice')).toBeUndefined();
+  });
+
+  it('should not write the values that the form fills in for a condition with a default', async () => {
+    const model = tracker.activeCell!.model;
+    const metadataForm = await buildForm(true, true);
+
+    // The form fills in the default of the else branch: RJSF selects the
+    // branch of the defaults with the metadata, which lacks the condition.
+    const condition = metadataForm.node.querySelector<HTMLInputElement>(
+      'input[type="checkbox"]'
+    );
+    const choice =
+      metadataForm.node.querySelector<HTMLInputElement>('input[type="text"]');
+    expect(condition?.checked).toBe(true);
+    expect(choice?.value).toBe('else-default');
+    expect(model.getMetadata('condition')).toBeUndefined();
+    expect(model.getMetadata('choice')).toBeUndefined();
+  });
+
+  it.each([false, true])(
+    'should write a partial update of a value that the form does not show (condition in the update: %s)',
+    async includeCondition => {
+      const model = tracker.activeCell!.model;
+      const metadataForm = await buildForm(false, true);
+
+      // The form leaves the choice empty: RJSF selects the branch of the
+      // defaults with the metadata, and the else branch has no default.
+      const choice =
+        metadataForm.node.querySelector<HTMLInputElement>('input[type="text"]');
+      expect(choice?.value).toBe('');
+
+      metadataForm.updateMetadata({
+        '/choice': 'then-default',
+        ...(includeCondition ? { '/condition': true } : {})
+      });
+
+      expect(model.getMetadata('choice')).toBe('then-default');
+      expect(model.getMetadata('condition')).toBeUndefined();
+    }
+  );
 });

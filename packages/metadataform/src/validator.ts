@@ -1,11 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type {
-  ReadonlyPartialJSONObject,
-  ReadonlyPartialJSONValue
-} from '@lumino/coreutils';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { PromiseDelegate } from '@lumino/coreutils';
+import { getDefaultFormState } from '@rjsf/utils';
 import type validatorAjv8 from '@rjsf/validator-ajv8';
 
 import type { MetadataForm } from './token';
@@ -37,19 +35,20 @@ export function getValidator(): typeof validatorAjv8 | null {
 }
 
 /**
- * Whether the form data is valid against a schema, or null before the validator has loaded.
+ * Get the form data with the values that the form fills in for missing keys,
+ * such as defaults, or null before the validator has loaded.
  */
-export function isValid(
-  schema: ReadonlyPartialJSONValue,
-  formData: ReadonlyPartialJSONObject,
-  rootSchema: MetadataForm.IMetadataSchema
-): boolean | null {
+export function fillFormData(
+  schema: MetadataForm.IMetadataSchema,
+  formData: ReadonlyPartialJSONObject
+): ReadonlyPartialJSONObject | null {
   if (validator === null) {
     return null;
   }
-  return validator.isValid(
-    schema as MetadataForm.IMetadataSchema,
+  return getDefaultFormState(
+    validator,
+    schema,
     formData,
-    rootSchema
-  );
+    schema
+  ) as ReadonlyPartialJSONObject;
 }
