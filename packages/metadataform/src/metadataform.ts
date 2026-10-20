@@ -23,6 +23,7 @@ import { SingletonLayout, Widget } from '@lumino/widgets';
 
 import type { MetadataForm } from './token';
 import { FormWidget } from './form';
+import { isValid } from './validator';
 
 /**
  * A class that create a metadata form widget
@@ -206,7 +207,7 @@ export class MetadataFormWidget
       if (baseMetadataKey == undefined) continue;
 
       // The form fills in the default of missing metadata, which is not a change to write.
-      const defaultValue = this._getDefault(metadataKey);
+      const defaultValue = this._getDefault(metadataKey, formData);
       if (
         value !== undefined &&
         defaultValue !== undefined &&
@@ -448,19 +449,24 @@ export class MetadataFormWidget
   }
 
   /**
-   * Get the default value of a metadataKey from the schema, including the conditional schemas.
+   * Get the default value of a metadataKey from the schema, including the
+   * conditional branches that the form data selects.
    */
   private _getDefault(
-    metadataKey: string
+    metadataKey: string,
+    formData: ReadonlyPartialJSONObject
   ): ReadonlyPartialJSONValue | undefined {
     const properties: PartialJSONObject[] = [this._metadataSchema.properties];
     this._metadataSchema.allOf?.forEach(conditional => {
-      for (const branch of [conditional.then, conditional.else]) {
-        const branchProperties = (branch as PartialJSONObject | undefined)
-          ?.properties;
-        if (branchProperties !== undefined)
-          properties.push(branchProperties as PartialJSONObject);
-      }
+      if (conditional.if === undefined) return;
+      // Before the validator has loaded, the active branch is unknown, so none is used.
+      const matches = isValid(conditional.if, formData, this._metadataSchema);
+      if (matches === null) return;
+      const branch = (matches ? conditional.then : conditional.else) as
+        | PartialJSONObject
+        | undefined;
+      if (branch?.properties !== undefined)
+        properties.push(branch.properties as PartialJSONObject);
     });
     for (const property of properties) {
       const defaultValue = (property[metadataKey] as PartialJSONObject)
