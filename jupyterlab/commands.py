@@ -1468,6 +1468,7 @@ class _AppHandler:
             "bootstrap.js",
             "publicpath.js",
             "webpack.config.js",
+            "process-shim.js",
             "webpack.prod.config.js",
             "webpack.prod.minimize.config.js",
         ]:
