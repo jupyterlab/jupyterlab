@@ -4747,6 +4747,21 @@
     }
   },
   {
+    "id": "notebook:not-editable",
+    "label": "Not editable Cell",
+    "caption": "Not editable cell",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether the cell is editable or not"
+        }
+      }
+    }
+  },
+  {
     "id": "notebook:paste-and-replace-cell",
     "label": "Paste Cell and Replace",
     "caption": "",
