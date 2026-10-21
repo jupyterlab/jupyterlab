@@ -1158,6 +1158,61 @@ describe('@jupyterlab/settingregistry', () => {
         settings = (await registry.load(id)) as Settings;
         expect(settings.default()).toStrictEqual(defaults);
       });
+
+      it('should keep array item keys that the item schema does not declare', async () => {
+        const id = 'omicron';
+
+        connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            foo: {
+              type: 'array',
+              items: { $ref: '#/definitions/fooItem' },
+              default: [{ command: 'bar', disabled: true }]
+            }
+          },
+          definitions: {
+            fooItem: {
+              type: 'object',
+              properties: {
+                command: { type: 'string' }
+              }
+            }
+          }
+        };
+        settings = (await registry.load(id)) as Settings;
+        expect(settings.default('foo')).toEqual([
+          { command: 'bar', disabled: true }
+        ]);
+      });
+
+      it('should keep falsy array item values over the item schema defaults', async () => {
+        const id = 'omicron';
+
+        connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            foo: {
+              type: 'array',
+              items: { $ref: '#/definitions/fooItem' },
+              default: [{ rank: 0, preventDefault: false }]
+            }
+          },
+          definitions: {
+            fooItem: {
+              type: 'object',
+              properties: {
+                rank: { type: 'number', default: 50 },
+                preventDefault: { type: 'boolean' }
+              }
+            }
+          }
+        };
+        settings = (await registry.load(id)) as Settings;
+        expect(settings.default('foo')).toEqual([
+          { rank: 0, preventDefault: false }
+        ]);
+      });
     });
 
     describe('#get()', () => {
