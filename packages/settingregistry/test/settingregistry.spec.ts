@@ -1159,59 +1159,78 @@ describe('@jupyterlab/settingregistry', () => {
         expect(settings.default()).toStrictEqual(defaults);
       });
 
-      it('should keep array item keys that the item schema does not declare', async () => {
+      it('should keep `disabled` and `preventDefault: false` on default shortcuts', async () => {
         const id = 'omicron';
-
-        connector.schemas[id] = {
-          type: 'object',
-          properties: {
-            foo: {
-              type: 'array',
-              items: { $ref: '#/definitions/fooItem' },
-              default: [{ command: 'bar', disabled: true }]
-            }
+        const shortcuts = [
+          // A shortcut disabled in `overrides.json`. The shortcut schema
+          // does not declare `disabled`.
+          {
+            command: 'notebook:change-cell-to-code',
+            keys: ['Y'],
+            selector: '.jp-Notebook',
+            disabled: true
           },
-          definitions: {
-            fooItem: {
-              type: 'object',
-              properties: {
-                command: { type: 'string' }
-              }
-            }
+          {
+            command: 'inline-completer:next',
+            keys: ['Alt ]'],
+            selector: '.jp-mod-completer-enabled',
+            preventDefault: false
           }
-        };
-        settings = (await registry.load(id)) as Settings;
-        expect(settings.default('foo')).toEqual([
-          { command: 'bar', disabled: true }
-        ]);
-      });
-
-      it('should keep falsy array item values over the item schema defaults', async () => {
-        const id = 'omicron';
+        ];
 
         connector.schemas[id] = {
           type: 'object',
           properties: {
-            foo: {
+            shortcuts: {
               type: 'array',
-              items: { $ref: '#/definitions/fooItem' },
-              default: [{ rank: 0, preventDefault: false }]
+              items: { $ref: '#/definitions/shortcut' },
+              default: shortcuts
             }
           },
           definitions: {
-            fooItem: {
+            shortcut: {
               type: 'object',
               properties: {
-                rank: { type: 'number', default: 50 },
+                command: { type: 'string' },
+                keys: { type: 'array', items: { type: 'string' } },
+                selector: { type: 'string' },
                 preventDefault: { type: 'boolean' }
               }
             }
           }
         };
         settings = (await registry.load(id)) as Settings;
-        expect(settings.default('foo')).toEqual([
-          { rank: 0, preventDefault: false }
-        ]);
+        expect(settings.default('shortcuts')).toEqual(shortcuts);
+      });
+
+      it('should keep a toolbar item `rank` of 0 over the schema default', async () => {
+        const id = 'omicron';
+        const toolbar = [
+          { name: 'run', command: 'console:run-forced', rank: 0 }
+        ];
+
+        connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            toolbar: {
+              type: 'array',
+              items: { $ref: '#/definitions/toolbarItem' },
+              default: toolbar
+            }
+          },
+          definitions: {
+            toolbarItem: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                command: { type: 'string' },
+                rank: { type: 'number', default: 50 }
+              }
+            }
+          }
+        };
+        settings = (await registry.load(id)) as Settings;
+        expect(settings.default('toolbar')).toEqual(toolbar);
       });
     });
 
