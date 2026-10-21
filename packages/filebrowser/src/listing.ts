@@ -1023,7 +1023,7 @@ export class DirListing extends Widget {
   }
 
   private _computeContentWidth(width: number | null = null) {
-    if (!width) {
+    if (width === null || width === 0) {
       width = this.node.getBoundingClientRect().width;
     }
 
@@ -1389,7 +1389,7 @@ export class DirListing extends Widget {
       }
       // restrict the minimum and maximum width
       size = Math.max(size, column.minWidth);
-      if (this._width) {
+      if (this._width !== null && this._width > 0) {
         let reservedForOtherColumns = 0;
         for (const other of visibleColumns) {
           if (other.id === column.id) {
@@ -1404,7 +1404,7 @@ export class DirListing extends Widget {
     }
 
     // Ensure that total fits
-    if (this._width) {
+    if (this._width !== null && this._width > 0) {
       // Distribute the excess/shortfall over the columns which should stretch.
       const excess = this._width - total;
       let growAllowed = doNotGrowBeforeInclusive === null;
@@ -1437,7 +1437,7 @@ export class DirListing extends Widget {
     for (const column of visibleColumns) {
       let size = this._columnSizes[column.id];
 
-      if (Private.isResizable(column) && size) {
+      if (Private.isResizable(column) && size !== null && size !== 0) {
         size -=
           (this._handleWidth * resizeHandles.length) / resizableColumns.length;
         // if this is first resizable or last resizable column
@@ -1473,7 +1473,7 @@ export class DirListing extends Widget {
     size: number | null
   ): void {
     const previousSize = this._columnSizes[name];
-    if (previousSize && size && size > previousSize) {
+    if (previousSize !== null && size !== null && size > previousSize) {
       // check if we can resize up
       let total = 0;
       let before = true;
@@ -1495,7 +1495,7 @@ export class DirListing extends Widget {
           total += column.minWidth;
         }
       }
-      if (this._width && total > this._width) {
+      if (this._width !== null && this._width > 0 && total > this._width) {
         // up sizing is no longer possible
         return;
       }
@@ -2273,6 +2273,10 @@ export class DirListing extends Widget {
       dropTarget.classList.remove(DROP_TARGET_CLASS);
     }
     const index = Private.hitTestNodes(this._items, event);
+    if (index === -1 || index >= this._items.length) {
+      event.dropAction = 'none';
+      return;
+    }
     this._items[index].classList.add(DROP_TARGET_CLASS);
   }
 
@@ -4059,7 +4063,7 @@ namespace Private {
     edit: HTMLInputElement,
     original: string
   ): Promise<string> {
-    const parent = text.parentElement as HTMLElement;
+    const parent = text.parentElement!;
     parent.replaceChild(edit, text);
     edit.focus();
     const index = edit.value.lastIndexOf('.');

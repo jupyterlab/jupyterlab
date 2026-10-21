@@ -149,6 +149,7 @@ export class MetadataFormWidget
     if (this.notebookTools == undefined) return;
 
     const notebook = this.notebookTools.activeNotebookPanel;
+    if (notebook?.viewOnly === true) return;
 
     const cell = this.notebookTools.activeCell;
     if (cell == null) return;
@@ -431,7 +432,8 @@ export class MetadataFormWidget
       formData: formData,
       metadataFormWidget: this,
       showModified: this._showModified,
-      pluginId: this._pluginId
+      pluginId: this._pluginId,
+      disabled: notebook?.viewOnly === true
     });
   }
 

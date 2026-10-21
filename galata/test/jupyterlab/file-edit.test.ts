@@ -34,6 +34,7 @@ test.describe('File Edit Operations', () => {
     const currentDir = await page.filebrowser.getCurrentDirectory();
     // Wait a short while as the file initializes before renaming, see
     // https://github.com/jupyterlab/jupyterlab/issues/18455
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(100);
     await page.contents.renameFile(
       `${currentDir}/${DEFAULT_NAME}`,
@@ -78,10 +79,13 @@ test.describe('Console Interactions', () => {
     // Select kernel
     await page.getByRole('button', { name: 'Select Kernel' }).click();
 
-    // Wait for banner to disappear once fully loaded
+    // Wait for loading banner to disappear once fully loaded
     await loadingBanner.waitFor({ state: 'detached' });
 
     await page.getByText('123', { exact: true }).click();
+
+    // Wait for kernel to start up before execution
+    await page.locator('.jp-ConsolePanel [title="Kernel Idle"]').waitFor();
 
     await page.keyboard.press('Shift+Enter');
 

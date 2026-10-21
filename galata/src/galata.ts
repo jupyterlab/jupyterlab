@@ -60,7 +60,7 @@ export namespace galata {
         // we fall back to Noto Simplified Chinese (for tests where only
         // a few Chinese characters are shown). For tests where the whole
         // UI is meant to be displayed in a non-Latin script, drop the
-        // "system-ui" part so that `font-display: swap` is respected.
+        // "DejaVu Sans" part so that `font-display: swap` is respected.
         'content-font-family': '"DejaVu Sans", "Noto Sans SC Variable"',
         'ui-font-family': '"DejaVu Sans", "Noto Sans SC Variable"'
       }
@@ -797,8 +797,7 @@ export namespace galata {
       config: Record<string, JSONObject>
     ): Promise<void> {
       await page.route(Routes.config, (route, request) => {
-        const section = Routes.config.exec(request.url())?.groups
-          ?.section as string;
+        const { section } = Routes.config.exec(request.url())!.groups!;
         switch (request.method()) {
           case 'GET':
             return route.fulfill({

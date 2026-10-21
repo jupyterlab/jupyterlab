@@ -29,11 +29,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@925e40fa6066f4533e0c40803bd4b6d0d2f4a781 # v1.1.0
 
       - name: Prep Release
         id: prep-release
-        uses: jupyter-server/jupyter_releaser/.github/actions/prep-release@v2
+        uses: jupyter-server/jupyter_releaser/.github/actions/prep-release@70e58c50c736ad496cca11fe4f2446033b68b027 # v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version_spec: ${{ github.event.inputs.version_spec }}

@@ -199,7 +199,7 @@ The following environment variables are respected
 
 By default, there are two extension managers provided by JupyterLab:
 
-- `pypi`: [default] Allow to un-/install extensions from PyPI.org
+- `pypi`: [default] Allow installing or uninstalling extensions from PyPI.org
 - `readonly`: Display installed extensions (with the ability to dis-/en-able them)
 
 You can specify the manager with the command line option `--LabApp.extension_manager`;
@@ -227,6 +227,19 @@ search result and the user is free to install any source extension. This is the 
 
 To bring more security, you or your administrator can enable `blocklists` or `allowlists`
 mode. JupyterLab will check the extensions against the defined listings.
+
+:::{note}
+In security-sensitive multi-user deployments, extension manager listings are not
+a substitute for isolating the JupyterLab server environment from user-controlled
+kernels. If users can import JupyterLab server internals such as
+`jupyterlab.extensions.pypi.PyPIExtensionManager` from a kernel, the kernel and
+server are sharing an environment that users may be able to modify outside the
+Extension Manager. Administrators should run the server in an environment users
+cannot modify, and may run kernels in separate user-writable environments. With
+that separation, installing packages in a kernel environment does not install
+extension code into the server environment. See JupyterHub's guidance on
+[isolating packages in a read-only environment](https://jupyterhub.readthedocs.io/en/latest/explanation/websecurity.html#isolate-packages-in-a-read-only-environment).
+:::
 
 :::{warning}
 Only one mode at a time is allowed. If you or your server administrator configures
@@ -390,10 +403,33 @@ Administrators may lock specific plugins with:
 jupyter labextension lock my-extension:plugin
 ```
 
+They may also add an extension-level lock by using the extension name without
+a plugin suffix:
+
+```bash
+jupyter labextension lock my-extension
+```
+
+JupyterLab identifies the extension for a plugin from the plugin ID prefix
+before the first colon. For example, `my-extension:plugin` is treated as a
+plugin in the `my-extension` extension. Extension-level locks therefore apply
+only to plugins whose IDs use the same prefix up to the colon, such as
+`my-extension:plugin` and `my-extension:other-plugin`. Extension authors should
+use the NPM extension package name, a colon, then a string identifying the
+plugin inside the extension, as described in the
+{ref}`plugin ID convention <plugin-id-convention>`, so
+administrators can lock or unlock all plugins in an extension consistently.
+
 To unlock a locked plugin:
 
 ```bash
 jupyter labextension unlock my-extension:plugin
+```
+
+To remove an extension-level lock:
+
+```bash
+jupyter labextension unlock my-extension
 ```
 
 The locked plugins appear on the plugin list with a lock icon and cannot be enabled/disabled from the user interface:
@@ -478,10 +514,10 @@ follows:
 See {ref}`documentation on LabConfig directories <labconfig-directories>` for
 more information.
 
-## Un-/Installing using `jupyter labextension`
+## Installing or Uninstalling using `jupyter labextension`
 
 :::{note}
-This way of un-/installing JupyterLab extensions is highly discouraged.
+This way of installing or uninstalling JupyterLab extensions is highly discouraged.
 :::
 
 The `jupyter labextension` command enables you to install or uninstall

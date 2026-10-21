@@ -10,6 +10,7 @@
 
 .jp-OutputArea {
   overflow-y: auto;
+  anchor-name: --jp-output-area;
   anchor-scope: --jp-output-area;
 }
 
@@ -18,7 +19,6 @@
   flex-direction: row;
   width: 100%;
   overflow: hidden;
-  anchor-name: --jp-output-area;
 }
 
 .jp-OutputPrompt {
@@ -66,8 +66,8 @@
 
 .jp-OutputArea-promptOverlay {
   position: absolute;
-  top: anchor(--jp-output-area top);
-  bottom: anchor(--jp-output-area bottom);
+  top: 0;
+  height: 100%;
   width: var(--jp-cell-prompt-width);
   opacity: 0.5;
   display: flex;

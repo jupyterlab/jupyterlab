@@ -34,10 +34,9 @@ please assume that no one else is working on it (even if someone previously
 volunteered) and open a pull request with proposed implementation.
 If you are not certain about the implementation, using draft pull requests is encouraged.
 
-If you believe you’ve found a security vulnerability in JupyterLab or
-any Jupyter project, please report it to [security@ipython.org](mailto:security@ipython.org). If you
-prefer to encrypt your security reports, you can use [this PGP public
-key](https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipython_security.asc).
+If you believe you've found a security vulnerability in JupyterLab or
+any Jupyter project, please report it as described in the
+[security policy](https://github.com/jupyterlab/jupyterlab/security/policy).
 
 ```{toctree}
 :hidden: true
@@ -125,6 +124,12 @@ pre-commit run
 
 which should run any autoformatting on your code
 and tell you about any errors it couldn't fix automatically.
+To run the GitHub Actions security analysis locally before pushing, use
+`pre-commit run zizmor --files .github/workflows/<workflow>.yml` or
+`pre-commit run zizmor --all-files`.
+
+The local hook is pinned and kept aligned with the CI `zizmor` version.
+For day-to-day development, prefer targeted runs with `--files`.
 You may also install [ruff integration](https://docs.astral.sh/ruff/integrations)
 into your text editor to format code automatically.
 
@@ -429,11 +434,11 @@ Then use the following steps:
 git clone https://github.com/<your-github-username>/jupyterlab.git
 cd jupyterlab
 pip install -e ".[dev,test]"
-jlpm install
-jlpm run build  # Build the dev mode assets
+jlpm
+jlpm build  # Build the dev mode assets
 
 # Build the core mode assets
-jlpm run build:core
+jlpm build:core
 
 # Build the app dir assets
 jupyter lab build
@@ -455,11 +460,7 @@ for instructions.
   will fail. You may wish to build in a conda environment, or make an
   alias.
 - The `jlpm` command is a JupyterLab-provided, locked version of the
-  [yarn](https://classic.yarnpkg.com/en/) package manager. If you have
-  `yarn` installed already, you can use the `yarn` command when
-  developing, and it will use the local version of `yarn` in
-  `jupyterlab/yarn.js` when run in the repository or a built
-  application directory.
+  `yarn` package manager from `jupyter-builder`
 - If you decide to use the `jlpm` command and encounter the
   `jlpm: command not found` error, try adding the user-level bin
   directory to your `PATH` environment variable. You already
@@ -480,7 +481,7 @@ for instructions.
   activation above; this will tie the installation to the
   `sys.prefix` location of your environment, without writing anything
   in your user-wide settings area (which are visible to all your envs):
-- You can run `jlpm run build:dev:prod` to build more accurate
+- You can run `jlpm build:dev:prod` to build more accurate
   sourcemaps that show the original Typescript code when debugging.
   However, it takes a bit longer to build the sources, so is used only
   to build for production by default.
@@ -504,17 +505,22 @@ dev mode, extensions will not be activated by default - refer
 When running in dev mode, a red stripe will appear at the top of the
 page; this is to indicate running an unreleased version.
 
-If you want to change the TypeScript code and rebuild on the fly
-(needs page refresh after each rebuild):
+If you want to change the TypeScript code in the core packages and
+rebuild on the fly (needs page refresh after each rebuild):
 
 ```bash
 jupyter lab --dev-mode --watch
 ```
 
+The watch mode rebuilds TypeScript sources in the JupyterLab repository.
+When developing a separate extension, run that extension's build or watch
+command as well so its TypeScript changes are compiled before refreshing
+JupyterLab.
+
 ### Build and Run the Tests
 
 ```bash
-jlpm run build:testutils
+jlpm build:testutils
 jlpm test
 ```
 
@@ -523,7 +529,7 @@ appropriate package folder:
 
 ```bash
 cd packages/notebook
-jlpm run build:test
+jlpm build:test
 jlpm test --runInBand
 ```
 
@@ -582,7 +588,8 @@ must be delayed on minor or major versions.
 
 ## Performance Testing
 
-Benchmark of JupyterLab is done using Playwright. The actions measured are:
+JupyterLab performance benchmarks are implemented with Playwright. The actions
+measured are:
 
 - Opening a file
 - Switching from the file to a simple text file
@@ -591,18 +598,11 @@ Benchmark of JupyterLab is done using Playwright. The actions measured are:
 
 Two files are tested: a notebook with many code cells and another with many markdown cells.
 
-The test is run on the CI by comparing the result in the commit at which a PR branch started and the PR branch head on
-the same CI job to ensure using the same hardware.
-The benchmark job is triggered on:
-
-- Approved PR review
-- PR review that contains the sentence `please run benchmark`
-
-The tests are located in the subfolder `galata/test/benchmark`. And they can be
-executed with the following command:
+The tests are located in the subfolder `galata/test/benchmark`. They can be
+executed locally with the following command:
 
 ```bash
-jlpm run test:benchmark
+jlpm test:benchmark
 ```
 
 A special report will be generated in the folder `benchmark-results` that will contain 4 files:
@@ -613,7 +613,20 @@ A special report will be generated in the folder `benchmark-results` that will c
 - `lab-benchmark.vl.json`: The [Vega-Lite](https://vega.github.io/vega-lite) description used to produce the PNG file.
 
 The reference, tagged _expected_, is stored in `lab-benchmark-expected.json`. It can be
-created using the `-u` option of Playwright; i.e. `jlpm run test:benchmark -u`.
+created using the `-u` option of Playwright; i.e. `jlpm test:benchmark -u`.
+
+Branch comparisons can be run from the
+[jupyterlab/benchmarks](https://github.com/jupyterlab/benchmarks/#readme)
+repository, which runs the challenger and reference branches on the same CI
+hardware.
+
+Memory leak regression tests live in the subfolder `galata/test/memory-leak`.
+They run in the Galata CI workflow as a Chromium-only project with one worker for
+deterministic object counts, and can be executed locally with:
+
+```bash
+jlpm test:memory-leak
+```
 
 ### Benchmark parameters
 
@@ -622,9 +635,6 @@ The benchmark can be customized using the following environment variables:
 - `BENCHMARK_NUMBER_SAMPLES`: Number of samples to compute the execution time distribution; default 20.
 - `BENCHMARK_OUTPUTFILE`: Benchmark result output file; default `benchmark.json`. It is overridden in the `playwright-benchmark.config.js`.
 - `BENCHMARK_REFERENCE`: Reference name of the data; default is `actual` for current data and `expected` for the reference.
-
-More tests can be carried out manually on JupyterLab branches and run weekly on the default branch in
-[jupyterlab/benchmarks](https://github.com/jupyterlab/benchmarks/#readme) repository.
 
 ## Visual Regression and UI Tests
 
@@ -639,7 +649,7 @@ Galata generates a user friendly test result report which can be used to inspect
 UI tests. Result report shows the failure reason, call-stack up to the failure and
 detailed information on visual regression issues. For visual regression errors, reference
 image and test capture image, along with diff image generated during comparison are
-provided in the report. You can use these information to debug failing tests. Galata test
+provided in the report. You can use this information to debug failing tests. Galata test
 report can be downloaded from GitHub Actions page for a UI test run. Test artifact is
 named `galata-report` and once you extract it, you can access the report by launching
 a server to serve the files `python -m http.server -d <path-to-extracted-report>`.
@@ -660,7 +670,7 @@ Main reasons for UI test failures are:
 
    If your code change is introducing an update to UI which causes existing UI Tests to
    fail, then you will need to update reference image(s) (and/or JSON snapshots) for the failing tests.
-   In order to do that, you can post a comment on your PR with the following content:
+   In order to do that, you can post a top-level comment on your PR with the following content:
    - (bot) `please open PR to update snapshots` - A bot will open a PR updating all snapshots
      generated in the most recent run of CI from your branch.
 
@@ -700,13 +710,17 @@ Here are some good practices to follow when writing integration tests:
 
 - Don't compare multiple screenshots in the same test, unless using `expect.soft`;
   if the first comparison breaks, it will require multiple re-runs of CI workflow to update all snapshots.
-- Don't include more UI elements than necessary, as that increases review burden when elements other than
-  the one tested change - reviewing hundreds of unrelated snapshots is exhausting and error-prone.
+- Crop the screenshot to the smallest area that still shows a reviewer the tested element in context.
+  Each extra UI element makes the test fail when that element changes. Reviewing hundreds of
+  unrelated snapshots is exhausting and error-prone. If the crop is too tight, the reviewer cannot
+  tell what the screenshot shows, or where the tested element is in the interface.
 - When cropping snapshots, prefer retrieving the required dimensions programmatically over hard-coding them.
 - Always use `toMatchSnapshot()` for comparing snapshots; do not implement custom logic reading/writing snapshots.
 - Do not use `waitForTimeout()` as this slows down tests and makes them flaky when CI runs slower than expected.
 - If your change introduces subpixel change to dozens of snapshots, consider if it is necessary;
   such a change often requires many extensions to update their snapshots too, leading to significant cost downstream.
+- When testing the notebook UI without executing code, open the notebook without the kernel to preserve resources
+  (starting hundreds of kernels slows down the test suite)
 
 ## Contributing to the debugger front-end
 
@@ -803,7 +817,7 @@ With:
 To install and build the examples in the `examples` directory:
 
 ```bash
-jlpm run build:examples
+jlpm build:examples
 ```
 
 To run a specific example, change to the examples directory (i.e.
@@ -829,7 +843,7 @@ while debugging.
 
 When running a test, the packages will be available at the top level
 (e.g. `application/src`), and the current set of test files available
-under `/src`. Note: it is recommended to use `jlpm run watch` in the
+under `/src`. Note: it is recommended to use `jlpm watch` in the
 test folder while debugging test options. See
 [above](#build-and-run-the-tests) for more info.
 
@@ -859,14 +873,14 @@ git clone https://github.com/jupyterlab/jupyterlab.git
 cd jupyterlab
 pip install -e .
 jlpm
-jlpm run build:packages
+jlpm build:packages
 ```
 
 **Rebuild**
 
 ```bash
-jlpm run clean
-jlpm run build:packages
+jlpm clean
+jlpm build:packages
 ```
 
 ## Writing Documentation
@@ -875,7 +889,7 @@ Documentation is written in Markdown. To ensure that the Read the Docs page buil
 need to install the documentation dependencies with `pip`:
 
 ```bash
-pip install -e ".[docs]"
+pip install -e . --group docs
 ```
 
 To test the docs run:
@@ -909,7 +923,7 @@ And then go to <http://localhost:8000/> in your browser.
 The JupyterLab API reference documentation can be built separately using `jlpm`:
 
 ```bash
-jlpm run docs
+jlpm docs
 ```
 
 ### Writing Style
@@ -1019,7 +1033,7 @@ server version 4.3 or later is installed.
 When you make a change to JupyterLab npm package source files, run:
 
 ```bash
-jlpm run build
+jlpm build
 ```
 
 to build the changes, and then refresh your browser to see the changes.
@@ -1034,15 +1048,15 @@ jupyter lab --dev-mode --watch
 
 There is a range of build utilities for maintaining the repository. To
 get a suggested version for a library use
-`jlpm run get:dependency foo`. To update the version of a library
-across the repo use `jlpm run update:dependency foo ^latest`. To
-remove an unwanted dependency use `jlpm run remove:dependency foo`.
+`jlpm get:dependency foo`. To update the version of a library
+across the repo use `jlpm update:dependency foo ^latest`. To
+remove an unwanted dependency use `jlpm remove:dependency foo`.
 
-The key utility is `jlpm run integrity`, which ensures the integrity
+The key utility is `jlpm integrity`, which ensures the integrity
 of the packages in the repo. It will:
 
 - Ensure the core package version dependencies match everywhere.
-- Ensure imported packages match dependencies.
+- Ensure imported packages match dependencies, counting dynamic `import()` calls as imports.
 - Ensure a consistent version of all packages.
 - Manage the meta package.
 
@@ -1051,11 +1065,11 @@ TypeScript in the repository at once, instead of 50+ individual builds.
 
 The integrity script also allows you to automatically add a dependency
 for a package by importing from it in the TypeScript file, and then
-running: `jlpm run integrity` from the repo root.
+running: `jlpm integrity` from the repo root.
 
 We also have scripts for creating and removing packages in
-`packages/`, `jlpm run create:package` and
-`jlpm run remove:package`. When creating a package, if it is meant to
+`packages/`, `jlpm create:package` and
+`jlpm remove:package`. When creating a package, if it is meant to
 be included in the core bundle, add the
 `jupyterlab: { coreDependency: true }` metadata to the
 `package.json`. Packages with `extension` or `mimeExtension`
@@ -1077,7 +1091,7 @@ them out against your copy of JupyterLab, you can easily do so using the
    - navigate to top level of your JupyterLab repo, then run
      `jlpm link <path-to-external-repo> --all`
 
-3\. You can then (re)build JupyterLab (eg `jlpm run build`) and your
+3\. You can then (re)build JupyterLab (eg `jlpm build`) and your
 changes should be picked up by the build.
 
 To restore JupyterLab to its original state, you use the `unlink`
@@ -1088,7 +1102,7 @@ command:
      `jlpm unlink <path-to-external-repo> --all`
 
 2. Reinstall original version of the external package in JupyterLab
-   - run `jlpm install --check-files`
+   - run `jlpm --check-files`
 
 3\. You can then (re)build JupyterLab and everything should be back to
 default.

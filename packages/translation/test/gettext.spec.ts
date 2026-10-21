@@ -97,6 +97,41 @@ describe('@jupyterlab/translation', () => {
           )
         ).toBe('Hay 2 manzanas, Joe!');
       });
+
+      it('should reject plural forms with appended JavaScript', () => {
+        const globalWithInjectedFlag = globalThis as typeof globalThis & {
+          __jupyterLabTranslationXss?: boolean;
+        };
+        delete globalWithInjectedFlag.__jupyterLabTranslationXss;
+
+        const maliciousTrans = new Gettext({
+          domain: 'jupyterlab',
+          locale: 'es'
+        });
+        maliciousTrans.loadJSON(
+          {
+            '': {
+              domain: 'jupyterlab',
+              language: 'es',
+              pluralForms:
+                'nplurals=2; plural=(n > 1); globalThis.__jupyterLabTranslationXss = true;'
+            },
+            'There is %1 apple': ['Hay %1 manzana', 'Hay %1 manzanas']
+          },
+          'jupyterlab'
+        );
+
+        try {
+          expect(() =>
+            maliciousTrans._n('There is %1 apple', 'There are %1 apples', 2)
+          ).toThrow('not valid');
+          expect(
+            globalWithInjectedFlag.__jupyterLabTranslationXss
+          ).toBeUndefined();
+        } finally {
+          delete globalWithInjectedFlag.__jupyterLabTranslationXss;
+        }
+      });
     });
 
     describe('#fallbackLocale', () => {

@@ -2,13 +2,19 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { program as commander } from 'commander';
 import * as path from 'path';
 import * as os from 'os';
 import { handlePackage } from './update-dist-tag';
 import * as utils from './utils';
+
+interface IPublishOptions {
+  skipBuild?: boolean;
+  skipPublish?: boolean;
+  skipTags?: boolean;
+  yes?: boolean;
+  dryRun?: boolean;
+}
 
 /**
  * Sleep for a specified period.
@@ -30,7 +36,7 @@ commander
   .option('--skip-tags', 'publish assets but do not handle tags')
   .option('--yes', 'Publish without confirmation')
   .option('--dry-run', 'Do not actually push any assets')
-  .action(async (options: any) => {
+  .action(async (options: IPublishOptions) => {
     utils.exitOnUncaughtException();
 
     // No-op if we're in release helper dry run
@@ -40,7 +46,7 @@ commander
 
     if (!options.skipPublish) {
       if (!options.skipBuild) {
-        utils.run('jlpm run build:all');
+        utils.run('jlpm build:all');
       }
 
       if (!options.dryRun) {
