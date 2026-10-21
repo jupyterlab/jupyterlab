@@ -361,6 +361,46 @@ describe('@jupyterlab/ui-components', () => {
         button.dispose();
       });
 
+      it('should update widget visibility on many-changed signal (GH-17697)', async () => {
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId
+        });
+        // Mutate shared describe-scope variables; restore them in finally so
+        // a mid-test assertion failure cannot corrupt subsequent tests.
+        // Initial values come from the describe-scope declarations:
+        //   let enabled = false;  let toggled = true;  let visible = false;
+        visible = false;
+        toggled = false;
+        enabled = true;
+        try {
+          await render(button);
+          // The parent widget node (not the inner <button>) carries lm-mod-hidden.
+          expect(button.hasClass('lm-mod-hidden')).toBe(true);
+
+          // Fire many-changed (no id argument) — this is the signal path that
+          // was broken before the fix.
+          visible = true;
+          commands.notifyCommandChanged();
+          await framePromise();
+          await button.renderPromise;
+          expect(button.hasClass('lm-mod-hidden')).toBe(false);
+
+          // Toggle back to hidden via many-changed to confirm bidirectionality.
+          visible = false;
+          commands.notifyCommandChanged();
+          await framePromise();
+          await button.renderPromise;
+          expect(button.hasClass('lm-mod-hidden')).toBe(true);
+        } finally {
+          // Restore to describe-scope initial values regardless of pass/fail.
+          enabled = false;
+          toggled = true;
+          visible = false;
+          button.dispose();
+        }
+      });
+
       it('should use the command label if no icon class/label', async () => {
         const id = 'to-be-removed';
         const cmd = commands.addCommand(id, {
