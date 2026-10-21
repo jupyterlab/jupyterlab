@@ -729,7 +729,6 @@ export class SessionContext implements ISessionContext {
   async startKernel(): Promise<boolean> {
     const preference = this.kernelPreference;
     const specs = this.specsManager.specs;
-
     if (!preference.autoStartDefault && preference.shouldStart === false) {
       return true;
     }
@@ -1473,14 +1472,17 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     if (hasCheckbox && result.isChecked !== null) {
       sessionContext.kernelPreference = {
         ...sessionContext.kernelPreference,
-        autoStartDefault: result.isChecked,
-        customKernelSpecs:
-          model && model.custom_kernel_specs
-            ? model.custom_kernel_specs
-            : undefined
+        autoStartDefault: result.isChecked
       };
     }
 
+    sessionContext.kernelPreference = {
+      ...sessionContext.kernelPreference,
+      customKernelSpecs:
+        model && model.custom_kernel_specs
+          ? model.custom_kernel_specs
+          : undefined
+    };
     if (model === null && !sessionContext.hasNoKernel) {
       return sessionContext.shutdown();
     }
@@ -1924,7 +1926,6 @@ namespace Private {
     let kernelSpecsContainer = document.querySelector<HTMLElement>(
       '#js-kernel-specs-select-container'
     )!;
-    console.log('kernelSpecsContainer', kernelSpecsContainer);
     if (!kernelSpecsContainer && kernelSpeccSelectorContainer) {
       kernelSpecsContainer = kernelSpeccSelectorContainer;
     }
@@ -1934,10 +1935,12 @@ namespace Private {
       selectedKernel && selectedKernel.name ? selectedKernel.name : '';
     let kernel =
       kernelName && sessionContext.specsManager.specs?.kernelspecs[kernelName];
-    const allowInsecureKernelspecParams =
+
+    let allowInsecureKernelspecParams =
       PageConfig.getOption('allow_insecure_kernelspec_params') === 'true'
         ? true
         : false;
+
     if (
       (kernel &&
         kernel?.metadata &&
@@ -1973,7 +1976,6 @@ namespace Private {
               }
             }
           }
-
           const _kernelSpecWidget = new DialogWidget(
             kernelParameters,
             kernelConfiguration,

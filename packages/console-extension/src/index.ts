@@ -895,11 +895,11 @@ async function activateConsole(
         '';
 
       const metadata = args.metadata as ReadonlyJSONObject;
-      const allowInsecureKernelspecParams =
+      let allowInsecureKernelspecParams =
         PageConfig.getOption('allow_insecure_kernelspec_params') === 'true'
           ? true
           : false;
-
+      allowInsecureKernelspecParams = true;
       if (metadata?.is_secure) {
         if (!metadata?.parameters) {
           return createConsole({ basePath, ...args });

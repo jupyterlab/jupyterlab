@@ -2528,7 +2528,6 @@ function activateNotebookHandler(
     ];
 
     // const autoStartDefault = sessionContext.kernelPreference.autoStartDefault;
-
     const dialog = new Dialog({
       title: trans.__('Select Kernel'),
       body: new DialogWidget(
@@ -2709,12 +2708,7 @@ function activateNotebookHandler(
         PageConfig.getOption('allow_insecure_kernelspec_params') === 'true'
           ? true
           : false;
-      console.log(
-        'allowInsecureKernelspecParams',
-        allowInsecureKernelspecParams
-      );
-      console.log('metadata', metadata);
-      allowInsecureKernelspecParams = true;
+
       if (metadata?.is_secure) {
         if (!metadata?.parameters) {
           return createNew(cwd, kernelId, kernelName);
