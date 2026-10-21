@@ -67,7 +67,7 @@ describe('@jupyterlab/settingeditor', () => {
 
       const component = renderer.create(
         <SettingsFormEditor
-          filteredValues={null}
+          filteredValues={'all'}
           hasError={() => void 0}
           onSelect={() => void 0}
           renderers={{}}
@@ -118,6 +118,38 @@ describe('@jupyterlab/settingeditor', () => {
       );
     });
 
+    it('should render all properties when filteredValues is tag', async () => {
+      const id = 'alpha';
+      const schema: ISettingRegistry.ISchema = {
+        type: 'object',
+        tags: ['my-tag'],
+        properties: {
+          keyA: { type: 'string', default: 'A' },
+          keyB: { type: 'string', default: 'B' }
+        }
+      };
+      connector.schemas[id] = schema;
+      settings = (await registry.load(id)) as Settings;
+
+      const component = renderer.create(
+        <SettingsFormEditor
+          filteredValues={'tag'}
+          hasError={() => void 0}
+          onSelect={() => void 0}
+          renderers={{}}
+          settings={settings}
+          translator={nullTranslator}
+          updateDirtyState={() => void 0}
+        />
+      );
+
+      const form = component.root.findByType(FormComponent);
+      expect(Object.keys(form.props.schema.properties ?? {})).toEqual([
+        'keyA',
+        'keyB'
+      ]);
+    });
+
     it('should preserve pending form data when settings change before save', async () => {
       jest.useFakeTimers();
 
@@ -144,7 +176,7 @@ describe('@jupyterlab/settingeditor', () => {
 
         component = renderer.create(
           <SettingsFormEditor
-            filteredValues={null}
+            filteredValues={'all'}
             hasError={() => void 0}
             onSelect={() => void 0}
             renderers={{}}
