@@ -170,6 +170,20 @@
       }
     ]
   },
+  "jupyter.lab.shortcuts": [
+    {
+      "command": "fileeditor:replace-selection",
+      "keys": ["Alt -"],
+      "selector": "[data-jp-editor-language='r']",
+      "args": { "text": "<- " }
+    },
+    {
+      "command": "fileeditor:replace-selection",
+      "keys": ["Accel Shift M"],
+      "selector": "[data-jp-editor-language='r']",
+      "args": { "text": "%>% " }
+    }
+  ],
   "jupyter.lab.toolbars": {
     "Editor": []
   },
