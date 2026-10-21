@@ -65,8 +65,7 @@
           "type": "array"
         },
         "selector": { "type": "string" },
-        "preventDefault": { "type": "boolean" },
-        "disabled": { "type": "boolean" }
+        "preventDefault": { "type": "boolean" }
       },
       "required": ["command", "keys", "selector"],
       "type": "object"

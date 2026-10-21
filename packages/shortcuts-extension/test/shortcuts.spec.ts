@@ -401,10 +401,7 @@ describe('@jupyterlab/shortcut-extension', () => {
 
   describe('shortcuts schema', () => {
     it('should preserve `disabled` when reifying default shortcuts', () => {
-      // `reifyDefault()` rebuilds each entry of an array default from the
-      // properties declared in the item definition, discarding any that are
-      // undeclared. `disabled` must therefore be declared in
-      // `#/definitions/shortcut`, or disabled defaults render identically to
+      // If `disabled` is dropped, disabled defaults render identically to
       // the shortcuts they disable in the JSON Settings Editor.
       const schema = JSON.parse(JSON.stringify(pluginSchema));
       schema.properties.shortcuts.default = [
