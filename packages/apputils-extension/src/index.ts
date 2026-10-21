@@ -42,6 +42,9 @@ import type { Widget } from '@lumino/widgets';
 import { announcements } from './announcements';
 import { licensesClient, licensesPlugin } from './licensesplugin';
 import { notificationPlugin } from './notificationplugin';
+// The plugins create the command palette at activation, so the module is
+// needed before the application starts.
+// eslint-disable-next-line jupyter/prefer-lazy-imports
 import { Palette } from './palette';
 import { settingsConnector, settingsPlugin } from './settingsplugin';
 import { kernelStatus, runningSessionsStatus } from './statusbarplugin';
@@ -120,9 +123,16 @@ const paletteRestorer: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:palette-restorer',
   description: 'Restores the command palette.',
   autoStart: true,
-  requires: [ILayoutRestorer],
-  activate: (app: JupyterFrontEnd, restorer: ILayoutRestorer) => {
-    Palette.restore(app, restorer);
+  requires: [ILayoutRestorer, ITranslator, IStateDB],
+  optional: [ISettingRegistry],
+  activate: (
+    app: JupyterFrontEnd,
+    restorer: ILayoutRestorer,
+    translator: ITranslator,
+    state: IStateDB,
+    settingRegistry: ISettingRegistry | null
+  ) => {
+    Palette.restore(app, restorer, translator, state, settingRegistry);
   }
 };
 
