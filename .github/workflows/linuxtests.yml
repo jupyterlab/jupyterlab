@@ -21,6 +21,8 @@ jobs:
         include:
           - group: release_test
             upload-output: true
+            # This will be used by the base setup action
+            node-version: 26.x
           - group: lint
             cache-path: |
               ./.eslintcache
