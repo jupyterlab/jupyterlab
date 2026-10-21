@@ -3,6 +3,7 @@
 
 import { galata } from '@jupyterlab/galata';
 import { expect, test } from '@jupyterlab/galata';
+import type { RunningSessions } from '@jupyterlab/running';
 
 import type { Locator } from '@playwright/test';
 
@@ -211,6 +212,34 @@ test('Check Running Session button on sidebar has correct aria label and role', 
     'Running Sessions section'
   );
   await expect(runningSessionsWidget).toHaveAttribute('role', 'region');
+});
+
+test('Running sessions includes terminals discovered while detached', async ({
+  page
+}) => {
+  await page.sidebar.openTab('jp-running-sessions');
+  const labels = page
+    .getByRole('region', { name: 'Terminals Section', exact: true })
+    .locator('.jp-RunningSessions-itemLabel');
+  await expect(labels).toHaveCount(0);
+
+  await page.evaluate(async () => {
+    const app = window.jupyterapp;
+    const sidebar = Array.from(app.shell.widgets('left')).find(
+      (widget): widget is RunningSessions => widget.id === 'jp-running-sessions'
+    );
+    const section = sidebar?.removeSectionById('Terminals');
+    if (!sidebar || !section) {
+      throw new Error('Terminals section is missing');
+    }
+    try {
+      await app.serviceManager.terminals.startNew();
+    } finally {
+      sidebar.reinsertSection(section);
+    }
+  });
+
+  await expect(labels).toHaveCount(1);
 });
 
 test('Check Extension Manager button on sidebar has correct aria label and role', async ({
