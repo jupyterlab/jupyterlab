@@ -3028,6 +3028,9 @@ function addCommands(
     commands.notifyCommandChanged(CommandIDs.duplicateBelow);
     commands.notifyCommandChanged(CommandIDs.showNonEditable);
     commands.notifyCommandChanged(CommandIDs.deleteCell);
+    if (commands.hasCommand('cell-toolbar:delete')) {
+      commands.notifyCommandChanged('cell-toolbar:delete');
+    }
     commands.notifyCommandChanged(CommandIDs.copySelectedtext);
     commands.notifyCommandChanged(CommandIDs.pasteText);
     commands.notifyCommandChanged(CommandIDs.cutSelectedtext);
@@ -3052,6 +3055,11 @@ function addCommands(
       cell.model.metadataChanged.connect(() => {
         commands.notifyCommandChanged(CommandIDs.deleteCell);
         commands.notifyCommandChanged(CommandIDs.showNonEditable);
+        // Notifying an unregistered command throws; the cell-toolbar plugin
+        // may register it after the notebook commands are added.
+        if (commands.hasCommand('cell-toolbar:delete')) {
+          commands.notifyCommandChanged('cell-toolbar:delete');
+        }
       });
     }
   });
@@ -4008,7 +4016,6 @@ function addCommands(
         (current.content.activeCell?.model.getMetadata(
           'deletable'
         ) as unknown as boolean) !== false;
-      console.warn('[deletable cell] isEnabled check fired ', deletable);
       return deletable && !Private.isViewOnly(tracker);
     },
     isVisible: () => !Private.isViewOnly(tracker),
