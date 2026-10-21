@@ -38,7 +38,11 @@ import { MarkdownCell } from '@jupyterlab/cells';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
-import { compareVersions, PageConfig } from '@jupyterlab/coreutils';
+import {
+  compareVersions,
+  PageConfig,
+  signalToPromise
+} from '@jupyterlab/coreutils';
 
 import {
   IEditorExtensionRegistry,
@@ -867,6 +871,8 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
 
       formatsInitialized = true;
 
+      await Private.notebooksLoaded(app, tracker);
+
       let response: NbConvert.IExportFormats | null = null;
       try {
         response = await services.nbconvert.getExportFormats(false);
@@ -1264,6 +1270,8 @@ const updateRawMimetype: JupyterFrontEndPlugin<void> = {
       tracker.widgetAdded.disconnect(maybeInitializeFormats);
 
       formatsInitialized = true;
+
+      await Private.notebooksLoaded(app, tracker);
 
       const services = app.serviceManager;
       const response = await services.nbconvert.getExportFormats(false);
@@ -5864,6 +5872,29 @@ namespace Private {
       }
     }
     return true;
+  }
+
+  /**
+   * Resolve once the open notebooks have loaded or closed.
+   *
+   * The first `/api/nbconvert` request imports nbconvert on the server event
+   * loop, which delays the requests that load the notebooks.
+   */
+  export async function notebooksLoaded(
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker
+  ): Promise<void> {
+    await app.restored;
+    const loading: Promise<unknown>[] = [];
+    tracker.forEach(panel => {
+      loading.push(
+        Promise.race([
+          panel.context.ready,
+          signalToPromise(panel.disposed)
+        ]).catch(() => undefined)
+      );
+    });
+    await Promise.all(loading);
   }
 
   /**
