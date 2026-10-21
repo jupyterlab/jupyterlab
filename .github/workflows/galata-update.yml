@@ -20,12 +20,12 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots-checkout@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots-checkout@925e40fa6066f4533e0c40803bd4b6d0d2f4a781 # v1.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@925e40fa6066f4533e0c40803bd4b6d0d2f4a781 # v1.1.0
         with:
           python_package_manager: "uv pip"
 
@@ -35,7 +35,7 @@ jobs:
           # Build dev-mode
           jlpm build
 
-      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@925e40fa6066f4533e0c40803bd4b6d0d2f4a781 # v1.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           server_url: http-get://localhost:8888/lab
@@ -71,7 +71,7 @@ jobs:
         python-version: ['3.10.6']
 
     steps:
-      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots-checkout@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots-checkout@925e40fa6066f4533e0c40803bd4b6d0d2f4a781 # v1.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -89,7 +89,7 @@ jobs:
         working-directory: demo
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@925e40fa6066f4533e0c40803bd4b6d0d2f4a781 # v1.1.0
         with:
           python_package_manager: "uv pip"
 
@@ -105,7 +105,7 @@ jobs:
           # Build dev-mode
           jlpm build
 
-      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@925e40fa6066f4533e0c40803bd4b6d0d2f4a781 # v1.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           server_url: http-get://localhost:8888/lab
