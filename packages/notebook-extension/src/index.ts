@@ -3963,7 +3963,7 @@ function addCommands(
       const noteditable =
         (current.content.activeCell?.model.getMetadata(
           'editable'
-        ) as unknown as boolean) !== true;
+        ) as unknown as boolean) === false;
       const visible = settings?.get('showLockForReadOnlyCells')
         .composite as boolean;
       return noteditable && visible;
