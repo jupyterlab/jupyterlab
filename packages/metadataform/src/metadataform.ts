@@ -23,7 +23,6 @@ import { SingletonLayout, Widget } from '@lumino/widgets';
 
 import type { MetadataForm } from './token';
 import { FormWidget } from './form';
-import { fillFormData } from './validator';
 
 /**
  * A class that create a metadata form widget
@@ -163,10 +162,6 @@ export class MetadataFormWidget
     // An object representing the notebook metadata to modify.
     const notebookMetadataObject: Private.IMetadataRepresentation = {};
 
-    // The form data that the form shows for the current metadata, with the
-    // values that it fills in for missing keys.
-    const filledFormData = this._getFilledFormData(cell, notebook);
-
     for (let [metadataKey, value] of Object.entries(formData)) {
       // Continue if the metadataKey does not exist in schema.
       if (!this.metadataKeys.includes(metadataKey)) continue;
@@ -209,17 +204,6 @@ export class MetadataFormWidget
 
       let baseMetadataKey = nestedKey[0];
       if (baseMetadataKey == undefined) continue;
-
-      // A value that the form fills in by itself for missing metadata, such as
-      // a default, is not a change to write.
-      const filledValue = filledFormData[metadataKey];
-      if (
-        value !== undefined &&
-        filledValue !== undefined &&
-        JSONExt.deepEqual(value, filledValue) &&
-        !Private.hasNestedKey(currentMetadata, nestedKey)
-      )
-        continue;
 
       let writeFinalData =
         value !== undefined &&
@@ -453,87 +437,6 @@ export class MetadataFormWidget
     });
   }
 
-  /**
-   * Get the form data that the form shows for the current metadata: the
-   * current values, and the values that the form fills in for missing keys,
-   * such as defaults.
-   */
-  private _getFilledFormData(
-    cell: NonNullable<NotebookTools['activeCell']>,
-    notebook: NotebookTools['activeNotebookPanel']
-  ): ReadonlyPartialJSONObject {
-    const formData = this._getCurrentFormData(cell, notebook);
-    const schema = this._getFormSchema(cell);
-    const filledFormData = fillFormData(schema, formData);
-    if (filledFormData !== null) return filledFormData;
-
-    // Before the validator has loaded, only the defaults outside the
-    // conditional branches are known.
-    const withDefaults: PartialJSONObject = { ...formData };
-    for (const [metadataKey, property] of Object.entries(schema.properties)) {
-      if (!(metadataKey in withDefaults) && property?.default !== undefined)
-        withDefaults[metadataKey] = property.default;
-    }
-    return withDefaults;
-  }
-
-  /**
-   * Get the current metadata of the form keys, including the conditional ones.
-   */
-  private _getCurrentFormData(
-    cell: NonNullable<NotebookTools['activeCell']>,
-    notebook: NotebookTools['activeNotebookPanel']
-  ): PartialJSONObject {
-    const formData: PartialJSONObject = {};
-    for (const metadataKey of this.metadataKeys) {
-      if (!this._isShown(metadataKey, cell)) continue;
-
-      const metadata: PartialJSONObject =
-        this._metaInformation[metadataKey]?.level === 'notebook'
-          ? notebook!.model!.metadata
-          : cell.model.metadata;
-      const nestedKey = metadataKey
-        .replace(/^\/+/, '')
-        .replace(/\/+$/, '')
-        .split('/');
-      if (!Private.hasNestedKey(metadata, nestedKey)) continue;
-
-      let value: PartialJSONValue | undefined = metadata;
-      for (const key of nestedKey) value = (value as PartialJSONObject)[key];
-      formData[metadataKey] = value;
-    }
-    return formData;
-  }
-
-  /**
-   * Get the schema of the form for a cell, without the keys that it does not show.
-   */
-  private _getFormSchema(
-    cell: NonNullable<NotebookTools['activeCell']>
-  ): MetadataForm.IMetadataSchema {
-    const properties = { ...this._metadataSchema.properties };
-    for (const metadataKey of Object.keys(properties)) {
-      if (!this._isShown(metadataKey, cell)) delete properties[metadataKey];
-    }
-    return { ...this._metadataSchema, properties };
-  }
-
-  /**
-   * Whether the form shows a metadataKey for a cell.
-   */
-  private _isShown(
-    metadataKey: string,
-    cell: NonNullable<NotebookTools['activeCell']>
-  ): boolean {
-    const metaInformation = this._metaInformation[metadataKey];
-    if (metaInformation?.level === 'notebook' && this._notebookModelNull)
-      return false;
-    return (
-      !metaInformation?.cellTypes ||
-      metaInformation.cellTypes.includes(cell.model.type)
-    );
-  }
-
   protected translator: ITranslator;
   private _form: FormWidget | undefined;
   private _metadataSchema: MetadataForm.IMetadataSchema;
@@ -578,25 +481,5 @@ namespace Private {
         delete metadataObject[metadataKey];
     }
     return metadataObject;
-  }
-
-  /**
-   * Whether the metadata has a value at the nested key.
-   */
-  export function hasNestedKey(
-    metadata: PartialJSONObject,
-    nestedKey: Array<string>
-  ): boolean {
-    let workingObject: PartialJSONValue | undefined = metadata;
-    for (let key of nestedKey) {
-      if (
-        workingObject === undefined ||
-        !JSONExt.isObject(workingObject) ||
-        !(key in workingObject)
-      )
-        return false;
-      workingObject = workingObject[key];
-    }
-    return true;
   }
 }
