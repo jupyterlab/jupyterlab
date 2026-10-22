@@ -30,6 +30,7 @@ import {
   SemanticCommand,
   SessionContextDialogs,
   showDialog,
+  showErrorMessage,
   Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
@@ -177,6 +178,8 @@ namespace CommandIDs {
   export const changeKernel = 'notebook:change-kernel';
 
   export const getKernel = 'notebook:get-kernel';
+
+  export const commitMetadataAndSave = 'notebook:commit-metadata-and-save';
 
   export const createConsole = 'notebook:create-console';
 
@@ -1352,7 +1355,6 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
       '@jupyterlab/notebook-extension:metadata-editor.cell-metadata',
       cellComponent
     );
-
     const notebookMetadataField = new NotebookMetadataField({
       editorFactory,
       tracker,
@@ -1368,6 +1370,37 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
       '@jupyterlab/notebook-extension:metadata-editor.notebook-metadata',
       notebookComponent
     );
+
+    app.commands.addCommand(CommandIDs.commitMetadataAndSave, {
+      label: trans.__('Commit Metadata and Save Notebook'),
+      caption: trans.__(
+        'Commit pending changes in the metadata editors, then save the notebook'
+      ),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: async () => {
+        const editors = [cellMetadataField, notebookMetadataField]
+          .map(field => field.editor)
+          .filter(editor => !editor.isDisposed);
+        if (editors.some(editor => !editor.isValid)) {
+          void showErrorMessage(
+            trans.__('Invalid Metadata'),
+            trans.__(
+              'The notebook was not saved because metadata must be a JSON object. Fix the metadata or revert the change, then save again.'
+            )
+          );
+          return;
+        }
+        for (const editor of editors) {
+          editor.commit();
+        }
+        return app.commands.execute('docmanager:save');
+      }
+    });
   }
 };
 
