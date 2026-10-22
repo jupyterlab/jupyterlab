@@ -52,10 +52,10 @@ commander
     }
 
     // Patch the python version
-    utils.run('bump-my-version bump --allow-dirty patch'); // switches to alpha
-    utils.run('bump-my-version bump --allow-dirty release'); // switches to beta
-    utils.run('bump-my-version bump --allow-dirty release'); // switches to rc.
-    utils.run('bump-my-version bump --allow-dirty release'); // switches to final.
+    utils.run('bumpversion patch --allow-dirty'); // switches to alpha
+    utils.run('bumpversion release --allow-dirty'); // switches to beta
+    utils.run('bumpversion release --allow-dirty'); // switches to rc.
+    utils.run('bumpversion release --allow-dirty'); // switches to final.
 
     // Run post-bump actions.
     const commit = options.skipCommit !== true;

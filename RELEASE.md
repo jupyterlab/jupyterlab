@@ -163,7 +163,7 @@ source scripts/release_prep.sh <branch_name>
 ### Bump version
 
 The next step is to bump the appropriate version numbers. We use
-[bump-my-version](https://github.com/callowayproject/bump-my-version) to manage the Python
+[bump2version](https://github.com/c4urself/bump2version) to manage the Python
 version, and we keep the JS versions and tags in sync with the release cycle.
 
 Here is an example of how version numbers progress through a release process.
