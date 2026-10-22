@@ -15,8 +15,10 @@ import type {
   ICell,
   ICodeCell,
   IDisplayData,
+  IError,
   IExecuteResult,
-  IMimeBundle
+  IMimeBundle,
+  IStream
 } from '@jupyterlab/nbformat';
 import {
   KernelError,
@@ -570,16 +572,248 @@ describe('@jupyterlab/notebook', () => {
         }, READ_ONLY_MERGE_ERROR);
       });
 
-      it('should clear the outputs of a code cell', () => {
+      it('should preserve the outputs of a code cell', () => {
+        const cellBefore = widget.activeCell as CodeCell;
+        const initialOutputsCount = cellBefore.model.outputs.length;
+        expect(initialOutputsCount).toBeGreaterThan(0);
         NotebookActions.mergeCells(widget);
         const cell = widget.activeCell as CodeCell;
-        expect(cell.model.outputs.length).toBe(0);
+        expect(cell.model.outputs.length).toBe(initialOutputsCount);
       });
 
-      it('should mark cell as trusted as cells without output are trusted', () => {
+      it('should preserve cell trust when merging trusted cells', () => {
+        (widget.widgets[0] as CodeCell).model.trusted = true;
+        (widget.widgets[1] as CodeCell).model.trusted = true;
         NotebookActions.mergeCells(widget);
         const cell = widget.activeCell as CodeCell;
         expect(cell.model.trusted).toBe(true);
+      });
+
+      it('should preserve outputs, collate execution count, consolidate streams, and set isDirty when merging executed code cells', () => {
+        widget.model!.fromJSON({
+          cells: [
+            {
+              cell_type: 'code',
+              execution_count: 1,
+              metadata: { trusted: true },
+              outputs: [
+                {
+                  name: 'stdout',
+                  output_type: 'stream',
+                  text: 'hello world\n'
+                }
+              ],
+              source: 'print("hello world")'
+            },
+            {
+              cell_type: 'code',
+              execution_count: 2,
+              metadata: { trusted: true },
+              outputs: [
+                {
+                  name: 'stdout',
+                  output_type: 'stream',
+                  text: 'output 2\n'
+                }
+              ],
+              source: 'print("output 2")'
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+        widget.activeCellIndex = 0;
+        widget.select(widget.widgets[1]);
+
+        NotebookActions.mergeCells(widget);
+
+        expect(widget.widgets.length).toBe(1);
+        const mergedCell = widget.activeCell as CodeCell;
+        expect(mergedCell).toBeInstanceOf(CodeCell);
+        expect(mergedCell.model.sharedModel.getSource()).toBe(
+          'print("hello world")\n\nprint("output 2")'
+        );
+        expect(mergedCell.model.outputs.length).toBe(1);
+        const output = mergedCell.model.outputs.get(0).toJSON() as IStream;
+        expect(output.output_type).toBe('stream');
+        expect(output.name).toBe('stdout');
+        expect(output.text).toBe('hello world\noutput 2\n');
+        expect(mergedCell.model.executionCount).toBe(2);
+        expect(mergedCell.model.isDirty).toBe(true);
+        expect(mergedCell.model.trusted).toBe(true);
+      });
+
+      it('should mark merged cell as untrusted if any contributing code cell is untrusted', () => {
+        widget.model!.fromJSON({
+          cells: [
+            {
+              cell_type: 'code',
+              execution_count: 1,
+              metadata: { trusted: true },
+              outputs: [
+                {
+                  name: 'stdout',
+                  output_type: 'stream',
+                  text: 'trusted output\n'
+                }
+              ],
+              source: 'print("trusted")'
+            },
+            {
+              cell_type: 'code',
+              execution_count: 2,
+              metadata: { trusted: false },
+              outputs: [
+                {
+                  name: 'stdout',
+                  output_type: 'stream',
+                  text: 'untrusted output\n'
+                }
+              ],
+              source: 'print("untrusted")'
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+        widget.activeCellIndex = 0;
+        widget.select(widget.widgets[1]);
+
+        NotebookActions.mergeCells(widget);
+
+        const mergedCell = widget.activeCell as CodeCell;
+        expect(mergedCell.model.trusted).toBe(false);
+      });
+
+      it('should preserve heterogeneous output types and maintain stream separation', () => {
+        widget.model!.fromJSON({
+          cells: [
+            {
+              cell_type: 'code',
+              execution_count: 1,
+              metadata: { trusted: true },
+              outputs: [
+                {
+                  name: 'stdout',
+                  output_type: 'stream',
+                  text: 'stdout 1\n'
+                },
+                {
+                  name: 'stderr',
+                  output_type: 'stream',
+                  text: 'stderr 1\n'
+                }
+              ],
+              source: 'print("1")'
+            },
+            {
+              cell_type: 'code',
+              execution_count: 2,
+              metadata: { trusted: true },
+              outputs: [
+                {
+                  name: 'stderr',
+                  output_type: 'stream',
+                  text: 'stderr 2\n'
+                },
+                {
+                  ename: 'Error',
+                  evalue: 'something went wrong',
+                  output_type: 'error',
+                  traceback: ['something went wrong']
+                }
+              ],
+              source: 'raise Error()'
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+        widget.activeCellIndex = 0;
+        widget.select(widget.widgets[1]);
+
+        NotebookActions.mergeCells(widget);
+
+        const mergedCell = widget.activeCell as CodeCell;
+        expect(mergedCell.model.outputs.length).toBe(3);
+        const out0 = mergedCell.model.outputs.get(0).toJSON() as IStream;
+        expect(out0.output_type).toBe('stream');
+        expect(out0.name).toBe('stdout');
+        expect(out0.text).toBe('stdout 1\n');
+
+        const out1 = mergedCell.model.outputs.get(1).toJSON() as IStream;
+        expect(out1.output_type).toBe('stream');
+        expect(out1.name).toBe('stderr');
+        expect(out1.text).toBe('stderr 1\nstderr 2\n');
+
+        const out2 = mergedCell.model.outputs.get(2).toJSON() as IError;
+        expect(out2.output_type).toBe('error');
+        expect(out2.ename).toBe('Error');
+      });
+
+      it('should collate execution count correctly for non-monotonic and unexecuted cells', () => {
+        // Non-monotonic execution counts: max is 5
+        widget.model!.fromJSON({
+          cells: [
+            {
+              cell_type: 'code',
+              execution_count: 5,
+              metadata: { trusted: true },
+              outputs: [],
+              source: 'cell 1'
+            },
+            {
+              cell_type: 'code',
+              execution_count: 2,
+              metadata: { trusted: true },
+              outputs: [],
+              source: 'cell 2'
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+        widget.activeCellIndex = 0;
+        widget.select(widget.widgets[1]);
+
+        NotebookActions.mergeCells(widget);
+
+        let mergedCell = widget.activeCell as CodeCell;
+        expect(mergedCell.model.executionCount).toBe(5);
+
+        // All unexecuted cells: count remains null
+        widget.model!.fromJSON({
+          cells: [
+            {
+              cell_type: 'code',
+              execution_count: null,
+              metadata: { trusted: true },
+              outputs: [],
+              source: 'cell a'
+            },
+            {
+              cell_type: 'code',
+              execution_count: null,
+              metadata: { trusted: true },
+              outputs: [],
+              source: 'cell b'
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+        widget.activeCellIndex = 0;
+        widget.select(widget.widgets[1]);
+
+        NotebookActions.mergeCells(widget);
+
+        mergedCell = widget.activeCell as CodeCell;
+        expect(mergedCell.model.executionCount).toBeNull();
       });
 
       it('should preserve the widget mode', () => {
