@@ -52,6 +52,51 @@ test.describe('CSV Viewer', () => {
     expect(await csvLocator.screenshot()).toMatchSnapshot(screenshotName);
   });
 
+  test('should show the current match and the number of matches', async ({
+    page
+  }) => {
+    await page.filebrowser.open(csvFileName);
+    await expect(page.locator('.jp-CSVViewer-grid')).toBeVisible();
+
+    await page.evaluate(async () => {
+      await window.jupyterapp.commands.execute('documentsearch:start', {
+        searchText: 'robert'
+      });
+    });
+
+    // `Janet Robertson`, `jrobertson1` and `Robert Simpson`.
+    const counter = page.locator('.jp-DocumentSearch-index-counter');
+    await expect(counter).toHaveText('1/3');
+
+    const input = page.locator('[placeholder="Find"]');
+    await input.press('Enter');
+    await expect(counter).toHaveText('2/3');
+
+    // The column headers are searched too.
+    await input.fill('ip_address');
+    await expect(counter).toHaveText('1/1');
+  });
+
+  test('should update the number of matches when the delimiter changes', async ({
+    page
+  }) => {
+    await page.filebrowser.open(csvFileName);
+    await expect(page.locator('.jp-CSVViewer-grid')).toBeVisible();
+
+    await page.evaluate(async () => {
+      await window.jupyterapp.commands.execute('documentsearch:start', {
+        searchText: 'robert'
+      });
+    });
+
+    const counter = page.locator('.jp-DocumentSearch-index-counter');
+    await expect(counter).toHaveText('1/3');
+
+    // Each line becomes one cell, so the two matches in line 3 become one.
+    await page.locator('.jp-CSVDelimiter select').selectOption(';');
+    await expect(counter).toHaveText('1/2');
+  });
+
   test.afterEach(async ({ page }) => {
     try {
       await page.contents.deleteFile(csvFileName);

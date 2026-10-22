@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+import type { ISearchMatch } from '@jupyterlab/documentsearch';
 import {
   GenericSearchProvider,
   SearchDocumentModel
@@ -7,6 +8,7 @@ import {
 import { Widget } from '@lumino/widgets';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { signalToPromise } from '@jupyterlab/testing';
+import { MatchListProvider } from './utils';
 
 class LogSearchProvider extends GenericSearchProvider {
   private _queryReceived: PromiseDelegate<RegExp | null>;
@@ -186,6 +188,90 @@ describe('documentsearch/searchmodel', () => {
         model.replaceText = '1';
         model.replaceText = '1';
         expect(emitted).toEqual(1);
+      });
+    });
+
+    describe('#replaceEnabled', () => {
+      let matchList: MatchListProvider;
+      let replaceModel: SearchDocumentModel;
+
+      beforeEach(async () => {
+        matchList = new MatchListProvider([
+          { text: 'query', position: 0 },
+          { text: 'query', position: 10, readOnly: true }
+        ]);
+        replaceModel = new SearchDocumentModel(matchList, 0);
+        replaceModel.searchExpression = 'query';
+        await signalToPromise(replaceModel.stateChanged);
+      });
+
+      afterEach(() => {
+        replaceModel.dispose();
+        matchList.dispose();
+      });
+
+      it('should be true on a match which can be replaced', () => {
+        expect(replaceModel.replaceEnabled).toEqual(true);
+      });
+
+      it('should be false on a read-only match', async () => {
+        await replaceModel.highlightNext();
+        expect(replaceModel.replaceEnabled).toEqual(false);
+        await replaceModel.highlightPrevious();
+        expect(replaceModel.replaceEnabled).toEqual(true);
+      });
+
+      it('should be true again after the search text is cleared', async () => {
+        await replaceModel.highlightNext();
+        expect(replaceModel.replaceEnabled).toEqual(false);
+        replaceModel.searchExpression = '';
+        await signalToPromise(replaceModel.stateChanged);
+        expect(replaceModel.replaceEnabled).toEqual(true);
+      });
+
+      it('should not replace a read-only match', async () => {
+        await replaceModel.highlightNext();
+        await replaceModel.replaceCurrentMatch();
+        expect(matchList.replaced).toEqual([]);
+        await replaceModel.highlightNext();
+        await replaceModel.replaceCurrentMatch();
+        expect(matchList.replaced).toEqual([0]);
+      });
+    });
+
+    describe('#replaceAllEnabled', () => {
+      const search = async (matches: ISearchMatch[]) => {
+        const replaceModel = new SearchDocumentModel(
+          new MatchListProvider(matches),
+          0
+        );
+        replaceModel.searchExpression = 'query';
+        await signalToPromise(replaceModel.stateChanged);
+        return replaceModel;
+      };
+
+      it('should be true when one match can be replaced', async () => {
+        const replaceModel = await search([
+          { text: 'query', position: 0, readOnly: true },
+          { text: 'query', position: 10 }
+        ]);
+        expect(replaceModel.replaceAllEnabled).toEqual(true);
+        replaceModel.dispose();
+      });
+
+      it('should be false when no match can be replaced', async () => {
+        const replaceModel = await search([
+          { text: 'query', position: 0, readOnly: true },
+          { text: 'query', position: 10, readOnly: true }
+        ]);
+        expect(replaceModel.replaceAllEnabled).toEqual(false);
+        replaceModel.dispose();
+      });
+
+      it('should be true when there are no matches', async () => {
+        const replaceModel = await search([]);
+        expect(replaceModel.replaceAllEnabled).toEqual(true);
+        replaceModel.dispose();
       });
     });
   });
