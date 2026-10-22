@@ -4748,8 +4748,8 @@
   },
   {
     "id": "notebook:not-editable",
-    "label": "Not editable Cell",
-    "caption": "Not editable cell",
+    "label": "read-only Cell",
+    "caption": "read-only Cell",
     "shortcuts": [],
     "args": {
       "type": "object",

@@ -3942,23 +3942,25 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.showNonEditable, {
-    label: trans.__('Not editable Cell'),
-    caption: trans.__('Not editable cell'),
+    label: trans.__('read-only Cell'),
+    caption: trans.__('read-only Cell'),
     execute: async args => {
       const current = getCurrent(tracker, shell, { ...args, activate: false });
       if (current) {
         const cell = current.content.activeCell;
         if (cell) {
-          const editable =
-            (cell.model.getMetadata('editable') as unknown as boolean) !==
-            false;
-          const result = await InputDialog.getBoolean({
-            title: trans.__('Set Cell Editable'),
-            label: trans.__('Is this cell editable?'),
-            value: editable
+          const result = await showDialog({
+            title: trans.__('Cell is read-only'),
+            body: trans.__(
+              'This cell is read-only, its content cannot be edited'
+            ),
+            buttons: [
+              Dialog.cancelButton(),
+              Dialog.okButton({ label: trans.__('Make Editable') })
+            ]
           });
           if (result.button.accept) {
-            cell.model.setMetadata('editable', result.value);
+            cell.model.setMetadata('editable', undefined);
           }
         }
       }
