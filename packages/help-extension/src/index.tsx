@@ -439,8 +439,8 @@ const resources: JupyterFrontEndPlugin<void> = {
     }));
     helpMenu.addGroup(resourcesGroup, 10);
 
-    // Kernel info by kernel name, once its help entries were added.
-    const kernelInfoCache = new Map<string, KernelMessage.IInfoReply>();
+    // Names of the kernels whose help entries were added.
+    const kernelsWithEntries = new Set<string>();
     // Name of the kernel the current widget uses or last used; its entries
     // are shown.
     let currentKernel: string | null = null;
@@ -456,7 +456,7 @@ const resources: JupyterFrontEndPlugin<void> = {
       spec: KernelSpec.ISpecModel,
       kernelInfo: KernelMessage.IInfoReply
     ) => {
-      kernelInfoCache.set(name, kernelInfo);
+      kernelsWithEntries.add(name);
       const isEnabled = () => currentKernel === name;
 
       // Add the kernel banner to the Help Menu.
@@ -548,7 +548,7 @@ const resources: JupyterFrontEndPlugin<void> = {
         currentKernel = name;
         kernelCommands.forEach(id => commands.notifyCommandChanged(id));
       }
-      if (!kernel || kernelInfoCache.has(kernel.name)) {
+      if (!kernel || kernelsWithEntries.has(kernel.name)) {
         return;
       }
       const spec = serviceManager.kernelspecs?.specs?.kernelspecs[kernel.name];
@@ -556,7 +556,7 @@ const resources: JupyterFrontEndPlugin<void> = {
         return;
       }
       const kernelInfo = await kernel.info;
-      if (!kernelInfoCache.has(kernel.name)) {
+      if (!kernelsWithEntries.has(kernel.name)) {
         addKernelEntries(kernel.name, spec, kernelInfo);
       }
     };
