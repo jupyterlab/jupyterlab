@@ -27,7 +27,7 @@ import {
   jupyterIcon,
   jupyterlabWordmarkIcon
 } from '@jupyterlab/ui-components';
-import type { Menu } from '@lumino/widgets';
+import type { Menu, Widget } from '@lumino/widgets';
 import * as React from 'react';
 
 /**
@@ -441,8 +441,12 @@ const resources: JupyterFrontEndPlugin<void> = {
 
     // Kernel info by kernel name, once its help entries were added.
     const kernelInfoCache = new Map<string, KernelMessage.IInfoReply>();
-    // Name of the kernel used by the current widget; its entries are shown.
+    // Name of the kernel the current widget uses or last used; its entries
+    // are shown.
     let currentKernel: string | null = null;
+    // The last kernel name of each widget, kept after the kernel dies or is
+    // shut down, as this is when users are likely to look for help.
+    const widgetKernels = new WeakMap<Widget, string>();
     // Commands of the kernel entries, re-evaluated when the kernel changes.
     const kernelCommands: string[] = [];
     let updates = 0;
@@ -527,6 +531,7 @@ const resources: JupyterFrontEndPlugin<void> = {
     // another one just for the menu can break the widget's connection.
     const update = async () => {
       const request = ++updates;
+      const widget = app.shell.currentWidget;
       const kernel: Kernel.IKernelConnection | null = await commands.execute(
         'helpmenu:get-kernel'
       );
@@ -534,8 +539,13 @@ const resources: JupyterFrontEndPlugin<void> = {
       if (request !== updates) {
         return;
       }
-      if (currentKernel !== (kernel?.name ?? null)) {
-        currentKernel = kernel?.name ?? null;
+      if (widget && kernel) {
+        widgetKernels.set(widget, kernel.name);
+      }
+      const name =
+        kernel?.name ?? (widget && widgetKernels.get(widget)) ?? null;
+      if (currentKernel !== name) {
+        currentKernel = name;
         kernelCommands.forEach(id => commands.notifyCommandChanged(id));
       }
       if (!kernel || kernelInfoCache.has(kernel.name)) {
@@ -573,6 +583,8 @@ const resources: JupyterFrontEndPlugin<void> = {
     };
     (labShell ?? app.shell).currentChanged?.connect(onCurrentChanged);
     serviceManager.sessions.runningChanged.connect(onChanged);
+    // The kernel specs can arrive after the kernel info.
+    serviceManager.kernelspecs?.specsChanged.connect(onChanged);
     onCurrentChanged();
 
     if (palette) {
