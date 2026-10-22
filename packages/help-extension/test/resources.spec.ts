@@ -4,24 +4,24 @@
 import type { JupyterFrontEnd } from '@jupyterlab/application';
 import plugins from '@jupyterlab/help-extension';
 import type { IMainMenu } from '@jupyterlab/mainmenu';
-import type { KernelMessage, Session } from '@jupyterlab/services';
+import type { KernelMessage } from '@jupyterlab/services';
 import { nullTranslator } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { Signal } from '@lumino/signaling';
 
-type InfoReply = KernelMessage.IInfoReplyMsg['content'];
+type InfoReply = KernelMessage.IInfoReply;
 
 /**
- * A kernel info request that the test settles.
+ * A fake kernel connection whose info reply the test settles.
  */
-class InfoRequest {
-  constructor() {
-    this.promise = new Promise<InfoReply>((resolve, reject) => {
+class FakeKernel {
+  constructor(readonly name: string) {
+    this.info = new Promise<InfoReply>((resolve, reject) => {
       this.resolve = resolve;
       this.reject = reject;
     });
   }
-  promise: Promise<InfoReply>;
+  info: Promise<InfoReply>;
   resolve: (reply: InfoReply) => void;
   reject: (reason: Error) => void;
 }
@@ -31,26 +31,31 @@ const reply = {
   help_links: [{ text: 'Python Reference', url: 'https://docs.python.org' }]
 } as InfoReply;
 
-const model = (id: string, name: string): Session.IModel =>
-  ({ id, kernel: { id: `kernel-${id}`, name } }) as Session.IModel;
-
 describe('@jupyterlab/help-extension:resources', () => {
   const resources = plugins.find(
     plugin => plugin.id === '@jupyterlab/help-extension:resources'
   )!;
 
   let commands: CommandRegistry;
-  let running: Session.IModel[];
-  let runningChanged: Signal<unknown, Session.IModel[]>;
-  let requests: InfoRequest[];
-  let sessions: { kernel: { name: string }; dispose: jest.Mock }[];
+  let current: FakeKernel | null;
+  let currentChanged: Signal<unknown, unknown>;
+  let currentWidget: {
+    sessionContext: { kernelChanged: Signal<unknown, unknown> };
+  } | null;
+  let runningChanged: Signal<unknown, unknown>;
   let connectTo: jest.Mock;
 
   const activate = () => {
     const app = {
       commands,
+      shell: {
+        currentChanged,
+        get currentWidget() {
+          return currentWidget;
+        }
+      },
       serviceManager: {
-        sessions: { running: () => running, runningChanged, connectTo },
+        sessions: { runningChanged, connectTo },
         kernelspecs: {
           specs: {
             kernelspecs: {
@@ -70,75 +75,163 @@ describe('@jupyterlab/help-extension:resources', () => {
   // Let promise callbacks run.
   const flush = () => new Promise(resolve => setTimeout(resolve, 0));
 
+  const focus = async (kernel: FakeKernel | null) => {
+    current = kernel;
+    currentChanged.emit(undefined);
+    await flush();
+  };
+
+  const banner = 'help-menu-python3:banner';
+
   beforeEach(() => {
     commands = new CommandRegistry();
-    commands.addCommand('helpmenu:get-kernel', { execute: () => null });
-    running = [];
-    runningChanged = new Signal<unknown, Session.IModel[]>({});
-    requests = [];
-    sessions = [];
-    connectTo = jest.fn(({ model }: { model: Session.IModel }) => {
-      const request = new InfoRequest();
-      requests.push(request);
-      const session = {
-        kernel: { name: model.kernel!.name, info: request.promise },
-        dispose: jest.fn()
-      };
-      sessions.push(session);
-      return session;
+    commands.addCommand('help:open', {
+      label: args => args.text as string,
+      execute: () => null
     });
+    commands.addCommand('helpmenu:get-kernel', { execute: () => current });
+    current = null;
+    currentChanged = new Signal({});
+    currentWidget = null;
+    runningChanged = new Signal({});
+    connectTo = jest.fn();
   });
 
-  it('should connect once to a kernel while its info is pending', async () => {
-    running = [model('a', 'python3'), model('b', 'python3')];
+  it('should reuse the kernel connection of the current widget', async () => {
+    const python = new FakeKernel('python3');
+    current = python;
     activate();
-    runningChanged.emit([model('c', 'python3')]);
-    expect(connectTo).toHaveBeenCalledTimes(1);
-
-    requests[0].resolve(reply);
+    runningChanged.emit(undefined);
+    python.resolve(reply);
     await flush();
-    expect(sessions[0].dispose).toHaveBeenCalled();
-    expect(commands.hasCommand('help-menu-python3:banner')).toBe(true);
-    expect(commands.hasCommand('help-menu-python3:Python Reference')).toBe(
-      true
-    );
 
-    // Cached from now on.
-    runningChanged.emit([model('d', 'python3')]);
-    expect(connectTo).toHaveBeenCalledTimes(1);
+    expect(connectTo).not.toHaveBeenCalled();
   });
 
-  it('should connect once to each kernel', () => {
-    running = [model('a', 'python3'), model('b', 'julia')];
+  it('should add the entries of the current kernel', async () => {
+    const python = new FakeKernel('python3');
+    current = python;
     activate();
-    expect(connectTo).toHaveBeenCalledTimes(2);
+    python.resolve(reply);
+    await flush();
+
+    expect(commands.isVisible(banner)).toBe(true);
+    expect(commands.isVisible('help-menu-python3:Python Reference')).toBe(true);
   });
 
-  it('should dispose of the connection and retry if the info fails', async () => {
+  it('should only show the entries of the current kernel', async () => {
+    const python = new FakeKernel('python3');
+    activate();
+    await focus(python);
+    python.resolve(reply);
+    await flush();
+    expect(commands.isVisible(banner)).toBe(true);
+
+    // Menus re-check the entries when notified.
+    const changed: (string | undefined)[] = [];
+    commands.commandChanged.connect((_, args) => changed.push(args.id));
+    await focus(new FakeKernel('julia'));
+    expect(commands.isVisible(banner)).toBe(false);
+    expect(changed).toContain(banner);
+
+    await focus(null);
+    expect(commands.isVisible(banner)).toBe(false);
+
+    await focus(python);
+    expect(commands.isVisible(banner)).toBe(true);
+  });
+
+  it('should add the entries once a kernel starts in the current widget', async () => {
+    activate();
+    await focus(null);
+
+    const python = new FakeKernel('python3');
+    current = python;
+    runningChanged.emit(undefined);
+    python.resolve(reply);
+    await flush();
+
+    expect(commands.isVisible(banner)).toBe(true);
+  });
+
+  it('should add the entries once the current widget gets its kernel', async () => {
+    const kernelChanged = new Signal<unknown, unknown>({});
+    currentWidget = { sessionContext: { kernelChanged } };
+    activate();
+    await focus(null);
+
+    // The session connects without any change in the running sessions.
+    const python = new FakeKernel('python3');
+    current = python;
+    kernelChanged.emit(undefined);
+    python.resolve(reply);
+    await flush();
+    expect(commands.isVisible(banner)).toBe(true);
+
+    // The previous widget is not followed anymore.
+    currentWidget = null;
+    await focus(null);
+    current = python;
+    kernelChanged.emit(undefined);
+    await flush();
+    expect(commands.isVisible(banner)).toBe(false);
+  });
+
+  it('should add the entries once for concurrent updates', async () => {
+    const python = new FakeKernel('python3');
+    current = python;
+    activate();
+    currentChanged.emit(undefined);
+    runningChanged.emit(undefined);
+    python.resolve(reply);
+    await flush();
+
+    expect(commands.hasCommand(banner)).toBe(true);
+  });
+
+  it('should not wait on a kernel that never replies', async () => {
+    activate();
+    await focus(new FakeKernel('python3'));
+
+    const restarted = new FakeKernel('python3');
+    await focus(restarted);
+    restarted.resolve(reply);
+    await flush();
+
+    expect(commands.isVisible(banner)).toBe(true);
+  });
+
+  it('should not request the info of a kernel without spec', async () => {
+    let requested = false;
+    const unknown = {
+      name: 'unknown',
+      get info() {
+        requested = true;
+        return new Promise<InfoReply>(() => undefined);
+      }
+    } as unknown as FakeKernel;
+    activate();
+    await focus(unknown);
+
+    expect(requested).toBe(false);
+    expect(commands.hasCommand('help-menu-unknown:banner')).toBe(false);
+  });
+
+  it('should retry after a failed info request', async () => {
     const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-    running = [model('a', 'python3')];
     activate();
-
-    requests[0].reject(new Error('Kernel died'));
+    const failing = new FakeKernel('python3');
+    await focus(failing);
+    failing.reject(new Error('Kernel died'));
     await flush();
-    expect(sessions[0].dispose).toHaveBeenCalled();
     expect(warn).toHaveBeenCalled();
-    expect(commands.hasCommand('help-menu-python3:banner')).toBe(false);
+    expect(commands.hasCommand(banner)).toBe(false);
 
-    runningChanged.emit([model('b', 'python3')]);
-    expect(connectTo).toHaveBeenCalledTimes(2);
-    warn.mockRestore();
-  });
-
-  it('should dispose of the connection and retry if the spec is unknown', async () => {
-    running = [model('a', 'unknown')];
-    activate();
-
-    requests[0].resolve(reply);
+    const python = new FakeKernel('python3');
+    await focus(python);
+    python.resolve(reply);
     await flush();
-    expect(sessions[0].dispose).toHaveBeenCalled();
-
-    runningChanged.emit([model('b', 'unknown')]);
-    expect(connectTo).toHaveBeenCalledTimes(2);
+    expect(commands.isVisible(banner)).toBe(true);
+    warn.mockRestore();
   });
 });

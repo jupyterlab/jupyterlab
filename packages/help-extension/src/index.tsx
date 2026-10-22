@@ -10,6 +10,7 @@ import type {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   Dialog,
   ICommandPalette,
@@ -19,7 +20,7 @@ import {
 } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import type { Kernel, KernelMessage, Session } from '@jupyterlab/services';
+import type { Kernel, KernelMessage, KernelSpec } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   IFrame,
@@ -438,151 +439,141 @@ const resources: JupyterFrontEndPlugin<void> = {
     }));
     helpMenu.addGroup(resourcesGroup, 10);
 
-    // Generate a cache of the kernel help links.
-    const kernelInfoCache = new Map<
-      string,
-      KernelMessage.IInfoReplyMsg['content']
-    >();
-    // Kernels whose info is being fetched. Reserved before the request, as
-    // concurrent extra connections to a kernel can break the connection of
-    // the notebook using it.
-    const pendingKernels = new Set<string>();
+    // Kernel info by kernel name, once its help entries were added.
+    const kernelInfoCache = new Map<string, KernelMessage.IInfoReply>();
+    // Name of the kernel used by the current widget; its entries are shown.
+    let currentKernel: string | null = null;
+    // Commands of the kernel entries, re-evaluated when the kernel changes.
+    const kernelCommands: string[] = [];
+    let updates = 0;
 
-    const onSessionRunningChanged = (
-      m: Session.IManager,
-      sessions: Session.IModel[]
+    const addKernelEntries = (
+      name: string,
+      spec: KernelSpec.ISpecModel,
+      kernelInfo: KernelMessage.IInfoReply
     ) => {
-      // If a new session has been added, it is at the back
-      // of the session list. If one has changed or stopped,
-      // it does not hurt to check it.
-      if (!sessions.length) {
-        return;
-      }
-      const sessionModel = sessions[sessions.length - 1];
-      if (!sessionModel.kernel) {
-        return;
-      }
-      const name = sessionModel.kernel.name;
-      if (kernelInfoCache.has(name) || pendingKernels.has(name)) {
-        return;
-      }
-      pendingKernels.add(name);
-      const session = serviceManager.sessions.connectTo({
-        model: sessionModel,
-        kernelConnectionOptions: { handleComms: false }
+      kernelInfoCache.set(name, kernelInfo);
+      const isEnabled = () => currentKernel === name;
+
+      // Add the kernel banner to the Help Menu.
+      const bannerCommand = `help-menu-${name}:banner`;
+      const kernelName = spec.display_name;
+      const kernelIconUrl =
+        spec.resources['logo-svg'] || spec.resources['logo-64x64'];
+      commands.addCommand(bannerCommand, {
+        label: trans.__('About the %1 Kernel', kernelName),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
+        isVisible: isEnabled,
+        isEnabled,
+        execute: () => {
+          // Create the header of the about dialog
+          const headerLogo = (
+            <img src={kernelIconUrl} alt={trans.__('Kernel Icon')} />
+          );
+          const title = (
+            <span className="jp-About-header">
+              {headerLogo}
+              <div className="jp-About-header-info">{kernelName}</div>
+            </span>
+          );
+          const banner = <pre>{kernelInfo.banner}</pre>;
+          const body = <div className="jp-About-body">{banner}</div>;
+
+          return showDialog({
+            title,
+            body,
+            buttons: [
+              Dialog.cancelButton({
+                label: trans.__('Close')
+              })
+            ]
+          });
+        }
       });
-      const done = () => {
-        pendingKernels.delete(name);
-        // Dispose of the session object since we no longer need it.
-        session.dispose();
-      };
+      helpMenu.addGroup([{ command: bannerCommand }], 20);
+      kernelCommands.push(bannerCommand);
 
-      void Promise.resolve(session.kernel?.info)
-        .then(kernelInfo => {
-          const spec = serviceManager.kernelspecs?.specs?.kernelspecs[name];
-          if (!kernelInfo || !spec) {
-            return;
-          }
-
-          // Set the Kernel Info cache.
-          kernelInfoCache.set(name, kernelInfo);
-
-          // Utility function to check if the current widget
-          // has registered itself with the help menu.
-          let usesKernel = false;
-          const onCurrentChanged = async () => {
-            const kernel: Kernel.IKernelConnection | null =
-              await commands.execute('helpmenu:get-kernel');
-            usesKernel = kernel?.name === name;
-          };
-          // Set the status for the current widget
-          onCurrentChanged().catch(error => {
-            console.error(
-              'Failed to get the kernel for the current widget.',
-              error
-            );
-          });
-          if (labShell) {
-            // Update status when current widget changes
-            labShell.currentChanged.connect(onCurrentChanged);
-          }
-          const isEnabled = () => usesKernel;
-
-          // Add the kernel banner to the Help Menu.
-          const bannerCommand = `help-menu-${name}:banner`;
-          const kernelName = spec.display_name;
-          const kernelIconUrl =
-            spec.resources['logo-svg'] || spec.resources['logo-64x64'];
-          commands.addCommand(bannerCommand, {
-            label: trans.__('About the %1 Kernel', kernelName),
-            describedBy: {
-              args: {
-                type: 'object',
-                properties: {}
-              }
-            },
-            isVisible: isEnabled,
-            isEnabled,
-            execute: () => {
-              // Create the header of the about dialog
-              const headerLogo = (
-                <img src={kernelIconUrl} alt={trans.__('Kernel Icon')} />
-              );
-              const title = (
-                <span className="jp-About-header">
-                  {headerLogo}
-                  <div className="jp-About-header-info">{kernelName}</div>
-                </span>
-              );
-              const banner = <pre>{kernelInfo.banner}</pre>;
-              const body = <div className="jp-About-body">{banner}</div>;
-
-              return showDialog({
-                title,
-                body,
-                buttons: [
-                  Dialog.cancelButton({
-                    label: trans.__('Close')
-                  })
-                ]
-              });
+      // Add the kernel info help_links to the Help menu.
+      const kernelGroup: Menu.IItemOptions[] = [];
+      (kernelInfo.help_links || []).forEach(link => {
+        const commandId = `help-menu-${name}:${link.text}`;
+        commands.addCommand(commandId, {
+          describedBy: {
+            args: {
+              type: 'object',
+              properties: {}
             }
-          });
-          helpMenu.addGroup([{ command: bannerCommand }], 20);
-
-          // Add the kernel info help_links to the Help menu.
-          const kernelGroup: Menu.IItemOptions[] = [];
-          (kernelInfo.help_links || []).forEach(link => {
-            const commandId = `help-menu-${name}:${link.text}`;
-            commands.addCommand(commandId, {
-              describedBy: {
-                args: {
-                  type: 'object',
-                  properties: {}
-                }
-              },
-              label: commands.label(CommandIDs.open, link),
-              isVisible: isEnabled,
-              isEnabled,
-              execute: () => {
-                return commands.execute(CommandIDs.open, link);
-              }
-            });
-            kernelGroup.push({ command: commandId });
-          });
-          helpMenu.addGroup(kernelGroup, 21);
-        })
-        .then(done, reason => {
-          console.warn(`Failed to get the info of kernel ${name}.`, reason);
-          done();
+          },
+          label: commands.label(CommandIDs.open, link),
+          isVisible: isEnabled,
+          isEnabled,
+          execute: () => {
+            return commands.execute(CommandIDs.open, link);
+          }
         });
+        kernelGroup.push({ command: commandId });
+        kernelCommands.push(commandId);
+      });
+      helpMenu.addGroup(kernelGroup, 21);
     };
 
-    // Create menu items for currently running sessions
-    for (const model of serviceManager.sessions.running()) {
-      onSessionRunningChanged(serviceManager.sessions, [model]);
-    }
-    serviceManager.sessions.runningChanged.connect(onSessionRunningChanged);
+    // Show the entries of the current widget's kernel, adding them the first
+    // time. The info comes from the widget's own kernel connection: opening
+    // another one just for the menu can break the widget's connection.
+    const update = async () => {
+      const request = ++updates;
+      const kernel: Kernel.IKernelConnection | null = await commands.execute(
+        'helpmenu:get-kernel'
+      );
+      // Only the latest request decides which entries are shown.
+      if (request !== updates) {
+        return;
+      }
+      if (currentKernel !== (kernel?.name ?? null)) {
+        currentKernel = kernel?.name ?? null;
+        kernelCommands.forEach(id => commands.notifyCommandChanged(id));
+      }
+      if (!kernel || kernelInfoCache.has(kernel.name)) {
+        return;
+      }
+      const spec = serviceManager.kernelspecs?.specs?.kernelspecs[kernel.name];
+      if (!spec) {
+        return;
+      }
+      const kernelInfo = await kernel.info;
+      if (!kernelInfoCache.has(kernel.name)) {
+        addKernelEntries(kernel.name, spec, kernelInfo);
+      }
+    };
+    const onChanged = () => {
+      update().catch(reason => {
+        console.warn(
+          'Failed to get the kernel info for the Help menu.',
+          reason
+        );
+      });
+    };
+
+    // The current widget may get its kernel after it became current, e.g.
+    // while its session starts or reconnects, so also follow its kernel.
+    let currentSession: ISessionContext | null = null;
+    const onCurrentChanged = () => {
+      currentSession?.kernelChanged.disconnect(onChanged);
+      const widget = app.shell.currentWidget as {
+        sessionContext?: ISessionContext;
+      } | null;
+      currentSession = widget?.sessionContext ?? null;
+      currentSession?.kernelChanged.connect(onChanged);
+      onChanged();
+    };
+    (labShell ?? app.shell).currentChanged?.connect(onCurrentChanged);
+    serviceManager.sessions.runningChanged.connect(onChanged);
+    onCurrentChanged();
 
     if (palette) {
       resources.forEach(args => {
