@@ -52,10 +52,12 @@ export interface IKernelSpecAPIClient {
   /**
    * Fetch all of the kernel specs.
    *
+   * @param noTrackActivity - Whether to exclude this request from activity tracking.
+   *
    * @returns A promise that resolves with the kernel specs.
    *
    * #### Notes
    * Uses the Jupyter Server API and validates the response model.
    */
-  get(): Promise<ISpecModels>;
+  get(noTrackActivity?: boolean): Promise<ISpecModels>;
 }
