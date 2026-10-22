@@ -227,7 +227,7 @@ is slow to update with the new packages, so this script tries to fetch
 the packages until they are available.
 
 At this point, run the `./scripts/release_test.sh` to test the wheel in
-a fresh conda environment with and without extensions installed. Open and run
+a fresh virtual environment with and without extensions installed. Open and run
 the Outputs notebook and verify everything runs properly. Also add a cell with the following code and make sure the widget renders:
 
 ```python
