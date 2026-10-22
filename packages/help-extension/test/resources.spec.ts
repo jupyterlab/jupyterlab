@@ -44,6 +44,7 @@ describe('@jupyterlab/help-extension:resources', () => {
   } | null;
   let runningChanged: Signal<unknown, unknown>;
   let connectTo: jest.Mock;
+  let kernelspecs: { specs: unknown; specsChanged: Signal<unknown, unknown> };
 
   const activate = () => {
     const app = {
@@ -56,14 +57,7 @@ describe('@jupyterlab/help-extension:resources', () => {
       },
       serviceManager: {
         sessions: { runningChanged, connectTo },
-        kernelspecs: {
-          specs: {
-            kernelspecs: {
-              python3: { display_name: 'Python 3', resources: {} },
-              julia: { display_name: 'Julia', resources: {} }
-            }
-          }
-        }
+        kernelspecs
       }
     } as unknown as JupyterFrontEnd;
     const mainMenu = {
@@ -95,6 +89,15 @@ describe('@jupyterlab/help-extension:resources', () => {
     currentWidget = null;
     runningChanged = new Signal({});
     connectTo = jest.fn();
+    kernelspecs = {
+      specs: {
+        kernelspecs: {
+          python3: { display_name: 'Python 3', resources: {} },
+          julia: { display_name: 'Julia', resources: {} }
+        }
+      },
+      specsChanged: new Signal({})
+    };
   });
 
   it('should reuse the kernel connection of the current widget', async () => {
@@ -233,5 +236,45 @@ describe('@jupyterlab/help-extension:resources', () => {
     await flush();
     expect(commands.isVisible(banner)).toBe(true);
     warn.mockRestore();
+  });
+
+  it('should keep the entries of a widget after its kernel is gone', async () => {
+    const notebook = { sessionContext: { kernelChanged: new Signal({}) } };
+    currentWidget = notebook;
+    const python = new FakeKernel('python3');
+    current = python;
+    activate();
+    python.resolve(reply);
+    await flush();
+
+    // The kernel dies or is shut down, and its session is removed.
+    current = null;
+    runningChanged.emit(undefined);
+    await flush();
+    expect(commands.isVisible(banner)).toBe(true);
+
+    currentWidget = { sessionContext: { kernelChanged: new Signal({}) } };
+    await focus(null);
+    expect(commands.isVisible(banner)).toBe(false);
+
+    currentWidget = notebook;
+    await focus(null);
+    expect(commands.isVisible(banner)).toBe(true);
+  });
+
+  it('should add the entries when the kernel specs arrive late', async () => {
+    const specs = kernelspecs.specs;
+    kernelspecs.specs = null;
+    const python = new FakeKernel('python3');
+    current = python;
+    activate();
+    python.resolve(reply);
+    await flush();
+    expect(commands.hasCommand(banner)).toBe(false);
+
+    kernelspecs.specs = specs;
+    kernelspecs.specsChanged.emit(specs);
+    await flush();
+    expect(commands.isVisible(banner)).toBe(true);
   });
 });
