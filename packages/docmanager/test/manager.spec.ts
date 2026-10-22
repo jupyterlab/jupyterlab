@@ -316,6 +316,39 @@ describe('@jupyterlab/docmanager', () => {
         expect(manager.findWidget(model.path, null)).toBe(widget);
         await dismissDialog();
       });
+
+      it('should find a widget with non preferred factory given a file and a null widget name', async () => {
+        const widgetFactory2 = new WidgetFactory({
+          name: 'test2',
+          fileTypes: ['other']
+        });
+        manager.registry.addWidgetFactory(widgetFactory2);
+        const model = await services.contents.newUntitled({
+          type: 'file',
+          ext: '.txt'
+        });
+        widget = manager.createNew(model.path, 'test2');
+        expect(manager.findWidget(model.path, null)).toBe(widget);
+        await dismissDialog();
+      });
+    });
+
+    describe('#openOrReveal()', () => {
+      it('should reveal an existing widget with non preferred factory when widgetName is omitted', async () => {
+        const widgetFactory2 = new WidgetFactory({
+          name: 'test2',
+          fileTypes: ['other']
+        });
+        manager.registry.addWidgetFactory(widgetFactory2);
+        const model = await services.contents.newUntitled({
+          type: 'file',
+          ext: '.txt'
+        });
+        widget = manager.createNew(model.path, 'test2');
+        const revealed = manager.openOrReveal(model.path);
+        expect(revealed).toBe(widget);
+        await dismissDialog();
+      });
     });
 
     describe('#contextForWidget()', () => {
