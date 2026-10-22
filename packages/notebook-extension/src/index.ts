@@ -3094,8 +3094,8 @@ function addCommands(
       }
     },
     isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     icon: args => (args.toolbar ? runIcon : undefined),
     describedBy: {
       args: {
@@ -3111,6 +3111,10 @@ function addCommands(
             description: trans.__(
               'Whether to activate the notebook after execution'
             )
+          },
+          widgetId: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -3210,8 +3214,8 @@ function addCommands(
         );
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3315,8 +3319,8 @@ function addCommands(
       }
     },
     isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     icon: args => (args.toolbar ? refreshIcon : undefined),
     describedBy: {
       args: {
@@ -3326,6 +3330,10 @@ function addCommands(
             type: 'boolean',
             description:
               'Whether the command is being executed from the toolbar'
+          },
+          widgetId: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -3502,8 +3510,8 @@ function addCommands(
       }
     },
     isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     icon: args => (args.toolbar ? fastForwardIcon : undefined),
     describedBy: {
       args: {
@@ -3519,6 +3527,10 @@ function addCommands(
             description: trans.__(
               'Whether to activate the notebook after execution'
             )
+          },
+          widgetId: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -3579,8 +3591,8 @@ function addCommands(
       }
     },
     isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     icon: args => (args.toolbar ? stopIcon : undefined),
     describedBy: {
       args: {
@@ -3590,6 +3602,10 @@ function addCommands(
             type: 'boolean',
             description:
               'Whether the command is being executed from the toolbar'
+          },
+          widgetId: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -3690,8 +3706,8 @@ function addCommands(
     },
     icon: args => (args.toolbar ? cutIcon : undefined),
     isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3706,6 +3722,10 @@ function addCommands(
             description: trans.__(
               'Whether to activate the notebook after execution'
             )
+          },
+          widgetId: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -3754,6 +3774,10 @@ function addCommands(
             description: trans.__(
               'Whether to activate the notebook after execution'
             )
+          },
+          widgetId: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -3784,8 +3808,8 @@ function addCommands(
     },
     icon: args => (args.toolbar ? pasteIcon : undefined),
     isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3800,6 +3824,10 @@ function addCommands(
             description: trans.__(
               'Whether to activate the notebook after execution'
             )
+          },
+          widgetId: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -3870,8 +3898,8 @@ function addCommands(
     },
     icon: args => (args.toolbar ? duplicateIcon : undefined),
     isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3886,6 +3914,10 @@ function addCommands(
             description: trans.__(
               'Whether to activate the notebook after execution'
             )
+          },
+          widgetId: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -3957,9 +3989,9 @@ function addCommands(
         (current.content.activeCell?.model.getMetadata(
           'deletable'
         ) as unknown as boolean) !== false;
-      return deletable && !Private.isViewOnly(tracker);
+      return deletable && !Private.isViewOnly(tracker, args);
     },
-    isVisible: () => !Private.isViewOnly(tracker),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3974,6 +4006,10 @@ function addCommands(
             description: trans.__(
               'Whether to activate the notebook after execution'
             )
+          },
+          widgetId: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -4169,7 +4205,7 @@ function addCommands(
       }
     },
     isVisible: args => {
-      if (Private.isViewOnly(tracker)) {
+      if (Private.isViewOnly(tracker, args)) {
         return false;
       }
       const current = getCurrent(tracker, shell, { ...args, activate: false });
@@ -4253,8 +4289,8 @@ function addCommands(
     },
     icon: args => (args.toolbar ? addAboveIcon : undefined),
     isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4263,6 +4299,10 @@ function addCommands(
             type: 'boolean',
             description:
               'Whether the command is being executed from the toolbar'
+          },
+          widgetId: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -4280,8 +4320,8 @@ function addCommands(
     },
     icon: args => (args.toolbar ? addBelowIcon : undefined),
     isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4290,6 +4330,10 @@ function addCommands(
             type: 'boolean',
             description:
               'Whether the command is being executed from the toolbar'
+          },
+          widgetId: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -4540,10 +4584,11 @@ function addCommands(
         return false;
       }
       return (
-        !Private.isViewOnly(tracker) && current.content.activeCellIndex >= 1
+        !Private.isViewOnly(tracker, args) &&
+        current.content.activeCellIndex >= 1
       );
     },
-    isVisible: () => !Private.isViewOnly(tracker),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     icon: args => (args.toolbar ? moveUpIcon : undefined),
     describedBy: {
       args: {
@@ -4559,6 +4604,10 @@ function addCommands(
             description: trans.__(
               'Whether to activate the notebook after execution'
             )
+          },
+          widgetId: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -4600,11 +4649,11 @@ function addCommands(
 
       const length = current.content.model.cells.length;
       return (
-        !Private.isViewOnly(tracker) &&
+        !Private.isViewOnly(tracker, args) &&
         current.content.activeCellIndex < length - 1
       );
     },
-    isVisible: () => !Private.isViewOnly(tracker),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     icon: args => (args.toolbar ? moveDownIcon : undefined),
     describedBy: {
       args: {
@@ -4620,6 +4669,10 @@ function addCommands(
             description: trans.__(
               'Whether to activate the notebook after execution'
             )
+          },
+          widgetId: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -5754,9 +5807,19 @@ namespace Private {
   }
 
   /**
-   * Whether the current notebook is view-only (declared read-only by the server).
+   * Whether the notebook is view-only (declared read-only by the server).
+   * When args contains a widgetId (set by toolbar button creation), checks that
+   * specific notebook rather than the currently focused one, so toolbar buttons
+   * on non-focused notebooks reflect their own viewOnly state.
    */
-  export function isViewOnly(tracker: INotebookTracker): boolean {
+  export function isViewOnly(
+    tracker: INotebookTracker,
+    args?: ReadonlyPartialJSONObject
+  ): boolean {
+    if (args?.widgetId) {
+      const w = tracker.find(nb => nb.id === args.widgetId);
+      return w?.viewOnly === true;
+    }
     return tracker.currentWidget?.viewOnly === true;
   }
 

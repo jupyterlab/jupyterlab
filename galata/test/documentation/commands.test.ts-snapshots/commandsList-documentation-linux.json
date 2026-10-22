@@ -4172,6 +4172,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4297,6 +4301,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4329,6 +4337,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4368,6 +4380,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4560,6 +4576,10 @@
         "toolbar": {
           "type": "boolean",
           "description": "Whether the command is being executed from the toolbar"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4577,6 +4597,10 @@
         "toolbar": {
           "type": "boolean",
           "description": "Whether the command is being executed from the toolbar"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4616,6 +4640,10 @@
         "toolbar": {
           "type": "boolean",
           "description": "Whether the command is being executed from the toolbar"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4673,6 +4701,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4694,6 +4726,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4793,6 +4829,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4900,6 +4940,10 @@
         "toolbar": {
           "type": "boolean",
           "description": "Whether the command is being executed from the toolbar"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4919,6 +4963,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -5004,6 +5052,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
