@@ -236,6 +236,8 @@ namespace CommandIDs {
 
   export const clearOutputs = 'notebook:clear-cell-output';
 
+  export const makeCellEditable = 'notebook:make-cell-editable';
+
   export const deleteCell = 'notebook:delete-cell';
 
   export const insertAbove = 'notebook:insert-cell-above';
@@ -3030,6 +3032,7 @@ function addCommands(
 
   tracker.selectionChanged.connect(() => {
     commands.notifyCommandChanged(CommandIDs.duplicateBelow);
+    commands.notifyCommandChanged(CommandIDs.makeCellEditable);
     commands.notifyCommandChanged(CommandIDs.deleteCell);
     commands.notifyCommandChanged(CommandIDs.copySelectedtext);
     commands.notifyCommandChanged(CommandIDs.pasteText);
@@ -3046,13 +3049,21 @@ function addCommands(
     commands.notifyCommandChanged(CommandIDs.runAndAdvance);
     commands.notifyCommandChanged(CommandIDs.runAndInsert);
   });
-  tracker.activeCellChanged.connect(() => {
+  const onCellMetadataChanged = () => {
     commands.notifyCommandChanged(CommandIDs.deleteCell);
+    commands.notifyCommandChanged(CommandIDs.makeCellEditable);
+  };
+  tracker.activeCellChanged.connect((_, cell) => {
     commands.notifyCommandChanged(CommandIDs.moveUp);
     commands.notifyCommandChanged(CommandIDs.moveDown);
     commands.notifyCommandChanged(CommandIDs.selectLastModifiedCell);
     commands.notifyCommandChanged(CommandIDs.selectNextModifiedCell);
+    if (cell) {
+      cell.model.metadataChanged.connect(onCellMetadataChanged);
+      cell.disposed.disconnect(onCellMetadataChanged);
+    }
   });
+
   tracker.widgetAdded.connect((_, panel) => {
     panel.content.stateChanged.connect((_, args) => {
       if (args.name === 'lastModifiedCellStack') {
@@ -3922,6 +3933,57 @@ function addCommands(
       }
     }
   });
+
+  commands.addCommand(CommandIDs.makeCellEditable, {
+    label: trans.__('Enable Cell Editing'),
+    caption: trans.__('Read-only cell'),
+    execute: async args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (current) {
+        const cell = current.content.activeCell;
+        if (cell) {
+          const result = await showDialog({
+            title: trans.__('Cell is read-only'),
+            body: trans.__(
+              'This cell is read-only, its content cannot be edited'
+            ),
+            buttons: [
+              Dialog.cancelButton(),
+              Dialog.okButton({ label: trans.__('Make Editable') })
+            ]
+          });
+          if (result.button.accept) {
+            cell.model.setMetadata('editable', undefined);
+          }
+        }
+      }
+    },
+    isVisible: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (!current) {
+        return false;
+      }
+      const noteditable =
+        (current.content.activeCell?.model.getMetadata(
+          'editable'
+        ) as unknown as boolean) === false;
+      const visible = settings?.get('showLockForReadOnlyCells')
+        .composite as boolean;
+      return noteditable && visible;
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether the cell is editable or not')
+          }
+        }
+      }
+    }
+  });
+
   commands.addCommand(CommandIDs.deleteCell, {
     label: args => {
       const current = getCurrent(tracker, shell, { ...args, activate: false });
