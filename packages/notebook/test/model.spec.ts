@@ -194,6 +194,40 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#kernelLock', () => {
+      it('should default to false', () => {
+        const model = new NotebookModel();
+        expect(model.kernelLocked).toBe(false);
+      });
+
+      it('should reflect the `kernel_lock` metadata', () => {
+        const model = new NotebookModel();
+        model.setMetadata('kernel_lock', true);
+        expect(model.kernelLocked).toBe(true);
+      });
+
+      it('should be false when `kernel_lock` is false', () => {
+        const model = new NotebookModel();
+        model.setMetadata('kernel_lock', false);
+        expect(model.kernelLocked).toBe(false);
+      });
+
+      it('should set the `kernel_lock` metadata when locking', () => {
+        const model = new NotebookModel();
+        model.setKernelLocked(true);
+        expect(model.kernelLocked).toBe(true);
+        expect(model.getMetadata('kernel_lock')).toBe(true);
+      });
+
+      it('should remove the `kernel_lock` metadata when unlocking', () => {
+        const model = new NotebookModel();
+        model.setKernelLocked(true);
+        model.setKernelLocked(false);
+        expect(model.kernelLocked).toBe(false);
+        expect(model.getMetadata('kernel_lock')).toBeUndefined();
+      });
+    });
+
     describe('#dispose()', () => {
       it('should dispose of the resources held by the model', () => {
         const model = new NotebookModel();
