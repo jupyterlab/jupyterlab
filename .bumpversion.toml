@@ -1,0 +1,13 @@
+[tool.bumpversion]
+current_version = "4, 7, 0, \"alpha\", 2"
+commit = false
+tag = false
+parse = '(?P<major>\d+)\,\ (?P<minor>\d+)\,\ (?P<patch>\d+)\,\ \"(?P<release>\S+)\"\,\ (?P<build>\d+)'
+serialize = ['{major}, {minor}, {patch}, "{release}", {build}']
+
+[tool.bumpversion.parts.release]
+optional_value = "final"
+values = ["alpha", "beta", "candidate", "final"]
+
+[[tool.bumpversion.files]]
+filename = "jupyterlab/_version.py"
