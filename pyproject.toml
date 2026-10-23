@@ -37,7 +37,7 @@ classifiers = [
 dependencies = [
     "jupyter-builder>=1.1.1",
     "async_lru>=1.0.0",
-    "httpx>=0.25.0,<1",
+    "httpx2>=2,<3",
     "ipykernel>=6.5.0,!=6.30.0",
     "jinja2>=3.0.3",
     "jupyter_core",
