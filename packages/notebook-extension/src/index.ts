@@ -3049,16 +3049,24 @@ function addCommands(
     commands.notifyCommandChanged(CommandIDs.runAndAdvance);
     commands.notifyCommandChanged(CommandIDs.runAndInsert);
   });
+  let activeCellMetadataCell: Cell | null = null;
+  const onCellMetadataChanged = () => {
+    commands.notifyCommandChanged(CommandIDs.deleteCell);
+    commands.notifyCommandChanged(CommandIDs.makeCellEditable);
+  };
   tracker.activeCellChanged.connect((_, cell) => {
     commands.notifyCommandChanged(CommandIDs.moveUp);
     commands.notifyCommandChanged(CommandIDs.moveDown);
     commands.notifyCommandChanged(CommandIDs.selectLastModifiedCell);
     commands.notifyCommandChanged(CommandIDs.selectNextModifiedCell);
-    if (cell) {
-      cell.model.metadataChanged.connect(() => {
-        commands.notifyCommandChanged(CommandIDs.deleteCell);
-        commands.notifyCommandChanged(CommandIDs.makeCellEditable);
-      });
+    if (cell !== activeCellMetadataCell) {
+      activeCellMetadataCell?.model.metadataChanged.disconnect(
+        onCellMetadataChanged
+      );
+      activeCellMetadataCell = cell;
+      if (cell) {
+        cell.model.metadataChanged.connect(onCellMetadataChanged);
+      }
     }
   });
   tracker.widgetAdded.connect((_, panel) => {
