@@ -68,7 +68,7 @@ jobs:
     strategy:
       matrix:
         # Freeze Python version because it appears in console header
-        python-version: ['3.10.6']
+        python-version: ['3.11.17']
 
     steps:
       - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots-checkout@925e40fa6066f4533e0c40803bd4b6d0d2f4a781 # v1.1.0
