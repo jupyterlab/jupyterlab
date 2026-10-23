@@ -149,6 +149,67 @@ describe('codeeditor', () => {
       });
     });
 
+    describe('#commit()', () => {
+      it('should merge pending changes into the source', () => {
+        const source = new ObservableJSON({
+          values: { changed: 1, unchanged: 1, removed: true }
+        });
+        editor.source = source;
+        editor.model.sharedModel.setSource(
+          '{"changed": 2, "unchanged": 1, "added": true}'
+        );
+        source.set('unchanged', 2);
+        source.set('concurrent', true);
+
+        editor.commit();
+
+        expect(source.toJSON()).toEqual({
+          changed: 2,
+          unchanged: 2,
+          added: true,
+          concurrent: true
+        });
+        expect(editor.isDirty).toBe(false);
+        expect(editor.commitButtonNode.hidden).toBe(true);
+        expect(editor.revertButtonNode.hidden).toBe(true);
+        expect(JSON.parse(editor.model.sharedModel.getSource())).toEqual(
+          source.toJSON()
+        );
+      });
+
+      it('should leave invalid JSON uncommitted', () => {
+        editor.source = new ObservableJSON({ values: { foo: 1 } });
+        editor.model.sharedModel.setSource('{"foo":');
+
+        editor.commit();
+
+        expect(editor.source.toJSON()).toEqual({ foo: 1 });
+        expect(editor.model.sharedModel.getSource()).toBe('{"foo":');
+        expect(editor.isDirty).toBe(true);
+        expect(editor.hasClass('jp-mod-error')).toBe(true);
+      });
+
+      it('should do nothing without pending changes', () => {
+        editor.source = new ObservableJSON({ values: { foo: 1 } });
+        const changed = jest.fn();
+        editor.source.changed.connect(changed);
+
+        editor.commit();
+
+        expect(changed).not.toHaveBeenCalled();
+        expect(editor.isDirty).toBe(false);
+      });
+
+      it('should do nothing without a source', () => {
+        editor.model.sharedModel.setSource('{"foo": 1}');
+
+        editor.commit();
+
+        expect(editor.source).toBeNull();
+        expect(editor.model.sharedModel.getSource()).toBe('{"foo": 1}');
+      });
+    });
+
     describe('model.value.changed', () => {
       it('should add the error flag if invalid JSON', () => {
         editor.model.sharedModel.setSource('foo');
