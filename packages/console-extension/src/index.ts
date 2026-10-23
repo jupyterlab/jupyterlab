@@ -49,9 +49,11 @@ import type { IRenderMime } from '@jupyterlab/rendermime';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { RJSFSchema } from '@rjsf/utils';
 import {
   clearIcon,
   consoleIcon,
+  DialogWidget,
   dockBottomIcon,
   dockLeftIcon,
   dockRightIcon,
@@ -67,6 +69,8 @@ import {
 import { find } from '@lumino/algorithm';
 import type {
   JSONObject,
+  PartialJSONObject,
+  ReadonlyJSONObject,
   ReadonlyJSONValue,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
@@ -76,6 +80,7 @@ import type { DockLayout, Widget } from '@lumino/widgets';
 import { Menu } from '@lumino/widgets';
 import foreign from './foreign';
 import { cellExecutor } from './cellexecutor';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 /**
  * The command IDs used by the console plugin.
@@ -304,6 +309,57 @@ async function activateConsole(
   const sessionDialogs =
     sessionDialogs_ ?? new SessionContextDialogs({ translator });
 
+  const showKernelSpecDialog = async (
+    parameters: RJSFSchema,
+    basePath: string,
+    args: ReadonlyPartialJSONObject
+  ) => {
+    let newArgs = { ...args };
+    let kernelConfiguration: PartialJSONObject = {};
+    let label = trans.__('Cancel');
+    const buttons = [
+      Dialog.cancelButton({
+        label
+      }),
+      Dialog.okButton({
+        label: trans.__('Select'),
+        ariaLabel: trans.__('Select Kernel')
+      })
+    ];
+
+    const dialog = new Dialog({
+      title: trans.__('Select Kernel'),
+      body: new DialogWidget(
+        parameters,
+        kernelConfiguration,
+        formData => {
+          kernelConfiguration = formData as PartialJSONObject;
+        },
+        trans
+      ),
+      buttons
+    });
+
+    const result = await dialog.launch();
+
+    if (!result.button.accept) {
+      return;
+    }
+    if (result.value) {
+      if (kernelConfiguration) {
+        if (args.kernelPreference) {
+          let kernelPreference =
+            args.kernelPreference as ReadonlyPartialJSONObject;
+          newArgs.kernelPreference = {
+            ...kernelPreference,
+            customKernelSpecs: kernelConfiguration
+          };
+        }
+      }
+      return createConsole({ basePath, ...newArgs });
+    }
+  };
+
   const pluginId = '@jupyterlab/console-extension:tracker';
   const promptCellPositions: CodeConsole.PromptCellPosition[] = [
     'top',
@@ -410,7 +466,11 @@ async function activateConsole(
           disposables.add(
             launcher.add({
               command: CommandIDs.create,
-              args: { isLauncher: true, kernelPreference: { name } },
+              args: {
+                isLauncher: true,
+                kernelPreference: { name },
+                metadata: spec.metadata as ReadonlyJSONObject
+              },
               category: trans.__('Console'),
               rank,
               kernelIconUrl,
@@ -833,7 +893,29 @@ async function activateConsole(
           (args['cwd'] as string) ||
           currentBrowser?.model.path) ??
         '';
-      return createConsole({ basePath, ...args });
+
+      const metadata = args.metadata as ReadonlyJSONObject;
+      let allowInsecureKernelspecParams =
+        PageConfig.getOption('allow_insecure_kernelspec_params') === 'true'
+          ? true
+          : false;
+      allowInsecureKernelspecParams = true;
+      if (metadata?.is_secure) {
+        if (!metadata?.parameters) {
+          return createConsole({ basePath, ...args });
+        } else {
+          let schema = metadata.parameters as RJSFSchema;
+          return showKernelSpecDialog(schema, basePath, args);
+        }
+      } else {
+        if (allowInsecureKernelspecParams) {
+          let schema = metadata.parameters as RJSFSchema;
+          return showKernelSpecDialog(schema, basePath, args);
+        } else {
+          return createConsole({ basePath, ...args });
+        }
+      }
+      // return createConsole({ basePath, ...args });
     }
   });
 

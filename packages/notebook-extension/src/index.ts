@@ -6,7 +6,7 @@
  * @module notebook-extension
  */
 
-import type { FieldProps } from '@rjsf/utils';
+import type { FieldProps, RJSFSchema } from '@rjsf/utils';
 
 import type {
   JupyterFrontEnd,
@@ -120,6 +120,7 @@ import {
   buildIcon,
   copyIcon,
   cutIcon,
+  DialogWidget,
   duplicateIcon,
   fastForwardIcon,
   IFormRendererRegistry,
@@ -136,6 +137,7 @@ import { ArrayExt } from '@lumino/algorithm';
 import type { CommandRegistry } from '@lumino/commands';
 import type {
   JSONObject,
+  PartialJSONObject,
   ReadonlyJSONObject,
   ReadonlyJSONValue,
   ReadonlyPartialJSONObject
@@ -2515,6 +2517,53 @@ function activateNotebookHandler(
     });
   }
 
+  const showKernelSpecDialog = async (
+    parameters: RJSFSchema,
+    cwd: string,
+    kernelId: string,
+    kernelName: string
+  ) => {
+    let kernelConfiguration: PartialJSONObject = {};
+    let label = trans.__('Cancel');
+    const buttons = [
+      Dialog.cancelButton({
+        label
+      }),
+      Dialog.okButton({
+        label: trans.__('Select'),
+        ariaLabel: trans.__('Select Kernel')
+      })
+    ];
+
+    // const autoStartDefault = sessionContext.kernelPreference.autoStartDefault;
+    const dialog = new Dialog({
+      title: trans.__('Select Kernel'),
+      body: new DialogWidget(
+        parameters,
+        kernelConfiguration,
+        formData => {
+          kernelConfiguration = formData as PartialJSONObject;
+        },
+        trans
+      ),
+      buttons
+    });
+
+    const result = await dialog.launch();
+
+    if (!result.button.accept) {
+      return;
+    }
+    if (result.value) {
+      let customKernelSpecs = undefined;
+      if (kernelConfiguration && Object.keys(kernelConfiguration).length) {
+        customKernelSpecs = kernelConfiguration;
+      }
+
+      createNew(cwd, kernelId, kernelName, customKernelSpecs);
+    }
+  };
+
   /**
    * Update the setting values.
    */
@@ -2616,7 +2665,8 @@ function activateNotebookHandler(
   const createNew = async (
     cwd: string,
     kernelId: string,
-    kernelName: string
+    kernelName: string,
+    customKernelSpecs?: PartialJSONObject
   ) => {
     const model = await commands.execute('docmanager:new-untitled', {
       path: cwd,
@@ -2626,7 +2676,11 @@ function activateNotebookHandler(
       const widget = (await commands.execute('docmanager:open', {
         path: model.path,
         factory: FACTORY,
-        kernel: { id: kernelId, name: kernelName }
+        kernel: {
+          id: kernelId,
+          name: kernelName,
+          custom_kernel_specs: customKernelSpecs
+        }
       })) as unknown as IDocumentWidget;
       widget.isUntitled = true;
       return widget;
@@ -2656,7 +2710,36 @@ function activateNotebookHandler(
       const cwd = (args['cwd'] as string) || (currentBrowser?.model.path ?? '');
       const kernelId = (args['kernelId'] as string) || '';
       const kernelName = (args['kernelName'] as string) || '';
-      return createNew(cwd, kernelId, kernelName);
+
+      const metadata = args['metadata'] as ReadonlyJSONObject;
+      let allowInsecureKernelspecParams =
+        PageConfig.getOption('allow_insecure_kernelspec_params') === 'true'
+          ? true
+          : false;
+
+      if (metadata?.is_secure) {
+        if (!metadata?.parameters) {
+          return createNew(cwd, kernelId, kernelName);
+        } else {
+          let schema = metadata.parameters as RJSFSchema;
+          if (schema) {
+            showKernelSpecDialog(schema, cwd, kernelId, kernelName);
+          } else {
+            return createNew(cwd, kernelId, kernelName);
+          }
+        }
+      } else {
+        if (allowInsecureKernelspecParams) {
+          let schema = metadata.parameters as RJSFSchema;
+          if (schema) {
+            showKernelSpecDialog(schema, cwd, kernelId, kernelName);
+          } else {
+            return createNew(cwd, kernelId, kernelName);
+          }
+        } else {
+          return createNew(cwd, kernelId, kernelName);
+        }
+      }
     },
     describedBy: {
       args: {
@@ -2722,7 +2805,11 @@ function activateNotebookHandler(
           disposables.add(
             launcher.add({
               command: CommandIDs.createNew,
-              args: { isLauncher: true, kernelName: name },
+              args: {
+                isLauncher: true,
+                kernelName: name,
+                metadata: spec.metadata as ReadonlyJSONObject
+              },
               category: trans.__('Notebook'),
               rank,
               kernelIconUrl,
