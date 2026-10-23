@@ -3049,7 +3049,6 @@ function addCommands(
     commands.notifyCommandChanged(CommandIDs.runAndAdvance);
     commands.notifyCommandChanged(CommandIDs.runAndInsert);
   });
-  let activeCellMetadataCell: Cell | null = null;
   const onCellMetadataChanged = () => {
     commands.notifyCommandChanged(CommandIDs.deleteCell);
     commands.notifyCommandChanged(CommandIDs.makeCellEditable);
@@ -3059,16 +3058,12 @@ function addCommands(
     commands.notifyCommandChanged(CommandIDs.moveDown);
     commands.notifyCommandChanged(CommandIDs.selectLastModifiedCell);
     commands.notifyCommandChanged(CommandIDs.selectNextModifiedCell);
-    if (cell !== activeCellMetadataCell) {
-      activeCellMetadataCell?.model.metadataChanged.disconnect(
-        onCellMetadataChanged
-      );
-      activeCellMetadataCell = cell;
-      if (cell) {
-        cell.model.metadataChanged.connect(onCellMetadataChanged);
-      }
+    if (cell) {
+      cell.model.metadataChanged.connect(onCellMetadataChanged);
+      cell.disposed.disconnect(onCellMetadataChanged);
     }
   });
+
   tracker.widgetAdded.connect((_, panel) => {
     panel.content.stateChanged.connect((_, args) => {
       if (args.name === 'lastModifiedCellStack') {
