@@ -260,7 +260,8 @@ test.describe('General', () => {
       .locator('.jp-MetadataForm .jp-MetadataEditorTool')
       .last()
       .textContent();
-    expect(cellMetadata).toContain('"tags": []');
+    // Opening Common Tools does not write default metadata into the cell.
+    expect(cellMetadata).not.toContain('"tags"');
     expect(notebookMetadata).not.toContain('"base_numbering"');
 
     // Expect adding tag is reflected in CellMetadataEditor
@@ -292,7 +293,11 @@ test.describe('General', () => {
     expect(newNotebookMetadata).toContain('"base_numbering":3');
 
     // Expect modifying cell metadata from advanced tools
-    await page.click('.cm-content > div:nth-child(8)');
+    await page
+      .locator('.jp-MetadataForm .jp-MetadataEditorTool')
+      .first()
+      .locator('.cm-line', { hasText: 'test-tag' })
+      .click();
     await page.keyboard.press('End');
     await page.keyboard.type(',"newtest-tag"');
     const modifiedCellMetadata = (
