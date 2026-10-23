@@ -575,6 +575,69 @@ describe('filebrowser/model', () => {
           await uploaded;
         });
 
+        it('should stop tracking a failed upload in a subdirectory', async () => {
+          await model.cd(subDir);
+          const error = new Error('save failed');
+          const save = jest
+            .spyOn(model.manager.services.contents, 'save')
+            .mockRejectedValueOnce(error);
+          const file = new File(
+            [new ArrayBuffer(CHUNK_SIZE + 1)],
+            UUID.uuid4() + '.txt'
+          );
+
+          try {
+            await expect(model.upload(file)).rejects.toBe(error);
+            expect(Array.from(model.uploads())).toEqual([]);
+          } finally {
+            save.mockRestore();
+          }
+        });
+
+        it('should preserve another upload when a small upload fails', async () => {
+          const fname = UUID.uuid4() + '.txt';
+          const error = new Error('save failed');
+          const largeError = new Error('large save failed');
+          let rejectLarge: (reason?: unknown) => void = () => undefined;
+          let resolveLargeSaveStarted: () => void = () => undefined;
+          const largeSaveStarted = new Promise<void>(resolve => {
+            resolveLargeSaveStarted = resolve;
+          });
+          const save = jest
+            .spyOn(model.manager.services.contents, 'save')
+            .mockImplementation((_path, options) => {
+              if (options?.chunk !== undefined) {
+                return new Promise<Contents.IModel>((_resolve, reject) => {
+                  rejectLarge = reject;
+                  resolveLargeSaveStarted();
+                });
+              }
+              return Promise.reject(error);
+            });
+          const [started, updated] = signalToPromises(model.uploadChanged, 2);
+          const largeUpload = model.upload(
+            new File([new ArrayBuffer(CHUNK_SIZE + 1)], fname)
+          );
+
+          try {
+            await started;
+            await updated;
+            await largeSaveStarted;
+            await model.cd(subDir);
+
+            await expect(model.upload(new File(['small'], fname))).rejects.toBe(
+              error
+            );
+            expect(Array.from(model.uploads())).toEqual([
+              { path: fname, progress: 0 }
+            ]);
+          } finally {
+            rejectLarge(largeError);
+            await expect(largeUpload).rejects.toBe(largeError);
+            save.mockRestore();
+          }
+        });
+
         afterAll(() => {
           PageConfig.setOption('notebookVersion', prevNotebookVersion);
         });
