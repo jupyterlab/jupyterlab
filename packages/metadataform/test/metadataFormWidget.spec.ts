@@ -180,6 +180,67 @@ describe('metadataform/form simple', () => {
     );
   });
 
+  it('should not update metadata coming from a form built for another cell', async () => {
+    const metadataForm = await buildForm();
+    const content = tracker.currentWidget!.content;
+    const firstCell = content.widgets[0];
+
+    // Switch to another code cell.
+    content.activeCellIndex = 3;
+    const secondCell = tracker.activeCell!;
+    expect(secondCell).not.toBe(firstCell);
+
+    // Data carried from the first cell's form must not be written to the
+    // second cell.
+    metadataForm.updateMetadata(
+      { '/cell-metadata': 'stale value' },
+      undefined,
+      firstCell
+    );
+    expect(secondCell.model!.getMetadata('cell-metadata')).toBeUndefined();
+
+    // The same write applies when that cell is active again.
+    content.activeCellIndex = 0;
+    metadataForm.updateMetadata(
+      { '/cell-metadata': 'test value' },
+      undefined,
+      firstCell
+    );
+    expect(firstCell.model!.getMetadata('cell-metadata')).toBe('test value');
+  });
+
+  it('should bind the form callbacks to the cell the form was built for', async () => {
+    const metadataForm = await buildForm();
+    const content = tracker.currentWidget!.content;
+    const firstCell = content.widgets[0];
+
+    // Render the form element to grab the wired-up callbacks.
+    const element = metadataForm.form!.render();
+    expect(element).not.toBeNull();
+    const props = element!.props;
+
+    // Switch to another code cell after the form was built.
+    content.activeCellIndex = 3;
+    const secondCell = tracker.activeCell!;
+    expect(secondCell).not.toBe(firstCell);
+
+    // The RJSF onChange path must not write to the newly active cell.
+    props.onChange({ formData: { '/cell-metadata': 'stale onchange' } });
+    expect(secondCell.model!.getMetadata('cell-metadata')).toBeUndefined();
+
+    // The custom-field formContext path is guarded the same way.
+    props.formContext.updateMetadata(
+      { '/cell-metadata': 'stale field' },
+      true
+    );
+    expect(secondCell.model!.getMetadata('cell-metadata')).toBeUndefined();
+
+    // Both paths write again once the original cell is active.
+    content.activeCellIndex = 0;
+    props.onChange({ formData: { '/cell-metadata': 'fresh value' } });
+    expect(firstCell.model!.getMetadata('cell-metadata')).toBe('fresh value');
+  });
+
   it('should update notebook metadata', async () => {
     const metadataForm = await buildForm();
     expect(
