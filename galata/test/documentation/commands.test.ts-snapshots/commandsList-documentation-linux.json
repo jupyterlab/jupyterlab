@@ -4621,6 +4621,21 @@
     }
   },
   {
+    "id": "notebook:make-cell-editable",
+    "label": "Enable Cell Editing",
+    "caption": "Read-only cell",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "activate": {
+          "type": "boolean",
+          "description": "Whether the cell is editable or not"
+        }
+      }
+    }
+  },
+  {
     "id": "notebook:merge-cell-above",
     "label": "Merge Cell Above",
     "caption": "",
@@ -4744,21 +4759,6 @@
     "args": {
       "type": "object",
       "properties": {}
-    }
-  },
-  {
-    "id": "notebook:make-cell-editable",
-    "label": "Enable Cell Editing",
-    "caption": "Read-only cell",
-    "shortcuts": [],
-    "args": {
-      "type": "object",
-      "properties": {
-        "activate": {
-          "type": "boolean",
-          "description": "Whether the cell is editable or not"
-        }
-      }
     }
   },
   {
