@@ -22,7 +22,8 @@ test.use({
  * packages/ui-components/src/components/toolbar.tsx).
  */
 const DELETE_BUTTON = '.jp-cell-toolbar [data-command="cell-toolbar:delete"]';
-const LOCK_BUTTON = '.jp-cell-toolbar [data-command="notebook:not-editable"]';
+const LOCK_BUTTON =
+  '.jp-cell-toolbar [data-command="notebook:make-cell-editable"]';
 
 /**
  * These buttons are `jp-button` (FAST) web components: the native `disabled`

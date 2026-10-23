@@ -236,7 +236,7 @@ namespace CommandIDs {
 
   export const clearOutputs = 'notebook:clear-cell-output';
 
-  export const showNonEditable = 'notebook:not-editable';
+  export const makeCellEditable = 'notebook:make-cell-editable';
 
   export const deleteCell = 'notebook:delete-cell';
 
@@ -2554,8 +2554,6 @@ function activateNotebookHandler(
         | 'global'
         | 'session',
       maxNumberOutputs: settings.get('maxNumberOutputs').composite as number,
-      showLockForReadOnlyCells: settings.get('showLockForReadOnlyCells')
-        .composite as boolean,
       showEditorForReadOnlyMarkdown: settings.get(
         'showEditorForReadOnlyMarkdown'
       ).composite as boolean,
@@ -3034,11 +3032,8 @@ function addCommands(
 
   tracker.selectionChanged.connect(() => {
     commands.notifyCommandChanged(CommandIDs.duplicateBelow);
-    commands.notifyCommandChanged(CommandIDs.showNonEditable);
+    commands.notifyCommandChanged(CommandIDs.makeCellEditable);
     commands.notifyCommandChanged(CommandIDs.deleteCell);
-    if (commands.hasCommand('cell-toolbar:delete')) {
-      commands.notifyCommandChanged('cell-toolbar:delete');
-    }
     commands.notifyCommandChanged(CommandIDs.copySelectedtext);
     commands.notifyCommandChanged(CommandIDs.pasteText);
     commands.notifyCommandChanged(CommandIDs.cutSelectedtext);
@@ -3062,12 +3057,7 @@ function addCommands(
     if (cell) {
       cell.model.metadataChanged.connect(() => {
         commands.notifyCommandChanged(CommandIDs.deleteCell);
-        commands.notifyCommandChanged(CommandIDs.showNonEditable);
-        // Notifying an unregistered command throws; the cell-toolbar plugin
-        // may register it after the notebook commands are added.
-        if (commands.hasCommand('cell-toolbar:delete')) {
-          commands.notifyCommandChanged('cell-toolbar:delete');
-        }
+        commands.notifyCommandChanged(CommandIDs.makeCellEditable);
       });
     }
   });
@@ -3941,9 +3931,9 @@ function addCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.showNonEditable, {
-    label: trans.__('read-only Cell'),
-    caption: trans.__('read-only Cell'),
+  commands.addCommand(CommandIDs.makeCellEditable, {
+    label: trans.__('Enable Cell Editing'),
+    caption: trans.__('Read-only cell'),
     execute: async args => {
       const current = getCurrent(tracker, shell, { ...args, activate: false });
       if (current) {

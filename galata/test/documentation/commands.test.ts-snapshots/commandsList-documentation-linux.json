@@ -4747,9 +4747,9 @@
     }
   },
   {
-    "id": "notebook:not-editable",
-    "label": "read-only Cell",
-    "caption": "read-only Cell",
+    "id": "notebook:make-cell-editable",
+    "label": "Enable Cell Editing",
+    "caption": "Read-only cell",
     "shortcuts": [],
     "args": {
       "type": "object",
