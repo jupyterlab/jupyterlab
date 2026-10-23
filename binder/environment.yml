@@ -40,7 +40,7 @@ dependencies:
   - requests-cache
   - virtualenv
   # dev
-  - bump-my-version
+  - bump-my-version >=1,<2
   - hatch
   - pre-commit
   - pytest-cov
