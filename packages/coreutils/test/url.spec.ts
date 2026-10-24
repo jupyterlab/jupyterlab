@@ -3,6 +3,32 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 
+// Polyfill Blob arrayBuffer and text methods for jsdom environment
+// See https://github.com/jsdom/jsdom/issues/2555
+if (!Blob.prototype.arrayBuffer) {
+  // Since "this" must refer to the Blob instance, we use a function expression
+  Blob.prototype.arrayBuffer = function (): Promise<ArrayBuffer> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as ArrayBuffer);
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(this);
+    });
+  };
+}
+
+if (!Blob.prototype.text) {
+  // Since "this" must refer to the Blob instance, we use a function expression
+  Blob.prototype.text = function (): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsText(this);
+    });
+  };
+}
+
 describe('@jupyterlab/coreutils', () => {
   describe('URLExt', () => {
     describe('.parse()', () => {
@@ -109,6 +135,123 @@ describe('@jupyterlab/coreutils', () => {
       it('should optionally allow references to root', () => {
         expect(URLExt.isLocal('/foo/bar.txt', true)).toBe(true);
         expect(URLExt.isLocal('//foo/bar.txt', true)).toBe(false);
+      });
+    });
+
+    describe('.parseDataURI()', () => {
+      it('should parse a valid base64 data URI', () => {
+        const result = URLExt.parseDataURI(
+          'data:image/png;base64,iVBORw0KGgo='
+        );
+        expect(result).toEqual({
+          mimeType: 'image/png',
+          isBase64: true,
+          data: 'iVBORw0KGgo='
+        });
+      });
+
+      it('should parse a valid non-base64 data URI', () => {
+        const result = URLExt.parseDataURI('data:text/plain,Hello%20World');
+        expect(result).toEqual({
+          mimeType: 'text/plain',
+          isBase64: false,
+          data: 'Hello%20World'
+        });
+      });
+
+      it('should use default MIME type when empty', () => {
+        const result = URLExt.parseDataURI('data:,test');
+        expect(result).toEqual({
+          mimeType: 'text/plain;charset=US-ASCII',
+          isBase64: false,
+          data: 'test'
+        });
+      });
+
+      it('should return null for missing data: prefix', () => {
+        const result = URLExt.parseDataURI('http://example.com');
+        expect(result).toBeNull();
+      });
+
+      it('should return null for missing comma', () => {
+        const result = URLExt.parseDataURI('data:text/plain');
+        expect(result).toBeNull();
+      });
+
+      it('should handle empty data portion', () => {
+        const result = URLExt.parseDataURI('data:text/plain,');
+        expect(result).toEqual({
+          mimeType: 'text/plain',
+          isBase64: false,
+          data: ''
+        });
+      });
+
+      it('should handle MIME type with charset', () => {
+        const result = URLExt.parseDataURI(
+          'data:text/html;charset=utf-8,<h1>Hi</h1>'
+        );
+        expect(result).toEqual({
+          mimeType: 'text/html;charset=utf-8',
+          isBase64: false,
+          data: '<h1>Hi</h1>'
+        });
+        const result2 = URLExt.parseDataURI(
+          'data:text/plain;charset=utf-8;base64,SGVsbG8='
+        );
+        expect(result2).toEqual({
+          mimeType: 'text/plain;charset=utf-8',
+          isBase64: true,
+          data: 'SGVsbG8='
+        });
+      });
+    });
+
+    describe('.parseUriListFirst()', () => {
+      it('should return the first URI from a single URI', () => {
+        const result = URLExt.parseUriListFirst('https://example.com\r\n');
+        expect(result).toBe('https://example.com');
+      });
+
+      it('should return the first URI from multiple URIs', () => {
+        const result = URLExt.parseUriListFirst(
+          'https://example.com/first\r\nhttps://example.com/second\r\n'
+        );
+        expect(result).toBe('https://example.com/first');
+      });
+
+      it('should skip comments and return first URI', () => {
+        const result = URLExt.parseUriListFirst(
+          '# first comment\r\n# second comment\r\nhttps://example.com\r\nhttps://example.com/second\r\n'
+        );
+        expect(result).toBe('https://example.com');
+      });
+
+      it('should handle URI without trailing CRLF', () => {
+        const result = URLExt.parseUriListFirst('http://example.com');
+        expect(result).toBe('http://example.com');
+      });
+
+      it('should handle data URI', () => {
+        const result = URLExt.parseUriListFirst(
+          'data:text/plain;base64,SGVsbG8=\r\n'
+        );
+        expect(result).toBe('data:text/plain;base64,SGVsbG8=');
+      });
+
+      it('should return null for empty string', () => {
+        const result = URLExt.parseUriListFirst('');
+        expect(result).toBeNull();
+      });
+
+      it('should return null for only comments', () => {
+        const result = URLExt.parseUriListFirst('# comment1\r\n# comment2\r\n');
+        expect(result).toBeNull();
+      });
+
+      it('should return null for null input', () => {
+        const result = URLExt.parseUriListFirst(null as any);
+        expect(result).toBeNull();
       });
     });
   });
