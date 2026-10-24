@@ -327,6 +327,10 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
+      case 'pointerdown':
+      case 'keydown':
+        this._focusBeforeClick = document.activeElement;
+        break;
       case 'click':
         this.handleClick(event);
         break;
@@ -347,8 +351,22 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     if (event.target instanceof HTMLLabelElement) {
       const forId = event.target.getAttribute('for');
       if (forId && this.node.querySelector(`#${forId}`)) {
+        this._focusBeforeClick = null;
         return;
       }
+    }
+
+    const focusBeforeClick = this._focusBeforeClick;
+    this._focusBeforeClick = null;
+
+    // If the click moved focus to a menu outside the toolbar,
+    // do not reactivate the parent widget.
+    if (
+      focusBeforeClick !== null &&
+      document.activeElement !== focusBeforeClick &&
+      !this.node.contains(document.activeElement)
+    ) {
+      return;
     }
 
     // If this click already focused a control, let it be.
@@ -361,12 +379,13 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
       this.parent.activate();
     }
   }
-
   /**
    * Handle `after-attach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('click', this);
+    this.node.addEventListener('pointerdown', this);
+    this.node.addEventListener('keydown', this);
   }
 
   /**
@@ -374,9 +393,12 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    */
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
+    this.node.removeEventListener('pointerdown', this);
+    this.node.removeEventListener('keydown', this);
   }
 
   noFocusOnClick: boolean;
+  private _focusBeforeClick: Element | null = null;
 }
 
 /**
