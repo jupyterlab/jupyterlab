@@ -31,6 +31,8 @@ jobs:
     name: Integration Tests (${{ matrix.browser }} - ${{ matrix.suite }} ${{ matrix.shard }}/${{ matrix.shards }})
     timeout-minutes: 30
     runs-on: ubuntu-24.04
+    env:
+      YARN_ENABLE_GLOBAL_CACHE: '1'
     permissions:
       contents: read
       pull-requests: read
@@ -176,6 +178,13 @@ jobs:
         with:
           path: ${{ github.workspace }}/pw-browsers
           key: ${{ runner.os }}-${{ matrix.browser }}-${{ steps.pw-version.outputs.version }}
+
+      # base-setup runs outside the checkout and caches the yarn 1 folder instead.
+      - name: Set up yarn cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        with:
+          path: ~/.yarn/berry/cache
+          key: ${{ runner.os }}-yarn-berry-${{ hashFiles('core/yarn.lock') }}
 
       - name: Install dependencies
         env:
@@ -337,6 +346,8 @@ jobs:
     name: Example Tests
     timeout-minutes: 45
     runs-on: ubuntu-24.04
+    env:
+      YARN_ENABLE_GLOBAL_CACHE: '1'
     permissions:
       contents: read
     steps:
@@ -367,6 +378,13 @@ jobs:
         with:
           path: ${{ github.workspace }}/pw-browsers
           key: ${{ runner.os }}-chromium-${{ steps.pw-version.outputs.version }}
+
+      # base-setup runs outside the checkout and caches the yarn 1 folder instead.
+      - name: Set up yarn cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        with:
+          path: ~/.yarn/berry/cache
+          key: ${{ runner.os }}-yarn-berry-${{ hashFiles('core/yarn.lock') }}
 
       - name: Install dependencies
         env:

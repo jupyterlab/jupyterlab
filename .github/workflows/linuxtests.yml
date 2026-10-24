@@ -16,6 +16,7 @@ jobs:
     name: Linux
     env:
       PLAYWRIGHT_BROWSERS_PATH: /home/runner/pw-browsers
+      YARN_ENABLE_GLOBAL_CACHE: "1"
     strategy:
       matrix:
         group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, interop, nonode, lint]
@@ -115,6 +116,8 @@ jobs:
     name: Test Minimum Versions
     timeout-minutes: 30
     runs-on: ubuntu-latest
+    env:
+      YARN_ENABLE_GLOBAL_CACHE: "1"
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
@@ -135,6 +138,8 @@ jobs:
     name: Make SDist
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      YARN_ENABLE_GLOBAL_CACHE: "1"
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
