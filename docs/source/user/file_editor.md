@@ -14,9 +14,19 @@ JupyterLab:
 :class: jp-screenshot
 ```
 
+
 The text editor includes syntax highlighting, configurable indentation
-(tabs or spaces) and
-basic theming. These settings can be found in the Settings menu:
+(tabs or spaces) and basic theming. These settings can be found in the
+Settings menu:
+
+The **Text Editor Theme** setting controls the syntax highlighting theme
+used by the text editor. The available themes are provided by JupyterLab
+and its installed extensions.
+
+To use an additional theme, install a JupyterLab extension that provides
+and registers a CodeMirror theme. Follow the installation instructions
+provided by that extension. Installing a standalone CodeMirror theme
+package does not, by itself, make the theme available in JupyterLab.
 
 ```{image} ../images/file-editor-settings.png
 :align: center
