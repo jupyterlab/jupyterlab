@@ -126,8 +126,8 @@ export class ObservableUndoableList<T>
     }
     const changes = this._stack[this._index];
     this._isUndoable = false;
-    for (const change of changes.reverse()) {
-      this._undoChange(change);
+    for (let i = changes.length - 1; i >= 0; i--) {
+      this._undoChange(changes[i]);
     }
     this._isUndoable = true;
     this._index--;
@@ -191,7 +191,7 @@ export class ObservableUndoableList<T>
    * Undo a change event.
    */
   private _undoChange(change: IObservableList.IChangedArgs<JSONValue>): void {
-    let index = 0;
+    let index: number;
     const serializer = this._serializer;
     switch (change.type) {
       case 'add':
@@ -229,7 +229,7 @@ export class ObservableUndoableList<T>
    * Redo a change event.
    */
   private _redoChange(change: IObservableList.IChangedArgs<JSONValue>): void {
-    let index = 0;
+    let index: number;
     const serializer = this._serializer;
     switch (change.type) {
       case 'add':
@@ -241,7 +241,7 @@ export class ObservableUndoableList<T>
       case 'set':
         index = change.newIndex;
         for (const value of change.newValues) {
-          this.set(change.newIndex++, serializer.fromJSON(value));
+          this.set(index++, serializer.fromJSON(value));
         }
         break;
       case 'remove':
