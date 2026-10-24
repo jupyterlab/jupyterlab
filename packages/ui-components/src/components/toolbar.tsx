@@ -885,6 +885,9 @@ export function ToolbarButtonComponent(
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const { key } = event;
     if (key === 'Enter' || key === ' ') {
+      // The action may move the focus to an editor, which would then
+      // receive the rest of this keystroke.
+      event.preventDefault();
       props.onClick?.(event);
     }
   };

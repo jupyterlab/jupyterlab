@@ -712,6 +712,44 @@ describe('@jupyterlab/ui-components', () => {
           expect(called).toBe(true);
           button.dispose();
         });
+        it.each([
+          ['Enter', false],
+          ['Enter', true],
+          [' ', false],
+          [' ', true]
+        ])(
+          'should prevent the default action of %j with noFocusOnClick %s',
+          async (key, noFocusOnClick) => {
+            const onClick = jest.fn();
+            const button = new ToolbarButton({ onClick, noFocusOnClick });
+            Widget.attach(button, document.body);
+            await framePromise();
+            const event = new KeyboardEvent('keydown', {
+              key,
+              bubbles: true,
+              cancelable: true
+            });
+            (button.node.firstChild as HTMLElement).dispatchEvent(event);
+            expect(onClick).toHaveBeenCalledTimes(1);
+            expect(event.defaultPrevented).toBe(true);
+            button.dispose();
+          }
+        );
+        it('should not prevent the default action of other keys', async () => {
+          const onClick = jest.fn();
+          const button = new ToolbarButton({ onClick });
+          Widget.attach(button, document.body);
+          await framePromise();
+          const event = new KeyboardEvent('keydown', {
+            key: 'Tab',
+            bubbles: true,
+            cancelable: true
+          });
+          (button.node.firstChild as HTMLElement).dispatchEvent(event);
+          expect(onClick).not.toHaveBeenCalled();
+          expect(event.defaultPrevented).toBe(false);
+          button.dispose();
+        });
       });
     });
 
