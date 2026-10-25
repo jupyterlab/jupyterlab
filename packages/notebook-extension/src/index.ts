@@ -3961,7 +3961,9 @@ function addCommands(
             buttons: [
               Dialog.cancelButton(),
               Dialog.okButton({ label: trans.__('Make Editable') })
-            ]
+            ],
+            // Enter keeps the lock: the author may have set it on purpose
+            defaultButton: 0
           });
           if (result.button.accept) {
             cell.model.setMetadata('editable', undefined);
