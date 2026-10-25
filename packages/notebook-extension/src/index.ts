@@ -3953,7 +3953,7 @@ function addCommands(
     );
   };
   commands.addCommand(CommandIDs.makeCellEditable, {
-    label: trans.__('Enable Cell Editing'),
+    label: trans.__('Enable Cell Editing…'),
     caption: trans.__('Read-only cell'),
     icon: args => (args.toolbar ? lockIcon : undefined),
     execute: async args => {
@@ -3964,7 +3964,7 @@ function addCommands(
           const result = await showDialog({
             title: trans.__('Cell is read-only'),
             body: trans.__(
-              'This cell is read-only, its content cannot be edited'
+              'This cell is read-only, so its contents cannot be edited.'
             ),
             buttons: [
               Dialog.cancelButton(),

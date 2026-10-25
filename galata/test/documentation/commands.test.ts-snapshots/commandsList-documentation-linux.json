@@ -4622,7 +4622,7 @@
   },
   {
     "id": "notebook:make-cell-editable",
-    "label": "Enable Cell Editing",
+    "label": "Enable Cell Editing…",
     "caption": "Read-only cell",
     "shortcuts": [],
     "args": {
