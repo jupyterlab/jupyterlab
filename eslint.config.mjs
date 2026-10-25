@@ -15,6 +15,7 @@ import prettierPluginRecommended from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
 import * as jsoncParser from 'jsonc-eslint-parser';
 import jupyterPlugin from '@jupyter/eslint-plugin';
+import lazyImports from '@jupyter/eslint-plugin/lib/utils/lazy-imports.js';
 
 // Application-lifetime sender types for the signal lifetime rules. The
 // `longLivedTypes` option replaces the plugin's built-in list, so the twelve
@@ -294,14 +295,49 @@ export default defineConfig([
 
     rules: {
       'jupyter/command-described-by': 'error',
+      'jupyter/command-id-convention': 'error',
       'jupyter/plugin-activation-args': 'error',
       'jupyter/plugin-description': 'error',
+      'jupyter/plugin-id-convention': 'error',
       'jupyter/token-format': 'error',
       'jupyter/no-translation-concatenation': 'error',
       'jupyter/no-dynamic-translation': 'error',
       'jupyter/incorrect-translator-usage': 'error',
       'jupyter/no-untranslated-string': 'error',
       'jupyter/no-pageconfig-base-url': 'error',
+      'jupyter/prefer-lazy-imports': [
+        'error',
+        {
+          deferredPackages: [
+            ...lazyImports.DEFAULT_DEFERRED_PACKAGES,
+            // Keep JupyterLab's other on-demand dependencies out of startup.
+            '@mermaid-js/layout-elk',
+            '@plutojl/lang-julia',
+            '@xterm/xterm',
+            '@xterm/addon-*',
+            'marked',
+            'marked-gfm-heading-id',
+            'marked-mangle',
+            'mathjax-full',
+            'regexp-match-indices',
+            'vega-embed'
+          ],
+          allowedPackages: [
+            // Keep defaults
+            ...lazyImports.DEFAULT_ALLOWED_PACKAGES,
+            // Deferring these needs larger changes: an asynchronous editor
+            // creation path for `@codemirror/commands`, a copy of
+            // `closeBrackets` for `@codemirror/autocomplete` (the only part of
+            // that package in use, but the bundler keeps the whole module), and
+            // a lazily loaded `FormComponent` in ui-components for the rjsf
+            // packages.
+            '@codemirror/autocomplete',
+            '@codemirror/commands',
+            '@rjsf/core',
+            '@rjsf/utils'
+          ]
+        }
+      ],
       'jupyter/require-signal-cleanup': [
         'error',
         { longLivedTypes: LONG_LIVED_TYPES }
@@ -529,7 +565,11 @@ export default defineConfig([
 
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/non-nullable-type-assertion-style': 'off'
+      '@typescript-eslint/non-nullable-type-assertion-style': 'off',
+      // Mock plugins do not participate in extension-level configuration.
+      'jupyter/plugin-id-convention': 'off',
+      // Tests load their modules up front; there is no startup to protect.
+      'jupyter/prefer-lazy-imports': 'off'
     }
   },
   {
@@ -573,9 +613,20 @@ export default defineConfig([
   },
   {
     files: ['galata/test/**/*.ts', 'galata/test/**/*.tsx'],
+    // Benchmarks use plain Playwright fixtures without Galata page helpers.
+    ignores: ['galata/test/benchmark/**'],
+    rules: {
+      'jupyter/galata-prefer-context-menu-helper': 'error',
+      'jupyter/galata-prefer-filebrowser-helper': 'error',
+      'jupyter/galata-prefer-menu-helper': 'error',
+      'jupyter/galata-prefer-notebook-cell-helper': 'error',
+      'jupyter/galata-prefer-sidebar-activity-helper': 'error'
+    }
+  },
+  {
+    files: ['galata/test/**/*.ts', 'galata/test/**/*.tsx'],
     plugins: { playwright: playwrightPlugin, jupyter: jupyterPlugin },
     rules: {
-      'jupyter/galata-prefer-filebrowser-helper': 'error',
       // Custom Galata guards not covered by eslint-plugin-playwright.
       'no-restricted-syntax': [
         'error',

@@ -67,6 +67,7 @@
     "@lezer/generator": "^1.7.0",
     "@lezer/highlight": "^1.2.0",
     "@lezer/markdown": "^1.3.0",
+    "@lumino/commands": "^2.3.4",
     "@lumino/coreutils": "^2.2.3",
     "@lumino/disposable": "^2.1.6",
     "@lumino/signaling": "^2.1.6",

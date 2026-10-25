@@ -163,7 +163,7 @@ source scripts/release_prep.sh <branch_name>
 ### Bump version
 
 The next step is to bump the appropriate version numbers. We use
-[bump2version](https://github.com/c4urself/bump2version) to manage the Python
+[bump-my-version](https://github.com/callowayproject/bump-my-version) to manage the Python
 version, and we keep the JS versions and tags in sync with the release cycle.
 
 Here is an example of how version numbers progress through a release process.
@@ -227,7 +227,7 @@ is slow to update with the new packages, so this script tries to fetch
 the packages until they are available.
 
 At this point, run the `./scripts/release_test.sh` to test the wheel in
-a fresh conda environment with and without extensions installed. Open and run
+a fresh virtual environment with and without extensions installed. Open and run
 the Outputs notebook and verify everything runs properly. Also add a cell with the following code and make sure the widget renders:
 
 ```python
