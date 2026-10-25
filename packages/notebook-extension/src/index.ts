@@ -2261,6 +2261,7 @@ function activateNotebookHandler(
       settings.changed.connect(() => {
         updateConfig(settings);
         commands.notifyCommandChanged(CommandIDs.virtualScrollbar);
+        commands.notifyCommandChanged(CommandIDs.makeCellEditable);
       });
 
       const updateSessionSettings = (
