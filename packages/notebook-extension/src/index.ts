@@ -33,6 +33,7 @@ import {
   Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
+import type { IMapChange } from '@jupyter/ydoc';
 import type { Cell, CodeCell, ICellModel } from '@jupyterlab/cells';
 import { MarkdownCell } from '@jupyterlab/cells';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
@@ -3049,19 +3050,28 @@ function addCommands(
     commands.notifyCommandChanged(CommandIDs.runAndAdvance);
     commands.notifyCommandChanged(CommandIDs.runAndInsert);
   });
-  const onCellMetadataChanged = () => {
+  let activeCellModel: ICellModel | null = null;
+  const onActiveCellMetadataChanged = (_: ICellModel, change: IMapChange) => {
+    if (change.key === 'deletable' || change.key === 'editable') {
+      commands.notifyCommandChanged(CommandIDs.deleteCell);
+      commands.notifyCommandChanged(CommandIDs.makeCellEditable);
+    }
+  };
+  const followActiveCell = () => {
+    activeCellModel?.metadataChanged.disconnect(onActiveCellMetadataChanged);
+    activeCellModel = tracker.activeCell?.model ?? null;
+    activeCellModel?.metadataChanged.connect(onActiveCellMetadataChanged);
+  };
+  // Closing the last notebook emits `currentChanged` but no `activeCellChanged`
+  tracker.currentChanged.connect(followActiveCell);
+  tracker.activeCellChanged.connect(() => {
+    followActiveCell();
     commands.notifyCommandChanged(CommandIDs.deleteCell);
     commands.notifyCommandChanged(CommandIDs.makeCellEditable);
-  };
-  tracker.activeCellChanged.connect((_, cell) => {
     commands.notifyCommandChanged(CommandIDs.moveUp);
     commands.notifyCommandChanged(CommandIDs.moveDown);
     commands.notifyCommandChanged(CommandIDs.selectLastModifiedCell);
     commands.notifyCommandChanged(CommandIDs.selectNextModifiedCell);
-    if (cell) {
-      cell.model.metadataChanged.connect(onCellMetadataChanged);
-      cell.disposed.disconnect(onCellMetadataChanged);
-    }
   });
 
   tracker.widgetAdded.connect((_, panel) => {
