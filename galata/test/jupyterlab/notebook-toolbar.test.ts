@@ -400,6 +400,25 @@ test.describe('Reactive toolbar', () => {
 
     await expect(toolbar).toHaveScreenshot(imageName);
   });
+
+  test('Hiding an item should bring back the items from the popup', async ({
+    page
+  }) => {
+    const toolbar = page.locator('.jp-NotebookPanel-toolbar');
+    const opener = toolbar.locator('.jp-Toolbar-responsive-opener');
+    const item = toolbar.locator('[data-jp-item-name="restart-and-run"]');
+    // Wide enough to push the next items to the popup, not to go there itself.
+    await item.evaluate(node => {
+      node.style.minWidth = '350px';
+    });
+    await expect(opener).toBeVisible();
+
+    await item.evaluate(node => {
+      node.style.display = 'none';
+    });
+
+    await expect(opener).toBeHidden();
+  });
 });
 
 test('Reactive toolbar should move items to the popup when the kernel name gets longer', async ({
