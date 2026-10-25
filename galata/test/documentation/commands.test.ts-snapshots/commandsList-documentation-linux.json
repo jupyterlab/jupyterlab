@@ -4628,9 +4628,9 @@
     "args": {
       "type": "object",
       "properties": {
-        "activate": {
+        "toolbar": {
           "type": "boolean",
-          "description": "Whether the cell is editable or not"
+          "description": "Whether the command is being executed from the toolbar"
         }
       }
     }

@@ -183,6 +183,8 @@ test.describe('Cell toolbar command icons react to cell metadata', () => {
     // writes, and what Advanced Tools writes).
     await setCellMetadata(page, 'editable', false);
     await expect(lock).toBeVisible();
+    const icon = lock.locator('[data-icon="ui-components:lock"]');
+    await expect(icon).toHaveCount(1);
 
     // Reverting to "Editable" in Common Tools deletes the key because the
     // value equals the schema default; the lock must go away.

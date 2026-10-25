@@ -125,6 +125,7 @@ import {
   fastForwardIcon,
   IFormRendererRegistry,
   infoIcon,
+  lockIcon,
   moveDownIcon,
   moveUpIcon,
   notebookIcon,
@@ -3954,6 +3955,7 @@ function addCommands(
   commands.addCommand(CommandIDs.makeCellEditable, {
     label: trans.__('Enable Cell Editing'),
     caption: trans.__('Read-only cell'),
+    icon: args => (args.toolbar ? lockIcon : undefined),
     execute: async args => {
       const current = getCurrent(tracker, shell, { ...args, activate: false });
       if (current) {
@@ -3979,15 +3981,17 @@ function addCommands(
     },
     isEnabled: canMakeCellEditable,
     isVisible: args =>
-      (settings?.get('showLockForReadOnlyCells').composite as boolean) &&
+      (!args.toolbar ||
+        (settings?.get('showLockForReadOnlyCells').composite as boolean)) &&
       canMakeCellEditable(args),
     describedBy: {
       args: {
         type: 'object',
         properties: {
-          activate: {
+          toolbar: {
             type: 'boolean',
-            description: trans.__('Whether the cell is editable or not')
+            description:
+              'Whether the command is being executed from the toolbar'
           }
         }
       }
