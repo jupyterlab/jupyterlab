@@ -896,6 +896,81 @@ describe('metadataform/form field ids', () => {
     expect(cellMetadata()).toEqual({ obj: { p: 'new', q: 'kept' } });
   });
 
+  it.each([
+    ['null', null],
+    ['a string', 'slide'],
+    ['a number', 3]
+  ])(
+    'should show and write a nested key whose parent is %s',
+    async (_name, parent) => {
+      const model = tracker.activeCell!.model;
+      // The model ignores null for a missing key, so set an object first.
+      model.setMetadata('slideshow', {});
+      model.setMetadata('slideshow', parent);
+      const metadataForm = await buildForm({
+        '/slideshow/slide_type': { type: 'string', default: '' }
+      });
+      const input = metadataForm.node.querySelector<HTMLInputElement>(
+        'input[id$="/slideshow/slide_type"]'
+      )!;
+      expect(input.value).toBe('');
+      expect(cellMetadata()).toEqual({ slideshow: parent });
+
+      await typeInto(input, 'slide');
+
+      expect(cellMetadata()).toEqual({ slideshow: { slide_type: 'slide' } });
+    }
+  );
+
+  it('should write a nested key whose intermediate value is not an object', async () => {
+    tracker.activeCell!.model.setMetadata('a', { b: 'x', kept: 1 });
+    const metadataForm = await buildForm({ '/a/b/c': { type: 'string' } });
+
+    await typeInto(
+      metadataForm.node.querySelector<HTMLInputElement>('input[id$="/a/b/c"]')!,
+      'value'
+    );
+
+    expect(cellMetadata()).toEqual({ a: { b: { c: 'value' }, kept: 1 } });
+  });
+
+  it.each([null, 'x', 3, false, ''])(
+    'should preserve a non-object intermediate %p when clearing a missing nested key',
+    async parent => {
+      tracker.activeCell!.model.setMetadata('a', { b: parent, kept: 1 });
+      const metadataForm = await buildForm({ '/a/b/c': { type: 'string' } });
+
+      expect(() =>
+        metadataForm.updateMetadata({ '/a/b/c': undefined })
+      ).not.toThrow();
+      expect(cellMetadata()).toEqual({ a: { b: parent, kept: 1 } });
+    }
+  );
+
+  it('should preserve a non-object intermediate when a displayed default is cleared', async () => {
+    tracker.activeCell!.model.setMetadata('a', { b: 3, kept: 1 });
+    const metadataForm = await buildForm({
+      '/a/b/c': { type: 'string', default: 'placeholder' }
+    });
+    const input = metadataForm.node.querySelector<HTMLInputElement>(
+      'input[id$="/a/b/c"]'
+    )!;
+    expect(input.value).toBe('placeholder');
+
+    await typeInto(input, '');
+
+    expect(cellMetadata()).toEqual({ a: { b: 3, kept: 1 } });
+  });
+
+  it('should still prune empty object ancestors when clearing a missing nested key', async () => {
+    tracker.activeCell!.model.setMetadata('a', { b: {}, kept: 1 });
+    const metadataForm = await buildForm({ '/a/b/c/d': { type: 'string' } });
+
+    metadataForm.updateMetadata({ '/a/b/c/d': undefined });
+
+    expect(cellMetadata()).toEqual({ a: { kept: 1 } });
+  });
+
   it('should remove the metadata of a field that is cleared', async () => {
     tracker.activeCell!.model.setMetadata('slideshow', { slide_type: 'slide' });
     const metadataForm = await buildForm({
