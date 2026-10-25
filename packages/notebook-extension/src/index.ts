@@ -3945,6 +3945,12 @@ function addCommands(
     }
   });
 
+  const canMakeCellEditable = (args: ReadonlyPartialJSONObject): boolean => {
+    const current = getCurrent(tracker, shell, { ...args, activate: false });
+    return (
+      !!current && !current.viewOnly && !!current.content.activeCell?.readOnly
+    );
+  };
   commands.addCommand(CommandIDs.makeCellEditable, {
     label: trans.__('Enable Cell Editing'),
     caption: trans.__('Read-only cell'),
@@ -3952,7 +3958,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, { ...args, activate: false });
       if (current) {
         const cell = current.content.activeCell;
-        if (cell) {
+        if (cell && canMakeCellEditable(args)) {
           const result = await showDialog({
             title: trans.__('Cell is read-only'),
             body: trans.__(
@@ -3971,19 +3977,10 @@ function addCommands(
         }
       }
     },
-    isVisible: args => {
-      const current = getCurrent(tracker, shell, { ...args, activate: false });
-      if (!current) {
-        return false;
-      }
-      const noteditable =
-        (current.content.activeCell?.model.getMetadata(
-          'editable'
-        ) as unknown as boolean) === false;
-      const visible = settings?.get('showLockForReadOnlyCells')
-        .composite as boolean;
-      return noteditable && visible;
-    },
+    isEnabled: canMakeCellEditable,
+    isVisible: args =>
+      (settings?.get('showLockForReadOnlyCells').composite as boolean) &&
+      canMakeCellEditable(args),
     describedBy: {
       args: {
         type: 'object',
