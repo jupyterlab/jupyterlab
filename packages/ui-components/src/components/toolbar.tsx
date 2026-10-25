@@ -884,11 +884,12 @@ export function ToolbarButtonComponent(
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const { key } = event;
-    if (key === 'Enter' || key === ' ') {
-      // The action may move the focus to an editor, which would then
-      // receive the rest of this keystroke.
+    if ((key === 'Enter' || key === ' ') && props.onClick) {
+      // Stop the browser from clicking the button, and then also
+      // passing the key to whatever the action focused
+      // (a cell editor, a dialog button).
       event.preventDefault();
-      props.onClick?.(event);
+      props.onClick(event);
     }
   };
 
@@ -965,7 +966,7 @@ export class ToolbarButton extends ReactWidget {
     addToolbarButtonClass(this);
     this._enabled = props.enabled ?? true;
     this._pressed = this._enabled! && (props.pressed ?? false);
-    this._onClick = props.onClick!;
+    this._onClick = props.onClick;
   }
 
   /**
@@ -1027,7 +1028,7 @@ export class ToolbarButton extends ReactWidget {
       this.pressed = !this.pressed;
 
       // Call the original click handler, if defined
-      this._onClick(event);
+      this._onClick?.(event);
     };
   }
 
@@ -1038,14 +1039,14 @@ export class ToolbarButton extends ReactWidget {
         noFocusOnClick={this.props.noFocusOnClick}
         pressed={this.pressed}
         enabled={this.enabled}
-        onClick={this.onClick}
+        onClick={this._onClick ? this.onClick : undefined}
       />
     );
   }
 
   private _pressed: boolean;
   private _enabled: boolean;
-  private _onClick: (event?: React.SyntheticEvent) => void;
+  private _onClick?: (event?: React.SyntheticEvent) => void;
 }
 
 /**
