@@ -578,8 +578,8 @@ export class PluginList extends ReactWidget {
       }
 
       // Finally, recurse on the properties left.
-      acc.concat(
-        this.getFilterString(
+      acc.push(
+        ...this.getFilterString(
           filter,
           subProps as ISettingRegistry.IProperty,
           definitions,

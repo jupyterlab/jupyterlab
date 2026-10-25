@@ -394,7 +394,7 @@ test.describe('Reactive toolbar', () => {
       .first();
     await checkboxLabel.click();
 
-    await page.locator('div.lm-TabBar-tabLabel >> text=Notebook.ipynb').click();
+    await page.activity.activateTab('Notebook.ipynb');
     const saveLocator = toolbar.locator('[data-jp-item-name="save"]');
     await expect(saveLocator).toHaveCount(0, { timeout: 1000 });
 
