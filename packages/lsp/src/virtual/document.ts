@@ -614,7 +614,7 @@ export class VirtualDocument implements IDisposable {
    * @param  block - block to be appended
    * @param  editorShift - position shift in source
    * document
-   * @param  [virtualShift] - position shift in
+   * @param  virtualShift - position shift in
    * virtual document.
    */
   appendCodeBlock(

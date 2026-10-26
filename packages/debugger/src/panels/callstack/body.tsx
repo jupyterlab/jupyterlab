@@ -32,8 +32,8 @@ export class CallstackBody extends ReactWidget {
 /**
  * A React component to display a list of frames in a callstack.
  *
- * @param {object} props The component props.
- * @param props.model The model for the callstack.
+ * @param props The component props.
+ * - `model`: The model for the callstack.
  * @returns A JSX element.
  */
 const FramesComponent = ({

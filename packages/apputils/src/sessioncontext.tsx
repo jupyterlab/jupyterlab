@@ -1609,24 +1609,24 @@ export namespace SessionContextDialogs {
    * returned are grouped with the language preference at the top:
    *
    *  - (Start %1 Kernel, language)
-   *    - { all kernelspecs whose language matches in alphabetical order }
+   *    - all kernelspecs whose language matches in alphabetical order
    *  - (Use No Kernel)
    *    - `No Kernel`
    *  - (Start Kernel)
-   *    - { all other kernelspecs in alphabetical order }
+   *    - all other kernelspecs in alphabetical order
    *  - (Connect to Existing %1 Kernel, language)
-   *    - { all running kernels whose language matches in alphabetical order }
+   *    - all running kernels whose language matches in alphabetical order
    *  - (Connect to Kernel)
-   *    - { all other running kernels in alphabetical order }
+   *    - all other running kernels in alphabetical order
    *
    * If no language preference is set, these groups and options are returned:
    *
    *  - (Start Kernel)
-   *    - { all kernelspecs in alphabetical order }
+   *    - all kernelspecs in alphabetical order
    *  - (Use No Kernel)
    *    - `No Kernel`
    *  - (Connect to Existing Kernel)
-   *    - { all running kernels in alphabetical order  }
+   *    - all running kernels in alphabetical order
    *
    * If the session has a kernel ID and a kernel exists with that id, its
    * corresponding option has `selected` set to `true`. Otherwise if the session

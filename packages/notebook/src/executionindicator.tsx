@@ -337,7 +337,7 @@ export namespace ExecutionIndicator {
 
     /**
      * Set of messages scheduled for executing, `executionStatus` is set
-     *  to `idle if the length of this set is 0 and to `busy` otherwise.
+     *  to `idle` if the length of this set is 0 and to `busy` otherwise.
      */
     scheduledCell: Set<string>;
 

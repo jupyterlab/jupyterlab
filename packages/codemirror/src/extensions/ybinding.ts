@@ -277,8 +277,9 @@ export interface IYSyncPlugin {
  * Extension for CodeMirror 6 binding the Yjs text (source of truth)
  * and the editor state.
  *
- * @param options.ytext Yjs text to bind
- * @param options.undoManager Yjs text undo manager
+ * @param options - The options.
+ * - `ytext`: Yjs text to bind
+ * - `undoManager`: Yjs text undo manager
  * @returns CodeMirror 6 extension
  */
 export function ybinding(options: {

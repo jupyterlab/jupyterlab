@@ -36,7 +36,7 @@ const copy = JSONExt.deepCopy;
  */
 const AJV_DEFAULT_OPTIONS: Partial<AjvOptions> = {
   /**
-   * @todo the implications of enabling strict mode are beyond the scope of
+   * TODO: the implications of enabling strict mode are beyond the scope of
    *       the initial PR
    */
   strict: false
@@ -1542,7 +1542,7 @@ namespace Private {
   /**
    * Create a fully extrapolated default value for a root key in a schema.
    *
-   * @todo This function would ideally reuse `getDefaultFormState` from rjsf
+   * TODO: This function would ideally reuse `getDefaultFormState` from rjsf
    * with appropriate`defaultFormStateBehavior` setting, as currently
    * these two implementations duplicate each other.
    *

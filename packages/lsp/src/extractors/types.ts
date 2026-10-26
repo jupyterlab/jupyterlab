@@ -30,7 +30,7 @@ export interface IExtractedCode {
  * Foreign code extractor makes it possible to analyze code of language X embedded in code (or notebook) of language Y.
  *
  * The typical examples are:
- *  - (X=CSS< Y=HTML), or
+ *  - `(X=CSS < Y=HTML)`, or
  *  - (X=JavaScript, Y=HTML),
  *
  * while in the data analysis realm, examples include:

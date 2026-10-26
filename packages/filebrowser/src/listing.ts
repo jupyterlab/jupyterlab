@@ -1058,7 +1058,7 @@ export class DirListing extends Widget {
 
   /**
    * Compute the Intl.RelativeTimeFormat style for a date column based on
-   * its pixel width: < 100px → 'narrow', 100–120px → 'short', > 120px → 'long'.
+   * its pixel width: less than 100px → 'narrow', 100–120px → 'short', more than 120px → 'long'.
    */
   private _computeDateColumnStyle(
     node: HTMLElement,

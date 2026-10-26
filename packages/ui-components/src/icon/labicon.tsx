@@ -601,37 +601,37 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   /**
    * A React component that will create the icon.
    *
-   * @param className - a string that will be used as the class
+   * @param props - The icon and style properties. Additional CSS properties
+   * override the styles applied to the inner SVG element.
+   *
+   * - `className`: a string that will be used as the class
    * of the container element. Overrides any existing class
    *
-   * @param container - a preexisting DOM element that
+   * - `container`: a preexisting DOM element that
    * will be used as the container for the svg element
    *
-   * @param label - text that will be displayed adjacent
+   * - `label`: text that will be displayed adjacent
    * to the icon
    *
-   * @param title - a tooltip for the icon
+   * - `title`: a tooltip for the icon
    *
-   * @param tag - if container is not explicitly
+   * - `tag`: if container is not explicitly
    * provided, this tag will be used when creating the container
    *
-   * @param stylesheet - optional string naming a builtin icon
+   * - `stylesheet`: optional string naming a builtin icon
    * stylesheet, for example 'menuItem' or `statusBar`. Can also be an
    * object defining a custom icon stylesheet, or a list of builtin
    * stylesheet names and/or custom stylesheet objects. If array,
    * the given stylesheets will be merged.
    *
-   *   See @jupyterlab/ui-components/src/style/icon.ts for details
+   *   See `@jupyterlab/ui-components/src/style/icon.ts` for details
    *
-   * @param elementPosition - optional position for the inner svg element
+   * - `elementPosition`: optional position for the inner svg element
    *
-   * @param elementSize - optional size for the inner svg element.
+   * - `elementSize`: optional size for the inner svg element.
    * Set to 'normal' to get a standard 16px x 16px icon
    *
-   * @param ...elementCSS - all additional args are treated as
-   * overrides for the CSS props applied to the inner svg element
-   *
-   * @param ref - forwarded to the ref prop of the icon's svg element
+   * - `ref`: forwarded to the ref prop of the icon's SVG element
    */
   readonly react: LabIcon.IReact;
 
@@ -891,10 +891,10 @@ namespace Private {
    * This function assumes that svgstr will look like one of:
    *
    * - the raw contents of an .svg file:
-   *   <svg...</svg>
+   *   `<svg...</svg>`
    *
    * - a data URL:
-   *   data:[<mediatype>][;base64],<svg...</svg>
+   *   `data:[<mediatype>][;base64],<svg...</svg>`
    *
    * See https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
    */

@@ -754,12 +754,12 @@ namespace Private {
   export type RankPair = { readonly id: number; readonly rank: number };
 
   /**
-   * A type alias for a mapping of mime type -> rank pair.
+   * A type alias for a mapping of mime type → rank pair.
    */
   export type RankMap = { [key: string]: RankPair };
 
   /**
-   * A type alias for a mapping of mime type -> ordered factories.
+   * A type alias for a mapping of mime type → ordered factories.
    */
   export type FactoryMap = { [key: string]: IRenderMime.IRendererFactory };
 

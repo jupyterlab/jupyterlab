@@ -1115,7 +1115,7 @@ export class ContentsManager implements Contents.IManager {
   }
 
   /**
-   * Given a path, get the `IDrive to which it refers,
+   * Given a path, get the `IDrive` to which it refers,
    * where the path satisfies the pattern
    * `'driveName:path/to/file'`. If there is no `driveName`
    * prepended to the path, it returns the default drive.

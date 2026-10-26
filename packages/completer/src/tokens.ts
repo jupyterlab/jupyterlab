@@ -345,7 +345,7 @@ export interface ICompletionProviderManager {
   /**
    * Register a completer provider with the manager.
    *
-   * @param {ICompletionProvider} provider - the provider to be registered.
+   * @param provider - the provider to be registered.
    */
   registerProvider(provider: ICompletionProvider): void;
 
@@ -362,14 +362,14 @@ export interface ICompletionProviderManager {
   /**
    * Invoke the completer in the widget with provided id.
    *
-   * @param {string} id - the id of notebook panel, console panel or code editor.
+   * @param id - the id of notebook panel, console panel or code editor.
    */
   invoke(id: string): void;
 
   /**
    * Activate `select` command in the widget with provided id.
    *
-   * @param {string} id - the id of notebook panel, console panel or code editor.
+   * @param id - the id of notebook panel, console panel or code editor.
    */
   select(id: string): void;
 
@@ -511,7 +511,7 @@ export interface IProviderReconciliator {
    * the response for a completer request before timeout,
    * the result of this provider will be ignore.
    *
-   * @param {CompletionHandler.IRequest} request - The completion request.
+   * @param request - The completion request.
    * @param trigger - Who triggered the request (optional).
    */
   fetch(

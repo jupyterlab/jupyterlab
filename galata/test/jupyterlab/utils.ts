@@ -172,7 +172,7 @@ export async function getFileListFontSize(
 }
 
 /**
- * Change font size using Settings > Theme menu.
+ * Change font size using Settings → Theme menu.
  */
 export async function changeCodeFontSize(
   page: IJupyterLabPageFixture,

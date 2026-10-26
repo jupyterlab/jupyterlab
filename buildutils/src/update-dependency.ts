@@ -28,7 +28,7 @@ const SEMVER_RANGE = /^(~|\^|=|<|>|<=|>=)?([\w\-.]*)$/;
  *
  * #### Notes
  * If the suggested specifier is not a valid range, we assume it is of the
- * form ${RANGE}${TAG}, where TAG is an npm tag (such as 'latest') and RANGE
+ * form `${RANGE}${TAG}`, where TAG is an npm tag (such as 'latest') and RANGE
  * is either a semver range indicator (one of `~, ^, >, <, =, >=, <=`), or is
  * not given (in which case the current specifier range prefix is used).
  */

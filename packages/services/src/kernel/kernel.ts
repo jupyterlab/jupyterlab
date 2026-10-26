@@ -799,7 +799,7 @@ export interface IManager extends IBaseManager {
    * Connect to an existing kernel.
    *
    * @param options - The options for connecting to the kernel
-   * @param options.model - The model of the target kernel.
+   * - `model`: The model of the target kernel.
    *
    * @returns A promise that resolves with the new kernel instance.
    */

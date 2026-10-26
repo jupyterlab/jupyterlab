@@ -145,10 +145,10 @@ interface IVariablesBranchProps {
 /**
  * A React component to display a list of variables.
  *
- * @param {object} props The component props.
- * @param props.data An array of variables.
- * @param props.service The debugger service.
- * @param props.filter Optional variable filter list.
+ * @param props The component props.
+ * - `data`: An array of variables.
+ * - `service`: The debugger service.
+ * - `filter`: Optional variable filter list.
  */
 const VariablesBranch = (props: IVariablesBranchProps): JSX.Element => {
   const { commands, data, service, filter, translator, handleSelectVariable } =
@@ -232,10 +232,10 @@ function _prepareDetail(variable: IDebugger.IVariable) {
 /**
  * A React component to display one node variable in tree.
  *
- * @param {object} props The component props.
- * @param props.data An array of variables.
- * @param props.service The debugger service.
- * @param props.filter Optional variable filter list.
+ * @param props The component props.
+ * - `data`: An array of variables.
+ * - `service`: The debugger service.
+ * - `filter`: Optional variable filter list.
  */
 const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
   const { commands, data, service, filter, translator, onSelect } = props;
