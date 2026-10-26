@@ -192,6 +192,8 @@ if [[ $GROUP == examples ]]; then
     # Build the examples.
     jlpm build:packages
     jlpm build:examples
+    # The browser-require example test serves this bundle in place of unpkg.
+    (cd packages/services && jlpm build:all)
 
     # Test the examples
     jlpm test:examples

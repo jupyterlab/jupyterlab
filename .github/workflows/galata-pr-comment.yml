@@ -14,7 +14,7 @@ jobs:
       actions: read
       pull-requests: write
     steps:
-      - uses: jupyterlab/maintainer-tools/.github/actions/ui-test-report-comment@1139fd4ebe0dff50be32fa160d445d5fb80ee4d6
+      - uses: jupyterlab/maintainer-tools/.github/actions/ui-test-report-comment@4016d4e69656e13e662d629ee3c30dc31e68628f # v1.1.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           run_id: ${{ github.event.workflow_run.id }}
