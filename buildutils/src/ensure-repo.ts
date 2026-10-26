@@ -41,7 +41,13 @@ const URL_CONFIG = {
 // Data to ignore.
 const MISSING: Dict<string[]> = {
   '@jupyterlab/coreutils': ['path'],
-  '@jupyterlab/buildutils': ['assert', 'child_process', 'fs', 'path'],
+  '@jupyterlab/buildutils': [
+    'assert',
+    'child_process',
+    'fs',
+    'path',
+    'readline'
+  ],
   '@jupyterlab/galata': ['fs', 'path', '@jupyterlab/galata'],
   '@jupyterlab/testing': ['child_process', 'fs', 'path'],
   '@jupyterlab/vega5-extension': ['vega-embed']
@@ -61,7 +67,7 @@ const UNUSED: Dict<string[]> = {
   // url is a polyfill for sanitize-html
   '@jupyterlab/apputils': ['@types/react'],
   '@jupyterlab/application': ['@fortawesome/fontawesome-free'],
-  '@jupyterlab/buildutils': ['inquirer', 'verdaccio'],
+  '@jupyterlab/buildutils': ['verdaccio'],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/galata-extension': [
     '@fontsource/dejavu-mono',
@@ -71,7 +77,6 @@ const UNUSED: Dict<string[]> = {
   '@jupyterlab/testing': [
     '@babel/core',
     '@babel/preset-env',
-    'fs-extra',
     'identity-obj-proxy',
     'jest-junit'
   ],
