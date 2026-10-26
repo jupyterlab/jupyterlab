@@ -2482,7 +2482,7 @@ function activateNotebookHandler(
       // Toolbar buttons only re-check a command's `isEnabled`/`isVisible`
       // when notified for that specific id
       const skip = [CommandIDs.createNew, CommandIDs.createOutputView];
-      Object.values(CommandIDs)
+      Object.values({ ...CommandIDs, save: 'docmanager:save' })
         .filter(id => !skip.includes(id) && commands.hasCommand(id))
         .forEach(id => commands.notifyCommandChanged(id));
     }, widget);
