@@ -62,28 +62,53 @@ const SCHEMA = {
     ['account', 'Vendor account'], ['replyTo', 'ReplyTo'], ['createdAt', 'Created At'], ['readBy', 'ReadBy'], ['deletedBy', 'DeletedBy']
   ],
   Currencies: [['code', 'Code'], ['name', 'Name'], ['rate', 'Rate to reporting currency'], ['active', 'Active'], ['updatedAt', 'Updated At']],
+  // Master data
+  Items: [
+    ['itemId', 'Item number'], ['itemName', 'Item name'], ['unit', 'Unit'], ['cost', 'Cost'],
+    ['itemGroup', 'Item group'], ['accNo', 'Account number'], ['note', 'Note']
+  ],
+  ItemGroups: [['igId', 'Item group id'], ['igName', 'Item group name']],
+  Warehouses: [['whId', 'Warehouse id'], ['whName', 'Warehouse name']],
+  Accounts: [['accNo', 'Account number'], ['accName', 'Account name'], ['parentAcc', 'Main account']],
+  // Purchase invoices: one header row + its lines (linked by invoice number).
+  PurchaseInvoices: [
+    ['invNo', 'Invoice number'], ['date', 'Date'], ['account', 'Vendor account'], ['vendorName', 'Vendor name'],
+    ['description', 'Description'], ['total', 'Total'], ['createdBy', 'Created By'], ['createdAt', 'Created At'],
+    ['updatedBy', 'Updated By'], ['updatedAt', 'Updated At']
+  ],
+  PurchaseInvoiceLines: [
+    ['invNo', 'Invoice number'], ['lineNo', 'Line no.'], ['itemId', 'Item number'], ['itemName', 'Item name'],
+    ['quantity', 'Quantity'], ['cost', 'Cost'], ['amount', 'Amount'], ['note', 'Note']
+  ],
   Settings: [['key', 'Key'], ['value', 'Value']]
 };
 
-const ID_FIELD = { Vendors: 'account', Transactions: 'rowId', VendorGroups: 'groupId', Users: 'userId', FollowUps: 'id', Currencies: 'code', Allocations: 'id', Messages: 'id' };
+const ID_FIELD = { Vendors: 'account', Transactions: 'rowId', VendorGroups: 'groupId', Users: 'userId', FollowUps: 'id', Currencies: 'code', Allocations: 'id', Messages: 'id',
+  Items: 'itemId', ItemGroups: 'igId', Warehouses: 'whId', Accounts: 'accNo', PurchaseInvoices: 'invNo' };
 const DATE_FIELDS = ['date', 'dueDate', 'createdAt', 'updatedAt', 'postedAt', 'lastLogin', 'actionDate', 'promiseDate', 'chequeDate'];
-const NUMBER_FIELDS = ['amountCur', 'exchange', 'creditMST', 'debitMST', 'creditLimit', 'termsDays', 'promiseAmount', 'rate', 'amount'];
+const NUMBER_FIELDS = ['amountCur', 'exchange', 'creditMST', 'debitMST', 'creditLimit', 'termsDays', 'promiseAmount', 'rate', 'amount',
+  'cost', 'quantity', 'total', 'lineNo'];
 const BOOL_FIELDS = ['isDeleted', 'canAdd', 'canEdit', 'canDelete', 'canPost', 'isCollector', 'active'];
 
-const ALL_PAGES = ['dashboard', 'customers', 'transactions', 'receipts', 'groups', 'statement', 'balances', 'paid',
-  'overdue', 'credit', 'followup', 'collection', 'collections', 'performance', 'currencies', 'import', 'users'];
+const ALL_PAGES = ['dashboard', 'customers', 'transactions', 'receipts', 'purchases', 'groups', 'items', 'itemgroups', 'warehouses', 'accounts',
+  'statement', 'balances', 'paid', 'overdue', 'credit', 'followup', 'collection', 'collections', 'performance', 'currencies', 'import', 'users'];
+/** Master-data entities saved through the generic form: [required fields]. */
+const MASTER_REQUIRED = { Items: ['itemId', 'itemName'], ItemGroups: ['igId', 'igName'], Warehouses: ['whId', 'whName'], Accounts: ['accNo', 'accName'] };
 const PAY_METHODS = ['Cash', 'Cheque', 'Transfer'];
 /** Actions that make sense on each page (permissions matrix). */
 const PAGE_ACTIONS = {
   customers: ['add', 'edit', 'delete'], transactions: ['add', 'edit', 'delete', 'post'], receipts: ['add', 'edit', 'delete', 'post'],
-  groups: ['add', 'edit', 'delete'], followup: ['add', 'edit', 'delete'], currencies: ['add', 'edit', 'delete'], import: ['add', 'delete']
+  groups: ['add', 'edit', 'delete'], followup: ['add', 'edit', 'delete'], currencies: ['add', 'edit', 'delete'], import: ['add', 'delete'],
+  purchases: ['add', 'edit', 'delete'], items: ['add', 'edit', 'delete'], itemgroups: ['add', 'edit', 'delete'],
+  warehouses: ['add', 'edit', 'delete'], accounts: ['add', 'edit', 'delete']
 };
 
 // Which entity each page edits (used for permission checks on writes).
-const ENTITY_PAGE = { Vendors: 'customers', Transactions: 'transactions', VendorGroups: 'groups', FollowUps: 'followup', Users: 'users', Currencies: 'currencies' };
+const ENTITY_PAGE = { Vendors: 'customers', Transactions: 'transactions', VendorGroups: 'groups', FollowUps: 'followup', Users: 'users', Currencies: 'currencies',
+  Items: 'items', ItemGroups: 'itemgroups', Warehouses: 'warehouses', Accounts: 'accounts', PurchaseInvoices: 'purchases' };
 
 /** Must match CLIENT_VERSION in Script.html — a mismatch means Code.gs was not updated/deployed. */
-const APP_VERSION = 'V1';
+const APP_VERSION = 'V2';
 function getVersion() { return APP_VERSION; }
 /** Public branding for the sign-in screen (no login needed, nothing sensitive). */
 function getBranding() {
@@ -450,6 +475,10 @@ function lookups_(user) {
     currencies: readTable('Currencies').map(function (c) { return { code: String(c.code).toUpperCase(), name: c.name, rate: c.rate }; }),
     users: users.filter(function (u) { return u.active; }).map(function (u) { return { username: u.username, name: u.fullName || u.username }; }),
     payMethods: PAY_METHODS,
+    items: readTable('Items').map(function (i) { return { id: i.itemId, name: i.itemName, unit: i.unit, cost: i.cost }; }),
+    itemGroups: readTable('ItemGroups').map(function (g) { return { id: g.igId, name: g.igName }; }),
+    warehouses: readTable('Warehouses').map(function (w) { return { id: w.whId, name: w.whName }; }),
+    accounts: readTable('Accounts').map(function (a) { return { no: a.accNo, name: a.accName, parent: a.parentAcc }; }),
     dupCustomers: MEMO.dupCustomers || 0,
     transactionTypes: ['Invoice', 'Payment', 'Credit note', 'Debit note', 'Settlement', 'Opening balance', 'Adjustment']
   };
@@ -473,7 +502,7 @@ function listRecords(token, entity, opts) {
   if (entity === 'Vendors') rows = visibleCustomers_(user);
   else rows = readTable(entity);
 
-  if (entity === 'Transactions' || entity === 'FollowUps') {
+  if (entity === 'Transactions' || entity === 'FollowUps' || entity === 'PurchaseInvoices') {
     const allowed = {};
     visibleCustomers_(user).forEach(function (c) { allowed[c.account] = c; });
     rows = rows.filter(function (r) { return allowed[r.account] !== undefined; }).map(function (r0) {
@@ -524,8 +553,9 @@ function listRecords(token, entity, opts) {
   if (opts.dateFrom) rows = rows.filter(function (r) { return r[dateKey] && r[dateKey] >= opts.dateFrom; });
   if (opts.dateTo) rows = rows.filter(function (r) { return r[dateKey] && r[dateKey] <= opts.dateTo; });
 
-  const sortKey = opts.sort || (entity === 'Transactions' ? 'date' : entity === 'FollowUps' ? 'actionDate' : ID_FIELD[entity]);
-  const desc = opts.desc !== undefined ? opts.desc : (entity === 'Transactions' || entity === 'FollowUps');
+  const byDate = entity === 'Transactions' || entity === 'PurchaseInvoices';
+  const sortKey = opts.sort || (byDate ? 'date' : entity === 'FollowUps' ? 'actionDate' : ID_FIELD[entity]);
+  const desc = opts.desc !== undefined ? opts.desc : (byDate || entity === 'FollowUps');
   rows.sort(function (a, b) {
     const x = a[sortKey], y = b[sortKey];
     const c = (typeof x === 'number' && typeof y === 'number') ? x - y : String(x).localeCompare(String(y), undefined, { numeric: true });
@@ -546,6 +576,7 @@ function listRecords(token, entity, opts) {
     }
     totals.localCurrency = getSettings_().LocalCurrency || '';
   }
+  if (entity === 'PurchaseInvoices') { totals.total = sum_(rows, 'total'); totals.localCurrency = getSettings_().LocalCurrency || ''; }
   const size = Math.min(Math.max(+opts.pageSize || 25, 5), 500);
   const total = rows.length;
   const p = Math.max(1, Math.min(+opts.page || 1, Math.ceil(total / size) || 1));
@@ -621,6 +652,18 @@ function saveRecord(token, entity, record, isNew) {
       if (isNew && findRow_(entity, rec.code) > -1) throw new Error('DUPLICATE_ID');
       rec.active = rec.active === undefined ? true : rec.active;
       rec.updatedAt = now;
+    } else if (MASTER_REQUIRED[entity]) {
+      MASTER_REQUIRED[entity].forEach(function (k) {
+        rec[k] = String(rec[k] === undefined || rec[k] === null ? '' : rec[k]).trim();
+        if (!rec[k]) throw new Error('REQUIRED_FIELDS');
+      });
+      if (isNew && findRow_(entity, rec[ID_FIELD[entity]]) > -1) throw new Error('DUPLICATE_ID');
+      if (entity === 'Items' && rec.accNo && !readTable('Accounts').some(function (a) { return a.accNo === String(rec.accNo).trim(); })) {
+        throw new Error('ACCOUNT_NOT_FOUND');
+      }
+      if (entity === 'Accounts') assertAccountParent_(rec.accNo, String(rec.parentAcc || '').trim());
+    } else if (entity === 'PurchaseInvoices') {
+      throw new Error('NO_PERMISSION'); // saved with savePurchaseInvoice (header + lines together)
     }
 
     if (isNew) appendRows(entity, [rec]);
@@ -631,6 +674,15 @@ function saveRecord(token, entity, record, isNew) {
     }
     return true;
   });
+}
+
+/** Main account must exist and must not be the account itself or one of its sub-accounts. */
+function assertAccountParent_(accNo, parent) {
+  if (!parent) return;
+  const up = {};
+  readTable('Accounts').forEach(function (a) { up[a.accNo] = a.parentAcc; });
+  if (up[parent] === undefined) throw new Error('ACCOUNT_NOT_FOUND');
+  for (let p = parent, i = 0; p && i < 100; p = up[p], i++) if (p === accNo) throw new Error('ACCOUNT_LOOP');
 }
 
 function getById_(entity, id) {
@@ -692,8 +744,17 @@ function deleteRecord(token, entity, id) {
     }
     if (entity === 'Vendors') {
       assertCustomerVisible_(user, id);
-      const used = readTable('Transactions').some(function (t) { return t.account === id && !t.isDeleted; });
+      const used = readTable('Transactions').some(function (t) { return t.account === id && !t.isDeleted; }) ||
+        readTable('PurchaseInvoices').some(function (p) { return p.account === id; });
       if (used) throw new Error('HAS_TRANSACTIONS');
+    }
+    if (entity === 'ItemGroups' && readTable('Items').some(function (i) { return i.itemGroup === id; })) throw new Error('IN_USE');
+    if (entity === 'Items' && readTable('PurchaseInvoiceLines').some(function (l) { return l.itemId === id; })) throw new Error('IN_USE');
+    if (entity === 'Accounts' && (readTable('Accounts').some(function (a) { return a.parentAcc === id; }) ||
+      readTable('Items').some(function (i) { return i.accNo === id; }))) throw new Error('IN_USE');
+    if (entity === 'PurchaseInvoices') {
+      assertCustomerVisible_(user, getById_(entity, id).account);
+      deleteWhere_('PurchaseInvoiceLines', 'invNo', id);
     }
     if (entity === 'VendorGroups' && readTable('Vendors').some(function (c) { return c.group === id; })) {
       throw new Error('IN_USE');
@@ -710,6 +771,85 @@ function deleteRecord(token, entity, id) {
     invalidate_();
     sheet_(entity).deleteRow(rowNum);
     return true;
+  });
+}
+
+// ───────────────────────────── Purchase invoices ─────────────────────────────
+/** Removes every row of `name` whose `field` equals `value` (one read + one write). */
+function deleteWhere_(name, field, value) {
+  const sh = sheet_(name);
+  const last = sh.getLastRow();
+  if (last < 2) return;
+  const hm = headerMap_(sh), col = fieldIndex_(name, hm)[field];
+  const range = sh.getRange(2, 1, last - 1, hm.headers.length);
+  const values = range.getValues();
+  const keep = values.filter(function (row) { return String(row[col]).trim() !== String(value).trim(); });
+  if (keep.length === values.length) return;
+  invalidate_();
+  range.clearContent();
+  if (keep.length) sh.getRange(2, 1, keep.length, hm.headers.length).setValues(keep);
+}
+
+function nextPurchaseNo_() {
+  const r = readTable('Settings').filter(function (x) { return x.key === 'PurchaseSeq'; })[0];
+  const n = (r ? +r.value || 0 : 0) + 1;
+  if (r) updateRow_('Settings', r._row, { value: n }); else appendRows('Settings', [{ key: 'PurchaseSeq', value: n }]);
+  return 'PI-' + ('00000' + n).slice(-6);
+}
+
+/** Header + lines of one purchase invoice (for editing and printing). */
+function getPurchaseInvoice(token, invNo) {
+  const user = auth_(token, 'purchases');
+  const head = getById_('PurchaseInvoices', invNo);
+  assertCustomerVisible_(user, head.account);
+  const lines = readTable('PurchaseInvoiceLines').filter(function (l) { return String(l.invNo) === String(invNo); })
+    .sort(function (a, b) { return a.lineNo - b.lineNo; });
+  return { head: head, lines: lines, settings: publicSettings_() };
+}
+
+/**
+ * Saves a purchase invoice. inv: {invNo, isNew, date, account, description, lines: [{itemId, quantity, cost, note}]}.
+ * Empty number on a new invoice → PI-000001 sequence. Amount = quantity × cost; total = sum of amounts.
+ */
+function savePurchaseInvoice(token, inv) {
+  const user = auth_(token, 'purchases');
+  const isNew = !!inv.isNew;
+  requireAction_(user, isNew ? 'add' : 'edit', 'purchases');
+  if (!inv.account || !inv.date) throw new Error('REQUIRED_FIELDS');
+  assertCustomerVisible_(user, inv.account);
+  const items = {};
+  readTable('Items').forEach(function (i) { items[i.itemId] = i; });
+  const lines = (inv.lines || []).map(function (l) {
+    return { itemId: String(l.itemId || '').trim(), quantity: toNum_(l.quantity), cost: toNum_(l.cost), note: String(l.note || '').trim() };
+  }).filter(function (l) { return l.itemId; });
+  if (!lines.length || lines.some(function (l) { return !(l.quantity > 0); })) throw new Error('LINES_REQUIRED');
+  lines.forEach(function (l) { if (!items[l.itemId]) throw new Error('ITEM_NOT_FOUND: ' + l.itemId); });
+  return withLock_(function () {
+    const now = new Date(), who = user.fullName || user.username;
+    let existing = null;
+    if (!isNew) {
+      existing = getById_('PurchaseInvoices', inv.invNo);
+      assertCustomerVisible_(user, existing.account);
+    }
+    const invNo = existing ? existing.invNo : (String(inv.invNo || '').trim() || nextPurchaseNo_());
+    if (!existing && findRow_('PurchaseInvoices', invNo) > -1) throw new Error('DUPLICATE_ID');
+    const vendor = readTable('Vendors').filter(function (v) { return v.account === inv.account; })[0];
+    const rows = lines.map(function (l, i) {
+      return { invNo: invNo, lineNo: i + 1, itemId: l.itemId, itemName: items[l.itemId].itemName, quantity: l.quantity,
+        cost: l.cost, amount: round2_(l.quantity * l.cost), note: l.note };
+    });
+    const head = { invNo: invNo, date: inv.date, account: inv.account, vendorName: vendor ? vendor.name : '',
+      description: inv.description || '', total: round2_(rows.reduce(function (s, r) { return s + r.amount; }, 0)),
+      updatedBy: who, updatedAt: now };
+    if (existing) {
+      updateRow_('PurchaseInvoices', existing._row, head);
+      deleteWhere_('PurchaseInvoiceLines', 'invNo', invNo);
+    } else {
+      head.createdBy = who; head.createdAt = now;
+      appendRows('PurchaseInvoices', [head]);
+    }
+    appendRows('PurchaseInvoiceLines', rows);
+    return { invNo: invNo, total: head.total };
   });
 }
 
@@ -757,7 +897,7 @@ function postTransactions(token, ids, unpost, page) {
  * Import rows parsed client-side (Excel/CSV from Dynamics 365).
  * rows: array of objects keyed by the file's headers. mode: 'append' | 'replace' | 'upsert'.
  */
-const IMPORT_ENTITIES = ['Vendors', 'Transactions', 'VendorGroups', 'Currencies'];
+const IMPORT_ENTITIES = ['Vendors', 'Transactions', 'VendorGroups', 'Currencies', 'Items', 'ItemGroups', 'Warehouses', 'Accounts'];
 const IMPORT_ALIASES = {
   account: ['vendoraccount', 'account', 'vendaccount', 'accountnum', 'supplieraccount', 'رقمالمورد', 'حسابالمورد'],
   name: ['name', 'vendorname', 'suppliername', 'اسمالمورد', 'الاسم'],
@@ -772,7 +912,15 @@ const IMPORT_ALIASES = {
   createdAt: ['createddateandtime', 'createdat', 'createddatetime'],
   dueDate: ['duedate', 'due'],
   groupName: ['groupname', 'description'],
-  custName: ['name', 'vendorname', 'suppliername', 'اسمالمورد']   // transactions only: used to create missing vendors
+  custName: ['name', 'vendorname', 'suppliername', 'اسمالمورد'],   // transactions only: used to create missing vendors
+  itemId: ['itemnumber', 'itemid', 'itemcode', 'رقمالصنف', 'كودالصنف'],
+  itemName: ['itemname', 'productname', 'name', 'اسمالصنف'],
+  itemGroup: ['itemgroup', 'itemgroupid', 'مجموعةالصنف'],
+  accNo: ['mainaccount', 'mainaccountid', 'accountnumber', 'رقمالحساب'],
+  accName: ['accountname', 'name', 'اسمالحساب'],
+  parentAcc: ['parentaccount', 'mainaccountparent', 'الحسابالرئيسي'],
+  unit: ['unit', 'unitid', 'inventoryunit', 'الوحدة'],
+  cost: ['cost', 'costprice', 'price', 'التكلفة']
 };
 const importNorm_ = function (s) { return String(s).toLowerCase().replace(/[^a-z0-9؀-ۿ]/g, ''); };
 

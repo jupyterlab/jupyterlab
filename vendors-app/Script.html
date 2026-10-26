@@ -2,7 +2,7 @@
 /* ═══════════════════════════ Vendor Console — client ═══════════════════════════ */
 
 /** Must match APP_VERSION in Code.gs. */
-const CLIENT_VERSION = 'V1';
+const CLIENT_VERSION = 'V2';
 
 // ───────── Translations (Arabic default, English toggle) ─────────
 const I18N = {
@@ -153,6 +153,21 @@ const I18N = {
     linkNotShared: 'تم حفظ الملف في Drive لكن مشاركته للعامة غير مسموحة في حسابكم', fromStart: 'من البداية',
     CompanyAddress: 'عنوان الشركة', CompanyPhone: 'هاتف الشركة', CompanyEmail: 'بريد الشركة (للرد)', BankDetails: 'بيانات إضافية (تظهر في كشف الحساب)',
     StatementNote: 'ملاحظة أسفل كشف الحساب', WhatsAppCountryCode: 'كود الدولة للواتساب (مثال 253)', SessionMinutes: 'دقائق الخمول قبل طلب الدخول مجدداً',
+    masters: 'البيانات الأساسية',
+    p_purchases: 'فواتير المشتريات', s_purchases: 'فواتير الشراء من الموردين: رأس الفاتورة وتفاصيل الأصناف والكميات والتكلفة.',
+    p_items: 'الأصناف', s_items: 'بطاقات الأصناف: الوحدة والتكلفة والمجموعة والحساب المحاسبي.',
+    p_itemgroups: 'مجموعات الأصناف', s_itemgroups: 'تصنيف الأصناف حسب المجموعات.',
+    p_warehouses: 'المستودعات', s_warehouses: 'تكويد المستودعات.',
+    p_accounts: 'دليل الحسابات', s_accounts: 'شجرة الحسابات: رقم الحساب واسمه والحساب الرئيسي التابع له.',
+    f_itemId: 'رقم الصنف', f_itemName: 'اسم الصنف', f_unit: 'الوحدة', f_cost: 'التكلفة', f_itemGroup: 'مجموعة الصنف',
+    f_accNo: 'رقم الحساب', f_accName: 'اسم الحساب', f_parentAcc: 'الحساب الرئيسي', f_igId: 'رمز المجموعة', f_igName: 'اسم المجموعة',
+    f_whId: 'رمز المستودع', f_whName: 'اسم المستودع', f_invNo: 'رقم الفاتورة', f_vendorName: 'اسم المورد', f_lineNo: 'م',
+    f_quantity: 'الكمية', f_total: 'إجمالي الفاتورة', f_item: 'الصنف',
+    addPurchase: 'فاتورة مشتريات جديدة', addItem: 'صنف جديد', addItemGroup: 'مجموعة أصناف جديدة', addWarehouse: 'مستودع جديد',
+    addAccount: 'حساب جديد', addLine: 'إضافة بند', invLines: 'تفاصيل الفاتورة', purchaseTitle: 'فاتورة مشتريات', printInvoice: 'طباعة الفاتورة',
+    editPurchase: 'تعديل فاتورة المشتريات', mainAccount: 'حساب رئيسي',
+    err_LINES_REQUIRED: 'أضف بنداً واحداً على الأقل، وأدخل كمية أكبر من صفر لكل بند', err_ITEM_NOT_FOUND: 'الصنف غير موجود في بطاقات الأصناف',
+    err_ACCOUNT_NOT_FOUND: 'رقم الحساب غير موجود في دليل الحسابات', err_ACCOUNT_LOOP: 'لا يصح أن يكون الحساب رئيساً لنفسه أو لأحد حساباته الفرعية',
   },
   en: {
     app: 'Vendor Console', caption: 'Vendors & Payments', eyebrow: 'Vendor management',
@@ -301,6 +316,21 @@ const I18N = {
     linkNotShared: 'Saved to Drive, but public sharing is not allowed for your account', fromStart: 'From start',
     CompanyAddress: 'Company address', CompanyPhone: 'Company phone', CompanyEmail: 'Company email (reply-to)', BankDetails: 'Additional details (shown on statement)',
     StatementNote: 'Statement footer note', WhatsAppCountryCode: 'WhatsApp country code (e.g. 253)', SessionMinutes: 'Idle minutes before sign-in is required',
+    masters: 'Master data',
+    p_purchases: 'Purchase invoices', s_purchases: 'Purchase invoices from vendors: invoice header plus item lines, quantities and cost.',
+    p_items: 'Items', s_items: 'Item cards: unit, cost, group and ledger account.',
+    p_itemgroups: 'Item groups', s_itemgroups: 'Item segmentation by group.',
+    p_warehouses: 'Warehouses', s_warehouses: 'Warehouse codes.',
+    p_accounts: 'Chart of accounts', s_accounts: 'Account tree: account number, name and its main (parent) account.',
+    f_itemId: 'Item number', f_itemName: 'Item name', f_unit: 'Unit', f_cost: 'Cost', f_itemGroup: 'Item group',
+    f_accNo: 'Account number', f_accName: 'Account name', f_parentAcc: 'Main account', f_igId: 'Group ID', f_igName: 'Group name',
+    f_whId: 'Warehouse ID', f_whName: 'Warehouse name', f_invNo: 'Invoice no.', f_vendorName: 'Vendor name', f_lineNo: '#',
+    f_quantity: 'Quantity', f_total: 'Invoice total', f_item: 'Item',
+    addPurchase: 'New purchase invoice', addItem: 'New item', addItemGroup: 'New item group', addWarehouse: 'New warehouse',
+    addAccount: 'New account', addLine: 'Add line', invLines: 'Invoice lines', purchaseTitle: 'Purchase invoice', printInvoice: 'Print invoice',
+    editPurchase: 'Edit purchase invoice', mainAccount: 'Main account',
+    err_LINES_REQUIRED: 'Add at least one line with a quantity greater than zero', err_ITEM_NOT_FOUND: 'Item not found in the item cards',
+    err_ACCOUNT_NOT_FOUND: 'Account number not found in the chart of accounts', err_ACCOUNT_LOOP: 'An account cannot be the main account of itself or of its sub-accounts',
   }
 };
 
@@ -310,7 +340,12 @@ const PAGES = [
   { id: 'customers', glyph: '♙', sec: 'workspace' },
   { id: 'transactions', glyph: '⇄', sec: 'workspace' },
   { id: 'receipts', glyph: '⊕', sec: 'workspace' },
+  { id: 'purchases', glyph: '▣', sec: 'workspace' },
   { id: 'groups', glyph: '▤', sec: 'workspace' },
+  { id: 'items', glyph: '◫', sec: 'masters' },
+  { id: 'itemgroups', glyph: '▥', sec: 'masters' },
+  { id: 'warehouses', glyph: '⌂', sec: 'masters' },
+  { id: 'accounts', glyph: '☷', sec: 'masters' },
   { id: 'statement', glyph: '§', sec: 'reports' },
   { id: 'balances', glyph: '≡', sec: 'reports' },
   { id: 'paid', glyph: '✓', sec: 'reports' },
@@ -365,7 +400,9 @@ const yearStart = () => today().slice(0, 5) + '01-01';
 /** Actions available per page in the permissions matrix (same list as PAGE_ACTIONS in Code.gs). */
 const PAGE_ACTS = {
   customers: ['add', 'edit', 'delete'], transactions: ['add', 'edit', 'delete', 'post'], receipts: ['add', 'edit', 'delete', 'post'],
-  groups: ['add', 'edit', 'delete'], followup: ['add', 'edit', 'delete'], currencies: ['add', 'edit', 'delete'], import: ['add', 'delete']
+  groups: ['add', 'edit', 'delete'], followup: ['add', 'edit', 'delete'], currencies: ['add', 'edit', 'delete'], import: ['add', 'delete'],
+  purchases: ['add', 'edit', 'delete'], items: ['add', 'edit', 'delete'], itemgroups: ['add', 'edit', 'delete'],
+  warehouses: ['add', 'edit', 'delete'], accounts: ['add', 'edit', 'delete']
 };
 const ACTIONS = ['add', 'edit', 'delete', 'post'];
 /** Can the user do `a` (add/edit/delete/post) on `page` (default: the page on screen)? */
@@ -636,7 +673,7 @@ function renderShell() {
   <div class="app ${store.get('vms_sidebar') === 'hidden' ? 'collapsed' : ''}" id="app">
     <aside class="sidebar" id="sidebar">
       <div class="brand">${brandMark(S.settings)}<div><p class="brand-name">${esc(S.settings.AppName || t('app'))}</p><p class="brand-caption">${esc(S.settings.CompanyName || t('caption'))}</p></div></div>
-      ${nav('workspace')}${nav('reports')}${nav('admin')}
+      ${nav('workspace')}${nav('masters')}${nav('reports')}${nav('admin')}
       <div class="profile"><div class="avatar">${esc((u.fullName || u.username)[0].toUpperCase())}</div>
         <div><p class="profile-name">${esc(u.fullName || u.username)}</p><p class="profile-role">${esc(t(u.role))}</p></div>
         <button class="icon-button" data-act="changePw" title="${t('changePw')}" aria-label="${t('changePw')}">🔑</button>
@@ -698,6 +735,11 @@ function opts(list, value, withAll) {
     list.map(o => `<option value="${esc(o[0])}" ${o[2] ? `data-code="${esc(o[2])}" data-name="${esc(o[3])}"` : ''} ${String(o[0]) === String(value == null ? '' : value) ? 'selected' : ''}>${esc(o[1])}</option>`).join('');
 }
 const groupOpts = () => S.lookups.groups.map(g => [g.id, g.id + ' — ' + g.name, g.id, g.name]);
+const itemOpts = () => (S.lookups.items || []).map(i => [i.id, i.id + ' — ' + i.name, i.id, i.name]);
+const itemGroupOpts = () => (S.lookups.itemGroups || []).map(g => [g.id, g.id + ' — ' + g.name, g.id, g.name]);
+const accountOpts = () => (S.lookups.accounts || []).map(a => [a.no, a.no + ' — ' + a.name, a.no, a.name]);
+const itemGroupName = id => { const g = (S.lookups.itemGroups || []).find(x => x.id === id); return g ? g.name : (id || ''); };
+const accountLabel = no => { if (!no) return ''; const a = (S.lookups.accounts || []).find(x => x.no === no); return a ? no + ' — ' + a.name : no; };
 const collectorOpts = () => S.lookups.collectors.map(c => [c.username, c.name]);
 const statusOpts = () => ['Active', 'Inactive', 'Blocked'].map(s => [s, t(s)]);
 const customerOpts = () => S.lookups.customers.map(c => [c.account, c.account + ' — ' + c.name, c.account, c.name]);
@@ -870,6 +912,49 @@ const LISTS = {
     cols: () => [{ k: 'groupId', l: t('f_groupId') }, { k: 'groupName', l: t('f_groupName') }],
     actions: editDel
   },
+  purchases: {
+    entity: 'PurchaseInvoices', id: 'invNo', click: true,
+    tools: s => [tool('q', t('searchLbl'), 'search', s.q), tool('account', t('f_account'), 'customer', s.filters.account),
+      tool('dateFrom', t('from'), 'date', s.dateFrom), tool('dateTo', t('to'), 'date', s.dateTo)],
+    cols: () => [
+      { k: 'invNo', l: t('f_invNo') }, { k: 'date', l: t('f_date') }, { k: 'account', l: t('f_account') },
+      { k: 'vendorName', l: t('f_vendorName') }, { k: 'description', l: t('f_description'), cls: 'clip' },
+      { k: 'total', l: t('f_total'), num: true }, { k: 'createdBy', l: t('f_createdBy') }],
+    actions: r => (can('edit') ? `<button data-act="rowEdit" title="${t('edit')}">✎</button>` : '') +
+      `<button data-act="rowPrintInv" title="${t('printInvoice')}">🖨</button>` +
+      (can('delete') ? `<button data-act="rowDelete" title="${t('del')}">🗑</button>` : '')
+  },
+  items: {
+    entity: 'Items', id: 'itemId',
+    tools: s => [tool('q', t('searchLbl'), 'search', s.q), tool('itemGroup', t('f_itemGroup'), 'select', s.filters.itemGroup, itemGroupOpts()),
+      tool('accNo', t('f_accNo'), 'select', s.filters.accNo, accountOpts())],
+    cols: () => [
+      { k: 'itemId', l: t('f_itemId') }, { k: 'itemName', l: t('f_itemName') }, { k: 'unit', l: t('f_unit') },
+      { k: 'cost', l: t('f_cost'), num: true },
+      { k: 'itemGroup', l: t('f_itemGroup'), f: v => bdi(itemGroupName(v)), x: r => itemGroupName(r.itemGroup) },
+      { k: 'accNo', l: t('f_accNo'), f: v => bdi(accountLabel(v)), x: r => accountLabel(r.accNo) },
+      { k: 'note', l: t('f_note'), cls: 'clip' }],
+    actions: editDel
+  },
+  itemgroups: {
+    entity: 'ItemGroups', id: 'igId',
+    tools: s => [tool('q', t('searchLbl'), 'search', s.q)],
+    cols: () => [{ k: 'igId', l: t('f_igId') }, { k: 'igName', l: t('f_igName') }],
+    actions: editDel
+  },
+  warehouses: {
+    entity: 'Warehouses', id: 'whId',
+    tools: s => [tool('q', t('searchLbl'), 'search', s.q)],
+    cols: () => [{ k: 'whId', l: t('f_whId') }, { k: 'whName', l: t('f_whName') }],
+    actions: editDel
+  },
+  accounts: {
+    entity: 'Accounts', id: 'accNo',
+    tools: s => [tool('q', t('searchLbl'), 'search', s.q), tool('parentAcc', t('f_parentAcc'), 'select', s.filters.parentAcc, accountOpts())],
+    cols: () => [{ k: 'accNo', l: t('f_accNo') }, { k: 'accName', l: t('f_accName') },
+      { k: 'parentAcc', l: t('f_parentAcc'), f: v => v ? bdi(accountLabel(v)) : pill(t('mainAccount'), 'info'), x: r => accountLabel(r.parentAcc) }],
+    actions: editDel
+  },
   currencies: {
     entity: 'Currencies', id: 'code',
     tools: s => [tool('q', t('searchLbl'), 'search', s.q)],
@@ -923,6 +1008,9 @@ async function loadList(view) {
   const cols = cfg.cols();
   const sel = can('post') ? cfg.select : null;
   let foot = '';
+  if (view === 'purchases' && res.rows.length) {
+    foot = footRow(cols, { total: { html: numCell(res.totals.total) + curTag(res.totals.localCurrency) } }, t('all') + ' (' + NI.format(res.total) + ')', false, true);
+  }
   if (view === 'transactions' && res.rows.length) {
     const lc = res.totals.localCurrency;
     foot = footRow(cols, {
@@ -970,6 +1058,12 @@ const FORMS = {
     { k: 'amountCur', type: 'number', hint: t('amountHint'), span: 1 },
     { k: 'debitMST', type: 'number' }, { k: 'creditMST', type: 'number' }, { k: 'description', type: 'textarea', span: 1 }],
   VendorGroups: () => [{ k: 'groupId', req: 1, lock: 1 }, { k: 'groupName', req: 1 }],
+  Items: () => [{ k: 'itemId', req: 1, lock: 1 }, { k: 'itemName', req: 1 }, { k: 'unit' }, { k: 'cost', type: 'number' },
+    { k: 'itemGroup', type: 'select', o: itemGroupOpts() }, { k: 'accNo', type: 'select', o: accountOpts() }, { k: 'note', type: 'textarea', span: 1 }],
+  ItemGroups: () => [{ k: 'igId', req: 1, lock: 1 }, { k: 'igName', req: 1 }],
+  Warehouses: () => [{ k: 'whId', req: 1, lock: 1 }, { k: 'whName', req: 1 }],
+  Accounts: () => [{ k: 'accNo', req: 1, lock: 1 }, { k: 'accName', req: 1 },
+    { k: 'parentAcc', type: 'select', o: accountOpts().filter(a => a[0] !== (FORM && FORM.rec.accNo)), span: 1 }],
   Currencies: () => [{ k: 'code', req: 1, lock: 1 }, { k: 'name', label: 'f_curName' },
     { k: 'rate', type: 'number', req: 1, hint: t('rateOf', { c: (FORM && FORM.rec.code) || '…', b: baseCur() }) }, { k: 'active', type: 'check' }],
   FollowUps: () => [
@@ -983,8 +1077,12 @@ const FORMS = {
     { k: 'scope', type: 'select', o: [['all', t('scope_all')], ['own', t('scope_own')]], noAll: 1 },
     { k: 'active', type: 'check' }, { k: 'isCollector', type: 'check' }, { k: 'pages', type: 'perm', span: 1 }]
 };
-const ENTITY_TITLE = { Vendors: 'p_customers', Transactions: 'p_transactions', VendorGroups: 'p_groups', FollowUps: 'p_followup', Users: 'p_users', Currencies: 'p_currencies' };
-const ID_KEY = { Vendors: 'account', Transactions: 'rowId', VendorGroups: 'groupId', FollowUps: 'id', Users: 'userId', Currencies: 'code' };
+const ENTITY_TITLE = { Vendors: 'p_customers', Transactions: 'p_transactions', VendorGroups: 'p_groups', FollowUps: 'p_followup', Users: 'p_users', Currencies: 'p_currencies',
+  Items: 'p_items', ItemGroups: 'p_itemgroups', Warehouses: 'p_warehouses', Accounts: 'p_accounts' };
+const ID_KEY = { Vendors: 'account', Transactions: 'rowId', VendorGroups: 'groupId', FollowUps: 'id', Users: 'userId', Currencies: 'code',
+  Items: 'itemId', ItemGroups: 'igId', Warehouses: 'whId', Accounts: 'accNo' };
+/** Entities whose changes refresh the dropdown lookups. */
+const LOOKUP_ENTITIES = ['Vendors', 'VendorGroups', 'Users', 'Currencies', 'Items', 'ItemGroups', 'Warehouses', 'Accounts'];
 let FORM = null;
 
 function fieldHtml(f, rec, isNew) {
@@ -1087,7 +1185,7 @@ async function submitForm(form) {
     await call('saveRecord', entity, data, isNew);
     toast(t('saved'));
     closeDrawer();
-    if (['Vendors', 'VendorGroups', 'Users', 'Currencies'].indexOf(entity) > -1) await refreshLookups();
+    if (LOOKUP_ENTITIES.indexOf(entity) > -1) await refreshLookups();
     reload();
   } catch (e) { b.disabled = false; }
 }
@@ -1284,6 +1382,27 @@ const VIEWS = {
     runReport();
   },
 
+  purchases() {
+    setContent(heading('purchases', [can('add') && btn('newPurchase', '＋ ' + t('addPurchase')), exportBtn(), btn('print', '🖨 ' + t('print'), 'button-ghost')]) + listBlock('purchases'));
+    loadList('purchases');
+  },
+  items() {
+    setContent(heading('items', [can('add') && btn('newItem', '＋ ' + t('addItem')), exportBtn(), btn('print', '🖨 ' + t('print'), 'button-ghost')]) + listBlock('items'));
+    loadList('items');
+  },
+  itemgroups() {
+    setContent(heading('itemgroups', [can('add') && btn('newItemGroup', '＋ ' + t('addItemGroup')), exportBtn(), btn('print', '🖨 ' + t('print'), 'button-ghost')]) + listBlock('itemgroups'));
+    loadList('itemgroups');
+  },
+  warehouses() {
+    setContent(heading('warehouses', [can('add') && btn('newWarehouse', '＋ ' + t('addWarehouse')), exportBtn(), btn('print', '🖨 ' + t('print'), 'button-ghost')]) + listBlock('warehouses'));
+    loadList('warehouses');
+  },
+  accounts() {
+    setContent(heading('accounts', [can('add') && btn('newAccount', '＋ ' + t('addAccount')), exportBtn(), btn('print', '🖨 ' + t('print'), 'button-ghost')]) + listBlock('accounts'));
+    loadList('accounts');
+  },
+
   groups() {
     setContent(heading('groups', [can('add') && btn('newGroup', '＋ ' + t('addGroup')), exportBtn(), btn('print', '🖨 ' + t('print'), 'button-ghost')]) + listBlock('groups'));
     loadList('groups');
@@ -1439,7 +1558,8 @@ const VIEWS = {
         <p class="subtitle" style="margin:0;line-height:1.7">${t('imp_help')}</p>
         <div class="form-grid">
           <label class="field span2">${t('chooseFile')}<input type="file" id="impFile" accept=".xlsx,.xls,.csv"></label>
-          <label class="field">${t('imp_entity')}<select id="impEntity">${opts([['Vendors', t('p_customers')], ['Transactions', t('p_transactions')], ['VendorGroups', t('p_groups')], ['Currencies', t('p_currencies')]], IMP.entity || 'Vendors')}</select></label>
+          <label class="field">${t('imp_entity')}<select id="impEntity">${opts([['Vendors', t('p_customers')], ['Transactions', t('p_transactions')], ['VendorGroups', t('p_groups')], ['Currencies', t('p_currencies')],
+            ['Items', t('p_items')], ['ItemGroups', t('p_itemgroups')], ['Warehouses', t('p_warehouses')], ['Accounts', t('p_accounts')]], IMP.entity || 'Vendors')}</select></label>
           <label class="field">${t('imp_mode')}<select id="impMode">${opts([['append', t('append')], ['upsert', t('upsert')]].concat(can('delete') ? [['replace', t('replace')]] : []), 'upsert')}</select></label>
         </div>
         <div id="impTxOpts" class="imp-opts" hidden>
@@ -1692,7 +1812,8 @@ function groupCustomers(rows) {
 
 // ───────── Import ─────────
 const IMP = { rows: null, preview: null, entity: '' };
-const IMP_KEY = { Vendors: 'Vendor account', Transactions: 'Vendor account + Date', VendorGroups: 'GroupId', Currencies: 'Code' };
+const IMP_KEY = { Vendors: 'Vendor account', Transactions: 'Vendor account + Date', VendorGroups: 'GroupId', Currencies: 'Code',
+  Items: 'Item number', ItemGroups: 'Item group id', Warehouses: 'Warehouse id', Accounts: 'Account number' };
 
 /**
  * Reads the first sheet. Date cells are converted from their Excel serial numbers directly
@@ -1731,7 +1852,8 @@ function readImportFile(file) {
   };
   reader.readAsArrayBuffer(file);
 }
-const entityName = e => t({ Vendors: 'p_customers', Transactions: 'p_transactions', VendorGroups: 'p_groups', Currencies: 'p_currencies' }[e]);
+const entityName = e => t({ Vendors: 'p_customers', Transactions: 'p_transactions', VendorGroups: 'p_groups', Currencies: 'p_currencies',
+  Items: 'p_items', ItemGroups: 'p_itemgroups', Warehouses: 'p_warehouses', Accounts: 'p_accounts' }[e]);
 function setComboValue(sel, v) {
   sel.value = v;
   sel.dispatchEvent(new Event('change', { bubbles: true }));
@@ -2010,6 +2132,87 @@ function receiptDoc(rc) {
 async function printReceipt(rowId) {
   const rc = await call('getReceipt', rowId);
   askPrint(() => receiptDoc(rc), 'portrait');
+}
+
+// ───────── Purchase invoices (header + lines) ─────────
+function piLineHtml(l) {
+  l = l || {};
+  return `<tr data-line><td class="pi-no"></td>
+    <td style="min-width:220px"><select name="itemId"><option value=""></option>${opts(itemOpts(), l.itemId || '')}</select></td>
+    <td><input class="alloc-amt" name="quantity" type="text" inputmode="decimal" data-num value="${esc(fmtInputNum(l.quantity))}"></td>
+    <td><input class="alloc-amt" name="cost" type="text" inputmode="decimal" data-num value="${esc(fmtInputNum(l.cost))}"></td>
+    <td class="num"><b data-amt>0</b></td>
+    <td><input class="alloc-amt" name="note" value="${esc(l.note || '')}" style="width:110px !important"></td>
+    <td><button type="button" class="icon-button" data-act="piDelLine" title="${t('del')}">×</button></td></tr>`;
+}
+/** New invoice, or edit of an existing one when invNo is given. */
+async function openPurchase(invNo) {
+  let r = { head: { date: today() }, lines: [{}] };
+  if (invNo) { openDrawer(`<div class="skeleton">${t('loading')}</div>`, true); r = await call('getPurchaseInvoice', invNo); }
+  const h = r.head, isNew = !invNo;
+  S.piEdit = { isNew, invNo: h.invNo };
+  openDrawer(`
+    <div class="drawer-head"><h2>${isNew ? '＋ ' + t('purchaseTitle') : '✎ ' + t('editPurchase') + ' — ' + esc(h.invNo)}</h2>
+      <div style="display:flex;gap:8px">${isNew ? '' : btn('piPrint', '🖨', 'button-ghost', `data-inv="${esc(h.invNo)}"`)}<button class="icon-button" data-act="closeDrawer" aria-label="${t('close')}">×</button></div></div>
+    <form class="form-panel" id="piForm" style="padding:16px 0 0">
+      <div class="form-grid">
+        <label class="field">${t('f_invNo')}<input name="invNo" value="${esc(h.invNo || '')}" placeholder="${t('autoNo')}" ${isNew ? '' : 'readonly'}></label>
+        <label class="field">${t('f_date')} <span class="req">*</span><input type="date" name="date" value="${esc(h.date || today())}" required></label>
+        <label class="field">${t('f_account')} <span class="req">*</span><select name="account" required><option value=""></option>${opts(customerOpts(), h.account || '')}</select></label>
+        <label class="field">${t('f_vendorName')}<input name="vendorName" value="${esc(h.vendorName || custName(h.account) || '')}" readonly></label>
+        <label class="field span2">${t('f_description')}<textarea name="description">${esc(h.description || '')}</textarea></label>
+      </div>
+      <div class="field">${t('invLines')} <span class="req">*</span><div class="alloc-box">
+        <div class="table-wrap"><table class="alloc" style="min-width:700px"><thead><tr><th>${t('f_lineNo')}</th><th>${t('f_item')}</th><th>${t('f_quantity')}</th>
+          <th>${t('f_cost')}</th><th class="num">${t('amount')}</th><th>${t('f_note')}</th><th></th></tr></thead>
+          <tbody id="piLines">${(r.lines.length ? r.lines : [{}]).map(piLineHtml).join('')}</tbody>
+          <tfoot><tr><td colspan="4">${t('f_total')}</td><td class="num"><b id="piTotal">0</b> <small class="cur">${esc(localCur())}</small></td><td colspan="2"></td></tr></tfoot></table></div>
+        <div style="margin-top:8px">${btn('piAddLine', '＋ ' + t('addLine'), 'button-ghost', 'type="button"')}</div></div></div>
+      <div class="form-actions"><button type="button" class="button-ghost" data-act="closeDrawer">${t('cancel')}</button><button class="button-primary" type="submit">${t('save')}</button></div>
+    </form>`, true);
+  piCalc();
+}
+/** Line numbers, line amounts (quantity × cost) and the invoice total. */
+function piCalc() {
+  let total = 0;
+  $$('#piLines tr[data-line]').forEach((tr, i) => {
+    $('.pi-no', tr).textContent = i + 1;
+    const amt = Math.round(parseNum($('[name=quantity]', tr).value) * parseNum($('[name=cost]', tr).value) * 100) / 100;
+    $('[data-amt]', tr).textContent = money(amt);
+    total += amt;
+  });
+  const el = $('#piTotal'); if (el) el.textContent = money(total);
+}
+async function submitPurchase(form) {
+  const E = form.elements;
+  const lines = $$('#piLines tr[data-line]', form).map(tr => ({
+    itemId: $('[name=itemId]', tr).value, quantity: parseNum($('[name=quantity]', tr).value),
+    cost: parseNum($('[name=cost]', tr).value), note: $('[name=note]', tr).value.trim()
+  })).filter(l => l.itemId);
+  if (!lines.length || lines.some(l => !(l.quantity > 0))) { toast(t('err_LINES_REQUIRED'), 'error'); return; }
+  const b = form.querySelector('button[type=submit]'); b.disabled = true;
+  try {
+    const r = await call('savePurchaseInvoice', { isNew: S.piEdit.isNew, invNo: S.piEdit.isNew ? E.invNo.value.trim() : S.piEdit.invNo,
+      date: E.date.value, account: E.account.value, description: E.description.value.trim(), lines });
+    toast(t('saved') + ' — ' + r.invNo + ' · ' + money(r.total));
+    closeDrawer();
+    if (S.view === 'purchases') reload();
+  } catch (e) { b.disabled = false; }
+}
+function purchaseDoc(r) {
+  S.lastSettings = r.settings;
+  const h = r.head;
+  return companyHeader(t('purchaseTitle'), [[t('f_invNo'), h.invNo], [t('f_date'), h.date], [t('f_currency'), localCur()]]) +
+    `<table class="dkv"><tr><td class="k">${t('f_vendorName')}</td><td><b>${esc(h.vendorName || custName(h.account))}</b></td><td class="k">${t('f_account')}</td><td>${esc(h.account)}</td></tr>
+      ${h.description ? `<tr><td class="k">${t('f_description')}</td><td colspan="3">${esc(h.description)}</td></tr>` : ''}</table>` +
+    `<h2>${t('invLines')}</h2>` + printTableHtml([{ k: 'lineNo', l: t('f_lineNo') }, { k: 'itemId', l: t('f_itemId') }, { k: 'itemName', l: t('f_itemName') },
+      { k: 'quantity', l: t('f_quantity'), num: true, p: x => NF6.format(+x.quantity || 0) }, { k: 'cost', l: t('f_cost'), num: true, p: x => NF6.format(+x.cost || 0) },
+      { k: 'amount', l: t('amount'), num: true }, { k: 'note', l: t('f_note') }], r.lines, { amount: h.total }) +
+    `<table class="sign"><tr><td><span>${t('receiver')}: ${esc(h.createdBy || '')}</span></td><td><span>${t('accountant')}</span></td><td><span>${t('customerSign')}</span></td></tr></table>`;
+}
+async function printPurchase(invNo) {
+  const r = await call('getPurchaseInvoice', invNo);
+  askPrint(() => purchaseDoc(r), 'portrait');
 }
 
 // ───────── Modal ─────────
@@ -2319,6 +2522,15 @@ const ACT = {
   newCustomer() { openForm('Vendors', { status: 'Active', currency: localCur(), termsDays: 30, collector: S.user.isCollector ? S.user.username : '' }, true); },
   newTx() { openForm('Transactions', { date: today(), type: 'Invoice', currency: localCur(), exchange: 1 }, true); },
   newGroup() { openForm('VendorGroups', {}, true); },
+  newItem() { openForm('Items', {}, true); },
+  newItemGroup() { openForm('ItemGroups', {}, true); },
+  newWarehouse() { openForm('Warehouses', {}, true); },
+  newAccount() { openForm('Accounts', {}, true); },
+  newPurchase() { openPurchase(''); },
+  piAddLine() { const tb = $('#piLines'); tb.insertAdjacentHTML('beforeend', piLineHtml()); enhance(tb.lastElementChild); piCalc(); },
+  piDelLine(el) { const tb = $('#piLines'); el.closest('tr').remove(); if (!tb.children.length) ACT.piAddLine(); piCalc(); },
+  piPrint(el) { printPurchase(el.dataset.inv); },
+  rowPrintInv(el) { printPurchase(rowOf(el).row.invNo); },
   newCurrency(el) { openForm('Currencies', { code: (el && el.dataset.code) || '', active: true }, true); },
   changePw() {
     openModal(`<div class="drawer-head"><h2>🔑 ${t('changePw')}</h2><button class="icon-button" data-act="closeModal">×</button></div>
@@ -2338,7 +2550,8 @@ const ACT = {
   stmtApply() { const tl = $('#stmtTools'); const v = readTools(tl); openCustomer(tl.dataset.acc, v.from, v.to, true, v.currency); },
   rowEdit(el) {
     const { view, row } = rowOf(el);
-    if (LISTS[view].entity === 'Transactions' && row.payMethod) editReceipt(row.rowId); // payment vouchers keep their invoice links
+    if (view === 'purchases') openPurchase(row.invNo); // header + lines editor
+    else if (LISTS[view].entity === 'Transactions' && row.payMethod) editReceipt(row.rowId); // payment vouchers keep their invoice links
     else openForm(LISTS[view].entity, row, false);
   },
   async rowDelete(el) {
@@ -2346,7 +2559,7 @@ const ACT = {
     if (!confirm(t('confirmDelete'))) return;
     await call('deleteRecord', LISTS[view].entity, row[LISTS[view].id]);
     toast(t('deleted'));
-    if (['customers', 'groups', 'users', 'currencies'].indexOf(view) > -1) await refreshLookups();
+    if (LOOKUP_ENTITIES.indexOf(LISTS[view].entity) > -1) await refreshLookups();
     loadList(view);
   },
   async rowPost(el) { const { view, row } = rowOf(el); const n = await call('postTransactions', [row.rowId], false, S.view); toast(t('postedN', { n })); loadList(view); },
@@ -2425,7 +2638,8 @@ document.addEventListener('click', e => {
   if (tr) {
     const view = tr.closest('table').dataset.view;
     const row = (S.rows[view] || [])[+tr.dataset.i];
-    if (row && ROW_CUSTOMER_VIEWS.indexOf(view) > -1) openCustomer(row.account);
+    if (row && view === 'purchases') openPurchase(row.invNo);
+    else if (row && ROW_CUSTOMER_VIEWS.indexOf(view) > -1) openCustomer(row.account);
   }
   if (e.target.id === 'overlay') closeDrawer();
   if (e.target.id === 'modal') closeModal();
@@ -2437,6 +2651,7 @@ document.addEventListener('input', e => {
     formatNumInput(e.target);
     if (e.target.id === 'rcTotal') rcDistribute(parseNum(e.target.value));
     else if (e.target.dataset.aamt !== undefined) rcSum();
+    if (e.target.closest('#piForm')) piCalc();
     if (FORM && FORM.entity === 'Transactions' && e.target.form && e.target.form.id === 'recForm') txFormCalc(e.target.form, e.target.name);
     return;
   }
@@ -2461,6 +2676,15 @@ document.addEventListener('change', e => {
   if (e.target.matches('input[data-permcol]')) {
     const c = e.target.dataset.permcol, on = e.target.checked;
     $$(`table.perm input[data-perm="${c}"]`).forEach(i => { i.checked = on; i.dispatchEvent(new Event('change', { bubbles: true })); });
+    return;
+  }
+  if (e.target.form && e.target.form.id === 'piForm') {
+    if (e.target.name === 'account') e.target.form.elements.vendorName.value = custName(e.target.value);
+    else if (e.target.name === 'itemId') { // item → its card cost
+      const it = (S.lookups.items || []).find(x => x.id === e.target.value), tr = e.target.closest('tr');
+      if (it && tr) { $('[name=cost]', tr).value = fmtInputNum(it.cost); if (!parseNum($('[name=quantity]', tr).value)) $('[name=quantity]', tr).value = '1'; }
+      piCalc();
+    }
     return;
   }
   if (e.target.form && e.target.form.id === 'rcForm') {
@@ -2501,6 +2725,7 @@ document.addEventListener('submit', async e => {
   if (e.target.id === 'loginForm') doLogin(e.target);
   else if (e.target.id === 'recForm') submitForm(e.target);
   else if (e.target.id === 'rcForm') submitReceipt(e.target);
+  else if (e.target.id === 'piForm') submitPurchase(e.target);
   else if (e.target.id === 'msgForm') submitMessage(e.target);
   else if (e.target.id === 'pwForm') {
     const E = e.target.elements;
