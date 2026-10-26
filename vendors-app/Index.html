@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark light" />
+  <title>Vendor Console</title>
+  <?!= include('Styles'); ?>
+</head>
+<body>
+  <div id="root"></div>
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true">
+    <section class="drawer" id="drawer"></section>
+  </div>
+  <div class="loading" id="loading" hidden></div>
+  <div class="toast" id="toast" hidden></div>
+  <div class="modal" id="modal" hidden><div class="panel modal-card" id="modalCard" role="dialog" aria-modal="true"></div></div>
+  <!-- Printable A4 document is rendered here; everything else is hidden while printing -->
+  <div id="printArea"></div>
+  <!-- SheetJS: reads Excel / CSV exports from Dynamics 365 on the Import page -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <?!= include('Script'); ?>
+</body>
+</html>

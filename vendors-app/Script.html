@@ -1,0 +1,2541 @@
+<script>
+/* ═══════════════════════════ Vendor Console — client ═══════════════════════════ */
+
+/** Must match APP_VERSION in Code.gs. */
+const CLIENT_VERSION = 'V1';
+
+// ───────── Translations (Arabic default, English toggle) ─────────
+const I18N = {
+  ar: {
+    app: 'Vendor Console', caption: 'إدارة الموردين والمدفوعات', eyebrow: 'نظام إدارة الموردين',
+    workspace: 'مساحة العمل', reports: 'التقارير والمتابعة', admin: 'الإدارة',
+    p_dashboard: 'لوحة التحكم', p_customers: 'الموردون', p_transactions: 'حركات الموردين', p_groups: 'مجموعات الموردين',
+    p_balances: 'تقرير أرصدة الموردين', p_paid: 'الفواتير المسددة', p_overdue: 'الفواتير المتأخرة السداد', p_credit: 'تجاوز حد الائتمان',
+    p_followup: 'متابعة الموردين', p_collection: 'لوحة مسؤولي الموردين', p_currencies: 'العملات وأسعار الصرف',
+    p_import: 'استيراد البيانات', p_users: 'المستخدمون والصلاحيات',
+    s_dashboard: 'ملخص المستحقات للموردين والمدفوعات والفواتير المتأخرة لحظياً.',
+    s_customers: 'بيانات الموردين الأساسية وبيانات التواصل ومسؤول المورد.',
+    s_transactions: 'فواتير المشتريات والمدفوعات المستوردة من Dynamics 365 والحركات اليدوية مع الترحيل والرصيد.',
+    s_groups: 'تصنيف الموردين حسب المجموعات.',
+    s_balances: 'الرصيد الافتتاحي وحركات الفترة والرصيد الختامي المستحق لكل مورد حسب الفلتر.',
+    s_paid: 'فواتير الموردين التي سُددت بالكامل خلال الفترة (تسوية الأقدم فالأحدث).',
+    s_overdue: 'فواتير الموردين المفتوحة التي تجاوزت تاريخ استحقاقها دون سداد.',
+    s_credit: 'الموردون الذين تجاوز رصيدنا لديهم حد الائتمان الممنوح لنا (بعملة المورد).',
+    s_followup: 'متابعة الموردين ذوي الفواتير المتأخرة وتسجيل التواصل ومواعيد السداد المخططة.',
+    s_collection: 'مسؤول المورد، الموردون التابعون له، الفواتير المتأخرة وأيام التأخير.',
+    s_currencies: 'تكويد العملات، عملة التقارير، وسعر كل عملة مقابل عملة التقارير.',
+    s_import: 'استيراد ملفات Excel / CSV المصدرة من Dynamics 365.',
+    s_users: 'إضافة المستخدمين وتحديد الصفحات والعمليات المسموحة لكل مستخدم.',
+    f_account: 'رقم المورد', f_name: 'اسم المورد', f_group: 'مجموعة المورد', f_currency: 'العملة',
+    f_contactPerson: 'جهة الاتصال', f_phone: 'رقم التواصل', f_email: 'البريد الإلكتروني', f_address: 'العنوان',
+    f_city: 'المدينة', f_country: 'الدولة', f_taxNo: 'الرقم الضريبي', f_creditLimit: 'حد الائتمان',
+    f_termsDays: 'أيام السداد', f_collector: 'مسؤول المورد', f_status: 'الحالة', f_notes: 'ملاحظات',
+    f_createdAt: 'تاريخ الإنشاء', f_updatedAt: 'آخر تعديل', f_voucher: 'رقم السند', f_type: 'نوع الحركة', f_date: 'التاريخ',
+    f_description: 'البيان', f_dueDate: 'تاريخ الاستحقاق', f_amountCur: 'المبلغ بعملة الحركة', f_exchange: 'سعر الصرف',
+    f_debitMST: 'مدين (عملة محلية)', f_creditMST: 'دائن (عملة محلية)', f_postStatus: 'الترحيل',
+    f_createdByName: 'أنشئ بواسطة', f_updatedByName: 'عُدّل بواسطة', f_groupId: 'رمز المجموعة', f_groupName: 'اسم المجموعة',
+    f_username: 'اسم المستخدم', f_fullName: 'الاسم الكامل', f_password: 'كلمة المرور', f_role: 'الدور',
+    f_pages: 'الصفحات المسموحة', f_actions: 'العمليات المسموحة', f_canAdd: 'إضافة', f_canEdit: 'تعديل',
+    f_canDelete: 'حذف', f_canPost: 'ترحيل', f_isCollector: 'مسؤول موردين', f_scope: 'نطاق البيانات',
+    f_active: 'نشط', f_lastLogin: 'آخر دخول', f_actionDate: 'تاريخ الإجراء', f_actionType: 'نوع الإجراء',
+    f_note: 'الملاحظة', f_promiseDate: 'تاريخ السداد المخطط', f_promiseAmount: 'المبلغ المخطط', f_createdBy: 'بواسطة',
+    f_code: 'رمز العملة', f_curName: 'اسم العملة', f_rate: 'السعر مقابل عملة التقارير',
+    opening: 'الرصيد الافتتاحي', debit: 'مدين', credit: 'دائن', closing: 'الرصيد الختامي', balance: 'الرصيد',
+    remaining: 'المتبقي', amount: 'المبلغ', paidDate: 'تاريخ السداد', lateDays: 'أيام التأخير', days: 'أيام التأخير',
+    invoices: 'الفواتير', maxDays: 'أقصى تأخير', avgDays: 'متوسط التأخير', lastFollowUp: 'آخر متابعة',
+    lastPayment: 'آخر دفعة', overdueAmt: 'المتأخرات', customersCount: 'عدد الموردين', collectedMTD: 'المدفوع هذا الشهر',
+    receivable: 'إجمالي المستحق للموردين', companies: 'الموردون', bucket: 'الفئة', openAmount: 'المبالغ المفتوحة',
+    net: 'صافي الحركة', runBalance: 'رصيد المورد',
+    add: 'إضافة', edit: 'تعديل', del: 'حذف', save: 'حفظ', cancel: 'إلغاء', close: 'إغلاق', run: 'عرض التقرير',
+    exportXlsx: 'تصدير Excel', print: 'طباعة', post: 'ترحيل', unpost: 'إلغاء الترحيل', postSelected: 'ترحيل المحدد',
+    login: 'تسجيل الدخول', logout: 'تسجيل الخروج', search: 'بحث باسم المورد، الرقم، البريد...', searchLbl: 'بحث عام', all: 'الكل',
+    from: 'من تاريخ', to: 'إلى تاريخ', asOf: 'حتى تاريخ', minDays: 'أقل أيام تأخير', hideZero: 'إخفاء الأرصدة الصفرية',
+    statement: 'كشف حساب', logAction: 'تسجيل متابعة', call: 'اتصال', mail: 'بريد', apply: 'تطبيق',
+    voucherSearch: 'رقم السند', displayCurrency: 'عملة العرض', typeToSearch: 'اكتب للبحث...', noResults: 'لا توجد نتائج',
+    confirmDelete: 'هل أنت متأكد من الحذف؟', saved: 'تم الحفظ بنجاح', deleted: 'تم الحذف', postedN: 'تم ترحيل {n} حركة',
+    unpostedN: 'تم إلغاء ترحيل {n} حركة', noData: 'لا توجد بيانات', page: 'صفحة', of: 'من', rowsWord: 'سجل',
+    prev: 'السابق', next: 'التالي', loading: 'جارٍ التحميل...', unassigned: 'بدون مسؤول', perPage: 'لكل صفحة',
+    addCustomer: 'مورد جديد', addTransaction: 'حركة جديدة', addGroup: 'مجموعة جديدة', addUser: 'مستخدم جديد', addCurrency: 'عملة جديدة',
+    newFollowUp: 'متابعة جديدة', selectDraft: 'حدد حركات المسودة ثم اضغط ترحيل', toggleSidebar: 'إظهار / إخفاء القائمة',
+    Active: 'نشط', Inactive: 'غير نشط', Blocked: 'موقوف', Draft: 'مسودة', Posted: 'مرحّل', Open: 'مفتوح', Done: 'تم', Broken: 'لم يُنفَّذ',
+    b1: '1 - 30 يوم', b2: '31 - 60 يوم', b3: '61 - 90 يوم', b4: 'أكثر من 90 يوم',
+    Call: 'اتصال هاتفي', Email: 'بريد إلكتروني', Visit: 'زيارة', WhatsApp: 'واتساب', Promise: 'موعد سداد مخطط', Other: 'أخرى',
+    scope_all: 'كل الموردين', scope_own: 'موردوه فقط', Admin: 'مدير النظام', User: 'مستخدم',
+    err_INVALID_LOGIN: 'اسم المستخدم أو كلمة المرور غير صحيحة', err_NO_PERMISSION: 'ليست لديك صلاحية لهذه العملية',
+    err_SESSION_EXPIRED: 'انتهت الجلسة، سجّل الدخول مرة أخرى', err_REQUIRED_FIELDS: 'أكمل الحقول المطلوبة',
+    err_DUPLICATE_ID: 'هذا الرقم/الاسم مستخدم من قبل', err_POSTED_LOCKED: 'لا يمكن تعديل أو حذف حركة مرحّلة',
+    err_HAS_TRANSACTIONS: 'لا يمكن حذف مورد لديه حركات', err_IN_USE: 'لا يمكن الحذف لأنه مستخدم',
+    err_NOT_FOUND: 'السجل غير موجود', err_PASSWORD_REQUIRED: 'كلمة المرور مطلوبة للمستخدم الجديد',
+    err_CANNOT_DELETE_SELF: 'لا يمكنك حذف حسابك الحالي', err_RATE_REQUIRED: 'أدخل سعر صرف أكبر من صفر لهذه العملة أولاً',
+    imp_entity: 'الجدول', imp_mode: 'طريقة الاستيراد', append: 'إضافة للموجود', upsert: 'تحديث الموجود وإضافة الجديد',
+    replace: 'حذف الموجود واستبداله', chooseFile: 'ملف Excel أو CSV', importNow: 'بدء الاستيراد', template: 'تنزيل قالب الأعمدة',
+    importedMsg: 'تم: إضافة {i} — تحديث {u} — تخطي {s}', rowsFound: 'عدد الصفوف في الملف', previewTitle: 'معاينة أول 5 صفوف',
+    imp_help: 'صدّر الجدول من Dynamics 365 إلى Excel ثم ارفعه هنا. تتم مطابقة الأعمدة تلقائياً بالاسم (Vendor account، Voucher، Credit in local currency ...). الحركات المستوردة تعتبر مرحّلة.',
+    xlsxMissing: 'تعذر تحميل مكتبة Excel، تأكد من الاتصال بالإنترنت.',
+    settings: 'إعدادات النظام', AppName: 'اسم التطبيق', CompanyName: 'اسم الشركة', LocalCurrency: 'العملة المحلية (عملة القيود في Dynamics)',
+    ReportCurrency: 'عملة التقارير', ConversionBasis: 'أساس التحويل', basis_local: 'من المبالغ بالعملة المحلية (موصى به)',
+    basis_transaction: 'من المبلغ بعملة الحركة × سعر عملتها', curSettings: 'إعدادات العملات',
+    curHelp: 'السعر = قيمة 1 من العملة بعملة التقارير. مثال: إذا كانت عملة التقارير USD فسعر DJF = 0.0056. عند تغيير عملة التقارير يُعاد حساب كل الأسعار تلقائياً.',
+    missingRates: 'عملات بدون سعر صرف (تُحسب حالياً بسعر 1)', addRate: 'إضافة سعر', rateOf: '1 {c} = ? {b}',
+    k_customers: 'إجمالي الموردين', k_receivable: 'إجمالي المستحق للموردين', k_overdue: 'إجمالي المتأخرات',
+    k_collected: 'المدفوع هذا الشهر', activeWord: 'نشط', lateCustomers: 'مورد متأخر سداده', drafts: 'حركة غير مرحّلة',
+    avgLate: 'متوسط التأخير {n} يوم', monthly: 'الفواتير والمدفوعات - آخر 6 أشهر', aging: 'أعمار المتأخرات',
+    topCustomers: 'أعلى الموردين رصيداً', invoicesL: 'فواتير', paymentsL: 'مدفوعات', viewAll: 'عرض الكل ←', details: 'التفاصيل ←',
+    byCurrency: 'الأرصدة حسب عملة المورد', creditOverN: 'تجاوزوا حد الائتمان',
+    team: 'أداء مسؤولي الموردين', overdueCustomers: 'موردون متأخر سدادهم', overdueInvoices: 'فواتير متأخرة',
+    companiesOf: 'موردو المسؤول', allCompanies: 'المتأخرات حسب المسؤول والمورد', ofBalance: 'من الرصيد',
+    promisesDue: 'مدفوعات مخططة مستحقة اليوم', followLog: 'سجل المتابعات', noOverdue: 'لا توجد فواتير متأخرة',
+    onTime: 'سُددت في الموعد', late: 'سُددت متأخرة', paidCount: 'عدد الفواتير المسددة', totalPaid: 'إجمالي المسدد',
+    threshold: 'نسبة الاستخدام ≥ %', includeNoLimit: 'إظهار الموردين بدون حد', excess: 'التجاوز', available: 'المتاح',
+    usedPct: 'نسبة الاستخدام', exceededN: 'موردون متجاوزون', listed: 'موردون في التقرير', excessTotal: 'إجمالي التجاوز',
+    welcome: 'مرحباً بك', loginHint: 'أدخل بيانات حسابك للمتابعة', byInvoice: 'حسب الفاتورة', byCustomer: 'حسب المورد',
+    customerInfo: 'بيانات المورد', amountHint: 'سالب = دائن (فاتورة) / موجب = مدين (دفعة) — يحسب المدين/الدائن تلقائياً',
+    passwordHint: 'اتركها فارغة للإبقاء على كلمة المرور الحالية', pagesN: '{n} صفحة', day: 'يوم',
+    settingsSaved: 'تم حفظ الإعدادات',
+    err_OUTDATED: 'ملف Code.gs في Apps Script غير محدّث: استبدله بالنسخة الجديدة كاملة، احفظ (Ctrl+S)، ثم Deploy ← Manage deployments ← تعديل ← New version.',
+    permTitle: 'الصلاحيات حسب الصفحة', pageCol: 'الصفحة', perm_view: 'عرض', perm_add: 'إضافة', perm_edit: 'تعديل', perm_delete: 'حذف', perm_post: 'ترحيل',
+    permHint: 'اختيار أي عملية يفعّل «عرض» تلقائياً. صفحات التقارير عرض فقط. مدير النظام له كل الصلاحيات.',
+    changePw: 'تغيير كلمة المرور', curPw: 'كلمة المرور الحالية', newPw: 'كلمة المرور الجديدة', confirmPw: 'تأكيد كلمة المرور الجديدة',
+    pwChanged: 'تم تغيير كلمة المرور', pwMismatch: 'كلمتا المرور غير متطابقتين', err_WRONG_PASSWORD: 'كلمة المرور الحالية غير صحيحة',
+    err_PASSWORD_SHORT: 'كلمة المرور يجب ألا تقل عن 6 أحرف',
+    imp_map: 'مطابقة الأعمدة', imp_field: 'الحقل في التطبيق', imp_col: 'العمود في الملف', imp_ignored: 'يُتجاهل',
+    imp_detected: 'تم اختيار الجدول «{e}» تلقائياً حسب أعمدة الملف',
+    imp_mismatch: 'تنبيه: أعمدة الملف تخص جدول «{b}» وليس «{e}». الاستيراد في الجدول الخطأ يُنشئ بيانات غير صحيحة.',
+    imp_noid: 'الملف لا يحتوي العمود الأساسي لهذا الجدول ({f})، لا يمكن الاستيراد.', imp_confirmWrong: 'أعمدة الملف لا تخص هذا الجدول. متأكد من الاستيراد؟',
+    imp_options: 'خيارات الحركات', imp_sign: 'إشارة المبلغ بعملة الحركة (عند غياب أعمدة المدين/الدائن)',
+    sign_auto: 'تلقائي حسب نوع الحركة (فاتورة = دائن، دفعة = مدين)', sign_pos: 'موجب = مدين (Dynamics)', sign_neg: 'سالب = مدين',
+    imp_dates: 'ترتيب التاريخ في ملفات CSV', date_auto: 'تلقائي', date_dmy: 'يوم/شهر/سنة', date_mdy: 'شهر/يوم/سنة',
+    imp_createCust: 'إنشاء الموردين غير الموجودين تلقائياً', imp_skipDup: 'تخطي الحركات المكررة (نفس السند والمورد والتاريخ والمبلغ)',
+    imp_result: 'نتيجة الاستيراد', imp_added: 'أُضيف', imp_updated: 'حُدِّث', imp_dups: 'مكرر تم تخطيه', imp_noIdRows: 'صفوف بلا رقم أساسي/تاريخ',
+    imp_newCust: 'موردون جدد أُنشئوا', imp_unknown: 'حركات لموردين غير موجودين (لن تظهر حتى إضافة الموردين)',
+    imp_replaceTx: 'سيتم حذف الحركات المستوردة سابقاً فقط، وتبقى الحركات وسندات الصرف المسجّلة من التطبيق.',
+    dupFound: 'يوجد {n} صف مورد مكرر في شيت الموردين (نفس رقم المورد). تم دمجها تلقائياً في التقارير، ويُفضّل حذفها نهائياً:', askAdmin: 'اطلب من مدير النظام تنظيفها من صفحة الاستيراد.',
+    cleanDup: 'تنظيف الموردين المكررين', cleanDupDone: 'تم حذف {n} صف مكرر من الموردين',
+    editReceipt: 'تعديل سند الصرف', CompanyLogo: 'شعار الشركة', uploadLogo: 'رفع شعار', removeLogo: 'إزالة الشعار',
+    logoHint: 'PNG أو JPG أو SVG — يُصغَّر تلقائياً ويظهر في القائمة وشاشة الدخول وكل المطبوعات وكشوف الحساب',
+    logoSaved: 'تم حفظ الشعار', err_LOGO_INVALID: 'الصورة غير مدعومة أو كبيرة جداً، جرّب صورة أبسط',
+    mtdByMethod: 'المدفوعات هذا الشهر حسب الطريقة', mtdPerformance: 'أداء مسؤولي الموردين هذا الشهر',
+    p_collections: 'تقرير المدفوعات', s_collections: 'المبالغ المدفوعة للموردين خلال الفترة حسب طريقة الدفع والمستخدم.',
+    p_performance: 'أداء مسؤولي الموردين', s_performance: 'لكل مسؤول موردين: عدد الموردين، المبالغ المستحقة، المدفوع، المتبقي ونسبة السداد خلال الفترة.',
+    byCollector: 'حسب المستخدم', receiptDetails: 'تفاصيل السندات', receiptsCount: 'عدد السندات', totalCollected: 'إجمالي المدفوع',
+    invoicedPeriod: 'فواتير الفترة', totalDue: 'المبالغ المستحقة', collectedAmt: 'المدفوع', otherCredits: 'إشعارات / تسويات مدينة',
+    remainingAmt: 'المتبقي', collectRate: 'نسبة السداد', companiesN: 'عدد الموردين', activeCompanies: 'موردون بهم حركة', openingPeriod: 'رصيد أول الفترة',
+    collectorRule: 'صُرف بواسطة = المستخدم الذي سجّل سند الصرف، وللدفعات المستوردة من Dynamics = مسؤول المورد.',
+    dueRule: 'المستحق = رصيد أول الفترة + فواتير الفترة · المتبقي = المستحق − المدفوع − الإشعارات المدينة · نسبة السداد = المدفوع ÷ المستحق',
+    p_messages: 'الرسائل والإشعارات', s_messages: 'تواصل بين مستخدمي التطبيق وتنبيهات النظام (سندات صرف بانتظار الترحيل، مدفوعات مخططة مستحقة).',
+    inbox: 'الوارد', sentBox: 'المرسل', alerts: 'التنبيهات', compose: 'رسالة جديدة', msgTo: 'إلى', allUsers: 'كل المستخدمين',
+    msgSubject: 'الموضوع', msgBody: 'نص الرسالة', reply: 'رد', sendMsg: 'إرسال', msgSent: 'تم إرسال الرسالة', markAllRead: 'تحديد الكل كمقروء',
+    noMessages: 'لا توجد رسائل', newMsgToast: 'لديك {n} رسالة جديدة', system: 'النظام', relatedCustomer: 'المورد المرتبط',
+    RECEIPT_PENDING: 'سند صرف بانتظار الترحيل', RECEIPT_POSTED: 'تم ترحيل سند الصرف', PROMISE_DUE: 'موعد سداد مخطط مستحق',
+    msgColleague: 'رسالة لزميل', openCustomer: 'فتح المورد', pickRecipient: 'اختر مستلماً واحداً على الأقل', writeReply: 'اكتب ردك...',
+    p_receipts: 'سندات الصرف', s_receipts: 'تسجيل المدفوعات للموردين (نقدي / شيك / تحويل بنكي) وربطها بالفواتير المسددة.',
+    p_statement: 'كشف حساب المورد', s_statement: 'كشف حساب رسمي لمطابقة الرصيد مع المورد: طباعة A4، إرسال بالبريد أو واتساب.',
+    Cash: 'نقدي', Cheque: 'شيك', Transfer: 'تحويل بنكي', OtherMethod: 'أخرى (Dynamics)',
+    f_payMethod: 'طريقة الدفع', f_chequeNo: 'رقم الشيك', f_chequeDate: 'تاريخ استحقاق الشيك', f_bankName: 'البنك',
+    f_payRef: 'رقم الحوالة / المرجع', f_collectedBy: 'صُرف بواسطة', allocText: 'الفواتير المسددة',
+    collect: 'تسجيل دفعة', pickInvoices: 'حدد فاتورة/فواتير المورد التي يتم سدادها', amountToCollect: 'المبلغ المدفوع (يوزَّع تلقائياً على الأقدم)',
+    allocated: 'إجمالي الموزّع', onAccount: 'دفعة مقدمة تحت الحساب (لا توجد فواتير مفتوحة)', noOpenInvoices: 'لا توجد فواتير مفتوحة لهذا المورد',
+    postNow: 'ترحيل مباشر', autoNo: 'تلقائي', printReceipt: 'طباعة سند الصرف', receiptTitle: 'سند صرف', receiptNo: 'رقم السند',
+    receivedFrom: 'صرفنا إلى السادة', theSumOf: 'مبلغاً وقدره', forInvoices: 'وذلك سداداً للفواتير التالية', receiver: 'أعدّه',
+    accountant: 'المحاسب', customerSign: 'توقيع المستلم', paidBy: 'سندات السداد', linked: 'مربوط بالفاتورة', fifo: 'تسوية تلقائية',
+    err_INVOICE_REQUIRED: 'اختر فاتورة واحدة على الأقل ليتم سدادها', err_OVER_ALLOCATED: 'المبلغ أكبر من المتبقي على الفاتورة',
+    err_CHEQUE_REQUIRED: 'رقم الشيك مطلوب', err_RECEIPT_LOCKED: 'سند صرف مرتبط بفواتير: احذفه وأعد تسجيله',
+    err_EMAIL_REQUIRED: 'أدخل البريد الإلكتروني',
+    orientation: 'اتجاه الصفحة', portrait: 'رأسي (Portrait)', landscape: 'أفقي (Landscape)', paperA4: 'مقاس الورق: A4',
+    printedAt: 'تاريخ الطباعة', printedBy: 'بواسطة', filtersLbl: 'الفلاتر', rowsCapped: 'تمت طباعة أول {n} سجل فقط',
+    stmtTitle: 'كشف حساب مورد', period: 'الفترة', stmtDate: 'تاريخ الكشف', totalDebit: 'إجمالي المدين', totalCredit: 'إجمالي الدائن',
+    amountDue: 'الرصيد المستحق للمورد', agingTitle: 'أعمار المستحقات', current: 'غير مستحق بعد', openInvTitle: 'الفواتير المفتوحة', paid: 'المسدد',
+    sendEmail: 'إرسال بالبريد', sendWhatsApp: 'إرسال واتساب', emailTo: 'إلى', emailCc: 'نسخة (CC)', subject: 'الموضوع', message: 'نص الرسالة',
+    send: 'إرسال', sentOk: 'تم الإرسال', quotaLeft: 'تم الإرسال — المتبقي من حصة البريد اليوم: {n}', attachLink: 'إرفاق رابط PDF للكشف (يُحفظ في Google Drive)',
+    waPhone: 'رقم الواتساب', waHint: 'بالصيغة الدولية بدون + أو 00، مثال: 25377123456 (يمكن ضبط كود الدولة من صفحة المستخدمين ← الإعدادات)', openWhatsApp: 'فتح واتساب', chooseCustomer: 'اختر مورداً لعرض كشف الحساب',
+    msgDear: 'السادة / {n}', msgGreeting: 'تحية طيبة وبعد،', msgBalance: 'نرفق لكم كشف حسابكم لدينا، والرصيد المستحق لكم حتى {d} هو: {a}',
+    msgOverdue: 'منها مبالغ تجاوزت تاريخ استحقاقها: {a}', msgOpen: 'الفواتير المفتوحة لدينا:', msgLink: 'كشف الحساب (PDF): {u}', msgThanks: 'نرجو مطابقة الرصيد مع سجلاتكم وإفادتنا بأي اختلاف، وشكراً لتعاونكم.',
+    linkNotShared: 'تم حفظ الملف في Drive لكن مشاركته للعامة غير مسموحة في حسابكم', fromStart: 'من البداية',
+    CompanyAddress: 'عنوان الشركة', CompanyPhone: 'هاتف الشركة', CompanyEmail: 'بريد الشركة (للرد)', BankDetails: 'بيانات إضافية (تظهر في كشف الحساب)',
+    StatementNote: 'ملاحظة أسفل كشف الحساب', WhatsAppCountryCode: 'كود الدولة للواتساب (مثال 253)', SessionMinutes: 'دقائق الخمول قبل طلب الدخول مجدداً',
+  },
+  en: {
+    app: 'Vendor Console', caption: 'Vendors & Payments', eyebrow: 'Vendor management',
+    workspace: 'Workspace', reports: 'Reports & follow-up', admin: 'Administration',
+    p_dashboard: 'Dashboard', p_customers: 'Vendors', p_transactions: 'Vendor transactions', p_groups: 'Vendor groups',
+    p_balances: 'Vendor balances', p_paid: 'Paid invoices', p_overdue: 'Late invoices', p_credit: 'Credit limit exceeded',
+    p_followup: 'Vendor follow-up', p_collection: 'Vendor managers', p_currencies: 'Currencies & rates',
+    p_import: 'Import data', p_users: 'Users & permissions',
+    s_dashboard: 'Live summary of amounts owed to vendors, payments and late invoices.',
+    s_customers: 'Vendor master data, contact details and assigned vendor manager.',
+    s_transactions: 'Purchase invoices and payments imported from Dynamics 365 plus manual entries, posting and running balance.',
+    s_groups: 'Vendor segmentation by group.',
+    s_balances: 'Opening balance, period activity and closing balance owed per vendor.',
+    s_paid: 'Vendor invoices fully paid within the period (oldest-first settlement).',
+    s_overdue: 'Open vendor invoices past their due date and not yet paid.',
+    s_credit: 'Vendors where our balance exceeds the credit limit they grant us (vendor currency).',
+    s_followup: 'Follow up vendors with late invoices, log contacts and planned payments.',
+    s_collection: 'Vendor manager, assigned vendors, late invoices and days late.',
+    s_currencies: 'Currency codes, reporting currency and each currency rate to it.',
+    s_import: 'Import Excel / CSV files exported from Dynamics 365.',
+    s_users: 'Add users and choose the pages and actions each one is allowed.',
+    f_account: 'Vendor account', f_name: 'Vendor name', f_group: 'Vendor group', f_currency: 'Currency',
+    f_contactPerson: 'Contact person', f_phone: 'Contact number', f_email: 'Email', f_address: 'Address',
+    f_city: 'City', f_country: 'Country', f_taxNo: 'Tax number', f_creditLimit: 'Credit limit',
+    f_termsDays: 'Payment terms (days)', f_collector: 'Vendor manager', f_status: 'Status', f_notes: 'Notes',
+    f_createdAt: 'Created', f_updatedAt: 'Updated', f_voucher: 'Voucher', f_type: 'Transaction type', f_date: 'Date',
+    f_description: 'Description', f_dueDate: 'Due date', f_amountCur: 'Amount (transaction currency)', f_exchange: 'Exchange rate',
+    f_debitMST: 'Debit (local)', f_creditMST: 'Credit (local)', f_postStatus: 'Posting',
+    f_createdByName: 'Created by', f_updatedByName: 'Updated by', f_groupId: 'Group ID', f_groupName: 'Group name',
+    f_username: 'Username', f_fullName: 'Full name', f_password: 'Password', f_role: 'Role',
+    f_pages: 'Allowed pages', f_actions: 'Allowed actions', f_canAdd: 'Add', f_canEdit: 'Edit',
+    f_canDelete: 'Delete', f_canPost: 'Post', f_isCollector: 'Vendor manager', f_scope: 'Data scope',
+    f_active: 'Active', f_lastLogin: 'Last login', f_actionDate: 'Action date', f_actionType: 'Action type',
+    f_note: 'Note', f_promiseDate: 'Planned payment date', f_promiseAmount: 'Planned amount', f_createdBy: 'By',
+    f_code: 'Currency code', f_curName: 'Currency name', f_rate: 'Rate to reporting currency',
+    opening: 'Opening', debit: 'Debit', credit: 'Credit', closing: 'Closing', balance: 'Balance',
+    remaining: 'Remaining', amount: 'Amount', paidDate: 'Paid on', lateDays: 'Days late', days: 'Days late',
+    invoices: 'Invoices', maxDays: 'Max days', avgDays: 'Avg days', lastFollowUp: 'Last follow-up',
+    lastPayment: 'Last payment', overdueAmt: 'Overdue', customersCount: 'Vendors', collectedMTD: 'Paid MTD',
+    receivable: 'Total payables', companies: 'Vendors', bucket: 'Bucket', openAmount: 'Open amount',
+    net: 'Net movement', runBalance: 'Vendor balance',
+    add: 'Add', edit: 'Edit', del: 'Delete', save: 'Save', cancel: 'Cancel', close: 'Close', run: 'Run report',
+    exportXlsx: 'Export Excel', print: 'Print', post: 'Post', unpost: 'Unpost', postSelected: 'Post selected',
+    login: 'Sign in', logout: 'Sign out', search: 'Search vendor name, account, email...', searchLbl: 'Search', all: 'All',
+    from: 'From', to: 'To', asOf: 'As of', minDays: 'Min days late', hideZero: 'Hide zero balances',
+    statement: 'Statement', logAction: 'Log follow-up', call: 'Call', mail: 'Email', apply: 'Apply',
+    voucherSearch: 'Voucher no.', displayCurrency: 'Display currency', typeToSearch: 'Type to search...', noResults: 'No results',
+    confirmDelete: 'Are you sure you want to delete?', saved: 'Saved', deleted: 'Deleted', postedN: '{n} transactions posted',
+    unpostedN: '{n} transactions unposted', noData: 'No data', page: 'Page', of: 'of', rowsWord: 'records',
+    prev: 'Prev', next: 'Next', loading: 'Loading...', unassigned: 'Unassigned', perPage: 'per page',
+    addCustomer: 'New vendor', addTransaction: 'New transaction', addGroup: 'New group', addUser: 'New user', addCurrency: 'New currency',
+    newFollowUp: 'New follow-up', selectDraft: 'Select draft rows, then post', toggleSidebar: 'Show / hide menu',
+    Active: 'Active', Inactive: 'Inactive', Blocked: 'Blocked', Draft: 'Draft', Posted: 'Posted', Open: 'Open', Done: 'Done', Broken: 'Not done',
+    b1: '1 - 30 days', b2: '31 - 60 days', b3: '61 - 90 days', b4: '90+ days',
+    Call: 'Phone call', Email: 'Email', Visit: 'Visit', WhatsApp: 'WhatsApp', Promise: 'Planned payment', Other: 'Other',
+    scope_all: 'All vendors', scope_own: 'Own vendors only', Admin: 'Administrator', User: 'User',
+    err_INVALID_LOGIN: 'Wrong username or password', err_NO_PERMISSION: 'You are not allowed to do this',
+    err_SESSION_EXPIRED: 'Session expired, please sign in again', err_REQUIRED_FIELDS: 'Please fill the required fields',
+    err_DUPLICATE_ID: 'This ID / name already exists', err_POSTED_LOCKED: 'Posted transactions cannot be changed',
+    err_HAS_TRANSACTIONS: 'Vendor has transactions and cannot be deleted', err_IN_USE: 'Cannot delete: in use',
+    err_NOT_FOUND: 'Record not found', err_PASSWORD_REQUIRED: 'Password is required for new users',
+    err_CANNOT_DELETE_SELF: 'You cannot delete your own account', err_RATE_REQUIRED: 'Enter a rate greater than zero for this currency first',
+    imp_entity: 'Table', imp_mode: 'Import mode', append: 'Append', upsert: 'Update existing + add new',
+    replace: 'Replace all', chooseFile: 'Excel or CSV file', importNow: 'Start import', template: 'Download column template',
+    importedMsg: 'Done: {i} added — {u} updated — {s} skipped', rowsFound: 'Rows in file', previewTitle: 'Preview (first 5 rows)',
+    imp_help: 'Export the table from Dynamics 365 to Excel and upload it here. Columns are matched by name (Vendor account, Voucher, Credit in local currency ...). Imported transactions are treated as posted.',
+    xlsxMissing: 'Could not load the Excel library. Check your connection.',
+    settings: 'System settings', AppName: 'App name', CompanyName: 'Company name', LocalCurrency: 'Local currency (Dynamics accounting currency)',
+    ReportCurrency: 'Reporting currency', ConversionBasis: 'Conversion basis', basis_local: 'From local-currency amounts (recommended)',
+    basis_transaction: 'From transaction amount × its currency rate', curSettings: 'Currency settings',
+    curHelp: 'Rate = value of 1 unit in the reporting currency. Example: with USD as reporting currency, DJF = 0.0056. Changing the reporting currency re-bases all rates automatically.',
+    missingRates: 'Currencies without a rate (currently counted at 1)', addRate: 'Add rate', rateOf: '1 {c} = ? {b}',
+    k_customers: 'Total vendors', k_receivable: 'Total payables', k_overdue: 'Total overdue',
+    k_collected: 'Paid this month', activeWord: 'active', lateCustomers: 'vendors paid late', drafts: 'unposted transactions',
+    avgLate: 'avg {n} days late', monthly: 'Invoiced vs paid — last 6 months', aging: 'Overdue aging',
+    topCustomers: 'Top vendors by balance', invoicesL: 'Invoiced', paymentsL: 'Paid', viewAll: 'View all →', details: 'Details →',
+    byCurrency: 'Balances by vendor currency', creditOverN: 'over credit limit',
+    team: 'Vendor managers performance', overdueCustomers: 'Vendors paid late', overdueInvoices: 'Late invoices',
+    companiesOf: 'Manager vendors', allCompanies: 'Late invoices by manager and vendor', ofBalance: 'of balance',
+    promisesDue: 'Planned payments due', followLog: 'Follow-up log', noOverdue: 'No late invoices',
+    onTime: 'Paid on time', late: 'Paid late', paidCount: 'Invoices paid', totalPaid: 'Total paid',
+    threshold: 'Usage ≥ %', includeNoLimit: 'Include vendors without limit', excess: 'Excess', available: 'Available',
+    usedPct: 'Usage', exceededN: 'Vendors over limit', listed: 'Vendors listed', excessTotal: 'Total excess',
+    welcome: 'Welcome back', loginHint: 'Sign in to continue', byInvoice: 'By invoice', byCustomer: 'By vendor',
+    customerInfo: 'Vendor details', amountHint: 'Negative = credit (invoice) / positive = debit (payment) — fills debit/credit automatically',
+    passwordHint: 'Leave empty to keep the current password', pagesN: '{n} pages', day: 'days',
+    settingsSaved: 'Settings saved',
+    err_OUTDATED: 'Code.gs in Apps Script is out of date: replace it with the new version, save (Ctrl+S), then Deploy → Manage deployments → Edit → New version.',
+    permTitle: 'Permissions by page', pageCol: 'Page', perm_view: 'View', perm_add: 'Add', perm_edit: 'Edit', perm_delete: 'Delete', perm_post: 'Post',
+    permHint: 'Ticking any action also ticks “View”. Report pages are view-only. Administrators have every permission.',
+    changePw: 'Change password', curPw: 'Current password', newPw: 'New password', confirmPw: 'Confirm new password',
+    pwChanged: 'Password changed', pwMismatch: 'Passwords do not match', err_WRONG_PASSWORD: 'Current password is wrong',
+    err_PASSWORD_SHORT: 'Password must be at least 6 characters',
+    imp_map: 'Column mapping', imp_field: 'App field', imp_col: 'File column', imp_ignored: 'ignored',
+    imp_detected: 'Table «{e}» selected automatically from the file columns',
+    imp_mismatch: 'Warning: the file columns belong to «{b}», not «{e}». Importing into the wrong table creates bad data.',
+    imp_noid: 'The file has no key column for this table ({f}); it cannot be imported.', imp_confirmWrong: 'The file columns do not match this table. Import anyway?',
+    imp_options: 'Transaction options', imp_sign: 'Transaction-amount sign (when debit/credit columns are empty)',
+    sign_auto: 'Automatic by type (invoice = credit, payment = debit)', sign_pos: 'Positive = debit (Dynamics)', sign_neg: 'Negative = debit',
+    imp_dates: 'Date order in CSV files', date_auto: 'Automatic', date_dmy: 'Day/Month/Year', date_mdy: 'Month/Day/Year',
+    imp_createCust: 'Create missing vendors automatically', imp_skipDup: 'Skip duplicate transactions (same voucher, vendor, date, amount)',
+    imp_result: 'Import result', imp_added: 'Added', imp_updated: 'Updated', imp_dups: 'Duplicates skipped', imp_noIdRows: 'Rows without key/date',
+    imp_newCust: 'New vendors created', imp_unknown: 'Transactions for unknown vendors (hidden until the vendors exist)',
+    imp_replaceTx: 'Only previously imported transactions are removed; entries and payment vouchers made in the app are kept.',
+    dupFound: '{n} repeated vendor rows found in the Vendors sheet (same account). They are merged automatically in reports; better remove them:', askAdmin: 'Ask the administrator to clean them from the Import page.',
+    cleanDup: 'Clean duplicate vendors', cleanDupDone: '{n} duplicate vendor rows removed',
+    editReceipt: 'Edit payment voucher', CompanyLogo: 'Company logo', uploadLogo: 'Upload logo', removeLogo: 'Remove logo',
+    logoHint: 'PNG, JPG or SVG — resized automatically; shown in the menu, sign-in screen, all printouts and statements',
+    logoSaved: 'Logo saved', err_LOGO_INVALID: 'Image not supported or too large, try a simpler one',
+    mtdByMethod: 'Payments this month by method', mtdPerformance: 'Vendor managers this month',
+    p_collections: 'Payments report', s_collections: 'Amounts paid to vendors in the period by payment method and user.',
+    p_performance: 'Vendor managers performance', s_performance: 'Per vendor manager: vendors, amounts due, paid, remaining and payment rate for the period.',
+    byCollector: 'By user', receiptDetails: 'Voucher details', receiptsCount: 'Vouchers', totalCollected: 'Total paid',
+    invoicedPeriod: 'Period invoices', totalDue: 'Amounts due', collectedAmt: 'Paid', otherCredits: 'Debit notes / adjustments',
+    remainingAmt: 'Remaining', collectRate: 'Payment rate', companiesN: 'Vendors', activeCompanies: 'Active vendors', openingPeriod: 'Opening balance',
+    collectorRule: 'Paid by = user who recorded the payment voucher; for payments imported from Dynamics = the vendor manager.',
+    dueRule: 'Due = opening balance + period invoices · Remaining = due − paid − debit notes · Rate = paid ÷ due',
+    p_messages: 'Messages & notifications', s_messages: 'Messages between app users and system alerts (payment vouchers awaiting posting, planned payments due).',
+    inbox: 'Inbox', sentBox: 'Sent', alerts: 'Alerts', compose: 'New message', msgTo: 'To', allUsers: 'All users',
+    msgSubject: 'Subject', msgBody: 'Message', reply: 'Reply', sendMsg: 'Send', msgSent: 'Message sent', markAllRead: 'Mark all as read',
+    noMessages: 'No messages', newMsgToast: 'You have {n} new message(s)', system: 'System', relatedCustomer: 'Related vendor',
+    RECEIPT_PENDING: 'Payment voucher awaiting posting', RECEIPT_POSTED: 'Your payment voucher was posted', PROMISE_DUE: 'Planned payment due',
+    msgColleague: 'Message a colleague', openCustomer: 'Open vendor', pickRecipient: 'Choose at least one recipient', writeReply: 'Write a reply...',
+    p_receipts: 'Payment vouchers', s_receipts: 'Record payments to vendors (cash / cheque / bank transfer) linked to the invoices they pay.',
+    p_statement: 'Vendor statement', s_statement: 'Formal statement for balance reconciliation with the vendor: A4 print, email or WhatsApp.',
+    Cash: 'Cash', Cheque: 'Cheque', Transfer: 'Bank transfer', OtherMethod: 'Other (Dynamics)',
+    f_payMethod: 'Payment method', f_chequeNo: 'Cheque no.', f_chequeDate: 'Cheque due date', f_bankName: 'Bank',
+    f_payRef: 'Transfer / reference no.', f_collectedBy: 'Paid by', allocText: 'Invoices paid',
+    collect: 'Record payment', pickInvoices: 'Select the vendor invoice(s) being paid', amountToCollect: 'Amount paid (auto-split oldest first)',
+    allocated: 'Total allocated', onAccount: 'Advance payment on account (no open invoices)', noOpenInvoices: 'This vendor has no open invoices',
+    postNow: 'Post immediately', autoNo: 'Automatic', printReceipt: 'Print payment voucher', receiptTitle: 'Payment voucher', receiptNo: 'Voucher no.',
+    receivedFrom: 'Paid to', theSumOf: 'The sum of', forInvoices: 'In settlement of the following invoices', receiver: 'Prepared by',
+    accountant: 'Accountant', customerSign: 'Receiver signature', paidBy: 'Paid by', linked: 'Linked to invoice', fifo: 'Auto-settled',
+    err_INVOICE_REQUIRED: 'Select at least one invoice to pay', err_OVER_ALLOCATED: 'Amount exceeds the invoice balance',
+    err_CHEQUE_REQUIRED: 'Cheque number is required', err_RECEIPT_LOCKED: 'Payment voucher is linked to invoices: delete and record it again',
+    err_EMAIL_REQUIRED: 'Enter an email address',
+    orientation: 'Page orientation', portrait: 'Portrait', landscape: 'Landscape', paperA4: 'Paper size: A4',
+    printedAt: 'Printed on', printedBy: 'By', filtersLbl: 'Filters', rowsCapped: 'Only the first {n} records were printed',
+    stmtTitle: 'Vendor statement of account', period: 'Period', stmtDate: 'Statement date', totalDebit: 'Total debit', totalCredit: 'Total credit',
+    amountDue: 'Balance due to vendor', agingTitle: 'Aging', current: 'Not yet due', openInvTitle: 'Open invoices', paid: 'Paid',
+    sendEmail: 'Send by email', sendWhatsApp: 'Send WhatsApp', emailTo: 'To', emailCc: 'CC', subject: 'Subject', message: 'Message',
+    send: 'Send', sentOk: 'Sent', quotaLeft: 'Sent — emails left today: {n}', attachLink: 'Attach a PDF link (saved to Google Drive)',
+    waPhone: 'WhatsApp number', waHint: 'International format without + or 00, e.g. 25377123456 (set a default country code in Users → settings)', openWhatsApp: 'Open WhatsApp', chooseCustomer: 'Choose a vendor to view the statement',
+    msgDear: 'Dear {n},', msgGreeting: 'Greetings,', msgBalance: 'Please find your statement of account with us. The balance due to you as of {d} is: {a}',
+    msgOverdue: 'Of which past due: {a}', msgOpen: 'Open invoices on our side:', msgLink: 'Statement (PDF): {u}', msgThanks: 'Kindly reconcile this balance with your records and let us know of any difference. Thank you.',
+    linkNotShared: 'Saved to Drive, but public sharing is not allowed for your account', fromStart: 'From start',
+    CompanyAddress: 'Company address', CompanyPhone: 'Company phone', CompanyEmail: 'Company email (reply-to)', BankDetails: 'Additional details (shown on statement)',
+    StatementNote: 'Statement footer note', WhatsAppCountryCode: 'WhatsApp country code (e.g. 253)', SessionMinutes: 'Idle minutes before sign-in is required',
+  }
+};
+
+const PAGES = [
+  { id: 'dashboard', glyph: '▦', sec: 'workspace' },
+  { id: 'messages', glyph: '✉', sec: 'workspace' },
+  { id: 'customers', glyph: '♙', sec: 'workspace' },
+  { id: 'transactions', glyph: '⇄', sec: 'workspace' },
+  { id: 'receipts', glyph: '⊕', sec: 'workspace' },
+  { id: 'groups', glyph: '▤', sec: 'workspace' },
+  { id: 'statement', glyph: '§', sec: 'reports' },
+  { id: 'balances', glyph: '≡', sec: 'reports' },
+  { id: 'paid', glyph: '✓', sec: 'reports' },
+  { id: 'overdue', glyph: '!', sec: 'reports' },
+  { id: 'credit', glyph: '⚑', sec: 'reports' },
+  { id: 'followup', glyph: '☎', sec: 'reports' },
+  { id: 'collection', glyph: '◉', sec: 'reports' },
+  { id: 'collections', glyph: '∑', sec: 'reports' },
+  { id: 'performance', glyph: '★', sec: 'reports' },
+  { id: 'currencies', glyph: '¤', sec: 'admin' },
+  { id: 'import', glyph: '⇪', sec: 'admin' },
+  { id: 'users', glyph: '⚙', sec: 'admin' }
+];
+
+// ───────── State & helpers ─────────
+const S = { token: '', user: null, settings: {}, lookups: { groups: [], collectors: [], customers: [], currencies: [], transactionTypes: [] },
+  lang: 'ar', view: '', lists: {}, rows: {}, rep: {}, exportData: null, badges: {} };
+
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} }
+};
+// The login token lives only in this browser tab: opening the link again always asks for the password.
+const sess = {
+  get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { v == null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, v); } catch (e) {} }
+};
+const $ = (s, el) => (el || document).querySelector(s);
+const $$ = (s, el) => Array.from((el || document).querySelectorAll(s));
+const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const bdi = v => `<bdi>${esc(v)}</bdi>`;
+const t = (k, vars) => {
+  let s = (I18N[S.lang] && I18N[S.lang][k]) || I18N.en[k] || k;
+  if (vars) Object.keys(vars).forEach(v => { s = s.replace('{' + v + '}', vars[v]); });
+  return s;
+};
+// Thousands separators everywhere: 000,000,000.00
+// All amounts are shown rounded to the nearest whole number (rates keep their decimals).
+const NF = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+const NF1 = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 });
+const NF6 = new Intl.NumberFormat('en-US', { maximumFractionDigits: 6 });
+const NI = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+const money = n => NF.format(Math.round(+n || 0) || 0);
+const short = n => { n = +n || 0; const a = Math.abs(n); return a >= 1e9 ? NF1.format(n / 1e9) + 'B' : a >= 1e6 ? NF1.format(n / 1e6) + 'M' : money(n); };
+const baseCur = () => (S.settings.ReportCurrency || S.settings.LocalCurrency || '').toUpperCase();
+const localCur = () => (S.settings.LocalCurrency || '').toUpperCase();
+const z = n => String(n).padStart(2, '0');
+const ymd = d => d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate());
+const today = () => ymd(new Date());
+const monthStart = () => today().slice(0, 8) + '01';
+const yearStart = () => today().slice(0, 5) + '01-01';
+/** Actions available per page in the permissions matrix (same list as PAGE_ACTIONS in Code.gs). */
+const PAGE_ACTS = {
+  customers: ['add', 'edit', 'delete'], transactions: ['add', 'edit', 'delete', 'post'], receipts: ['add', 'edit', 'delete', 'post'],
+  groups: ['add', 'edit', 'delete'], followup: ['add', 'edit', 'delete'], currencies: ['add', 'edit', 'delete'], import: ['add', 'delete']
+};
+const ACTIONS = ['add', 'edit', 'delete', 'post'];
+/** Can the user do `a` (add/edit/delete/post) on `page` (default: the page on screen)? */
+const can = (a, page) => {
+  const u = S.user;
+  if (!u) return false;
+  if (u.isAdmin) return true;
+  page = page || S.view;
+  if (u.perms) return !!(u.perms[page] && u.perms[page].indexOf(a) > -1);
+  return !!u['can' + a[0].toUpperCase() + a.slice(1)]; // users created before per-page permissions
+};
+const hasPage = p => S.user && (p === 'messages' || S.user.pages.indexOf(p) > -1);
+const groupName = id => { const g = S.lookups.groups.find(x => x.id === id); return g ? g.name : (id || ''); };
+const collectorName = u => { if (!u) return t('unassigned'); const c = S.lookups.collectors.find(x => x.username === u); return c ? c.name : u; };
+const custName = a => { const c = S.lookups.customers.find(x => x.account === a); return c ? c.name : ''; };
+const pill = (txt, cls) => `<span class="health ${cls}">${esc(txt)}</span>`;
+const statusPill = v => pill(t(v || 'Active'), { Active: 'healthy', Inactive: 'neutral', Blocked: 'risk', Draft: 'watch', Posted: 'healthy', Open: 'info', Done: 'healthy', Broken: 'risk' }[v] || 'neutral');
+const daysPill = d => pill(NI.format(d) + ' ' + t('day'), d > 90 ? 'risk' : d > 30 ? 'watch' : 'info');
+const numCell = n => `<span dir="ltr" class="${Math.round(+n || 0) < 0 ? 'neg' : ''}">${money(n)}</span>`;
+const curTag = c => c ? ` <small class="cur">${esc(c)}</small>` : '';
+const rateOf = code => {
+  code = String(code || '').toUpperCase();
+  if (code === baseCur()) return 1;
+  const c = S.lookups.currencies.find(x => x.code === code);
+  return c && c.rate > 0 ? c.rate : 0;
+};
+// Arabic-friendly search normalisation (alef forms, taa marbuta, yaa, diacritics).
+const norm = s => String(s || '').toLowerCase().replace(/[ً-ْـ]/g, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي');
+const parseNum = s => { const n = parseFloat(String(s == null ? '' : s).replace(/,/g, '')); return isNaN(n) ? 0 : n; };
+
+// ───────── Server bridge ─────────
+let pending = 0;
+function setLoading(d) { pending = Math.max(0, pending + d); $('#loading').hidden = pending === 0; }
+function run(fn, ...args) {
+  return new Promise((res, rej) => {
+    google.script.run.withSuccessHandler(res).withFailureHandler(rej)[fn](...args);
+  });
+}
+function errText(e) {
+  const msg = String((e && e.message) || e);
+  if (/is not a function/.test(msg)) return t('err_OUTDATED');
+  const code = (msg.match(/\b[A-Z][A-Z_]{4,}\b/) || [])[0];
+  return code && I18N.en['err_' + code] ? t('err_' + code) : msg.replace(/^(Exception|Error):\s*/, '');
+}
+async function api(fn, ...args) {
+  setLoading(1);
+  try { return await run(fn, ...args); }
+  catch (e) {
+    if (/SESSION_EXPIRED/.test(String(e && e.message || e))) { signOutLocal(); }
+    toast(errText(e), 'error');
+    throw e;
+  } finally { setLoading(-1); }
+}
+const call = (fn, ...args) => api(fn, S.token, ...args);
+
+let toastTimer;
+function toast(msg, kind) {
+  const el = $('#toast');
+  el.textContent = msg; el.className = 'toast ' + (kind || 'ok'); el.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 3500);
+}
+
+// ───────── Theme & language ─────────
+function applyPrefs() {
+  S.lang = store.get('vms_lang') || 'ar';
+  document.documentElement.lang = S.lang;
+  document.documentElement.dir = S.lang === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.classList.toggle('light', store.get('vms_theme') === 'light');
+}
+
+// ───────── Searchable dropdowns (every <select> in the app) ─────────
+function enhance(root) {
+  $$('select:not([data-plain]):not(.cb-native)', root || document).forEach(makeCombo);
+}
+function optHtml(o) {
+  return o.dataset.code
+    ? `<span class="cb-code">${esc(o.dataset.code)}</span><span class="cb-name">${esc(o.dataset.name || '')}</span>`
+    : `<span class="cb-name">${esc(o.textContent)}</span>`;
+}
+function makeCombo(sel) {
+  sel.classList.add('cb-native');
+  sel.tabIndex = -1;
+  const wrap = document.createElement('div');
+  wrap.className = 'cb';
+  sel.parentNode.insertBefore(wrap, sel);
+  wrap.appendChild(sel);
+  const inp = document.createElement('input');
+  inp.type = 'text'; inp.className = 'cb-input'; inp.autocomplete = 'off'; inp.spellcheck = false; inp.dir = 'auto';
+  inp.setAttribute('role', 'combobox');
+  const list = document.createElement('div');
+  list.className = 'cb-list'; list.hidden = true;
+  wrap.append(inp, list);
+  const first = sel.options[0];
+  inp.placeholder = first && first.value === '' && first.textContent ? first.textContent : t('typeToSearch');
+  const label = () => { const o = sel.selectedOptions[0]; return o && o.value !== '' ? o.textContent : ''; };
+  inp.value = label();
+  let items = [], active = -1;
+  const paint = () => {
+    $$('.cb-opt', list).forEach((el, i) => el.classList.toggle('active', i === active));
+    const a = list.children[active];
+    if (a && a.scrollIntoView) a.scrollIntoView({ block: 'nearest' });
+  };
+  const render = q => {
+    const nq = norm(q).trim();
+    items = Array.from(sel.options).filter(o => !nq || norm(o.textContent + ' ' + o.value).indexOf(nq) > -1).slice(0, 300);
+    active = nq ? (items.length ? 0 : -1) : items.findIndex(o => o.value === sel.value);
+    list.innerHTML = items.length
+      ? items.map((o, i) => `<div class="cb-opt ${o.value === '' ? 'cb-blank' : ''}" data-i="${i}">${optHtml(o)}</div>`).join('')
+      : `<div class="cb-none">${t('noResults')}</div>`;
+    paint();
+  };
+  const open = () => { if (sel.disabled || !list.hidden) return; render(''); list.hidden = false; wrap.classList.add('open'); inp.select(); };
+  const close = () => { list.hidden = true; wrap.classList.remove('open'); inp.value = label(); };
+  const pick = o => {
+    if (o && sel.value !== o.value) { sel.value = o.value; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+    close();
+  };
+  inp.addEventListener('focus', open);
+  inp.addEventListener('click', open);
+  inp.addEventListener('input', () => { list.hidden = false; wrap.classList.add('open'); render(inp.value); });
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault(); if (list.hidden) open();
+      active = Math.max(0, Math.min(items.length - 1, active + (e.key === 'ArrowDown' ? 1 : -1))); paint();
+    } else if (e.key === 'Enter') { if (!list.hidden) { e.preventDefault(); pick(items[active]); } }
+    else if (e.key === 'Escape') { e.stopPropagation(); close(); }
+    else if (e.key === 'Tab') close();
+  });
+  inp.addEventListener('blur', () => setTimeout(close, 150));
+  list.addEventListener('mousedown', e => {
+    e.preventDefault();
+    const el = e.target.closest('.cb-opt');
+    if (el) pick(items[+el.dataset.i]);
+  });
+  sel.addEventListener('change', () => { if (list.hidden) inp.value = label(); });
+}
+
+// ───────── Number inputs with live thousands separators ─────────
+function groupDigits(raw) {
+  let v = String(raw).replace(/[^\d.\-]/g, '');
+  const neg = v.charAt(0) === '-';
+  v = v.replace(/-/g, '');
+  const dot = v.indexOf('.');
+  let int = dot > -1 ? v.slice(0, dot) : v;
+  const dec = dot > -1 ? '.' + v.slice(dot + 1).replace(/\./g, '') : '';
+  int = int.replace(/^0+(?=\d)/, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return (neg ? '-' : '') + int + dec;
+}
+function formatNumInput(el) {
+  const caret = el.selectionStart == null ? el.value.length : el.selectionStart;
+  const keep = el.value.slice(0, caret).replace(/[^\d.\-]/g, '').length;
+  el.value = groupDigits(el.value);
+  let pos = 0, seen = 0;
+  while (pos < el.value.length && seen < keep) { if (/[\d.\-]/.test(el.value[pos])) seen++; pos++; }
+  try { el.setSelectionRange(pos, pos); } catch (e) {}
+}
+const fmtInputNum = v => (v === '' || v == null) ? '' : groupDigits(String(+v === +v ? +v : v));
+
+// ───────── Login ─────────
+function renderLogin(err) {
+  $('#root').innerHTML = `
+    <div class="login">
+      <form class="panel login-card form-panel" id="loginForm">
+        <div class="brand">${brandMark(S.branding)}<div><p class="brand-name">${esc((S.branding && S.branding.AppName) || t('app'))}</p><p class="brand-caption">${esc((S.branding && S.branding.CompanyName) || t('caption'))}</p></div></div>
+        <div><h1>${t('welcome')}</h1><p class="subtitle">${t('loginHint')}</p></div>
+        <label class="field">${t('f_username')}<input name="u" autocomplete="username" required></label>
+        <label class="field">${t('f_password')}<input name="p" type="password" autocomplete="current-password" required></label>
+        <div class="login-error">${esc(err || '')}</div>
+        <button class="button-primary" type="submit">${t('login')}</button>
+        <div style="display:flex;justify-content:space-between;gap:8px">
+          <button type="button" class="icon-button" data-act="lang">${S.lang === 'ar' ? 'EN' : 'ع'}</button>
+          <button type="button" class="icon-button" data-act="theme">☼</button>
+        </div>
+      </form>
+    </div>`;
+  showOutdated();
+}
+
+async function checkVersion() {
+  try { S.serverVersion = await run('getVersion'); } catch (e) { S.serverVersion = 'missing'; }
+  S.outdated = S.serverVersion !== CLIENT_VERSION;
+  showOutdated();
+  if (!S.outdated) { // logo / names on the sign-in screen
+    try { S.branding = await run('getBranding'); if (!S.user && $('#loginForm')) renderLogin(); } catch (e) {}
+  }
+}
+const brandMark = st => st && st.CompanyLogo ? `<img class="brand-logo" src="${esc(st.CompanyLogo)}" alt="">` : '<div class="brand-mark">↗</div>';
+
+/** Shrinks an uploaded image so the data URL fits in one Google Sheets cell (< 48 KB). */
+function logoDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('LOGO_INVALID'));
+      img.onload = () => {
+        let w = img.naturalWidth || 400, h = img.naturalHeight || 160;
+        const k = Math.min(1, 400 / w, 160 / h);
+        w = Math.max(1, Math.round(w * k)); h = Math.max(1, Math.round(h * k));
+        for (let step = 0; step < 6; step++) {
+          const c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          let url = c.toDataURL('image/png');
+          if (url.length > 48000) url = c.toDataURL('image/webp', .85);
+          if (url.length > 48000) url = c.toDataURL('image/jpeg', .85);
+          if (url.length <= 48000) return resolve(url);
+          w = Math.round(w * .75); h = Math.round(h * .75);
+        }
+        reject(new Error('LOGO_INVALID'));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+async function saveLogo(url) {
+  S.settings = await call('saveSettings', { CompanyLogo: url });
+  S.branding = Object.assign(S.branding || {}, { CompanyLogo: url });
+  toast(t('logoSaved'));
+  renderShell(); go('users');
+}
+function showOutdated() {
+  if (!S.outdated) return;
+  const host = $('#content') || $('.login-card');
+  if (host && !$('.outdated', host)) host.insertAdjacentHTML('afterbegin', `<div class="panel notice outdated">⚠ ${t('err_OUTDATED')}</div>`);
+}
+
+async function doLogin(form) {
+  const btn = form.querySelector('button[type=submit]');
+  btn.disabled = true;
+  try {
+    setLoading(1);
+    const r = await run('login', form.u.value, form.p.value);
+    onLogin(r);
+  } catch (e) {
+    renderLogin(errText(e));
+  } finally { setLoading(-1); }
+}
+
+function onLogin(r) {
+  S.token = r.token; S.user = r.user; S.settings = r.settings || {}; S.lookups = r.lookups;
+  S.lookups.currencies = S.lookups.currencies || [];
+  sess.set('vms_token', r.token);
+  renderShell();
+  startPolling();
+  const last = store.get('vms_view');
+  go(last && hasPage(last) ? last : S.user.pages[0]);
+}
+
+function signOutLocal() {
+  clearInterval(S.pollTimer);
+  S.token = ''; S.user = null; sess.set('vms_token', null);
+  closeDrawer(); renderLogin();
+}
+
+// ───────── Shell ─────────
+function renderShell() {
+  const u = S.user;
+  const nav = sec => {
+    const items = PAGES.filter(p => p.sec === sec && hasPage(p.id));
+    if (!items.length) return '';
+    return `<p class="nav-label">${t(sec)}</p><nav class="nav">${items.map(p =>
+      `<button class="nav-item" data-go="${p.id}"><span><span class="nav-glyph">${p.glyph}</span>${t('p_' + p.id)}</span><span class="badge red" data-badge="${p.id}" hidden></span></button>`).join('')}</nav>`;
+  };
+  $('#root').innerHTML = `
+  <div class="app ${store.get('vms_sidebar') === 'hidden' ? 'collapsed' : ''}" id="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">${brandMark(S.settings)}<div><p class="brand-name">${esc(S.settings.AppName || t('app'))}</p><p class="brand-caption">${esc(S.settings.CompanyName || t('caption'))}</p></div></div>
+      ${nav('workspace')}${nav('reports')}${nav('admin')}
+      <div class="profile"><div class="avatar">${esc((u.fullName || u.username)[0].toUpperCase())}</div>
+        <div><p class="profile-name">${esc(u.fullName || u.username)}</p><p class="profile-role">${esc(t(u.role))}</p></div>
+        <button class="icon-button" data-act="changePw" title="${t('changePw')}" aria-label="${t('changePw')}">🔑</button>
+        <button class="icon-button" data-act="logout" title="${t('logout')}" aria-label="${t('logout')}">⎋</button></div>
+    </aside>
+    <div class="scrim" id="scrim" data-act="menu"></div>
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-button menu-btn" data-act="menu" title="${t('toggleSidebar')}" aria-label="${t('toggleSidebar')}">☰</button>
+        <span class="eyebrow">${t('eyebrow')}</span>
+        <div class="top-actions">
+          ${hasPage('customers') ? `<input class="search" id="gsearch" type="search" placeholder="${t('search')}" aria-label="${t('search')}">` : ''}
+          <button class="icon-button bell" data-go="messages" title="${t('p_messages')}" aria-label="${t('p_messages')}">🔔<span class="bell-badge" id="bellBadge" hidden></span></button>
+          <button class="icon-button" data-act="lang" aria-label="Language">${S.lang === 'ar' ? 'EN' : 'ع'}</button>
+          <button class="icon-button" data-act="theme" aria-label="Theme">☼</button>
+        </div>
+      </header>
+      <div class="content" id="content"></div>
+    </main>
+  </div>`;
+  Object.keys(S.badges).forEach(k => setBadge(k, S.badges[k]));
+}
+
+async function refreshLookups() {
+  S.lookups = await call('getLookups');
+}
+
+function setBadge(page, n) {
+  S.badges[page] = n;
+  const el = $(`[data-badge="${page}"]`);
+  if (el) { el.textContent = n; el.hidden = !n; }
+  if (page === 'messages') { const b = $('#bellBadge'); if (b) { b.textContent = n > 99 ? '99+' : n; b.hidden = !n; } }
+}
+
+function go(view) {
+  if (!hasPage(view)) view = S.user.pages[0];
+  if (!view) { setContent(`<div class="panel empty">${t('err_NO_PERMISSION')}</div>`); return; }
+  S.view = view; store.set('vms_view', view);
+  $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.go === view));
+  $('#sidebar').classList.remove('open'); $('#scrim').classList.remove('open');
+  S.exportData = null;
+  VIEWS[view]();
+}
+const reload = () => VIEWS[S.view]();
+
+function heading(view, actions) {
+  return `<div class="page-heading"><div><h1>${t('p_' + view)}</h1><p class="subtitle">${t('s_' + view)}</p></div>
+    <div class="page-actions">${(actions || []).filter(Boolean).join('')}</div></div>`;
+}
+const btn = (act, label, cls, extra) => `<button class="${cls || 'button-primary'}" data-act="${act}" ${extra || ''}>${label}</button>`;
+const exportBtn = () => btn('export', '⬇ ' + t('exportXlsx'), 'button-ghost');
+const reportBtns = () => [exportBtn(), btn('print', '🖨 ' + t('print'), 'button-ghost')];
+const setContent = html => { $('#content').innerHTML = html; enhance($('#content')); showOutdated(); };
+
+// ───────── Generic building blocks ─────────
+/** list items: [value, label] or [value, label, code, name] for "code — name" options */
+function opts(list, value, withAll) {
+  return (withAll ? `<option value="">${t('all')}</option>` : '') +
+    list.map(o => `<option value="${esc(o[0])}" ${o[2] ? `data-code="${esc(o[2])}" data-name="${esc(o[3])}"` : ''} ${String(o[0]) === String(value == null ? '' : value) ? 'selected' : ''}>${esc(o[1])}</option>`).join('');
+}
+const groupOpts = () => S.lookups.groups.map(g => [g.id, g.id + ' — ' + g.name, g.id, g.name]);
+const collectorOpts = () => S.lookups.collectors.map(c => [c.username, c.name]);
+const statusOpts = () => ['Active', 'Inactive', 'Blocked'].map(s => [s, t(s)]);
+const customerOpts = () => S.lookups.customers.map(c => [c.account, c.account + ' — ' + c.name, c.account, c.name]);
+const currencyOpts = extra => {
+  const list = S.lookups.currencies.map(c => [c.code, c.code + (c.name ? ' — ' + c.name : ''), c.code, c.name || '']);
+  [baseCur(), localCur()].concat(extra || []).forEach(c => { if (c && !list.some(x => x[0] === c)) list.push([c, c, c, '']); });
+  return list;
+};
+
+function tool(key, label, type, value, options, noAll) {
+  let input;
+  if (type === 'select') input = `<select data-f="${key}">${opts(options, value, !noAll)}</select>`;
+  else if (type === 'customer') input = `<select data-f="${key}">${opts(customerOpts(), value, true)}</select>`;
+  else if (type === 'check') return `<label class="check" style="flex:0 0 auto"><input type="checkbox" data-f="${key}" ${value ? 'checked' : ''}>${label}</label>`;
+  else input = `<input data-f="${key}" type="${type || 'text'}" value="${esc(value)}" ${type === 'search' ? `placeholder="${t('typeToSearch')}"` : ''}>`;
+  return `<label class="tool">${esc(label)}${input}</label>`;
+}
+const curTool = f => tool('currency', t('displayCurrency'), 'select', f.currency || baseCur(), currencyOpts(), true);
+function readTools(el) {
+  const o = {};
+  $$('[data-f]', el).forEach(i => { o[i.dataset.f] = i.type === 'checkbox' ? i.checked : i.value.trim(); });
+  return o;
+}
+function missingNotice(r) {
+  if (!r) return '';
+  return dupNotice(r.dupCustomers) + (!r.missingRates || !r.missingRates.length ? '' :
+    `<div class="panel notice">⚠ ${t('missingRates')}: <b>${r.missingRates.map(esc).join('، ')}</b>
+    ${hasPage('currencies') ? `<button class="section-action" data-go="currencies">${t('p_currencies')} ←</button>` : ''}</div>`);
+}
+/** Repeated vendor rows in the sheet (merged automatically) → offer the cleanup. */
+function dupNotice(n) {
+  if (!n) return '';
+  return `<div class="panel notice">⚠ ${t('dupFound', { n: NI.format(n) })}
+    ${S.user.isAdmin && hasPage('import') ? btn('cleanDup', '🧹 ' + t('cleanDup'), 'button-ghost') : `<span>${t('askAdmin')}</span>`}</div>`;
+}
+
+/**
+ * cols: [{k, l, f(value,row) → html, num, cls, x(row) → export value}]
+ * opts: { click, actions(row,i) → html, foot: html, select(row) → bool, sortable }
+ */
+function table(view, cols, rows, o) {
+  o = o || {};
+  S.rows[view] = rows;
+  if (!rows.length) return `<div class="empty">${t('noData')}</div>`;
+  const st = S.lists[view];
+  const sortable = !!(st && o.sortable !== false);
+  const th = cols.map(c => {
+    const arrow = sortable && st.sort === c.k ? (st.desc ? ' ↓' : ' ↑') : '';
+    return `<th class="${c.num ? 'num' : ''} ${sortable && c.k ? 'sortable' : ''}" ${sortable && c.k ? `data-sort="${c.k}"` : ''}>${esc(c.l)}${arrow}</th>`;
+  }).join('');
+  const body = rows.map((r, i) => `<tr data-i="${i}" class="${o.click ? 'click' : ''}">` +
+    (o.select ? `<td class="actions-cell" data-label="">${o.select(r) ? `<label class="check"><input type="checkbox" data-sel="${esc(r.rowId)}"></label>` : ''}</td>` : '') +
+    cols.map(c => {
+      const v = r[c.k];
+      const html = c.f ? c.f(v, r) : c.num ? numCell(v) : bdi(v);
+      const title = c.cls === 'clip' ? ` title="${esc(v)}"` : '';
+      return `<td data-label="${esc(c.l)}" class="${c.num ? 'num' : ''} ${c.cls || ''}"${title}>${html}</td>`;
+    }).join('') +
+    (o.actions ? `<td class="actions-cell" data-label=""><div class="row-actions">${o.actions(r, i)}</div></td>` : '') +
+    '</tr>').join('');
+  return `<div class="table-wrap"><table class="cards" data-view="${view}"><thead><tr>${o.select ? '<th></th>' : ''}${th}${o.actions ? '<th></th>' : ''}</tr></thead>
+    <tbody>${body}</tbody>${o.foot ? `<tfoot>${o.foot}</tfoot>` : ''}</table></div>`;
+}
+
+/** Totals row. totals[k] = number, or {html} for custom content. */
+function footRow(cols, totals, label, lead, tail) {
+  return '<tr>' + (lead ? '<td data-label=""></td>' : '') + cols.map((c, i) => {
+    const v = totals[c.k];
+    const html = i === 0 ? esc(label) : v === undefined ? '' : (v && v.html) ? v.html : numCell(v);
+    return `<td data-label="${esc(c.l)}" class="${c.num ? 'num' : ''}">${html}</td>`;
+  }).join('') + (tail ? '<td></td>' : '') + '</tr>';
+}
+
+function pager(view, res) {
+  const pages = Math.max(1, Math.ceil(res.total / res.pageSize));
+  return `<div class="pager" data-view="${view}"><span>${NI.format(res.total)} ${t('rowsWord')} · ${t('page')} ${res.page} ${t('of')} ${pages}</span>
+    <div class="pager-btns">
+      <select data-pagesize data-plain>${opts([[25, '25'], [50, '50'], [100, '100'], [250, '250']], res.pageSize)}</select>
+      <button class="button-ghost" data-act="page" data-p="${res.page - 1}" ${res.page <= 1 ? 'disabled' : ''}>${t('prev')}</button>
+      <button class="button-ghost" data-act="page" data-p="${res.page + 1}" ${res.page >= pages ? 'disabled' : ''}>${t('next')}</button>
+    </div></div>`;
+}
+
+function stat(label, value, mark, markCls, foot) {
+  return `<article class="panel stat"><div class="stat-top"><div><div class="stat-label">${esc(label)}</div><div class="stat-value">${value}</div></div>
+    <div class="stat-mark ${markCls || ''}">${mark}</div></div>${foot ? `<div class="stat-foot">${foot}</div>` : ''}</article>`;
+}
+
+function permSummary(r) {
+  if (r.role === 'Admin') return t('all');
+  let pm = null;
+  try { pm = r.perms ? JSON.parse(r.perms) : null; } catch (e) { pm = null; }
+  if (!pm) return ['Add', 'Edit', 'Delete', 'Post'].filter(a => r['can' + a]).map(a => t('f_can' + a)).join(' · ');
+  return Object.keys(pm).map(pg => t('p_' + pg) + ': ' + pm[pg].map(a => t('perm_' + a)).join('/')).join(' · ') || '—';
+}
+
+const SETTING_INPUTS = ['AppName', 'CompanyName', 'CompanyAddress', 'CompanyPhone', 'CompanyEmail', 'WhatsAppCountryCode', 'SessionMinutes'];
+const SETTING_TEXTS = ['BankDetails', 'StatementNote'];
+
+// ───────── Data lists ─────────
+const editDel = () => (can('edit') ? `<button data-act="rowEdit" title="${t('edit')}">✎</button>` : '') + (can('delete') ? `<button data-act="rowDelete" title="${t('del')}">🗑</button>` : '');
+const LISTS = {
+  customers: {
+    entity: 'Vendors', id: 'account', click: true,
+    tools: s => [tool('q', t('searchLbl'), 'search', s.q), tool('group', t('f_group'), 'select', s.filters.group, groupOpts()),
+      tool('collector', t('f_collector'), 'select', s.filters.collector, collectorOpts()), tool('currency', t('f_currency'), 'select', s.filters.currency, currencyOpts()),
+      tool('status', t('f_status'), 'select', s.filters.status, statusOpts())],
+    cols: () => [
+      { k: 'account', l: t('f_account') }, { k: 'name', l: t('f_name') },
+      { k: 'group', l: t('f_group'), f: v => bdi(groupName(v)), x: r => groupName(r.group) }, { k: 'currency', l: t('f_currency') },
+      { k: 'creditLimit', l: t('f_creditLimit'), num: true }, { k: 'phone', l: t('f_phone') },
+      { k: 'email', l: t('f_email') }, { k: 'city', l: t('f_city') },
+      { k: 'collector', l: t('f_collector'), f: v => bdi(collectorName(v)), x: r => collectorName(r.collector) },
+      { k: 'status', l: t('f_status'), f: statusPill, x: r => t(r.status || 'Active') }],
+    actions: editDel
+  },
+  transactions: {
+    entity: 'Transactions', id: 'rowId',
+    tools: s => [tool('voucher', t('voucherSearch'), 'search', s.voucher), tool('q', t('searchLbl'), 'search', s.q),
+      tool('account', t('f_account'), 'customer', s.filters.account), tool('group', t('f_group'), 'select', s.filters.group, groupOpts()),
+      tool('type', t('f_type'), 'select', s.filters.type, S.lookups.transactionTypes.map(x => [x, x])),
+      tool('payMethod', t('f_payMethod'), 'select', s.filters.payMethod, payOpts()),
+      tool('currency', t('f_currency'), 'select', s.filters.currency, currencyOpts()),
+      tool('postStatus', t('f_postStatus'), 'select', s.filters.postStatus, [['Draft', t('Draft')], ['Posted', t('Posted')]]),
+      tool('dateFrom', t('from'), 'date', s.dateFrom), tool('dateTo', t('to'), 'date', s.dateTo)],
+    cols: () => [
+      { k: 'voucher', l: t('f_voucher') }, { k: 'date', l: t('f_date') }, { k: 'account', l: t('f_account') },
+      { k: 'customerName', l: t('f_name') }, { k: 'type', l: t('f_type') }, { k: 'description', l: t('f_description'), cls: 'clip' },
+      { k: 'dueDate', l: t('f_dueDate') }, { k: 'currency', l: t('f_currency') }, { k: 'amountCur', l: t('f_amountCur'), num: true },
+      { k: 'exchange', l: t('f_exchange'), num: true, f: v => NF6.format(+v || 0) },
+      { k: 'debitMST', l: t('debit'), num: true }, { k: 'creditMST', l: t('credit'), num: true },
+      { k: 'balance', l: t('runBalance'), num: true, f: (v, r) => r.postStatus === 'Draft' ? '—' : numCell(v) },
+      { k: 'payMethod', l: t('f_payMethod'), f: v => v ? pill(t(v), 'info') : '', x: r => r.payMethod ? t(r.payMethod) : '' },
+      { k: 'postStatus', l: t('f_postStatus'), f: statusPill, x: r => t(r.postStatus) }],
+    select: r => can('post') && r.postStatus === 'Draft',
+    actions: r => {
+      const draft = r.postStatus === 'Draft';
+      return (draft && (r.payMethod ? hasPage('receipts') && can('edit', 'receipts') : can('edit')) ? `<button data-act="rowEdit" title="${t('edit')}">✎</button>` : '') +
+        (draft && can('post') ? `<button data-act="rowPost" title="${t('post')}">⇪</button>` : '') +
+        (!draft && S.user.isAdmin ? `<button data-act="rowUnpost" title="${t('unpost')}">↺</button>` : '') +
+        ((draft || S.user.isAdmin) && can('delete') ? `<button data-act="rowDelete" title="${t('del')}">🗑</button>` : '');
+    }
+  },
+  receipts: {
+    entity: 'Transactions', id: 'rowId', receipts: true, click: true,
+    tools: s => [tool('voucher', t('voucherSearch'), 'search', s.voucher), tool('account', t('f_account'), 'customer', s.filters.account),
+      tool('payMethod', t('f_payMethod'), 'select', s.filters.payMethod, payOpts()),
+      tool('postStatus', t('f_postStatus'), 'select', s.filters.postStatus, [['Draft', t('Draft')], ['Posted', t('Posted')]]),
+      tool('dateFrom', t('from'), 'date', s.dateFrom), tool('dateTo', t('to'), 'date', s.dateTo)],
+    cols: () => [
+      { k: 'voucher', l: t('receiptNo') }, { k: 'date', l: t('f_date') }, { k: 'account', l: t('f_account') }, { k: 'customerName', l: t('f_name') },
+      { k: 'payMethod', l: t('f_payMethod'), f: v => pill(methodName(v), v ? 'info' : 'neutral'), x: r => methodName(r.payMethod) },
+      { k: 'debitMST', l: t('amount'), num: true }, { k: 'currency', l: t('f_currency') },
+      { k: 'chequeNo', l: t('f_chequeNo') }, { k: 'chequeDate', l: t('f_chequeDate') }, { k: 'bankName', l: t('f_bankName') }, { k: 'payRef', l: t('f_payRef') },
+      { k: 'allocText', l: t('allocText'), cls: 'clip' }, { k: 'collectedBy', l: t('f_collectedBy') },
+      { k: 'postStatus', l: t('f_postStatus'), f: statusPill, x: r => t(r.postStatus) }],
+    select: r => can('post') && r.postStatus === 'Draft',
+    actions: r => {
+      const draft = r.postStatus === 'Draft';
+      return (draft && r.payMethod && can('edit') ? `<button data-act="rowEdit" title="${t('edit')}">✎</button>` : '') +
+        (r.payMethod ? `<button data-act="rowReceipt" title="${t('printReceipt')}">🖨</button>` : '') +
+        (draft && can('post') ? `<button data-act="rowPost" title="${t('post')}">⇪</button>` : '') +
+        (!draft && S.user.isAdmin ? `<button data-act="rowUnpost" title="${t('unpost')}">↺</button>` : '') +
+        ((draft || S.user.isAdmin) && can('delete') ? `<button data-act="rowDelete" title="${t('del')}">🗑</button>` : '');
+    }
+  },
+  groups: {
+    entity: 'VendorGroups', id: 'groupId',
+    tools: s => [tool('q', t('searchLbl'), 'search', s.q)],
+    cols: () => [{ k: 'groupId', l: t('f_groupId') }, { k: 'groupName', l: t('f_groupName') }],
+    actions: editDel
+  },
+  currencies: {
+    entity: 'Currencies', id: 'code',
+    tools: s => [tool('q', t('searchLbl'), 'search', s.q)],
+    cols: () => [{ k: 'code', l: t('f_code') }, { k: 'name', l: t('f_curName') },
+      { k: 'rate', l: t('f_rate'), num: true, f: (v, r) => `${NF6.format(+v || 0)} <small class="cur">${esc(baseCur())}</small>` },
+      { k: 'inverse', l: '1 ' + baseCur() + ' =', num: true, f: (v, r) => r.rate > 0 ? `${NF6.format(1 / r.rate)} <small class="cur">${esc(r.code)}</small>` : '—', x: r => r.rate > 0 ? 1 / r.rate : '' },
+      { k: 'active', l: t('f_active'), f: v => pill(v ? t('Active') : t('Inactive'), v ? 'healthy' : 'neutral'), x: r => r.active ? 1 : 0 },
+      { k: 'updatedAt', l: t('f_updatedAt') }],
+    actions: editDel
+  },
+  users: {
+    entity: 'Users', id: 'userId',
+    tools: s => [tool('q', t('searchLbl'), 'search', s.q)],
+    cols: () => [
+      { k: 'username', l: t('f_username') }, { k: 'fullName', l: t('f_fullName') }, { k: 'role', l: t('f_role'), f: v => pill(t(v), v === 'Admin' ? 'info' : 'neutral') },
+      { k: 'pages', l: t('f_pages'), f: (v, r) => r.role === 'Admin' ? t('all') : t('pagesN', { n: String(v || '').split(',').filter(String).length }) },
+      { k: 'perms', l: t('f_actions'), cls: 'clip', f: (v, r) => esc(permSummary(r)), x: r => permSummary(r) },
+      { k: 'isCollector', l: t('f_isCollector'), f: v => v ? '✓' : '' }, { k: 'scope', l: t('f_scope'), f: v => t('scope_' + (v || 'all')) },
+      { k: 'active', l: t('f_active'), f: v => pill(v ? t('Active') : t('Inactive'), v ? 'healthy' : 'neutral') }, { k: 'lastLogin', l: t('f_lastLogin') }],
+    actions: () => `<button data-act="rowEdit">✎</button><button data-act="rowDelete">🗑</button>`
+  },
+  followlog: {
+    entity: 'FollowUps', id: 'id',
+    tools: s => [tool('q', t('searchLbl'), 'search', s.q), tool('account', t('f_account'), 'customer', s.filters.account),
+      tool('status', t('f_status'), 'select', s.filters.status, ['Open', 'Done', 'Broken'].map(x => [x, t(x)])),
+      tool('dateFrom', t('from'), 'date', s.dateFrom), tool('dateTo', t('to'), 'date', s.dateTo)],
+    cols: () => [
+      { k: 'actionDate', l: t('f_actionDate') }, { k: 'account', l: t('f_account') }, { k: 'customerName', l: t('f_name') },
+      { k: 'actionType', l: t('f_actionType'), f: v => esc(t(v)), x: r => t(r.actionType) },
+      { k: 'note', l: t('f_note'), cls: 'clip' }, { k: 'promiseDate', l: t('f_promiseDate') }, { k: 'promiseAmount', l: t('f_promiseAmount'), num: true },
+      { k: 'status', l: t('f_status'), f: statusPill, x: r => t(r.status) }, { k: 'createdBy', l: t('f_createdBy') }],
+    actions: editDel
+  }
+};
+
+function listState(view) {
+  return S.lists[view] = S.lists[view] || { q: '', voucher: '', filters: {}, page: 1, pageSize: 25, sort: '', desc: undefined, dateFrom: '', dateTo: '' };
+}
+
+function listBlock(view) {
+  const cfg = LISTS[view], s = listState(view);
+  return `<div class="panel view-tools" data-list="${view}">${cfg.tools(s).join('')}</div>
+    <section class="panel section" style="margin-top:0"><div id="list_${view}"><div class="skeleton">${t('loading')}</div></div></section>`;
+}
+
+async function loadList(view) {
+  const cfg = LISTS[view], s = listState(view);
+  const query = { q: s.q, voucher: s.voucher, filters: s.filters, page: s.page, pageSize: s.pageSize, sort: s.sort, desc: s.desc, dateFrom: s.dateFrom, dateTo: s.dateTo, receipts: !!cfg.receipts };
+  const res = await call('listRecords', cfg.entity, query);
+  s.page = res.page;
+  const cols = cfg.cols();
+  const sel = can('post') ? cfg.select : null;
+  let foot = '';
+  if (view === 'transactions' && res.rows.length) {
+    const lc = res.totals.localCurrency;
+    foot = footRow(cols, {
+      debitMST: { html: numCell(res.totals.debit) + curTag(lc) }, creditMST: { html: numCell(res.totals.credit) + curTag(lc) },
+      balance: { html: `<small class="cur">${t('net')}</small> ${numCell(res.totals.net)}` }
+    }, t('all') + ' (' + NI.format(res.total) + ')', !!sel, !!cfg.actions);
+  }
+  const el = $('#list_' + view);
+  if (!el) return;
+  el.innerHTML = table(view, cols, res.rows, { click: !!cfg.click, actions: cfg.actions, select: sel, foot: foot }) + pager(view, res);
+  const exp = S.exportData = { name: view, cols: cols, rows: res.rows,
+    fetchAll: async () => (await call('listRecords', cfg.entity, Object.assign({}, query, { all: true }))).rows };
+  if (cfg.entity === 'Transactions') exp.totals = { debitMST: res.totals.debit, creditMST: res.totals.credit };
+  if (view === 'receipts' && res.totals.byMethod) {
+    const bm = res.totals.byMethod, lc = res.totals.localCurrency;
+    exp.summary = [['Cash', 'Cash'], ['Cheque', 'Cheque'], ['Transfer', 'Transfer'], ['Other', 'OtherMethod']].map(x => [t(x[1]), money(bm[x[0]]) + ' ' + lc]);
+    const box = $('#recStats');
+    if (box) box.innerHTML = stat(t('Cash'), money(bm.Cash) + curTag(lc), '¤', 'green') + stat(t('Cheque'), money(bm.Cheque) + curTag(lc), '✎', 'amber') +
+      stat(t('Transfer'), money(bm.Transfer) + curTag(lc), '⇄', '') + stat(t('OtherMethod'), money(bm.Other) + curTag(lc), '…', '');
+  }
+}
+
+function onListTools(view, el) {
+  const s = listState(view), v = readTools(el);
+  s.q = v.q || ''; s.voucher = v.voucher || ''; s.dateFrom = v.dateFrom || ''; s.dateTo = v.dateTo || '';
+  s.filters = {};
+  Object.keys(v).forEach(k => { if (['q', 'voucher', 'dateFrom', 'dateTo'].indexOf(k) === -1) s.filters[k] = v[k]; });
+  s.page = 1;
+  loadList(view);
+}
+
+// ───────── Forms ─────────
+const FORMS = {
+  Vendors: () => [
+    { k: 'account', req: 1, lock: 1 }, { k: 'name', req: 1 }, { k: 'group', type: 'select', o: groupOpts() },
+    { k: 'currency', type: 'select', o: currencyOpts() },
+    { k: 'contactPerson' }, { k: 'phone', type: 'tel' }, { k: 'email', type: 'email' }, { k: 'city' }, { k: 'country' }, { k: 'taxNo' },
+    { k: 'creditLimit', type: 'number' }, { k: 'termsDays', type: 'number' },
+    { k: 'collector', type: 'select', o: collectorOpts(), hide: !S.user.isAdmin && S.user.scope === 'own' },
+    { k: 'status', type: 'select', o: statusOpts(), noAll: 1 }, { k: 'address', type: 'textarea', span: 1 }, { k: 'notes', type: 'textarea', span: 1 }],
+  Transactions: () => [
+    { k: 'voucher', req: 1 }, { k: 'type', type: 'select', o: S.lookups.transactionTypes.map(x => [x, x]), noAll: 1 },
+    { k: 'account', type: 'customer', req: 1, span: 1 }, { k: 'date', type: 'date', req: 1 }, { k: 'dueDate', type: 'date' },
+    { k: 'currency', type: 'select', o: currencyOpts(), noAll: 1 }, { k: 'exchange', type: 'number' },
+    { k: 'amountCur', type: 'number', hint: t('amountHint'), span: 1 },
+    { k: 'debitMST', type: 'number' }, { k: 'creditMST', type: 'number' }, { k: 'description', type: 'textarea', span: 1 }],
+  VendorGroups: () => [{ k: 'groupId', req: 1, lock: 1 }, { k: 'groupName', req: 1 }],
+  Currencies: () => [{ k: 'code', req: 1, lock: 1 }, { k: 'name', label: 'f_curName' },
+    { k: 'rate', type: 'number', req: 1, hint: t('rateOf', { c: (FORM && FORM.rec.code) || '…', b: baseCur() }) }, { k: 'active', type: 'check' }],
+  FollowUps: () => [
+    { k: 'account', type: 'customer', req: 1, span: 1 }, { k: 'voucher' }, { k: 'actionDate', type: 'date', req: 1 },
+    { k: 'actionType', type: 'select', o: ['Call', 'Email', 'Visit', 'WhatsApp', 'Promise', 'Other'].map(x => [x, t(x)]), noAll: 1 },
+    { k: 'promiseDate', type: 'date' }, { k: 'promiseAmount', type: 'number' },
+    { k: 'status', type: 'select', o: ['Open', 'Done', 'Broken'].map(x => [x, t(x)]), noAll: 1 }, { k: 'note', type: 'textarea', span: 1, req: 1 }],
+  Users: () => [
+    { k: 'username', req: 1 }, { k: 'fullName', req: 1 }, { k: 'email', type: 'email' }, { k: 'password', type: 'password', hint: t('passwordHint') },
+    { k: 'role', type: 'select', o: [['User', t('User')], ['Admin', t('Admin')]], noAll: 1 },
+    { k: 'scope', type: 'select', o: [['all', t('scope_all')], ['own', t('scope_own')]], noAll: 1 },
+    { k: 'active', type: 'check' }, { k: 'isCollector', type: 'check' }, { k: 'pages', type: 'perm', span: 1 }]
+};
+const ENTITY_TITLE = { Vendors: 'p_customers', Transactions: 'p_transactions', VendorGroups: 'p_groups', FollowUps: 'p_followup', Users: 'p_users', Currencies: 'p_currencies' };
+const ID_KEY = { Vendors: 'account', Transactions: 'rowId', VendorGroups: 'groupId', FollowUps: 'id', Users: 'userId', Currencies: 'code' };
+let FORM = null;
+
+function fieldHtml(f, rec, isNew) {
+  const v = rec[f.k] == null ? '' : rec[f.k];
+  const label = t(f.label || ('f_' + f.k)) + (f.req ? ' <span class="req">*</span>' : '');
+  const req = f.req ? 'required' : '';
+  const cls = 'field' + (f.span ? ' span2' : '');
+  const hint = f.hint ? `<span class="field-hint" data-hint="${f.k}">${esc(f.hint)}</span>` : '';
+  switch (f.type) {
+    case 'select': {
+      const o = f.o.slice();
+      if (v !== '' && !o.some(x => String(x[0]) === String(v))) o.push([v, v]);
+      return `<label class="${cls}">${label}<select name="${f.k}" ${req}>${f.noAll ? '' : '<option value=""></option>'}${opts(o, v)}</select>${hint}</label>`;
+    }
+    case 'textarea': return `<label class="${cls}">${label}<textarea name="${f.k}" ${req}>${esc(v)}</textarea>${hint}</label>`;
+    case 'customer': return `<label class="${cls}">${label}<select name="${f.k}" ${req}><option value=""></option>${opts(customerOpts(), v)}</select>${hint}</label>`;
+    case 'number': return `<label class="${cls}">${label}<input name="${f.k}" type="text" inputmode="decimal" data-num value="${esc(fmtInputNum(v))}" ${req}>${hint}</label>`;
+    case 'check': return `<label class="check" style="align-self:end;min-height:34px"><input type="checkbox" name="${f.k}" ${v ? 'checked' : ''}>${t('f_' + f.k)}</label>`;
+    case 'flags': return `<div class="${cls}">${label}<div class="check-grid">${['canAdd', 'canEdit', 'canDelete', 'canPost'].map(k =>
+      `<label class="check"><input type="checkbox" name="${k}" ${rec[k] ? 'checked' : ''}>${t('f_' + k)}</label>`).join('')}</div></div>`;
+    case 'perm': { // page × (view, add, edit, delete, post)
+      const view = String(rec.pages || '').split(',').map(x => x.trim());
+      let pm = null;
+      try { pm = rec.perms ? JSON.parse(rec.perms) : null; } catch (e) { pm = null; }
+      const has = (pg, a) => pm ? !!(pm[pg] && pm[pg].indexOf(a) > -1) : view.indexOf(pg) > -1 && !!rec['can' + a[0].toUpperCase() + a.slice(1)];
+      const cols = ['view'].concat(ACTIONS);
+      return `<div class="${cls}">${t('permTitle')}<div class="table-wrap perm-wrap"><table class="perm"><thead><tr><th>${t('pageCol')}</th>${cols.map(c =>
+        `<th><label class="check"><input type="checkbox" data-permcol="${c}">${t('perm_' + c)}</label></th>`).join('')}</tr></thead>
+        <tbody>${PAGES.filter(p => p.id !== 'messages').map(p => `<tr data-pg="${p.id}"><td>${p.glyph} ${t('p_' + p.id)}</td>
+          <td><input type="checkbox" name="v_${p.id}" data-perm="view" ${view.indexOf(p.id) > -1 ? 'checked' : ''}></td>
+          ${ACTIONS.map(a => (PAGE_ACTS[p.id] || []).indexOf(a) > -1
+            ? `<td><input type="checkbox" name="a_${p.id}_${a}" data-perm="${a}" ${has(p.id, a) ? 'checked' : ''}></td>` : '<td class="na">—</td>').join('')}</tr>`).join('')}</tbody></table></div>
+        <span class="field-hint">${t('permHint')}</span></div>`;
+    }
+    case 'pages': {
+      const sel = String(v || '').split(',');
+      return `<div class="${cls}">${label}<div class="check-grid">${PAGES.filter(p => p.id !== 'messages').map(p =>
+        `<label class="check"><input type="checkbox" name="page" value="${p.id}" ${sel.indexOf(p.id) > -1 ? 'checked' : ''}>${t('p_' + p.id)}</label>`).join('')}</div></div>`;
+    }
+    default: return `<label class="${cls}">${label}<input name="${f.k}" type="${f.type || 'text'}" value="${esc(v)}" ${req} ${f.lock && !isNew ? 'readonly' : ''} ${f.type === 'password' ? 'autocomplete="new-password"' : ''}>${hint}</label>`;
+  }
+}
+
+function openForm(entity, rec, isNew) {
+  rec = Object.assign({}, rec || {});
+  FORM = { entity, rec, isNew };
+  const fields = FORMS[entity]().filter(f => !f.hide);
+  FORM.fields = fields;
+  openDrawer(`
+    <div class="drawer-head"><h2>${isNew ? '＋ ' : '✎ '}${t(ENTITY_TITLE[entity])}</h2><button class="icon-button" data-act="closeDrawer" aria-label="${t('close')}">×</button></div>
+    <form class="form-panel" id="recForm" style="padding:16px 0 0">
+      <div class="form-grid">${fields.map(f => fieldHtml(f, rec, isNew)).join('')}</div>
+      <div class="form-actions"><button type="button" class="button-ghost" data-act="closeDrawer">${t('cancel')}</button><button class="button-primary" type="submit">${t('save')}</button></div>
+    </form>`, entity === 'Users');
+}
+
+/** Transaction form: amount × rate → debit/credit (negative = credit / vendor invoice), currency → exchange rate. */
+function txFormCalc(form, changed) {
+  const E = form.elements, set = (n, v) => { E[n].value = v === '' ? '' : groupDigits(String(Math.round(v * 100) / 100)); };
+  if (changed === 'currency') {
+    const r = rateOf(E.currency.value), l = rateOf(localCur());
+    if (r && l) E.exchange.value = groupDigits(String(+(r / l).toFixed(6)));
+    changed = 'amountCur';
+  }
+  const ex = parseNum(E.exchange.value) || 1;
+  if (changed === 'amountCur' || changed === 'exchange') {
+    const amt = parseNum(E.amountCur.value);
+    if (!amt) return;
+    const local = Math.abs(amt) * ex;
+    if (amt < 0) { set('creditMST', local); set('debitMST', 0); } else { set('debitMST', local); set('creditMST', 0); }
+  } else if (changed === 'debitMST' || changed === 'creditMST') {
+    const d = parseNum(E.debitMST.value), c = parseNum(E.creditMST.value);
+    if (d || c) set('amountCur', (d - c) / ex);
+  }
+}
+
+async function submitForm(form) {
+  const { entity, rec, isNew, fields } = FORM;
+  const data = {};
+  if (!isNew) data[ID_KEY[entity]] = rec[ID_KEY[entity]];
+  fields.forEach(f => {
+    if (f.type === 'flags') ['canAdd', 'canEdit', 'canDelete', 'canPost'].forEach(k => { data[k] = form.elements[k].checked; });
+    else if (f.type === 'pages') data.pages = $$('input[name=page]:checked', form).map(i => i.value).join(',');
+    else if (f.type === 'perm') {
+      const perms = {}, pages = [];
+      $$('tr[data-pg]', form).forEach(tr => {
+        const pg = tr.dataset.pg;
+        if ($('[data-perm=view]', tr).checked) pages.push(pg);
+        const acts = $$('input[data-perm]:not([data-perm=view]):checked', tr).map(i => i.dataset.perm);
+        if (acts.length) perms[pg] = acts;
+      });
+      data.pages = pages.join(','); data.perms = perms;
+    }
+    else if (f.type === 'check') data[f.k] = form.elements[f.k].checked;
+    else if (f.type === 'number') data[f.k] = form.elements[f.k].value.trim() === '' ? '' : parseNum(form.elements[f.k].value);
+    else data[f.k] = form.elements[f.k].value.trim();
+  });
+  const b = form.querySelector('button[type=submit]'); b.disabled = true;
+  try {
+    await call('saveRecord', entity, data, isNew);
+    toast(t('saved'));
+    closeDrawer();
+    if (['Vendors', 'VendorGroups', 'Users', 'Currencies'].indexOf(entity) > -1) await refreshLookups();
+    reload();
+  } catch (e) { b.disabled = false; }
+}
+
+// ───────── Drawer ─────────
+function openDrawer(html, wide) {
+  const d = $('#drawer');
+  d.className = 'drawer' + (wide ? ' wide' : '');
+  d.innerHTML = html; d.scrollTop = 0;
+  enhance(d);
+  $('#overlay').classList.add('open');
+}
+function closeDrawer() { $('#overlay').classList.remove('open'); }
+
+/** Vendor 360: balance owed, overdue, contact data, statement with running balance, follow-ups. */
+async function openCustomer(account, from, to, keep, currency) {
+  if (!['customers', 'balances', 'overdue', 'followup', 'collection', 'dashboard', 'paid', 'credit', 'transactions'].some(hasPage)) return;
+  if (!keep) openDrawer(`<div class="skeleton">${t('loading')}</div>`, true);
+  const r = await call('customerStatement', account, from || '', to || '', currency || '');
+  S.lastStmt = r;
+  const c = r.customer || {};
+  const cc = r.currency;
+  const kv = (k, v) => `<div><div class="drawer-label">${t(k)}</div><p>${v || '—'}</p></div>`;
+  const cols = [{ k: 'date', l: t('f_date') }, { k: 'voucher', l: t('f_voucher') }, { k: 'type', l: t('f_type') },
+    { k: 'description', l: t('f_description'), cls: 'clip' }, { k: 'currency', l: t('f_currency') }, { k: 'amountCur', l: t('f_amountCur'), num: true },
+    { k: 'debit', l: t('debit') + ' ' + cc, num: true }, { k: 'credit', l: t('credit') + ' ' + cc, num: true }, { k: 'balance', l: t('balance') + ' ' + cc, num: true }];
+  const blank = n => '<td></td>'.repeat(n);
+  S.exportData = { name: 'statement_' + account, cols: cols, rows: r.lines };
+  openDrawer(`
+    <div class="drawer-head"><div><h2>${bdi(c.name)}</h2><p style="margin:4px 0 0">${esc(c.account)} · ${bdi(groupName(c.group))} · ${esc(c.currency || '')} · ${statusPill(c.status)}</p></div>
+      <button class="icon-button" data-act="closeDrawer" aria-label="${t('close')}">×</button></div>
+    ${missingNotice(r)}
+    <section class="stats four" style="margin:16px 0 0">
+      ${stat(t('balance'), `${money(r.closing)}${curTag(cc)}`, '$', 'green')}
+      ${stat(t('openAmount'), `${money(r.openAmount)}${curTag(cc)}`, '◔', '')}
+      ${stat(t('overdueAmt'), `${money(r.overdueAmount)}${curTag(cc)}`, '!', 'red')}
+      ${stat(t('maxDays'), NI.format(r.maxDays) + ' <small>' + t('day') + '</small>', '⏱', 'amber')}
+    </section>
+    <div class="panel"><div class="drawer-label" style="margin-bottom:10px">${t('customerInfo')}</div><div class="kv">
+      ${kv('f_contactPerson', bdi(c.contactPerson))}${kv('f_phone', c.phone ? `<a style="color:inherit" href="tel:${esc(c.phone)}">${esc(c.phone)}</a>` : '')}
+      ${kv('f_email', c.email ? `<a style="color:inherit" href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : '')}${kv('f_address', bdi([c.address, c.city, c.country].filter(Boolean).join('، ')))}
+      ${kv('f_collector', bdi(collectorName(c.collector)))}${kv('f_currency', esc(c.currency))}
+      ${kv('f_creditLimit', c.creditLimit ? money(c.creditLimit) + curTag(c.currency) : '')}${kv('f_termsDays', esc(c.termsDays))}
+      ${kv('f_taxNo', esc(c.taxNo))}${kv('f_createdAt', esc(c.createdAt))}</div>
+      ${c.notes ? `<div class="drawer-label">${t('f_notes')}</div><p>${esc(c.notes)}</p>` : ''}
+      <div class="card-actions">
+        ${hasPage('customers') && can('edit', 'customers') ? btn('custEdit', '✎ ' + t('edit'), 'button-ghost', `data-acc="${esc(c.account)}"`) : ''}
+        ${hasPage('receipts') && can('add', 'receipts') ? btn('newReceipt', '⊕ ' + t('collect'), 'button-primary', `data-acc="${esc(c.account)}"`) : ''}
+        ${hasPage('followup') && can('add', 'followup') ? btn('newFollow', '☎ ' + t('logAction'), 'button-ghost', `data-acc="${esc(c.account)}"`) : ''}
+        ${hasPage('statement') ? btn('goStatement', '§ ' + t('p_statement'), 'button-ghost', `data-acc="${esc(c.account)}"`) : ''}
+        ${btn('compose', '✉ ' + t('msgColleague'), 'button-ghost', `data-acc="${esc(c.account)}"`)}
+        ${exportBtn()}${btn('stmtPrint', '🖨 ' + t('print'), 'button-ghost')}
+      </div></div>
+    <div class="panel flush">
+      <div class="section-head"><h3 class="section-title">${t('statement')}</h3></div>
+      <div class="view-tools" id="stmtTools" data-acc="${esc(c.account)}" style="margin:0">
+        ${tool('from', t('from'), 'date', from || '')}${tool('to', t('to'), 'date', to || '')}
+        ${tool('currency', t('displayCurrency'), 'select', cc, currencyOpts([String(c.currency || '').toUpperCase()]), true)}
+        <div class="tool-btns">${btn('stmtApply', t('apply'))}</div></div>
+      <div class="table-wrap"><table class="cards"><thead><tr>${cols.map(x => `<th class="${x.num ? 'num' : ''}">${esc(x.l)}</th>`).join('')}</tr></thead>
+        <tbody><tr><td data-label="">${t('opening')}</td>${blank(7)}<td class="num" data-label="${t('balance')}">${numCell(r.opening)}</td></tr>
+        ${r.lines.map(l => '<tr>' + cols.map(x => `<td data-label="${esc(x.l)}" class="${x.num ? 'num' : ''} ${x.cls || ''}"${x.cls === 'clip' ? ` title="${esc(l[x.k])}"` : ''}>${x.num ? numCell(l[x.k]) : bdi(l[x.k])}</td>`).join('') + '</tr>').join('')}</tbody>
+        <tfoot><tr><td data-label="">${t('closing')}</td>${blank(7)}<td class="num" data-label="${t('balance')}">${numCell(r.closing)}${curTag(cc)}</td></tr></tfoot></table></div></div>
+    ${r.followUps.length ? `<div class="panel"><div class="drawer-label">${t('followLog')}</div>${r.followUps.map(f =>
+      `<p><b style="color:var(--text)">${esc(f.actionDate)} · ${esc(t(f.actionType))}</b> ${statusPill(f.status)}<br>${esc(f.note)}${f.promiseDate ? `<br>${t('f_promiseDate')}: ${esc(f.promiseDate)} — ${money(f.promiseAmount)}` : ''}</p>`).join('')}</div>` : ''}
+  `, true);
+}
+
+// ───────── Views ─────────
+const VIEWS = {
+  async dashboard() {
+    const f = S.rep.dashboard = S.rep.dashboard || {};
+    const actions = () => [`<div class="view-tools inline-tools" id="dashTools">${curTool(f)}</div>`,
+      hasPage('transactions') && can('add', 'transactions') && btn('newTx', '＋ ' + t('addTransaction'))];
+    setContent(heading('dashboard', actions()) + `<div class="skeleton">${t('loading')}</div>`);
+    const d = await call('getDashboard', f.currency || '');
+    setBadge('overdue', d.kpi.overdueCustomers); setBadge('followup', d.kpi.overdueCustomers); setBadge('credit', d.kpi.creditOver);
+    if (S.view !== 'dashboard') return;
+    const cc = d.currency;
+    const max = Math.max(1, ...d.months.map(m => Math.max(m.debit, m.credit)));
+    const totalB = Object.values(d.buckets).reduce((a, b) => a + b, 0) || 1;
+    const pct = k => d.buckets[k] / totalB * 100;
+    const p1 = pct('b1'), p2 = p1 + pct('b2'), p3 = p2 + pct('b3');
+    const donutBg = Object.values(d.buckets).some(Boolean)
+      ? `conic-gradient(var(--green) 0 ${p1}%, var(--amber) ${p1}% ${p2}%, var(--orange) ${p2}% ${p3}%, var(--red) ${p3}% 100%)` : 'var(--surface-raised)';
+    const topCols = [{ k: 'account', l: t('f_account') }, { k: 'name', l: t('f_name') }, { k: 'custCurrency', l: t('f_currency') },
+      { k: 'collector', l: t('f_collector'), f: v => bdi(collectorName(v)), x: r => collectorName(r.collector) },
+      { k: 'balance', l: t('balance') + ' ' + cc, num: true }, { k: 'overdue', l: t('overdueAmt') + ' ' + cc, num: true },
+      { k: 'maxDays', l: t('maxDays'), f: v => v ? daysPill(v) : pill('0', 'healthy') }];
+    S.exportData = { name: 'top_vendors', cols: topCols, rows: d.top };
+    setContent(heading('dashboard', actions()) + missingNotice(d) + `
+      <section class="stats four">
+        ${stat(t('k_customers'), NI.format(d.kpi.customers), '♙', '', `<span class="trend">${NI.format(d.kpi.active)}</span><span>${t('activeWord')}</span>`)}
+        ${stat(t('k_receivable'), `${money(d.kpi.receivable)}${curTag(cc)}`, '$', 'green', d.kpi.drafts ? `<span class="trend down">${NI.format(d.kpi.drafts)}</span><span>${t('drafts')}</span>` : '')}
+        ${stat(t('k_overdue'), `${money(d.kpi.overdue)}${curTag(cc)}`, '!', 'red', `<span class="trend down">${NI.format(d.kpi.overdueCustomers)}</span><span>${t('lateCustomers')} · ${t('avgLate', { n: d.kpi.avgDays })}</span>`)}
+        ${stat(t('k_collected'), `${money(d.kpi.collectedMTD)}${curTag(cc)}`, '✓', 'amber')}
+      </section>
+      <div class="section-head" style="padding:0 0 10px;border:0"><h2 class="section-title">${t('byCurrency')}</h2></div>
+      <div class="cur-grid">${d.byCurrency.map(x => `
+        <article class="panel risk-item">
+          <div class="card-head"><h3 style="margin:0;font-size:18px">${esc(x.currency)}</h3><span class="badge">${NI.format(x.customers)} ${t('customersCount')}</span></div>
+          <div class="mini-stats">
+            <div><span>${t('balance')}</span><b>${money(x.balance)}</b></div>
+            <div><span>${t('overdueAmt')}</span><b class="neg">${money(x.overdue)}</b></div>
+            <div><span>${t('overdueCustomers')}</span><b>${NI.format(x.overdueCustomers)}</b></div>
+            <div><span>${t('creditOverN')}</span><b class="${x.creditOver ? 'neg' : ''}">${NI.format(x.creditOver)}</b></div>
+          </div></article>`).join('')}</div>
+      <section class="charts section">
+        <article class="panel">
+          <div class="section-head"><h2 class="section-title">${t('monthly')} (${esc(cc)})</h2>
+            <div class="legend" style="display:flex;gap:12px"><span class="legend-row"><i class="dot blue"></i>${t('invoicesL')}</span><span class="legend-row"><i class="dot"></i>${t('paymentsL')}</span></div></div>
+          <div class="chart-body">${d.months.map(m => `<div class="bar-group" title="${esc(m.key)}: ${money(m.debit)} / ${money(m.credit)}">
+            <div class="bar-pair"><div class="bar" style="height:${m.debit / max * 100}%"></div><div class="bar alt" style="height:${m.credit / max * 100}%"></div></div><span>${esc(m.label)}</span></div>`).join('')}</div>
+        </article>
+        <article class="panel">
+          <div class="section-head"><h2 class="section-title">${t('aging')}</h2>${hasPage('overdue') ? `<button class="section-action" data-go="overdue">${t('details')}</button>` : ''}</div>
+          <div class="donut-wrap"><div class="donut" style="background:${donutBg}"><div class="donut-center"><div>${NI.format(d.kpi.overdueCustomers)}<small>${t('lateCustomers')}</small></div></div></div>
+            <div class="legend">${['b1', 'b2', 'b3', 'b4'].map((b, i) => `<div class="legend-row"><i class="dot ${['', 'amber', 'orange', 'red'][i]}"></i>${t(b)} <b>${short(d.buckets[b])}</b></div>`).join('')}</div></div>
+        </article>
+      </section>
+      <section class="section dual">
+        <article class="panel">
+          <div class="section-head"><h2 class="section-title">${t('mtdByMethod')} (${esc(cc)})</h2>${hasPage('collections') ? `<button class="section-action" data-go="collections">${t('details')}</button>` : ''}</div>
+          <div class="method-bars">${[['Cash', 'green'], ['Cheque', 'amber'], ['Transfer', 'accent'], ['Other', 'subtle']].map(([k, col]) => {
+            const v = d.collections.byMethod[k] || 0, tot = d.collections.totals.total || 0, pc = tot ? Math.round(v / tot * 100) : 0;
+            return `<div class="mrow"><span>${t(k === 'Other' ? 'OtherMethod' : k)}</span><div class="meter"><i style="width:${pc}%;background:var(--${col})"></i></div><b dir="ltr">${money(v)}</b><small>${pc}%</small></div>`;
+          }).join('')}
+            <div class="mrow total"><span>${t('totalCollected')}</span><div></div><b dir="ltr">${money(d.collections.totals.total)}</b><small>${NI.format(d.collections.totals.count)}</small></div></div>
+          ${table('dashCol', [{ k: 'name', l: t('f_collectedBy'), f: (v, x) => bdi(v || t('unassigned')) }, { k: 'Cash', l: t('Cash'), num: true }, { k: 'Cheque', l: t('Cheque'), num: true },
+            { k: 'Transfer', l: t('Transfer'), num: true }, { k: 'total', l: t('totalCollected'), num: true }], d.collections.collectors, { sortable: false })}
+        </article>
+        <article class="panel">
+          <div class="section-head"><h2 class="section-title">${t('mtdPerformance')} (${esc(cc)})</h2>${hasPage('performance') ? `<button class="section-action" data-go="performance">${t('details')}</button>` : ''}</div>
+          ${table('dashPerf', [{ k: 'name', l: t('f_collector'), f: (v) => bdi(v || t('unassigned')) }, { k: 'companies', l: t('companiesN'), num: true, f: v => NI.format(v) },
+            { k: 'due', l: t('totalDue'), num: true }, { k: 'collected', l: t('collectedAmt'), num: true }, { k: 'remaining', l: t('remainingAmt'), num: true },
+            { k: 'rate', l: t('collectRate'), f: v => `<div class="rate"><span dir="ltr">${v}%</span><div class="meter"><i style="width:${Math.min(100, v)}%;background:var(--${v >= 80 ? 'green' : v >= 50 ? 'amber' : 'red'})"></i></div></div>` }],
+            d.performance.rows, { sortable: false, foot: footRow([{ k: 'name' }, { k: 'companies', num: true }, { k: 'due', num: true }, { k: 'collected', num: true }, { k: 'remaining', num: true }, { k: 'rate' }],
+              { companies: { html: NI.format(d.performance.totals.companies) }, due: d.performance.totals.due, collected: d.performance.totals.collected,
+                remaining: d.performance.totals.remaining, rate: { html: d.performance.totals.rate + '%' } }, t('all')) })}
+        </article>
+      </section>
+      <section class="panel section">
+        <div class="section-head"><h2 class="section-title">${t('topCustomers')}</h2>${hasPage('balances') ? `<button class="section-action" data-go="balances">${t('viewAll')}</button>` : ''}</div>
+        ${table('dashTop', topCols, d.top, { click: true })}
+      </section>`);
+  },
+
+  async messages() {
+    const box = S.msgBox || 'inbox';
+    setContent(heading('messages', [btn('compose', '✉ ' + t('compose')), btn('markAll', '✓ ' + t('markAllRead'), 'button-ghost')]) +
+      `<div class="panel tabs">${['inbox', 'alerts', 'sentBox'].map(b => `<button class="tab ${b === box || (b === 'sentBox' && box === 'sent') ? 'active' : ''}" data-act="msgTab" data-tab="${b === 'sentBox' ? 'sent' : b}">${t(b)}</button>`).join('')}</div>
+      <section class="panel msg-list" id="msgList"><div class="skeleton">${t('loading')}</div></section>`);
+    const rows = await call('getMessages', box);
+    if (S.view !== 'messages') return;
+    S.msgRows = rows;
+    $('#msgList').innerHTML = rows.length ? rows.map((m, i) => `
+      <div class="msg-item ${m.unread ? 'unread' : ''} ${m.type}" data-mi="${i}">
+        <span class="msg-dot"></span>
+        <div class="msg-main">
+          <div class="msg-top"><b>${bdi(box === 'sent' ? t('msgTo') + ': ' + msgTo(m) : msgFrom(m))}</b><span class="msg-date">${esc(m.createdAt)}</span></div>
+          <div class="msg-subject">${m.type === 'alert' ? '⏰ ' : m.type === 'notification' ? '🔔 ' : ''}${esc(msgTitle(m))}${m.account ? ` <span class="badge">${esc(m.account)}${m.customerName ? ' — ' + esc(m.customerName) : ''}</span>` : ''}</div>
+          <div class="msg-snippet">${esc(String(m.body || '').slice(0, 160))}</div>
+        </div></div>`).join('') : `<div class="empty">${t('noMessages')}</div>`;
+  },
+
+  customers() {
+    setContent(heading('customers', [can('add') && btn('newCustomer', '＋ ' + t('addCustomer')), exportBtn(), btn('print', '🖨 ' + t('print'), 'button-ghost')]) + listBlock('customers'));
+    loadList('customers').then(() => { if (S.lookups.dupCustomers) $('#content .page-heading').insertAdjacentHTML('afterend', dupNotice(S.lookups.dupCustomers)); });
+  },
+
+  transactions() {
+    setContent(heading('transactions', [can('post') && btn('postSelected', '⇪ ' + t('postSelected'), 'button-ghost'),
+      can('add') && btn('newTx', '＋ ' + t('addTransaction')), exportBtn(), btn('print', '🖨 ' + t('print'), 'button-ghost')]) + listBlock('transactions'));
+    loadList('transactions');
+  },
+
+  receipts() {
+    setContent(heading('receipts', [can('post') && btn('postSelected', '⇪ ' + t('postSelected'), 'button-ghost'),
+      can('add') && btn('newReceipt', '⊕ ' + t('collect')), exportBtn(), btn('print', '🖨 ' + t('print'), 'button-ghost')]) +
+      `<section class="stats four" id="recStats"></section>` + listBlock('receipts'));
+    loadList('receipts');
+  },
+
+  statement() {
+    const f = S.rep.statement = S.rep.statement || { dateFrom: yearStart(), dateTo: today(), currency: localCur() };
+    setContent(heading('statement', [btn('stmtPrint', '🖨 ' + t('print'), 'button-ghost'), exportBtn(),
+      btn('stmtEmail', '✉ ' + t('sendEmail'), 'button-ghost'), btn('stmtWa', '💬 ' + t('sendWhatsApp'))]) + `
+      <div class="panel view-tools" id="repTools">
+        <label class="tool" style="flex:2 1 280px">${t('f_account')}<select data-f="account"><option value="">${t('chooseCustomer')}</option>${opts(customerOpts(), f.account)}</select></label>
+        ${tool('dateFrom', t('from'), 'date', f.dateFrom)}${tool('dateTo', t('to'), 'date', f.dateTo)}
+        ${tool('currency', t('displayCurrency'), 'select', f.currency || localCur(), currencyOpts(), true)}
+        <div class="tool-btns">${btn('runReport', t('run'))}</div></div>
+      <div id="repOut"></div>`);
+    runReport();
+  },
+
+  groups() {
+    setContent(heading('groups', [can('add') && btn('newGroup', '＋ ' + t('addGroup')), exportBtn(), btn('print', '🖨 ' + t('print'), 'button-ghost')]) + listBlock('groups'));
+    loadList('groups');
+  },
+
+  async currencies() {
+    setContent(heading('currencies', [can('add') && btn('newCurrency', '＋ ' + t('addCurrency')), exportBtn(), btn('print', '🖨 ' + t('print'), 'button-ghost')]) +
+      `<div id="curTop"><div class="skeleton">${t('loading')}</div></div>` + listBlock('currencies'));
+    loadList('currencies');
+    const st = await call('getCurrencyStatus');
+    if (S.view !== 'currencies') return;
+    const s = st.settings;
+    const list = currencyOpts([s.ReportCurrency, s.LocalCurrency].filter(Boolean).map(x => x.toUpperCase()));
+    const dis = can('edit') ? '' : 'disabled';
+    $('#curTop').innerHTML = `
+      ${st.missing.length ? `<div class="panel notice">⚠ ${t('missingRates')}: ${st.missing.map(c =>
+        can('add') ? `<button class="button-ghost" data-act="newCurrency" data-code="${esc(c)}">＋ ${esc(c)}</button>` : `<b>${esc(c)}</b>`).join(' ')}</div>` : ''}
+      <form class="panel form-panel" id="curSettings" style="margin-bottom:16px">
+        <h2 class="section-title">${t('curSettings')}</h2>
+        <p class="subtitle" style="margin:0;line-height:1.7">${t('curHelp')}</p>
+        <div class="form-grid">
+          <label class="field">${t('ReportCurrency')}<select name="ReportCurrency" ${dis}>${opts(list, (s.ReportCurrency || '').toUpperCase())}</select></label>
+          <label class="field">${t('LocalCurrency')}<select name="LocalCurrency" ${dis}>${opts(list, (s.LocalCurrency || '').toUpperCase())}</select></label>
+          <label class="field span2">${t('ConversionBasis')}<select name="ConversionBasis" ${dis}>${opts([['local', t('basis_local')], ['transaction', t('basis_transaction')]], s.ConversionBasis)}</select></label>
+        </div>
+        ${can('edit') ? `<div style="display:flex;justify-content:end"><button class="button-primary" type="submit">${t('save')}</button></div>` : ''}
+      </form>`;
+    enhance($('#curTop'));
+  },
+
+  users() {
+    const st = S.settings;
+    setContent(heading('users', [btn('newUser', '＋ ' + t('addUser')), exportBtn()]) + listBlock('users') + `
+      <form class="panel form-panel section" id="settingsForm">
+        <h2 class="section-title">${t('settings')}</h2>
+        <div class="form-grid">${SETTING_INPUTS.map(k =>
+          `<label class="field">${t(k)}<input name="${k}" value="${esc(st[k] || '')}" ${k === 'SessionMinutes' ? 'type="number" min="5" max="360"' : ''}></label>`).join('')}
+          ${SETTING_TEXTS.map(k => `<label class="field span2">${t(k)}<textarea name="${k}">${esc(st[k] || '')}</textarea></label>`).join('')}
+          <div class="field span2">${t('CompanyLogo')}<div class="logo-box">
+            <div class="logo-preview">${st.CompanyLogo ? `<img src="${esc(st.CompanyLogo)}" alt="">` : '<span>—</span>'}</div>
+            <div class="logo-actions"><label class="button-ghost link-btn" style="cursor:pointer">⇪ ${t('uploadLogo')}<input type="file" id="logoFile" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif" hidden></label>
+              ${st.CompanyLogo ? btn('removeLogo', t('removeLogo'), 'button-danger') : ''}
+              <span class="field-hint">${t('logoHint')}</span></div></div></div></div>
+        <div style="display:flex;justify-content:end"><button class="button-primary" type="submit">${t('save')}</button></div>
+      </form>`);
+    loadList('users');
+  },
+
+  balances() {
+    const f = S.rep.balances = S.rep.balances || { dateFrom: yearStart(), dateTo: today(), hideZero: true };
+    setContent(heading('balances', reportBtns()) + `
+      <div class="panel view-tools" id="repTools">
+        ${tool('dateFrom', t('from'), 'date', f.dateFrom)}${tool('dateTo', t('to'), 'date', f.dateTo)}
+        ${tool('group', t('f_group'), 'select', f.group, groupOpts())}${tool('collector', t('f_collector'), 'select', f.collector, collectorOpts())}
+        ${tool('account', t('f_account'), 'customer', f.account)}${tool('custCurrency', t('f_currency'), 'select', f.custCurrency, currencyOpts())}
+        ${curTool(f)}${tool('hideZero', t('hideZero'), 'check', f.hideZero)}
+        <div class="tool-btns">${btn('runReport', t('run'))}</div></div>
+      <div id="repOut"><div class="skeleton">${t('loading')}</div></div>`);
+    runReport();
+  },
+
+  paid() {
+    const f = S.rep.paid = S.rep.paid || { dateFrom: monthStart(), dateTo: today() };
+    setContent(heading('paid', reportBtns()) + `
+      <div class="panel view-tools" id="repTools">
+        ${tool('dateFrom', t('from'), 'date', f.dateFrom)}${tool('dateTo', t('to'), 'date', f.dateTo)}
+        ${tool('group', t('f_group'), 'select', f.group, groupOpts())}${tool('collector', t('f_collector'), 'select', f.collector, collectorOpts())}
+        ${tool('account', t('f_account'), 'customer', f.account)}${curTool(f)}
+        <div class="tool-btns">${btn('runReport', t('run'))}</div></div>
+      <div id="repOut"><div class="skeleton">${t('loading')}</div></div>`);
+    runReport();
+  },
+
+  overdue() {
+    const f = S.rep.overdue = S.rep.overdue || { asOf: today(), minDays: 1, tab: 'inv' };
+    setContent(heading('overdue', reportBtns()) + `
+      <div class="panel view-tools" id="repTools">
+        ${tool('asOf', t('asOf'), 'date', f.asOf)}${tool('voucher', t('voucherSearch'), 'search', f.voucher)}
+        ${tool('group', t('f_group'), 'select', f.group, groupOpts())}
+        ${tool('collector', t('f_collector'), 'select', f.collector, collectorOpts())}${tool('account', t('f_account'), 'customer', f.account)}
+        ${tool('minDays', t('minDays'), 'number', f.minDays)}
+        ${tool('bucket', t('bucket'), 'select', f.bucket, ['b1', 'b2', 'b3', 'b4'].map(b => [b, t(b)]))}${curTool(f)}
+        <div class="tool-btns">${btn('runReport', t('run'))}</div></div>
+      <div id="repOut"><div class="skeleton">${t('loading')}</div></div>`);
+    runReport();
+  },
+
+  credit() {
+    const f = S.rep.credit = S.rep.credit || { asOf: today(), threshold: 100 };
+    setContent(heading('credit', reportBtns()) + `
+      <div class="panel view-tools" id="repTools">
+        ${tool('asOf', t('asOf'), 'date', f.asOf)}${tool('group', t('f_group'), 'select', f.group, groupOpts())}
+        ${tool('collector', t('f_collector'), 'select', f.collector, collectorOpts())}${tool('account', t('f_account'), 'customer', f.account)}
+        ${tool('custCurrency', t('f_currency'), 'select', f.custCurrency, currencyOpts())}
+        ${tool('threshold', t('threshold'), 'number', f.threshold)}${tool('includeNoLimit', t('includeNoLimit'), 'check', f.includeNoLimit)}
+        <div class="tool-btns">${btn('runReport', t('run'))}</div></div>
+      <div id="repOut"><div class="skeleton">${t('loading')}</div></div>`);
+    runReport();
+  },
+
+  followup() {
+    const f = S.rep.followup = S.rep.followup || { minDays: 1 };
+    setContent(heading('followup', [can('add') && btn('newFollow', '＋ ' + t('newFollowUp'))]) + `
+      <div class="panel view-tools" id="repTools">
+        ${tool('collector', t('f_collector'), 'select', f.collector, collectorOpts())}${tool('group', t('f_group'), 'select', f.group, groupOpts())}
+        ${tool('minDays', t('minDays'), 'number', f.minDays)}${curTool(f)}
+        <div class="tool-btns">${btn('runReport', t('run'))}</div></div>
+      <div id="repOut"><div class="skeleton">${t('loading')}</div></div>
+      <section class="section"><div class="section-head panel" style="border-radius:8px 8px 0 0;border-bottom:0"><h2 class="section-title">${t('followLog')}</h2><div class="page-actions">${exportBtn()}${btn('print', '🖨 ' + t('print'), 'button-ghost')}</div></div>
+        ${listBlock('followlog').replace('class="panel view-tools"', 'class="panel view-tools" style="border-radius:0;margin:0;border-bottom:0"')}</section>`);
+    runReport();
+    loadList('followlog');
+  },
+
+  collection() {
+    const f = S.rep.collection = S.rep.collection || { asOf: today() };
+    setContent(heading('collection', reportBtns()) + `
+      <div class="panel view-tools" id="repTools">
+        ${tool('asOf', t('asOf'), 'date', f.asOf)}${tool('collector', t('f_collector'), 'select', f.collector, collectorOpts())}
+        ${tool('group', t('f_group'), 'select', f.group, groupOpts())}${curTool(f)}
+        <div class="tool-btns">${btn('runReport', t('run'))}</div></div>
+      <div id="repOut"><div class="skeleton">${t('loading')}</div></div>`);
+    runReport();
+  },
+
+  collections() {
+    const f = S.rep.collections = S.rep.collections || { dateFrom: monthStart(), dateTo: today(), tab: 'col' };
+    setContent(heading('collections', reportBtns()) + `
+      <div class="panel view-tools" id="repTools">
+        ${tool('dateFrom', t('from'), 'date', f.dateFrom)}${tool('dateTo', t('to'), 'date', f.dateTo)}
+        ${tool('collector', t('f_collectedBy'), 'select', f.collector, (S.lookups.users || []).map(u => [u.username, u.name]))}
+        ${tool('method', t('f_payMethod'), 'select', f.method, payOpts().concat([['Other', t('OtherMethod')]]))}
+        ${tool('group', t('f_group'), 'select', f.group, groupOpts())}${tool('account', t('f_account'), 'customer', f.account)}${curTool(f)}
+        <div class="tool-btns">${btn('runReport', t('run'))}</div></div>
+      <div id="repOut"><div class="skeleton">${t('loading')}</div></div>`);
+    runReport();
+  },
+
+  performance() {
+    const f = S.rep.performance = S.rep.performance || { dateFrom: monthStart(), dateTo: today() };
+    setContent(heading('performance', reportBtns()) + `
+      <div class="panel view-tools" id="repTools">
+        ${tool('dateFrom', t('from'), 'date', f.dateFrom)}${tool('dateTo', t('to'), 'date', f.dateTo)}
+        ${tool('collector', t('f_collector'), 'select', f.collector, collectorOpts())}${tool('group', t('f_group'), 'select', f.group, groupOpts())}${curTool(f)}
+        <div class="tool-btns">${btn('runReport', t('run'))}</div></div>
+      <div id="repOut"><div class="skeleton">${t('loading')}</div></div>`);
+    runReport();
+  },
+
+  import() {
+    setContent(heading('import', []) + `
+      <section class="panel form-panel">
+        <p class="subtitle" style="margin:0;line-height:1.7">${t('imp_help')}</p>
+        <div class="form-grid">
+          <label class="field span2">${t('chooseFile')}<input type="file" id="impFile" accept=".xlsx,.xls,.csv"></label>
+          <label class="field">${t('imp_entity')}<select id="impEntity">${opts([['Vendors', t('p_customers')], ['Transactions', t('p_transactions')], ['VendorGroups', t('p_groups')], ['Currencies', t('p_currencies')]], IMP.entity || 'Vendors')}</select></label>
+          <label class="field">${t('imp_mode')}<select id="impMode">${opts([['append', t('append')], ['upsert', t('upsert')]].concat(can('delete') ? [['replace', t('replace')]] : []), 'upsert')}</select></label>
+        </div>
+        <div id="impTxOpts" class="imp-opts" hidden>
+          <h3 class="section-title">${t('imp_options')}</h3>
+          <div class="form-grid">
+            <label class="field">${t('imp_sign')}<select id="impSign">${opts([['auto', t('sign_auto')], ['posDebit', t('sign_pos')], ['negDebit', t('sign_neg')]], 'auto')}</select></label>
+            <label class="field">${t('imp_dates')}<select id="impDates">${opts([['auto', t('date_auto')], ['dmy', t('date_dmy')], ['mdy', t('date_mdy')]], 'auto')}</select></label>
+            <label class="check"><input type="checkbox" id="impCreate" checked>${t('imp_createCust')}</label>
+            <label class="check"><input type="checkbox" id="impSkip" checked>${t('imp_skipDup')}</label>
+          </div>
+          <p class="field-hint" id="impReplaceHint" hidden>${t('imp_replaceTx')}</p>
+        </div>
+        <div id="impNotice"></div>
+        <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+          <div style="display:flex;gap:8px;flex-wrap:wrap">${btn('impTemplate', '⬇ ' + t('template'), 'button-ghost')}${S.user.isAdmin ? btn('cleanDup', '🧹 ' + t('cleanDup'), 'button-ghost') : ''}</div>
+          ${btn('impRun', t('importNow'), 'button-primary', 'id="impRun" disabled')}</div>
+      </section>
+      <div id="impResult"></div>
+      <div id="impPreview"></div>`);
+    IMP.rows = null; IMP.preview = null;
+    impOptions();
+  }
+};
+
+// Report runner — reads the tool bar, calls the matching server report, renders it.
+async function runReport() {
+  const view = S.view;
+  const f = Object.assign(S.rep[view], readTools($('#repTools')));
+  const out = () => $('#repOut');
+  const collCol = { k: 'collector', l: t('f_collector'), f: v => bdi(collectorName(v)), x: r => collectorName(r.collector) };
+  if (view === 'statement') {
+    if (!f.account) { S.lastStmt = null; out().innerHTML = `<div class="panel empty">${t('chooseCustomer')}</div>`; return; }
+    out().innerHTML = `<div class="skeleton">${t('loading')}</div>`;
+    const r = await call('customerStatement', f.account, f.dateFrom, f.dateTo, f.currency);
+    if (S.view !== view) return;
+    S.lastStmt = r;
+    const cc = r.currency;
+    S.exportData = { name: stmtFileName(r), title: t('stmtTitle') + ' — ' + (r.customer || {}).name, rows: r.lines,
+      cols: [{ k: 'date', l: t('f_date') }, { k: 'voucher', l: t('f_voucher') }, { k: 'type', l: t('f_type') }, { k: 'description', l: t('f_description') },
+        { k: 'payMethod', l: t('f_payMethod'), x: x => x.payMethod ? t(x.payMethod) : '' }, { k: 'dueDate', l: t('f_dueDate') },
+        { k: 'debit', l: t('debit') + ' ' + cc, num: true }, { k: 'credit', l: t('credit') + ' ' + cc, num: true }, { k: 'balance', l: t('balance') + ' ' + cc, num: true }] };
+    out().innerHTML = missingNotice(r) + `<div class="paper"><div class="doc" dir="${document.documentElement.dir}">${statementDoc(r)}</div></div>`;
+    return;
+  }
+  if (view === 'collections') {
+    const r = await call('reportCollections', f);
+    if (S.view !== view) return;
+    const cc = r.currency;
+    const userName = u => { if (!u) return t('unassigned'); const x = (S.lookups.users || []).find(y => y.username === u); return x ? x.name : u; };
+    const colCols = [{ k: 'collector', l: t('f_collectedBy'), f: v => bdi(userName(v)), x: x => userName(x.collector) },
+      { k: 'Cash', l: t('Cash'), num: true }, { k: 'Cheque', l: t('Cheque'), num: true }, { k: 'Transfer', l: t('Transfer'), num: true },
+      { k: 'Other', l: t('OtherMethod'), num: true }, { k: 'total', l: t('totalCollected') + ' ' + cc, num: true },
+      { k: 'count', l: t('receiptsCount'), num: true, f: v => NI.format(v) }, { k: 'customers', l: t('companiesN'), num: true, f: v => NI.format(v) }];
+    const detCols = [{ k: 'voucher', l: t('receiptNo') }, { k: 'date', l: t('f_date') }, { k: 'account', l: t('f_account') }, { k: 'name', l: t('f_name') },
+      { k: 'method', l: t('f_payMethod'), f: v => pill(methodName(v === 'Other' ? '' : v), v === 'Other' ? 'neutral' : 'info'), x: x => methodName(x.method === 'Other' ? '' : x.method) },
+      { k: 'amount', l: t('amount') + ' ' + cc, num: true }, { k: 'collector', l: t('f_collectedBy'), f: v => bdi(userName(v)), x: x => userName(x.collector) },
+      { k: 'chequeNo', l: t('f_chequeNo') }, { k: 'chequeDate', l: t('f_chequeDate') }, { k: 'bankName', l: t('f_bankName') }, { k: 'payRef', l: t('f_payRef') }];
+    const byCol = f.tab !== 'det';
+    const totals = Object.assign({ total: r.totals.total, count: r.totals.count }, r.byMethod);
+    const summary = [[t('Cash'), money(r.byMethod.Cash)], [t('Cheque'), money(r.byMethod.Cheque)], [t('Transfer'), money(r.byMethod.Transfer)],
+      [t('OtherMethod'), money(r.byMethod.Other)], [t('totalCollected'), money(r.totals.total) + ' ' + cc]];
+    S.exportData = byCol ? { name: 'payments_by_user_' + r.from + '_' + r.to, cols: colCols, rows: r.collectors, totals, summary }
+      : { name: 'payments_details_' + r.from + '_' + r.to, cols: detCols, rows: r.rows, totals: { amount: r.totals.total }, summary };
+    const pct = k => r.totals.total ? Math.round(r.byMethod[k] / r.totals.total * 100) : 0;
+    out().innerHTML = missingNotice(r) + `<section class="stats four">
+        ${stat(t('Cash'), money(r.byMethod.Cash) + curTag(cc), '¤', 'green', `<span>${pct('Cash')}%</span>`)}
+        ${stat(t('Cheque'), money(r.byMethod.Cheque) + curTag(cc), '✎', 'amber', `<span>${pct('Cheque')}%</span>`)}
+        ${stat(t('Transfer'), money(r.byMethod.Transfer) + curTag(cc), '⇄', '', `<span>${pct('Transfer')}%</span>`)}
+        ${stat(t('totalCollected'), money(r.totals.total) + curTag(cc), '∑', 'green', `<span>${NI.format(r.totals.count)} ${t('receiptsCount')}</span>${r.byMethod.Other ? `<span>· ${t('OtherMethod')}: ${money(r.byMethod.Other)}</span>` : ''}`)}</section>
+      <p class="subtitle" style="margin:-6px 0 12px">${t('collectorRule')}</p>
+      <div class="panel tabs"><button class="tab ${byCol ? 'active' : ''}" data-act="repTab" data-tab="col">${t('byCollector')}</button><button class="tab ${byCol ? '' : 'active'}" data-act="repTab" data-tab="det">${t('receiptDetails')}</button></div>
+      <section class="panel">${byCol
+        ? table('collectionsCol', colCols, r.collectors, { sortable: false, foot: footRow(colCols, { Cash: r.byMethod.Cash, Cheque: r.byMethod.Cheque, Transfer: r.byMethod.Transfer, Other: r.byMethod.Other, total: r.totals.total, count: { html: NI.format(r.totals.count) } }, t('all')) })
+        : table('collectionsDet', detCols, r.rows, { click: true, sortable: false, foot: footRow(detCols, { amount: r.totals.total }, t('all') + ' (' + NI.format(r.rows.length) + ')') })}</section>`;
+    return;
+  }
+  if (view === 'performance') {
+    const r = await call('reportPerformance', f);
+    if (S.view !== view) return;
+    const cc = r.currency;
+    S.rows.perf = r.rows;
+    const rateCell = v => `<div class="rate"><span dir="ltr">${NI.format(v)}%</span><div class="meter"><i style="width:${Math.min(100, v)}%;background:var(--${v >= 80 ? 'green' : v >= 50 ? 'amber' : 'red'})"></i></div></div>`;
+    const cols = [{ k: 'collector', l: t('f_collector'), f: (v, x) => bdi(x.name || t('unassigned')), x: x => x.name || t('unassigned') },
+      { k: 'companies', l: t('companiesN'), num: true, f: v => NI.format(v) },
+      { k: 'opening', l: t('openingPeriod'), num: true }, { k: 'invoiced', l: t('invoicedPeriod'), num: true },
+      { k: 'due', l: t('totalDue'), num: true }, { k: 'collected', l: t('collectedAmt'), num: true, f: v => `<span dir="ltr" class="pos">${money(v)}</span>` },
+      { k: 'otherCredits', l: t('otherCredits'), num: true }, { k: 'remaining', l: t('remainingAmt'), num: true },
+      { k: 'rate', l: t('collectRate'), f: rateCell, x: x => x.rate / 100, p: x => x.rate + '%' },
+      { k: 'overdue', l: t('overdueAmt'), num: true }, { k: 'maxDays', l: t('maxDays'), f: v => v ? daysPill(v) : '' }];
+    S.exportData = { name: 'vendor_managers_performance_' + r.from + '_' + r.to, cols, rows: r.rows,
+      totals: { companies: r.totals.companies, opening: r.totals.opening, invoiced: r.totals.invoiced, due: r.totals.due, collected: r.totals.collected,
+        otherCredits: r.totals.otherCredits, remaining: r.totals.remaining, overdue: r.totals.overdue },
+      summary: [[t('companiesN'), NI.format(r.totals.companies)], [t('totalDue'), money(r.totals.due) + ' ' + cc], [t('collectedAmt'), money(r.totals.collected) + ' ' + cc],
+        [t('remainingAmt'), money(r.totals.remaining) + ' ' + cc], [t('collectRate'), r.totals.rate + '%']] };
+    out().innerHTML = missingNotice(r) + `<section class="stats four">
+        ${stat(t('totalDue'), money(r.totals.due) + curTag(cc), '$', '', `<span>${NI.format(r.totals.companies)} ${t('companiesN')}</span>`)}
+        ${stat(t('collectedAmt'), money(r.totals.collected) + curTag(cc), '✓', 'green', `<span class="trend">${r.totals.rate}%</span><span>${t('collectRate')}</span>`)}
+        ${stat(t('remainingAmt'), money(r.totals.remaining) + curTag(cc), '◔', 'amber')}
+        ${stat(t('overdueAmt'), money(r.totals.overdue) + curTag(cc), '!', 'red')}</section>
+      <p class="subtitle" style="margin:-6px 0 12px">${t('dueRule')}</p>
+      <section class="panel">${table('perf', cols, r.rows, { sortable: false, actions: () => `<button data-act="perfList" title="${t('companies')}">☰</button>`,
+        foot: footRow(cols, { companies: { html: NI.format(r.totals.companies) }, opening: r.totals.opening, invoiced: r.totals.invoiced, due: r.totals.due,
+          collected: r.totals.collected, otherCredits: r.totals.otherCredits, remaining: r.totals.remaining, rate: { html: rateCell(r.totals.rate) }, overdue: r.totals.overdue }, t('all'), false, true) })}</section>`;
+    return;
+  }
+  if (view === 'balances') {
+    const r = await call('reportBalances', f);
+    if (S.view !== view) return;
+    const cc = r.currency;
+    const cols = [{ k: 'account', l: t('f_account') }, { k: 'name', l: t('f_name') }, { k: 'group', l: t('f_group'), f: v => bdi(groupName(v)), x: r => groupName(r.group) },
+      { k: 'custCurrency', l: t('f_currency') }, collCol,
+      { k: 'opening', l: t('opening'), num: true }, { k: 'debit', l: t('debit'), num: true }, { k: 'credit', l: t('credit'), num: true }, { k: 'closing', l: t('closing'), num: true }];
+    S.exportData = { name: 'balances_' + r.from + '_' + r.to + '_' + cc, cols, rows: r.rows, totals: r.totals,
+      summary: [[t('opening'), money(r.totals.opening)], [t('debit'), money(r.totals.debit)], [t('credit'), money(r.totals.credit)], [t('closing'), money(r.totals.closing) + ' ' + cc]] };
+    out().innerHTML = missingNotice(r) + `<section class="stats four">
+        ${stat(t('opening'), money(r.totals.opening) + curTag(cc), '◐', '')}${stat(t('debit'), money(r.totals.debit) + curTag(cc), '↓', 'green')}
+        ${stat(t('credit'), money(r.totals.credit) + curTag(cc), '↑', 'amber')}${stat(t('closing'), money(r.totals.closing) + curTag(cc), '$', 'red', `<span>${NI.format(r.rows.length)} ${t('customersCount')}</span>`)}</section>
+      <section class="panel">${table('balances', cols, r.rows, { click: true, sortable: false, foot: footRow(cols, r.totals, t('all') + ' (' + cc + ')') })}</section>`;
+  } else if (view === 'paid') {
+    const r = await call('reportPaidInvoices', f);
+    if (S.view !== view) return;
+    const cc = r.currency;
+    const cols = [{ k: 'voucher', l: t('f_voucher') }, { k: 'account', l: t('f_account') }, { k: 'name', l: t('f_name') }, { k: 'date', l: t('f_date') }, { k: 'dueDate', l: t('f_dueDate') },
+      { k: 'paidDate', l: t('paidDate') }, { k: 'amount', l: t('amount') + ' ' + cc, num: true },
+      { k: 'lateDays', l: t('lateDays'), f: v => v ? daysPill(v) : pill(t('onTime'), 'healthy') },
+      { k: 'payVouchers', l: t('paidBy'), cls: 'clip' },
+      { k: 'methods', l: t('f_payMethod'), f: (v, x) => esc(String(v || '').split('، ').filter(Boolean).map(m => t(m)).join('، ')) + (x.linked ? ' ' + pill(t('linked'), 'info') : ''),
+        x: x => String(x.methods || '').split('، ').filter(Boolean).map(m => t(m)).join('، ') }, collCol];
+    S.exportData = { name: 'paid_invoices', cols, rows: r.rows, totals: { amount: r.totals.amount },
+      summary: [[t('paidCount'), NI.format(r.totals.count)], [t('totalPaid'), money(r.totals.amount) + ' ' + cc], [t('onTime'), NI.format(r.totals.onTime)], [t('late'), NI.format(r.totals.late)]] };
+    out().innerHTML = missingNotice(r) + `<section class="stats four">
+        ${stat(t('paidCount'), NI.format(r.totals.count), '✓', 'green')}${stat(t('totalPaid'), money(r.totals.amount) + curTag(cc), '$', '')}
+        ${stat(t('onTime'), NI.format(r.totals.onTime), '◷', 'green')}${stat(t('late'), NI.format(r.totals.late), '!', 'red')}</section>
+      <section class="panel">${table('paid', cols, r.rows, { click: true, sortable: false, foot: footRow(cols, { amount: r.totals.amount }, t('all')) })}</section>`;
+  } else if (view === 'overdue') {
+    const r = await call('reportOverdue', f);
+    if (S.view !== view) return;
+    const cc = r.currency;
+    if (!f.account && !f.group && !f.collector && !f.voucher) setBadge('overdue', r.totals.customers);
+    const rows = f.bucket ? r.rows.filter(x => x.bucket === f.bucket) : r.rows;
+    const invCols = [{ k: 'voucher', l: t('f_voucher') }, { k: 'account', l: t('f_account') }, { k: 'name', l: t('f_name') }, { k: 'date', l: t('f_date') }, { k: 'dueDate', l: t('f_dueDate') },
+      { k: 'amount', l: t('amount') + ' ' + cc, num: true }, { k: 'remaining', l: t('remaining') + ' ' + cc, num: true }, { k: 'days', l: t('days'), f: daysPill },
+      collCol, { k: 'lastFollowUp', l: t('lastFollowUp') }];
+    const custRows = f.bucket ? groupCustomers(rows) : r.customers;
+    const custCols = [{ k: 'account', l: t('f_account') }, { k: 'name', l: t('f_name') }, { k: 'count', l: t('invoices'), num: true, f: v => NI.format(v) },
+      { k: 'remaining', l: t('overdueAmt') + ' ' + cc, num: true }, { k: 'maxDays', l: t('maxDays'), f: daysPill }, collCol,
+      { k: 'phone', l: t('f_phone') }, { k: 'lastFollowUp', l: t('lastFollowUp') }, { k: 'promiseDate', l: t('f_promiseDate') }];
+    const byCust = f.tab === 'cust';
+    const sumRem = rows.reduce((a, x) => a + x.remaining, 0);
+    S.exportData = byCust ? { name: 'late_vendors', cols: custCols, rows: custRows, totals: { remaining: sumRem } }
+      : { name: 'late_invoices', cols: invCols, rows, totals: { remaining: sumRem } };
+    S.exportData.summary = [[t('overdueAmt'), money(sumRem) + ' ' + cc], [t('overdueInvoices'), NI.format(rows.length)],
+      [t('overdueCustomers'), NI.format(custRows.length)], [t('avgDays'), NI.format(r.totals.avgDays)]];
+    out().innerHTML = missingNotice(r) + `<section class="stats four">
+        ${stat(t('overdueAmt'), money(sumRem) + curTag(cc), '!', 'red')}${stat(t('overdueInvoices'), NI.format(rows.length), '▤', 'amber')}
+        ${stat(t('overdueCustomers'), NI.format(custRows.length), '♙', '')}${stat(t('avgDays'), NI.format(r.totals.avgDays) + ' <small>' + t('day') + '</small>', '⏱', 'amber')}</section>
+      <section class="panel" style="padding:14px 16px;margin-bottom:16px"><div class="legend" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">
+        ${['b1', 'b2', 'b3', 'b4'].map((b, i) => `<div><div class="legend-row"><i class="dot ${['', 'amber', 'orange', 'red'][i]}"></i>${t(b)} <b style="color:var(--text)">${money(r.buckets[b])}</b></div>
+          <div class="meter"><i style="width:${r.totals.remaining ? r.buckets[b] / r.totals.remaining * 100 : 0}%;background:var(--${['green', 'amber', 'orange', 'red'][i]})"></i></div></div>`).join('')}</div></section>
+      <div class="panel tabs"><button class="tab ${byCust ? '' : 'active'}" data-act="odTab" data-tab="inv">${t('byInvoice')}</button><button class="tab ${byCust ? 'active' : ''}" data-act="odTab" data-tab="cust">${t('byCustomer')}</button></div>
+      <section class="panel">${byCust
+        ? table('overdueCust', custCols, custRows, { click: true, sortable: false, foot: footRow(custCols, { remaining: sumRem }, t('all')) })
+        : table('overdue', invCols, rows, { click: true, sortable: false, foot: footRow(invCols, { remaining: sumRem, amount: rows.reduce((a, x) => a + x.amount, 0) }, t('all')) })}</section>`;
+  } else if (view === 'credit') {
+    const r = await call('reportCreditLimit', f);
+    if (S.view !== view) return;
+    if (!f.account && !f.group && !f.collector && !f.custCurrency) setBadge('credit', r.totals.exceeded);
+    const pctPill = v => pill(v >= 999 ? '∞' : NI.format(v) + '%', v >= 100 ? 'risk' : v >= 80 ? 'watch' : 'healthy');
+    const cols = [{ k: 'account', l: t('f_account') }, { k: 'name', l: t('f_name') }, { k: 'currency', l: t('f_currency') },
+      { k: 'creditLimit', l: t('f_creditLimit'), num: true }, { k: 'balance', l: t('balance'), num: true },
+      { k: 'excess', l: t('excess'), num: true, f: v => v > 0 ? `<span class="neg">${money(v)}</span>` : money(0) },
+      { k: 'available', l: t('available'), num: true }, { k: 'pct', l: t('usedPct'), f: pctPill, x: r => r.pct / 100, p: r => r.pct >= 999 ? '∞' : r.pct + '%' },
+      { k: 'overdue', l: t('overdueAmt'), num: true }, { k: 'maxDays', l: t('maxDays'), f: v => v ? daysPill(v) : '' }, collCol,
+      { k: 'group', l: t('f_group'), f: v => bdi(groupName(v)), x: r => groupName(r.group) }];
+    S.exportData = { name: 'credit_limit', cols, rows: r.rows,
+      summary: [[t('listed'), NI.format(r.totals.customers)], [t('exceededN'), NI.format(r.totals.exceeded)], [t('excessTotal'), money(r.totals.excessBase) + ' ' + r.base]] };
+    out().innerHTML = missingNotice(r) + `<section class="stats">
+        ${stat(t('listed'), NI.format(r.totals.customers), '♙', '')}
+        ${stat(t('exceededN'), NI.format(r.totals.exceeded), '⚑', 'red')}
+        ${stat(t('excessTotal'), money(r.totals.excessBase) + curTag(r.base), '!', 'amber')}</section>
+      ${r.byCurrency.length > 1 ? `<div class="cur-grid" style="margin-bottom:16px">${r.byCurrency.map(x => `<article class="panel risk-item">
+        <div class="card-head"><h3 style="margin:0">${esc(x.currency)}</h3><span class="badge">${NI.format(x.customers)}</span></div>
+        <div class="mini-stats"><div><span>${t('f_creditLimit')}</span><b>${money(x.limit)}</b></div><div><span>${t('excess')}</span><b class="neg">${money(x.excess)}</b></div></div></article>`).join('')}</div>` : ''}
+      <section class="panel">${table('credit', cols, r.rows, { click: true, sortable: false })}</section>`;
+  } else if (view === 'followup') {
+    const r = await call('getFollowUpBoard', f);
+    if (S.view !== view) return;
+    const cc = r.currency;
+    setBadge('followup', r.totals.customers);
+    out().innerHTML = missingNotice(r) + `<section class="stats">
+        ${stat(t('overdueCustomers'), NI.format(r.totals.customers), '♙', 'red')}${stat(t('overdueAmt'), money(r.totals.remaining) + curTag(cc), '!', 'amber')}
+        ${stat(t('promisesDue'), NI.format(r.promisesDue), '☎', '')}</section>
+      ${r.customers.length ? `<div class="risk-grid">${r.customers.map(c => `
+        <article class="panel risk-item">
+          <div class="card-head">${daysPill(c.maxDays)}<small style="color:var(--subtle)">${esc(c.account)}</small></div>
+          <h3>${bdi(c.name)}</h3>
+          <p>${t('f_collector')}: ${bdi(collectorName(c.collector))}</p>
+          <div class="mini-stats"><div><span>${t('overdueAmt')} ${esc(cc)}</span><b>${money(c.remaining)}</b></div><div><span>${t('invoices')}</span><b>${NI.format(c.count)}</b></div></div>
+          <p>${t('lastFollowUp')}: ${esc(c.lastFollowUp || '—')}${c.promiseDate ? `<br>${t('f_promiseDate')}: <b style="color:var(--text)">${esc(c.promiseDate)}</b>` : ''}</p>
+          <div class="card-actions">
+            ${can('add') ? btn('newFollow', '☎ ' + t('logAction'), 'button-primary', `data-acc="${esc(c.account)}"`) : ''}
+            ${hasPage('receipts') && can('add', 'receipts') ? btn('newReceipt', '⊕ ' + t('collect'), 'button-ghost', `data-acc="${esc(c.account)}"`) : ''}
+            ${btn('openCust', t('statement'), 'button-ghost', `data-acc="${esc(c.account)}"`)}
+            ${c.phone ? `<a class="button-ghost link-btn" href="tel:${esc(c.phone)}">${t('call')}</a>` : ''}
+            ${c.email ? `<a class="button-ghost link-btn" href="mailto:${esc(c.email)}">${t('mail')}</a>` : ''}
+          </div></article>`).join('')}</div>` : `<div class="panel empty">${t('noOverdue')}</div>`}`;
+  } else if (view === 'collection') {
+    const r = await call('reportCollection', f);
+    if (S.view !== view) return;
+    const cc = r.currency;
+    S.rows.collectors = r.rows;
+    const flat = [];
+    r.rows.forEach(m => m.companies.forEach(c => flat.push(Object.assign({ collector: m.collector }, c))));
+    const cols = [collCol, { k: 'account', l: t('f_account') }, { k: 'name', l: t('f_name') },
+      { k: 'balance', l: t('balance') + ' ' + cc, num: true }, { k: 'remaining', l: t('overdueAmt') + ' ' + cc, num: true }, { k: 'count', l: t('invoices'), num: true, f: v => NI.format(v) },
+      { k: 'maxDays', l: t('maxDays'), f: daysPill }, { k: 'lastFollowUp', l: t('lastFollowUp') }];
+    S.exportData = { name: 'vendor_managers', cols, rows: flat,
+      summary: [[t('receivable'), money(r.totals.balance) + ' ' + cc], [t('overdueAmt'), money(r.totals.overdue) + ' ' + cc], [t('collectedMTD'), money(r.totals.collectedMTD) + ' ' + cc]] };
+    out().innerHTML = missingNotice(r) + `<section class="stats">
+        ${stat(t('receivable'), money(r.totals.balance) + curTag(cc), '$', '')}
+        ${stat(t('overdueAmt'), money(r.totals.overdue) + curTag(cc), '!', 'red')}
+        ${stat(t('collectedMTD'), money(r.totals.collectedMTD) + curTag(cc), '✓', 'green')}</section>
+      <div class="section-head" style="padding:0 0 10px;border:0"><h2 class="section-title">${t('team')}</h2></div>
+      <div class="risk-grid">${r.rows.map((m, i) => `
+        <article class="panel risk-item">
+          <div class="card-head"><div style="display:flex;gap:10px;align-items:center"><div class="avatar">${esc((m.name || '?')[0].toUpperCase())}</div>
+            <div><h3 style="margin:0">${bdi(m.name || t('unassigned'))}</h3><p style="margin:0">${NI.format(m.customers)} ${t('companies')}</p></div></div>
+            ${m.maxDays ? daysPill(m.maxDays) : pill('0', 'healthy')}</div>
+          <div class="mini-stats">
+            <div><span>${t('balance')}</span><b>${money(m.balance)}</b></div><div><span>${t('overdueAmt')}</span><b class="neg">${money(m.overdue)}</b></div>
+            <div><span>${t('overdueCustomers')}</span><b>${NI.format(m.overdueCustomers)}</b></div><div><span>${t('avgDays')}</span><b>${NI.format(m.avgDays)}</b></div>
+            <div><span>${t('overdueInvoices')}</span><b>${NI.format(m.overdueInvoices)}</b></div><div><span>${t('collectedMTD')}</span><b class="pos">${money(m.collectedMTD)}</b></div></div>
+          <p>${t('overdueAmt')} ${m.balance > 0 ? Math.round(m.overdue / m.balance * 100) : 0}% ${t('ofBalance')}</p>
+          <div class="meter"><i style="width:${m.balance > 0 ? Math.min(100, m.overdue / m.balance * 100) : 0}%"></i></div>
+          <div class="card-actions">${btn('collCompanies', t('companiesOf'), 'button-ghost', `data-i="${i}"`)}</div>
+        </article>`).join('')}</div>
+      <section class="panel section"><div class="section-head"><h2 class="section-title">${t('allCompanies')}</h2></div>
+        ${table('collFlat', cols, flat, { click: true, sortable: false })}</section>`;
+  }
+}
+
+function groupCustomers(rows) {
+  const m = {};
+  rows.forEach(r => {
+    const c = m[r.account] = m[r.account] || { account: r.account, name: r.name, collector: r.collector, phone: r.phone, count: 0, remaining: 0, maxDays: 0, lastFollowUp: r.lastFollowUp, promiseDate: r.promiseDate };
+    c.count++; c.remaining += r.remaining; c.maxDays = Math.max(c.maxDays, r.days);
+  });
+  return Object.values(m).sort((a, b) => b.remaining - a.remaining);
+}
+
+// ───────── Import ─────────
+const IMP = { rows: null, preview: null, entity: '' };
+const IMP_KEY = { Vendors: 'Vendor account', Transactions: 'Vendor account + Date', VendorGroups: 'GroupId', Currencies: 'Code' };
+
+/**
+ * Reads the first sheet. Date cells are converted from their Excel serial numbers directly
+ * (no browser time-zone shift, which used to move dates to the previous day 23:59).
+ */
+function readImportFile(file) {
+  if (typeof XLSX === 'undefined') { toast(t('xlsxMissing'), 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = async e => {
+    const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array', cellDates: false, cellNF: true, raw: /\.csv$/i.test(file.name) });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    Object.keys(ws).forEach(addr => {
+      const c = ws[addr];
+      if (addr[0] === '!' || !c || c.t !== 'n') return;
+      const fmt = c.z || (c.XF && c.XF.numFmtId != null && XLSX.SSF._table ? XLSX.SSF._table[c.XF.numFmtId] : '');
+      if (fmt && XLSX.SSF.is_date(fmt)) {
+        const d = XLSX.SSF.parse_date_code(c.v);
+        if (!d) return;
+        const txt = d.y + '-' + z(d.m) + '-' + z(d.d) + (d.H || d.M ? ' ' + z(d.H) + ':' + z(d.M) : '');
+        ws[addr] = { t: 's', v: txt, w: txt };
+      }
+    });
+    IMP.rows = XLSX.utils.sheet_to_json(ws, { defval: '', raw: true }).map(r => {
+      const o = {};
+      Object.keys(r).forEach(k => { o[String(k).trim()] = typeof r[k] === 'string' ? r[k].trim() : r[k]; });
+      return o;
+    }).filter(r => Object.values(r).some(v => v !== '' && v != null));
+    $('#impResult').innerHTML = '';
+    const heads = IMP.rows.length ? Object.keys(IMP.rows[0]) : [];
+    IMP.preview = heads.length ? await call('previewImport', heads) : null;
+    if (IMP.preview && IMP.preview.best && IMP.preview.best !== $('#impEntity').value) {
+      setComboValue($('#impEntity'), IMP.preview.best);
+      toast(t('imp_detected', { e: entityName(IMP.preview.best) }));
+    }
+    renderImportPreview();
+  };
+  reader.readAsArrayBuffer(file);
+}
+const entityName = e => t({ Vendors: 'p_customers', Transactions: 'p_transactions', VendorGroups: 'p_groups', Currencies: 'p_currencies' }[e]);
+function setComboValue(sel, v) {
+  sel.value = v;
+  sel.dispatchEvent(new Event('change', { bubbles: true }));
+}
+function impOptions() {
+  const e = $('#impEntity').value;
+  IMP.entity = e;
+  $('#impTxOpts').hidden = e !== 'Transactions';
+  $('#impReplaceHint').hidden = !(e === 'Transactions' && $('#impMode').value === 'replace');
+}
+function renderImportPreview() {
+  impOptions();
+  const box = $('#impPreview'), note = $('#impNotice');
+  if (!IMP.rows) { box.innerHTML = ''; note.innerHTML = ''; return; }
+  const e = $('#impEntity').value;
+  const pv = IMP.preview && IMP.preview.entities[e];
+  const heads = IMP.rows.length ? Object.keys(IMP.rows[0]) : [];
+  let warn = '';
+  if (pv && !pv.hasId) warn = `<div class="panel notice danger">⛔ ${t('imp_noid', { f: IMP_KEY[e] })}</div>`;
+  else if (IMP.preview && IMP.preview.best && IMP.preview.best !== e) warn = `<div class="panel notice danger">⚠ ${t('imp_mismatch', { b: entityName(IMP.preview.best), e: entityName(e) })}</div>`;
+  note.innerHTML = warn;
+  $('#impRun').disabled = !IMP.rows.length || (pv && !pv.hasId);
+  const fieldLabel = f => I18N.en['f_' + f] ? t('f_' + f) : f === 'custName' ? t('f_name') : f;
+  box.innerHTML = `<section class="panel section">
+      <div class="section-head"><h2 class="section-title">${t('imp_map')}</h2><span class="badge blue">${t('rowsFound')}: ${NI.format(IMP.rows.length)}</span></div>
+      <div class="map-grid">${(pv ? pv.pairs : heads.map(h => [h, ''])).map(p => `<div class="map-item ${p[1] ? 'ok' : 'off'}"><span>${esc(p[0])}</span><b>${p[1] ? '→ ' + esc(fieldLabel(p[1])) : t('imp_ignored')}</b></div>`).join('')}</div>
+    </section>
+    <section class="panel section">
+      <div class="section-head"><h2 class="section-title">${t('previewTitle')}</h2></div>
+      <div class="table-wrap"><table><thead><tr>${heads.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead>
+      <tbody>${IMP.rows.slice(0, 5).map(r => '<tr>' + heads.map(h => `<td>${typeof r[h] === 'number' ? money(r[h]) : bdi(r[h])}</td>`).join('') + '</tr>').join('')}</tbody></table></div></section>`;
+}
+
+async function runImport() {
+  const entity = $('#impEntity').value, mode = $('#impMode').value;
+  if (!IMP.rows || !IMP.rows.length) return;
+  if (IMP.preview && IMP.preview.best && IMP.preview.best !== entity && !confirm(t('imp_confirmWrong'))) return;
+  if (mode === 'replace' && !confirm(t('replace') + ' — ' + t('confirmDelete') + (entity === 'Transactions' ? '\n' + t('imp_replaceTx') : ''))) return;
+  const o = entity === 'Transactions'
+    ? { sign: $('#impSign').value, dateOrder: $('#impDates').value, createCustomers: $('#impCreate').checked, skipDuplicates: $('#impSkip').checked }
+    : { dateOrder: 'auto' };
+  const b = $('#impRun'); b.disabled = true;
+  const total = { inserted: 0, updated: 0, skipped: 0, duplicates: 0, createdCustomers: 0, unknownAccounts: 0 };
+  const size = 2000;
+  let done = false;
+  try {
+    for (let i = 0; i < IMP.rows.length; i += size) {
+      b.textContent = `${t('importNow')} ${NI.format(Math.min(i + size, IMP.rows.length))}/${NI.format(IMP.rows.length)}`;
+      const r = await call('importRows', entity, IMP.rows.slice(i, i + size), i === 0 ? mode : (mode === 'replace' ? 'append' : mode), o);
+      Object.keys(total).forEach(k => { total[k] += r[k] || 0; });
+    }
+    done = true;
+    toast(t('importedMsg', { i: NI.format(total.inserted), u: NI.format(total.updated), s: NI.format(total.skipped + total.duplicates) }));
+    const row = (k, v, cls) => v ? `<div class="mini-stat ${cls || ''}"><span>${t(k)}</span><b>${NI.format(v)}</b></div>` : '';
+    $('#impResult').innerHTML = `<section class="panel section imp-result"><div class="section-head"><h2 class="section-title">✓ ${t('imp_result')} — ${esc(entityName(entity))}</h2></div>
+      <div class="mini-stats" style="padding:0 16px 14px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+        ${row('imp_added', total.inserted, 'pos')}${row('imp_updated', total.updated)}${row('imp_dups', total.duplicates)}
+        ${row('imp_noIdRows', total.skipped, 'neg')}${row('imp_newCust', total.createdCustomers)}${row('imp_unknown', total.unknownAccounts, 'neg')}
+        ${!total.inserted && !total.updated ? `<div class="mini-stat"><span>${t('imp_added')}</span><b>0</b></div>` : ''}</div></section>`;
+    await refreshLookups();
+  } finally {
+    b.textContent = t('importNow');
+    if (done) { IMP.rows = null; $('#impFile').value = ''; } // prevents importing the same file twice by mistake
+    b.disabled = !IMP.rows;
+  }
+}
+
+// ───────── Export to Excel (.xlsx) ─────────
+async function exportXlsx() {
+  if (typeof XLSX === 'undefined') { toast(t('xlsxMissing'), 'error'); return; }
+  const d = await fullExportData(100000);
+  if (!d || !d.rows.length) { toast(t('noData'), 'error'); return; }
+  const val = (c, r) => {
+    const v = c.x ? c.x(r) : r[c.k];
+    if (c.num) return v === '' || v == null ? '' : (+v || 0);
+    return v == null ? '' : v;
+  };
+  const aoa = [d.cols.map(c => c.l)].concat(d.rows.map(r => d.cols.map(c => val(c, r))));
+  if (d.totals) aoa.push(d.cols.map((c, i) => i === 0 ? t('all') : d.totals[c.k] !== undefined ? +d.totals[c.k] : ''));
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  const rows = aoa.length;
+  d.cols.forEach((c, ci) => {
+    if (!c.num && c.k !== 'pct') return;
+    for (let r = 1; r < rows; r++) {
+      const cell = ws[XLSX.utils.encode_cell({ r, c: ci })];
+      if (cell && cell.t === 'n') cell.z = c.k === 'pct' ? '0%' : c.k === 'rate' || c.k === 'exchange' || c.k === 'inverse' ? '#,##0.######' : '#,##0';
+    }
+  });
+  ws['!cols'] = d.cols.map((c, ci) => ({ wch: Math.min(60, Math.max(10, ...aoa.slice(0, 500).map(row => String(row[ci] == null ? '' : row[ci]).length + 3))) }));
+  ws['!autofilter'] = { ref: XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: d.rows.length, c: d.cols.length - 1 } }) };
+  const wb = XLSX.utils.book_new();
+  if (S.lang === 'ar') wb.Workbook = { Views: [{ RTL: true }] };
+  XLSX.utils.book_append_sheet(wb, ws, String(d.name).replace(/[\\\/?*\[\]:]/g, '_').slice(0, 31));
+  XLSX.writeFile(wb, d.name + '_' + today() + '.xlsx');
+}
+
+// ───────── Printing (A4 · portrait / landscape) ─────────
+// One stylesheet for screen preview, browser printing and the emailed PDF (table layout = PDF-safe).
+const DOC_CSS = `
+.doc{font-family:Tahoma,Arial,'Segoe UI',sans-serif;color:#111;background:#fff;font-size:9.5pt;line-height:1.45}
+.doc h1,.doc h2,.doc td,.doc th,.doc b{color:#111 !important}
+.doc th{letter-spacing:0 !important;text-transform:none !important}
+.doc td{white-space:normal}
+.doc table{min-width:0 !important}
+.doc tbody tr:hover{background:none}
+.doc h1{font-size:15pt;margin:0 0 3px}
+.doc h2{font-size:10.5pt;margin:12px 0 5px;padding-bottom:3px;border-bottom:1.5px solid #1f2937}
+.doc .muted{color:#555;font-size:8.3pt}
+.doc .doc-title{font-size:13pt;font-weight:bold;margin-bottom:4px;color:#1d4ed8}
+.doc table{width:100%;border-collapse:collapse;margin:4px 0}
+.doc table.hdr{margin:0 0 8px;border-bottom:2px solid #1f2937}
+.doc table.hdr td{border:0;padding:0 0 8px;vertical-align:top;font-size:9pt}
+.doc table.hdr td.hdr-r{text-align:end;width:42%}
+.doc .grid th{background:#eef2f7;border:1px solid #c7cfda;padding:4px 5px;font-size:8pt;text-align:start;font-weight:bold}
+.doc .grid td{border:1px solid #d5dbe3;padding:3px 5px;font-size:8pt;vertical-align:top}
+.doc .grid tr:nth-child(even) td{background:#fafbfc}
+.doc td.n,.doc th.n{text-align:left;white-space:nowrap;direction:ltr}
+.doc[dir=rtl] td.n,.doc[dir=rtl] th.n{text-align:right}
+.doc .grid tfoot td{font-weight:bold;background:#eef2f7}
+.doc .grid tr.sub td{font-weight:bold;background:#f3f6fa}
+.doc thead{display:table-header-group}
+.doc tr{page-break-inside:avoid}
+.doc table.dkv td{border:1px solid #d5dbe3;padding:4px 6px;font-size:8.6pt}
+.doc table.dkv td.k{background:#f3f6fa;color:#444;width:16%;font-weight:bold}
+.doc table.boxes td{border:1px solid #c7cfda;text-align:center;padding:6px 4px;font-size:8pt;color:#444;width:20%}
+.doc table.boxes b{display:block;font-size:11pt;color:#111;direction:ltr}
+.doc table.boxes td.due{background:#fff7ed;border-color:#f59e0b}
+.doc table.sign td{border:0;padding:34px 8px 0;text-align:center;font-size:8.5pt}
+.doc table.sign span{display:block;border-top:1px solid #333;padding-top:4px}
+.doc .note{border:1px dashed #9ca3af;padding:6px 8px;margin-top:10px;font-size:8.3pt;white-space:pre-line}
+.doc .filt{margin:0 0 6px}
+.doc img.doc-logo{display:block;max-height:60px;max-width:200px;margin-bottom:6px}
+.doc .stamp{display:inline-block;border:2px solid #b45309;color:#b45309;padding:2px 10px;font-weight:bold;transform:rotate(-4deg)}
+.doc .big{font-size:13pt;font-weight:bold;direction:ltr;display:inline-block}
+.doc.landscape .grid td,.doc.landscape .grid th{font-size:7.6pt}
+`;
+
+const docSettings = () => S.lastSettings || S.settings || {};
+const nowText = () => { const d = new Date(); return ymd(d) + ' ' + z(d.getHours()) + ':' + z(d.getMinutes()); };
+const methodName = m => m ? t(m) : t('OtherMethod');
+
+function companyHeader(title, pairs) {
+  const st = docSettings();
+  return `<table class="hdr"><tr><td>${st.CompanyLogo ? `<img class="doc-logo" src="${esc(st.CompanyLogo)}" alt="">` : ''}<h1>${esc(st.CompanyName || st.AppName || t('app'))}</h1>
+    <div class="muted">${esc(st.CompanyAddress || '')}${st.CompanyAddress ? '<br>' : ''}${esc([st.CompanyPhone, st.CompanyEmail].filter(Boolean).join(' · '))}</div></td>
+    <td class="hdr-r"><div class="doc-title">${esc(title)}</div>${pairs.filter(p => p[1] !== '' && p[1] != null).map(p =>
+      `<div><span class="muted">${esc(p[0])}:</span> <b>${esc(p[1])}</b></div>`).join('')}</td></tr></table>`;
+}
+function summaryBoxes(items, dueIdx) {
+  return `<table class="boxes"><tr>${items.map((x, i) => `<td class="${i === dueIdx ? 'due' : ''}">${esc(x[0])}<b>${esc(x[1])}</b></td>`).join('')}</tr></table>`;
+}
+function printCell(c, r) {
+  if (c.p) return c.p(r);
+  const v = c.x ? c.x(r) : r[c.k];
+  if (c.num) return v === '' || v == null ? '' : (['rate', 'exchange', 'inverse'].indexOf(c.k) > -1 ? NF6.format(+v || 0) : money(v));
+  return v == null ? '' : v;
+}
+function printTableHtml(cols, rows, totals) {
+  return `<table class="grid"><thead><tr>${cols.map(c => `<th class="${c.num ? 'n' : ''}">${esc(c.l)}</th>`).join('')}</tr></thead>
+    <tbody>${rows.map(r => '<tr>' + cols.map(c => `<td class="${c.num ? 'n' : ''}">${esc(printCell(c, r))}</td>`).join('') + '</tr>').join('')}</tbody>
+    ${totals ? `<tfoot><tr>${cols.map((c, i) => `<td class="${c.num ? 'n' : ''}">${i === 0 ? t('all') : totals[c.k] !== undefined ? money(totals[c.k]) : ''}</td>`).join('')}</tr></tfoot>` : ''}</table>`;
+}
+function filtersText(el) {
+  return $$('label.tool', el).map(l => {
+    const lbl = (l.childNodes[0] && l.childNodes[0].textContent || '').trim();
+    const sel = $('select', l), inp = $('input:not(.cb-input)', l);
+    if (sel) return sel.value !== '' ? lbl + ': ' + sel.selectedOptions[0].textContent : '';
+    if (inp && inp.type === 'checkbox') return inp.checked ? l.textContent.trim() : '';
+    return inp && inp.value ? lbl + ': ' + inp.value : '';
+  }).filter(Boolean).join(' · ');
+}
+function fullDocHtml(inner, orient) {
+  return `<!doctype html><html dir="${document.documentElement.dir}"><head><meta charset="utf-8"><style>@page{size:A4 ${orient};margin:12mm 10mm}body{margin:0;background:#fff}${DOC_CSS}</style></head>
+    <body><div class="doc ${orient}" dir="${document.documentElement.dir}">${inner}</div></body></html>`;
+}
+
+/** Fetches every filtered row for list pages (not just the visible page). */
+async function fullExportData(limit) {
+  const d = S.exportData;
+  if (!d) return null;
+  if (!d.fetchAll) return d;
+  const rows = await d.fetchAll();
+  return Object.assign({}, d, { rows: rows.slice(0, limit), capped: rows.length > limit ? limit : 0 });
+}
+
+let PRINT_JOB = null;
+/** Opens the A4 orientation chooser, then prints whatever build(orientation) returns. */
+function askPrint(build, def) {
+  PRINT_JOB = build;
+  const o = def || store.get('vms_orient') || 'portrait';
+  openModal(`<div class="drawer-head"><h2>🖨 ${t('print')}</h2><button class="icon-button" data-act="closeModal">×</button></div>
+    <p class="subtitle">${t('paperA4')} · ${t('orientation')}</p>
+    <div class="orient">
+      <button class="orient-btn ${o === 'portrait' ? 'active' : ''}" data-act="printGo" data-o="portrait"><i class="sheet p"></i>${t('portrait')}</button>
+      <button class="orient-btn ${o === 'landscape' ? 'active' : ''}" data-act="printGo" data-o="landscape"><i class="sheet l"></i>${t('landscape')}</button>
+    </div>`);
+}
+async function printGo(orient) {
+  store.set('vms_orient', orient);
+  closeModal();
+  const html = await PRINT_JOB(orient);
+  if (!html) return;
+  const area = $('#printArea');
+  area.innerHTML = `<div class="doc ${orient}" dir="${document.documentElement.dir}">${html}</div>`;
+  $('#pageStyle').textContent = `@page { size: A4 ${orient}; margin: 12mm 10mm; }`;
+  const clean = () => { area.innerHTML = ''; window.removeEventListener('afterprint', clean); };
+  window.addEventListener('afterprint', clean);
+  setTimeout(() => window.print(), 60);
+}
+
+/** Generic page print: title, filters, summary boxes and the full table. */
+async function buildViewPrint(orient) {
+  const d = await fullExportData(5000);
+  if (!d || !d.rows.length) { toast(t('noData'), 'error'); return ''; }
+  const tools = $('#content .view-tools');
+  const ft = tools ? filtersText(tools) : '';
+  return companyHeader(d.title || t('p_' + S.view), [[t('printedAt'), nowText()], [t('printedBy'), S.user.fullName || S.user.username],
+    [t('rowsWord'), NI.format(d.rows.length)]]) +
+    (ft ? `<div class="muted filt">${t('filtersLbl')}: ${esc(ft)}</div>` : '') +
+    (d.summary ? summaryBoxes(d.summary) : '') +
+    printTableHtml(d.cols, d.rows, d.totals) +
+    (d.capped ? `<p class="muted">${t('rowsCapped', { n: NI.format(d.capped) })}</p>` : '');
+}
+
+// ───────── Statement document ─────────
+function statementDoc(r) {
+  const c = r.customer || {}, cc = r.currency, st = r.settings || docSettings();
+  S.lastSettings = st;
+  const m = v => money(v) + ' ' + cc;
+  const lineDesc = l => [l.description, l.payMethod ? methodName(l.payMethod) + (l.chequeNo ? ' #' + l.chequeNo : '') + (l.payRef ? ' ' + l.payRef : '') : ''].filter(Boolean).join(' — ');
+  const overdue = ['b1', 'b2', 'b3', 'b4'].reduce((s, k) => s + (r.aging[k] || 0), 0);
+  return companyHeader(t('stmtTitle'), [[t('stmtDate'), today()], [t('period'), (r.from || t('fromStart')) + ' → ' + r.to], [t('f_currency'), cc]]) +
+    `<table class="dkv"><tr><td class="k">${t('f_name')}</td><td><b>${esc(c.name)}</b></td><td class="k">${t('f_account')}</td><td>${esc(c.account)}</td></tr>
+      <tr><td class="k">${t('f_address')}</td><td>${esc([c.address, c.city, c.country].filter(Boolean).join('، '))}</td><td class="k">${t('f_phone')}</td><td>${esc(c.phone)}</td></tr>
+      <tr><td class="k">${t('f_email')}</td><td>${esc(c.email)}</td><td class="k">${t('f_termsDays')}</td><td>${esc(c.termsDays)}</td></tr></table>` +
+    summaryBoxes([[t('opening'), m(r.opening)], [t('totalDebit'), m(r.periodDebit)], [t('totalCredit'), m(r.periodCredit)],
+      [t('amountDue'), m(r.closing)], [t('overdueAmt'), m(overdue)]], 3) +
+    `<h2>${t('statement')}</h2><table class="grid"><thead><tr><th>${t('f_date')}</th><th>${t('f_voucher')}</th><th>${t('f_type')}</th><th>${t('f_description')}</th>
+      <th>${t('f_dueDate')}</th><th class="n">${t('debit')}</th><th class="n">${t('credit')}</th><th class="n">${t('balance')}</th></tr></thead>
+      <tbody><tr class="sub"><td colspan="7">${t('opening')}</td><td class="n">${money(r.opening)}</td></tr>
+      ${r.lines.map(l => `<tr><td>${esc(l.date)}</td><td>${esc(l.voucher)}</td><td>${esc(l.type)}</td><td>${esc(lineDesc(l))}</td><td>${esc(l.dueDate || '')}</td>
+        <td class="n">${l.debit ? money(l.debit) : ''}</td><td class="n">${l.credit ? money(l.credit) : ''}</td><td class="n">${money(l.balance)}</td></tr>`).join('')}</tbody>
+      <tfoot><tr><td colspan="5">${t('closing')}</td><td class="n">${money(r.periodDebit)}</td><td class="n">${money(r.periodCredit)}</td><td class="n">${money(r.closing)}</td></tr></tfoot></table>` +
+    `<h2>${t('agingTitle')}</h2><table class="grid"><thead><tr><th class="n">${t('current')}</th>${['b1', 'b2', 'b3', 'b4'].map(b => `<th class="n">${t(b)}</th>`).join('')}<th class="n">${t('all')}</th></tr></thead>
+      <tbody><tr><td class="n">${money(r.aging.current)}</td>${['b1', 'b2', 'b3', 'b4'].map(b => `<td class="n">${money(r.aging[b])}</td>`).join('')}<td class="n"><b>${money(r.openAmount)}</b></td></tr></tbody></table>` +
+    (r.openInvoices.length ? `<h2>${t('openInvTitle')}</h2><table class="grid"><thead><tr><th>${t('f_voucher')}</th><th>${t('f_date')}</th><th>${t('f_dueDate')}</th>
+      <th class="n">${t('amount')}</th><th class="n">${t('paid')}</th><th class="n">${t('remaining')}</th><th class="n">${t('days')}</th></tr></thead>
+      <tbody>${r.openInvoices.map(i => `<tr><td>${esc(i.voucher)}</td><td>${esc(i.date)}</td><td>${esc(i.dueDate)}</td><td class="n">${money(i.amount)}</td>
+        <td class="n">${money(i.paid)}</td><td class="n">${money(i.remaining)}</td><td class="n">${i.days || ''}</td></tr>`).join('')}</tbody>
+      <tfoot><tr><td colspan="5">${t('all')}</td><td class="n">${money(r.openAmount)}</td><td></td></tr></tfoot></table>` : '') +
+    (st.BankDetails ? `<div class="note"><b>${t('BankDetails')}</b>\n${esc(st.BankDetails)}</div>` : '') +
+    (st.StatementNote ? `<div class="note">${esc(st.StatementNote)}</div>` : '');
+}
+
+// ───────── Payment voucher document ─────────
+function receiptDoc(rc) {
+  S.lastSettings = rc.settings;
+  const tx = rc.tx, c = rc.customer || {}, cc = tx.currency || localCur();
+  const total = (+tx.debitMST || 0) - (+tx.creditMST || 0);
+  const kv = (k, v) => v ? `<tr><td class="k">${esc(k)}</td><td colspan="3">${v}</td></tr>` : '';
+  const sumAlloc = rc.allocations.reduce((s, a) => s + a.amount, 0);
+  return companyHeader(t('receiptTitle'), [[t('receiptNo'), tx.voucher], [t('f_date'), tx.date], [t('f_status'), t(tx.postStatus || 'Posted')]]) +
+    (tx.postStatus === 'Draft' ? `<p><span class="stamp">${t('Draft')}</span></p>` : '') +
+    `<table class="dkv">
+      ${kv(t('receivedFrom'), `<b>${esc(c.name || tx.customerName || '')}</b> (${esc(tx.account)})`)}
+      ${kv(t('theSumOf'), `<span class="big">${money(total)} ${esc(cc)}</span>${+tx.amountCur && cc !== localCur() ? ` <span class="muted">(${money(Math.abs(tx.amountCur))} ${esc(tx.currency)} × ${NF6.format(+tx.exchange || 1)})</span>` : ''}`)}
+      ${kv(t('f_payMethod'), esc(methodName(tx.payMethod)))}
+      ${kv(t('f_chequeNo'), esc(tx.chequeNo))}${kv(t('f_chequeDate'), esc(tx.chequeDate))}
+      ${kv(t('f_bankName'), esc(tx.bankName))}${kv(t('f_payRef'), esc(tx.payRef))}
+      ${kv(t('f_description'), esc(tx.description))}
+    </table>` +
+    (rc.allocations.length ? `<h2>${t('forInvoices')}</h2>${printTableHtml(
+      [{ k: 'invoiceVoucher', l: t('f_voucher') }, { k: 'amount', l: t('amount') + ' ' + localCur(), num: true }], rc.allocations, { amount: sumAlloc })}` : '') +
+    `<table class="sign"><tr><td><span>${t('receiver')}: ${esc(tx.createdByName || '')}</span></td><td><span>${t('accountant')}</span></td><td><span>${t('customerSign')}</span></td></tr></table>`;
+}
+async function printReceipt(rowId) {
+  const rc = await call('getReceipt', rowId);
+  askPrint(() => receiptDoc(rc), 'portrait');
+}
+
+// ───────── Modal ─────────
+function openModal(html) { $('#modalCard').innerHTML = html; $('#modal').hidden = false; enhance($('#modalCard')); }
+function closeModal() { $('#modal').hidden = true; $('#modalCard').innerHTML = ''; }
+
+// ───────── Payment voucher form (invoice-linked) ─────────
+const payOpts = () => (S.lookups.payMethods || ['Cash', 'Cheque', 'Transfer']).map(m => [m, t(m)]);
+/** New vendor payment, or edit of an unposted payment voucher when rc (from getReceipt) is given. */
+function openCollect(account, rc) {
+  S.rcOpen = [];
+  S.rcEdit = rc || null;
+  const x = rc ? rc.tx : {};
+  if (rc) account = x.account;
+  openDrawer(`
+    <div class="drawer-head"><h2>${rc ? '✎ ' + t('editReceipt') + ' — ' + esc(x.voucher) : '⊕ ' + t('collect')}</h2><button class="icon-button" data-act="closeDrawer" aria-label="${t('close')}">×</button></div>
+    <form class="form-panel" id="rcForm" style="padding:16px 0 0">
+      <div class="form-grid">
+        <label class="field span2">${t('f_account')} <span class="req">*</span><select name="account" required><option value=""></option>${opts(customerOpts(), account)}</select></label>
+        <label class="field">${t('f_date')} <span class="req">*</span><input type="date" name="date" value="${esc(x.date || today())}" required></label>
+        <label class="field">${t('receiptNo')}<input name="voucher" value="${esc(x.voucher || '')}" placeholder="${t('autoNo')}"></label>
+        <label class="field">${t('f_payMethod')} <span class="req">*</span><select name="payMethod">${opts(payOpts(), x.payMethod || 'Cash')}</select></label>
+        <label class="field">${t('f_currency')}<select name="currency">${opts(currencyOpts(x.currency ? [String(x.currency).toUpperCase()] : []), (x.currency || localCur()).toUpperCase())}</select></label>
+        <label class="field" data-m="Cheque">${t('f_chequeNo')} <span class="req">*</span><input name="chequeNo" value="${esc(x.chequeNo || '')}"></label>
+        <label class="field" data-m="Cheque">${t('f_chequeDate')}<input type="date" name="chequeDate" value="${esc(x.chequeDate || '')}"></label>
+        <label class="field" data-m="Cheque Transfer">${t('f_bankName')}<input name="bankName" value="${esc(x.bankName || '')}"></label>
+        <label class="field" data-m="Transfer">${t('f_payRef')}<input name="payRef" value="${esc(x.payRef || '')}"></label>
+        <label class="field">${t('f_exchange')}<input name="exchange" type="text" inputmode="decimal" data-num value="${esc(fmtInputNum(x.exchange || 1))}"></label>
+      </div>
+      <div class="field">${t('pickInvoices')} <span class="req">*</span><div id="allocBox" class="alloc-box"><div class="empty">${t('chooseCustomer')}</div></div></div>
+      <label class="field">${t('f_description')}<textarea name="description">${esc(/^Payment - (Cash|Cheque|Transfer)$/.test(x.description || '') ? '' : (x.description || ''))}</textarea></label>
+      ${can('post', 'receipts') ? `<label class="check"><input type="checkbox" name="post">${t('postNow')}</label>` : ''}
+      <div class="form-actions"><button type="button" class="button-ghost" data-act="closeDrawer">${t('cancel')}</button><button class="button-primary" type="submit">${t('save')}</button></div>
+    </form>`, true);
+  rcMethod();
+  if (account) loadAlloc(account);
+}
+function rcMethod() {
+  const f = $('#rcForm'); if (!f) return;
+  const m = f.elements.payMethod.value;
+  $$('[data-m]', f).forEach(el => { el.hidden = el.dataset.m.split(' ').indexOf(m) === -1; });
+}
+async function loadAlloc(account) {
+  const box = $('#allocBox');
+  if (!account) { box.innerHTML = `<div class="empty">${t('chooseCustomer')}</div>`; return; }
+  box.innerHTML = `<div class="skeleton">${t('loading')}</div>`;
+  const ed = S.rcEdit && S.rcEdit.tx.account === account ? S.rcEdit : null;
+  const r = await call('getOpenInvoices', account, ed ? ed.tx.rowId : '');
+  S.rcOpen = r.invoices;
+  const lc = r.currency;
+  box.innerHTML = r.invoices.length ? `
+    <label class="field" style="margin-bottom:8px">${t('amountToCollect')} (${esc(lc)})<input id="rcTotal" type="text" inputmode="decimal" data-num></label>
+    <div class="table-wrap"><table class="alloc"><thead><tr><th></th><th>${t('f_voucher')}</th><th>${t('f_date')}</th><th>${t('f_dueDate')}</th><th>${t('days')}</th>
+      <th class="num">${t('remaining')}</th><th class="num">${t('amount')}</th></tr></thead>
+      <tbody>${r.invoices.map((i, k) => `<tr><td><input type="checkbox" data-ai="${k}"></td><td><b>${esc(i.voucher)}</b></td><td>${esc(i.date)}</td><td>${esc(i.dueDate)}</td>
+        <td>${i.days ? daysPill(i.days) : ''}</td><td class="num">${money(i.remaining)}${i.pending ? `<br><small class="cur">${t('Draft')}: ${money(i.pending)}</small>` : ''}</td>
+        <td class="num"><input class="alloc-amt" type="text" inputmode="decimal" data-num data-aamt="${k}"></td></tr>`).join('')}</tbody>
+      <tfoot><tr><td colspan="6">${t('allocated')}</td><td class="num"><b id="rcSum">0.00</b> <small class="cur">${esc(lc)}</small></td></tr></tfoot></table></div>`
+    : `<div class="empty">${t('noOpenInvoices')}</div><label class="field">${t('onAccount')} (${esc(lc)})<input name="onAccount" type="text" inputmode="decimal" data-num></label>`;
+  if (ed) { // put back the amounts this payment voucher already pays
+    const left = {};
+    ed.allocations.forEach(a => { left[a.invoiceVoucher] = (left[a.invoiceVoucher] || 0) + a.amount; });
+    $$('[data-aamt]', box).forEach(el => {
+      const inv = S.rcOpen[+el.dataset.aamt], v = Math.min(left[inv.voucher] || 0, inv.remaining);
+      if (v > 0) { el.value = groupDigits(String(Math.round(v * 100) / 100)); left[inv.voucher] -= v; }
+    });
+    const onAcc = $('[name=onAccount]', box);
+    if (onAcc) {
+      const total = (+ed.tx.debitMST || 0) - (+ed.tx.creditMST || 0) - ed.allocations.reduce((s, a) => s + a.amount, 0);
+      if (total > 0) onAcc.value = groupDigits(String(Math.round(total * 100) / 100));
+    }
+    rcSum();
+  }
+}
+async function editReceipt(rowId) {
+  const rc = await call('getReceipt', rowId);
+  if (rc.tx.postStatus !== 'Draft') { toast(t('err_POSTED_LOCKED'), 'error'); return; }
+  openCollect(rc.tx.account, rc);
+}
+function rcSum() {
+  let s = 0;
+  $$('[data-aamt]').forEach(el => {
+    const i = +el.dataset.aamt, v = parseNum(el.value);
+    el.classList.toggle('over', v > S.rcOpen[i].remaining + 0.005);
+    $(`[data-ai="${i}"]`).checked = v > 0;
+    s += v;
+  });
+  const el = $('#rcSum'); if (el) el.textContent = money(s);
+}
+function rcDistribute(total) {
+  let left = total;
+  $$('[data-aamt]').forEach(el => {
+    const rem = S.rcOpen[+el.dataset.aamt].remaining;
+    const a = Math.max(0, Math.min(left, rem));
+    el.value = a ? groupDigits(String(Math.round(a * 100) / 100)) : '';
+    left -= a;
+  });
+  rcSum();
+}
+async function submitReceipt(form) {
+  const E = form.elements;
+  const allocations = $$('[data-aamt]', form).map(el => ({ voucher: S.rcOpen[+el.dataset.aamt].voucher, amount: parseNum(el.value) })).filter(a => a.amount > 0);
+  if (E.payMethod.value === 'Cheque' && !E.chequeNo.value.trim()) { toast(t('err_CHEQUE_REQUIRED'), 'error'); E.chequeNo.focus(); return; }
+  if ($$('.alloc-amt.over', form).length) { toast(t('err_OVER_ALLOCATED'), 'error'); return; }
+  const onAccount = E.onAccount ? parseNum(E.onAccount.value) : 0;
+  if (!allocations.length && !onAccount) { toast(t('err_INVOICE_REQUIRED'), 'error'); return; }
+  const b = form.querySelector('button[type=submit]'); b.disabled = true;
+  try {
+    const r = await call('saveReceipt', {
+      rowId: S.rcEdit ? S.rcEdit.tx.rowId : '',
+      account: E.account.value, date: E.date.value, voucher: E.voucher.value.trim(), payMethod: E.payMethod.value,
+      chequeNo: E.chequeNo.value.trim(), chequeDate: E.chequeDate.value, bankName: E.bankName.value.trim(), payRef: E.payRef.value.trim(),
+      currency: E.currency.value, exchange: parseNum(E.exchange.value) || 1, description: E.description.value.trim(),
+      post: E.post ? E.post.checked : false, onAccount: onAccount, allocations: allocations
+    });
+    toast(t('saved') + ' — ' + r.voucher + ' · ' + money(r.total));
+    closeDrawer();
+    if (S.view === 'receipts' || S.view === 'transactions') reload();
+    printReceipt(r.rowId);
+  } catch (e) { b.disabled = false; }
+}
+
+// ───────── Statement sending ─────────
+function normPhone(p) {
+  let d = String(p || '').replace(/[^\d+]/g, '');
+  if (d.charAt(0) === '+') return d.slice(1);
+  if (d.indexOf('00') === 0) return d.slice(2);
+  const cc = String(docSettings().WhatsAppCountryCode || S.settings.WhatsAppCountryCode || '').replace(/\D/g, '');
+  if (cc && (d.charAt(0) === '0' || d.length <= 9) && d.indexOf(cc) !== 0) d = cc + d.replace(/^0+/, '');
+  return d;
+}
+function stmtMessage(r, link) {
+  const c = r.customer || {}, cc = r.currency, st = r.settings || docSettings();
+  const overdue = ['b1', 'b2', 'b3', 'b4'].reduce((s, k) => s + (r.aging[k] || 0), 0);
+  const lines = [t('msgDear', { n: c.name }), t('msgGreeting'), '', t('msgBalance', { d: r.to, a: money(r.closing) + ' ' + cc })];
+  if (overdue > 0) lines.push(t('msgOverdue', { a: money(overdue) + ' ' + cc }));
+  if (r.openInvoices.length) {
+    lines.push('', t('msgOpen'));
+    r.openInvoices.slice(0, 12).forEach(i => lines.push('• ' + i.voucher + ' — ' + i.date + ' — ' + money(i.remaining) + (i.days ? ' (' + i.days + ' ' + t('day') + ')' : '')));
+  }
+  if (link) lines.push('', t('msgLink', { u: link }));
+  if (st.BankDetails) lines.push('', t('BankDetails') + ':', st.BankDetails);
+  lines.push('', t('msgThanks'), st.CompanyName || '');
+  return lines.join('\n');
+}
+const stmtFileName = r => 'Vendor_Statement_' + (r.customer || {}).account + '_' + r.to;
+function openEmailDialog() {
+  const r = S.lastStmt; if (!r) return;
+  const c = r.customer || {};
+  openModal(`<div class="drawer-head"><h2>✉ ${t('sendEmail')}</h2><button class="icon-button" data-act="closeModal">×</button></div>
+    <form class="form-panel" id="mailForm" style="padding:12px 0 0">
+      <label class="field">${t('emailTo')} <span class="req">*</span><input name="to" type="text" value="${esc(c.email || '')}" required></label>
+      <label class="field">${t('emailCc')}<input name="cc" type="text"></label>
+      <label class="field">${t('subject')}<input name="subject" value="${esc(t('stmtTitle') + ' — ' + c.name + ' — ' + r.to)}"></label>
+      <label class="field">${t('message')}<textarea name="message" style="min-height:190px">${esc(stmtMessage(r))}</textarea></label>
+      <p class="field-hint">📎 ${esc(stmtFileName(r))}.pdf</p>
+      <div class="form-actions"><button type="button" class="button-ghost" data-act="closeModal">${t('cancel')}</button><button class="button-primary" type="submit">${t('send')}</button></div>
+    </form>`);
+}
+function openWaDialog() {
+  const r = S.lastStmt; if (!r) return;
+  const c = r.customer || {};
+  openModal(`<div class="drawer-head"><h2>💬 ${t('sendWhatsApp')}</h2><button class="icon-button" data-act="closeModal">×</button></div>
+    <form class="form-panel" id="waForm" style="padding:12px 0 0">
+      <label class="field">${t('waPhone')} <span class="req">*</span><input name="phone" type="text" dir="ltr" value="${esc(normPhone(c.phone))}" required>
+        <span class="field-hint">${t('waHint')}</span></label>
+      <label class="check"><input type="checkbox" name="link" checked>${t('attachLink')}</label>
+      <label class="field">${t('message')}<textarea name="message" style="min-height:220px">${esc(stmtMessage(r))}</textarea></label>
+      <div id="waGo"></div>
+      <div class="form-actions"><button type="button" class="button-ghost" data-act="closeModal">${t('cancel')}</button><button class="button-primary" type="submit">${t('send')}</button></div>
+    </form>`);
+}
+async function sendEmail(form) {
+  const r = S.lastStmt, E = form.elements;
+  const b = form.querySelector('button[type=submit]'); b.disabled = true;
+  try {
+    const res = await call('sendStatementEmail', r.customer.account, {
+      to: E.to.value.trim(), cc: E.cc.value.trim(), subject: E.subject.value, message: E.message.value,
+      html: fullDocHtml(statementDoc(r), 'portrait'), fileName: stmtFileName(r), rtl: S.lang === 'ar'
+    });
+    closeModal(); toast(t('quotaLeft', { n: res.quota }));
+  } catch (e) { b.disabled = false; }
+}
+async function sendWhatsApp(form) {
+  const r = S.lastStmt, E = form.elements;
+  const phone = normPhone(E.phone.value);
+  let msg = E.message.value;
+  const b = form.querySelector('button[type=submit]'); b.disabled = true;
+  try {
+    if (E.link.checked) {
+      const l = await call('statementPdfLink', r.customer.account, { html: fullDocHtml(statementDoc(r), 'portrait'), fileName: stmtFileName(r) });
+      if (!l.shared) toast(t('linkNotShared'), 'error');
+      const thanks = msg.lastIndexOf('\n\n' + t('msgThanks'));
+      const add = '\n\n' + t('msgLink', { u: l.url });
+      msg = thanks > -1 ? msg.slice(0, thanks) + add + msg.slice(thanks) : msg + add;
+    }
+    const url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(msg);
+    call('logContact', r.customer.account, 'WhatsApp', 'Statement sent via WhatsApp to ' + phone).catch(() => {});
+    $('#waGo').innerHTML = `<a class="button-primary link-btn wa-btn" href="${esc(url)}" target="_blank" rel="noopener" data-act="closeModalSoon">💬 ${t('openWhatsApp')} (+${esc(phone)})</a>`;
+    try { window.open(url, '_blank'); } catch (e) {}
+  } finally { b.disabled = false; }
+}
+
+
+// ───────── Messages & notifications ─────────
+function startPolling() {
+  clearInterval(S.pollTimer);
+  S.lastUnread = null;
+  pollUnread();
+  S.pollTimer = setInterval(pollUnread, 60000);
+}
+async function pollUnread() {
+  if (!S.token) return;
+  try {
+    const r = await run('getUnreadCount', S.token);
+    setBadge('messages', r.messages + r.alerts);
+    if (S.lastUnread !== null && r.messages > S.lastUnread) {
+      toast(t('newMsgToast', { n: r.messages }));
+      if (S.view === 'messages' && !$('#overlay').classList.contains('open')) VIEWS.messages();
+    }
+    S.lastUnread = r.messages;
+  } catch (e) {
+    if (/SESSION_EXPIRED/.test(String(e && e.message || e))) { signOutLocal(); toast(t('err_SESSION_EXPIRED'), 'error'); }
+  }
+}
+const msgTitle = m => I18N.en[m.subject] ? t(m.subject) : (m.subject || '—');
+const msgFrom = m => m.from === 'system' ? t('system') : m.fromName;
+const msgTo = m => m.to === 'ALL' ? t('allUsers') : (m.toName || m.to);
+
+function composeForm(account) {
+  const others = (S.lookups.users || []).filter(u => u.username !== S.user.username);
+  openDrawer(`<div class="drawer-head"><h2>✉ ${t('compose')}</h2><button class="icon-button" data-act="closeDrawer">×</button></div>
+    <form class="form-panel" id="msgForm" style="padding:16px 0 0">
+      <div class="field">${t('msgTo')} <span class="req">*</span><div class="check-grid">
+        <label class="check"><input type="checkbox" name="to" value="ALL"><b>${t('allUsers')}</b></label>
+        ${others.map(u => `<label class="check"><input type="checkbox" name="to" value="${esc(u.username)}">${bdi(u.name)}</label>`).join('')}</div></div>
+      <label class="field">${t('relatedCustomer')}<select name="account"><option value=""></option>${opts(customerOpts(), account || '')}</select></label>
+      <label class="field">${t('msgSubject')}<input name="subject" maxlength="200"></label>
+      <label class="field">${t('msgBody')} <span class="req">*</span><textarea name="body" required maxlength="5000" style="min-height:160px"></textarea></label>
+      <div class="form-actions"><button type="button" class="button-ghost" data-act="closeDrawer">${t('cancel')}</button><button class="button-primary" type="submit">${t('sendMsg')}</button></div>
+    </form>`);
+}
+async function submitMessage(form) {
+  const to = $$('input[name=to]:checked', form).map(i => i.value);
+  if (!to.length) { toast(t('pickRecipient'), 'error'); return; }
+  const b = form.querySelector('button[type=submit]'); b.disabled = true;
+  try {
+    await call('sendMessage', { to: to, subject: form.elements.subject.value, body: form.elements.body.value, account: form.elements.account.value });
+    toast(t('msgSent')); closeDrawer();
+    if (S.view === 'messages') { S.msgBox = 'sent'; VIEWS.messages(); }
+  } catch (e) { b.disabled = false; }
+}
+async function openThread(id) {
+  openDrawer(`<div class="skeleton">${t('loading')}</div>`, true);
+  const r = await call('getThread', id);
+  const first = r.thread[0] || {};
+  openDrawer(`<div class="drawer-head"><div><h2>${esc(msgTitle(first))}</h2>
+      ${first.account ? `<p style="margin:4px 0 0">${t('relatedCustomer')}: <button class="section-action" data-act="openCust" data-acc="${esc(first.account)}">${esc(first.account)} — ${bdi(r.customerName)}</button></p>` : ''}</div>
+      <div style="display:flex;gap:8px"><button class="icon-button" data-act="msgDelete" data-id="${esc(id)}" title="${t('del')}">🗑</button>
+      <button class="icon-button" data-act="closeDrawer">×</button></div></div>
+    <div class="thread">${r.thread.map(m => `<div class="bubble ${m.mine ? 'mine' : ''} ${m.type === 'notification' ? 'sys' : ''}">
+      <div class="bubble-head"><b>${bdi(m.from === 'system' ? t('system') : m.fromName)}</b><span>${esc(m.createdAt)}</span></div>
+      <div class="bubble-body">${esc(m.body)}</div></div>`).join('')}</div>
+    ${first.type !== 'notification' ? `<form id="replyForm" class="form-panel" data-root="${esc(r.root)}" style="padding:14px 0 0">
+      <textarea name="body" required maxlength="5000" placeholder="${t('writeReply')}" style="min-height:90px;width:100%;border:1px solid var(--border);border-radius:6px;padding:9px;background:var(--page);color:var(--text)"></textarea>
+      <div class="form-actions"><button class="button-primary" type="submit">↩ ${t('reply')}</button></div></form>` : ''}`, true);
+  pollUnread();
+}
+async function submitReply(form) {
+  const b = form.querySelector('button[type=submit]'); b.disabled = true;
+  try {
+    await call('sendMessage', { replyTo: form.dataset.root, body: form.elements.body.value });
+    toast(t('msgSent'));
+    openThread(form.dataset.root);
+  } catch (e) { b.disabled = false; }
+}
+
+// ───────── Events ─────────
+const ACT = {
+  menu() {
+    if (window.innerWidth <= 680) { $('#sidebar').classList.toggle('open'); $('#scrim').classList.toggle('open'); return; }
+    const hidden = $('#app').classList.toggle('collapsed');
+    store.set('vms_sidebar', hidden ? 'hidden' : 'shown');
+  },
+  theme() { const l = !document.documentElement.classList.contains('light'); document.documentElement.classList.toggle('light', l); store.set('vms_theme', l ? 'light' : 'dark'); },
+  lang() { store.set('vms_lang', S.lang === 'ar' ? 'en' : 'ar'); applyPrefs(); if (S.user) { renderShell(); go(S.view); } else renderLogin(); },
+  async logout() { try { await run('logout', S.token); } catch (e) {} signOutLocal(); },
+  closeDrawer,
+  export: exportXlsx,
+  print() { const d = S.exportData; askPrint(buildViewPrint, d && d.cols && d.cols.length > 7 ? 'landscape' : 'portrait'); },
+  printGo(el) { printGo(el.dataset.o); },
+  closeModal,
+  closeModalSoon() { setTimeout(closeModal, 300); },
+  stmtPrint() { if (!S.lastStmt) { toast(t('chooseCustomer'), 'error'); return; } askPrint(() => statementDoc(S.lastStmt), 'portrait'); },
+  stmtEmail() { if (!S.lastStmt) { toast(t('chooseCustomer'), 'error'); return; } openEmailDialog(); },
+  stmtWa() { if (!S.lastStmt) { toast(t('chooseCustomer'), 'error'); return; } openWaDialog(); },
+  goStatement(el) { closeDrawer(); S.rep.statement = Object.assign(S.rep.statement || { dateFrom: yearStart(), dateTo: today(), currency: localCur() }, { account: el.dataset.acc }); go('statement'); },
+  compose(el) { composeForm((el && el.dataset.acc) || ''); },
+  msgTab(el) { S.msgBox = el.dataset.tab; VIEWS.messages(); },
+  async markAll() { await call('markMessagesRead', 'ALL'); pollUnread(); VIEWS.messages(); },
+  async msgDelete(el) { if (!confirm(t('confirmDelete'))) return; await call('deleteMessage', el.dataset.id); closeDrawer(); toast(t('deleted')); VIEWS.messages(); },
+  removeLogo() { if (confirm(t('confirmDelete'))) saveLogo(''); },
+  newReceipt(el) { openCollect((el && el.dataset.acc) || ''); },
+  rowReceipt(el) { printReceipt(rowOf(el).row.rowId); },
+  runReport,
+  page(el) { const v = el.closest('.pager').dataset.view; listState(v).page = +el.dataset.p; loadList(v); },
+  newCustomer() { openForm('Vendors', { status: 'Active', currency: localCur(), termsDays: 30, collector: S.user.isCollector ? S.user.username : '' }, true); },
+  newTx() { openForm('Transactions', { date: today(), type: 'Invoice', currency: localCur(), exchange: 1 }, true); },
+  newGroup() { openForm('VendorGroups', {}, true); },
+  newCurrency(el) { openForm('Currencies', { code: (el && el.dataset.code) || '', active: true }, true); },
+  changePw() {
+    openModal(`<div class="drawer-head"><h2>🔑 ${t('changePw')}</h2><button class="icon-button" data-act="closeModal">×</button></div>
+      <form class="form-panel" id="pwForm" style="padding:12px 0 0">
+        <label class="field">${t('curPw')} <span class="req">*</span><input name="cur" type="password" autocomplete="current-password" required></label>
+        <label class="field">${t('newPw')} <span class="req">*</span><input name="next" type="password" autocomplete="new-password" minlength="6" required></label>
+        <label class="field">${t('confirmPw')} <span class="req">*</span><input name="again" type="password" autocomplete="new-password" minlength="6" required></label>
+        <div class="form-actions"><button type="button" class="button-ghost" data-act="closeModal">${t('cancel')}</button><button class="button-primary" type="submit">${t('save')}</button></div>
+      </form>`);
+  },
+  newUser() { openForm('Users', { role: 'User', scope: 'all', active: true, pages: 'dashboard,customers' }, true); },
+  newFollow(el) { openForm('FollowUps', { account: el.dataset.acc || '', actionDate: today(), actionType: 'Call', status: 'Open' }, true); },
+  openCust(el) { openCustomer(el.dataset.acc); },
+  custEdit(el) {
+    call('listRecords', 'Vendors', { filters: { account: el.dataset.acc }, pageSize: 5 }).then(r => r.rows[0] && openForm('Vendors', r.rows[0], false));
+  },
+  stmtApply() { const tl = $('#stmtTools'); const v = readTools(tl); openCustomer(tl.dataset.acc, v.from, v.to, true, v.currency); },
+  rowEdit(el) {
+    const { view, row } = rowOf(el);
+    if (LISTS[view].entity === 'Transactions' && row.payMethod) editReceipt(row.rowId); // payment vouchers keep their invoice links
+    else openForm(LISTS[view].entity, row, false);
+  },
+  async rowDelete(el) {
+    const { view, row } = rowOf(el);
+    if (!confirm(t('confirmDelete'))) return;
+    await call('deleteRecord', LISTS[view].entity, row[LISTS[view].id]);
+    toast(t('deleted'));
+    if (['customers', 'groups', 'users', 'currencies'].indexOf(view) > -1) await refreshLookups();
+    loadList(view);
+  },
+  async rowPost(el) { const { view, row } = rowOf(el); const n = await call('postTransactions', [row.rowId], false, S.view); toast(t('postedN', { n })); loadList(view); },
+  async rowUnpost(el) { const { view, row } = rowOf(el); const n = await call('postTransactions', [row.rowId], true, S.view); toast(t('unpostedN', { n })); loadList(view); },
+  async postSelected() {
+    const ids = $$('[data-sel]:checked').map(i => i.dataset.sel);
+    if (!ids.length) { toast(t('selectDraft'), 'error'); return; }
+    const n = await call('postTransactions', ids, false, S.view);
+    toast(t('postedN', { n })); loadList(S.view);
+  },
+  odTab(el) { S.rep.overdue.tab = el.dataset.tab; runReport(); },
+  repTab(el) { S.rep[S.view].tab = el.dataset.tab; runReport(); },
+  perfList(el) {
+    const m = rowOf(el).row, cc = (S.rep.performance && S.rep.performance.currency) || baseCur();
+    const cols = [{ k: 'account', l: t('f_account') }, { k: 'name', l: t('f_name') }, { k: 'opening', l: t('openingPeriod'), num: true },
+      { k: 'invoiced', l: t('invoicedPeriod'), num: true }, { k: 'due', l: t('totalDue'), num: true }, { k: 'collected', l: t('collectedAmt'), num: true },
+      { k: 'remaining', l: t('remainingAmt'), num: true }, { k: 'rate', l: t('collectRate'), f: v => NI.format(v) + '%', p: x => x.rate + '%', x: x => x.rate / 100 },
+      { k: 'overdue', l: t('overdueAmt'), num: true }, { k: 'maxDays', l: t('maxDays'), f: v => v ? daysPill(v) : '' }];
+    S.exportData = { name: 'performance_' + (m.collector || 'unassigned'), title: t('p_performance') + ' — ' + (m.name || t('unassigned')), cols, rows: m.list };
+    openDrawer(`<div class="drawer-head"><h2>${bdi(m.name || t('unassigned'))} — ${t('companies')} (${NI.format(m.companies)})</h2>
+      <div style="display:flex;gap:8px">${exportBtn()}${btn('print', '🖨', 'button-ghost')}<button class="icon-button" data-act="closeDrawer">×</button></div></div>
+      <div class="panel flush">${table('perfDrawer', cols, m.list, { click: true, sortable: false })}</div>`, true);
+  },
+  collCompanies(el) {
+    const m = S.rows.collectors[+el.dataset.i];
+    const cols = [{ k: 'account', l: t('f_account') }, { k: 'name', l: t('f_name') }, { k: 'balance', l: t('balance'), num: true },
+      { k: 'remaining', l: t('overdueAmt'), num: true }, { k: 'count', l: t('invoices'), num: true, f: v => NI.format(v) }, { k: 'maxDays', l: t('maxDays'), f: daysPill }, { k: 'lastFollowUp', l: t('lastFollowUp') }];
+    S.exportData = { name: 'manager_' + (m.collector || 'unassigned'), cols, rows: m.companies };
+    openDrawer(`<div class="drawer-head"><h2>${bdi(m.name || t('unassigned'))} — ${t('companies')}</h2><div style="display:flex;gap:8px">${exportBtn()}<button class="icon-button" data-act="closeDrawer">×</button></div></div>
+      <div class="panel flush">${table('collDrawer', cols, m.companies, { click: true, sortable: false })}</div>`, true);
+  },
+  impTemplate() {
+    const entity = $('#impEntity').value;
+    call('getTemplateHeaders', entity).then(h => {
+      S.exportData = { name: entity + '_template', cols: h.map(x => ({ k: x, l: x })), rows: [{}] };
+      exportXlsx();
+    });
+  },
+  impRun: runImport,
+  async cleanDup() {
+    if (!confirm(t('cleanDup') + '?')) return;
+    const r = await call('removeDuplicateCustomers');
+    toast(t('cleanDupDone', { n: NI.format(r.removed) }));
+    await refreshLookups();
+    reload();
+  }
+};
+
+function rowOf(el) {
+  const tbl = el.closest('table'), tr = el.closest('tr');
+  const view = tbl.dataset.view;
+  return { view, row: S.rows[view][+tr.dataset.i] };
+}
+
+// Rows that open the vendor 360 drawer when clicked.
+const ROW_CUSTOMER_VIEWS = ['collectionsDet', 'perfDrawer', 'receipts', 'customers', 'dashTop', 'balances', 'paid', 'overdue', 'overdueCust', 'credit', 'collFlat', 'collDrawer'];
+
+document.addEventListener('click', e => {
+  const goEl = e.target.closest('[data-go]');
+  if (goEl) { go(goEl.dataset.go); return; }
+  const actEl = e.target.closest('[data-act]');
+  if (actEl && ACT[actEl.dataset.act]) { e.preventDefault(); ACT[actEl.dataset.act](actEl, e); return; }
+  const th = e.target.closest('th[data-sort]');
+  if (th) {
+    const view = th.closest('table').dataset.view, s = listState(view);
+    s.desc = s.sort === th.dataset.sort ? !s.desc : false; s.sort = th.dataset.sort; loadList(view); return;
+  }
+  const mi = e.target.closest('.msg-item[data-mi]');
+  if (mi) {
+    const m = S.msgRows[+mi.dataset.mi];
+    if (m.type === 'alert') openCustomer(m.account); else { mi.classList.remove('unread'); openThread(m.id); }
+    return;
+  }
+  if (e.target.closest('input,label,a,button,select,.cb')) return;
+  const tr = e.target.closest('tbody tr[data-i]');
+  if (tr) {
+    const view = tr.closest('table').dataset.view;
+    const row = (S.rows[view] || [])[+tr.dataset.i];
+    if (row && ROW_CUSTOMER_VIEWS.indexOf(view) > -1) openCustomer(row.account);
+  }
+  if (e.target.id === 'overlay') closeDrawer();
+  if (e.target.id === 'modal') closeModal();
+});
+
+let searchTimer;
+document.addEventListener('input', e => {
+  if (e.target.matches('input[data-num]')) {
+    formatNumInput(e.target);
+    if (e.target.id === 'rcTotal') rcDistribute(parseNum(e.target.value));
+    else if (e.target.dataset.aamt !== undefined) rcSum();
+    if (FORM && FORM.entity === 'Transactions' && e.target.form && e.target.form.id === 'recForm') txFormCalc(e.target.form, e.target.name);
+    return;
+  }
+  const tools = e.target.closest('[data-list]');
+  if (tools && e.target.type === 'search') {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => onListTools(tools.dataset.list, tools), 400);
+  }
+});
+document.addEventListener('change', e => {
+  if (e.target.classList.contains('cb-input') || e.target.matches('input[data-num]')) return;
+  if (e.target.form && e.target.form.id === 'recForm' && FORM && FORM.entity === 'Transactions' && e.target.name === 'currency') { txFormCalc(e.target.form, 'currency'); return; }
+  if (e.target.form && e.target.form.id === 'recForm' && FORM && FORM.entity === 'Currencies' && e.target.name === 'code') {
+    const h = $('[data-hint="rate"]'); if (h) h.textContent = t('rateOf', { c: e.target.value.toUpperCase(), b: baseCur() }); return;
+  }
+  if (e.target.matches('input[data-perm]')) {
+    const tr = e.target.closest('tr');
+    if (e.target.dataset.perm === 'view' && !e.target.checked) $$('input[data-perm]', tr).forEach(i => { i.checked = false; });
+    if (e.target.dataset.perm !== 'view' && e.target.checked) $('[data-perm=view]', tr).checked = true;
+    return;
+  }
+  if (e.target.matches('input[data-permcol]')) {
+    const c = e.target.dataset.permcol, on = e.target.checked;
+    $$(`table.perm input[data-perm="${c}"]`).forEach(i => { i.checked = on; i.dispatchEvent(new Event('change', { bubbles: true })); });
+    return;
+  }
+  if (e.target.form && e.target.form.id === 'rcForm') {
+    const n = e.target.name;
+    if (n === 'account') loadAlloc(e.target.value);
+    else if (n === 'payMethod') rcMethod();
+    else if (n === 'currency') {
+      const r = rateOf(e.target.value), l = rateOf(localCur());
+      if (r && l) e.target.form.elements.exchange.value = groupDigits(String(+(r / l).toFixed(6)));
+    } else if (e.target.dataset.ai !== undefined) {
+      const i = e.target.dataset.ai, amt = $(`[data-aamt="${i}"]`);
+      amt.value = e.target.checked ? groupDigits(String(S.rcOpen[+i].remaining)) : '';
+      rcSum();
+    }
+    return;
+  }
+  if (S.view === 'statement' && e.target.dataset.f === 'account' && e.target.closest('#repTools')) { runReport(); return; }
+  if (e.target.closest('#dashTools')) { S.rep.dashboard.currency = e.target.value; VIEWS.dashboard(); return; }
+  const tools = e.target.closest('[data-list]');
+  if (tools && e.target.type !== 'search') { onListTools(tools.dataset.list, tools); return; }
+  if (e.target.matches('[data-pagesize]')) {
+    const v = e.target.closest('.pager').dataset.view, s = listState(v);
+    s.pageSize = +e.target.value; s.page = 1; loadList(v); return;
+  }
+  if (e.target.id === 'impFile' && e.target.files[0]) readImportFile(e.target.files[0]);
+  if (e.target.id === 'impEntity') renderImportPreview();
+  if (e.target.id === 'impMode') impOptions();
+  if (e.target.id === 'logoFile' && e.target.files[0]) logoDataUrl(e.target.files[0]).then(saveLogo).catch(() => toast(t('err_LOGO_INVALID'), 'error'));
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { if (!$('#modal').hidden) closeModal(); else closeDrawer(); }
+  if (e.key === 'Enter' && e.target.id === 'gsearch') {
+    const s = listState('customers'); s.q = e.target.value.trim(); s.page = 1; go('customers');
+  }
+});
+document.addEventListener('submit', async e => {
+  e.preventDefault();
+  if (e.target.id === 'loginForm') doLogin(e.target);
+  else if (e.target.id === 'recForm') submitForm(e.target);
+  else if (e.target.id === 'rcForm') submitReceipt(e.target);
+  else if (e.target.id === 'msgForm') submitMessage(e.target);
+  else if (e.target.id === 'pwForm') {
+    const E = e.target.elements;
+    if (E.next.value !== E.again.value) { toast(t('pwMismatch'), 'error'); return; }
+    if (E.next.value.length < 6) { toast(t('err_PASSWORD_SHORT'), 'error'); return; }
+    const b = e.target.querySelector('button[type=submit]'); b.disabled = true;
+    try { await call('changePassword', E.cur.value, E.next.value); closeModal(); toast(t('pwChanged')); } catch (err) { b.disabled = false; }
+  }
+  else if (e.target.id === 'replyForm') submitReply(e.target);
+  else if (e.target.id === 'mailForm') sendEmail(e.target);
+  else if (e.target.id === 'waForm') sendWhatsApp(e.target);
+  else if (e.target.id === 'settingsForm') {
+    const fd = {}; SETTING_INPUTS.concat(SETTING_TEXTS).forEach(k => { fd[k] = e.target.elements[k].value.trim(); });
+    S.settings = await call('saveSettings', fd); toast(t('settingsSaved')); renderShell(); go('users');
+  } else if (e.target.id === 'curSettings') {
+    const E = e.target.elements;
+    S.settings = await call('saveCurrencySettings', { ReportCurrency: E.ReportCurrency.value, LocalCurrency: E.LocalCurrency.value, ConversionBasis: E.ConversionBasis.value });
+    await refreshLookups();
+    toast(t('settingsSaved')); go('currencies');
+  }
+});
+
+// ───────── Boot ─────────
+(async function boot() {
+  applyPrefs();
+  const css = document.createElement('style'); css.textContent = DOC_CSS; document.head.appendChild(css);
+  const page = document.createElement('style'); page.id = 'pageStyle'; document.head.appendChild(page);
+  checkVersion();
+  store.set('vms_token', null); // drop tokens saved by older versions
+  const tok = sess.get('vms_token');
+  if (tok) {
+    try { setLoading(1); onLogin(await run('resume', tok)); return; }
+    catch (e) { sess.set('vms_token', null); }
+    finally { setLoading(-1); }
+  }
+  renderLogin();
+})();
+</script>
