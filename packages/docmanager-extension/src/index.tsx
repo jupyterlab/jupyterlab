@@ -649,20 +649,13 @@ export namespace ToolbarItems {
     commands: CommandRegistry,
     fileChanged: ISignal<any, Omit<Contents.IModel, 'content'>>
   ): Widget {
-    return addCommandToolbarButtonClass(
-      ReactWidget.create(
-        <UseSignal signal={fileChanged}>
-          {() => (
-            <CommandToolbarButtonComponent
-              commands={commands}
-              id={CommandIDs.save}
-              label={''}
-              args={{ toolbar: true }}
-            />
-          )}
-        </UseSignal>
-      )
-    );
+    return new CommandToolbarButton({
+      commands,
+      id: CommandIDs.save,
+      label: '',
+      args: { toolbar: true },
+      additionalSignals: [fileChanged]
+    });
   }
 }
 

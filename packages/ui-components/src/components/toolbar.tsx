@@ -13,6 +13,7 @@ import { nullTranslator } from '@jupyterlab/translation';
 import { find, map, some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import type { ISignal } from '@lumino/signaling';
 import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
@@ -1087,6 +1088,11 @@ export namespace CommandToolbarButtonComponent {
      * the focus on the button.
      */
     noFocusOnClick?: boolean;
+
+    /**
+     * Additional signals that trigger a re-render of the button.
+     */
+    additionalSignals?: ISignal<unknown, unknown>[];
   }
 }
 
@@ -1135,7 +1141,7 @@ export class CommandToolbarButton extends ReactWidget {
    */
   constructor(private props: CommandToolbarButtonComponent.IProps) {
     super();
-    const { commands, id, args } = props;
+    const { commands, id, args, additionalSignals } = props;
     addCommandToolbarButtonClass(this);
     this.setCommandAttributes(commands, id, args);
     commands.commandChanged.connect((_, change) => {
@@ -1143,6 +1149,12 @@ export class CommandToolbarButton extends ReactWidget {
         this.setCommandAttributes(commands, id, args);
       }
     }, this);
+    additionalSignals?.forEach(signal => {
+      signal.connect(() => {
+        this.setCommandAttributes(commands, id, args);
+        this.update();
+      }, this);
+    });
   }
   protected setCommandAttributes(
     commands: CommandRegistry,
