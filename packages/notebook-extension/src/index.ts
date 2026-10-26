@@ -3054,8 +3054,9 @@ function addCommands(
   });
   let activeCellModel: ICellModel | null = null;
   const onActiveCellMetadataChanged = (_: ICellModel, change: IMapChange) => {
-    if (change.key === 'deletable' || change.key === 'editable') {
+    if (change.key === 'deletable') {
       commands.notifyCommandChanged(CommandIDs.deleteCell);
+    } else if (change.key === 'editable') {
       commands.notifyCommandChanged(CommandIDs.makeCellEditable);
     }
   };
