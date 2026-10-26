@@ -572,7 +572,9 @@ export class CSVViewer extends Widget {
       this._columnWidths.length
     );
     for (let i = 0; i < columnCount; i++) {
-      this._grid.resizeColumn('body', i, this._columnWidths[i]);
+      if (this._columnWidths[i] !== this._grid.defaultSizes.columnWidth) {
+        this._grid.resizeColumn('body', i, this._columnWidths[i]);
+      }
     }
     dataModel.changed.connect(this._onDataModelChanged, this);
     this._grid.selectionModel = new BasicSelectionModel({ dataModel });
@@ -593,7 +595,9 @@ export class CSVViewer extends Widget {
     if (args.type === 'columns-inserted' && args.region === 'body') {
       const end = Math.min(args.index + args.span, this._columnWidths.length);
       for (let i = args.index; i < end; i++) {
-        this._grid.resizeColumn('body', i, this._columnWidths[i]);
+        if (this._columnWidths[i] !== this._grid.defaultSizes.columnWidth) {
+          this._grid.resizeColumn('body', i, this._columnWidths[i]);
+        }
       }
     }
     this._dataChanged.emit(undefined);
