@@ -58,8 +58,9 @@ export class EditorHandler implements IDisposable {
     this._debuggerService = options.debuggerService;
     this._editor = options.getEditor;
 
+    this._src.changed.connect(this._onSharedModelChanged, this);
     this._editorMonitor = new ActivityMonitor({
-      signal: this._src.changed,
+      signal: this._sourceChanged,
       timeout: EDITOR_CHANGED_TIMEOUT
     });
     this._editorMonitor.activityStopped.connect(() => {
@@ -266,6 +267,19 @@ export class EditorHandler implements IDisposable {
   }
 
   /**
+   * Handle a change of the shared model, ignoring changes that leave the
+   * source unchanged, such as outputs or execution count.
+   */
+  private _onSharedModelChanged(
+    sender: ISharedText,
+    change: SourceChange
+  ): void {
+    if (change.sourceChange) {
+      this._sourceChanged.emit();
+    }
+  }
+
+  /**
    * Send the breakpoints from the editor UI via the debug service.
    */
   private _sendEditorBreakpoints(): void {
@@ -468,7 +482,8 @@ export class EditorHandler implements IDisposable {
   private _gutter: Compartment;
   private _highlightDeco: Decoration;
   private _highlightState: StateField<DecorationSet>;
-  private _editorMonitor: ActivityMonitor<ISharedText, SourceChange>;
+  private _editorMonitor: ActivityMonitor<this, void>;
+  private _sourceChanged = new Signal<this, void>(this);
   private _path: string;
   private _src: ISharedText;
   private _selectedBreakpoint: IDebugger.IBreakpoint | null;
