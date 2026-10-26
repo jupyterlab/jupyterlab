@@ -419,6 +419,22 @@ test.describe('Reactive toolbar', () => {
 
     await expect(opener).toBeHidden();
   });
+
+  test('Adding padding to an item should move items to the popup', async ({
+    page
+  }) => {
+    const toolbar = page.locator('.jp-NotebookPanel-toolbar');
+    const opener = toolbar.locator('.jp-Toolbar-responsive-opener');
+    await expect(opener).toBeHidden();
+
+    await toolbar
+      .locator('[data-jp-item-name="restart-and-run"]')
+      .evaluate(node => {
+        node.style.paddingRight = '600px';
+      });
+
+    await expect(opener).toBeVisible();
+  });
 });
 
 test('Reactive toolbar should move items to the popup when the kernel name gets longer', async ({

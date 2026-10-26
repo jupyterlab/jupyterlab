@@ -507,7 +507,9 @@ export class ReactiveToolbar extends Toolbar<Widget> {
       );
       status = super.insertItem(j, name, widget);
       if (status && !widget.hasClass(TOOLBAR_SPACER_CLASS)) {
-        this._itemResizeObserver.observe(widget.node);
+        // Watch the border box: a padding change, for example from a theme,
+        // leaves the content box as it is but changes the width the layout uses.
+        this._itemResizeObserver.observe(widget.node, { box: 'border-box' });
       }
 
       if (j !== index) {
