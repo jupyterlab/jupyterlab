@@ -19,7 +19,6 @@ import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { MessageLoop } from '@lumino/messaging';
 import type { PanelLayout } from '@lumino/widgets';
 import { Panel, Widget } from '@lumino/widgets';
-import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { simulate } from 'simulate-event';
 
