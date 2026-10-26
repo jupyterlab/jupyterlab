@@ -3065,8 +3065,13 @@ function addCommands(
     activeCellModel = tracker.activeCell?.model ?? null;
     activeCellModel?.metadataChanged.connect(onActiveCellMetadataChanged);
   };
+
   // Closing the last notebook emits `currentChanged` but no `activeCellChanged`
   tracker.currentChanged.connect(followActiveCell);
+
+  // In case if a notebook is already open when the commands are added
+  followActiveCell();
+
   tracker.activeCellChanged.connect(() => {
     followActiveCell();
     commands.notifyCommandChanged(CommandIDs.deleteCell);
