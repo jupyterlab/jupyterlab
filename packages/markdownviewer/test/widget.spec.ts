@@ -11,9 +11,11 @@ import { MarkdownViewer } from '../src';
 
 class TestRenderer extends Widget implements IRenderMime.IRenderer {
   renderCount = 0;
+  fragments: unknown[] = [];
 
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     this.renderCount += 1;
+    this.fragments.push(model.metadata.fragment);
   }
 }
 
@@ -44,6 +46,15 @@ describe('MarkdownViewer', () => {
     MessageLoop.sendMessage(viewer, Widget.Msg.UpdateRequest);
 
     expect(renderer.renderCount).toBe(1);
+  });
+
+  it('should render on an update request after the content changed', () => {
+    expect(renderer.renderCount).toBe(1);
+
+    context.model.fromString('# Changed');
+    MessageLoop.sendMessage(viewer, Widget.Msg.UpdateRequest);
+
+    expect(renderer.renderCount).toBe(2);
   });
 
   it('should render when an option affecting the content changes', async () => {
@@ -100,5 +111,29 @@ describe('MarkdownViewer', () => {
     MessageLoop.sendMessage(viewer, Widget.Msg.UpdateRequest);
     expect(renderer.renderCount).toBe(2);
     renderSpy.mockRestore();
+  });
+
+  it('should not pass the fragment to a later render', async () => {
+    viewer.dispose();
+    const ready = new PromiseDelegate<void>();
+    const readySpy = jest.spyOn(context, 'ready', 'get');
+    readySpy.mockReturnValue(ready.promise);
+    const isReadySpy = jest.spyOn(context, 'isReady', 'get');
+    isReadySpy.mockReturnValue(false);
+    renderer = new TestRenderer();
+    viewer = new MarkdownViewer({ context, renderer });
+    Widget.attach(viewer, document.body);
+    viewer.setFragment('#section');
+    MessageLoop.flush();
+
+    isReadySpy.mockReturnValue(true);
+    ready.resolve(undefined);
+    await viewer.ready;
+    viewer.setOption('hideFrontMatter', false);
+    MessageLoop.flush();
+
+    expect(renderer.fragments).toEqual(['#section', '']);
+    readySpy.mockRestore();
+    isReadySpy.mockRestore();
   });
 });

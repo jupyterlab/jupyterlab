@@ -54,6 +54,8 @@ export class MarkdownViewer extends Widget {
         timeout: this._config.renderTimeout
       });
       this._monitor.activityStopped.connect(this._requestRender, this);
+      // An update request made before the timeout renders the change.
+      this.context.model.contentChanged.connect(this._onContentChanged, this);
 
       this._ready.resolve(undefined);
     });
@@ -143,7 +145,6 @@ export class MarkdownViewer extends Widget {
     if (this._renderPending && this.context.isReady && !this.isDisposed) {
       this._renderPending = false;
       void this._render();
-      this._fragment = '';
     }
   }
 
@@ -160,6 +161,13 @@ export class MarkdownViewer extends Widget {
   private _requestRender(): void {
     this._renderPending = true;
     this.update();
+  }
+
+  /**
+   * Mark the rendered content as stale.
+   */
+  private _onContentChanged(): void {
+    this._renderPending = true;
   }
 
   /**
@@ -192,6 +200,7 @@ export class MarkdownViewer extends Widget {
       data,
       metadata: { fragment: this._fragment }
     });
+    this._fragment = '';
 
     try {
       // Do the rendering asynchronously.
