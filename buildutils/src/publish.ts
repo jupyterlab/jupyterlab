@@ -12,7 +12,6 @@ interface IPublishOptions {
   skipBuild?: boolean;
   skipPublish?: boolean;
   skipTags?: boolean;
-  yes?: boolean;
   dryRun?: boolean;
 }
 
@@ -25,6 +24,22 @@ async function sleep(wait: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, wait));
 }
 
+/**
+ * Whether a package version is on the registry.
+ *
+ * @param spec - The package name and version, as `name@version`.
+ */
+function isPublished(spec: string): boolean {
+  try {
+    return (
+      utils.run(`npm view ${spec} version`, { stdio: 'pipe' }, true) !== ''
+    );
+  } catch {
+    // npm view fails for a package that was never published.
+    return false;
+  }
+}
+
 // Specify the program signature.
 commander
   .description('Publish the JS packages')
@@ -34,7 +49,6 @@ commander
   )
   .option('--skip-publish', 'Skip publish and only handle tags')
   .option('--skip-tags', 'publish assets but do not handle tags')
-  .option('--yes', 'Publish without confirmation')
   .option('--dry-run', 'Do not actually push any assets')
   .action(async (options: IPublishOptions) => {
     utils.exitOnUncaughtException();
@@ -66,19 +80,27 @@ commander
 
       // Publish JS to the appropriate tag.
       const curr = utils.getPythonVersion();
-      let cmd = 'lerna publish from-package ';
+      let cmd = 'npm publish';
       if (options.dryRun) {
-        cmd += '--no-git-tag-version --no-push ';
-      }
-      if (options.yes) {
-        cmd += '  --yes ';
+        cmd += ' --dry-run';
       }
 
       let tag = 'latest';
       if (!/\d+\.\d+\.\d+$/.test(curr)) {
         tag = 'next';
       }
-      utils.run(`${cmd} --dist-tag=${tag} -m "Publish"`);
+      for (const pkgPath of utils.getYarnPaths().sort()) {
+        const data = utils.readJSONFile(path.join(pkgPath, 'package.json'));
+        if (data.private === true) {
+          continue;
+        }
+        const spec = `${data.name}@${data.version}`;
+        if (isPublished(spec)) {
+          console.log(`${spec} is already published`);
+          continue;
+        }
+        utils.run(`${cmd} --tag=${tag}`, { cwd: pkgPath });
+      }
     }
 
     // Fix up any tagging issues.
