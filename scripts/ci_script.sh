@@ -145,6 +145,8 @@ if [[ $GROUP == integrity3 ]]; then
     jlpm bumpversion next
     VERSION=$(hatch version)
     if [[ $VERSION != *rc2 ]]; then exit 1; fi
+    JS_VERSION=$(node -p "require('./packages/application/package.json').version")
+    if [[ $JS_VERSION != *-rc.2 ]]; then exit 1; fi
 
     # make sure we can patch release
     jlpm bumpversion release # switch to final
