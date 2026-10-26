@@ -242,23 +242,18 @@ commander
     async (name: string | RegExp, version: string = '^latest', args: any) => {
       const basePath = path.resolve(args.path || '.');
       const pkg = args.regex ? new RegExp(name) : name;
-      const paths = [];
 
-      if (args.lerna) {
-        paths.push(...utils.getLernaPaths(basePath).sort());
-      } else if (args.yarn) {
-        paths.push(...utils.getYarnPaths(basePath).sort());
-      }
+      if (args.lerna || args.yarn) {
+        const paths = args.lerna
+          ? utils.getLernaPaths(basePath)
+          : utils.getYarnPaths(basePath);
 
-      if (paths.length) {
-        paths.sort();
         // We use a loop instead of Promise.all so that the output is in
         // alphabetical order.
-        for (const pkgPath of paths) {
+        for (const pkgPath of paths.sort()) {
           await handlePackage(pkg, version, pkgPath, args.dryRun, args.minimal);
         }
       }
-
       await handlePackage(pkg, version, basePath, args.dryRun, args.minimal);
     }
   );

@@ -36,6 +36,8 @@ export function exitOnUncaughtException(): void {
 
 /**
  * Get all of the lerna package paths.
+ *
+ * @deprecated Use `getYarnPaths`.
  */
 export function getLernaPaths(basePath = '.'): string[] {
   basePath = path.resolve(basePath);
@@ -70,21 +72,11 @@ export function getLernaPaths(basePath = '.'): string[] {
  */
 export function getYarnPaths(basePath = '.'): string[] {
   basePath = path.resolve(basePath);
-  let packages;
-  try {
-    let baseConfig = require(path.join(basePath, 'package.json'));
-    if (baseConfig.workspaces) {
-      packages = baseConfig.workspaces.packages || baseConfig.workspaces;
-    }
-  } catch (e) {
-    if (e.code === 'MODULE_NOT_FOUND') {
-      throw new Error(`No yarn workspace list found in ${basePath}`);
-    }
-    throw e;
-  }
+  const { workspaces } = readJSONFile(path.join(basePath, 'package.json'));
+  const patterns: string[] = workspaces?.packages ?? workspaces ?? [];
   let paths: string[] = [];
-  for (const config of packages) {
-    paths = paths.concat(glob.sync(path.join(basePath, config)));
+  for (const pattern of patterns) {
+    paths = paths.concat(glob.sync(path.join(basePath, pattern)));
   }
   return paths.filter(pkgPath => {
     return fs.existsSync(path.join(pkgPath, 'package.json'));
