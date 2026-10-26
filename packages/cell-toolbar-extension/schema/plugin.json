@@ -6,8 +6,7 @@
     "Cell": [
       {
         "name": "non-editable-cell",
-        "command": "notebook:make-cell-editable",
-        "icon": "ui-components:lock"
+        "command": "notebook:make-cell-editable"
       },
       {
         "name": "duplicate-cell",
