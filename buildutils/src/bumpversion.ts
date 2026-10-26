@@ -3,11 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import { program as commander } from 'commander';
+import type { ReleaseType } from 'semver';
 import * as utils from './utils';
 
 interface IBumpVersionOptions {
   dryRun?: boolean;
-  force?: boolean;
   skipCommit?: boolean;
 }
 
@@ -15,6 +15,7 @@ interface IBumpVersionOptions {
 commander
   .description('Update the version and publish')
   .option('--dry-run', 'Dry run')
+  .option('--skip-commit', 'Whether to skip commit changes')
   .arguments('<spec>')
   .action((spec: string, opts: IBumpVersionOptions) => {
     utils.exitOnUncaughtException();
@@ -34,6 +35,9 @@ commander
     // For patch, defer to `patch:release` command
     if (spec === 'patch') {
       let cmd = 'jlpm patch:release';
+      if (opts.skipCommit) {
+        cmd += ' --skip-commit';
+      }
       utils.run(cmd);
       process.exit(0);
     }
@@ -61,44 +65,31 @@ commander
       return;
     }
 
-    // Determine the version spec to use for lerna.
-    let lernaVersion = 'preminor';
+    // Determine the version increment of the JS packages.
+    let increment: ReleaseType = 'preminor';
+    let preid: string | undefined = 'alpha';
     if (spec === 'build') {
-      lernaVersion = 'prerelease';
+      increment = 'prerelease';
+      preid = undefined;
       // a -> b
     } else if (spec === 'release' && prev.indexOf('a') !== -1) {
-      lernaVersion = 'prerelease --preid=beta';
+      increment = 'prerelease';
+      preid = 'beta';
       // b -> rc
     } else if (spec === 'release' && prev.indexOf('b') !== -1) {
-      lernaVersion = 'prerelease --preid=rc';
+      increment = 'prerelease';
+      preid = 'rc';
       // rc -> final
     } else if (spec === 'release' && prev.indexOf('rc') !== -1) {
-      lernaVersion = 'patch';
+      increment = 'patch';
     }
-    if (lernaVersion === 'preminor') {
-      lernaVersion += ' --preid=alpha';
-    }
-
-    let cmd = `jlpm workspaces foreach run`;
-    cmd += ` npm version ${lernaVersion}`;
-
-    const oldVersion = utils.getJSVersion('metapackage');
 
     // For a major release, we bump 10 minor versions so that we do
     // not conflict with versions during minor releases of the top
     // level package.
-    if (spec === 'major') {
-      for (let i = 0; i < 10; i++) {
-        utils.run(cmd);
-      }
-    } else {
-      utils.run(cmd);
-    }
-
-    const newVersion = utils.getJSVersion('metapackage');
-    if (spec !== 'major' && oldVersion === newVersion) {
-      // lerna didn't version anything, so we assume the user aborted
-      throw new Error('Lerna aborted');
+    const count = spec === 'major' ? 10 : 1;
+    for (let i = 0; i < count; i++) {
+      utils.bumpWorkspaceVersions(increment, { preid });
     }
 
     // Bump the version.

@@ -260,7 +260,7 @@ follow_imports = "skip"
 follow_imports_for_stubs = true
 
 [tool.jupyter-releaser.options]
-version-cmd = "jlpm bumpversion --force --skip-commit"
+version-cmd = "jlpm bumpversion --skip-commit"
 npm-install-options = "--legacy-peer-deps"
 release-message = "[ci skip] Publish {version}"
 tag-message = "[ci skip] Release {tag_name}"

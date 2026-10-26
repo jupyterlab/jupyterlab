@@ -6,15 +6,13 @@ import { program as commander } from 'commander';
 import * as utils from './utils';
 
 interface IPatchReleaseOptions {
-  all?: boolean;
-  force?: boolean;
   skipCommit?: boolean;
 }
 
 // Specify the program signature.
 commander
   .description('Create a patch release')
-  .option('--force', 'Force the upgrade')
+  .option('--skip-commit', 'Whether to skip commit changes')
   .action((options: IPatchReleaseOptions) => {
     utils.exitOnUncaughtException();
 
@@ -31,18 +29,8 @@ commander
     // Run pre-bump actions.
     utils.prebump();
 
-    // Version the changed
-    let cmd = `jlpm workspaces foreach run `;
-    cmd += ` npm version patch`;
-
-    const oldVersion = utils.getJSVersion('metapackage');
-    utils.run(cmd);
-    const newVersion = utils.getJSVersion('metapackage');
-
-    if (oldVersion === newVersion) {
-      // lerna didn't version anything, so we assume the user aborted
-      throw new Error('Lerna aborted');
-    }
+    // Patch the JS packages.
+    utils.bumpWorkspaceVersions('patch');
 
     // Patch the python version
     utils.run('bump-my-version bump --allow-dirty patch'); // switches to alpha

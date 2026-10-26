@@ -8,7 +8,6 @@ import path from 'path';
 import * as utils from './utils';
 
 interface IBumpJSOptions {
-  force?: boolean;
   dryRun?: boolean;
 }
 
@@ -91,16 +90,14 @@ commander
         'Cannot bump JS packages until we switch to prerelease mode'
       );
     }
-    const pkgs = Array.from(toBump).join(',');
-    let cmd = `jlpm workspaces foreach --include "${pkgs}" run`;
-    cmd += ` npm version premajor --preid=${preId}`;
-
+    const names = Array.from(toBump).map(pkg => `@jupyterlab/${pkg}`);
     if (options.dryRun) {
-      console.debug('Would run:');
-      console.debug(cmd);
+      console.debug('Would bump:');
+      console.debug(names.join('\n'));
       return;
     }
-    utils.run(cmd);
+    utils.bumpWorkspaceVersions('premajor', { preid: preId, packages: names });
+    utils.postbump(false);
   });
 
 commander.parse(process.argv);
