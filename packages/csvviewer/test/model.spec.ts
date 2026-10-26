@@ -580,6 +580,24 @@ describe('csvviewer/model', () => {
       d.dispose();
     });
 
+    it.each(['\n', '\r\n'])(
+      'skips an empty line between comments and the header with row delimiter %j',
+      rowDelimiter => {
+        const d = new DSVModel({
+          data: ['# Pages', '', 'Page,Pageviews', '/,1200', ''].join(
+            rowDelimiter
+          ),
+          delimiter: ',',
+          comment: '#'
+        });
+        expect(d.header).toEqual(['Page', 'Pageviews']);
+        expect(d.rowCount('body')).toBe(3);
+        expect([0, 1].map(c => d.data('body', 1, c))).toEqual(['', '']);
+        expect([0, 1].map(c => d.data('body', 2, c))).toEqual(['/', '1200']);
+        d.dispose();
+      }
+    );
+
     it('handles delayed parsing of rows past the initial rows', async () => {
       const d = new DSVModel({
         data: `a,b,c\nc,d,e\nf,g,h\ni,j,k`,

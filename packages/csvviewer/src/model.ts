@@ -635,8 +635,8 @@ export class DSVModel extends DataModel implements IDisposable {
   }
 
   /**
-   * Find the first non-comment row and use it to determine the header row and
-   * column count.
+   * Find the first row that is neither a comment nor empty, and use it to
+   * determine the header row and column count.
    */
   private _getFirstDataRow(): { row: number; ncols: number } {
     const comment = this._comment;
@@ -645,7 +645,10 @@ export class DSVModel extends DataModel implements IDisposable {
     let row = 0;
     let startIndex = 0;
     while (startIndex < this._rawData.length) {
-      if (this._rawData[startIndex] !== comment) {
+      if (
+        this._rawData[startIndex] !== comment &&
+        !this._rawData.startsWith(this._rowDelimiter, startIndex)
+      ) {
         const { ncols } = parser({
           data: this._rawData,
           startIndex,
