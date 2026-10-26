@@ -331,9 +331,36 @@ describe('@jupyterlab/docmanager', () => {
         expect(manager.findWidget(model.path, null)).toBe(widget);
         await dismissDialog();
       });
+
+      it('should not find a sibling widget given a file and a null widget name', async () => {
+        const model = await services.contents.newUntitled({
+          type: 'file',
+          ext: '.txt'
+        });
+        const documentWidget = manager.open(model.path)!;
+        documentWidget.context.addSibling(new Widget());
+        documentWidget.dispose();
+        expect(manager.findWidget(model.path, null)).toBeUndefined();
+        await dismissDialog();
+      });
     });
 
     describe('#openOrReveal()', () => {
+      it('should open a new widget when only a sibling widget is left', async () => {
+        const model = await services.contents.newUntitled({
+          type: 'file',
+          ext: '.txt'
+        });
+        const documentWidget = manager.open(model.path)!;
+        const sibling = new Widget();
+        documentWidget.context.addSibling(sibling);
+        documentWidget.dispose();
+        widget = manager.openOrReveal(model.path);
+        expect(widget).not.toBe(sibling);
+        expect(widget).toBeInstanceOf(DocumentWidget);
+        await dismissDialog();
+      });
+
       it('should reveal an existing widget with non preferred factory when widgetName is omitted', async () => {
         const widgetFactory2 = new WidgetFactory({
           name: 'test2',
