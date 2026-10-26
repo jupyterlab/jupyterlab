@@ -95,7 +95,7 @@ export class BreadCrumbs extends Widget {
     this._onPathEdited = options.onPathEdited;
     this._onPathActivated = options.onPathActivated;
     this.addClass(BREADCRUMB_CLASS);
-    this._crumbs = Private.createCrumbs();
+    this._crumbs = Private.createCrumbs(this._trans);
     const hasPreferred = PageConfig.getOption('preferredPath');
     this._hasPreferred = hasPreferred && hasPreferred !== '/' ? true : false;
     this._crumbContainer = document.createElement('span');
@@ -1119,11 +1119,14 @@ namespace Private {
   /**
    * Create the breadcrumb nodes.
    */
-  export function createCrumbs(): ReadonlyArray<HTMLElement> {
+  export function createCrumbs(
+    trans: TranslationBundle
+  ): ReadonlyArray<HTMLElement> {
     const home = rootIcon.element({
       className: BREADCRUMB_ROOT_CLASS,
       tag: 'span',
-      title: PageConfig.getOption('serverRoot') || 'Jupyter Server Root',
+      title:
+        PageConfig.getOption('serverRoot') || trans.__('Jupyter Server Root'),
       stylesheet: 'breadCrumb'
     });
     home.dataset.path = '/';
@@ -1146,7 +1149,7 @@ namespace Private {
     const preferred = (preferredPathIsHome ? homeIcon : preferredIcon).element({
       className: BREADCRUMB_PREFERRED_CLASS,
       tag: 'span',
-      title: path || 'Jupyter Preferred Path',
+      title: path || trans.__('Jupyter Preferred Path'),
       stylesheet: 'breadCrumb'
     });
     preferred.dataset.path = path || '/';
