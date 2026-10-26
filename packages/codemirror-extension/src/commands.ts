@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
   deleteLine,
@@ -21,7 +22,6 @@ import {
 } from '@codemirror/language';
 import { EditorSelection } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
-import { selectNextOccurrence } from '@codemirror/search';
 import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -46,6 +46,10 @@ namespace CommandIDs {
   export const unfoldSubregions = 'codemirror:unfold-subregions';
   export const foldAll = 'codemirror:fold-all';
   export const unfoldAll = 'codemirror:unfold-all';
+}
+
+function toggleBlockCommentWithFallback(view: EditorView): boolean {
+  return toggleBlockComment(view) || toggleComment(view);
 }
 
 /**
@@ -219,7 +223,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(CommandIDs.toggleBlockComment, {
       label: trans.__('Toggle Block Comment'),
       caption: trans.__(
-        'Toggles block comments in languages which support it (e.g. C, JavaScript)'
+        'Toggles block comments; falls back to regular comment toggle when block comment syntax is unavailable'
       ),
       describedBy: {
         args: {
@@ -232,7 +236,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
         if (!view) {
           return;
         }
-        toggleBlockComment(view);
+        toggleBlockCommentWithFallback(view);
       },
       isEnabled
     });
@@ -284,11 +288,12 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
           properties: {}
         }
       },
-      execute: () => {
+      execute: async () => {
         const view = findEditorView();
         if (!view) {
           return;
         }
+        const { selectNextOccurrence } = await import('@codemirror/search');
         selectNextOccurrence(view);
       },
       isEnabled

@@ -2,15 +2,20 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-
 import { program as commander } from 'commander';
 import * as utils from './utils';
+
+interface IPatchReleaseOptions {
+  all?: boolean;
+  force?: boolean;
+  skipCommit?: boolean;
+}
 
 // Specify the program signature.
 commander
   .description('Create a patch release')
   .option('--force', 'Force the upgrade')
-  .action((options: any) => {
+  .action((options: IPatchReleaseOptions) => {
     utils.exitOnUncaughtException();
 
     // Make sure we can patch release.
@@ -40,10 +45,10 @@ commander
     }
 
     // Patch the python version
-    utils.run('bumpversion patch --allow-dirty'); // switches to alpha
-    utils.run('bumpversion release --allow-dirty'); // switches to beta
-    utils.run('bumpversion release --allow-dirty'); // switches to rc.
-    utils.run('bumpversion release --allow-dirty'); // switches to final.
+    utils.run('bump-my-version bump --allow-dirty patch'); // switches to alpha
+    utils.run('bump-my-version bump --allow-dirty release'); // switches to beta
+    utils.run('bump-my-version bump --allow-dirty release'); // switches to rc.
+    utils.run('bump-my-version bump --allow-dirty release'); // switches to final.
 
     // Run post-bump actions.
     const commit = options.skipCommit !== true;

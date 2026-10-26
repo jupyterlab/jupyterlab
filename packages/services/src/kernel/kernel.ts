@@ -17,10 +17,10 @@ import type { KernelSpec } from '../kernelspec';
 
 import type { IKernelSpecAPIClient } from '../kernelspec/kernelspec';
 
-import { IKernelOptions, IModel } from './restapi';
+import type { IKernelOptions, IModel } from './restapi';
 
-export { Status } from './messages';
-export { IKernelOptions, IModel };
+export type { Status } from './messages';
+export type { IKernelOptions, IModel };
 
 /**
  * Interface of a Kernel connection that is managed by a session.
@@ -691,6 +691,11 @@ export namespace IKernelConnection {
      * The subshell ID.
      */
     subshellId?: string;
+
+    /**
+     * Timeout awaiting Websocket responds Kernel's information.
+     */
+    kernelInfoTimeout?: number;
   }
 }
 

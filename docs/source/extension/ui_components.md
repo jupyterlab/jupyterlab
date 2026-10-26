@@ -303,7 +303,7 @@ _rendered icon:_
 
 ### Background
 
-#### Icon handling in Jupyterlab
+#### Icon handling in JupyterLab
 
 Pre JupyterLab 2.0, most icons were created using the icons-as-css-background
 pattern:
@@ -369,4 +369,4 @@ images rendered as `background-image` are invisible to CSS. On the
 other hand, an icon rendered as an inline svg node is fully exposed to
 the CSS. This allows us to dynamically change icon styling as needed
 simply by modifying our CSS. Most importantly, this allows us to recolor
-icons according to Jupyterlab’s current theme.
+icons according to JupyterLab’s current theme.

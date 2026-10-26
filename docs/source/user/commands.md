@@ -14,17 +14,19 @@ also require input arguments. Those arguments are maybe different in the command
 and the keyboard shortcuts for example. That can explain varying behavior depending on the
 source of a command trigger.
 
-# Commands in Markdown Files
+# Commands in Markdown Output and Files
 
 JupyterLab supports using commands in Markdown files with the following syntax:
 
 ```markdown
-`<button data-commandLinker-command="help:about" href="#">TEST</button>`
+<button data-commandLinker-command="help:about" href="#">TEST</button>
 ```
 
-The value of `data-commandLinker-command` must be a valid command identifier (see list below).
+The value of `data-commandLinker-command` must be a valid command identifier (see list below). Arguments can be passed along using `data-commandLinker-args`.
 
 This allows you to embed buttons or other elements with custom commands in your Markdown documents.
+
+The command linker functionality can be disabled in the HTML Sanitizer settings if required given by security constraints.
 
 ## Command Palette
 

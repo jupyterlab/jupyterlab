@@ -121,9 +121,11 @@ ut elit.`
         .locator('.jp-FileEditorCodeWrapper .cm-content')
         .fill('text editor');
     };
-    const changeFontSize = async (page: IJupyterLabPageFixture, menuOption) => {
-      await page.click('text=Settings');
-      await page.click(`.lm-Menu ul[role="menu"] >> text="${menuOption}"`);
+    const changeFontSize = async (
+      page: IJupyterLabPageFixture,
+      menuOption: string
+    ) => {
+      await page.menu.clickMenuItem(`Settings>${menuOption}`);
     };
 
     test('Should increase a text editor font-size', async ({ page }) => {
@@ -131,7 +133,12 @@ ut elit.`
       let fontSize = await getFontSize(page);
       await changeFontSize(page, 'Increase Text Editor Font Size');
 
-      expect(await getFontSize(page)).toEqual(fontSize + 1);
+      // We wrap the font size comparisons in `expect().toPass()`
+      // because clicking on the menu only triggers the asynchronous
+      // update which might take a fraction on second to propagate.
+      await expect(async () => {
+        expect(await getFontSize(page)).toEqual(fontSize + 1);
+      }).toPass();
     });
 
     test('Should decrease a text editor font-size', async ({ page }) => {
@@ -139,7 +146,9 @@ ut elit.`
       let fontSize = await getFontSize(page);
       await changeFontSize(page, 'Decrease Text Editor Font Size');
 
-      expect(await getFontSize(page)).toEqual(fontSize - 1);
+      await expect(async () => {
+        expect(await getFontSize(page)).toEqual(fontSize - 1);
+      }).toPass();
     });
   });
 });

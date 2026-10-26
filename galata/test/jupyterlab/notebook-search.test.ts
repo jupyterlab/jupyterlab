@@ -282,9 +282,9 @@ test.describe('Notebook Search', () => {
 
     // First escape should NOT close the search box (but leave the editing mode)
     await page.keyboard.press('Escape');
-    await page.waitForTimeout(250);
+    await page.getByText(`Mode: Command`, { exact: true }).waitFor();
     expect(await page.notebook.isCellInEditingMode(0)).toBeFalsy();
-    expect(await page.isVisible('.jp-DocumentSearch-overlay')).toBeTruthy();
+    await expect(page.locator('.jp-DocumentSearch-overlay')).toBeVisible();
 
     // Second escape should close the search box (even if it is not focused)
     await page.keyboard.press('Escape');
@@ -341,19 +341,26 @@ test.describe('Notebook Search', () => {
     await page.fill('[placeholder="Find"]', 'with');
     await page.click('button[title="Show Search Filters"]');
     await page.click('text=Search in 1 Selected Cell');
+    await page.locator('text=1/4').waitFor();
 
     // Bring focus to first cell without switching away from command mode
     let cell = await page.notebook.getCellLocator(0);
     await cell!.locator('.jp-InputPrompt').click();
 
-    // Select two cells below
+    // Select three cells below
+    await page.keyboard.press('Shift+ArrowDown');
     await page.keyboard.press('Shift+ArrowDown');
     await page.keyboard.press('Shift+ArrowDown');
 
     // Expect the filter text to be updated
-    await page.locator('text=Search in 3 Selected Cells').waitFor();
+    await page.locator('text=Search in 4 Selected Cells').waitFor();
 
-    // Reset selection, switch to third cell, preserving command mode
+    // Wait for the counter to reset to the first match in the selection.
+    await page
+      .locator('.jp-DocumentSearch-index-counter:has-text("1/19")')
+      .waitFor({ timeout: 10000 });
+
+    // Reset selection, switch to a middle cell, preserving command mode.
     cell = await page.notebook.getCellLocator(2);
     await cell!.locator('.jp-InputPrompt').click();
 
@@ -361,7 +368,7 @@ test.describe('Notebook Search', () => {
     // Wait for the counter to be properly updated
     await page
       .locator('.jp-DocumentSearch-index-counter:has-text("1/10")')
-      .waitFor();
+      .waitFor({ timeout: 10000 });
 
     // Select cell above
     await page.keyboard.press('Shift+ArrowUp');
@@ -580,6 +587,11 @@ test.describe('Notebook Search', () => {
     await page.click('button[title="Show Search Filters"]');
 
     await page.click('text=Search Cell Outputs');
+
+    // If the notebook is not fully loaded yet a confirmation dialog will show up
+    if (await page.locator('.jp-Dialog').isVisible()) {
+      await page.click('.jp-Dialog .jp-mod-accept');
+    }
 
     await page.locator('text=1/29').waitFor();
 

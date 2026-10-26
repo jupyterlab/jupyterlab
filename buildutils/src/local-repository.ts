@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /* eslint-disable camelcase */
 import * as fs from 'fs-extra';
@@ -84,10 +85,16 @@ packages:
     fs.unlinkSync(log_file);
   }
 
-  // Warm up npx cache to avoid conflating install time with startup time,
-  // also get and print out the version info for debugging while at it.
+  // Run the verdaccio dependency, so that the lockfile pins its version
+  const verdaccio = path.join(
+    path.dirname(require.resolve('verdaccio/package.json')),
+    'bin',
+    'verdaccio'
+  );
+
+  // Print out the version info for debugging
   const version = child_process
-    .execFileSync('npx', ['verdaccio@6.2.1', '--version'], {
+    .execFileSync(process.execPath, [verdaccio, '--version'], {
       encoding: 'utf-8'
     })
     .trim();
@@ -100,8 +107,8 @@ packages:
   const options = { cwd: out_dir, detached: true, stdio: ['ignore', out, err] };
 
   const subproc = child_process.spawn(
-    'npx',
-    ['verdaccio@6.2.1'].concat(args.split(' ')),
+    process.execPath,
+    [verdaccio].concat(args.split(' ')),
     options
   );
   subproc.unref();

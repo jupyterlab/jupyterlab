@@ -6,6 +6,7 @@ import { expect, galata, test } from '@jupyterlab/galata';
 import * as path from 'path';
 
 const filebrowserId = 'filebrowser';
+const testImageName = 'lighthouse.png';
 const testFileName = 'simple.md';
 const testNotebook = 'simple_notebook.ipynb';
 const testFolderName = 'test-folder';
@@ -27,6 +28,10 @@ test.describe('Application Context Menu', () => {
       path.resolve(__dirname, `./notebooks/${testFileName}`),
       `${tmpPath}/${testFileName}`
     );
+    await contents.uploadFile(
+      path.resolve(__dirname, '../../../docs/source/images/lighthouse.png'),
+      `${tmpPath}/${testImageName}`
+    );
     // Create a dummy folder
     await contents.createDirectory(`${tmpPath}/${testFolderName}`);
   });
@@ -40,11 +45,6 @@ test.describe('Application Context Menu', () => {
     await page.keyboard.press('Escape');
 
     await page.filebrowser.openHomeDirectory();
-  });
-
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
   });
 
   test('Open file browser context menu on folder', async ({ page }) => {
@@ -131,6 +131,67 @@ test.describe('Application Context Menu', () => {
     const imageName = `tab-launcher.png`;
     const menu = await page.menu.getOpenMenuLocator();
     expect(await menu.screenshot()).toMatchSnapshot(imageName);
+  });
+
+  test('Open image context menu', async ({ page, tmpPath }) => {
+    await page.filebrowser.open(`${tmpPath}/${testImageName}`);
+
+    const image = page.locator('.jp-ImageViewer img');
+    await image.waitFor();
+    await image.click({ button: 'right' });
+
+    expect(await page.menu.isAnyOpen()).toBe(true);
+    for (const action of [
+      'Zoom In',
+      'Zoom Out',
+      'Reset Image',
+      'Rotate Clockwise',
+      'Rotate Counterclockwise',
+      'Flip image horizontally',
+      'Flip image vertically',
+      'Invert Colors'
+    ]) {
+      await expect(page.getByRole('menuitem', { name: action })).toBeVisible();
+    }
+    await expect(
+      page.getByRole('menuitem', { name: 'Copy Image' })
+    ).toBeVisible();
+  });
+
+  test.describe('Image clipboard', () => {
+    test.skip(
+      ({ browserName }) => browserName !== 'chromium',
+      'Image clipboard read is tested on Chromium.'
+    );
+
+    test('Copy image from context menu to clipboard', async ({
+      page,
+      tmpPath
+    }) => {
+      await page
+        .context()
+        .grantPermissions(['clipboard-read', 'clipboard-write']);
+      await page.filebrowser.open(`${tmpPath}/${testImageName}`);
+
+      const image = page.locator('.jp-ImageViewer img');
+      await image.waitFor();
+      await image.click({ button: 'right' });
+      await page.getByRole('menuitem', { name: 'Copy Image' }).click();
+
+      await expect
+        .poll(async () =>
+          page.evaluate(async () => {
+            const items = await navigator.clipboard.read();
+            const item = items.find(item => item.types.includes('image/png'));
+            if (!item) {
+              return 0;
+            }
+            const blob = await item.getType('image/png');
+            return blob.type === 'image/png' ? blob.size : 0;
+          })
+        )
+        .toBeGreaterThan(0);
+    });
   });
 
   test.describe('Notebook context menus', () => {

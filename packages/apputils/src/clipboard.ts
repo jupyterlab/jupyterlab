@@ -2,6 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { MimeData } from '@lumino/coreutils';
+import { Dialog, showDialog } from './dialog';
+import type { TranslationBundle } from '@jupyterlab/translation';
+
+type ClipboardWindow = Window & { clipboardData?: DataTransfer };
 
 // 'string' is allowed so as to make it non-breaking for any 1.x releases
 export type ClipboardData = string | MimeData;
@@ -35,7 +39,8 @@ export namespace Clipboard {
   export function copyToSystem(clipboardData: ClipboardData): void {
     const node = document.body;
     const handler = (event: ClipboardEvent) => {
-      const data = event.clipboardData || (window as any).clipboardData;
+      const data =
+        event.clipboardData || (window as ClipboardWindow).clipboardData!;
       if (typeof clipboardData === 'string') {
         data.setData('text', clipboardData);
       } else {
@@ -71,8 +76,8 @@ export namespace Clipboard {
     let sel = window.getSelection();
 
     // Save the current selection.
-    const savedRanges: any[] = [];
-    for (let i = 0, len = sel?.rangeCount || 0; i < len; ++i) {
+    const savedRanges: Range[] = [];
+    for (let i = 0, len = sel?.rangeCount ?? 0; i < len; ++i) {
       savedRanges[i] = sel!.getRangeAt(i).cloneRange();
     }
 
@@ -95,6 +100,16 @@ export namespace Clipboard {
         sel.addRange(savedRanges[i]);
       }
     }
+  }
+
+  export function showPasteUnavailableDialog(trans: TranslationBundle): void {
+    void showDialog({
+      title: trans.__('Paste Unavailable'),
+      body: trans.__(
+        'Due to browser security restrictions, pasting from the context menu may not be supported.\n\nPlease use Ctrl + V (or ⌘ + V on macOS) instead.'
+      ),
+      buttons: [Dialog.okButton({ label: trans.__('OK') })]
+    });
   }
 }
 
@@ -128,6 +143,18 @@ export namespace SystemClipboard {
      * @param mime - The mime type to retrieve.
      */
     getData(mime: string): Promise<unknown | null>;
+
+    /**
+     * Whether the given data matches the last value this application wrote to
+     * the clipboard for this mime type.
+     *
+     * Pass the value just returned by `getData`. Returns `false` once the
+     * current clipboard data differs from what this application last wrote.
+     *
+     * @param mime - The mime type that was retrieved.
+     * @param data - The data returned by `getData`.
+     */
+    matchesLastWrite(mime: string, data: unknown): boolean;
 
     /**
      * Set the data for a given mime type.
@@ -166,6 +193,11 @@ namespace Private {
     fallback: MimeData;
 
     /**
+     * The text last written to the clipboard, per mime type.
+     */
+    private _lastWritten = new Map<string, string>();
+
+    /**
      * Create a new clipboard instance.
      */
     constructor(fallback?: MimeData) {
@@ -183,6 +215,7 @@ namespace Private {
      */
     clear(): void {
       this.fallback.clear();
+      this._lastWritten.clear();
     }
 
     /**
@@ -211,7 +244,7 @@ namespace Private {
       try {
         this.convertStringToData(mime, text);
         return true;
-      } catch (reason) {
+      } catch {
         return false;
       }
     }
@@ -242,6 +275,23 @@ namespace Private {
     }
 
     /**
+     * Whether the given data matches the last value this application wrote to
+     * the clipboard for a given mime type.
+     *
+     * @param mime - The mime type that was retrieved.
+     * @param data - The data returned by `getData`.
+     */
+    matchesLastWrite(mime: string, data: unknown): boolean {
+      const text = this._lastWritten.get(mime);
+      return (
+        data !== null &&
+        data !== undefined &&
+        text !== undefined &&
+        text === this.convertDataToString(mime, data)
+      );
+    }
+
+    /**
      * Set the data for a given mime type.
      *
      * @param mime - The mime type to set.
@@ -249,13 +299,16 @@ namespace Private {
      */
     async setData(mime: string, data: unknown): Promise<void> {
       const { systemClipboard } = this;
+      const text = this.convertDataToString(mime, data);
+      this._lastWritten.clear();
+      this._lastWritten.set(mime, text);
       if (!systemClipboard) {
         this.fallback.clear();
         this.fallback.setData(mime, data);
         return;
       }
       try {
-        await systemClipboard.writeText(this.convertDataToString(mime, data));
+        await systemClipboard.writeText(text);
       } catch (reason) {
         console.warn('Failed to write data to clipboard:', reason);
         // If the clipboard API is not allowed, fall back to the

@@ -1,24 +1,35 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { JSONExt, type ReadonlyPartialJSONValue } from '@lumino/coreutils';
+
+export function isRecord(value: unknown): value is Record<string, unknown> {
+  return (
+    typeof value === 'object' &&
+    JSONExt.isObject(value as ReadonlyPartialJSONValue)
+  );
+}
+
 /**
  * Validate a property as being on an object, and optionally
  * of a given type and among a given set of values.
  */
 export function validateProperty(
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  object: any,
+  object: unknown,
   name: string,
   typeName?: string,
-  values: any[] = []
-): void {
-  if (!object.hasOwnProperty(name)) {
+  values: unknown[] = []
+): asserts object is Record<string, unknown> {
+  if (
+    !isRecord(object) ||
+    !Object.prototype.hasOwnProperty.call(object, name)
+  ) {
     throw Error(`Missing property '${name}'`);
   }
   const value = object[name];
 
   if (typeName !== void 0) {
-    let valid = true;
+    let valid;
     switch (typeName) {
       case 'array':
         valid = Array.isArray(value);
@@ -34,7 +45,7 @@ export function validateProperty(
     }
 
     if (values.length > 0) {
-      let valid = true;
+      let valid;
       switch (typeName) {
         case 'string':
         case 'number':

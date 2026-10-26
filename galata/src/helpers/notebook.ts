@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { NotebookPanel } from '@jupyterlab/notebook';
@@ -66,15 +67,30 @@ export class NotebookHelper {
    * The notebook needs to exist in the current folder.
    *
    * @param name Notebook name
+   * @param options.noKernel If true, the notebook will be opened without a kernel
    * @returns Action success status
    */
-  async open(name: string): Promise<boolean> {
-    const isListed = await this.filebrowser.isFileListedInBrowser(name);
-    if (!isListed) {
+  async open(name: string, options?: { noKernel?: boolean }): Promise<boolean> {
+    try {
+      // The notebook may not be rendered on the list if the upload
+      // has just completed but the listing was not refreshed yet.
+      await Utils.waitForCondition(() =>
+        this.filebrowser.isFileListedInBrowser(name)
+      );
+    } catch {
       return false;
     }
 
-    await this.filebrowser.open(name);
+    if (options?.noKernel) {
+      await this.page.click(`.jp-DirListing-item span:has-text("${name}")`, {
+        button: 'right'
+      });
+      await Utils.waitForCondition(() => this.menu.isAnyOpen());
+      await this.page.hover('text=Open With');
+      await this.page.click('text=Notebook (no kernel)');
+    } else {
+      await this.filebrowser.open(name);
+    }
 
     return await this.isOpen(name);
   }
@@ -261,7 +277,7 @@ export class NotebookHelper {
       );
       if ((await focusedMarkdownEditor.count()) > 0) {
         await this.page.keyboard.press('Escape');
-        await this.page.waitForTimeout(50);
+        await this.page.waitForTimeout(25);
       }
     }
 
@@ -317,6 +333,25 @@ export class NotebookHelper {
   }
 
   /**
+   * Wait until kernel is ready to schedule cell execution.
+   *
+   * This is not the same as waiting for it to be idle.
+   * If this is not awaited and `enableKernelInitNotification` setting is off
+   * (which is the default) the tests can randomly fail without any error
+   * because the kernel ignores execution requests before startup completes.
+   * Also see: https://github.com/jupyterlab/jupyterlab/issues/15420
+   */
+  private async _waitUntilKernelReadyToScheduleExecution() {
+    await this.page.waitForFunction(() => {
+      const text =
+        document.querySelector('#jp-main-statusbar')?.textContent ?? '';
+      return !['Connecting', 'Initializing', 'Starting'].some(s =>
+        text.includes(s)
+      );
+    });
+  }
+
+  /**
    * Revert changes to the currently active notebook
    *
    * @returns Action success status
@@ -348,6 +383,9 @@ export class NotebookHelper {
     await this.page.evaluate(() => {
       window.galata.resetExecutionCount();
     });
+
+    await this._waitUntilKernelReadyToScheduleExecution();
+
     await this.menu.clickMenuItem('Run>Run All Cells');
     await this.waitForRun();
 
@@ -364,6 +402,7 @@ export class NotebookHelper {
     if (!(await this.isAnyActive())) {
       return false;
     }
+    await this._waitUntilKernelReadyToScheduleExecution();
 
     let callbackName = '';
 
@@ -430,25 +469,32 @@ export class NotebookHelper {
    * @returns Whether the action succeeded or not.
    */
   async trust(): Promise<boolean> {
-    if (
-      (await this.isAnyActive()) &&
-      (await this.page
-        .locator('[data-icon="ui-components:not-trusted"]')
-        .count()) === 1
-    ) {
-      await this.page.keyboard.press('Control+Shift+C');
-      await this.page.getByPlaceholder('SEARCH', { exact: true }).fill('trust');
-      await this.page.getByText('Trust Notebook').click();
-      await this.page.getByRole('button', { name: 'Trust' }).click();
-
-      return (
-        (await this.page
-          .locator('[data-icon="ui-components:trusted"]')
-          .count()) === 1
-      );
+    if (!(await this.isAnyActive())) {
+      return true;
     }
 
-    return true;
+    const trusted = await this.page.evaluate(async () => {
+      const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+      await panel.context.ready;
+      return Array.from(panel.content.model!.cells).every(cell => cell.trusted);
+    });
+    if (trusted) {
+      return true;
+    }
+
+    // The command resolves after confirmation and saving the notebook.
+    const [result] = await Promise.all([
+      this.page.evaluate<{ trusted: boolean }>(() =>
+        window.jupyterapp.commands.execute('notebook:trust')
+      ),
+      this.page
+        .getByRole('button', {
+          name: 'Confirm Trusting this notebook',
+          exact: true
+        })
+        .click()
+    ]);
+    return result.trusted;
   }
 
   /**
@@ -567,8 +613,13 @@ export class NotebookHelper {
    *
    * @deprecated You should use locator instead {@link getCellLocator}
    */
-  async getCell(cellIndex: number): Promise<ElementHandle<Element> | null> {
-    return (await this.getCellLocator(cellIndex))?.elementHandle() ?? null;
+  async getCell(
+    cellIndex: number,
+    name?: string
+  ): Promise<ElementHandle<Element> | null> {
+    return (
+      (await this.getCellLocator(cellIndex, name))?.elementHandle() ?? null
+    );
   }
 
   /**
@@ -578,8 +629,11 @@ export class NotebookHelper {
    * @param name Notebook name
    * @returns Handle to the cell
    */
-  async getCellLocator(cellIndex: number): Promise<Locator | null> {
-    const notebook = await this.getNotebookInPanelLocator();
+  async getCellLocator(
+    cellIndex: number,
+    name?: string
+  ): Promise<Locator | null> {
+    const notebook = await this.getNotebookInPanelLocator(name);
     if (!notebook) {
       return null;
     }
@@ -920,7 +974,13 @@ export class NotebookHelper {
     if (textOutputsNum > 0) {
       const outputs: string[] = [];
       for (let i = 0; i < textOutputsNum; i++) {
-        outputs.push((await textOutputs.nth(i).textContent()) ?? '');
+        const output = textOutputs.nth(i);
+        // Wait for incremental text rendering to populate the pre element
+        const renderedText = output.locator('.jp-RenderedText');
+        if ((await renderedText.count()) > 0) {
+          await renderedText.locator('pre').first().waitFor();
+        }
+        outputs.push((await output.textContent()) ?? '');
       }
 
       return outputs;
@@ -1037,17 +1097,18 @@ export class NotebookHelper {
    */
   async clickCellGutter(
     cellIndex: number,
-    lineNumber: number
+    lineNumber: number,
+    name?: string
   ): Promise<boolean> {
     if (lineNumber < 1) {
       return false;
     }
 
-    if (!(await this.isCellGutterPresent(cellIndex))) {
+    if (!(await this.isCellGutterPresent(cellIndex, name))) {
       return false;
     }
 
-    const cell = await this.getCellLocator(cellIndex);
+    const cell = await this.getCellLocator(cellIndex, name);
     return this._clickOnGutter(cell!, lineNumber);
   }
 
@@ -1056,8 +1117,11 @@ export class NotebookHelper {
    *
    * @param cellIndex
    */
-  async isCellGutterPresent(cellIndex: number): Promise<boolean> {
-    const cell = await this.getCellLocator(cellIndex);
+  async isCellGutterPresent(
+    cellIndex: number,
+    name?: string
+  ): Promise<boolean> {
+    const cell = await this.getCellLocator(cellIndex, name);
     if (!cell) {
       return false;
     }
@@ -1069,8 +1133,10 @@ export class NotebookHelper {
    *
    * @param cellIndex
    */
-  waitForCellGutter(cellIndex: number): Promise<void> {
-    return Utils.waitForCondition(() => this.isCellGutterPresent(cellIndex));
+  waitForCellGutter(cellIndex: number, name?: string): Promise<void> {
+    return Utils.waitForCondition(() =>
+      this.isCellGutterPresent(cellIndex, name)
+    );
   }
 
   /**
@@ -1112,7 +1178,7 @@ export class NotebookHelper {
     if (!(panel && (await panel.count()))) {
       return false;
     }
-    return (await panel.locator('.cm-gutters')?.isVisible()) !== null;
+    return await panel.locator('.cm-gutters').isVisible();
   }
 
   /**
@@ -1282,22 +1348,36 @@ export class NotebookHelper {
       // over 10 consecutive animation frames.
       await cell.evaluate((cell: HTMLElement) => {
         let _resolve: () => void;
-        const promise = new Promise<void>(resolve => {
+        let _reject: (reason?: string) => void;
+        const promise = new Promise<void>((resolve, reject) => {
           _resolve = resolve;
+          _reject = reject;
         });
         let framesWithoutChange = 0;
-        let content = cell.querySelector('.cm-content')!.innerHTML;
+        let previousContent = cell.querySelector('.cm-content')!.innerHTML;
+        let newContent: string | null = null;
+        let cancelled = false;
+        const timeoutId = window.setTimeout(() => {
+          cancelled = true;
+          _reject(
+            `CodeMirror highlighting did not stabilize in 10s. Previous innerHTML: ${previousContent}; Current innerHTML: ${newContent}`
+          );
+        }, 10000);
         const waitUntilNextFrame = () => {
           window.requestAnimationFrame(() => {
-            const newContent = cell.querySelector('.cm-content')!.innerHTML;
-            if (content === newContent) {
+            newContent = cell.querySelector('.cm-content')!.innerHTML;
+            if (previousContent === newContent) {
               framesWithoutChange += 1;
             } else {
               framesWithoutChange = 0;
             }
+            previousContent = newContent;
             if (framesWithoutChange < 10) {
-              waitUntilNextFrame();
+              if (!cancelled) {
+                waitUntilNextFrame();
+              }
             } else {
+              window.clearTimeout(timeoutId);
               _resolve();
             }
           });
@@ -1398,13 +1478,33 @@ export class NotebookHelper {
   }
 
   /**
-   * Run a given cell
+   * Run a given cell.
+   *
+   * Note: cell execution relies on cell selection, thus this method
+   * is not reliable if cell selection changes before the cell gets run.
    *
    * @param cellIndex Cell index
-   * @param inplace Whether to stay on the cell or select the next one
+   * @param options Options for running cell; for compatibility a boolean can be passed as shorthand for `inplace`
+   * @param options.inplace Whether to stay on the cell or select the next one (default `false`)
+   * @param options.wait Whether to wait for the completion (default `true`)
    * @returns Action success status
    */
-  async runCell(cellIndex: number, inplace?: boolean): Promise<boolean> {
+  async runCell(
+    cellIndex: number,
+    options?:
+      | boolean
+      | {
+          inplace?: boolean;
+          wait?: boolean;
+        }
+  ): Promise<boolean> {
+    if (typeof options === 'boolean') {
+      options = {
+        inplace: options
+      };
+    }
+    const inplace = options?.inplace ?? false;
+    const wait = options?.wait ?? true;
     if (!(await this.isAnyActive())) {
       return false;
     }
@@ -1419,10 +1519,14 @@ export class NotebookHelper {
     await this.page.evaluate(cellIdx => {
       window.galata.resetExecutionCount(cellIdx);
     }, cellIndex);
+
+    await this._waitUntilKernelReadyToScheduleExecution();
     await this.page.keyboard.press(
       inplace === true ? 'Control+Enter' : 'Shift+Enter'
     );
-    await this.waitForRun(cellIndex);
+    if (wait) {
+      await this.waitForRun(cellIndex);
+    }
 
     return true;
   }

@@ -5,13 +5,12 @@ import { validateModel as validateKernelModel } from '../kernel/validate';
 
 import type * as Session from './session';
 
-import { validateProperty } from '../validate';
+import { isRecord, validateProperty } from '../validate';
 
 /**
  * Validate an `Session.IModel` object.
  */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function validateModel(data: any): asserts data is Session.IModel {
+export function validateModel(data: unknown): asserts data is Session.IModel {
   validateProperty(data, 'id', 'string');
   validateProperty(data, 'type', 'string');
   validateProperty(data, 'name', 'string');
@@ -23,9 +22,11 @@ export function validateModel(data: any): asserts data is Session.IModel {
 /**
  * Update model from legacy session data.
  */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function updateLegacySessionModel(data: any): void {
-  if (data.path === undefined && data.notebook !== undefined) {
+export function updateLegacySessionModel(data: unknown): void {
+  if (!isRecord(data)) {
+    return;
+  }
+  if (data.path === undefined && isRecord(data.notebook)) {
     data.path = data.notebook.path;
     data.type = 'notebook';
     data.name = '';

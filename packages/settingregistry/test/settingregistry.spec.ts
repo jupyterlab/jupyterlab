@@ -36,6 +36,70 @@ class TestConnector extends StateDB {
   }
 }
 
+function createDeferred<T>(): {
+  promise: Promise<T>;
+  resolve: (value: T | PromiseLike<T>) => void;
+} {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  const promise = new Promise<T>(value => {
+    resolve = value;
+  });
+  return { promise, resolve };
+}
+
+class SaveRaceConnector extends TestConnector {
+  constructor(options: { blockSecondSaveFetch?: boolean } = {}) {
+    super();
+    this._blockSecondSaveFetch = options.blockSecondSaveFetch ?? false;
+  }
+
+  readonly saveRequests: string[] = [];
+
+  get firstSaveFetchStarted(): Promise<void> {
+    return this._firstSaveFetchStarted.promise;
+  }
+
+  get secondSaveFetchStarted(): Promise<void> {
+    return this._secondSaveFetchStarted.promise;
+  }
+
+  releaseFirstSaveFetch(): void {
+    this._firstSaveFetchRelease.resolve(undefined);
+  }
+
+  releaseSecondSaveFetch(): void {
+    this._secondSaveFetchRelease.resolve(undefined);
+  }
+
+  async fetch(id: string): Promise<ISettingRegistry.IPlugin | undefined> {
+    this._fetchCount += 1;
+
+    if (this._fetchCount === 2) {
+      this._firstSaveFetchStarted.resolve(undefined);
+      await this._firstSaveFetchRelease.promise;
+    }
+
+    if (this._blockSecondSaveFetch && this._fetchCount === 3) {
+      this._secondSaveFetchStarted.resolve(undefined);
+      await this._secondSaveFetchRelease.promise;
+    }
+
+    return super.fetch(id);
+  }
+
+  async save(id: string, raw: string): Promise<void> {
+    this.saveRequests.push(raw);
+    return super.save(id, raw);
+  }
+
+  private _fetchCount = 0;
+  private _blockSecondSaveFetch = false;
+  private _firstSaveFetchRelease = createDeferred<void>();
+  private _firstSaveFetchStarted = createDeferred<void>();
+  private _secondSaveFetchRelease = createDeferred<void>();
+  private _secondSaveFetchStarted = createDeferred<void>();
+}
+
 describe('@jupyterlab/settingregistry', () => {
   describe('DefaultSchemaValidator', () => {
     describe('#constructor()', () => {
@@ -146,6 +210,106 @@ describe('@jupyterlab/settingregistry', () => {
         await registry.load(id);
         await registry.set(id, key, value);
         expect(called).toBe(true);
+      });
+    });
+
+    describe('#set()', () => {
+      it('should preserve queued updates while a previous save is in-flight', async () => {
+        const id = 'foo';
+        const key = 'enabled';
+        const connector = new SaveRaceConnector();
+        const registry = new SettingRegistry({ connector, timeout });
+
+        connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            [key]: { type: 'boolean' }
+          }
+        };
+
+        await registry.load(id);
+
+        const firstSave = registry.set(id, key, true);
+        await connector.firstSaveFetchStarted;
+
+        const secondSave = registry.set(id, key, false);
+        connector.releaseFirstSaveFetch();
+
+        await Promise.all([firstSave, secondSave]);
+
+        expect(connector.saveRequests).toHaveLength(2);
+        expect(json5.parse(connector.saveRequests[0])[key]).toBe(true);
+        expect(json5.parse(connector.saveRequests[1])[key]).toBe(false);
+
+        const saved = await registry.get(id, key);
+        expect(saved.user).toBe(false);
+
+        await connector.clear();
+      });
+    });
+
+    describe('#upload()', () => {
+      it('should not emit stale plugin changes while a newer save is queued', async () => {
+        const id = 'foo';
+        const key = 'settings';
+        const connector = new SaveRaceConnector({
+          blockSecondSaveFetch: true
+        });
+        const registry = new SettingRegistry({ connector, timeout });
+        const changed: string[] = [];
+
+        connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            [key]: {
+              type: 'object',
+              properties: {
+                first: { type: 'boolean' },
+                second: { type: 'boolean' }
+              }
+            }
+          }
+        };
+
+        await registry.load(id);
+        registry.pluginChanged.connect((_sender, plugin) => {
+          if (plugin === id) {
+            changed.push(registry.plugins[id].raw);
+          }
+        });
+
+        const firstSave = registry.upload(
+          id,
+          JSON.stringify({ [key]: { first: true } })
+        );
+        await connector.firstSaveFetchStarted;
+
+        const secondSave = registry.upload(
+          id,
+          JSON.stringify({ [key]: { first: true, second: true } })
+        );
+        await Promise.resolve();
+        expect(json5.parse(registry.plugins[id].raw)[key]).toEqual({
+          first: true,
+          second: true
+        });
+        connector.releaseFirstSaveFetch();
+
+        await connector.secondSaveFetchStarted;
+        await firstSave;
+
+        expect(changed).toHaveLength(0);
+
+        connector.releaseSecondSaveFetch();
+        await secondSave;
+
+        expect(changed).toHaveLength(1);
+        expect(json5.parse(changed[0])[key]).toEqual({
+          first: true,
+          second: true
+        });
+
+        await connector.clear();
       });
     });
 
@@ -993,6 +1157,80 @@ describe('@jupyterlab/settingregistry', () => {
         };
         settings = (await registry.load(id)) as Settings;
         expect(settings.default()).toStrictEqual(defaults);
+      });
+
+      it('should keep `disabled` and `preventDefault: false` on default shortcuts', async () => {
+        const id = 'omicron';
+        const shortcuts = [
+          // A shortcut disabled in `overrides.json`. The shortcut schema
+          // does not declare `disabled`.
+          {
+            command: 'notebook:change-cell-to-code',
+            keys: ['Y'],
+            selector: '.jp-Notebook',
+            disabled: true
+          },
+          {
+            command: 'inline-completer:next',
+            keys: ['Alt ]'],
+            selector: '.jp-mod-completer-enabled',
+            preventDefault: false
+          }
+        ];
+
+        connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            shortcuts: {
+              type: 'array',
+              items: { $ref: '#/definitions/shortcut' },
+              default: shortcuts
+            }
+          },
+          definitions: {
+            shortcut: {
+              type: 'object',
+              properties: {
+                command: { type: 'string' },
+                keys: { type: 'array', items: { type: 'string' } },
+                selector: { type: 'string' },
+                preventDefault: { type: 'boolean' }
+              }
+            }
+          }
+        };
+        settings = (await registry.load(id)) as Settings;
+        expect(settings.default('shortcuts')).toEqual(shortcuts);
+      });
+
+      it('should keep a toolbar item `rank` of 0 over the schema default', async () => {
+        const id = 'omicron';
+        const toolbar = [
+          { name: 'run', command: 'console:run-forced', rank: 0 }
+        ];
+
+        connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            toolbar: {
+              type: 'array',
+              items: { $ref: '#/definitions/toolbarItem' },
+              default: toolbar
+            }
+          },
+          definitions: {
+            toolbarItem: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                command: { type: 'string' },
+                rank: { type: 'number', default: 50 }
+              }
+            }
+          }
+        };
+        settings = (await registry.load(id)) as Settings;
+        expect(settings.default('toolbar')).toEqual(toolbar);
       });
     });
 

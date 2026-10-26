@@ -38,7 +38,7 @@ JupyterLab provides a way for users to copy URLs that
 {ref}`open a specific notebook or file <url-tree>`. Additionally,
 JupyterLab URLs are an advanced part of the user interface that allows for
 managing {ref}`workspaces <url-workspaces>`. To learn more about URLs in
-Jupyterlab, visit {ref}`urls`.
+JupyterLab, visit {ref}`urls`.
 
 JupyterLab runs on top of Jupyter Server, so see the [security
 section](https://jupyter-server.readthedocs.io/en/latest/operators/security.html)

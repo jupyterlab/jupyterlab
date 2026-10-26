@@ -7,7 +7,18 @@ import { filterContent } from './utils';
 test.use({
   autoGoto: false,
   mockState: galata.DEFAULT_DOCUMENTATION_STATE,
-  viewport: { height: 720, width: 1280 }
+  viewport: { height: 720, width: 1280 },
+  mockSettings: {
+    ...galata.DEFAULT_SETTINGS,
+    '@jupyterlab/apputils-extension:themes': {
+      overrides: {
+        // Use a font with full Simplified Chineese support for this test;
+        // Note, it also includes the `latin` subset so no fallback needed.
+        'content-font-family': '"Noto Sans SC Variable"',
+        'ui-font-family': '"Noto Sans SC Variable"'
+      }
+    }
+  }
 });
 
 test.describe('Internationalization', () => {
@@ -16,14 +27,13 @@ test.describe('Internationalization', () => {
     await page.goto();
 
     // Expect the default language to be English
-    expect.soft(await page.getAttribute('html', 'lang')).toEqual('en');
+    await expect.soft(page.locator('html')).toHaveAttribute('lang', 'en');
 
-    await page.dblclick('[aria-label="File Browser Section"] >> text=data');
+    await page.filebrowser.openDirectory('data');
     await page.sidebar.setWidth();
 
     // Check menu
-    await page.click('text=Settings');
-    await page.click('.lm-Menu ul[role="menu"] >> text=Language');
+    const languageMenu = (await page.menu.openLocator('Settings>Language'))!;
 
     expect
       .soft(
@@ -34,7 +44,7 @@ test.describe('Internationalization', () => {
       .toMatchSnapshot('language_settings.png');
 
     // Prompt user confirmation
-    await page.click('#jp-mainmenu-settings-language >> text=Chinese');
+    await languageMenu.getByText('Chinese').click();
 
     expect
       .soft(
@@ -47,11 +57,15 @@ test.describe('Internationalization', () => {
     // Check UI is in Chinese
     await Promise.all([
       page.waitForURL(baseURL! + '/lab/tree/data'),
-      page.locator('#jupyterlab-splash').waitFor(),
       page.click('button:has-text("Change and reload")')
     ]);
 
     await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
+
+    // Wait for fonts to be loaded (again, we are reloading)
+    // eslint-disable-next-line playwright/no-networkidle
+    await page.waitForLoadState('networkidle');
+    await page.evaluate(() => document.fonts.ready);
 
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {
@@ -62,7 +76,7 @@ test.describe('Internationalization', () => {
     // Wait for the launcher to be loaded
     await page.locator('text=README.md').waitFor();
 
-    expect.soft(await page.getAttribute('html', 'lang')).toEqual('zh-CN');
+    await expect.soft(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
 
     expect(await page.screenshot()).toMatchSnapshot('language_chinese.png');
   });
@@ -71,6 +85,20 @@ test.describe('Internationalization', () => {
     page
   }) => {
     let requestedLanguage: string | undefined;
+
+    // Fake the server locale as Chinese, as the default language of an
+    // English server is not requested
+    await page.route('**/*', async (route, request) => {
+      if (!request.isNavigationRequest()) {
+        return route.fallback();
+      }
+      const response = await route.fetch();
+      const body = (await response.text()).replace(
+        /"serverLocale": "[^"]*"/,
+        '"serverLocale": "zh_CN"'
+      );
+      return route.fulfill({ response, body });
+    });
 
     await page.route(galata.Routes.translations, async (route, request) => {
       const language = galata.Routes.translations.exec(request.url())?.groups
@@ -123,6 +151,6 @@ test.describe('Internationalization', () => {
     await page.goto();
 
     expect.soft(requestedLanguage).toEqual('/default');
-    expect(await page.getAttribute('html', 'lang')).toEqual('zh-CN');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
   });
 });

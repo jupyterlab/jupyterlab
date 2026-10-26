@@ -22,9 +22,9 @@ export class FileBrowserHelper {
    * @returns XPath to file in file browser
    */
   xpBuildFileSelector(fileName: string): string {
-    return `//div[@id='filebrowser']//li[./span[${Utils.xpContainsClass(
+    return `//div[@id='filebrowser']//li[.//span[${Utils.xpContainsClass(
       'jp-DirListing-itemText'
-    )} and ./span[text()="${fileName}"]]]`;
+    )} and .//span[text()="${fileName}"]]]`;
   }
 
   /**
@@ -34,9 +34,9 @@ export class FileBrowserHelper {
    * @returns XPath to directory in file browser
    */
   xpBuildDirectorySelector(dirName: string): string {
-    return `//div[@id='filebrowser']//li[@data-isdir='true' and ./span[${Utils.xpContainsClass(
+    return `//div[@id='filebrowser']//li[@data-isdir='true' and .//span[${Utils.xpContainsClass(
       'jp-DirListing-itemText'
-    )} and ./span[text()="${dirName}"]]]`;
+    )} and .//span[text()="${dirName}"]]]`;
   }
 
   /**
@@ -64,9 +64,7 @@ export class FileBrowserHelper {
    * @returns File status
    */
   async isFileListedInBrowser(fileName: string): Promise<boolean> {
-    const item = this.page
-      .getByRole('region', { name: 'File Browser Section' })
-      .getByRole('listitem', { name: new RegExp(`^Name: ${fileName}`) });
+    const item = this.page.locator(this.xpBuildFileSelector(fileName));
 
     return (await item.count()) > 0;
   }
@@ -78,16 +76,14 @@ export class FileBrowserHelper {
    */
   async getCurrentDirectory(): Promise<string> {
     return await this.page.evaluate(() => {
-      let directory = '';
-      const spans = document.querySelectorAll(
-        '.jp-FileBrowser .jp-FileBrowser-crumbs span'
+      const items = document.querySelectorAll(
+        '.jp-FileBrowser .jp-BreadCrumbs-container .jp-BreadCrumbs-item'
       );
-      const numSpans = spans.length;
-      if (numSpans > 1) {
-        directory = spans[numSpans - 2].getAttribute('title') ?? '';
+      if (items.length > 0) {
+        const lastItem = items[items.length - 1];
+        return lastItem.getAttribute('data-path') ?? '';
       }
-
-      return directory;
+      return '';
     });
   }
 
@@ -105,9 +101,7 @@ export class FileBrowserHelper {
     await this.revealFileInBrowser(filePath);
     const name = path.basename(filePath);
 
-    const fileItem = this.page
-      .getByRole('region', { name: 'File Browser Section' })
-      .getByRole('listitem', { name: new RegExp(`^Name: ${name}`) });
+    const fileItem = this.page.locator(this.xpBuildFileSelector(name));
     if (await fileItem.count()) {
       if (factory) {
         await fileItem.click({ button: 'right' });
@@ -144,22 +138,19 @@ export class FileBrowserHelper {
    * @returns Action success status
    */
   async openHomeDirectory(): Promise<boolean> {
-    const homeButton = this.page
-      .locator('.jp-FileBrowser .jp-FileBrowser-crumbs span')
-      .first();
+    const homeButton = this.page.locator(
+      '.jp-FileBrowser .jp-BreadCrumbs-home'
+    );
     if (!(await homeButton.count())) {
       return false;
     }
     await homeButton.click();
 
     await this.page.waitForFunction(() => {
-      const spans = document.querySelectorAll(
-        '.jp-FileBrowser .jp-FileBrowser-crumbs span'
+      const items = document.querySelectorAll(
+        '.jp-FileBrowser .jp-BreadCrumbs-item'
       );
-      return (
-        // The home is the root if no preferred dir is defined.
-        spans.length === 2 && spans[0].classList.contains('jp-BreadCrumbs-home')
-      );
+      return items.length === 0;
     });
 
     // wait for DOM rerender
@@ -229,9 +220,7 @@ export class FileBrowserHelper {
   }
 
   protected async _openDirectory(dirName: string): Promise<boolean> {
-    const item = this.page
-      .getByRole('region', { name: 'File Browser Section' })
-      .getByRole('listitem', { name: new RegExp(`^Name: ${dirName}`) });
+    const item = this.page.locator(this.xpBuildDirectorySelector(dirName));
 
     await Utils.waitForCondition(async () => (await item.count()) > 0);
     await this.contents.waitForAPIResponse(async () => {

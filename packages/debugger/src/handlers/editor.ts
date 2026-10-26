@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 
 import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
@@ -57,8 +56,9 @@ export class EditorHandler implements IDisposable {
     this._debuggerService = options.debuggerService;
     this._editor = options.getEditor;
 
+    this._src.changed.connect(this._onSharedModelChanged, this);
     this._editorMonitor = new ActivityMonitor({
-      signal: this._src.changed,
+      signal: this._sourceChanged,
       timeout: EDITOR_CHANGED_TIMEOUT
     });
     this._editorMonitor.activityStopped.connect(() => {
@@ -265,6 +265,19 @@ export class EditorHandler implements IDisposable {
   }
 
   /**
+   * Handle a change of the shared model, ignoring changes that leave the
+   * source unchanged, such as outputs or execution count.
+   */
+  private _onSharedModelChanged(
+    sender: ISharedText,
+    change: SourceChange
+  ): void {
+    if (change.sourceChange) {
+      this._sourceChanged.emit();
+    }
+  }
+
+  /**
    * Send the breakpoints from the editor UI via the debug service.
    */
   private _sendEditorBreakpoints(): void {
@@ -467,7 +480,8 @@ export class EditorHandler implements IDisposable {
   private _gutter: Compartment;
   private _highlightDeco: Decoration;
   private _highlightState: StateField<DecorationSet>;
-  private _editorMonitor: ActivityMonitor<ISharedText, SourceChange>;
+  private _editorMonitor: ActivityMonitor<this, void>;
+  private _sourceChanged = new Signal<this, void>(this);
   private _path: string;
   private _src: ISharedText;
   private _selectedBreakpoint: IDebugger.IBreakpoint | null;
@@ -524,11 +538,20 @@ export namespace EditorHandler {
     line: number,
     scrollLogicalPosition: ScrollLogicalPosition | false = 'nearest'
   ): void {
+    const lineCount = editor.lineCount;
+
+    if (line < 1 || line > lineCount) {
+      console.warn(
+        `Line ${line} is not in the document which contains ${lineCount} lines`
+      );
+      return;
+    }
+
     clearHighlight(editor);
     const cmEditor = editor as CodeMirrorEditor;
     const linePos = cmEditor.doc.line(line).from;
 
-    const effects: StateEffect<any>[] = [
+    const effects: StateEffect<unknown>[] = [
       _highlightEffect.of({ pos: [linePos] })
     ];
 

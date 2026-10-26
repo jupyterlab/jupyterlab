@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { IOutputAreaModel } from '@jupyterlab/outputarea';
@@ -66,7 +65,7 @@ export interface ILogPayloadBase {
   /**
    * Data
    */
-  data: any;
+  data: unknown;
 }
 
 /**

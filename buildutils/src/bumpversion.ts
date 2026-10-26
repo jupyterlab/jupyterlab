@@ -2,16 +2,21 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-
 import { program as commander } from 'commander';
 import * as utils from './utils';
+
+interface IBumpVersionOptions {
+  dryRun?: boolean;
+  force?: boolean;
+  skipCommit?: boolean;
+}
 
 // Specify the program signature.
 commander
   .description('Update the version and publish')
   .option('--dry-run', 'Dry run')
   .arguments('<spec>')
-  .action((spec: any, opts: any) => {
+  .action((spec: string, opts: IBumpVersionOptions) => {
     utils.exitOnUncaughtException();
 
     // Get the previous version.
@@ -28,7 +33,7 @@ commander
 
     // For patch, defer to `patch:release` command
     if (spec === 'patch') {
-      let cmd = 'jlpm run patch:release';
+      let cmd = 'jlpm patch:release';
       utils.run(cmd);
       process.exit(0);
     }
@@ -50,7 +55,9 @@ commander
 
     // Handle dry runs.
     if (opts.dryRun) {
-      utils.run(`bumpversion --allow-dirty --dry-run --verbose ${spec}`);
+      utils.run(
+        `bump-my-version bump --allow-dirty --dry-run --verbose ${spec}`
+      );
       return;
     }
 
@@ -95,7 +102,7 @@ commander
     }
 
     // Bump the version.
-    utils.run(`bumpversion --allow-dirty ${spec}`);
+    utils.run(`bump-my-version bump --allow-dirty ${spec}`);
 
     // Run the post-bump script.
     utils.postbump(commit);

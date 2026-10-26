@@ -116,6 +116,17 @@ class ExtensionHandler(APIHandler):
                 f"Could not process instruction {cmd!r} with extension name {name!r}",
             )
 
+        if cmd == "install" and not await self.manager.is_install_allowed(name, version):
+            raise web.HTTPError(
+                422,
+                f"Install of {name!r} was blocked, check the logs.",
+            )
+        if cmd == "uninstall" and not await self.manager.is_uninstall_allowed(name):
+            raise web.HTTPError(
+                422,
+                f"Uninstall of {name!r} was blocked, check the logs.",
+            )
+
         ret_value = None
         try:
             if cmd == "install":

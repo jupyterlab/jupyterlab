@@ -32,11 +32,6 @@ test.describe('Workspace', () => {
     );
   });
 
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
-  });
-
   test('should reset the workspace', async ({ page, tmpPath }) => {
     await page.goto();
 
@@ -235,7 +230,7 @@ test.describe('Workspace', () => {
     await page.goto();
     const workspaceSelector = page.locator('.jp-WorkspaceSelector-header');
     // Not visible by default
-    expect(await workspaceSelector.isVisible()).toBe(false);
+    await expect(workspaceSelector).toBeHidden();
 
     // Open custom workspace
     await page.goto('workspaces/foo');
@@ -262,11 +257,6 @@ test.describe('Workspace in doc mode', () => {
       path.resolve(__dirname, `./notebooks/${mdFile}`),
       `${tmpPath}/${mdFile}`
     );
-  });
-
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
   });
 
   // Use non-default state to have the running session panel displayed
@@ -400,7 +390,7 @@ test.describe('Workspace in doc mode', () => {
         );
       }),
       page.url() === `${baseURL}/lab`,
-      page.click('button.jp-switch[role="switch"]')
+      page.menu.clickMenuItem('View>Appearance>Simple Interface')
     ]);
 
     // Ensure that the document opened by URL is closed, and that the one from workspace file is restored.
@@ -421,11 +411,6 @@ test.describe('Restore non-default-type editor', () => {
       path.resolve(__dirname, `./notebooks/${nbFile}`),
       `${tmpPath}/${nbFile}`
     );
-  });
-
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
   });
 
   // Use non-default state to have the running session panel displayed
@@ -563,5 +548,84 @@ test.describe('Restore non-default-type editor', () => {
     await expect(
       page.locator('#jp-main-dock-panel .jp-MainAreaWidget')
     ).toHaveCount(1);
+  });
+});
+
+test.describe('Restore with a slow nbconvert endpoint', () => {
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${nbFile}`),
+      `${tmpPath}/${nbFile}`
+    );
+  });
+
+  test.use({
+    mockState: {
+      'layout-restorer:data': {
+        main: {
+          dock: {
+            type: 'tab-area',
+            currentIndex: 0,
+            widgets: ['notebook:workspace-test/simple_notebook.ipynb']
+          }
+        },
+        down: { size: 0, widgets: [] },
+        left: { collapsed: true, visible: true, widgets: ['filebrowser'] },
+        right: { collapsed: true, visible: true, widgets: [] },
+        relativeSizes: [0, 1, 0],
+        top: { simpleVisibility: true }
+      },
+      'notebook:workspace-test/simple_notebook.ipynb': {
+        data: {
+          path: 'workspace-test/simple_notebook.ipynb',
+          factory: 'Notebook'
+        }
+      }
+    } as any
+  });
+
+  test('should show the notebook content while export formats are pending', async ({
+    page
+  }) => {
+    // On a fresh server the first `/api/nbconvert` request imports nbconvert
+    // on the event loop, which takes seconds on a slow file system, and every
+    // request that arrives meanwhile waits. Hold API requests accordingly.
+    let release = () => {};
+    const released = new Promise<void>(resolve => {
+      release = resolve;
+    });
+    let nbconvertRequested = false;
+    await page.route(/\/api\//, async route => {
+      if (nbconvertRequested) {
+        await released;
+      }
+      await route.fallback();
+    });
+    await page.route(/\/api\/nbconvert(\?.*)?$/, async route => {
+      nbconvertRequested = true;
+      await released;
+      await route.continue();
+    });
+
+    await page.goto();
+
+    await expect(
+      page.locator('[role="main"] >> text=Test Notebook¶').first()
+    ).toBeVisible();
+
+    await expect.poll(() => nbconvertRequested).toBe(true);
+    const formats = page.waitForResponse(/\/api\/nbconvert(\?.*)?$/);
+    release();
+    await formats;
+    // The export submenu does not open until the formats are processed.
+    await expect(async () => {
+      const exportMenu = await page.menu.openLocator(
+        'File>Save and Export Notebook As'
+      );
+      await expect(
+        exportMenu!.getByRole('menuitem', { name: 'HTML', exact: true })
+      ).toHaveCount(1, { timeout: 500 });
+    }).toPass();
   });
 });

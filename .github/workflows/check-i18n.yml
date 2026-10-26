@@ -3,15 +3,21 @@ name: Check internationalization changes
 on:
   pull_request:
 
+
+permissions:
+  contents: read
+
 jobs:
   check_i18n:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@4016d4e69656e13e662d629ee3c30dc31e68628f # v1.1.1
 
       - name: Install dependencies
         run: |

@@ -64,6 +64,7 @@ export class StyleHelper {
       // so we just check their parents
       .map(selector =>
         selector.replace(
+          // eslint-disable-next-line regexp/no-unused-capturing-group, regexp/no-dupe-disjunctions
           /::?(after|before|backdrop|cue|cue-region|first-letter|first-line|file-selector-button|marker|placeholder|selection)/,
           ''
         )

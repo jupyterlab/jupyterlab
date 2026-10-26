@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
 import { Token } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
@@ -67,6 +66,6 @@ export namespace IStatusBar {
     /**
      * A signal that is fired when the item active state changes.
      */
-    activeStateChanged?: ISignal<any, void>;
+    activeStateChanged?: ISignal<unknown, void>;
   }
 }

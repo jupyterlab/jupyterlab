@@ -5,7 +5,8 @@
     "rootDir": "src",
     "module": "commonjs",
     "strictNullChecks": false,
-    "types": ["node"]
+    "types": ["node"],
+    "verbatimModuleSyntax": false
   },
   "include": ["src/**/*"],
   "references": [

@@ -27,10 +27,18 @@ test.beforeAll(async ({ request, tmpPath }) => {
   );
 });
 
-test.afterAll(async ({ request, tmpPath }) => {
-  const contents = galata.newContentsHelper(request);
-  await contents.deleteDirectory(tmpPath);
-});
+/**
+ * Open the test notebook without a kernel, and wait for its content.
+ *
+ * A kernel writes `language_info` when it connects, and loading the file
+ * replaces the cells and the metadata. Both rebuild the metadata form.
+ */
+async function openNotebook(page: IJupyterLabPageFixture, tmpPath: string) {
+  await page.filebrowser.open(`${tmpPath}/${nbFile}`, 'Notebook (no kernel)');
+  await page.evaluate(
+    () => window.jupyterapp.shell.currentWidget.context.ready
+  );
+}
 
 /**
  * Activate notebook tools side bar.
@@ -86,12 +94,13 @@ async function openForm(
  */
 async function getFormGroup(page: IJupyterLabPageFixture) {
   const form = await openForm(page);
-  return {
-    form: form,
-    formGroup: form.locator(
-      '.jp-Collapse-contents .jp-MetadataForm fieldset > .form-group'
-    )
-  };
+  const formGroup = form.locator(
+    '.jp-Collapse-contents .jp-MetadataForm fieldset > .form-group'
+  );
+  // The fields render, and the default values are written, once the
+  // validator has loaded.
+  await formGroup.first().waitFor();
+  return { form, formGroup };
 }
 
 /*
@@ -122,6 +131,7 @@ async function getNotebookMetadata(
 test.describe('Required metadata', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
@@ -147,7 +157,7 @@ test.describe('Required metadata', () => {
   test('should display the form', async ({ page, baseURL, tmpPath }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Activate the property inspector.
     await activatePropertyInspector(page);
@@ -193,16 +203,16 @@ test.describe('Required metadata', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { form, formGroup } = await getFormGroup(page);
 
     // Error should be displayed as required field is empty.
     await expect(formGroup.locator('.validationErrors')).not.toBeEmpty();
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-required-missing.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-required-missing.png');
 
     // Relevant metadata should be empty.
     let cellMetadata = await getCellMetadata(page, 0);
@@ -224,6 +234,7 @@ test.describe('Required metadata', () => {
 test.describe('Nested metadata', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
@@ -255,7 +266,7 @@ test.describe('Nested metadata', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
@@ -283,7 +294,7 @@ test.describe('Nested metadata', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
@@ -315,6 +326,7 @@ test.describe('Nested metadata', () => {
 test.describe('Default metadata without "showModified" flag', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
@@ -353,7 +365,7 @@ test.describe('Default metadata without "showModified" flag', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
@@ -391,7 +403,7 @@ test.describe('Default metadata without "showModified" flag', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
@@ -412,6 +424,7 @@ test.describe('Default metadata without "showModified" flag', () => {
 test.describe('Default metadata with "showModified" flag', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
@@ -441,7 +454,7 @@ test.describe('Default metadata with "showModified" flag', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
@@ -462,6 +475,7 @@ test.describe('Default metadata with "showModified" flag', () => {
 test.describe('Notebook level and cell type metadata', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
@@ -501,14 +515,14 @@ test.describe('Notebook level and cell type metadata', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM
     const { form, formGroup } = await getFormGroup(page);
 
     // There should be 2 fields displayed.
     await expect(formGroup).toHaveCount(2);
-    expect(await form.screenshot()).toMatchSnapshot('metadata-level.png');
+    expect.soft(await form.screenshot()).toMatchSnapshot('metadata-level.png');
 
     // Metadata should be empty.
     let cellMetadata = await getCellMetadata(page, 0);
@@ -537,7 +551,7 @@ test.describe('Notebook level and cell type metadata', () => {
     let form, formGroup;
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Close the sidebar to avoid clicking on the cell toolbar when expecting
     // clicking in the cell editor.
@@ -548,18 +562,18 @@ test.describe('Notebook level and cell type metadata', () => {
     await page.notebook.selectCells((await page.notebook.getCellCount()) - 1);
     ({ form, formGroup } = await getFormGroup(page));
     await expect(formGroup).toHaveCount(1);
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-wrong-cell-type.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-wrong-cell-type.png');
 
     // Create a raw cell and select it.
     await page.notebook.addCell('raw', 'Raw cell');
     await page.notebook.selectCells((await page.notebook.getCellCount()) - 1);
     ({ form, formGroup } = await getFormGroup(page));
     await expect(formGroup).toHaveCount(1);
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-wrong-cell-type.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-wrong-cell-type.png');
 
     // Select the code cell again to retrieve full form.
     await page.notebook.selectCells(0);
@@ -574,6 +588,7 @@ test.describe('Notebook level and cell type metadata', () => {
 test.describe('Conditional metadata', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
@@ -617,7 +632,7 @@ test.describe('Conditional metadata', () => {
   test('display conditional field', async ({ page, baseURL, tmpPath }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM
     const { form, formGroup } = await getFormGroup(page);
@@ -625,16 +640,16 @@ test.describe('Conditional metadata', () => {
     // There should be 1 field displayed as condition is not met.
     await formGroup.locator('select').first().selectOption('not met');
     await expect(formGroup).toHaveCount(1);
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-condition-not-met.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-condition-not-met.png');
 
     // Met the condition, then the second field should be displayed too.
     await formGroup.locator('select').first().selectOption('met');
     await expect(formGroup).toHaveCount(2);
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-condition-met.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-condition-met.png');
 
     // If the condition is not met, only one field should be displayed.
     await formGroup.locator('select').first().selectOption('not met');
@@ -648,6 +663,7 @@ test.describe('Conditional metadata', () => {
 test.describe('UISchema', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
@@ -684,7 +700,7 @@ test.describe('UISchema', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { form, formGroup } = await getFormGroup(page);
@@ -723,7 +739,7 @@ test.describe('Advanced tools', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Activate the property inspector.
     await activatePropertyInspector(page);
@@ -751,7 +767,7 @@ test.describe('Advanced tools', () => {
       .click();
 
     // Close the sidebar
-    await page.locator('[title="Property Inspector"]').click();
+    await page.sidebar.close('right');
     // Reopen the sidebar
     await activatePropertyInspector(page);
 

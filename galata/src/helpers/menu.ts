@@ -20,7 +20,6 @@ export class MenuHelper {
     // close menus
     for (let i = 0; i < numOpenMenus; ++i) {
       await page.keyboard.press('Escape');
-      await page.waitForTimeout(100);
       await Utils.waitForCondition(
         async () => (await existingMenus.count()) === numOpenMenus - (i + 1)
       );
@@ -246,7 +245,6 @@ export class MenuHelper {
               )
             );
           });
-          await page.waitForTimeout(200);
 
           // Fetch a new list of menus, and fetch the last one.
           // We are assuming the last menu is the most recently opened.

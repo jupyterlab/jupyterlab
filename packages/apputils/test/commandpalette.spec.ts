@@ -81,7 +81,7 @@ describe('@jupyterlab/apputils', () => {
       it('should hide and reset when ESC is pressed', () => {
         MessageLoop.sendMessage(modalPalette, Widget.Msg.ActivateRequest);
         palette.inputNode.value = 'Search string…';
-        simulate(modalPalette.node, 'keydown', { keyCode: 27 });
+        simulate(modalPalette.node, 'keydown', { key: 'Escape' });
         expect(modalPalette.isVisible).toBe(false);
         expect(palette.inputNode.value).toEqual('');
       });

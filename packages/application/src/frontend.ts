@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { CommandLinker } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';

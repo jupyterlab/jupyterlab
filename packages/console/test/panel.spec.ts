@@ -4,7 +4,9 @@
 import { createSimpleSessionContext } from '@jupyterlab/docregistry/lib/testutils';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { CodeConsole, ConsolePanel } from '@jupyterlab/console';
-import { dismissDialog } from '@jupyterlab/testing';
+import { Drive } from '@jupyterlab/services';
+import { dismissDialog, signalToPromise } from '@jupyterlab/testing';
+import { UUID } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
@@ -14,8 +16,6 @@ import {
   mimeTypeService,
   rendermime
 } from './utils';
-import { Drive } from '@jupyterlab/services';
-import { UUID } from '@lumino/coreutils';
 
 class TestPanel extends ConsolePanel {
   methods: string[] = [];
@@ -64,18 +64,38 @@ describe('console/panel', () => {
         );
       });
 
-      it('should set the session context path to local path', () => {
+      it('should keep the drive name in the session context path', () => {
         manager.contents.addDrive(new Drive({ name: 'TestDrive' }));
         const localPath = `${UUID.uuid4()}.txt`;
+        const globalPath = `TestDrive:${localPath}`;
         const panel = new TestPanel({
           manager,
           contentFactory,
           rendermime,
           mimeTypeService,
-          path: `TestDrive:${localPath}`
+          path: globalPath
         });
 
-        expect(panel.sessionContext.path).toEqual(localPath);
+        expect(panel.sessionContext.path).toEqual(globalPath);
+        panel.dispose();
+      });
+
+      it('should start the session with the drive name for root-level paths', async () => {
+        manager.contents.addDrive(new Drive({ name: 'TestDrive' }));
+        const startNew = jest.mocked(manager.sessions.startNew);
+        startNew.mockClear();
+        const panel = new TestPanel({
+          manager,
+          contentFactory,
+          rendermime,
+          mimeTypeService,
+          path: `TestDrive:${UUID.uuid4()}.txt`,
+          kernelPreference: { name: manager.kernelspecs.specs!.default }
+        });
+
+        await panel.sessionContext.initialize();
+
+        expect(startNew.mock.calls[0][0].path).toMatch(/^TestDrive:\//);
         panel.dispose();
       });
     });
@@ -149,6 +169,73 @@ describe('console/panel', () => {
             CodeConsole
           );
         });
+      });
+    });
+
+    describe('#updateTitle', () => {
+      it('Should update the caption on session change', async () => {
+        const newName = 'new session name';
+        Widget.attach(panel, document.body);
+        await panel.sessionContext.ready;
+        const caption = panel.title.caption;
+        const promise = signalToPromise(panel.sessionContext.propertyChanged);
+        await panel.sessionContext.session?.setName(newName);
+        await promise;
+        expect(panel.title.caption).not.toEqual(caption);
+        expect(panel.title.caption).toContain(newName);
+      });
+
+      it('Should update the caption on cell execution', async () => {
+        Widget.attach(panel, document.body);
+        await panel.sessionContext.ready;
+        const caption = panel.title.caption;
+        const promise = signalToPromise(panel.console.executed);
+        panel.console.promptCell!.model.sharedModel.setSource('a = 2');
+        void panel.console.execute(true);
+        await promise;
+        expect(panel.title.caption).not.toEqual(caption);
+        expect(panel.title.caption).toContain('Last Execution:');
+        expect(panel.title.caption).not.toContain('Last Execution: undefined');
+        expect(panel.title.caption).not.toContain('Last Execution: %1');
+      });
+
+      it('Should not update the caption on session change', async () => {
+        const newName = 'new session name';
+        panel = new TestPanel({
+          manager,
+          contentFactory,
+          rendermime,
+          mimeTypeService,
+          sessionContext: createSimpleSessionContext(),
+          preventTitleUpdate: true
+        });
+        Widget.attach(panel, document.body);
+        await panel.sessionContext.ready;
+        const caption = panel.title.caption;
+        const promise = signalToPromise(panel.sessionContext.propertyChanged);
+        await panel.sessionContext.session?.setName(newName);
+        await promise;
+        expect(panel.title.caption).toEqual(caption);
+        expect(panel.title.caption).not.toContain(newName);
+      });
+
+      it('Should not update the caption on cell execution', async () => {
+        panel = new TestPanel({
+          manager,
+          contentFactory,
+          rendermime,
+          mimeTypeService,
+          sessionContext: createSimpleSessionContext(),
+          preventTitleUpdate: true
+        });
+        Widget.attach(panel, document.body);
+        await panel.sessionContext.ready;
+        const caption = panel.title.caption;
+        const promise = signalToPromise(panel.console.executed);
+        panel.console.promptCell!.model.sharedModel.setSource('a = 2');
+        void panel.console.execute(true);
+        await promise;
+        expect(panel.title.caption).toEqual(caption);
       });
     });
   });

@@ -64,8 +64,8 @@ Let's define a function that adds two elements:
 
 ```python
 def add(a, b):
-   res = a + b
-   return res
+    res = a + b
+    return res
 ```
 
 We can call the function and print the result:
@@ -95,8 +95,10 @@ The execution stops where the breakpoint is set:
 
 ### Explore the code state
 
-Exploring the code state is done with the debugger sidebar. It shows a variable explorer,
-a list of breakpoints, a source preview and the possibility to navigate the call stack.
+You can explore the code state with the debugger sidebar. It shows a variable explorer,
+a list of breakpoints, a list of kernel sources and enables navigating the call stack.
+
+The sidebar may also include a source preview if "Show Sources in Main Area" setting is turned off.
 
 ```{image} ../images/debugger-sidebar.png
 
@@ -104,11 +106,52 @@ a list of breakpoints, a source preview and the possibility to navigate the call
 
 **Variables**
 
-Variables can be explored using a tree view and a table view:
+The variables panel lists the variables defined in the frame selected in the call
+stack. The drop down of its toolbar switches between the _Locals_ of that frame and
+the _Globals_ of the module it belongs to.
+
+Variables can be explored using a tree view and a table view, which are toggled with
+the two buttons on the right of the toolbar. The tree view shows the value of each
+variable, and expanding an entry reveals the variables it contains:
 
 ```{image} ../images/debugger-variables.png
-
+:alt: The variables panel in tree view, listing two variables and their values.
 ```
+
+The table view shows the type of each variable next to its value:
+
+```{image} ../images/debugger-variables-table.png
+:alt: The variables panel in table view, with a Name, a Type and a Value column.
+```
+
+In the table view, double-clicking a variable which contains other variables -
+or choosing _Inspect Variable_ in its context menu - opens its contents as a
+table of their own in the main area:
+
+```{image} ../images/debugger-variable-inspector.png
+:alt: A notebook stopped on a breakpoint, with the items of a list shown in a table below it.
+```
+
+Variables whose value is too large to read in the panel can be opened on their own.
+When the kernel supports it, hovering over a variable in the tree view reveals a
+magnifying glass button which renders the variable in the main area, using the same
+renderers as notebook outputs - so an image is displayed as an image, and a data
+frame as a table:
+
+```{image} ../images/debugger-variable-renderer.png
+:alt: A notebook stopped on a breakpoint, with the value of an image variable rendered in a panel below it.
+```
+
+The panel refreshes as you step through the code, and is closed together with the
+document it was opened from. The same command is available as _Render Variable_ in
+the context menu of the variables panel, together with _Copy to Clipboard_, which
+copies the text representation of the value, and _Copy Variable to Globals_, which
+copies a local variable to the global scope of the kernel, where it remains
+reachable once the execution has resumed.
+
+Kernels expose internal variables which are rarely of interest. The variables listed
+for the kernel in use in the **Variable filter** setting of the Debugger section of
+the Settings Editor are hidden from both views.
 
 **Call stack**
 
@@ -129,11 +172,23 @@ they will be shown in the list of breakpoints:
 
 **Source**
 
-The source panel shows the source of the current file being debugged:
+By default the source of the current file being debugged will show up in the
+main area in a read-only editor view. The auto-opened source view widget
+will auto-close when the debugger steps into another file,
+or when the debugging session ends.
 
-```{image} ../images/debugger-source.png
+```{image} ../images/debugger-open-module.png
 
 ```
 
-If the source corresponds to a cell that has been deleted, clicking on the
-_Open in Main Area_ button will open a read-only view of the source.
+If you would like to keep the source view open for longer, you can manually
+open it by clicking on the file in the "Kernel Sources" panel as manually
+opened files will not auto-close.
+
+If you prefer the source to show up in the sidebar instead, you can
+turn off the "Show Sources in Main Area" setting in the Settings Editor
+which will make it display as another panel:
+
+```{image} ../images/debugger-with-source-panel.png
+
+```

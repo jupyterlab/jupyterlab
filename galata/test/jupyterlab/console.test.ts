@@ -3,6 +3,7 @@
 
 import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
 import { expect, galata, test } from '@jupyterlab/galata';
+import type { Locator } from '@playwright/test';
 
 const CELL_EDITOR_SELECTOR = '.jp-InputArea-editor';
 const CODE_MIRROR_CURSOR = '.cm-cursor';
@@ -28,7 +29,7 @@ test.describe('Console', () => {
     await executedCell.waitFor();
 
     const cellEditor = executedCell.locator(CELL_EDITOR_SELECTOR);
-    expect(await cellEditor.innerText()).toBe('2 + 2');
+    await expect(cellEditor).toHaveText('2 + 2');
 
     // Focus the editor
     await cellEditor.click();
@@ -41,7 +42,21 @@ test.describe('Console', () => {
     await cellEditor.pressSequentially('more text');
 
     // Expect the editor content to not change
-    expect(await cellEditor.innerText()).toBe('2 + 2');
+    await expect(cellEditor).toHaveText('2 + 2');
+  });
+
+  test('Should rename the console from the tab context menu', async ({
+    page
+  }) => {
+    const newName = 'Custom Name';
+
+    await page.activity.getTabLocator('Console 1').click({ button: 'right' });
+    await page.getByRole('menuitem', { name: 'Rename Console…' }).click();
+
+    await page.locator('.jp-Dialog >> input').fill(newName);
+    await page.click('.jp-Dialog >> button >> text=Rename');
+
+    await expect(page.activity.getTabLocator(newName)).toBeVisible();
   });
 });
 
@@ -77,8 +92,8 @@ test.describe('Console Input Auto-Resize', () => {
   }) => {
     const codeConsoleInput = page.locator('.jp-CodeConsole-input');
 
-    const initialHeight = await codeConsoleInput.boundingBox();
-    expect(initialHeight).not.toBeNull();
+    const initialHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(initialHeight).toBeGreaterThan(0);
 
     const multiLineCode = `def hello_world():
 print("Hello")
@@ -87,9 +102,9 @@ return "Done"`;
 
     await page.keyboard.type(multiLineCode);
 
-    const afterTypingHeight = await codeConsoleInput.boundingBox();
-    expect(afterTypingHeight).not.toBeNull();
-    expect(afterTypingHeight!.height).toBeGreaterThan(initialHeight!.height);
+    const afterTypingHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(afterTypingHeight).toBeGreaterThan(0);
+    expect(afterTypingHeight).toBeGreaterThan(initialHeight);
   });
 
   test('Input prompt auto-resize works with paste operations', async ({
@@ -97,8 +112,8 @@ return "Done"`;
   }) => {
     const codeConsoleInput = page.locator('.jp-CodeConsole-input');
 
-    const initialHeight = await codeConsoleInput.boundingBox();
-    expect(initialHeight).not.toBeNull();
+    const initialHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(initialHeight).toBeGreaterThan(0);
 
     const pastedCode = `import numpy as np
 import pandas as pd
@@ -116,9 +131,9 @@ print(data.head())`;
 
     await page.keyboard.press('ControlOrMeta+v');
 
-    const afterPasteHeight = await codeConsoleInput.boundingBox();
-    expect(afterPasteHeight).not.toBeNull();
-    expect(afterPasteHeight!.height).toBeGreaterThan(initialHeight!.height);
+    const afterPasteHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(afterPasteHeight).toBeGreaterThan(0);
+    expect(afterPasteHeight).toBeGreaterThan(initialHeight);
   });
 
   test('Input prompt maintains auto-resize height when moved from bottom to top', async ({
@@ -138,19 +153,22 @@ print(data.head())`;
       await navigator.clipboard.writeText(code);
     }, pastedCode);
 
+    // Since neither paste, nor initialization of CodeMirror editor
+    // (after moving the prompt position) is instantaneous, we only
+    // record height once it stabilised for both before and after.
+
     await page.keyboard.press('ControlOrMeta+v');
 
-    const heightAtBottom = await codeConsoleInput.boundingBox();
-    expect(heightAtBottom).not.toBeNull();
+    const heightAtBottom = await getStabilisedHeight(page, codeConsoleInput);
+    expect(heightAtBottom).toBeGreaterThan(0);
 
     await page.getByLabel('Change Console Prompt Position').first().click();
     await page.getByText('Prompt to top').click();
 
-    const heightAtTop = await codeConsoleInput.boundingBox();
-    expect(heightAtTop).not.toBeNull();
+    const heightAtTop = await getStabilisedHeight(page, codeConsoleInput);
+    expect(heightAtTop).toBeGreaterThan(0);
 
-    // TODO: Sometimes fails when it expects 157.3125 but receives 52
-    expect(heightAtTop!.height).toBeCloseTo(heightAtBottom!.height, 1);
+    expect(heightAtTop).toBeCloseTo(heightAtBottom, 1);
   });
 
   test('Input prompt continues to auto-resize after code execution', async ({
@@ -158,8 +176,8 @@ print(data.head())`;
   }) => {
     const codeConsoleInput = page.locator('.jp-CodeConsole-input');
 
-    const initialHeight = await codeConsoleInput.boundingBox();
-    expect(initialHeight).not.toBeNull();
+    const initialHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(initialHeight).toBeGreaterThan(0);
 
     const multiLineCode = `def test_function():
     print("Line 1")
@@ -168,11 +186,12 @@ print(data.head())`;
 
     await page.keyboard.type(multiLineCode);
 
-    const heightBeforeExecution = await codeConsoleInput.boundingBox();
-    expect(heightBeforeExecution).not.toBeNull();
-    expect(heightBeforeExecution!.height).toBeGreaterThan(
-      initialHeight!.height
+    const heightBeforeExecution = await getStabilisedHeight(
+      page,
+      codeConsoleInput
     );
+    expect(heightBeforeExecution).toBeGreaterThan(0);
+    expect(heightBeforeExecution).toBeGreaterThan(initialHeight);
 
     // Execute the code
     await page.keyboard.press('Shift+Enter');
@@ -180,9 +199,12 @@ print(data.head())`;
     await page.locator('text=| Idle').waitFor();
 
     // Check that the new empty input cell has shrunk back to original size
-    const heightAfterExecution = await codeConsoleInput.boundingBox();
-    expect(heightAfterExecution).not.toBeNull();
-    expect(heightAfterExecution!.height).toBe(initialHeight!.height);
+    const heightAfterExecution = await getStabilisedHeight(
+      page,
+      codeConsoleInput
+    );
+    expect(heightAfterExecution).toBeGreaterThan(0);
+    expect(heightAfterExecution).toBe(initialHeight);
 
     // Type new multi-line code in the new prompt cell
     const moreCode = `import os
@@ -192,20 +214,18 @@ print("After execution")`;
 
     await page.keyboard.type(moreCode);
 
-    const heightAfterTyping = await codeConsoleInput.boundingBox();
-    expect(heightAfterTyping).not.toBeNull();
+    const heightAfterTyping = await getStabilisedHeight(page, codeConsoleInput);
+    expect(heightAfterTyping).toBeGreaterThan(0);
 
     // The input should have grown again for the new multi-line content
-    expect(heightAfterTyping!.height).toBeGreaterThan(
-      heightAfterExecution!.height
-    );
+    expect(heightAfterTyping).toBeGreaterThan(heightAfterExecution!);
   });
 
   test('Input prompt shrinks when content is cleared', async ({ page }) => {
     const codeConsoleInput = page.locator('.jp-CodeConsole-input');
 
-    const initialHeight = await codeConsoleInput.boundingBox();
-    expect(initialHeight).not.toBeNull();
+    const initialHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(initialHeight).toBeGreaterThan(0);
 
     const multiLineCode = `def multi_line_function():
     print("This is line 1")
@@ -217,16 +237,39 @@ print("After execution")`;
 
     await page.keyboard.type(multiLineCode);
 
-    const expandedHeight = await codeConsoleInput.boundingBox();
-    expect(expandedHeight).not.toBeNull();
-    expect(expandedHeight!.height).toBeGreaterThan(initialHeight!.height);
+    const expandedHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(expandedHeight).toBeGreaterThan(0);
+    expect(expandedHeight).toBeGreaterThan(initialHeight);
 
     // Clear the input using Ctrl+A followed by Delete
     await page.keyboard.press('ControlOrMeta+a');
     await page.keyboard.press('Delete');
 
-    const shrunkHeight = await codeConsoleInput.boundingBox();
-    expect(shrunkHeight).not.toBeNull();
-    expect(shrunkHeight!.height).toBe(initialHeight!.height);
+    const shrunkHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(shrunkHeight).toBeGreaterThan(0);
+    expect(shrunkHeight).toBe(initialHeight);
   });
 });
+
+async function getStabilisedHeight(
+  page: IJupyterLabPageFixture,
+  element: Locator
+) {
+  // Poll the element's height until two consecutive reads match, i.e. it
+  // has stopped changing. There is no fixed target height to assert on
+  // (it depends on the content under test), so we rely on `toPass`'s
+  // built-in retry/backoff instead of a hand-rolled `waitForTimeout` loop.
+  let lastHeight: number | null = null;
+  let stableHeight: number | null = null;
+  await expect(async () => {
+    const box = await element.boundingBox();
+    const height = box?.height ?? null;
+    const isStable = height !== null && height === lastHeight;
+    lastHeight = height;
+    if (isStable) {
+      stableHeight = height;
+    }
+    expect(isStable).toBe(true);
+  }).toPass({ intervals: [100], timeout: 10000 });
+  return stableHeight!;
+}

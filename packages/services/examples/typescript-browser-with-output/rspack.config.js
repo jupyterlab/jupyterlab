@@ -28,7 +28,6 @@ module.exports = {
         test: /\.js$/,
         use: ['source-map-loader'],
         enforce: 'pre',
-        // eslint-disable-next-line no-undef
         exclude: /node_modules/
       },
       { test: /\.(jpg|png|gif)$/, type: 'asset/resource' },
@@ -53,6 +52,12 @@ module.exports = {
       {
         test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
         type: 'asset'
+      },
+      {
+        test: /\.m?js/,
+        resolve: {
+          fullySpecified: false
+        }
       }
     ]
   },

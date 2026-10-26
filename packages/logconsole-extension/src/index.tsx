@@ -41,6 +41,9 @@ import {
 import { UUID } from '@lumino/coreutils';
 import type { DockLayout } from '@lumino/widgets';
 import * as React from 'react';
+// The plugin activates at startup and creates the status item at once, so
+// the module is needed before the application starts.
+// eslint-disable-next-line jupyter/prefer-lazy-imports
 import { LogConsoleStatus } from './status';
 
 const LOG_CONSOLE_FACTORY = 'LogConsole';
@@ -412,7 +415,7 @@ export class LogLevelSwitcher extends ReactWidget {
    * Handle `keydown` events for the HTMLSelect component.
    */
   handleKeyDown = (event: React.KeyboardEvent): void => {
-    if (event.keyCode === 13) {
+    if (event.key === 'Enter') {
       this._logConsole.activate();
     }
   };
