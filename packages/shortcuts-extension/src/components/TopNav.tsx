@@ -79,8 +79,13 @@ export class TopNav extends React.Component<ITopNavProps> {
   }
 
   getShortCutTitleItem(title: string, columnId: IShortcutUI.ColumnId) {
+    const isActive = columnId === this.props.currentSort;
     return (
-      <div className="jp-Shortcuts-Cell">
+      <th
+        scope="col"
+        className="jp-Shortcuts-Cell"
+        aria-sort={isActive ? this.props.sortDirection : undefined}
+      >
         <ShortcutTitleItem
           title={title}
           updateSort={this.props.updateSort}
@@ -88,7 +93,7 @@ export class TopNav extends React.Component<ITopNavProps> {
           sortDirection={this.props.sortDirection}
           columnId={columnId}
         />
-      </div>
+      </th>
     );
   }
 
@@ -117,9 +122,9 @@ export class TopNav extends React.Component<ITopNavProps> {
           <div className="jp-Shortcuts-HeaderRow">
             {this.getShortCutTitleItem(trans.__('Category'), 'category')}
             {this.getShortCutTitleItem(trans.__('Command'), 'command')}
-            <div className="jp-Shortcuts-Cell">
+            <th scope="col" className="jp-Shortcuts-Cell">
               <div className="title-div">{trans.__('Shortcut')}</div>
-            </div>
+            </th>
             {this.getShortCutTitleItem(trans.__('Source'), 'source')}
             {this.props.showSelectors &&
               this.getShortCutTitleItem(trans.__('Selectors'), 'selector')}
