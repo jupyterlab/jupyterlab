@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { SettingRegistry } from '@jupyterlab/settingregistry';
+import { BaseSettings, SettingRegistry } from '@jupyterlab/settingregistry';
 import * as plugin from '@jupyterlab/shortcuts-extension';
 import type { IDataConnector } from '@jupyterlab/statedb';
 import { CommandRegistry } from '@lumino/commands';
@@ -396,6 +396,35 @@ describe('@jupyterlab/shortcut-extension', () => {
         .composite as ISettingRegistry.IShortcut[];
 
       expect(shortcuts).toHaveLength(1);
+    });
+  });
+
+  describe('shortcuts schema', () => {
+    it('should preserve `disabled` when reifying default shortcuts', () => {
+      // If `disabled` is dropped, disabled defaults render identically to
+      // the shortcuts they disable in the JSON Settings Editor.
+      const schema = JSON.parse(JSON.stringify(pluginSchema));
+      schema.properties.shortcuts.default = [
+        {
+          command: 'notebook:change-cell-to-code',
+          keys: ['Y'],
+          selector: '.jp-Notebook'
+        },
+        {
+          command: 'notebook:change-cell-to-code',
+          keys: ['Y'],
+          selector: '.jp-Notebook',
+          disabled: true
+        }
+      ];
+
+      const defaults = new BaseSettings({ schema }).default(
+        'shortcuts'
+      ) as ISettingRegistry.IShortcut[];
+
+      expect(defaults).toHaveLength(2);
+      expect(defaults[0].disabled).toBeUndefined();
+      expect(defaults[1].disabled).toBe(true);
     });
   });
 });

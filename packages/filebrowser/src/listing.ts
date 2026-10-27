@@ -2247,12 +2247,19 @@ export class DirListing extends Widget {
         promises.push(renameFile(manager, path, newPath));
       }
     }
-    Promise.all(promises).catch(error => {
-      void showErrorMessage(
-        this._trans._p('showErrorMessage', 'Error while copying/moving files'),
-        error
-      );
-    });
+    // Report a failure once every move is done, so that it does not open
+    // under a later prompt.
+    Promise.all(promises.map(promise => promise.catch(() => undefined)))
+      .then(() => Promise.all(promises))
+      .catch(error => {
+        void showErrorMessage(
+          this._trans._p(
+            'showErrorMessage',
+            'Error while copying/moving files'
+          ),
+          error
+        );
+      });
   }
 
   /**
