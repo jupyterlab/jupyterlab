@@ -2479,12 +2479,11 @@ function activateNotebookHandler(
     applyNotebookViewOnlyUI(widget, widget.viewOnly);
     widget.content.viewOnlyChanged.connect((_, viewOnly) => {
       applyNotebookViewOnlyUI(widget, viewOnly);
-      // Toolbar buttons only re-check a command's `isEnabled`/`isVisible`
-      // when notified for that specific id
-      const skip = [CommandIDs.createNew, CommandIDs.createOutputView];
-      Object.values(CommandIDs)
-        .filter(id => !skip.includes(id) && commands.hasCommand(id))
-        .forEach(id => commands.notifyCommandChanged(id));
+      // Commands of other extensions can also depend on the view-only state.
+      // Extensions notify their commands when the current widget changes, but
+      // a notebook can become view-only while it stays current, so notify all
+      // commands rather than only the ones defined here.
+      commands.notifyCommandChanged();
     }, widget);
 
     // Intercept kernel start for view-only notebooks opened read-only
