@@ -61,6 +61,21 @@ export abstract class ReactWidget extends Widget {
   }
 
   /**
+   * Called before the widget is detached from the DOM.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    // Unmount the component so it can tear down. Defer it to a microtask:
+    // moving the widget to another parent attaches it again synchronously,
+    // and a moved widget keeps its component state.
+    queueMicrotask(() => {
+      if (!this.isAttached && this._rootDOM !== null) {
+        this._rootDOM.unmount();
+        this._rootDOM = null;
+      }
+    });
+  }
+
+  /**
    * Dispose the widget.
    */
   dispose(): void {
