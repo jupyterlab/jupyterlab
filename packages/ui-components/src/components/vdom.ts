@@ -61,17 +61,6 @@ export abstract class ReactWidget extends Widget {
   }
 
   /**
-   * Called before the widget is detached from the DOM.
-   */
-  protected onBeforeDetach(msg: Message): void {
-    // Unmount the component so it can tear down.
-    if (this._rootDOM !== null) {
-      this._rootDOM.unmount();
-      this._rootDOM = null;
-    }
-  }
-
-  /**
    * Dispose the widget.
    */
   dispose(): void {
