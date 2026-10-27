@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
+import {
+  ReactWidget,
+  VDomModel,
+  VDomRenderer
+} from '@jupyterlab/ui-components';
 import { framePromise } from '@jupyterlab/testing';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
@@ -22,6 +26,23 @@ class TestModel extends VDomModel {
 class TestWidget extends VDomRenderer<TestModel> {
   protected render(): React.ReactElement<any> {
     return React.createElement('span', null, this.model.value);
+  }
+}
+
+class LifecycleCounter extends React.Component {
+  static mounts = 0;
+  static unmounts = 0;
+
+  componentDidMount(): void {
+    LifecycleCounter.mounts++;
+  }
+
+  componentWillUnmount(): void {
+    LifecycleCounter.unmounts++;
+  }
+
+  render(): React.ReactElement {
+    return React.createElement('span', null, 'counter');
   }
 }
 
@@ -61,6 +82,33 @@ describe('@jupyterlab/ui-components', () => {
         model.value = 'newvalue';
         expect(changed).toBe(true);
       });
+    });
+  });
+
+  describe('ReactWidget', () => {
+    beforeEach(() => {
+      LifecycleCounter.mounts = 0;
+      LifecycleCounter.unmounts = 0;
+    });
+
+    it('should keep the React tree mounted when the widget is moved', async () => {
+      const widget = ReactWidget.create(React.createElement(LifecycleCounter));
+      Widget.attach(widget, document.body);
+      await widget.renderPromise;
+      Widget.detach(widget);
+      Widget.attach(widget, document.body);
+      await widget.renderPromise;
+      expect(LifecycleCounter.mounts).toBe(1);
+      expect(LifecycleCounter.unmounts).toBe(0);
+      widget.dispose();
+    });
+
+    it('should unmount the React tree when disposed', async () => {
+      const widget = ReactWidget.create(React.createElement(LifecycleCounter));
+      Widget.attach(widget, document.body);
+      await widget.renderPromise;
+      widget.dispose();
+      expect(LifecycleCounter.unmounts).toBe(1);
     });
   });
 
