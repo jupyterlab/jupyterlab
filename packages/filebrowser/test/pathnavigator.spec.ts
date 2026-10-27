@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { simulate } from 'simulate-event';
+import { PathExt } from '@jupyterlab/coreutils';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { PathNavigator } from '../src/pathnavigator';
@@ -48,6 +49,8 @@ function mockModel(
       services: {
         contents: {
           localPath: (p: string) => p,
+          resolvePath: (root: string, p: string) =>
+            PathExt.resolve('/', root, p),
           get: async (_path: string, _opts: unknown) => ({
             type: 'directory',
             content: getResult

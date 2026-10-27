@@ -19,6 +19,7 @@ import type { IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
+import { isPathWithinRoot } from './utils';
 
 /**
  * The default duration of the auto-refresh in ms
@@ -262,7 +263,7 @@ export class FileBrowserModel implements IDisposable {
       path = this._pendingPath || this._model.path;
     }
     // Check if navigation is restricted and the path is outside the root
-    if (this._root && !this._isPathWithinRoot(path)) {
+    if (!isPathWithinRoot(path, this._root)) {
       if (isRefresh) {
         // During refresh, if current path is outside root, navigate to root
         path = this._root;
@@ -690,26 +691,6 @@ export class FileBrowserModel implements IDisposable {
       this._fileChanged.emit(change);
       return;
     }
-  }
-
-  /**
-   * Check if a path is within the navigation root.
-   *
-   * @param path - The path to check.
-   * @returns Whether the path is within the root boundary.
-   */
-  private _isPathWithinRoot(path: string): boolean {
-    if (!this._root) {
-      return true;
-    }
-    // Normalize paths for comparison (remove trailing slashes)
-    const normalizedPath = PathExt.removeSlash(path);
-    const normalizedRoot = PathExt.removeSlash(this._root);
-    // Path is valid if it equals the root or is a subdirectory of root
-    return (
-      normalizedPath === normalizedRoot ||
-      normalizedPath.startsWith(normalizedRoot + '/')
-    );
   }
 
   /**

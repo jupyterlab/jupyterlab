@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { showErrorMessage } from '@jupyterlab/apputils';
-import { PathExt } from '@jupyterlab/coreutils';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { Message } from '@lumino/messaging';
@@ -13,6 +12,7 @@ import type {
   FileBrowserModel,
   TogglableHiddenFileBrowserModel
 } from './model';
+import { isPathWithinRoot } from './utils';
 
 /**
  * We cache per directory; in case the filesystem changes below us, we refresh
@@ -212,7 +212,9 @@ export class PathNavigator extends Widget {
       const fetchId = ++this._fetchId;
       try {
         const contents = this._model.manager.services.contents;
-        const result = this._isWithinRoot(dirPart)
+        // Only list directories that `cd()` would navigate to.
+        const path = contents.resolvePath(this._model.path, '/' + dirPart);
+        const result = isPathWithinRoot(path, this._model.root)
           ? await contents.get(dirPart || '', { content: true })
           : null;
         // Discard result if a newer fetch has started or the widget was closed.
@@ -256,22 +258,6 @@ export class PathNavigator extends Widget {
         return nameA.localeCompare(nameB);
       })
     );
-  }
-
-  /**
-   * Whether the directory is within the model's navigation root.
-   *
-   * `cd()` does not navigate outside of the root, so the suggestions do not
-   * list directories there either.
-   */
-  private _isWithinRoot(dirPart: string): boolean {
-    const contents = this._model.manager.services.contents;
-    const root = contents.localPath(this._model.root);
-    if (!root) {
-      return true;
-    }
-    const path = PathExt.resolve('/', dirPart);
-    return path === root || path.startsWith(root + '/');
   }
 
   /**
