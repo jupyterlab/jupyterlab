@@ -32,6 +32,7 @@ const DIRS = ['alpha', 'beta', 'gamma'];
 function mockModel(
   overrides: {
     path?: string;
+    root?: string;
     getResult?: Array<{ name: string; type: string }>;
   } = {}
 ): { model: FileBrowserModel; cdCalls: string[] } {
@@ -41,6 +42,7 @@ function mockModel(
   const refreshed = new Signal<FileBrowserModel, void>({} as FileBrowserModel);
   const model = {
     path: overrides.path ?? '',
+    root: overrides.root ?? '',
     refreshed,
     manager: {
       services: {
@@ -65,6 +67,7 @@ const createdNavigators: PathNavigator[] = [];
 function makeNavigator(
   overrides: {
     path?: string;
+    root?: string;
     getResult?: Array<{ name: string; type: string }>;
   } = {}
 ): {
@@ -164,6 +167,36 @@ describe('PathNavigator', () => {
       await flushPromises();
       expect(suggestionItems(navigator).length).toBe(0);
     });
+
+    it('should suggest directories within the model root', async () => {
+      const { navigator } = makeNavigator({
+        path: 'projects/demo',
+        root: 'projects/demo'
+      });
+      navigator.open();
+      await flushPromises();
+      expect(suggestionItems(navigator).map(li => li.textContent)).toEqual([
+        'alpha',
+        'beta',
+        'gamma'
+      ]);
+    });
+
+    it.each(['', '/', 'projects/', 'projects/demo/../', 'projects/demo-old/'])(
+      'should not suggest directories outside the model root for %j',
+      async value => {
+        const { navigator } = makeNavigator({
+          path: 'projects/demo',
+          root: 'projects/demo'
+        });
+        navigator.open();
+        await flushPromises();
+        inputEl(navigator).value = value;
+        simulate(inputEl(navigator), 'input');
+        await flushPromises();
+        expect(suggestionItems(navigator)).toHaveLength(0);
+      }
+    );
   });
 
   describe('keyboard navigation', () => {

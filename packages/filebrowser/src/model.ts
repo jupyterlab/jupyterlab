@@ -783,6 +783,10 @@ export namespace FileBrowserModel {
      *
      * When set, navigation will be restricted to this path and its
      * subdirectories. Users will not be able to navigate above this path.
+     *
+     * The model applies this restriction in the browser, so it is not a
+     * security boundary. The contents API still serves any path under the
+     * server root.
      */
     root?: string;
 
