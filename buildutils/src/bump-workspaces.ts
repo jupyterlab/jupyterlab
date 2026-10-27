@@ -45,9 +45,9 @@ export function bumpWorkspaceVersions(
   );
 
   const newVersions = new Map<string, string>();
-  oldVersions.forEach((version, name) => {
+  for (const [name, version] of oldVersions) {
     if (options.packages && !options.packages.has(name)) {
-      return;
+      continue;
     }
     const preid =
       options.preid ?? String(semver.prerelease(version)?.[0] ?? 'alpha');
@@ -57,9 +57,9 @@ export function bumpWorkspaceVersions(
     }
     console.debug(`${name}: ${version} => ${newVersion}`);
     newVersions.set(name, newVersion);
-  });
+  }
 
-  pkgs.forEach(({ pkgJsonPath, data }) => {
+  for (const { pkgJsonPath, data } of pkgs) {
     data.version = newVersions.get(data.name) ?? data.version;
     for (const field of [
       'dependencies',
@@ -67,18 +67,18 @@ export function bumpWorkspaceVersions(
       'optionalDependencies'
     ]) {
       const deps: Record<string, string> = data[field] ?? {};
-      Object.entries(deps).forEach(([name, range]) => {
+      for (const [name, range] of Object.entries(deps)) {
         const newVersion = newVersions.get(name);
         // A range that the local version does not satisfy refers to a
         // published version.
         if (!newVersion || !semver.satisfies(oldVersions.get(name)!, range)) {
-          return;
+          continue;
         }
         deps[name] = `${/^[~^]?/.exec(range)![0]}${newVersion}`;
-      });
+      }
     }
     writePackageData(pkgJsonPath, data);
-  });
+  }
 
   return newVersions;
 }
