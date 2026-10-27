@@ -12,7 +12,8 @@ import {
   acceptDialog,
   dismissDialog,
   signalToPromises,
-  sleep
+  sleep,
+  waitForDialog
 } from '@jupyterlab/testing';
 import {
   ContentsManagerMock,
@@ -438,6 +439,27 @@ describe('filebrowser/model', () => {
         await dismissDialog();
 
         await expect(promise).rejects.toBe('File not uploaded');
+      });
+
+      it('should ask about one large file at a time', async () => {
+        const uploads = [1, 2].map(i => {
+          const file = new File(
+            [new ArrayBuffer(LARGE_FILE_SIZE + i)],
+            UUID.uuid4() + '.bin'
+          );
+          return model.upload(file).catch((reason: unknown) => reason);
+        });
+        await waitForDialog();
+        expect(document.querySelectorAll('.jp-Dialog')).toHaveLength(1);
+        await dismissDialog();
+        await waitForDialog();
+        expect(document.querySelectorAll('.jp-Dialog')).toHaveLength(1);
+        await dismissDialog();
+
+        expect(await Promise.all(uploads)).toEqual([
+          'Cancelled large file upload',
+          'Cancelled large file upload'
+        ]);
       });
 
       it('should emit the fileChanged signal', async () => {

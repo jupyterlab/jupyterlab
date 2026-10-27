@@ -8,14 +8,18 @@ import {
   CommandToolbarButton,
   jupyterIcon,
   ReactiveToolbar,
+  ReactWidget,
   Toolbar,
-  ToolbarButton
+  ToolbarButton,
+  ToolbarButtonComponent
 } from '@jupyterlab/ui-components';
 import { framePromise, JupyterServer } from '@jupyterlab/testing';
 import { CommandRegistry } from '@lumino/commands';
 import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { MessageLoop } from '@lumino/messaging';
 import type { PanelLayout } from '@lumino/widgets';
-import { Widget } from '@lumino/widgets';
+import { Panel, Widget } from '@lumino/widgets';
+import * as React from 'react';
 import { simulate } from 'simulate-event';
 
 const server = new JupyterServer();
@@ -589,6 +593,32 @@ describe('@jupyterlab/ui-components', () => {
         ]);
       });
     });
+
+    describe('#onResize()', () => {
+      it('should not move an item to the popup when all the items fit without the opener', async () => {
+        const reactive = new ReactiveToolbar();
+        for (const name of ['a', 'b', 'c', 'd', 'e']) {
+          const item = new Widget();
+          Object.defineProperty(item.node, 'clientWidth', { value: 100 });
+          reactive.addItem(name, item);
+        }
+        // The items take 507 px with the padding, and 539 px with the opener.
+        Object.defineProperty(reactive.node, 'clientWidth', { value: 520 });
+        const parent = new Panel();
+        parent.addWidget(reactive);
+        Widget.attach(parent, document.body);
+        const insertWidget = jest.spyOn(
+          (reactive as any).popupOpener,
+          'insertWidget'
+        );
+
+        MessageLoop.sendMessage(reactive, new Widget.ResizeMessage(520, 32));
+        await (reactive as any)._resizer.invoke();
+
+        expect(insertWidget).not.toHaveBeenCalled();
+        parent.dispose();
+      });
+    });
   });
 
   describe('ToolbarButton', () => {
@@ -710,6 +740,78 @@ describe('@jupyterlab/ui-components', () => {
             key: ' '
           });
           expect(called).toBe(true);
+          button.dispose();
+        });
+        it.each([
+          ['Enter', false],
+          ['Enter', true],
+          [' ', false],
+          [' ', true]
+        ])(
+          'should prevent the default action of %j with noFocusOnClick %s',
+          async (key, noFocusOnClick) => {
+            const onClick = jest.fn();
+            const button = new ToolbarButton({ onClick, noFocusOnClick });
+            Widget.attach(button, document.body);
+            await framePromise();
+            const event = new KeyboardEvent('keydown', {
+              key,
+              bubbles: true,
+              cancelable: true
+            });
+            (button.node.firstChild as HTMLElement).dispatchEvent(event);
+            expect(onClick).toHaveBeenCalledTimes(1);
+            expect(event.defaultPrevented).toBe(true);
+            button.dispose();
+          }
+        );
+        it.each(['Enter', ' '])(
+          'should not prevent the default action of %j without onClick',
+          async key => {
+            const button = new ToolbarButton();
+            Widget.attach(button, document.body);
+            await framePromise();
+            const event = new KeyboardEvent('keydown', {
+              key,
+              bubbles: true,
+              cancelable: true
+            });
+            (button.node.firstChild as HTMLElement).dispatchEvent(event);
+            expect(event.defaultPrevented).toBe(false);
+            button.dispose();
+          }
+        );
+        it.each(['Enter', ' '])(
+          'should not prevent the default action of %j in a ToolbarButtonComponent without onClick',
+          async key => {
+            const widget = ReactWidget.create(
+              React.createElement(ToolbarButtonComponent, { label: 'label' })
+            );
+            Widget.attach(widget, document.body);
+            await framePromise();
+            const event = new KeyboardEvent('keydown', {
+              key,
+              bubbles: true,
+              cancelable: true
+            });
+            (widget.node.firstChild as HTMLElement).dispatchEvent(event);
+            expect(event.defaultPrevented).toBe(false);
+            widget.dispose();
+          }
+        );
+        it('should not prevent the default action of other keys', async () => {
+          const onClick = jest.fn();
+          const button = new ToolbarButton({ onClick });
+          Widget.attach(button, document.body);
+          await framePromise();
+          const event = new KeyboardEvent('keydown', {
+            key: 'Tab',
+            bubbles: true,
+            cancelable: true
+          });
+          (button.node.firstChild as HTMLElement).dispatchEvent(event);
+          expect(onClick).not.toHaveBeenCalled();
+          expect(event.defaultPrevented).toBe(false);
           button.dispose();
         });
       });
