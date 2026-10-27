@@ -123,6 +123,27 @@ describe('@jupyterlab/ui-components', () => {
       widget.dispose();
       expect(LifecycleCounter.unmounts).toBe(1);
     });
+
+    it('should unmount the React tree before the node leaves the document when the parent is disposed', async () => {
+      const connected: boolean[] = [];
+      const Probe = () => {
+        const ref = React.useRef<HTMLSpanElement>(null);
+        React.useLayoutEffect(() => {
+          const node = ref.current!;
+          return () => {
+            connected.push(node.isConnected);
+          };
+        }, []);
+        return React.createElement('span', { ref }, 'probe');
+      };
+      const panel = new Panel();
+      Widget.attach(panel, document.body);
+      const widget = ReactWidget.create(React.createElement(Probe));
+      panel.addWidget(widget);
+      await widget.renderPromise;
+      panel.dispose();
+      expect(connected).toEqual([true]);
+    });
   });
 
   describe('VDomRenderer', () => {
