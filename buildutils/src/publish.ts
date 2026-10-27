@@ -72,10 +72,12 @@ commander
       }
 
       // Ensure a clean git environment
-      try {
-        utils.run('git commit -am "[ci skip] bump version"');
-      } catch (e) {
-        // do nothing
+      if (!options.dryRun) {
+        try {
+          utils.run('git commit -am "[ci skip] bump version"');
+        } catch (e) {
+          // do nothing
+        }
       }
 
       // Publish JS to the appropriate tag.
@@ -104,7 +106,7 @@ commander
     }
 
     // Fix up any tagging issues.
-    if (!options.skipTags && !options.dryRun) {
+    if (!options.skipTags) {
       const basePath = path.resolve('.');
       const paths = utils.getYarnPaths(basePath).sort();
       const cmds = await Promise.all(paths.map(handlePackage));
@@ -113,10 +115,15 @@ commander
           if (!options.dryRun) {
             utils.run(cmd);
           } else {
-            throw new Error(`Tag is out of sync: ${cmd}`);
+            console.log(`Would run: ${cmd}`);
           }
         });
       });
+    }
+
+    // A dry run published nothing, so there is nothing to install.
+    if (options.dryRun) {
+      return;
     }
 
     // Make sure all current JS packages are published.
