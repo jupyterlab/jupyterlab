@@ -46,6 +46,21 @@ class LifecycleCounter extends React.Component {
   }
 }
 
+/**
+ * Record whether the rendered node is in the document when a layout effect
+ * cleanup runs.
+ */
+const ConnectionProbe = (props: { connected: boolean[] }) => {
+  const ref = React.useRef<HTMLSpanElement>(null);
+  React.useLayoutEffect(() => {
+    const node = ref.current!;
+    return () => {
+      props.connected.push(node.isConnected);
+    };
+  }, []);
+  return React.createElement('span', { ref }, 'probe');
+};
+
 class TestWidgetNoModel extends VDomRenderer {
   protected render(): React.ReactElement<any> {
     return React.createElement('span', null, 'No model!');
@@ -92,15 +107,19 @@ describe('@jupyterlab/ui-components', () => {
     });
 
     it('should keep the React tree mounted when the widget is moved', async () => {
+      const source = new Panel();
+      const target = new Panel();
+      Widget.attach(source, document.body);
+      Widget.attach(target, document.body);
       const widget = ReactWidget.create(React.createElement(LifecycleCounter));
-      Widget.attach(widget, document.body);
+      source.addWidget(widget);
       await widget.renderPromise;
-      Widget.detach(widget);
-      Widget.attach(widget, document.body);
+      target.addWidget(widget);
       await widget.renderPromise;
       expect(LifecycleCounter.mounts).toBe(1);
       expect(LifecycleCounter.unmounts).toBe(0);
-      widget.dispose();
+      source.dispose();
+      target.dispose();
     });
 
     it('should unmount the React tree when the widget is closed', async () => {
@@ -126,23 +145,66 @@ describe('@jupyterlab/ui-components', () => {
 
     it('should unmount the React tree before the node leaves the document when the parent is disposed', async () => {
       const connected: boolean[] = [];
-      const Probe = () => {
-        const ref = React.useRef<HTMLSpanElement>(null);
-        React.useLayoutEffect(() => {
-          const node = ref.current!;
-          return () => {
-            connected.push(node.isConnected);
-          };
-        }, []);
-        return React.createElement('span', { ref }, 'probe');
-      };
       const panel = new Panel();
       Widget.attach(panel, document.body);
-      const widget = ReactWidget.create(React.createElement(Probe));
+      const widget = ReactWidget.create(
+        React.createElement(ConnectionProbe, { connected })
+      );
       panel.addWidget(widget);
       await widget.renderPromise;
       panel.dispose();
       expect(connected).toEqual([true]);
+    });
+
+    it('should unmount the React tree before the node leaves the document when the widget is closed', async () => {
+      const connected: boolean[] = [];
+      const panel = new Panel();
+      Widget.attach(panel, document.body);
+      const widget = ReactWidget.create(
+        React.createElement(ConnectionProbe, { connected })
+      );
+      panel.addWidget(widget);
+      await widget.renderPromise;
+      widget.close();
+      await Promise.resolve();
+      expect(connected).toEqual([true]);
+      widget.dispose();
+      panel.dispose();
+    });
+
+    it('should render again after a cleanup throws', async () => {
+      const spy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+      let fail = true;
+      const Throws = () => {
+        React.useLayoutEffect(
+          () => () => {
+            if (fail) {
+              fail = false;
+              throw new Error('cleanup failed');
+            }
+          },
+          []
+        );
+        return React.createElement('span', { className: 'rendered' });
+      };
+      const panel = new Panel();
+      Widget.attach(panel, document.body);
+      const widget = ReactWidget.create(React.createElement(Throws));
+      try {
+        panel.addWidget(widget);
+        await widget.renderPromise;
+        widget.close();
+        await Promise.resolve();
+        panel.addWidget(widget);
+        await expect(widget.renderPromise).resolves.toBeUndefined();
+        expect(widget.node.querySelector('.rendered')).not.toBeNull();
+      } finally {
+        spy.mockRestore();
+        widget.dispose();
+        panel.dispose();
+      }
     });
   });
 

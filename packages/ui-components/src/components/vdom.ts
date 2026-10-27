@@ -61,27 +61,37 @@ export abstract class ReactWidget extends Widget {
   }
 
   /**
+   * The parent of the widget.
+   */
+  get parent(): Widget | null {
+    return super.parent;
+  }
+  set parent(value: Widget | null) {
+    this._moving = value !== null;
+    try {
+      super.parent = value;
+    } finally {
+      this._moving = false;
+    }
+  }
+
+  /**
    * Called before the widget is detached from the DOM.
    */
   protected onBeforeDetach(msg: Message): void {
-    // A widget with a disposed ancestor is never attached again: unmount the
-    // React tree now, while the node is still in the document.
-    let ancestor = this.parent;
-    while (ancestor !== null && !ancestor.isDisposed) {
-      ancestor = ancestor.parent;
-    }
-    if (ancestor !== null) {
-      this._unmount();
+    if (this._moving) {
+      // A widget moved to another parent is attached again synchronously and
+      // keeps its component state; unmount only if the new parent is detached.
+      queueMicrotask(() => {
+        if (!this.isAttached) {
+          this._unmount();
+        }
+      });
       return;
     }
-    // Otherwise, defer the unmount to a microtask: moving the widget to another
-    // parent attaches the widget again synchronously, and a moved widget keeps
-    // its component state.
-    queueMicrotask(() => {
-      if (!this.isAttached) {
-        this._unmount();
-      }
-    });
+    // Unmount while the node is in the document, so that cleanups can still
+    // detach or measure what they rendered.
+    this._unmount();
   }
 
   /**
@@ -103,9 +113,12 @@ export abstract class ReactWidget extends Widget {
    * Unmount the React tree, if one is mounted.
    */
   private _unmount(): void {
-    if (this._rootDOM !== null) {
-      this._rootDOM.unmount();
+    const root = this._rootDOM;
+    if (root !== null) {
+      // Forget the root first: a cleanup that throws would otherwise leave a
+      // root that cannot render again.
       this._rootDOM = null;
+      root.unmount();
     }
   }
 
@@ -144,6 +157,7 @@ export abstract class ReactWidget extends Widget {
   // Set whenever a new render is triggered and resolved when it is finished.
   renderPromise?: Promise<void>;
   private _rootDOM: Root | null = null;
+  private _moving = false;
 }
 
 /**
