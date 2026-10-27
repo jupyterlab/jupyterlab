@@ -329,18 +329,30 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
 }
 
 /* Shortcut Title Item Style */
-.jp-Shortcuts-Header {
+button.jp-Shortcuts-Header {
   display: flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  font-weight: bold;
+  text-align: left;
   cursor: pointer;
 }
 
-.jp-Shortcuts-Header:hover .jp-ShortcutTitleItem-sortButton .jp-icon3[fill],
-.jp-Shortcuts-Header:focus .jp-ShortcutTitleItem-sortButton .jp-icon3[fill] {
-  fill: var(--jp-ui-font-color0);
+.jp-Shortcuts-SortButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
 }
 
-.jp-Shortcuts-Header:active .jp-ShortcutTitleItem-sortButton {
-  outline: none;
+.jp-Shortcuts-SortButton svg {
+  display: block;
+}
+
+button.jp-Shortcuts-Header:focus-visible {
+  outline: var(--jp-focus-outline-width) solid var(--jp-focus-outline-color);
 }
 
 .jp-Shortcuts-CurrentHeader .jp-icon3[fill] {
