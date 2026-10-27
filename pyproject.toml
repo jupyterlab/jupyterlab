@@ -37,7 +37,7 @@ classifiers = [
 dependencies = [
     "jupyter-builder>=1.1.1",
     "async_lru>=1.0.0",
-    "httpx>=0.25.0,<1",
+    "httpx2>=2,<3",
     "ipykernel>=6.5.0,!=6.30.0",
     "jinja2>=3.0.3",
     "jupyter_core",
@@ -49,7 +49,7 @@ dependencies = [
     "tomli>=1.2.2;python_version<\"3.11\"",
     "tornado>=6.2.0",
     "traitlets",
-    "typing-extensions>=4.6.0;python_version<\"3.12\"",
+    "typing-extensions>=4.6.1;python_version<\"3.12\"",
 ]
 dynamic = [
     "version",
@@ -110,7 +110,7 @@ dev = [
     "pytest-cov",
     "coverage",
     "hatch",
-    "bump-my-version<2",
+    "bump-my-version>=1,<2",
     "mypy==1.20.2",
     "ruff==0.16.10",
 ]
