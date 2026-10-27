@@ -82,72 +82,276 @@ test.describe('Sidebars (except debugger)', () => {
 });
 
 test.describe('Section reordering', () => {
-  test('should unlock, reorder and lock sections from the context menu', async ({
-    page
-  }) => {
-    await page.sidebar.openTab('jp-running-sessions');
-    const panel = page.locator('#jp-running-sessions .jp-SidePanel-content');
-    const titles = panel.locator('.lm-AccordionPanel-title');
-    const handles = panel.locator('.jp-AccordionPanel-dragHandle');
-    await expect(handles.first()).toBeHidden();
+  const TOGGLE_REORDERING_SELECTOR =
+    '[data-command="apputils:toggle-section-reordering"]';
 
-    const labels = await titles
+  async function toggleReordering(
+    page: galata.IJupyterLabPageFixture,
+    title: Locator
+  ): Promise<void> {
+    await title
       .locator('.lm-AccordionPanel-titleLabel')
-      .allTextContents();
-    await titles.first().click({ button: 'right' });
-    await page
-      .locator('[data-command="apputils:toggle-section-reordering"]')
-      .click();
-    await expect(handles.first()).toBeVisible();
+      .click({ button: 'right' });
+    await page.locator(TOGGLE_REORDERING_SELECTOR).click();
+  }
 
-    const target = await titles.nth(1).boundingBox();
-    const handle = await handles.first().boundingBox();
-    if (!target || !handle) {
+  async function startDrag(
+    page: galata.IJupyterLabPageFixture,
+    title: Locator,
+    target: Locator
+  ): Promise<number> {
+    const handle = await title
+      .locator('.jp-AccordionPanel-dragHandle')
+      .boundingBox();
+    const destination = await target.boundingBox();
+    if (!handle || !destination) {
       throw new Error('Section headers are not visible');
     }
+    await title.evaluate(node => {
+      node.addEventListener(
+        'pointerdown',
+        event => {
+          if (event instanceof PointerEvent) {
+            node.setAttribute('data-pointer-id', String(event.pointerId));
+          }
+        },
+        { once: true }
+      );
+    });
     await page.mouse.move(
       handle.x + handle.width / 2,
       handle.y + handle.height / 2
     );
     await page.mouse.down();
     await page.mouse.move(
-      target.x + target.width / 2,
-      target.y + target.height - 1,
+      destination.x + destination.width / 2,
+      destination.y + destination.height - 1,
       { steps: 5 }
     );
-    await page.mouse.up();
-    await expect(
-      titles.nth(0).locator('.lm-AccordionPanel-titleLabel')
-    ).toHaveText(labels[1]);
-    await expect(
-      titles.nth(1).locator('.lm-AccordionPanel-titleLabel')
-    ).toHaveText(labels[0]);
+    const pointerId = await title.getAttribute('data-pointer-id');
+    await title.evaluate(node => node.removeAttribute('data-pointer-id'));
+    if (pointerId === null) {
+      throw new Error('The section did not receive a pointer event');
+    }
+    return Number(pointerId);
+  }
 
-    await titles.first().click({ button: 'right' });
-    await page
-      .locator('[data-command="apputils:toggle-section-reordering"]')
-      .click();
-    await expect(handles.first()).toBeHidden();
+  test('should unlock, reorder and lock sections from the context menu', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('jp-running-sessions');
+    const panel = page.locator('#jp-running-sessions .jp-SidePanel-content');
+    const titles = panel.locator('.lm-AccordionPanel-title');
+    const labels = titles.locator('.lm-AccordionPanel-titleLabel');
+    const initialLabels = await labels.allTextContents();
+    const expanded = await titles.first().getAttribute('aria-expanded');
+    await expect(
+      titles.first().locator('.jp-AccordionPanel-dragHandle')
+    ).toBeHidden();
+
+    await toggleReordering(page, titles.first());
+    await expect(
+      titles.first().locator('.jp-AccordionPanel-dragHandle')
+    ).toBeVisible();
+    await startDrag(page, titles.first(), titles.nth(1));
+    await page.mouse.up();
+    await expect(labels.nth(0)).toHaveText(initialLabels[1]);
+    await expect(labels.nth(1)).toHaveText(initialLabels[0]);
+    await expect
+      .poll(() => titles.nth(1).getAttribute('aria-expanded'))
+      .toBe(expanded);
+
+    await titles.first().focus();
+    await page.keyboard.press('ArrowDown');
+    await expect(titles.nth(1)).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(titles.nth(2)).toBeFocused();
+
+    await toggleReordering(page, titles.first());
+    await expect(
+      titles.first().locator('.jp-AccordionPanel-dragHandle')
+    ).toBeHidden();
+  });
+
+  test('should cancel dragging with Escape when focus is outside the accordion', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('jp-running-sessions');
+    const panel = page.locator('#jp-running-sessions .jp-SidePanel-content');
+    const titles = panel.locator('.lm-AccordionPanel-title');
+    const labels = titles.locator('.lm-AccordionPanel-titleLabel');
+    const initialLabels = await labels.allTextContents();
+    await toggleReordering(page, titles.first());
+    await page.getByRole('menuitem', { name: 'File', exact: true }).focus();
+    await startDrag(page, titles.first(), titles.nth(1));
+    await expect(panel).toHaveClass(/jp-mod-dragging/);
+    await page.keyboard.press('Escape');
+    await expect(panel).not.toHaveClass(/jp-mod-dragging/);
+    await page.mouse.up();
+    await expect(labels).toHaveText(initialLabels);
+    await expect(
+      panel.locator('.jp-AccordionPanel-dropIndicator')
+    ).toBeHidden();
+  });
+
+  for (const eventType of ['pointercancel', 'lostpointercapture']) {
+    test(`should cancel dragging on ${eventType}`, async ({ page }) => {
+      await page.sidebar.openTab('jp-running-sessions');
+      const panel = page.locator('#jp-running-sessions .jp-SidePanel-content');
+      const titles = panel.locator('.lm-AccordionPanel-title');
+      const labels = titles.locator('.lm-AccordionPanel-titleLabel');
+      const initialLabels = await labels.allTextContents();
+      await toggleReordering(page, titles.first());
+      const pointerId = await startDrag(page, titles.first(), titles.nth(1));
+      if (eventType === 'pointercancel') {
+        await panel.dispatchEvent(eventType, { pointerId });
+      } else {
+        await panel.evaluate(
+          (node, id) => node.releasePointerCapture(id),
+          pointerId
+        );
+        await page.mouse.move(0, 0);
+      }
+      await expect(panel).not.toHaveClass(/jp-mod-dragging/);
+      await page.mouse.up();
+      await expect(labels).toHaveText(initialLabels);
+      await expect(
+        panel.locator('.jp-AccordionPanel-dropIndicator')
+      ).toBeHidden();
+    });
+  }
+
+  test('should ignore another pointer while dragging a section', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('jp-running-sessions');
+    const panel = page.locator('#jp-running-sessions .jp-SidePanel-content');
+    const titles = panel.locator('.lm-AccordionPanel-title');
+    const labels = titles.locator('.lm-AccordionPanel-titleLabel');
+    const initialLabels = await labels.allTextContents();
+    await toggleReordering(page, titles.first());
+    const pointerId = await startDrag(page, titles.first(), titles.nth(1));
+    await titles
+      .nth(1)
+      .locator('.jp-AccordionPanel-dragHandle')
+      .dispatchEvent('pointerdown', {
+        pointerId: pointerId + 1,
+        pointerType: 'touch',
+        button: 0
+      });
+    await page.mouse.up();
+    await expect(labels).toHaveText([
+      initialLabels[1],
+      initialLabels[0],
+      ...initialLabels.slice(2)
+    ]);
+    await expect(panel).not.toHaveClass(/jp-mod-dragging/);
+  });
+
+  test('should handle sections added to an unlocked file browser and recreated accordions', async ({
+    page
+  }) => {
+    const runningTitles = page.locator(
+      '#jp-running-sessions .lm-AccordionPanel-title'
+    );
+    const accordion = page.locator('.jp-FileBrowser-accordion');
+    const titles = accordion.locator('.lm-AccordionPanel-title');
+
+    const moveToFileBrowser = async (name: string): Promise<void> => {
+      await page.sidebar.openTab('jp-running-sessions');
+      await runningTitles.filter({ hasText: name }).click({ button: 'right' });
+      await page
+        .locator('[data-command="apputils:move-section-to"]')
+        .filter({ hasText: 'File Browser' })
+        .click();
+      await page.sidebar.openTab('filebrowser');
+    };
+    await moveToFileBrowser('Open Tabs');
+    await expect(titles).toHaveCount(2);
+    await toggleReordering(page, titles.first());
+    await moveToFileBrowser('Terminals');
+    await expect(titles).toHaveCount(3);
+    await expect(
+      accordion.locator('.jp-AccordionPanel-dragHandle')
+    ).toHaveCount(3);
+    await expect(
+      accordion.locator('.jp-AccordionPanel-dragHandle:visible')
+    ).toHaveCount(3);
+
+    for (const name of ['Open Tabs', 'Terminals']) {
+      await titles.filter({ hasText: name }).click({ button: 'right' });
+      await page.locator('[data-command="apputils:move-section-back"]').click();
+    }
+    await expect(accordion).toHaveCount(0);
+
+    await moveToFileBrowser('Open Tabs');
+    await expect(titles).toHaveCount(2);
+    await expect(
+      titles.first().locator('.jp-AccordionPanel-dragHandle')
+    ).toBeHidden();
+    const labels = titles.locator('.lm-AccordionPanel-titleLabel');
+    const initialLabels = await labels.allTextContents();
+    await toggleReordering(page, titles.first());
+    await startDrag(page, titles.first(), titles.nth(1));
+    await page.mouse.up();
+    await expect(labels).toHaveText([initialLabels[1], initialLabels[0]]);
   });
 
   test('should retain the search section handle when its title changes', async ({
     page
   }) => {
+    await page.route(galata.Routes.extensions, route =>
+      route.fulfill({ json: [] })
+    );
     await page.sidebar.openTab('extensionmanager.main-view');
     const panel = page.locator('.jp-extensionmanager-view');
-    await panel
-      .locator('.lm-AccordionPanel-title')
-      .first()
-      .click({ button: 'right' });
-    await page
-      .locator('[data-command="apputils:toggle-section-reordering"]')
-      .click();
+    await toggleReordering(
+      page,
+      panel.locator('.lm-AccordionPanel-title').first()
+    );
     await panel.locator('.jp-extensionmanager-disclaimer-enable').click();
     await panel.getByRole('searchbox').fill('jupyter');
     const search = panel
       .locator('.lm-AccordionPanel-title')
       .filter({ hasText: 'Search Results' });
+    await expect(search.locator('.jp-AccordionPanel-dragHandle')).toHaveCount(
+      1
+    );
     await expect(search.locator('.jp-AccordionPanel-dragHandle')).toBeVisible();
+    await panel.getByRole('searchbox').clear();
+    const discover = panel
+      .locator('.lm-AccordionPanel-title')
+      .filter({ hasText: 'Discover' });
+    await expect(discover.locator('.jp-AccordionPanel-dragHandle')).toHaveCount(
+      1
+    );
+    await expect(
+      discover.locator('.jp-AccordionPanel-dragHandle')
+    ).toBeVisible();
+  });
+
+  test('should acknowledge the warning after its section is reordered', async ({
+    page
+  }) => {
+    await page.route(galata.Routes.extensions, route =>
+      route.fulfill({ json: [] })
+    );
+    await page.sidebar.openTab('extensionmanager.main-view');
+    const panel = page.locator('.jp-extensionmanager-view');
+    const titles = panel.locator('.lm-AccordionPanel-title');
+    const warning = titles.filter({ hasText: 'Warning' });
+    const installed = titles.filter({ hasText: 'Installed' });
+    await toggleReordering(page, warning);
+    await startDrag(page, warning, installed);
+    await page.mouse.up();
+    await expect(titles.first()).toContainText('Installed');
+    await panel.locator('.jp-extensionmanager-disclaimer-enable').click();
+    await expect(warning).toHaveAttribute('aria-expanded', 'false');
+    await expect(installed).toHaveAttribute('aria-expanded', 'true');
+    await expect(titles.filter({ hasText: 'Discover' })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    );
   });
 });
 

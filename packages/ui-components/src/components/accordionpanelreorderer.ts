@@ -52,8 +52,7 @@ export class AccordionPanelReorderer
       'pointermove',
       'pointerup',
       'pointercancel',
-      'lostpointercapture',
-      'keydown'
+      'lostpointercapture'
     ]) {
       _panel.node.addEventListener(type, this);
     }
@@ -103,8 +102,7 @@ export class AccordionPanelReorderer
       'pointermove',
       'pointerup',
       'pointercancel',
-      'lostpointercapture',
-      'keydown'
+      'lostpointercapture'
     ]) {
       this._panel.node.removeEventListener(type, this);
     }
@@ -133,6 +131,7 @@ export class AccordionPanelReorderer
       const target = event.target;
       if (
         !this.enabled ||
+        this._pointerId !== null ||
         pointer.button !== 0 ||
         !(target instanceof HTMLElement) ||
         !target.closest('.jp-AccordionPanel-dragHandle')
@@ -148,6 +147,7 @@ export class AccordionPanelReorderer
       this._start = this._coordinate(pointer);
       this._pointerId = pointer.pointerId;
       this._panel.node.setPointerCapture(pointer.pointerId);
+      this._panel.node.ownerDocument.addEventListener('keydown', this, true);
       event.preventDefault();
     } else if (pointer.pointerId === this._pointerId) {
       switch (event.type) {
@@ -220,8 +220,8 @@ export class AccordionPanelReorderer
       : slot < titles.length
         ? rect.top
         : rect.bottom;
-    this._indicator.style[horizontal ? 'left' : 'top'] =
-      `${edge - (horizontal ? panelRect.left : panelRect.top)}px`;
+    this._indicator.style.left = horizontal ? `${edge - panelRect.left}px` : '';
+    this._indicator.style.top = horizontal ? '' : `${edge - panelRect.top}px`;
     this._indicator.style.display = 'block';
   }
 
@@ -234,6 +234,7 @@ export class AccordionPanelReorderer
     this._pointerId = null;
     this._indicator.style.display = 'none';
     this._panel.removeClass('jp-mod-dragging');
+    this._panel.node.ownerDocument.removeEventListener('keydown', this, true);
     if (pointerId !== null && this._panel.node.hasPointerCapture(pointerId)) {
       this._panel.node.releasePointerCapture(pointerId);
     }

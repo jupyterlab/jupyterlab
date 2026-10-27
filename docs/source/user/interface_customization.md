@@ -136,9 +136,9 @@ section header and select **Enable Section Reordering**, then drag its handle to
 the desired position. Select the same option again to hide the handles. This also
 works in the Running Sessions, Debugger, and Extension Manager panels.
 
-To move a section back, right-click the section
-header and choose **Move back to Running Sessions**. The layout is saved and
-restored on reload.
+To move a section back, right-click the section header and choose **Move back to
+Running Sessions**. Moved sections' destinations, order, and collapsed state are
+saved and restored on reload.
 
 (activity-bar-position-customization)=
 

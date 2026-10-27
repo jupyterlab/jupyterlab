@@ -2,10 +2,43 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { framePromise } from '@jupyterlab/testing';
-import { PanelWithToolbar, SidePanel } from '@jupyterlab/ui-components';
-import { Widget } from '@lumino/widgets';
+import {
+  AccordionPanelReorderer,
+  PanelWithToolbar,
+  SidePanel
+} from '@jupyterlab/ui-components';
+import { AccordionPanel, Widget } from '@lumino/widgets';
 
 describe('#SidePanel', () => {
+  it('should initialize handles for prepopulated accordion content', () => {
+    const content = new AccordionPanel();
+    content.addWidget(new Widget());
+    content.addWidget(new Widget());
+    const sidebar = new SidePanel({ content });
+    try {
+      expect(
+        content.node.querySelectorAll('.jp-AccordionPanel-dragHandle')
+      ).toHaveLength(2);
+      expect(AccordionPanelReorderer.get(content)).toBe(
+        AccordionPanelReorderer.find(content.node)
+      );
+    } finally {
+      sidebar.dispose();
+    }
+  });
+
+  it('should dispose its accordion reordering controls', () => {
+    const content = new AccordionPanel();
+    const sidebar = new SidePanel({ content });
+    const reorderer = AccordionPanelReorderer.get(content);
+    sidebar.dispose();
+    expect(reorderer.isDisposed).toBe(true);
+    expect(AccordionPanelReorderer.find(content.node)).toBeUndefined();
+    expect(
+      content.node.querySelector('.jp-AccordionPanel-dropIndicator')
+    ).toBeNull();
+  });
+
   describe('AccordionToolbarLayout', () => {
     it('should restore the toolbar when updating the title', async () => {
       const sidebar = new SidePanel();
