@@ -65,7 +65,8 @@ export interface ITopNavProps {
   showSelectors: boolean;
   showAddCommand: boolean;
   updateSort: IShortcutUI['updateSort'];
-  currentSort: string;
+  currentSort: IShortcutUI.ColumnId;
+  sortDirection: IShortcutUI.SortDirection;
   toggleAddCommandRow: IShortcutUI['toggleAddCommandRow'];
   width: number;
   translator: ITranslator;
@@ -84,6 +85,7 @@ export class TopNav extends React.Component<ITopNavProps> {
           title={title}
           updateSort={this.props.updateSort}
           active={this.props.currentSort}
+          sortDirection={this.props.sortDirection}
           columnId={columnId}
         />
       </div>
