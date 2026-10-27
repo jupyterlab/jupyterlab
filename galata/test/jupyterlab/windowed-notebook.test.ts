@@ -507,7 +507,7 @@ test('should rendered injected styles of out-of-viewport cells', async ({
   tmpPath
 }) => {
   await page.notebook.openByPath(`${tmpPath}/${injectionFile}`);
-  await page.notebook.trust();
+  expect(await page.notebook.trust()).toBe(true);
 
   // Check the cell is out of the viewport
   await expect
@@ -546,7 +546,7 @@ test('should rendered injected HTML scripts of out-of-viewport cells', async ({
   tmpPath
 }) => {
   await page.notebook.openByPath(`${tmpPath}/${injectionFile}`);
-  await page.notebook.trust();
+  expect(await page.notebook.trust()).toBe(true);
 
   // Check the cell is out of the viewport
   await expect
@@ -567,7 +567,7 @@ test('should rendered injected JavaScript snippets of out-of-viewport cells', as
   tmpPath
 }) => {
   await page.notebook.openByPath(`${tmpPath}/${injectionFile}`);
-  await page.notebook.trust();
+  expect(await page.notebook.trust()).toBe(true);
 
   // Check the cell is out of the viewport
   await expect
