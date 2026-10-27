@@ -14,7 +14,8 @@ import {
   ToolbarButtonComponent
 } from '@jupyterlab/ui-components';
 import type { Message } from '@lumino/messaging';
-import type { AccordionLayout, AccordionPanel } from '@lumino/widgets';
+import type { AccordionLayout } from '@lumino/widgets';
+import { AccordionPanel } from '@lumino/widgets';
 import * as React from 'react';
 import ReactPaginate from 'react-paginate';
 import type { Action, IActionOptions, IEntry } from './model';
@@ -661,7 +662,7 @@ export class ExtensionsPanel extends SidePanel {
 
     this.header.addWidget(new Header(model, this.trans, this._searchInputRef));
 
-    const warning = new Warning(model, this.trans);
+    const warning = (this._warning = new Warning(model, this.trans));
     warning.title.label = model.canInstall
       ? this.trans.__('Warning')
       : this.trans.__('Author avatars');
@@ -818,11 +819,15 @@ export class ExtensionsPanel extends SidePanel {
 
   private _onStateChanged(): void {
     if (!this._wasDisclaimed && this.model.isDisclaimed) {
-      (this.content as AccordionPanel).collapse(0);
-      (this.content as AccordionPanel).expand(1);
-      if (this.model.canInstall) {
-        // Only an installable manager has a search results panel.
-        (this.content as AccordionPanel).expand(2);
+      const accordion = this.content;
+      if (accordion instanceof AccordionPanel) {
+        accordion.widgets.forEach((widget, index) => {
+          if (widget === this._warning) {
+            accordion.collapse(index);
+          } else {
+            accordion.expand(index);
+          }
+        });
       }
     }
     this._wasDisclaimed = this.model.isDisclaimed;
@@ -839,6 +844,7 @@ export class ExtensionsPanel extends SidePanel {
   protected model: ListModel;
   protected trans: TranslationBundle;
   private _searchInputRef: React.RefObject<HTMLInputElement>;
+  private _warning: Warning;
   private _wasInitialized = false;
   private _wasDisclaimed = true;
 }

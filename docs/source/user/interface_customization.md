@@ -131,8 +131,12 @@ panel via the context menu.
 :class: jp-screenshot
 ```
 
-The section appears inside the File Browser, where it can be dragged to reorder
-it above or below the file listing. To move it back, right-click the section
+The section appears inside the File Browser. To reorder sections, right-click a
+section header and select **Enable Section Reordering**, then drag its handle to
+the desired position. Select the same option again to hide the handles. This also
+works in the Running Sessions, Debugger, and Extension Manager panels.
+
+To move a section back, right-click the section
 header and choose **Move back to Running Sessions**. The layout is saved and
 restored on reload.
 

@@ -113,38 +113,45 @@
   white-space: nowrap;
 }
 
-/* Drag-to-reorder handle shown on accordion section titles */
-.jp-SidePanel-dragHandle {
-  display: inline-flex;
+.jp-AccordionPanel-dragHandle {
+  display: none;
+  touch-action: none;
   align-items: center;
-  cursor: grab;
-  padding: 0 4px;
-  opacity: 0.4;
   flex-shrink: 0;
+  padding: 0 4px;
+  opacity: 0.5;
+  cursor: grab;
 }
 
-.jp-SidePanel-dragHandle::before {
-  content: '⣿';
+.jp-AccordionPanel-dragHandle::before {
+  content: '⠿';
+  font-size: var(--jp-ui-font-size1);
   line-height: 1;
+  color: var(--jp-ui-font-color1);
 }
 
-.jp-SidePanel-dragHandle:hover {
-  opacity: 0.8;
+.jp-mod-dragging .jp-AccordionPanel-dragHandle {
+  cursor: grabbing;
 }
 
-/* Drop position indicator line */
-.jp-SidePanel-dropIndicator {
+.jp-AccordionPanel-dropIndicator {
   position: absolute;
   left: 0;
   right: 0;
   height: 2px;
-  background: var(--jp-brand-color1);
+  background-color: var(--jp-brand-color1);
   pointer-events: none;
-  z-index: 1000;
-  border-radius: 1px;
+  z-index: 10;
 }
 
-/* Dim sections while dragging */
-.jp-SidePanel-content.jp-mod-dragging .jp-AccordionPanel-title {
-  opacity: 0.6;
+.jp-mod-reorderable > .lm-AccordionPanel-title > .jp-AccordionPanel-dragHandle {
+  display: inline-flex;
+}
+
+.lm-AccordionPanel[data-orientation='horizontal']
+  > .jp-AccordionPanel-dropIndicator {
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  height: auto;
 }

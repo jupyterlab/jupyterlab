@@ -14,6 +14,7 @@ import {
 } from '@jupyterlab/apputils';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
+import { AccordionPanelReorderer } from '@jupyterlab/ui-components';
 import type {
   ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
@@ -43,6 +44,7 @@ interface IMoveSectionsState {
 namespace CommandIDs {
   export const moveSectionTo = 'apputils:move-section-to';
   export const moveSectionBack = 'apputils:move-section-back';
+  export const toggleSectionReordering = 'apputils:toggle-section-reordering';
 }
 
 /**
@@ -63,11 +65,36 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
     registry: IMovableSectionRegistry | null,
     stateDB: IStateDB | null
   ): void => {
+    const trans = translator.load('jupyterlab');
+
+    const contextReorderer = (): AccordionPanelReorderer | undefined => {
+      const node = app.contextMenuHitTest(node =>
+        node.classList.contains('lm-AccordionPanel')
+      );
+      return node ? AccordionPanelReorderer.find(node) : undefined;
+    };
+
+    app.commands.addCommand(CommandIDs.toggleSectionReordering, {
+      label: trans.__('Enable Section Reordering'),
+      describedBy: { args: { type: 'object', properties: {} } },
+      isVisible: () => contextReorderer() !== undefined,
+      isToggled: () => contextReorderer()?.enabled ?? false,
+      execute: () => {
+        const reorderer = contextReorderer();
+        if (reorderer) {
+          reorderer.enabled = !reorderer.enabled;
+        }
+      }
+    });
+    app.contextMenu.addItem({
+      command: CommandIDs.toggleSectionReordering,
+      selector: '.lm-AccordionPanel-title',
+      rank: 20
+    });
+
     if (!registry) {
       return;
     }
-
-    const trans = translator.load('jupyterlab');
 
     // section title element (in source sidebar) → section identity
     const titleToSection = new WeakMap<
@@ -157,136 +184,15 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       }
     };
 
-    const addDragHandle = (widget: Widget, accordion: AccordionPanel): void => {
-      const idx = Array.from(accordion.widgets).indexOf(widget);
-      if (idx < 0) {
-        return;
-      }
-      const titleEl = accordion.titles[idx];
-      if (!titleEl.querySelector('.jp-movable-section-dragHandle')) {
-        const handle = document.createElement('span');
-        handle.className = 'jp-movable-section-dragHandle';
-        titleEl.prepend(handle);
-      }
-    };
-
     const setupAccordionDrag = (accordion: AccordionPanel): void => {
       if (dragSetupDone.has(accordion)) {
         return;
       }
       dragSetupDone.add(accordion);
-
-      // Add drag handles to all sections already present in the accordion.
-      for (const widget of accordion.widgets) {
-        addDragHandle(widget, accordion);
-      }
-
-      // Add drag handles to any section added to the accordion in the future
-      // (e.g. native sections added after initial setup, or moved-in sections).
-      const titleObserver = new MutationObserver(() => {
-        for (const widget of accordion.widgets) {
-          addDragHandle(widget, accordion);
-        }
-      });
-      titleObserver.observe(accordion.node, { childList: true });
-
-      // Persist collapse/expand state whenever the user toggles a section.
       accordion.expansionToggled.connect(() => void saveState());
-
-      let draggedWidget: Widget | null = null;
-      let startY = 0;
-      let isDragging = false;
-
-      const indicator = document.createElement('div');
-      indicator.className = 'jp-movable-section-dropIndicator';
-      indicator.style.display = 'none';
-      accordion.node.appendChild(indicator);
-
-      const getTargetSlot = (clientY: number): number => {
-        const layout = accordion.layout as AccordionLayout;
-        const titles = Array.from(layout.titles);
-        for (let i = 0; i < titles.length; i++) {
-          const rect = titles[i].getBoundingClientRect();
-          if (clientY < rect.top + rect.height / 2) {
-            return i;
-          }
-        }
-        return titles.length;
-      };
-
-      const showIndicator = (targetSlot: number): void => {
-        const layout = accordion.layout as AccordionLayout;
-        const titles = Array.from(layout.titles);
-        const panelRect = accordion.node.getBoundingClientRect();
-        let top: number;
-        if (targetSlot < titles.length) {
-          top = titles[targetSlot].getBoundingClientRect().top - panelRect.top;
-        } else {
-          const last = titles[titles.length - 1].getBoundingClientRect();
-          top = last.bottom - panelRect.top;
-        }
-        indicator.style.top = `${top}px`;
-        indicator.style.display = 'block';
-      };
-
-      const endDrag = (clientY?: number): void => {
-        indicator.style.display = 'none';
-        accordion.node.classList.remove('jp-mod-dragging');
-        if (isDragging && draggedWidget && clientY !== undefined) {
-          const currentIdx = Array.from(accordion.widgets).indexOf(
-            draggedWidget
-          );
-          const targetSlot = getTargetSlot(clientY);
-          const insertIdx =
-            targetSlot > currentIdx ? targetSlot - 1 : targetSlot;
-          if (insertIdx !== currentIdx) {
-            accordion.insertWidget(insertIdx, draggedWidget);
-            syncTitleDOMOrder(accordion);
-            void saveState();
-          }
-        }
-        draggedWidget = null;
-        isDragging = false;
-      };
-
-      accordion.node.addEventListener('pointerdown', (event: PointerEvent) => {
-        const target = event.target as HTMLElement;
-        const titleEl = target.closest(
-          '.jp-AccordionPanel-title'
-        ) as HTMLElement | null;
-        if (!titleEl || !target.closest('.jp-movable-section-dragHandle')) {
-          return;
-        }
-        const layout = accordion.layout as AccordionLayout;
-        const idx = Array.from(layout.titles).indexOf(titleEl);
-        if (idx < 0) {
-          return;
-        }
-        draggedWidget = accordion.widgets[idx];
-        startY = event.clientY;
-        accordion.node.setPointerCapture(event.pointerId);
-      });
-
-      accordion.node.addEventListener('pointermove', (event: PointerEvent) => {
-        if (!draggedWidget) {
-          return;
-        }
-        if (!isDragging && Math.abs(event.clientY - startY) > 5) {
-          isDragging = true;
-          accordion.node.classList.add('jp-mod-dragging');
-        }
-        if (isDragging) {
-          showIndicator(getTargetSlot(event.clientY));
-        }
-      });
-
-      accordion.node.addEventListener('pointerup', (event: PointerEvent) => {
-        endDrag(event.clientY);
-      });
-
-      accordion.node.addEventListener('pointercancel', () => {
-        endDrag();
-      });
+      AccordionPanelReorderer.get(accordion, translator).reordered.connect(
+        () => void saveState()
+      );
     };
 
     // Core move operations
@@ -319,7 +225,6 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
         }
 
         setupAccordionDrag(accordion);
-        addDragHandle(widget, accordion);
 
         const idx = Array.from(accordion.widgets).indexOf(widget);
         if (idx >= 0) {

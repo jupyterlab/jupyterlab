@@ -81,6 +81,76 @@ test.describe('Sidebars (except debugger)', () => {
     });
 });
 
+test.describe('Section reordering', () => {
+  test('should unlock, reorder and lock sections from the context menu', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('jp-running-sessions');
+    const panel = page.locator('#jp-running-sessions .jp-SidePanel-content');
+    const titles = panel.locator('.lm-AccordionPanel-title');
+    const handles = panel.locator('.jp-AccordionPanel-dragHandle');
+    await expect(handles.first()).toBeHidden();
+
+    const labels = await titles
+      .locator('.lm-AccordionPanel-titleLabel')
+      .allTextContents();
+    await titles.first().click({ button: 'right' });
+    await page
+      .locator('[data-command="apputils:toggle-section-reordering"]')
+      .click();
+    await expect(handles.first()).toBeVisible();
+
+    const target = await titles.nth(1).boundingBox();
+    const handle = await handles.first().boundingBox();
+    if (!target || !handle) {
+      throw new Error('Section headers are not visible');
+    }
+    await page.mouse.move(
+      handle.x + handle.width / 2,
+      handle.y + handle.height / 2
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      target.x + target.width / 2,
+      target.y + target.height - 1,
+      { steps: 5 }
+    );
+    await page.mouse.up();
+    await expect(
+      titles.nth(0).locator('.lm-AccordionPanel-titleLabel')
+    ).toHaveText(labels[1]);
+    await expect(
+      titles.nth(1).locator('.lm-AccordionPanel-titleLabel')
+    ).toHaveText(labels[0]);
+
+    await titles.first().click({ button: 'right' });
+    await page
+      .locator('[data-command="apputils:toggle-section-reordering"]')
+      .click();
+    await expect(handles.first()).toBeHidden();
+  });
+
+  test('should retain the search section handle when its title changes', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('extensionmanager.main-view');
+    const panel = page.locator('.jp-extensionmanager-view');
+    await panel
+      .locator('.lm-AccordionPanel-title')
+      .first()
+      .click({ button: 'right' });
+    await page
+      .locator('[data-command="apputils:toggle-section-reordering"]')
+      .click();
+    await panel.locator('.jp-extensionmanager-disclaimer-enable').click();
+    await panel.getByRole('searchbox').fill('jupyter');
+    const search = panel
+      .locator('.lm-AccordionPanel-title')
+      .filter({ hasText: 'Search Results' });
+    await expect(search.locator('.jp-AccordionPanel-dragHandle')).toBeVisible();
+  });
+});
+
 test.describe('Debugger sidebar', () => {
   for (const c of showSourcesCases) {
     test.describe(c.name, () => {
