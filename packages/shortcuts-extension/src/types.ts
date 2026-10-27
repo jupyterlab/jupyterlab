@@ -132,6 +132,11 @@ export namespace IShortcutUI {
     | 'source'
     | 'command';
 
+  /**
+   * Sort direction for the shortcuts listing.
+   */
+  export type SortDirection = 'ascending' | 'descending';
+
   interface IChangeKebindingRequest {
     /**
      * Identifier of the requested action.

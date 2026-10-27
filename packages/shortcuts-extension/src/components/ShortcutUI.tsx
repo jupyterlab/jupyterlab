@@ -44,6 +44,7 @@ export interface IShortcutUIState {
   searchQuery: string;
   showSelectors: boolean;
   currentSort: IShortcutUI.ColumnId;
+  sortDirection: IShortcutUI.SortDirection;
   showAddCommand: boolean;
   newShortcut: IShortcutTarget;
 }
@@ -77,6 +78,7 @@ export class ShortcutUI
       searchQuery: '',
       showSelectors: false,
       currentSort: 'category',
+      sortDirection: 'ascending',
       showAddCommand: false,
       newShortcut: this._newShortcutItem.shortcut
     };
@@ -414,7 +416,19 @@ export class ShortcutUI
 
   /** Toggles showing command selectors */
   toggleSelectors = (): void => {
-    this.setState({ showSelectors: !this.state.showSelectors });
+    const showSelectors = !this.state.showSelectors;
+    if (!showSelectors && this.state.currentSort === 'selector') {
+      this.setState(
+        {
+          showSelectors,
+          currentSort: 'category',
+          sortDirection: 'ascending'
+        },
+        this.sortShortcuts
+      );
+      return;
+    }
+    this.setState({ showSelectors });
   };
 
   /**
@@ -426,15 +440,31 @@ export class ShortcutUI
 
   /**
    * Set the sort order for the shortcuts listing.
+   *
+   * Clicking the same column toggles ascending/descending.
+   * Activating a different column sorts that column ascending.
    */
   updateSort = (value: IShortcutUI.ColumnId): void => {
-    if (value !== this.state.currentSort) {
-      this.setState({ currentSort: value }, this.sortShortcuts);
+    if (value === this.state.currentSort) {
+      this.setState(
+        {
+          sortDirection:
+            this.state.sortDirection === 'ascending'
+              ? 'descending'
+              : 'ascending'
+        },
+        this.sortShortcuts
+      );
+    } else {
+      this.setState(
+        { currentSort: value, sortDirection: 'ascending' },
+        this.sortShortcuts
+      );
     }
   };
 
   /**
-   * Sort shortcut list using current sort property.
+   * Sort shortcut list using current sort property and direction.
    */
   sortShortcuts(): void {
     const shortcuts: IShortcutTarget[] = this.state.filteredShortcutList;
@@ -442,6 +472,7 @@ export class ShortcutUI
     if (sortCriteria === 'command') {
       sortCriteria = 'label';
     }
+    const direction = this.state.sortDirection === 'ascending' ? 1 : -1;
     const getValue = (target: IShortcutTarget): string => {
       if (sortCriteria === 'source') {
         return target.keybindings.every(k => k.isDefault) ? 'default' : 'other';
@@ -453,7 +484,7 @@ export class ShortcutUI
       const compareB: string = getValue(b);
       const compareResult = compareA.localeCompare(compareB);
       if (compareResult) {
-        return compareResult;
+        return compareResult * direction;
       } else {
         const aLabel = a['label'] ?? '';
         const bLabel = b['label'] ?? '';
@@ -498,6 +529,7 @@ export class ShortcutUI
           showAddCommand={this.state.showAddCommand}
           updateSort={this.updateSort}
           currentSort={this.state.currentSort}
+          sortDirection={this.state.sortDirection}
           toggleAddCommandRow={this.toggleAddCommandRow}
           width={this.props.width}
           translator={this.props.external.translator}

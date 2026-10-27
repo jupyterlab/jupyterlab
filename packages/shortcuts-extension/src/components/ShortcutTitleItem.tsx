@@ -10,7 +10,8 @@ import type { IShortcutUI } from '../types';
 export interface IShortcutTitleItemProps {
   title: string;
   updateSort: IShortcutUI['updateSort'];
-  active: string;
+  active: IShortcutUI.ColumnId;
+  sortDirection: IShortcutUI.SortDirection;
   columnId: IShortcutUI.ColumnId;
 }
 
