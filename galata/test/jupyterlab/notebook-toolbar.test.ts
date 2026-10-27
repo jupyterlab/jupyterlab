@@ -413,4 +413,59 @@ test.describe('Reactive toolbar', () => {
 
     expect(await toolbar.screenshot()).toMatchSnapshot(imageName);
   });
+
+  test('Hiding an item should bring back the items from the popup', async ({
+    page
+  }) => {
+    const toolbar = page.locator('.jp-NotebookPanel-toolbar');
+    const opener = toolbar.locator('.jp-Toolbar-responsive-opener');
+    const item = toolbar.locator('[data-jp-item-name="restart-and-run"]');
+    // Wide enough to push the next items to the popup, not to go there itself.
+    await item.evaluate(node => {
+      node.style.minWidth = '350px';
+    });
+    await expect(opener).toBeVisible();
+
+    await item.evaluate(node => {
+      node.style.display = 'none';
+    });
+
+    await expect(opener).toBeHidden();
+  });
+
+  test('Adding padding to an item should move items to the popup', async ({
+    page
+  }) => {
+    const toolbar = page.locator('.jp-NotebookPanel-toolbar');
+    const opener = toolbar.locator('.jp-Toolbar-responsive-opener');
+    await expect(opener).toBeHidden();
+
+    await toolbar
+      .locator('[data-jp-item-name="restart-and-run"]')
+      .evaluate(node => {
+        node.style.paddingRight = '600px';
+      });
+
+    await expect(opener).toBeVisible();
+  });
+});
+
+test('Reactive toolbar should move items to the popup when the kernel name gets longer', async ({
+  page
+}) => {
+  await page.notebook.createNew(fileName, { kernel: null });
+  // At this width "No Kernel" fits in the toolbar, "Python 3 (ipykernel)" does not.
+  await page.sidebar.setWidth(430);
+  const toolbar = page.locator('.jp-NotebookPanel-toolbar');
+  const opener = toolbar.locator('.jp-Toolbar-responsive-opener');
+  await expect(opener).toBeHidden();
+
+  await toolbar.getByTitle('Switch kernel').click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByRole('combobox').selectOption('{"name":"python3"}');
+  await dialog
+    .getByRole('button', { name: 'Select Kernel', exact: true })
+    .click();
+
+  await expect(opener).toBeVisible();
 });
