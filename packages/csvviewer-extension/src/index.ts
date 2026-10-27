@@ -484,10 +484,14 @@ namespace Private {
       '--jp-content-font-family'
     );
     const fontSize = style.getPropertyValue('--jp-datagrid-font-size');
+    const commentColor = style
+      .getPropertyValue('--jp-mirror-editor-comment-color')
+      .trim();
     return {
       ...(isLight ? LIGHT_TEXT_CONFIG : DARK_TEXT_CONFIG),
       fontSize: fontSize || undefined,
-      fontFamily: fontFamily || fallbackFontFamily || undefined
+      fontFamily: fontFamily || fallbackFontFamily || undefined,
+      commentColor: commentColor || undefined
     };
   };
 

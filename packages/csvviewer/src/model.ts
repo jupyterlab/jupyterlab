@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PromiseDelegate } from '@lumino/coreutils';
+import type { CellGroup } from '@lumino/datagrid';
 // The viewer loads this model on demand; its base class must be available then.
 // eslint-disable-next-line jupyter/prefer-lazy-imports
 import { DataModel } from '@lumino/datagrid';
@@ -142,6 +143,7 @@ export class DSVModel extends DataModel implements IDisposable {
   set header(value: string[]) {
     this._header = value;
     this._hasHeader = value.length > 0;
+    this._groups = [];
   }
 
   /**
@@ -213,9 +215,16 @@ export class DSVModel extends DataModel implements IDisposable {
 
     // Look up the field and value for the region.
     switch (region) {
-      case 'body':
-        value = this._getField(this._bodyRowToRawRow(row), column);
+      case 'body': {
+        const rawRow = this._bodyRowToRawRow(row);
+        if (this._isCommentRow(rawRow) && !this._isSplitComment(rawRow)) {
+          // The first cell holds the whole line, merged across the row.
+          value = column === 0 ? this._getLine(rawRow) : '';
+        } else {
+          value = this._getField(rawRow, column);
+        }
         break;
+      }
       case 'column-header':
         if (this._hasHeader === false) {
           value = (column + 1).toString();
@@ -223,9 +232,11 @@ export class DSVModel extends DataModel implements IDisposable {
           value = this._header[column];
         }
         break;
-      case 'row-header':
-        value = (row + 1).toString();
+      case 'row-header': {
+        const rowNumber = this._rowNumber(this._bodyRowToRawRow(row));
+        value = rowNumber === null ? '' : rowNumber.toString();
         break;
+      }
       case 'corner-header':
         value = '';
         break;
@@ -235,6 +246,75 @@ export class DSVModel extends DataModel implements IDisposable {
 
     // Return the final value.
     return value;
+  }
+
+  /**
+   * Get the count of merged cell groups: one per merged comment row.
+   *
+   * #### Notes
+   * The grid scans every group for each cell it paints, so only the first
+   * comment rows are merged.
+   */
+  groupCount(region: DataModel.CellRegion): number {
+    if (region !== 'body' || this._columnCount! < 2) {
+      return 0;
+    }
+    return Math.min(this._getMergedRows().length, Private.MAX_MERGED_ROWS);
+  }
+
+  /**
+   * Get the merged cell group which spans a comment row.
+   */
+  group(region: DataModel.CellRegion, groupIndex: number): CellGroup | null {
+    if (region !== 'body') {
+      return null;
+    }
+    // The grid asks for every group once per painted cell, so reuse them.
+    const mergedRows = this._getMergedRows();
+    let group = this._groups[groupIndex];
+    if (group === undefined) {
+      const row = this._rawRowToBodyRow(mergedRows[groupIndex]);
+      const c2 = this._columnCount! - 1;
+      group = this._groups[groupIndex] = { r1: row, r2: row, c1: 0, c2 };
+    }
+    return group;
+  }
+
+  /**
+   * Get the metadata for a cell: `{ comment: true }` for comment rows, with
+   * `merged: true` when the row is merged across the columns.
+   */
+  metadata(
+    region: DataModel.CellRegion,
+    row: number,
+    column: number
+  ): DataModel.Metadata {
+    const rawRow = this._bodyRowToRawRow(row);
+    if (region !== 'body' || !this._isCommentRow(rawRow)) {
+      return DataModel.emptyMetadata;
+    }
+    return this._isSplitComment(rawRow)
+      ? Private.COMMENT_METADATA
+      : Private.MERGED_COMMENT_METADATA;
+  }
+
+  /**
+   * Get the body row of a row number, as shown in the row header.
+   *
+   * #### Notes
+   * Rows above the first data row and comment rows have no number.
+   */
+  bodyRowForNumber(rowNumber: number): number {
+    let row = this._firstNumberedRow() + rowNumber - 1;
+    for (const comment of this._commentRows) {
+      if (comment > row) {
+        break;
+      }
+      if (comment >= this._firstNumberedRow()) {
+        row++;
+      }
+    }
+    return this._rawRowToBodyRow(row);
   }
 
   /**
@@ -479,6 +559,27 @@ export class DSVModel extends DataModel implements IDisposable {
       this._rowOffsets.set(offsets, oldRowCount - duplicateRows);
     }
 
+    if (this._comment !== undefined) {
+      for (let row = oldRowCount; row < this._rowCount; row++) {
+        if (
+          this._rawData[this._rowOffsets[row]] === this._comment &&
+          !(this._hasHeader && row === this._headerRow)
+        ) {
+          const fields = this._getLine(row).split(this._delimiter);
+          let longest = 0;
+          let text = false;
+          for (let i = 0; i < fields.length; i++) {
+            longest = Math.max(longest, fields[i].length);
+            text = text || (i > 0 && fields[i].trim() !== '');
+          }
+          this._commentRows.push(row);
+          // A line padded with empty fields is text, not a row of cells.
+          this._commentFields.push(text ? fields.length : 0);
+          this._commentLongest.push(longest);
+        }
+      }
+    }
+
     // Expand the column offsets array if needed
 
     // If the full column offsets array is small enough, build a cache big
@@ -691,6 +792,99 @@ export class DSVModel extends DataModel implements IDisposable {
   }
 
   /**
+   * Map a raw row to the displayed body row.
+   */
+  private _rawRowToBodyRow(row: number): number {
+    if (this._hasHeader === false) {
+      return row;
+    }
+    return row < this._headerRow ? row : row - 1;
+  }
+
+  /**
+   * The first raw row which gets a row number: the row after the header.
+   */
+  private _firstNumberedRow(): number {
+    return this._hasHeader ? this._headerRow + 1 : this._headerRow;
+  }
+
+  /**
+   * The number of a raw row among the data rows, or `null` for rows above the
+   * first data row and for comment rows.
+   */
+  private _rowNumber(row: number): number | null {
+    const first = this._firstNumberedRow();
+    if (row < first || this._isCommentRow(row)) {
+      return null;
+    }
+    const comments =
+      Private.lowerBound(this._commentRows, row) -
+      Private.lowerBound(this._commentRows, first);
+    return row - first + 1 - comments;
+  }
+
+  /**
+   * Whether a raw row starts with the comment character.
+   */
+  private _isCommentRow(row: number): boolean {
+    return (
+      this._comment !== undefined &&
+      this._rawData[this._rowOffsets[row]] === this._comment
+    );
+  }
+
+  /**
+   * Whether a comment row is shown split into the columns: it has as many
+   * fields as the data, and in a file with two columns its fields are short.
+   */
+  private _isSplitComment(row: number): boolean {
+    const index = Private.lowerBound(this._commentRows, row);
+    return this._commentRows[index] === row && this._isSplitCommentAt(index);
+  }
+
+  /**
+   * Whether the comment row at an index of `_commentRows` is shown split.
+   */
+  private _isSplitCommentAt(index: number): boolean {
+    const columns = this._columnCount!;
+    return (
+      this._commentFields[index] === columns &&
+      (columns > 2 ||
+        this._commentLongest[index] <= Private.MAX_TWO_COLUMN_FIELD)
+    );
+  }
+
+  /**
+   * The comment rows merged across the columns, for the current column count.
+   */
+  private _getMergedRows(): number[] {
+    if (
+      this._mergedRowsColumns !== this._columnCount ||
+      this._mergedRowsComments !== this._commentRows.length
+    ) {
+      this._mergedRows = this._commentRows.filter(
+        (row, index) => !this._isSplitCommentAt(index)
+      );
+      this._mergedRowsColumns = this._columnCount;
+      this._mergedRowsComments = this._commentRows.length;
+      this._groups = [];
+    }
+    return this._mergedRows;
+  }
+
+  /**
+   * Get the text of a raw row without the row delimiter.
+   *
+   * #### Notes
+   * Quotes in comment rows are literal, so the row ends at the next delimiter.
+   */
+  private _getLine(row: number): string {
+    const start = this._rowOffsets[row];
+    const end = this._rawData.indexOf(this._rowDelimiter, start);
+    return this._rawData.slice(start, end === -1 ? undefined : end);
+  }
+
+  /**
    * Reset the parser state.
    */
   private _resetParser(): void {
@@ -699,6 +893,13 @@ export class DSVModel extends DataModel implements IDisposable {
     this._rowOffsets = new Uint32Array(0);
     this._rowCount = 0;
     this._startedParsing = false;
+    this._commentRows = [];
+    this._commentFields = [];
+    this._commentLongest = [];
+    this._mergedRows = [];
+    this._mergedRowsColumns = undefined;
+    this._mergedRowsComments = 0;
+    this._groups = [];
 
     this._columnOffsets = new Uint32Array(0);
 
@@ -742,6 +943,20 @@ export class DSVModel extends DataModel implements IDisposable {
   private _header: string[] = [];
   private _headerRow = 0;
   private _hasHeader = true;
+  /**
+   * The raw rows which start with the comment character, in order.
+   */
+  private _commentRows: number[] = [];
+  /**
+   * The field count of each comment row, or 0 when only empty fields follow
+   * the first one.
+   */
+  private _commentFields: number[] = [];
+  private _commentLongest: number[] = [];
+  private _mergedRows: number[] = [];
+  private _mergedRowsColumns: number | undefined = undefined;
+  private _mergedRowsComments = 0;
+  private _groups: CellGroup[] = [];
   /**
    * The column offset cache, starting with row _columnOffsetsStartingRow
    *
@@ -842,5 +1057,56 @@ export namespace DSVModel {
      * full parse of the data. This should be greater than 0.
      */
     initialRows?: number;
+  }
+}
+
+/**
+ * The namespace for module private data.
+ */
+namespace Private {
+  /**
+   * The metadata of the cells in a comment row.
+   */
+  export const COMMENT_METADATA: DataModel.Metadata = Object.freeze({
+    comment: true
+  });
+
+  /**
+   * The metadata of the cells in a comment row merged across the columns.
+   */
+  export const MERGED_COMMENT_METADATA: DataModel.Metadata = Object.freeze({
+    comment: true,
+    merged: true
+  });
+
+  /**
+   * The maximum number of comment rows merged across the columns.
+   */
+  export const MAX_MERGED_ROWS = 1000;
+
+  /**
+   * The longest field of a comment line split in a file with two columns.
+   *
+   * #### Notes
+   * Prose with one delimiter also has two fields; its fields are longer than
+   * column names or units.
+   */
+  export const MAX_TWO_COLUMN_FIELD = 30;
+
+  /**
+   * The number of items in a sorted array which are less than a value.
+   */
+  export function lowerBound(sorted: number[], value: number): number {
+    let low = 0;
+    let high = sorted.length;
+    while (low < high) {
+      const middle = (low + high) >>> 1;
+      if (sorted[middle] < value) {
+        low = middle + 1;
+      } else {
+        high = middle;
+      }
+    }
+    return low;
   }
 }

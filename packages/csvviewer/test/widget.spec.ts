@@ -6,8 +6,8 @@ import { Context, TextModelFactory } from '@jupyterlab/docregistry';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { framePromise, signalToPromise } from '@jupyterlab/testing';
 import { UUID } from '@lumino/coreutils';
-import type { CellRenderer } from '@lumino/datagrid';
-import { DataGrid, DataModel, JSONModel } from '@lumino/datagrid';
+import type { TextRenderer } from '@lumino/datagrid';
+import { CellRenderer, DataGrid, DataModel, JSONModel } from '@lumino/datagrid';
 import { MessageLoop } from '@lumino/messaging';
 import type { TextRenderConfig } from '../src';
 import { CSVViewer, DSVModel, GridSearchService } from '../src';
@@ -123,6 +123,64 @@ describe('csvviewer/widget', () => {
       it('should be the context for the file', () => {
         const widget = new CSVViewer({ context });
         expect(widget.context).toBe(context);
+      });
+    });
+
+    describe('comment rows', () => {
+      let viewerContext: Context<DocumentRegistry.IModel>;
+      let widget: CSVViewer;
+      let renderer: TextRenderer;
+      const cell = {
+        region: 'body',
+        row: 0,
+        column: 0,
+        value: '# note, with a comma',
+        metadata: { comment: true, merged: true }
+      } as unknown as CellRenderer.CellConfig;
+
+      beforeEach(async () => {
+        viewerContext = createContext();
+        await viewerContext.initialize(true);
+        viewerContext.model.fromString('# note, with a comma\nid,name\n1,a');
+        widget = new CSVViewer({ context: viewerContext });
+        await widget.ready;
+        widget.rendererConfig = { ...RENDER_CONFIG, commentColor: 'teal' };
+        await framePromise();
+        const grid = Array.from(widget.children())[0] as DataGrid;
+        renderer = grid.cellRenderers.get(cell) as TextRenderer;
+      });
+
+      afterEach(() => {
+        widget.dispose();
+        viewerContext.dispose();
+      });
+
+      it('should draw comment rows in italic', () => {
+        expect(CellRenderer.resolveOption(renderer.font, cell)).toMatch(
+          /^italic /
+        );
+      });
+
+      it('should draw comment rows in the comment color', () => {
+        expect(CellRenderer.resolveOption(renderer.textColor, cell)).toBe(
+          'teal'
+        );
+      });
+
+      it('should align merged comment rows to the left', () => {
+        expect(
+          CellRenderer.resolveOption(renderer.horizontalAlignment, cell)
+        ).toBe('left');
+      });
+
+      it('should keep the alignment of split comment rows', () => {
+        const split = {
+          ...cell,
+          metadata: { comment: true }
+        } as CellRenderer.CellConfig;
+        expect(
+          CellRenderer.resolveOption(renderer.horizontalAlignment, split)
+        ).toBe('right');
       });
     });
 

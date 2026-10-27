@@ -59,6 +59,10 @@ export class TextRenderConfig {
    * font family
    */
   fontFamily?: string;
+  /**
+   * text color of comment rows
+   */
+  commentColor?: string;
 }
 
 /**
@@ -534,7 +538,10 @@ export class CSVViewer extends Widget {
    * Go to line
    */
   goToLine(lineNumber: number): void {
-    this._grid.scrollToRow(lineNumber);
+    const model = this._grid.dataModel as DSVModelModule.DSVModel | null;
+    this._grid.scrollToRow(
+      model ? model.bodyRowForNumber(lineNumber) : lineNumber
+    );
   }
 
   /**
@@ -612,10 +619,19 @@ export class CSVViewer extends Widget {
     }
     const { TextRenderer } = await Private.ensureDataGrid();
     const rendererConfig = this._baseRenderer;
+    const font = `${rendererConfig.fontSize ?? '12px'} ${rendererConfig.fontFamily ?? 'sans-serif'}`;
+    const isComment = (config: DataGridModule.CellRenderer.CellConfig) =>
+      config.region === 'body' && config.metadata.comment === true;
     const renderer = new TextRenderer({
-      font: `${rendererConfig.fontSize ?? '12px'} ${rendererConfig.fontFamily ?? 'sans-serif'}`,
-      textColor: rendererConfig.textColor,
-      horizontalAlignment: rendererConfig.horizontalAlignment,
+      font: config => (isComment(config) ? `italic ${font}` : font),
+      textColor: config =>
+        isComment(config)
+          ? (rendererConfig.commentColor ?? rendererConfig.textColor)
+          : rendererConfig.textColor,
+      horizontalAlignment: config =>
+        isComment(config) && config.metadata.merged === true
+          ? 'left'
+          : rendererConfig.horizontalAlignment,
       backgroundColor:
         this._searchService.cellBackgroundColorRendererFunc(rendererConfig)
     });

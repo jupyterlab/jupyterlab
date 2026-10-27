@@ -403,10 +403,10 @@ describe('csvviewer/model', () => {
         ''
       ]);
       expect([0, 1, 2, 3].map(i => d.data('body', 1, i))).toEqual([
-        '# units',
-        'date',
-        'lon',
-        'lat,value'
+        '# units,date,lon,lat,value',
+        '',
+        '',
+        ''
       ]);
       expect([0, 1, 2, 3].map(i => d.data('body', 2, i))).toEqual([
         '2020-01-01',
@@ -597,6 +597,153 @@ describe('csvviewer/model', () => {
         d.dispose();
       }
     );
+
+    describe('comment rows', () => {
+      let d: DSVModel;
+
+      beforeEach(() => {
+        d = new DSVModel({
+          data: [
+            '# exported, 2024',
+            '',
+            'id,name,value',
+            '1,Alice,10',
+            '# note, with a comma',
+            '2,Bob,20'
+          ].join('\n'),
+          delimiter: ',',
+          comment: '#'
+        });
+      });
+
+      afterEach(() => {
+        d.dispose();
+      });
+
+      it('should hold the whole comment line in the first cell', () => {
+        expect([0, 1, 2].map(c => d.data('body', 3, c))).toEqual([
+          '# note, with a comma',
+          '',
+          ''
+        ]);
+      });
+
+      it('should merge each comment row across all columns', () => {
+        expect(d.groupCount('body')).toBe(2);
+        expect([0, 1].map(i => d.group('body', i))).toEqual([
+          { r1: 0, r2: 0, c1: 0, c2: 2 },
+          { r1: 3, r2: 3, c1: 0, c2: 2 }
+        ]);
+      });
+
+      it('should mark merged comment rows in the cell metadata', () => {
+        expect(d.metadata('body', 3, 1)).toEqual({
+          comment: true,
+          merged: true
+        });
+        expect(d.metadata('body', 2, 1)).toEqual({});
+      });
+
+      it('should number only the rows after the header which are not comments', () => {
+        expect([0, 1, 2, 3, 4].map(r => d.data('row-header', r, 0))).toEqual([
+          '',
+          '',
+          '1',
+          '',
+          '2'
+        ]);
+      });
+
+      it('should find the body row of a row number', () => {
+        expect([1, 2].map(n => d.bodyRowForNumber(n))).toEqual([2, 4]);
+      });
+
+      it('should split a comment line with as many fields as the data', () => {
+        const units = new DSVModel({
+          data: '# kg, m, s\nweight, length, time\n1, 2, 3\n',
+          delimiter: ',',
+          comment: '#'
+        });
+        expect([0, 1, 2].map(c => units.data('body', 0, c))).toEqual([
+          '# kg',
+          ' m',
+          ' s'
+        ]);
+        expect(units.groupCount('body')).toBe(0);
+        units.dispose();
+      });
+
+      it('should mark split comment rows in the cell metadata', () => {
+        const units = new DSVModel({
+          data: '# kg, m, s\nweight, length, time\n1, 2, 3\n',
+          delimiter: ',',
+          comment: '#'
+        });
+        expect(units.metadata('body', 0, 1)).toEqual({ comment: true });
+        units.dispose();
+      });
+
+      it('should merge a comment line padded with empty fields', () => {
+        const padded = new DSVModel({
+          data: '# Section title,,\na,b,c\n1,2,3\n',
+          delimiter: ',',
+          comment: '#'
+        });
+        expect([0, 1, 2].map(c => padded.data('body', 0, c))).toEqual([
+          '# Section title,,',
+          '',
+          ''
+        ]);
+        padded.dispose();
+      });
+
+      it('should merge a two-column comment line with a long field', () => {
+        const prose = new DSVModel({
+          data: '# reference: Viehland and Kirkpatrick, Int. J. Mass Spectrom. 149 (1995)\na,b\n1,2\n',
+          delimiter: ',',
+          comment: '#'
+        });
+        expect(prose.groupCount('body')).toBe(1);
+        prose.dispose();
+      });
+
+      it('should split a two-column comment line with short fields', () => {
+        const units = new DSVModel({
+          data: '# kg,m\nmass,length\n1,2\n',
+          delimiter: ',',
+          comment: '#'
+        });
+        expect([0, 1].map(c => units.data('body', 0, c))).toEqual([
+          '# kg',
+          'm'
+        ]);
+        units.dispose();
+      });
+
+      it('should merge at most 1000 comment rows', async () => {
+        const many = new DSVModel({
+          data: 'a,b\n' + '# note\n1,2\n'.repeat(1005),
+          delimiter: ',',
+          comment: '#'
+        });
+        await many.ready;
+        expect(many.groupCount('body')).toBe(1000);
+        many.dispose();
+      });
+
+      it('should merge comment rows found by the delayed parse', async () => {
+        const late = new DSVModel({
+          data: 'a,b\n' + '1,2\n'.repeat(10) + '# late note\n3,4\n',
+          delimiter: ',',
+          comment: '#',
+          initialRows: 3
+        });
+        await late.ready;
+        expect(late.groupCount('body')).toBe(1);
+        expect(late.group('body', 0)).toEqual({ r1: 10, r2: 10, c1: 0, c2: 1 });
+        late.dispose();
+      });
+    });
 
     it('handles delayed parsing of rows past the initial rows', async () => {
       const d = new DSVModel({

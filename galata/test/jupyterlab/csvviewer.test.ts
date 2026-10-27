@@ -22,11 +22,12 @@ const testData = `id,name,ip_address,userid
 `;
 
 // CSV data with leading comment lines prefixed with '#'
-const testDataWithComments = `# This file was exported on 2024-01-01
-# Source: internal database
+const testDataWithComments = `# This file was exported on 2024-01-01, from an internal database
+# integer,text,IPv4 address,text
 id,name,ip_address,userid
 1,Juan King,51.223.215.102,jking0
 2,Janet Robertson,94.135.163.124,jrobertson1
+# Charles Howard left on 2023-12-31
 3,Charles Howard,49.71.100.63,choward2
 4,Beverly Johnson,95.201.11.104,bjohnson3
 5,Robin Fowler,244.18.23.69,rfowler4
@@ -181,6 +182,32 @@ for (const extension of ['csv', 'tsv']) {
           )
         )
         .not.toBe(0);
+    });
+
+    test('should draw comment rows', async ({ page }) => {
+      test.skip(extension !== 'csv', 'One reference image is enough');
+      await page.filebrowser.open(csvFileName);
+
+      const csvLocator = page.locator('.jp-CSVViewer');
+      await expect(csvLocator).toBeVisible();
+      await page.evaluate(
+        () => window.jupyterapp.shell.currentWidget.content.ready
+      );
+      const screenshotWithoutComment = await csvLocator.screenshot();
+
+      await page.locator('.jp-CSVComment-dropdown select').selectOption('#');
+      await expect
+        .poll(async () =>
+          Buffer.compare(
+            await csvLocator.screenshot(),
+            screenshotWithoutComment
+          )
+        )
+        .not.toBe(0);
+
+      expect(await csvLocator.screenshot()).toMatchSnapshot(
+        'csv-comment-rows.png'
+      );
     });
 
     test('should revert to raw rendering when comment char is cleared', async ({
