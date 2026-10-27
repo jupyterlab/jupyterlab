@@ -7,7 +7,7 @@ import {
   VDomRenderer
 } from '@jupyterlab/ui-components';
 import { framePromise } from '@jupyterlab/testing';
-import { Widget } from '@lumino/widgets';
+import { Panel, Widget } from '@lumino/widgets';
 import * as React from 'react';
 
 class TestModel extends VDomModel {
@@ -101,6 +101,19 @@ describe('@jupyterlab/ui-components', () => {
       expect(LifecycleCounter.mounts).toBe(1);
       expect(LifecycleCounter.unmounts).toBe(0);
       widget.dispose();
+    });
+
+    it('should unmount the React tree when the widget is closed', async () => {
+      const panel = new Panel();
+      Widget.attach(panel, document.body);
+      const widget = ReactWidget.create(React.createElement(LifecycleCounter));
+      panel.addWidget(widget);
+      await widget.renderPromise;
+      widget.close();
+      await Promise.resolve();
+      expect(LifecycleCounter.unmounts).toBe(1);
+      widget.dispose();
+      panel.dispose();
     });
 
     it('should unmount the React tree when disposed', async () => {
