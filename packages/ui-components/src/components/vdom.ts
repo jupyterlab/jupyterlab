@@ -64,13 +64,22 @@ export abstract class ReactWidget extends Widget {
    * Called before the widget is detached from the DOM.
    */
   protected onBeforeDetach(msg: Message): void {
-    // Unmount the component so it can tear down. Defer it to a microtask:
-    // moving the widget to another parent attaches it again synchronously,
-    // and a moved widget keeps its component state.
+    // A widget with a disposed ancestor is never attached again: unmount the
+    // React tree now, while the node is still in the document.
+    let ancestor = this.parent;
+    while (ancestor !== null && !ancestor.isDisposed) {
+      ancestor = ancestor.parent;
+    }
+    if (ancestor !== null) {
+      this._unmount();
+      return;
+    }
+    // Otherwise, defer the unmount to a microtask: moving the widget to another
+    // parent attaches the widget again synchronously, and a moved widget keeps
+    // its component state.
     queueMicrotask(() => {
-      if (!this.isAttached && this._rootDOM !== null) {
-        this._rootDOM.unmount();
-        this._rootDOM = null;
+      if (!this.isAttached) {
+        this._unmount();
       }
     });
   }
@@ -82,14 +91,22 @@ export abstract class ReactWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
-    // `onBeforeDetach` unmounts on a normal detach, but a widget disposed
-    // while already detached would keep its React root mounted forever,
-    // along with every subscription made by the rendered components.
+    // Unmount before `super.dispose()` detaches the widget, so that cleanups
+    // run while the node is in the document. A widget disposed while already
+    // detached receives no `before-detach` message, and without this call its
+    // React root would stay mounted with every subscription of its components.
+    this._unmount();
+    super.dispose();
+  }
+
+  /**
+   * Unmount the React tree, if one is mounted.
+   */
+  private _unmount(): void {
     if (this._rootDOM !== null) {
       this._rootDOM.unmount();
       this._rootDOM = null;
     }
-    super.dispose();
   }
 
   /**
