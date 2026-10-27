@@ -4,6 +4,7 @@
 |----------------------------------------------------------------------------*/
 import { program as commander } from 'commander';
 import type { ReleaseType } from 'semver';
+import { bumpWorkspaceVersions } from './bump-workspaces';
 import * as utils from './utils';
 
 interface IBumpVersionOptions {
@@ -89,7 +90,7 @@ commander
     // level package.
     const count = spec === 'major' ? 10 : 1;
     for (let i = 0; i < count; i++) {
-      utils.bumpWorkspaceVersions(increment, { preid });
+      bumpWorkspaceVersions(increment, { preid });
     }
 
     // Bump the version.

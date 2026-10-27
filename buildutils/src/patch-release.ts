@@ -3,6 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import { program as commander } from 'commander';
+import { bumpWorkspaceVersions } from './bump-workspaces';
 import * as utils from './utils';
 
 interface IPatchReleaseOptions {
@@ -30,7 +31,7 @@ commander
     utils.prebump();
 
     // Patch the JS packages.
-    utils.bumpWorkspaceVersions('patch');
+    bumpWorkspaceVersions('patch');
 
     // Patch the python version
     utils.run('bump-my-version bump --allow-dirty patch'); // switches to alpha

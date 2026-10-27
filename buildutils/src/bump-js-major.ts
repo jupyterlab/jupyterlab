@@ -5,6 +5,7 @@
 import { program as commander } from 'commander';
 import semver from 'semver';
 import path from 'path';
+import { bumpWorkspaceVersions } from './bump-workspaces';
 import * as utils from './utils';
 
 interface IBumpJSOptions {
@@ -96,7 +97,7 @@ commander
       console.debug(names.join('\n'));
       return;
     }
-    utils.bumpWorkspaceVersions('premajor', { preid: preId, packages: names });
+    bumpWorkspaceVersions('premajor', { preid: preId, packages: names });
     utils.postbump(false);
   });
 
