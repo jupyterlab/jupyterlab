@@ -169,15 +169,18 @@ export class DocumentWidgetManager implements IDisposable {
    *
    * @param context - The document context object.
    *
+   * @param widgetName - The name of the widget factory to use. If not specified or null, a widget of any factory is matched.
+   *
    * @returns The found widget, or `undefined`.
    *
    * #### Notes
    * This can be used to use an existing widget instead of opening
-   * a new widget.
+   * a new widget. A sibling widget added with `context.addSibling` has no
+   * factory and is never matched.
    */
   findWidget(
     context: DocumentRegistry.Context,
-    widgetName: string
+    widgetName?: string | null
   ): IDocumentWidget | undefined {
     const widgets = Private.widgetsProperty.get(context);
     if (!widgets) {
@@ -188,7 +191,7 @@ export class DocumentWidgetManager implements IDisposable {
       if (!factory) {
         return false;
       }
-      return factory.name === widgetName;
+      return !widgetName || factory.name === widgetName;
     });
   }
 
