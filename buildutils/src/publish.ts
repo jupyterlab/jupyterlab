@@ -34,8 +34,11 @@ function isPublished(spec: string): boolean {
     return (
       utils.run(`npm view ${spec} version`, { stdio: 'pipe' }, true) !== ''
     );
-  } catch {
-    // npm view fails when the package or the version is not on the registry.
+  } catch (e) {
+    // E404 means that the package or the version is not on the registry.
+    if (!String(e).includes('E404')) {
+      console.warn(`Assuming that ${spec} is not published: ${String(e)}`);
+    }
     return false;
   }
 }
