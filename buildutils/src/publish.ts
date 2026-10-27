@@ -75,12 +75,8 @@ commander
       }
 
       // Ensure a clean git environment
-      if (!options.dryRun) {
-        try {
-          utils.run('git commit -am "[ci skip] bump version"');
-        } catch (e) {
-          // do nothing
-        }
+      if (!options.dryRun && utils.checkStatus('git diff --quiet HEAD') !== 0) {
+        utils.run('git commit -am "[ci skip] bump version"');
       }
 
       // Publish JS to the appropriate tag.
