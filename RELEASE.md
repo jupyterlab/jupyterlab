@@ -199,7 +199,7 @@ that JS package:
 Results:
 
 - Python package is not affected.
-- The packages in `packages/` that depend on them are also bumped a major version.
+- The public packages that depend on them, directly or through other packages, are also bumped a major version.
 - Packages that have already had a major bump in this prerelease cycle are not affected.
 - All affected packages changed to match the current release type of the Python package (`alpha`, `beta`, or `rc`).
 - The integrity script runs, and the changes are left uncommitted.
