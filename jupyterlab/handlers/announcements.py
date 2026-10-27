@@ -3,13 +3,15 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+from __future__ import annotations
+
 import abc
 import hashlib
 import json
 import xml.etree.ElementTree as ET
-from collections.abc import Awaitable
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
+from typing import TYPE_CHECKING
 
 from jupyter_server.base.handlers import APIHandler
 from jupyterlab_server.translation_utils import translator
@@ -18,12 +20,18 @@ from tornado import httpclient, web
 
 from jupyterlab._version import __version__
 
+if TYPE_CHECKING:
+    import logging
+
 ISO8601_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 JUPYTERLAB_LAST_RELEASE_URL = "https://pypi.org/pypi/jupyterlab/json"
 JUPYTERLAB_RELEASE_URL = "https://github.com/jupyterlab/jupyterlab/releases/tag/v"
+NotificationLink = tuple[str, str] | tuple[()] | None
+JSONValue = str | int | float | bool | None | list["JSONValue"] | dict[str, "JSONValue"]
+UpdateCheckResult = str | tuple[str, tuple[str, str]] | None
 
 
-def format_datetime(dt_str: str):
+def format_datetime(dt_str: str) -> float:
     return datetime.fromisoformat(dt_str).timestamp() * 1000
 
 
@@ -44,8 +52,8 @@ class Notification:
     message: str
     modifiedAt: float  # noqa
     type: str = "default"
-    link: tuple[str, str] = field(default_factory=tuple)
-    options: dict = field(default_factory=dict)
+    link: NotificationLink = ()
+    options: dict[str, JSONValue] = field(default_factory=dict)
 
 
 class CheckForUpdateABC(abc.ABC):
@@ -59,11 +67,13 @@ class CheckForUpdateABC(abc.ABC):
         logger - logging.Logger: Server logger
     """
 
+    logger: logging.Logger
+
     def __init__(self, version: str) -> None:
         self.version = version
 
     @abc.abstractmethod
-    async def __call__(self) -> Awaitable[None | str | tuple[str, tuple[str, str]]]:
+    async def __call__(self) -> UpdateCheckResult:
         """Get the notification message if a new version is available.
 
         Returns:
@@ -86,7 +96,7 @@ class CheckForUpdate(CheckForUpdateABC):
         logger - logging.Logger: Server logger
     """
 
-    async def __call__(self) -> Awaitable[tuple[str, tuple[str, str]]]:
+    async def __call__(self) -> tuple[str, tuple[str, str]] | None:
         """Get the notification message if a new version is available.
 
         Returns:
@@ -130,7 +140,7 @@ class NeverCheckForUpdate(CheckForUpdateABC):
         logger - logging.Logger: Server logger
     """
 
-    async def __call__(self) -> Awaitable[None]:
+    async def __call__(self) -> None:
         """Get the notification message if a new version is available.
 
         Returns:
@@ -150,10 +160,10 @@ class CheckForUpdateHandler(APIHandler):
 
     def initialize(
         self,
-        update_checker: CheckForUpdate | None = None,
+        update_checker: CheckForUpdateABC | None = None,
     ) -> None:
         super().initialize()
-        self.update_checker = (
+        self.update_checker: CheckForUpdateABC = (
             NeverCheckForUpdate(__version__) if update_checker is None else update_checker
         )
         self.update_checker.logger = self.log
@@ -202,7 +212,7 @@ class NewsHandler(APIHandler):
         self.news_url = news_url
 
     @web.authenticated
-    async def get(self):
+    async def get(self) -> None:
         """Get the news.
 
         Response:
@@ -210,7 +220,7 @@ class NewsHandler(APIHandler):
                 "news": List[Notification]
             }
         """
-        news = []
+        news: list[Notification] = []
 
         http_client = httpclient.AsyncHTTPClient()
 
@@ -229,10 +239,10 @@ class NewsHandler(APIHandler):
                 )
                 tree = ET.fromstring(response.body)  # noqa S314
 
-                def build_entry(node):
+                def build_entry(node: ET.Element) -> Notification:
                     def get_xml_text(attr: str, default: str | None = None) -> str:
                         node_item = node.find(f"atom:{attr}", xml_namespaces)
-                        if node_item is not None:
+                        if node_item is not None and node_item.text is not None:
                             return node_item.text
                         elif default is not None:
                             return default
@@ -248,8 +258,9 @@ class NewsHandler(APIHandler):
                     entry_published = get_xml_text("published", entry_updated)
                     entry_summary = get_xml_text("summary", default="")
                     links = node.findall("atom:link", xml_namespaces)
+                    link_node: ET.Element | None
                     if len(links) > 1:
-                        alternate = list(filter(lambda elem: elem.get("rel") == "alternate", links))
+                        alternate = [elem for elem in links if elem.get("rel") == "alternate"]
                         link_node = alternate[0] if alternate else links[0]
                     else:
                         link_node = links[0] if len(links) == 1 else None

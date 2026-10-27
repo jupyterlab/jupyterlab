@@ -811,7 +811,7 @@ export namespace InlineCompleter {
           }
           completions.items = items;
         } else {
-          if (!change.retain) {
+          if (change.retain === undefined || change.retain === 0) {
             this._completions = null;
           }
         }

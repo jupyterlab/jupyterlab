@@ -404,8 +404,8 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   async displayModules(): Promise<void> {
-    if (!this.session) {
-      throw new Error('No active debugger session');
+    if (!this.session?.isStarted) {
+      return;
     }
 
     const modules = await this.session.sendRequest('modules', {});
@@ -418,7 +418,8 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   private _applyKernelSources(): void {
-    if (this._pendingKernelSources) {
+    // The debugger may have stopped, and cleared the model, since the request.
+    if (this._pendingKernelSources && this.isStarted) {
       this._model.kernelSources.kernelSources = this._pendingKernelSources;
     }
   }
@@ -577,7 +578,13 @@ export class DebuggerService implements IDebugger, IDisposable {
     if (!this.session) {
       throw new Error('No active debugger session');
     }
-    await this.session.stop();
+    try {
+      await this.session.stop();
+    } finally {
+      // A kernel sources display still pending belongs to the stopped session.
+      void this._displayModulesDebouncer.stop();
+      this._pendingKernelSources = null;
+    }
     if (this._model) {
       this._model.clear();
     }

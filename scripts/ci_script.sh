@@ -41,7 +41,7 @@ if [[ $GROUP == python ]]; then
     YARN_ENABLE_IMMUTABLE_INSTALLS=1 jupyter lab build --debug --minimize=False
 
     # Run the python tests
-    python -m pytest -n 3
+    python -m pytest -n 3 --dist loadgroup
 fi
 
 
@@ -75,10 +75,9 @@ if [[ $GROUP == integrity ]]; then
     jlpm integrity --force
     # Validate the project
     jlpm --immutable  --immutable-cache
-    jlpm dlx yarn-berry-deduplicate --strategy fewerHighest
     # Here we should not be stringent as yarn may clean
     # output of `yarn-berry-deduplicate`
-    jlpm
+    jlpm deduplicate
     if [[ "$(git status --porcelain | wc -l | sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//")" != "0" ]]; then
         git status
         git diff
@@ -101,6 +100,7 @@ if [[ $GROUP == lint ]]; then
     # Python checks
     ruff format .
     ruff check .
+    python -m mypy
     pipx run 'validate-pyproject[all]' pyproject.toml
 fi
 
@@ -180,6 +180,21 @@ if [[ $GROUP == release_test ]]; then
 fi
 
 
+if [[ $GROUP == examples ]]; then
+    # Run the integrity script to link binary files
+    jlpm integrity
+
+    # Build the examples.
+    jlpm build:packages
+    jlpm build:examples
+    # The browser-require example test serves this bundle in place of unpkg.
+    (cd packages/services && jlpm build:all)
+
+    # Test the examples
+    jlpm test:examples
+fi
+
+
 if [[ $GROUP == usage ]]; then
     # Run the integrity script to link binary files
     jlpm integrity
@@ -231,6 +246,36 @@ if [[ $GROUP == usage ]]; then
     cat $USER_PAGE_CONFIG | grep "\"@jupyterlab/notebook-extension\": true"
     jupyter labextension enable @jupyterlab/notebook-extension --level user
     cat $USER_PAGE_CONFIG | grep "\"@jupyterlab/notebook-extension\": false"
+
+    # Test all-plugin lock configuration reaches the plugin manager API
+    LOCK_LOG="/tmp/jupyter_lock_log_$$.txt"
+    jupyter lab \
+        --no-browser \
+        --ServerApp.ip=127.0.0.1 \
+        --ServerApp.port=9988 \
+        --ServerApp.port_retries=0 \
+        --ServerApp.token='' \
+        --ServerApp.password='' \
+        --LabApp.lock_all_plugins=True \
+        > "$LOCK_LOG" 2>&1 &
+    TASK_PID=$!
+    if wait_for_condition 60 grep -q 'is running at:' "$LOCK_LOG"; then
+        if ! curl -fsS http://127.0.0.1:9988/lab/api/plugins | grep '"allLocked": true'; then
+            cat "$LOCK_LOG"
+            kill "$TASK_PID"
+            wait "$TASK_PID" || true
+            rm -f "$LOCK_LOG"
+            exit 1
+        fi
+    else
+        echo "Server failed to start within 60 seconds"
+        cat "$LOCK_LOG"
+        rm -f "$LOCK_LOG"
+        exit 1
+    fi
+    kill "$TASK_PID"
+    wait "$TASK_PID" || true
+    rm -f "$LOCK_LOG"
 
     # Test with a prebuilt install
     jupyter-builder develop extension --debug

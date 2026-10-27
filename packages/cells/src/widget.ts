@@ -370,6 +370,23 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   }
 
   /**
+   * Whether the cell is being displayed in view-only mode.
+   *
+   * This state is transient and is not persisted to the notebook model.
+   */
+  get viewOnly(): boolean {
+    return this._viewOnly;
+  }
+
+  set viewOnly(value: boolean) {
+    if (this._viewOnly === value) {
+      return;
+    }
+    this._viewOnly = value;
+    this.update();
+  }
+
+  /**
    * Whether the cell is a placeholder that defer rendering
    *
    * #### Notes
@@ -566,11 +583,16 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       return;
     }
     this._resizeDebouncer.dispose();
+    const input = this._input;
+    const inputPlaceholder = this._inputPlaceholder;
     this._input = null!;
     this._model = null!;
     this._inputWrapper = null!;
     this._inputPlaceholder = null!;
     super.dispose();
+    // Dispose the input widget that may have been swapped out of the layout.
+    input?.dispose();
+    inputPlaceholder?.dispose();
   }
 
   /**
@@ -637,7 +659,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
           .getSource()
           .split('\n')?.[0];
       }
-    });
+    }, this);
 
     if (this.inputHidden) {
       input.parent = null;
@@ -696,9 +718,12 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     if (!this._model) {
       return;
     }
-    // Handle read only state.
-    if (this.editor?.getOption('readOnly') !== this._readOnly) {
-      this.editor?.setOption('readOnly', this._readOnly);
+
+    // Handle read-only and view-only states.
+    const readOnly = this._readOnly || this._viewOnly;
+
+    if (this.editor?.getOption('readOnly') !== readOnly) {
+      this.editor?.setOption('readOnly', readOnly);
     }
   }
 
@@ -776,6 +801,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   private _model: T;
   private _placeholder: boolean;
   private _readOnly = false;
+  private _viewOnly = false;
   private _ready = new PromiseDelegate<void>();
   private _resizeDebouncer = new Debouncer(() => {
     this._displayChanged.emit();
@@ -1490,20 +1516,20 @@ export class CodeCell extends Cell<ICodeCellModel> {
       overlay.firstChild?.remove();
       return;
     }
+    const trans = this.translator.load('jupyterlab');
     let overlayTitle: string;
     if (this._outputsScrolled) {
       expandIcon.element({
         container: overlay
       });
-      overlayTitle = 'Expand Output';
+      overlayTitle = trans.__('Expand Output');
     } else {
       collapseIcon.element({
         container: overlay
       });
-      overlayTitle = 'Collapse Output';
+      overlayTitle = trans.__('Collapse Output');
     }
-    const trans = this.translator.load('jupyterlab');
-    overlay.title = trans.__(overlayTitle);
+    overlay.title = overlayTitle;
   }
   /**
    * Save view collapse state to model
@@ -1614,11 +1640,16 @@ export class CodeCell extends Cell<ICodeCellModel> {
       'keydown',
       this._detectCaretMovementInOuput
     );
+    const output = this._output;
+    const outputPlaceholder = this._outputPlaceholder;
     this._rendermime = null!;
     this._output = null!;
     this._outputWrapper = null!;
     this._outputPlaceholder = null!;
     super.dispose();
+    // Dispose the output widget that may have been swapped out of the layout.
+    output.dispose();
+    outputPlaceholder?.dispose();
   }
 
   /**
@@ -1695,7 +1726,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
     if (this.model.executionState == 'running') {
       prompt = '*';
     } else {
-      prompt = `${this.model.executionCount || ''}`;
+      prompt = `${this.model.executionCount ?? ''}`;
     }
     this._setPrompt(prompt);
   }

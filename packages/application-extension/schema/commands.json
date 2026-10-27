@@ -382,6 +382,11 @@
     ],
     "context": [
       {
+        "command": "application:copy-image",
+        "selector": ".jp-MainAreaWidget img",
+        "rank": 0
+      },
+      {
         "command": "application:close",
         "selector": "#jp-main-dock-panel .lm-DockPanel-tabBar .lm-TabBar-tab",
         "rank": 4
