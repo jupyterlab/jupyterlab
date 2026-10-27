@@ -35,7 +35,7 @@ function isPublished(spec: string): boolean {
       utils.run(`npm view ${spec} version`, { stdio: 'pipe' }, true) !== ''
     );
   } catch {
-    // npm view fails for a package that was never published.
+    // npm view fails when the package or the version is not on the registry.
     return false;
   }
 }
