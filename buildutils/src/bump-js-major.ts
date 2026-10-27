@@ -97,13 +97,12 @@ commander
         'Cannot bump JS packages until we switch to prerelease mode'
       );
     }
-    const names = Array.from(toBump);
     if (options.dryRun) {
       console.debug('Would bump:');
-      console.debug(names.join('\n'));
+      console.debug(Array.from(toBump).join('\n'));
       return;
     }
-    bumpWorkspaceVersions('premajor', { preid: preId, packages: names });
+    bumpWorkspaceVersions('premajor', { preid: preId, packages: toBump });
     utils.postbump(false);
   });
 

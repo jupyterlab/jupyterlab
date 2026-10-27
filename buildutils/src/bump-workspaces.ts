@@ -18,7 +18,7 @@ export interface IBumpWorkspaceOptions {
   /**
    * The names of the packages to bump, by default all of them.
    */
-  packages?: string[];
+  packages?: ReadonlySet<string>;
 
   /**
    * The root of the workspaces.
@@ -46,7 +46,7 @@ export function bumpWorkspaceVersions(
 
   const newVersions = new Map<string, string>();
   oldVersions.forEach((version, name) => {
-    if (options.packages && !options.packages.includes(name)) {
+    if (options.packages && !options.packages.has(name)) {
       return;
     }
     const preid =
