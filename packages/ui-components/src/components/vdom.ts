@@ -67,7 +67,9 @@ export abstract class ReactWidget extends Widget {
     return super.parent;
   }
   set parent(value: Widget | null) {
-    this._moving = value !== null;
+    // A move to a detached parent unmounts at once, while the node is still in
+    // the document.
+    this._moving = value !== null && value.isAttached;
     try {
       super.parent = value;
     } finally {
@@ -80,8 +82,8 @@ export abstract class ReactWidget extends Widget {
    */
   protected onBeforeDetach(msg: Message): void {
     if (this._moving) {
-      // A widget moved to another parent is attached again synchronously and
-      // keeps its component state; unmount only if the new parent is detached.
+      // A widget moved to an attached parent is attached again synchronously
+      // and keeps its component state; unmount if the layout did not attach it.
       queueMicrotask(() => {
         if (!this.isAttached) {
           this._unmount();
