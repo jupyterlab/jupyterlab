@@ -83,6 +83,12 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
       isEnabled: args => app.commands.isEnabled('notebook:delete-cell')
     });
 
+    app.commands.commandChanged.connect((_, change) => {
+      if (change.id === 'notebook:delete-cell') {
+        app.commands.notifyCommandChanged('cell-toolbar:delete');
+      }
+    });
+
     /**
      * Load the settings for this extension
      *

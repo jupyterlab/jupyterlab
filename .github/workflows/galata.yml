@@ -31,6 +31,8 @@ jobs:
     name: Integration Tests (${{ matrix.browser }} - ${{ matrix.suite }} ${{ matrix.shard }}/${{ matrix.shards }})
     timeout-minutes: 30
     runs-on: ubuntu-24.04
+    env:
+      YARN_ENABLE_GLOBAL_CACHE: '1'
     permissions:
       contents: read
       pull-requests: read
@@ -157,7 +159,7 @@ jobs:
         working-directory: demo
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@4016d4e69656e13e662d629ee3c30dc31e68628f # v1.1.1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
           python_package_manager: 'uv pip'
           python_cache_key_suffix: ${{ matrix.optional_dependencies || '' }}
@@ -176,6 +178,13 @@ jobs:
         with:
           path: ${{ github.workspace }}/pw-browsers
           key: ${{ runner.os }}-${{ matrix.browser }}-${{ steps.pw-version.outputs.version }}
+
+      # base-setup runs outside the checkout and caches the yarn 1 folder instead.
+      - name: Set up yarn cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        with:
+          path: ~/.yarn/berry/cache
+          key: ${{ runner.os }}-yarn-berry-${{ hashFiles('core/yarn.lock') }}
 
       - name: Install dependencies
         env:
@@ -337,6 +346,8 @@ jobs:
     name: Example Tests
     timeout-minutes: 45
     runs-on: ubuntu-24.04
+    env:
+      YARN_ENABLE_GLOBAL_CACHE: '1'
     permissions:
       contents: read
     steps:
@@ -347,7 +358,7 @@ jobs:
           persist-credentials: false
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@4016d4e69656e13e662d629ee3c30dc31e68628f # v1.1.1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
           python_package_manager: 'uv pip'
 
@@ -367,6 +378,13 @@ jobs:
         with:
           path: ${{ github.workspace }}/pw-browsers
           key: ${{ runner.os }}-chromium-${{ steps.pw-version.outputs.version }}
+
+      # base-setup runs outside the checkout and caches the yarn 1 folder instead.
+      - name: Set up yarn cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        with:
+          path: ~/.yarn/berry/cache
+          key: ${{ runner.os }}-yarn-berry-${{ hashFiles('core/yarn.lock') }}
 
       - name: Install dependencies
         env:
@@ -518,7 +536,7 @@ jobs:
           path: playwright-report
 
       - name: Inline the report
-        uses: jupyterlab/maintainer-tools/.github/actions/inline-playwright-report@4016d4e69656e13e662d629ee3c30dc31e68628f # v1.1.1
+        uses: jupyterlab/maintainer-tools/.github/actions/inline-playwright-report@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
           path: playwright-report
 

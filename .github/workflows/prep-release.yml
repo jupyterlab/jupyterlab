@@ -29,7 +29,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@4016d4e69656e13e662d629ee3c30dc31e68628f # v1.1.1
+      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
 
       - name: Prep Release
         id: prep-release
