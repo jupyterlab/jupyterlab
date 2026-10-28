@@ -89,7 +89,8 @@ function makeProvider(
     debuggerService: mockService({
       frame: { id: 1 },
       session: mockSession({ sendRequest })
-    })
+    }),
+    isDebugConsole: () => true
   });
 }
 
@@ -160,6 +161,10 @@ describe('DebuggerIPythonCompletionProvider', () => {
 
   describe('#shouldShowContinuousHint()', () => {
     const provider = new DebuggerIPythonCompletionProvider({
+      debuggerService: mockService({ session: mockSession() }),
+      isDebugConsole: () => true
+    });
+    const elsewhere = new DebuggerIPythonCompletionProvider({
       debuggerService: mockService({ session: mockSession() })
     });
 
@@ -244,7 +249,8 @@ describe('DebuggerIPythonCompletionProvider', () => {
       const custom = new DebuggerIPythonCompletionProvider({
         debuggerService: mockService({
           session: mockSession({ completionTriggerCharacters: ['['] })
-        })
+        }),
+        isDebugConsole: () => true
       });
       expect(
         custom.shouldShowContinuousHint(false, {
@@ -261,6 +267,26 @@ describe('DebuggerIPythonCompletionProvider', () => {
         custom.shouldShowContinuousHint(false, {
           sourceChange: [{ insert: '.' }]
         })
+      ).toBe(false);
+    });
+
+    it('should return true for an identifier character outside the Debug Console', () => {
+      expect(
+        elsewhere.shouldShowContinuousHint(
+          false,
+          { sourceChange: [{ insert: 'p' }] },
+          context
+        )
+      ).toBe(true);
+    });
+
+    it('should return false for a quote outside the Debug Console', () => {
+      expect(
+        elsewhere.shouldShowContinuousHint(
+          false,
+          { sourceChange: [{ insert: "'" }] },
+          context
+        )
       ).toBe(false);
     });
   });

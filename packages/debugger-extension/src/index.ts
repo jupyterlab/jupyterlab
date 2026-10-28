@@ -54,6 +54,7 @@ import {
 import type { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ICompletionContext } from '@jupyterlab/completer';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import type { CommandRegistry } from '@lumino/commands';
 import { WidgetTracker } from '@jupyterlab/apputils';
@@ -1433,15 +1434,20 @@ const debuggerCompletions: JupyterFrontEndPlugin<void> = {
     completionManager: ICompletionProviderManager,
     translator: ITranslator | null
   ): void => {
+    const isDebugConsole = (context?: ICompletionContext) =>
+      !!context?.widget.hasClass('jp-DebugConsole');
+
     const provider = new DebuggerCompletionProvider({
       debuggerService: debuggerService,
-      translator: translator || nullTranslator
+      translator: translator || nullTranslator,
+      isDebugConsole
     });
     completionManager.registerProvider(provider);
 
     const ipythonProvider = new DebuggerIPythonCompletionProvider({
       debuggerService: debuggerService,
-      translator: translator || nullTranslator
+      translator: translator || nullTranslator,
+      isDebugConsole
     });
     completionManager.registerProvider(ipythonProvider);
   }

@@ -8,6 +8,10 @@ import type {
   ICompletionProvider
 } from '@jupyterlab/completer';
 import type { CompletionHandler } from '@jupyterlab/completer';
+import {
+  isContinuousHintingChange,
+  isHintableMimeType
+} from '@jupyterlab/completer';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { IDebugger } from './tokens';
@@ -38,9 +42,11 @@ const HELPER_DEFINITION = `
 def ${HELPER_NAME}(text, offset, frame_locals, frame_globals, limit=${COMPLETION_LIMIT}):
     import base64
     import json
+    from IPython import get_ipython
     from IPython.core.completer import IPCompleter, CompletionContext
+    # file_matcher (IPython 9.8+) reads magics from the shell if the text has a space
     completer = IPCompleter(
-        namespace=frame_locals, global_namespace=frame_globals
+        shell=get_ipython(), namespace=frame_locals, global_namespace=frame_globals
     )
     completer.line_buffer = text
     completer.text_until_cursor = text
@@ -54,13 +60,17 @@ def ${HELPER_NAME}(text, offset, frame_locals, frame_globals, limit=${COMPLETION
         cursor_line=len(lines) - 1,
         limit=limit,
     )
-    matchers = ['dict_key_matcher', 'python_func_kw_matcher', 'file_matcher']
-    matches = [
-        [c.text, c.type or '']
-        for matcher in matchers
-        for c in getattr(completer, matcher)(context).get('completions', [])
-        if c.text
-    ]
+    matches = []
+    for matcher in ['dict_key_matcher', 'python_func_kw_matcher', 'file_matcher']:
+        result = getattr(completer, matcher)(context)
+        completions = [
+            [c.text, c.type or ''] for c in result.get('completions', []) if c.text
+        ]
+        # as in IPCompleter, matching dict keys suppress the other matchers
+        if completions and result.get('suppress'):
+            matches = completions
+            break
+        matches += completions
     payload = {
         'tok_len': len(token),
         # the context limit is only a hint to the matchers - enforce it
@@ -91,6 +101,7 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
     this._trans = translator.load('jupyterlab');
     this.name = this._trans.__('Debugger (IPython)');
     this._debuggerService = options.debuggerService;
+    this._isDebugConsole = options.isDebugConsole ?? (() => false);
   }
 
   async isApplicable(context: ICompletionContext): Promise<boolean> {
@@ -114,6 +125,15 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
     changed: SourceChange,
     context?: ICompletionContext
   ): boolean {
+    // Only the highest ranked provider is asked, so outside the Debug
+    // Console (e.g. in a notebook while paused) keep the default heuristic.
+    if (!this._isDebugConsole(context)) {
+      return (
+        isHintableMimeType(context?.editor?.model.mimeType ?? '') &&
+        !completerIsVisible &&
+        isContinuousHintingChange(changed)
+      );
+    }
     const { sourceChange } = changed;
     if (!sourceChange || sourceChange.some(delta => delta.delete != null)) {
       return false;
@@ -213,6 +233,7 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
   private _lastReplyTruncated = false;
   private _trans: TranslationBundle;
   private _debuggerService: IDebugger;
+  private _isDebugConsole: (context?: ICompletionContext) => boolean;
 }
 
 /**
@@ -283,5 +304,11 @@ export namespace DebuggerIPythonCompletionProvider {
   export interface IOptions {
     debuggerService: IDebugger;
     translator?: ITranslator;
+    /**
+     * Whether the completion context is the Debug Console, where quotes and
+     * the adapter's trigger characters open the completer. By default, no
+     * context is.
+     */
+    isDebugConsole?: (context?: ICompletionContext) => boolean;
   }
 }

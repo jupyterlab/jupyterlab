@@ -7,7 +7,7 @@ import { createSession } from '@jupyterlab/docregistry/lib/testutils';
 
 import type { Session } from '@jupyterlab/services';
 
-import { KernelSpecManager } from '@jupyterlab/services';
+import { ContentsManager, KernelSpecManager } from '@jupyterlab/services';
 
 import { JupyterServer, signalToPromise } from '@jupyterlab/testing';
 
@@ -120,7 +120,10 @@ describe('Debugger completion providers integration test', () => {
 
   describe('DebuggerIPythonCompletionProvider', () => {
     const provider = () =>
-      new DebuggerIPythonCompletionProvider({ debuggerService: service });
+      new DebuggerIPythonCompletionProvider({
+        debuggerService: service,
+        isDebugConsole: () => true
+      });
 
     it('should be applicable when stopped on a breakpoint', async () => {
       expect(await provider().isApplicable(context)).toBe(true);
@@ -154,6 +157,32 @@ describe('Debugger completion providers integration test', () => {
       );
       const labels = reply.items.map(item => item.label);
       expect(labels.some(label => label.includes('alpha_arg'))).toBe(true);
+    });
+
+    it('should complete function keyword arguments after a space', async () => {
+      const text = 'add(0, be';
+      const reply = await provider().fetch(
+        { text, offset: text.length },
+        context
+      );
+      const labels = reply.items.map(item => item.label);
+      expect(labels.some(label => label.includes('beta_arg'))).toBe(true);
+    });
+
+    it('should not complete paths when dictionary keys match', async () => {
+      // The kernel runs in the root directory of the server.
+      await new ContentsManager().save('alpha.csv', {
+        type: 'file',
+        format: 'text',
+        content: ''
+      });
+      const reply = await provider().fetch(
+        { text: "data['al", offset: 8 },
+        context
+      );
+      const labels = reply.items.map(item => item.label);
+      expect(labels).toContain('alpha');
+      expect(labels).not.toContain('alpha.csv');
     });
 
     it('should complete dictionary keys containing quotes', async () => {

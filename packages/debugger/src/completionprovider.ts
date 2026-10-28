@@ -8,6 +8,10 @@ import type {
   ICompletionProvider
 } from '@jupyterlab/completer';
 import type { CompletionHandler } from '@jupyterlab/completer';
+import {
+  isContinuousHintingChange,
+  isHintableMimeType
+} from '@jupyterlab/completer';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { IDebugger } from './tokens';
@@ -26,6 +30,7 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
     this._trans = translator.load('jupyterlab');
     this.name = this._trans.__('Debugger');
     this._debuggerService = options.debuggerService;
+    this._isDebugConsole = options.isDebugConsole ?? (() => false);
   }
 
   /**
@@ -41,14 +46,23 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
   }
 
   /**
-   * Trigger completion automatically when one of the adapter's
-   * `completionTriggerCharacters` is typed (defaults to `['.']`).
+   * In the Debug Console, trigger completion automatically when one of the
+   * adapter's `completionTriggerCharacters` is typed (defaults to `['.']`).
+   * Elsewhere, such as in a notebook while paused, use the default heuristic
+   * of the completer, because only the highest ranked provider is asked.
    */
   shouldShowContinuousHint(
     completerIsVisible: boolean,
     changed: SourceChange,
     context?: ICompletionContext
   ): boolean {
+    if (!this._isDebugConsole(context)) {
+      return (
+        isHintableMimeType(context?.editor?.model.mimeType ?? '') &&
+        !completerIsVisible &&
+        isContinuousHintingChange(changed)
+      );
+    }
     // The visible completer already filters its items on typing;
     // triggering another fetch would only cause redundant requests.
     if (completerIsVisible) {
@@ -75,6 +89,12 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
   ): Promise<CompletionHandler.ICompletionItemsReply> {
     const session = this._debuggerService.session;
     if (!session) {
+      return { start: 0, end: 0, items: [] };
+    }
+    // Inside a string literal (such as a dictionary key or a path) the names
+    // from the frame do not apply.
+    const tokenType = context.editor?.getTokenAtCursor().type;
+    if (tokenType && /string/i.test(tokenType)) {
       return { start: 0, end: 0, items: [] };
     }
 
@@ -121,11 +141,18 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
 
   private _trans: TranslationBundle;
   private _debuggerService: IDebugger;
+  private _isDebugConsole: (context?: ICompletionContext) => boolean;
 }
 
 export namespace DebuggerCompletionProvider {
   export interface IOptions {
     debuggerService: IDebugger;
     translator?: ITranslator;
+    /**
+     * Whether the completion context is the Debug Console, where the
+     * adapter's trigger characters open the completer. By default, no
+     * context is.
+     */
+    isDebugConsole?: (context?: ICompletionContext) => boolean;
   }
 }

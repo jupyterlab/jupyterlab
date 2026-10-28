@@ -97,6 +97,10 @@ describe('DebuggerCompletionProvider', () => {
 
   describe('#shouldShowContinuousHint()', () => {
     const provider = new DebuggerCompletionProvider({
+      debuggerService: mockService({ session: mockSession() }),
+      isDebugConsole: () => true
+    });
+    const elsewhere = new DebuggerCompletionProvider({
       debuggerService: mockService({ session: mockSession() })
     });
 
@@ -140,7 +144,8 @@ describe('DebuggerCompletionProvider', () => {
       const custom = new DebuggerCompletionProvider({
         debuggerService: mockService({
           session: mockSession({ completionTriggerCharacters: ['['] })
-        })
+        }),
+        isDebugConsole: () => true
       });
       expect(
         custom.shouldShowContinuousHint(false, {
@@ -152,6 +157,26 @@ describe('DebuggerCompletionProvider', () => {
         custom.shouldShowContinuousHint(false, {
           sourceChange: [{ insert: '.' }]
         })
+      ).toBe(false);
+    });
+
+    it('should return true for an identifier character outside the Debug Console', () => {
+      expect(
+        elsewhere.shouldShowContinuousHint(
+          false,
+          { sourceChange: [{ insert: 'p' }] },
+          context
+        )
+      ).toBe(true);
+    });
+
+    it('should return false for the "." trigger character outside the Debug Console', () => {
+      expect(
+        elsewhere.shouldShowContinuousHint(
+          false,
+          { sourceChange: [{ insert: '.' }] },
+          context
+        )
       ).toBe(false);
     });
   });
@@ -345,6 +370,27 @@ describe('DebuggerCompletionProvider', () => {
       const reply = await provider.fetch({ text: 'df.', offset: 3 }, context);
       expect(reply.start).toBe(3);
       expect(reply.end).toBe(3);
+    });
+
+    it('should not request completions inside a string literal', async () => {
+      const sendRequest = jest.fn();
+      const provider = new DebuggerCompletionProvider({
+        debuggerService: mockService({
+          frame: { id: 1 },
+          session: mockSession({ sendRequest })
+        })
+      });
+      // The token type which the Python grammar of CodeMirror reports.
+      const editor = {
+        getTokenAtCursor: () => ({ value: "'al", offset: 5, type: 'String' })
+      } as unknown as ICompletionContext['editor'];
+      expect(
+        await provider.fetch(
+          { text: "data['al", offset: 8 },
+          { widget, editor }
+        )
+      ).toEqual({ start: 0, end: 0, items: [] });
+      expect(sendRequest).not.toHaveBeenCalled();
     });
 
     it('should return an empty reply when the request throws', async () => {
