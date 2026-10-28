@@ -16,7 +16,7 @@ dependencies:
   - hatchling >=1.5.0
   # run
   - async-lru >=1.0.3
-  - httpx >=0.25.0,<1
+  - httpx2 >=2,<3
   - ipykernel
   - jinja2 >=3.0.3
   - jupyter_core
@@ -40,7 +40,7 @@ dependencies:
   - requests-cache
   - virtualenv
   # dev
-  - bump-my-version <2
+  - bump-my-version >=1,<2
   - hatch
   - pre-commit
   - pytest-cov
