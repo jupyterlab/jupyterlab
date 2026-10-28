@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@codemirror/commands": "^6.10.2",
-    "@codemirror/view": "^6.39.14",
+    "@codemirror/view": "^6.43.15",
     "@jupyterlab/application": "^4.7.0-alpha.2",
     "@jupyterlab/apputils": "^4.8.0-alpha.2",
     "@jupyterlab/codeeditor": "^4.7.0-alpha.2",
