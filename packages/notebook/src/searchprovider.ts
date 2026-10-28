@@ -461,7 +461,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         (activeCell as MarkdownCell).rendered
       ) {
         (activeCell as MarkdownCell).rendered = false;
-        if (highlightNext) {
+        // A read-only cell stays rendered when its editor is hidden, and
+        // highlighting the next match would then skip the current one
+        if (highlightNext && !(activeCell as MarkdownCell).rendered) {
           await this.highlightNext(loop);
         }
       }
