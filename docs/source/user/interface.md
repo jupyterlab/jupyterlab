@@ -294,24 +294,30 @@ using the R language is active. Press `Alt -` to insert `<-` or `Accel Shift M`
 to insert `%>%`. These shortcuts are scoped to R language editors, so they do
 not affect editors using another language.
 
-To customize these shortcuts, or to make them available for other commands,
-you can use the macro command in the Keyboard Shortcuts settings:
+To replace `%>%` with R's native pipe `|>`, use the following Keyboard
+Shortcuts settings. First disable the built-in bindings using their exact
+keys and selectors, then add a macro scoped to R editors:
 
 ```json
 {
   "shortcuts": [
     {
-      "command": "apputils:run-first-enabled",
-      "keys": ["Alt -"],
-      "args": {
-        "commands": [
-          "console:replace-selection",
-          "fileeditor:replace-selection",
-          "notebook:replace-selection"
-        ],
-        "args": {"text": "<- "}
-      },
-      "selector": "body"
+      "command": "console:replace-selection",
+      "keys": ["Accel Shift M"],
+      "selector": ".jp-CodeConsole [data-jp-editor-language='r']",
+      "disabled": true
+    },
+    {
+      "command": "fileeditor:replace-selection",
+      "keys": ["Accel Shift M"],
+      "selector": ".jp-FileEditor [data-jp-editor-language='r']",
+      "disabled": true
+    },
+    {
+      "command": "notebook:replace-selection",
+      "keys": ["Accel Shift M"],
+      "selector": ".jp-Notebook.jp-mod-editMode [data-jp-editor-language='r']",
+      "disabled": true
     },
     {
       "command": "apputils:run-first-enabled",
@@ -322,17 +328,17 @@ you can use the macro command in the Keyboard Shortcuts settings:
           "fileeditor:replace-selection",
           "notebook:replace-selection"
         ],
-        "args": {"text": "%>% "}
+        "args": { "text": "|> " }
       },
-      "selector": "body"
+      "selector": "[data-jp-editor-language='r']"
     }
   ]
 }
 ```
 
 `run-first-enabled` sends the replacement to the first command that is
-available in the current context. On macOS, `Accel` is `Cmd`; on Windows and
-Linux, it is `Ctrl`.
+available in the current context. Use the same pattern to customize `Alt -`.
+On macOS, `Accel` is `Cmd`; on Windows and Linux, it is `Ctrl`.
 
 ### Markdown editing shortcuts
 
