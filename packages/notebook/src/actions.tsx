@@ -1079,10 +1079,11 @@ export namespace NotebookActions {
    * @param text - The text to replace the selection.
    */
   export function replaceSelection(notebook: Notebook, text: string): void {
-    if (!notebook.model || !notebook.activeCell?.editor) {
+    const cell = notebook.activeCell;
+    if (!notebook.model || !cell?.editor || cell.readOnly) {
       return;
     }
-    notebook.activeCell.editor.replaceSelection?.(text);
+    cell.editor.replaceSelection?.(text);
   }
 
   /**
