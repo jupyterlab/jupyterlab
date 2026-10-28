@@ -2175,12 +2175,11 @@ namespace Private {
           value => value.toLowerCase() === extension.toLowerCase()
         )
       );
-    const [defaultExtension] = fileType?.extensions ?? [];
-    if (!defaultExtension) {
+    if (!fileType) {
       return openWith;
     }
 
-    return docRegistry.defaultWidgetFactory(`untitled${defaultExtension}`).name;
+    return docRegistry.preferredWidgetFactories(fileType)[0]?.name ?? openWith;
   }
 
   /**
