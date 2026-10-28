@@ -33,6 +33,7 @@ import {
   Toolbar,
   WidgetTracker
 } from '@jupyterlab/apputils';
+import type { IMapChange } from '@jupyter/ydoc';
 import type { Cell, CodeCell, ICellModel } from '@jupyterlab/cells';
 import { MarkdownCell } from '@jupyterlab/cells';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
@@ -124,6 +125,7 @@ import {
   fastForwardIcon,
   IFormRendererRegistry,
   infoIcon,
+  lockIcon,
   moveDownIcon,
   moveUpIcon,
   notebookIcon,
@@ -235,6 +237,8 @@ namespace CommandIDs {
   export const moveDown = 'notebook:move-cell-down';
 
   export const clearOutputs = 'notebook:clear-cell-output';
+
+  export const makeCellEditable = 'notebook:make-cell-editable';
 
   export const deleteCell = 'notebook:delete-cell';
 
@@ -2258,6 +2262,7 @@ function activateNotebookHandler(
       settings.changed.connect(() => {
         updateConfig(settings);
         commands.notifyCommandChanged(CommandIDs.virtualScrollbar);
+        commands.notifyCommandChanged(CommandIDs.makeCellEditable);
       });
 
       const updateSessionSettings = (
@@ -3029,6 +3034,7 @@ function addCommands(
 
   tracker.selectionChanged.connect(() => {
     commands.notifyCommandChanged(CommandIDs.duplicateBelow);
+    commands.notifyCommandChanged(CommandIDs.makeCellEditable);
     commands.notifyCommandChanged(CommandIDs.deleteCell);
     commands.notifyCommandChanged(CommandIDs.copySelectedtext);
     commands.notifyCommandChanged(CommandIDs.pasteText);
@@ -3045,13 +3051,36 @@ function addCommands(
     commands.notifyCommandChanged(CommandIDs.runAndAdvance);
     commands.notifyCommandChanged(CommandIDs.runAndInsert);
   });
+  let activeCellModel: ICellModel | null = null;
+  const onActiveCellMetadataChanged = (_: ICellModel, change: IMapChange) => {
+    if (change.key === 'deletable') {
+      commands.notifyCommandChanged(CommandIDs.deleteCell);
+    } else if (change.key === 'editable') {
+      commands.notifyCommandChanged(CommandIDs.makeCellEditable);
+    }
+  };
+  const followActiveCell = () => {
+    activeCellModel?.metadataChanged.disconnect(onActiveCellMetadataChanged);
+    activeCellModel = tracker.activeCell?.model ?? null;
+    activeCellModel?.metadataChanged.connect(onActiveCellMetadataChanged);
+  };
+
+  // Closing the last notebook emits `currentChanged` but no `activeCellChanged`
+  tracker.currentChanged.connect(followActiveCell);
+
+  // In case if a notebook is already open when the commands are added
+  followActiveCell();
+
   tracker.activeCellChanged.connect(() => {
+    followActiveCell();
     commands.notifyCommandChanged(CommandIDs.deleteCell);
+    commands.notifyCommandChanged(CommandIDs.makeCellEditable);
     commands.notifyCommandChanged(CommandIDs.moveUp);
     commands.notifyCommandChanged(CommandIDs.moveDown);
     commands.notifyCommandChanged(CommandIDs.selectLastModifiedCell);
     commands.notifyCommandChanged(CommandIDs.selectNextModifiedCell);
   });
+
   tracker.widgetAdded.connect((_, panel) => {
     panel.content.stateChanged.connect((_, args) => {
       if (args.name === 'lastModifiedCellStack') {
@@ -3921,6 +3950,59 @@ function addCommands(
       }
     }
   });
+
+  const canMakeCellEditable = (args: ReadonlyPartialJSONObject): boolean => {
+    const current = getCurrent(tracker, shell, { ...args, activate: false });
+    return (
+      !!current && !current.viewOnly && !!current.content.activeCell?.readOnly
+    );
+  };
+  commands.addCommand(CommandIDs.makeCellEditable, {
+    label: trans.__('Enable Cell Editing…'),
+    caption: trans.__('Read-only cell'),
+    icon: args => (args.toolbar ? lockIcon : undefined),
+    execute: async args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (current) {
+        const cell = current.content.activeCell;
+        if (cell && canMakeCellEditable(args)) {
+          const result = await showDialog({
+            title: trans.__('Cell is read-only'),
+            body: trans.__(
+              'This cell is read-only, so its contents cannot be edited.'
+            ),
+            buttons: [
+              Dialog.cancelButton(),
+              Dialog.okButton({ label: trans.__('Make Editable') })
+            ],
+            // Enter keeps the lock: the author may have set it on purpose
+            defaultButton: 0
+          });
+          if (result.button.accept) {
+            cell.model.setMetadata('editable', undefined);
+          }
+        }
+      }
+    },
+    isEnabled: canMakeCellEditable,
+    isVisible: args =>
+      (!args.toolbar ||
+        (settings?.get('showLockForReadOnlyCells').composite as boolean)) &&
+      canMakeCellEditable(args),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description:
+              'Whether the command is being executed from the toolbar'
+          }
+        }
+      }
+    }
+  });
+
   commands.addCommand(CommandIDs.deleteCell, {
     label: args => {
       const current = getCurrent(tracker, shell, { ...args, activate: false });
