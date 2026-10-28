@@ -2785,17 +2785,19 @@ namespace Private {
       KernelMessage.IExecuteReplyMsg
     >
   ): void {
-    const cellRef = cell;
     void future.done.then(
       reply => {
-        if (!cellRef.isDisposed) {
-          cellRef.model.executionCount = reply.content.execution_count;
-          cellRef.model.executionState = 'idle';
+        if (!cell.isDisposed) {
+          // The future is authoritative for the prompt number; a snapshot
+          // taken before completion would be stale (still null). Setting a
+          // non-null execution count also flips the state back to 'idle'.
+          cell.model.executionCount = reply.content.execution_count;
+          cell.model.executionState = 'idle';
         }
       },
       () => {
-        if (!cellRef.isDisposed) {
-          cellRef.model.executionState = 'idle';
+        if (!cell.isDisposed) {
+          cell.model.executionState = 'idle';
         }
       }
     );
@@ -2948,23 +2950,7 @@ namespace Private {
       // Restore the running state on the recreated cell widget.
       cell.model.executionState = 'running';
     }
-    const cellRef = cell;
-    void future.done.then(
-      reply => {
-        if (!cellRef.isDisposed) {
-          // The future is authoritative for the prompt number; a snapshot
-          // taken before completion would be stale (still null). Setting a
-          // non-null execution count also flips the state back to 'idle'.
-          cellRef.model.executionCount = reply.content.execution_count;
-          cellRef.model.executionState = 'idle';
-        }
-      },
-      () => {
-        if (!cellRef.isDisposed) {
-          cellRef.model.executionState = 'idle';
-        }
-      }
-    );
+    syncExecutionStateWithFuture(cell, future);
   }
 
   /**
