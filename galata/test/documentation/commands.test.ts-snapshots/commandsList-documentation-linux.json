@@ -4156,6 +4156,18 @@
     }
   },
   {
+    "id": "notebook:commit-metadata-and-save",
+    "label": "Commit Metadata and Save Notebook",
+    "caption": "Commit pending changes in the metadata editors, then save the notebook",
+    "shortcuts": [
+      "Ctrl S"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "notebook:copy-cell",
     "label": "Copy Cell",
     "caption": "Copy this cell",
