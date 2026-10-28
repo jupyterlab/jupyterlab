@@ -38,7 +38,11 @@ import { MarkdownCell } from '@jupyterlab/cells';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorServices, IPositionModel } from '@jupyterlab/codeeditor';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
-import { compareVersions, PageConfig } from '@jupyterlab/coreutils';
+import {
+  compareVersions,
+  PageConfig,
+  signalToPromise
+} from '@jupyterlab/coreutils';
 
 import {
   IEditorExtensionRegistry,
@@ -865,6 +869,8 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
 
       formatsInitialized = true;
 
+      await Private.notebooksLoaded(app, tracker);
+
       let response: NbConvert.IExportFormats | null = null;
       try {
         response = await services.nbconvert.getExportFormats(false);
@@ -1262,6 +1268,8 @@ const updateRawMimetype: JupyterFrontEndPlugin<void> = {
       tracker.widgetAdded.disconnect(maybeInitializeFormats);
 
       formatsInitialized = true;
+
+      await Private.notebooksLoaded(app, tracker);
 
       const services = app.serviceManager;
       const response = await services.nbconvert.getExportFormats(false);
@@ -2471,12 +2479,11 @@ function activateNotebookHandler(
     applyNotebookViewOnlyUI(widget, widget.viewOnly);
     widget.content.viewOnlyChanged.connect((_, viewOnly) => {
       applyNotebookViewOnlyUI(widget, viewOnly);
-      // Toolbar buttons only re-check a command's `isEnabled`/`isVisible`
-      // when notified for that specific id
-      const skip = [CommandIDs.createNew, CommandIDs.createOutputView];
-      Object.values(CommandIDs)
-        .filter(id => !skip.includes(id) && commands.hasCommand(id))
-        .forEach(id => commands.notifyCommandChanged(id));
+      // Commands of other extensions can also depend on the view-only state.
+      // Extensions notify their commands when the current widget changes, but
+      // a notebook can become view-only while it stays current, so notify all
+      // commands rather than only the ones defined here.
+      commands.notifyCommandChanged();
     }, widget);
 
     // Intercept kernel start for view-only notebooks opened read-only
@@ -5797,6 +5804,29 @@ namespace Private {
       }
     }
     return true;
+  }
+
+  /**
+   * Resolve once the open notebooks have loaded or closed.
+   *
+   * The first `/api/nbconvert` request imports nbconvert on the server event
+   * loop, which delays the requests that load the notebooks.
+   */
+  export async function notebooksLoaded(
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker
+  ): Promise<void> {
+    await app.restored;
+    const loading: Promise<unknown>[] = [];
+    tracker.forEach(panel => {
+      loading.push(
+        Promise.race([
+          panel.context.ready,
+          signalToPromise(panel.disposed)
+        ]).catch(() => undefined)
+      );
+    });
+    await Promise.all(loading);
   }
 
   /**
