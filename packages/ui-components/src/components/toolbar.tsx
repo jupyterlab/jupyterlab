@@ -390,8 +390,8 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     super(options);
     this.insertItem(0, TOOLBAR_OPENER_NAME, this.popupOpener);
     this.popupOpener.hide();
-    this._resizer = new Throttler(async (callTwice = false) => {
-      await this._onResize(callTwice);
+    this._resizer = new Throttler(async () => {
+      await this._onResize();
     }, 500);
   }
 
@@ -406,11 +406,13 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     if (this._resizer) {
       this._resizer.dispose();
     }
+    this._itemResizeObserver.disconnect();
 
     super.dispose();
   }
 
   protected onChildRemoved(msg: Widget.ChildMessage): void {
+    this._itemResizeObserver.unobserve(msg.child.node);
     // If the widget is being moved to the popup opener, keep tracking its
     // intended position so it can be restored to the right slot later.
     // NOTE: we cannot check msg.child.parent here because Lumino fires
@@ -504,6 +506,11 @@ export class ReactiveToolbar extends Toolbar<Widget> {
         Math.min(index, (this.layout as ToolbarLayout).widgets.length - 1)
       );
       status = super.insertItem(j, name, widget);
+      if (status && !widget.hasClass(TOOLBAR_SPACER_CLASS)) {
+        // Watch the border box: a padding change, for example from a theme,
+        // leaves the content box as it is but changes the width the layout uses.
+        this._itemResizeObserver.observe(widget.node, { box: 'border-box' });
+      }
 
       if (j !== index) {
         // This happens if the widget has been inserted at a wrong position:
@@ -539,11 +546,9 @@ export class ReactiveToolbar extends Toolbar<Widget> {
       this._widgetPositions.set(name, index);
 
       // Invokes resizing to ensure correct display of items after an addition, only
-      // if the toolbar is rendered. Call the resizer twice (callTwice = true) so that
-      // widgets that have not yet been painted (clientWidth === 0) get a chance to be
-      // rendered before the second pass recalculates the layout.
+      // if the toolbar is rendered.
       if (this.isVisible) {
-        void this._resizer.invoke(true);
+        void this._resizer.invoke();
       }
     }
     return status;
@@ -555,7 +560,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
    * Invokes resizing to ensure correct display of items.
    */
   onAfterShow(msg: Message): void {
-    void this._resizer.stop().then(() => void this._resizer.invoke(true));
+    void this._resizer.stop().then(() => void this._resizer.invoke());
   }
 
   /**
@@ -570,14 +575,28 @@ export class ReactiveToolbar extends Toolbar<Widget> {
 
   protected onResize(msg: Widget.ResizeMessage): void {
     super.onResize(msg);
-
-    // Check if the resize event is due to a zoom change.
-    const zoom = Math.round((window.outerWidth / window.innerWidth) * 100);
-    if (zoom !== this._zoom) {
-      this._zoomChanged = true;
-      this._zoom = zoom;
-    }
     if (msg.width > 0 && this._resizer) {
+      void this._resizer.invoke();
+    }
+  }
+
+  /**
+   * Invoke the resizer when an item in the toolbar no longer has the width
+   * used to place the items, for example when the kernel name changes.
+   */
+  private _onItemResize(entries: ResizeObserverEntry[]): void {
+    if (!this.isVisible) {
+      return;
+    }
+    const widgets = (this.layout as ToolbarLayout).widgets;
+    const resized = entries.some(entry => {
+      const widget = widgets.find(w => w.node === entry.target);
+      return (
+        widget !== undefined &&
+        widget.node.clientWidth !== this._getWidgetWidth(widget)
+      );
+    });
+    if (resized) {
       void this._resizer.invoke();
     }
   }
@@ -585,16 +604,19 @@ export class ReactiveToolbar extends Toolbar<Widget> {
   /**
    * Move the toolbar items between the reactive toolbar and the popup toolbar,
    * depending on the width of the toolbar and the width of each item.
-   *
-   * @param callTwice - whether to call the function twice.
-   *
-   * **NOTES**
-   * The `callTwice` parameter is useful when the toolbar is displayed the first time,
-   * because the size of the items is unknown before their first rendering. The first
-   * call will usually add all the items in the main toolbar, and the second call will
-   * reorganize the items between the main toolbar and the popup toolbar.
    */
-  private async _onResize(callTwice = false) {
+  private async _onResize() {
+    // Wait for all the items to render before measuring any of them. Waiting
+    // between two measurements would let an item that is already measured
+    // change its width, and the resizer drops the call that the item observer
+    // makes while this method runs.
+    await Promise.all(
+      (this.layout as ToolbarLayout).widgets.map(widget =>
+        widget instanceof ReactWidget ? widget.renderPromise : undefined
+      )
+    ).catch(msg => {
+      console.error('Error while computing the ReactiveToolbar', msg);
+    });
     if (!(this.parent && this.parent.isAttached)) {
       return;
     }
@@ -673,9 +695,6 @@ export class ReactiveToolbar extends Toolbar<Widget> {
         } else {
           opener.hide();
         }
-        if (callTwice) {
-          await this._onResize();
-        }
       })
       .catch(msg => {
         console.error('Error while computing the ReactiveToolbar', msg);
@@ -690,6 +709,16 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     const opener = this.popupOpener;
     const widgets = [...(this.layout as ToolbarLayout).widgets];
     const toIndex = widgets.length - 1;
+    const widths = widgets
+      .slice(0, toIndex)
+      .map(widget =>
+        this._saveWidgetWidth(Private.nameProperty.get(widget), widget)
+      );
+    // Count the opener only if the items do not all fit without it. Otherwise
+    // the last items move to the popup although they all fit in the toolbar.
+    const fitWithoutOpener =
+      widths.reduce((total, itemWidth) => total + itemWidth, width) <=
+      toolbarWidth;
 
     const widgetsToRemove = [];
 
@@ -697,23 +726,11 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     while (index < toIndex) {
       const widget = widgets[index];
       const name = Private.nameProperty.get(widget);
-      // Compute the widget size only if
-      // - the zoom has changed.
-      // - the widget size has not been computed yet.
-      let widgetWidth: number;
-      if (this._zoomChanged) {
-        widgetWidth = await this._saveWidgetWidth(name, widget);
-      } else {
-        // The widget widths can be 0px if it has been added to the toolbar but
-        // not rendered, this is why we must use '||' instead of '??'.
-        widgetWidth =
-          this._getWidgetWidth(widget) ||
-          (await this._saveWidgetWidth(name, widget));
-      }
-      width += widgetWidth;
+      width += widths[index];
       if (
         widgetsToRemove.length === 0 &&
         opener.isHidden &&
+        !fitWithoutOpener &&
         width + openerWidth > toolbarWidth
       ) {
         width += openerWidth;
@@ -730,20 +747,13 @@ export class ReactiveToolbar extends Toolbar<Widget> {
       }
       index++;
     }
-    this._zoomChanged = false;
     return {
       width: width,
       widgetsToRemove: widgetsToRemove
     };
   }
 
-  private async _saveWidgetWidth(
-    name: string,
-    widget: Widget
-  ): Promise<number> {
-    if (widget instanceof ReactWidget) {
-      await widget.renderPromise;
-    }
+  private _saveWidgetWidth(name: string, widget: Widget): number {
     const widgetWidth = widget.hasClass(TOOLBAR_SPACER_CLASS)
       ? 2
       : widget.node.clientWidth;
@@ -761,10 +771,9 @@ export class ReactiveToolbar extends Toolbar<Widget> {
   private readonly _widgetWidths = new Map<string, number>();
   private _widgetPositions = new Map<string, number>();
   private _movingToPopup = new Set<Widget>();
-  // The zoom property is not the real browser zoom, but a value proportional to
-  // the zoom, which is modified when the zoom changes.
-  private _zoom: number;
-  private _zoomChanged = true;
+  private _itemResizeObserver = new ResizeObserver(
+    this._onItemResize.bind(this)
+  );
 }
 
 /**
@@ -1139,7 +1148,7 @@ export class CommandToolbarButton extends ReactWidget {
     addCommandToolbarButtonClass(this);
     this.setCommandAttributes(commands, id, args);
     commands.commandChanged.connect((_, change) => {
-      if (change.id === props.id) {
+      if (change.id === props.id || change.type === 'many-changed') {
         this.setCommandAttributes(commands, id, args);
       }
     }, this);

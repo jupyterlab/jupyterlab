@@ -16,8 +16,9 @@ import {
 import { framePromise, JupyterServer } from '@jupyterlab/testing';
 import { CommandRegistry } from '@lumino/commands';
 import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { MessageLoop } from '@lumino/messaging';
 import type { PanelLayout } from '@lumino/widgets';
-import { Widget } from '@lumino/widgets';
+import { Panel, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { simulate } from 'simulate-event';
 
@@ -364,6 +365,46 @@ describe('@jupyterlab/ui-components', () => {
         button.dispose();
       });
 
+      it('should update widget visibility on many-changed signal (GH-17697)', async () => {
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId
+        });
+        // Mutate shared describe-scope variables; restore them in finally so
+        // a mid-test assertion failure cannot corrupt subsequent tests.
+        // Initial values come from the describe-scope declarations:
+        //   let enabled = false;  let toggled = true;  let visible = false;
+        visible = false;
+        toggled = false;
+        enabled = true;
+        try {
+          await render(button);
+          // The parent widget node (not the inner <button>) carries lm-mod-hidden.
+          expect(button.hasClass('lm-mod-hidden')).toBe(true);
+
+          // Fire many-changed (no id argument) — this is the signal path that
+          // was broken before the fix.
+          visible = true;
+          commands.notifyCommandChanged();
+          await framePromise();
+          await button.renderPromise;
+          expect(button.hasClass('lm-mod-hidden')).toBe(false);
+
+          // Toggle back to hidden via many-changed to confirm bidirectionality.
+          visible = false;
+          commands.notifyCommandChanged();
+          await framePromise();
+          await button.renderPromise;
+          expect(button.hasClass('lm-mod-hidden')).toBe(true);
+        } finally {
+          // Restore to describe-scope initial values regardless of pass/fail.
+          enabled = false;
+          toggled = true;
+          visible = false;
+          button.dispose();
+        }
+      });
+
       it('should use the command label if no icon class/label', async () => {
         const id = 'to-be-removed';
         const cmd = commands.addCommand(id, {
@@ -590,6 +631,32 @@ describe('@jupyterlab/ui-components', () => {
           'close',
           'toolbar-popup-opener'
         ]);
+      });
+    });
+
+    describe('#onResize()', () => {
+      it('should not move an item to the popup when all the items fit without the opener', async () => {
+        const reactive = new ReactiveToolbar();
+        for (const name of ['a', 'b', 'c', 'd', 'e']) {
+          const item = new Widget();
+          Object.defineProperty(item.node, 'clientWidth', { value: 100 });
+          reactive.addItem(name, item);
+        }
+        // The items take 507 px with the padding, and 539 px with the opener.
+        Object.defineProperty(reactive.node, 'clientWidth', { value: 520 });
+        const parent = new Panel();
+        parent.addWidget(reactive);
+        Widget.attach(parent, document.body);
+        const insertWidget = jest.spyOn(
+          (reactive as any).popupOpener,
+          'insertWidget'
+        );
+
+        MessageLoop.sendMessage(reactive, new Widget.ResizeMessage(520, 32));
+        await (reactive as any)._resizer.invoke();
+
+        expect(insertWidget).not.toHaveBeenCalled();
+        parent.dispose();
       });
     });
   });
