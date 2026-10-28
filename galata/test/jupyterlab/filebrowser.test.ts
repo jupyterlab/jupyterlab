@@ -115,3 +115,34 @@ test('Filter input is cleared after navigating into a subdirectory', async ({
 
   await expect(filterInput).toHaveValue('');
 });
+
+test.describe('Kernel specs arriving late', () => {
+  test.use({ autoGoto: false });
+
+  test('Context menu lists "New Python File" once', async ({ page }) => {
+    // Answer the kernel specs request only once the plugin adding the
+    // language file entries has started, as with a slow server.
+    await page.route(/\/api\/kernelspecs/, async route => {
+      try {
+        await page.waitForFunction(() =>
+          window.jupyterapp?.isPluginActivated(
+            '@jupyterlab/filebrowser-extension:create-new-language-file'
+          )
+        );
+      } finally {
+        await route.fallback();
+      }
+    });
+
+    await page.goto();
+    await page.waitForFunction(
+      () => window.jupyterapp.serviceManager.kernelspecs.isReady
+    );
+
+    await page.locator('.jp-DirListing-content').click({ button: 'right' });
+
+    await expect(
+      page.getByRole('menuitem', { name: 'New Python File', exact: true })
+    ).toHaveCount(1);
+  });
+});
