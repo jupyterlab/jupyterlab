@@ -16,7 +16,10 @@ import type {
 import { LruCache } from '@jupyterlab/coreutils';
 import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 import { IMarkdownParser } from '@jupyterlab/rendermime';
-import type { IMarkdownHeadingToken } from '@jupyterlab/rendermime';
+import type {
+  IMarkdownBlockToken,
+  IMarkdownHeadingToken
+} from '@jupyterlab/rendermime';
 import { IMermaidMarkdown } from '@jupyterlab/mermaid';
 
 import type {
@@ -67,6 +70,9 @@ export function createMarkdownParser(
     },
     getHeadingTokens: (content: string): Promise<IMarkdownHeadingToken[]> => {
       return Private.getHeadingTokens(content, options);
+    },
+    getBlockTokens: (content: string): Promise<IMarkdownBlockToken[]> => {
+      return Private.getBlockTokens(content, options);
     }
   };
 }
@@ -296,6 +302,29 @@ namespace Private {
     }
 
     return headings;
+  }
+
+  /**
+   * Extract top-level block metadata from markdown source.
+   */
+  export async function getBlockTokens(
+    content: string,
+    options?: IRenderOptions
+  ): Promise<IMarkdownBlockToken[]> {
+    if (!_marked) {
+      _marked = await initializeMarked(options);
+    }
+    const blocks = new Array<IMarkdownBlockToken>();
+    let currentLine = 0;
+    for (const token of _marked.lexer(content)) {
+      blocks.push({
+        type: token.type,
+        raw: token.raw,
+        line: currentLine
+      });
+      currentLine += token.raw.split('\n').length - 1;
+    }
+    return blocks;
   }
 
   function containsHeadingTag(raw: string) {

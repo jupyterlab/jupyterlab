@@ -36,6 +36,9 @@
     },
     "renderTimeout": {
       "type": "number"
+    },
+    "syncScrolling": {
+      "type": "boolean"
     }
   },
   "properties": {
@@ -74,6 +77,12 @@
       "description": "The render timeout in milliseconds.",
       "$ref": "#/definitions/renderTimeout",
       "default": 1000
+    },
+    "syncScrolling": {
+      "title": "Synchronize Scrolling",
+      "description": "Whether a Markdown preview scrolls in sync with its source editor.\nThe sync button in the toolbar of a preview toggles this for that preview only.",
+      "$ref": "#/definitions/syncScrolling",
+      "default": false
     }
   },
   "additionalProperties": false,
