@@ -67,9 +67,9 @@ export abstract class ReactWidget extends Widget {
     return super.parent;
   }
   set parent(value: Widget | null) {
-    // A move to a detached parent unmounts at once, while the node is still in
-    // the document.
-    this._moving = value !== null && value.isAttached;
+    // A move to a detached parent, or to one without a layout to attach the
+    // widget, unmounts at once, while the node is still in the document.
+    this._moving = value !== null && value.isAttached && value.layout !== null;
     try {
       super.parent = value;
     } finally {
@@ -103,12 +103,14 @@ export abstract class ReactWidget extends Widget {
     if (this.isDisposed) {
       return;
     }
-    // Unmount before `super.dispose()` detaches the widget, so that cleanups
-    // run while the node is in the document. A widget disposed while already
-    // detached receives no `before-detach` message, and without this call its
-    // React root would stay mounted with every subscription of its components.
-    this._unmount();
-    super.dispose();
+    // A widget disposed while already detached receives no `before-detach`
+    // message, and without this call its React root would stay mounted with
+    // every subscription of its components.
+    try {
+      this._unmount();
+    } finally {
+      super.dispose();
+    }
   }
 
   /**

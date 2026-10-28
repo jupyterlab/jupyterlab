@@ -217,6 +217,61 @@ describe('@jupyterlab/ui-components', () => {
       target.dispose();
     });
 
+    it('should unmount the React tree before the node leaves the document when the widget is moved to a parent without a layout', async () => {
+      const connected: boolean[] = [];
+      const source = new Panel();
+      const target = new Widget();
+      Widget.attach(source, document.body);
+      Widget.attach(target, document.body);
+      const widget = ReactWidget.create(
+        React.createElement(ConnectionProbe, { connected })
+      );
+      source.addWidget(widget);
+      await widget.renderPromise;
+      widget.parent = target;
+      expect(connected).toEqual([true]);
+      widget.dispose();
+      source.dispose();
+      target.dispose();
+    });
+
+    it('should unmount the React tree when the new parent does not attach the widget', async () => {
+      const source = new Panel();
+      const target = new Panel();
+      Widget.attach(source, document.body);
+      Widget.attach(target, document.body);
+      const widget = ReactWidget.create(React.createElement(LifecycleCounter));
+      source.addWidget(widget);
+      await widget.renderPromise;
+      // Setting the parent directly does not add the widget to the layout.
+      widget.parent = target;
+      await Promise.resolve();
+      expect(LifecycleCounter.unmounts).toBe(1);
+      widget.dispose();
+      source.dispose();
+      target.dispose();
+    });
+
+    it('should be disposed when a cleanup throws', async () => {
+      const spy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+      const Throws = createThrowingCleanup();
+      const panel = new Panel();
+      Widget.attach(panel, document.body);
+      const widget = ReactWidget.create(React.createElement(Throws));
+      try {
+        panel.addWidget(widget);
+        await widget.renderPromise;
+        expect(() => widget.dispose()).toThrow('cleanup failed');
+        expect(widget.isDisposed).toBe(true);
+      } finally {
+        spy.mockRestore();
+        widget.dispose();
+        panel.dispose();
+      }
+    });
+
     it('should render again after a cleanup throws', async () => {
       const spy = jest
         .spyOn(console, 'error')
