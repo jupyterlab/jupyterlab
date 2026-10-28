@@ -7,6 +7,7 @@ import {
   VDomRenderer
 } from '@jupyterlab/ui-components';
 import { framePromise } from '@jupyterlab/testing';
+import { MessageLoop } from '@lumino/messaging';
 import { Panel, Widget } from '@lumino/widgets';
 import * as React from 'react';
 
@@ -59,6 +60,25 @@ const ConnectionProbe = (props: { connected: boolean[] }) => {
     };
   }, []);
   return React.createElement('span', { ref }, 'probe');
+};
+
+/**
+ * Create a component whose layout effect cleanup throws the first time it runs.
+ */
+const createThrowingCleanup = () => {
+  let fail = true;
+  return () => {
+    React.useLayoutEffect(
+      () => () => {
+        if (fail) {
+          fail = false;
+          throw new Error('cleanup failed');
+        }
+      },
+      []
+    );
+    return React.createElement('span', { className: 'rendered' });
+  };
 };
 
 class TestWidgetNoModel extends VDomRenderer {
@@ -143,6 +163,14 @@ describe('@jupyterlab/ui-components', () => {
       expect(LifecycleCounter.unmounts).toBe(1);
     });
 
+    it('should unmount the React tree when a widget rendered while detached is disposed', async () => {
+      const widget = ReactWidget.create(React.createElement(LifecycleCounter));
+      MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+      await widget.renderPromise;
+      widget.dispose();
+      expect(LifecycleCounter.unmounts).toBe(1);
+    });
+
     it('should unmount the React tree before the node leaves the document when the parent is disposed', async () => {
       const connected: boolean[] = [];
       const panel = new Panel();
@@ -172,23 +200,28 @@ describe('@jupyterlab/ui-components', () => {
       panel.dispose();
     });
 
+    it('should unmount the React tree before the node leaves the document when the widget is moved to a detached parent', async () => {
+      const connected: boolean[] = [];
+      const source = new Panel();
+      const target = new Panel();
+      Widget.attach(source, document.body);
+      const widget = ReactWidget.create(
+        React.createElement(ConnectionProbe, { connected })
+      );
+      source.addWidget(widget);
+      await widget.renderPromise;
+      target.addWidget(widget);
+      await Promise.resolve();
+      expect(connected).toEqual([true]);
+      source.dispose();
+      target.dispose();
+    });
+
     it('should render again after a cleanup throws', async () => {
       const spy = jest
         .spyOn(console, 'error')
         .mockImplementation(() => undefined);
-      let fail = true;
-      const Throws = () => {
-        React.useLayoutEffect(
-          () => () => {
-            if (fail) {
-              fail = false;
-              throw new Error('cleanup failed');
-            }
-          },
-          []
-        );
-        return React.createElement('span', { className: 'rendered' });
-      };
+      const Throws = createThrowingCleanup();
       const panel = new Panel();
       Widget.attach(panel, document.body);
       const widget = ReactWidget.create(React.createElement(Throws));
@@ -204,6 +237,33 @@ describe('@jupyterlab/ui-components', () => {
         spy.mockRestore();
         widget.dispose();
         panel.dispose();
+      }
+    });
+
+    it('should render again after a cleanup throws on a null render', async () => {
+      const spy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+      const Throws = createThrowingCleanup();
+      let show = true;
+      const widget = new (class extends ReactWidget {
+        protected render() {
+          return show ? React.createElement(Throws) : null;
+        }
+      })();
+      try {
+        Widget.attach(widget, document.body);
+        await widget.renderPromise;
+        show = false;
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        await widget.renderPromise?.catch(() => undefined);
+        show = true;
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        await expect(widget.renderPromise).resolves.toBeUndefined();
+        expect(widget.node.querySelector('.rendered')).not.toBeNull();
+      } finally {
+        spy.mockRestore();
+        widget.dispose();
       }
     });
   });
