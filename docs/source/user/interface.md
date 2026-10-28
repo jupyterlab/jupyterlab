@@ -140,7 +140,12 @@ marked with a colored top border (blue by default).
 
 ### Switching Tabs by Index
 
-You can switch to a specific tab in the main area using the keyboard shortcuts with a modifier key and a number from `1` to `8` (where `1` is the first tab and `8` is the eighth tab, if it exists). To jump directly to the last tab, regardless of how many tabs are open or its position, use `9`.
+You can switch to a specific tab in the current tab bar using
+`Command/Ctrl Alt` and a number from `1` to `8` (where `1` is the first tab and
+`8` is the eighth tab, if it exists). Use `Command/Ctrl Alt 9` to activate the last
+tab in the current tab bar. When the main area is split into multiple panes,
+these shortcuts only switch tabs within the current pane. If the numbered tab
+does not exist in that pane, the shortcut does nothing.
 
 ## Tabs and Simple Interface Mode
 

@@ -66,6 +66,35 @@ test.describe('Tab Switching Shortcuts', () => {
     await expect(lastTab).toHaveClass(/lm-mod-current/);
   });
 
+  test('should switch tabs only within the current pane', async ({ page }) => {
+    const modifier = process.platform === 'darwin' ? 'Meta+Alt' : 'Control+Alt';
+
+    await page.activity.activateTab('file-3.txt');
+    await page.evaluate(() => {
+      const { shell } = window.jupyterapp;
+      const widget = shell.currentWidget;
+      if (widget) {
+        shell.add(widget, 'main', { mode: 'split-right' });
+      }
+    });
+
+    await page.keyboard.press(`${modifier}+1`);
+    await expect(page.activity.getTabLocator('file-3.txt')).toHaveClass(
+      /jp-mod-current/
+    );
+
+    await page.keyboard.press(`${modifier}+2`);
+    await expect(page.activity.getTabLocator('file-3.txt')).toHaveClass(
+      /jp-mod-current/
+    );
+
+    await page.activity.activateTab('file-1.txt');
+    await page.keyboard.press(`${modifier}+9`);
+    await expect(page.activity.getTabLocator('file-2.txt')).toHaveClass(
+      /jp-mod-current/
+    );
+  });
+
   test('should do nothing when an out-of-range index is pressed', async ({
     page
   }) => {

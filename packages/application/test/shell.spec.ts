@@ -348,6 +348,94 @@ describe('LabShell', () => {
     });
   });
 
+  describe('#activateTab()', () => {
+    it('should do nothing without a current tab bar', async () => {
+      shell.activateTab(0);
+      const widget = new ContentWidget();
+      widget.id = 'foo';
+      shell.add(widget, 'main', { activate: false });
+
+      shell.activateTab(1);
+      await framePromise();
+
+      expect(shell.currentWidget).toBe(null);
+      expect(widget.activated).toBe(false);
+    });
+
+    describe.each([
+      ['columns', 'split-right', 'split-bottom'],
+      ['rows', 'split-bottom', 'split-right']
+    ] as const)(
+      'with a grid split into %s first',
+      (_, outerMode, innerMode) => {
+        let widgets: ContentWidget[];
+
+        beforeEach(async () => {
+          widgets = Array.from({ length: 8 }, (_, index) => {
+            const widget = new ContentWidget();
+            widget.id = `tab-${index}`;
+            return widget;
+          });
+          shell.add(widgets[0], 'main', { activate: false });
+          shell.add(widgets[2], 'main', {
+            mode: outerMode,
+            ref: widgets[0].id,
+            activate: false
+          });
+          for (const index of [0, 2]) {
+            shell.add(widgets[index + 4], 'main', {
+              mode: innerMode,
+              ref: widgets[index].id,
+              activate: false
+            });
+          }
+          for (const index of [0, 2, 4, 6]) {
+            shell.add(widgets[index + 1], 'main', {
+              mode: 'tab-after',
+              ref: widgets[index].id,
+              activate: false
+            });
+          }
+          await framePromise();
+        });
+
+        it.each([
+          { index: 1, offset: 0 },
+          { index: 2, offset: 1 },
+          { index: 0, offset: 1 }
+        ])(
+          'should activate index $index within the current pane',
+          async ({ index, offset }) => {
+            for (const pane of [0, 2, 4, 6]) {
+              simulate(widgets[pane].node, 'focus');
+              widgets.forEach(widget => {
+                widget.activated = false;
+              });
+
+              shell.activateTab(index);
+              await framePromise();
+
+              expect(widgets.filter(widget => widget.activated)).toEqual([
+                widgets[pane + offset]
+              ]);
+            }
+          }
+        );
+
+        it('should ignore indices outside the current pane', async () => {
+          for (const pane of [0, 2, 4, 6]) {
+            simulate(widgets[pane].node, 'focus');
+
+            shell.activateTab(3);
+            await framePromise();
+
+            expect(widgets.some(widget => widget.activated)).toBe(false);
+          }
+        });
+      }
+    );
+  });
+
   describe('#collapseLeft()', () => {
     it('should collapse all widgets in the left area', () => {
       const widget = new Widget();

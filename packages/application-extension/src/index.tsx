@@ -641,17 +641,9 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           }
         },
         execute: args => {
-          const index = args['index'] as number;
-          const widgets = Array.from(labShell.widgets('main'));
-
-          if (widgets.length === 0) {
-            return;
-          }
-
-          if (index === 0) {
-            labShell.activateById(widgets[widgets.length - 1].id);
-          } else if (index > 0 && index <= widgets.length) {
-            labShell.activateById(widgets[index - 1].id);
+          const index = args['index'];
+          if (typeof index === 'number') {
+            labShell.activateTab(index);
           }
         }
       });
