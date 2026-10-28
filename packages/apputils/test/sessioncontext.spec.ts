@@ -496,6 +496,79 @@ describe('@jupyterlab/apputils', () => {
         await sessionContext.shutdown();
         expect(sessionContext.kernelDisplayStatus).toBe('unknown');
       });
+
+      it('should be "starting" while a change-kernel request is in flight', async () => {
+        // Reproduces the case where an existing session switches to a
+        // different kernel: without an in-flight signal, the getter falls
+        // through to the previous kernel's status (typically "idle"),
+        // masking the fact that a new kernel is being provisioned.
+        //
+        // We can't reliably assert on `kernelDisplayStatus` right after
+        // calling `changeKernel()` because that method awaits
+        // `_initStarted.promise` before reaching `_changeKernel` where
+        // the flag is set. Instead, hook `statusChanged` and snapshot
+        // the display status the moment `'starting'` is emitted from
+        // inside `_changeKernel`.
+        await sessionContext.initialize();
+        await sessionContext.session!.kernel!.info;
+        const name = sessionContext.session?.kernel?.name;
+
+        let displayWhileChanging: string | undefined;
+        const handler = (_: any, status: string) => {
+          if (status === 'starting' && displayWhileChanging === undefined) {
+            displayWhileChanging = sessionContext.kernelDisplayStatus;
+          }
+        };
+        sessionContext.statusChanged.connect(handler);
+
+        try {
+          await sessionContext.changeKernel({ name });
+        } finally {
+          sessionContext.statusChanged.disconnect(handler);
+        }
+
+        expect(displayWhileChanging).toBe('starting');
+      });
+
+      it('should not emit a redundant "unknown" status if change-kernel is rejected', async () => {
+        // Before the fix, `_changeKernel`'s `finally` block emitted the
+        // post-change status unconditionally, even though the `catch`
+        // branch's `_handleSessionError()` call already tears down the
+        // session (and therefore already emits a settled status). That
+        // made the `finally` emission a redundant *third* "unknown" on
+        // top of the two inherent emissions that any session teardown
+        // produces: one proxied from the disposed kernel's own status
+        // change, and one from `_handleNewSession(null)`'s explicit
+        // fallback. This test guards against that redundant emission
+        // reappearing; it does not assert only one "unknown" is emitted,
+        // since the two teardown-inherent emissions are pre-existing
+        // behavior of `_handleNewSession` unrelated to `changeKernel`.
+        await sessionContext.initialize();
+        await sessionContext.session!.kernel!.info;
+
+        jest
+          .spyOn(sessionContext.session!, 'changeKernel')
+          .mockRejectedValue(new Error('mock error'));
+
+        const statuses: string[] = [];
+        const handler = (_: any, status: string) => {
+          statuses.push(status);
+        };
+        sessionContext.statusChanged.connect(handler);
+
+        let caught = false;
+        const promise = sessionContext
+          .changeKernel({ name: 'echo' })
+          .catch(() => {
+            caught = true;
+          });
+        await Promise.all([promise, acceptDialog()]);
+        sessionContext.statusChanged.disconnect(handler);
+
+        expect(caught).toBe(true);
+        expect(statuses).toEqual(['starting', 'unknown', 'unknown']);
+        expect(sessionContext.kernelDisplayStatus).toBe('unknown');
+      });
     });
 
     describe('#isDisposed', () => {

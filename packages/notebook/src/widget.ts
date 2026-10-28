@@ -170,6 +170,11 @@ const HEADING_COLLAPSER_VISBILITY_CONTROL_CLASS =
 const SIDE_BY_SIDE_CLASS = 'jp-mod-sideBySide';
 
 /**
+ * The class name added to a notebook in view-only mode.
+ */
+const VIEW_ONLY_CLASS = 'jp-mod-view-only';
+
+/**
  * The interactivity modes for the notebook.
  */
 export type NotebookMode = 'command' | 'edit';
@@ -386,6 +391,12 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       this._contentVisibilityObserver = null;
     }
     super.dispose();
+    // Dispose cells that windowing modes may have detached from the layout.
+    for (const cell of this.cellsArray) {
+      cell.dispose();
+    }
+    this.cellsArray.length = 0;
+    this.viewModel.dispose();
   }
 
   protected onBeforeDetach(msg: Message): void {
@@ -620,7 +631,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     for (const cell of cells) {
       this._insertCell(++index, cell);
     }
-    this._syncMarkdownCellTrust();
+    this._syncCellTrust();
     newValue.cells.changed.connect(this._onCellsChanged, this);
     newValue.metadataChanged.connect(this.onMetadataChanged, this);
     newValue.contentChanged.connect(this.onModelContentChanged, this);
@@ -682,7 +693,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       this.addHeader();
     }
 
-    this._syncMarkdownCellTrust();
+    this._syncCellTrust();
     this.update();
   }
 
@@ -710,7 +721,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     widget.addClass(NB_CELL_CLASS);
 
     ArrayExt.insert(this.cellsArray, index, widget);
-    this._syncMarkdownCellTrust(widget);
+    this._syncCellTrust(widget);
     this.onCellInserted(index, widget);
 
     this._scheduleCellRenderOnIdle();
@@ -821,8 +832,8 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     widget.dispose();
   }
 
-  private _shouldTrustMarkdown(): boolean {
-    // Note: this returns false in a notebook without trsuted code cells;
+  private _shouldTrustCell(): boolean {
+    // Note: this returns false in a notebook without trusted code cells;
     // This is intended since only Code cells carry trust status on disk.
     if (!this._notebookModel) {
       return false;
@@ -839,11 +850,17 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     return hasCodeCell;
   }
 
-  private _syncMarkdownCellTrust(cell?: Cell): void {
-    const trusted = this._shouldTrustMarkdown();
+  private _syncCellTrust(cell?: Cell): void {
+    const trusted = this._shouldTrustCell();
     const trustHandler = this.rendermime.trustHandler;
     if (!trustHandler) {
       return;
+    }
+
+    if (trusted) {
+      trustHandler.markTrusted(this.node);
+    } else {
+      trustHandler.unmarkTrusted(this.node);
     }
 
     const cells = cell ? [cell] : this.widgets;
@@ -864,7 +881,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     args: IChangedArgs<any>
   ): void {
     if (args.name === 'trusted') {
-      this._syncMarkdownCellTrust();
+      this._syncCellTrust();
     }
   }
 
@@ -970,7 +987,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
 
   private _scheduleCellRenderOnIdle() {
     if (this.notebookConfig.windowingMode !== 'none' && !this.isDisposed) {
-      if (!this._idleCallBack) {
+      if (this._idleCallBack === null) {
         this._idleCallBack = requestIdleCallback(
           (deadline: IdleDeadline) => {
             this._idleCallBack = null;
@@ -1073,7 +1090,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
         this._scheduleCellRenderOnIdle();
       }
     } else {
-      if (this._idleCallBack) {
+      if (this._idleCallBack !== null) {
         window.cancelIdleCallback(this._idleCallBack);
         this._idleCallBack = null;
       }
@@ -1206,7 +1223,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           this._contentVisibilityObserver!.observe(cell.node);
         });
       });
-    });
+    }, this);
   }
 
   protected cellsArray: Array<Cell>;
@@ -1678,7 +1695,7 @@ class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
       state = 'error';
     } else if (model.executionState == 'running') {
       content = '[*]';
-    } else if (model.executionCount) {
+    } else if (model.executionCount !== null) {
       content = `[${model.executionCount}]`;
     } else {
       content = '[ ]';
@@ -1800,6 +1817,31 @@ export class Notebook extends StaticNotebook {
    */
   get selectedCells(): Cell[] {
     return this._selectedCells;
+  }
+
+  /**
+   * Whether the notebook is displayed in view-only mode.
+   */
+  get viewOnly(): boolean {
+    return this._viewOnly;
+  }
+  set viewOnly(value: boolean) {
+    if (this._viewOnly === value) {
+      return;
+    }
+    this._viewOnly = value;
+    this.toggleClass(VIEW_ONLY_CLASS, value);
+    for (const cell of this.widgets) {
+      cell.viewOnly = value;
+    }
+    this._viewOnlyChanged.emit(value);
+  }
+
+  /**
+   * A signal emitted when the view-only state of the notebook changes.
+   */
+  get viewOnlyChanged(): ISignal<this, boolean> {
+    return this._viewOnlyChanged;
   }
 
   /**
@@ -2769,6 +2811,7 @@ export class Notebook extends StaticNotebook {
    * Handle a cell being inserted.
    */
   protected onCellInserted(index: number, cell: Cell): void {
+    cell.viewOnly = this._viewOnly;
     void cell.ready.then(() => {
       if (!cell.isDisposed) {
         cell.editor!.edgeRequested.connect(this._onEdgeRequest, this);
@@ -2923,15 +2966,83 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
+   * Find the cell containing a node, traversing open shadow roots.
+   *
+   * Returned cell is `null` if the node is not in a cell of this notebook.
+   */
+  private _cellContaining(node: Node | null): Cell | null {
+    let current = node;
+    while (current) {
+      const element =
+        current instanceof Element ? current : current.parentElement;
+      if (element) {
+        const index = this._findCell(element);
+        if (index !== -1) {
+          return this.widgets[index];
+        }
+      }
+      const root = (element ?? current).getRootNode();
+      current = root instanceof ShadowRoot ? root.host : null;
+    }
+    return null;
+  }
+
+  /**
+   * Whether a shift-click on `target` should be left to the browser to handle
+   * as an extension of the current text selection, rather than be turned into
+   * a cell range selection.
+   *
+   * This is the case when the click lands in a region of a cell whose text the
+   * browser selects - the output area of a code cell, or the rendered input of
+   * a rendered markdown cell - and the current selection starts in such a
+   * region too; see https://github.com/jupyterlab/jupyterlab/issues/4800. A
+   * click on a cell prompt, on cell chrome, or on a cell without such a region
+   * (an unrendered markdown cell, a code cell without outputs) always selects
+   * cells.
+   *
+   * #### Notes
+   * Only the anchor of the selection is considered, because a shift-click
+   * moves the focus and leaves the anchor in place. The anchor may sit in a
+   * different cell than the one clicked, which is what allows a selection to
+   * be extended across the outputs of several cells; and disregarding the
+   * focus keeps this working when a drag overshot the edge of an output and
+   * left the focus outside of it.
+   *
+   * This trade-off between extending the text selection and extending the cell
+   * selection can be adjusted in the future. For now the text selection wins to
+   * preserve the behaviour from before refactor that users may be accustomed to.
+   */
+  private _isExtendingTextSelection(
+    selection: Selection | null,
+    targetCell: Cell,
+    target: Node
+  ): boolean {
+    if (!selection || selection.isCollapsed) {
+      return false;
+    }
+    if (!Private.isInTextRegion(targetCell, target)) {
+      return false;
+    }
+    const { anchorNode } = selection;
+    // The selection usually starts in the very cell which was clicked, which
+    // can be checked without having to locate the cell of the anchor.
+    if (Private.isInTextRegion(targetCell, anchorNode)) {
+      return true;
+    }
+    const anchorCell = this._cellContaining(anchorNode);
+    return !!anchorCell && Private.isInTextRegion(anchorCell, anchorNode);
+  }
+
+  /**
    * Find the cell index containing the target html element.
    *
    * #### Notes
    * Returns -1 if the cell is not found.
    */
-  private _findCell(node: HTMLElement): number {
+  private _findCell(node: Element): number {
     // Trace up the DOM hierarchy to find the root cell node.
     // Then find the corresponding child and select it.
-    let n: HTMLElement | null = node;
+    let n: Element | null = node;
     while (n && n !== this.node) {
       if (n.classList.contains(NB_CELL_CLASS)) {
         const i = ArrayExt.findFirstIndex(
@@ -3165,17 +3276,21 @@ export class Notebook extends StaticNotebook {
     if (targetArea === 'notebook') {
       this.deselectAll();
     } else if (targetArea === 'prompt' || targetArea === 'cell') {
-      // We don't want to prevent the default selection behavior
-      // if there is currently text selected in an output.
-      const hasSelection = (window.getSelection() ?? '').toString() !== '';
       if (
         button === 0 &&
         shiftKey &&
-        !hasSelection &&
-        !['INPUT', 'OPTION'].includes(target.tagName)
+        !['INPUT', 'OPTION'].includes(target.tagName) &&
+        // We don't want to prevent the default selection behavior when the
+        // user is extending a text selection into the clicked region.
+        !this._isExtendingTextSelection(window.getSelection(), widget, target)
       ) {
         // Prevent browser selecting text in prompt or output
         event.preventDefault();
+
+        // Preventing the default also stops the browser from collapsing any
+        // text selection which is already there; drop it explicitly so that
+        // stale highlighted text is not left over the new cell selection.
+        window.getSelection()?.removeAllRanges();
 
         // Shift-click - extend selection
         try {
@@ -3198,7 +3313,7 @@ export class Notebook extends StaticNotebook {
         document.addEventListener('mousemove', this, true);
       } else if (button === 0 && !shiftKey) {
         // Prepare to start a drag if we are on the drag region.
-        if (targetArea === 'prompt') {
+        if (targetArea === 'prompt' && !this._viewOnly) {
           // Prepare for a drag start
           this._dragData = {
             pressX: event.clientX,
@@ -3311,7 +3426,7 @@ export class Notebook extends StaticNotebook {
    * Handle the `'lm-dragenter'` event for the widget.
    */
   private _evtDragEnter(event: Drag.Event): void {
-    if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
+    if (this._viewOnly || !event.mimeData.hasData(JUPYTER_CELL_MIME)) {
       return;
     }
     event.preventDefault();
@@ -3345,7 +3460,7 @@ export class Notebook extends StaticNotebook {
    * Handle the `'lm-dragover'` event for the widget.
    */
   private _evtDragOver(event: Drag.Event): void {
-    if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
+    if (this._viewOnly || !event.mimeData.hasData(JUPYTER_CELL_MIME)) {
       return;
     }
     event.preventDefault();
@@ -3373,7 +3488,7 @@ export class Notebook extends StaticNotebook {
     }
     event.preventDefault();
     event.stopPropagation();
-    if (event.proposedAction === 'none') {
+    if (event.proposedAction === 'none' || this._viewOnly) {
       event.dropAction = 'none';
       return;
     }
@@ -3474,7 +3589,7 @@ export class Notebook extends StaticNotebook {
       const executionCount = (activeCell.model as ICodeCellModel)
         .executionCount;
       countString = ' ';
-      if (executionCount) {
+      if (executionCount !== null) {
         countString = executionCount.toString();
       }
     } else {
@@ -3723,10 +3838,12 @@ export class Notebook extends StaticNotebook {
     startingCellIndex: number;
   } | null = null;
   private _mouseMode: 'select' | 'couldDrag' | null = null;
+  private _viewOnly = false;
   private _activeCellChanged = new Signal<this, Cell | null>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
   private _selectionChanged = new Signal<this, void>(this);
   private _cellsPasted = new Signal<this, Notebook.IPastedCells>(this);
+  private _viewOnlyChanged = new Signal<this, boolean>(this);
   private _localCopy: nbformat.IBaseCell[] = [];
   // Attributes for optimized cell refresh:
   private _cellLayoutStateCache?: { width: number };
@@ -3827,6 +3944,62 @@ namespace Private {
     protected onUpdateRequest(msg: Message): void {
       // This is a no-op.
     }
+  }
+
+  /**
+   * Check whether `node` is `parent` or a descendant of it.
+   *
+   * Unlike `Node.contains()` this traverses out of open shadow roots, so a
+   * node rendered by a widget library which attaches a shadow root (such as
+   * Panel or Bokeh) is still recognised as belonging to its host subtree.
+   */
+  function containsDeep(parent: Node, node: Node | null): boolean {
+    let current = node;
+    while (current) {
+      if (parent.contains(current)) {
+        return true;
+      }
+      const root = current.getRootNode();
+      current = root instanceof ShadowRoot ? root.host : null;
+    }
+    return false;
+  }
+
+  /**
+   * Whether a cell exposes an output area.
+   *
+   * #### Notes
+   * This is a structural check rather than `instanceof CodeCell` so that it
+   * still holds when a federated extension loads its own copy of
+   * `@jupyterlab/cells`.
+   */
+  function hasOutputArea(cell: Cell): cell is CodeCell {
+    return 'outputArea' in cell;
+  }
+
+  /**
+   * The regions of a cell whose text the browser, rather than the notebook,
+   * is responsible for selecting: the output area of a code cell and the
+   * rendered input of a cell which renders it, such as a rendered markdown
+   * cell.
+   */
+  function textRegionsOf(cell: Cell): Node[] {
+    const regions: Node[] = [];
+    if (hasOutputArea(cell)) {
+      regions.push(cell.outputArea.node);
+    }
+    const rendered = cell.inputArea?.renderedInput;
+    if (rendered) {
+      regions.push(rendered.node);
+    }
+    return regions;
+  }
+
+  /**
+   * Whether a node is in a region of a cell whose text the browser selects.
+   */
+  export function isInTextRegion(cell: Cell, node: Node | null): boolean {
+    return textRegionsOf(cell).some(region => containsDeep(region, node));
   }
 
   /**

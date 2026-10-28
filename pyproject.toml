@@ -10,7 +10,7 @@ name = "jupyterlab"
 description = "JupyterLab computational environment"
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [
     { name = "Jupyter Development Team", email = "jupyter@googlegroups.com" },
 ]
@@ -28,16 +28,16 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
 ]
 dependencies = [
     "jupyter-builder>=1.1.1",
-    "async_lru>=1.0.0",
-    "httpx>=0.25.0,<1",
+    "async_lru>=1.0.3",
+    "httpx2>=2,<3",
     "ipykernel>=6.5.0,!=6.30.0",
     "jinja2>=3.0.3",
     "jupyter_core",
@@ -46,10 +46,9 @@ dependencies = [
     "jupyterlab_server>=2.28.0,<3",
     "notebook_shim>=0.2",
     "packaging>=23.2",
-    "tomli>=1.2.2;python_version<\"3.11\"",
     "tornado>=6.2.0",
     "traitlets",
-    "typing-extensions>=4.6.0;python_version<\"3.12\"",
+    "typing-extensions>=4.6.1;python_version<\"3.12\"",
 ]
 dynamic = [
     "version",
@@ -79,7 +78,6 @@ docs-screenshots = [
     # IPython is frozen because its version is displayed in
     # the console header
     "altair==6.0.0",
-    "ipykernel<7.0",
     "ipython==8.16.1",
     "ipywidgets==8.1.5",
     "jupyterlab-geojson==3.4.0",
@@ -111,9 +109,9 @@ dev = [
     "pytest-cov",
     "coverage",
     "hatch",
-    "bump2version",
+    "bump-my-version>=1,<2",
     "mypy==1.20.2",
-    "ruff==0.15.20",
+    "ruff==0.16.10",
 ]
 upgrade-extension = [
     "pyyaml-include<3.0",
@@ -239,7 +237,7 @@ ignore = "tests examples"
 
 [tool.mypy]
 files = ["jupyterlab"]
-python_version = "3.10"
+python_version = "3.11"
 show_error_codes = true
 
 [[tool.mypy.overrides]]
@@ -249,9 +247,7 @@ module = [
     "jupyterhub.singleuser",
     "jupyterhub.singleuser.mixins",
     "notebook_shim.shim",
-    "tomli",
     "tomli_w",
-    "tomllib",
 ]
 ignore_missing_imports = true
 
@@ -259,69 +255,6 @@ ignore_missing_imports = true
 module = ["numpy", "numpy.*"]
 follow_imports = "skip"
 follow_imports_for_stubs = true
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.browser_check"]
-disable_error_code = ["arg-type", "assignment"]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.commands"]
-disable_error_code = ["arg-type", "attr-defined"]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.debuglog"]
-disable_error_code = ["attr-defined"]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.extensions.manager"]
-disable_error_code = [
-    "arg-type",
-    "attr-defined",
-    "misc",
-    "return-value",
-    "union-attr",
-    "var-annotated",
-]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.extensions.pypi"]
-disable_error_code = [
-    "arg-type",
-    "assignment",
-    "attr-defined",
-    "call-overload",
-    "dict-item",
-    "override",
-    "return-value",
-    "var-annotated",
-]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.handlers.announcements"]
-disable_error_code = [
-    "arg-type",
-    "assignment",
-    "attr-defined",
-    "return-value",
-    "union-attr",
-    "var-annotated",
-]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.handlers.build_handler"]
-disable_error_code = ["arg-type", "misc", "override", "union-attr", "var-annotated"]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.handlers.error_handler"]
-disable_error_code = ["arg-type", "override"]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.labapp"]
-disable_error_code = ["arg-type", "assignment", "union-attr"]
-
-[[tool.mypy.overrides]]
-module = ["jupyterlab.upgrade_extension"]
-disable_error_code = ["assignment", "operator"]
 
 [tool.jupyter-releaser.options]
 version-cmd = "jlpm bumpversion --force --skip-commit"
@@ -348,7 +281,7 @@ after-publish-assets = "npm run after:publish:assets"
 
 [tool.ruff]
 exclude = ["*.ipynb"]
-target-version = "py310"
+target-version = "py311"
 line-length = 100
 lint.select = [
   "A", "ANN", "B", "C", "C4", "DTZ", "E", "EM", "F", "FBT", "FLY", "FURB", "I",
@@ -362,6 +295,8 @@ lint.ignore = [
 "E501",
 # PLR0913 Too many arguments to function call
 "PLR0913",
+# PLR0917 Too many positional arguments
+"PLR0917",
 # SIM105 Use `contextlib.suppress(...)`
 "SIM105",
 ]
@@ -389,8 +324,7 @@ suppress-none-returning = true
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
 "jupyterlab/browser_check.py" = ["RUF012"]
 # C901 method is too complex
-# ANN is being added incrementally; command helpers are covered separately.
-"jupyterlab/commands.py" = ["C901", "ANN"]
+"jupyterlab/commands.py" = ["C901"]
 # B028 No explicit `stacklevel` keyword argument found
 "jupyterlab/debuglog.py" = ["B028"]
 "jupyterlab/extensions/manager.py" = ["C901"]

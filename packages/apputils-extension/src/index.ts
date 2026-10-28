@@ -844,6 +844,8 @@ const sanitizer: JupyterFrontEndPlugin<IRenderMime.ISanitizer> = {
         .composite as Array<string>;
 
       const autolink = setting.get('autolink').composite as boolean;
+      const incrementalAutolink = setting.get('incrementalAutolink')
+        .composite as boolean;
       const allowNamedProperties = setting.get('allowNamedProperties')
         .composite as boolean;
       const allowCommandLinker = setting.get('allowCommandLinker')
@@ -854,6 +856,7 @@ const sanitizer: JupyterFrontEndPlugin<IRenderMime.ISanitizer> = {
       }
 
       sanitizer.setAutolink(autolink);
+      sanitizer.setIncrementalAutolink(incrementalAutolink);
       sanitizer.setAllowNamedProperties(allowNamedProperties);
       sanitizer.setAllowCommandLinker(allowCommandLinker);
     };

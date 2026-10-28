@@ -279,12 +279,15 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
       const autosaveInterval = settings.get('autosaveInterval').composite as
         | number
         | null;
-      docManager.autosaveInterval = autosaveInterval || 120;
+      docManager.autosaveInterval =
+        autosaveInterval === null || autosaveInterval === 0
+          ? 120
+          : autosaveInterval;
 
       // Handle last modified timestamp check margin
       const lastModifiedCheckMargin = settings.get('lastModifiedCheckMargin')
         .composite as number | null;
-      docManager.lastModifiedCheckMargin = lastModifiedCheckMargin || 500;
+      docManager.lastModifiedCheckMargin = lastModifiedCheckMargin ?? 500;
 
       const renameUntitledFile = settings.get('renameUntitledFileOnSave')
         .composite as boolean;
