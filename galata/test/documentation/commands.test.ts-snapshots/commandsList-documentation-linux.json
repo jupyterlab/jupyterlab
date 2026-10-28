@@ -110,6 +110,16 @@
     }
   },
   {
+    "id": "application:copy-image",
+    "label": "Copy Image",
+    "caption": "Copy image to clipboard",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "application:move-widget",
     "label": "Move Widget",
     "caption": "",
@@ -3890,6 +3900,16 @@
     }
   },
   {
+    "id": "markdownviewer:copy",
+    "label": "Copy",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "markdownviewer:edit",
     "label": "Show Markdown Editor",
     "caption": "",
@@ -3928,7 +3948,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "commandLinkerTrustBoundaryId": {
+          "type": "string",
+          "description": "The Markdown preview trust boundary ID"
+        }
+      }
     }
   },
   {
@@ -4616,6 +4641,21 @@
     }
   },
   {
+    "id": "notebook:make-cell-editable",
+    "label": "Enable Cell Editing…",
+    "caption": "Read-only cell",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether the command is being executed from the toolbar"
+        }
+      }
+    }
+  },
+  {
     "id": "notebook:merge-cell-above",
     "label": "Merge Cell Above",
     "caption": "",
@@ -5236,7 +5276,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "commandLinkerTrustBoundaryId": {
+          "type": "string",
+          "description": "The notebook trust boundary ID"
+        }
+      }
     }
   },
   {

@@ -409,7 +409,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
 
     if (palette) {
       palette.addItem({
-        category: 'Notebook Operations',
+        category: trans.__('Notebook Operations'),
         command: Debugger.CommandIDs.restartDebug
       });
     }
@@ -598,7 +598,7 @@ const variables: JupyterFrontEndPlugin<void> = {
           name?: string;
         };
 
-        if (!variableReference) {
+        if (variableReference === undefined) {
           variableReference =
             service.model.variables.selectedVariable?.variablesReference;
         }
@@ -609,7 +609,8 @@ const variables: JupyterFrontEndPlugin<void> = {
         const id = `jp-debugger-variable-${name}`;
         if (
           !name ||
-          !variableReference ||
+          variableReference === undefined ||
+          variableReference <= 0 ||
           tracker.find(widget => widget.id === id)
         ) {
           return;
@@ -680,7 +681,7 @@ const variables: JupyterFrontEndPlugin<void> = {
         if (!name) {
           name = service.model.variables.selectedVariable?.name;
         }
-        if (!frameId) {
+        if (frameId === undefined) {
           frameId = service.model.callstack.frame?.id;
         }
 
@@ -701,7 +702,7 @@ const variables: JupyterFrontEndPlugin<void> = {
         if (
           !name || // Name is mandatory
           trackerMime.find(widget => widget.id === id) || // Widget already exists
-          (!frameId && service.hasStoppedThreads()) // frame id missing on breakpoint
+          (frameId === undefined && service.hasStoppedThreads()) // frame id missing on breakpoint
         ) {
           return;
         }
@@ -1265,7 +1266,8 @@ const main: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.pauseOnExceptions, {
-      label: args => (args.filter as string) || 'Breakpoints on exception',
+      label: args =>
+        (args.filter as string) || trans.__('Breakpoints on exception'),
       caption: args => (args.description as string) ?? '',
       isToggled: args =>
         service.session?.isPausingOnException(args.filter as string) || false,
