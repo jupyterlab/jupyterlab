@@ -149,8 +149,7 @@ export abstract class ReactWidget extends Widget {
         requestIdleCallback(() => resolve());
       } else {
         // If the virtual node is null, unmount the node content
-        this._rootDOM.unmount();
-        this._rootDOM = null;
+        this._unmount();
         requestIdleCallback(() => resolve());
       }
     });
