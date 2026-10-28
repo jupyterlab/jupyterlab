@@ -3266,7 +3266,7 @@ describe('@jupyterlab/notebook', () => {
         }
       });
 
-      it('should reconnect future output when the newer-output notification expires', async () => {
+      it('should keep newer output available after the toast closes', async () => {
         const cell = widget.widgets[0] as CodeCell;
         const cellId = cell.model.id;
         const future = createResolvedFuture();
@@ -3275,13 +3275,41 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.deleteCells(widget);
         void future.onIOPub(createStreamMessage('after'));
         await future.done;
-        const notificationInfo = jest
-          .spyOn(Notification, 'info')
-          .mockImplementation(() => '');
+        const notificationInfo = jest.spyOn(Notification, 'info');
         jest.useFakeTimers();
         try {
           NotebookActions.undo(widget);
-          jest.advanceTimersByTime(10000);
+          jest.advanceTimersByTime(60000);
+          const notification = Notification.manager.notifications.find(
+            n => n.id === notificationInfo.mock.results[0].value
+          );
+          expect(notification).toBeDefined();
+          notification!.options.actions![0].callback(new MouseEvent('click'));
+          const restored = widget.widgets.find(
+            w => w.model.id === cellId
+          ) as CodeCell;
+          expect(restored.model.outputs.get(0).data[STDOUT_TYPE]).toBe(
+            'beforeafter'
+          );
+        } finally {
+          jest.useRealTimers();
+          notificationInfo.mockRestore();
+        }
+      });
+
+      it('should reconnect future output when the newer-output notification is closed', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        const cellId = cell.model.id;
+        const future = createResolvedFuture();
+        cell.outputArea.future = future;
+        void future.onIOPub(createStreamMessage('before'));
+        NotebookActions.deleteCells(widget);
+        void future.onIOPub(createStreamMessage('after'));
+        await future.done;
+        const notificationInfo = jest.spyOn(Notification, 'info');
+        try {
+          NotebookActions.undo(widget);
+          Notification.manager.dismiss(notificationInfo.mock.results[0].value);
           const restored = widget.widgets.find(
             w => w.model.id === cellId
           ) as CodeCell;
@@ -3291,7 +3319,6 @@ describe('@jupyterlab/notebook', () => {
             'beforelater'
           );
         } finally {
-          jest.useRealTimers();
           notificationInfo.mockRestore();
         }
       });
@@ -3368,10 +3395,7 @@ describe('@jupyterlab/notebook', () => {
           NotebookActions.deleteCells(widget);
           void future.onIOPub(createStreamMessage('after'));
           await future.done;
-          const notificationInfo = jest
-            .spyOn(Notification, 'info')
-            .mockImplementation(() => '');
-          jest.useFakeTimers();
+          const notificationInfo = jest.spyOn(Notification, 'info');
           try {
             NotebookActions.undo(widget);
             const restored = widget.widgets.find(
@@ -3383,7 +3407,9 @@ describe('@jupyterlab/notebook', () => {
             } else {
               restored.model.outputs.remove(0);
             }
-            jest.advanceTimersByTime(10000);
+            Notification.manager.dismiss(
+              notificationInfo.mock.results[0].value
+            );
             for (const displayId of ['first', 'second']) {
               void future.onIOPub(
                 KernelMessage.createMessage<KernelMessage.IUpdateDisplayDataMsg>(
@@ -3407,7 +3433,6 @@ describe('@jupyterlab/notebook', () => {
               action === 'clear' ? undefined : 'second updated'
             );
           } finally {
-            jest.useRealTimers();
             notificationInfo.mockRestore();
           }
         }

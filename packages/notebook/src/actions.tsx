@@ -3002,11 +3002,10 @@ namespace Private {
     pendingOutputExecutions.set(cell, storedExecution);
     const model = cell.model;
     let notificationId = '';
-    let dismissTimeout = 0;
     const dismiss = () => {
-      window.clearTimeout(dismissTimeout);
       cell.disposed.disconnect(dismiss);
       model.stateChanged.disconnect(onStateChanged);
+      Notification.manager.changed.disconnect(onNotificationChanged);
       pendingOutputExecutions.delete(cell);
       if (notificationId) {
         Notification.dismiss(notificationId);
@@ -3018,6 +3017,26 @@ namespace Private {
         storedExecution.pendingOutputs = false;
         storedExecution.buffered.length = 0;
         future.dispose();
+      }
+    };
+    // A toast that times out stays in the notification center, so only closing
+    // the notification keeps the restored output and reconnects the future.
+    const onNotificationChanged = (
+      _: unknown,
+      change: Notification.IChange
+    ) => {
+      if (
+        change.type !== 'removed' ||
+        change.notification.id !== notificationId
+      ) {
+        return;
+      }
+      const restore = canRestore();
+      dismiss();
+      if (restore) {
+        storedExecution.pendingOutputs = false;
+        storedExecution.buffered.length = 0;
+        cell.outputArea.reattachFuture(future);
       }
     };
     const canRestore = () =>
@@ -3046,15 +3065,7 @@ namespace Private {
         ]
       }
     );
-    dismissTimeout = window.setTimeout(() => {
-      const restore = canRestore();
-      dismiss();
-      if (restore) {
-        storedExecution.pendingOutputs = false;
-        storedExecution.buffered.length = 0;
-        cell.outputArea.reattachFuture(future);
-      }
-    }, NEW_OUTPUTS_NOTIFICATION_AUTO_CLOSE);
+    Notification.manager.changed.connect(onNotificationChanged);
   }
 
   /**
