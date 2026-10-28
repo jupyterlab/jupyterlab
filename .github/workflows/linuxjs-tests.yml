@@ -47,7 +47,7 @@ jobs:
     needs: setup
     strategy:
       matrix:
-        python-version: ["3.14"]
+        python-version: ["3.15"]
         group: ${{ fromJson(needs.setup.outputs.group) }}
       fail-fast: false
     runs-on: ubuntu-latest
@@ -61,7 +61,7 @@ jobs:
           persist-credentials: false
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@925e40fa6066f4533e0c40803bd4b6d0d2f4a781 # v1.1.0
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@4016d4e69656e13e662d629ee3c30dc31e68628f # v1.1.1
         with:
           python_package_manager: "uv pip"
 
