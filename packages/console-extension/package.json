@@ -42,6 +42,7 @@
     "@jupyterlab/codeeditor": "^4.7.0-alpha.2",
     "@jupyterlab/completer": "^4.7.0-alpha.2",
     "@jupyterlab/console": "^4.7.0-alpha.2",
+    "@jupyterlab/coreutils": "^6.7.0-alpha.2",
     "@jupyterlab/filebrowser": "^4.7.0-alpha.2",
     "@jupyterlab/launcher": "^4.7.0-alpha.2",
     "@jupyterlab/mainmenu": "^4.7.0-alpha.2",
@@ -54,7 +55,8 @@
     "@lumino/coreutils": "^2.2.3",
     "@lumino/disposable": "^2.1.6",
     "@lumino/properties": "^2.0.5",
-    "@lumino/widgets": "^2.10.0"
+    "@lumino/widgets": "^2.10.0",
+    "@rjsf/utils": "^5.13.4"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",

@@ -21,7 +21,7 @@ import type {
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 
-import type { PartialJSONValue } from '@lumino/coreutils';
+import type { PartialJSONObject, PartialJSONValue } from '@lumino/coreutils';
 import { PromiseDelegate } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import { DisposableDelegate } from '@lumino/disposable';
@@ -576,7 +576,9 @@ export class Context<
   /**
    * Handle an initial population.
    */
-  private async _populate(): Promise<void> {
+  private async _populate(
+    customKernelSpecs?: PartialJSONObject
+  ): Promise<void> {
     this._isPopulated = true;
     this._isReady = true;
     this._populatedPromise.resolve(void 0);
@@ -586,6 +588,19 @@ export class Context<
     if (this.isDisposed) {
       return;
     }
+    let newCustomKernelSpecs: PartialJSONObject | undefined = {
+      ...customKernelSpecs
+    };
+    if (
+      (!customKernelSpecs || !Object.keys(customKernelSpecs).length) &&
+      this.sessionContext.kernelPreference.customKernelSpecs &&
+      Object.keys(this.sessionContext.kernelPreference.customKernelSpecs).length
+    ) {
+      newCustomKernelSpecs = {
+        ...this.sessionContext.kernelPreference.customKernelSpecs
+      }; //?
+    }
+
     // Update the kernel preference.
     const name =
       this._model.defaultKernelName ||
@@ -593,7 +608,8 @@ export class Context<
     this.sessionContext.kernelPreference = {
       ...this.sessionContext.kernelPreference,
       name,
-      language: this._model.defaultKernelLanguage
+      language: this._model.defaultKernelLanguage,
+      customKernelSpecs: newCustomKernelSpecs
     };
     // Note: we don't wait on the session to initialize
     // so that the user can be shown the content before

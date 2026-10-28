@@ -10,7 +10,7 @@ import { DocumentWidget } from '@jupyterlab/docregistry';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 import type { ITranslator } from '@jupyterlab/translation';
-import { Token } from '@lumino/coreutils';
+import { type PartialJSONObject, Token } from '@lumino/coreutils';
 import type { INotebookModel } from './model';
 import type { StaticNotebook } from './widget';
 import { Notebook } from './widget';
@@ -287,11 +287,37 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       'kernelspec'
     ) as nbformat.IKernelspecMetadata;
     const preserved = oldSpec?.name === kernel.name ? oldSpec : undefined;
+
+    let customKernelSpecs =
+      this.context.sessionContext.kernelPreference?.customKernelSpecs!;
+    let data = {} as PartialJSONObject;
+    if (
+      customKernelSpecs &&
+      spec &&
+      spec?.metadata &&
+      spec?.metadata?.parameters &&
+      Object.keys(customKernelSpecs).length &&
+      Object.keys(spec?.metadata?.parameters).length
+    ) {
+      let kernelParameters = spec?.metadata?.parameters as PartialJSONObject;
+      for (let key in customKernelSpecs) {
+        let properties = kernelParameters.properties as PartialJSONObject;
+        let kernelParameter = properties[key] as PartialJSONObject;
+
+        if (kernelParameter && kernelParameter?.save) {
+          let item = customKernelSpecs[key] as PartialJSONObject | {};
+
+          data[key] = item;
+        }
+      }
+    }
+
     this.model!.setMetadata('kernelspec', {
       name: kernel.name,
       display_name:
         spec?.display_name ?? preserved?.display_name ?? kernel.name,
-      language: spec?.language ?? preserved?.language
+      language: spec?.language ?? preserved?.language,
+      ...(Object.keys(data).length ? { customKernelSpecs: data } : {})
     });
   }
 
