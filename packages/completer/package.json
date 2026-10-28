@@ -46,8 +46,8 @@
   },
   "dependencies": {
     "@codemirror/language": "^6.12.1",
-    "@codemirror/state": "^6.5.4",
-    "@codemirror/view": "^6.39.14",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.15",
     "@jupyter/ydoc": "^4.0.0",
     "@jupyterlab/apputils": "^4.8.0-alpha.2",
     "@jupyterlab/codeeditor": "^4.7.0-alpha.2",
