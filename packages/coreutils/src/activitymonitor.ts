@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { IDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
@@ -15,7 +13,10 @@ export class ActivityMonitor<Sender, Args> implements IDisposable {
    */
   constructor(options: ActivityMonitor.IOptions<Sender, Args>) {
     options.signal.connect(this._onSignalFired, this);
-    this._timeout = options.timeout || 1000;
+    this._timeout =
+      options.timeout === undefined || options.timeout === 0
+        ? 1000
+        : options.timeout;
   }
 
   /**
@@ -74,7 +75,7 @@ export class ActivityMonitor<Sender, Args> implements IDisposable {
     }, this._timeout);
   }
 
-  private _timer: any = -1;
+  private _timer: ReturnType<typeof setTimeout> | undefined;
   private _timeout = -1;
   private _sender: Sender;
   private _args: Args;

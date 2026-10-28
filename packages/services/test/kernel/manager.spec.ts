@@ -3,7 +3,7 @@
 
 import { JupyterServer, sleep, testEmission } from '@jupyterlab/testing';
 import type { Kernel } from '../../src';
-import { KernelAPI, KernelManager } from '../../src';
+import { CommsOverSubshells, KernelAPI, KernelManager } from '../../src';
 import { makeSettings } from '../utils';
 
 describe('kernel/manager', () => {
@@ -139,6 +139,15 @@ describe('kernel/manager', () => {
         await kernel.info;
         expect(called).toBe(true);
       });
+
+      it('should keep the comms over subshells mode given in the options', async () => {
+        manager.commsOverSubshells = CommsOverSubshells.PerComm;
+        const kernel = await manager.startNew(
+          {},
+          { commsOverSubshells: CommsOverSubshells.Disabled }
+        );
+        expect(kernel.commsOverSubshells).toBe(CommsOverSubshells.Disabled);
+      });
     });
 
     describe('#findById()', () => {
@@ -154,6 +163,32 @@ describe('kernel/manager', () => {
         const id = kernel.id;
         const newConnection = manager.connectTo({ model: kernel });
         expect(newConnection.model.id).toBe(id);
+      });
+
+      it('should use the comms over subshells mode of the manager', () => {
+        manager.commsOverSubshells = CommsOverSubshells.PerComm;
+        const connection = manager.connectTo({ model: kernel });
+        expect(connection.commsOverSubshells).toBe(CommsOverSubshells.PerComm);
+        connection.dispose();
+      });
+
+      it('should keep the comms over subshells mode given in the options', () => {
+        manager.commsOverSubshells = CommsOverSubshells.PerComm;
+        const connection = manager.connectTo({
+          model: kernel,
+          commsOverSubshells: CommsOverSubshells.Disabled
+        });
+        expect(connection.commsOverSubshells).toBe(CommsOverSubshells.Disabled);
+        connection.dispose();
+      });
+
+      it('should not add the comms over subshells mode to the given options', () => {
+        const options: Omit<
+          Kernel.IKernelConnection.IOptions,
+          'serverSettings'
+        > = { model: kernel };
+        manager.connectTo(options).dispose();
+        expect(options.commsOverSubshells).toBeUndefined();
       });
     });
 

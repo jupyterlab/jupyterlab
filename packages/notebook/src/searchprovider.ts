@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
+import type { IMapChange } from '@jupyter/ydoc';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import type {
   CellSearchProvider,
@@ -26,6 +25,7 @@ import type { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt } from '@lumino/algorithm';
+import { Debouncer } from '@lumino/polling';
 import type { Widget } from '@lumino/widgets';
 import type { CellList } from './celllist';
 import { NotebookPanel } from './panel';
@@ -66,20 +66,11 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._filtersChanged.connect(this._setEnginesSelectionSearchMode, this);
   }
 
-  private _onNotebookStateChanged(_: Notebook, args: IChangedArgs<any>) {
+  private _onNotebookStateChanged(_: Notebook, args: IChangedArgs<unknown>) {
     if (args.name === 'mode') {
-      // Delay the update to ensure that `document.activeElement` settled.
-      window.setTimeout(() => {
-        if (
-          args.newValue === 'command' &&
-          document.activeElement?.closest('.jp-DocumentSearch-overlay')
-        ) {
-          // Do not request updating mode when user switched focus to search overlay.
-          return;
-        }
-        this._updateSelectionMode();
-        this._filtersChanged.emit();
-      }, 0);
+      // Debounce to ensure that `document.activeElement` settled, and to keep
+      // only the most recent mode transition.
+      void this._modeChangeDebouncer.invoke();
     }
   }
 
@@ -148,6 +139,16 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   /**
+   * The number of matches which can be replaced.
+   */
+  get replaceableMatchesCount(): number {
+    return this._searchProviders.reduce(
+      (sum, provider) => sum + provider.replaceableMatchesCount,
+      0
+    );
+  }
+
+  /**
    * Set to true if the widget under search is read-only, false
    * if it is editable. Will be used to determine whether to show
    * the replace option.
@@ -208,6 +209,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     );
     this._stopObservingLastCell();
 
+    this._modeChangeDebouncer.dispose();
+
     super.dispose();
 
     const index = this.widget.content.activeCellIndex;
@@ -234,11 +237,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       output: {
         title: trans.__('Search Cell Outputs'),
         description: trans.__('Search in the cell outputs.'),
-        disabledDescription: trans.__(
-          'Search in the cell outputs (not available when replace options are shown).'
-        ),
-        default: false,
-        supportReplace: false
+        default: false
       },
       selection: {
         title:
@@ -256,8 +255,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         description: trans.__(
           'Search only in the selected cells or text (depending on edit/command mode).'
         ),
-        default: false,
-        supportReplace: true
+        default: false
       }
     };
   }
@@ -369,6 +367,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._searchProviders = await Promise.all(
       cells.map(async (cell, index) => {
         const cellSearchProvider = createCellSearchProvider(cell);
+        cell.model.metadataChanged.connect(this._onCellMetadataChanged, this);
 
         await cellSearchProvider.setIsActive(
           !this._filters!.selection ||
@@ -426,6 +425,18 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   /**
+   * Get the current match, if any.
+   */
+  getCurrentMatch(): ISearchMatch | undefined {
+    if (this._currentProviderIndex === null) {
+      return undefined;
+    }
+    // The index points past the last cell after cells are deleted, until the
+    // search restarts.
+    return this._searchProviders[this._currentProviderIndex]?.getCurrentMatch();
+  }
+
+  /**
    * Replace the currently selected match with the provided text
    *
    * @param newText The replacement text.
@@ -467,7 +478,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       );
       if (searchEngine.currentMatchIndex === null) {
         // switch to next cell
-        await this.highlightNext(loop, { from: 'previous-match' });
+        await this.highlightNext(loop, {
+          from: 'previous-match',
+          skipReadOnly: true
+        });
       }
     }
 
@@ -538,6 +552,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   private _addCellProvider(index: number) {
     const cell = this.widget.content.widgets[index];
     const cellSearchProvider = createCellSearchProvider(cell);
+    cell.model.metadataChanged.connect(this._onCellMetadataChanged, this);
 
     ArrayExt.insert(this._searchProviders, index, cellSearchProvider);
 
@@ -599,6 +614,13 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._stateChanged.emit();
   }
 
+  private _onCellMetadataChanged(_: ICellModel, change: IMapChange): void {
+    if (change.key === 'editable') {
+      // The search box disables Replace for matches in read-only cells
+      this._stateChanged.emit();
+    }
+  }
+
   private async _stepNext(
     reverse = false,
     loop = false,
@@ -642,9 +664,28 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       }
 
       await activeCell.ready;
-      const editor = activeCell.editor!;
-      editor.revealPosition(editor.getPositionAt(match.position)!);
+      // Matches in the cell source come from `EditorSearchProvider` as plain
+      // `ISearchMatch` objects, without `node`. Output matches come from
+      // `GenericSearchProvider` as `IHTMLSearchMatch` objects: `node` is the
+      // text node holding the match, `position` counts from the start of that
+      // node, and that provider already scrolled the match into view.
+      if (!('node' in match)) {
+        const editor = activeCell.editor!;
+        editor.revealPosition(editor.getPositionAt(match.position)!);
+      }
       this._selectionLock = false;
+    };
+
+    const highlightInCell = async (
+      searchEngine: CellSearchProvider
+    ): Promise<ISearchMatch | undefined> => {
+      if (options?.skipReadOnly && searchEngine.isReadOnlyProvider()) {
+        // Treat it as a cell without matches, so the loop below still ends
+        return undefined;
+      }
+      return reverse
+        ? searchEngine.highlightPrevious(false, options)
+        : searchEngine.highlightNext(false, options);
     };
 
     if (this._currentProviderIndex === null) {
@@ -695,9 +736,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     do {
       const searchEngine = this._searchProviders[this._currentProviderIndex];
 
-      const match = reverse
-        ? await searchEngine.highlightPrevious(false, options)
-        : await searchEngine.highlightNext(false, options);
+      const match = await highlightInCell(searchEngine);
 
       if (match) {
         await activateNewMatch(match);
@@ -722,10 +761,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
     if (loop) {
       // try the first provider again
-      const searchEngine = this._searchProviders[startIndex];
-      const match = reverse
-        ? await searchEngine.highlightPrevious(false, options)
-        : await searchEngine.highlightNext(false, options);
+      const match = await highlightInCell(this._searchProviders[startIndex]);
       if (match) {
         await activateNewMatch(match);
         return match;
@@ -796,7 +832,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         return;
       }
       const currentMatch = searchEngine.getCurrentMatch();
-      if (!currentMatch && this.matchesCount) {
+      const matchesCount = this.matchesCount;
+      if (!currentMatch && matchesCount !== null && matchesCount > 0) {
         // Select a match as current by highlighting next (with looping) from
         // the selection start, to prevent "current" match from jumping around.
         await this.highlightNext(true, {
@@ -932,6 +969,19 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   protected delayedActiveCellChangeHandlerReady: Promise<void>;
   private _currentProviderIndex: number | null = null;
   private _delayedActiveCellChangeHandler: number | null = null;
+  private _modeChangeDebouncer = new Debouncer(() => {
+    // The mode can change again before this handler runs; check the
+    // current mode because this is what `_updateSelectionMode()` acts on.
+    if (
+      this.widget.content.mode === 'command' &&
+      document.activeElement?.closest('.jp-DocumentSearch-overlay')
+    ) {
+      // Do not request updating mode when user switched focus to search overlay.
+      return;
+    }
+    this._updateSelectionMode();
+    this._filtersChanged.emit();
+  }, 0);
   private _filters: IFilters | undefined;
   private _onSelection = false;
   private _selectedCells: number = 1;

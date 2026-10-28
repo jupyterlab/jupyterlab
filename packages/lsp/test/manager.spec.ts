@@ -4,7 +4,9 @@
  */
 
 import { LanguageServerManager } from '@jupyterlab/lsp';
+import type { ILanguageServerProvider } from '@jupyterlab/lsp';
 import { ServerConnection } from '@jupyterlab/services';
+import { Signal } from '@lumino/signaling';
 
 const spy = jest.spyOn(ServerConnection, 'makeRequest');
 const specs = {
@@ -30,6 +32,29 @@ const sessions = {
   }
   /* eslint-enable  */
 };
+const runtimeSpecs = {
+  /* eslint-disable */
+  pyright: {
+    argv: [''],
+    display_name: 'pyright',
+    env: {},
+    languages: ['python'],
+    mime_types: ['text/python'],
+    version: 2
+  }
+  /* eslint-enable  */
+};
+const runtimeSessions = {
+  /* eslint-disable */
+  pyright: {
+    handler_count: 0,
+    last_handler_message_at: null,
+    last_server_message_at: null,
+    spec: runtimeSpecs.pyright,
+    status: 'started'
+  }
+  /* eslint-enable  */
+};
 spy.mockImplementation((status, method, setting) => {
   return Promise.resolve({
     ok: true,
@@ -52,6 +77,202 @@ describe('@jupyterlab/lsp', () => {
         await manager.fetchSessions();
         expect(manager.sessions.has('pyls' as any)).toEqual(true);
         expect(manager.specs.has('pyls' as any)).toEqual(true);
+      });
+
+      it('should merge runtime provider sessions and specs', async () => {
+        const provider: ILanguageServerProvider = {
+          id: 'test-provider',
+          fetch: async () => ({
+            sessions: runtimeSessions as any,
+            specs: runtimeSpecs as any
+          })
+        };
+
+        manager.registerProvider(provider);
+        await manager.fetchSessions();
+
+        expect(manager.sessions.has('pyright' as any)).toEqual(true);
+        expect(manager.specs.has('pyright' as any)).toEqual(true);
+      });
+
+      it('should remove provider sessions and specs after disposal', async () => {
+        const provider: ILanguageServerProvider = {
+          id: 'test-provider',
+          fetch: async () => ({
+            sessions: runtimeSessions as any,
+            specs: runtimeSpecs as any
+          })
+        };
+
+        const disposable = manager.registerProvider(provider);
+        await manager.fetchSessions();
+        expect(manager.sessions.has('pyright' as any)).toEqual(true);
+
+        disposable.dispose();
+        await manager.fetchSessions();
+
+        expect(manager.sessions.has('pyright' as any)).toEqual(false);
+        expect(manager.specs.has('pyright' as any)).toEqual(false);
+      });
+
+      it('should refresh when provider emits sessionsChanged', async () => {
+        let active = false;
+        const provider = {
+          id: 'test-provider',
+          fetch: async () => ({
+            sessions: active ? (runtimeSessions as any) : {},
+            specs: active ? (runtimeSpecs as any) : {}
+          })
+        } as ILanguageServerProvider;
+        const sessionsChanged = new Signal<ILanguageServerProvider, void>(
+          provider
+        );
+        (provider as any).sessionsChanged = sessionsChanged;
+
+        manager.registerProvider(provider);
+        await manager.fetchSessions();
+        expect(manager.sessions.has('pyright' as any)).toEqual(false);
+
+        active = true;
+        sessionsChanged.emit(void 0);
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        expect(manager.sessions.has('pyright' as any)).toEqual(true);
+        expect(manager.specs.has('pyright' as any)).toEqual(true);
+      });
+
+      it('should preserve previous sessions/specs on malformed server payload', async () => {
+        await manager.fetchSessions();
+        expect(manager.sessions.has('pyls' as any)).toEqual(true);
+
+        const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+        spy.mockImplementationOnce((status, method, setting) => {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: () => {
+              throw new Error('malformed');
+            }
+          }) as any;
+        });
+        await manager.fetchSessions();
+
+        expect(manager.sessions.has('pyls' as any)).toEqual(true);
+        expect(manager.specs.has('pyls' as any)).toEqual(true);
+        warnSpy.mockRestore();
+      });
+
+      it('should fetch providers when the server request rejects', async () => {
+        const defaultImplementation = spy.getMockImplementation();
+        const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+        spy.mockImplementation(() => {
+          return Promise.reject(new Error('offline'));
+        });
+
+        const provider: ILanguageServerProvider = {
+          id: 'test-provider',
+          fetch: async () => ({
+            sessions: runtimeSessions as any,
+            specs: runtimeSpecs as any
+          })
+        };
+
+        manager.registerProvider(provider);
+        await manager.fetchSessions();
+
+        expect(manager.sessions.has('pyright' as any)).toEqual(true);
+        expect(manager.specs.has('pyright' as any)).toEqual(true);
+
+        spy.mockImplementation(defaultImplementation!);
+        warnSpy.mockRestore();
+      });
+
+      it('should not register the same provider id twice', async () => {
+        const firstProvider: ILanguageServerProvider = {
+          id: 'test-provider',
+          fetch: async () => ({
+            sessions: runtimeSessions as any,
+            specs: runtimeSpecs as any
+          })
+        };
+        const secondProvider: ILanguageServerProvider = {
+          id: 'test-provider',
+          fetch: jest.fn(async () => ({
+            sessions: {},
+            specs: {}
+          }))
+        };
+        const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+        manager.registerProvider(firstProvider);
+        const duplicateDisposable = manager.registerProvider(secondProvider);
+        await manager.fetchSessions();
+        duplicateDisposable.dispose();
+
+        expect(manager.sessions.has('pyright' as any)).toEqual(true);
+        expect(secondProvider.fetch).not.toHaveBeenCalled();
+        expect(warnSpy).toHaveBeenLastCalledWith(
+          expect.stringContaining(
+            'Language server provider with id test-provider is already registered'
+          )
+        );
+
+        warnSpy.mockRestore();
+      });
+
+      it('should not expose stale server sessions or specs after disable', async () => {
+        await manager.fetchSessions();
+        expect(manager.sessions.has('pyls' as any)).toEqual(true);
+
+        const defaultImplementation = spy.getMockImplementation();
+        const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+        manager.disable();
+        expect(manager.sessions.has('pyls' as any)).toEqual(false);
+        expect(manager.specs.has('pyls' as any)).toEqual(false);
+        spy.mockImplementation((status, method, setting) => {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: () => {
+              throw new Error('malformed');
+            }
+          }) as any;
+        });
+
+        await manager.enable();
+
+        expect(manager.sessions.has('pyls' as any)).toEqual(false);
+        expect(manager.specs.has('pyls' as any)).toEqual(false);
+
+        spy.mockImplementation(defaultImplementation!);
+        warnSpy.mockRestore();
+      });
+
+      it('should update status code when retry is scheduled', async () => {
+        spy.mockImplementationOnce((status, method, setting) => {
+          return Promise.resolve({
+            ok: false,
+            status: 503,
+            json: () => ({})
+          }) as any;
+        });
+        const setTimeoutSpy = jest
+          .spyOn(global, 'setTimeout')
+          .mockImplementation(((
+            _callback: (...args: any[]) => void,
+            _ms?: number
+          ) => {
+            return 0 as any;
+          }) as any);
+        const retryManager = new LanguageServerManager({
+          retries: 1,
+          retriesInterval: 1
+        });
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(retryManager.statusCode).toEqual(503);
+        setTimeoutSpy.mockRestore();
       });
     });
 

@@ -328,6 +328,7 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
 
   const thisObject: Contents.IManager = {
     ...jest.requireActual('@jupyterlab/services'),
+    serverSettings: dummy.serverSettings,
     newUntitled: jest.fn(options => {
       const driveName = dummy.driveName(options?.path || '');
       const localPath = dummy.localPath(options?.path || '');

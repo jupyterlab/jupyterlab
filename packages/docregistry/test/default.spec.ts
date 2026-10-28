@@ -16,7 +16,7 @@ import {
 import { createFileContextWithMockedServices } from '@jupyterlab/docregistry/lib/testutils';
 import type { ServiceManager } from '@jupyterlab/services';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
-import { sleep } from '@jupyterlab/testing';
+import { framePromise, sleep } from '@jupyterlab/testing';
 import { UUID } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
@@ -616,6 +616,29 @@ describe('docregistry/default', () => {
         expect(widget.title.className).toContain('jp-mod-dirty');
         context.model.dirty = false;
         expect(widget.title.className).not.toContain('jp-mod-dirty');
+      });
+
+      it('should add the read-only indicator when the file is not writable', async () => {
+        // Force the contents model to report the document as read-only.
+        const baseModel = context.contentsModel;
+        Object.defineProperty(context, 'contentsModel', {
+          configurable: true,
+          get: () => ({ ...baseModel!, writable: false })
+        });
+
+        // The read-only state is handled once the context is ready.
+        const readOnlyWidget = new DocumentWidget({
+          context,
+          content: new Widget()
+        });
+        await context.ready;
+        await framePromise();
+
+        expect(Array.from(readOnlyWidget.toolbar.names())).toContain(
+          'read-only-indicator'
+        );
+
+        readOnlyWidget.dispose();
       });
 
       it('should store the context', () => {
