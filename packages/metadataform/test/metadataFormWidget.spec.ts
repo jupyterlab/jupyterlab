@@ -1085,6 +1085,10 @@ describe('metadataform/form field ids', () => {
           properties: { heading: { type: 'null', title: 'A heading' } }
         }
       }
+    ],
+    [
+      'a null option',
+      { '/foo/heading': { anyOf: [{ type: 'null' }, { type: 'string' }] } }
     ]
   ])(
     'should not write a null field when the form opens (%s)',
@@ -1093,6 +1097,62 @@ describe('metadataform/form field ids', () => {
       await sleep(100);
 
       expect(cellMetadata()).toEqual({});
+    }
+  );
+
+  it('should not write a null field that a change of another key shows', async () => {
+    const metadataForm = await buildForm(
+      { '/show': { type: 'boolean' } },
+      {},
+      {},
+      [
+        {
+          if: { properties: { '/show': { const: true } }, required: ['/show'] },
+          then: {
+            properties: { '/foo/heading': { type: 'null', title: 'A heading' } }
+          }
+        }
+      ]
+    );
+
+    metadataForm.node
+      .querySelector<HTMLInputElement>('input[type="checkbox"]')!
+      .click();
+    await sleep(100);
+
+    expect(cellMetadata()).toEqual({ show: true });
+  });
+
+  it.each<[string, MetadataForm.IMetadataSchema['properties'], string]>([
+    [
+      'a key',
+      { '/opt/x': { anyOf: [{ type: 'string' }, { type: 'null' }] } },
+      '_/opt/x'
+    ],
+    [
+      'a field of an object key',
+      {
+        '/opt': {
+          type: 'object',
+          properties: { x: { anyOf: [{ type: 'string' }, { type: 'null' }] } }
+        }
+      },
+      '_/opt_x'
+    ]
+  ])(
+    'should write null when the null option of %s is chosen',
+    async (_name, properties, fieldId) => {
+      tracker.activeCell!.model.setMetadata('opt', { x: 'a' });
+      const metadataForm = await buildForm(properties);
+
+      const select = metadataForm.node.querySelector<HTMLSelectElement>(
+        `select[id$="${fieldId}__anyof_select"]`
+      )!;
+      select.value = '1';
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      await sleep(100);
+
+      expect(cellMetadata()).toEqual({ opt: { x: null } });
     }
   );
 });

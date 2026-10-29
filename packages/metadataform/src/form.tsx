@@ -33,12 +33,7 @@ export class FormWidget extends ReactWidget {
     // RJSF uses the root field id of the uiSchema instead of the prefix, if set.
     const rootId =
       (props.uiSchema['ui:rootFieldId'] as unknown as string) || this._idPrefix;
-    this._fields = {
-      SchemaField: Private.createSchemaField(rootId),
-      // RJSF's NullField calls onChange(null) when it mounts without a value,
-      // and the form writes every change to the metadata.
-      NullField: () => null
-    };
+    this._fields = Private.createFields(rootId);
     if (Private.getValidator() === null) {
       void Private.ensureValidator().then(() => {
         if (!this.isDisposed) {
@@ -122,13 +117,22 @@ namespace Private {
   }
 
   /**
-   * Create a SchemaField that reports each change of a metadata key's field
-   * with the key as id, because a field id joins names with `_` and keys may
-   * contain `_` too.
+   * Create the SchemaField and the NullField of the form.
+   *
+   * The SchemaField reports each change of a metadata key's field with the key
+   * as id, because a field id joins names with `_` and keys may contain `_` too.
    */
-  export function createSchemaField(rootId: string): Field {
-    const { SchemaField } = getDefaultRegistry().fields;
-    return function MetadataSchemaField(props: FieldProps): JSX.Element {
+  export function createFields(rootId: string): {
+    SchemaField: Field;
+    NullField: Field;
+  } {
+    const { NullField, SchemaField } = getDefaultRegistry().fields;
+    // The metadata key of the field that reported the last change.
+    let changedKey: string | null = null;
+    // The metadata key of the field that a field is in.
+    const KeyContext = React.createContext<string | null>(null);
+
+    function MetadataSchemaField(props: FieldProps): JSX.Element {
       const { idSchema, name, onChange } = props;
       // The id of a property of the root field is the root id and its name;
       // the ids of nested fields are longer.
@@ -136,11 +140,29 @@ namespace Private {
         return <SchemaField {...props} />;
       }
       return (
-        <SchemaField
-          {...props}
-          onChange={(value, errorSchema) => onChange(value, errorSchema, name)}
-        />
+        <KeyContext.Provider value={name}>
+          <SchemaField
+            {...props}
+            onChange={(value, errorSchema) => {
+              changedKey = name;
+              onChange(value, errorSchema, name);
+            }}
+          />
+        </KeyContext.Provider>
       );
-    };
+    }
+
+    function MetadataNullField(props: FieldProps): JSX.Element | null {
+      // RJSF's NullField sets a missing value to null when it mounts, and the
+      // form writes that change. Use it only for a field that mounts after a
+      // change of its key, such as the null option that the user chooses.
+      const key = React.useContext(KeyContext);
+      const [afterChange] = React.useState(
+        () => key !== null && key === changedKey
+      );
+      return afterChange ? <NullField {...props} /> : null;
+    }
+
+    return { SchemaField: MetadataSchemaField, NullField: MetadataNullField };
   }
 }
