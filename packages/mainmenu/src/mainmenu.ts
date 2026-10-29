@@ -605,6 +605,9 @@ namespace Private {
    * The label is left to assistive technologies and shown as a tooltip.
    */
   class IconMenuBarRenderer extends MenuBar.Renderer {
+    /**
+     * Render a menu bar item, with its label as a tooltip.
+     */
     renderItem(data: MenuBar.IRenderData): VirtualElement {
       const item = super.renderItem(data);
       return h.li({ ...item.attrs, title: data.title.label }, [
@@ -612,6 +615,9 @@ namespace Private {
       ]);
     }
 
+    /**
+     * Render the label of a menu bar item for screen readers only.
+     */
     renderLabel(data: MenuBar.IRenderData): VirtualElement {
       return h.div(
         { className: 'lm-MenuBar-itemLabel jp-sr-only' },
