@@ -6,6 +6,8 @@ set -ex
 set -o pipefail
 
 # use a single global cache dir
+# Workflows must also set this in the job env: base-setup resolves the yarn
+# cache folder to restore and save before this script runs.
 export YARN_ENABLE_GLOBAL_CACHE=1
 
 # display verbose output for pkg builds run during `jlpm`
@@ -55,13 +57,6 @@ uv pip install --system -e "${SPEC}" || uv pip install --verbose --system -e "${
 
 node -p process.versions
 jlpm config
-
-if [[ $GROUP != js-services ]]; then
-    # Tests run much faster in ipykernel 6, so use that except for
-    # ikernel.spec.ts in js-services, which tests subshell compatibility in
-    # ipykernel 7.
-    uv pip install --system "ipykernel<7"
-fi
 
 if [[ $GROUP == nonode ]]; then
     # Build the wheel

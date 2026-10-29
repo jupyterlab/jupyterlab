@@ -121,6 +121,8 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    * #### Notes
    * This will use the manager's server settings and ignore any server
    * settings passed in the options.
+   *
+   * The manager's `commsOverSubshells` is used unless the options give one.
    */
   connectTo(
     options: Omit<Kernel.IKernelConnection.IOptions, 'serverSettings'>
@@ -138,11 +140,11 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
       }
     }
 
-    options.commsOverSubshells = this._commsOverSubshells;
-
     const kernelConnection = new KernelConnection({
       handleComms,
       ...options,
+      commsOverSubshells:
+        options.commsOverSubshells ?? this._commsOverSubshells,
       serverSettings: this.serverSettings,
       kernelAPIClient: this._kernelAPIClient,
       kernelSpecAPIClient: this._kernelSpecAPIClient,

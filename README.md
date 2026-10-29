@@ -178,7 +178,7 @@ Prior to transition to the new governance model with the JupyterLab and then Fro
 
 ### Weekly Dev Meeting
 
-We have videoconference meetings every week where we discuss what we have been working on and get feedback from one another.
+We have video conference meetings every week where we discuss what we have been working on and get feedback from one another.
 
 Anyone is welcome to attend, if they would like to discuss a topic or just listen in.
 

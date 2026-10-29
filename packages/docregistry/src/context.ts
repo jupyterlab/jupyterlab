@@ -50,7 +50,7 @@ export class Context<
       new SessionContextDialogs({ translator: options.translator });
     this._opener = options.opener || Private.noOp;
     this._path = this._manager.contents.normalize(options.path);
-    this._lastModifiedCheckMargin = options.lastModifiedCheckMargin || 500;
+    this._lastModifiedCheckMargin = options.lastModifiedCheckMargin ?? 500;
     const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
@@ -77,6 +77,7 @@ export class Context<
 
     const ext = PathExt.extname(this._path);
     this.sessionContext = new SessionContext({
+      driveName: manager.contents.driveName(this._path),
       kernelManager: manager.kernels,
       sessionManager: manager.sessions,
       specsManager: manager.kernelspecs,
@@ -525,6 +526,7 @@ export class Context<
     const mod = this._contentsModel?.last_modified ?? null;
     const hash = this._contentsModel?.hash ?? null;
     this._contentsModel = newModel;
+    this._model.readOnly = newModel.writable === false;
     if (
       // If neither modification date nor hash available, assume the file has changed
       (!mod && !hash) ||
@@ -692,6 +694,9 @@ export class Context<
         if (this.isDisposed) {
           return;
         }
+        if (path !== this._path) {
+          return this._revert(initializeModel);
+        }
         if (contents.content) {
           if (contents.format === 'json') {
             model.fromJSON(contents.content);
@@ -718,6 +723,9 @@ export class Context<
         }
       })
       .catch(async err => {
+        if (!this.isDisposed && path !== this._path) {
+          return this._revert(initializeModel);
+        }
         const localPath = this._manager.contents.localPath(this._path);
         const name = PathExt.basename(localPath);
         void this._handleError(
@@ -873,7 +881,7 @@ or load the version on disk (revert)?`,
       this.path
     );
     const revertBtn = Dialog.okButton({
-      label: this._trans.__('Revert'),
+      label: this._trans.__('Reload from Disk'),
       actions: ['revert']
     });
     const overwriteBtn = Dialog.warnButton({

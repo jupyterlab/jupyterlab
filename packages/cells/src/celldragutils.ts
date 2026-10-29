@@ -146,7 +146,7 @@ export namespace CellDragUtils {
       const executionCount = (activeCell.model as ICodeCellModel)
         .executionCount;
       promptNumber = ' ';
-      if (executionCount) {
+      if (executionCount !== null) {
         promptNumber = executionCount.toString();
       }
     } else {

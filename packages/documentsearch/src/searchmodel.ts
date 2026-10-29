@@ -85,6 +85,25 @@ export class SearchDocumentModel
   }
 
   /**
+   * Whether the current match can be replaced.
+   */
+  get replaceEnabled(): boolean {
+    return !this.searchProvider.getCurrentMatch?.()?.readOnly;
+  }
+
+  /**
+   * Whether Replace All has a match to replace.
+   *
+   * It stays enabled when there are no matches, and when the provider does
+   * not count the matches which can be replaced.
+   */
+  get replaceAllEnabled(): boolean {
+    return (
+      !this.totalMatches || this.searchProvider.replaceableMatchesCount !== 0
+    );
+  }
+
+  /**
    * Filter definitions for the current provider.
    */
   get filtersDefinition(): { [n: string]: IFilter } {
@@ -305,6 +324,9 @@ export class SearchDocumentModel
    * Replace the current match.
    */
   async replaceCurrentMatch(): Promise<void> {
+    if (!this.replaceEnabled) {
+      return;
+    }
     await this.searchProvider.replaceCurrentMatch(this._replaceText, true, {
       preserveCase: this.preserveCase,
       regularExpression: this.useRegex
