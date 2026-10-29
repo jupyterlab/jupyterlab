@@ -5,6 +5,10 @@
   "jupyter.lab.toolbars": {
     "Cell": [
       {
+        "name": "non-editable-cell",
+        "command": "notebook:make-cell-editable"
+      },
+      {
         "name": "duplicate-cell",
         "command": "notebook:duplicate-below"
       },

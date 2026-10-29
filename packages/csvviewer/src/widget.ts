@@ -14,7 +14,7 @@ import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import type * as DSVModelModule from './model';
-import { CSVDelimiter } from './toolbar';
+import { CSVComment, CSVDelimiter } from './toolbar';
 
 /**
  * The class name added to a CSV viewer.
@@ -59,6 +59,10 @@ export class TextRenderConfig {
    * font family
    */
   fontFamily?: string;
+  /**
+   * text color of comment rows
+   */
+  commentColor?: string;
 }
 
 /**
@@ -474,6 +478,20 @@ export class CSVViewer extends Widget {
   }
 
   /**
+   * The optional comment character for the file.
+   */
+  get comment(): string | null {
+    return this._comment;
+  }
+  set comment(value: string | null) {
+    if (value === this._comment) {
+      return;
+    }
+    this._comment = value;
+    void this._updateGrid();
+  }
+
+  /**
    * The style used by the data grid.
    */
   get style(): DataGridModule.DataGrid.Style {
@@ -500,7 +518,7 @@ export class CSVViewer extends Widget {
 
   /**
    * A signal emitted when the data shown in the grid changes: after the file
-   * or the delimiter changes, and when the rest of a large file is parsed.
+   * or the parsing options change, and when the rest of a large file is parsed.
    */
   get dataChanged(): ISignal<CSVViewer, void> {
     return this._dataChanged;
@@ -520,7 +538,10 @@ export class CSVViewer extends Widget {
    * Go to line
    */
   goToLine(lineNumber: number): void {
-    this._grid.scrollToRow(lineNumber);
+    const model = this._grid.dataModel as DSVModelModule.DSVModel | null;
+    this._grid.scrollToRow(
+      model ? model.bodyRowForNumber(lineNumber) : lineNumber
+    );
   }
 
   /**
@@ -535,15 +556,33 @@ export class CSVViewer extends Widget {
    * Create the model for the grid.
    */
   private async _updateGrid(): Promise<void> {
+    const updateId = ++this._updateId;
     const { BasicSelectionModel } = await Private.ensureDataGrid();
     const { DSVModel } = await Private.ensureDSVModel();
+    if (updateId !== this._updateId) {
+      return;
+    }
     const data: string = this._context.model.toString();
     const delimiter = this._delimiter;
     const oldModel = this._grid.dataModel as DSVModelModule.DSVModel;
+    // Replacing the data model clears the grid's column sizes.
+    for (let i = 0; i < this._grid.columnCount('body'); i++) {
+      this._columnWidths[i] = this._grid.columnSize('body', i);
+    }
     const dataModel = (this._grid.dataModel = new DSVModel({
       data,
-      delimiter
+      delimiter,
+      comment: this._comment ?? undefined
     }));
+    const columnCount = Math.min(
+      dataModel.columnCount('body'),
+      this._columnWidths.length
+    );
+    for (let i = 0; i < columnCount; i++) {
+      if (this._columnWidths[i] !== this._grid.defaultSizes.columnWidth) {
+        this._grid.resizeColumn('body', i, this._columnWidths[i]);
+      }
+    }
     dataModel.changed.connect(this._onDataModelChanged, this);
     this._grid.selectionModel = new BasicSelectionModel({ dataModel });
     if (oldModel) {
@@ -554,9 +593,20 @@ export class CSVViewer extends Widget {
   }
 
   /**
-   * Handle a change of the data model.
+   * Restore widths of new columns and notify listeners of data changes.
    */
-  private _onDataModelChanged(): void {
+  private _onDataModelChanged(
+    sender: DSVModelModule.DSVModel,
+    args: DataGridModule.DataModel.ChangedArgs
+  ): void {
+    if (args.type === 'columns-inserted' && args.region === 'body') {
+      const end = Math.min(args.index + args.span, this._columnWidths.length);
+      for (let i = args.index; i < end; i++) {
+        if (this._columnWidths[i] !== this._grid.defaultSizes.columnWidth) {
+          this._grid.resizeColumn('body', i, this._columnWidths[i]);
+        }
+      }
+    }
     this._dataChanged.emit(undefined);
   }
 
@@ -569,10 +619,19 @@ export class CSVViewer extends Widget {
     }
     const { TextRenderer } = await Private.ensureDataGrid();
     const rendererConfig = this._baseRenderer;
+    const font = `${rendererConfig.fontSize ?? '12px'} ${rendererConfig.fontFamily ?? 'sans-serif'}`;
+    const isComment = (config: DataGridModule.CellRenderer.CellConfig) =>
+      config.region === 'body' && config.metadata.comment === true;
     const renderer = new TextRenderer({
-      font: `${rendererConfig.fontSize ?? '12px'} ${rendererConfig.fontFamily ?? 'sans-serif'}`,
-      textColor: rendererConfig.textColor,
-      horizontalAlignment: rendererConfig.horizontalAlignment,
+      font: config => (isComment(config) ? `italic ${font}` : font),
+      textColor: config =>
+        isComment(config)
+          ? (rendererConfig.commentColor ?? rendererConfig.textColor)
+          : rendererConfig.textColor,
+      horizontalAlignment: config =>
+        isComment(config) && config.metadata.merged === true
+          ? 'left'
+          : rendererConfig.horizontalAlignment,
       backgroundColor:
         this._searchService.cellBackgroundColorRendererFunc(rendererConfig)
     });
@@ -592,6 +651,9 @@ export class CSVViewer extends Widget {
   private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null =
     null;
   private _delimiter = ',';
+  private _comment: string | null = null;
+  private _columnWidths: number[] = [];
+  private _updateId = 0;
   private _revealed = new PromiseDelegate<void>();
   private _baseRenderer: TextRenderConfig | null = null;
   private _ready: Promise<void>;
@@ -692,6 +754,13 @@ export class CSVViewerFactory extends ABCWidgetFactory<
       {
         name: 'delimiter',
         widget: new CSVDelimiter({
+          widget: widget.content,
+          translator: this.translator
+        })
+      },
+      {
+        name: 'comment',
+        widget: new CSVComment({
           widget: widget.content,
           translator: this.translator
         })

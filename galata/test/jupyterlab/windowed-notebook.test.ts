@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import { expect, galata, test } from '@jupyterlab/galata';
+import type { NotebookPanel } from '@jupyterlab/notebook';
 import type { Locator } from '@playwright/test';
 import * as path from 'path';
 
@@ -76,6 +77,13 @@ test('should not update height when hiding', async ({ page, tmpPath }) => {
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
   const notebook = await page.notebook.getNotebookInPanelLocator();
   let initialHeight = 0;
+
+  // Off-screen cells are rendered when the browser is idle, which updates the
+  // estimated height of the notebook; on a busy runner this can take seconds.
+  await page.waitForFunction(() => {
+    const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+    return panel.content.widgets.every(cell => !cell.isPlaceholder());
+  });
 
   // Wait to ensure the rendering logic is stable: poll the inner height
   // every 600ms until two consecutive reads agree
