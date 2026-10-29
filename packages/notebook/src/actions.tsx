@@ -2662,11 +2662,6 @@ namespace Private {
      * discarded by action such as move.
      */
     activeCellId: string | null;
-
-    /**
-     * The active cell height before the action.
-     */
-    activeCellHeight: number;
   }
 
   /**
@@ -2675,9 +2670,7 @@ namespace Private {
   export function getState(notebook: Notebook): IState {
     return {
       wasFocused: notebook.node.contains(document.activeElement),
-      activeCellId: notebook.activeCell?.model.id ?? null,
-      activeCellHeight:
-        notebook.activeCell?.node.getBoundingClientRect().height ?? 0
+      activeCellId: notebook.activeCell?.model.id ?? null
     };
   }
 
@@ -2691,44 +2684,38 @@ namespace Private {
   ): Promise<void> {
     const { activeCell, activeCellIndex } = notebook;
     if (scrollIfNeeded && activeCell) {
-      const alignPreference = getActiveCellAlignmentPreference(notebook, state);
-      const scrollPromise =
-        alignPreference === undefined
-          ? notebook.scrollToItem(activeCellIndex, 'auto', 0)
-          : notebook.scrollToItem(activeCellIndex, 'auto', 0, alignPreference);
-
-      await scrollPromise.catch(reason => {
-        // no-op
-      });
+      await notebook
+        .scrollToItem(
+          activeCellIndex,
+          'auto',
+          0,
+          getActiveCellAlignmentPreference(notebook)
+        )
+        .catch(reason => {
+          // no-op
+        });
     }
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();
     }
   }
 
+  /**
+   * Get the alignment preference used when scrolling to the active cell.
+   *
+   * Cells taller than the viewport are aligned to their start so that
+   * navigation does not land at the end of long outputs; other cells
+   * keep the default `auto` heuristic which minimizes viewport shift.
+   */
   function getActiveCellAlignmentPreference(
-    notebook: Notebook,
-    state: IState
+    notebook: Notebook
   ): 'start' | undefined {
-    const { activeCell } = notebook;
-    if (!activeCell) {
-      return;
-    }
-
     const viewportHeight = notebook.outerNode.clientHeight;
-    if (viewportHeight <= 0) {
-      return;
-    }
-
-    const activeCellHeight = activeCell.node.getBoundingClientRect().height;
-    const sameActiveCell =
-      state.activeCellId !== null && state.activeCellId === activeCell.model.id;
-    const activeCellWasOversized =
-      sameActiveCell && state.activeCellHeight > viewportHeight;
-
-    if (activeCellHeight > viewportHeight || activeCellWasOversized) {
-      return 'start';
-    }
+    const activeCellHeight =
+      notebook.activeCell?.node.getBoundingClientRect().height ?? 0;
+    return viewportHeight > 0 && activeCellHeight > viewportHeight
+      ? 'start'
+      : undefined;
   }
 
   /**

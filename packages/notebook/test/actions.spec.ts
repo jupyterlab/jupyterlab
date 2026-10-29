@@ -133,27 +133,24 @@ describe('@jupyterlab/notebook', () => {
       } as DOMRect;
     }
 
-    function setViewportHeight(height: number) {
-      return jest
-        .spyOn(widget, 'outerNode', 'get')
-        .mockReturnValue({ clientHeight: height } as HTMLElement);
+    function mockViewportHeight(height: number) {
+      jest
+        .spyOn(widget.outerNode, 'clientHeight', 'get')
+        .mockReturnValue(height);
     }
 
-    function mockCellHeights(cell: Cell, ...heights: number[]) {
-      const remainingHeights = [...heights];
-
-      return jest
+    function mockCellHeight(cell: Cell, height: number) {
+      jest
         .spyOn(cell.node, 'getBoundingClientRect')
-        .mockImplementation(() =>
-          createDOMRect(
-            remainingHeights.length > 1
-              ? remainingHeights.shift()!
-              : (remainingHeights[0] ?? 0)
-          )
-        );
+        .mockReturnValue(createDOMRect(height));
+    }
+
+    function mockScrollToItem() {
+      return jest.spyOn(widget, 'scrollToItem').mockResolvedValue(undefined);
     }
 
     afterEach(() => {
+      jest.restoreAllMocks();
       widget.model?.dispose();
       widget.dispose();
       utils.clipboard.clear();
@@ -670,18 +667,13 @@ describe('@jupyterlab/notebook', () => {
 
       it('should prefer scrolling to the start when the next active cell is taller than the viewport', () => {
         widget.activeCellIndex = 1;
-        const outerNodeSpy = setViewportHeight(200);
-        const nextCellRectSpy = mockCellHeights(widget.widgets[2], 400);
-        const scrollSpy = jest
-          .spyOn(widget, 'scrollToItem')
-          .mockResolvedValue(undefined);
+        mockViewportHeight(200);
+        mockCellHeight(widget.widgets[2], 400);
+        const scrollSpy = mockScrollToItem();
 
         NotebookActions.deleteCells(widget);
 
         expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, 'start');
-        outerNodeSpy.mockRestore();
-        nextCellRectSpy.mockRestore();
-        scrollSpy.mockRestore();
       });
 
       it('should activate the cell after the last selected cell', () => {
@@ -1479,20 +1471,15 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCellIndex).toBe(0);
       });
 
-      it('should prefer scrolling to the start for a selected cell taller than the viewport', () => {
+      it('should prefer scrolling to the start when moving up into a cell taller than the viewport', () => {
         widget.activeCellIndex = 2;
-        const outerNodeSpy = setViewportHeight(200);
-        const selectedCellRectSpy = mockCellHeights(widget.widgets[1], 400);
-        const scrollSpy = jest
-          .spyOn(widget, 'scrollToItem')
-          .mockResolvedValue(undefined);
+        mockViewportHeight(200);
+        mockCellHeight(widget.widgets[1], 400);
+        const scrollSpy = mockScrollToItem();
 
         NotebookActions.selectAbove(widget);
 
         expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, 'start');
-        outerNodeSpy.mockRestore();
-        selectedCellRectSpy.mockRestore();
-        scrollSpy.mockRestore();
       });
 
       it('should be a no-op if there is no model', () => {
@@ -1532,34 +1519,24 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCellIndex).toBe(1);
       });
 
-      it('should preserve auto alignment for a selected cell smaller than the viewport', () => {
-        const outerNodeSpy = setViewportHeight(400);
-        const selectedCellRectSpy = mockCellHeights(widget.widgets[1], 200);
-        const scrollSpy = jest
-          .spyOn(widget, 'scrollToItem')
-          .mockResolvedValue(undefined);
+      it('should keep the auto alignment heuristic when moving down into a cell smaller than the viewport', () => {
+        mockViewportHeight(400);
+        mockCellHeight(widget.widgets[1], 200);
+        const scrollSpy = mockScrollToItem();
 
         NotebookActions.selectBelow(widget);
 
-        expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0);
-        outerNodeSpy.mockRestore();
-        selectedCellRectSpy.mockRestore();
-        scrollSpy.mockRestore();
+        expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, undefined);
       });
 
-      it('should prefer scrolling to the start for a selected cell taller than the viewport', () => {
-        const outerNodeSpy = setViewportHeight(200);
-        const selectedCellRectSpy = mockCellHeights(widget.widgets[1], 400);
-        const scrollSpy = jest
-          .spyOn(widget, 'scrollToItem')
-          .mockResolvedValue(undefined);
+      it('should prefer scrolling to the start when moving down into a cell taller than the viewport', () => {
+        mockViewportHeight(200);
+        mockCellHeight(widget.widgets[1], 400);
+        const scrollSpy = mockScrollToItem();
 
         NotebookActions.selectBelow(widget);
 
         expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, 'start');
-        outerNodeSpy.mockRestore();
-        selectedCellRectSpy.mockRestore();
-        scrollSpy.mockRestore();
       });
 
       it('should be a no-op if there is no model', () => {
@@ -2553,26 +2530,6 @@ describe('@jupyterlab/notebook', () => {
         widget.select(next);
         NotebookActions.hideOutput(widget);
         expect((widget.activeCell as CodeCell).outputHidden).toBe(true);
-      });
-
-      it('should prefer scrolling to the start when hiding output for a cell that was taller than the viewport', () => {
-        widget.activeCellIndex = 1;
-        const outerNodeSpy = setViewportHeight(200);
-        const selectedCellRectSpy = mockCellHeights(
-          widget.widgets[1],
-          400,
-          120
-        );
-        const scrollSpy = jest
-          .spyOn(widget, 'scrollToItem')
-          .mockResolvedValue(undefined);
-
-        NotebookActions.hideOutput(widget);
-
-        expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, 'start');
-        outerNodeSpy.mockRestore();
-        selectedCellRectSpy.mockRestore();
-        scrollSpy.mockRestore();
       });
 
       it('should hide and show the outputs on the selected cell', () => {
