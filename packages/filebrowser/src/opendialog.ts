@@ -61,6 +61,10 @@ export namespace FileDialog {
      *
      * When set, navigation will be restricted to this path and its
      * subdirectories. Users will not be able to navigate above this path.
+     *
+     * The dialog applies this restriction in the browser, so it is not a
+     * security boundary. Users can still open any path under the server
+     * root, for example in the file browser.
      */
     root?: string;
 

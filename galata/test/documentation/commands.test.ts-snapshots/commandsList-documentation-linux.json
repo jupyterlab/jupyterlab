@@ -1586,7 +1586,9 @@
     "id": "console:replace-selection",
     "label": "Replace Selection in Console",
     "caption": "",
-    "shortcuts": [],
+    "shortcuts": [
+      "Alt -"
+    ],
     "args": {
       "type": "object",
       "properties": {
@@ -3148,7 +3150,9 @@
     "id": "fileeditor:replace-selection",
     "label": "Replace Selection in Editor",
     "caption": "",
-    "shortcuts": [],
+    "shortcuts": [
+      "Alt -"
+    ],
     "args": {
       "type": "object",
       "properties": {
@@ -4156,6 +4160,18 @@
     }
   },
   {
+    "id": "notebook:commit-metadata-and-save",
+    "label": "Commit Metadata and Save Notebook",
+    "caption": "Commit pending changes in the metadata editors, then save the notebook",
+    "shortcuts": [
+      "Ctrl S"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "notebook:copy-cell",
     "label": "Copy Cell",
     "caption": "Copy this cell",
@@ -4868,7 +4884,9 @@
     "id": "notebook:replace-selection",
     "label": "Replace Selection in Notebook Cell",
     "caption": "",
-    "shortcuts": [],
+    "shortcuts": [
+      "Alt -"
+    ],
     "args": {
       "type": "object",
       "properties": {
