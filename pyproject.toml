@@ -279,7 +279,7 @@ before-build-python = [
 ]
 after-publish-assets = [
     # Install is needed again because `before-bump-version` is skipped on restart of half-completed release runs
-    "pip install jupyter-builder",
+    "pip install jupyter-builder>=1.1.1",
     "npm run after:publish:assets",
 ]
 
