@@ -2889,13 +2889,38 @@ namespace Private {
   ): Promise<void> {
     const { activeCell, activeCellIndex } = notebook;
     if (scrollIfNeeded && activeCell) {
-      await notebook.scrollToItem(activeCellIndex, 'auto', 0).catch(reason => {
-        // no-op
-      });
+      await notebook
+        .scrollToItem(
+          activeCellIndex,
+          'auto',
+          0,
+          getActiveCellAlignmentPreference(notebook)
+        )
+        .catch(reason => {
+          // no-op
+        });
     }
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();
     }
+  }
+
+  /**
+   * Get the alignment preference used when scrolling to the active cell.
+   *
+   * Cells taller than the viewport are aligned to their start so that
+   * navigation does not land at the end of long outputs; other cells
+   * keep the default `auto` heuristic which minimizes viewport shift.
+   */
+  function getActiveCellAlignmentPreference(
+    notebook: Notebook
+  ): 'start' | undefined {
+    const viewportHeight = notebook.outerNode.clientHeight;
+    const activeCellHeight =
+      notebook.activeCell?.node.getBoundingClientRect().height ?? 0;
+    return viewportHeight > 0 && activeCellHeight > viewportHeight
+      ? 'start'
+      : undefined;
   }
 
   /**
