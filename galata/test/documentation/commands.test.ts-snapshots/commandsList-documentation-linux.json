@@ -59,7 +59,7 @@
       "properties": {
         "index": {
           "type": "number",
-          "description": "The index of the tab to activate (1-8, or 9 for last)"
+          "description": "The one-based index of the tab to activate in the current tab bar, or 0 for the last tab"
         }
       },
       "required": [

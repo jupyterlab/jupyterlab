@@ -415,9 +415,11 @@ describe('LabShell', () => {
               shell.activateTab(index);
               await framePromise();
 
-              expect(widgets.filter(widget => widget.activated)).toEqual([
-                widgets[pane + offset]
-              ]);
+              expect(
+                widgets
+                  .filter(widget => widget.activated)
+                  .map(widget => widget.id)
+              ).toEqual([widgets[pane + offset].id]);
             }
           }
         );
