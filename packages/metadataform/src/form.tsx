@@ -34,7 +34,7 @@ export class FormWidget extends ReactWidget {
     const rootId =
       (props.uiSchema['ui:rootFieldId'] as unknown as string) || this._idPrefix;
     this._fields = {
-      SchemaField: Private.createSchemaField(rootId, this._changedKeys)
+      SchemaField: Private.createSchemaField(rootId)
     };
     if (Private.getValidator() === null) {
       void Private.ensureValidator().then(() => {
@@ -69,19 +69,11 @@ export class FormWidget extends ReactWidget {
         liveValidate
         idPrefix={this._idPrefix}
         onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>, id?: string) => {
-          // Write only the metadata key whose field was changed. The form also
-          // reports values that it fills in itself, e.g. the defaults when it
-          // is created, for which no field recorded a key.
+          // The field of a metadata key reports its changes with the key as id.
+          // The values that the form fills in itself come without an id.
           if (id === undefined) return;
-          // The form reports the changes of a field in the order they were made.
-          const pendingKeys = this._changedKeys.get(id);
-          const metadataKey = pendingKeys?.shift();
-          if (metadataKey === undefined) return;
-          if (pendingKeys?.length === 0) this._changedKeys.delete(id);
           const formData = e.formData || {};
-          this._props.metadataFormWidget.updateMetadata({
-            [metadataKey]: formData[metadataKey]
-          });
+          this._props.metadataFormWidget.updateMetadata({ [id]: formData[id] });
         }}
         compact={true}
         showModifiedFromDefault={this._props.showModified}
@@ -93,11 +85,6 @@ export class FormWidget extends ReactWidget {
 
   private _props: MetadataForm.IProps;
   private _idPrefix: string;
-  /**
-   * The metadata keys of the changes that the form has not reported yet, in
-   * the order of the changes, by the id of the changed field.
-   */
-  private _changedKeys = new Map<string, string[]>();
   private _fields: { SchemaField: Field };
 }
 
@@ -132,47 +119,25 @@ namespace Private {
   }
 
   /**
-   * Create a SchemaField that records the metadata key of each change.
-   *
-   * RJSF reports a change with the id of the changed field, which joins the
-   * names of the metadata key and of the nested fields with `_`. Keys may
-   * contain `_` too, so an id does not identify a key. Instead, the field of
-   * each metadata key, i.e. each property of the root field, records its key
-   * for each change that it passes on, with the id that the form reports the
-   * change with.
-   *
-   * @param rootId - the id of the root field of the form.
-   * @param changedKeys - the map to record the metadata keys in.
+   * Create a SchemaField that reports each change of a metadata key's field
+   * with the key as id, because a field id joins names with `_` and keys may
+   * contain `_` too.
    */
-  export function createSchemaField(
-    rootId: string,
-    changedKeys: Map<string, string[]>
-  ): Field {
+  export function createSchemaField(rootId: string): Field {
     const { SchemaField } = getDefaultRegistry().fields;
-    // The change handlers that record a key. The option of a `oneOf` or
-    // `anyOf` key is rendered with the props of the key's field, including
-    // this handler, and must not record the key a second time.
-    const recording = new WeakSet<FieldProps['onChange']>();
     return function MetadataSchemaField(props: FieldProps): JSX.Element {
       const { idSchema, name, onChange } = props;
       // The id of a property of the root field is the root id and its name;
       // the ids of nested fields are longer.
-      if (idSchema.$id !== `${rootId}_${name}` || recording.has(onChange)) {
+      if (idSchema.$id !== `${rootId}_${name}`) {
         return <SchemaField {...props} />;
       }
-      const recordingOnChange: FieldProps['onChange'] = (
-        value,
-        errorSchema,
-        id
-      ) => {
-        const fieldId = id ?? idSchema.$id;
-        const pendingKeys = changedKeys.get(fieldId) ?? [];
-        pendingKeys.push(name);
-        changedKeys.set(fieldId, pendingKeys);
-        onChange(value, errorSchema, fieldId);
-      };
-      recording.add(recordingOnChange);
-      return <SchemaField {...props} onChange={recordingOnChange} />;
+      return (
+        <SchemaField
+          {...props}
+          onChange={(value, errorSchema) => onChange(value, errorSchema, name)}
+        />
+      );
     };
   }
 }

@@ -817,6 +817,41 @@ describe('metadataform/form field ids', () => {
     expect(model.getMetadata('a_b')).toBe('top changed');
   });
 
+  it('should write each change when a custom field renders the field of its key', async () => {
+    // The custom field of `/a_b` wraps the default field of the key, which has
+    // the same id as the field `b` of `/a`.
+    const model = tracker.activeCell!.model;
+    model.setMetadata('a', { b: 'nested' });
+    model.setMetadata('a_b', 'top');
+    const Decorated = (props: FieldProps): JSX.Element =>
+      React.createElement(
+        'div',
+        null,
+        React.createElement(props.registry.fields.SchemaField, {
+          ...props,
+          uiSchema: {}
+        })
+      );
+    const metadataForm = await buildForm(
+      {
+        '/a': { type: 'object', properties: { b: { type: 'string' } } },
+        '/a_b': { type: 'string' }
+      },
+      { '/a_b': { 'ui:field': Decorated } } as unknown as MetadataForm.IUiSchema
+    );
+    const inputs = Array.from(
+      metadataForm.node.querySelectorAll<HTMLInputElement>('input[type="text"]')
+    );
+    const nested = inputs.find(input => input.value === 'nested')!;
+    const top = inputs.find(input => input.value === 'top')!;
+
+    await typeInto(top, 'top changed');
+    await typeInto(nested, 'nested changed');
+
+    expect(model.getMetadata('a')).toEqual({ b: 'nested changed' });
+    expect(model.getMetadata('a_b')).toBe('top changed');
+  });
+
   it('should write the last value when a field reports two changes at once', async () => {
     const model = tracker.activeCell!.model;
     model.setMetadata('note', 'before');
