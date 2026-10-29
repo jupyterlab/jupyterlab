@@ -108,6 +108,8 @@ describe('@jupyterlab/mainmenu', () => {
         });
 
         mainMenu.collapseMode = 'always';
+        expect(changes).toEqual([true]);
+
         mainMenu.collapseMode = 'never';
         expect(changes).toEqual([true, false]);
       });
