@@ -157,7 +157,7 @@ test.describe('Collapsed main menu', () => {
       page.waitForResponse(
         response =>
           response.request().method() === 'PUT' &&
-          /api\/settings\/@jupyterlab\/mainmenu-extension:plugin/.test(
+          /api\/settings\/@jupyterlab\/mainmenu-extension:menu-bar/.test(
             response.request().url()
           )
       ),
@@ -177,8 +177,8 @@ test.describe('Automatically collapsed main menu', () => {
   test.use({
     mockSettings: {
       ...galata.DEFAULT_SETTINGS,
-      '@jupyterlab/mainmenu-extension:plugin': {
-        ...galata.DEFAULT_SETTINGS['@jupyterlab/mainmenu-extension:plugin'],
+      '@jupyterlab/mainmenu-extension:menu-bar': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/mainmenu-extension:menu-bar'],
         collapse: 'auto'
       }
     }

@@ -1,0 +1,42 @@
+{
+  "title": "Menu Bar",
+  "description": "Menu bar settings.",
+  "jupyter.lab.setting-icon": "ui-components:menu",
+  "jupyter.lab.setting-icon-label": "Menu Bar",
+  "jupyter.lab.menus": {
+    "main": [
+      {
+        "id": "jp-mainmenu-view",
+        "items": [
+          {
+            "type": "submenu",
+            "submenu": {
+              "id": "jp-mainmenu-view-appearance",
+              "items": [
+                {
+                  "command": "mainmenu:toggle-collapsed",
+                  "rank": 16
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "properties": {
+    "collapse": {
+      "title": "Collapse the main menu",
+      "description": "When to collapse the main menu into a single menu button: never, always, or automatically when the menu bar does not fit in the window.",
+      "type": "string",
+      "oneOf": [
+        { "const": "never", "title": "Never" },
+        { "const": "always", "title": "Always" },
+        { "const": "auto", "title": "Automatically" }
+      ],
+      "default": "never"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}

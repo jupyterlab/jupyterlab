@@ -52,6 +52,8 @@ import { recentsMenuPlugin } from './recents';
 
 const PLUGIN_ID = '@jupyterlab/mainmenu-extension:plugin';
 
+const MENU_BAR_PLUGIN_ID = '@jupyterlab/mainmenu-extension:menu-bar';
+
 /**
  * A namespace for command IDs of semantic extension points.
  */
@@ -162,9 +164,8 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     menu.collapsedMenuBar.id = 'jp-CollapsedMainMenu';
 
     // Built menu from settings
-    let settings: ISettingRegistry.ISettings | null = null;
     if (registry) {
-      settings = await Private.loadSettingsMenu(
+      await Private.loadSettingsMenu(
         registry,
         (aMenu: RankedMenu) => {
           menu.addMenu(aMenu, false, { rank: aMenu.rank });
@@ -294,6 +295,58 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
       }
     });
 
+    if (palette) {
+      // Add some of the commands defined here to the command palette.
+      palette.addItem({
+        command: CommandIDs.shutdown,
+        category: trans.__('Main Area')
+      });
+      palette.addItem({
+        command: CommandIDs.logout,
+        category: trans.__('Main Area')
+      });
+
+      palette.addItem({
+        command: CommandIDs.shutdownAllKernels,
+        category: trans.__('Kernel Operations')
+      });
+
+      palette.addItem({
+        command: CommandIDs.activatePreviouslyUsedTab,
+        category: trans.__('Main Area')
+      });
+    }
+
+    app.shell.add(menu, 'menu', { rank: 100 });
+    app.shell.add(menu.collapsedMenuBar, 'menu', { rank: 100 });
+
+    return menu;
+  }
+};
+
+/**
+ * A plugin to collapse the main menu into a single menu button.
+ */
+const menuBarPlugin: JupyterFrontEndPlugin<void> = {
+  id: MENU_BAR_PLUGIN_ID,
+  description: 'Adds a setting and a command to collapse the main menu.',
+  autoStart: true,
+  requires: [IMainMenu, ITranslator],
+  optional: [ICommandPalette, ISettingRegistry],
+  activate: async (
+    app: JupyterFrontEnd,
+    menu: IMainMenu,
+    translator: ITranslator,
+    palette: ICommandPalette | null,
+    registry: ISettingRegistry | null
+  ): Promise<void> => {
+    if (!(menu instanceof MainMenu)) {
+      return;
+    }
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+    const settings = registry ? await registry.load(MENU_BAR_PLUGIN_ID) : null;
+
     commands.addCommand(CommandIDs.toggleCollapsed, {
       label: trans.__('Collapse Main Menu'),
       caption: trans.__('Collapse the main menu into a single menu button'),
@@ -325,36 +378,11 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     }
 
     if (palette) {
-      // Add some of the commands defined here to the command palette.
-      palette.addItem({
-        command: CommandIDs.shutdown,
-        category: trans.__('Main Area')
-      });
-      palette.addItem({
-        command: CommandIDs.logout,
-        category: trans.__('Main Area')
-      });
-
-      palette.addItem({
-        command: CommandIDs.shutdownAllKernels,
-        category: trans.__('Kernel Operations')
-      });
-
-      palette.addItem({
-        command: CommandIDs.activatePreviouslyUsedTab,
-        category: trans.__('Main Area')
-      });
-
       palette.addItem({
         command: CommandIDs.toggleCollapsed,
         category: trans.__('Main Area')
       });
     }
-
-    app.shell.add(menu, 'menu', { rank: 100 });
-    app.shell.add(menu.collapsedMenuBar, 'menu', { rank: 100 });
-
-    return menu;
   }
 };
 
@@ -1069,7 +1097,7 @@ function createHelpMenu(
   });
 }
 
-export default [plugin, recentsMenuPlugin];
+export default [plugin, menuBarPlugin, recentsMenuPlugin];
 
 /**
  * A namespace for Private data.
@@ -1097,7 +1125,7 @@ namespace Private {
     addMenu: (menu: Menu) => void,
     menuFactory: (options: IMainMenu.IMenuOptions) => RankedMenu,
     translator: ITranslator
-  ): Promise<ISettingRegistry.ISettings> {
+  ): Promise<void> {
     const trans = translator.load('jupyterlab');
     let canonical: ISettingRegistry.ISchema | null = null;
     let loaded: { [name: string]: ISettingRegistry.IMenu[] } = {};
@@ -1242,7 +1270,5 @@ namespace Private {
         }
       }
     });
-
-    return settings;
   }
 }
