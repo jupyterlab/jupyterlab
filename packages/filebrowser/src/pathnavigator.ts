@@ -215,7 +215,7 @@ export class PathNavigator extends Widget {
         // Only list directories that `cd()` would navigate to.
         const path = contents.resolvePath(this._model.path, '/' + dirPart);
         const result = isPathWithinRoot(path, this._model.root)
-          ? await contents.get(dirPart || '', { content: true })
+          ? await contents.get(path, { content: true })
           : null;
         // Discard result if a newer fetch has started or the widget was closed.
         if (fetchId !== this._fetchId || !this._isOpen) {
