@@ -304,6 +304,61 @@ wish to run are passed in the `args` argument as a list of strings:
 In this example `docmanager:save` and `application:close` commands are mapped to `Accel T`.
 The commands are run in succession when you use the shortcut.
 
+### Shortcuts for R operators
+
+JupyterLab provides shortcuts for operators that are common in R when an editor
+using the R language is active. Press {kbd}`Alt+-` ({kbd}`Option+-` on macOS)
+to insert `<-`, or {kbd}`Ctrl+Shift+M` ({kbd}`Cmd+Shift+M` on macOS) to insert
+`%>%`. These shortcuts are scoped to R language editors, so they do not affect
+editors using another language.
+
+To replace `%>%` with R's native pipe `|>`, use the following Keyboard
+Shortcuts settings. First disable the built-in bindings using their exact
+keys and selectors, then add a macro scoped to R editors:
+
+```json
+{
+  "shortcuts": [
+    {
+      "command": "console:replace-selection",
+      "keys": ["Accel Shift M"],
+      "selector": ".jp-CodeConsole-promptCell [data-jp-editor-language='r']",
+      "disabled": true
+    },
+    {
+      "command": "fileeditor:replace-selection",
+      "keys": ["Accel Shift M"],
+      "selector": ".jp-FileEditor [data-jp-editor-language='r']",
+      "disabled": true
+    },
+    {
+      "command": "notebook:replace-selection",
+      "keys": ["Accel Shift M"],
+      "selector": ".jp-Notebook.jp-mod-editMode [data-jp-editor-language='r']",
+      "disabled": true
+    },
+    {
+      "command": "apputils:run-first-enabled",
+      "keys": ["Accel Shift M"],
+      "args": {
+        "commands": [
+          "console:replace-selection",
+          "fileeditor:replace-selection",
+          "notebook:replace-selection"
+        ],
+        "args": { "text": "|> " }
+      },
+      "selector": "[data-jp-editor-language='r']"
+    }
+  ]
+}
+```
+
+`run-first-enabled` sends the replacement to the first command that is
+available in the current context. Use the same pattern to customize `Alt -`.
+In the settings, `Alt` is the {kbd}`Option` key on macOS, and `Accel` maps to
+{kbd}`Cmd` on macOS and {kbd}`Ctrl` on other platforms.
+
 ### Markdown editing shortcuts
 
 When editing markdown cells, you can use {kbd}`Ctrl+B` ({kbd}`Cmd+B` on macOS) to toggle bold formatting.

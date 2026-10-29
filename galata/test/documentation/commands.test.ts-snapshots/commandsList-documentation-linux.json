@@ -1606,7 +1606,9 @@
     "id": "console:replace-selection",
     "label": "Replace Selection in Console",
     "caption": "",
-    "shortcuts": [],
+    "shortcuts": [
+      "Alt -"
+    ],
     "args": {
       "type": "object",
       "properties": {
@@ -3168,7 +3170,9 @@
     "id": "fileeditor:replace-selection",
     "label": "Replace Selection in Editor",
     "caption": "",
-    "shortcuts": [],
+    "shortcuts": [
+      "Alt -"
+    ],
     "args": {
       "type": "object",
       "properties": {
@@ -4888,7 +4892,9 @@
     "id": "notebook:replace-selection",
     "label": "Replace Selection in Notebook Cell",
     "caption": "",
-    "shortcuts": [],
+    "shortcuts": [
+      "Alt -"
+    ],
     "args": {
       "type": "object",
       "properties": {

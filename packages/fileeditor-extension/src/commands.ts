@@ -741,7 +741,12 @@ export namespace Commands {
         widget.content.editor.replaceSelection?.(text);
       },
       isEnabled,
-      label: trans.__('Replace Selection in Editor'),
+      label: args => {
+        const text = args['text'];
+        return typeof text === 'string' && text
+          ? trans.__('Replace Selection in Editor with "%1"', text)
+          : trans.__('Replace Selection in Editor');
+      },
       describedBy: {
         args: {
           type: 'object',

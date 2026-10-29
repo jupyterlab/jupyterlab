@@ -407,6 +407,28 @@ test('Keyboard Shortcuts: should filter commands in add shortcut row', async ({
   await expect(commandOptions).toHaveCount(1);
 });
 
+test('Keyboard Shortcuts: should find a shortcut by the text it inserts', async ({
+  page
+}) => {
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Keyboard Shortcuts'
+    });
+  });
+
+  const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
+  const filterInput = shortcutsForm.locator('jp-search.jp-FilterBox');
+  await filterInput.locator('input').fill('%>%');
+
+  await expect(shortcutsForm.locator('.jp-Shortcuts-Row .jp-label')).toHaveText(
+    [
+      'Replace Selection in Console with "%>% "',
+      'Replace Selection in Editor with "%>% "',
+      'Replace Selection in Notebook Cell with "%>% "'
+    ]
+  );
+});
+
 test('Keyboard Shortcuts: should add a new shortcut', async ({ page }) => {
   // Function that get the shortcuts related to a command.
   const getShortcut = async (command: string) => {
