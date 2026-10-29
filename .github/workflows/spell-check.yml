@@ -19,6 +19,7 @@ permissions:
 
 jobs:
   sphinx-spelling:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -40,16 +41,7 @@ jobs:
       - name: Install documentation dependencies
         run: |
           python -m pip install --upgrade pip
-          python - <<'PY'
-          import subprocess
-          import sys
-          import tomllib
-          from pathlib import Path
-
-          pyproject = tomllib.loads(Path("pyproject.toml").read_text())
-          docs_deps = pyproject["project"]["optional-dependencies"]["docs"]
-          subprocess.check_call([sys.executable, "-m", "pip", "install", *docs_deps, "pyenchant"])
-          PY
+          python -m pip install --group docs pyenchant
 
       - name: Run Sphinx spelling builder
         env:
@@ -68,7 +60,9 @@ jobs:
             exit 0
           fi
           spell_source="$(mktemp -d)"
-          trap 'rm -rf "${spell_source}"' EXIT
+          spell_build="$(mktemp -d)"
+          spelling_reports="$(mktemp)"
+          trap 'rm -rf "${spell_source}" "${spell_build}" "${spelling_reports}"' EXIT
           cp docs/source/spelling_wordlist.txt "${spell_source}/spelling_wordlist.txt"
           changed_docs=()
           for path in "${changed_docs_raw[@]}"; do
@@ -88,4 +82,14 @@ jobs:
             printf '```\n'
           } > "${spell_source}/index.md"
           printf 'Running Sphinx spelling for changed docs:\n%s\n' "${changed_docs_raw[@]}"
-          python -m sphinx -b spelling -W --keep-going -c docs/source "${spell_source}" docs/build/spelling "${changed_docs[@]}"
+          python -m sphinx -Q -b spelling --keep-going -c docs/source "${spell_source}" "${spell_build}" "${changed_docs[@]}"
+
+          find "${spell_build}" -name '*.spelling' -type f -size +0c -print > "${spelling_reports}"
+          if [ -s "${spelling_reports}" ]; then
+            printf 'Spelling errors found in changed docs:\n'
+            while IFS= read -r report; do
+              printf '\n'
+              cat "${report}"
+            done < "${spelling_reports}"
+            exit 1
+          fi

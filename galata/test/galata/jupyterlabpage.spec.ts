@@ -36,7 +36,7 @@ test('should reset the UI', async ({ page }) => {
   expect(await page.menu.isAnyOpen()).toEqual(false);
   await expect(page.launcher).toBeVisible();
   expect(await page.kernel.isAnyRunning()).toEqual(false);
-  expect(await page.statusbar.isVisible()).toEqual(true);
+  await expect(page.locator('#jp-main-statusbar')).toBeVisible();
   expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(true);
 });
 

@@ -76,7 +76,10 @@ export class FileBrowserModel implements IDisposable {
       format: 'text'
     };
     this._state = options.state || null;
-    const refreshInterval = options.refreshInterval || DEFAULT_REFRESH_INTERVAL;
+    const refreshInterval =
+      options.refreshInterval === undefined || options.refreshInterval === 0
+        ? DEFAULT_REFRESH_INTERVAL
+        : options.refreshInterval;
 
     const { services } = options.manager;
     services.contents.fileChanged.connect(this.onFileChanged, this);
@@ -460,7 +463,10 @@ export class FileBrowserModel implements IDisposable {
     }
 
     const err = 'File not uploaded';
-    if (largeFile && !(await this._shouldUploadLarge(file))) {
+    if (
+      largeFile &&
+      !(await this._prompt(() => this._shouldUploadLarge(file)))
+    ) {
       throw 'Cancelled large file upload';
     }
     await this._uploadCheckDisposed();
@@ -468,13 +474,23 @@ export class FileBrowserModel implements IDisposable {
     await this._uploadCheckDisposed();
     if (
       this._items.find(i => i.name === file.name) &&
-      !(await shouldOverwrite(file.name))
+      !(await this._prompt(() => shouldOverwrite(file.name)))
     ) {
       throw err;
     }
     await this._uploadCheckDisposed();
     const chunkedUpload = supportsChunked && file.size > CHUNK_SIZE;
     return await this._upload(file, chunkedUpload, path);
+  }
+
+  /**
+   * Show upload prompts one at a time. They skip the dialog launch queue, so
+   * concurrent uploads would otherwise open them all at once.
+   */
+  private _prompt(show: () => Promise<boolean>): Promise<boolean> {
+    const answer = this._prompts.then(show);
+    this._prompts = answer.catch(() => false);
+    return answer;
   }
 
   private async _shouldUploadLarge(file: File): Promise<boolean> {
@@ -487,7 +503,8 @@ export class FileBrowserModel implements IDisposable {
       buttons: [
         Dialog.cancelButton({ label: this._trans.__('Cancel') }),
         Dialog.warnButton({ label: this._trans.__('Upload') })
-      ]
+      ],
+      skipQueue: true
     });
     return button.accept;
   }
@@ -718,6 +735,7 @@ export class FileBrowserModel implements IDisposable {
   private _paths = new Set<string>();
   private _pending: Promise<void> | null = null;
   private _pendingPath: string | null = null;
+  private _prompts: Promise<boolean> = Promise.resolve(true);
   private _refreshed = new Signal<this, void>(this);
   private _sessions: Session.IModel[] = [];
   private _state: IStateDB | null = null;

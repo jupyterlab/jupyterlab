@@ -24,6 +24,7 @@ import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import type { IOutputAreaModel } from './model';
+import type { IPageHandler } from './tokens';
 
 /**
  * The class name added to an output area widget.
@@ -110,6 +111,7 @@ export class OutputArea extends Widget {
     this._translator = options.translator ?? nullTranslator;
     this._inputHistoryScope = options.inputHistoryScope ?? 'global';
     this._showInputPlaceholder = options.showInputPlaceholder ?? true;
+    this._pageHandler = options.pageHandler ?? null;
 
     const model = (this.model = options.model);
     for (
@@ -127,7 +129,8 @@ export class OutputArea extends Widget {
             event: IObservableString.IChangedArgs
           ) => {
             this._setOutput(i, output);
-          }
+          },
+          this
         );
       }
     }
@@ -294,6 +297,13 @@ export class OutputArea extends Widget {
       this._future.dispose();
       this._future = null!;
     }
+    if (this._promptOverlay) {
+      this._promptOverlay.removeEventListener(
+        'click',
+        this._onPromptOverlayClick
+      );
+      this._promptOverlay = null;
+    }
     this._displayIdMap.clear();
     this._outputTracker.dispose();
     super.dispose();
@@ -358,7 +368,8 @@ export class OutputArea extends Widget {
               event: IObservableString.IChangedArgs
             ) => {
               this._setOutput(args.newIndex, output);
-            }
+            },
+            this
           );
         }
         break;
@@ -369,16 +380,36 @@ export class OutputArea extends Widget {
             this._clear();
           } else {
             // range of items removed from model
-            // remove widgets corresponding to removed model items
+            // remove widgets corresponding to removed visible model items
             const startIndex = args.oldIndex;
-            for (
-              let i = 0;
-              i < args.oldValues.length && startIndex < this.widgets.length;
-              ++i
-            ) {
+            let outputWidgetCount = this._outputModelWidgetCount();
+            const count = Math.min(
+              args.oldValues.length,
+              Math.max(0, outputWidgetCount - startIndex)
+            );
+            for (let i = 0; i < count; ++i) {
               const widget = this.widgets[startIndex];
               widget.parent = null;
               widget.dispose();
+            }
+            outputWidgetCount -= count;
+
+            if (this.model.length <= this._maxNumberOutputs) {
+              this.widgets
+                .find(widget => this._isTrimmedOutputsWidget(widget))
+                ?.dispose();
+            }
+
+            const targetOutputCount = Math.min(
+              this.model.length,
+              this._maxNumberOutputs
+            );
+            while (outputWidgetCount < targetOutputCount) {
+              this._insertOutput(
+                outputWidgetCount,
+                this.model.get(outputWidgetCount)
+              );
+              outputWidgetCount++;
             }
 
             // apply item offset to target model item indices in _displayIdMap
@@ -420,15 +451,18 @@ export class OutputArea extends Widget {
   private _addPromptOverlay() {
     const overlay = document.createElement('div');
     overlay.className = OUTPUT_PROMPT_OVERLAY;
-    overlay.addEventListener('click', () => {
-      this._toggleScrolling.emit();
-    });
+    overlay.addEventListener('click', this._onPromptOverlayClick);
     this.node.appendChild(overlay);
+    this._promptOverlay = overlay;
 
     requestAnimationFrame(() => {
       this._initialize.emit();
     });
   }
+
+  private _onPromptOverlayClick = (): void => {
+    this._toggleScrolling.emit();
+  };
 
   /**
    * Update indices in _displayIdMap in response to element remove from model items
@@ -464,7 +498,7 @@ export class OutputArea extends Widget {
     change: number | void
   ): void {
     const outputLength = Math.min(this.model.length, this._maxNumberOutputs);
-    if (change) {
+    if (change !== undefined) {
       if (change >= this._maxNumberOutputs) {
         // Bail early
         return;
@@ -510,7 +544,7 @@ export class OutputArea extends Widget {
     // to prevent this jitter.
     const rect = this.node.getBoundingClientRect();
     this.node.style.minHeight = `${rect.height}px`;
-    if (this._minHeightTimeout) {
+    if (this._minHeightTimeout !== null) {
       window.clearTimeout(this._minHeightTimeout);
     }
     this._minHeightTimeout = window.setTimeout(() => {
@@ -556,10 +590,6 @@ export class OutputArea extends Widget {
     input.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(input);
 
-    // Increase number of outputs to display the result up to the input request.
-    if (this.model.length >= this.maxNumberOutputs) {
-      this.maxNumberOutputs = this.model.length;
-    }
     this._inputRequested.emit(input);
 
     // Get the input node to ensure focus after updating the model upon user reply.
@@ -708,6 +738,28 @@ export class OutputArea extends Widget {
   }
 
   /**
+   * Count layout widgets that map directly to output model indices.
+   */
+  private _outputModelWidgetCount(): number {
+    const boundary = this.widgets.findIndex(
+      widget =>
+        widget.hasClass(OUTPUT_AREA_STDIN_ITEM_CLASS) ||
+        this._isTrimmedOutputsWidget(widget)
+    );
+    return boundary === -1 ? this.widgets.length : boundary;
+  }
+
+  /**
+   * Whether a layout widget wraps the trimmed outputs marker.
+   */
+  private _isTrimmedOutputsWidget(widget: Widget): boolean {
+    return (
+      widget instanceof Panel &&
+      widget.widgets.some(child => child instanceof Private.TrimmedOutputs)
+    );
+  }
+
+  /**
    * Create an output item with a prompt and actual output
    *
    * @returns a rendered widget, or null if we cannot render
@@ -830,10 +882,16 @@ export class OutputArea extends Widget {
     if (!pages.length) {
       return;
     }
-    const page = JSON.parse(JSON.stringify(pages[0]));
+
+    const page = pages[0] as ReadonlyJSONObject;
+    if (this._pageHandler?.handlePage(page)) {
+      return;
+    }
+
+    const pageData = JSON.parse(JSON.stringify(page));
     const output: nbformat.IOutput = {
       output_type: 'display_data',
-      data: (page as any).data as nbformat.IMimeBundle,
+      data: (pageData as any).data as nbformat.IMimeBundle,
       metadata: {}
     };
     model.add(output);
@@ -877,6 +935,7 @@ export class OutputArea extends Widget {
   private _inputRequested = new Signal<OutputArea, IStdin>(this);
   private _toggleScrolling = new Signal<OutputArea, void>(this);
   private _initialize = new Signal<OutputArea, void>(this);
+  private _promptOverlay: HTMLDivElement | null = null;
   private _outputTracker = new WidgetTracker<Widget>({
     namespace: UUID.uuid4()
   });
@@ -884,6 +943,7 @@ export class OutputArea extends Widget {
   private _inputHistoryScope: 'global' | 'session' = 'global';
   private _pendingInput: boolean = false;
   private _showInputPlaceholder: boolean = true;
+  private _pageHandler: IPageHandler | null = null;
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -963,6 +1023,11 @@ export namespace OutputArea {
      * Whether to show placeholder text in standard input
      */
     showInputPlaceholder?: boolean;
+
+    /**
+     * Optional handler for pager payloads (`source: page`).
+     */
+    pageHandler?: IPageHandler;
   }
 
   /**

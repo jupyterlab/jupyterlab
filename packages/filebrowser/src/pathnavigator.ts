@@ -331,7 +331,7 @@ export class PathNavigator extends Widget {
         }
         return;
       }
-      target = target.parentElement as HTMLElement;
+      target = target.parentElement!;
     }
   }
 

@@ -75,7 +75,7 @@ application environment.
 
 The following configurations may be present in this file:
 
-1. `terminalsAvailable` identifies whether a terminal (i.e. `bash/tsch`
+1. `terminalsAvailable` identifies whether a terminal (i.e. `bash`/`tcsh`
    on Mac/Linux OR `PowerShell` on Windows) is available to be launched
    via the Launcher. (This configuration was predominantly required for
    Windows prior to PowerShell access being enabled in Jupyter Lab.) The
@@ -141,7 +141,7 @@ environment variable.
 We recommend users not install JupyterLab in a system location on Unix-like
 systems, because then the application directory will be read-only. Instead,
 use a conda environment or `pip install --user jupyterlab` so the
-application directory is writeable by the user.
+application directory is writable by the user.
 
 This directory location and semantics do _not_ follow the standard Jupyter
 config semantics because we need to build a single unified application, and

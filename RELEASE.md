@@ -112,7 +112,7 @@ Click on "Run workflow", then once completed:
 
 ### Publish Release
 
-The second step is to generate and publish release artifacts. We use the [Publish Release](https://github.com/jupyterlab/jupyterlab/actions/workflows/publish-release.yml) workflow to build JupyterLab, generate Javascript and Python packages, and publish those to NPM and PyPI. We run this workflow from the main branch (i.e., we want the latest workflow configuration), even if we are releasing a different branch.
+The second step is to generate and publish release artifacts. We use the [Publish Release](https://github.com/jupyterlab/jupyterlab/actions/workflows/publish-release.yml) workflow to build JupyterLab, generate JavaScript and Python packages, and publish those to NPM and PyPI. We run this workflow from the main branch (i.e., we want the latest workflow configuration), even if we are releasing a different branch.
 
 The [Publish Release](https://github.com/jupyterlab/jupyterlab/actions/workflows/publish-release.yml) workflow takes a couple of input parameters. Commonly specified parameters are:
 
@@ -163,7 +163,7 @@ source scripts/release_prep.sh <branch_name>
 ### Bump version
 
 The next step is to bump the appropriate version numbers. We use
-[bump2version](https://github.com/c4urself/bump2version) to manage the Python
+[bump-my-version](https://github.com/callowayproject/bump-my-version) to manage the Python
 version, and we keep the JS versions and tags in sync with the release cycle.
 
 Here is an example of how version numbers progress through a release process.
@@ -227,11 +227,12 @@ is slow to update with the new packages, so this script tries to fetch
 the packages until they are available.
 
 At this point, run the `./scripts/release_test.sh` to test the wheel in
-a fresh conda environment with and without extensions installed. Open and run
+a fresh virtual environment with and without extensions installed. Open and run
 the Outputs notebook and verify everything runs properly. Also add a cell with the following code and make sure the widget renders:
 
 ```python
 from ipywidgets import IntSlider
+
 IntSlider()
 ```
 
@@ -281,7 +282,7 @@ Now do the actual final release:
 - [ ] Create a branch for the release and push to GitHub
 - [ ] Update the API [docs](#updating-api-docs)
 - [ ] Merge the PRs on the other repos and set the default branch of the
-      xckd repo
+      xkcd repo
 - [ ] Publish to [conda-forge](https://github.com/jupyterlab/jupyterlab/blob/main/RELEASE.md#publishing-to-conda-forge).
 
 After a few days (to allow for possible patch releases), set up development for
