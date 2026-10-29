@@ -292,9 +292,10 @@ The commands are run in succession when you use the shortcut.
 ### Shortcuts for R operators
 
 JupyterLab provides shortcuts for operators that are common in R when an editor
-using the R language is active. Press `Alt -` to insert `<-` or `Accel Shift M`
-to insert `%>%`. These shortcuts are scoped to R language editors, so they do
-not affect editors using another language.
+using the R language is active. Press {kbd}`Alt+-` ({kbd}`Option+-` on macOS)
+to insert `<-`, or {kbd}`Ctrl+Shift+M` ({kbd}`Cmd+Shift+M` on macOS) to insert
+`%>%`. These shortcuts are scoped to R language editors, so they do not affect
+editors using another language.
 
 To replace `%>%` with R's native pipe `|>`, use the following Keyboard
 Shortcuts settings. First disable the built-in bindings using their exact
@@ -340,7 +341,8 @@ keys and selectors, then add a macro scoped to R editors:
 
 `run-first-enabled` sends the replacement to the first command that is
 available in the current context. Use the same pattern to customize `Alt -`.
-On macOS, `Accel` is `Cmd`; on Windows and Linux, it is `Ctrl`.
+In the settings, `Alt` is the {kbd}`Option` key on macOS, and `Accel` maps to
+{kbd}`Cmd` on macOS and {kbd}`Ctrl` on other platforms.
 
 ### Markdown editing shortcuts
 
