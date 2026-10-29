@@ -3,6 +3,7 @@
 
 import { galata } from '@jupyterlab/galata';
 import { expect, test } from '@jupyterlab/galata';
+import type { ILabShell } from '@jupyterlab/application';
 
 import type { Locator } from '@playwright/test';
 
@@ -26,6 +27,14 @@ type ShowSourcesCase = {
   showSourcesInMainArea: boolean;
   expectSourcesPanel: boolean;
 };
+
+interface ISavedWorkspace {
+  data: {
+    'layout-restorer:data'?: {
+      left?: Pick<ILabShell.ISideArea, 'widgetStates'>;
+    };
+  };
+}
 const showSourcesCases: ShowSourcesCase[] = [
   {
     name: 'showSourcesInMainArea = false',
@@ -171,6 +180,54 @@ test.describe('Section reordering', () => {
     await expect(
       titles.first().locator('.jp-AccordionPanel-dragHandle')
     ).toBeHidden();
+  });
+
+  test('should restore reordered section states after reload', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('jp-running-sessions');
+    const panel = page.locator('#jp-running-sessions .jp-SidePanel-content');
+    const titles = panel.locator('.lm-AccordionPanel-title');
+    const labels = titles.locator('.lm-AccordionPanel-titleLabel');
+    await expect(labels).toContainText(['Open Tabs', 'Kernels']);
+    const initialLabels = await labels.allTextContents();
+    for (const title of await titles.all()) {
+      if ((await title.getAttribute('aria-expanded')) === 'false') {
+        await title.locator('.lm-AccordionPanel-titleLabel').click();
+      }
+    }
+    await toggleReordering(page, titles.first());
+    await startDrag(page, titles.first(), titles.nth(1));
+    await page.mouse.up();
+    const reordered = [
+      initialLabels[1],
+      initialLabels[0],
+      ...initialLabels.slice(2)
+    ];
+    await expect(labels).toHaveText(reordered);
+
+    await Promise.all([
+      page.waitForResponse(response => {
+        if (
+          response.request().method() !== 'PUT' ||
+          !galata.Routes.workspaces.test(response.url())
+        ) {
+          return false;
+        }
+        const workspace = response.request().postDataJSON() as ISavedWorkspace;
+        return (
+          workspace.data['layout-restorer:data']?.left?.widgetStates[
+            'jp-running-sessions'
+          ]?.expansionStates?.[0] === false
+        );
+      }),
+      titles.first().locator('.lm-AccordionPanel-titleLabel').click()
+    ]);
+    await page.reload();
+    await page.sidebar.openTab('jp-running-sessions');
+    await expect(labels).toHaveText(reordered);
+    await expect(titles.first()).toHaveAttribute('aria-expanded', 'false');
+    await expect(titles.nth(1)).toHaveAttribute('aria-expanded', 'true');
   });
 
   test('should cancel dragging with Escape when focus is outside the accordion', async ({
