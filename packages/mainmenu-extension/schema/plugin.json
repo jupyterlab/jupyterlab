@@ -90,6 +90,10 @@
               "label": "Appearance",
               "items": [
                 {
+                  "command": "mainmenu:toggle-collapsed",
+                  "rank": 16
+                },
+                {
                   "command": "viewmenu:show-minimap",
                   "rank": 50
                 },
@@ -345,6 +349,12 @@
   ],
   "jupyter.lab.transform": true,
   "properties": {
+    "collapsed": {
+      "title": "Collapse the main menu",
+      "description": "Whether to collapse the main menu into a single menu button.",
+      "type": "boolean",
+      "default": false
+    },
     "menus": {
       "title": "The application menu description.",
       "description": "Note: To disable a menu or a menu item,\ncopy it to User Preferences and add the\n\"disabled\" key. The following example will disable\nthe \"Tabs\" menu and \"Restart Kernel and Run up to Selected Cell\"\nitem:\n{\n  \"menus\": [\n    {\n      \"id\": \"jp-mainmenu-tabs\",\n      \"disabled\": true\n    },\n    {\n      \"id\": \"jp-mainmenu-kernel\",\n      \"items\": [\n        {\n          \"command\": \"notebook:restart-and-run-to-selected\",\n          \"disabled\": true\n        }\n      ]\n    }\n  ]\n}\n\nMenu description:",

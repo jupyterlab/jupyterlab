@@ -132,6 +132,8 @@ export namespace CommandIDs {
   export const getKernel = 'helpmenu:get-kernel';
 
   export const openFirst = 'mainmenu:open-first';
+
+  export const toggleCollapsed = 'mainmenu:toggle-collapsed';
 }
 
 /**
@@ -154,13 +156,15 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     const { commands } = app;
     const trans = translator.load('jupyterlab');
 
-    const menu = new MainMenu(commands);
+    const menu = new MainMenu(commands, { translator });
     menu.id = 'jp-MainMenu';
     menu.addClass('jp-scrollbar-tiny');
+    menu.collapsedMenuBar.id = 'jp-CollapsedMainMenu';
 
     // Built menu from settings
+    let settings: ISettingRegistry.ISettings | null = null;
     if (registry) {
-      await Private.loadSettingsMenu(
+      settings = await Private.loadSettingsMenu(
         registry,
         (aMenu: RankedMenu) => {
           menu.addMenu(aMenu, false, { rank: aMenu.rank });
@@ -290,6 +294,35 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
       }
     });
 
+    const setCollapsed = (collapsed: boolean) => {
+      menu.collapsed = collapsed;
+      commands.notifyCommandChanged(CommandIDs.toggleCollapsed);
+    };
+
+    commands.addCommand(CommandIDs.toggleCollapsed, {
+      label: trans.__('Collapse Main Menu'),
+      caption: trans.__('Collapse the main menu into a single menu button'),
+      isToggled: () => menu.collapsed,
+      execute: () => {
+        setCollapsed(!menu.collapsed);
+        return settings?.set('collapsed', menu.collapsed);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
+    if (settings) {
+      const onSettingsChanged = (settings: ISettingRegistry.ISettings) => {
+        setCollapsed(settings.get('collapsed').composite as boolean);
+      };
+      onSettingsChanged(settings);
+      settings.changed.connect(onSettingsChanged);
+    }
+
     if (palette) {
       // Add some of the commands defined here to the command palette.
       palette.addItem({
@@ -310,9 +343,15 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
         command: CommandIDs.activatePreviouslyUsedTab,
         category: trans.__('Main Area')
       });
+
+      palette.addItem({
+        command: CommandIDs.toggleCollapsed,
+        category: trans.__('Main Area')
+      });
     }
 
     app.shell.add(menu, 'menu', { rank: 100 });
+    app.shell.add(menu.collapsedMenuBar, 'menu', { rank: 100 });
 
     return menu;
   }
@@ -1057,7 +1096,7 @@ namespace Private {
     addMenu: (menu: Menu) => void,
     menuFactory: (options: IMainMenu.IMenuOptions) => RankedMenu,
     translator: ITranslator
-  ): Promise<void> {
+  ): Promise<ISettingRegistry.ISettings> {
     const trans = translator.load('jupyterlab');
     let canonical: ISettingRegistry.ISchema | null = null;
     let loaded: { [name: string]: ISettingRegistry.IMenu[] } = {};
@@ -1202,5 +1241,7 @@ namespace Private {
         }
       }
     });
+
+    return settings;
   }
 }

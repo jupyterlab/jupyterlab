@@ -89,6 +89,7 @@
   --jp-icon-list: url('icons/statusbar/list.svg');
   --jp-icon-lock: url('icons/lock.svg');
   --jp-icon-markdown: url('icons/filetype/markdown.svg');
+  --jp-icon-menu: url('icons/toolbar/menu.svg');
   --jp-icon-mermaid: url('icons/filetype/mermaid.svg');
   --jp-icon-move-down: url('icons/toolbar/move-down.svg');
   --jp-icon-move-up: url('icons/toolbar/move-up.svg');
@@ -448,6 +449,10 @@
 
 .jp-MarkdownIcon {
   background-image: var(--jp-icon-markdown);
+}
+
+.jp-MenuIcon {
+  background-image: var(--jp-icon-menu);
 }
 
 .jp-MermaidIcon {

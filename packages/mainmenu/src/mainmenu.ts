@@ -1,11 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import type { TranslationBundle } from '@jupyterlab/translation';
-import { IRankedMenu, MenuSvg, RankedMenu } from '@jupyterlab/ui-components';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import {
+  IRankedMenu,
+  menuIcon,
+  MenuSvg,
+  RankedMenu
+} from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import type { CommandRegistry } from '@lumino/commands';
-import type { Menu } from '@lumino/widgets';
-import { MenuBar } from '@lumino/widgets';
+import type { ElementARIAAttrs, VirtualElement } from '@lumino/virtualdom';
+import { h } from '@lumino/virtualdom';
+import { Menu, MenuBar } from '@lumino/widgets';
 import { EditMenu } from './edit';
 import { FileMenu } from './file';
 import { HelpMenu } from './help';
@@ -22,11 +29,62 @@ import { ViewMenu } from './view';
 export class MainMenu extends MenuBar implements IMainMenu {
   /**
    * Construct the main menu bar.
+   *
+   * @param commands - The command registry.
+   * @param options - The main menu options.
    */
-  constructor(commands: CommandRegistry) {
-    let options = { forceItemsPosition: { forceX: false, forceY: true } };
-    super(options);
+  constructor(commands: CommandRegistry, options: MainMenu.IOptions = {}) {
+    const menuBarOptions = {
+      forceItemsPosition: { forceX: false, forceY: true }
+    };
+    super(menuBarOptions);
     this._commands = commands;
+
+    const trans = (options.translator ?? nullTranslator).load('jupyterlab');
+    this._collapsedMenu = new Menu({
+      commands,
+      renderer: MenuSvg.defaultRenderer
+    });
+    this._collapsedMenu.addClass('jp-ThemedContainer');
+    this._collapsedMenu.title.icon = Private.collapsedMenuIcon;
+    this._collapsedMenu.title.caption = trans.__('Main Menu');
+
+    this.collapsedMenuBar = new MenuBar({
+      ...menuBarOptions,
+      overflowMenuOptions: { isVisible: false },
+      renderer: Private.iconMenuBarRenderer
+    });
+    this.collapsedMenuBar.addClass('jp-CollapsedMainMenu');
+    this.collapsedMenuBar.addMenu(this._collapsedMenu);
+    this.collapsedMenuBar.hide();
+  }
+
+  /**
+   * The menu bar shown in place of the main menu when it is collapsed.
+   *
+   * #### Notes
+   * Its single item opens a menu listing every main menu as a submenu, in
+   * rank order. Add it to the application shell next to the main menu.
+   */
+  readonly collapsedMenuBar: MenuBar;
+
+  /**
+   * Whether the main menu is collapsed into a single menu bar item.
+   *
+   * #### Notes
+   * A collapsed main menu is hidden, and the collapsed menu bar is shown
+   * instead.
+   */
+  get collapsed(): boolean {
+    return this._collapsed;
+  }
+  set collapsed(value: boolean) {
+    if (this._collapsed === value) {
+      return;
+    }
+    this._collapsed = value;
+    this.setHidden(value);
+    this.collapsedMenuBar.setHidden(!value);
   }
 
   /**
@@ -173,6 +231,7 @@ export class MainMenu extends MenuBar implements IMainMenu {
      * Create a new menu.
      */
     this.insertMenu(index, menu);
+    this._collapsedMenu.insertItem(index, { type: 'submenu', submenu: menu });
 
     // Link the menu to the API - backward compatibility when switching to menu description in settings
     switch (menu.id) {
@@ -220,9 +279,41 @@ export class MainMenu extends MenuBar implements IMainMenu {
   }
 
   /**
+   * Open the active menu and activate its first menu item.
+   *
+   * #### Notes
+   * When the main menu is collapsed, the active menu opens as a submenu of
+   * the collapsed menu bar.
+   */
+  openActiveMenu(): void {
+    if (!this._collapsed) {
+      super.openActiveMenu();
+      return;
+    }
+
+    const menu = this.activeMenu;
+    this.activeIndex = -1;
+    if (!menu) {
+      return;
+    }
+
+    this.collapsedMenuBar.activeIndex = 0;
+    this.collapsedMenuBar.openActiveMenu();
+    const index = this._collapsedMenu.items.findIndex(
+      item => item.submenu === menu
+    );
+    if (index !== -1) {
+      this._collapsedMenu.activeIndex = index;
+      this._collapsedMenu.triggerActiveItem();
+    }
+  }
+
+  /**
    * Dispose of the resources held by the menu bar.
    */
   dispose(): void {
+    this.collapsedMenuBar.dispose();
+    this._collapsedMenu.dispose();
     this._editMenu?.dispose();
     this._fileMenu?.dispose();
     this._helpMenu?.dispose();
@@ -334,9 +425,12 @@ export class MainMenu extends MenuBar implements IMainMenu {
     );
     if (index !== -1) {
       ArrayExt.removeAt(this._items, index);
+      this._collapsedMenu.removeItemAt(index);
     }
   }
 
+  private _collapsed = false;
+  private _collapsedMenu: Menu;
   private _commands: CommandRegistry;
   private _items: Private.IRankItem[] = [];
   private _editMenu: EditMenu;
@@ -347,6 +441,21 @@ export class MainMenu extends MenuBar implements IMainMenu {
   private _settingsMenu: SettingsMenu;
   private _viewMenu: ViewMenu;
   private _tabsMenu: TabsMenu;
+}
+
+/**
+ * A namespace for MainMenu statics.
+ */
+export namespace MainMenu {
+  /**
+   * The options used to create a main menu.
+   */
+  export interface IOptions {
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
+  }
 }
 
 /**
@@ -374,4 +483,37 @@ namespace Private {
   export function itemCmp(first: IRankItem, second: IRankItem): number {
     return first.rank - second.rank;
   }
+
+  /**
+   * The icon of the collapsed menu bar item.
+   */
+  export const collapsedMenuIcon = menuIcon.bindprops({
+    stylesheet: 'menuItem'
+  });
+
+  /**
+   * A menu bar renderer for items showing only an icon.
+   *
+   * It names each item after its caption, also shown as a tooltip.
+   */
+  class IconMenuBarRenderer extends MenuBar.Renderer {
+    renderItem(data: MenuBar.IRenderData): VirtualElement {
+      const item = super.renderItem(data);
+      return h.li({ ...item.attrs, title: data.title.caption }, [
+        ...item.children
+      ]);
+    }
+
+    createItemARIA(data: MenuBar.IRenderData): ElementARIAAttrs {
+      return {
+        ...super.createItemARIA(data),
+        'aria-label': data.title.caption
+      };
+    }
+  }
+
+  /**
+   * The renderer of the collapsed menu bar.
+   */
+  export const iconMenuBarRenderer = new IconMenuBarRenderer();
 }
