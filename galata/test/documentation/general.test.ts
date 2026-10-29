@@ -714,7 +714,7 @@ test.describe('General', () => {
           'Expected to find at least one terminal entry in the dialog.'
         );
       }
-      terminalEntry.textContent = 'terminals/1';
+      terminalEntry.textContent = 'Terminal 1';
     });
 
     expect(await dialog.screenshot()).toMatchSnapshot('running_modal.png');
