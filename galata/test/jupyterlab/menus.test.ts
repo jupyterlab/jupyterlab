@@ -112,6 +112,26 @@ test.describe('Collapsed main menu', () => {
     ).toBeVisible();
   });
 
+  test('Open the menu button', async ({ page }) => {
+    await page.menu.clickMenuItem('View>Appearance>Collapse Main Menu');
+
+    const menu = await page.menu.openLocator('Main Menu');
+    const buttonBox = (await page
+      .getByRole('menuitem', { name: 'Main Menu', exact: true })
+      .boundingBox())!;
+    const menuBox = (await menu!.boundingBox())!;
+    expect(
+      await page.screenshot({
+        clip: {
+          x: buttonBox.x,
+          y: buttonBox.y,
+          width: menuBox.x + menuBox.width - buttonBox.x,
+          height: menuBox.y + menuBox.height - buttonBox.y
+        }
+      })
+    ).toMatchSnapshot('opened-collapsed-main-menu.png');
+  });
+
   test('Open a menu from the menu button', async ({ page }) => {
     await page.menu.clickMenuItem('View>Appearance>Collapse Main Menu');
 
