@@ -70,8 +70,8 @@ export class TerminalHelper {
       // `host.UI.RawUI.WindowTitle` works on PowerShell, `title` works on cmd.exe.
       command = `powershell -Command "\"$host.UI.RawUI.WindowTitle='${escapedTitle}'\"" 2>nul || title ${escapedTitle}`;
     } else {
-      const escapedTitle = title.replace(/'/g, `'\\''`);
-      command = `PROMPT_COMMAND='printf "\\033]0;${escapedTitle}\\007"'`;
+      const promptCommand = `printf '\\033]0;%s\\007' ${Private.quoteShellArgument(title)}`;
+      command = `PROMPT_COMMAND=${Private.quoteShellArgument(promptCommand)}`;
     }
     await this.runCommand(command, { terminal: options.terminal });
   }
@@ -141,6 +141,13 @@ export namespace TerminalHelper {
 }
 
 namespace Private {
+  /**
+   * Quote a literal shell argument.
+   */
+  export function quoteShellArgument(value: string): string {
+    return `'${value.replace(/'/g, `'\\''`)}'`;
+  }
+
   export function workspaceSaveIncludesTitle(
     response: Response,
     title: string
