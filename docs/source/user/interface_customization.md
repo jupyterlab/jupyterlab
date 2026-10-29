@@ -411,6 +411,26 @@ Users can add a "Open in Simple Mode" context menu option by adding the followin
 }
 ```
 
+### Notebook
+
+The selector is matched against the element which was clicked and all its parents.
+Because the cells are inside the notebook, `.jp-Notebook` matches both a click on a
+cell and a click on the empty space of the notebook. To tell the two apart, the
+notebook records what the click was on in its `data-jp-context-menu-target`
+attribute, which is either `cell` or `notebook`:
+
+```json
+{
+  "command": "notebook:clear-all-cell-outputs",
+  "selector": ".jp-Notebook[data-jp-context-menu-target=\"notebook\"]",
+  "rank": 22
+}
+```
+
+This is how "Clear Outputs of All Cells" is offered on the empty space of the
+notebook only. Use `.jp-Notebook` instead to also offer an entry on the cells, or
+`.jp-Notebook .jp-Cell` to offer it on the cells only.
+
 (custom-css)=
 
 ```{include} custom_css.md
