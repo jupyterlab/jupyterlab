@@ -34,7 +34,10 @@ export class FormWidget extends ReactWidget {
     const rootId =
       (props.uiSchema['ui:rootFieldId'] as unknown as string) || this._idPrefix;
     this._fields = {
-      SchemaField: Private.createSchemaField(rootId)
+      SchemaField: Private.createSchemaField(rootId),
+      // RJSF's NullField calls onChange(null) when it mounts without a value,
+      // and the form writes every change to the metadata.
+      NullField: () => null
     };
     if (Private.getValidator() === null) {
       void Private.ensureValidator().then(() => {
@@ -85,7 +88,7 @@ export class FormWidget extends ReactWidget {
 
   private _props: MetadataForm.IProps;
   private _idPrefix: string;
-  private _fields: { SchemaField: Field };
+  private _fields: { SchemaField: Field; NullField: Field };
 }
 
 /**

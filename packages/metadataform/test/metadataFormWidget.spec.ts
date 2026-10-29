@@ -1074,16 +1074,25 @@ describe('metadataform/form field ids', () => {
     expect(cellMetadata()).toEqual({ mode: { b: 'y' } });
   });
 
-  it('should keep the metadata when the form sets a missing null key', async () => {
-    // RJSF sets a missing null field to null from an effect, like a change of
-    // the field, so the form writes it. The cell model ignores null for a
-    // missing key; a null field nested in an object would write the object.
-    await buildForm({
-      '/heading': { type: 'null', title: 'A heading' },
-      '/x': { type: 'string' }
-    });
-    await sleep(100);
+  it.each<[string, MetadataForm.IMetadataSchema['properties']]>([
+    ['a key', { '/heading': { type: 'null', title: 'A heading' } }],
+    ['a nested key', { '/foo/heading': { type: 'null', title: 'A heading' } }],
+    [
+      'a field of an object key',
+      {
+        '/a': {
+          type: 'object',
+          properties: { heading: { type: 'null', title: 'A heading' } }
+        }
+      }
+    ]
+  ])(
+    'should not write a null field when the form opens (%s)',
+    async (_name, properties) => {
+      await buildForm({ ...properties, '/x': { type: 'string' } });
+      await sleep(100);
 
-    expect(cellMetadata()).toEqual({});
-  });
+      expect(cellMetadata()).toEqual({});
+    }
+  );
 });
