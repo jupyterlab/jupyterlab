@@ -7,6 +7,7 @@ import * as path from 'path';
 
 const nbFile = 'simple_notebook.ipynb';
 const mdFile = 'simple.md';
+const vegaFile = 'plot.json';
 
 test.use({
   autoGoto: false,
@@ -30,6 +31,15 @@ test.describe('Workspace', () => {
       path.resolve(__dirname, `./notebooks/${mdFile}`),
       `${tmpPath}/${mdFile}`
     );
+    await contents.uploadContent(
+      JSON.stringify({
+        data: { values: [{ x: 1 }] },
+        mark: 'point',
+        encoding: { x: { field: 'x', type: 'quantitative' } }
+      }),
+      'text',
+      `${tmpPath}/${vegaFile}`
+    );
   });
 
   test('should reset the workspace', async ({ page, tmpPath }) => {
@@ -51,6 +61,77 @@ test.describe('Workspace', () => {
 
     await expect(
       page.locator('[role="main"] >> text=Title').first()
+    ).toBeVisible();
+  });
+
+  test('should open a file from `tree` url with `open-with` query', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.goto(`tree/${tmpPath}/${nbFile}?open-with=txt`);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-FileEditor')
+    ).toHaveCount(1);
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-Notebook')
+    ).toHaveCount(0);
+  });
+
+  test('should open a file from `tree` url with JSON viewer query', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.goto(`tree/${tmpPath}/${nbFile}?open-with=json`);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-RenderedJSON')
+    ).toHaveCount(1);
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-FileEditor')
+    ).toHaveCount(0);
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-Notebook')
+    ).toHaveCount(0);
+  });
+
+  for (const fileType of ['vega-lite3', 'vega-lite4']) {
+    test(`should open a file from \`tree\` url with ${fileType} query`, async ({
+      page,
+      tmpPath
+    }) => {
+      await page.goto(`tree/${tmpPath}/${vegaFile}?open-with=${fileType}`);
+
+      await expect(
+        page.locator('#jp-main-dock-panel .jp-RenderedVegaLite .vega-embed')
+      ).toBeVisible();
+    });
+  }
+
+  test('should preserve a file type alias sharing another type extension', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.goto();
+
+    await page.evaluate(async path => {
+      const { commands, docRegistry } = window.jupyterapp;
+      const registration = docRegistry.addFileType(
+        { name: 'notebook-json', extensions: ['.ipynb'] },
+        ['JSON']
+      );
+      try {
+        await commands.execute('filebrowser:open-path', {
+          path,
+          factory: 'notebook-json'
+        });
+      } finally {
+        registration.dispose();
+      }
+    }, `${tmpPath}/${nbFile}`);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-RenderedJSON')
     ).toBeVisible();
   });
 

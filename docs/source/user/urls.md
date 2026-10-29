@@ -33,6 +33,18 @@ http(s)://<server:port>/<lab-location>/lab/tree/path/to/notebook.ipynb?file-brow
 Entering the above URL will show the workspace root folder instead of the `/path/to/`
 folder in the file browser.
 
+The file can also be opened with a non-default viewer by using the optional
+`open-with` query parameter. The value can be a widget factory, file type, or file
+extension registered in JupyterLab. Common examples include `txt` for the text
+editor, `json` for the JSON viewer, and `ipynb` for the notebook viewer:
+
+```none
+http(s)://<server:port>/<lab-location>/lab/tree/path/to/notebook.ipynb?open-with=txt
+```
+
+The available viewers depend on the installed extensions and registered document
+factories.
+
 ## Linking Notebook Sections
 
 To create an URL which will scroll to a specific heading in the notebook append

@@ -351,7 +351,7 @@ export class DocumentRegistry implements IDisposable {
   /**
    * Get a list of the preferred widget factories.
    *
-   * @param path - The file path to filter the results.
+   * @param path - The file path or file type to filter the results.
    *
    * @returns A new array of widget factories.
    *
@@ -366,11 +366,16 @@ export class DocumentRegistry implements IDisposable {
    * - all other path-specific factories
    * - all other global factories
    */
-  preferredWidgetFactories(path: string): DocumentRegistry.WidgetFactory[] {
+  preferredWidgetFactories(
+    path: string | DocumentRegistry.IFileType
+  ): DocumentRegistry.WidgetFactory[] {
     const factories = new Set<string>();
 
     // Get the ordered matching file types.
-    const fts = this.getFileTypesForPath(PathExt.basename(path));
+    const fts =
+      typeof path === 'string'
+        ? this.getFileTypesForPath(PathExt.basename(path))
+        : [path];
 
     // Start with any user overrides for the defaults.
     fts.forEach(ft => {
