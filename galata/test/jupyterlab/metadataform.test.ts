@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as path from 'path';
-import type { Page } from '@playwright/test';
+import type { APIRequestContext, Page, TestInfo } from '@playwright/test';
 import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
 import { expect, galata, test } from '@jupyterlab/galata';
 import type { ObservableJSON } from '@jupyterlab/observables';
@@ -33,10 +33,59 @@ test.beforeAll(async ({ request, tmpPath }) => {
  * A kernel writes `language_info` when it connects, and loading the file
  * replaces the cells and the metadata. Both rebuild the metadata form.
  */
-async function openNotebook(page: IJupyterLabPageFixture, tmpPath: string) {
-  await page.filebrowser.open(`${tmpPath}/${nbFile}`, 'Notebook (no kernel)');
+async function openNotebook(
+  page: IJupyterLabPageFixture,
+  tmpPath: string,
+  name = nbFile
+) {
+  await page.filebrowser.open(`${tmpPath}/${name}`, 'Notebook (no kernel)');
   await page.evaluate(
     () => window.jupyterapp.shell.currentWidget.context.ready
+  );
+}
+
+/**
+ * Upload a copy of the test notebook for a test that saves it.
+ *
+ * The other tests open the shared notebook file and expect its original
+ * content.
+ */
+async function uploadNotebookCopy(
+  request: APIRequestContext,
+  tmpPath: string,
+  testInfo: TestInfo
+): Promise<string> {
+  const name = `${testInfo.testId}.ipynb`;
+  await galata
+    .newContentsHelper(request)
+    .uploadFile(
+      path.resolve(__dirname, `./notebooks/${nbFile}`),
+      `${tmpPath}/${name}`
+    );
+  return name;
+}
+
+/**
+ * Get the notebook file content once the current notebook is saved.
+ *
+ * The context clears `dirty` after the server has written the file, and a
+ * read during the write can get an empty file.
+ */
+async function getSavedNotebook(
+  page: IJupyterLabPageFixture,
+  filePath: string
+) {
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => window.jupyterapp.shell.currentWidget.context.model.dirty
+      )
+    )
+    .toBe(false);
+  return await page.evaluate(
+    async filePath =>
+      (await window.jupyterapp.serviceManager.contents.get(filePath)).content,
+    filePath
   );
 }
 
@@ -732,6 +781,61 @@ test.describe('UISchema', () => {
 });
 
 test.describe('Advanced tools', () => {
+  for (const notebookDraft of [
+    '{"draft":',
+    'null',
+    'true',
+    '42',
+    '"text"',
+    '[]'
+  ]) {
+    test(`should preserve both metadata drafts when saving ${notebookDraft} as notebook metadata`, async ({
+      page,
+      baseURL,
+      request,
+      tmpPath
+    }, testInfo) => {
+      const name = await uploadNotebookCopy(request, tmpPath, testInfo);
+      await page.goto(baseURL);
+      await openNotebook(page, tmpPath, name);
+      await openForm(page, 'Advanced Tools');
+
+      const cellEditor = page.locator('.jp-CellMetadataEditor .cm-content');
+      const notebookEditor = page.locator(
+        '.jp-NotebookMetadataEditor .cm-content'
+      );
+      const cellMetadata = await getCellMetadata(page);
+      const notebookMetadata = await getNotebookMetadata(page);
+      const cellDraft = JSON.stringify({ ...cellMetadata, draft: 'cell' });
+
+      await cellEditor.fill(cellDraft);
+      await notebookEditor.fill(notebookDraft);
+      await notebookEditor.press('ControlOrMeta+s');
+
+      const dialog = page.getByRole('dialog', { name: 'Invalid Metadata' });
+      await expect(dialog).toBeVisible();
+      await dialog.getByRole('button', { name: 'Close', exact: true }).click();
+      await expect(cellEditor).toHaveText(cellDraft);
+      await expect(notebookEditor).toHaveText(notebookDraft);
+      expect(await getCellMetadata(page)).toEqual(cellMetadata);
+      expect(await getNotebookMetadata(page)).toEqual(notebookMetadata);
+
+      await notebookEditor.fill(
+        JSON.stringify({ ...notebookMetadata, draft: 'notebook' })
+      );
+      await notebookEditor.press('ControlOrMeta+s');
+      await expect
+        .poll(() => getCellMetadata(page))
+        .toEqual({ ...cellMetadata, draft: 'cell' });
+      await expect
+        .poll(() => getNotebookMetadata(page))
+        .toEqual({ ...notebookMetadata, draft: 'notebook' });
+      const saved = await getSavedNotebook(page, `${tmpPath}/${name}`);
+      expect(saved.cells[0].metadata.draft).toBe('cell');
+      expect(saved.metadata.draft).toBe('notebook');
+    });
+  }
+
   test('should remove a field from cellMedata and verify it is updated', async ({
     page,
     baseURL,

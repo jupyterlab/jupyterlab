@@ -447,7 +447,7 @@ jupyter lab build
 ### Frequent issues
 
 :::{important}
-On Windows, symbolic links need to be activated on Windows 10 or above for Python version 3.8 or higher
+On Windows, symbolic links need to be activated on Windows 10 or above
 by activating the 'Developer Mode'. That may not be allowed by your administrators.
 See [Activate Developer Mode on Windows](https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development)
 for instructions.

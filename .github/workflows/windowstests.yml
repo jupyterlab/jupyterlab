@@ -16,7 +16,7 @@ jobs:
     name: Windows
     strategy:
       matrix:
-        python-version: ["3.14"]
+        python-version: ["3.15"]
         group: [integrity, python]
         include:
           - group: integrity
@@ -47,7 +47,7 @@ jobs:
           "UV_CACHE_DIR=$(Join-Path $Env:RUNNER_TEMP uv-cache)" >> $Env:GITHUB_ENV
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@4016d4e69656e13e662d629ee3c30dc31e68628f # v1.1.1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
           python_package_manager: "uv pip"
           python_cache_key_suffix: ${{ matrix.optional_dependencies }}
