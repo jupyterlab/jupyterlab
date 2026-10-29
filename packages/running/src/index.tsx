@@ -867,6 +867,7 @@ export class RunningSessions
     manager: IRunningSessions.IManager
   ) {
     const section = new Section({ manager, translator: this.translator });
+    section.id = manager.id ?? `jp-running-${encodeURIComponent(manager.name)}`;
     this._sectionMap.set(manager.name, section);
     this.addWidget(section);
 
@@ -1213,6 +1214,11 @@ export namespace IRunningSessions {
    * A manager of running items grouped under a single section.
    */
   export interface IManager {
+    /**
+     * Unique section ID, stable across sessions and translations.
+     */
+    id?: string;
+
     /**
      * Name that is shown to the user in plural.
      */

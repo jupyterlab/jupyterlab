@@ -145,6 +145,7 @@ export async function addKernelRunningSessionManager(
 
   // Add the kernels pane to the running sidebar.
   managers.add({
+    id: 'jp-running-kernels',
     name: trans.__('Kernels'),
     supportsMultipleViews: true,
     running: (options: { mode: 'tree' | 'list' }) => {

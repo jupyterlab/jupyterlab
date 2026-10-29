@@ -135,6 +135,8 @@ The section appears inside the File Browser. To reorder sections, right-click a
 section header and select **Enable Section Reordering**, then drag its handle to
 the desired position. Select the same option again to hide the handles. This also
 works in the Running Sessions, Debugger, and Extension Manager panels.
+Section order, collapsed states, and sizes are restored when reopening the same
+workspace.
 
 To move a section back, right-click the section header and choose **Move back to
 Running Sessions**. Moved sections' destinations, order, and collapsed state are

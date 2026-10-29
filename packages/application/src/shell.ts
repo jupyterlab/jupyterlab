@@ -8,6 +8,7 @@ import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { SidePanel } from '@jupyterlab/ui-components';
 import {
+  AccordionPanelReorderer,
   classes,
   LabIcon,
   TabBarSvg,
@@ -340,6 +341,11 @@ export namespace ILabShell {
          * Expansion states of the widgets.
          */
         readonly expansionStates: Array<boolean> | null;
+
+        /**
+         * Stable widget IDs in display order, when available.
+         */
+        readonly widgetIds?: string[];
       };
     };
   }
@@ -2428,6 +2434,12 @@ namespace Private {
       widget.content?.expansionToggled?.connect(this._onExpansionToggle, this);
       // @ts-expect-error sometimes widget is a SidePanel
       widget.content?.handleMoved?.connect(this._onHandleMoved, this);
+      if ('content' in widget && widget.content instanceof AccordionPanel) {
+        AccordionPanelReorderer.find(widget.content.node)?.reordered.connect(
+          this._onHandleMoved,
+          this
+        );
+      }
       this._refreshVisibility();
     }
 
@@ -2441,17 +2453,17 @@ namespace Private {
           : this._isCollapsedByUser;
       const widgets = Array.from(this._stackedPanel.widgets);
       const currentWidget = widgets[this._sideBar.currentIndex];
-      const widgetStates: {
-        [id: string]: {
-          sizes: number[] | null;
-          expansionStates: boolean[] | null;
-        };
-      } = {};
+      const widgetStates: ILabShell.ISideArea['widgetStates'] = {};
       this._stackedPanel.widgets.forEach((w: SidePanel) => {
         if (w.id && w.content instanceof SplitPanel) {
+          const widgetIds = w.content.widgets.map(wi => wi.id);
           widgetStates[w.id] = {
             sizes: w.content.relativeSizes() as number[],
-            expansionStates: w.content.widgets.map(wi => !wi.isHidden)
+            expansionStates: w.content.widgets.map(wi => !wi.isHidden),
+            ...(widgetIds.every(id => id.length > 0) &&
+            new Set(widgetIds).size === widgetIds.length
+              ? { widgetIds }
+              : {})
           };
         }
       });
@@ -2515,8 +2527,38 @@ namespace Private {
         this._stackedPanel.widgets.forEach((w: SidePanel) => {
           if (w.id && w.content instanceof SplitPanel) {
             const state = data.widgetStates[w.id] ?? {};
+            const widgets = new Map(
+              w.content.widgets.filter(wi => wi.id).map(wi => [wi.id, wi])
+            );
+            // Older extensions may recreate sections with generated IDs.
+            const widgetIds = state.widgetIds?.some(id => widgets.has(id))
+              ? state.widgetIds
+              : undefined;
+            if (widgetIds && w.content instanceof AccordionPanel) {
+              const ordered = widgetIds
+                .map(id => widgets.get(id))
+                .filter((wi): wi is Widget => wi !== undefined);
+              const savedWidgets = new Set(ordered);
+              let savedIndex = 0;
+              const targetWidgets = w.content.widgets.map(wi =>
+                savedWidgets.has(wi) ? ordered[savedIndex++] : wi
+              );
+              targetWidgets.forEach((wi, index) => {
+                w.content.insertWidget(index, wi);
+              });
+              // Keep keyboard navigation in the restored visual order.
+              for (const title of w.content.titles) {
+                w.content.node.appendChild(title);
+              }
+            }
+            const sizes = w.content.relativeSizes();
             w.content.widgets.forEach((wi, widx) => {
-              const expansion = (state.expansionStates ?? [])[widx];
+              const savedIndex = widgetIds
+                ? wi.id
+                  ? widgetIds.indexOf(wi.id)
+                  : -1
+                : widx;
+              const expansion = state.expansionStates?.[savedIndex];
               if (
                 typeof expansion === 'boolean' &&
                 w.content instanceof AccordionPanel
@@ -2527,9 +2569,13 @@ namespace Private {
                   w.content.collapse(widx);
                 }
               }
+              const size = state.sizes?.[savedIndex];
+              if (typeof size === 'number') {
+                sizes[widx] = size;
+              }
             });
             if (state.sizes) {
-              w.content.setRelativeSizes(state.sizes);
+              w.content.setRelativeSizes(sizes);
             }
           }
         });

@@ -14,6 +14,7 @@ import { Toolbar } from './toolbar';
  * #### Note
  * By default the content widget is an accordion panel that supports widget with
  * associated toolbar to be displayed in the widget title.
+ * Give content widgets stable, unique IDs to persist their order and state.
  */
 export class SidePanel extends Widget {
   constructor(options: SidePanel.IOptions = {}) {

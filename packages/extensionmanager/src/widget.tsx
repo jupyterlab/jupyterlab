@@ -663,12 +663,14 @@ export class ExtensionsPanel extends SidePanel {
     this.header.addWidget(new Header(model, this.trans, this._searchInputRef));
 
     const warning = (this._warning = new Warning(model, this.trans));
+    warning.id = 'jp-extensionmanager-warning';
     warning.title.label = model.canInstall
       ? this.trans.__('Warning')
       : this.trans.__('Author avatars');
     this.addWidget(warning);
 
     const installed = new PanelWithToolbar();
+    installed.id = 'jp-extensionmanager-installed';
     installed.addClass('jp-extensionmanager-installedlist');
     installed.toolbar.node.setAttribute(
       'aria-label',
@@ -697,6 +699,7 @@ export class ExtensionsPanel extends SidePanel {
 
     if (this.model.canInstall) {
       const searchResults = new SearchResult(model, this.trans);
+      searchResults.id = 'jp-extensionmanager-search';
       searchResults.addClass('jp-extensionmanager-searchresults');
       this.addWidget(searchResults);
     }
