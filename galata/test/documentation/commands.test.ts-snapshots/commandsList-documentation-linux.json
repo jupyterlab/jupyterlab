@@ -59,7 +59,7 @@
       "properties": {
         "index": {
           "type": "number",
-          "description": "The one-based index of the tab to activate in the current tab bar, or 0 for the last tab"
+          "description": "The zero-based index of the tab to activate in the current tab bar; a negative index counts from the end, so -1 is the last tab"
         }
       },
       "required": [

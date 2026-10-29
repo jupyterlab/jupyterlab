@@ -916,7 +916,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
    * Activate a tab in the active tab bar.
    *
-   * @param index - The one-based tab index, or 0 for the last tab.
+   * @param index - The zero-based tab index. A negative index counts from
+   *   the end, so -1 is the last tab.
    */
   activateTab(index: number): void {
     const current = this._currentTabBar();
@@ -924,8 +925,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       return;
     }
 
-    const title =
-      current.titles[index === 0 ? current.titles.length - 1 : index - 1];
+    const { titles } = current;
+    const title = titles[index < 0 ? titles.length + index : index];
     if (title) {
       this._dockPanel.activateWidget(title.owner);
     }

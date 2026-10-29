@@ -262,7 +262,7 @@
       "keys": ["Accel Alt 1"],
       "selector": "body",
       "args": {
-        "index": 1
+        "index": 0
       },
       "preventDefault": false
     },
@@ -271,7 +271,7 @@
       "keys": ["Accel Alt 2"],
       "selector": "body",
       "args": {
-        "index": 2
+        "index": 1
       },
       "preventDefault": false
     },
@@ -280,7 +280,7 @@
       "keys": ["Accel Alt 3"],
       "selector": "body",
       "args": {
-        "index": 3
+        "index": 2
       },
       "preventDefault": false
     },
@@ -289,7 +289,7 @@
       "keys": ["Accel Alt 4"],
       "selector": "body",
       "args": {
-        "index": 4
+        "index": 3
       },
       "preventDefault": false
     },
@@ -298,7 +298,7 @@
       "keys": ["Accel Alt 5"],
       "selector": "body",
       "args": {
-        "index": 5
+        "index": 4
       },
       "preventDefault": false
     },
@@ -307,7 +307,7 @@
       "keys": ["Accel Alt 6"],
       "selector": "body",
       "args": {
-        "index": 6
+        "index": 5
       },
       "preventDefault": false
     },
@@ -316,7 +316,7 @@
       "keys": ["Accel Alt 7"],
       "selector": "body",
       "args": {
-        "index": 7
+        "index": 6
       },
       "preventDefault": false
     },
@@ -325,7 +325,7 @@
       "keys": ["Accel Alt 8"],
       "selector": "body",
       "args": {
-        "index": 8
+        "index": 7
       },
       "preventDefault": false
     },
@@ -334,7 +334,7 @@
       "keys": ["Accel Alt 9"],
       "selector": "body",
       "args": {
-        "index": 0
+        "index": -1
       },
       "preventDefault": false
     }

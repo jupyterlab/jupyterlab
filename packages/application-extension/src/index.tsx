@@ -626,11 +626,11 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.activateTabIndex, {
         label: args =>
-          typeof args.index !== 'number'
-            ? trans.__('Activate Tab by Index')
-            : args.index === 0
-              ? trans.__('Activate Last Tab')
-              : trans.__('Activate Tab %1', args.index),
+          args.index === -1
+            ? trans.__('Activate Last Tab')
+            : typeof args.index === 'number' && args.index >= 0
+              ? trans.__('Activate Tab %1', args.index + 1)
+              : trans.__('Activate Tab by Index'),
         describedBy: {
           args: {
             type: 'object',
@@ -638,7 +638,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
               index: {
                 type: 'number',
                 description: trans.__(
-                  'The one-based index of the tab to activate in the current tab bar, or 0 for the last tab'
+                  'The zero-based index of the tab to activate in the current tab bar; a negative index counts from the end, so -1 is the last tab'
                 )
               }
             },

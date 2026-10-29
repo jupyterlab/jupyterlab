@@ -355,7 +355,7 @@ describe('LabShell', () => {
       widget.id = 'foo';
       shell.add(widget, 'main', { activate: false });
 
-      shell.activateTab(1);
+      shell.activateTab(0);
       await framePromise();
 
       expect(shell.currentWidget).toBe(null);
@@ -400,9 +400,10 @@ describe('LabShell', () => {
         });
 
         it.each([
-          { index: 1, offset: 0 },
-          { index: 2, offset: 1 },
-          { index: 0, offset: 1 }
+          { index: 0, offset: 0 },
+          { index: 1, offset: 1 },
+          { index: -1, offset: 1 },
+          { index: -2, offset: 0 }
         ])(
           'should activate index $index within the current pane',
           async ({ index, offset }) => {
@@ -424,16 +425,19 @@ describe('LabShell', () => {
           }
         );
 
-        it('should ignore indices outside the current pane', async () => {
-          for (const pane of [0, 2, 4, 6]) {
-            simulate(widgets[pane].node, 'focus');
+        it.each([2, -3])(
+          'should ignore index %d outside the current pane',
+          async index => {
+            for (const pane of [0, 2, 4, 6]) {
+              simulate(widgets[pane].node, 'focus');
 
-            shell.activateTab(3);
-            await framePromise();
+              shell.activateTab(index);
+              await framePromise();
 
-            expect(widgets.some(widget => widget.activated)).toBe(false);
+              expect(widgets.some(widget => widget.activated)).toBe(false);
+            }
           }
-        });
+        );
       }
     );
   });
