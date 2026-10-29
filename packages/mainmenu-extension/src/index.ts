@@ -294,18 +294,15 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
       }
     });
 
-    const setCollapsed = (collapsed: boolean) => {
-      menu.collapsed = collapsed;
-      commands.notifyCommandChanged(CommandIDs.toggleCollapsed);
-    };
-
     commands.addCommand(CommandIDs.toggleCollapsed, {
       label: trans.__('Collapse Main Menu'),
       caption: trans.__('Collapse the main menu into a single menu button'),
       isToggled: () => menu.collapsed,
       execute: () => {
-        setCollapsed(!menu.collapsed);
-        return settings?.set('collapsed', menu.collapsed);
+        // Leave the automatic mode, if enabled, for the opposite of what is shown.
+        const mode = menu.collapsed ? 'never' : 'always';
+        menu.collapseMode = mode;
+        return settings?.set('collapse', mode);
       },
       describedBy: {
         args: {
@@ -314,10 +311,14 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
         }
       }
     });
+    menu.collapsedChanged.connect(() => {
+      commands.notifyCommandChanged(CommandIDs.toggleCollapsed);
+    });
 
     if (settings) {
       const onSettingsChanged = (settings: ISettingRegistry.ISettings) => {
-        setCollapsed(settings.get('collapsed').composite as boolean);
+        menu.collapseMode = settings.get('collapse')
+          .composite as MainMenu.CollapseMode;
       };
       onSettingsChanged(settings);
       settings.changed.connect(onSettingsChanged);

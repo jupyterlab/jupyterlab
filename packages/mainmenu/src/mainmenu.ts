@@ -10,6 +10,9 @@ import {
 } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import type { CommandRegistry } from '@lumino/commands';
+import type { Message } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import type { VirtualElement } from '@lumino/virtualdom';
 import { h } from '@lumino/virtualdom';
 import { Menu, MenuBar } from '@lumino/widgets';
@@ -69,6 +72,24 @@ export class MainMenu extends MenuBar implements IMainMenu {
   readonly collapsedMenuBar: MenuBar;
 
   /**
+   * When to collapse the main menu into a single menu bar item.
+   */
+  get collapseMode(): MainMenu.CollapseMode {
+    return this._collapseMode;
+  }
+  set collapseMode(value: MainMenu.CollapseMode) {
+    if (this._collapseMode === value) {
+      return;
+    }
+    this._collapseMode = value;
+    if (value === 'auto') {
+      this._fitCollapsed();
+    } else {
+      this._setCollapsed(value === 'always');
+    }
+  }
+
+  /**
    * Whether the main menu is collapsed into a single menu bar item.
    *
    * #### Notes
@@ -78,13 +99,12 @@ export class MainMenu extends MenuBar implements IMainMenu {
   get collapsed(): boolean {
     return this._collapsed;
   }
-  set collapsed(value: boolean) {
-    if (this._collapsed === value) {
-      return;
-    }
-    this._collapsed = value;
-    this.setHidden(value);
-    this.collapsedMenuBar.setHidden(!value);
+
+  /**
+   * A signal emitted when the main menu is collapsed or expanded.
+   */
+  get collapsedChanged(): ISignal<this, boolean> {
+    return this._collapsedChanged;
   }
 
   /**
@@ -309,6 +329,19 @@ export class MainMenu extends MenuBar implements IMainMenu {
   }
 
   /**
+   * Handle the DOM events for the menu bar.
+   *
+   * @param event - The DOM event sent to the menu bar.
+   */
+  handleEvent(event: Event): void {
+    if (event.type === 'resize') {
+      this._fitCollapsed();
+      return;
+    }
+    super.handleEvent(event);
+  }
+
+  /**
    * Dispose of the resources held by the menu bar.
    */
   dispose(): void {
@@ -415,6 +448,76 @@ export class MainMenu extends MenuBar implements IMainMenu {
   }
 
   /**
+   * A message handler invoked on an `'after-attach'` message.
+   */
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    window.addEventListener('resize', this);
+  }
+
+  /**
+   * A message handler invoked on a `'before-detach'` message.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    window.removeEventListener('resize', this);
+    super.onBeforeDetach(msg);
+  }
+
+  /**
+   * A message handler invoked on an `'update-request'` message.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    super.onUpdateRequest(msg);
+    // The rendered items may no longer fit, e.g. after adding a menu.
+    this._fitCollapsed();
+  }
+
+  /**
+   * Collapse the main menu if its items do not fit in the window, and expand
+   * it otherwise, in `auto` collapse mode.
+   */
+  private _fitCollapsed(): void {
+    if (this._collapseMode !== 'auto') {
+      return;
+    }
+    if (this.isVisible) {
+      // Keep the width the items need, to know when to expand them again.
+      this._itemsWidth = 0;
+      for (const item of this.contentNode.children) {
+        this._itemsWidth += item.getBoundingClientRect().width;
+      }
+    }
+    const bar = this._collapsed ? this.collapsedMenuBar : this;
+    if (!bar.isVisible) {
+      return;
+    }
+    // Both menu bars start at the same place, so the result does not depend
+    // on which one is shown.
+    const right = bar.node.getBoundingClientRect().left + this._itemsWidth;
+    const collapsed = right > document.documentElement.clientWidth;
+    if (collapsed !== this._collapsed) {
+      this._setCollapsed(collapsed);
+      if (!collapsed) {
+        // Measure the items again, as they may have changed while hidden.
+        this._fitCollapsed();
+      }
+    }
+  }
+
+  /**
+   * Show either the main menu or the collapsed menu bar.
+   */
+  private _setCollapsed(value: boolean): void {
+    if (this._collapsed === value) {
+      return;
+    }
+    this._collapsed = value;
+    this.setHidden(value);
+    this.collapsedMenuBar.setHidden(!value);
+    this._collapsedChanged.emit(value);
+  }
+
+  /**
    * Handle the disposal of a menu.
    */
   private _onMenuDisposed(menu: Menu): void {
@@ -430,9 +533,12 @@ export class MainMenu extends MenuBar implements IMainMenu {
   }
 
   private _collapsed = false;
+  private _collapsedChanged = new Signal<this, boolean>(this);
   private _collapsedMenu: Menu;
+  private _collapseMode: MainMenu.CollapseMode = 'never';
   private _commands: CommandRegistry;
   private _items: Private.IRankItem[] = [];
+  private _itemsWidth = 0;
   private _editMenu: EditMenu;
   private _fileMenu: FileMenu;
   private _helpMenu: HelpMenu;
@@ -447,6 +553,15 @@ export class MainMenu extends MenuBar implements IMainMenu {
  * A namespace for MainMenu statics.
  */
 export namespace MainMenu {
+  /**
+   * When to collapse the main menu into a single menu bar item.
+   *
+   * - `never`: always show the main menu.
+   * - `always`: always collapse the main menu.
+   * - `auto`: collapse the main menu while its items do not fit in the window.
+   */
+  export type CollapseMode = 'never' | 'always' | 'auto';
+
   /**
    * The options used to create a main menu.
    */

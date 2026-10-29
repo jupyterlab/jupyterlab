@@ -81,19 +81,35 @@ describe('@jupyterlab/mainmenu', () => {
       });
     });
 
-    describe('#collapsed', () => {
-      it('should be false by default', () => {
+    describe('#collapseMode', () => {
+      it('should be never by default', () => {
+        expect(mainMenu.collapseMode).toBe('never');
         expect(mainMenu.collapsed).toBe(false);
       });
 
       it('should swap the main menu for the collapsed menu bar', () => {
-        mainMenu.collapsed = true;
+        mainMenu.collapseMode = 'always';
+        expect(mainMenu.collapsed).toBe(true);
         expect(mainMenu.isHidden).toBe(true);
         expect(mainMenu.collapsedMenuBar.isHidden).toBe(false);
 
-        mainMenu.collapsed = false;
+        mainMenu.collapseMode = 'never';
+        expect(mainMenu.collapsed).toBe(false);
         expect(mainMenu.isHidden).toBe(false);
         expect(mainMenu.collapsedMenuBar.isHidden).toBe(true);
+      });
+    });
+
+    describe('#collapsedChanged', () => {
+      it('should be emitted when the main menu is collapsed or expanded', () => {
+        const changes: boolean[] = [];
+        mainMenu.collapsedChanged.connect((_, collapsed) => {
+          changes.push(collapsed);
+        });
+
+        mainMenu.collapseMode = 'always';
+        mainMenu.collapseMode = 'never';
+        expect(changes).toEqual([true, false]);
       });
     });
 
@@ -108,7 +124,7 @@ describe('@jupyterlab/mainmenu', () => {
         mainMenu.addMenu(menu);
         Widget.attach(mainMenu, document.body);
         Widget.attach(mainMenu.collapsedMenuBar, document.body);
-        mainMenu.collapsed = true;
+        mainMenu.collapseMode = 'always';
 
         mainMenu.activeMenu = menu;
         mainMenu.openActiveMenu();

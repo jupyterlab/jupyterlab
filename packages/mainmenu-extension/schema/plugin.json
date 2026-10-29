@@ -349,11 +349,12 @@
   ],
   "jupyter.lab.transform": true,
   "properties": {
-    "collapsed": {
+    "collapse": {
       "title": "Collapse the main menu",
-      "description": "Whether to collapse the main menu into a single menu button.",
-      "type": "boolean",
-      "default": false
+      "description": "When to collapse the main menu into a single menu button: never, always, or automatically when the menu bar does not fit in the window.",
+      "type": "string",
+      "enum": ["never", "always", "auto"],
+      "default": "never"
     },
     "menus": {
       "title": "The application menu description.",

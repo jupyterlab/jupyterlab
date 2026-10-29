@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, test } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 const menuPaths = [
@@ -144,6 +144,36 @@ test.describe('Collapsed main menu', () => {
     await expect(
       page.getByRole('menuitem', { name: 'Main Menu', exact: true })
     ).toBeVisible();
+  });
+});
+
+test.describe('Automatically collapsed main menu', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/mainmenu-extension:plugin': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/mainmenu-extension:plugin'],
+        collapse: 'auto'
+      }
+    }
+  });
+
+  test('Collapse the main menu when it does not fit', async ({ page }) => {
+    await expect(page.locator('#jp-MainMenu')).toBeVisible();
+
+    await page.setViewportSize({ width: 400, height: 768 });
+
+    await expect(page.locator('#jp-MainMenu')).toBeHidden();
+    await expect(
+      page.getByRole('menuitem', { name: 'Main Menu', exact: true })
+    ).toBeVisible();
+
+    await page.setViewportSize({ width: 1024, height: 768 });
+
+    await expect(page.locator('#jp-MainMenu')).toBeVisible();
+    await expect(
+      page.getByRole('menuitem', { name: 'Main Menu', exact: true })
+    ).toBeHidden();
   });
 });
 
