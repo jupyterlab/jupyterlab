@@ -141,11 +141,7 @@ test.describe('Notebook Trust', () => {
     await expect(page.locator(NOT_TRUSTED_SELECTOR)).toHaveCount(0);
 
     // Open notebook in text editor using context menu
-    await page.click(`.jp-DirListing-item span:has-text("${fileName}")`, {
-      button: 'right'
-    });
-    await page.hover('text=Open With');
-    await page.click('.lm-Menu li[role="menuitem"]:has-text("Editor")');
+    await page.filebrowser.open(fileName, 'Editor');
     const editorContent = page.locator('.jp-FileEditor .cm-content');
     await editorContent.waitFor();
     await editorContent.locator('text=TEST_TEXT').waitFor();
