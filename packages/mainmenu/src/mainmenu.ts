@@ -46,7 +46,7 @@ export class MainMenu extends MenuBar implements IMainMenu {
       renderer: MenuSvg.defaultRenderer
     });
     this._collapsedMenu.addClass('jp-ThemedContainer');
-    this._collapsedMenu.title.icon = Private.collapsedMenuIcon;
+    this._collapsedMenu.title.icon = menuIcon;
     this._collapsedMenu.title.label = trans.__('Main Menu');
 
     this.collapsedMenuBar = new MenuBar({
@@ -483,13 +483,6 @@ namespace Private {
   export function itemCmp(first: IRankItem, second: IRankItem): number {
     return first.rank - second.rank;
   }
-
-  /**
-   * The icon of the collapsed menu bar item.
-   */
-  export const collapsedMenuIcon = menuIcon.bindprops({
-    stylesheet: 'menuItem'
-  });
 
   /**
    * A menu bar renderer for items showing only an icon.
