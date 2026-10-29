@@ -5,6 +5,7 @@
 import { program as commander } from 'commander';
 import * as path from 'path';
 import * as os from 'os';
+import packageJson from 'package-json';
 import { handlePackage } from './update-dist-tag';
 import * as utils from './utils';
 
@@ -41,6 +42,30 @@ function isPublished(spec: string): boolean {
     }
     return false;
   }
+}
+
+/**
+ * Wait until the registry lists the local version of a public package.
+ *
+ * The registry lists a new version a minute or more after `npm publish`
+ * returns, and the dist-tags must be computed from data that includes it.
+ */
+async function waitForRegistry(pkgPath: string): Promise<void> {
+  const data = utils.readJSONFile(path.join(pkgPath, 'package.json'));
+  if (data.private) {
+    return;
+  }
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const npmData = await packageJson(data.name, { allVersions: true });
+    if (data.version in npmData.versions) {
+      return;
+    }
+    console.log(
+      `Waiting for the registry to list ${data.name}@${data.version}`
+    );
+    await sleep(30 * 1000);
+  }
+  throw new Error(`The registry does not list ${data.name}@${data.version}`);
 }
 
 // Specify the program signature.
@@ -108,6 +133,10 @@ commander
     if (!options.skipTags) {
       const basePath = path.resolve('.');
       const paths = utils.getYarnPaths(basePath).sort();
+      // A dry run published nothing, so there is nothing to wait for.
+      if (!options.dryRun) {
+        await Promise.all(paths.map(waitForRegistry));
+      }
       const cmds = await Promise.all(paths.map(handlePackage));
       cmds.forEach(cmdList => {
         cmdList.forEach(cmd => {
