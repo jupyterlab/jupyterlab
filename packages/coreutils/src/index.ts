@@ -9,6 +9,7 @@ export * from './activitymonitor';
 export * from './interfaces';
 export * from './lru';
 export * from './markdowncodeblocks';
+export * from './mime';
 export * from './pageconfig';
 export * from './path';
 export * from './signal';
