@@ -195,8 +195,8 @@ export function getHeadings(text: string): IMarkdownHeading[] {
 // Returns the length of ``` or ~~~ fences.
 function extractLeadingFences(line: string) {
   let match;
-  if (line.startsWith('`')) match = line.match(/^(`{3,})/);
-  else match = line.match(/^(~{3,})/);
+  if (line.startsWith('`')) match = line.match(/^`{3,}/);
+  else match = line.match(/^~{3,}/);
   return match ? match[0].length : 0;
 }
 
@@ -305,7 +305,7 @@ interface IHeader {
  */
 function parseHeading(line: string, nextLine?: string): IHeader | null {
   // Case: Markdown heading
-  let match = line.match(/^([#]{1,6}) (.*)/);
+  let match = line.match(/^(#{1,6}) (.*)/);
   if (match) {
     return {
       text: cleanTitle(match[2]),
@@ -316,7 +316,7 @@ function parseHeading(line: string, nextLine?: string): IHeader | null {
   }
   // Case: Markdown heading (alternative style)
   if (nextLine) {
-    match = nextLine.match(/^ {0,3}([=]{2,}|[-]{2,})\s*$/);
+    match = nextLine.match(/^ {0,3}([=]{2,}|-{2,})\s*$/);
     if (match) {
       return {
         text: cleanTitle(line),
@@ -327,7 +327,7 @@ function parseHeading(line: string, nextLine?: string): IHeader | null {
     }
   }
   // Case: HTML heading (WARNING: this is not particularly robust, as HTML headings can span multiple lines)
-  match = line.match(/<h([1-6]).*>(.*)<\/h\1>/i);
+  match = line.match(/<h([1-6]).*>(.*)<\/h\1>/i); // eslint-disable-line regexp/no-super-linear-backtracking
   if (match) {
     return {
       text: match[2],
@@ -349,4 +349,4 @@ function cleanTitle(heading: string): string {
  * Ignore title with html tag with a class name equal to `jp-toc-ignore` or `tocSkip`
  */
 const skipHeading =
-  /<\w+\s(.*?\s)?class="(.*?\s)?(jp-toc-ignore|tocSkip)(\s.*?)?"(\s.*?)?>/;
+  /<\w+\s(?:.*?\s)?class="(?:.*?\s)?(?:jp-toc-ignore|tocSkip)(?:\s.*?)?"(?:\s.*?)?>/;

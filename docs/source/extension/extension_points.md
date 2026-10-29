@@ -220,6 +220,40 @@ export default plugin;
 ></div>
 ```
 
+(command-state)=
+
+### Update the State of a Command
+
+A toolbar button calls the `isEnabled`, `isVisible`, `isToggled` and `label` functions of its command when it renders.
+It renders again only when the command registry emits `commandChanged` for the command, so call `notifyCommandChanged` with the command ID whenever one of these functions can return a different value.
+
+Most often, these functions read the current widget.
+For example, an extension adds a side panel with a button that exports the current notebook.
+The command is enabled only when a notebook is the current widget:
+
+```typescript
+app.commands.addCommand(commandID, {
+  label: 'Export Notebook',
+  isEnabled: () =>
+    tracker.currentWidget !== null &&
+    tracker.currentWidget === app.shell.currentWidget,
+  execute: () => {
+    // Export tracker.currentWidget
+  }
+});
+
+app.shell.currentChanged?.connect(() => {
+  app.commands.notifyCommandChanged(commandID);
+});
+```
+
+Here `tracker` is the {ts:interface}`notebook.INotebookTracker` token.
+Without the `currentChanged` handler, the button keeps the state it had when it was last rendered: if no notebook was open when the side panel was created, the button stays greyed out after the user opens one.
+When the current widget changes, JupyterLab notifies its own commands only.
+It notifies all commands when a notebook becomes view-only or editable, so a command that also depends on the view-only state of the current notebook needs no other handler.
+
+Pass the command ID to `notifyCommandChanged`: without an ID it notifies every command, and every command button in the application renders again.
+
 (context-menu)=
 
 ## Context Menu
@@ -538,6 +572,36 @@ The recommended ranges for this rank are:
 - 501-899: reserved for third-party extensions.
 - 900: The default rank if none is specified.
 - 1000: The JupyterLab extension manager.
+
+#### Movable accordion sections
+
+Sidebar panels can participate in the movable-sections system so users can
+relocate accordion sections between panels via the context menu. There are two
+roles — **source** (sections can be taken out) and **target** (sections can be
+dropped in). A panel can serve as both simultaneously.
+
+Take {ts:interface}`apputils.IMovableSectionRegistry` as an **optional** dependency and register your panel:
+
+```typescript
+import { IMovableSectionRegistry } from '@jupyterlab/apputils';
+
+optional: [IMovableSectionRegistry];
+activate: (app, registry: IMovableSectionRegistry | null) => {
+  if (registry) {
+    // Expose sections that can be moved out:
+    registry.registerSource('@my-org/my-ext:panel', 'My Panel', myPanel);
+    // Accept sections dropped in:
+    registry.registerTarget('@my-org/my-ext:panel', 'My Panel', myPanel);
+  }
+};
+```
+
+The label (second argument) appears in the context menu as "Move to My Panel" or
+"Move back to My Panel".
+
+**Source panels** must implement {ts:interface}`apputils.IMovableSectionSource`
+
+**Target panels** must implement {ts:interface}`apputils.IMovableSectionDestination`
 
 (mainmenu)=
 
@@ -975,6 +1039,8 @@ which are then provided as tokens so that other extensions may request them.
 For instance, if you want to interact with notebooks, you should request the {ts:interface}`notebook.INotebookTracker` token.
 You can then use this tracker to iterate over, filter, and search all open notebooks.
 You can also use it to be notified via signals when notebooks are added and removed from the tracker.
+Its `currentWidget` is the most recently focused notebook, and its `currentChanged` signal fires when a different notebook becomes current.
+A command that reads `currentWidget` needs a `currentChanged` handler that notifies the command registry, as described in {ref}`command-state`.
 
 Widget tracker tokens are provided for many activities in JupyterLab, including
 notebooks, consoles, text files, mime documents, and terminals.
@@ -1134,7 +1200,7 @@ Kernel subshells enable concurrent code execution within kernels that support th
 Subshells are supported by:
 
 - **ipykernel 7.0.0+** (Python kernels) - Kernels advertise support via `supported_features: ['kernel subshells']` in kernel info replies
-- Other kernels implementing [JEP 91](https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html)
+- Other kernels implementing [JEP 91](https://jupyter.org/enhancement-proposals/kernel-subshells/)
 
 **User Interface**
 
@@ -1179,7 +1245,7 @@ if (kernel.supportsSubshells) {
 }
 ```
 
-For detailed specifications, see [JEP 91](https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html).
+For detailed specifications, see [JEP 91](https://jupyter.org/enhancement-proposals/kernel-subshells/).
 
 ## LSP Features
 

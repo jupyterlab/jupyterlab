@@ -83,6 +83,7 @@ const entryPoints = packages
 module.exports = {
   entryPoints,
   entryPointStrategy: 'packages',
+  treatValidationWarningsAsErrors: process.env.CI === 'true',
   includeVersion: false,
   externalSymbolLinkMappings: {
     '@codemirror/language': {
@@ -116,7 +117,7 @@ module.exports = {
       ISharedMarkdownCell:
         'https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedMarkdownCell.html',
       ISharedNotebook:
-        'https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedNotebook-1.html',
+        'https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedNotebook.html',
       ISharedRawCell:
         'https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedRawCell.html',
       ISharedText:
@@ -130,7 +131,7 @@ module.exports = {
       YCodeCell:
         'https://jupyter-ydoc.readthedocs.io/en/latest/api/classes/YCodeCell.html',
       YDocument:
-        'https://jupyter-ydoc.readthedocs.io/en/latest/api/classes/YDocument-1.html',
+        'https://jupyter-ydoc.readthedocs.io/en/latest/api/classes/YDocument.html',
       YFile:
         'https://jupyter-ydoc.readthedocs.io/en/latest/api/classes/YFile.html',
       YNotebook:
@@ -208,6 +209,10 @@ module.exports = {
         'https://lumino.readthedocs.io/en/stable/api/classes/widgets.PanelLayout.html',
       SplitPanel:
         'https://lumino.readthedocs.io/en/latest/api/classes/widgets.SplitPanel-1.html',
+      'SplitLayout.Alignment':
+        'https://lumino.readthedocs.io/en/latest/api/types/widgets.SplitLayout.Alignment.html',
+      'SplitLayout.Orientation':
+        'https://lumino.readthedocs.io/en/latest/api/types/widgets.SplitLayout.Orientation.html',
       TabBar:
         'https://lumino.readthedocs.io/en/stable/api/classes/widgets.TabBar-1.html',
       'TabBar.IOptions':
@@ -217,7 +222,9 @@ module.exports = {
       'TabPanel.IOptions':
         'https://lumino.readthedocs.io/en/stable/api/interfaces/widgets.TabPanel.IOptions.html',
       Widget:
-        'https://lumino.readthedocs.io/en/latest/api/classes/widgets.Widget-1.html'
+        'https://lumino.readthedocs.io/en/latest/api/classes/widgets.Widget-1.html',
+      'Widget.Flag.IsVisible':
+        'https://lumino.readthedocs.io/en/latest/api/enums/widgets.Widget.Flag.html#IsVisible'
     },
     '@rjsf/utils': {
       FieldProps:

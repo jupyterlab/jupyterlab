@@ -5,6 +5,7 @@
     "outDir": "lib",
     "rootDir": "src",
     "module": "commonjs",
+    "verbatimModuleSyntax": false,
     "types": ["node"]
   },
   "include": ["src/**/*"],
@@ -14,6 +15,9 @@
     },
     {
       "path": "../nbformat"
+    },
+    {
+      "path": "../rendermime-interfaces"
     },
     {
       "path": "../settingregistry"

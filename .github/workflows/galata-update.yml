@@ -4,9 +4,7 @@ on:
   issue_comment:
     types: [created, edited]
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: {}
 
 jobs:
   update-galata-snapshots:
@@ -17,14 +15,17 @@ jobs:
       )
     timeout-minutes: 80
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
-      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots-checkout@main
+      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots-checkout@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
           python_package_manager: "uv pip"
 
@@ -32,9 +33,9 @@ jobs:
         run: |
           bash ./scripts/ci_install.sh
           # Build dev-mode
-          jlpm run build
+          jlpm build
 
-      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@v1
+      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           server_url: http-get://localhost:8888/lab
@@ -57,6 +58,9 @@ jobs:
       )
     timeout-minutes: 80
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      pull-requests: write
 
     # Python version is frozen through strategy.matrix.python-version
     # Python dependencies are frozen in the installation step
@@ -64,19 +68,20 @@ jobs:
     strategy:
       matrix:
         # Freeze Python version because it appears in console header
-        python-version: ['3.10.6']
+        python-version: ['3.11.17']
 
     steps:
-      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots-checkout@main
+      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots-checkout@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout demo project
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           repository: jupyterlab/jupyterlab-demo
           ref: master
           path: demo
+          persist-credentials: false
 
       - name: Get demo folder
         run: |
@@ -84,7 +89,7 @@ jobs:
         working-directory: demo
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
           python_package_manager: "uv pip"
 
@@ -98,9 +103,9 @@ jobs:
           bash ./scripts/ci_install.sh
 
           # Build dev-mode
-          jlpm run build
+          jlpm build
 
-      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@v1
+      - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           server_url: http-get://localhost:8888/lab

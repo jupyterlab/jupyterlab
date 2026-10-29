@@ -41,55 +41,43 @@ const URL_CONFIG = {
 // Data to ignore.
 const MISSING: Dict<string[]> = {
   '@jupyterlab/coreutils': ['path'],
-  '@jupyterlab/buildutils': ['assert', 'child_process', 'fs', 'path'],
+  '@jupyterlab/buildutils': [
+    'assert',
+    'child_process',
+    'fs',
+    'path',
+    'readline'
+  ],
   '@jupyterlab/galata': ['fs', 'path', '@jupyterlab/galata'],
   '@jupyterlab/testing': ['child_process', 'fs', 'path'],
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
 
+// Library packages that are deliberately not singletons.
+const NOT_SINGLETON: string[] = [
+  // Not an importable JavaScript module at all
+  '@jupyterlab/core-meta',
+  // Stylesheet-only package.
+  '@jupyterlab/nbconvert-css',
+  // Aggregation shell package
+  '@jupyterlab/metapackage'
+];
+
 const UNUSED: Dict<string[]> = {
   // url is a polyfill for sanitize-html
   '@jupyterlab/apputils': ['@types/react'],
   '@jupyterlab/application': ['@fortawesome/fontawesome-free'],
-  '@jupyterlab/buildutils': ['inquirer', 'verdaccio'],
-  '@jupyterlab/codemirror': [
-    '@codemirror/lang-cpp',
-    '@codemirror/lang-css',
-    '@codemirror/lang-html',
-    '@codemirror/lang-java',
-    '@codemirror/lang-javascript',
-    '@codemirror/lang-json',
-    '@codemirror/lang-markdown',
-    '@codemirror/lang-php',
-    '@codemirror/lang-python',
-    '@codemirror/lang-rust',
-    '@codemirror/lang-sql',
-    '@codemirror/lang-wast',
-    '@codemirror/lang-xml',
-    '@codemirror/legacy-modes'
-  ],
-  '@jupyterlab/codemirror-extension': [
-    '@codemirror/lang-markdown',
-    '@codemirror/legacy-modes'
-  ],
+  '@jupyterlab/buildutils': ['verdaccio'],
   '@jupyterlab/coreutils': ['path-browserify'],
-  '@jupyterlab/fileeditor': ['regexp-match-indices'],
   '@jupyterlab/galata-extension': [
     '@fontsource/dejavu-mono',
     '@fontsource/dejavu-sans'
-  ],
-  '@jupyterlab/markedparser-extension': [
-    // only (but always) imported asynchronously
-    'marked-gfm-heading-id',
-    'marked-mangle'
   ],
   '@jupyterlab/services': ['ws'],
   '@jupyterlab/testing': [
     '@babel/core',
     '@babel/preset-env',
-    'fs-extra',
     'identity-obj-proxy',
-    'jest-environment-jsdom',
     'jest-junit'
   ],
   '@jupyterlab/testutils': [
@@ -289,6 +277,7 @@ function ensureBranch(): string[] {
   // Handle the github_version in conf.py
   const confPath = 'docs/source/conf.py';
   const oldConfData = fs.readFileSync(confPath, 'utf-8');
+  // eslint-disable-next-line prefer-regex-literals
   const confTest = new RegExp('"github_version": "(.*)"');
   const newConfData = oldConfData.replace(
     confTest,
@@ -345,6 +334,21 @@ function ensureBranch(): string[] {
       while (newData.indexOf(toReplace) !== -1) {
         newData = newData.replace(toReplace, badgeLink);
       }
+    }
+
+    if (filePath === 'packages/notebook-extension/src/index.ts') {
+      // Runtime help links should point users to stable documentation.
+      const runtimeHelpLinks = [
+        'https://jupyterlab.readthedocs.io/en/stable/user/export.html'
+      ];
+      runtimeHelpLinks.forEach(stableLink => {
+        const versionedLink = stableLink.replace('/stable/', `/${rtdVersion}/`);
+        if (stableLink !== versionedLink) {
+          while (newData.indexOf(versionedLink) !== -1) {
+            newData = newData.replace(versionedLink, stableLink);
+          }
+        }
+      });
     }
 
     if (newData !== oldData) {
@@ -468,11 +472,13 @@ function ensureCorePackage(corePackage: any, corePaths: string[]) {
       return;
     }
 
-    // If the package has a tokens.ts file, make sure it is noted as a singleton
-    if (
-      fs.existsSync(path.join(pkgPath, 'src', 'tokens.ts')) &&
-      !singletonPackages.includes(data.name)
-    ) {
+    // Every library package is a singleton unless it opts out: they either
+    // declare tokens, whose identity must be unique to resolve, or export
+    // classes that third-party extensions may use in `instanceof` checks.
+    const isSingleton =
+      !data.name.endsWith('-extension') && !NOT_SINGLETON.includes(data.name);
+
+    if (isSingleton && !singletonPackages.includes(data.name)) {
       singletonPackages.push(data.name);
     }
   });
@@ -841,15 +847,15 @@ export async function ensureIntegrity(): Promise<boolean> {
     console.debug(JSON.stringify(messages, null, 2));
     if (process.argv.indexOf('--force') !== -1) {
       console.debug(
-        '\n\nPlease run `jlpm run integrity` locally and commit the changes'
+        '\n\nPlease run `jlpm integrity` locally and commit the changes'
       );
       process.exit(1);
     }
     try {
-      utils.run('jlpm install');
+      utils.run('jlpm');
     } catch (error) {
       // Fallback in case this script is called during editable installation
-      utils.run(`node jupyterlab/staging/yarn.js install`);
+      utils.run(`jlpm`);
     }
 
     console.debug('\n\nMade integrity changes!');

@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type MermaidType from 'mermaid';
 import type MermaidElkType from '@mermaid-js/layout-elk';
 
@@ -31,7 +29,7 @@ export class MermaidManager implements IMermaidManager {
   protected _themes: IThemeManager | null;
 
   constructor(options: MermaidManager.IOptions = {}) {
-    this._diagrams = new LruCache({ maxSize: options.maxCacheSize || null });
+    this._diagrams = new LruCache({ maxSize: options.maxCacheSize ?? null });
 
     // handle reacting to themes
     if (options.themes) {
@@ -213,8 +211,9 @@ export class MermaidManager implements IMermaidManager {
     );
 
     // add dimension information
-    if (info.width) {
-      img.width = info.width;
+    const { width } = info;
+    if (width !== undefined && width !== null && width !== 0) {
+      img.width = width;
     }
 
     // add accessible alt title
@@ -350,7 +349,7 @@ namespace Private {
    * The current upstream behavior appears to be last-in wins, but check all.
    */
   export async function ensureRenderers(text: string): Promise<void> {
-    let promises: Promise<any>[] = [];
+    const promises: Promise<typeof MermaidElkType>[] = [];
 
     for (const match of [...text.matchAll(RE_DEFAULT_RENDERER)]) {
       // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
@@ -398,7 +397,7 @@ namespace Private {
    * but _any_ "malformed" tag will break the SVG rendering entirely.
    */
   export const RE_VOID_ELEMENT =
-    /<\s*(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)\s*([^>]*?)\s*>/gi;
+    /<\s*(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)\s*([^>]*?)\s*>/gi; // eslint-disable-line regexp/no-super-linear-backtracking
 
   /**
    * Ensure a void element is closed with a slash, preserving any attributes.

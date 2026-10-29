@@ -53,7 +53,9 @@ export class MarkdownViewer extends Widget {
         signal: this.context.model.contentChanged,
         timeout: this._config.renderTimeout
       });
-      this._monitor.activityStopped.connect(this.update, this);
+      this._monitor.activityStopped.connect(this._requestRender, this);
+      // An update request made before the timeout renders the change.
+      this.context.model.contentChanged.connect(this._onContentChanged, this);
 
       this._ready.resolve(undefined);
     });
@@ -78,7 +80,7 @@ export class MarkdownViewer extends Widget {
    */
   setFragment(fragment: string): void {
     this._fragment = fragment;
-    this.update();
+    this._requestRender();
   }
 
   /**
@@ -101,7 +103,7 @@ export class MarkdownViewer extends Widget {
         style.setProperty('font-size', value ? value + 'px' : null);
         break;
       case 'hideFrontMatter':
-        this.update();
+        this._requestRender();
         break;
       case 'lineHeight':
         style.setProperty('line-height', value ? value.toString() : null);
@@ -140,9 +142,9 @@ export class MarkdownViewer extends Widget {
    * Handle an `update-request` message to the widget.
    */
   protected onUpdateRequest(msg: Message): void {
-    if (this.context.isReady && !this.isDisposed) {
+    if (this._renderPending && this.context.isReady && !this.isDisposed) {
+      this._renderPending = false;
       void this._render();
-      this._fragment = '';
     }
   }
 
@@ -151,6 +153,21 @@ export class MarkdownViewer extends Widget {
    */
   protected onActivateRequest(msg: Message): void {
     this.node.focus();
+  }
+
+  /**
+   * Request that the markdown content be rendered.
+   */
+  private _requestRender(): void {
+    this._renderPending = true;
+    this.update();
+  }
+
+  /**
+   * Mark the rendered content as stale.
+   */
+  private _onContentChanged(): void {
+    this._renderPending = true;
   }
 
   /**
@@ -169,6 +186,7 @@ export class MarkdownViewer extends Widget {
     }
 
     // Set up for this rendering pass.
+    this._renderPending = false;
     this._renderRequested = false;
     const { context } = this;
     const { model } = context;
@@ -182,6 +200,7 @@ export class MarkdownViewer extends Widget {
       data,
       metadata: { fragment: this._fragment }
     });
+    this._fragment = '';
 
     try {
       // Do the rendering asynchronously.
@@ -215,6 +234,7 @@ export class MarkdownViewer extends Widget {
   private _fragment = '';
   private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null;
   private _ready = new PromiseDelegate<void>();
+  private _renderPending = false;
   private _isRendering = false;
   private _renderRequested = false;
   private _rendered = new Signal<MarkdownViewer, void>(this);
@@ -375,7 +395,7 @@ namespace Private {
    * Remove YAML front matter from source.
    */
   export function removeFrontMatter(source: string): string {
-    const re = /^---\n[^]*?\n(---|...)\n/;
+    const re = /^---\n[\s\S]*?\n(?:---|\.\.\.)\n/;
     const match = source.match(re);
     if (!match) {
       return source;
