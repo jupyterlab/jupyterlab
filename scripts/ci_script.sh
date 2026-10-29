@@ -177,6 +177,11 @@ if [[ $GROUP == release_test ]]; then
 
     ./scripts/release_test.sh
     node buildutils/lib/local-repository.js stop
+
+    # Drop the packages fetched from verdaccio so the saved yarn cache
+    # cannot serve them to a later run in place of freshly built ones.
+    YARN_CACHE_DIR="$(jlpm config get cacheFolder)"
+    rm -f "${YARN_CACHE_DIR:?}"/@jupyterlab-*
 fi
 
 
@@ -187,6 +192,8 @@ if [[ $GROUP == examples ]]; then
     # Build the examples.
     jlpm build:packages
     jlpm build:examples
+    # The browser-require example test serves this bundle in place of unpkg.
+    (cd packages/services && jlpm build:all)
 
     # Test the examples
     jlpm test:examples

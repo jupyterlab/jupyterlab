@@ -96,7 +96,7 @@ test.describe('Default', () => {
 
     await page.sidebar.setWidth();
 
-    await page.click('text=Tabs');
+    await page.menu.openLocator('Tabs');
 
     await page.locator('#jp-mainmenu-tabs').waitFor();
 
@@ -275,7 +275,7 @@ test.describe('Customized', () => {
 
     await page.sidebar.setWidth();
 
-    await page.click('text=Tabs');
+    await page.menu.openLocator('Tabs');
 
     await page.locator('#jp-mainmenu-tabs').waitFor();
 

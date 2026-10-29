@@ -10,7 +10,7 @@ import hashlib
 import json
 import xml.etree.ElementTree as ET
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from jupyter_server.base.handlers import APIHandler
@@ -180,7 +180,7 @@ class CheckForUpdateHandler(APIHandler):
         out = await self.update_checker()
         if out:
             message, link = (out, ()) if isinstance(out, str) else out
-            now = datetime.now(tz=timezone.utc).timestamp() * 1000.0
+            now = datetime.now(tz=UTC).timestamp() * 1000.0
             hash_ = hashlib.sha1(message.encode()).hexdigest()  # noqa: S324
             notification = Notification(
                 message=message,
