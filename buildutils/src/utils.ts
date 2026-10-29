@@ -35,6 +35,8 @@ export function exitOnUncaughtException(): void {
 
 /**
  * Get all of the lerna package paths.
+ *
+ * @deprecated Use `getYarnPaths`.
  */
 export function getLernaPaths(basePath = '.'): string[] {
   basePath = path.resolve(basePath);
@@ -58,6 +60,22 @@ export function getLernaPaths(basePath = '.'): string[] {
   let paths: string[] = [];
   for (const config of packages) {
     paths = paths.concat(glob.sync(path.join(basePath, config)));
+  }
+  return paths.filter(pkgPath => {
+    return fs.existsSync(path.join(pkgPath, 'package.json'));
+  });
+}
+
+/**
+ * Get all of the yarn workspace package paths.
+ */
+export function getYarnPaths(basePath = '.'): string[] {
+  basePath = path.resolve(basePath);
+  const { workspaces } = readJSONFile(path.join(basePath, 'package.json'));
+  const patterns: string[] = workspaces?.packages ?? workspaces ?? [];
+  let paths: string[] = [];
+  for (const pattern of patterns) {
+    paths = paths.concat(glob.sync(path.join(basePath, pattern)));
   }
   return paths.filter(pkgPath => {
     return fs.existsSync(path.join(pkgPath, 'package.json'));
@@ -301,7 +319,7 @@ export function run(
  */
 export function getPackageGraph(): DepGraph<Dict<unknown>> {
   // Pick up all the package versions.
-  const paths = getLernaPaths();
+  const paths = getYarnPaths();
   const locals: Dict<any> = {};
 
   // These two are not part of the workspaces but should be
