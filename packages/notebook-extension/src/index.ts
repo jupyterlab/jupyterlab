@@ -5382,7 +5382,12 @@ function addCommands(
     }
   });
   commands.addCommand(CommandIDs.replaceSelection, {
-    label: trans.__('Replace Selection in Notebook Cell'),
+    label: args => {
+      const text = args['text'];
+      return typeof text === 'string' && text
+        ? trans.__('Replace Selection in Notebook Cell with "%1"', text)
+        : trans.__('Replace Selection in Notebook Cell');
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       const text: string = (args['text'] as string) || '';
