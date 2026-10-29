@@ -120,6 +120,19 @@ test.describe('Terminal', () => {
   });
 
   test.describe('Open', () => {
+    test('should preserve shell characters when setting a terminal title', async ({
+      page
+    }) => {
+      test.skip(process.platform === 'win32', 'Checks Bash prompt quoting.');
+      await waitForTerminal(page);
+
+      const title =
+        'Progress 50%: "$HOME" `printf expanded` \\path and \'single\'';
+      await page.terminal.setTitle(title);
+
+      await expect(page.locator(TERMINAL_TAB_LABEL_SELECTOR)).toHaveText(title);
+    });
+
     test('should appear in the sidebar', async ({ page }) => {
       await waitForTerminal(page);
       const terminalTitle = await page
