@@ -29,7 +29,7 @@ jobs:
 
       - name: Publish changelog
         id: publish-changelog
-        uses: jupyter-server/jupyter_releaser/.github/actions/publish-changelog@70e58c50c736ad496cca11fe4f2446033b68b027 # v2
+        uses: jupyter-server/jupyter_releaser/.github/actions/publish-changelog@0bdca04f31abd7dfa75f8f8d33c52620ed3c8357 # v1.11.3
         with:
           token: ${{ steps.app-token.outputs.token }}
           branch: ${{ github.event.inputs.branch }}
