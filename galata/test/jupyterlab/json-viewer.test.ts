@@ -70,6 +70,35 @@ test.describe('JSON viewer find', () => {
     await expect(viewer.locator('mark.jp-mod-selected')).toHaveText('needle');
   });
 
+  test('ignores case', async ({ page, tmpPath }) => {
+    const viewer = await openJSON(page, tmpPath, 'config.json', CONFIG);
+    await viewer.getByPlaceholder('Find…').fill('NEEDLE');
+
+    await expect(
+      viewer.getByText('"/etc/ssl/needle.pem"', { exact: true })
+    ).toBeVisible();
+    await expect(viewer.locator('mark.jp-mod-selected')).toHaveText('needle');
+  });
+
+  test('keeps the nodes the user expanded', async ({ page, tmpPath }) => {
+    const viewer = await openJSON(page, tmpPath, 'config.json', CONFIG);
+    await viewer.getByText('client', { exact: true }).click();
+    await expect(viewer.getByText('timeout', { exact: true })).toBeVisible();
+
+    const find = viewer.getByPlaceholder('Find…');
+    await find.fill('needle');
+    await expect(
+      viewer.getByText('"/etc/ssl/needle.pem"', { exact: true })
+    ).toBeVisible();
+    await expect(viewer.getByText('timeout', { exact: true })).toBeVisible();
+
+    await find.fill('');
+    await expect(
+      viewer.getByText('"/etc/ssl/needle.pem"', { exact: true })
+    ).toHaveCount(0);
+    await expect(viewer.getByText('timeout', { exact: true })).toBeVisible();
+  });
+
   test('treats regular expression characters literally', async ({
     page,
     tmpPath
