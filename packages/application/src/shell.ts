@@ -913,6 +913,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         throw new Error(`Invalid area: ${area}`);
     }
   }
+
   /**
    * Activate a tab in the active tab bar.
    *
