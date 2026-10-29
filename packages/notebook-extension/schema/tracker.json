@@ -382,7 +382,7 @@
     {
       "command": "notebook:commit-metadata-and-save",
       "keys": ["Accel S"],
-      "selector": ".jp-MetadataEditorTool" main
+      "selector": ".jp-MetadataEditorTool"
     },
     {
       "command": "notebook:replace-selection",
