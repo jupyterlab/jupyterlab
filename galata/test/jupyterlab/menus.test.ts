@@ -66,6 +66,12 @@ test.describe('General Tests', () => {
     expect(await page.menu.isAnyOpen()).toEqual(false);
   });
 
+  test('Click a menu item in a nested submenu', async ({ page }) => {
+    await page.goto();
+    await page.menu.clickMenuItem('View>Appearance>Activity Bar Position>Top');
+    await expect(page.locator('.jp-SideBar[data-side="top"]')).toHaveCount(2);
+  });
+
   test('Export menu shows guidance when no format is available', async ({
     page
   }) => {
