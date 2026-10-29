@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import type { CommandRegistry } from '@lumino/commands';
-import type { ElementARIAAttrs, VirtualElement } from '@lumino/virtualdom';
+import type { VirtualElement } from '@lumino/virtualdom';
 import { h } from '@lumino/virtualdom';
 import { Menu, MenuBar } from '@lumino/widgets';
 import { EditMenu } from './edit';
@@ -47,7 +47,7 @@ export class MainMenu extends MenuBar implements IMainMenu {
     });
     this._collapsedMenu.addClass('jp-ThemedContainer');
     this._collapsedMenu.title.icon = Private.collapsedMenuIcon;
-    this._collapsedMenu.title.caption = trans.__('Main Menu');
+    this._collapsedMenu.title.label = trans.__('Main Menu');
 
     this.collapsedMenuBar = new MenuBar({
       ...menuBarOptions,
@@ -494,21 +494,21 @@ namespace Private {
   /**
    * A menu bar renderer for items showing only an icon.
    *
-   * It names each item after its caption, also shown as a tooltip.
+   * The label is left to assistive technologies and shown as a tooltip.
    */
   class IconMenuBarRenderer extends MenuBar.Renderer {
     renderItem(data: MenuBar.IRenderData): VirtualElement {
       const item = super.renderItem(data);
-      return h.li({ ...item.attrs, title: data.title.caption }, [
+      return h.li({ ...item.attrs, title: data.title.label }, [
         ...item.children
       ]);
     }
 
-    createItemARIA(data: MenuBar.IRenderData): ElementARIAAttrs {
-      return {
-        ...super.createItemARIA(data),
-        'aria-label': data.title.caption
-      };
+    renderLabel(data: MenuBar.IRenderData): VirtualElement {
+      return h.div(
+        { className: 'lm-MenuBar-itemLabel jp-sr-only' },
+        this.formatLabel(data)
+      );
     }
   }
 

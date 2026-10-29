@@ -106,23 +106,23 @@ test.describe('Collapsed main menu', () => {
     ).toBeVisible();
   });
 
-  test('Expand the main menu from the menu button', async ({ page }) => {
+  test('Open a menu from the menu button', async ({ page }) => {
     await page.menu.clickMenuItem('View>Appearance>Collapse Main Menu');
 
-    const button = page.getByRole('menuitem', {
-      name: 'Main Menu',
-      exact: true
-    });
-    // eslint-disable-next-line jupyter/galata-prefer-menu-helper -- The menu helper drives the menu bar, hidden while collapsed.
-    await button.click();
-    const menus = page.locator('.lm-Menu');
-    await menus.getByText('View', { exact: true }).hover();
-    await menus.getByText('Appearance', { exact: true }).hover();
-    // eslint-disable-next-line jupyter/galata-prefer-menu-helper -- The menu helper drives the menu bar, hidden while collapsed.
-    await menus.getByText('Collapse Main Menu', { exact: true }).click();
+    await page.menu.openLocator('Main Menu>File');
+    expect(await page.menu.isOpen('Main Menu>File')).toBeTruthy();
+  });
+
+  test('Expand the main menu from the menu button', async ({ page }) => {
+    await page.menu.clickMenuItem('View>Appearance>Collapse Main Menu');
+    await page.menu.clickMenuItem(
+      'Main Menu>View>Appearance>Collapse Main Menu'
+    );
 
     await expect(page.locator('#jp-MainMenu')).toBeVisible();
-    await expect(button).toBeHidden();
+    await expect(
+      page.getByRole('menuitem', { name: 'Main Menu', exact: true })
+    ).toBeHidden();
   });
 
   test('Keep the main menu collapsed after reload', async ({ page }) => {
