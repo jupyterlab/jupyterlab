@@ -8,9 +8,9 @@ import type {
   Kernel,
   KernelMessage,
   KernelSpec,
+  ServerConnection,
   Session
 } from '@jupyterlab/services';
-import type { ServerConnection } from '@jupyterlab/services';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -858,9 +858,7 @@ export class SessionContext implements ISessionContext {
           const session = manager.connectTo({ model });
           this._handleNewSession(session);
         } catch (err) {
-          // Route all connection errors through the session error handler so that
-          // a user-visible dialog is shown, regardless of the specific error type.
-          void this._handleSessionError(err as any);
+          void this._handleSessionError(err as ServerConnection.ResponseError);
           return Promise.reject(err);
         }
       }
@@ -963,9 +961,7 @@ export class SessionContext implements ISessionContext {
         await this._session.changeKernel(model);
       } catch (err) {
         this._isChangingKernel = false;
-        // Route all connection errors through the session error handler so that
-        // a user-visible dialog is shown, regardless of the specific error type.
-        void this._handleSessionError(err as any);
+        void this._handleSessionError(err as ServerConnection.ResponseError);
         throw err;
       }
       this._isChangingKernel = false;
@@ -1010,9 +1006,7 @@ export class SessionContext implements ISessionContext {
       }
       return this._handleNewSession(session);
     } catch (err) {
-      // Route all connection errors through the session error handler so that
-      // a user-visible dialog is shown, regardless of the specific error type.
-      void this._handleSessionError(err as any);
+      void this._handleSessionError(err as ServerConnection.ResponseError);
       throw err;
     }
   }

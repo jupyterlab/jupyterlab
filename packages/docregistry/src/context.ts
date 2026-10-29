@@ -13,8 +13,11 @@ import { PathExt } from '@jupyterlab/coreutils';
 import type { IUrlResolverFactory } from '@jupyterlab/rendermime';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import type { Contents, ServiceManager } from '@jupyterlab/services';
-import type { ServerConnection } from '@jupyterlab/services';
+import type {
+  Contents,
+  ServerConnection,
+  ServiceManager
+} from '@jupyterlab/services';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 
@@ -662,6 +665,7 @@ export class Context<
         err as Error,
         this._trans.__('File Save Error for %1', file)
       );
+
       // Emit failure.
       this._saveState.emit('failed');
       throw err;

@@ -1528,8 +1528,9 @@ function addCommands(
           return;
         }
         return commands.execute('docmanager:open', { path });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (reason: any) {
-        if (reason.response.status === 404) {
+        if (reason.response && reason.response.status === 404) {
           reason.message = trans.__('Could not find path: %1', path);
         }
         return showErrorMessage(
