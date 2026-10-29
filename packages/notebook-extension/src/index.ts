@@ -1359,6 +1359,7 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
       '@jupyterlab/notebook-extension:metadata-editor.cell-metadata',
       cellComponent
     );
+
     const notebookMetadataField = new NotebookMetadataField({
       editorFactory,
       tracker,
