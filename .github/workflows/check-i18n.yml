@@ -17,7 +17,7 @@ jobs:
           persist-credentials: false
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@925e40fa6066f4533e0c40803bd4b6d0d2f4a781 # v1.1.0
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
 
       - name: Install dependencies
         run: |

@@ -234,8 +234,8 @@ export function getJSVersion(pkg: string): string {
  * Pre-bump.
  */
 export function prebump(): void {
-  // Ensure bump2version is installed (active fork of bumpversion)
-  run('python -m pip install bump2version');
+  // Ensure bump-my-version is installed (maintained fork of bumpversion)
+  run('python -m pip install "bump-my-version>=1,<2"');
 
   // Make sure we start in a clean git state.
   const status = run('git status --porcelain', {

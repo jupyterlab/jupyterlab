@@ -591,12 +591,12 @@ const createNewLanguageFilePlugin: JupyterFrontEndPlugin<void> = {
     const specsManager = app.serviceManager.kernelspecs;
 
     const updateFileBrowserContextMenu = async () => {
-      if (filebrowsermenuDisposables) {
-        filebrowsermenuDisposables.dispose();
-        filebrowsermenuDisposables = new DisposableSet();
-      }
-
       const updatedFileTypes = await getAvailableKernelFileTypes(specsManager);
+
+      // Replace the entries only now: updates that overlap while waiting for
+      // the kernel specs would otherwise each add their own entries.
+      filebrowsermenuDisposables.dispose();
+      filebrowsermenuDisposables = new DisposableSet();
 
       for (const filetype of updatedFileTypes) {
         filebrowsermenuDisposables.add(

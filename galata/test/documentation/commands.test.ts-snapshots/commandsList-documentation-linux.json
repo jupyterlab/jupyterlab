@@ -4621,6 +4621,21 @@
     }
   },
   {
+    "id": "notebook:make-cell-editable",
+    "label": "Enable Cell Editing…",
+    "caption": "Read-only cell",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether the command is being executed from the toolbar"
+        }
+      }
+    }
+  },
+  {
     "id": "notebook:merge-cell-above",
     "label": "Merge Cell Above",
     "caption": "",
