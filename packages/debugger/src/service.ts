@@ -235,7 +235,7 @@ export class DebuggerService implements IDebugger, IDisposable {
         threadId: this._currentThread()
       });
     } catch (err) {
-      console.error('Error:', err.message);
+      console.error('Error:', err instanceof Error ? err.message : String(err));
     }
   }
 
@@ -298,7 +298,7 @@ export class DebuggerService implements IDebugger, IDisposable {
         threadId: this._currentThread()
       });
     } catch (err) {
-      console.error('Error:', err.message);
+      console.error('Error:', err instanceof Error ? err.message : String(err));
     }
   }
 
@@ -534,7 +534,7 @@ export class DebuggerService implements IDebugger, IDisposable {
         threadId: this._currentThread()
       });
     } catch (err) {
-      console.error('Error:', err.message);
+      console.error('Error:', err instanceof Error ? err.message : String(err));
     }
   }
 
@@ -550,7 +550,7 @@ export class DebuggerService implements IDebugger, IDisposable {
         threadId: this._currentThread()
       });
     } catch (err) {
-      console.error('Error:', err.message);
+      console.error('Error:', err instanceof Error ? err.message : String(err));
     }
   }
 
@@ -566,7 +566,7 @@ export class DebuggerService implements IDebugger, IDisposable {
         threadId: this._currentThread()
       });
     } catch (err) {
-      console.error('Error:', err.message);
+      console.error('Error:', err instanceof Error ? err.message : String(err));
     }
   }
 
