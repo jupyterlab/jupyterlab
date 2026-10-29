@@ -1117,7 +1117,12 @@ async function activateConsole(
   });
 
   commands.addCommand(CommandIDs.replaceSelection, {
-    label: trans.__('Replace Selection in Console'),
+    label: args => {
+      const text = args['text'];
+      return typeof text === 'string' && text
+        ? trans.__('Replace Selection in Console with "%1"', text)
+        : trans.__('Replace Selection in Console');
+    },
     describedBy: {
       args: {
         type: 'object',

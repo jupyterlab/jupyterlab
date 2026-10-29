@@ -1708,6 +1708,50 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#replaceSelection()', () => {
+      it.each(['<- ', '%>% '])(
+        'should replace the selection with %s in an editable cell',
+        text => {
+          const cell = widget.activeCell!;
+          cell.model.sharedModel.setSource('x');
+          cell.editor!.setSelection({
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 1 }
+          });
+
+          NotebookActions.replaceSelection(widget, text);
+
+          expect(cell.model.sharedModel.getSource()).toBe(text);
+        }
+      );
+
+      it.each(['<- ', '%>% '])(
+        'should not insert %s into a read-only cell',
+        text => {
+          const cell = widget.activeCell!;
+          cell.model.sharedModel.setSource('x');
+          cell.model.setMetadata('editable', false);
+          expect(cell.readOnly).toBe(true);
+
+          NotebookActions.replaceSelection(widget, text);
+
+          expect(cell.model.sharedModel.getSource()).toBe('x');
+        }
+      );
+
+      it('should respect a read-only view without editable metadata', () => {
+        const cell = widget.activeCell!;
+        cell.model.sharedModel.setSource('x');
+        cell.syncEditable = false;
+        cell.readOnly = true;
+        expect(cell.model.getMetadata('editable')).toBeUndefined();
+
+        NotebookActions.replaceSelection(widget, '<- ');
+
+        expect(cell.model.sharedModel.getSource()).toBe('x');
+      });
+    });
+
     describe('#selectAbove()', () => {
       it('should select the cell above the active cell', () => {
         widget.activeCellIndex = 1;
