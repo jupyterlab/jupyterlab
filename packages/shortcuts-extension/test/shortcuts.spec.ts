@@ -34,7 +34,7 @@ describe('@jupyterlab/shortcut-extension', () => {
   });
 
   describe('shorcuts list', () => {
-    it('should register R operator shortcuts for consoles, file editors and notebooks', async () => {
+    async function registerRShortcuts(): Promise<CommandRegistry> {
       const schemas = [consoleSchema, fileEditorSchema, notebookSchema];
       const plugins: ISettingRegistry.IPlugin[] = schemas.map((schema, i) => ({
         id: `test-plugin-${i}:settings`,
@@ -62,9 +62,14 @@ describe('@jupyterlab/shortcut-extension', () => {
         null,
         null
       );
+      return commands;
+    }
+
+    it('should register R operator shortcuts for consoles, file editors and notebooks', async () => {
+      const commands = await registerRShortcuts();
 
       for (const [widgetClass, command] of [
-        ['jp-CodeConsole', 'console:replace-selection'],
+        ['jp-CodeConsole-promptCell', 'console:replace-selection'],
         ['jp-FileEditor', 'fileeditor:replace-selection'],
         ['jp-Notebook jp-mod-editMode', 'notebook:replace-selection']
       ]) {
@@ -95,6 +100,26 @@ describe('@jupyterlab/shortcut-extension', () => {
           ).toEqual([]);
         }
       }
+    });
+
+    it('should not register R operator shortcuts for executed console cells', async () => {
+      const commands = await registerRShortcuts();
+      const widget = document.createElement('div');
+      widget.className = 'jp-CodeConsole';
+      const cell = document.createElement('div');
+      cell.className = 'jp-CodeCell';
+      const editor = document.createElement('div');
+      editor.dataset.jpEditorLanguage = 'r';
+      cell.appendChild(editor);
+      widget.appendChild(cell);
+
+      expect(
+        commands.keyBindings.filter(
+          binding =>
+            binding.command === 'console:replace-selection' &&
+            editor.matches(binding.selector)
+        )
+      ).toEqual([]);
     });
 
     it('should ignored Cmd on non-Mac platform', async () => {

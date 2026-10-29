@@ -306,7 +306,7 @@ keys and selectors, then add a macro scoped to R editors:
     {
       "command": "console:replace-selection",
       "keys": ["Accel Shift M"],
-      "selector": ".jp-CodeConsole [data-jp-editor-language='r']",
+      "selector": ".jp-CodeConsole-promptCell [data-jp-editor-language='r']",
       "disabled": true
     },
     {
