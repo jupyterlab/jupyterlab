@@ -123,6 +123,41 @@ describe('KernelSourcesBody', () => {
     expect(getSourceItem('/lib/json/decoder.py')).not.toBeNull();
   });
 
+  it('should restore the expanded directories when the filter is cleared', async () => {
+    const sources = [
+      { name: 'email', path: '/lib/email/__init__.py' },
+      { name: 'email.parser', path: '/lib/email/parser.py' },
+      { name: 'json', path: '/lib/json/__init__.py' },
+      { name: 'json.decoder', path: '/lib/json/decoder.py' }
+    ];
+    await setSources(sources);
+    await click(getItem('email'));
+
+    model.filter = 'decoder';
+    await setSources(sources);
+    model.filter = '';
+    await setSources(sources);
+
+    expect(getSourceItem('/lib/email/parser.py')).not.toBeNull();
+  });
+
+  it('should expand a directory collapsed in an earlier use of the same filter', async () => {
+    const sources = [
+      { name: 'json', path: '/lib/json/__init__.py' },
+      { name: 'json.decoder', path: '/lib/json/decoder.py' }
+    ];
+    model.filter = 'json';
+    await setSources(sources);
+    await click(getItem('json'));
+    model.filter = '';
+    await setSources(sources);
+
+    model.filter = 'json';
+    await setSources(sources);
+
+    expect(getSourceItem('/lib/json/decoder.py')).not.toBeNull();
+  });
+
   it('should not split a file name on the dot of its extension', async () => {
     await setSources([{ name: 'module.cpp', path: '/src/module.cpp' }]);
 

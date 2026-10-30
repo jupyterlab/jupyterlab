@@ -79,10 +79,11 @@ interface IKernelSourceNode {
  * Props shared by the components of the tree.
  */
 interface ITreeProps {
-  filter: string;
   selectedPath: string | null;
   onSelect: (path: string) => void;
   onOpen: (path: string) => void;
+  isExpanded: (id: string) => boolean;
+  onToggle: (id: string) => void;
 }
 
 /**
@@ -116,25 +117,17 @@ function KernelSourceItem(
  * A collapsible directory of the tree.
  *
  * Once expanded, directories that only contain one directory are merged
- * into a single row. While a filter is set, the directories that the user
- * has not toggled since the filter was set are expanded, so that the
- * matching sources show.
+ * into a single row.
  */
 function KernelSourceDirectory(
-  props: ITreeProps & { node: IKernelSourceNode }
+  props: ITreeProps & { id: string; node: IKernelSourceNode }
 ): JSX.Element {
-  const { node, ...treeProps } = props;
-  const [toggled, setToggled] = useState<{
-    filter: string;
-    expanded: boolean;
-  } | null>(null);
-  const expanded =
-    toggled?.filter === treeProps.filter
-      ? toggled.expanded
-      : treeProps.filter !== '';
+  const { id, node, ...treeProps } = props;
+  const expanded = treeProps.isExpanded(id);
 
   let label = node.name;
   let contents = node;
+  let contentsId = id;
   while (
     expanded &&
     contents.path === null &&
@@ -142,17 +135,13 @@ function KernelSourceDirectory(
     contents.children[0].children.length > 0
   ) {
     contents = contents.children[0];
+    contentsId = Private.childId(contentsId, contents.name);
     label += contents.separator + contents.name;
   }
 
   return (
     <div className={DIRECTORY_CLASS}>
-      <div
-        className={ITEM_CLASS}
-        onClick={() =>
-          setToggled({ filter: treeProps.filter, expanded: !expanded })
-        }
-      >
+      <div className={ITEM_CLASS} onClick={() => treeProps.onToggle(id)}>
         {expanded ? (
           <caretDownIcon.react tag={null} />
         ) : (
@@ -169,7 +158,11 @@ function KernelSourceDirectory(
               path={contents.path}
             />
           )}
-          <KernelSourceNodes {...treeProps} nodes={contents.children} />
+          <KernelSourceNodes
+            {...treeProps}
+            parentId={contentsId}
+            nodes={contents.children}
+          />
         </div>
       )}
     </div>
@@ -180,14 +173,19 @@ function KernelSourceDirectory(
  * A list of sibling nodes of the tree.
  */
 function KernelSourceNodes(
-  props: ITreeProps & { nodes: IKernelSourceNode[] }
+  props: ITreeProps & { parentId: string | null; nodes: IKernelSourceNode[] }
 ): JSX.Element {
-  const { nodes, ...treeProps } = props;
+  const { parentId, nodes, ...treeProps } = props;
   return (
     <>
       {nodes.map(node =>
         node.children.length > 0 || node.path === null ? (
-          <KernelSourceDirectory key={node.name} {...treeProps} node={node} />
+          <KernelSourceDirectory
+            key={node.name}
+            {...treeProps}
+            id={Private.childId(parentId, node.name)}
+            node={node}
+          />
         ) : (
           <KernelSourceItem
             key={node.name}
@@ -203,6 +201,10 @@ function KernelSourceNodes(
 
 /**
  * The tree of kernel sources.
+ *
+ * Without a filter, the directories that the user expanded are expanded.
+ * While a filter is set, the directories that the user has not collapsed
+ * since the filter was set are expanded, so that the matching sources show.
  */
 function KernelSourcesTree(props: {
   kernelSources: IDebugger.KernelSource[];
@@ -215,13 +217,34 @@ function KernelSourcesTree(props: {
     [kernelSources]
   );
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
+  const [filtered, setFiltered] = useState<{
+    filter: string;
+    collapsed: ReadonlySet<string>;
+  }>({ filter, collapsed: new Set() });
+  if (filtered.filter !== filter) {
+    setFiltered({ filter, collapsed: new Set() });
+  }
   return (
     <KernelSourceNodes
       nodes={nodes}
-      filter={filter}
+      parentId={null}
       selectedPath={selectedPath}
       onSelect={setSelectedPath}
       onOpen={onOpen}
+      isExpanded={id =>
+        filter === '' ? expanded.has(id) : !filtered.collapsed.has(id)
+      }
+      onToggle={id => {
+        if (filter === '') {
+          setExpanded(ids => Private.toggle(ids, id));
+        } else {
+          setFiltered(state => ({
+            ...state,
+            collapsed: Private.toggle(state.collapsed, id)
+          }));
+        }
+      }}
     />
   );
 }
@@ -309,6 +332,26 @@ namespace Private {
    */
   export function basename(path: string): string {
     return path.split(/[\\/]/).pop() ?? path;
+  }
+
+  /**
+   * Get the id of a directory of the tree from the id of its parent.
+   *
+   * Node names never contain a slash, since names are split on them.
+   */
+  export function childId(parentId: string | null, name: string): string {
+    return parentId === null ? name : `${parentId}/${name}`;
+  }
+
+  /**
+   * Add an id to a set of ids, or remove it if the set has it.
+   */
+  export function toggle(ids: ReadonlySet<string>, id: string): Set<string> {
+    const toggled = new Set(ids);
+    if (!toggled.delete(id)) {
+      toggled.add(id);
+    }
+    return toggled;
   }
 
   /**
