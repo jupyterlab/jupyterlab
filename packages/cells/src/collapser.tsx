@@ -6,7 +6,7 @@ import { ReactWidget } from '@jupyterlab/ui-components';
 
 import * as React from 'react';
 
-import { scrollCellIntoView } from './scroll';
+import { scrollCellIntoView } from './utils';
 import type { Cell, CodeCell } from './widget';
 
 /**

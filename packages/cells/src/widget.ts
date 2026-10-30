@@ -88,7 +88,7 @@ import { InputPlaceholder, OutputPlaceholder } from './placeholder';
 
 import { ResizeHandle } from './resizeHandle';
 
-import { scrollCellIntoView } from './scroll';
+import { scrollCellIntoView } from './utils';
 
 /**
  * The CSS class added to cell widgets.
