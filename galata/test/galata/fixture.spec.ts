@@ -36,8 +36,6 @@ test.describe('mockSettings', () => {
   });
 
   test('should not return mocked settings after save', async ({ page }) => {
-    await page.click('text=Settings');
-    await page.click('.lm-Menu ul[role="menu"] >> text=Theme');
     const [response] = await Promise.all([
       page.waitForResponse(
         response =>
@@ -45,7 +43,7 @@ test.describe('mockSettings', () => {
             response.url()
           ) && response.request().method() === 'GET'
       ),
-      page.click('.lm-Menu ul[role="menu"] >> text=JupyterLab Light')
+      page.menu.clickMenuItem('Settings>Theme>JupyterLab Light')
     ]);
 
     await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
@@ -103,6 +101,35 @@ test.describe('mockState', () => {
       )
     ).toBeTruthy();
   });
+
+  test('should remove state omitted from a workspace save', async ({
+    context,
+    baseURL
+  }) => {
+    const page = await context.newPage();
+    await page.route('**/mock-state-test', route =>
+      route.fulfill({ contentType: 'text/html', body: '' })
+    );
+    await galata.Mock.mockState(page, {
+      metadata: { id: 'default' },
+      data: { 'terminal:1': { name: '1' }, retained: true }
+    });
+    await page.goto(`${baseURL}/mock-state-test`);
+    const saved = await page.evaluate(async () => {
+      const url = '/api/workspaces/default';
+      await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          metadata: { id: 'default' },
+          data: { retained: true }
+        })
+      });
+      return (await fetch(url)).json();
+    });
+    expect(saved.data).toEqual({ retained: true });
+    await page.close();
+  });
 });
 
 test.describe('kernels', () => {
@@ -110,9 +137,7 @@ test.describe('kernels', () => {
     await page.notebook.createNew();
     await page.locator('text= | Idle').waitFor();
 
-    await page
-      .getByRole('tab', { name: 'Running Terminals and Kernels' })
-      .click();
+    await page.sidebar.openTab('jp-running-sessions');
 
     await Promise.all([
       page.waitForResponse(

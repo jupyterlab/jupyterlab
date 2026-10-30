@@ -19,9 +19,13 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
 
-      - uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
+      # `npm dist-tag` in the after-publish-assets hook needs npm >= 11.21.0 for trusted publishing
+      - name: Install npm
+        run: npm install -g npm@^11.21.1 # zizmor: ignore[adhoc-packages] no Node release bundles npm >= 11.21.0 yet
+
+      - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         id: app-token
         with:
           app-id: ${{ vars.APP_ID }}
@@ -30,7 +34,7 @@ jobs:
 
       - name: Populate Release
         id: populate-release
-        uses: jupyter-server/jupyter_releaser/.github/actions/populate-release@634ac751f8a58d3d4a19b63f58aad138e6355cc8 # v2
+        uses: jupyter-server/jupyter_releaser/.github/actions/populate-release@0bdca04f31abd7dfa75f8f8d33c52620ed3c8357 # v1.11.3
         with:
           token: ${{ steps.app-token.outputs.token }}
           branch: ${{ github.event.inputs.branch }}
@@ -41,7 +45,7 @@ jobs:
         id: finalize-release
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        uses: jupyter-server/jupyter_releaser/.github/actions/finalize-release@634ac751f8a58d3d4a19b63f58aad138e6355cc8 # v2
+        uses: jupyter-server/jupyter_releaser/.github/actions/finalize-release@0bdca04f31abd7dfa75f8f8d33c52620ed3c8357 # v1.11.3
         with:
           token: ${{ steps.app-token.outputs.token }}
           release_url: ${{ steps.populate-release.outputs.release_url }}

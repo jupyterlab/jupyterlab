@@ -53,7 +53,7 @@ export class Context<
       new SessionContextDialogs({ translator: options.translator });
     this._opener = options.opener || Private.noOp;
     this._path = this._manager.contents.normalize(options.path);
-    this._lastModifiedCheckMargin = options.lastModifiedCheckMargin || 500;
+    this._lastModifiedCheckMargin = options.lastModifiedCheckMargin ?? 500;
     const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
@@ -80,6 +80,7 @@ export class Context<
 
     const ext = PathExt.extname(this._path);
     this.sessionContext = new SessionContext({
+      driveName: manager.contents.driveName(this._path),
       kernelManager: manager.kernels,
       sessionManager: manager.sessions,
       specsManager: manager.kernelspecs,
@@ -102,7 +103,8 @@ export class Context<
 
     this._urlResolver = urlResolverFactory.createResolver({
       path: this._path,
-      contents: manager.contents
+      contents: manager.contents,
+      getKernelId: () => this.sessionContext.session?.kernel?.id
     });
   }
 
@@ -320,7 +322,8 @@ export class Context<
         content: false
       });
       await this._maybeOverWrite(newPath);
-    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       if (!err.response || err.response.status !== 404) {
         // Dialog rejection (user cancelled)
         if (!err.response) {
@@ -526,6 +529,7 @@ export class Context<
     const mod = this._contentsModel?.last_modified ?? null;
     const hash = this._contentsModel?.hash ?? null;
     this._contentsModel = newModel;
+    this._model.readOnly = newModel.writable === false;
     if (
       // If neither modification date nor hash available, assume the file has changed
       (!mod && !hash) ||
@@ -647,16 +651,18 @@ export class Context<
     } catch (err) {
       // If the save has been canceled by the user, throw the error
       // so that whoever called save() can decide what to do.
-      const { name } = err;
-      if (name === 'ModalCancelError' || name === 'ModalDuplicateError') {
-        throw err;
+      if (err instanceof Error) {
+        const { name } = err;
+        if (name === 'ModalCancelError' || name === 'ModalDuplicateError') {
+          throw err;
+        }
       }
 
       // Otherwise show an error message and throw the error.
       const localPath = this._manager.contents.localPath(this._path);
       const file = PathExt.basename(localPath);
       void this._handleError(
-        err,
+        err as Error,
         this._trans.__('File Save Error for %1', file)
       );
 
@@ -692,6 +698,9 @@ export class Context<
         if (this.isDisposed) {
           return;
         }
+        if (path !== this._path) {
+          return this._revert(initializeModel);
+        }
         if (contents.content) {
           if (contents.format === 'json') {
             model.fromJSON(contents.content);
@@ -713,16 +722,18 @@ export class Context<
         }
 
         this._updateContentsModel(contents);
-        model.dirty = false;
         if (!this._isPopulated) {
           return this._populate();
         }
       })
       .catch(async err => {
+        if (!this.isDisposed && path !== this._path) {
+          return this._revert(initializeModel);
+        }
         const localPath = this._manager.contents.localPath(this._path);
         const name = PathExt.basename(localPath);
         void this._handleError(
-          err,
+          err as Error,
           this._trans.__('File Load Error for %1', name)
         );
         throw err;
@@ -874,7 +885,7 @@ or load the version on disk (revert)?`,
       this.path
     );
     const revertBtn = Dialog.okButton({
-      label: this._trans.__('Revert'),
+      label: this._trans.__('Reload from Disk'),
       actions: ['revert']
     });
     const overwriteBtn = Dialog.warnButton({
@@ -957,8 +968,9 @@ or load the version on disk (revert)?`,
       // throw the error so that whoever called save()
       // can decide what to do.
       if (
-        err.message === 'Cancel' ||
-        err.message === 'Modal is already displayed'
+        err instanceof Error &&
+        (err.message === 'Cancel' ||
+          err.message === 'Modal is already displayed')
       ) {
         throw err;
       }
@@ -967,7 +979,7 @@ or load the version on disk (revert)?`,
       const localPath = this._manager.contents.localPath(this._path);
       const name = PathExt.basename(localPath);
       void this._handleError(
-        err,
+        err as Error,
         this._trans.__('File Save Error for %1', name)
       );
 
@@ -978,7 +990,7 @@ or load the version on disk (revert)?`,
   }
 
   private _createSaveOptions(): Partial<Contents.IModel> {
-    let content: PartialJSONValue = null;
+    let content: PartialJSONValue;
     if (this._factory.fileFormat === 'json') {
       content = this._model.toJSON();
     } else {

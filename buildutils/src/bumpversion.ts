@@ -2,19 +2,23 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { program as commander } from 'commander';
+import type { ReleaseType } from 'semver';
+import { bumpWorkspaceVersions } from './bump-workspaces';
 import * as utils from './utils';
+
+interface IBumpVersionOptions {
+  dryRun?: boolean;
+  skipCommit?: boolean;
+}
 
 // Specify the program signature.
 commander
   .description('Update the version and publish')
   .option('--dry-run', 'Dry run')
-  .option('--force', 'Force the upgrade')
   .option('--skip-commit', 'Whether to skip commit changes')
   .arguments('<spec>')
-  .action((spec: any, opts: any) => {
+  .action((spec: string, opts: IBumpVersionOptions) => {
     utils.exitOnUncaughtException();
 
     // Get the previous version.
@@ -31,10 +35,7 @@ commander
 
     // For patch, defer to `patch:release` command
     if (spec === 'patch') {
-      let cmd = 'jlpm patch:release --all';
-      if (opts.force) {
-        cmd += ' --force';
-      }
+      let cmd = 'jlpm patch:release';
       if (opts.skipCommit) {
         cmd += ' --skip-commit';
       }
@@ -59,54 +60,41 @@ commander
 
     // Handle dry runs.
     if (opts.dryRun) {
-      utils.run(`bumpversion --allow-dirty --dry-run --verbose ${spec}`);
+      utils.run(
+        `bump-my-version bump --allow-dirty --dry-run --verbose ${spec}`
+      );
       return;
     }
 
-    // Determine the version spec to use for lerna.
-    let lernaVersion = 'preminor';
+    // Determine the version increment of the JS packages.
+    let increment: ReleaseType = 'preminor';
+    let preid: string | undefined = 'alpha';
     if (spec === 'build') {
-      lernaVersion = 'prerelease';
+      increment = 'prerelease';
+      preid = undefined;
       // a -> b
     } else if (spec === 'release' && prev.indexOf('a') !== -1) {
-      lernaVersion = 'prerelease --preid=beta';
+      increment = 'prerelease';
+      preid = 'beta';
       // b -> rc
     } else if (spec === 'release' && prev.indexOf('b') !== -1) {
-      lernaVersion = 'prerelease --preid=rc';
+      increment = 'prerelease';
+      preid = 'rc';
       // rc -> final
     } else if (spec === 'release' && prev.indexOf('rc') !== -1) {
-      lernaVersion = 'patch';
+      increment = 'patch';
     }
-    if (lernaVersion === 'preminor') {
-      lernaVersion += ' --preid=alpha';
-    }
-
-    let cmd = `lerna version --no-git-tag-version --force-publish=* --no-push ${lernaVersion}`;
-    if (opts.force) {
-      cmd += ' --yes';
-    }
-
-    const oldVersion = utils.getJSVersion('metapackage');
 
     // For a major release, we bump 10 minor versions so that we do
     // not conflict with versions during minor releases of the top
     // level package.
-    if (spec === 'major') {
-      for (let i = 0; i < 10; i++) {
-        utils.run(cmd);
-      }
-    } else {
-      utils.run(cmd);
-    }
-
-    const newVersion = utils.getJSVersion('metapackage');
-    if (spec !== 'major' && oldVersion === newVersion) {
-      // lerna didn't version anything, so we assume the user aborted
-      throw new Error('Lerna aborted');
+    const count = spec === 'major' ? 10 : 1;
+    for (let i = 0; i < count; i++) {
+      bumpWorkspaceVersions(increment, { preid });
     }
 
     // Bump the version.
-    utils.run(`bumpversion --allow-dirty ${spec}`);
+    utils.run(`bump-my-version bump --allow-dirty ${spec}`);
 
     // Run the post-bump script.
     utils.postbump(commit);

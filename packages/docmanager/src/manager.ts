@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ISessionContext } from '@jupyterlab/apputils';
 import { SessionContextDialogs } from '@jupyterlab/apputils';
@@ -27,6 +26,7 @@ import { SaveHandler } from './savehandler';
 import type {
   IDocumentManager,
   IDocumentManagerDialogs,
+  IDocumentManagerStateChange,
   IDocumentWidgetOpener,
   IRecentsManager
 } from './tokens';
@@ -216,7 +216,7 @@ export class DocumentManager implements IDocumentManager {
   /**
    * Signal triggered when an attribute changes.
    */
-  get stateChanged(): ISignal<IDocumentManager, IChangedArgs<any>> {
+  get stateChanged(): ISignal<IDocumentManager, IDocumentManagerStateChange> {
     return this._stateChanged;
   }
 
@@ -380,6 +380,7 @@ export class DocumentManager implements IDocumentManager {
    * @param path - The file path to use.
    *
    * @param widgetName - The name of the widget factory to use. 'default' will use the default widget.
+   * `null` will look for a widget of the preferred factories first, then for a widget of any factory.
    *
    * @returns The found widget, or `undefined`.
    *
@@ -415,6 +416,16 @@ export class DocumentManager implements IDocumentManager {
         }
       }
     }
+
+    if (widgetName === null) {
+      for (const context of this._contextsForPath(newPath)) {
+        const widget = this._widgetManager.findWidget(context, null);
+        if (widget) {
+          return widget;
+        }
+      }
+    }
+
     return undefined;
   }
 
@@ -469,6 +480,8 @@ export class DocumentManager implements IDocumentManager {
    * @param path - The file path to open.
    *
    * @param widgetName - The name of the widget factory to use. 'default' will use the default widget.
+   * If not given, reveals the widget found by `findWidget(path, null)`, or opens the default widget
+   * when there is none.
    *
    * @param kernel - An optional kernel name/id to override the default.
    *
@@ -739,7 +752,7 @@ export class DocumentManager implements IDocumentManager {
 
   protected _onWidgetStateChanged(
     sender: DocumentWidgetManager,
-    args: IChangedArgs<any>
+    args: IChangedArgs<boolean, boolean, 'confirmClosingDocument'>
   ): void {
     if (args.name === 'confirmClosingDocument') {
       this._stateChanged.emit(args);
@@ -761,7 +774,10 @@ export class DocumentManager implements IDocumentManager {
   private _urlResolverFactory?: IUrlResolverFactory;
   private _dialogs: ISessionContext.IDialogs;
   private _isConnectedCallback: () => boolean;
-  private _stateChanged = new Signal<DocumentManager, IChangedArgs<any>>(this);
+  private _stateChanged = new Signal<
+    IDocumentManager,
+    IDocumentManagerStateChange
+  >(this);
   private _docManagerDialogs: IDocumentManagerDialogs;
 }
 

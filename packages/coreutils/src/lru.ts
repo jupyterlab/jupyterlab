@@ -9,7 +9,14 @@ export class LruCache<T, U> {
   protected _maxSize: number;
 
   constructor(options: LruCache.IOptions = {}) {
-    this._maxSize = options?.maxSize || DEFAULT_MAX_SIZE;
+    const maxSize = options.maxSize;
+    this._maxSize =
+      maxSize === undefined ||
+      maxSize === null ||
+      maxSize === 0 ||
+      Number.isNaN(maxSize)
+        ? DEFAULT_MAX_SIZE
+        : maxSize;
     if (this._maxSize < 1) {
       throw new Error('maxSize must be at least 1');
     }
@@ -42,10 +49,12 @@ export class LruCache<T, U> {
   }
 
   /**
-   * Set a value in the cache, potentially evicting an old item.
+   * Set a value in the cache, potentially evicting the least recently used
+   * item. Replacing a key counts as using it and does not evict another.
    */
   set(key: T, value: U): void {
-    if (this._map.size >= this._maxSize) {
+    const replacing = this._map.delete(key);
+    if (!replacing && this._map.size >= this._maxSize) {
       // Map is non-empty since maxSize >= 1
       this._map.delete(this._map.keys().next().value!);
     }

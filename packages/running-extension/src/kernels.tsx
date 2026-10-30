@@ -49,10 +49,14 @@ export async function addKernelRunningSessionManager(
   const { commands, contextMenu, serviceManager } = app;
   const { kernels, kernelspecs, sessions } = serviceManager;
   const { runningChanged, RunningKernel } = Private;
+  // This function is called from a plugin `activate`, so both throttlers live
+  // for the application session; there is no owner to hand them to.
+  // eslint-disable-next-line jupyter/require-disposable-ownership
   const throttler = new Throttler(() => runningChanged.emit(undefined), 100);
   const trans = translator.load('jupyterlab');
   const shutdownUnusedLabel = trans.__('Shut Down Unused');
   let shutdownUnusedEnabled = false;
+  // eslint-disable-next-line jupyter/require-disposable-ownership
   const shutdownUnusedThrottler = new Throttler(
     checkShutdownUnusedEnabled,
     10000
@@ -64,9 +68,6 @@ export async function addKernelRunningSessionManager(
     void shutdownUnusedThrottler.invoke();
   });
   sessions.runningChanged.connect(() => void throttler.invoke());
-
-  // Wait until the relevant services are ready.
-  await Promise.all([kernels.ready, kernelspecs.ready, sessions.ready]);
 
   function getUnusedKernels() {
     // Identifies unused kernels
@@ -139,7 +140,9 @@ export async function addKernelRunningSessionManager(
     }
   });
 
-  // Add the kernels pane to the running sidebar.
+  // Add the kernels pane to the running sidebar. It is added before the
+  // services are ready, so that the position of the pane does not depend on
+  // the server response time.
   managers.add({
     name: trans.__('Kernels'),
     supportsMultipleViews: true,
@@ -344,6 +347,10 @@ export async function addKernelRunningSessionManager(
       }
     }
   });
+
+  // Render the kernels with their specs and sessions once all are loaded.
+  await Promise.all([kernels.ready, kernelspecs.ready, sessions.ready]);
+  runningChanged.emit(undefined);
 }
 
 namespace Private {

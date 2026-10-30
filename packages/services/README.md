@@ -1,6 +1,6 @@
 # JupyterLab Services
 
-Javascript client for the Jupyter services REST APIs
+JavaScript client for the Jupyter services REST APIs
 
 [API Docs](https://jupyterlab.readthedocs.io/en/latest/api/)
 
@@ -173,7 +173,7 @@ A _session_ is a mapping on the server from an identifying string (the
 session's `path`) to a kernel. A session has a few other pieces of information
 to allow for easy categorization and searching of sessions.
 
-The primary usecase of a session is to enable persisting a connection to a
+The primary use case of a session is to enable persisting a connection to a
 kernel. For example, a notebook viewer may start a session with session path
 of the notebook's file path. When a browser is refreshed, the notebook viewer
 can connect to the same kernel by asking the server for the session

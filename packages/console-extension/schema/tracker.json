@@ -75,6 +75,11 @@
         "rank": 10
       },
       {
+        "command": "console:rename",
+        "selector": "[data-type=\"console-title\"]",
+        "rank": 20
+      },
+      {
         "command": "console:restart-kernel",
         "selector": ".jp-CodeConsole",
         "rank": 30
@@ -82,6 +87,18 @@
     ]
   },
   "jupyter.lab.shortcuts": [
+    {
+      "command": "console:replace-selection",
+      "keys": ["Alt -"],
+      "selector": ".jp-CodeConsole-promptCell [data-jp-editor-language='r']",
+      "args": { "text": "<- " }
+    },
+    {
+      "command": "console:replace-selection",
+      "keys": ["Accel Shift M"],
+      "selector": ".jp-CodeConsole-promptCell [data-jp-editor-language='r']",
+      "args": { "text": "%>% " }
+    },
     {
       "command": "console:run-forced",
       "keys": ["Shift Enter"],

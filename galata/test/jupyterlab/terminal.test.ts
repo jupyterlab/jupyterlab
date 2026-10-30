@@ -4,62 +4,299 @@
  */
 
 import path from 'path';
-import { type Locator, type Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { expect, galata, test } from '@jupyterlab/galata';
 
 const TERMINAL_SELECTOR = '.jp-Terminal';
 const TERMINAL_INPUT_SELECTOR = '[aria-label="Terminal input"]';
+const TERMINAL_TAB_LABEL_SELECTOR =
+  '.lm-TabBar-tab:has([data-icon="ui-components:terminal"]) .lm-TabBar-tabLabel';
 const TERMINAL_THEME_ATTRIBUTE = 'data-term-theme';
 
+async function waitForTerminal(page: Page) {
+  const terminal = page.locator(TERMINAL_SELECTOR);
+  await terminal.waitFor();
+  const terminalTabLabel = page.locator(TERMINAL_TAB_LABEL_SELECTOR);
+  await terminalTabLabel.filter({ hasText: /^Terminal \d+$/ }).waitFor();
+}
+
+async function waitForTerminalLayoutSaved(
+  page: Page,
+  name: string,
+  open: boolean
+): Promise<void> {
+  await page.waitForResponse(response => {
+    if (
+      !response.ok() ||
+      response.request().method() !== 'PUT' ||
+      !/\/api\/workspaces\//.test(response.url())
+    ) {
+      return false;
+    }
+    const data = response.request().postDataJSON().data;
+    const widgets: unknown =
+      data?.['layout-restorer:data']?.main?.dock?.widgets;
+    const key = `terminal:${name}`;
+    return (
+      Array.isArray(widgets) &&
+      widgets.includes(key) === open &&
+      (data[key] !== undefined) === open
+    );
+  });
+}
+
 /**
- * Run a shell command in the visible terminal panel.
+ * Get the viewport position of the beginning of the terminal row matching
+ * `rowText`.
  *
- * @param page Playwright page (provided by galata fixture)
- * @param terminalLocator Locator that matches the terminal container
- * @param command Shell command to run
+ * The row index is retrieved from the accessibility tree (which requires
+ * the `screenReaderMode` setting), making the position independent of the
+ * font metrics of the platform.
+ *
+ * @param terminalLocator - Locator that matches the terminal container
+ * @param rowText - Pattern matching the full text of the row
+ * @returns The position, in viewport coordinates
  */
-async function runCommand(
+async function rowPosition(
+  terminalLocator: Locator,
+  rowText: RegExp
+): Promise<{ x: number; y: number }> {
+  const rows = terminalLocator.locator('.xterm-accessibility-tree > div');
+  const row = rows.filter({ hasText: rowText }).first();
+  await row.waitFor();
+  const rowIndex = await row.evaluate(element =>
+    Array.prototype.indexOf.call(element.parentElement!.children, element)
+  );
+  const rowCount = await rows.count();
+  const screenBox = await terminalLocator
+    .locator('.xterm-screen')
+    .boundingBox();
+  if (!screenBox) {
+    throw new Error('Could not get the position of the terminal screen');
+  }
+  // The accessibility tree rows map one-to-one to the rendered rows, so the
+  // row index gives the vertical position of the row on the screen.
+  const cellHeight = screenBox.height / rowCount;
+  return {
+    x: screenBox.x + 10,
+    y: screenBox.y + (rowIndex + 0.5) * cellHeight
+  };
+}
+
+/**
+ * Hover over the beginning of the terminal row matching `rowText` until the
+ * link on it gets detected.
+ *
+ * @param page - Playwright page (provided by galata fixture)
+ * @param terminalLocator - Locator that matches the terminal container
+ * @param rowText - Pattern matching the full text of the row to hover
+ * @returns The hovered position, in viewport coordinates
+ */
+async function hoverOverLink(
   page: Page,
   terminalLocator: Locator,
-  command: string,
-  verify = false
-): Promise<void> {
-  await terminalLocator.waitFor({ state: 'visible' });
-  await terminalLocator.locator('.jp-Terminal-body').focus();
-
-  await terminalLocator
-    .locator(TERMINAL_INPUT_SELECTOR)
-    .waitFor({ state: 'visible' });
-
-  await page.keyboard.type(command);
-  if (verify) {
-    await expect(terminalLocator.locator('.jp-Terminal-body')).toContainText(
-      command
-    );
-  }
-  await page.keyboard.press('Enter');
+  rowText: RegExp
+): Promise<{ x: number; y: number }> {
+  const position = await rowPosition(terminalLocator, rowText);
+  // Move the pointer onto the link until the linkifier flags it with the
+  // pointer cursor.
+  await expect
+    .poll(async () => {
+      await page.mouse.move(position.x + 20, position.y);
+      await page.mouse.move(position.x, position.y);
+      return terminalLocator
+        .locator('.jp-Terminal-body .xterm-cursor-pointer')
+        .count();
+    })
+    .toBeGreaterThan(0);
+  return position;
 }
 
 test.describe('Terminal', () => {
   test.beforeEach(async ({ page }) => {
+    await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
     await page.menu.clickMenuItem('File>New>Terminal');
     await page.locator(TERMINAL_SELECTOR).waitFor();
   });
 
   test.describe('Open', () => {
+    test('should preserve shell characters when setting a terminal title', async ({
+      page
+    }) => {
+      test.skip(process.platform === 'win32', 'Checks Bash prompt quoting.');
+      await waitForTerminal(page);
+
+      const title =
+        'Progress 50%: "$HOME" `printf expanded` \\path and \'single\'';
+      await page.terminal.setTitle(title);
+
+      await expect(page.locator(TERMINAL_TAB_LABEL_SELECTOR)).toHaveText(title);
+    });
+
     test('should appear in the sidebar', async ({ page }) => {
+      await waitForTerminal(page);
+      const terminalTitle = await page
+        .locator(TERMINAL_TAB_LABEL_SELECTOR)
+        .first()
+        .innerText();
+
       await page.sidebar.openTab('jp-running-sessions');
-      // The number at the end is the identifier of the terminal.
-      // We allow any because concurrent execution of tests means
-      // that server can assign an identifier different than `1`.
-      await expect(page.locator('text=/terminals\\/\\d+/')).toBeVisible();
+
+      await expect(
+        page
+          .locator('#jp-running-sessions .jp-RunningSessions-itemLabel')
+          .filter({ hasText: terminalTitle })
+      ).toHaveCount(2);
+    });
+
+    test('should preserve a literal ellipsis terminal title in the running sidebar', async ({
+      page,
+      terminals
+    }) => {
+      const terminalTitle = '...';
+      const terminal = page.locator(TERMINAL_SELECTOR);
+      await waitForTerminal(page);
+
+      const titleSaved = page.terminal.waitForTitleSaved(terminalTitle);
+      await page.terminal.runCommand(`printf "\\033]2;${terminalTitle}\\007"`, {
+        terminal
+      });
+
+      await expect(
+        page.locator(TERMINAL_TAB_LABEL_SELECTOR, { hasText: terminalTitle })
+      ).toBeVisible();
+
+      await page.sidebar.openTab('jp-running-sessions');
+      const runningLabels = page.locator(
+        '#jp-running-sessions .jp-RunningSessions-itemLabel'
+      );
+
+      await expect(
+        runningLabels.filter({ hasText: terminalTitle })
+      ).toHaveCount(2);
+
+      const terminalName = terminals!.keys().next().value!;
+      const closedLayoutSaved = waitForTerminalLayoutSaved(
+        page,
+        terminalName,
+        false
+      );
+      await page.activity.closePanel(terminalTitle);
+
+      await expect(
+        runningLabels.filter({ hasText: terminalTitle })
+      ).toHaveCount(1);
+      await titleSaved;
+      await closedLayoutSaved;
+
+      // Simulate a title sequence that has left the server's replay buffer.
+      await page.routeWebSocket(/\/terminals\/websocket\//, socket => {
+        const server = socket.connectToServer();
+        server.onMessage(data => {
+          if (typeof data === 'string') {
+            const message: unknown = JSON.parse(data);
+            if (
+              Array.isArray(message) &&
+              message[0] === 'stdout' &&
+              typeof message[1] === 'string'
+            ) {
+              message[1] = message[1].replaceAll(
+                `\x1b]2;${terminalTitle}\x07`,
+                ''
+              );
+              socket.send(JSON.stringify(message));
+              return;
+            }
+          }
+          socket.send(data);
+        });
+      });
+
+      await page.reload();
+      await page.sidebar.openTab('jp-running-sessions');
+
+      await expect(
+        runningLabels.filter({ hasText: terminalTitle })
+      ).toHaveCount(1);
+
+      const layoutSaved = waitForTerminalLayoutSaved(page, terminalName, true);
+      await runningLabels.filter({ hasText: terminalTitle }).click();
+      await expect(
+        page.locator(TERMINAL_TAB_LABEL_SELECTOR, { hasText: terminalTitle })
+      ).toBeVisible();
+      await expect(
+        runningLabels.filter({ hasText: terminalTitle })
+      ).toHaveCount(2);
+
+      await layoutSaved;
+      await page.reload({ waitForIsReady: false });
+      await page.evaluate(() => window.jupyterapp.restored);
+      await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
+      await page.sidebar.openTab('jp-running-sessions');
+      await expect(
+        page.locator(TERMINAL_TAB_LABEL_SELECTOR, { hasText: terminalTitle })
+      ).toBeVisible();
+      await expect(
+        runningLabels.filter({ hasText: terminalTitle })
+      ).toHaveCount(2);
+    });
+
+    test('should update the running sidebar when the terminal title resets', async ({
+      page
+    }) => {
+      const terminalTitle = 'Galata terminal title reset';
+      const terminal = page.locator(TERMINAL_SELECTOR);
+      await waitForTerminal(page);
+      const defaultTerminalTitle = await page
+        .locator(TERMINAL_TAB_LABEL_SELECTOR)
+        .first()
+        .innerText();
+
+      const titleSaved = page.terminal.waitForTitleSaved(terminalTitle);
+      await page.terminal.runCommand(`printf "\\033]2;${terminalTitle}\\007"`, {
+        terminal
+      });
+      await titleSaved;
+
+      await expect(
+        page.locator(TERMINAL_TAB_LABEL_SELECTOR, { hasText: terminalTitle })
+      ).toBeVisible();
+
+      await page.sidebar.openTab('jp-running-sessions');
+      const runningLabels = page.locator(
+        '#jp-running-sessions .jp-RunningSessions-itemLabel'
+      );
+
+      await expect(
+        runningLabels.filter({ hasText: terminalTitle })
+      ).toHaveCount(2);
+
+      const defaultTitleSaved =
+        page.terminal.waitForTitleSaved(defaultTerminalTitle);
+      await page.terminal.runCommand(
+        `printf "\\033]2;${defaultTerminalTitle}\\007"`,
+        { terminal }
+      );
+      await defaultTitleSaved;
+
+      await expect(
+        page.locator(TERMINAL_TAB_LABEL_SELECTOR, {
+          hasText: defaultTerminalTitle
+        })
+      ).toBeVisible();
+      await expect(
+        runningLabels.filter({ hasText: terminalTitle })
+      ).toHaveCount(0);
+      await expect(
+        runningLabels.filter({ hasText: defaultTerminalTitle })
+      ).toHaveCount(2);
     });
   });
 
   test.describe('Theme', () => {
     test('Light theme terminal inherit', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await expect(terminal).toHaveAttribute(
         TERMINAL_THEME_ATTRIBUTE,
         'inherit'
@@ -72,9 +309,10 @@ test.describe('Terminal', () => {
 
     test('Light theme terminal light', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await page.menu.clickMenuItem('Settings>Terminal Theme>Light');
       await expect(terminal).toHaveAttribute(TERMINAL_THEME_ATTRIBUTE, 'light');
+      await terminal.focus();
       expect(await terminal.screenshot()).toMatchSnapshot(
         'light-term-light.png'
       );
@@ -82,7 +320,7 @@ test.describe('Terminal', () => {
 
     test('Light theme terminal dark', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await page.menu.clickMenuItem('Settings>Terminal Theme>Dark');
       await expect(terminal).toHaveAttribute(TERMINAL_THEME_ATTRIBUTE, 'dark');
       await terminal.focus();
@@ -93,7 +331,7 @@ test.describe('Terminal', () => {
 
     test('Dark theme terminal inherit', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await page.theme.setDarkTheme();
       await expect(terminal).toHaveAttribute(
         TERMINAL_THEME_ATTRIBUTE,
@@ -107,7 +345,7 @@ test.describe('Terminal', () => {
 
     test('Dark theme terminal light', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await page.theme.setDarkTheme();
       await page.menu.clickMenuItem('Settings>Terminal Theme>Light');
       await expect(terminal).toHaveAttribute(TERMINAL_THEME_ATTRIBUTE, 'light');
@@ -119,7 +357,7 @@ test.describe('Terminal', () => {
 
     test('Dark theme terminal dark', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await page.theme.setDarkTheme();
       await page.menu.clickMenuItem('Settings>Terminal Theme>Dark');
       await expect(terminal).toHaveAttribute(TERMINAL_THEME_ATTRIBUTE, 'dark');
@@ -131,10 +369,10 @@ test.describe('Terminal', () => {
   test.describe('Search', () => {
     test('should highlight matches', async ({ page }) => {
       const terminal = page.locator(TERMINAL_SELECTOR);
-      await terminal.waitFor();
+      await waitForTerminal(page);
 
       // Display some content in terminal.
-      await runCommand(page, terminal, 'seq 1006 2 1024');
+      await page.terminal.runCommand('seq 1006 2 1024', { terminal });
 
       // Perform search.
       const searchText = '101';
@@ -144,8 +382,9 @@ test.describe('Terminal', () => {
         });
       }, searchText);
 
-      // Wait for search to be performed and terminal canvas rerendered.
-      await page.waitForSelector('.xterm-find-active-result-decoration');
+      // Wait for the search match decorations to be rendered. The active
+      // match is distinguished by its colors, not by a dedicated CSS class.
+      await page.waitForSelector('.xterm-find-result-decoration');
 
       expect(await terminal.screenshot()).toMatchSnapshot('search.png');
     });
@@ -158,7 +397,7 @@ test.describe('Terminal', () => {
       const terminal = page.locator(TERMINAL_SELECTOR);
       const terminalInput = terminal.locator(TERMINAL_INPUT_SELECTOR);
 
-      await terminal.waitFor();
+      await waitForTerminal(page);
       await terminalInput.waitFor();
 
       // Focus terminal input.
@@ -173,8 +412,63 @@ test.describe('Terminal', () => {
       await page.keyboard.press('Escape');
       await expect(terminal.locator('.xterm-viewport')).toBeFocused();
 
+      // allow focus/cursor styling to settle before screenshot
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(100);
       expect(await terminal.screenshot()).toMatchSnapshot('focus.png');
+    });
+
+    test('should scroll with the keyboard when the viewport is focused', async ({
+      page
+    }) => {
+      const terminal = page.locator(TERMINAL_SELECTOR);
+      const terminalInput = terminal.locator(TERMINAL_INPUT_SELECTOR);
+
+      await waitForTerminal(page);
+      await terminalInput.waitFor();
+
+      // Display enough content to make the terminal scrollable.
+      await page.terminal.runCommand('seq 1 200', { terminal });
+
+      // The position of the scrollbar slider reflects the scroll position
+      // independently of the renderer; once the output arrives the terminal
+      // is scrolled to the bottom, so the slider moves away from the top.
+      const slider = terminal.locator(
+        '.xterm-scrollable-element > .scrollbar.vertical > .slider'
+      );
+      const sliderTop = () =>
+        slider.evaluate(element => parseFloat(element.style.top || '0'));
+      let previousTop = -1;
+      await expect
+        .poll(
+          async () => {
+            const currentTop = await sliderTop();
+            const settled = currentTop > 0 && currentTop === previousTop;
+            previousTop = currentTop;
+            return settled;
+          },
+          { intervals: [500], timeout: 15000 }
+        )
+        .toBe(true);
+      const bottomPosition = await sliderTop();
+
+      // Move focus to the terminal viewport with a double Escape.
+      await page.locator('div.xterm-screen').click();
+      await page.keyboard.press('Escape');
+      await page.keyboard.press('Escape');
+      await expect(terminal.locator('.xterm-viewport')).toBeFocused();
+
+      // The scrolling keys scroll the terminal while the viewport is
+      // focused.
+      await page.keyboard.press('PageUp');
+      await expect.poll(sliderTop).toBeLessThan(bottomPosition);
+      const pageUpPosition = await sliderTop();
+
+      await page.keyboard.press('Home');
+      await expect.poll(sliderTop).toBeLessThan(pageUpPosition);
+
+      await page.keyboard.press('End');
+      await expect.poll(sliderTop).toBeGreaterThan(pageUpPosition);
     });
   });
 });
@@ -196,6 +490,10 @@ test.describe('Terminal', () => {
     await contents.createDirectory(tmpPath);
   });
 
+  test.beforeEach(async ({ page }) => {
+    await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
+  });
+
   test('Terminal should open in Launcher cwd', async ({ page, tmpPath }) => {
     await page
       .locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`)
@@ -204,10 +502,13 @@ test.describe('Terminal', () => {
     await page.locator('[role="main"] >> p:has-text("Terminal")').click();
 
     const terminal = page.locator(TERMINAL_SELECTOR);
-    await terminal.waitFor();
+    await waitForTerminal(page);
 
     // use the local helper to run basename
-    await runCommand(page, terminal, 'basename $PWD', true);
+    await page.terminal.runCommand('basename $PWD', {
+      terminal,
+      verify: true
+    });
 
     // Wait for the basename to appear in the terminal output
     const basename = path.basename(tmpPath);
@@ -217,9 +518,7 @@ test.describe('Terminal', () => {
     expect(await terminal.screenshot()).toMatchSnapshot('launcher-term.png');
   });
 
-  test('Terminal web link', async ({ page, tmpPath, browserName }) => {
-    test.skip(browserName === 'firefox', 'Flaky on Firefox');
-
+  test('Terminal web link', async ({ page, tmpPath }) => {
     await page
       .locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`)
       .waitFor();
@@ -227,9 +526,12 @@ test.describe('Terminal', () => {
     await page.locator('[role="main"] >> p:has-text("Terminal")').click();
 
     const terminal = page.locator(TERMINAL_SELECTOR);
-    await terminal.waitFor();
+    await waitForTerminal(page);
 
-    await runCommand(page, terminal, 'echo https://jupyter.org/', true);
+    await page.terminal.runCommand('echo https://jupyter.org/', {
+      terminal,
+      verify: true
+    });
 
     // Wait for the URL to appear in the terminal output
     const terminalBody = terminal.locator('.jp-Terminal-body:visible');
@@ -237,18 +539,140 @@ test.describe('Terminal', () => {
       timeout: 5000
     });
 
-    // Hover over the link layer to trigger link highlighting
-    await Promise.all([
-      terminal.locator('.jp-Terminal-body .xterm-cursor-pointer').waitFor(),
-      terminal.locator('canvas.xterm-link-layer').hover({
-        position: {
-          x: 60,
-          y: 23
-        }
-      })
-    ]);
+    await hoverOverLink(page, terminal, /^https:\/\/jupyter\.org\/\s*$/);
 
     expect(await terminal.screenshot()).toMatchSnapshot('web-links-term.png');
+  });
+
+  test('Copy link address from the terminal context menu', async ({ page }) => {
+    await page.menu.clickMenuItem('File>New>Terminal');
+
+    const terminal = page.locator(TERMINAL_SELECTOR);
+    await waitForTerminal(page);
+
+    await page.terminal.runCommand('echo https://jupyter.org/', {
+      terminal,
+      verify: true
+    });
+
+    // Hover over the link on the output row to trigger link detection.
+    const position = await hoverOverLink(
+      page,
+      terminal,
+      /^https:\/\/jupyter\.org\/\s*$/
+    );
+
+    // Open the context menu over the link.
+    await page.mouse.click(position.x, position.y, { button: 'right' });
+
+    const menuItem = page.getByRole('menuitem', { name: 'Copy Link Address' });
+    await expect(menuItem).toBeVisible();
+    await menuItem.click();
+
+    try {
+      await page.context().grantPermissions(['clipboard-read']);
+    } catch {
+      // Firefox does not support clipboard-read but does not need it either
+    }
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+      'https://jupyter.org/'
+    );
+  });
+
+  test('Copy the target of an OSC 8 hyperlink from the terminal context menu', async ({
+    page
+  }) => {
+    await page.menu.clickMenuItem('File>New>Terminal');
+
+    const terminal = page.locator(TERMINAL_SELECTOR);
+    await waitForTerminal(page);
+
+    // Emit an escape-sequence hyperlink whose displayed text differs from
+    // its target.
+    await page.terminal.runCommand(
+      "printf '\\e]8;;https://example.com/issues/42\\e\\\\click-me\\e]8;;\\e\\\\\\n'",
+      { terminal }
+    );
+
+    // Hover over the link on the output row to trigger link detection.
+    const position = await hoverOverLink(page, terminal, /^click-me\s*$/);
+
+    // Open the context menu over the link.
+    await page.mouse.click(position.x, position.y, { button: 'right' });
+
+    const menuItem = page.getByRole('menuitem', { name: 'Copy Link Address' });
+    await expect(menuItem).toBeVisible();
+    await menuItem.click();
+
+    try {
+      await page.context().grantPermissions(['clipboard-read']);
+    } catch {
+      // Firefox does not support clipboard-read but does not need it either
+    }
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+      'https://example.com/issues/42'
+    );
+  });
+
+  test('Ignore an OSC 8 hyperlink with a disallowed scheme', async ({
+    page
+  }) => {
+    await page.menu.clickMenuItem('File>New>Terminal');
+
+    const terminal = page.locator(TERMINAL_SELECTOR);
+    await waitForTerminal(page);
+
+    // As a control that link detection works in this session, check that
+    // an allowed (https) escape-sequence hyperlink offers the copy entry.
+    await page.terminal.runCommand(
+      "printf '\\e]8;;https://example.com/\\e\\\\allowed\\e]8;;\\e\\\\\\n'",
+      { terminal }
+    );
+    const allowedPosition = await hoverOverLink(page, terminal, /^allowed\s*$/);
+    await page.mouse.click(allowedPosition.x, allowedPosition.y, {
+      button: 'right'
+    });
+    const copyLinkItem = page.getByRole('menuitem', {
+      name: 'Copy Link Address'
+    });
+    await expect(copyLinkItem).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(copyLinkItem).toBeHidden();
+
+    // A hyperlink with an unsafe scheme is not detected as a link at all:
+    // it cannot be activated and offers no copy entry.
+    await page.terminal.runCommand(
+      "printf '\\e]8;;javascript:alert(1)\\e\\\\dangerous\\e]8;;\\e\\\\\\n'",
+      { terminal }
+    );
+    const blockedPosition = await rowPosition(terminal, /^dangerous\s*$/);
+    // Move the pointer over the row as a real hover would.
+    await page.mouse.move(blockedPosition.x + 20, blockedPosition.y);
+    await page.mouse.move(blockedPosition.x, blockedPosition.y);
+    await page.mouse.click(blockedPosition.x, blockedPosition.y, {
+      button: 'right'
+    });
+    await expect(
+      page.getByRole('menuitem', { name: 'Refresh Terminal' })
+    ).toBeVisible();
+    await expect(copyLinkItem).toBeHidden();
+  });
+
+  test('Copy link address entry only shows over a link', async ({ page }) => {
+    await page.menu.clickMenuItem('File>New>Terminal');
+
+    const terminal = page.locator(TERMINAL_SELECTOR);
+    await waitForTerminal(page);
+
+    // Open the context menu away from any link.
+    await terminal.click({ button: 'right', position: { x: 200, y: 100 } });
+
+    await expect(
+      page.getByRole('menuitem', { name: 'Refresh Terminal' })
+    ).toBeVisible();
+    await expect(
+      page.getByRole('menuitem', { name: 'Copy Link Address' })
+    ).toBeHidden();
   });
 });
 
@@ -312,7 +736,7 @@ test.describe('Open in Terminal from File Browser', () => {
     await terminalPanelLocator.click();
 
     // Use helper to execute pwd in the visible terminal container
-    await runCommand(page, terminalPanelLocator, 'pwd');
+    await page.terminal.runCommand('pwd', { terminal: terminalPanelLocator });
 
     await expect(terminalPanelLocator).toContainText(folderName, {
       timeout: 5000
@@ -360,25 +784,39 @@ test.describe('Open in Terminal from File Browser', () => {
     await expect(tabs).toHaveCount(2, { timeout: 10000 });
 
     // Iterate through tabs, activate each, and check content
-    const activeTerminal = page.locator('.jp-Terminal-body:visible');
+    const firstTabIndex =
+      (await tabs.nth(0).getAttribute('aria-selected')) === 'true' ? 0 : 1;
     const foundFolders = new Set<string>();
-    for (let i = 0; i < 2; i++) {
-      await tabs.nth(i).click();
-      await activeTerminal.waitFor({ state: 'visible' });
+    for (const i of [firstTabIndex, 1 - firstTabIndex]) {
+      const tab = tabs.nth(i);
+      if ((await tab.getAttribute('aria-selected')) !== 'true') {
+        await tab.click();
+      }
+      await expect(tab).toHaveAttribute('aria-selected', 'true');
 
-      // Find the currently visible terminal body
-      await expect(activeTerminal).toHaveCount(1);
+      const tabId = await tab.getAttribute('id');
+      if (!tabId) {
+        throw new Error('Terminal tab is missing an id');
+      }
 
-      await activeTerminal.click();
-      await page.keyboard.type('pwd');
-      await page.keyboard.press('Enter');
+      const terminalPanel = page.locator(
+        `.lm-DockPanel-widget[aria-labelledby="${tabId}"]`
+      );
+      await terminalPanel.waitFor({ state: 'visible' });
 
-      await expect(activeTerminal).toContainText(
+      const terminalBody = terminalPanel.locator('.jp-Terminal-body');
+      await expect(terminalBody).toContainText(/[$#%>]/, {
+        timeout: 15000
+      });
+
+      await page.terminal.runCommand('pwd', { terminal: terminalPanel });
+
+      await expect(terminalPanel).toContainText(
         new RegExp(`${folderA}|${folderB}`),
         { timeout: 10000 }
       );
 
-      const text = await activeTerminal.textContent();
+      const text = await terminalPanel.textContent();
       if (text?.includes(folderA)) {
         foundFolders.add(folderA);
       }
@@ -438,7 +876,7 @@ test.describe('Open in Terminal from File Browser', () => {
     const activeTerminal = page.locator('.lm-DockPanel .jp-Terminal:visible');
     await activeTerminal.waitFor({ state: 'visible' });
 
-    await runCommand(page, activeTerminal, 'pwd');
+    await page.terminal.runCommand('pwd', { terminal: activeTerminal });
 
     const activeBody = activeTerminal.locator('.jp-Terminal-body:visible');
     await expect(activeBody).toContainText(folderName, { timeout: 5000 });

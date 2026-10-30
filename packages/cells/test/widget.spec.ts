@@ -22,13 +22,17 @@ import {
 import { NBTestUtils } from '@jupyterlab/cells/lib/testutils';
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
+import type { IMarkdownParser } from '@jupyterlab/rendermime';
 import { defaultRenderMime } from '@jupyterlab/rendermime/lib/testutils';
 import type { IExecuteReplyMsg } from '@jupyterlab/services/lib/kernel/messages';
 import {
   framePromise,
   JupyterServer,
-  signalToPromise
+  signalToPromise,
+  simulate,
+  sleep
 } from '@jupyterlab/testing';
+import { WindowedList, WindowedListModel } from '@jupyterlab/ui-components';
 import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
@@ -101,6 +105,55 @@ class LogMarkdownCell extends MarkdownCell {
     super.onUpdateRequest(msg);
     this.methods.push('onUpdateRequest');
   }
+}
+
+class SingleItemListModel extends WindowedListModel {
+  constructor(private _item: Widget) {
+    super({ count: 1, windowingActive: false });
+  }
+
+  estimateWidgetSize = (): number => 100;
+
+  widgetRenderer = (): Widget => this._item;
+}
+
+function createRect(top: number, height: number): DOMRect {
+  return {
+    x: 0,
+    y: top,
+    width: 0,
+    height,
+    top,
+    right: 0,
+    bottom: top + height,
+    left: 0,
+    toJSON: () => ({})
+  };
+}
+
+/**
+ * Attach a code cell to a windowed list and place the cell above its viewport.
+ */
+function attachCellAboveViewport(): { cell: CodeCell; list: WindowedList } {
+  const cell = new CodeCell({
+    contentFactory: NBTestUtils.createCodeCellFactory(),
+    model: new CodeCellModel(),
+    rendermime,
+    placeholder: false
+  });
+  cell.initializeState();
+  const list = new WindowedList({ model: new SingleItemListModel(cell) });
+  Widget.attach(list, document.body);
+  // The list renders its items on update requests.
+  MessageLoop.sendMessage(list, Widget.Msg.UpdateRequest);
+  jest
+    .spyOn(list.outerNode, 'getBoundingClientRect')
+    .mockReturnValue(createRect(0, 500));
+  jest
+    .spyOn(cell.node, 'getBoundingClientRect')
+    .mockReturnValue(createRect(-600, 100));
+  list.outerNode.scrollTop = 1000;
+  return { cell, list };
 }
 
 describe('cells/widget', () => {
@@ -623,6 +676,22 @@ describe('cells/widget', () => {
         widget.outputHidden = true;
         expect(widget.outputHidden).toEqual(true);
       });
+
+      it('should scroll the cell into view when the output collapser hides the output', async () => {
+        const { cell, list } = attachCellAboveViewport();
+        const collapser = () =>
+          cell.node.querySelector('.jp-OutputCollapser .jp-Collapser-child');
+        // React renders the collapser content after the cell is attached.
+        while (!collapser()) {
+          await sleep(10);
+        }
+
+        simulate(collapser()!, 'click');
+
+        expect(cell.outputHidden).toBe(true);
+        expect(list.outerNode.scrollTop).toBe(400);
+        list.dispose();
+      });
     });
 
     describe('#outputsScrolled', () => {
@@ -662,6 +731,19 @@ describe('cells/widget', () => {
         });
         widget.initializeState();
         expect(widget.outputsScrolled).toEqual(true);
+      });
+
+      it('should scroll the cell into view when the output prompt turns scrolling on', () => {
+        const { cell, list } = attachCellAboveViewport();
+
+        simulate(
+          cell.node.querySelector('.jp-OutputArea-promptOverlay')!,
+          'click'
+        );
+
+        expect(cell.outputsScrolled).toBe(true);
+        expect(list.outerNode.scrollTop).toBe(400);
+        list.dispose();
       });
     });
 
@@ -1051,7 +1133,88 @@ describe('cells/widget', () => {
         widget.initializeState();
         Widget.attach(widget, document.body);
         await framePromise();
-        expect(widget.node.textContent).toBe('this is empty');
+        const renderedPlaceholder =
+          widget.node.querySelector('.jp-MarkdownOutput');
+        expect(renderedPlaceholder?.textContent).toBe('this is empty');
+      });
+
+      it('should show the default placeholder in command mode', async () => {
+        const model = new MarkdownCellModel();
+        const widget = new MarkdownCell({
+          model,
+          rendermime,
+          contentFactory,
+          placeholder: false
+        });
+        widget.initializeState();
+        Widget.attach(widget, document.body);
+        await framePromise();
+        const renderedPlaceholder =
+          widget.node.querySelector('.jp-MarkdownOutput');
+        expect(renderedPlaceholder?.textContent).toBe(
+          'Double-click (or press Enter) to edit'
+        );
+        expect(
+          widget.node.classList.contains('jp-mod-emptyMarkdownPlaceholder')
+        ).toBe(true);
+      });
+
+      it('should not mark rendered markdown content as placeholder', async () => {
+        const model = new MarkdownCellModel();
+        model.sharedModel.setSource('hello');
+        const widget = new MarkdownCell({
+          model,
+          rendermime,
+          contentFactory,
+          placeholder: false
+        });
+        widget.initializeState();
+        Widget.attach(widget, document.body);
+        await framePromise();
+        expect(
+          widget.node.classList.contains('jp-mod-emptyMarkdownPlaceholder')
+        ).toBe(false);
+      });
+
+      it('should show markdown help placeholder in edit mode', async () => {
+        const model = new MarkdownCellModel();
+        const widget = new MarkdownCell({
+          model,
+          rendermime,
+          contentFactory,
+          placeholder: false
+        });
+        widget.initializeState();
+        Widget.attach(widget, document.body);
+        widget.rendered = false;
+        await signalToPromise(widget.renderedChanged);
+        widget.editor!.focus();
+        await framePromise();
+        const placeholder = widget.node.querySelector('.cm-placeholder');
+        expect(placeholder?.textContent).toBe(
+          'You can use Markdown and LaTeX: $ α^2 $'
+        );
+      });
+
+      it('should leave the markdown help placeholder unfocused in command mode', async () => {
+        const model = new MarkdownCellModel();
+        const widget = new MarkdownCell({
+          model,
+          rendermime,
+          contentFactory,
+          placeholder: false
+        });
+        widget.initializeState();
+        Widget.attach(widget, document.body);
+        widget.rendered = false;
+        await signalToPromise(widget.renderedChanged);
+        await framePromise();
+        const editor = widget.node.querySelector('.cm-editor');
+        const placeholder = widget.node.querySelector('.cm-placeholder');
+        expect(editor?.classList.contains('cm-focused')).toBe(false);
+        expect(placeholder?.textContent).toBe(
+          'You can use Markdown and LaTeX: $ α^2 $'
+        );
       });
     });
 
@@ -1079,6 +1242,33 @@ describe('cells/widget', () => {
         expect(widget.model.sharedModel.getSource()).toEqual(
           '\nTest\nString\n.\n'
         );
+      });
+    });
+
+    describe('#getHeadings()', () => {
+      it('should not cache headings parsed from an outdated source', async () => {
+        let release = () => {};
+        const released = new Promise<void>(resolve => (release = resolve));
+        const markdownParser: IMarkdownParser = {
+          render: async source => `<h1>${source.replace(/^# /, '')}</h1>`,
+          getHeadingTokens: async source => {
+            await released;
+            return source.startsWith('# ') ? [{ raw: source, line: 0 }] : [];
+          }
+        };
+        const widget = new MarkdownCell({
+          model: new MarkdownCellModel(),
+          rendermime: rendermime.clone({ markdownParser }),
+          contentFactory,
+          placeholder: false
+        });
+        widget.initializeState();
+        const parsing = widget.getHeadings();
+        widget.model.sharedModel.setSource('# Heading 1');
+        release();
+        await parsing;
+        const headings = await widget.getHeadings();
+        expect(headings.map(heading => heading.text)).toEqual(['Heading 1']);
       });
     });
 

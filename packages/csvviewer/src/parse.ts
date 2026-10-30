@@ -5,7 +5,6 @@
 Possible options to add to the parser:
 
 - Optional offsets array to modify, so we don't need to create a new offsets list (we would need to be careful not to overwrite things if a row needs to be truncated.)
-- Comment character at the start of the line
 - Skip empty whitespace lines
 - Skip rows with empty columns
 - Logging an error for too many or too few fields on a line
@@ -54,6 +53,11 @@ export namespace IParser {
      * The delimiter to use. Defaults to ','.
      */
     delimiter?: string;
+
+    /**
+     * Optional comment character. Quotes in matching rows are treated literally.
+     */
+    comment?: string;
 
     /**
      * The row delimiter to use. Defaults to '\r\n'.
@@ -109,6 +113,10 @@ export namespace IParser {
     ncols: number;
 
     /**
+     * The maximum number of columns observed in non-comment rows while parsing.
+     */
+    maxNcols?: number;
+    /**
      * The index offsets into the data string for the rows or data items.
      *
      * #### Notes
@@ -161,7 +169,8 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
     startIndex = 0,
     maxRows = 0xffffffff,
     rowDelimiter = '\r\n',
-    quote = '"'
+    quote = '"',
+    comment
   } = options;
 
   // ncols will be set automatically if it is undefined.
@@ -169,6 +178,7 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
 
   // The number of rows we've already parsed.
   let nrows = 0;
+  let maxNcols = 0;
 
   // The row or column offsets we return.
   const offsets = [];
@@ -203,6 +213,7 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
   // We initialize to 0 just in case we are asked to parse past the end of the
   // string. In that case, we want the number of columns to be 0.
   let col = 0;
+  let isComment = false;
 
   // Declare some useful temporaries
   let char;
@@ -219,6 +230,7 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
       // Start a new row and reset the column counter.
       offsets.push(i);
       col = 1;
+      isComment = data[i] === comment;
     }
 
     // Below, we handle this character, modify the parser state and increment the index to be consistent.
@@ -238,7 +250,7 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
         switch (char) {
           // If we have a quote, we are starting an escaped field.
           case CH_QUOTE:
-            state = QUOTED_FIELD;
+            state = isComment ? UNQUOTED_FIELD : QUOTED_FIELD;
             break;
 
           // A field delimiter means we are starting a new field.
@@ -401,6 +413,9 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
     switch (state) {
       case NEW_ROW:
         nrows++;
+        if (!isComment) {
+          maxNcols = Math.max(maxNcols, col);
+        }
 
         // If ncols is undefined, set it to the number of columns in this row (first row implied).
         if (ncols === undefined) {
@@ -427,7 +442,7 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
 
         // Shortcut return if nrows reaches the maximum rows we are to parse.
         if (nrows === maxRows) {
-          return { nrows, ncols: columnOffsets ? ncols : 0, offsets };
+          return { nrows, ncols: columnOffsets ? ncols : 0, maxNcols, offsets };
         }
         break;
 
@@ -451,6 +466,9 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
   // defined.
   if (state !== NEW_ROW) {
     nrows++;
+    if (!isComment) {
+      maxNcols = Math.max(maxNcols, col);
+    }
     if (columnOffsets === true) {
       // If ncols is *still* undefined, then we only parsed one row and didn't
       // have a newline, so set it to the number of columns we found.
@@ -460,9 +478,9 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
 
       if (col < ncols) {
         // We didn't have enough columns, so add some more column offsets that
-        // point to just before the row delimiter we just saw.
+        // point to the end of the data.
         for (; col < ncols; col++) {
-          offsets.push(i - (rowDelimiterLength - 1));
+          offsets.push(endIndex);
         }
       } else if (col > ncols) {
         // We had too many columns, so truncate them.
@@ -471,7 +489,7 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
     }
   }
 
-  return { nrows, ncols: columnOffsets ? (ncols ?? 0) : 0, offsets };
+  return { nrows, ncols: columnOffsets ? (ncols ?? 0) : 0, maxNcols, offsets };
 }
 
 /**
@@ -494,7 +512,8 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
     delimiter = ',',
     rowDelimiter = '\r\n',
     startIndex = 0,
-    maxRows = 0xffffffff
+    maxRows = 0xffffffff,
+    comment
   } = options;
 
   // ncols will be set automatically if it is undefined.
@@ -503,6 +522,7 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
   // Set up our return variables.
   const offsets: number[] = [];
   let nrows = 0;
+  let maxNcols = 0;
 
   // Set up various state variables.
   const rowDelimiterLength = rowDelimiter.length;
@@ -510,7 +530,6 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
   const len = data.length;
   let nextRow: number;
   let col: number;
-  let rowString: string;
   let colIndex: number;
 
   // The end of the current row.
@@ -532,41 +551,33 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
     // end of the data string.
     rowEnd = nextRow === -1 ? len : nextRow;
 
-    // If we are returning column offsets, push them onto the array.
-    if (columnOffsets === true) {
-      // Find the next field delimiter. We slice the current row out so that
-      // the indexOf will stop at the end of the row. It may possibly be faster
-      // to just use a loop to check each character.
-      col = 1;
-      rowString = data.slice(currRow, rowEnd);
-      colIndex = rowString.indexOf(delimiter);
+    // Find field delimiters in the current row.
+    col = 1;
 
-      if (ncols === undefined) {
-        // If we don't know how many columns we need, loop through and find all
-        // of the field delimiters in this row.
-        while (colIndex !== -1) {
-          offsets.push(currRow + colIndex + 1);
-          col++;
-          colIndex = rowString.indexOf(delimiter, colIndex + 1);
-        }
+    for (colIndex = currRow; colIndex < rowEnd; colIndex++) {
+      if (data[colIndex] !== delimiter) {
+        continue;
+      }
 
-        // Set ncols to the number of fields we found.
-        ncols = col;
-      } else {
-        // If we know the number of columns we expect, find the field delimiters
-        // up to that many columns.
-        while (colIndex !== -1 && col < ncols) {
-          offsets.push(currRow + colIndex + 1);
-          col++;
-          colIndex = rowString.indexOf(delimiter, colIndex + 1);
-        }
+      if (columnOffsets === true && (ncols === undefined || col < ncols)) {
+        offsets.push(colIndex + 1);
+      }
+      col++;
+    }
 
-        // If we didn't reach the number of columns we expected, pad the offsets
-        // with the offset just before the row delimiter.
-        while (col < ncols) {
-          offsets.push(rowEnd);
-          col++;
-        }
+    if (data[currRow] !== comment) {
+      maxNcols = Math.max(maxNcols, col);
+    }
+
+    if (ncols === undefined) {
+      // Set ncols to the number of fields we found.
+      ncols = col;
+    } else if (columnOffsets === true) {
+      // If we didn't reach the number of columns we expected, pad the offsets
+      // with the offset just before the row delimiter.
+      while (col < ncols) {
+        offsets.push(rowEnd);
+        col++;
       }
     }
 
@@ -574,5 +585,5 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
     currRow = rowEnd + rowDelimiterLength;
   }
 
-  return { nrows, ncols: columnOffsets ? (ncols ?? 0) : 0, offsets };
+  return { nrows, ncols: columnOffsets ? (ncols ?? 0) : 0, maxNcols, offsets };
 }

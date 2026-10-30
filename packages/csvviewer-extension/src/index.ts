@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module csvviewer-extension
@@ -18,11 +17,12 @@ import {
   IToolbarWidgetRegistry,
   WidgetTracker
 } from '@jupyterlab/apputils';
+// The package root also loads the model and its datagrid dependency.
+import { CSVComment, CSVDelimiter } from '@jupyterlab/csvviewer/lib/toolbar';
 import {
   CSVViewerFactory,
   TSVViewerFactory
 } from '@jupyterlab/csvviewer/lib/widget';
-import { CSVDelimiter } from '@jupyterlab/csvviewer/lib/toolbar';
 import type { CSVViewer } from '@jupyterlab/csvviewer';
 import type { TextRenderConfig } from '@jupyterlab/csvviewer';
 import type {
@@ -115,6 +115,16 @@ function activateCsv(
       'delimiter',
       widget =>
         new CSVDelimiter({
+          widget: widget.content,
+          translator
+        })
+    );
+
+    toolbarRegistry.addFactory<IDocumentWidget<CSVViewer>>(
+      FACTORY_CSV,
+      'comment',
+      widget =>
+        new CSVComment({
           widget: widget.content,
           translator
         })
@@ -287,6 +297,16 @@ function activateTsv(
         })
     );
 
+    toolbarRegistry.addFactory<IDocumentWidget<CSVViewer>>(
+      FACTORY_TSV,
+      'comment',
+      widget =>
+        new CSVComment({
+          widget: widget.content,
+          translator
+        })
+    );
+
     if (settingRegistry) {
       toolbarFactory = createToolbarFactory(
         toolbarRegistry,
@@ -421,7 +441,7 @@ function activateTsv(
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [csv, tsv];
+const plugins: JupyterFrontEndPlugin<unknown>[] = [csv, tsv];
 export default plugins;
 
 /**
@@ -464,10 +484,14 @@ namespace Private {
       '--jp-content-font-family'
     );
     const fontSize = style.getPropertyValue('--jp-datagrid-font-size');
+    const commentColor = style
+      .getPropertyValue('--jp-mirror-editor-comment-color')
+      .trim();
     return {
       ...(isLight ? LIGHT_TEXT_CONFIG : DARK_TEXT_CONFIG),
       fontSize: fontSize || undefined,
-      fontFamily: fontFamily || fallbackFontFamily || undefined
+      fontFamily: fontFamily || fallbackFontFamily || undefined,
+      commentColor: commentColor || undefined
     };
   };
 

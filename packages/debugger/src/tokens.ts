@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import type { KernelMessage, Session } from '@jupyterlab/services';
@@ -149,6 +147,7 @@ export interface IDebugger {
 
   /**
    * Requests all the loaded modules and display them.
+   * Does nothing unless the debugger is started.
    */
   displayModules(): Promise<void>;
 
@@ -533,7 +532,7 @@ export namespace IDebugger {
       /**
        * An optional hashing seed provided by the kernel.
        */
-      seed?: any;
+      seed?: string;
     };
   }
 
@@ -665,7 +664,7 @@ export namespace IDebugger {
          */
         copyToGlobals?: boolean;
         hashMethod: string;
-        hashSeed: number;
+        hashSeed: string;
         isStarted: boolean;
         /**
          * Whether the kernel supports variable rich rendering or not.

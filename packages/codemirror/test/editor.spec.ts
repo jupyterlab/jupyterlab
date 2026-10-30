@@ -50,7 +50,7 @@ describe('CodeMirrorEditor', () => {
         extensionsRegistry.addExtension(ext);
       });
     for (const language of EditorLanguageRegistry.getDefaultLanguages().filter(
-      spec => spec.name === 'Python'
+      spec => ['Python', 'R'].includes(spec.name)
     )) {
       languages.addLanguage(language);
       await languages.getLanguage(language.name);
@@ -85,6 +85,26 @@ describe('CodeMirrorEditor', () => {
   describe('#constructor()', () => {
     it('should create a CodeMirrorEditor', () => {
       expect(editor).toBeInstanceOf(CodeMirrorEditor);
+    });
+
+    it('should set the editor language data attribute for Python', async () => {
+      model.mimeType = 'text/x-python';
+      await sleep(0);
+      expect(editor.host.dataset.jpEditorLanguage).toBe('python');
+    });
+
+    it('should set the editor language data attribute for R', async () => {
+      model.mimeType = 'text/x-rsrc';
+      await sleep(0);
+      expect(editor.host.dataset.jpEditorLanguage).toBe('r');
+    });
+
+    it('should update the editor language data attribute', async () => {
+      model.mimeType = 'text/x-python';
+      await sleep(0);
+      model.mimeType = 'text/plain';
+      await sleep(0);
+      expect(editor.host.dataset.jpEditorLanguage).toBe('none');
     });
   });
 
@@ -133,6 +153,21 @@ describe('CodeMirrorEditor', () => {
     it('should be the codemirror editor wrapped by the editor', () => {
       const cm = editor.editor;
       expect(cm.state.doc).toBe(editor.doc);
+    });
+
+    it('should warn when accessing the legacy cmView shim', () => {
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const content = editor.editor.contentDOM as HTMLElement & {
+        cmView?: { view: typeof editor.editor; dom: HTMLElement };
+      };
+
+      expect(content.cmView?.view).toBe(editor.editor);
+      expect(content.cmView?.dom).toBe(content);
+      expect(warn).toHaveBeenCalledWith(
+        'Accessing cmView is deprecated. Use the public API EditorView.findFromDOM() instead.'
+      );
+
+      warn.mockRestore();
     });
   });
 
@@ -478,7 +513,7 @@ describe('CodeMirrorEditor', () => {
         value: 'import'
       });
     });
-    it('should return token of parent when erronous leaf is found', async () => {
+    it('should return token of parent when erroneous leaf is found', async () => {
       model.mimeType = 'text/x-python';
       model.sharedModel.setSource('a = "/home');
       // Needed to have the sharedModel content transferred to the editor document

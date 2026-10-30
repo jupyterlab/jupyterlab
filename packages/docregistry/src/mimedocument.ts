@@ -65,7 +65,7 @@ export class MimeContent extends Widget {
         });
         void showErrorMessage(
           this._trans.__('Renderer Failure: %1', this._context.path),
-          reason
+          reason instanceof Error ? reason : String(reason)
         );
       });
   }
@@ -169,7 +169,7 @@ export class MimeContent extends Widget {
       });
       void showErrorMessage(
         this._trans.__('Renderer Failure: %1', context.path),
-        reason
+        reason instanceof Error ? reason : String(reason)
       );
     }
   }
@@ -269,7 +269,10 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
   constructor(options: MimeDocumentFactory.IOptions<MimeDocument>) {
     super(Private.createRegistryOptions(options));
     this._rendermime = options.rendermime;
-    this._renderTimeout = options.renderTimeout || 1000;
+    this._renderTimeout =
+      options.renderTimeout === undefined || options.renderTimeout === 0
+        ? 1000
+        : options.renderTimeout;
     this._dataType = options.dataType || 'string';
     this._fileType = options.primaryFileType;
     this._factory = options.factory;
@@ -280,9 +283,11 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
    */
   protected createNewWidget(context: DocumentRegistry.Context): MimeDocument {
     const ft = this._fileType;
-    const mimeType = ft?.mimeTypes.length
-      ? ft.mimeTypes[0]
-      : IEditorMimeTypeService.defaultMimeType;
+    const mimeTypes = ft?.mimeTypes ?? [];
+    const mimeType =
+      mimeTypes.length > 0
+        ? mimeTypes[0]
+        : IEditorMimeTypeService.defaultMimeType;
 
     const rendermime = this._rendermime.clone({
       resolver: context.urlResolver
