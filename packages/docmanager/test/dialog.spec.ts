@@ -6,7 +6,6 @@
 import type { IDocumentManagerDialogs } from '@jupyterlab/docmanager';
 import {
   DocumentManager,
-  DocumentManagerDialogs,
   renameDialog,
   renameFile
 } from '@jupyterlab/docmanager';
@@ -105,26 +104,24 @@ describe('docregistry/dialog', () => {
 /**
  * A minimal docmanager dialog for test
  */
-class MinimalCustomDialogs extends DocumentManagerDialogs {
+class MinimalCustomDialogs implements IDocumentManagerDialogs {
   renameCalled = false;
   confirmCloseCalled = false;
   saveBeforeCloseCalled = false;
 
-  override async rename(
-    context: DocumentRegistry.Context
-  ): Promise<void | null> {
+  async rename(context: DocumentRegistry.Context): Promise<void | null> {
     this.renameCalled = true;
     return null;
   }
 
-  override async confirmClose(
+  async confirmClose(
     args: IDocumentManagerDialogs.ConfirmClose.IOptions
   ): Promise<IDocumentManagerDialogs.ConfirmClose.IResult> {
     this.confirmCloseCalled = true;
     return { shouldClose: false, ignoreSave: true, doNotAskAgain: true };
   }
 
-  override async saveBeforeClose(
+  async saveBeforeClose(
     args: IDocumentManagerDialogs.SaveBeforeClose.IOptions
   ): Promise<IDocumentManagerDialogs.SaveBeforeClose.IResult> {
     this.saveBeforeCloseCalled = true;

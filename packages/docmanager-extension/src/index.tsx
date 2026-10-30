@@ -249,9 +249,6 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
     const trans = translator.load('jupyterlab');
     const registry = app.docRegistry;
 
-    // Ensure a dialogs provider is always available, then register commands.
-    dialogs = dialogs ?? new DocumentManagerDialogs({ translator });
-
     // Register the file operations commands.
     addCommands(
       app,
@@ -261,7 +258,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
       translator,
       labShell,
       palette,
-      dialogs
+      Private.withDefaultDialogs(dialogs, translator)
     );
 
     // Keep up to date with the settings registry.
@@ -691,7 +688,7 @@ function addCommands(
   translator: ITranslator,
   labShell: ILabShell | null,
   palette: ICommandPalette | null,
-  dialogs: IDocumentManagerDialogs
+  dialogs: Required<IDocumentManagerDialogs>
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
@@ -1325,7 +1322,7 @@ function addLabCommands(
   labShell: ILabShell,
   widgetOpener: IDocumentWidgetOpener,
   translator: ITranslator,
-  dialogs: IDocumentManagerDialogs
+  dialogs: Required<IDocumentManagerDialogs>
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands } = app;
@@ -1532,4 +1529,30 @@ namespace Private {
    * A counter for unique IDs.
    */
   export let id = 0;
+
+  /**
+   * Use the default dialogs for the optional methods `dialogs` does not implement.
+   */
+  export function withDefaultDialogs(
+    dialogs: IDocumentManagerDialogs | null,
+    translator: ITranslator
+  ): Required<IDocumentManagerDialogs> {
+    const defaults = new DocumentManagerDialogs({ translator });
+    if (!dialogs) {
+      return defaults;
+    }
+    return {
+      rename: context => dialogs.rename(context),
+      confirmClose: options => dialogs.confirmClose(options),
+      saveBeforeClose: options => dialogs.saveBeforeClose(options),
+      reload: options => dialogs.reload?.(options) ?? defaults.reload(options),
+      delete: options => dialogs.delete?.(options) ?? defaults.delete(options),
+      chooseCheckpoint: options =>
+        dialogs.chooseCheckpoint?.(options) ??
+        defaults.chooseCheckpoint(options),
+      revert: options => dialogs.revert?.(options) ?? defaults.revert(options),
+      renameOnSave: options =>
+        dialogs.renameOnSave?.(options) ?? defaults.renameOnSave(options)
+    };
+  }
 }

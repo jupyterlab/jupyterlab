@@ -192,6 +192,9 @@ export namespace IDocumentManagerDialogs {
 
 /**
  * Dialog interfaces for document management.
+ *
+ * When an optional method is not implemented, the default dialog
+ * from `DocumentManagerDialogs` is shown instead.
  */
 export interface IDocumentManagerDialogs {
   /**
@@ -231,7 +234,7 @@ export interface IDocumentManagerDialogs {
    * @param options - Options for the dialog
    * @returns A promise that resolves to a result object
    */
-  reload(
+  reload?(
     options: IDocumentManagerDialogs.Reload.IOptions
   ): Promise<IDocumentManagerDialogs.Reload.IResult>;
 
@@ -241,7 +244,7 @@ export interface IDocumentManagerDialogs {
    * @param options - Options for the dialog
    * @returns A promise that resolves to a result object
    */
-  delete(
+  delete?(
     options: IDocumentManagerDialogs.Delete.IOptions
   ): Promise<IDocumentManagerDialogs.Delete.IResult>;
 
@@ -254,7 +257,7 @@ export interface IDocumentManagerDialogs {
    * @param options - Options for the dialog
    * @returns A promise that resolves to a result object
    */
-  chooseCheckpoint(
+  chooseCheckpoint?(
     options: IDocumentManagerDialogs.ChooseCheckpoint.IOptions
   ): Promise<IDocumentManagerDialogs.ChooseCheckpoint.IResult>;
 
@@ -264,7 +267,7 @@ export interface IDocumentManagerDialogs {
    * @param options - Options for the dialog
    * @returns A promise that resolves to a result object
    */
-  renameOnSave(
+  renameOnSave?(
     options: IDocumentManagerDialogs.RenameOnSave.IOptions
   ): Promise<IDocumentManagerDialogs.RenameOnSave.IResult>;
   /**
@@ -273,7 +276,7 @@ export interface IDocumentManagerDialogs {
    * @param options - Options for the dialog
    * @returns A promise resolving to whether the user confirmed the revert.
    */
-  revert(
+  revert?(
     options: IDocumentManagerDialogs.Revert.IOptions
   ): Promise<IDocumentManagerDialogs.Revert.IResult>;
 }
