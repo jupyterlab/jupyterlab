@@ -2270,11 +2270,16 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * This method caches the result after the first call to avoid redundant parsing.
    **/
   async getHeadings(): Promise<Cell.IHeading[]> {
-    if (!this._headingsCache) {
+    while (!this._headingsCache) {
+      const source = this.model.sharedModel.getSource();
       const headings = await TableOfContentsUtils.Markdown.parseHeadings(
-        this.model.sharedModel.getSource(),
+        source,
         this._rendermime.markdownParser
       );
+      if (!this.isDisposed && source !== this.model.sharedModel.getSource()) {
+        // The source changed while it was parsed: parse it again.
+        continue;
+      }
       this._headingsCache = headings.map(h => {
         return { ...h, type: Cell.HeadingType.Markdown };
       });
