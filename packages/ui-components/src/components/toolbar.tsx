@@ -346,31 +346,30 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     // Stop propagating the click outside the toolbar
     event.stopPropagation();
 
+    const focusBeforeClick = this._focusBeforeClick;
+    this._focusBeforeClick = null;
+
     // Clicking a label focuses the corresponding control
     // that is linked with `for` attribute, so let it be.
     if (event.target instanceof HTMLLabelElement) {
       const forId = event.target.getAttribute('for');
       if (forId && this.node.querySelector(`#${forId}`)) {
-        this._focusBeforeClick = null;
         return;
       }
     }
 
-    const focusBeforeClick = this._focusBeforeClick;
-    this._focusBeforeClick = null;
-
-    // If the click moved focus to a menu outside the toolbar,
-    // do not reactivate the parent widget.
-    if (
-      focusBeforeClick !== null &&
-      document.activeElement !== focusBeforeClick &&
-      !this.node.contains(document.activeElement)
-    ) {
+    // If this click already focused a control, let it be.
+    if (this.node.contains(document.activeElement)) {
       return;
     }
 
-    // If this click already focused a control, let it be.
-    if (this.node.contains(document.activeElement)) {
+    // If this click moved the focus out of the toolbar, for example to a menu,
+    // let it be. The focus is on the body when the click did not focus anything.
+    if (
+      focusBeforeClick !== null &&
+      document.activeElement !== focusBeforeClick &&
+      document.activeElement !== document.body
+    ) {
       return;
     }
 
@@ -379,6 +378,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
       this.parent.activate();
     }
   }
+
   /**
    * Handle `after-attach` messages for the widget.
    */
