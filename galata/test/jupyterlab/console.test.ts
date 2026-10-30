@@ -58,6 +58,57 @@ test.describe('Console', () => {
 
     await expect(page.activity.getTabLocator(newName)).toBeVisible();
   });
+
+  test('Should ask for confirmation before showing all kernel activity', async ({
+    page
+  }) => {
+    const command = 'console:toggle-show-all-kernel-activity';
+    const isToggled = () =>
+      page.evaluate(id => window.jupyterapp.commands.isToggled(id), command);
+
+    void page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    const dialog = page.locator('.jp-Dialog');
+    await expect(dialog).toContainText('treated as trusted');
+    await dialog.getByRole('button', { name: 'Cancel' }).click();
+    expect(await isToggled()).toBe(false);
+
+    void page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    await expect(dialog).toBeVisible();
+    await page.keyboard.press('Enter');
+    await expect(dialog).toHaveCount(0);
+    expect(await isToggled()).toBe(false);
+
+    void page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    await dialog.getByRole('button', { name: 'Show All Activity' }).click();
+    await expect.poll(isToggled).toBe(true);
+
+    await page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    await expect(dialog).toHaveCount(0);
+    expect(await isToggled()).toBe(false);
+  });
+
+  test('Should not ask again today about showing all kernel activity when checked', async ({
+    page
+  }) => {
+    const command = 'console:toggle-show-all-kernel-activity';
+    const toggle = () =>
+      page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    const isToggled = () =>
+      page.evaluate(id => window.jupyterapp.commands.isToggled(id), command);
+
+    void toggle();
+    const dialog = page.locator('.jp-Dialog');
+    await dialog.getByRole('checkbox').check();
+    await dialog.getByRole('button', { name: 'Show All Activity' }).click();
+    await expect.poll(isToggled).toBe(true);
+
+    await toggle();
+    expect(await isToggled()).toBe(false);
+
+    await toggle();
+    expect(await isToggled()).toBe(true);
+    await expect(dialog).toHaveCount(0);
+  });
 });
 
 test.describe('Console (terminal mode)', () => {

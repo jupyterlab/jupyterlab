@@ -167,9 +167,16 @@
     },
     "showAllKernelActivity": {
       "title": "Show All Kernel Activity",
-      "description": "Whether the console defaults to showing all\nkernel activity or just kernel activity originating from itself.",
+      "description": "Whether the console defaults to showing all\nkernel activity or just kernel activity originating from itself.\nWarning: outputs of code executed by other clients of the kernel,\nsuch as collaborators, are rendered as trusted, so JavaScript and HTML\nthey contain run in your browser with your permissions.",
       "type": "boolean",
       "default": false
+    },
+    "showAllKernelActivityWarningSnoozedUntil": {
+      "title": "Skip Show All Kernel Activity Warning Until",
+      "description": "Date (YYYY-MM-DD) until which turning on Show All Kernel Activity\ndoes not ask for confirmation. Leave empty to always ask.",
+      "type": "string",
+      "pattern": "^(\\d{4}-\\d{2}-\\d{2})?$",
+      "default": ""
     },
     "promptCellConfig": {
       "title": "Prompt Cell Configuration",
