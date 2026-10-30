@@ -44,7 +44,11 @@ export class AccordionPanelReorderer
     this._indicator.className = 'jp-AccordionPanel-dropIndicator';
     this._indicator.style.display = 'none';
     _panel.node.appendChild(this._indicator);
-    this._updateHandles();
+    this._onEnabledChanged();
+    AccordionPanelReorderer._enabledChanged.connect(
+      this._onEnabledChanged,
+      this
+    );
     this._observer = new MutationObserver(() => this._updateHandles());
     this._observer.observe(_panel.node, { childList: true });
     for (const type of [
@@ -60,17 +64,17 @@ export class AccordionPanelReorderer
   }
 
   /**
-   * Whether drag handles are visible and reordering is enabled.
+   * Whether drag reordering is enabled for all managed accordion panels.
    */
   get enabled(): boolean {
-    return this._panel.hasClass('jp-mod-reorderable');
+    return !this.isDisposed && AccordionPanelReorderer._enabled;
   }
   set enabled(value: boolean) {
-    this._panel.toggleClass('jp-mod-reorderable', value);
-    if (!value) {
-      this._endDrag();
+    if (this.isDisposed || value === AccordionPanelReorderer._enabled) {
+      return;
     }
-    this._updateHandles();
+    AccordionPanelReorderer._enabled = value;
+    AccordionPanelReorderer._enabledChanged.emit();
   }
 
   /**
@@ -95,7 +99,8 @@ export class AccordionPanelReorderer
       return;
     }
     this._isDisposed = true;
-    this.enabled = false;
+    this._endDrag();
+    this._panel.removeClass('jp-mod-reorderable');
     this._observer.disconnect();
     for (const type of [
       'pointerdown',
@@ -171,6 +176,14 @@ export class AccordionPanelReorderer
           break;
       }
     }
+  }
+
+  private _onEnabledChanged(): void {
+    this._panel.toggleClass('jp-mod-reorderable', this.enabled);
+    if (!this.enabled) {
+      this._endDrag();
+    }
+    this._updateHandles();
   }
 
   private _updateHandles(): void {
@@ -260,6 +273,8 @@ export class AccordionPanelReorderer
     HTMLElement,
     AccordionPanelReorderer
   >();
+  private static _enabled = false;
+  private static _enabledChanged = new Signal<object, void>({});
   private _trans: TranslationBundle;
   private _observer: MutationObserver;
   private _indicator = document.createElement('div');

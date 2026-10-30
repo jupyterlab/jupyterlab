@@ -133,8 +133,10 @@ panel via the context menu.
 
 The section appears inside the File Browser. To reorder sections, right-click a
 section header and select **Enable Section Reordering**, then drag its handle to
-the desired position. Select the same option again to hide the handles. This also
-works in the Running Sessions, Debugger, and Extension Manager panels.
+the desired position. This enables reordering in all sidebar panels, including
+the Running Sessions, Debugger, and Extension Manager. Select the same option
+in any panel to hide all handles and lock reordering. Expanding, collapsing, and
+resizing sections remain available while reordering is locked.
 Section order, collapsed states, and sizes are restored when reopening the same
 workspace.
 
