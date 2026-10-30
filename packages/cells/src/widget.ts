@@ -88,6 +88,8 @@ import { InputPlaceholder, OutputPlaceholder } from './placeholder';
 
 import { ResizeHandle } from './resizeHandle';
 
+import { scrollCellIntoView } from './utils';
+
 /**
  * The CSS class added to cell widgets.
  */
@@ -1148,6 +1150,9 @@ export class CodeCell extends Cell<ICodeCellModel> {
     output.addClass(CELL_OUTPUT_AREA_CLASS);
     output.toggleScrolling.connect(() => {
       this.outputsScrolled = !this.outputsScrolled;
+      if (this.outputsScrolled) {
+        scrollCellIntoView(this);
+      }
     });
     output.initialize.connect(() => {
       this.updatePromptOverlayIcon();
