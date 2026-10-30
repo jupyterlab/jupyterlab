@@ -16,11 +16,12 @@ jobs:
     name: Linux
     env:
       PLAYWRIGHT_BROWSERS_PATH: /home/runner/pw-browsers
+      YARN_ENABLE_GLOBAL_CACHE: "1"
     strategy:
       matrix:
         group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, interop, nonode, lint]
         # This will be used by the base setup action
-        python-version: ["3.10", "3.14"]
+        python-version: ["3.11", "3.15"]
         include:
           - group: release_test
             upload-output: true
@@ -33,25 +34,25 @@ jobs:
               ./.stylelintcache
         exclude:
           - group: integrity
-            python-version: "3.10"
+            python-version: "3.11"
           - group: integrity2
-            python-version: "3.10"
+            python-version: "3.11"
           - group: integrity3
-            python-version: "3.10"
+            python-version: "3.11"
           - group: release_test
-            python-version: "3.10"
+            python-version: "3.11"
           - group: docs
-            python-version: "3.10"
+            python-version: "3.11"
           - group: usage
-            python-version: "3.10"
+            python-version: "3.11"
           - group: usage2
-            python-version: "3.10"
+            python-version: "3.11"
           - group: nonode
-            python-version: "3.10"
+            python-version: "3.11"
           - group: lint
-            python-version: "3.10"
+            python-version: "3.11"
           - group: splice_source
-            python-version: "3.10"
+            python-version: "3.11"
       fail-fast: false
     timeout-minutes: 45
     runs-on: ubuntu-latest
@@ -62,7 +63,7 @@ jobs:
           persist-credentials: false
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@925e40fa6066f4533e0c40803bd4b6d0d2f4a781 # v1.1.0
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
           python_package_manager: "uv pip"
 
@@ -115,14 +116,16 @@ jobs:
     name: Test Minimum Versions
     timeout-minutes: 30
     runs-on: ubuntu-latest
+    env:
+      YARN_ENABLE_GLOBAL_CACHE: "1"
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           persist-credentials: false
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@925e40fa6066f4533e0c40803bd4b6d0d2f4a781 # v1.1.0
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
-          python_version: "3.10"
+          python_version: "3.11"
           dependency_type: minimum
           python_package_manager: "uv pip"
       - name: Install dependencies
@@ -135,12 +138,14 @@ jobs:
     name: Make SDist
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      YARN_ENABLE_GLOBAL_CACHE: "1"
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           persist-credentials: false
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@925e40fa6066f4533e0c40803bd4b6d0d2f4a781 # v1.1.0
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
           python_package_manager: "uv pip"
       - name: Install dependencies
@@ -162,7 +167,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@925e40fa6066f4533e0c40803bd4b6d0d2f4a781 # v1.1.0
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
       - name: Download sdist
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
@@ -189,13 +194,13 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           persist-credentials: false
-      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@925e40fa6066f4533e0c40803bd4b6d0d2f4a781 # v1.1.0
+      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
       - run: |
           pip install -vv --group builder
           jlpm
           jlpm build:packages
           jlpm docs
-      - uses: jupyterlab/maintainer-tools/.github/actions/check-links@925e40fa6066f4533e0c40803bd4b6d0d2f4a781 # v1.1.0
+      - uses: jupyterlab/maintainer-tools/.github/actions/check-links@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
           ignore_glob: "docs/api packages/ui-components/docs/source/ui_components.rst images"
           ignore_links: "https?://.* .*/images/[\\w-]+.png"

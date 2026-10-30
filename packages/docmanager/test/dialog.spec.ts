@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import type { ServiceManager } from '@jupyterlab/services';
-import { dismissDialog } from '@jupyterlab/testing';
+import { dismissDialog, waitForDialog } from '@jupyterlab/testing';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { Widget } from '@lumino/widgets';
 import { UUID } from '@lumino/coreutils';
@@ -61,6 +61,23 @@ describe('docregistry/dialog', () => {
             renameFile(manager, 'foo.ipynb', 'bar.ipynb')
           ])
         ).rejects.toBe('File not renamed');
+      });
+      it('should show one overwrite dialog at a time', async () => {
+        const renames = [
+          renameFile(manager, 'foo.ipynb', 'bar.ipynb'),
+          renameFile(manager, 'baz.ipynb', 'qux.ipynb')
+        ].map(rename => rename.catch((reason: unknown) => reason));
+        await waitForDialog();
+        expect(document.querySelectorAll('.jp-Dialog')).toHaveLength(1);
+        await dismissDialog();
+        await waitForDialog();
+        expect(document.querySelectorAll('.jp-Dialog')).toHaveLength(1);
+        await dismissDialog();
+
+        expect(await Promise.all(renames)).toEqual([
+          'File not renamed',
+          'File not renamed'
+        ]);
       });
       it('should throw error on no status', async () => {
         alreadyExistsError.response = {};

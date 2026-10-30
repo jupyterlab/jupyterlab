@@ -48,6 +48,26 @@
     }
   },
   {
+    "id": "application:activate-tab-index",
+    "label": "Activate Tab by Index",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Alt 1"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "number",
+          "description": "The zero-based index of the tab to activate in the current tab bar; a negative index counts from the end, so -1 is the last tab"
+        }
+      },
+      "required": [
+        "index"
+      ]
+    }
+  },
+  {
     "id": "application:close",
     "label": "Close Tab",
     "caption": "",
@@ -1586,7 +1606,9 @@
     "id": "console:replace-selection",
     "label": "Replace Selection in Console",
     "caption": "",
-    "shortcuts": [],
+    "shortcuts": [
+      "Alt -"
+    ],
     "args": {
       "type": "object",
       "properties": {
@@ -3148,7 +3170,9 @@
     "id": "fileeditor:replace-selection",
     "label": "Replace Selection in Editor",
     "caption": "",
-    "shortcuts": [],
+    "shortcuts": [
+      "Alt -"
+    ],
     "args": {
       "type": "object",
       "properties": {
@@ -4156,6 +4180,18 @@
     }
   },
   {
+    "id": "notebook:commit-metadata-and-save",
+    "label": "Commit Metadata and Save Notebook",
+    "caption": "Commit pending changes in the metadata editors, then save the notebook",
+    "shortcuts": [
+      "Ctrl S"
+    ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "notebook:copy-cell",
     "label": "Copy Cell",
     "caption": "Copy this cell",
@@ -4621,6 +4657,21 @@
     }
   },
   {
+    "id": "notebook:make-cell-editable",
+    "label": "Enable Cell Editing…",
+    "caption": "Read-only cell",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "toolbar": {
+          "type": "boolean",
+          "description": "Whether the command is being executed from the toolbar"
+        }
+      }
+    }
+  },
+  {
     "id": "notebook:merge-cell-above",
     "label": "Merge Cell Above",
     "caption": "",
@@ -4853,7 +4904,9 @@
     "id": "notebook:replace-selection",
     "label": "Replace Selection in Notebook Cell",
     "caption": "",
-    "shortcuts": [],
+    "shortcuts": [
+      "Alt -"
+    ],
     "args": {
       "type": "object",
       "properties": {

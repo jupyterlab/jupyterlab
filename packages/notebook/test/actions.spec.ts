@@ -198,7 +198,38 @@ describe('@jupyterlab/notebook', () => {
       widget.activeCellIndex = 0;
     });
 
+    function createDOMRect(height: number): DOMRect {
+      return {
+        x: 0,
+        y: 0,
+        width: 0,
+        height,
+        top: 0,
+        right: 0,
+        bottom: height,
+        left: 0,
+        toJSON: () => ''
+      } as DOMRect;
+    }
+
+    function mockViewportHeight(height: number) {
+      jest
+        .spyOn(widget.outerNode, 'clientHeight', 'get')
+        .mockReturnValue(height);
+    }
+
+    function mockCellHeight(cell: Cell, height: number) {
+      jest
+        .spyOn(cell.node, 'getBoundingClientRect')
+        .mockReturnValue(createDOMRect(height));
+    }
+
+    function mockScrollToItem() {
+      return jest.spyOn(widget, 'scrollToItem').mockResolvedValue(undefined);
+    }
+
     afterEach(() => {
+      jest.restoreAllMocks();
       widget.model?.dispose();
       widget.dispose();
       utils.clipboard.clear();
@@ -713,6 +744,17 @@ describe('@jupyterlab/notebook', () => {
         widget.mode = 'edit';
         NotebookActions.deleteCells(widget);
         expect(widget.mode).toBe('command');
+      });
+
+      it('should prefer scrolling to the start when the next active cell is taller than the viewport', () => {
+        widget.activeCellIndex = 1;
+        mockViewportHeight(200);
+        mockCellHeight(widget.widgets[2], 400);
+        const scrollSpy = mockScrollToItem();
+
+        NotebookActions.deleteCells(widget);
+
+        expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, 'start');
       });
 
       it('should activate the cell after the last selected cell', () => {
@@ -1708,11 +1750,66 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#replaceSelection()', () => {
+      it.each(['<- ', '%>% '])(
+        'should replace the selection with %s in an editable cell',
+        text => {
+          const cell = widget.activeCell!;
+          cell.model.sharedModel.setSource('x');
+          cell.editor!.setSelection({
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 1 }
+          });
+
+          NotebookActions.replaceSelection(widget, text);
+
+          expect(cell.model.sharedModel.getSource()).toBe(text);
+        }
+      );
+
+      it.each(['<- ', '%>% '])(
+        'should not insert %s into a read-only cell',
+        text => {
+          const cell = widget.activeCell!;
+          cell.model.sharedModel.setSource('x');
+          cell.model.setMetadata('editable', false);
+          expect(cell.readOnly).toBe(true);
+
+          NotebookActions.replaceSelection(widget, text);
+
+          expect(cell.model.sharedModel.getSource()).toBe('x');
+        }
+      );
+
+      it('should respect a read-only view without editable metadata', () => {
+        const cell = widget.activeCell!;
+        cell.model.sharedModel.setSource('x');
+        cell.syncEditable = false;
+        cell.readOnly = true;
+        expect(cell.model.getMetadata('editable')).toBeUndefined();
+
+        NotebookActions.replaceSelection(widget, '<- ');
+
+        expect(cell.model.sharedModel.getSource()).toBe('x');
+      });
+    });
+
     describe('#selectAbove()', () => {
       it('should select the cell above the active cell', () => {
         widget.activeCellIndex = 1;
         NotebookActions.selectAbove(widget);
         expect(widget.activeCellIndex).toBe(0);
+      });
+
+      it('should prefer scrolling to the start when moving up into a cell taller than the viewport', () => {
+        widget.activeCellIndex = 2;
+        mockViewportHeight(200);
+        mockCellHeight(widget.widgets[1], 400);
+        const scrollSpy = mockScrollToItem();
+
+        NotebookActions.selectAbove(widget);
+
+        expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, 'start');
       });
 
       it('should be a no-op if there is no model', () => {
@@ -1750,6 +1847,26 @@ describe('@jupyterlab/notebook', () => {
       it('should select the cell below the active cell', () => {
         NotebookActions.selectBelow(widget);
         expect(widget.activeCellIndex).toBe(1);
+      });
+
+      it('should keep the auto alignment heuristic when moving down into a cell smaller than the viewport', () => {
+        mockViewportHeight(400);
+        mockCellHeight(widget.widgets[1], 200);
+        const scrollSpy = mockScrollToItem();
+
+        NotebookActions.selectBelow(widget);
+
+        expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, undefined);
+      });
+
+      it('should prefer scrolling to the start when moving down into a cell taller than the viewport', () => {
+        mockViewportHeight(200);
+        mockCellHeight(widget.widgets[1], 400);
+        const scrollSpy = mockScrollToItem();
+
+        NotebookActions.selectBelow(widget);
+
+        expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, 'start');
       });
 
       it('should be a no-op if there is no model', () => {

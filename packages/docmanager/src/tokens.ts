@@ -304,6 +304,7 @@ export interface IDocumentManager extends IDisposable {
    * @param path - The file path to use.
    *
    * @param widgetName - The name of the widget factory to use. 'default' will use the default widget.
+   * `null` will look for a widget of the preferred factories first, then for a widget of any factory.
    *
    * @returns The found widget, or `undefined`.
    *
@@ -352,6 +353,8 @@ export interface IDocumentManager extends IDisposable {
    * @param path - The file path to open.
    *
    * @param widgetName - The name of the widget factory to use. 'default' will use the default widget.
+   * If not given, reveals the widget found by `findWidget(path, null)`, or opens the default widget
+   * when there is none.
    *
    * @param kernel - An optional kernel name/id to override the default.
    *

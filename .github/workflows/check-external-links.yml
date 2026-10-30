@@ -71,13 +71,13 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           persist-credentials: false
-      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@925e40fa6066f4533e0c40803bd4b6d0d2f4a781 # v1.1.0
+      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
       - run: |
           pip install -vv --group builder
           jlpm
           jlpm build:packages
           jlpm docs
-      - uses: jupyterlab/maintainer-tools/.github/actions/check-links@925e40fa6066f4533e0c40803bd4b6d0d2f4a781 # v1.1.0
+      - uses: jupyterlab/maintainer-tools/.github/actions/check-links@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
           ignore_glob: 'docs/api packages/ui-components/docs/source/ui_components.rst images'
           ignore_links: ".*/images/[\\w-]+.png https://docs.github.com/en/.* https://jupyterlab.github.io https://mybinder.org/v2/gh/jupyterlab/.* https://github.com/[^/]+/?$ https://blog.jupyter.org/.* https://pypi.org/.* https://code.visualstudio.com/.* https://github.com/.* https://www.npmjs.com.* https://webpack.js.org/.* https://docs.conda.io/* https://conda.io/*"
