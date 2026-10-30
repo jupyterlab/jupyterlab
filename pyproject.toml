@@ -77,15 +77,15 @@ docs-screenshots = [
     # Freeze the packages to ensure consistent look and feel
     # IPython is frozen because its version is displayed in
     # the console header
-    "altair==6.0.0",
-    "ipython==8.16.1",
-    "ipywidgets==8.1.5",
+    "altair==6.3.0",
+    "ipython==9.17.1",
+    "ipywidgets==8.1.9",
     "jupyterlab-geojson==3.4.0",
-    "jupyterlab-language-pack-zh-CN==4.3.post1",
-    "matplotlib==3.10.0",
+    "jupyterlab-language-pack-zh-CN==4.5.post3",
+    "matplotlib==3.11.2",
     "nbconvert>=7.0.0",
-    "pandas==2.2.3",
-    "scipy==1.15.1",
+    "pandas==3.1.0",
+    "scipy==1.17.1",
 ]
 test = [
     "coverage",
@@ -110,8 +110,8 @@ dev = [
     "coverage",
     "hatch",
     "bump-my-version>=1,<2",
-    "mypy==1.20.2",
-    "ruff==0.16.10",
+    "mypy==2.4.0",
+    "ruff==0.17.1",
 ]
 upgrade-extension = [
     "pyyaml-include<3.0",
@@ -134,7 +134,7 @@ docs = [
     "pytest-check-links",
     "pytest-jupyter",
     "shellcheck-py",
-    "sphinx>=1.8,<8.2.0",
+    "sphinx>=1.8,<9.1.0",
     "sphinx-copybutton",
     "sphinxcontrib-mermaid",
     "sphinxcontrib-spelling",
