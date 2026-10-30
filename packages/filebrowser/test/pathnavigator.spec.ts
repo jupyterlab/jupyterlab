@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { simulate } from 'simulate-event';
+import { ContentsManager, Drive } from '@jupyterlab/services';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { PathNavigator } from '../src/pathnavigator';
@@ -25,6 +26,11 @@ afterAll(() => {
   scrollIntoViewSpy.mockRestore();
 });
 const DIRS = ['alpha', 'beta', 'gamma'];
+const REMOTE_DIRS = ['delta'];
+
+// Path helpers of a real contents manager, with an additional drive.
+const contentsManager = new ContentsManager();
+contentsManager.addDrive(new Drive({ name: 'remote' }));
 
 /**
  * Create a minimal mock of FileBrowserModel that satisfies PathNavigator.
@@ -32,6 +38,7 @@ const DIRS = ['alpha', 'beta', 'gamma'];
 function mockModel(
   overrides: {
     path?: string;
+    root?: string;
     getResult?: Array<{ name: string; type: string }>;
   } = {}
 ): { model: FileBrowserModel; cdCalls: string[] } {
@@ -41,14 +48,19 @@ function mockModel(
   const refreshed = new Signal<FileBrowserModel, void>({} as FileBrowserModel);
   const model = {
     path: overrides.path ?? '',
+    root: overrides.root ?? '',
     refreshed,
     manager: {
       services: {
         contents: {
-          localPath: (p: string) => p,
-          get: async (_path: string, _opts: unknown) => ({
+          localPath: (p: string) => contentsManager.localPath(p),
+          resolvePath: (root: string, p: string) =>
+            contentsManager.resolvePath(root, p),
+          get: async (path: string, _opts: unknown) => ({
             type: 'directory',
-            content: getResult
+            content: contentsManager.driveName(path)
+              ? REMOTE_DIRS.map(n => ({ name: n, type: 'directory' }))
+              : getResult
           })
         }
       }
@@ -65,6 +77,7 @@ const createdNavigators: PathNavigator[] = [];
 function makeNavigator(
   overrides: {
     path?: string;
+    root?: string;
     getResult?: Array<{ name: string; type: string }>;
   } = {}
 ): {
@@ -163,6 +176,45 @@ describe('PathNavigator', () => {
       simulate(inputEl(navigator), 'input');
       await flushPromises();
       expect(suggestionItems(navigator).length).toBe(0);
+    });
+
+    it('should suggest directories within the model root', async () => {
+      const { navigator } = makeNavigator({
+        path: 'projects/demo',
+        root: 'projects/demo'
+      });
+      navigator.open();
+      await flushPromises();
+      expect(suggestionItems(navigator).map(li => li.textContent)).toEqual([
+        'alpha',
+        'beta',
+        'gamma'
+      ]);
+    });
+
+    it.each(['', '/', 'projects/', 'projects/demo/../', 'projects/demo-old/'])(
+      'should not suggest directories outside the model root for %j',
+      async value => {
+        const { navigator } = makeNavigator({
+          path: 'projects/demo',
+          root: 'projects/demo'
+        });
+        navigator.open();
+        await flushPromises();
+        inputEl(navigator).value = value;
+        simulate(inputEl(navigator), 'input');
+        await flushPromises();
+        expect(suggestionItems(navigator)).toHaveLength(0);
+      }
+    );
+
+    it('should suggest directories from the drive of the model path', async () => {
+      const { navigator } = makeNavigator({ path: 'remote:projects/demo' });
+      navigator.open();
+      await flushPromises();
+      expect(suggestionItems(navigator).map(li => li.textContent)).toEqual([
+        'delta'
+      ]);
     });
   });
 

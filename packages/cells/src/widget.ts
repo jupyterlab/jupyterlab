@@ -88,6 +88,8 @@ import { InputPlaceholder, OutputPlaceholder } from './placeholder';
 
 import { ResizeHandle } from './resizeHandle';
 
+import { scrollCellIntoView } from './utils';
+
 /**
  * The CSS class added to cell widgets.
  */
@@ -366,6 +368,23 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     if (this.syncEditable) {
       this.saveEditableState();
     }
+    this.update();
+  }
+
+  /**
+   * Whether the cell is being displayed in view-only mode.
+   *
+   * This state is transient and is not persisted to the notebook model.
+   */
+  get viewOnly(): boolean {
+    return this._viewOnly;
+  }
+
+  set viewOnly(value: boolean) {
+    if (this._viewOnly === value) {
+      return;
+    }
+    this._viewOnly = value;
     this.update();
   }
 
@@ -701,9 +720,12 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     if (!this._model) {
       return;
     }
-    // Handle read only state.
-    if (this.editor?.getOption('readOnly') !== this._readOnly) {
-      this.editor?.setOption('readOnly', this._readOnly);
+
+    // Handle read-only and view-only states.
+    const readOnly = this._readOnly || this._viewOnly;
+
+    if (this.editor?.getOption('readOnly') !== readOnly) {
+      this.editor?.setOption('readOnly', readOnly);
     }
   }
 
@@ -781,6 +803,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   private _model: T;
   private _placeholder: boolean;
   private _readOnly = false;
+  private _viewOnly = false;
   private _ready = new PromiseDelegate<void>();
   private _resizeDebouncer = new Debouncer(() => {
     this._displayChanged.emit();
@@ -1127,6 +1150,9 @@ export class CodeCell extends Cell<ICodeCellModel> {
     output.addClass(CELL_OUTPUT_AREA_CLASS);
     output.toggleScrolling.connect(() => {
       this.outputsScrolled = !this.outputsScrolled;
+      if (this.outputsScrolled) {
+        scrollCellIntoView(this);
+      }
     });
     output.initialize.connect(() => {
       this.updatePromptOverlayIcon();
@@ -2249,11 +2275,16 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * This method caches the result after the first call to avoid redundant parsing.
    **/
   async getHeadings(): Promise<Cell.IHeading[]> {
-    if (!this._headingsCache) {
+    while (!this._headingsCache) {
+      const source = this.model.sharedModel.getSource();
       const headings = await TableOfContentsUtils.Markdown.parseHeadings(
-        this.model.sharedModel.getSource(),
+        source,
         this._rendermime.markdownParser
       );
+      if (!this.isDisposed && source !== this.model.sharedModel.getSource()) {
+        // The source changed while it was parsed: parse it again.
+        continue;
+      }
       this._headingsCache = headings.map(h => {
         return { ...h, type: Cell.HeadingType.Markdown };
       });
