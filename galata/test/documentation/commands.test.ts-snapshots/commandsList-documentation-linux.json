@@ -1767,6 +1767,16 @@
     }
   },
   {
+    "id": "debugger:copy-kernel-source-path",
+    "label": "Copy Path",
+    "caption": "Copy the path of the kernel source to the clipboard",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "debugger:copy-to-clipboard",
     "label": "Copy to Clipboard",
     "caption": "Copy text representation of the value to clipboard",
@@ -1834,6 +1844,16 @@
     "shortcuts": [
       "F10"
     ],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "debugger:open-kernel-source",
+    "label": "Open",
+    "caption": "Open the kernel source",
+    "shortcuts": [],
     "args": {
       "type": "object",
       "properties": {}
