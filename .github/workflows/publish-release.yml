@@ -25,7 +25,7 @@ jobs:
       - name: Install npm
         run: npm install -g npm@^11.21.1 # zizmor: ignore[adhoc-packages] no Node release bundles npm >= 11.21.0 yet
 
-      - uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
+      - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         id: app-token
         with:
           app-id: ${{ vars.APP_ID }}
