@@ -22,6 +22,7 @@ import {
 import { NBTestUtils } from '@jupyterlab/cells/lib/testutils';
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
+import type { IMarkdownParser } from '@jupyterlab/rendermime';
 import { defaultRenderMime } from '@jupyterlab/rendermime/lib/testutils';
 import type { IExecuteReplyMsg } from '@jupyterlab/services/lib/kernel/messages';
 import {
@@ -1079,6 +1080,33 @@ describe('cells/widget', () => {
         expect(widget.model.sharedModel.getSource()).toEqual(
           '\nTest\nString\n.\n'
         );
+      });
+    });
+
+    describe('#getHeadings()', () => {
+      it('should not cache headings parsed from an outdated source', async () => {
+        let release = () => {};
+        const released = new Promise<void>(resolve => (release = resolve));
+        const markdownParser: IMarkdownParser = {
+          render: async source => `<h1>${source.replace(/^# /, '')}</h1>`,
+          getHeadingTokens: async source => {
+            await released;
+            return source.startsWith('# ') ? [{ raw: source, line: 0 }] : [];
+          }
+        };
+        const widget = new MarkdownCell({
+          model: new MarkdownCellModel(),
+          rendermime: rendermime.clone({ markdownParser }),
+          contentFactory,
+          placeholder: false
+        });
+        widget.initializeState();
+        const parsing = widget.getHeadings();
+        widget.model.sharedModel.setSource('# Heading 1');
+        release();
+        await parsing;
+        const headings = await widget.getHeadings();
+        expect(headings.map(heading => heading.text)).toEqual(['Heading 1']);
       });
     });
 
