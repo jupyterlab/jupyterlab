@@ -89,10 +89,13 @@ test.describe('Console Interactions', () => {
       await page.locator('.jp-FileEditor .cm-content').click();
       const menu = await page.menu.openLocator('Run');
       await expect(
-        menu!.getByRole('menuitem', { name: 'Run All Code', exact: true })
+        menu!.getByRole('menuitemcheckbox', {
+          name: 'Run All Code',
+          exact: true
+        })
       ).toBeDisabled();
       await expect(
-        menu!.getByRole('menuitem', {
+        menu!.getByRole('menuitemcheckbox', {
           name: 'Restart Kernel and Run All Code',
           exact: true
         })
