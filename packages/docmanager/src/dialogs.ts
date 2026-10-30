@@ -150,9 +150,11 @@ export class DocumentManagerDialogs implements IDocumentManagerDialogs {
     options: IDocumentManagerDialogs.ChooseCheckpoint.IOptions
   ): Promise<IDocumentManagerDialogs.ChooseCheckpoint.IResult> {
     const trans = this._translator.load('jupyterlab');
+    // the id could be too long to show so use the index instead
     const items = options.checkpoints.map((checkpoint, index) => {
-      const isoDate = new Date(checkpoint.last_modified).toISOString();
-      return `${index}. ${isoDate}`;
+      const isoDate = Time.format(checkpoint.last_modified);
+      const humanDate = Time.formatHuman(checkpoint.last_modified);
+      return `${index}. ${isoDate} (${humanDate})`;
     });
     const selection = await InputDialog.getItem({
       items,

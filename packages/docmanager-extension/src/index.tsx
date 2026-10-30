@@ -54,7 +54,7 @@ import { JSONExt } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { recentsManagerPlugin } from './recents';
 
@@ -605,8 +605,8 @@ export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * A plugin that provides the default dialogs for three document management operations:
- * Rename, Confirm Close, and Save Before Close.
+ * A plugin that provides the default dialogs for document management operations,
+ * such as Rename, Confirm Close, Save Before Close, Reload and Revert to Checkpoint.
  *
  * To customize these dialogs, implement a custom plugin that provides the `IDocumentManagerDialogs` token.
  */
@@ -1040,7 +1040,7 @@ function addCommands(
           checkpoint: chosen,
           fileType: type
         });
-        if (!confirm.shouldRevert) {
+        if (!confirm.shouldRevert || context.isDisposed) {
           return;
         }
         if (context.model.readOnly) {
@@ -1437,16 +1437,9 @@ function addLabCommands(
         if (!context) {
           return;
         }
-        const result = await showDialog({
-          title: trans.__('Delete'),
-          body: trans.__('Are you sure you want to delete %1', context.path),
-          buttons: [
-            Dialog.cancelButton(),
-            Dialog.warnButton({ label: trans.__('Delete') })
-          ]
-        });
+        const result = await dialogs.delete({ path: context.path });
 
-        if (result.button.accept) {
+        if (result.shouldDelete) {
           await app.commands.execute('docmanager:delete-file', {
             path: context.path
           });
