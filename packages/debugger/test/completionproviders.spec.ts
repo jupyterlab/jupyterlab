@@ -33,6 +33,7 @@ const code = [
   '    return alpha_arg + beta_arg',
   '',
   "data = {'alpha': 1, 'beta': 2}",
+  "names = ['hello']",
   "big = {f'key_{i:03d}': i for i in range(120)}",
   "huge = {f'k_{i:04d}': i for i in range(500)}",
   'tricky = {"it\'s": 1, \'say "hi"\': 2}',
@@ -116,6 +117,15 @@ describe('Debugger completion providers integration test', () => {
       expect(reply.start).toBe(text.indexOf('dat'));
       expect(reply.end).toBe(text.length);
     });
+
+    it('should not complete variables as attributes of a subscript', async () => {
+      const text = 'names[0].a';
+      const reply = await provider().fetch(
+        { text, offset: text.length },
+        context
+      );
+      expect(reply.items).toEqual([]);
+    });
   });
 
   describe('DebuggerIPythonCompletionProvider', () => {
@@ -167,6 +177,35 @@ describe('Debugger completion providers integration test', () => {
       );
       const labels = reply.items.map(item => item.label);
       expect(labels.some(label => label.includes('beta_arg'))).toBe(true);
+    });
+
+    it('should complete function keyword arguments after a nested call', async () => {
+      const text = 'add(len(data), be';
+      const reply = await provider().fetch(
+        { text, offset: text.length },
+        context
+      );
+      const labels = reply.items.map(item => item.label);
+      expect(labels.some(label => label.includes('beta_arg'))).toBe(true);
+    });
+
+    it('should complete attributes of a subscript', async () => {
+      const text = 'names[0].cap';
+      const reply = await provider().fetch(
+        { text, offset: text.length },
+        context
+      );
+      expect(reply.items.map(item => item.label)).toEqual(['capitalize']);
+      expect(reply.start).toBe(text.length - 'cap'.length);
+    });
+
+    it('should complete attributes of a string literal', async () => {
+      const text = "'abc'.up";
+      const reply = await provider().fetch(
+        { text, offset: text.length },
+        context
+      );
+      expect(reply.items.map(item => item.label)).toEqual(['upper']);
     });
 
     it('should not complete paths when dictionary keys match', async () => {

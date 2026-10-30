@@ -14,6 +14,7 @@ import {
 } from '@jupyterlab/completer';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
+import { isAttributeOfExpression } from './completionprovider';
 import type { IDebugger } from './tokens';
 
 /**
@@ -39,7 +40,7 @@ const COMPLETION_LIMIT = 200;
  * ~64 kB - ample headroom for the completion limit below.
  */
 const HELPER_DEFINITION = `
-def ${HELPER_NAME}(text, offset, frame_locals, frame_globals, limit=${COMPLETION_LIMIT}):
+def ${HELPER_NAME}(text, offset, frame_locals, frame_globals, attribute, limit=${COMPLETION_LIMIT}):
     import base64
     import json
     from IPython import get_ipython
@@ -61,16 +62,27 @@ def ${HELPER_NAME}(text, offset, frame_locals, frame_globals, limit=${COMPLETION
         limit=limit,
     )
     matches = []
-    for matcher in ['dict_key_matcher', 'python_func_kw_matcher', 'file_matcher']:
-        result = getattr(completer, matcher)(context)
-        completions = [
-            [c.text, c.type or ''] for c in result.get('completions', []) if c.text
+    if attribute:
+        result = completer.python_matcher(context)
+        # the matches end with the attribute, as .capitalize for names[0].cap,
+        # so keep and replace only the name after the last dot
+        matches = [
+            [c.text.rpartition('.')[2], c.type or '']
+            for c in result.get('completions', [])
+            if '.' in c.text
         ]
-        # as in IPCompleter, matching dict keys suppress the other matchers
-        if completions and result.get('suppress'):
-            matches = completions
-            break
-        matches += completions
+        token = token.rpartition('.')[2]
+    else:
+        for matcher in ['dict_key_matcher', 'python_func_kw_matcher', 'file_matcher']:
+            result = getattr(completer, matcher)(context)
+            completions = [
+                [c.text, c.type or ''] for c in result.get('completions', []) if c.text
+            ]
+            # as in IPCompleter, matching dict keys suppress the other matchers
+            if completions and result.get('suppress'):
+                matches = completions
+                break
+            matches += completions
     payload = {
         'tok_len': len(token),
         # the context limit is only a hint to the matchers - enforce it
@@ -86,6 +98,8 @@ def ${HELPER_NAME}(text, offset, frame_locals, frame_globals, limit=${COMPLETION
  * - dict_key_matcher: dict/DataFrame/numpy keys, custom _ipython_key_completions_()
  * - python_func_kw_matcher: function keyword arguments
  * - file_matcher: filesystem paths
+ * - python_matcher: attributes of expressions which are not dotted names,
+ *   such as `names[0].cap`
  *
  * Only applicable when stopped at a Python frame.
  */
@@ -168,12 +182,17 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
 
     const frameId = this._debuggerService.model.callstack.frame?.id;
     const textBeforeCursor = request.text.slice(0, request.offset);
+    // A quote before the dot can also open a string, as in `open('.git`.
+    const tokenType = context.editor?.getTokenAtCursor().type;
+    const attribute =
+      !(tokenType && /string/i.test(tokenType)) &&
+      isAttributeOfExpression(textBeforeCursor);
 
     // The reconciliator fetches from all applicable providers in parallel,
     // so skip the kernel round-trip when none of the IPython-only matchers
-    // can contribute (identifier/attribute completion is covered by the
-    // DAP provider).
-    if (!_hasMatcherContext(textBeforeCursor)) {
+    // can contribute (names and attributes of dotted names are completed by
+    // the DAP provider).
+    if (!attribute && !_hasMatcherContext(textBeforeCursor)) {
       return { start: 0, end: 0, items: [] };
     }
 
@@ -193,7 +212,8 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
       `(lambda ns={}, frame_locals=locals(), frame_globals=globals(): ` +
       `(exec(${JSON.stringify(HELPER_DEFINITION)}, ns), ` +
       `ns[${JSON.stringify(HELPER_NAME)}](` +
-      `${textLiteral}, ${offset}, frame_locals, frame_globals))[1])()`;
+      `${textLiteral}, ${offset}, frame_locals, frame_globals, ` +
+      `${attribute ? 'True' : 'False'}))[1])()`;
 
     try {
       const reply = await session.sendRequest('evaluate', {
@@ -248,11 +268,26 @@ function _hasMatcherContext(textBeforeCursor: string): boolean {
   return (
     // Unclosed subscript, e.g. `data['al` or `df.loc[`.
     /\[[^\]]*$/.test(textBeforeCursor) ||
-    // Unclosed call arguments, e.g. `plot(al`.
-    /\([^)]*$/.test(textBeforeCursor) ||
+    // Unclosed call arguments, e.g. `plot(al` or `add(other(), be`.
+    _hasUnclosedParenthesis(textBeforeCursor) ||
     // Possibly inside a string literal, e.g. `open('./da`.
     /['"][^'"]*$/.test(textBeforeCursor)
   );
+}
+
+/**
+ * Whether the text has an opening parenthesis which is not closed.
+ */
+function _hasUnclosedParenthesis(text: string): boolean {
+  let depth = 0;
+  for (const char of text) {
+    if (char === '(') {
+      depth++;
+    } else if (char === ')' && depth > 0) {
+      depth--;
+    }
+  }
+  return depth > 0;
 }
 
 /**

@@ -19,6 +19,10 @@ interface IMockSessionOptions {
    * Mock for `IDebugger.ISession.sendRequest`.
    */
   sendRequest?: jest.Mock;
+  /**
+   * The language reported by the kernel info.
+   */
+  kernelLanguage?: string;
 }
 
 function mockSession(options: IMockSessionOptions = {}) {
@@ -27,7 +31,14 @@ function mockSession(options: IMockSessionOptions = {}) {
       supportsCompletionsRequest: options.supportsCompletionsRequest ?? true,
       completionTriggerCharacters: options.completionTriggerCharacters
     },
-    sendRequest: options.sendRequest ?? jest.fn()
+    sendRequest: options.sendRequest ?? jest.fn(),
+    connection: {
+      kernel: {
+        info: Promise.resolve({
+          language_info: { name: options.kernelLanguage ?? 'python' }
+        })
+      }
+    }
   };
 }
 
@@ -391,6 +402,51 @@ describe('DebuggerCompletionProvider', () => {
         )
       ).toEqual({ start: 0, end: 0, items: [] });
       expect(sendRequest).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['a subscript', 'names[0].a'],
+      ['a call', 'get().a'],
+      ['a string literal', "'abc'.a"]
+    ])(
+      'should not request completions for an attribute of %s in Python',
+      async (_, text) => {
+        // debugpy returns the variables and builtins which start with `a`.
+        const sendRequest = jest.fn().mockResolvedValue({
+          success: true,
+          body: {
+            targets: [{ label: 'abs', start: text.length - 1, length: 1 }]
+          }
+        });
+        const provider = new DebuggerCompletionProvider({
+          debuggerService: mockService({
+            frame: { id: 1 },
+            session: mockSession({ sendRequest })
+          })
+        });
+        expect(
+          await provider.fetch({ text, offset: text.length }, context)
+        ).toEqual({ start: 0, end: 0, items: [] });
+        expect(sendRequest).not.toHaveBeenCalled();
+      }
+    );
+
+    it('should request completions for an attribute of a subscript in other languages', async () => {
+      const sendRequest = jest.fn().mockResolvedValue({
+        success: true,
+        body: { targets: [{ label: 'size', start: 5, length: 1 }] }
+      });
+      const provider = new DebuggerCompletionProvider({
+        debuggerService: mockService({
+          frame: { id: 1 },
+          session: mockSession({ sendRequest, kernelLanguage: 'C++' })
+        })
+      });
+      const reply = await provider.fetch(
+        { text: 'v[0].s', offset: 6 },
+        context
+      );
+      expect(reply.items.map(item => item.label)).toEqual(['size']);
     });
 
     it('should return an empty reply when the request throws', async () => {

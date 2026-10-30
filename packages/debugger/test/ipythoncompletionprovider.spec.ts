@@ -304,7 +304,8 @@ describe('DebuggerIPythonCompletionProvider', () => {
     it.each([
       ['an identifier', 'dat'],
       ['an attribute access', 'df.he'],
-      ['a closed call', 'df.head()']
+      ['a closed call', 'df.head()'],
+      ['a closed nested call', 'add(other())']
     ])('should skip the kernel round-trip for %s', async (_, text) => {
       const sendRequest = mockEvaluate(completionsPayload(0, []));
       const provider = makeProvider(sendRequest);
@@ -335,7 +336,9 @@ describe('DebuggerIPythonCompletionProvider', () => {
       const { expression } = sendRequest.mock.calls[0][1];
       // A single expression (eval mode), not a multi-line block.
       expect(expression).not.toContain('\n');
-      expect(expression).toContain(`("df['", 4, frame_locals, frame_globals)`);
+      expect(expression).toContain(
+        `("df['", 4, frame_locals, frame_globals, False)`
+      );
     });
 
     it('should only send the text up to the cursor', async () => {
@@ -345,6 +348,51 @@ describe('DebuggerIPythonCompletionProvider', () => {
       const { expression } = sendRequest.mock.calls[0][1];
       expect(expression).toContain(`"df['"`);
       expect(expression).not.toContain('tail');
+    });
+
+    it('should complete keyword arguments after a nested call', async () => {
+      const sendRequest = mockEvaluate(
+        completionsPayload(2, [['beta=', 'param']])
+      );
+      const provider = makeProvider(sendRequest);
+      const text = 'add(other(), be';
+      const reply = await provider.fetch(
+        { text, offset: text.length },
+        context
+      );
+      expect(reply.items.map(item => item.label)).toEqual(['beta=']);
+    });
+
+    it.each([
+      ['a subscript', 'names[0].cap'],
+      ['a call', 'get().cap'],
+      ['a string literal', "'abc'.cap"]
+    ])('should complete the attributes of %s', async (_, text) => {
+      const sendRequest = mockEvaluate(
+        completionsPayload(3, [['capitalize', 'attribute']])
+      );
+      const provider = makeProvider(sendRequest);
+      const reply = await provider.fetch(
+        { text, offset: text.length },
+        context
+      );
+      expect(reply.items.map(item => item.label)).toEqual(['capitalize']);
+      expect(reply.start).toBe(text.length - 3);
+      const { expression } = sendRequest.mock.calls[0][1];
+      expect(expression).toContain('frame_locals, frame_globals, True)');
+    });
+
+    it('should not complete attributes after a quote which opens a string', async () => {
+      const sendRequest = mockEvaluate(completionsPayload(0, []));
+      const provider = makeProvider(sendRequest);
+      // The token type which the Python grammar of CodeMirror reports.
+      const editor = {
+        getTokenAtCursor: () => ({ value: "'.git", offset: 5, type: 'String' })
+      } as unknown as ICompletionContext['editor'];
+      const text = "open('.git";
+      await provider.fetch({ text, offset: text.length }, { widget, editor });
+      const { expression } = sendRequest.mock.calls[0][1];
+      expect(expression).toContain('frame_locals, frame_globals, False)');
     });
 
     it('should return an empty reply when the request is unsuccessful', async () => {

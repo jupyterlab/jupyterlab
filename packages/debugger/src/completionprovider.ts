@@ -97,6 +97,16 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
     if (tokenType && /string/i.test(tokenType)) {
       return { start: 0, end: 0, items: [] };
     }
+    // debugpy, the adapter of Python kernels, completes attributes of dotted
+    // names only: for `names[0].a` it returns the variables and builtins
+    // which start with `a`. DebuggerIPythonCompletionProvider completes
+    // these attributes.
+    if (
+      isAttributeOfExpression(request.text.slice(0, request.offset)) &&
+      (await this._isPython())
+    ) {
+      return { start: 0, end: 0, items: [] };
+    }
 
     const frameId = this._debuggerService.model.callstack.frame?.id;
 
@@ -139,9 +149,32 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
     }
   }
 
+  /**
+   * Whether the kernel of the debug session runs Python.
+   */
+  private async _isPython(): Promise<boolean> {
+    try {
+      const info =
+        await this._debuggerService.session?.connection?.kernel?.info;
+      return info?.language_info?.name === 'python';
+    } catch {
+      return false;
+    }
+  }
+
   private _trans: TranslationBundle;
   private _debuggerService: IDebugger;
   private _isDebugConsole: (context?: ICompletionContext) => boolean;
+}
+
+/**
+ * Whether the text before the cursor ends with an attribute of an expression
+ * which is not a dotted name, as in `names[0].cap`, `get().` or `'abc'.up`.
+ * Callers check first that the cursor is not inside a string, where a quote
+ * can open the string, as in `open('.git`.
+ */
+export function isAttributeOfExpression(textBeforeCursor: string): boolean {
+  return /[\])}'"](?:\.\w*)+$/.test(textBeforeCursor);
 }
 
 export namespace DebuggerCompletionProvider {
