@@ -21,6 +21,10 @@ jobs:
     steps:
       - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
 
+      # `npm dist-tag` in the after-publish-assets hook needs npm >= 11.21.0 for trusted publishing
+      - name: Install npm
+        run: npm install -g npm@^11.21.1 # zizmor: ignore[adhoc-packages] no Node release bundles npm >= 11.21.0 yet
+
       - uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
         id: app-token
         with:
