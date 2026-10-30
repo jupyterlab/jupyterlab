@@ -172,11 +172,13 @@ jobs:
         run: |
           set -ex
           cd core/galata
+          # "Install dependencies" has built dev mode. Skip the dev build check: its yarn
+          # install rewrites node_modules/.yarn-state.yml while the next steps run jlpm.
           if [[ "${{ matrix.project }}" == "documentation" ]]; then
             JUPYTERLAB_GALATA_ROOT_DIR="${DEMO_DIR}" PYTHONWARNINGS=ignore \
-              jupyter lab --config jupyter_server_test_config.py --extensions-in-dev-mode --custom-css > /tmp/jupyterlab_server.log 2>&1 &
+              jupyter lab --config jupyter_server_test_config.py --extensions-in-dev-mode --custom-css --skip-dev-build > /tmp/jupyterlab_server.log 2>&1 &
           else
-            jlpm start 2>&1 > /tmp/jupyterlab_server.log &
+            jlpm start --skip-dev-build > /tmp/jupyterlab_server.log 2>&1 &
           fi
 
       - name: Install browser
