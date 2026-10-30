@@ -397,6 +397,11 @@ export namespace ISettingRegistry {
      * The type or types of the data.
      */
     type?: Primitive | Primitive[];
+
+    /**
+     * Tags of the settings that can be filtered out
+     */
+    tags?: string[];
   }
 
   /**
