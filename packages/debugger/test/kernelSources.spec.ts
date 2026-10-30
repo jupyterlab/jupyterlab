@@ -108,6 +108,21 @@ describe('KernelSourcesBody', () => {
     expect(getSourceItem('/lib/json/decoder.py')).not.toBeNull();
   });
 
+  it('should show the matching sources of a directory collapsed before filtering', async () => {
+    const sources = [
+      { name: 'json', path: '/lib/json/__init__.py' },
+      { name: 'json.decoder', path: '/lib/json/decoder.py' }
+    ];
+    await setSources(sources);
+    await click(getItem('json'));
+    await click(getItem('json'));
+
+    model.filter = 'decoder';
+    await setSources(sources);
+
+    expect(getSourceItem('/lib/json/decoder.py')).not.toBeNull();
+  });
+
   it('should not split a file name on the dot of its extension', async () => {
     await setSources([{ name: 'module.cpp', path: '/src/module.cpp' }]);
 

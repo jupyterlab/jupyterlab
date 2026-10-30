@@ -79,7 +79,7 @@ interface IKernelSourceNode {
  * Props shared by the components of the tree.
  */
 interface ITreeProps {
-  filtered: boolean;
+  filter: string;
   selectedPath: string | null;
   onSelect: (path: string) => void;
   onOpen: (path: string) => void;
@@ -117,14 +117,21 @@ function KernelSourceItem(
  *
  * Once expanded, directories that only contain one directory are merged
  * into a single row. While a filter is set, the directories that the user
- * has not toggled are expanded, so that the matching sources show.
+ * has not toggled since the filter was set are expanded, so that the
+ * matching sources show.
  */
 function KernelSourceDirectory(
   props: ITreeProps & { node: IKernelSourceNode }
 ): JSX.Element {
   const { node, ...treeProps } = props;
-  const [toggled, setToggled] = useState<boolean | null>(null);
-  const expanded = toggled ?? treeProps.filtered;
+  const [toggled, setToggled] = useState<{
+    filter: string;
+    expanded: boolean;
+  } | null>(null);
+  const expanded =
+    toggled?.filter === treeProps.filter
+      ? toggled.expanded
+      : treeProps.filter !== '';
 
   let label = node.name;
   let contents = node;
@@ -140,7 +147,12 @@ function KernelSourceDirectory(
 
   return (
     <div className={DIRECTORY_CLASS}>
-      <div className={ITEM_CLASS} onClick={() => setToggled(!expanded)}>
+      <div
+        className={ITEM_CLASS}
+        onClick={() =>
+          setToggled({ filter: treeProps.filter, expanded: !expanded })
+        }
+      >
         {expanded ? (
           <caretDownIcon.react tag={null} />
         ) : (
@@ -194,10 +206,10 @@ function KernelSourceNodes(
  */
 function KernelSourcesTree(props: {
   kernelSources: IDebugger.KernelSource[];
-  filtered: boolean;
+  filter: string;
   onOpen: (path: string) => void;
 }): JSX.Element {
-  const { kernelSources, filtered, onOpen } = props;
+  const { kernelSources, filter, onOpen } = props;
   const nodes = useMemo(
     () => Private.buildTree(kernelSources),
     [kernelSources]
@@ -206,7 +218,7 @@ function KernelSourcesTree(props: {
   return (
     <KernelSourceNodes
       nodes={nodes}
-      filtered={filtered}
+      filter={filter}
       selectedPath={selectedPath}
       onSelect={setSelectedPath}
       onOpen={onOpen}
@@ -238,7 +250,7 @@ export class KernelSourcesBody extends ReactWidget {
         {(_, kernelSources) => (
           <KernelSourcesTree
             kernelSources={kernelSources ?? []}
-            filtered={this._model.filter !== ''}
+            filter={this._model.filter}
             onOpen={this._openSource}
           />
         )}
