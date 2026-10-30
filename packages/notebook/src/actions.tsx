@@ -26,7 +26,7 @@ import * as nbformat from '@jupyterlab/nbformat';
 import type { Kernel, KernelMessage } from '@jupyterlab/services';
 import type { ISharedAttachmentsCell } from '@jupyter/ydoc';
 import type { YNotebook } from '@jupyter/ydoc';
-import type { ITranslator } from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { every, findIndex } from '@lumino/algorithm';
 import type { JSONObject } from '@lumino/coreutils';
@@ -477,6 +477,7 @@ export namespace NotebookActions {
       const undoManager = (model.sharedModel as YNotebook).undoManager;
       const lastItem = undoManager.undoStack[undoManager.undoStack.length - 1];
       lastItem?.meta.set(Private.CELL_EXECUTION_META_KEY, storedExecutions);
+      lastItem?.meta.set(Private.CELL_EXECUTION_SOURCE_META_KEY, 'merge');
     }
 
     // If the original cell is a markdown cell, make sure
@@ -671,6 +672,7 @@ export namespace NotebookActions {
       const undoManager = (notebook.model.sharedModel as YNotebook).undoManager;
       const lastItem = undoManager.undoStack[undoManager.undoStack.length - 1];
       lastItem?.meta.set(Private.CELL_EXECUTION_META_KEY, storedExecutions);
+      lastItem?.meta.set(Private.CELL_EXECUTION_SOURCE_META_KEY, 'move');
     }
   }
 
@@ -1712,6 +1714,7 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
+    const trans = notebook.translator.load('jupyterlab');
     notebook.mode = 'command';
 
     const undoManager = (notebook.model.sharedModel as YNotebook).undoManager;
@@ -1745,6 +1748,7 @@ export namespace NotebookActions {
 
     // Capture execution context from the stack item being popped.
     let storedExecutions: Private.IStoredCellExecution[] | undefined;
+    let executionCaptureSource: Private.IExecutionCaptureSource | undefined;
     const onStackItemPopped = ({
       stackItem
     }: {
@@ -1753,19 +1757,34 @@ export namespace NotebookActions {
       storedExecutions = stackItem.meta.get(Private.CELL_EXECUTION_META_KEY) as
         | Private.IStoredCellExecution[]
         | undefined;
+      executionCaptureSource = stackItem.meta.get(
+        Private.CELL_EXECUTION_SOURCE_META_KEY
+      ) as Private.IExecutionCaptureSource | undefined;
     };
     undoManager.on('stack-item-popped', onStackItemPopped);
     notebook.model.sharedModel.undo();
     undoManager.off('stack-item-popped', onStackItemPopped);
+    if (storedExecutions) {
+      const redoItem = undoManager.redoStack[undoManager.redoStack.length - 1];
+      redoItem?.meta.set(Private.CELL_EXECUTION_META_KEY, storedExecutions);
+      if (executionCaptureSource) {
+        redoItem?.meta.set(
+          Private.CELL_EXECUTION_SOURCE_META_KEY,
+          executionCaptureSource
+        );
+      }
+    }
 
     // Restore execution state on resurrected/moved cell widgets.
     // For move-undo: use freshly pre-captured data (stored data is stale).
     // For delete-undo: stored data has the futures captured at deletion time.
     storedExecutions?.forEach(stored => {
-      Private.restoreExecution(
-        notebook,
-        preCaptured.get(stored.cellId) ?? stored
-      );
+      const execution = preCaptured.get(stored.cellId) ?? stored;
+      if (execution.isDone() && executionCaptureSource === 'delete') {
+        Private.restoreFinishedDeleteExecution(notebook, execution, trans);
+      } else {
+        Private.restoreExecution(notebook, execution);
+      }
     });
 
     notebook.deselectAll();
@@ -1786,9 +1805,28 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
+    const redoExecutions = Private.captureRedoExecutions(notebook);
+    const undoManager = (notebook.model.sharedModel as YNotebook).undoManager;
+    const redoItem = undoManager.redoStack[undoManager.redoStack.length - 1];
+    const executionCaptureSource = redoItem?.meta.get(
+      Private.CELL_EXECUTION_SOURCE_META_KEY
+    );
 
     notebook.mode = 'command';
     notebook.model.sharedModel.redo();
+    if (redoExecutions) {
+      if (executionCaptureSource === 'move') {
+        redoExecutions.forEach(execution => {
+          Private.restoreExecution(notebook, execution);
+        });
+      }
+      const undoItem = undoManager.undoStack[undoManager.undoStack.length - 1];
+      undoItem?.meta.set(Private.CELL_EXECUTION_META_KEY, redoExecutions);
+      undoItem?.meta.set(
+        Private.CELL_EXECUTION_SOURCE_META_KEY,
+        executionCaptureSource
+      );
+    }
     notebook.deselectAll();
     void Private.handleState(notebook, state);
   }
@@ -2673,6 +2711,15 @@ export function setCellExecutor(executor: INotebookCellExecutor): void {
 namespace Private {
   /** Key used to store cell execution state in Y.js undo stack item metadata. */
   export const CELL_EXECUTION_META_KEY = Symbol('cellExecutionState');
+  /** Key used to store the action kind that captured execution context. */
+  export const CELL_EXECUTION_SOURCE_META_KEY = Symbol('cellExecutionSource');
+  export const NEW_OUTPUTS_NOTIFICATION_AUTO_CLOSE = 10000;
+
+  export type IExecutionCaptureSource =
+    | 'delete'
+    | 'merge'
+    | 'change-cell-type'
+    | 'move';
 
   /**
    * A kernel message that arrived while the future was detached, tagged with
@@ -2702,7 +2749,59 @@ namespace Private {
      * cell as it was when the move happened, rolling back any output received
      * since. Re-applying this snapshot after the undo prevents that loss.
      */
-    outputs?: nbformat.IOutput[];
+    outputs: nbformat.IOutput[];
+    /** Display id targets from the output area when execution was detached. */
+    displayIdMap: ReadonlyMap<string, readonly number[]>;
+    /** Whether newer outputs are waiting for the user to accept them. */
+    pendingOutputs?: boolean;
+  }
+
+  const pendingOutputExecutions = new WeakMap<CodeCell, IStoredCellExecution>();
+
+  function isOutputChangingIOPubMessage(
+    msg: KernelMessage.IIOPubMessage
+  ): boolean {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+    switch (msg.header.msg_type) {
+      case 'execute_result':
+      case 'display_data':
+      case 'stream':
+      case 'error':
+      case 'clear_output':
+      case 'update_display_data':
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * The original execute() call targeted a previous cell widget instance, so it
+   * may not update executionCount/executionState on the resurrected one.
+   */
+  export function syncExecutionStateWithFuture(
+    cell: CodeCell,
+    future: Kernel.IShellFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >
+  ): void {
+    void future.done.then(
+      reply => {
+        if (!cell.isDisposed) {
+          // The future is authoritative for the prompt number; a snapshot
+          // taken before completion would be stale (still null). Setting a
+          // non-null execution count also flips the state back to 'idle'.
+          cell.model.executionCount = reply.content.execution_count;
+          cell.model.executionState = 'idle';
+        }
+      },
+      () => {
+        if (!cell.isDisposed) {
+          cell.model.executionState = 'idle';
+        }
+      }
+    );
   }
 
   /**
@@ -2718,14 +2817,27 @@ namespace Private {
   export function captureExecution(
     cell: CodeCell
   ): IStoredCellExecution | null {
+    const pending = pendingOutputExecutions.get(cell);
+    if (pending && !cell.outputArea.future) {
+      pending.outputs = cell.model.outputs.toJSON();
+      pending.displayIdMap = cell.outputArea.displayIdMap;
+      return pending;
+    }
     const future = cell.outputArea.detachFuture();
     if (!future) {
       return null;
     }
+    const displayIdMap = cell.outputArea.displayIdMap;
+    const outputs = cell.model.outputs.toJSON();
     let done = false;
-    void future.done.finally(() => {
-      done = true;
-    });
+    void future.done.then(
+      () => {
+        done = true;
+      },
+      () => {
+        done = true;
+      }
+    );
     const buffered: IBufferedMessage[] = [];
     future.onIOPub = msg => {
       buffered.push({ channel: 'iopub', msg });
@@ -2736,7 +2848,46 @@ namespace Private {
     future.onReply = msg => {
       buffered.push({ channel: 'reply', msg });
     };
-    return { cellId: cell.model.id, future, isDone: () => done, buffered };
+    return {
+      cellId: cell.model.id,
+      outputs,
+      future,
+      isDone: () => done,
+      buffered,
+      displayIdMap
+    };
+  }
+
+  /**
+   * Recapture cell execution before redoing a deletion or move.
+   */
+  export function captureRedoExecutions(
+    notebook: Notebook
+  ): IStoredCellExecution[] | null {
+    if (!notebook.model) {
+      return null;
+    }
+    const undoManager = (notebook.model.sharedModel as YNotebook).undoManager;
+    const stackItem = undoManager.redoStack[undoManager.redoStack.length - 1];
+    const source = stackItem?.meta.get(CELL_EXECUTION_SOURCE_META_KEY);
+    if (source !== 'delete' && source !== 'move') {
+      return null;
+    }
+    const storedExecutions = stackItem.meta.get(CELL_EXECUTION_META_KEY) as
+      | IStoredCellExecution[]
+      | undefined;
+    const recapturedExecutions: IStoredCellExecution[] = [];
+    storedExecutions?.forEach(({ cellId }) => {
+      const cell = notebook.widgets.find(w => w.model.id === cellId);
+      if (!(cell instanceof CodeCell)) {
+        return;
+      }
+      const recaptured = captureExecution(cell);
+      if (recaptured) {
+        recapturedExecutions.push(recaptured);
+      }
+    });
+    return recapturedExecutions.length === 0 ? null : recapturedExecutions;
   }
 
   /**
@@ -2746,8 +2897,18 @@ namespace Private {
    */
   export function restoreExecution(
     notebook: Notebook,
-    { cellId, future, isDone, buffered, outputs }: IStoredCellExecution
+    storedExecution: IStoredCellExecution
   ): void {
+    if (storedExecution.pendingOutputs) {
+      restoreFinishedDeleteExecution(
+        notebook,
+        storedExecution,
+        notebook.translator.load('jupyterlab')
+      );
+      return;
+    }
+    const { cellId, future, isDone, buffered, outputs, displayIdMap } =
+      storedExecution;
     const cell = notebook.widgets.find(w => w.model.id === cellId);
     if (!(cell instanceof CodeCell)) {
       return;
@@ -2765,7 +2926,7 @@ namespace Private {
     // whether or not the execution has already finished, so that final outputs
     // (or a pending stdin request) that arrived while detached are not lost
     // (e.g. if the kernel completed in the brief window during the undo).
-    cell.outputArea.reattachFuture(future);
+    cell.outputArea.reattachFuture(future, displayIdMap);
     for (const buf of buffered) {
       switch (buf.channel) {
         case 'iopub':
@@ -2779,6 +2940,7 @@ namespace Private {
           break;
       }
     }
+    buffered.length = 0;
     if (isDone()) {
       // The execution already finished (e.g. it completed or was interrupted
       // during the undo). The resurrected cell may carry a stale 'running'
@@ -2789,23 +2951,108 @@ namespace Private {
       // Restore the running state on the recreated cell widget.
       cell.model.executionState = 'running';
     }
-    const cellRef = cell;
-    void future.done.then(
-      reply => {
-        if (!cellRef.isDisposed) {
-          // The future is authoritative for the prompt number; a snapshot
-          // taken before completion would be stale (still null). Setting a
-          // non-null execution count also flips the state back to 'idle'.
-          cellRef.model.executionCount = reply.content.execution_count;
-          cellRef.model.executionState = 'idle';
-        }
-      },
-      () => {
-        if (!cellRef.isDisposed) {
-          cellRef.model.executionState = 'idle';
-        }
+    syncExecutionStateWithFuture(cell, future);
+  }
+
+  /**
+   * Restore a finished deleted cell without applying newer output by default.
+   */
+  export function restoreFinishedDeleteExecution(
+    notebook: Notebook,
+    storedExecution: IStoredCellExecution,
+    trans: TranslationBundle
+  ): void {
+    const { cellId, future } = storedExecution;
+    const cell = notebook.widgets.find(w => w.model.id === cellId);
+    if (!(cell instanceof CodeCell)) {
+      return;
+    }
+    if (
+      !JSONExt.deepEqual(storedExecution.outputs, cell.model.outputs.toJSON())
+    ) {
+      cell.model.outputs.fromJSON(storedExecution.outputs);
+    }
+    cell.outputArea.displayIdMap = storedExecution.displayIdMap;
+    cell.model.executionState = 'idle';
+    syncExecutionStateWithFuture(cell, future);
+    const hasOutputChanges = storedExecution.buffered.some(
+      buffered =>
+        buffered.channel === 'iopub' &&
+        isOutputChangingIOPubMessage(buffered.msg)
+    );
+    storedExecution.pendingOutputs = hasOutputChanges;
+    if (!hasOutputChanges) {
+      restoreExecution(notebook, storedExecution);
+      return;
+    }
+
+    pendingOutputExecutions.set(cell, storedExecution);
+    const model = cell.model;
+    let notificationId = '';
+    const dismiss = () => {
+      cell.disposed.disconnect(dismiss);
+      model.stateChanged.disconnect(onStateChanged);
+      Notification.manager.changed.disconnect(onNotificationChanged);
+      pendingOutputExecutions.delete(cell);
+      if (notificationId) {
+        Notification.dismiss(notificationId);
+      }
+    };
+    const onStateChanged = () => {
+      if (model.executionState === 'running') {
+        dismiss();
+        storedExecution.pendingOutputs = false;
+        storedExecution.buffered.length = 0;
+        future.dispose();
+      }
+    };
+    // A toast that times out stays in the notification center, so only closing
+    // the notification keeps the restored output and reconnects the future.
+    const onNotificationChanged = (
+      _: unknown,
+      change: Notification.IChange
+    ) => {
+      if (
+        change.type !== 'removed' ||
+        change.notification.id !== notificationId
+      ) {
+        return;
+      }
+      const restore = canRestore();
+      dismiss();
+      if (restore) {
+        storedExecution.pendingOutputs = false;
+        storedExecution.buffered.length = 0;
+        cell.outputArea.reattachFuture(future);
+      }
+    };
+    const canRestore = () =>
+      !cell.isDisposed &&
+      pendingOutputExecutions.get(cell) === storedExecution &&
+      (!cell.outputArea.future || cell.outputArea.future === future);
+    cell.disposed.connect(dismiss);
+    model.stateChanged.connect(onStateChanged);
+    notificationId = Notification.info(
+      trans.__('A restored cell has newer outputs available.'),
+      {
+        autoClose: NEW_OUTPUTS_NOTIFICATION_AUTO_CLOSE,
+        actions: [
+          {
+            label: trans.__('Show new outputs'),
+            displayType: 'accent',
+            callback: () => {
+              const restore = canRestore();
+              dismiss();
+              if (restore) {
+                storedExecution.pendingOutputs = false;
+                restoreExecution(notebook, storedExecution);
+              }
+            }
+          }
+        ]
       }
     );
+    Notification.manager.changed.connect(onNotificationChanged);
   }
 
   /**
@@ -3362,6 +3609,10 @@ namespace Private {
           lastItem?.meta.set(Private.CELL_EXECUTION_META_KEY, [
             storedExecution
           ]);
+          lastItem?.meta.set(
+            Private.CELL_EXECUTION_SOURCE_META_KEY,
+            'change-cell-type'
+          );
         }
       } else if (value === 'markdown' && headingLevel !== undefined) {
         notebookSharedModel.transact(() => {
@@ -3474,6 +3725,7 @@ namespace Private {
         const lastItem =
           undoManager.undoStack[undoManager.undoStack.length - 1];
         lastItem?.meta.set(Private.CELL_EXECUTION_META_KEY, storedExecutions);
+        lastItem?.meta.set(Private.CELL_EXECUTION_SOURCE_META_KEY, 'delete');
       }
       // Select the *first* interior cell not deleted or the cell
       // *after* the last selected cell.
