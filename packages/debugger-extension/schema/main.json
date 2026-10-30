@@ -38,6 +38,14 @@
       {
         "command": "debugger:copy-to-globals",
         "selector": ".jp-DebuggerVariables-body.jp-debuggerVariables-local"
+      },
+      {
+        "command": "debugger:open-kernel-source",
+        "selector": ".jp-DebuggerKernelSource-source"
+      },
+      {
+        "command": "debugger:copy-kernel-source-path",
+        "selector": ".jp-DebuggerKernelSource-source"
       }
     ]
   },

@@ -1167,69 +1167,44 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     }
 
-    app.contextMenu.addItem({
-      selector: '.jp-DebuggerKernelSource-source',
-      rank: 1,
-      command: CommandIDs.openKernelSource
-    });
-
-    app.contextMenu.addItem({
-      selector: '.jp-DebuggerKernelSource-source',
-      rank: 2,
-      command: CommandIDs.copyKernelSourcePath
-    });
-
-    function isKernelSourceNode(node: HTMLElement): boolean {
-      return node.classList.contains('jp-DebuggerKernelSource-source');
-    }
+    const getKernelSourcePath = (): string | null => {
+      const node = app.contextMenuHitTest(element =>
+        element.classList.contains('jp-DebuggerKernelSource-source')
+      );
+      return node?.title || null;
+    };
 
     commands.addCommand(CommandIDs.openKernelSource, {
-      label: 'Open',
-      execute: async () => {
-        const node = app.contextMenuHitTest(isKernelSourceNode);
-        if (!node) {
-          console.warn('No source node found from context menu');
-          return;
-        }
-
-        const path = node.getAttribute('title');
-        if (!path) {
-          console.warn('Source node missing title');
-          return;
-        }
-
-        const source = await service.getSource({
-          path
-        });
-
-        sourceViewer?.open(source);
-      },
+      label: trans.__('Open'),
+      caption: trans.__('Open the kernel source'),
+      isEnabled: () => !!sourceViewer,
       describedBy: {
         args: {
           type: 'object',
           properties: {}
+        }
+      },
+      execute: async () => {
+        const path = getKernelSourcePath();
+        if (path) {
+          await commands.execute(CommandIDs.openSource, { path });
         }
       }
     });
 
     commands.addCommand(CommandIDs.copyKernelSourcePath, {
-      label: 'Copy Path',
-      execute: async () => {
-        const node = app.contextMenuHitTest(isKernelSourceNode);
-        if (!node) {
-          console.warn('No source node found from context menu');
-          return;
-        }
-
-        const path = node.getAttribute('title');
-        if (!path) return;
-
-        await navigator.clipboard.writeText(path);
-      },
+      label: trans.__('Copy Path'),
+      caption: trans.__('Copy the path of the kernel source to the clipboard'),
       describedBy: {
         args: {
           type: 'object',
           properties: {}
+        }
+      },
+      execute: () => {
+        const path = getKernelSourcePath();
+        if (path) {
+          Clipboard.copyToSystem(path);
         }
       }
     });
