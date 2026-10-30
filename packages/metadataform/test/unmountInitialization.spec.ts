@@ -15,7 +15,9 @@ import { JupyterServer, sleep } from '@jupyterlab/testing';
 import { JSONExt } from '@lumino/coreutils';
 import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
-import type { FormWidget } from '../src/form';
+import type { IChangeEvent } from '@rjsf/core';
+import React from 'react';
+import { FormWidget } from '../src/form';
 import { MetadataFormWidget } from '../src';
 
 const server = new JupyterServer();
@@ -68,20 +70,40 @@ describe('metadataform initialization flushed by another root unmount', () => {
 
   function captureInitializationStacks(): string[] {
     const stacks: string[] = [];
-    const update = metadataForm.updateMetadata;
-    jest.spyOn(metadataForm, 'updateMetadata').mockImplementation((...args) => {
-      if ('/tags' in args[0]) {
-        const limit = Error.stackTraceLimit;
-        try {
-          Error.stackTraceLimit = 100;
-          stacks.push(new Error('Metadata initialization').stack ?? '');
-        } finally {
-          Error.stackTraceLimit = limit;
+    // Observe the initialization where RJSF reports it, before the form
+    // decides what to write.
+    const render = FormWidget.prototype.render;
+    function observedRender(this: FormWidget): JSX.Element | null {
+      const element = render.call(this);
+      if (element === null) return null;
+      return React.cloneElement(element, {
+        onChange: (event: IChangeEvent, id?: string) => {
+          if (id === undefined && '/tags' in (event.formData ?? {})) {
+            const limit = Error.stackTraceLimit;
+            try {
+              Error.stackTraceLimit = 100;
+              stacks.push(new Error('Metadata initialization').stack ?? '');
+            } finally {
+              Error.stackTraceLimit = limit;
+            }
+          }
+          element.props.onChange(event, id);
         }
-      }
-      update(...args);
-    });
+      });
+    }
+    jest
+      .spyOn(FormWidget.prototype, 'render')
+      .mockImplementation(observedRender);
+    jest.spyOn(metadataForm, 'updateMetadata');
     return stacks;
+  }
+
+  function expectNoInitializationWritten(): void {
+    const written = jest
+      .mocked(metadataForm.updateMetadata)
+      .mock.calls.map(([formData]) => formData)
+      .filter(formData => '/tags' in formData);
+    expect(written).toEqual([]);
   }
 
   function expectInitializationDuringUnmount(stacks: string[]): void {
@@ -126,9 +148,15 @@ describe('metadataform initialization flushed by another root unmount', () => {
     warmup.update();
     await sleep(100);
     await warmup.renderPromise;
-    expect(warmup.render()).not.toBeNull();
-    expect(notebookTools.isVisible).toBe(false);
-    expect(notebookTools.isAttached).toBe(false);
+    // The tests need the loaded validator and hidden notebook tools, as with
+    // a collapsed sidebar, which do not rebuild the form on changes.
+    if (
+      warmup.render() === null ||
+      notebookTools.isVisible ||
+      notebookTools.isAttached
+    ) {
+      throw new Error('Unexpected test setup');
+    }
 
     const source = panel.content.widgets[0].model;
     source.setMetadata('tags', ['not-in-handout']);
@@ -169,16 +197,7 @@ describe('metadataform initialization flushed by another root unmount', () => {
     expect(tracker.activeCell).toBe(victim);
 
     expectInitializationDuringUnmount(stacks);
-    expect(metadataForm.updateMetadata).toHaveBeenCalledWith(
-      expect.objectContaining({
-        '/tags': ['not-in-handout'],
-        '/editable': true,
-        '/deletable': true,
-        '/slideshow/slide_type': ''
-      }),
-      undefined,
-      source
-    );
+    expectNoInitializationWritten();
     expect(victim.model.metadata).toEqual(victimBefore);
     expect(source.model.metadata).toEqual(sourceBefore);
   });
@@ -199,12 +218,8 @@ describe('metadataform initialization flushed by another root unmount', () => {
 
     if (stacks.length) {
       expectInitializationDuringUnmount(stacks);
-      expect(metadataForm.updateMetadata).toHaveBeenCalledWith(
-        expect.objectContaining({ '/tags': ['not-in-handout'] }),
-        undefined,
-        source
-      );
     }
+    expectNoInitializationWritten();
     expect(source.model.metadata).toEqual(before);
   });
 });

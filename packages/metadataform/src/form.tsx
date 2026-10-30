@@ -6,6 +6,7 @@
  */
 
 import { ReactWidget } from '@jupyterlab/apputils';
+import type { NotebookTools } from '@jupyterlab/notebook';
 import { FormComponent } from '@jupyterlab/ui-components';
 import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { PromiseDelegate } from '@lumino/coreutils';
@@ -34,6 +35,10 @@ export class FormWidget extends ReactWidget {
     const rootId =
       (props.uiSchema['ui:rootFieldId'] as unknown as string) || this._idPrefix;
     this._fields = Private.createFields(rootId);
+    // The cell this form is built for. Captured at construction time so a
+    // stale form can be recognized later.
+    this._sourceCell =
+      props.metadataFormWidget.notebookTools?.activeCell ?? null;
     if (Private.getValidator() === null) {
       void Private.ensureValidator().then(() => {
         if (!this.isDisposed) {
@@ -52,9 +57,17 @@ export class FormWidget extends ReactWidget {
     if (validator === null) {
       return null;
     }
+    const updateMetadata = (
+      formData: ReadonlyPartialJSONObject,
+      reload?: boolean
+    ): void => {
+      const owner = this._props.metadataFormWidget;
+      if (owner.isDisposed || owner.form !== this) return;
+      owner.updateMetadata(formData, reload, this._sourceCell);
+    };
     const formContext = {
       defaultFormData: this._props.settings.default(),
-      updateMetadata: this._props.metadataFormWidget.updateMetadata
+      updateMetadata
     };
     return (
       <FormComponent
@@ -71,7 +84,7 @@ export class FormWidget extends ReactWidget {
           // The values that the form fills in itself come without an id.
           if (id === undefined) return;
           const formData = e.formData || {};
-          this._props.metadataFormWidget.updateMetadata({ [id]: formData[id] });
+          updateMetadata({ [id]: formData[id] });
         }}
         compact={true}
         showModifiedFromDefault={this._props.showModified}
@@ -84,6 +97,7 @@ export class FormWidget extends ReactWidget {
   private _props: MetadataForm.IProps;
   private _idPrefix: string;
   private _fields: { SchemaField: Field; NullField: Field };
+  private _sourceCell: NotebookTools['activeCell'] = null;
 }
 
 /**

@@ -228,6 +228,9 @@ describe('metadataform/form simple', () => {
     const metadataForm = await buildForm();
     const content = tracker.currentWidget!.content;
     const firstCell = content.widgets[0];
+    const input = metadataForm.node.querySelector<HTMLInputElement>(
+      'input[id$="_/cell-metadata"]'
+    )!;
 
     // Render the form element to grab the wired-up callbacks.
     const element = metadataForm.form!.render();
@@ -239,21 +242,61 @@ describe('metadataform/form simple', () => {
     const secondCell = tracker.activeCell!;
     expect(secondCell).not.toBe(firstCell);
 
-    // The RJSF onChange path must not write to the newly active cell.
-    props.onChange({ formData: { '/cell-metadata': 'stale onchange' } });
+    // A change in the form must not write to the newly active cell.
+    await typeInto(input, 'stale onchange');
     expect(secondCell.model!.getMetadata('cell-metadata')).toBeUndefined();
 
     // The custom-field formContext path is guarded the same way.
-    props.formContext.updateMetadata(
-      { '/cell-metadata': 'stale field' },
-      true
-    );
+    props.formContext.updateMetadata({ '/cell-metadata': 'stale field' }, true);
     expect(secondCell.model!.getMetadata('cell-metadata')).toBeUndefined();
 
     // Both paths write again once the original cell is active.
     content.activeCellIndex = 0;
-    props.onChange({ formData: { '/cell-metadata': 'fresh value' } });
+    await typeInto(input, 'fresh value');
     expect(firstCell.model!.getMetadata('cell-metadata')).toBe('fresh value');
+  });
+
+  it('should not update metadata from an obsolete form for the same cell', async () => {
+    const model = tracker.activeCell!.model;
+    model.setMetadata('cell-metadata', 'before');
+    const metadataForm = await buildForm();
+    const obsolete = metadataForm.form!;
+    const obsoleteInput = obsolete.node.querySelector<HTMLInputElement>(
+      'input[id$="_/cell-metadata"]'
+    )!;
+    const obsoleteContext = obsolete.render()!.props.formContext;
+    try {
+      // A newer form replaces it for the same cell.
+      model.setMetadata('cell-metadata', 'newer');
+      metadataForm.updateMetadata({}, true);
+      const current = metadataForm.form!;
+      expect(current).not.toBe(obsolete);
+      current.update();
+      await sleep(100);
+      await current.renderPromise;
+
+      // Neither a field nor the custom-field context of the obsolete form writes.
+      await typeInto(obsoleteInput, 'obsolete input');
+      expect(model.getMetadata('cell-metadata')).toBe('newer');
+      obsoleteContext.updateMetadata(
+        { '/cell-metadata': 'obsolete custom' },
+        true
+      );
+      expect(model.getMetadata('cell-metadata')).toBe('newer');
+      expect(metadataForm.form).toBe(current);
+
+      // Both paths of the current form write.
+      const currentInput = current.node.querySelector<HTMLInputElement>(
+        'input[id$="_/cell-metadata"]'
+      )!;
+      await typeInto(currentInput, 'current input');
+      expect(model.getMetadata('cell-metadata')).toBe('current input');
+      const currentContext = current.render()!.props.formContext;
+      currentContext.updateMetadata({ '/cell-metadata': 'current custom' });
+      expect(model.getMetadata('cell-metadata')).toBe('current custom');
+    } finally {
+      obsolete.dispose();
+    }
   });
 
   it('should update notebook metadata', async () => {
