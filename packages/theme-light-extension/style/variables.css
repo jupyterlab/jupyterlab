@@ -264,7 +264,7 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* Cell specific styles */
 
-  --jp-cell-padding: 5px;
+  --jp-cell-padding: 6px;
   --jp-cell-collapser-width: 8px;
   --jp-cell-collapser-min-height: 20px;
   --jp-cell-collapser-not-active-hover-opacity: 0.6;
