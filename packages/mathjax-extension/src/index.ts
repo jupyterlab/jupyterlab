@@ -107,6 +107,10 @@ export class MathJaxTypesetter implements ILatexTypesetter {
       return;
     }
 
+    // MathJax measures the surrounding font while rendering, so rendering
+    // a node without a layout box bakes in the fallback size.
+    await Private.waitUntilVisible(node);
+
     this._mathDocument.options.elements = [node];
     // `clear()` empties the document's math list before rendering, so that
     // memory retained per math expression (most notably the compiled internal
@@ -440,6 +444,102 @@ namespace Private {
       if (anchor.target !== '_blank') {
         anchor.target = '_blank';
       }
+    });
+  }
+
+  /**
+   * Whether `node` is hidden in a way that leaves MathJax without a
+   * measurable font size: every way Lumino hides a widget, checked on
+   * the node and its ancestors.
+   */
+  function isHidden(node: HTMLElement): boolean {
+    let element: HTMLElement | null = node;
+    while (element) {
+      if (element.classList.contains('lm-mod-hidden')) {
+        return true;
+      }
+      const style = window.getComputedStyle(element);
+      if (
+        style.display === 'none' ||
+        style.getPropertyValue('content-visibility') === 'hidden' ||
+        element.style.contentVisibility === 'hidden' ||
+        element.style.transform === 'scale(0)' ||
+        hasZeroScale(style.transform)
+      ) {
+        return true;
+      }
+      element = element.parentElement;
+    }
+    return false;
+  }
+
+  /**
+   * Whether a computed `transform` value scales the element to zero size.
+   */
+  function hasZeroScale(transform: string): boolean {
+    const numbers = transform.match(/-?\d*\.?\d+(?:e-?\d+)?/g)?.map(Number);
+    if (!numbers) {
+      return false;
+    }
+    if (numbers.length === 6) {
+      return numbers.slice(0, 4).every(value => value === 0);
+    }
+    if (numbers.length === 16) {
+      return numbers[0] === 0 && numbers[5] === 0;
+    }
+    return false;
+  }
+
+  /**
+   * Wait until `node` is no longer hidden (see {@link isHidden}).
+   *
+   * The `IntersectionObserver` reports the node once it is laid out again;
+   * the `MutationObserver` reports the style and class changes which show
+   * it, including when it is still outside the viewport. A node which is
+   * not attached yet is typeset immediately: it has no layout box either
+   * way, and attaching it re-typesets it through `onAfterAttach`.
+   */
+  export function waitUntilVisible(node: HTMLElement): Promise<void> {
+    if (
+      typeof IntersectionObserver === 'undefined' &&
+      typeof MutationObserver === 'undefined'
+    ) {
+      return Promise.resolve();
+    }
+    if (!node.isConnected || !isHidden(node)) {
+      return Promise.resolve();
+    }
+    return new Promise<void>(resolve => {
+      let settled = false;
+      let intersectionObserver: IntersectionObserver | undefined;
+      let mutationObserver: MutationObserver | undefined;
+      const check = () => {
+        if (!settled && (!node.isConnected || !isHidden(node))) {
+          settled = true;
+          intersectionObserver?.disconnect();
+          mutationObserver?.disconnect();
+          resolve();
+        }
+      };
+      if (typeof IntersectionObserver !== 'undefined') {
+        intersectionObserver = new IntersectionObserver(check, {
+          threshold: 0
+        });
+        intersectionObserver.observe(node);
+      }
+      if (typeof MutationObserver !== 'undefined') {
+        mutationObserver = new MutationObserver(check);
+        let element: HTMLElement | null = node;
+        while (element) {
+          mutationObserver.observe(element, {
+            attributes: true,
+            attributeFilter: ['style', 'class'],
+            childList: true
+          });
+          element = element.parentElement;
+        }
+      }
+      check();
     });
   }
 }

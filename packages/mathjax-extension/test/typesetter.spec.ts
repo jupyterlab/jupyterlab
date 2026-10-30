@@ -147,10 +147,13 @@ describe('@jupyterlab/mathjax-extension', () => {
         {
           name: 'content-visibility: hidden',
           hide: (wrapper: HTMLElement) => {
-            wrapper.style.setProperty('content-visibility', 'hidden');
+            // Set the property directly, as Lumino does; jsdom discards it
+            // from the serialized style, so `setProperty` alone is not
+            // observable here.
+            wrapper.style.contentVisibility = 'hidden';
           },
           show: (wrapper: HTMLElement) => {
-            wrapper.style.removeProperty('content-visibility');
+            wrapper.style.contentVisibility = '';
           }
         }
       ])(
