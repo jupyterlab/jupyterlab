@@ -3020,6 +3020,14 @@ function addCommands(
     return Private.isEnabledAndHeadingSelected(shell, tracker);
   };
 
+  const hasNonEditableSelected = (): boolean => {
+    return (
+      tracker.currentWidget?.content.selectedCells.some(
+        cell => cell.model.getMetadata('editable') === false
+      ) ?? false
+    );
+  };
+
   const executePaste = async (
     notebook: Notebook,
     mode: 'below' | 'above' | 'replace'
@@ -3113,6 +3121,9 @@ function addCommands(
     commands.notifyCommandChanged(CommandIDs.moveDown);
     commands.notifyCommandChanged(CommandIDs.selectLastModifiedCell);
     commands.notifyCommandChanged(CommandIDs.selectNextModifiedCell);
+    commands.notifyCommandChanged(CommandIDs.copy);
+    commands.notifyCommandChanged(CommandIDs.cut);
+    commands.notifyCommandChanged(CommandIDs.duplicateBelow);
   });
 
   tracker.widgetAdded.connect((_, panel) => {
@@ -3751,8 +3762,18 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? cutIcon : undefined),
-    isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
+    isEnabled: args => {
+      if (
+        (settings?.get('preventCopyPasteForNonEditable')
+          .composite as boolean) &&
+        hasNonEditableSelected()
+      ) {
+        return false;
+      }
+      return (
+        (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker)
+      );
+    },
     isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
@@ -3801,7 +3822,16 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? copyIcon : undefined),
-    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    isEnabled: args => {
+      if (
+        (settings?.get('preventCopyPasteForNonEditable')
+          .composite as boolean) &&
+        hasNonEditableSelected()
+      ) {
+        return false;
+      }
+      return args.toolbar ? true : isEnabled();
+    },
     describedBy: {
       args: {
         type: 'object',
@@ -3931,8 +3961,18 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? duplicateIcon : undefined),
-    isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker),
+    isEnabled: args => {
+      if (
+        (settings?.get('preventCopyPasteForNonEditable')
+          .composite as boolean) &&
+        hasNonEditableSelected()
+      ) {
+        return false;
+      }
+      return (
+        (args.toolbar ? true : isEnabled()) && !Private.isViewOnly(tracker)
+      );
+    },
     isVisible: () => !Private.isViewOnly(tracker),
     describedBy: {
       args: {
