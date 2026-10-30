@@ -138,7 +138,6 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
 /* Shortcut Item Style */
 .jp-Shortcuts-Cell {
   padding: 6px 12px;
-  display: table-cell;
   width: 20%;
   vertical-align: middle;
 }
@@ -201,23 +200,19 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
 }
 
 .jp-Shortcuts-Row {
-  width: 100%;
-  display: table-row;
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
   vertical-align: middle;
   background-color: var(--jp-layout-color0);
+}
+
+.jp-Shortcuts-ShortcutList tbody .jp-Shortcuts-Cell {
+  border-top: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 .jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut {
   background-color: var(--jp-layout-color2);
 }
 
-.jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut
-  .jp-Shortcuts-Cell:first-of-type {
-  display: none;
-}
-
-.jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell:nth-child(2) {
+.jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell:first-of-type {
   width: 40%;
 }
 
@@ -235,6 +230,11 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
 
 .jp-Shortcuts-RowWithConflict {
   height: 45px;
+  position: relative;
+}
+
+.jp-Shortcuts-RowWithConflict > .jp-Shortcuts-Cell {
+  padding: 0;
   position: relative;
 }
 
@@ -319,13 +319,37 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
 /* Shortcut List Style */
 .jp-Shortcuts-ShortcutList {
   width: 100%;
-  display: table;
-  border-collapse: collapse;
+  max-width: 1600px;
+  /* separate + spacing 0: sticky header borders/shadows behave predictably */
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  border: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
+/* No nested overflow: the settings panel (.jp-SettingsPanel) is the scrollport. */
 .jp-Shortcuts-ShortcutListContainer {
-  overflow-y: scroll;
-  border: var(--jp-border-width) solid var(--jp-border-color1);
+  overflow: visible;
+}
+
+.jp-Shortcuts-ShortcutList thead th.jp-Shortcuts-Cell {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+  font-weight: bold;
+  font-size: var(--jp-ui-font-size1);
+  padding-top: 10px;
+  padding-bottom: 10px;
+  text-align: left;
+  /* box-shadow sticks with the header; avoids collapsed-border quirks */
+  box-shadow: 0 var(--jp-border-width) 0 0 var(--jp-border-color1);
+}
+
+.jp-Shortcuts-ShortcutList thead th.jp-Shortcuts-Cell button {
+  /* To compensate for the padding */
+  margin-left: -5px;
 }
 
 /* Shortcut Title Item Style */
@@ -338,6 +362,7 @@ button.jp-Shortcuts-Header {
   font-weight: bold;
   text-align: left;
   cursor: pointer;
+  color: inherit;
 }
 
 .jp-Shortcuts-SortButton {
@@ -351,12 +376,12 @@ button.jp-Shortcuts-Header {
   display: block;
 }
 
-button.jp-Shortcuts-Header:focus-visible {
-  outline: var(--jp-focus-outline-width) solid var(--jp-focus-outline-color);
+.jp-Shortcuts-CurrentHeader .jp-icon3[fill] {
+  fill: var(--jp-ui-font-color1);
 }
 
-.jp-Shortcuts-CurrentHeader .jp-icon3[fill] {
-  fill: var(--jp-ui-font-color0);
+button.jp-Shortcuts-Header:focus-visible {
+  outline: var(--jp-focus-outline-width) solid var(--jp-focus-outline-color);
 }
 
 /* Shortcut UI Style */
@@ -380,6 +405,7 @@ button.jp-Shortcuts-Header:focus-visible {
   box-sizing: border-box;
   font-size: var(--jp-ui-font-size1);
   background-color: var(--jp-layout-color0);
+  margin-bottom: 24px;
 }
 
 .jp-Shortcuts-TopNav > .jp-FilterBox {
@@ -422,20 +448,6 @@ button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
 
 .jp-Shortcuts-AddShortcut.jp-mod-styled:focus-visible {
   outline-offset: 1px;
-}
-
-.jp-Shortcuts-HeaderRowContainer {
-  padding-right: 14px;
-}
-
-.jp-Shortcuts-HeaderRow {
-  font-weight: bold;
-  font-size: var(--jp-ui-font-size1);
-  background-color: var(--jp-layout-color0);
-  width: 100%;
-  z-index: 1;
-  display: table;
-  padding: 10px 0;
 }
 
 .jp-Shortcuts-CustomOptionsDialogBody {

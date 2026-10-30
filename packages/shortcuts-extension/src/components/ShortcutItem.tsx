@@ -160,7 +160,7 @@ export class ShortcutItem extends React.Component<
 
   getCategoryCell(): JSX.Element {
     return (
-      <div className="jp-Shortcuts-Cell">{this.props.shortcut.category}</div>
+      <td className="jp-Shortcuts-Cell">{this.props.shortcut.category}</td>
     );
   }
 
@@ -168,7 +168,7 @@ export class ShortcutItem extends React.Component<
     if (this.props.newShortcutUtils) {
       const filteredShortcuts = this._getFilteredCommands();
       return (
-        <div className="jp-Shortcuts-Cell">
+        <td className="jp-Shortcuts-Cell" colSpan={2}>
           <HTMLSelect
             value={this.props.shortcut.command}
             options={[
@@ -188,18 +188,17 @@ export class ShortcutItem extends React.Component<
               );
             }}
           />
-        </div>
-      );
-    } else {
-      return (
-        <div className="jp-Shortcuts-Cell">
-          <div className="jp-label">
-            {this.props.shortcut.label ??
-              this._trans.__('(Command label missing)')}
-          </div>
-        </div>
+        </td>
       );
     }
+    return (
+      <td className="jp-Shortcuts-Cell">
+        <div className="jp-label">
+          {this.props.shortcut.label ??
+            this._trans.__('(Command label missing)')}
+        </div>
+      </td>
+    );
   }
 
   getResetShortCutLink(): JSX.Element {
@@ -235,7 +234,7 @@ export class ShortcutItem extends React.Component<
       : this._trans.__('Shortcut details');
 
     return (
-      <div className="jp-Shortcuts-Cell">
+      <td className="jp-Shortcuts-Cell">
         {!this.props.newShortcutUtils && (
           <div className="jp-Shortcuts-SourceCell">
             {allDefault ? this._trans.__('Default') : this._trans.__('Custom')}
@@ -303,15 +302,15 @@ export class ShortcutItem extends React.Component<
             </button>
           </>
         )}
-      </div>
+      </td>
     );
   }
 
   getOptionalSelectorCell(): JSX.Element | null {
     return this.props.showSelectors ? (
-      <div className="jp-Shortcuts-Cell">
+      <td className="jp-Shortcuts-Cell">
         <div className="jp-selector">{this.props.shortcut.selector}</div>
-      </div>
+      </td>
     ) : null;
   }
 
@@ -507,7 +506,7 @@ export class ShortcutItem extends React.Component<
 
   getShortCutsCell(nonEmptyBindings: IKeybinding[]): JSX.Element {
     return (
-      <div className="jp-Shortcuts-Cell">
+      <td className="jp-Shortcuts-Cell">
         <div
           className={this.getClassNameForShortCuts(nonEmptyBindings)}
           ref={this._shortcutCellRef}
@@ -524,7 +523,7 @@ export class ShortcutItem extends React.Component<
             this.getAddLink()}
           {this.getInputBoxWhenToggled()}
         </div>
-      </div>
+      </td>
     );
   }
 
@@ -535,29 +534,32 @@ export class ShortcutItem extends React.Component<
     if (conflicts.length === 0) {
       return <></>;
     }
+    const columnCount = this.props.showSelectors ? 5 : 4;
     return (
-      <div className="jp-Shortcuts-Row jp-Shortcuts-RowWithConflict">
-        <div className="jp-Shortcuts-ConflictContainer">
-          {conflicts.map(conflict => {
-            const key =
-              conflict.keys.join(' ') +
-              '_' +
-              conflict.conflictsWith.map(target => target.id).join('');
-            return (
-              <div className="jp-Shortcuts-Conflict" key={key}>
-                <div className="jp-Shortcuts-ErrorMessage">
-                  {this._trans.__(
-                    'Shortcut already in use by %1.',
-                    conflict.conflictsWith
-                      .map(target => target.label ?? target.command)
-                      .join(', ')
-                  )}
+      <tr className="jp-Shortcuts-Row jp-Shortcuts-RowWithConflict">
+        <td className="jp-Shortcuts-Cell" colSpan={columnCount}>
+          <div className="jp-Shortcuts-ConflictContainer">
+            {conflicts.map(conflict => {
+              const key =
+                conflict.keys.join(' ') +
+                '_' +
+                conflict.conflictsWith.map(target => target.id).join('');
+              return (
+                <div className="jp-Shortcuts-Conflict" key={key}>
+                  <div className="jp-Shortcuts-ErrorMessage">
+                    {this._trans.__(
+                      'Shortcut already in use by %1.',
+                      conflict.conflictsWith
+                        .map(target => target.label ?? target.command)
+                        .join(', ')
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+              );
+            })}
+          </div>
+        </td>
+      </tr>
     );
   }
 
@@ -628,18 +630,18 @@ export class ShortcutItem extends React.Component<
   render(): JSX.Element {
     return (
       <>
-        <div
+        <tr
           className={`jp-Shortcuts-Row${
             this.props.newShortcutUtils ? ' jp-Shortcuts-Row-newShortcut' : ''
           }`}
           data-shortcut={this.props.shortcut.id}
         >
-          {this.getCategoryCell()}
+          {!this.props.newShortcutUtils && this.getCategoryCell()}
           {this.getLabelCell()}
           {this.getShortCutsCell(this._nonEmptyBindings)}
           {this.getSourceCell()}
           {this.getOptionalSelectorCell()}
-        </div>
+        </tr>
         {this.getConflicts()}
       </>
     );
