@@ -33,8 +33,7 @@ test.describe('Internationalization', () => {
     await page.sidebar.setWidth();
 
     // Check menu
-    await page.click('text=Settings');
-    await page.click('.lm-Menu ul[role="menu"] >> text=Language');
+    const languageMenu = (await page.menu.openLocator('Settings>Language'))!;
 
     expect
       .soft(
@@ -45,7 +44,7 @@ test.describe('Internationalization', () => {
       .toMatchSnapshot('language_settings.png');
 
     // Prompt user confirmation
-    await page.click('#jp-mainmenu-settings-language >> text=Chinese');
+    await languageMenu.getByText('Chinese').click();
 
     expect
       .soft(
@@ -86,6 +85,20 @@ test.describe('Internationalization', () => {
     page
   }) => {
     let requestedLanguage: string | undefined;
+
+    // Fake the server locale as Chinese, as the default language of an
+    // English server is not requested
+    await page.route('**/*', async (route, request) => {
+      if (!request.isNavigationRequest()) {
+        return route.fallback();
+      }
+      const response = await route.fetch();
+      const body = (await response.text()).replace(
+        /"serverLocale": "[^"]*"/,
+        '"serverLocale": "zh_CN"'
+      );
+      return route.fulfill({ response, body });
+    });
 
     await page.route(galata.Routes.translations, async (route, request) => {
       const language = galata.Routes.translations.exec(request.url())?.groups
