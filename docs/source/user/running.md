@@ -38,6 +38,9 @@ The recently closed and currently open documents can be searched in the
 modal view, which can be opened using a keyboard shortcut,
 or by clicking the [↗] icon in the running sidebar.
 
+Terminal entries display the last {ref}`terminal title <terminal-titles>` observed
+in the current workspace, including after closing their tabs or reloading the page.
+
 ```{image} ../images/running-modal.png
 :align: center
 :alt: The modal running dialog

@@ -78,6 +78,37 @@ describe('terminal/index', () => {
       it('should create a terminal widget', () => {
         expect(widget).toBeInstanceOf(Terminal);
       });
+
+      it('should preserve a restored title until the terminal sets a new one', async () => {
+        const restoredSession = await manager.startNew();
+        const restored = new Terminal(restoredSession, {
+          autoFit: false,
+          initialTitle: 'Restored title'
+        });
+        try {
+          await restored.ready;
+          if (restoredSession.connectionStatus !== 'connected') {
+            await testEmission(restoredSession.connectionStatusChanged, {
+              find: (_, status) => status === 'connected'
+            });
+          }
+          expect(restored.title.label).toBe('Restored title');
+
+          const title = `Terminal ${restoredSession.name}`;
+          const changed = testEmission(restored.title.changed, {
+            find: sender => sender.label === title
+          });
+          restoredSession.send({
+            type: 'stdin',
+            content: [`printf '\\033]2;${title}\\007'\r`]
+          });
+          await changed;
+          expect(restored.title.label).toBe(title);
+        } finally {
+          restored.dispose();
+          await restoredSession.shutdown();
+        }
+      });
     });
 
     describe('#session', () => {
