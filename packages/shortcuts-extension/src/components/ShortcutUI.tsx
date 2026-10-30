@@ -32,8 +32,6 @@ type ShortcutOverride = CommandRegistry.IKeyBindingOptions & {
 /** Props for ShortcutUI component */
 export interface IShortcutUIProps {
   external: IShortcutUI.IExternalBundle;
-  height: number;
-  width: number;
 }
 
 /** State for ShortcutUI component */
@@ -527,24 +525,9 @@ export class ShortcutUI
           toggleSelectors={this.toggleSelectors}
           showSelectors={this.state.showSelectors}
           showAddCommand={this.state.showAddCommand}
-          updateSort={this.updateSort}
-          currentSort={this.state.currentSort}
-          sortDirection={this.state.sortDirection}
           toggleAddCommandRow={this.toggleAddCommandRow}
-          width={this.props.width}
           translator={this.props.external.translator}
         />
-        {this.state.showAddCommand && (
-          <ShortcutItem
-            {...this._newShortcutItem}
-            shortcut={this.state.newShortcut}
-            newShortcutUtils={{
-              searchQuery: this.state.searchQuery,
-              updateCommand: this._newShortcutItem.updateCommand,
-              saveShortcut: this.saveNewShortcut
-            }}
-          />
-        )}
         <ShortcutList
           shortcuts={this.state.filteredShortcutList}
           resetKeybindings={this.resetKeybindings}
@@ -566,8 +549,25 @@ export class ShortcutUI
               return [];
             }
           }}
-          height={this.props.height}
           external={this.props.external}
+          updateSort={this.updateSort}
+          currentSort={this.state.currentSort}
+          sortDirection={this.state.sortDirection}
+          translator={this.props.external.translator}
+          newShortcutRow={
+            this.state.showAddCommand ? (
+              <ShortcutItem
+                key="new-shortcut"
+                {...this._newShortcutItem}
+                shortcut={this.state.newShortcut}
+                newShortcutUtils={{
+                  searchQuery: this.state.searchQuery,
+                  updateCommand: this._newShortcutItem.updateCommand,
+                  saveShortcut: this.saveNewShortcut
+                }}
+              />
+            ) : null
+          }
         />
       </div>
     );

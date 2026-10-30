@@ -11,7 +11,6 @@ import {
 } from '@jupyterlab/ui-components';
 import * as React from 'react';
 
-import { ShortcutTitleItem } from './ShortcutTitleItem';
 import type { IShortcutUI } from '../types';
 
 export interface IAdvancedOptionsProps {
@@ -64,40 +63,13 @@ export interface ITopNavProps {
   toggleSelectors: IShortcutUI['toggleSelectors'];
   showSelectors: boolean;
   showAddCommand: boolean;
-  updateSort: IShortcutUI['updateSort'];
-  currentSort: IShortcutUI.ColumnId;
-  sortDirection: IShortcutUI.SortDirection;
   toggleAddCommandRow: IShortcutUI['toggleAddCommandRow'];
-  width: number;
   translator: ITranslator;
 }
 
 /** React component for top navigation */
 export class TopNav extends React.Component<ITopNavProps> {
-  constructor(props: ITopNavProps) {
-    super(props);
-  }
-
-  getShortCutTitleItem(title: string, columnId: IShortcutUI.ColumnId) {
-    const isActive = columnId === this.props.currentSort;
-    return (
-      <th
-        scope="col"
-        className="jp-Shortcuts-Cell"
-        aria-sort={isActive ? this.props.sortDirection : undefined}
-      >
-        <ShortcutTitleItem
-          title={title}
-          updateSort={this.props.updateSort}
-          active={this.props.currentSort}
-          sortDirection={this.props.sortDirection}
-          columnId={columnId}
-        />
-      </th>
-    );
-  }
-
-  render() {
+  render(): JSX.Element {
     const trans = this.props.translator.load('jupyterlab');
     return (
       <div className="jp-Shortcuts-Top">
@@ -117,18 +89,6 @@ export class TopNav extends React.Component<ITopNavProps> {
             toggleAddCommandRow={this.props.toggleAddCommandRow}
             translator={this.props.translator}
           />
-        </div>
-        <div className="jp-Shortcuts-HeaderRowContainer">
-          <div className="jp-Shortcuts-HeaderRow">
-            {this.getShortCutTitleItem(trans.__('Category'), 'category')}
-            {this.getShortCutTitleItem(trans.__('Command'), 'command')}
-            <th scope="col" className="jp-Shortcuts-Cell">
-              <div className="title-div">{trans.__('Shortcut')}</div>
-            </th>
-            {this.getShortCutTitleItem(trans.__('Source'), 'source')}
-            {this.props.showSelectors &&
-              this.getShortCutTitleItem(trans.__('Selectors'), 'selector')}
-          </div>
         </div>
       </div>
     );
