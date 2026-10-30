@@ -3904,6 +3904,16 @@
     }
   },
   {
+    "id": "mainmenu:toggle-collapsed",
+    "label": "Collapse Main Menu",
+    "caption": "Collapse the main menu into a single menu button",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "markdownviewer:copy",
     "label": "Copy",
     "caption": "",

@@ -248,8 +248,9 @@ export class MenuHelper {
 
           // Fetch a new list of menus, and fetch the last one.
           // We are assuming the last menu is the most recently opened.
+          // Pin its index: `last()` would move to the next submenu opened.
           const newMenus = page.locator('.lm-Menu');
-          subMenu = newMenus.last();
+          subMenu = newMenus.nth((await newMenus.count()) - 1);
         }
       }
     }

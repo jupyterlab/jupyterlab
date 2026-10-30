@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, test } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 const menuPaths = [
@@ -66,6 +66,12 @@ test.describe('General Tests', () => {
     expect(await page.menu.isAnyOpen()).toEqual(false);
   });
 
+  test('Click a menu item in a nested submenu', async ({ page }) => {
+    await page.goto();
+    await page.menu.clickMenuItem('View>Appearance>Activity Bar Position>Top');
+    await expect(page.locator('.jp-SideBar[data-side="top"]')).toHaveCount(2);
+  });
+
   test('Export menu shows guidance when no format is available', async ({
     page
   }) => {
@@ -93,6 +99,107 @@ test.describe('General Tests', () => {
       })
     ).toHaveCount(1);
     await expect(exportMenu!.getByRole('menuitem')).toHaveCount(1);
+  });
+});
+
+test.describe('Collapsed main menu', () => {
+  test('Collapse the main menu into a menu button', async ({ page }) => {
+    await page.menu.clickMenuItem('View>Appearance>Collapse Main Menu');
+
+    await expect(page.locator('#jp-MainMenu')).toBeHidden();
+    await expect(
+      page.getByRole('menuitem', { name: 'Main Menu', exact: true })
+    ).toBeVisible();
+  });
+
+  test('Open the menu button', async ({ page }) => {
+    await page.menu.clickMenuItem('View>Appearance>Collapse Main Menu');
+
+    const menu = await page.menu.openLocator('Main Menu');
+    const buttonBox = (await page
+      .getByRole('menuitem', { name: 'Main Menu', exact: true })
+      .boundingBox())!;
+    const menuBox = (await menu!.boundingBox())!;
+    expect(
+      await page.screenshot({
+        clip: {
+          x: buttonBox.x,
+          y: buttonBox.y,
+          width: menuBox.x + menuBox.width - buttonBox.x,
+          height: menuBox.y + menuBox.height - buttonBox.y
+        }
+      })
+    ).toMatchSnapshot('opened-collapsed-main-menu.png');
+  });
+
+  test('Open a menu from the menu button', async ({ page }) => {
+    await page.menu.clickMenuItem('View>Appearance>Collapse Main Menu');
+
+    await page.menu.openLocator('Main Menu>File');
+    expect(await page.menu.isOpen('Main Menu>File')).toBeTruthy();
+  });
+
+  test('Expand the main menu from the menu button', async ({ page }) => {
+    await page.menu.clickMenuItem('View>Appearance>Collapse Main Menu');
+    await page.menu.clickMenuItem(
+      'Main Menu>View>Appearance>Collapse Main Menu'
+    );
+
+    await expect(page.locator('#jp-MainMenu')).toBeVisible();
+    await expect(
+      page.getByRole('menuitem', { name: 'Main Menu', exact: true })
+    ).toBeHidden();
+  });
+
+  test('Keep the main menu collapsed after reload', async ({ page }) => {
+    await Promise.all([
+      // Wait for the setting to be saved
+      page.waitForResponse(
+        response =>
+          response.request().method() === 'PUT' &&
+          /api\/settings\/@jupyterlab\/mainmenu-extension:menu-bar/.test(
+            response.request().url()
+          )
+      ),
+      page.menu.clickMenuItem('View>Appearance>Collapse Main Menu')
+    ]);
+
+    await page.reload();
+
+    await expect(page.locator('#jp-MainMenu')).toBeHidden();
+    await expect(
+      page.getByRole('menuitem', { name: 'Main Menu', exact: true })
+    ).toBeVisible();
+  });
+});
+
+test.describe('Automatically collapsed main menu', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/mainmenu-extension:menu-bar': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/mainmenu-extension:menu-bar'],
+        collapse: 'auto'
+      }
+    }
+  });
+
+  test('Collapse the main menu when it does not fit', async ({ page }) => {
+    await expect(page.locator('#jp-MainMenu')).toBeVisible();
+
+    await page.setViewportSize({ width: 400, height: 768 });
+
+    await expect(page.locator('#jp-MainMenu')).toBeHidden();
+    await expect(
+      page.getByRole('menuitem', { name: 'Main Menu', exact: true })
+    ).toBeVisible();
+
+    await page.setViewportSize({ width: 1024, height: 768 });
+
+    await expect(page.locator('#jp-MainMenu')).toBeVisible();
+    await expect(
+      page.getByRole('menuitem', { name: 'Main Menu', exact: true })
+    ).toBeHidden();
   });
 });
 

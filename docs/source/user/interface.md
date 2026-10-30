@@ -61,6 +61,12 @@ default menus are:
 {ref}`JupyterLab extensions <user-extensions>` can also create new top-level menus in the menu
 bar.
 
+To save room in the top area, the menu bar can be collapsed into a single menu
+button with _View > Appearance > Collapse Main Menu_. The button opens the same
+menus, and the menu bar can be restored from the same entry. The _Collapse the
+main menu_ setting of the _Menu Bar_ settings can also collapse the menu bar
+automatically, whenever it does not fit in the window.
+
 (sidebars)=
 
 ## Left and Right Sidebar

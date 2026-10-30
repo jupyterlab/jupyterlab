@@ -137,6 +137,7 @@
   "@jupyterlab/lsp-extension:plugin": "Provides the language server connection manager.",
   "@jupyterlab/lsp-extension:settings": "Provides the language server settings.",
   "@jupyterlab/lsp-extension:tracker": "Provides the tracker of `WidgetLSPAdapter`.",
+  "@jupyterlab/mainmenu-extension:menu-bar": "Adds a setting and a command to collapse the main menu.",
   "@jupyterlab/mainmenu-extension:plugin": "Adds and provides the application main menu.",
   "@jupyterlab/mainmenu-extension:recents": "Adds sub-menu for opening recent documents to the File section of the main menu.",
   "@jupyterlab/markdownviewer-extension:plugin": "Adds markdown file viewer and provides its tracker.",
