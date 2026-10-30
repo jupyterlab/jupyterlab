@@ -535,7 +535,7 @@ test.describe('Debugger Tests', () => {
 
       await expect(
         page
-          .locator('.jp-DebuggerKernelSource-source')
+          .locator('.jp-DebuggerKernelSource-item')
           .filter({ hasText: 'anyio' })
           .first()
       ).toBeVisible({ timeout: 30000 });
