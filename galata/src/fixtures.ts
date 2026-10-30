@@ -67,7 +67,7 @@ export type GalataOptions = {
    *
    * Possible values are:
    * - null: The kernels API won't be mocked
-   * - Map<string, Kernel.IModel>: The kernels created during a test.
+   * - `Map<string, Kernel.IModel>`: The kernels created during a test.
    *
    * By default the kernels created during a test will be tracked and disposed at the end.
    */
@@ -78,7 +78,7 @@ export type GalataOptions = {
    * Possible values are:
    * - true (default): JupyterLab config will be mocked on a per test basis
    * - false: JupyterLab config won't be mocked (Be careful it will write config in local files)
-   * - Record<string, JSONObject>: Initial JupyterLab data config - Mapping (config section, value).
+   * - `Record<string, JSONObject>`: Initial JupyterLab data config - Mapping (config section, value).
    *
    * By default the config is stored in-memory.
    */
@@ -89,7 +89,7 @@ export type GalataOptions = {
    * Possible values are:
    * - true (default): JupyterLab state will be mocked on a per test basis
    * - false: JupyterLab state won't be mocked (Be careful it will write state in local files)
-   * - Record<string, unknown>: Initial JupyterLab data state - Mapping (state key, value).
+   * - `Record<string, unknown>`: Initial JupyterLab data state - Mapping (state key, value).
    *
    * By default the state is stored in-memory.
    */
@@ -100,7 +100,7 @@ export type GalataOptions = {
    * Possible values are:
    * - true: JupyterLab settings will be mocked on a per test basis
    * - false: JupyterLab settings won't be mocked (Be careful it will read & write settings local files)
-   * - Record<string, unknown>: Mapping {pluginId: settings} that will be default user settings
+   * - `Record<string, unknown>`: Mapping `{pluginId: settings}` that will be default user settings
    *
    * The default value is `galata.DEFAULT_SETTINGS`
    *
@@ -114,19 +114,19 @@ export type GalataOptions = {
    * Possible values are:
    * - true (default): JupyterLab user will be mocked on a per test basis
    * - false: JupyterLab user won't be mocked (It will be a random user so snapshots won't match)
-   * - Record<string, unknown>: Initial JupyterLab user - Mapping (user attribute, value).
+   * - `Record<string, unknown>`: Initial JupyterLab user - Mapping (user attribute, value).
    *
    * By default the user is stored in-memory.
    */
   mockUser: boolean | Partial<User.IUser>;
   /**
-   * Galata can keep the uploaded and created files in ``tmpPath`` on
+   * Galata can keep the uploaded and created files in `tmpPath` on
    * the server root for debugging purpose. By default the files are
    * always deleted
    *
-   * - 'off' - ``tmpPath`` is deleted after each tests
-   * - 'on' - ``tmpPath`` is never deleted
-   * - 'only-on-failure' - ``tmpPath`` is deleted except if a test failed or timed out.
+   * - 'off' - `tmpPath` is deleted after each tests
+   * - 'on' - `tmpPath` is never deleted
+   * - 'only-on-failure' - `tmpPath` is deleted except if a test failed or timed out.
    */
   serverFiles: 'on' | 'off' | 'only-on-failure';
   /**
@@ -134,7 +134,7 @@ export type GalataOptions = {
    *
    * Possible values are:
    * - null: The sessions API won't be mocked
-   * - Map<string, Session.IModel>: The sessions created during a test.
+   * - `Map<string, Session.IModel>`: The sessions created during a test.
    *
    * By default the sessions created during a test will be tracked and disposed at the end.
    */
@@ -144,7 +144,7 @@ export type GalataOptions = {
    *
    * Possible values are:
    * - null: The Terminals API won't be mocked
-   * - Map<string, TerminalsAPI.IModel>: The Terminals created during a test.
+   * - `Map<string, TerminalsAPI.IModel>`: The Terminals created during a test.
    *
    * By default the Terminals created during a test will be tracked and disposed at the end.
    */
@@ -207,7 +207,7 @@ export const test: TestType<
    *
    * Possible values are:
    * - null: The kernels API won't be mocked
-   * - Map<string, Kernel.IModel>: The kernels created during a test.
+   * - `Map<string, Kernel.IModel>`: The kernels created during a test.
    *
    * By default the kernels created during a test will be tracked and disposed at the end.
    */
@@ -226,7 +226,7 @@ export const test: TestType<
    * Possible values are:
    * - true (default): JupyterLab config will be mocked on a per test basis
    * - false: JupyterLab config won't be mocked (Be careful it will write config in local files)
-   * - Record<string, JSONObject>: Initial JupyterLab data config - Mapping (config section, value).
+   * - `Record<string, JSONObject>`: Initial JupyterLab data config - Mapping (config section, value).
    *
    * By default the config is stored in-memory.
    */
@@ -237,7 +237,7 @@ export const test: TestType<
    * Possible values are:
    * - true (default): JupyterLab state will be mocked on a per test basis
    * - false: JupyterLab state won't be mocked (Be careful it will write state in local files)
-   * - Record<string, unknown>: Initial JupyterLab data state - Mapping (state key, value).
+   * - `Record<string, unknown>`: Initial JupyterLab data state - Mapping (state key, value).
    *
    * By default the state is stored in-memory
    */
@@ -248,7 +248,7 @@ export const test: TestType<
    * Possible values are:
    * - true: JupyterLab settings will be mocked on a per test basis
    * - false: JupyterLab settings won't be mocked (Be careful it may write settings local files)
-   * - Record<string, unknown>: Mapping {pluginId: settings} that will be default user settings
+   * - `Record<string, unknown>`: Mapping `{pluginId: settings}` that will be default user settings
    *
    * The default value is `galata.DEFAULT_SETTINGS`
    *
@@ -262,19 +262,19 @@ export const test: TestType<
    * Possible values are:
    * - true (default): JupyterLab user will be mocked on a per test basis
    * - false: JupyterLab user won't be mocked (It will be a random user so snapshots won't match)
-   * - Record<string, unknown>: Initial JupyterLab user - Mapping (user attribute, value).
+   * - `Record<string, unknown>`: Initial JupyterLab user - Mapping (user attribute, value).
    *
    * By default the user is stored in-memory.
    */
   mockUser: [true, { option: true }],
   /**
-   * Galata can keep the uploaded and created files in ``tmpPath`` on
+   * Galata can keep the uploaded and created files in `tmpPath` on
    * the server root for debugging purpose. By default the files are
    * always deleted.
    *
-   * - 'off' - ``tmpPath`` is deleted after each tests
-   * - 'on' - ``tmpPath`` is never deleted
-   * - 'only-on-failure' - ``tmpPath`` is deleted except if a test failed or timed out.
+   * - 'off' - `tmpPath` is deleted after each tests
+   * - 'on' - `tmpPath` is never deleted
+   * - 'only-on-failure' - `tmpPath` is deleted except if a test failed or timed out.
    */
   serverFiles: ['off', { option: true }],
   /**
@@ -282,7 +282,7 @@ export const test: TestType<
    *
    * Possible values are:
    * - null: The sessions API won't be mocked
-   * - Map<string, Session.IModel>: The sessions created during a test.
+   * - `Map<string, Session.IModel>`: The sessions created during a test.
    *
    * By default the sessions created during a test will be tracked and disposed at the end.
    */
@@ -300,7 +300,7 @@ export const test: TestType<
    *
    * Possible values are:
    * - null: The Terminals API won't be mocked
-   * - Map<string, TerminalAPI.IModel>: The Terminals created during a test.
+   * - `Map<string, TerminalAPI.IModel>`: The Terminals created during a test.
    *
    * By default the Terminals created during a test will be tracked and disposed at the end.
    */

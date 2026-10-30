@@ -37,9 +37,6 @@ export interface ILauncher {
   add(options: ILauncher.IItemOptions): IDisposable;
 }
 
-/**
- * The namespace for `ILauncher` class statics.
- */
 export namespace ILauncher {
   /**
    * An interface for the launcher model

@@ -175,8 +175,8 @@ export function replaceMath(text: string, math: string[]): string {
  *
  * The math is in blocks i through j, so
  *   collect it into one block and clear the others.
- *  Replace &, <, and > by named entities.
- *  For IE, put <br> at the ends of comments since IE removes \n.
+ *  Replace `&`, `<`, and `>` by named entities.
+ *  For IE, put `<br>` at the ends of comments since IE removes `\n`.
  *  Clear the current math positions and store the index of the
  *   math, then push the math string onto the storage array.
  *  The preProcess function is called on all blocks if it has been passed in

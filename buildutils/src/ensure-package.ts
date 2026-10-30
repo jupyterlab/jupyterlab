@@ -713,11 +713,11 @@ export async function ensurePackage(
 }
 
 /**
- * An extra ensure function just for the @jupyterlab/ui-components package.
+ * An extra ensure function just for the `@jupyterlab/ui-components` package.
  * Ensures that the icon svg import statements are synced with the contents
  * of ui-components/style/icons.
  *
- * @param pkgPath - The path to the @jupyterlab/ui-components package.
+ * @param pkgPath - The path to the `@jupyterlab/ui-components` package.
  * @param dorequire - If true, use `require` function in place of `import`
  *  statements when loading the icon svg files
  *

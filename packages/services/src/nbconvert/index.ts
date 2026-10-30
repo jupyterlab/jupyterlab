@@ -86,10 +86,11 @@ export class NbConvertManager implements NbConvert.IManager {
    * Export a notebook to a given format.
    *
    * @param options - The export options.
-   * @param options.format - The export format (e.g., 'html', 'pdf').
-   * @param options.path - The path to the notebook to export.
-   * @param options.exporterOptions.download - Whether to download the file or open it in a new tab. Defaults to false.
-   * @param options.exporterOptions.sanitizeHtml - Whether to sanitize HTML in the output. Defaults to false.
+   * - `format`: The export format (e.g., 'html', 'pdf').
+   * - `path`: The path to the notebook to export.
+   * - `exporterOptions`: Additional exporter options. Set `download`
+   * to download the file instead of opening it in a new tab, or `sanitizeHtml`
+   * to sanitize HTML in the output. Both default to false.
    */
   async exportAs(options: NbConvert.IExportOptions): Promise<void> {
     const { format, path } = options;
@@ -197,10 +198,11 @@ export namespace NbConvert {
      * Export a notebook to a given format.
      *
      * @param options - The export options.
-     * @param options.format - The export format (e.g., 'html', 'pdf').
-     * @param options.path - The path to the notebook to export.
-     * @param options.exporterOptions.download - Whether to download the file or open it in a new tab. Defaults to false.
-     * @param options.exporterOptions.sanitizeHtml - Whether to sanitize HTML in the output. Defaults to false.
+     * - `format`: The export format (e.g., 'html', 'pdf').
+     * - `path`: The path to the notebook to export.
+     * - `exporterOptions`: Additional exporter options. Set `download`
+     * to download the file instead of opening it in a new tab, or `sanitizeHtml`
+     * to sanitize HTML in the output. Both default to false.
      */
     exportAs?(options: NbConvert.IExportOptions): Promise<void>;
   }

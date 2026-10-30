@@ -542,10 +542,10 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
  * A plugin providing open-browser-tab commands.
  *
  * This is its own plugin in case you would like to disable this feature.
- * e.g. jupyter labextension disable @jupyterlab/docmanager-extension:open-browser-tab
+ * e.g. `jupyter labextension disable @jupyterlab/docmanager-extension:open-browser-tab`
  *
  * Note: If disabling this, you may also want to disable:
- * @jupyterlab/filebrowser-extension:open-browser-tab
+ * `@jupyterlab/filebrowser-extension:open-browser-tab`
  */
 export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/docmanager-extension:open-browser-tab',

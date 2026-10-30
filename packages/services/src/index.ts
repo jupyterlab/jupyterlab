@@ -22,4 +22,4 @@ export * from './user';
 export * from './workspace';
 export * from './nbconvert';
 
-export type { Builder } from './builder';
+export type { Builder, BuildManager } from './builder';

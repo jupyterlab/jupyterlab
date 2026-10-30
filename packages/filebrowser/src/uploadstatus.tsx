@@ -238,7 +238,7 @@ export namespace FileUploadStatus {
  * The interface for an item that is being uploaded to
  * the file system.
  */
-interface IFileUploadItem {
+export interface IFileUploadItem {
   /**
    * The path on the filesystem that is being uploaded to.
    */

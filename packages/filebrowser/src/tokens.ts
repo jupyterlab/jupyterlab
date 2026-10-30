@@ -74,9 +74,6 @@ export interface IFileBrowserFactory {
   readonly tracker: WidgetTracker<FileBrowser>;
 }
 
-/**
- * A namespace for file browser factory interfaces.
- */
 export namespace IFileBrowserFactory {
   /**
    * The options for creating a file browser using a file browser factory.

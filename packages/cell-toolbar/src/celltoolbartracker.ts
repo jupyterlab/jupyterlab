@@ -55,7 +55,7 @@ export class CellToolbarTracker implements IDisposable {
    * CellToolbarTracker constructor
    *
    * @param panel The notebook panel
-   * @param toolbar The toolbar; deprecated use {@link toolbarFactory} instead
+   * @param toolbar The toolbar; deprecated use `toolbarFactory` instead
    * @param toolbarFactory The toolbar factory
    */
   constructor(

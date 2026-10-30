@@ -1058,7 +1058,7 @@ export class DirListing extends Widget {
 
   /**
    * Compute the Intl.RelativeTimeFormat style for a date column based on
-   * its pixel width: < 100px → 'narrow', 100–120px → 'short', > 120px → 'long'.
+   * its pixel width: less than 100px → 'narrow', 100–120px → 'short', more than 120px → 'long'.
    */
   private _computeDateColumnStyle(
     node: HTMLElement,
@@ -3108,7 +3108,7 @@ export namespace DirListing {
     ): HTMLElement;
   }
 
-  interface IBaseColumn {
+  export interface IBaseColumn {
     /**
      * Name of the header class, must be unique among other columns.
      */
@@ -3127,7 +3127,7 @@ export namespace DirListing {
      */
     grow: number;
   }
-  interface IFixedColumn extends IBaseColumn {
+  export interface IFixedColumn extends IBaseColumn {
     id: 'is_selected';
     resizable: false;
     sortable: false;
@@ -3409,12 +3409,13 @@ export namespace DirListing {
      * url from MDN shows:
      * https://developer.mozilla.org/en-US/docs/Learn/Forms/Property_compatibility_table_for_form_controls#check_boxes_and_radio_buttons
      *
-     * @param [options]
-     * @params options.alwaysVisible Should the checkbox be visible even when
-     * not hovered?
+     * @param options - The checkbox options.
      * @returns A new DOM node that contains a checkbox.
      */
     createCheckboxWrapperNode(options?: {
+      /**
+       * Whether the checkbox should be visible even when not hovered.
+       */
       alwaysVisible: boolean;
       headerNode?: boolean;
     }): HTMLElement {

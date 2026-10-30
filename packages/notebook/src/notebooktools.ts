@@ -614,3 +614,5 @@ namespace Private {
     return first.rank - second.rank;
   }
 }
+
+export type { RankedPanel };

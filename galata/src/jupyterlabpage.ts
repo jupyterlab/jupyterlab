@@ -162,9 +162,9 @@ export interface IJupyterLabPage {
    * Found" and 500 "Internal Server Error".  The status code for such responses can be retrieved by calling
    * [response.status()](https://playwright.dev/docs/api/class-response#response-status).
    *
-   * > NOTE: `page.goto` either throws an error or returns a main resource response. The only exceptions are navigation to
+   * **Note:** `page.goto` either throws an error or returns a main resource response. The only exceptions are navigation to
    * `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
-   * > NOTE: Headless mode doesn't support navigation to a PDF document. See the
+   * **Note:** Headless mode doesn't support navigation to a PDF document. See the
    * [upstream issue](https://bugs.chromium.org/p/chromium/issues/detail?id=761295).
    *
    * Shortcut for main frame's [frame.goto(url[, options])](https://playwright.dev/docs/api/class-frame#frame-goto)
@@ -466,9 +466,9 @@ export class JupyterLabPage implements IJupyterLabPage {
    * Found" and 500 "Internal Server Error".  The status code for such responses can be retrieved by calling
    * [response.status()](https://playwright.dev/docs/api/class-response#response-status).
    *
-   * > NOTE: `page.goto` either throws an error or returns a main resource response. The only exceptions are navigation to
+   * **Note:** `page.goto` either throws an error or returns a main resource response. The only exceptions are navigation to
    * `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
-   * > NOTE: Headless mode doesn't support navigation to a PDF document. See the
+   * **Note:** Headless mode doesn't support navigation to a PDF document. See the
    * [upstream issue](https://bugs.chromium.org/p/chromium/issues/detail?id=761295).
    *
    * Shortcut for main frame's [frame.goto(url[, options])](https://playwright.dev/docs/api/class-frame#frame-goto)

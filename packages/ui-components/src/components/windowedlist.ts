@@ -469,7 +469,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   /**
    * Compute the items range to display.
    *
-   * It returns ``null`` if the range does not need to be updated.
+   * It returns `null` if the range does not need to be updated.
    *
    * @param options - Control how the range is computed.
    *   - `virtual`: If `true`, return a virtual range without updating
@@ -510,7 +510,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
 
   /**
    * Return the viewport top position and height for range spanning from
-   * ``startIndex`` to ``stopIndex``.
+   * `startIndex` to `stopIndex`.
    *
    * @param startIndex First item in viewport index
    * @param stopIndex Last item in viewport index
@@ -2171,7 +2171,7 @@ export namespace WindowedList {
     /**
      * Compute the items range to display.
      *
-     * It returns ``null`` if the range does not need to be updated.
+     * It returns `null` if the range does not need to be updated.
      *
      * @param options - Control how the range is computed.
      *   - `virtual`: If `true`, return a virtual range without updating
@@ -2185,7 +2185,7 @@ export namespace WindowedList {
 
     /**
      * Return the viewport top position and height for range spanning from
-     * ``startIndex`` to ``stopIndex``.
+     * `startIndex` to `stopIndex`.
      *
      * @param start First item in viewport index
      * @param stop Last item in viewport index

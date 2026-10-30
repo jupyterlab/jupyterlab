@@ -1000,7 +1000,7 @@ export namespace DSVModel {
    */
   export interface IOptions {
     /**
-     * The field delimiter, such as ',' or '\t'.
+     * The field delimiter, such as ',' or `'\t'`.
      *
      * #### Notes
      * The field delimiter must be a single character.

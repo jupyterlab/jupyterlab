@@ -36,7 +36,7 @@ const copy = JSONExt.deepCopy;
  */
 const AJV_DEFAULT_OPTIONS: Partial<AjvOptions> = {
   /**
-   * @todo the implications of enabling strict mode are beyond the scope of
+   * TODO: the implications of enabling strict mode are beyond the scope of
    *       the initial PR
    */
   strict: false
@@ -98,28 +98,28 @@ export namespace ISchemaValidator {
     schemaPath: string;
 
     /**
-     * @todo handle new fields from ajv8
-     **/
+     * The schema value for the failing keyword, when verbose errors are enabled.
+     */
     schema?: unknown;
 
     /**
-     * @todo handle new fields from ajv8
-     **/
+     * The JSON pointer to the part of the data that failed validation.
+     */
     instancePath: string;
 
     /**
-     * @todo handle new fields from ajv8
-     **/
+     * The property name that failed the `propertyNames` keyword.
+     */
     propertyName?: string;
 
     /**
-     * @todo handle new fields from ajv8
-     **/
+     * The data that failed validation, when verbose errors are enabled.
+     */
     data?: unknown;
 
     /**
-     * @todo handle new fields from ajv8
-     **/
+     * The schema containing the failing keyword, when verbose errors are enabled.
+     */
     parentSchema?: unknown;
   }
 }
@@ -1539,7 +1539,7 @@ namespace Private {
   /**
    * Create a fully extrapolated default value for a root key in a schema.
    *
-   * @todo This function would ideally reuse `getDefaultFormState` from rjsf
+   * TODO: This function would ideally reuse `getDefaultFormState` from rjsf
    * with appropriate`defaultFormStateBehavior` setting, as currently
    * these two implementations duplicate each other.
    *

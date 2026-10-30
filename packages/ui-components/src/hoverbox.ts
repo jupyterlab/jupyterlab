@@ -11,7 +11,7 @@ const HOVERBOX_CLASS = 'jp-HoverBox';
  */
 const OUTOFVIEW_Z_INDEX = '-1000';
 
-type OutOfViewDisplay =
+export type OutOfViewDisplay =
   | 'hidden-inside'
   | 'hidden-outside'
   | 'stick-inside'

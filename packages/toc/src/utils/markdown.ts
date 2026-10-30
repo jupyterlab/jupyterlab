@@ -67,7 +67,7 @@ export async function getHeadingId(
 /**
  * Parses the provided string and returns a list of headings.
  *
- * @param text - Markdown text
+ * @param markdownText - Markdown text
  * @param parser - A Markdown parser instance used to render the content to HTML.
  * @returns List of headings
  *
@@ -256,31 +256,29 @@ interface IHeader {
  *
  * ## Notes
  *
- * -   Heading examples:
+ * Markdown heading:
  *
- *     -   Markdown heading:
+ * ```md
+ * # Foo
+ * ```
  *
- *         ```
- *         # Foo
- *         ```
+ * Markdown headings (alternative styles):
  *
- *     -   Markdown heading (alternative style):
+ * ```md
+ * Foo
+ * ===
+ * ```
  *
- *         ```
- *         Foo
- *         ===
- *         ```
+ * ```md
+ * Foo
+ * ---
+ * ```
  *
- *         ```
- *         Foo
- *         ---
- *         ```
+ * HTML heading:
  *
- *     -   HTML heading:
- *
- *         ```
- *         <h3>Foo</h3>
- *         ```
+ * ```html
+ * <h3>Foo</h3>
+ * ```
  *
  * @private
  * @param line - Line to parse
@@ -288,20 +286,28 @@ interface IHeader {
  * @returns heading info
  *
  * @example
+ * ```ts
  * const out = parseHeading('### Foo\n');
- * // returns {'text': 'Foo', 'level': 3}
+ * // out.text === 'Foo'; out.level === 3
+ * ```
  *
  * @example
- * const out = parseHeading('Foo\n===\n');
- * // returns {'text': 'Foo', 'level': 1}
+ * ```ts
+ * const out = parseHeading('Foo', '===');
+ * // out.text === 'Foo'; out.level === 1
+ * ```
  *
  * @example
+ * ```ts
  * const out = parseHeading('<h4>Foo</h4>\n');
- * // returns {'text': 'Foo', 'level': 4}
+ * // out.text === 'Foo'; out.level === 4
+ * ```
  *
  * @example
+ * ```ts
  * const out = parseHeading('Foo');
  * // returns null
+ * ```
  */
 function parseHeading(line: string, nextLine?: string): IHeader | null {
   // Case: Markdown heading
