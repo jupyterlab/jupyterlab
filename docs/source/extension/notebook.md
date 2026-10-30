@@ -65,7 +65,7 @@ and `deleteMetadata` (see {ts:class}`notebook.NotebookModel`
 and {ts:class}`cells.CellModel`).
 You can listen for changes in the metadata through the `sharedModel.metadataChanged` attribute
 (see [cell shared model](https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedBaseCell.html#metadataChanged)
-and [notebook shared model](https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedNotebook-1.html#metadataChanged)).
+and [notebook shared model](https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedNotebook.html#metadataChanged)).
 
 ### Notebook widget
 
@@ -226,6 +226,8 @@ following JSON snippet in your extension settings file:
 ```
 
 You may add a `rank` attribute to modify the item position (the default value is 50).
+
+The button renders the state of its command again only when the command registry is notified about the command (see {ref}`command-state`).
 
 ### Adding a widget to the notebook header
 

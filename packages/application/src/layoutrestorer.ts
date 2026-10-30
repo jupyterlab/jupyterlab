@@ -15,7 +15,7 @@ import type {
 } from '@lumino/coreutils';
 import { JSONExt, PromiseDelegate, Token } from '@lumino/coreutils';
 import { AttachedProperty } from '@lumino/properties';
-import type { DockPanel, Widget } from '@lumino/widgets';
+import type { DockLayout, DockPanel, Widget } from '@lumino/widgets';
 import type { ILabShell } from './shell';
 
 /**
@@ -777,6 +777,33 @@ namespace Private {
   });
 
   /**
+   * The name of the widget at `index`, or, when that widget has no name, the
+   * name of the nearest widget with a name before it, else after it.
+   *
+   * #### Notes
+   * A widget without a name, such as one that a plugin adds on each start,
+   * is not restored, so the tab next to it takes its place.
+   */
+  function nearestName(
+    widgets: ReadonlyArray<Widget>,
+    index: number
+  ): string | null {
+    for (let i = Math.min(index, widgets.length - 1); i >= 0; i--) {
+      const name = nameProperty.get(widgets[i]);
+      if (name) {
+        return name;
+      }
+    }
+    for (let i = index + 1; i < widgets.length; i++) {
+      const name = nameProperty.get(widgets[i]);
+      if (name) {
+        return name;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Serialize individual areas within the main area.
    */
   function serializeArea(
@@ -787,12 +814,16 @@ namespace Private {
     }
 
     if (area.type === 'tab-area') {
+      const widgets = area.widgets
+        .map(widget => nameProperty.get(widget))
+        .filter(name => !!name);
+      // Only the widgets with a name are saved: count the current index
+      // among them, or it points at another tab after a restore.
+      const current = nearestName(area.widgets, area.currentIndex);
       return {
         type: 'tab-area',
-        currentIndex: area.currentIndex,
-        widgets: area.widgets
-          .map(widget => nameProperty.get(widget))
-          .filter(name => !!name)
+        currentIndex: current ? widgets.indexOf(current) : 0,
+        widgets
       };
     }
 
@@ -815,13 +846,66 @@ namespace Private {
     };
     if (area) {
       if (area.currentWidget) {
-        const current = Private.nameProperty.get(area.currentWidget);
+        const current =
+          Private.nameProperty.get(area.currentWidget) ||
+          nearestInArea(area.dock?.main ?? null, area.currentWidget);
         if (current) {
           dehydrated.current = current;
         }
       }
     }
     return dehydrated;
+  }
+
+  /**
+   * The name of the widget nearest to `widget` in the tab area that holds it,
+   * for a current widget that has no name and is not restored.
+   */
+  function nearestInArea(
+    area: ILabShell.AreaConfig | null,
+    widget: Widget
+  ): string | null {
+    if (!area) {
+      return null;
+    }
+    if (area.type === 'tab-area') {
+      const index = area.widgets.indexOf(widget);
+      return index === -1 ? null : nearestName(area.widgets, index);
+    }
+    for (const child of area.children) {
+      const name = nearestInArea(child, widget);
+      if (name) {
+        return name;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Restore a saved tab area from the names of its widgets.
+   *
+   * #### Notes
+   * A saved widget that was not restored drops out: the current index follows
+   * the widget saved at `index`, or the nearest restored one before it.
+   */
+  function restoreTabArea(
+    widgets: ReadonlyArray<string>,
+    index: number,
+    names: Map<string, Widget>
+  ): DockLayout.ITabAreaConfig {
+    const restored: Widget[] = [];
+    let current = 0;
+    widgets.forEach((name, i) => {
+      const widget = names.get(name);
+      if (!widget) {
+        return;
+      }
+      if (i <= index) {
+        current = restored.length;
+      }
+      restored.push(widget);
+    });
+    return { type: 'tab-area', currentIndex: current, widgets: restored };
   }
 
   /**
@@ -852,23 +936,7 @@ namespace Private {
 
     if (type === 'tab-area') {
       const { currentIndex, widgets } = area as ITabArea;
-      const hydrated: ILabShell.AreaConfig = {
-        type: 'tab-area',
-        currentIndex: currentIndex || 0,
-        widgets:
-          (widgets &&
-            (widgets
-              .map(widget => names.get(widget))
-              .filter(widget => !!widget) as Widget[])) ||
-          []
-      };
-
-      // Make sure the current index is within bounds.
-      if (hydrated.currentIndex > hydrated.widgets.length - 1) {
-        hydrated.currentIndex = 0;
-      }
-
-      return hydrated;
+      return restoreTabArea(widgets || [], currentIndex || 0, names);
     }
 
     const { orientation, sizes, children } = area as ISplitArea;
@@ -904,12 +972,68 @@ namespace Private {
       return null;
     }
 
-    const name = (area as any).current || null;
+    const name: string | null = (area as any).current || null;
     const dock = (area as any).dock || null;
+    const main = dock ? deserializeArea(dock, names) : null;
+
+    // The shell activates only the current widget. When the saved one did not
+    // come back, or had no name, use the tab that is shown in its place.
+    const currentWidget =
+      (name && (names.get(name) || nearestRestored(dock, name, names))) ||
+      selectedWidget(main);
 
     return {
-      currentWidget: (name && names.has(name) && names.get(name)) || null,
-      dock: dock ? { main: deserializeArea(dock, names) } : null
+      currentWidget,
+      dock: dock ? { main } : null
     };
+  }
+
+  /**
+   * The widget that a restored tab area shows in place of the widget saved as
+   * `name`, when that widget did not come back.
+   */
+  function nearestRestored(
+    area: ITabArea | ISplitArea | null,
+    name: string,
+    names: Map<string, Widget>
+  ): Widget | null {
+    if (!area) {
+      return null;
+    }
+    if (area.type === 'tab-area') {
+      const widgets = area.widgets || [];
+      const index = widgets.indexOf(name);
+      if (index === -1) {
+        return null;
+      }
+      const restored = restoreTabArea(widgets, index, names);
+      return restored.widgets[restored.currentIndex] ?? null;
+    }
+    for (const child of area.children || []) {
+      const widget = nearestRestored(child, name, names);
+      if (widget) {
+        return widget;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * The widget that the first tab area with widgets shows.
+   */
+  function selectedWidget(area: ILabShell.AreaConfig | null): Widget | null {
+    if (!area) {
+      return null;
+    }
+    if (area.type === 'tab-area') {
+      return area.widgets[area.currentIndex] ?? null;
+    }
+    for (const child of area.children) {
+      const widget = selectedWidget(child);
+      if (widget) {
+        return widget;
+      }
+    }
+    return null;
   }
 }

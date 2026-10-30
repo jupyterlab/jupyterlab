@@ -15,7 +15,7 @@ import sys
 import tempfile
 import xmlrpc.client
 from collections.abc import Awaitable, Callable
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from functools import partial
 from itertools import groupby
 from os import environ
@@ -26,7 +26,7 @@ from typing import TypeVar, cast
 from urllib.parse import urlparse
 from zipfile import ZipFile
 
-import httpx
+import httpx2
 import tornado
 from async_lru import alru_cache
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
@@ -111,9 +111,7 @@ https_proxy_url = (
     environ.get("https_proxy") or environ.get("HTTPS_PROXY") or http_proxy_url or all_proxy_url
 )
 
-# sniff ``httpx`` version for version-sensitive API
-_httpx_version = Version(httpx.__version__)
-_httpx_client_args: dict[str, object] = {}
+_httpx_mounts: dict[str, httpx2.AsyncBaseTransport] | None = None
 
 xmlrpc_transport_override = None
 
@@ -121,20 +119,10 @@ if http_proxy_url:
     http_proxy = urlparse(http_proxy_url)
     proxy_host, _, proxy_port = http_proxy.netloc.partition(":")
 
-    if _httpx_version >= Version("0.28.0"):
-        _httpx_client_args = {
-            "mounts": {
-                "http://": httpx.AsyncHTTPTransport(proxy=http_proxy_url),
-                "https://": httpx.AsyncHTTPTransport(proxy=https_proxy_url),
-            }
-        }
-    else:
-        _httpx_client_args = {
-            "proxies": {
-                "http://": http_proxy_url,
-                "https://": https_proxy_url,
-            }
-        }
+    _httpx_mounts = {
+        "http://": httpx2.AsyncHTTPTransport(proxy=http_proxy_url),
+        "https://": httpx2.AsyncHTTPTransport(proxy=https_proxy_url),
+    }
 
     xmlrpc_transport_override = ProxiedTransport()
     xmlrpc_transport_override.set_proxy(proxy_host, proxy_port)
@@ -175,7 +163,7 @@ def _process_output(output: bytes | str | None) -> str:
 
 
 async def _fetch_package_metadata(
-    client: httpx.AsyncClient,
+    client: httpx2.AsyncClient,
     name: str,
     latest_version: str,
     base_url: str,
@@ -270,7 +258,7 @@ class PyPIExtensionManager(ExtensionManager):
         parent: config.Configurable | None = None,
     ) -> None:
         super().__init__(app_options, ext_options, parent)
-        self._httpx_client = httpx.AsyncClient(**_httpx_client_args)  # type: ignore[arg-type]
+        self._httpx_client = httpx2.AsyncClient(mounts=_httpx_mounts)
         # Set configurable cache size to fetch function
         self._fetch_package_metadata: FetchPackageMetadata = partial(
             _fetch_package_metadata, self._httpx_client
@@ -280,7 +268,7 @@ class PyPIExtensionManager(ExtensionManager):
         self._rpc_client = xmlrpc.client.ServerProxy(
             self.base_url, transport=xmlrpc_transport_override
         )
-        self.__last_all_packages_request_time = datetime.now(tz=timezone.utc) - timedelta(
+        self.__last_all_packages_request_time = datetime.now(tz=UTC) - timedelta(
             seconds=self.cache_timeout * 1.01
         )
         self.__all_packages_cache: list[tuple[str, str]] | None = None
@@ -298,13 +286,12 @@ class PyPIExtensionManager(ExtensionManager):
 
     @override
     async def is_install_allowed(self, name: str, version: str | None = None) -> bool:
+        if not self._is_valid_package_name(name):
+            return False
+
         try:
-            canonicalize_name(name, validate=True)
             if version is not None:
                 parse_version(version)
-        except InvalidName:
-            self.log.warning(f"Invalid extension name: {name!r}")
-            return False
         except InvalidVersion:
             self.log.warning(f"Version {version!r} does not comply with PEP 440")
             return False
@@ -313,6 +300,18 @@ class PyPIExtensionManager(ExtensionManager):
         if not allowed:
             self.log.warning(f"Installation denied by allowlist/blocklist for {name}")
         return allowed
+
+    @override
+    async def is_uninstall_allowed(self, name: str) -> bool:
+        return self._is_valid_package_name(name)
+
+    def _is_valid_package_name(self, name: str) -> bool:
+        try:
+            canonicalize_name(name, validate=True)
+        except InvalidName:
+            self.log.warning(f"Invalid extension name: {name!r}")
+            return False
+        return True
 
     @override
     def _canonicalize_name(self, name: str) -> str:
@@ -536,7 +535,7 @@ class PyPIExtensionManager(ExtensionManager):
     async def __get_all_extensions(self) -> list[tuple[str, str]]:
         all_packages_cache = self.__all_packages_cache
         if all_packages_cache is None or datetime.now(
-            tz=timezone.utc
+            tz=UTC
         ) > self.__last_all_packages_request_time + timedelta(seconds=self.cache_timeout):
             self.log.debug("Requesting PyPI.org RPC API for prebuilt JupyterLab extensions.")
             browse = cast(
@@ -570,7 +569,7 @@ class PyPIExtensionManager(ExtensionManager):
                     all_packages_cache.append((name, result))
 
             self.__all_packages_cache = all_packages_cache
-            self.__last_all_packages_request_time = datetime.now(tz=timezone.utc)
+            self.__last_all_packages_request_time = datetime.now(tz=UTC)
 
         return all_packages_cache
 
@@ -677,8 +676,9 @@ class PyPIExtensionManager(ExtensionManager):
                                         if jlab_metadata is not None:
                                             break
                             elif download_url.endswith("tar.gz"):
-                                sdist_bytes = io.BytesIO(response.content)
-                                with TarFile(sdist_bytes) as sdist:  # type: ignore[arg-type]
+                                with TarFile.open(
+                                    fileobj=io.BytesIO(response.content), mode="r:gz"
+                                ) as sdist:
                                     for filename in filter(
                                         lambda f: Path(f).name == "package.json",
                                         sdist.getnames(),
@@ -723,6 +723,9 @@ class PyPIExtensionManager(ExtensionManager):
         Returns:
             The action result
         """
+        if not await self.is_uninstall_allowed(extension):
+            return ActionResult(status="error", message="uninstall is not allowed")
+
         current_loop = tornado.ioloop.IOLoop.current()
         cmdline = [
             sys.executable,
@@ -731,6 +734,7 @@ class PyPIExtensionManager(ExtensionManager):
             "uninstall",
             "--yes",
             "--no-input",
+            "--",
             extension,
         ]
 

@@ -37,7 +37,7 @@ communicate with each other.
 
 Models contain an instance of [ISharedDocument](https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedDocument.html)
 that acts as data storage for the model's content. As of JupyterLab 4, the default data
-storage implementation is a [YDocument](https://jupyter-ydoc.readthedocs.io/en/latest/api/classes/YDocument-1.html)
+storage implementation is a [YDocument](https://jupyter-ydoc.readthedocs.io/en/latest/api/classes/YDocument.html)
 based on [Yjs](https://docs.yjs.dev), a high-performance CRDT for building collaborative
 applications. Both the interface and the implementation are provided by the package
 [@jupyter/ydoc](https://github.com/jupyter-server/jupyter_ydoc).

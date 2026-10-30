@@ -57,6 +57,21 @@ module.exports = {
       }
     },
     {
+      name: 'memory-leak',
+      testMatch: [
+        'test/memory-leak/**/*.test.ts',
+        'test/memory-leak/**/*.spec.ts'
+      ],
+      testIgnore: '**/.ipynb_checkpoints/**',
+      retries: 0,
+      timeout: 120000,
+      use: {
+        launchOptions: {
+          args: chromiumArgs
+        }
+      }
+    },
+    {
       name: 'jupyterlab',
       testMatch: [
         'test/jupyterlab/**/*.test.ts',

@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import type { NotebookPanel } from '@jupyterlab/notebook';
 import path from 'path';
 import {
   ensureMathTypeset,
@@ -9,8 +10,7 @@ import {
   freeezeKernelIds,
   generateArrow,
   positionMouse,
-  positionMouseOver,
-  setTerminalTitle
+  positionMouseOver
 } from './utils';
 
 test.use({
@@ -25,11 +25,21 @@ test.use({
       // once https://github.com/ipython/ipython/pull/15144 is released
       // we can use SOURCE_DATE_EPOCH env variable instead
       showBanner: false
+    },
+    // Comm messages go to a kernel subshell by default, so an ipywidgets
+    // callback can run on that thread while the main shell is still executing
+    // cells. Both then use matplotlib's global pyplot state, and the Lorenz
+    // figure is captured while it is still being drawn. Keeping comms on the
+    // main shell makes the output deterministic.
+    '@jupyterlab/apputils-extension:kernels-settings': {
+      commsOverSubshells: 'disabled'
     }
   }
 });
 
 test.describe('General', () => {
+  const COMMON_TOOLS_CELL_ID = 'right-sidebar-common-tools-cell';
+
   test('Welcome', async ({ page }) => {
     await galata.Mock.freezeContentLastModified(page, filterContent);
     await page.goto();
@@ -42,16 +52,9 @@ test.describe('General', () => {
     await page.sidebar.setWidth();
 
     // README.md in preview
-    await page.click('text=README.md', {
-      button: 'right'
-    });
-    await page.click('text=Open With');
-    await page.click('text=Markdown Preview');
+    await page.filebrowser.open('README.md', 'Markdown Preview');
 
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
-    await page.dblclick('text=Lorenz.ipynb');
+    await page.notebook.openByPath('notebooks/Lorenz.ipynb');
 
     // Force the Lorenz equations to typeset at their correct size while the
     // notebook is still the active tab. Otherwise MathJax can render them too
@@ -60,21 +63,17 @@ test.describe('General', () => {
     await ensureMathTypeset(page);
 
     await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
-    await page.click('text=File');
-    await page.click('.lm-Menu ul[role="menu"] >> text=New');
-    await page.click('#jp-mainmenu-file-new >> text=Terminal');
-    await setTerminalTitle(page, 'Terminal 1');
+    await page.menu.clickMenuItem('File>New>Terminal');
+    await page.terminal.setTitle('Terminal 1');
 
-    await page.click('text=File');
-    await page.click('.lm-Menu ul[role="menu"] >> text=New');
-    await page.click('#jp-mainmenu-file-new >> text=Console');
+    await page.menu.clickMenuItem('File>New>Console');
     await page.click('button:has-text("Select")');
 
-    await page.dblclick('text=Data.ipynb');
+    await page.notebook.open('Data.ipynb');
 
-    await page.dblclick('text=lorenz.py');
+    await page.filebrowser.open('lorenz.py');
 
-    await page.click('div[role="main"] >> text=Lorenz.ipynb');
+    await page.activity.activateTab('Lorenz.ipynb');
 
     // Wait for the debugger bug icon to settle.
     // This needs to be before running any cells/switching to a different panel.
@@ -108,7 +107,7 @@ test.describe('General', () => {
     const viewerHandle = page.locator(
       '.lm-TabBar-tabLabel:text-is("lorenz.py")'
     );
-    await viewerHandle.click();
+    await page.activity.activateTab('lorenz.py');
     const viewerBBox = await viewerHandle.boundingBox();
 
     await page.mouse.move(
@@ -133,7 +132,7 @@ test.describe('General', () => {
 
     await page.sidebar.setWidth();
 
-    await page.dblclick('[aria-label="File Browser Section"] >> text=data');
+    await page.filebrowser.openDirectory('data');
     // Wait for the `data` folder to load to have something to blur
     await page.locator('text=1024px').waitFor();
 
@@ -149,7 +148,7 @@ test.describe('General', () => {
       )
       .toMatchSnapshot('interface_left.png');
 
-    await page.click('[title="Running Terminals and Kernels"]');
+    await page.sidebar.openTab('jp-running-sessions');
     await page.click('[aria-label="Open Tabs Section"]', {
       button: 'right',
       position: { x: 10, y: 10 }
@@ -168,7 +167,38 @@ test.describe('General', () => {
     });
 
     await page.notebook.createNew();
-    await page.click('[title="Property Inspector"]');
+    // Give the initial cell a deterministic ID so the Common Tools
+    // property inspector metadata is stable in the screenshot.
+    await page.evaluate(cellId => {
+      const notebookPanel = window.galata.app.shell
+        .currentWidget as NotebookPanel;
+      const notebook = notebookPanel.content;
+      const activeCell = notebook.activeCell;
+      const activeCellIndex = notebook.activeCellIndex;
+
+      if (!notebookPanel.model || !activeCell || activeCellIndex < 0) {
+        throw new Error(
+          'No active cell available for Common Tools screenshot.'
+        );
+      }
+
+      const cellJSON = activeCell.model.toJSON();
+      const sharedModel = notebookPanel.model.sharedModel;
+      sharedModel.transact(() => {
+        sharedModel.deleteCell(activeCellIndex);
+        sharedModel.insertCell(activeCellIndex, {
+          ...cellJSON,
+          id: cellId
+        });
+      });
+      notebook.activeCellIndex = activeCellIndex;
+    }, COMMON_TOOLS_CELL_ID);
+    await page.waitForFunction(cellId => {
+      const notebookPanel = window.galata.app.shell
+        .currentWidget as NotebookPanel;
+      return notebookPanel.content.activeCell?.model.id === cellId;
+    }, COMMON_TOOLS_CELL_ID);
+    await page.sidebar.openTab('jp-property-inspector');
     await page.sidebar.setWidth(251, 'right');
 
     expect
@@ -195,11 +225,13 @@ test.describe('General', () => {
       page.locator('.jp-ActiveCellTool .jp-InputPrompt')
     ).not.toHaveClass(/lm-mod-hidden/);
 
-    expect(
-      await page.screenshot({
-        clip: { y: 32, x: 997, width: 283, height: 400 }
-      })
-    ).toMatchSnapshot('interface_right_common.png');
+    expect
+      .soft(
+        await page.screenshot({
+          clip: { y: 32, x: 997, width: 283, height: 400 }
+        })
+      )
+      .toMatchSnapshot('interface_right_common.png');
 
     // Expect the 'Raw NbConvert Format' field to be displayed only on raw cells
     await expect(
@@ -227,7 +259,8 @@ test.describe('General', () => {
       .locator('.jp-MetadataForm .jp-MetadataEditorTool')
       .last()
       .textContent();
-    expect(cellMetadata).toContain('"tags": []');
+    // Opening Common Tools does not write default metadata into the cell.
+    expect(cellMetadata).not.toContain('"tags"');
     expect(notebookMetadata).not.toContain('"base_numbering"');
 
     // Expect adding tag is reflected in CellMetadataEditor
@@ -257,6 +290,29 @@ test.describe('General', () => {
         .textContent()
     )?.replace(/\s/g, '');
     expect(newNotebookMetadata).toContain('"base_numbering":3');
+
+    // Expect modifying cell metadata from advanced tools
+    await page
+      .locator('.jp-MetadataForm .jp-MetadataEditorTool')
+      .first()
+      .locator('.cm-line', { hasText: 'test-tag' })
+      .click();
+    await page.keyboard.press('End');
+    await page.keyboard.type(',"newtest-tag"');
+    const modifiedCellMetadata = (
+      await page
+        .locator('.jp-MetadataForm .jp-MetadataEditorTool')
+        .first()
+        .textContent()
+    )?.replace(/\s/g, '');
+    expect(modifiedCellMetadata).toContain('"tags":["test-tag","newtest-tag"]');
+    expect
+      .soft(
+        await page.screenshot({
+          clip: { y: 340, x: 997, width: 283, height: 660 }
+        })
+      )
+      .toMatchSnapshot('interface_right_advanced.png');
 
     // Test the active cell widget
     const activeCellPreview = page.locator(
@@ -295,7 +351,7 @@ test.describe('General', () => {
     });
 
     // Hide file browser
-    await page.click('[title^="File Browser"]');
+    await page.sidebar.close('left');
 
     // Inject arrow
     await page.evaluate(
@@ -319,15 +375,12 @@ test.describe('General', () => {
     });
 
     // Hide file browser
-    await page.click('[title^="File Browser"]');
+    await page.sidebar.close('left');
 
-    await page.click('text=File');
-    await page.mouse.move(70, 40);
-    const fileMenuNewItem = page
-      .locator('.lm-Menu ul[role="menu"]')
-      .getByText('New', { exact: true });
-    await fileMenuNewItem.waitFor();
-    await fileMenuNewItem.click();
+    await page.menu.openLocator('File>New');
+    const fileMenuNewItem = (await page.menu.getMenuItemLocator(
+      'File>New'
+    ))!.locator('.lm-Menu-itemLabel');
 
     // Inject mouse
     await page.evaluate(
@@ -359,9 +412,7 @@ test.describe('General', () => {
 
     await page.sidebar.setWidth();
 
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
+    await page.filebrowser.openDirectory('notebooks');
 
     await page.click('text=Lorenz.ipynb', { button: 'right' });
     await page.hover('text=Copy Shareable Link');
@@ -390,11 +441,9 @@ test.describe('General', () => {
     });
 
     // Hide file browser
-    await page.click('[title^="File Browser"]');
+    await page.sidebar.close('left');
 
-    await page.click('text=File');
-    await page.mouse.move(70, 40);
-    await page.click('.lm-Menu ul[role="menu"] >> text=New');
+    await page.menu.openLocator('File>New');
     await page.hover('.lm-Menu ul[role="menu"] >> text=Text File');
 
     // Inject mouse
@@ -419,13 +468,10 @@ test.describe('General', () => {
     });
 
     // Open jupyterlab.md
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=narrative'
-    );
-    await page.dblclick('text=jupyterlab.md');
+    await page.filebrowser.open('narrative/jupyterlab.md');
 
     // Hide file browser
-    await page.click('[title^="File Browser"]');
+    await page.sidebar.close('left');
 
     expect(await page.screenshot()).toMatchSnapshot('file_editor_overview.png');
   });
@@ -441,15 +487,9 @@ test.describe('General', () => {
     await page.sidebar.setWidth();
 
     // Open jupyterlab.md
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=narrative'
-    );
-    await page.dblclick('text=jupyterlab.md');
+    await page.filebrowser.open('narrative/jupyterlab.md');
 
-    await page.click('text=Settings');
-    await page.click(
-      '.lm-Menu ul[role="menu"] >> text=Text Editor Indentation'
-    );
+    await page.menu.openLocator('Settings>Text Editor Indentation');
 
     expect(
       await page.screenshot({ clip: { y: 0, x: 260, width: 600, height: 450 } })
@@ -468,10 +508,7 @@ test.describe('General', () => {
     await page.sidebar.setWidth();
 
     // Open Data.ipynb
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
-    await page.dblclick('text=Data.ipynb');
+    await page.notebook.openByPath('notebooks/Data.ipynb');
     await page.menu.clickMenuItem('Edit>Clear Outputs of All Cells');
     await page.notebook.setCell(
       1,
@@ -500,10 +537,7 @@ test.describe('General', () => {
   test('Trust indicator', async ({ page }) => {
     await page.goto();
     // Open Data.ipynb which is not trusted by default
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
-    await page.dblclick('text=Data.ipynb');
+    await page.notebook.openByPath('notebooks/Data.ipynb');
 
     // Wait for the notebook to fully load up to avoid sub-pixel shift on statusbar
     // AND because the "not trusted" status only shows up once untrusted cells are loaded up.
@@ -536,10 +570,7 @@ test.describe('General', () => {
     await page.sidebar.setWidth();
 
     // Open Data.ipynb
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
-    await page.dblclick('text=Data.ipynb');
+    await page.notebook.openByPath('notebooks/Data.ipynb');
 
     const heading = page.locator(
       'h2[data-jupyter-id="Open-a-CSV-file-using-Pandas"]'
@@ -589,21 +620,16 @@ test.describe('General', () => {
     await page.sidebar.setWidth();
 
     // Open Data.ipynb
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
-    await page.dblclick('text=Data.ipynb');
+    await page.notebook.openByPath('notebooks/Data.ipynb');
 
     // Open a terminal
     await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
-    await page.click('text=File');
-    await page.click('.lm-Menu ul[role="menu"] >> text=New');
-    await page.click('#jp-mainmenu-file-new >> text=Terminal');
+    await page.menu.clickMenuItem('File>New>Terminal');
 
     // Wait for the xterm.js element to be added in the DOM
     await page.locator('.jp-Terminal-body').waitFor();
 
-    await setTerminalTitle(page, 'Terminal 1');
+    await page.terminal.setTitle('Terminal 1');
     await page.keyboard.type('cd $JUPYTERLAB_GALATA_ROOT_DIR');
     await page.keyboard.press('Enter');
     await page.keyboard.type(`clear && cat ${tmpPath}/${fileName}`);
@@ -627,19 +653,14 @@ test.describe('General', () => {
     await page.sidebar.setWidth();
 
     // Open a terminal
-    await page.click('text=File');
-    await page.click('.lm-Menu ul[role="menu"] >> text=New');
-    await page.click('#jp-mainmenu-file-new >> text=Terminal');
+    await page.menu.clickMenuItem('File>New>Terminal');
 
-    await setTerminalTitle(page, 'Terminal 1');
+    await page.terminal.setTitle('Terminal 1');
 
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
-    await page.dblclick('text=Data.ipynb');
-    await page.dblclick('text=Julia.ipynb');
+    await page.notebook.openByPath('notebooks/Data.ipynb');
+    await page.notebook.open('Julia.ipynb');
 
-    await page.click('[title="Running Terminals and Kernels"]');
+    await page.sidebar.openTab('jp-running-sessions');
 
     // Wait up to 5s for both kernels to startup
     await expect
@@ -674,29 +695,31 @@ test.describe('General', () => {
     );
     await freeezeKernelIds(dialog, mockedKernelIds);
 
-    // Freeze `terminal/X` identifier because under concurrent execution the
-    // server might be tracking another terminal already so instead of
-    // `terminal/1` the screenshot would show e.g. `terminal/2`.
+    // Freeze the terminal identifier because under concurrent execution the
+    // server might be tracking another terminal already, and the displayed
+    // terminal label can depend on the terminal tab title. Terminal labels are
+    // covered in terminal tests; keep this modal snapshot focused on layout.
     // Changing this via mocks would involve both intercepting terminal REST
     // API and then rewiring websocket connections which does not work
     // reliably in galata as of now.
     await dialog.evaluate(node => {
-      let changed = false;
-      for (let [_, entry] of node
-        .querySelectorAll('.jp-RunningSessions-itemLabel')
-        .entries()) {
-        const label = entry.textContent ?? '';
-        if (/terminals\/\d+/i.test(label)) {
-          entry.textContent = label.replace(/terminals\/\d+/gi, 'terminals/1');
-          changed = true;
-          break;
-        }
-      }
-      if (!changed) {
+      const terminalSection = Array.from(
+        node.querySelectorAll('.jp-RunningSessions-section')
+      ).find(section => {
+        const label = section.querySelector(
+          '.jp-SearchableSessions-titleLabel'
+        );
+        return label?.textContent?.toLowerCase() === 'terminals';
+      });
+      const terminalEntry = terminalSection?.querySelector(
+        '.jp-RunningSessions-itemLabel'
+      );
+      if (!terminalEntry) {
         throw Error(
           'Expected to find at least one terminal entry in the dialog.'
         );
       }
+      terminalEntry.textContent = 'Terminal 1';
     });
 
     expect(await dialog.screenshot()).toMatchSnapshot('running_modal.png');
@@ -753,7 +776,7 @@ test.describe('General', () => {
     await page.goto(`tree/${tmpPath}`);
 
     // Hide file browser
-    await page.click('[title^="File Browser"]');
+    await page.sidebar.close('left');
 
     await page.notebook.createNew();
     await page.notebook.setCell(
@@ -764,10 +787,7 @@ test.describe('General', () => {
 
     await page.notebook.run();
 
-    await page.click('text=File');
-    await page.click(
-      '.lm-Menu ul[role="menu"] >> text=New Console for Notebook'
-    );
+    await page.menu.clickMenuItem('File>New Console for Notebook');
 
     await page.click('.jp-CodeConsole-input >> .cm-content');
     await page.keyboard.type(
@@ -786,7 +806,7 @@ test.describe('General', () => {
     await page.goto(`tree/${tmpPath}`);
 
     // Hide file browser
-    await page.click('[title^="File Browser"]');
+    await page.sidebar.close('left');
 
     await page.notebook.createNew();
     await page.notebook.setCell(
