@@ -16,8 +16,8 @@ We welcome contributions made with AI and expect them to be of the highest quali
 
 - Frontend: TypeScript, React 18, Lumino (widgets), CodeMirror 6
 - Backend: Python, Jupyter Server, Tornado, Traitlets
-- Build: Rspack, TypeScript, Lerna (independent versioning)
-- Package Manager: Yarn via `jlpm` wrapper (locked version in `jupyterlab/yarn.js`); run tools with `jlpm <tool>`, never `npx <tool>`
+- Build: Rspack, TypeScript, Yarn workspaces (independent versioning)
+- Package Manager: Yarn via `jlpm` wrapper (the version bundled in the `jupyter-builder` Python package); run tools with `jlpm <tool>`, never `npx <tool>`
 
 ## Code Quality Rules
 

@@ -12,7 +12,6 @@ interface IPublishOptions {
   skipBuild?: boolean;
   skipPublish?: boolean;
   skipTags?: boolean;
-  yes?: boolean;
   dryRun?: boolean;
 }
 
@@ -25,6 +24,25 @@ async function sleep(wait: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, wait));
 }
 
+/**
+ * Whether a package version is on the registry.
+ *
+ * @param spec - The package name and version, as `name@version`.
+ */
+function isPublished(spec: string): boolean {
+  try {
+    return (
+      utils.run(`npm view ${spec} version`, { stdio: 'pipe' }, true) !== ''
+    );
+  } catch (e) {
+    // E404 means that the package or the version is not on the registry.
+    if (!String(e).includes('E404')) {
+      console.warn(`Assuming that ${spec} is not published: ${String(e)}`);
+    }
+    return false;
+  }
+}
+
 // Specify the program signature.
 commander
   .description('Publish the JS packages')
@@ -34,7 +52,6 @@ commander
   )
   .option('--skip-publish', 'Skip publish and only handle tags')
   .option('--skip-tags', 'publish assets but do not handle tags')
-  .option('--yes', 'Publish without confirmation')
   .option('--dry-run', 'Do not actually push any assets')
   .action(async (options: IPublishOptions) => {
     utils.exitOnUncaughtException();
@@ -58,43 +75,54 @@ commander
       }
 
       // Ensure a clean git environment
-      try {
+      if (!options.dryRun && utils.checkStatus('git diff --quiet HEAD') !== 0) {
         utils.run('git commit -am "[ci skip] bump version"');
-      } catch (e) {
-        // do nothing
       }
 
       // Publish JS to the appropriate tag.
       const curr = utils.getPythonVersion();
-      let cmd = 'lerna publish from-package ';
+      let cmd = 'npm publish';
       if (options.dryRun) {
-        cmd += '--no-git-tag-version --no-push ';
-      }
-      if (options.yes) {
-        cmd += '  --yes ';
+        cmd += ' --dry-run';
       }
 
       let tag = 'latest';
       if (!/\d+\.\d+\.\d+$/.test(curr)) {
         tag = 'next';
       }
-      utils.run(`${cmd} --dist-tag=${tag} -m "Publish"`);
+      for (const pkgPath of utils.getYarnPaths().sort()) {
+        const data = utils.readJSONFile(path.join(pkgPath, 'package.json'));
+        if (data.private === true) {
+          continue;
+        }
+        const spec = `${data.name}@${data.version}`;
+        if (isPublished(spec)) {
+          console.log(`${spec} is already published`);
+          continue;
+        }
+        utils.run(`${cmd} --tag=${tag}`, { cwd: pkgPath });
+      }
     }
 
     // Fix up any tagging issues.
-    if (!options.skipTags && !options.dryRun) {
+    if (!options.skipTags) {
       const basePath = path.resolve('.');
-      const paths = utils.getLernaPaths(basePath).sort();
+      const paths = utils.getYarnPaths(basePath).sort();
       const cmds = await Promise.all(paths.map(handlePackage));
       cmds.forEach(cmdList => {
         cmdList.forEach(cmd => {
           if (!options.dryRun) {
             utils.run(cmd);
           } else {
-            throw new Error(`Tag is out of sync: ${cmd}`);
+            console.log(`Would run: ${cmd}`);
           }
         });
       });
+    }
+
+    // A dry run published nothing, so there is nothing to install.
+    if (options.dryRun) {
+      return;
     }
 
     // Make sure all current JS packages are published.

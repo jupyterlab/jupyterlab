@@ -15,6 +15,8 @@ jobs:
 
   check_release:
     runs-on: ubuntu-latest
+    env:
+      YARN_ENABLE_GLOBAL_CACHE: "1"
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -22,13 +24,19 @@ jobs:
           persist-credentials: false
 
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@925e40fa6066f4533e0c40803bd4b6d0d2f4a781 # v1.1.0
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
 
       - name: Check Release
-        uses: jupyter-server/jupyter_releaser/.github/actions/check-release@70e58c50c736ad496cca11fe4f2446033b68b027 # v2
+        uses: jupyter-server/jupyter_releaser/.github/actions/check-release@0bdca04f31abd7dfa75f8f8d33c52620ed3c8357 # v1.11.3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version_spec: next
+
+      # The staging build installs @jupyterlab packages from a local Verdaccio
+      # registry. Keep them out of the saved cache, or a later run reuses them.
+      - name: Remove Verdaccio packages from the yarn cache
+        if: always()
+        run: rm -f ~/.yarn/berry/cache/@jupyterlab-*
 
       - name: Upload Assets
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6

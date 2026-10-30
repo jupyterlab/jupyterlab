@@ -177,7 +177,7 @@ Choose and run an appropriate command to bump version numbers for this release.
 | `jlpm bumpversion release` | x.y.z.a1-> x.y.z.b0   | All a.b.c-alpha.1 -> a.b.c-beta.0  |
 | `jlpm bumpversion release` | x.y.z.b1-> x.y.z.rc0  | All a.b.c-beta.1 -> a.b.c-rc.0     |
 | `jlpm bumpversion release` | x.y.z.rc0-> x.y.z     | All a.b.c-rc0 -> a.b.c             |
-| `jlpm bumpversion patch`   | x.y.z -> x.y.(z+1)    | Changed a.b.c -> a.b.(c+1)         |
+| `jlpm bumpversion patch`   | x.y.z -> x.y.(z+1)    | All a.b.c -> a.b.(c+1)             |
 
 Note: For a major release, we bump the JS packages by 10 versions so that
 we are not competing amongst the minor releases for version numbers.
@@ -199,9 +199,10 @@ that JS package:
 Results:
 
 - Python package is not affected.
-- JS dependencies are also bumped a major version.
+- The public packages that depend on them, directly or through other packages, are also bumped a major version.
 - Packages that have already had a major bump in this prerelease cycle are not affected.
 - All affected packages changed to match the current release type of the Python package (`alpha`, `beta`, or `rc`).
+- The integrity script runs, and the changes are left uncommitted.
 
 ### Publishing Packages
 
