@@ -98,6 +98,16 @@ describe('KernelSourcesBody', () => {
     expect(getSourceItem('/lib/google/protobuf/message.py')).not.toBeNull();
   });
 
+  it('should show the sources that match the filter', async () => {
+    model.filter = 'decoder';
+    await setSources([
+      { name: 'json', path: '/lib/json/__init__.py' },
+      { name: 'json.decoder', path: '/lib/json/decoder.py' }
+    ]);
+
+    expect(getSourceItem('/lib/json/decoder.py')).not.toBeNull();
+  });
+
   it('should not split a file name on the dot of its extension', async () => {
     await setSources([{ name: 'module.cpp', path: '/src/module.cpp' }]);
 

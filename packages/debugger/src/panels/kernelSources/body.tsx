@@ -79,6 +79,7 @@ interface IKernelSourceNode {
  * Props shared by the components of the tree.
  */
 interface ITreeProps {
+  filtered: boolean;
   selectedPath: string | null;
   onSelect: (path: string) => void;
   onOpen: (path: string) => void;
@@ -115,13 +116,15 @@ function KernelSourceItem(
  * A collapsible directory of the tree.
  *
  * Once expanded, directories that only contain one directory are merged
- * into a single row.
+ * into a single row. While a filter is set, the directories that the user
+ * has not toggled are expanded, so that the matching sources show.
  */
 function KernelSourceDirectory(
   props: ITreeProps & { node: IKernelSourceNode }
 ): JSX.Element {
   const { node, ...treeProps } = props;
-  const [expanded, setExpanded] = useState(false);
+  const [toggled, setToggled] = useState<boolean | null>(null);
+  const expanded = toggled ?? treeProps.filtered;
 
   let label = node.name;
   let contents = node;
@@ -137,7 +140,7 @@ function KernelSourceDirectory(
 
   return (
     <div className={DIRECTORY_CLASS}>
-      <div className={ITEM_CLASS} onClick={() => setExpanded(!expanded)}>
+      <div className={ITEM_CLASS} onClick={() => setToggled(!expanded)}>
         {expanded ? (
           <caretDownIcon.react tag={null} />
         ) : (
@@ -191,9 +194,10 @@ function KernelSourceNodes(
  */
 function KernelSourcesTree(props: {
   kernelSources: IDebugger.KernelSource[];
+  filtered: boolean;
   onOpen: (path: string) => void;
 }): JSX.Element {
-  const { kernelSources, onOpen } = props;
+  const { kernelSources, filtered, onOpen } = props;
   const nodes = useMemo(
     () => Private.buildTree(kernelSources),
     [kernelSources]
@@ -202,6 +206,7 @@ function KernelSourcesTree(props: {
   return (
     <KernelSourceNodes
       nodes={nodes}
+      filtered={filtered}
       selectedPath={selectedPath}
       onSelect={setSelectedPath}
       onOpen={onOpen}
@@ -233,6 +238,7 @@ export class KernelSourcesBody extends ReactWidget {
         {(_, kernelSources) => (
           <KernelSourcesTree
             kernelSources={kernelSources ?? []}
+            filtered={this._model.filter !== ''}
             onOpen={this._openSource}
           />
         )}
