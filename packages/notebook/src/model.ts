@@ -63,6 +63,22 @@ export interface INotebookModel extends DocumentRegistry.IModel {
   readonly deletedCells: string[];
 
   /**
+   * Whether the notebook's chosen kernel is locked.
+   *
+   * ### Notes
+   * When `true`, the user should be prevented from changing the kernel.
+   * Represented through the `kernel_lock` notebook metadata field.
+   */
+  readonly kernelLocked: boolean;
+
+  /**
+   * Set whether the notebook's chosen kernel is locked.
+   *
+   * @param locked Whether the kernel should be locked.
+   */
+  setKernelLocked(locked: boolean): void;
+
+  /**
    * Shared model
    */
   readonly sharedModel: ISharedNotebook;
@@ -235,6 +251,26 @@ export class NotebookModel implements INotebookModel {
   get defaultKernelLanguage(): string {
     const info = this.getMetadata('language_info');
     return info?.name ?? '';
+  }
+
+  /**
+   * Whether the notebook's chosen kernel is locked.
+   */
+  get kernelLocked(): boolean {
+    return this.getMetadata('kernel_lock') === true;
+  }
+
+  /**
+   * Set whether the notebook's chosen kernel is locked.
+   *
+   * @param locked Whether the kernel should be locked.
+   */
+  setKernelLocked(locked: boolean): void {
+    if (locked) {
+      this.setMetadata('kernel_lock', true);
+    } else {
+      this.deleteMetadata('kernel_lock');
+    }
   }
 
   /**

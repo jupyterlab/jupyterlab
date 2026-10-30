@@ -160,12 +160,27 @@ namespace Private {
         initialSender={props.sessionContext}
       >
         {sessionContext => (
-          <ToolbarButtonComponent
-            className={TOOLBAR_KERNEL_NAME_CLASS}
-            onClick={callback}
-            tooltip={trans.__('Switch kernel')}
-            label={sessionContext?.kernelDisplayName}
-          />
+          <UseSignal
+            signal={props.sessionContext.kernelPreferenceChanged}
+            initialSender={props.sessionContext}
+          >
+            {() => {
+              const locked =
+                props.sessionContext.kernelPreference.locked === true;
+              return (
+                <ToolbarButtonComponent
+                  className={TOOLBAR_KERNEL_NAME_CLASS}
+                  onClick={callback}
+                  tooltip={trans.__('Switch kernel')}
+                  disabledTooltip={trans.__(
+                    'The kernel is locked for this notebook'
+                  )}
+                  enabled={!locked}
+                  label={sessionContext?.kernelDisplayName}
+                />
+              );
+            }}
+          </UseSignal>
         )}
       </UseSignal>
     );
