@@ -15,7 +15,7 @@ import { framePromise, JupyterServer } from '@jupyterlab/testing';
 import { CommandRegistry } from '@lumino/commands';
 import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import type { PanelLayout } from '@lumino/widgets';
-import { Widget } from '@lumino/widgets';
+import { Panel, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 
 const server = new JupyterServer();
@@ -252,6 +252,55 @@ describe('@jupyterlab/ui-components', () => {
         widget.addItem('b', new Widget());
         const value = widget.insertBefore('c', 'd', new Widget());
         expect(value).toBe(false);
+      });
+    });
+
+    describe('#handleEvent()', () => {
+      let parent: Panel;
+      let button: Widget;
+
+      beforeEach(() => {
+        parent = new Panel();
+        parent.addWidget(widget);
+        button = new Widget({ node: document.createElement('button') });
+        widget.addItem('button', button);
+        Widget.attach(parent, document.body);
+      });
+
+      afterEach(() => {
+        parent.dispose();
+      });
+
+      it.each(['pointerdown', 'keydown'])(
+        'should not activate the parent when a click after %s moves the focus to a menu',
+        eventType => {
+          const menu = document.createElement('div');
+          menu.tabIndex = -1;
+          document.body.appendChild(menu);
+          button.node.addEventListener('click', () => menu.focus());
+          const activate = jest.spyOn(parent, 'activate');
+
+          button.node.focus();
+          button.node.dispatchEvent(new Event(eventType, { bubbles: true }));
+          simulate(button.node, 'click');
+
+          expect(activate).not.toHaveBeenCalled();
+          menu.remove();
+        }
+      );
+
+      it('should activate the parent when a click on empty space leaves the focus on the body', () => {
+        const input = new Widget({ node: document.createElement('input') });
+        parent.addWidget(input);
+        const activate = jest.spyOn(parent, 'activate');
+
+        input.node.focus();
+        widget.node.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+        // A press on an element that cannot take focus moves the focus to the body.
+        input.node.blur();
+        simulate(widget.node, 'click');
+
+        expect(activate).toHaveBeenCalled();
       });
     });
 
