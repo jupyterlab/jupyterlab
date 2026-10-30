@@ -299,6 +299,7 @@ function addRunningSessionManager(
   lsManager.documentsChanged.connect(() => signal.emit(lsManager));
   let currentRunning: RunningLanguageServer[] = [];
   managers.add({
+    id: 'jp-running-language-servers',
     name: trans.__('Language servers'),
     supportsMultipleViews: false,
     running: () => {

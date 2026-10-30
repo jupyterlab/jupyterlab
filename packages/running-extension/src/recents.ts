@@ -31,6 +31,7 @@ export function addRecentlyClosedSessionManager(
   const trans = translator.load('jupyterlab');
 
   managers.add({
+    id: 'jp-running-recently-closed',
     name: trans.__('Recently Closed'),
     supportsMultipleViews: false,
     running: () => {

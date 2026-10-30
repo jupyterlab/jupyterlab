@@ -65,12 +65,14 @@ export class DebuggerSidebar extends SidePanel {
       themeManager,
       translator
     });
+    this.variables.id = 'jp-debugger-variables';
 
     this.callstack = new CallstackPanel({
       commands: callstackCommands,
       model: model.callstack,
       translator
     });
+    this.callstack.id = 'jp-debugger-callstack';
 
     this.breakpoints = new BreakpointsPanel({
       service,
@@ -78,12 +80,14 @@ export class DebuggerSidebar extends SidePanel {
       model: model.breakpoints,
       translator
     });
+    this.breakpoints.id = 'jp-debugger-breakpoints';
 
     this.kernelSources = new KernelSourcesPanel({
       model: model.kernelSources,
       service,
       translator
     });
+    this.kernelSources.id = 'jp-debugger-kernel-sources';
 
     const header = new DebuggerSidebar.Header();
 
@@ -119,6 +123,7 @@ export class DebuggerSidebar extends SidePanel {
 
       if (!this._sources || this._sources.isDisposed) {
         this._sources = new SourcesPanel(this._sourcesOptions);
+        this._sources.id = 'jp-debugger-sources';
         this.insertWidget(3, this._sources);
       }
     } else {

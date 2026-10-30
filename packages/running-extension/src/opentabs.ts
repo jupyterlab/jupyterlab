@@ -71,6 +71,7 @@ export function addOpenTabsSessionManager(
   const trans = translator.load('jupyterlab');
 
   managers.add({
+    id: 'jp-running-open-tabs',
     name: trans.__('Open Tabs'),
     supportsMultipleViews: false,
     running: () => {
