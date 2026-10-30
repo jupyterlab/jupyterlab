@@ -182,6 +182,48 @@ test.describe('Section reordering', () => {
     ).toBeHidden();
   });
 
+  test('should share the reordering lock between sidebar panels', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('jp-running-sessions');
+    await page.sidebar.openTab('jp-debugger-sidebar');
+    const runningTitle = page
+      .locator('#jp-running-sessions .lm-AccordionPanel-title')
+      .first();
+    const debuggerTitle = page
+      .locator('#jp-debugger-sidebar .lm-AccordionPanel-title')
+      .first();
+    const runningHandle = runningTitle.locator('.jp-AccordionPanel-dragHandle');
+    const debuggerHandle = debuggerTitle.locator(
+      '.jp-AccordionPanel-dragHandle'
+    );
+    await expect(runningHandle).toBeHidden();
+    await expect(debuggerHandle).toBeHidden();
+
+    await toggleReordering(page, runningTitle);
+    await expect(runningHandle).toBeVisible();
+    await expect(debuggerHandle).toBeVisible();
+    await debuggerTitle
+      .locator('.lm-AccordionPanel-titleLabel')
+      .click({ button: 'right' });
+    const toggle = page.locator(TOGGLE_REORDERING_SELECTOR);
+    await expect(toggle).toHaveAttribute('aria-checked', 'true');
+    await toggle.click();
+    await expect(runningHandle).toBeHidden();
+    await expect(debuggerHandle).toBeHidden();
+
+    for (const unlocked of [false, true]) {
+      if (unlocked) {
+        await toggleReordering(page, debuggerTitle);
+        await expect(runningHandle).toBeVisible();
+      }
+      await runningTitle.locator('.lm-AccordionPanel-titleLabel').click();
+      await expect(runningTitle).toHaveAttribute('aria-expanded', 'false');
+      await runningTitle.locator('.lm-AccordionPanel-titleLabel').click();
+      await expect(runningTitle).toHaveAttribute('aria-expanded', 'true');
+    }
+  });
+
   test('should restore reordered section states after reload', async ({
     page
   }) => {
@@ -323,9 +365,13 @@ test.describe('Section reordering', () => {
         .click();
       await page.sidebar.openTab('filebrowser');
     };
+    await page.sidebar.openTab('jp-running-sessions');
+    await toggleReordering(page, runningTitles.first());
     await moveToFileBrowser('Open Tabs');
     await expect(titles).toHaveCount(2);
-    await toggleReordering(page, titles.first());
+    await expect(
+      titles.first().locator('.jp-AccordionPanel-dragHandle')
+    ).toBeVisible();
     await moveToFileBrowser('Terminals');
     await expect(titles).toHaveCount(3);
     await expect(
@@ -345,10 +391,9 @@ test.describe('Section reordering', () => {
     await expect(titles).toHaveCount(2);
     await expect(
       titles.first().locator('.jp-AccordionPanel-dragHandle')
-    ).toBeHidden();
+    ).toBeVisible();
     const labels = titles.locator('.lm-AccordionPanel-titleLabel');
     const initialLabels = await labels.allTextContents();
-    await toggleReordering(page, titles.first());
     await startDrag(page, titles.first(), titles.nth(1));
     await page.mouse.up();
     await expect(labels).toHaveText([initialLabels[1], initialLabels[0]]);

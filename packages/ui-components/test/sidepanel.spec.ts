@@ -9,6 +9,71 @@ import {
 } from '@jupyterlab/ui-components';
 import { AccordionPanel, Widget } from '@lumino/widgets';
 
+describe('AccordionPanelReorderer', () => {
+  let first: AccordionPanel;
+  let second: AccordionPanel;
+
+  beforeEach(() => {
+    first = new AccordionPanel();
+    second = new AccordionPanel();
+    AccordionPanelReorderer.get(first).enabled = false;
+  });
+
+  afterEach(() => {
+    AccordionPanelReorderer.get(first).enabled = false;
+    first.dispose();
+    second.dispose();
+  });
+
+  it('should share the lock across panels', () => {
+    const firstReorderer = AccordionPanelReorderer.get(first);
+    const secondReorderer = AccordionPanelReorderer.get(second);
+    expect(firstReorderer.enabled).toBe(false);
+    expect(secondReorderer.enabled).toBe(false);
+    expect(first.hasClass('jp-mod-reorderable')).toBe(false);
+    expect(second.hasClass('jp-mod-reorderable')).toBe(false);
+
+    firstReorderer.enabled = true;
+    expect(secondReorderer.enabled).toBe(true);
+    expect(first.hasClass('jp-mod-reorderable')).toBe(true);
+    expect(second.hasClass('jp-mod-reorderable')).toBe(true);
+
+    secondReorderer.enabled = false;
+    expect(firstReorderer.enabled).toBe(false);
+    expect(first.hasClass('jp-mod-reorderable')).toBe(false);
+    expect(second.hasClass('jp-mod-reorderable')).toBe(false);
+  });
+
+  it('should initialize new panels with the shared lock state', () => {
+    AccordionPanelReorderer.get(first).enabled = true;
+    const sidebar = new SidePanel({ content: second });
+    try {
+      expect(AccordionPanelReorderer.get(second).enabled).toBe(true);
+      expect(second.hasClass('jp-mod-reorderable')).toBe(true);
+      expect(AccordionPanelReorderer.get(first).enabled).toBe(true);
+    } finally {
+      sidebar.dispose();
+    }
+  });
+
+  it('should keep other panels unlocked when a reorderer is disposed', () => {
+    const firstReorderer = AccordionPanelReorderer.get(first);
+    const secondReorderer = AccordionPanelReorderer.get(second);
+    firstReorderer.enabled = true;
+    secondReorderer.enabled = true;
+
+    firstReorderer.dispose();
+    expect(first.hasClass('jp-mod-reorderable')).toBe(false);
+    expect(secondReorderer.enabled).toBe(true);
+    expect(second.hasClass('jp-mod-reorderable')).toBe(true);
+
+    secondReorderer.enabled = false;
+    secondReorderer.enabled = true;
+    expect(first.hasClass('jp-mod-reorderable')).toBe(false);
+    expect(AccordionPanelReorderer.get(first).enabled).toBe(true);
+  });
+});
+
 describe('#SidePanel', () => {
   it('should initialize handles for prepopulated accordion content', () => {
     const content = new AccordionPanel();
