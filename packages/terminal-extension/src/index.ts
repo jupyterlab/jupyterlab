@@ -518,7 +518,7 @@ function addCommands(
       const term = new XTerm(session, options, translator);
 
       term.title.icon = terminalIcon;
-      // eslint-disable-next-line jupyter/no-untranslated-string
+
       term.title.label = '...';
 
       const main = new MainAreaWidget({ content: term, reveal: term.ready });
@@ -595,7 +595,8 @@ function addCommands(
           current.content.activate();
         }
       } catch (err) {
-        Private.showErrorMessage(err);
+        const error = err instanceof Error ? err : new Error(String(err));
+        Private.showErrorMessage(error);
       }
     },
     icon: args =>
@@ -773,7 +774,8 @@ function addCommands(
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize + 1);
         } catch (err) {
-          Private.showErrorMessage(err);
+          const error = err instanceof Error ? err : new Error(String(err));
+          Private.showErrorMessage(error);
         }
       }
     },
@@ -793,7 +795,8 @@ function addCommands(
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize - 1);
         } catch (err) {
-          Private.showErrorMessage(err);
+          const error = err instanceof Error ? err : new Error(String(err));
+          Private.showErrorMessage(error);
         }
       }
     },
@@ -840,8 +843,8 @@ function addCommands(
         await settingRegistry.set(plugin.id, 'theme', theme);
         commands.notifyCommandChanged(CommandIDs.setTheme);
       } catch (err) {
-        console.log(err);
-        Private.showErrorMessage(err);
+        const error = err instanceof Error ? err : new Error(String(err));
+        Private.showErrorMessage(error);
       }
     },
     describedBy: {

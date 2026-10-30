@@ -168,26 +168,21 @@ export function createSemanticCommand(
     caption: concatenateTexts('caption'),
     isEnabled: () => {
       const isEnabled = reduceAttribute('isEnabled');
-      return (
-        (isEnabled.length > 0 &&
-          !isEnabled.some(enabled => enabled === false)) ||
-        (defaultValues.isEnabled ?? false)
-      );
+      return isEnabled.length > 0
+        ? !isEnabled.some(enabled => enabled === false)
+        : (defaultValues.isEnabled ?? false);
     },
     isToggled: () => {
       const isToggled = reduceAttribute('isToggled');
-      return (
-        isToggled.some(enabled => enabled === true) ||
-        (defaultValues.isToggled ?? false)
-      );
+      return isToggled.length > 0
+        ? isToggled.some(enabled => enabled === true)
+        : (defaultValues.isToggled ?? false);
     },
     isVisible: () => {
       const isVisible = reduceAttribute('isVisible');
-      return (
-        (isVisible.length > 0 &&
-          !isVisible.some(visible => visible === false)) ||
-        (defaultValues.isVisible ?? true)
-      );
+      return isVisible.length > 0
+        ? !isVisible.some(visible => visible === false)
+        : (defaultValues.isVisible ?? true);
     },
     execute: async () => {
       const widget = shell.currentWidget;

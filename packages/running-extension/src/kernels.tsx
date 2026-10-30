@@ -69,9 +69,6 @@ export async function addKernelRunningSessionManager(
   });
   sessions.runningChanged.connect(() => void throttler.invoke());
 
-  // Wait until the relevant services are ready.
-  await Promise.all([kernels.ready, kernelspecs.ready, sessions.ready]);
-
   function getUnusedKernels() {
     // Identifies unused kernels
     return Array.from(kernels.running()).filter(
@@ -143,7 +140,9 @@ export async function addKernelRunningSessionManager(
     }
   });
 
-  // Add the kernels pane to the running sidebar.
+  // Add the kernels pane to the running sidebar. It is added before the
+  // services are ready, so that the position of the pane does not depend on
+  // the server response time.
   managers.add({
     id: 'jp-running-kernels',
     name: trans.__('Kernels'),
@@ -349,6 +348,10 @@ export async function addKernelRunningSessionManager(
       }
     }
   });
+
+  // Render the kernels with their specs and sessions once all are loaded.
+  await Promise.all([kernels.ready, kernelspecs.ready, sessions.ready]);
+  runningChanged.emit(undefined);
 }
 
 namespace Private {

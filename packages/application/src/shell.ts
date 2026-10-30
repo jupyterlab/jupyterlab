@@ -919,6 +919,26 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         throw new Error(`Invalid area: ${area}`);
     }
   }
+
+  /**
+   * Activate a tab in the active tab bar.
+   *
+   * @param index - The zero-based tab index. A negative index counts from
+   *   the end, so -1 is the last tab.
+   */
+  activateTab(index: number): void {
+    const current = this._currentTabBar();
+    if (!current) {
+      return;
+    }
+
+    const { titles } = current;
+    const title = titles[index < 0 ? titles.length + index : index];
+    if (title) {
+      this._dockPanel.activateWidget(title.owner);
+    }
+  }
+
   /**
    * Activate the next Tab in the active TabBar.
    */

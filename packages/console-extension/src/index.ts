@@ -1117,7 +1117,12 @@ async function activateConsole(
   });
 
   commands.addCommand(CommandIDs.replaceSelection, {
-    label: trans.__('Replace Selection in Console'),
+    label: args => {
+      const text = args['text'];
+      return typeof text === 'string' && text
+        ? trans.__('Replace Selection in Console with "%1"', text)
+        : trans.__('Replace Selection in Console');
+    },
     describedBy: {
       args: {
         type: 'object',
@@ -1289,7 +1294,10 @@ async function activateConsole(
       try {
         await session.setName(result.value);
       } catch (error) {
-        void showErrorMessage(trans.__('Rename Error'), error);
+        void showErrorMessage(
+          trans.__('Rename Error'),
+          error instanceof Error ? error : String(error)
+        );
       }
     },
     isEnabled: () => contextMenuConsole() !== null || isEnabled(),
@@ -1497,7 +1505,7 @@ async function activateConsole(
   commands.addCommand(CommandIDs.interactionMode, {
     label: args =>
       runShortcutTitles[args['interactionMode'] as string] ??
-      'Set the console interaction mode.',
+      trans.__('Set the console interaction mode.'),
     execute: async args => {
       const key = 'keyMap';
       try {
@@ -1507,7 +1515,11 @@ async function activateConsole(
           args['interactionMode'] as string
         );
       } catch (reason) {
-        console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
+        console.error(
+          `Failed to set ${pluginId}:${key} - ${
+            reason instanceof Error ? reason.message : String(reason)
+          }`
+        );
       }
     },
     isToggled: args => args['interactionMode'] === interactionMode,
