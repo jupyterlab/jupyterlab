@@ -8,7 +8,6 @@ import {
   CodeCellModel,
   MarkdownCell,
   MarkdownCellModel,
-  OutputCollapser,
   RawCell,
   RawCellModel
 } from '@jupyterlab/cells';
@@ -2068,75 +2067,6 @@ describe('@jupyter/notebook', () => {
           widget.node.dispatchEvent(evt);
           expect(widget.mode).toBe('command');
         });
-      });
-    });
-
-    describe('shrinking outputs', () => {
-      let widget: LogNotebook;
-      let cell: CodeCell;
-
-      function createRect(top: number, height: number): DOMRect {
-        return {
-          x: 0,
-          y: top,
-          width: 0,
-          height,
-          top,
-          right: 0,
-          bottom: top + height,
-          left: 0,
-          toJSON: () => ({})
-        };
-      }
-
-      beforeEach(() => {
-        widget = createActiveWidget();
-        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
-        Widget.attach(widget, document.body);
-        cell = widget.widgets.find(
-          (cell): cell is CodeCell => cell instanceof CodeCell
-        )!;
-        jest
-          .spyOn(widget.outerNode, 'getBoundingClientRect')
-          .mockReturnValue(createRect(0, 500));
-        jest
-          .spyOn(cell.node, 'getBoundingClientRect')
-          .mockReturnValue(createRect(-600, 100));
-      });
-
-      afterEach(() => {
-        jest.restoreAllMocks();
-        widget.dispose();
-      });
-
-      it('should scroll the notebook to the cell when collapsing its output', async () => {
-        const collapser = Array.from(cell.children(), child => [
-          ...child.children()
-        ])
-          .flat()
-          .find(
-            (child): child is OutputCollapser =>
-              child instanceof OutputCollapser
-          )!;
-        await collapser.renderPromise;
-        widget.outerNode.scrollTop = 1000;
-
-        simulate(collapser.node.firstElementChild!, 'click');
-
-        expect(cell.outputHidden).toBe(true);
-        expect(widget.outerNode.scrollTop).toBe(400);
-      });
-
-      it('should scroll the notebook to the cell when enabling output scrolling', () => {
-        widget.outerNode.scrollTop = 1000;
-
-        simulate(
-          cell.node.querySelector('.jp-OutputArea-promptOverlay')!,
-          'click'
-        );
-
-        expect(cell.outputsScrolled).toBe(true);
-        expect(widget.outerNode.scrollTop).toBe(400);
       });
     });
 

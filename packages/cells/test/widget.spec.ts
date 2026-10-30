@@ -27,8 +27,11 @@ import type { IExecuteReplyMsg } from '@jupyterlab/services/lib/kernel/messages'
 import {
   framePromise,
   JupyterServer,
-  signalToPromise
+  signalToPromise,
+  simulate,
+  sleep
 } from '@jupyterlab/testing';
+import { WindowedList, WindowedListModel } from '@jupyterlab/ui-components';
 import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
@@ -101,6 +104,55 @@ class LogMarkdownCell extends MarkdownCell {
     super.onUpdateRequest(msg);
     this.methods.push('onUpdateRequest');
   }
+}
+
+class SingleItemListModel extends WindowedListModel {
+  constructor(private _item: Widget) {
+    super({ count: 1, windowingActive: false });
+  }
+
+  estimateWidgetSize = (): number => 100;
+
+  widgetRenderer = (): Widget => this._item;
+}
+
+function createRect(top: number, height: number): DOMRect {
+  return {
+    x: 0,
+    y: top,
+    width: 0,
+    height,
+    top,
+    right: 0,
+    bottom: top + height,
+    left: 0,
+    toJSON: () => ({})
+  };
+}
+
+/**
+ * Attach a code cell to a windowed list and place the cell above its viewport.
+ */
+function attachCellAboveViewport(): { cell: CodeCell; list: WindowedList } {
+  const cell = new CodeCell({
+    contentFactory: NBTestUtils.createCodeCellFactory(),
+    model: new CodeCellModel(),
+    rendermime,
+    placeholder: false
+  });
+  cell.initializeState();
+  const list = new WindowedList({ model: new SingleItemListModel(cell) });
+  Widget.attach(list, document.body);
+  // The list renders its items on update requests.
+  MessageLoop.sendMessage(list, Widget.Msg.UpdateRequest);
+  jest
+    .spyOn(list.outerNode, 'getBoundingClientRect')
+    .mockReturnValue(createRect(0, 500));
+  jest
+    .spyOn(cell.node, 'getBoundingClientRect')
+    .mockReturnValue(createRect(-600, 100));
+  list.outerNode.scrollTop = 1000;
+  return { cell, list };
 }
 
 describe('cells/widget', () => {
@@ -623,6 +675,22 @@ describe('cells/widget', () => {
         widget.outputHidden = true;
         expect(widget.outputHidden).toEqual(true);
       });
+
+      it('should scroll the cell into view when the output collapser hides the output', async () => {
+        const { cell, list } = attachCellAboveViewport();
+        const collapser = () =>
+          cell.node.querySelector('.jp-OutputCollapser .jp-Collapser-child');
+        // React renders the collapser content after the cell is attached.
+        while (!collapser()) {
+          await sleep(10);
+        }
+
+        simulate(collapser()!, 'click');
+
+        expect(cell.outputHidden).toBe(true);
+        expect(list.outerNode.scrollTop).toBe(400);
+        list.dispose();
+      });
     });
 
     describe('#outputsScrolled', () => {
@@ -662,6 +730,19 @@ describe('cells/widget', () => {
         });
         widget.initializeState();
         expect(widget.outputsScrolled).toEqual(true);
+      });
+
+      it('should scroll the cell into view when the output prompt turns scrolling on', () => {
+        const { cell, list } = attachCellAboveViewport();
+
+        simulate(
+          cell.node.querySelector('.jp-OutputArea-promptOverlay')!,
+          'click'
+        );
+
+        expect(cell.outputsScrolled).toBe(true);
+        expect(list.outerNode.scrollTop).toBe(400);
+        list.dispose();
       });
     });
 
