@@ -3,9 +3,23 @@
 
 import { Toolbar } from '@jupyterlab/apputils';
 
+import {
+  CodeMirrorEditorFactory,
+  CodeMirrorMimeTypeService,
+  EditorLanguageRegistry
+} from '@jupyterlab/codemirror';
+
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+
+import { Context, TextModelFactory } from '@jupyterlab/docregistry';
+
 import { createSession } from '@jupyterlab/docregistry/lib/testutils';
 
+import { FileEditor, FileEditorWidget } from '@jupyterlab/fileeditor';
+
 import type { Session } from '@jupyterlab/services';
+
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 
 import { JupyterServer, signalToPromise, sleep } from '@jupyterlab/testing';
 
@@ -167,6 +181,90 @@ describe('DebuggerHandler', () => {
       expect(handler['_debuggerAvailability'][widget.id]).toBeUndefined();
       expect(handler['_iconButtons'][widget.id]).toBeUndefined();
       expect(handler['_kernelChangedHandlers'][widget.id]).toBeUndefined();
+    });
+  });
+
+  describe('debugger button', () => {
+    let context: Context<DocumentRegistry.ICodeModel>;
+    let fileWidget: FileEditorWidget;
+
+    beforeEach(() => {
+      context = new Context({
+        manager: new ServiceManagerMock(),
+        factory: new TextModelFactory(),
+        path: UUID.uuid4() + '.py'
+      });
+      const editorFactory = new CodeMirrorEditorFactory();
+      const content = new FileEditor({
+        factory: options => editorFactory.newDocumentEditor(options),
+        mimeTypeService: new CodeMirrorMimeTypeService(
+          new EditorLanguageRegistry()
+        ),
+        context
+      });
+      fileWidget = new FileEditorWidget({ content, context });
+      // Clicks are ignored unless the widget is the current one.
+      handler = new DebuggerHandler({
+        type: 'file',
+        shell: { currentWidget: fileWidget } as any,
+        service
+      });
+    });
+
+    afterEach(async () => {
+      // Stop here so that the disposal hook does not send `disconnect` after
+      // the kernel is shut down.
+      if (service.isStarted) {
+        await service.stop();
+      }
+      fileWidget.dispose();
+      context.dispose();
+    });
+
+    it('ignores a second click while the debugger starts', async () => {
+      await handler.update(fileWidget, connection);
+      const button = handler['_iconButtons'][fileWidget.id]!;
+
+      button.onClick();
+      // `isStarted` turns true when `initialize` is answered, while the first
+      // click still waits for `attach`.
+      while (!service.isStarted) {
+        await sleep(10);
+      }
+      button.onClick();
+      const pressedAfterSecondClick = button.pressed;
+      // The first click creates the debug handler last.
+      while (!fileWidget.node.hasAttribute('data-jp-debugger')) {
+        await sleep(10);
+      }
+
+      const reply = await service.session!.sendRequest('debugInfo', {});
+      expect(reply.body.isStarted).toBe(true);
+      expect(service.isStarted).toBe(true);
+      expect(button.pressed).toBe(true);
+      expect(pressedAfterSecondClick).toBe(true);
+    });
+
+    it('lets clicks through again once the kernel restarts while the debugger starts', async () => {
+      await handler.update(fileWidget, connection);
+      const button = handler['_iconButtons'][fileWidget.id]!;
+
+      // The restart drops the requests of this click, which never settles.
+      button.onClick();
+      await connection.kernel!.restart();
+      // The handler turns the button off once it has seen the restart.
+      while (button.pressed) {
+        await sleep(10);
+      }
+      button.onClick();
+      while (!fileWidget.node.hasAttribute('data-jp-debugger')) {
+        await sleep(10);
+      }
+
+      const reply = await service.session!.sendRequest('debugInfo', {});
+      expect(reply.body.isStarted).toBe(true);
+      expect(service.isStarted).toBe(true);
+      expect(button.pressed).toBe(true);
     });
   });
 });

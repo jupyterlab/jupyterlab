@@ -150,6 +150,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     // connection missed by the explicit disconnects via
     // `Signal.clearData(this)`.
     const kernelChanged = (): void => {
+      this._dropPendingToggle(connection);
       void this.updateWidget(widget, connection);
     };
     const kernelChangedHandler = this._kernelChangedHandlers[widget.id];
@@ -165,6 +166,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       status: Kernel.Status
     ): void => {
       if (status.endsWith('restarting')) {
+        this._dropPendingToggle(connection);
         void this.updateWidget(widget, connection);
       }
     };
@@ -429,14 +431,29 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
         return;
       }
       const debugButton = this._iconButtons[widget.id]!;
-      if (isDebuggerOn()) {
-        await stopDebugger();
-        removeHandlers();
-        updateIconButtonState(debugButton, false);
-      } else {
-        await startDebugger();
-        createHandler();
-        updateIconButtonState(debugButton, true);
+      if (this._pendingToggle) {
+        // An earlier click is still starting or stopping the debugger: the
+        // service turns `isStarted` on before it attaches, so acting on this
+        // click would stop it halfway. Undo the toggle the button made itself.
+        debugButton.pressed = !debugButton.pressed;
+        return;
+      }
+      const pendingToggle = { connection };
+      this._pendingToggle = pendingToggle;
+      try {
+        if (isDebuggerOn()) {
+          await stopDebugger();
+          removeHandlers();
+          updateIconButtonState(debugButton, false);
+        } else {
+          await startDebugger();
+          createHandler();
+          updateIconButtonState(debugButton, true);
+        }
+      } finally {
+        if (this._pendingToggle === pendingToggle) {
+          this._pendingToggle = null;
+        }
       }
     };
 
@@ -532,10 +549,23 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     this._previousConnection = connection;
   }
 
+  /**
+   * Let clicks through again once the kernel of a pending toggle restarts or
+   * changes: its debug requests are dropped then, and it may never settle.
+   */
+  private _dropPendingToggle(connection: Session.ISessionConnection): void {
+    if (this._pendingToggle?.connection === connection) {
+      this._pendingToggle = null;
+    }
+  }
+
   private _type: DebuggerHandler.SessionType;
   private _shell: JupyterFrontEnd.IShell;
   private _service: IDebugger;
   private _previousConnection: Session.ISessionConnection | null;
+  private _pendingToggle: {
+    connection: Session.ISessionConnection;
+  } | null = null;
   private _activeWidget:
     | DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
     | null;
