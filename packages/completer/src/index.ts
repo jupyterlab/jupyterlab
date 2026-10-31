@@ -16,3 +16,4 @@ export * from './inline';
 export * from './default/contextprovider';
 export * from './default/kernelprovider';
 export * from './default/inlinehistoryprovider';
+export * from './utils';

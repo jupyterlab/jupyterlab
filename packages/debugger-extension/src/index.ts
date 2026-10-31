@@ -27,7 +27,9 @@ import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import {
   Debugger,
+  DebuggerCompletionProvider,
   DebuggerDisplayRegistry,
+  DebuggerIPythonCompletionProvider,
   IDebugger,
   IDebuggerConfig,
   IDebuggerDisplayRegistry,
@@ -52,11 +54,11 @@ import {
 import type { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ICompletionContext } from '@jupyterlab/completer';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import type { CommandRegistry } from '@lumino/commands';
 import { WidgetTracker } from '@jupyterlab/apputils';
 import { DebugConsoleCellExecutor } from './debug-console-executor';
-import { DebuggerCompletionProvider } from './debugger-completion-provider';
 import { isCodeCellModel } from '@jupyterlab/cells';
 import type { Widget } from '@lumino/widgets';
 
@@ -1474,14 +1476,22 @@ const debuggerCompletions: JupyterFrontEndPlugin<void> = {
     completionManager: ICompletionProviderManager,
     translator: ITranslator | null
   ): void => {
-    // Create and register the debugger completion provider
+    const isDebugConsole = (context?: ICompletionContext) =>
+      !!context?.widget.hasClass('jp-DebugConsole');
+
     const provider = new DebuggerCompletionProvider({
       debuggerService: debuggerService,
-      translator: translator || nullTranslator
+      translator: translator || nullTranslator,
+      isDebugConsole
     });
-
-    // Register the provider with the completion manager
     completionManager.registerProvider(provider);
+
+    const ipythonProvider = new DebuggerIPythonCompletionProvider({
+      debuggerService: debuggerService,
+      translator: translator || nullTranslator,
+      isDebugConsole
+    });
+    completionManager.registerProvider(ipythonProvider);
   }
 };
 
