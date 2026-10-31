@@ -7,7 +7,7 @@
 // Copyright (C) 2020 by Marijn Haverbeke <marijnh@gmail.com> and others
 
 import { parseMathIPython } from '@jupyterlab/codemirror';
-import { Tree } from '@lezer/common';
+import { Tree, TreeFragment } from '@lezer/common';
 import type { MarkdownParser } from '@lezer/markdown';
 import { parser } from '@lezer/markdown';
 import { StreamLanguage } from '@codemirror/language';
@@ -301,6 +301,26 @@ Title
 );
 
 test(
+  'Block math $$ containing a line starting with a list marker',
+  `
+{MaBD:{maBD:$$}
+L = \\sum_i y_i
+- \\lambda w^2
+{maBD:$$}}
+`
+);
+
+test(
+  'Block math $$ containing a line starting with a quote marker',
+  `
+{MaBD:{maBD:$$}
+f(x)
+> 0
+{maBD:$$}}
+`
+);
+
+test(
   'Block math $$ interrupting a paragraph',
   `
 {P:Some text}
@@ -312,13 +332,38 @@ a
 );
 
 test(
-  'Unclosed block math $$ stops at a blank line',
+  'Block math $$ after a paragraph with $$ in a code span',
+  '\n{P:Wrap display math in {C:{c:`}$${c:`}}:}\n{MaBD:{maBD:$$}\nx^2\n{maBD:$$}}\n{P:where {Em:{e:*}x{e:*}} is a variable.}\n'
+);
+
+test(
+  'Block math $$ followed by Markdown on the closing line',
   `
 {MaBD:{maBD:$$}
+E = mc^2
+{maBD:$$}} {P:where {MaID:{maID:$}m{maID:$}} is the {Em:{e:*}mass{e:*}}.}
+`
+);
+
+test(
+  'Unclosed block math $$ is a paragraph up to a blank line',
+  `
+{P:$$
 a}
 
 {SH1:b
 {h:=}}
+`
+);
+
+test(
+  'Closing $$ of math interrupted by a list item is a paragraph',
+  `
+{P:The loss is $$
+L = \\sum_i y_i}
+{BL:{LI:{l:+} {P:\\lambda w^2}}}
+{P:$$
+where {Em:{e:*}w{e:*}} is the weight.}
 `
 );
 
@@ -358,5 +403,36 @@ describe('markdown parser', () => {
   it('should parse empty math block $$$$ without error', () => {
     const inputText = '$$$$';
     expect(() => mixedParser.parse(inputText)).not.toThrow();
+  });
+
+  it('should reparse a list item ending with $$ math as from scratch', () => {
+    // TreeFragment.applyChanges drops unchanged ranges under 128 characters.
+    const doc = [
+      'The energy of a body at rest follows from its mass, as the list below',
+      'shows for a few cases.',
+      '',
+      '- Energy:',
+      '  $$',
+      '  E = mc^2',
+      '  $$ where $m$ is the *mass*.',
+      '1. Next step',
+      '',
+      'Text'
+    ].join('\n');
+    const edited = `${doc}x`;
+    const fragments = TreeFragment.applyChanges(
+      TreeFragment.addTree(ipythonParser.parse(doc)),
+      [
+        {
+          fromA: doc.length,
+          toA: doc.length,
+          fromB: doc.length,
+          toB: edited.length
+        }
+      ]
+    );
+    expect(ipythonParser.parse(edited, fragments).toString()).toBe(
+      ipythonParser.parse(edited).toString()
+    );
   });
 });
