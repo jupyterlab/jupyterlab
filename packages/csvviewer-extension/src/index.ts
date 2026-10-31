@@ -144,10 +144,9 @@ function activateCsv(
 
   const trans = translator.load('jupyterlab');
 
-  // Default delimiter from settings
   let defaultDelimiter = ',';
 
-  // Custom factory that uses the default delimiter from settings
+  // Opens new files with the delimiter from the settings.
   class CustomCSVViewerFactory extends CSVViewerFactory {
     protected createNewWidget(
       context: DocumentRegistry.Context
@@ -161,21 +160,21 @@ function activateCsv(
     }
   }
 
-  // Load settings if available
   if (settingRegistry) {
-    void settingRegistry.load(csv.id).then(settings => {
-      defaultDelimiter = (settings.get('delimiter').composite as string) || ',';
-      // Update existing widgets when settings change
-      settings.changed.connect(() => {
-        const newDelimiter =
-          (settings.get('delimiter').composite as string) || ',';
-        if (newDelimiter !== defaultDelimiter) {
-          defaultDelimiter = newDelimiter;
-          // Note: Existing widgets won't be updated automatically,
-          // but new widgets will use the new default
-        }
+    void settingRegistry
+      .load(csv.id)
+      .then(settings => {
+        // Open files keep their delimiter, which the toolbar may have changed.
+        const updateSettings = () => {
+          defaultDelimiter =
+            (settings.get('delimiter').composite as string) || ',';
+        };
+        updateSettings();
+        settings.changed.connect(updateSettings);
+      })
+      .catch(reason => {
+        console.error(`Failed to load settings for ${csv.id}.`, reason);
       });
-    });
   }
 
   const factory = new CustomCSVViewerFactory({
