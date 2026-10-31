@@ -453,14 +453,14 @@ export class DocumentRegistry implements IDisposable {
     );
 
     // Start with any user overrides for the defaults.
-    for (const name in ftNames) {
+    for (const name of ftNames) {
       if (name in this._defaultWidgetFactoryOverrides) {
         return this._widgetFactories[this._defaultWidgetFactoryOverrides[name]];
       }
     }
 
     // Find if a there is a default rendered factory for this type.
-    for (const name in ftNames) {
+    for (const name of ftNames) {
       if (name in this._defaultRenderedWidgetFactories) {
         return this._widgetFactories[
           this._defaultRenderedWidgetFactories[name]
