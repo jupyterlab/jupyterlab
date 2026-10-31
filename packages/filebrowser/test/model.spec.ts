@@ -614,7 +614,7 @@ describe('filebrowser/model', () => {
             model.uploadChanged.disconnect(record);
           }
           expect(snapshots).toContainEqual([...names].sort());
-          expect(Array.from(model.uploads())).toEqual([]);          
+          expect(Array.from(model.uploads())).toEqual([]);
         });
 
         it('should stop tracking a failed upload in a subdirectory', async () => {
