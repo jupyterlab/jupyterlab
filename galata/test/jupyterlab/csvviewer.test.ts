@@ -147,14 +147,18 @@ test.describe('CSV Viewer', () => {
 
       const csvLocator = page.locator('.jp-CSVViewer');
       await expect(csvLocator).toBeVisible();
-
-      // With semicolon delimiter, "name" should be its own column and we should see "Alpha", "Beta", "Gamma"
-      await expect(csvLocator.locator('text=Alpha')).toBeVisible();
-      await expect(csvLocator.locator('text=Beta')).toBeVisible();
-      await expect(csvLocator.locator('text=Gamma')).toBeVisible();
-      // Value column (200, 300) should be in separate cells
-      await expect(csvLocator.locator('text=200')).toBeVisible();
-      await expect(csvLocator.locator('text=300')).toBeVisible();
+      await expect(page.locator('.jp-CSVDelimiter select')).toHaveValue(';');
+      // The grid draws on a canvas, so only a screenshot shows its columns.
+      const size = await page.evaluate(async () => {
+        const viewer = window.jupyterapp.shell.currentWidget.content;
+        await viewer.ready;
+        const grid = Array.from(viewer.children())[0];
+        return { width: grid.totalWidth, height: grid.totalHeight };
+      });
+      const { x, y } = (await csvLocator.boundingBox())!;
+      expect(
+        await page.screenshot({ clip: { x, y, ...size } })
+      ).toMatchSnapshot('csv-default-delimiter.png');
     });
 
     test.afterEach(async ({ page }) => {
