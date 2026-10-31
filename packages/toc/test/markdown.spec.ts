@@ -608,5 +608,86 @@ front: matter
         expect(headings[1].prefix).toEqual(numberingH1 ? '3.1. ' : '3. ');
       }
     );
+
+    it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
+      // A line of `=` or `-` inside a `$$` block is LaTeX, not a setext heading
+      // underline. See https://github.com/jupyterlab/jupyterlab/issues/19816
+      ['$$\n\\text{This}\n=\n\\text{broken.}\n$$', []],
+      ['$$\nTitle\n---\n$$', []],
+      ['$$\na\n=\nb\n$$', []],
+      // Math inside a heading must survive masking and read as authored.
+      [
+        '# Title $x=1$',
+        [
+          {
+            text: 'Title $x=1$',
+            level: 1,
+            line: 0,
+            raw: '# Title $x=1$',
+            prefix: '1. ',
+            skip: false
+          }
+        ]
+      ],
+      // Math must not shift the line number of the headings that follow it.
+      [
+        '$$\na\n=\nb\n$$\n\n# Title',
+        [
+          {
+            text: 'Title',
+            level: 1,
+            line: 6,
+            raw: '# Title',
+            prefix: '1. ',
+            skip: false
+          }
+        ]
+      ],
+      // The heading source keeps `<`, `>` and `&`, which `removeMath` escapes.
+      [
+        '# Case $n > 0$',
+        [
+          {
+            text: 'Case $n > 0$',
+            level: 1,
+            line: 0,
+            raw: '# Case $n > 0$',
+            prefix: '1. ',
+            skip: false
+          }
+        ]
+      ],
+      // A `---` line right after math underlines it, as in the renderer.
+      [
+        '$$\nx = 1\n$$\n---',
+        [
+          {
+            text: '$$\nx = 1\n$$',
+            level: 2,
+            line: 0,
+            raw: '$$\nx = 1\n$$\n---',
+            prefix: '0.1. ',
+            skip: false
+          }
+        ]
+      ]
+    ])(
+      'should not read a setext heading inside a math block in %s',
+      async (src, headers) => {
+        const languages: IEditorLanguageRegistry = new EditorLanguageRegistry();
+        const parser: IMarkdownParser = createMarkdownParser(languages);
+        const headings = TableOfContentsUtils.filterHeadings(
+          await TableOfContentsUtils.Markdown.parseHeadings(src, parser),
+          {
+            maximalDepth: 6,
+            numberHeaders: true
+          }
+        );
+        expect(headings).toHaveLength(headers.length);
+        for (let i = 0; i < headers.length; i++) {
+          expect(headings[i]).toEqual(headers[i]);
+        }
+      }
+    );
   });
 });
