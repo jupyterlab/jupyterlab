@@ -5,6 +5,7 @@
 
 import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
 import { expect, galata, test } from '@jupyterlab/galata';
+import * as path from 'path';
 
 const writableNotebook = 'notebook-writable.ipynb';
 const readonlyNotebook = 'notebook-readonly.ipynb';
@@ -97,35 +98,19 @@ test.describe('Notebook toolbar visibility with read-only and writable notebooks
   });
 
   test('Toolbar buttons reflect notebook state regardless of focused panel', async ({
-    page
+    page,
+    tmpPath
   }) => {
-    // Create the writable notebook.
-    await page.notebook.createNew(writableNotebook);
-
-    // Create the second notebook via menu directly: a second call to
-    // page.notebook.createNew is not robust because the kernel dialog
-    // may not appear when a kernel is already running.
-    await page.menu.clickMenuItem('File>New>Notebook');
-    try {
-      await page.locator('.jp-Dialog').waitFor({ timeout: 5000 });
-      await page.click('.jp-Dialog .jp-mod-accept');
-    } catch {
-      // no-op: dialog may not appear if a kernel is already running
+    for (const name of [writableNotebook, readonlyNotebook]) {
+      await page.contents.uploadFile(
+        path.resolve(__dirname, './notebooks/simple_notebook.ipynb'),
+        `${tmpPath}/${name}`
+      );
     }
 
-    // Rename the new notebook so it can be reliably located later.
-    const currentDir = await page.filebrowser.getCurrentDirectory();
-    const assignedTab = page.activity.getTabLocator();
-    const assignedName = await assignedTab
-      .locator('.lm-TabBar-tabLabel')
-      .textContent();
-    await page.contents.renameFile(
-      `${currentDir}/${assignedName}`,
-      `${currentDir}/${readonlyNotebook}`
-    );
-
-    // Reopen as read-only: close, activate the mock, then reopen without kernel.
-    await page.notebook.close();
+    // Open the writable notebook, then the read-only one without a kernel.
+    await page.notebook.openByPath(`${tmpPath}/${writableNotebook}`);
+    await page.notebook.activate(writableNotebook);
     await galata.Mock.makeNotebookReadonly(page);
     await page.notebook.open(readonlyNotebook, { noKernel: true });
 
@@ -158,7 +143,6 @@ test.describe('Notebook toolbar visibility with read-only and writable notebooks
       | string
       | RegExp
     )[]) {
-      await page.pause();
       await page.activity.activateTab(tabName);
       await assertReadonlyToolbar(page);
       await assertWritableToolbar(page);
