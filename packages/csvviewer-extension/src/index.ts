@@ -20,6 +20,7 @@ import {
 // The package root also loads the model and its datagrid dependency.
 import { CSVComment, CSVDelimiter } from '@jupyterlab/csvviewer/lib/toolbar';
 import {
+  CSVDocumentWidget,
   CSVViewerFactory,
   TSVViewerFactory
 } from '@jupyterlab/csvviewer/lib/widget';
@@ -143,7 +144,40 @@ function activateCsv(
 
   const trans = translator.load('jupyterlab');
 
-  const factory = new CSVViewerFactory({
+  let defaultDelimiter = ',';
+
+  // Opens new files with the delimiter from the settings.
+  class CustomCSVViewerFactory extends CSVViewerFactory {
+    protected createNewWidget(
+      context: DocumentRegistry.Context
+    ): IDocumentWidget<CSVViewer> {
+      const translator = this.translator;
+      return new CSVDocumentWidget({
+        context,
+        delimiter: defaultDelimiter,
+        translator
+      });
+    }
+  }
+
+  if (settingRegistry) {
+    void settingRegistry
+      .load(csv.id)
+      .then(settings => {
+        // Open files keep their delimiter, which the toolbar may have changed.
+        const updateSettings = () => {
+          defaultDelimiter =
+            (settings.get('delimiter').composite as string) || ',';
+        };
+        updateSettings();
+        settings.changed.connect(updateSettings);
+      })
+      .catch(reason => {
+        console.error(`Failed to load settings for ${csv.id}.`, reason);
+      });
+  }
+
+  const factory = new CustomCSVViewerFactory({
     name: FACTORY_CSV,
     label: trans.__('CSV Viewer'),
     fileTypes: ['csv'],
