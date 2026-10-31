@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { expect } from '@jupyterlab/galata';
 import type { Locator } from '@playwright/test';
 
 const OUTER_SELECTOR = '.jp-WindowedPanel-outer';
@@ -61,6 +62,20 @@ export async function positionCellPartiallyBelowViewport(
 ): Promise<void> {
   const scroller = notebook.locator(OUTER_SELECTOR).first();
 
+  // `page.mouse.wheel` returns before the browser applies the scroll, so wait
+  // for `scrollTop` to change; a wheel of less than one pixel may not scroll
+  const wheel = async (deltaY: number) => {
+    const delta = Math.round(deltaY);
+    if (delta === 0) {
+      return;
+    }
+    const before = await scroller.evaluate(node => node.scrollTop);
+    await page.mouse.wheel(0, delta);
+    await expect
+      .poll(() => scroller.evaluate(node => node.scrollTop))
+      .not.toBe(before);
+  };
+
   // Helper to measure actual visible pixels of the cell
   const measureVisiblePixels = async (): Promise<number> => {
     const notebookBbox = await scroller.boundingBox();
@@ -89,7 +104,7 @@ export async function positionCellPartiallyBelowViewport(
 
   const initialScrollOffset =
     cellBbox.y - notebookBbox.y - notebookBbox.height + targetPixels;
-  await page.mouse.wheel(0, initialScrollOffset);
+  await wheel(initialScrollOffset);
 
   // Optimization loop to refine positioning
   const MAX_ITERATIONS = 10;
@@ -105,7 +120,7 @@ export async function positionCellPartiallyBelowViewport(
 
     // Correct by half the error amount
     const correction = -error / 2;
-    await page.mouse.wheel(0, correction);
+    await wheel(correction);
   }
 }
 

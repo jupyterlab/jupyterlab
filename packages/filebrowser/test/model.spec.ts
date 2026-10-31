@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PageConfig } from '@jupyterlab/coreutils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentManager } from '@jupyterlab/docmanager';
@@ -21,6 +22,7 @@ import {
 } from '@jupyterlab/services/lib/testutils';
 import { UUID } from '@lumino/coreutils';
 import expect from 'expect';
+import type { IUploadModel } from '../src';
 import { CHUNK_SIZE, FileBrowserModel, LARGE_FILE_SIZE } from '../src';
 
 /**
@@ -595,6 +597,148 @@ describe('filebrowser/model', () => {
           ]);
           expect(Array.from(model.uploads())).toEqual([]);
           await uploaded;
+        });
+
+        it('should keep concurrent large uploads in the upload list', async () => {
+          const names = [UUID.uuid4() + '.txt', UUID.uuid4() + '.txt'];
+          const snapshots: string[][] = [];
+          const record = () => {
+            snapshots.push(Array.from(model.uploads(), u => u.path).sort());
+          };
+          model.uploadChanged.connect(record);
+          try {
+            await Promise.all(
+              names.map(name =>
+                model.upload(new File([new ArrayBuffer(2 * CHUNK_SIZE)], name))
+              )
+            );
+          } finally {
+            model.uploadChanged.disconnect(record);
+          }
+          expect(snapshots).toContainEqual([...names].sort());
+          expect(Array.from(model.uploads())).toEqual([]);
+        });
+
+        it('should keep an unfinished upload in the list when another finishes', async () => {
+          const short = UUID.uuid4() + '.txt';
+          const long = UUID.uuid4() + '.txt';
+          const remaining: string[][] = [];
+          const record = (
+            _: FileBrowserModel,
+            change: IChangedArgs<IUploadModel | null>
+          ) => {
+            if (change.name === 'finish') {
+              remaining.push(Array.from(model.uploads(), u => u.path));
+            }
+          };
+          model.uploadChanged.connect(record);
+          try {
+            await Promise.all([
+              model.upload(new File([new ArrayBuffer(2 * CHUNK_SIZE)], short)),
+              model.upload(new File([new ArrayBuffer(4 * CHUNK_SIZE)], long))
+            ]);
+          } finally {
+            model.uploadChanged.disconnect(record);
+          }
+          expect(remaining).toEqual([[long], []]);
+        });
+
+        it('should stop tracking a failed upload in a subdirectory', async () => {
+          await model.cd(subDir);
+          const error = new Error('save failed');
+          const save = jest.spyOn(model.manager.services.contents, 'save');
+          const saveImplementation = save.getMockImplementation()!;
+          save.mockRejectedValueOnce(error);
+          const file = new File(
+            [new ArrayBuffer(CHUNK_SIZE + 1)],
+            UUID.uuid4() + '.txt'
+          );
+
+          try {
+            await expect(model.upload(file)).rejects.toBe(error);
+            expect(Array.from(model.uploads())).toEqual([]);
+          } finally {
+            save.mockImplementation(saveImplementation);
+          }
+        });
+
+        it('should preserve another upload when a small upload fails', async () => {
+          const fname = UUID.uuid4() + '.txt';
+          const error = new Error('save failed');
+          const largeError = new Error('large save failed');
+          let rejectLarge: (reason?: unknown) => void = () => undefined;
+          let resolveLargeSaveStarted: () => void = () => undefined;
+          const largeSaveStarted = new Promise<void>(resolve => {
+            resolveLargeSaveStarted = resolve;
+          });
+          const save = jest.spyOn(model.manager.services.contents, 'save');
+          const saveImplementation = save.getMockImplementation()!;
+          save.mockImplementation((_path, options) => {
+            if (options?.chunk !== undefined) {
+              return new Promise<Contents.IModel>((_resolve, reject) => {
+                rejectLarge = reject;
+                resolveLargeSaveStarted();
+              });
+            }
+            return Promise.reject(error);
+          });
+          const [started, updated] = signalToPromises(model.uploadChanged, 2);
+          const largeUpload = model.upload(
+            new File([new ArrayBuffer(CHUNK_SIZE + 1)], fname)
+          );
+
+          try {
+            await started;
+            await updated;
+            await largeSaveStarted;
+            await model.cd(subDir);
+
+            await expect(model.upload(new File(['small'], fname))).rejects.toBe(
+              error
+            );
+            expect(Array.from(model.uploads())).toEqual([
+              { path: fname, progress: 0 }
+            ]);
+          } finally {
+            rejectLarge(largeError);
+            await expect(largeUpload).rejects.toBe(largeError);
+            save.mockImplementation(saveImplementation);
+          }
+        });
+
+        it('should stop tracking a failed upload that shares its path with a running upload', async () => {
+          const fname = UUID.uuid4() + '.txt';
+          const error = new Error('save failed');
+          let release: () => void = () => undefined;
+          const released = new Promise<void>(resolve => {
+            release = resolve;
+          });
+          let resolveSaveStarted: () => void = () => undefined;
+          const saveStarted = new Promise<void>(resolve => {
+            resolveSaveStarted = resolve;
+          });
+          const save = jest.spyOn(model.manager.services.contents, 'save');
+          const saveImplementation = save.getMockImplementation()!;
+          save
+            .mockImplementationOnce(async (path, options) => {
+              resolveSaveStarted();
+              await released;
+              return saveImplementation(path, options);
+            })
+            .mockRejectedValueOnce(error);
+          const upload = () =>
+            model.upload(new File([new ArrayBuffer(2 * CHUNK_SIZE)], fname));
+
+          const running = upload();
+          try {
+            await saveStarted;
+            await expect(upload()).rejects.toBe(error);
+          } finally {
+            release();
+            await running;
+            save.mockImplementation(saveImplementation);
+          }
+          expect(Array.from(model.uploads())).toEqual([]);
         });
 
         afterAll(() => {
