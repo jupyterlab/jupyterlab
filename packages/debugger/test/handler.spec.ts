@@ -244,5 +244,27 @@ describe('DebuggerHandler', () => {
       expect(button.pressed).toBe(true);
       expect(pressedAfterSecondClick).toBe(true);
     });
+
+    it('lets clicks through again once the kernel restarts while the debugger starts', async () => {
+      await handler.update(fileWidget, connection);
+      const button = handler['_iconButtons'][fileWidget.id]!;
+
+      // The restart drops the requests of this click, which never settles.
+      button.onClick();
+      await connection.kernel!.restart();
+      // The handler turns the button off once it has seen the restart.
+      while (button.pressed) {
+        await sleep(10);
+      }
+      button.onClick();
+      while (!fileWidget.node.hasAttribute('data-jp-debugger')) {
+        await sleep(10);
+      }
+
+      const reply = await service.session!.sendRequest('debugInfo', {});
+      expect(reply.body.isStarted).toBe(true);
+      expect(service.isStarted).toBe(true);
+      expect(button.pressed).toBe(true);
+    });
   });
 });
