@@ -4,6 +4,7 @@ import type MermaidType from 'mermaid';
 import type MermaidElkType from '@mermaid-js/layout-elk';
 
 import { PromiseDelegate } from '@lumino/coreutils';
+import { type ISignal, Signal } from '@lumino/signaling';
 
 import { LruCache } from '@jupyterlab/coreutils';
 
@@ -27,9 +28,13 @@ import {
 export class MermaidManager implements IMermaidManager {
   protected _diagrams: LruCache<string, HTMLElement>;
   protected _themes: IThemeManager | null;
+  private _themeChanged = new Signal<this, void>(this);
+  private _isDisposed = false;
+  private _refreshId = 0;
 
   constructor(options: MermaidManager.IOptions = {}) {
     this._diagrams = new LruCache({ maxSize: options.maxCacheSize ?? null });
+    this._themes = options.themes ?? null;
 
     // handle reacting to themes
     if (options.themes) {
@@ -47,11 +52,88 @@ export class MermaidManager implements IMermaidManager {
   }
 
   /**
+   * A signal emitted when the theme changes or mermaid is re-initialized.
+   */
+  get themeChanged(): ISignal<this, void> {
+    return this._themeChanged;
+  }
+
+  /**
+   * Whether the manager is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources held by the manager.
+   */
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    Signal.disconnectReceiver(this);
+    Signal.clearData(this);
+    this._diagrams.clear();
+  }
+
+  /**
+   * Refresh all rendered mermaid diagrams in the document (or within the specified root element).
+   */
+  async refreshDiagrams(root?: ParentNode): Promise<void> {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    const currentRefreshId = this._refreshId;
+    const parent = root ?? document;
+    const nodes: HTMLElement[] = [];
+    if (
+      parent instanceof HTMLElement &&
+      parent.classList.contains(MERMAID_CLASS)
+    ) {
+      nodes.push(parent);
+    }
+    nodes.push(
+      ...Array.from(parent.querySelectorAll<HTMLElement>(`.${MERMAID_CLASS}`))
+    );
+
+    for (const node of nodes) {
+      if (this._isDisposed || this._refreshId !== currentRefreshId) {
+        return;
+      }
+      const code = node.querySelector(`.${MERMAID_CODE_CLASS}`);
+      if (!code || !code.textContent) {
+        continue;
+      }
+      try {
+        const figure = await this.renderFigure(code.textContent);
+        if (this._isDisposed || this._refreshId !== currentRefreshId) {
+          return;
+        }
+        if (node.innerHTML !== figure.innerHTML) {
+          node.innerHTML = figure.innerHTML;
+        }
+        if (figure.classList.contains(WARNING_CLASS)) {
+          node.classList.add(WARNING_CLASS);
+        } else {
+          node.classList.remove(WARNING_CLASS);
+        }
+      } catch {
+        // Continue refreshing other diagrams if one fails
+      }
+    }
+  }
+
+  /**
    * Handle (re)-initializing mermaid based on external values.
    */
-  initialize() {
+  initialize(sender?: unknown, args?: unknown): void {
+    this._refreshId++;
     this._diagrams.clear();
     Private.initMermaid();
+    this._themeChanged.emit();
+    void this.refreshDiagrams();
   }
 
   /**

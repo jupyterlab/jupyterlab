@@ -1,3 +1,6 @@
+import type { IThemeManager } from '@jupyterlab/apputils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { type ISignal, Signal } from '@lumino/signaling';
 /*
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
@@ -59,7 +62,15 @@ export const SVG_XHTML_FOOTER = ['</div>', '</foreignObject>', '</svg>'];
  *
  * @see https://github.com/mermaid-js/mermaid/issues/559
  */
-class MockMermaid {
+export class MockMermaid {
+  currentTheme = 'default';
+
+  initialize(config: { theme?: string }): void {
+    if (config?.theme) {
+      this.currentTheme = config.theme;
+    }
+  }
+
   async render(
     id: string,
     text: string,
@@ -69,7 +80,7 @@ class MockMermaid {
       throw new Error('Intentionally failed');
     }
     return {
-      svg: '<svg></svg>',
+      svg: `<svg data-theme="${this.currentTheme}"></svg>`,
       diagramType: 'mock-diagram'
     };
   }
@@ -88,12 +99,14 @@ class MockMermaid {
 /**
  * A mock manager that overloads the mermaid.
  */
-class MockMermaidManager extends MermaidManager {
+export class MockMermaidManager extends MermaidManager {
+  readonly mockMermaid = new MockMermaid();
+
   /**
    * Shim the real mermaid.
    */
   async getMermaid() {
-    return new MockMermaid() as any;
+    return this.mockMermaid as any;
   }
 
   /**
@@ -101,6 +114,52 @@ class MockMermaidManager extends MermaidManager {
    */
   getMermaidVersion(): string | null {
     return 'x.x.x';
+  }
+
+  initialize(sender?: unknown, args?: unknown): void {
+    if (this._themes) {
+      const jpTheme = this._themes.theme;
+      this.mockMermaid.currentTheme =
+        jpTheme && this._themes.isLight(jpTheme) ? 'default' : 'dark';
+    }
+    super.initialize(sender, args);
+  }
+}
+
+export class MockThemeManager {
+  private _theme: string = 'JupyterLab Light';
+  private _themeChanged = new Signal<
+    IThemeManager,
+    IChangedArgs<string, string | null>
+  >(this as unknown as IThemeManager);
+
+  get theme(): string {
+    return this._theme;
+  }
+
+  async setTheme(theme: string): Promise<void> {
+    const oldValue = this._theme;
+    this._theme = theme;
+    this._themeChanged.emit({
+      name: 'theme',
+      oldValue,
+      newValue: theme
+    });
+  }
+
+  get themeChanged(): ISignal<
+    IThemeManager,
+    IChangedArgs<string, string | null>
+  > {
+    return this._themeChanged;
+  }
+
+  isLight(theme: string): boolean {
+    return !theme.toLowerCase().includes('dark');
+  }
+
+  asThemeManager(): IThemeManager {
+    return this as unknown as IThemeManager;
   }
 }
 
