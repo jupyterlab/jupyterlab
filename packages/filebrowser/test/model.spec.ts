@@ -600,9 +600,9 @@ describe('filebrowser/model', () => {
         it('should stop tracking a failed upload in a subdirectory', async () => {
           await model.cd(subDir);
           const error = new Error('save failed');
-          const save = jest
-            .spyOn(model.manager.services.contents, 'save')
-            .mockRejectedValueOnce(error);
+          const save = jest.spyOn(model.manager.services.contents, 'save');
+          const saveImplementation = save.getMockImplementation()!;
+          save.mockRejectedValueOnce(error);
           const file = new File(
             [new ArrayBuffer(CHUNK_SIZE + 1)],
             UUID.uuid4() + '.txt'
@@ -612,7 +612,7 @@ describe('filebrowser/model', () => {
             await expect(model.upload(file)).rejects.toBe(error);
             expect(Array.from(model.uploads())).toEqual([]);
           } finally {
-            save.mockRestore();
+            save.mockImplementation(saveImplementation);
           }
         });
 
@@ -625,17 +625,17 @@ describe('filebrowser/model', () => {
           const largeSaveStarted = new Promise<void>(resolve => {
             resolveLargeSaveStarted = resolve;
           });
-          const save = jest
-            .spyOn(model.manager.services.contents, 'save')
-            .mockImplementation((_path, options) => {
-              if (options?.chunk !== undefined) {
-                return new Promise<Contents.IModel>((_resolve, reject) => {
-                  rejectLarge = reject;
-                  resolveLargeSaveStarted();
-                });
-              }
-              return Promise.reject(error);
-            });
+          const save = jest.spyOn(model.manager.services.contents, 'save');
+          const saveImplementation = save.getMockImplementation()!;
+          save.mockImplementation((_path, options) => {
+            if (options?.chunk !== undefined) {
+              return new Promise<Contents.IModel>((_resolve, reject) => {
+                rejectLarge = reject;
+                resolveLargeSaveStarted();
+              });
+            }
+            return Promise.reject(error);
+          });
           const [started, updated] = signalToPromises(model.uploadChanged, 2);
           const largeUpload = model.upload(
             new File([new ArrayBuffer(CHUNK_SIZE + 1)], fname)
@@ -656,7 +656,7 @@ describe('filebrowser/model', () => {
           } finally {
             rejectLarge(largeError);
             await expect(largeUpload).rejects.toBe(largeError);
-            save.mockRestore();
+            save.mockImplementation(saveImplementation);
           }
         });
 
