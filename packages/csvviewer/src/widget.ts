@@ -692,6 +692,10 @@ export class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
     content = content || Private.createContent(context, delimiter);
     reveal = Promise.all([reveal, content.revealed]);
     super({ content, context, reveal, ...other });
+
+    if (delimiter) {
+      content.delimiter = delimiter;
+    }
   }
 
   /**

@@ -204,6 +204,10 @@ namespace Private {
     const select = document.createElement('select');
     labelNode.textContent = label;
     labelNode.className = labelClassName;
+    // The default delimiter setting accepts characters that are not listed.
+    if (!values.some(([value]) => value === selected)) {
+      values.push([selected, selected]);
+    }
     for (const [value, optionLabel] of values) {
       const option = document.createElement('option');
       option.value = value;
