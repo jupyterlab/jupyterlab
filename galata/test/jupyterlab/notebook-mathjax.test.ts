@@ -50,26 +50,31 @@ test.describe('Notebook MathJax in a background tab', () => {
     }
   });
 
-  test.beforeEach(async ({ page, tmpPath }) => {
+  // Upload in `beforeAll`: the `page` fixture navigates into `tmpPath`
+  // before any `beforeEach` hook runs, so the files must already exist
+  // or the application fails to open the path and the test never starts.
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
     const notebook = galata.Notebook.generateNotebook(
       1,
       'markdown',
       CELL_SOURCE
     );
-    await page.contents.uploadContent(
+    await contents.uploadContent(
       JSON.stringify(notebook),
       'text',
       `${tmpPath}/${fileName}`
     );
-    await page.contents.uploadContent(
+    await contents.uploadContent(
       'Other file.\n',
       'text',
       `${tmpPath}/${otherFileName}`
     );
   });
 
-  test.afterEach(async ({ page, tmpPath }) => {
-    await page.contents.deleteDirectory(tmpPath);
+  test.afterAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.deleteDirectory(tmpPath);
   });
 
   test('Math rendered in a background tab is full size when the tab is shown', async ({
