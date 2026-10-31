@@ -554,14 +554,7 @@ export class FileBrowserModel implements IDisposable {
     };
 
     if (!chunked) {
-      try {
-        return await uploadInner(file);
-      } catch (err) {
-        ArrayExt.removeFirstWhere(this._uploads, uploadIndex => {
-          return file.name === uploadIndex.path;
-        });
-        throw err;
-      }
+      return await uploadInner(file);
     }
 
     let finalModel: Contents.IModel | undefined;
@@ -593,7 +586,7 @@ export class FileBrowserModel implements IDisposable {
         currentModel = await uploadInner(file.slice(start, end), chunk);
       } catch (err) {
         ArrayExt.removeFirstWhere(this._uploads, uploadIndex => {
-          return file.name === uploadIndex.path;
+          return path === uploadIndex.path;
         });
 
         this._uploadChanged.emit({
