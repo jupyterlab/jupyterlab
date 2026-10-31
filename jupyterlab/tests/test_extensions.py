@@ -123,6 +123,51 @@ async def test_ExtensionManager_list_extensions_installed(monkeypatch):
     assert extensions == ([extension1], 1)
 
 
+async def test_ExtensionManager_get_installed_extensions_concurrent(monkeypatch):
+    mock_info = {
+        "federated_extensions": {
+            "ext1": {"version": "1.0.0", "description": "desc1", "url": "", "install": {}},
+            "ext2": {"version": "2.0.0", "description": "desc2", "url": "", "install": {}},
+        },
+        "extensions": {},
+        "disabled": [],
+        "compat_errors": {},
+        "shadowed_exts": [],
+    }
+    monkeypatch.setattr("jupyterlab.extensions.manager.get_app_info", lambda *a, **kw: mock_info)
+    monkeypatch.setattr(
+        "jupyterlab.extensions.manager._build_check_info",
+        lambda *a, **kw: {"install": [], "uninstall": [], "update": []},
+    )
+    monkeypatch.setattr(
+        "jupyterlab.extensions.manager._ensure_compat_errors", lambda *a, **kw: None
+    )
+
+    manager = ReadOnlyExtensionManager()
+
+    async def mock_get_latest_version(pkg_name):
+        return f"{pkg_name}-latest"
+
+    monkeypatch.setattr(manager, "get_latest_version", mock_get_latest_version)
+
+    installed = await manager._get_installed_extensions(get_latest_version=True)
+    assert len(installed) == 2
+    assert installed["ext1"].latest_version == "ext1-latest"
+    assert installed["ext2"].latest_version == "ext2-latest"
+
+    # Also test error resilience when one network call fails
+    async def mock_get_latest_version_with_error(pkg_name):
+        if pkg_name == "ext1":
+            raise RuntimeError("Network error")
+        return "2.1.0"
+
+    monkeypatch.setattr(manager, "get_latest_version", mock_get_latest_version_with_error)
+    installed = await manager._get_installed_extensions(get_latest_version=True)
+    assert len(installed) == 2
+    assert installed["ext1"].latest_version == "1.0.0"
+    assert installed["ext2"].latest_version == "2.1.0"
+
+
 async def test_ExtensionManager_list_extensions_query(monkeypatch):
     extension1 = ExtensionPackage("extension1", "Extension 1 description", "", "prebuilt")
     extension2 = ExtensionPackage("extension2", "Extension 2 description", "", "prebuilt")
