@@ -108,6 +108,60 @@ _Examples_
 
 File Types (see {ts:class}`docregistry.DocumentRegistry` `addFileType` method) add a new file type to be understood through a mimetype and file extensions within JupyterLab.
 
+### Associate a file extension with a CodeMirror language
+
+Registering a file type with the document registry does not select the syntax
+highlighting used by the text editor. JupyterLab uses the CodeMirror language
+registry to match a file name to a language. Register both the language and
+the file type for a custom extension. The following example reuses the built-in
+JSON language support for `.myjson` files:
+
+```typescript
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
+import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
+
+const plugin: JupyterFrontEndPlugin<void> = {
+  id: 'my-extension:my-json-file-type',
+  autoStart: true,
+  requires: [IEditorLanguageRegistry],
+  activate: (app, languages) => {
+    const jsonLanguage = languages.findByMIME('application/json');
+    if (!jsonLanguage) {
+      throw new Error('The JSON language is not available.');
+    }
+
+    languages.addLanguage({
+      name: 'My JSON',
+      mime: 'application/vnd.example.my-json',
+      extensions: ['myjson'],
+      load: async () => {
+        const language = await languages.getLanguage(jsonLanguage);
+        if (!language?.support) {
+          throw new Error('The JSON language support could not be loaded.');
+        }
+        return language.support;
+      }
+    });
+
+    app.docRegistry.addFileType({
+      name: 'my-json',
+      displayName: 'My JSON',
+      extensions: ['.myjson'],
+      mimeTypes: ['application/vnd.example.my-json'],
+      fileFormat: 'text'
+    });
+  }
+};
+
+export default plugin;
+```
+
+The extension strings use different formats in these APIs: `IEditorLanguage`
+uses `myjson` without a leading dot, while `DocumentRegistry.addFileType()`
+uses `.myjson`. Use the MIME type registered for the language in the file type
+as well. To use a custom syntax highlighter, make the language's `load` callback
+return the `LanguageSupport` provided by its CodeMirror 6 language package.
+
 ### Document Models
 
 {ts:interface}`docregistry.DocumentRegistry.IModel` instances are created by the model factories and passed to widget factories and widget
@@ -145,7 +199,7 @@ types of collaborative applications.
 
 In addition, a shared model has an [Awareness](https://docs.yjs.dev/getting-started/adding-awareness)
 attribute. This attribute is linked to the _Y.Doc_ which means there is one _Awareness_ object per document and is
-used for sharing cursor locations and presence information. The `Awareness` is an implementation detail of Yjs
+used for sharing cursor locations and presence information. The _Awareness_ is an implementation detail of Yjs
 and is not part of the `ISharedDocument` interface.
 
 Please, check out the [@jupyter/ydoc documentation](https://jupyter-ydoc.readthedocs.io/en/latest)
