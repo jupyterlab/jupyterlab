@@ -259,6 +259,11 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.type('Heading 3');
     await page.keyboard.press('Shift+Enter');
     await page.notebook.selectCells(0);
+    await expect(
+      (await page.notebook.getCellLocator(0))!.locator(
+        '.jp-showHiddenCellsButton'
+      )
+    ).toHaveText(/3 cells hidden/);
     expect(
       await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('add_header_below_02.png');
@@ -293,6 +298,11 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
       async () =>
         (await page.notebook.getCellCount()) === cellCountBeforeInsert + 1
     );
+    await expect(
+      (await page.notebook.getCellLocator(6))!.locator(
+        '.jp-collapseHeadingButton'
+      )
+    ).toBeVisible();
     expect(
       await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('add_header_above_01.png');
@@ -307,6 +317,11 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
       async () =>
         (await page.notebook.getCellCount()) === cellCountBeforeInsert + 1
     );
+    await expect(
+      (await page.notebook.getCellLocator(4))!.locator(
+        '.jp-collapseHeadingButton'
+      )
+    ).toBeVisible();
     expect(
       await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('add_header_above_02.png');
@@ -321,6 +336,11 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
       async () =>
         (await page.notebook.getCellCount()) === cellCountBeforeInsert + 1
     );
+    await expect(
+      (await page.notebook.getCellLocator(3))!.locator(
+        '.jp-collapseHeadingButton'
+      )
+    ).toBeVisible();
     expect(
       await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('add_header_above_03.png');

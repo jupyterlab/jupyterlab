@@ -5,8 +5,11 @@ import type { Parser } from '@lezer/common';
 import { parseMixed } from '@lezer/common';
 import { tags } from '@lezer/highlight';
 import type {
+  BlockContext,
   DelimiterType,
   InlineContext,
+  LeafBlock,
+  Line,
   MarkdownConfig,
   NodeSpec
 } from '@lezer/markdown';
@@ -39,6 +42,61 @@ const DELIMITERS = Object.keys(DELIMITER_LENGTH).reduce<
 }, {});
 
 /**
+ * Length of the run of backticks starting at `pos`.
+ */
+function backtickRun(text: string, pos: number): number {
+  let end = pos;
+  while (text[end] === '`') {
+    end++;
+  }
+  return end - pos;
+}
+
+/**
+ * Positions of the `$$` delimiters in text, skipping backslash escapes and
+ * code spans as the inline parser does.
+ */
+function mathDelimiters(text: string, from = 0): number[] {
+  const found: number[] = [];
+  for (let i = from; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '\\') {
+      i++;
+    } else if (ch === '`') {
+      const ticks = backtickRun(text, i);
+      // A code span closes with a run of exactly as many backticks.
+      let close = text.indexOf('`', i + ticks);
+      while (close >= 0 && backtickRun(text, close) !== ticks) {
+        close = text.indexOf('`', close + backtickRun(text, close));
+      }
+      i = (close >= 0 ? close : i) + ticks - 1;
+    } else if (ch === '$' && text[i + 1] === '$') {
+      found.push(i);
+      i++;
+    }
+  }
+  return found;
+}
+
+/**
+ * Whether a line opens `$$` display math that it does not also close.
+ */
+function opensMathBlock(line: Line): boolean {
+  return (
+    line.indent - line.baseIndent < 4 &&
+    line.text.startsWith('$$', line.pos) &&
+    !line.text.includes('$$', line.pos + 2)
+  );
+}
+
+/**
+ * Whether text has a `$$` that it does not close.
+ */
+function hasOpenMath(text: string): boolean {
+  return mathDelimiters(text).length % 2 === 1;
+}
+
+/**
  * Define an IPython mathematical expression parser for Markdown.
  *
  * @param latexParser CodeMirror parser for LaTeX mathematical expression
@@ -57,6 +115,63 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
   });
   return {
     defineNodes,
+    // Multiline `$$` math must be a block, otherwise its lines are parsed as
+    // Markdown and a line of `=` or `-` becomes a setext heading underline.
+    parseBlock: [
+      {
+        name: BLOCK_MATH_DOLLAR,
+        parse(cx: BlockContext, line: Line): boolean {
+          if (!opensMathBlock(line)) {
+            return false;
+          }
+          const mark = `${BLOCK_MATH_DOLLAR}Mark`;
+          const from = cx.lineStart + line.pos;
+          const marks = [cx.elt(mark, from, from + 2)];
+          let to = cx.lineStart + line.text.length;
+          let content = line.text.slice(line.pos);
+          // Like the renderer, do not let math run past a blank line.
+          while (cx.nextLine() && line.next != -1) {
+            const close = line.text.indexOf('$$', line.pos);
+            if (close < 0) {
+              to = cx.lineStart + line.text.length;
+              // Replace quote markers with spaces, as lezer does for paragraphs.
+              content +=
+                '\n' + ' '.repeat(line.basePos) + line.text.slice(line.basePos);
+              continue;
+            }
+            to = cx.lineStart + close + 2;
+            marks.push(cx.elt(mark, to - 2, to));
+            cx.addElement(cx.elt(BLOCK_MATH_DOLLAR, from, to, marks));
+            const rest = line.skipSpace(close + 2);
+            if (rest < line.text.length) {
+              // Text after the closing `$$` is still Markdown.
+              cx.addElement(
+                cx.elt(
+                  'Paragraph',
+                  cx.lineStart + rest,
+                  cx.lineStart + line.text.length,
+                  cx.parser.parseInline(
+                    line.text.slice(rest),
+                    cx.lineStart + rest
+                  )
+                )
+              );
+            }
+            cx.nextLine();
+            return true;
+          }
+          // Like the renderer, leave math that is not closed as text.
+          cx.addElement(
+            cx.elt('Paragraph', from, to, cx.parser.parseInline(content, from))
+          );
+          return true;
+        },
+        // A `$$` line that closes inline math opened earlier in the paragraph
+        // must not start a new block.
+        endLeaf: (cx: BlockContext, line: Line, leaf: LeafBlock) =>
+          opensMathBlock(line) && !hasOpenMath(leaf.content)
+      }
+    ],
     parseInline: [
       {
         name: BLOCK_MATH_DOLLAR,

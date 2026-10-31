@@ -591,12 +591,12 @@ const createNewLanguageFilePlugin: JupyterFrontEndPlugin<void> = {
     const specsManager = app.serviceManager.kernelspecs;
 
     const updateFileBrowserContextMenu = async () => {
-      if (filebrowsermenuDisposables) {
-        filebrowsermenuDisposables.dispose();
-        filebrowsermenuDisposables = new DisposableSet();
-      }
-
       const updatedFileTypes = await getAvailableKernelFileTypes(specsManager);
+
+      // Replace the entries only now: updates that overlap while waiting for
+      // the kernel specs would otherwise each add their own entries.
+      filebrowsermenuDisposables.dispose();
+      filebrowsermenuDisposables = new DisposableSet();
 
       for (const filetype of updatedFileTypes) {
         filebrowsermenuDisposables.add(
@@ -1099,7 +1099,7 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
             (
               await InputDialog.getText({
                 label: trans.__('URL'),
-                placeholder: 'https://example.com/path/to/file',
+                placeholder: trans.__('https://example.com/path/to/file'),
                 title: trans.__('Open URL'),
                 okLabel: trans.__('Open')
               })
@@ -1115,13 +1115,19 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
         // fetch the file from the URL
         try {
           const req = await fetch(url);
+          if (!req.ok) {
+            return showErrorMessage(
+              trans.__('Cannot fetch'),
+              trans.__('Could not open URL: %1', url)
+            );
+          }
           blob = await req.blob();
           type = req.headers.get('Content-Type') ?? '';
         } catch (reason) {
-          if (reason.response && reason.response.status !== 200) {
-            reason.message = trans.__('Could not open URL: %1', url);
-          }
-          return showErrorMessage(trans.__('Cannot fetch'), reason);
+          return showErrorMessage(
+            trans.__('Cannot fetch'),
+            reason instanceof Error ? reason : String(reason)
+          );
         }
 
         // upload the content of the file to the server
@@ -1135,7 +1141,7 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
         } catch (error) {
           return showErrorMessage(
             trans._p('showErrorMessage', 'Upload Error'),
-            error
+            error instanceof Error ? error : String(error)
           );
         }
       },
@@ -1487,7 +1493,7 @@ function addCommands(
           (
             await InputDialog.getText({
               label: trans.__('Path'),
-              placeholder: '/path/relative/to/jlab/root',
+              placeholder: trans.__('/path/relative/to/jlab/root'),
               title: trans.__('Open Path'),
               okLabel: trans.__('Open')
             })
@@ -1522,11 +1528,15 @@ function addCommands(
           return;
         }
         return commands.execute('docmanager:open', { path });
-      } catch (reason) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (reason: any) {
         if (reason.response && reason.response.status === 404) {
           reason.message = trans.__('Could not find path: %1', path);
         }
-        return showErrorMessage(trans.__('Cannot open'), reason);
+        return showErrorMessage(
+          trans.__('Cannot open'),
+          reason instanceof Error ? reason : String(reason)
+        );
       }
     },
     describedBy: {
