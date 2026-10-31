@@ -128,11 +128,15 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
           const from = cx.lineStart + line.pos;
           const marks = [cx.elt(mark, from, from + 2)];
           let to = cx.lineStart + line.text.length;
+          let content = line.text.slice(line.pos);
           // Like the renderer, do not let math run past a blank line.
           while (cx.nextLine() && line.next != -1) {
             const close = line.text.indexOf('$$', line.pos);
             if (close < 0) {
               to = cx.lineStart + line.text.length;
+              // Replace quote markers with spaces, as lezer does for paragraphs.
+              content +=
+                '\n' + ' '.repeat(line.basePos) + line.text.slice(line.basePos);
               continue;
             }
             to = cx.lineStart + close + 2;
@@ -156,7 +160,10 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
             cx.nextLine();
             return true;
           }
-          cx.addElement(cx.elt(BLOCK_MATH_DOLLAR, from, to, marks));
+          // Like the renderer, leave math that is not closed as text.
+          cx.addElement(
+            cx.elt('Paragraph', from, to, cx.parser.parseInline(content, from))
+          );
           return true;
         },
         // A `$$` line that closes inline math opened earlier in the paragraph
@@ -249,10 +256,7 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
           const delimiterLength = DELIMITER_LENGTH[node.type.name];
           if (delimiterLength) {
             const contentFrom = node.from + delimiterLength;
-            // A math block cut short by a blank line has no closing mark.
-            const closed =
-              node.node.getChildren(`${node.type.name}Mark`).length > 1;
-            const contentTo = closed ? node.to - delimiterLength : node.to;
+            const contentTo = node.to - delimiterLength;
             if (contentTo - contentFrom > 0) {
               return {
                 parser: latexParser,
