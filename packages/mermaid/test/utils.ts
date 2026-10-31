@@ -1,18 +1,17 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import type { IThemeManager } from '@jupyterlab/apputils';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { type ISignal, Signal } from '@lumino/signaling';
-/*
- * Copyright (c) Jupyter Development Team.
- * Distributed under the terms of the Modified BSD License.
- */
+import type MermaidType from 'mermaid';
+import type { ParseOptions, RenderResult } from 'mermaid';
 
 import {
   MERMAID_MIME_TYPE,
   MermaidManager,
   RenderedMermaid
 } from '@jupyterlab/mermaid';
-
-import type { ParseOptions, RenderResult } from 'mermaid';
 
 export const GOOD_MERMAID = `
 flowchart LR
@@ -105,8 +104,8 @@ export class MockMermaidManager extends MermaidManager {
   /**
    * Shim the real mermaid.
    */
-  async getMermaid() {
-    return this.mockMermaid as any;
+  async getMermaid(): Promise<typeof MermaidType> {
+    return this.mockMermaid as unknown as typeof MermaidType;
   }
 
   /**
