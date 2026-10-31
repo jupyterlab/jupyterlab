@@ -10,7 +10,12 @@ import type { TextRenderer } from '@lumino/datagrid';
 import { CellRenderer, DataGrid, DataModel, JSONModel } from '@lumino/datagrid';
 import { MessageLoop } from '@lumino/messaging';
 import type { TextRenderConfig } from '../src';
-import { CSVViewer, DSVModel, GridSearchService } from '../src';
+import {
+  CSVDocumentWidget,
+  CSVViewer,
+  DSVModel,
+  GridSearchService
+} from '../src';
 
 const FRUITS = `fruit,colour,price
 apple,red,1.20
@@ -325,6 +330,21 @@ describe('csvviewer/widget', () => {
         expect(widget.delimiter).toBe('\t');
         widget.dispose();
       });
+
+      it('should parse the file with the delimiter from the options', async () => {
+        const viewerContext = createContext();
+        viewerContext.model.fromString('id;name\n1;Alpha');
+        await viewerContext.initialize(true);
+        const widget = new CSVViewer({
+          context: viewerContext,
+          delimiter: ';'
+        });
+        await widget.ready;
+        const grid = Array.from(widget.children())[0] as DataGrid;
+        expect((grid.dataModel as DSVModel).columnCount('body')).toBe(2);
+        widget.dispose();
+        viewerContext.dispose();
+      });
     });
 
     describe('#dispose()', () => {
@@ -385,6 +405,27 @@ describe('csvviewer/widget', () => {
           widget,
           undefined
         ]);
+        widget.dispose();
+      });
+    });
+  });
+
+  describe('CSVDocumentWidget', () => {
+    describe('#constructor()', () => {
+      it('should create the content with the delimiter', () => {
+        const widget = new CSVDocumentWidget({ context, delimiter: ';' });
+        expect(widget.content.delimiter).toBe(';');
+        widget.dispose();
+      });
+
+      it('should set the delimiter of the content it is given', () => {
+        const content = new CSVViewer({ context });
+        const widget = new CSVDocumentWidget({
+          content,
+          context,
+          delimiter: ';'
+        });
+        expect(content.delimiter).toBe(';');
         widget.dispose();
       });
     });
