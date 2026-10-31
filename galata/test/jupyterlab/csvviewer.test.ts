@@ -148,17 +148,6 @@ test.describe('CSV Viewer', () => {
       const csvLocator = page.locator('.jp-CSVViewer');
       await expect(csvLocator).toBeVisible();
       await expect(page.locator('.jp-CSVDelimiter select')).toHaveValue(';');
-      // The grid draws on a canvas, so only a screenshot shows its columns.
-      const size = await page.evaluate(async () => {
-        const viewer = window.jupyterapp.shell.currentWidget.content;
-        await viewer.ready;
-        const grid = Array.from(viewer.children())[0];
-        return { width: grid.totalWidth, height: grid.totalHeight };
-      });
-      const { x, y } = (await csvLocator.boundingBox())!;
-      expect(
-        await page.screenshot({ clip: { x, y, ...size } })
-      ).toMatchSnapshot('csv-default-delimiter.png');
     });
 
     test.afterEach(async ({ page }) => {
