@@ -27,14 +27,26 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
   protected static _manager: IMermaidManager | null = null;
   protected static _managerReady = new PromiseDelegate<IMermaidManager>();
   protected _lastRendered: string | null = null;
+  private _mimeModel: IRenderMime.IMimeModel | null = null;
+  private _renderId = 0;
 
   /**
-   * Create a new widget for rendering Vega/Vega-Lite.
+   * Create a new widget for rendering Mermaid.
    */
   constructor(options: IRenderMime.IRendererOptions) {
     super();
     this._mimeType = options.mimeType;
     this.addClass(MERMAID_CLASS);
+    if (RenderedMermaid._manager) {
+      RenderedMermaid._manager.themeChanged.connect(this._onThemeChanged, this);
+    } else {
+      void RenderedMermaid._managerReady.promise.then(manager => {
+        if (this.isDisposed) {
+          return;
+        }
+        manager.themeChanged.connect(this._onThemeChanged, this);
+      });
+    }
   }
 
   static set manager(manager: IMermaidManager) {
@@ -47,20 +59,46 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
   }
 
   /**
+   * Dispose of the resources held by the widget.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    if (RenderedMermaid._manager) {
+      RenderedMermaid._manager.themeChanged.disconnect(
+        this._onThemeChanged,
+        this
+      );
+    }
+    this._mimeModel = null;
+    super.dispose();
+  }
+
+  /**
    * Render mermaid text-based diagrams into this widget's node.
    */
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+    this._mimeModel = model;
+    const renderId = ++this._renderId;
+
     const manager = await RenderedMermaid._managerReady.promise;
+    if (this.isDisposed || renderId !== this._renderId) {
+      return;
+    }
 
     const text = model.data[this._mimeType] as string | undefined;
     if (text == null || text === this._lastRendered) {
       return;
     }
 
-    this._lastRendered = text;
-
     // get a div containing a figure or parser message
     const figure = await manager.renderFigure(text);
+    if (this.isDisposed || renderId !== this._renderId) {
+      return;
+    }
+
+    this._lastRendered = text;
 
     if (figure.classList.contains(WARNING_CLASS)) {
       this.node.classList.add(WARNING_CLASS);
@@ -106,6 +144,13 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
       const dataWithoutSvg = { ...model.data };
       delete dataWithoutSvg[SVG_MIME];
       model.setData({ data: dataWithoutSvg, metadata });
+    }
+  }
+
+  private _onThemeChanged(): void {
+    this._lastRendered = null;
+    if (this._mimeModel) {
+      void this.renderModel(this._mimeModel);
     }
   }
 

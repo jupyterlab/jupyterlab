@@ -2,6 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Token } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
 import type MermaidType from 'mermaid';
 import type { MermaidConfig } from 'mermaid/dist/config.type';
 
@@ -35,7 +37,11 @@ export const IMermaidManager = new Token<IMermaidManager>(
 /**
  * A namespace for public mermaid interfaces.
  */
-export interface IMermaidManager {
+export interface IMermaidManager extends IDisposable {
+  /**
+   * A signal emitted when the theme changes or mermaid is re-initialized.
+   */
+  readonly themeChanged: ISignal<this, void>;
   /**
    * Get the (potentially uninitialized) mermaid module.
    */
@@ -60,6 +66,11 @@ export interface IMermaidManager {
    * Get the pre-cached element for a mermaid string, if available.
    */
   getCachedFigure(text: string): HTMLElement | null;
+
+  /**
+   * Refresh all rendered mermaid diagrams in the document (or within the specified root element).
+   */
+  refreshDiagrams(root?: ParentNode): Promise<void>;
 }
 
 /**
