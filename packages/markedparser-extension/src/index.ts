@@ -15,11 +15,7 @@ import type {
 } from '@jupyterlab/application';
 import { LruCache } from '@jupyterlab/coreutils';
 import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
-import {
-  IMarkdownParser,
-  removeMath,
-  replaceMath
-} from '@jupyterlab/rendermime';
+import { IMarkdownParser, removeMath } from '@jupyterlab/rendermime';
 import type { IMarkdownHeadingToken } from '@jupyterlab/rendermime';
 import { IMermaidMarkdown } from '@jupyterlab/mermaid';
 
@@ -277,7 +273,8 @@ namespace Private {
       _marked = await initializeMarked(options);
     }
     const headings = new Array<IMarkdownHeadingToken>();
-    const { text, math } = maskMath(content);
+    // Hide math from the lexer, as `renderMarkdown` does.
+    const { text, math } = removeMath(content);
     const tokens = _marked.lexer(text);
 
     // Extract heading tokens and compute line numbers
@@ -287,37 +284,21 @@ namespace Private {
     // - paragraph: Only paragraphs with nested HTML tokens (inline html tags) that might contain embedded headings (<span><h1>Title</h1></span>)
     let currentLine = 0;
     for (const token of tokens) {
+      const raw = restoreMath(token.raw, math);
       if (
         token.type === 'heading' ||
         (token.type === 'html' && containsHeadingTag(token.raw)) ||
         (token.type === 'paragraph' && containsInlineHeading(token))
       ) {
         headings.push({
-          raw: replaceMath(token.raw, math),
+          raw,
           line: currentLine
         });
       }
-      currentLine += token.raw.split('\n').length - 1;
+      currentLine += raw.split('\n').length - 1;
     }
 
     return headings;
-  }
-
-  /**
-   * Hide math from the lexer, as `renderMarkdown` does, while keeping the
-   * source's line count so heading line numbers stay correct.
-   */
-  function maskMath(content: string): { text: string; math: string[] } {
-    const { text, math } = removeMath(content);
-    // `removeMath` collapses each block to one line; restore the lines it spanned.
-    return {
-      text: text.replace(
-        /@@(\d+)@@/g,
-        (placeholder: string, index: string) =>
-          placeholder + '\n'.repeat(math[Number(index)].split('\n').length - 1)
-      ),
-      math
-    };
   }
 
   function containsHeadingTag(raw: string) {
@@ -329,6 +310,19 @@ namespace Private {
 
     return token.tokens.some(
       (t: Tokens.Generic) => t.type === 'html' && containsHeadingTag(t.raw)
+    );
+  }
+
+  /**
+   * Put back the math source hidden by `removeMath`, undoing the HTML
+   * escaping it applies, so that the result matches the Markdown source.
+   */
+  function restoreMath(text: string, math: string[]): string {
+    return text.replace(/@@(\d+)@@/g, (_match: string, index: string) =>
+      math[Number(index)]
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
     );
   }
 }
