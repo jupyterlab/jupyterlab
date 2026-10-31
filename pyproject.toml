@@ -10,7 +10,7 @@ name = "jupyterlab"
 description = "JupyterLab computational environment"
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [
     { name = "Jupyter Development Team", email = "jupyter@googlegroups.com" },
 ]
@@ -28,16 +28,16 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
 ]
 dependencies = [
     "jupyter-builder>=1.1.1",
-    "async_lru>=1.0.0",
-    "httpx>=0.25.0,<1",
+    "async_lru>=1.0.3",
+    "httpx2>=2,<3",
     "ipykernel>=6.5.0,!=6.30.0",
     "jinja2>=3.0.3",
     "jupyter_core",
@@ -46,10 +46,9 @@ dependencies = [
     "jupyterlab_server>=2.28.0,<3",
     "notebook_shim>=0.2",
     "packaging>=23.2",
-    "tomli>=1.2.2;python_version<\"3.11\"",
     "tornado>=6.2.0",
     "traitlets",
-    "typing-extensions>=4.6.0;python_version<\"3.12\"",
+    "typing-extensions>=4.6.1;python_version<\"3.12\"",
 ]
 dynamic = [
     "version",
@@ -110,7 +109,7 @@ dev = [
     "pytest-cov",
     "coverage",
     "hatch",
-    "bump2version",
+    "bump-my-version>=1,<2",
     "mypy==1.20.2",
     "ruff==0.16.10",
 ]
@@ -238,7 +237,7 @@ ignore = "tests examples"
 
 [tool.mypy]
 files = ["jupyterlab"]
-python_version = "3.10"
+python_version = "3.11"
 show_error_codes = true
 
 [[tool.mypy.overrides]]
@@ -248,9 +247,7 @@ module = [
     "jupyterhub.singleuser",
     "jupyterhub.singleuser.mixins",
     "notebook_shim.shim",
-    "tomli",
     "tomli_w",
-    "tomllib",
 ]
 ignore_missing_imports = true
 
@@ -260,7 +257,7 @@ follow_imports = "skip"
 follow_imports_for_stubs = true
 
 [tool.jupyter-releaser.options]
-version-cmd = "jlpm bumpversion --force --skip-commit"
+version-cmd = "jlpm bumpversion --skip-commit"
 npm-install-options = "--legacy-peer-deps"
 release-message = "[ci skip] Publish {version}"
 tag-message = "[ci skip] Release {tag_name}"
@@ -280,11 +277,15 @@ before-build-python = [
     "jlpm before:build:python",
     "node buildutils/lib/local-repository stop",
 ]
-after-publish-assets = "npm run after:publish:assets"
+after-publish-assets = [
+    # Install is needed again because `before-bump-version` is skipped on restart of half-completed release runs
+    "pip install jupyter-builder>=1.1.1",
+    "npm run after:publish:assets",
+]
 
 [tool.ruff]
 exclude = ["*.ipynb"]
-target-version = "py310"
+target-version = "py311"
 line-length = 100
 lint.select = [
   "A", "ANN", "B", "C", "C4", "DTZ", "E", "EM", "F", "FBT", "FLY", "FURB", "I",

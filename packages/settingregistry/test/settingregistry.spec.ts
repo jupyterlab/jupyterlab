@@ -1158,6 +1158,80 @@ describe('@jupyterlab/settingregistry', () => {
         settings = (await registry.load(id)) as Settings;
         expect(settings.default()).toStrictEqual(defaults);
       });
+
+      it('should keep `disabled` and `preventDefault: false` on default shortcuts', async () => {
+        const id = 'omicron';
+        const shortcuts = [
+          // A shortcut disabled in `overrides.json`. The shortcut schema
+          // does not declare `disabled`.
+          {
+            command: 'notebook:change-cell-to-code',
+            keys: ['Y'],
+            selector: '.jp-Notebook',
+            disabled: true
+          },
+          {
+            command: 'inline-completer:next',
+            keys: ['Alt ]'],
+            selector: '.jp-mod-completer-enabled',
+            preventDefault: false
+          }
+        ];
+
+        connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            shortcuts: {
+              type: 'array',
+              items: { $ref: '#/definitions/shortcut' },
+              default: shortcuts
+            }
+          },
+          definitions: {
+            shortcut: {
+              type: 'object',
+              properties: {
+                command: { type: 'string' },
+                keys: { type: 'array', items: { type: 'string' } },
+                selector: { type: 'string' },
+                preventDefault: { type: 'boolean' }
+              }
+            }
+          }
+        };
+        settings = (await registry.load(id)) as Settings;
+        expect(settings.default('shortcuts')).toEqual(shortcuts);
+      });
+
+      it('should keep a toolbar item `rank` of 0 over the schema default', async () => {
+        const id = 'omicron';
+        const toolbar = [
+          { name: 'run', command: 'console:run-forced', rank: 0 }
+        ];
+
+        connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            toolbar: {
+              type: 'array',
+              items: { $ref: '#/definitions/toolbarItem' },
+              default: toolbar
+            }
+          },
+          definitions: {
+            toolbarItem: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                command: { type: 'string' },
+                rank: { type: 'number', default: 50 }
+              }
+            }
+          }
+        };
+        settings = (await registry.load(id)) as Settings;
+        expect(settings.default('toolbar')).toEqual(toolbar);
+      });
     });
 
     describe('#get()', () => {

@@ -86,6 +86,20 @@ test.describe('Internationalization', () => {
   }) => {
     let requestedLanguage: string | undefined;
 
+    // Fake the server locale as Chinese, as the default language of an
+    // English server is not requested
+    await page.route('**/*', async (route, request) => {
+      if (!request.isNavigationRequest()) {
+        return route.fallback();
+      }
+      const response = await route.fetch();
+      const body = (await response.text()).replace(
+        /"serverLocale": "[^"]*"/,
+        '"serverLocale": "zh_CN"'
+      );
+      return route.fulfill({ response, body });
+    });
+
     await page.route(galata.Routes.translations, async (route, request) => {
       const language = galata.Routes.translations.exec(request.url())?.groups
         ?.id;

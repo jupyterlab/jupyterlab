@@ -1179,7 +1179,7 @@ export namespace galata {
           }
           case 'PUT': {
             const data = request.postDataJSON();
-            workspace.data = { ...workspace.data, ...data.data };
+            workspace.data = { ...data.data };
             workspace.metadata = { ...workspace.metadata, ...data.metadata };
             return route.fulfill({ status: 204 });
           }

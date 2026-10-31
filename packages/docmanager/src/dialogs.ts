@@ -242,11 +242,15 @@ export function shouldOverwrite(
         label: trans.__('Overwrite'),
         ariaLabel: trans.__('Overwrite Existing File')
       })
-    ]
+    ],
+    skipQueue: true
   };
-  return showDialog(options).then(result => {
-    return Promise.resolve(result.button.accept);
-  });
+  // The dialog skips the launch queue, so show one prompt at a time here.
+  const answer = Private.overwritePrompts
+    .then(() => showDialog(options))
+    .then(result => result.button.accept);
+  Private.overwritePrompts = answer.catch(() => false);
+  return answer;
 }
 
 /**
@@ -293,6 +297,11 @@ class RenameHandler extends Widget {
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * The answer to the last overwrite prompt, which the next prompt waits for.
+   */
+  export let overwritePrompts: Promise<boolean> = Promise.resolve(true);
+
   /**
    * Create the node for a rename handler.
    */

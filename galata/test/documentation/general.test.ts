@@ -10,8 +10,7 @@ import {
   freeezeKernelIds,
   generateArrow,
   positionMouse,
-  positionMouseOver,
-  setTerminalTitle
+  positionMouseOver
 } from './utils';
 
 test.use({
@@ -65,7 +64,7 @@ test.describe('General', () => {
 
     await page.evaluate(() => document.fonts.load('12px "DejaVu Mono"'));
     await page.menu.clickMenuItem('File>New>Terminal');
-    await setTerminalTitle(page, 'Terminal 1');
+    await page.terminal.setTitle('Terminal 1');
 
     await page.menu.clickMenuItem('File>New>Console');
     await page.click('button:has-text("Select")');
@@ -260,7 +259,8 @@ test.describe('General', () => {
       .locator('.jp-MetadataForm .jp-MetadataEditorTool')
       .last()
       .textContent();
-    expect(cellMetadata).toContain('"tags": []');
+    // Opening Common Tools does not write default metadata into the cell.
+    expect(cellMetadata).not.toContain('"tags"');
     expect(notebookMetadata).not.toContain('"base_numbering"');
 
     // Expect adding tag is reflected in CellMetadataEditor
@@ -292,7 +292,11 @@ test.describe('General', () => {
     expect(newNotebookMetadata).toContain('"base_numbering":3');
 
     // Expect modifying cell metadata from advanced tools
-    await page.click('.cm-content > div:nth-child(8)');
+    await page
+      .locator('.jp-MetadataForm .jp-MetadataEditorTool')
+      .first()
+      .locator('.cm-line', { hasText: 'test-tag' })
+      .click();
     await page.keyboard.press('End');
     await page.keyboard.type(',"newtest-tag"');
     const modifiedCellMetadata = (
@@ -625,7 +629,7 @@ test.describe('General', () => {
     // Wait for the xterm.js element to be added in the DOM
     await page.locator('.jp-Terminal-body').waitFor();
 
-    await setTerminalTitle(page, 'Terminal 1');
+    await page.terminal.setTitle('Terminal 1');
     await page.keyboard.type('cd $JUPYTERLAB_GALATA_ROOT_DIR');
     await page.keyboard.press('Enter');
     await page.keyboard.type(`clear && cat ${tmpPath}/${fileName}`);
@@ -651,7 +655,7 @@ test.describe('General', () => {
     // Open a terminal
     await page.menu.clickMenuItem('File>New>Terminal');
 
-    await setTerminalTitle(page, 'Terminal 1');
+    await page.terminal.setTitle('Terminal 1');
 
     await page.notebook.openByPath('notebooks/Data.ipynb');
     await page.notebook.open('Julia.ipynb');
@@ -691,29 +695,31 @@ test.describe('General', () => {
     );
     await freeezeKernelIds(dialog, mockedKernelIds);
 
-    // Freeze `terminal/X` identifier because under concurrent execution the
-    // server might be tracking another terminal already so instead of
-    // `terminal/1` the screenshot would show e.g. `terminal/2`.
+    // Freeze the terminal identifier because under concurrent execution the
+    // server might be tracking another terminal already, and the displayed
+    // terminal label can depend on the terminal tab title. Terminal labels are
+    // covered in terminal tests; keep this modal snapshot focused on layout.
     // Changing this via mocks would involve both intercepting terminal REST
     // API and then rewiring websocket connections which does not work
     // reliably in galata as of now.
     await dialog.evaluate(node => {
-      let changed = false;
-      for (let [_, entry] of node
-        .querySelectorAll('.jp-RunningSessions-itemLabel')
-        .entries()) {
-        const label = entry.textContent ?? '';
-        if (/terminals\/\d+/i.test(label)) {
-          entry.textContent = label.replace(/terminals\/\d+/gi, 'terminals/1');
-          changed = true;
-          break;
-        }
-      }
-      if (!changed) {
+      const terminalSection = Array.from(
+        node.querySelectorAll('.jp-RunningSessions-section')
+      ).find(section => {
+        const label = section.querySelector(
+          '.jp-SearchableSessions-titleLabel'
+        );
+        return label?.textContent?.toLowerCase() === 'terminals';
+      });
+      const terminalEntry = terminalSection?.querySelector(
+        '.jp-RunningSessions-itemLabel'
+      );
+      if (!terminalEntry) {
         throw Error(
           'Expected to find at least one terminal entry in the dialog.'
         );
       }
+      terminalEntry.textContent = 'Terminal 1';
     });
 
     expect(await dialog.screenshot()).toMatchSnapshot('running_modal.png');

@@ -265,6 +265,7 @@ export default defineConfig([
 
     rules: {
       'jupyter/command-described-by': 'error',
+      'jupyter/command-id-convention': 'error',
       'jupyter/plugin-activation-args': 'error',
       'jupyter/plugin-description': 'error',
       'jupyter/plugin-id-convention': 'error',
