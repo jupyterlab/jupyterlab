@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { YFile } from '@jupyter/ydoc';
+
 import { Toolbar } from '@jupyterlab/apputils';
 
 import { createSession } from '@jupyterlab/docregistry/lib/testutils';
@@ -76,6 +78,46 @@ describe('DebuggerHandler', () => {
     service.dispose();
     await connection.shutdown();
     connection.dispose();
+  });
+
+  describe('toolbar button', () => {
+    it('ignores a click while the previous click is still being handled', async () => {
+      // The button only acts while its widget is the current one.
+      handler = new DebuggerHandler({
+        type: 'file',
+        shell: { currentWidget: widget } as any,
+        service
+      });
+      // Just enough of a file editor for the handler created on start; a
+      // disposed editor makes it skip the breakpoint gutter setup.
+      (widget as any).content = {
+        editor: {
+          isDisposed: true,
+          getOption: () => false,
+          setOptions: () => undefined
+        },
+        model: { sharedModel: YFile.create() }
+      };
+      await handler.update(widget as any, connection);
+      const button = handler['_iconButtons'][widget.id]!;
+      // The public `onClick` getter drops the promise of the handler.
+      const click = (): Promise<void> => button['_onClick']();
+
+      const firstClick = click();
+      // `isStarted` turns true when `initialize` replies, before the first
+      // click has sent `attach` and created the debug handler.
+      while (!service.isStarted) {
+        await sleep(10);
+      }
+      const secondClick = click();
+      await Promise.all([firstClick, secondClick]);
+
+      const reply = await service.session!.sendRequest('debugInfo', {});
+      expect(reply.body.isStarted).toBe(true);
+      expect(service.isStarted).toBe(true);
+      expect(button.pressed).toBe(true);
+      expect(widget.node.getAttribute('data-jp-debugger')).toBe('true');
+    });
   });
 
   describe('#update()', () => {

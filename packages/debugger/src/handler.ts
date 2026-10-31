@@ -428,15 +428,25 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       if (!hasFocus()) {
         return;
       }
-      const debugButton = this._iconButtons[widget.id]!;
-      if (isDebuggerOn()) {
-        await stopDebugger();
-        removeHandlers();
-        updateIconButtonState(debugButton, false);
-      } else {
-        await startDebugger();
-        createHandler();
-        updateIconButtonState(debugButton, true);
+      // A click while an earlier one is still starting or stopping the
+      // debugger would read a half-updated `isStarted` and undo it.
+      if (this._togglingWidgets.has(widget.id)) {
+        return;
+      }
+      this._togglingWidgets.add(widget.id);
+      try {
+        const debugButton = this._iconButtons[widget.id]!;
+        if (isDebuggerOn()) {
+          await stopDebugger();
+          removeHandlers();
+          updateIconButtonState(debugButton, false);
+        } else {
+          await startDebugger();
+          createHandler();
+          updateIconButtonState(debugButton, true);
+        }
+      } finally {
+        this._togglingWidgets.delete(widget.id);
       }
     };
 
@@ -579,6 +589,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
   private _iconButtons: {
     [id: string]: ToolbarButton | undefined;
   } = {};
+  private _togglingWidgets = new Set<string>();
   private _debuggerAvailability: {
     [id: string]: IDebuggerAvailability | undefined;
   } = {};
