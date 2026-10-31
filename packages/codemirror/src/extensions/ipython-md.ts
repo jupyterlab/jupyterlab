@@ -42,6 +42,43 @@ const DELIMITERS = Object.keys(DELIMITER_LENGTH).reduce<
 }, {});
 
 /**
+ * Length of the run of backticks starting at `pos`.
+ */
+function backtickRun(text: string, pos: number): number {
+  let end = pos;
+  while (text[end] === '`') {
+    end++;
+  }
+  return end - pos;
+}
+
+/**
+ * Positions of the `$$` delimiters in text, skipping backslash escapes and
+ * code spans as the inline parser does.
+ */
+function mathDelimiters(text: string, from = 0): number[] {
+  const found: number[] = [];
+  for (let i = from; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '\\') {
+      i++;
+    } else if (ch === '`') {
+      const ticks = backtickRun(text, i);
+      // A code span closes with a run of exactly as many backticks.
+      let close = text.indexOf('`', i + ticks);
+      while (close >= 0 && backtickRun(text, close) !== ticks) {
+        close = text.indexOf('`', close + backtickRun(text, close));
+      }
+      i = (close >= 0 ? close : i) + ticks - 1;
+    } else if (ch === '$' && text[i + 1] === '$') {
+      found.push(i);
+      i++;
+    }
+  }
+  return found;
+}
+
+/**
  * Whether a line opens `$$` display math that it does not also close.
  */
 function opensMathBlock(line: Line): boolean {
@@ -50,6 +87,13 @@ function opensMathBlock(line: Line): boolean {
     line.text.startsWith('$$', line.pos) &&
     !line.text.includes('$$', line.pos + 2)
   );
+}
+
+/**
+ * Whether text has a `$$` that it does not close.
+ */
+function hasOpenMath(text: string): boolean {
+  return mathDelimiters(text).length % 2 === 1;
 }
 
 /**
@@ -101,8 +145,7 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
         // A `$$` line that closes inline math opened earlier in the paragraph
         // must not start a new block.
         endLeaf: (cx: BlockContext, line: Line, leaf: LeafBlock) =>
-          opensMathBlock(line) &&
-          leaf.content.split(/(?<!\\)\$\$/).length % 2 === 1
+          opensMathBlock(line) && !hasOpenMath(leaf.content)
       }
     ],
     parseInline: [
