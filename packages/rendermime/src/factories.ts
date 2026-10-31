@@ -82,6 +82,16 @@ export const textRendererFactory: IRenderMime.IRendererFactory = {
 };
 
 /**
+ * A mime renderer factory for URI lists.
+ */
+export const uriListRendererFactory: IRenderMime.IRendererFactory = {
+  safe: true,
+  mimeTypes: ['text/uri-list'],
+  defaultRank: 100,
+  createRenderer: options => new widgets.RenderedURIList(options)
+};
+
+/**
  * A placeholder factory for rendered JavaScript.
  */
 export const javaScriptRendererFactory: IRenderMime.IRendererFactory = {
@@ -101,6 +111,7 @@ export const standardRendererFactories: ReadonlyArray<IRenderMime.IRendererFacto
     latexRendererFactory,
     svgRendererFactory,
     imageRendererFactory,
+    uriListRendererFactory,
     javaScriptRendererFactory,
     errorRendererFactory,
     textRendererFactory
