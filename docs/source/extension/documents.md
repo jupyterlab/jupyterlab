@@ -199,7 +199,7 @@ types of collaborative applications.
 
 In addition, a shared model has an [Awareness](https://docs.yjs.dev/getting-started/adding-awareness)
 attribute. This attribute is linked to the _Y.Doc_ which means there is one _Awareness_ object per document and is
-used for sharing cursor locations and presence information. The _Awareness_ is an implementation detail of Yjs
+used for sharing cursor locations and presence information. The `Awareness` is an implementation detail of Yjs
 and is not part of the `ISharedDocument` interface.
 
 Please, check out the [@jupyter/ydoc documentation](https://jupyter-ydoc.readthedocs.io/en/latest)
