@@ -20,61 +20,106 @@ const THREE_MATCHES = /\/3$/;
 
 const counter = '.jp-DocumentSearch-index-counter';
 
-test.beforeEach(async ({ page, tmpPath }) => {
-  await page.contents.uploadContent(
-    FILE_CONTENT,
-    'text',
-    `${tmpPath}/${FILE_NAME}`
-  );
-  await page.filebrowser.open(`${tmpPath}/${FILE_NAME}`, 'Markdown Preview');
-  await page.locator('.jp-MarkdownViewer').waitFor();
-  // Make sure the preview holds the focus, so that the shortcut reaches it.
-  await page.activity.activateTab(FILE_NAME);
-});
-
-test('Search the rendered markdown', async ({ page }) => {
-  await page.evaluate(async searchText => {
-    await window.jupyterapp.commands.execute('documentsearch:start', {
-      searchText
-    });
-  }, SEARCH_TEXT);
-
-  await expect(page.getByPlaceholder('Find')).toHaveValue(SEARCH_TEXT);
-  await expect(page.locator(counter)).toHaveText(THREE_MATCHES);
-});
-
-test('Populate search box with text selected in the preview', async ({
-  page
-}) => {
-  // Select the first occurrence in the rendered markdown.
-  await page.locator('.jp-MarkdownViewer').evaluate((element, searchText) => {
-    const walker = document.createTreeWalker(
-      element,
-      NodeFilter.SHOW_TEXT,
-      null
+test.describe('Search', () => {
+  test.beforeEach(async ({ page, tmpPath }) => {
+    await page.contents.uploadContent(
+      FILE_CONTENT,
+      'text',
+      `${tmpPath}/${FILE_NAME}`
     );
+    await page.filebrowser.open(`${tmpPath}/${FILE_NAME}`, 'Markdown Preview');
+    await page.locator('.jp-MarkdownViewer').waitFor();
+    // Make sure the preview holds the focus, so that the shortcut reaches it.
+    await page.activity.activateTab(FILE_NAME);
+  });
 
-    let node: Node | null;
-    while ((node = walker.nextNode())) {
-      const start = node.textContent?.indexOf(searchText) ?? -1;
-      if (start === -1) {
-        continue;
+  test('Search the rendered markdown', async ({ page }) => {
+    await page.evaluate(async searchText => {
+      await window.jupyterapp.commands.execute('documentsearch:start', {
+        searchText
+      });
+    }, SEARCH_TEXT);
+
+    await expect(page.getByPlaceholder('Find')).toHaveValue(SEARCH_TEXT);
+    await expect(page.locator(counter)).toHaveText(THREE_MATCHES);
+  });
+
+  test('Populate search box with text selected in the preview', async ({
+    page
+  }) => {
+    // Select the first occurrence in the rendered markdown.
+    await page.locator('.jp-MarkdownViewer').evaluate((element, searchText) => {
+      const walker = document.createTreeWalker(
+        element,
+        NodeFilter.SHOW_TEXT,
+        null
+      );
+
+      let node: Node | null;
+      while ((node = walker.nextNode())) {
+        const start = node.textContent?.indexOf(searchText) ?? -1;
+        if (start === -1) {
+          continue;
+        }
+        const range = document.createRange();
+        range.setStart(node, start);
+        range.setEnd(node, start + searchText.length);
+
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+        break;
       }
-      const range = document.createRange();
-      range.setStart(node, start);
-      range.setEnd(node, start + searchText.length);
+    }, SEARCH_TEXT);
 
-      const selection = window.getSelection();
-      selection?.removeAllRanges();
-      selection?.addRange(range);
-      break;
-    }
-  }, SEARCH_TEXT);
+    await page.keyboard.press('Control+f');
 
-  await page.keyboard.press('Control+f');
+    const searchInput = page.getByPlaceholder('Find');
+    await expect(searchInput).toHaveValue(SEARCH_TEXT);
+    await expect(searchInput).toBeFocused();
+    await expect(page.locator(counter)).toHaveText(THREE_MATCHES);
+  });
+});
 
-  const searchInput = page.getByPlaceholder('Find');
-  await expect(searchInput).toHaveValue(SEARCH_TEXT);
-  await expect(searchInput).toBeFocused();
-  await expect(page.locator(counter)).toHaveText(THREE_MATCHES);
+test.describe('Local links', () => {
+  const LINK_FILE = 'links.md';
+
+  test('Directory link opens the directory in the file browser', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.contents.createDirectory(`${tmpPath}/subdir`);
+    await page.contents.uploadContent(
+      '[go to subdir](subdir)',
+      'text',
+      `${tmpPath}/${LINK_FILE}`
+    );
+    await page.filebrowser.open(`${tmpPath}/${LINK_FILE}`, 'Markdown Preview');
+    await page.locator('.jp-MarkdownViewer').waitFor();
+
+    await page
+      .locator('.jp-MarkdownViewer a', { hasText: 'go to subdir' })
+      .click();
+
+    await expect
+      .poll(() => page.filebrowser.getCurrentDirectory())
+      .toBe(`${tmpPath}/subdir`);
+  });
+
+  test('File link still opens the file', async ({ page, tmpPath }) => {
+    await page.contents.uploadContent('hello', 'text', `${tmpPath}/note.txt`);
+    await page.contents.uploadContent(
+      '[open note](note.txt)',
+      'text',
+      `${tmpPath}/${LINK_FILE}`
+    );
+    await page.filebrowser.open(`${tmpPath}/${LINK_FILE}`, 'Markdown Preview');
+    await page.locator('.jp-MarkdownViewer').waitFor();
+
+    await page
+      .locator('.jp-MarkdownViewer a', { hasText: 'open note' })
+      .click();
+
+    await expect(page.activity.getTabLocator('note.txt')).toBeVisible();
+  });
 });
