@@ -394,24 +394,65 @@ test.describe('Reactive toolbar', () => {
       .first();
     await checkboxLabel.click();
 
-    await page.locator('div.lm-TabBar-tabLabel >> text=Notebook.ipynb').click();
+    await page.activity.activateTab('Notebook.ipynb');
     const saveLocator = toolbar.locator('[data-jp-item-name="save"]');
     await expect(saveLocator).toHaveCount(0, { timeout: 1000 });
 
-    const debuggerActive = page.locator(
-      '.jp-DebuggerBugButton[aria-disabled="false"]'
-    );
-
-    // The debugger icon flickering is a persistent source of flakiness,
-    // we see it appear, disappear and appear again; while we want to
-    // fix this properly, it is not trivial as seen in attempts to address
-    // the issue https://github.com/jupyterlab/jupyterlab/issues/18514
-    // so for now to ease the snapshot updates we just wait for it to settle.
-    await debuggerActive.waitFor();
-    // eslint-disable-next-line playwright/no-wait-for-timeout
-    await page.waitForTimeout(1250);
-    await debuggerActive.waitFor();
-
-    expect(await toolbar.screenshot()).toMatchSnapshot(imageName);
+    await expect(toolbar).toHaveScreenshot(imageName);
   });
+
+  test('Hiding an item should bring back the items from the popup', async ({
+    page
+  }) => {
+    const toolbar = page.locator('.jp-NotebookPanel-toolbar');
+    const opener = toolbar.locator('.jp-Toolbar-responsive-opener');
+    const item = toolbar.locator('[data-jp-item-name="restart-and-run"]');
+    // Wide enough to push the next items to the popup, not to go there itself.
+    await item.evaluate(node => {
+      node.style.minWidth = '350px';
+    });
+    await expect(opener).toBeVisible();
+
+    await item.evaluate(node => {
+      node.style.display = 'none';
+    });
+
+    await expect(opener).toBeHidden();
+  });
+
+  test('Adding padding to an item should move items to the popup', async ({
+    page
+  }) => {
+    const toolbar = page.locator('.jp-NotebookPanel-toolbar');
+    const opener = toolbar.locator('.jp-Toolbar-responsive-opener');
+    await expect(opener).toBeHidden();
+
+    await toolbar
+      .locator('[data-jp-item-name="restart-and-run"]')
+      .evaluate(node => {
+        node.style.paddingRight = '600px';
+      });
+
+    await expect(opener).toBeVisible();
+  });
+});
+
+test('Reactive toolbar should move items to the popup when the kernel name gets longer', async ({
+  page
+}) => {
+  await page.notebook.createNew(fileName, { kernel: null });
+  // At this width "No Kernel" fits in the toolbar, "Python 3 (ipykernel)" does not.
+  await page.sidebar.setWidth(430);
+  const toolbar = page.locator('.jp-NotebookPanel-toolbar');
+  const opener = toolbar.locator('.jp-Toolbar-responsive-opener');
+  await expect(opener).toBeHidden();
+
+  await toolbar.getByTitle('Switch kernel').click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByRole('combobox').selectOption('{"name":"python3"}');
+  await dialog
+    .getByRole('button', { name: 'Select Kernel', exact: true })
+    .click();
+
+  await expect(opener).toBeVisible();
 });

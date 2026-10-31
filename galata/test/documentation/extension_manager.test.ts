@@ -59,7 +59,7 @@ test.describe('Extension Manager', () => {
   test('Warning', async ({ page }) => {
     await page.goto();
 
-    await page.click('[title="Extension Manager"]');
+    await page.sidebar.openTab('extensionmanager.main-view');
     expect(
       await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 400 } })
     ).toMatchSnapshot('extensions_disabled.png');
@@ -370,7 +370,7 @@ test.describe('Filtered Extension Manager', () => {
 });
 
 async function openExtensionSidebar(page: IJupyterLabPageFixture) {
-  await page.click('[title="Extension Manager"]');
+  await page.sidebar.openTab('extensionmanager.main-view');
 
   await Promise.all([
     page.waitForResponse(new RegExp(`${galata.Routes.extensions}?refresh=0`)),

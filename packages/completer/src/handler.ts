@@ -533,6 +533,13 @@ export class CompletionHandler implements IDisposable {
           if (current !== this._fetchingInline) {
             return;
           }
+          if (
+            trigger === InlineCompletionTriggerKind.Automatic &&
+            !editor.hasFocus()
+          ) {
+            // The user left the editor while the request was pending
+            return;
+          }
           completed.add(promise);
           if (completed.size === 1) {
             if (
