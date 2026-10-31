@@ -131,13 +131,30 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
           // Like the renderer, do not let math run past a blank line.
           while (cx.nextLine() && line.next != -1) {
             const close = line.text.indexOf('$$', line.pos);
-            if (close >= 0) {
-              to = cx.lineStart + close + 2;
-              marks.push(cx.elt(mark, to - 2, to));
-              cx.nextLine();
-              break;
+            if (close < 0) {
+              to = cx.lineStart + line.text.length;
+              continue;
             }
-            to = cx.lineStart + line.text.length;
+            to = cx.lineStart + close + 2;
+            marks.push(cx.elt(mark, to - 2, to));
+            cx.addElement(cx.elt(BLOCK_MATH_DOLLAR, from, to, marks));
+            const rest = line.skipSpace(close + 2);
+            if (rest < line.text.length) {
+              // Text after the closing `$$` is still Markdown.
+              cx.addElement(
+                cx.elt(
+                  'Paragraph',
+                  cx.lineStart + rest,
+                  cx.lineStart + line.text.length,
+                  cx.parser.parseInline(
+                    line.text.slice(rest),
+                    cx.lineStart + rest
+                  )
+                )
+              );
+            }
+            cx.nextLine();
+            return true;
           }
           cx.addElement(cx.elt(BLOCK_MATH_DOLLAR, from, to, marks));
           return true;
