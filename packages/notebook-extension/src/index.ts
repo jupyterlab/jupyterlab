@@ -1756,13 +1756,18 @@ function activateWidgetFactory(
 
   if (settingRegistry) {
     // Create the factory
-    toolbarFactory = createToolbarFactory(
+    const panelToolbarFactory = createToolbarFactory(
       toolbarRegistry,
       settingRegistry,
       FACTORY,
       PANEL_SETTINGS,
       translator
     );
+    // Pass the panel id so that the buttons act on their own notebook
+    toolbarFactory = (panel: NotebookPanel) =>
+      panelToolbarFactory(panel, {
+        [CellBarExtension.WIDGET_ID_ARG]: panel.id
+      });
   }
 
   const trans = translator.load('jupyterlab');

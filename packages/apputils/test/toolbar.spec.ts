@@ -3,7 +3,6 @@
 
 import type { SessionContext, ToolbarRegistry } from '@jupyterlab/apputils';
 import {
-  createDefaultFactory,
   createToolbarFactory,
   SessionContextDialogs,
   Toolbar,
@@ -14,7 +13,6 @@ import { SettingRegistry } from '@jupyterlab/settingregistry';
 import type { IDataConnector } from '@jupyterlab/statedb';
 import { framePromise, JupyterServer } from '@jupyterlab/testing';
 import type { ITranslator } from '@jupyterlab/translation';
-import { CommandRegistry } from '@lumino/commands';
 import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
@@ -630,58 +628,111 @@ describe('@jupyterlab/apputils', () => {
       expect(toolbar).toHaveLength(1);
       expect(toolbar.get(0).widget.node.textContent).toContain(textContent);
     });
-  });
 
-  describe('createDefaultFactory', () => {
-    it('includes widgetId in command toolbar button args', () => {
-      const commands = new CommandRegistry();
-      commands.addCommand('my-cmd', { execute: () => null });
+    const loadToolbarFactory = async (
+      items: ISettingRegistry.IToolbarItem[]
+    ) => {
+      const pluginId = 'test-plugin:settings';
+      const defaultFactory = jest.fn().mockImplementation(() => new Widget());
+      const toolbarRegistry = new ToolbarWidgetRegistry({ defaultFactory });
 
-      const widget = new Widget();
-      widget.id = 'my-widget-id';
+      const bar: ISettingRegistry.IPlugin = {
+        data: {
+          composite: {},
+          user: {}
+        },
+        id: pluginId,
+        raw: '{}',
+        schema: {
+          'jupyter.lab.toolbars': {
+            dummyFactory: items
+          },
+          'jupyter.lab.transform': true,
+          properties: {
+            toolbar: {
+              type: 'array'
+            }
+          },
+          type: 'object'
+        },
+        version: 'test'
+      };
 
-      // CommandToolbarButton calls commands.isVisible(id, args) in its
-      // constructor, so spying lets us verify the args it was given.
-      const isVisibleSpy = jest.spyOn(commands, 'isVisible');
+      const connector: IDataConnector<
+        ISettingRegistry.IPlugin,
+        string,
+        string,
+        string
+      > = {
+        fetch: jest.fn().mockImplementation((id: string) => {
+          switch (id) {
+            case bar.id:
+              return bar;
+            default:
+              return {};
+          }
+        }),
+        list: jest.fn(),
+        save: jest.fn(),
+        remove: jest.fn()
+      };
 
-      const factory = createDefaultFactory(commands);
-      factory('factoryName', widget, {
-        name: 'my-item',
-        type: 'command',
-        command: 'my-cmd'
+      const settingRegistry = new SettingRegistry({
+        connector
       });
 
-      expect(isVisibleSpy).toHaveBeenCalledWith(
-        'my-cmd',
-        expect.objectContaining({ toolbar: true, widgetId: 'my-widget-id' })
+      const translator: ITranslator = {
+        languageCode: DEFAULT_LANGUAGE_CODE,
+        load: jest.fn()
+      };
+
+      const factory = createToolbarFactory(
+        toolbarRegistry,
+        settingRegistry,
+        'dummyFactory',
+        pluginId,
+        translator
       );
+
+      await settingRegistry.load(bar.id);
+
+      return { factory, defaultFactory };
+    };
+
+    it('should add the command arguments to every item', async () => {
+      const { factory, defaultFactory } = await loadToolbarFactory([
+        { name: 'insert', command: 'notebook:insert-cell-below', rank: 20 },
+        {
+          name: 'cut',
+          command: 'notebook:cut-cell',
+          args: { extra: 'value' },
+          rank: 21
+        }
+      ]);
+
+      factory(new Widget(), { widgetId: 'panel-id' });
+
+      expect(defaultFactory.mock.calls.map(call => call[2].args)).toEqual([
+        { widgetId: 'panel-id' },
+        { extra: 'value', widgetId: 'panel-id' }
+      ]);
     });
 
-    it('merges extra toolbarItem args while preserving toolbar and widgetId', () => {
-      const commands = new CommandRegistry();
-      commands.addCommand('my-cmd', { execute: () => null });
+    it('should keep the arguments set by the item', async () => {
+      const { factory, defaultFactory } = await loadToolbarFactory([
+        {
+          name: 'viewer',
+          command: 'fileeditor:open-code-viewer',
+          args: { content: 'x = 1', widgetId: 'viewer-id' },
+          rank: 20
+        }
+      ]);
 
-      const widget = new Widget();
-      widget.id = 'my-widget-id';
+      factory(new Widget(), { widgetId: 'panel-id' });
 
-      const isVisibleSpy = jest.spyOn(commands, 'isVisible');
-
-      const factory = createDefaultFactory(commands);
-      factory('factoryName', widget, {
-        name: 'my-item',
-        type: 'command',
-        command: 'my-cmd',
-        args: { extra: 'value' }
-      });
-
-      expect(isVisibleSpy).toHaveBeenCalledWith(
-        'my-cmd',
-        expect.objectContaining({
-          toolbar: true,
-          widgetId: 'my-widget-id',
-          extra: 'value'
-        })
-      );
+      expect(defaultFactory.mock.calls.map(call => call[2].args)).toEqual([
+        { content: 'x = 1', widgetId: 'viewer-id' }
+      ]);
     });
   });
 });

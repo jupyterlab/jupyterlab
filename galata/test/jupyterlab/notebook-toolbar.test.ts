@@ -256,6 +256,90 @@ test('Toolbar items act on owner widget', async ({ page }) => {
   expect(await page.notebook.getCellCount()).toEqual(2);
 });
 
+test('Cell toolbar items follow the active cell of their own notebook', async ({
+  page,
+  tmpPath
+}) => {
+  const notebook = (sources: string[]) =>
+    JSON.stringify({
+      cells: sources.map((source, index) => ({
+        cell_type: 'code',
+        execution_count: null,
+        id: `cell-${index}`,
+        metadata: {},
+        outputs: [],
+        source
+      })),
+      metadata: {
+        kernelspec: {
+          display_name: 'Python 3 (ipykernel)',
+          language: 'python',
+          name: 'python3'
+        }
+      },
+      nbformat: 4,
+      nbformat_minor: 5
+    });
+  await page.contents.uploadContent(
+    notebook(['a = 1', 'b = 2']),
+    'text',
+    `${tmpPath}/two-cells.ipynb`
+  );
+  await page.contents.uploadContent(
+    notebook(['c = 3']),
+    'text',
+    `${tmpPath}/one-cell.ipynb`
+  );
+
+  // Given the second cell of a notebook active and a single-cell notebook
+  // next to it
+  await page.notebook.openByPath(`${tmpPath}/two-cells.ipynb`);
+  await page.notebook.activate('two-cells.ipynb');
+  await page.notebook.selectCells(1);
+  await page.evaluate(async path => {
+    await window.jupyterapp.commands.execute('docmanager:open', {
+      path,
+      options: { mode: 'split-right' }
+    });
+  }, `${tmpPath}/one-cell.ipynb`);
+
+  // When the single-cell notebook has the focus
+  await page.notebook.activate('one-cell.ipynb');
+
+  // Then the cell toolbar of the first notebook still allows moving its cell up
+  const panel = await page.activity.getPanelLocator('two-cells.ipynb');
+  await expect(
+    panel!.locator('.jp-cell-toolbar [data-command="notebook:move-cell-up"]')
+  ).toHaveAttribute('aria-disabled', 'false');
+});
+
+test.describe('Notebook command in the top bar', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/application-extension:top-bar': {
+        toolbar: [
+          {
+            name: 'insert-cell',
+            command: 'notebook:insert-cell-below',
+            rank: 5
+          }
+        ]
+      }
+    }
+  });
+
+  test('should act on the current notebook', async ({ page }) => {
+    await page.notebook.createNew(fileName);
+
+    await page
+      .locator('#jp-top-bar [data-command="notebook:insert-cell-below"]')
+      .click();
+
+    expect(await page.notebook.getCellCount()).toEqual(2);
+  });
+});
+
 test.describe('Reactive toolbar', () => {
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew(fileName);
