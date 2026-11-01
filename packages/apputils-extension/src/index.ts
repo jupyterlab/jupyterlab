@@ -284,7 +284,7 @@ Would you like to clear the workspace or keep waiting?`),
 
             splash.classList.add('splash-fade');
             window.setTimeout(() => {
-              document.body.removeChild(splash);
+              splash.parentNode?.removeChild(splash);
             }, 200);
           }
         });
