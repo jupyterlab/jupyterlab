@@ -96,6 +96,7 @@ class HTTPXTransport(xmlrpc.client.Transport):
         )
         response.raise_for_status()
         self.verbose = verbose
+        return self.parse_response(io.BytesIO(response.content))
 
 
 def _create_httpx_transports(
