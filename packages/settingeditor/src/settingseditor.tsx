@@ -176,10 +176,15 @@ export namespace SettingsEditor {
   export type SaveState = 'started' | 'failed' | 'completed';
 
   /**
-   *
+   * The filtered value type.
+   */
+  export type FilteredValues = string[] | 'all' | 'tag';
+
+  /**
+   * The setting search filter function.
    */
   export type PluginSearchFilter =
-    | ((plugin: ISettingRegistry.IPlugin) => string[] | null)
+    | ((plugin: ISettingRegistry.IPlugin) => FilteredValues)
     | null;
 
   /**
