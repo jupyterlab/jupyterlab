@@ -5,6 +5,7 @@ import io
 import json
 import sys
 import tarfile
+import xmlrpc.client
 from subprocess import CompletedProcess
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
@@ -20,10 +21,52 @@ from jupyterlab.extensions.manager import (
     ExtensionPackage,
     PluginManager,
 )
-from jupyterlab.extensions.pypi import _check_python_version_compatible
+from jupyterlab.extensions.pypi import (
+    HTTPXTransport,
+    _check_python_version_compatible,
+    _create_httpx_transports,
+)
 from jupyterlab.handlers.extension_manager_handler import ExtensionHandler
 
 from . import fake_client_factory
+
+
+def test_httpx_xmlrpc_transport():
+    response_body = xmlrpc.client.dumps(("result",), methodresponse=True).encode()
+    client = Mock()
+    client.post.return_value.content = response_body
+    transport = HTTPXTransport(client)
+
+    result = transport.request("pypi.org", "/pypi", b"request")
+
+    assert result == ("result",)
+    client.post.assert_called_once_with(
+        "https://pypi.org/pypi",
+        content=b"request",
+        headers={"Content-Type": "text/xml", "User-Agent": transport.user_agent},
+    )
+    client.post.return_value.raise_for_status.assert_called_once_with()
+
+
+@patch("jupyterlab.extensions.pypi.httpx2.Client")
+@patch("jupyterlab.extensions.pypi.httpx2.AsyncHTTPTransport")
+def test_authenticated_proxy_urls(mock_async_transport, mock_client):
+    http_proxy = "http://user:p%40ss@http-proxy.example:8080"
+    https_proxy = "http://user:p%40ss@https-proxy.example:8443"
+
+    mounts, xmlrpc_transport = _create_httpx_transports(http_proxy, https_proxy)
+
+    assert mounts == {
+        "http://": mock_async_transport.return_value,
+        "https://": mock_async_transport.return_value,
+    }
+    assert isinstance(xmlrpc_transport, HTTPXTransport)
+    assert xmlrpc_transport._client is mock_client.return_value
+    assert mock_async_transport.call_args_list == [
+        ((), {"proxy": http_proxy}),
+        ((), {"proxy": https_proxy}),
+    ]
+    mock_client.assert_called_once_with(proxy=https_proxy)
 
 
 @pytest.mark.parametrize(

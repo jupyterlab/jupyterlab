@@ -6,7 +6,6 @@
 from __future__ import annotations
 
 import asyncio
-import http.client
 import io
 import json
 import math
@@ -23,7 +22,6 @@ from pathlib import Path
 from subprocess import CalledProcessError, run
 from tarfile import TarFile
 from typing import TypeVar, cast
-from urllib.parse import urlparse
 from zipfile import ZipFile
 
 import httpx2
@@ -83,25 +81,37 @@ def _metadata_string_map(data: PackageMetadata, key: str) -> dict[str, str]:
     return {k: v for k, v in value.items() if isinstance(v, str)}
 
 
-class ProxiedTransport(xmlrpc.client.Transport):
-    proxy: tuple[str, str | int | None]
-    proxy_headers: dict[str, str] | None
+class HTTPXTransport(xmlrpc.client.Transport):
+    def __init__(self, client: httpx2.Client) -> None:
+        super().__init__()
+        self._client = client
 
-    def set_proxy(
-        self,
-        host: str,
-        port: str | int | None = None,
-        headers: dict[str, str] | None = None,
-    ) -> None:
-        self.proxy = host, port
-        self.proxy_headers = headers
+    def request(
+        self, host: str, handler: str, request_body: bytes, verbose: bool = False
+    ) -> tuple[object, ...]:
+        response = self._client.post(
+            f"https://{host}{handler}",
+            content=request_body,
+            headers={"Content-Type": "text/xml", "User-Agent": self.user_agent},
+        )
+        response.raise_for_status()
+        self.verbose = verbose
 
-    def make_connection(self, host: tuple[str, dict[str, str]] | str) -> http.client.HTTPConnection:
-        connection = http.client.HTTPConnection(*self.proxy)  # type: ignore[arg-type]
-        connection.set_tunnel(host, headers=self.proxy_headers)  # type: ignore[arg-type]
-        self._connection = host, connection
-        return connection
 
+def _create_httpx_transports(
+    http_proxy_url: str | None, https_proxy_url: str | None
+) -> tuple[dict[str, httpx2.AsyncBaseTransport], HTTPXTransport | None]:
+    mounts: dict[str, httpx2.AsyncBaseTransport] = {}
+    xmlrpc_transport = None
+
+    if http_proxy_url:
+        mounts["http://"] = httpx2.AsyncHTTPTransport(proxy=http_proxy_url)
+
+    if https_proxy_url:
+        mounts["https://"] = httpx2.AsyncHTTPTransport(proxy=https_proxy_url)
+        xmlrpc_transport = HTTPXTransport(httpx2.Client(proxy=https_proxy_url))
+
+    return mounts, xmlrpc_transport
 
 all_proxy_url = environ.get("ALL_PROXY")
 # For historical reasons, we also support the lowercase environment variables.
@@ -111,21 +121,7 @@ https_proxy_url = (
     environ.get("https_proxy") or environ.get("HTTPS_PROXY") or http_proxy_url or all_proxy_url
 )
 
-_httpx_mounts: dict[str, httpx2.AsyncBaseTransport] | None = None
-
-xmlrpc_transport_override = None
-
-if http_proxy_url:
-    http_proxy = urlparse(http_proxy_url)
-    proxy_host, _, proxy_port = http_proxy.netloc.partition(":")
-
-    _httpx_mounts = {
-        "http://": httpx2.AsyncHTTPTransport(proxy=http_proxy_url),
-        "https://": httpx2.AsyncHTTPTransport(proxy=https_proxy_url),
-    }
-
-    xmlrpc_transport_override = ProxiedTransport()
-    xmlrpc_transport_override.set_proxy(proxy_host, proxy_port)
+_httpx_mounts, xmlrpc_transport_override = _create_httpx_transports(http_proxy_url, https_proxy_url)
 
 
 def _check_python_version_compatible(requires_python: str | None) -> tuple[bool, str | None]:
@@ -275,9 +271,7 @@ class PyPIExtensionManager(ExtensionManager):
 
         self.log.debug(f"Extensions list will be fetched from {self.base_url}.")
         if xmlrpc_transport_override:
-            self.log.info(
-                f"Extensions will be fetched using proxy, proxy host and port: {xmlrpc_transport_override.proxy}"
-            )
+            self.log.info("Extensions will be fetched using a proxy.")
 
     @property
     def metadata(self) -> ExtensionManagerMetadata:
