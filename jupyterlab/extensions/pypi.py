@@ -113,6 +113,7 @@ def _create_httpx_transports(
 
     return mounts, xmlrpc_transport
 
+
 all_proxy_url = environ.get("ALL_PROXY")
 # For historical reasons, we also support the lowercase environment variables.
 # Info: https://about.gitlab.com/blog/2021/01/27/we-need-to-talk-no-proxy/
