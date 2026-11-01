@@ -223,6 +223,21 @@ export namespace Contents {
   }
 
   /**
+   * The options used to open a file.
+   */
+  export interface IOpenOptions {
+    /**
+     * The access mode for opening the file.
+     *
+     * - `"write"`: the client intends to edit the file (default).
+     *    The server may deny if another client has it open in write mode.
+     * - `"read"`: the client only intends to view the file.
+     *    Multiple clients may open a file in read mode concurrently.
+     */
+    mode?: 'read' | 'write';
+  }
+
+  /**
    * Checkpoint model.
    */
   export interface ICheckpointModel {
@@ -525,6 +540,37 @@ export namespace Contents {
      * @returns A promise which resolves when the checkpoint is deleted.
      */
     deleteCheckpoint(path: string, checkpointID: string): Promise<void>;
+
+    /**
+     * Open a file and notify the server that it is being actively edited.
+     *
+     * @param path - The path to the file.
+     *
+     * @param options - Optional parameters such as access mode.
+     *
+     * @returns A promise which resolves when the server acknowledges the open.
+     *
+     * #### Notes
+     * This can be used by server-side implementations to track which files
+     * are currently open across clients, to prevent conflicting operations
+     * such as renaming or deleting an open file.
+     * If not implemented, the operation is treated as a no-op.
+     */
+    open?(path: string, options?: Contents.IOpenOptions): Promise<void>;
+
+    /**
+     * Close a file and notify the server that it is no longer being edited.
+     *
+     * @param path - The path to the file.
+     *
+     * @returns A promise which resolves when the server acknowledges the close.
+     *
+     * #### Notes
+     * This is the counterpart to `open`. It should be called when the client
+     * is done editing a file.
+     * If not implemented, the operation is treated as a no-op.
+     */
+    close?(path: string): Promise<void>;
   }
 
   /**
@@ -681,6 +727,37 @@ export namespace Contents {
      * @returns A promise which resolves when the checkpoint is deleted.
      */
     deleteCheckpoint(localPath: string, checkpointID: string): Promise<void>;
+
+    /**
+     * Open a file and notify the server that it is being actively edited.
+     *
+     * @param localPath - The path to the file.
+     *
+     * @param options - Optional parameters such as access mode.
+     *
+     * @returns A promise which resolves when the server acknowledges the open.
+     *
+     * #### Notes
+     * This can be used by server-side implementations to track which files
+     * are currently open across clients, to prevent conflicting operations
+     * such as renaming or deleting an open file.
+     * If not implemented, the operation is treated as a no-op.
+     */
+    open?(localPath: string, options?: IOpenOptions): Promise<void>;
+
+    /**
+     * Close a file and notify the server that it is no longer being edited.
+     *
+     * @param localPath - The path to the file.
+     *
+     * @returns A promise which resolves when the server acknowledges the close.
+     *
+     * #### Notes
+     * This is the counterpart to `open`. It should be called when the client
+     * is done editing a file.
+     * If not implemented, the operation is treated as a no-op.
+     */
+    close?(localPath: string): Promise<void>;
   }
 }
 
@@ -1094,6 +1171,32 @@ export class ContentsManager implements Contents.IManager {
   deleteCheckpoint(path: string, checkpointID: string): Promise<void> {
     const [drive, localPath] = this._driveForPath(path);
     return drive.deleteCheckpoint(localPath, checkpointID);
+  }
+
+  /**
+   * Open a file and notify the server that it is being actively edited.
+   *
+   * @param path - The path to the file.
+   *
+   * @param options - Optional parameters such as access mode.
+   *
+   * @returns A promise which resolves when the server acknowledges the open.
+   */
+  open(path: string, options?: Contents.IOpenOptions): Promise<void> {
+    const [drive, localPath] = this._driveForPath(path);
+    return drive.open?.(localPath, options) ?? Promise.resolve();
+  }
+
+  /**
+   * Close a file and notify the server that it is no longer being edited.
+   *
+   * @param path - The path to the file.
+   *
+   * @returns A promise which resolves when the server acknowledges the close.
+   */
+  close(path: string): Promise<void> {
+    const [drive, localPath] = this._driveForPath(path);
+    return drive.close?.(localPath) ?? Promise.resolve();
   }
 
   /**
@@ -1611,6 +1714,47 @@ export class Drive implements Contents.IDrive {
   }
 
   /**
+   * Open a file and notify the server that it is being actively edited.
+   *
+   * @param localPath - The path to the file.
+   *
+   * @param options - Optional parameters such as access mode.
+   *
+   * @returns A promise which resolves when the server acknowledges the open.
+   *
+   * #### Notes
+   * Delegates to the REST content provider.
+   */
+  async open(
+    localPath: string,
+    options?: Contents.IOpenOptions
+  ): Promise<void> {
+    const contentProvider = this.contentProviderRegistry.getProvider(undefined);
+    if (contentProvider?.open) {
+      return contentProvider.open(localPath, options);
+    }
+    return this._restContentProvider.open(localPath, options);
+  }
+
+  /**
+   * Close a file and notify the server that it is no longer being edited.
+   *
+   * @param localPath - The path to the file.
+   *
+   * @returns A promise which resolves when the server acknowledges the close.
+   *
+   * #### Notes
+   * Delegates to the REST content provider.
+   */
+  async close(localPath: string): Promise<void> {
+    const contentProvider = this.contentProviderRegistry.getProvider(undefined);
+    if (contentProvider?.close) {
+      return contentProvider.close(localPath);
+    }
+    return this._restContentProvider.close(localPath);
+  }
+
+  /**
    * Get a REST url for a file given a path.
    */
   private _getUrl(...args: string[]): string {
@@ -1879,6 +2023,70 @@ export class RestContentProvider implements IContentProvider {
   }
 
   /**
+   * Open a file and notify the server that it is being actively edited.
+   *
+   * @param localPath - The path to the file.
+   *
+   * @returns A promise which resolves when the server acknowledges the open.
+   */
+  async open(
+    localPath: string,
+    options?: Contents.IOpenOptions
+  ): Promise<void> {
+    if (!this._openCloseSupported) {
+      return;
+    }
+    const settings = this._options.serverSettings;
+    const url = this._getUrl(localPath);
+    const body = JSON.stringify({
+      operation: 'open',
+      clientId: this._clientId,
+      mode: options?.mode ?? 'write'
+    });
+    const init = { method: 'POST', body };
+    const response = await ServerConnection.makeRequest(url, init, settings);
+    if (response.status === 200 || response.status === 201) {
+      this._openCloseSupported = true;
+      return;
+    }
+    if (response.status === 409) {
+      // Conflict — file is locked by another client.
+      const err = await ServerConnection.ResponseError.create(response);
+      this._openCloseSupported = false;
+      throw err;
+    }
+    // Any other status means the server does not support open/close;
+    // degrade gracefully.
+    this._openCloseSupported = false;
+  }
+
+  /**
+   * Close a file and notify the server that it is no longer being edited.
+   *
+   * @param localPath - The path to the file.
+   *
+   * @returns A promise which resolves when the server acknowledges the close.
+   */
+  async close(localPath: string): Promise<void> {
+    if (!this._openCloseSupported) {
+      return;
+    }
+    const settings = this._options.serverSettings;
+    const url = this._getUrl(localPath);
+    const body = JSON.stringify({
+      operation: 'close',
+      clientId: this._clientId
+    });
+    const init = { method: 'POST', body };
+    const response = await ServerConnection.makeRequest(url, init, settings);
+    if (response.status === 200 || response.status === 204) {
+      this._openCloseSupported = true;
+      return;
+    }
+    this._openCloseSupported = false;
+  }
+
+  /**
    * Get a REST url for a file given a path.
    */
   private _getUrl(...args: string[]): string {
@@ -1888,6 +2096,8 @@ export class RestContentProvider implements IContentProvider {
   }
 
   private _options: RestContentProvider.IOptions;
+  private _clientId = UUID.uuid4();
+  private _openCloseSupported = true;
 }
 
 /**
@@ -1966,4 +2176,28 @@ export interface IContentProvider extends Pick<
    * may emit this signal to communicate a change in the file contents.
    */
   readonly fileChanged?: ISignal<IContentProvider, Contents.IChangedArgs>;
+
+  /**
+   * Open a file and notify the server that it is being actively edited.
+   *
+   * @param localPath - The path to the file.
+   *
+   * @param options - Optional parameters such as access mode.
+   *
+   * @returns A promise which resolves when the server acknowledges the open.
+   *
+   * #### Notes
+   * If not implemented, the drive will handle open/close via the default
+   * REST content provider.
+   */
+  open?(localPath: string, options?: Contents.IOpenOptions): Promise<void>;
+
+  /**
+   * Close a file and notify the server that it is no longer being edited.
+   *
+   * @param localPath - The path to the file.
+   *
+   * @returns A promise which resolves when the server acknowledges the close.
+   */
+  close?(localPath: string): Promise<void>;
 }
