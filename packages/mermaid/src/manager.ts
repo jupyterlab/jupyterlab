@@ -111,9 +111,10 @@ export class MermaidManager implements IMermaidManager {
         if (this._isDisposed || this._refreshId !== currentRefreshId) {
           return;
         }
-        if (node.innerHTML !== figure.innerHTML) {
-          node.innerHTML = figure.innerHTML;
-        }
+        const children = Array.from(figure.childNodes).map(child =>
+          child.cloneNode(true)
+        );
+        node.replaceChildren(...children);
         if (figure.classList.contains(WARNING_CLASS)) {
           node.classList.add(WARNING_CLASS);
         } else {
@@ -210,7 +211,7 @@ export class MermaidManager implements IMermaidManager {
 
     let className = MERMAID_CLASS;
 
-    let result: HTMLElement | null = null;
+    let result: HTMLElement;
 
     // the element that will be returned
     output = document.createElement('div');
@@ -219,7 +220,7 @@ export class MermaidManager implements IMermaidManager {
     try {
       const response = await this.renderSvg(text);
       result = this.makeMermaidFigure(response);
-    } catch (err) {
+    } catch {
       output.classList.add(WARNING_CLASS);
       result = await this.makeMermaidError(text);
     }

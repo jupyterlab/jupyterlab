@@ -110,9 +110,10 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
       return;
     }
 
-    if (this.node.innerHTML !== figure.innerHTML) {
-      this.node.innerHTML = figure.innerHTML;
-    }
+    const children = Array.from(figure.childNodes).map(child =>
+      child.cloneNode(true)
+    );
+    this.node.replaceChildren(...children);
 
     // capture the version of mermaid used
     const version = manager.getMermaidVersion();

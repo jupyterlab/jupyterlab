@@ -82,7 +82,9 @@ describe('@jupyterlab/mermaid', () => {
         container.className = 'jp-RenderedMarkdown';
         const diagramEl = document.createElement('div');
         diagramEl.className = MERMAID_CLASS;
-        diagramEl.innerHTML = initialFigure.innerHTML;
+        diagramEl.replaceChildren(
+          ...Array.from(initialFigure.childNodes).map(c => c.cloneNode(true))
+        );
         container.appendChild(diagramEl);
         document.body.appendChild(container);
 
@@ -116,7 +118,9 @@ describe('@jupyterlab/mermaid', () => {
 
         const container = document.createElement('div');
         container.className = MERMAID_CLASS;
-        container.innerHTML = figure.innerHTML;
+        container.replaceChildren(
+          ...Array.from(figure.childNodes).map(c => c.cloneNode(true))
+        );
         document.body.appendChild(container);
 
         try {
@@ -129,6 +133,41 @@ describe('@jupyterlab/mermaid', () => {
           expect(decodeURIComponent(container.innerHTML)).toContain(
             'data-theme="dark"'
           );
+        } finally {
+          container.remove();
+          manager.dispose();
+        }
+      });
+
+      it('should not interpret HTML meta-characters in diagram source as HTML elements', async () => {
+        const themes = new MockThemeManager();
+        const manager = new MockMermaidManager({
+          themes: themes.asThemeManager()
+        });
+
+        const maliciousText =
+          'graph TD; A["<img src=x onerror=alert(1)>"] --> B;';
+        const initialFigure = await manager.renderFigure(maliciousText);
+
+        const container = document.createElement('div');
+        container.className = MERMAID_CLASS;
+        container.replaceChildren(
+          ...Array.from(initialFigure.childNodes).map(c => c.cloneNode(true))
+        );
+        document.body.appendChild(container);
+
+        try {
+          await themes.setTheme('JupyterLab Dark');
+          await manager.refreshDiagrams();
+
+          const code = container.querySelector(`.${MERMAID_CODE_CLASS}`);
+          expect(code).not.toBeNull();
+          expect(code?.textContent).toBe(maliciousText);
+
+          const imgElements = container.querySelectorAll('img');
+          for (const img of imgElements) {
+            expect(img.getAttribute('onerror')).toBeNull();
+          }
         } finally {
           container.remove();
           manager.dispose();
