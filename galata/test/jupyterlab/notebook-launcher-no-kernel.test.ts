@@ -62,6 +62,18 @@ for (const emptySpecs of [true, false]) {
       expect(notebook.content.metadata.language_info.name).toBe('Julia');
       expect(sessions?.size).toBe(0);
       expect(startedSessions).toEqual([]);
+
+      if (!emptySpecs) {
+        await page.getByTitle('Switch kernel').click();
+        await dialog.getByRole('combobox').selectOption('{"name":"python3"}');
+        await dialog
+          .getByRole('button', { name: 'Select Kernel', exact: true })
+          .click();
+        await expect(page.getByTitle('Switch kernel')).toHaveText(
+          'Python 3 (ipykernel)'
+        );
+        await expect.poll(() => sessions?.size).toBe(1);
+      }
     });
 
     test('canceling language selection does not create a notebook', async ({
