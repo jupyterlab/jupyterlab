@@ -162,12 +162,19 @@ test.describe('Notebook toolbar visibility with read-only and writable notebooks
       .waitFor();
     await page.locator('text=| Idle').waitFor();
 
-    // Check toolbar visibility for each focused panel.
-    for (const tabName of [readonlyNotebook, writableNotebook, /Console/] as (
-      | string
-      | RegExp
-    )[]) {
-      await page.activity.activateTab(tabName);
+    // Check toolbar visibility for each focused panel; the console tab has
+    // the same name as the notebook it was opened from.
+    const main = page.getByRole('main');
+    const documentTab = '[role="tab"][data-type="document-title"]';
+    for (const tab of [
+      main.locator(documentTab, { hasText: readonlyNotebook }),
+      main.locator(documentTab, { hasText: writableNotebook }),
+      main.locator(`[role="tab"]:not(${documentTab})`, {
+        hasText: writableNotebook
+      })
+    ]) {
+      await tab.click();
+      await expect(tab).toHaveClass(/jp-mod-current/);
       await assertReadonlyToolbar(page);
       await assertWritableToolbar(page);
     }
