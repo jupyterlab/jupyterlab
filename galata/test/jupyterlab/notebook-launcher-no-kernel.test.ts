@@ -9,13 +9,21 @@ test.use({ autoGoto: false });
 for (const emptySpecs of [true, false]) {
   test.describe(`Notebook launcher with ${emptySpecs ? 'no' : 'installed'} kernels`, () => {
     test.beforeEach(async ({ page, tmpPath }) => {
+      let requestedSpecs = false;
       if (emptySpecs) {
-        await page.route('**/api/kernelspecs', route =>
-          route.fulfill({ json: { default: '', kernelspecs: {} } })
-        );
+        await page.route(/\/api\/kernelspecs(?:\?.*)?$/, route => {
+          requestedSpecs = true;
+          return route.fulfill({ json: { default: '', kernelspecs: {} } });
+        });
       }
       await page.goto();
       await page.filebrowser.openDirectory(tmpPath);
+      if (emptySpecs) {
+        expect(requestedSpecs).toBe(true);
+        await expect(
+          page.locator('.jp-LauncherCard[data-category="Notebook"]')
+        ).toHaveCount(1);
+      }
     });
 
     test('creates a notebook with the selected language and no kernel', async ({
