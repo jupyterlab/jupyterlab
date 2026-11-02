@@ -16,7 +16,8 @@ const READONLY_HIDDEN_ITEMS = [
   'cut',
   'paste',
   'run',
-  'clear-all'
+  'clear-all',
+  'run-cell'
 ];
 const ALWAYS_VISIBLE_ITEMS = ['copy'];
 const WRITABLE_ONLY_ITEMS = [
@@ -25,7 +26,8 @@ const WRITABLE_ONLY_ITEMS = [
   'cut',
   'paste',
   'run',
-  'clear-all'
+  'clear-all',
+  'run-cell'
 ];
 
 async function assertReadonlyToolbar(
@@ -106,6 +108,8 @@ test.describe('test readonly status', () => {
 
 test.describe('Notebook toolbar visibility with read-only and writable notebooks', () => {
   test.use({
+    // Wide enough for both notebook toolbars to show all items without the overflow menu
+    viewport: { width: 1920, height: 1080 },
     mockSettings: {
       ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/notebook-extension:panel': {
@@ -115,6 +119,12 @@ test.describe('Notebook toolbar visibility with read-only and writable notebooks
             command: 'editmenu:clear-all',
             icon: 'ui-components:clear',
             rank: 34
+          },
+          {
+            name: 'run-cell',
+            command: 'notebook:run-cell',
+            icon: 'ui-components:run',
+            rank: 35
           }
         ]
       }
