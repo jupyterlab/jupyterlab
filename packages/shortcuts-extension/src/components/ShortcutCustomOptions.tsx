@@ -188,6 +188,7 @@ export class CustomOptionsDialogBody
 class JSONEditorWidget extends Widget {
   private _editor: CodeEditor.IEditor;
   private _checkValidation: () => void;
+  private _editorHostNode: HTMLDivElement;
 
   constructor(
     initialArgs: Record<string, unknown>,
@@ -197,22 +198,29 @@ class JSONEditorWidget extends Widget {
     super();
     this.addClass('jp-JSONEditor');
     this._checkValidation = checkValidation;
-    const editorHostNode = document.createElement('div');
-    editorHostNode.className = 'jp-JSONEditor-host';
+    this._editorHostNode = document.createElement('div');
+    this._editorHostNode.className = 'jp-JSONEditor-host';
 
     const model = new CodeEditor.Model({ mimeType: 'application/json' });
     const content = JSON.stringify(initialArgs, null, 2);
     model.sharedModel.setSource(content);
 
     this._editor = editorFactory({
-      host: editorHostNode,
+      host: this._editorHostNode,
       model,
       config: {
         readOnly: false
       }
     });
 
-    this.node.appendChild(editorHostNode);
+    this.node.appendChild(this._editorHostNode);
+
+    // CodeMirror binds Tab to indent; in dialogs Tab should move focus instead.
+    this._editorHostNode.addEventListener(
+      'keydown',
+      this._onEditorKeydown,
+      true
+    );
 
     this._editor.model.sharedModel.changed.connect(this._validateJSON, this);
   }
@@ -238,10 +246,22 @@ class JSONEditorWidget extends Widget {
     this._checkValidation();
   };
 
+  private _onEditorKeydown = (event: KeyboardEvent): void => {
+    if (event.key === 'Tab') {
+      // Stop before CodeMirror; leave default so focus advances.
+      event.stopPropagation();
+    }
+  };
+
   /**
    * Dispose of the resources.
    */
   dispose(): void {
+    this._editorHostNode.removeEventListener(
+      'keydown',
+      this._onEditorKeydown,
+      true
+    );
     this._editor.model.sharedModel.changed.disconnect(this._validateJSON, this);
     this._editor.dispose();
     super.dispose();
