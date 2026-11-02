@@ -100,7 +100,10 @@ export class ShortcutInput extends React.Component<
   }
 
   componentDidMount(): void {
-    this._inputRef.current?.focus();
+    // In dialog mode the parent owns initial focus (e.g. command select).
+    if (!this._deferPersist) {
+      this._inputRef.current?.focus();
+    }
     // Defer so aria-live announces; initial mount content is often skipped.
     this._announceStartRaf = requestAnimationFrame(() => {
       this._announceStartRaf = null;
