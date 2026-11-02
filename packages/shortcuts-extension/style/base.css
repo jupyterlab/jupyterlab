@@ -149,6 +149,12 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
 .jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell .jp-HTMLSelect select {
   max-width: 300px;
   white-space: pre-wrap;
+  border: var(--jp-border-width) solid var(--jp-input-border-color);
+  border-radius: var(--jp-border-radius);
+}
+
+.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell .jp-HTMLSelect select:focus-visible {
+  border-color: var(--jp-input-active-border-color);
 }
 
 .jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell .jp-HTMLSelect svg {
