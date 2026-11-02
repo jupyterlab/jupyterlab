@@ -277,7 +277,11 @@ before-build-python = [
     "jlpm before:build:python",
     "node buildutils/lib/local-repository stop",
 ]
-after-publish-assets = "npm run after:publish:assets"
+after-publish-assets = [
+    # Install is needed again because `before-bump-version` is skipped on restart of half-completed release runs
+    "pip install jupyter-builder>=1.1.1",
+    "npm run after:publish:assets",
+]
 
 [tool.ruff]
 exclude = ["*.ipynb"]

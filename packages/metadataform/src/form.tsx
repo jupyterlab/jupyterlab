@@ -10,6 +10,8 @@ import { FormComponent } from '@jupyterlab/ui-components';
 import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { PromiseDelegate } from '@lumino/coreutils';
 import type { IChangeEvent } from '@rjsf/core';
+import { getDefaultRegistry } from '@rjsf/core';
+import type { Field, FieldProps } from '@rjsf/utils';
 import type validatorAjv8 from '@rjsf/validator-ajv8';
 import type { JSONSchema7 } from 'json-schema';
 import React from 'react';
@@ -27,6 +29,11 @@ export class FormWidget extends ReactWidget {
     super();
     this.addClass('jp-FormWidget');
     this._props = props;
+    this._idPrefix = `jp-MetadataForm-${props.pluginId}`;
+    // RJSF uses the root field id of the uiSchema instead of the prefix, if set.
+    const rootId =
+      (props.uiSchema['ui:rootFieldId'] as unknown as string) || this._idPrefix;
+    this._fields = Private.createFields(rootId);
     if (Private.getValidator() === null) {
       void Private.ensureValidator().then(() => {
         if (!this.isDisposed) {
@@ -56,10 +63,15 @@ export class FormWidget extends ReactWidget {
         formData={this._props.formData}
         formContext={formContext}
         uiSchema={this._props.uiSchema}
+        fields={this._fields}
         liveValidate
-        idPrefix={`jp-MetadataForm-${this._props.pluginId}`}
-        onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
-          this._props.metadataFormWidget.updateMetadata(e.formData || {});
+        idPrefix={this._idPrefix}
+        onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>, id?: string) => {
+          // The field of a metadata key reports its changes with the key as id.
+          // The values that the form fills in itself come without an id.
+          if (id === undefined) return;
+          const formData = e.formData || {};
+          this._props.metadataFormWidget.updateMetadata({ [id]: formData[id] });
         }}
         compact={true}
         showModifiedFromDefault={this._props.showModified}
@@ -70,6 +82,8 @@ export class FormWidget extends ReactWidget {
   }
 
   private _props: MetadataForm.IProps;
+  private _idPrefix: string;
+  private _fields: { SchemaField: Field; NullField: Field };
 }
 
 /**
@@ -100,5 +114,55 @@ namespace Private {
    */
   export function getValidator(): typeof validatorAjv8 | null {
     return validator;
+  }
+
+  /**
+   * Create the SchemaField and the NullField of the form.
+   *
+   * The SchemaField reports each change of a metadata key's field with the key
+   * as id, because a field id joins names with `_` and keys may contain `_` too.
+   */
+  export function createFields(rootId: string): {
+    SchemaField: Field;
+    NullField: Field;
+  } {
+    const { NullField, SchemaField } = getDefaultRegistry().fields;
+    // The metadata key of the field that reported the last change.
+    let changedKey: string | null = null;
+    // The metadata key of the field that a field is in.
+    const KeyContext = React.createContext<string | null>(null);
+
+    function MetadataSchemaField(props: FieldProps): JSX.Element {
+      const { idSchema, name, onChange } = props;
+      // The id of a property of the root field is the root id and its name;
+      // the ids of nested fields are longer.
+      if (idSchema.$id !== `${rootId}_${name}`) {
+        return <SchemaField {...props} />;
+      }
+      return (
+        <KeyContext.Provider value={name}>
+          <SchemaField
+            {...props}
+            onChange={(value, errorSchema) => {
+              changedKey = name;
+              onChange(value, errorSchema, name);
+            }}
+          />
+        </KeyContext.Provider>
+      );
+    }
+
+    function MetadataNullField(props: FieldProps): JSX.Element | null {
+      // RJSF's NullField sets a missing value to null when it mounts, and the
+      // form writes that change. Use it only for a field that mounts after a
+      // change of its key, such as the null option that the user chooses.
+      const key = React.useContext(KeyContext);
+      const [afterChange] = React.useState(
+        () => key !== null && key === changedKey
+      );
+      return afterChange ? <NullField {...props} /> : null;
+    }
+
+    return { SchemaField: MetadataSchemaField, NullField: MetadataNullField };
   }
 }

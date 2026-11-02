@@ -4255,6 +4255,7 @@ __metadata:
     "@lumino/messaging": ^2.0.5
     "@lumino/widgets": ^2.10.0
     "@rjsf/core": ^5.13.4
+    "@rjsf/utils": ^5.13.4
     "@rjsf/validator-ajv8": ^5.13.4
     "@types/jest": ^29.2.0
     "@types/react": ^18.0.26
@@ -5027,10 +5028,13 @@ __metadata:
     "@jupyterlab/running": ^4.7.0-beta.0
     "@jupyterlab/services": ^7.7.0-beta.0
     "@jupyterlab/settingregistry": ^4.7.0-beta.0
+    "@jupyterlab/statedb": ^4.7.0-beta.0
     "@jupyterlab/statusbar": ^4.7.0-beta.0
     "@jupyterlab/terminal": ^4.7.0-beta.0
     "@jupyterlab/translation": ^4.7.0-beta.0
     "@jupyterlab/ui-components": ^4.7.0-beta.0
+    "@lumino/polling": ^2.1.6
+    "@lumino/signaling": ^2.1.6
     "@lumino/widgets": ^2.10.0
     "@types/webpack-env": ^1.18.0
     "@xterm/addon-search": ~0.16.0
@@ -8758,8 +8762,8 @@ __metadata:
   linkType: hard
 
 "body-parser@npm:~1.20.5":
-  version: 1.20.8
-  resolution: "body-parser@npm:1.20.8"
+  version: 1.20.9
+  resolution: "body-parser@npm:1.20.9"
   dependencies:
     bytes: ~3.1.2
     content-type: ~1.0.5
@@ -8773,7 +8777,7 @@ __metadata:
     raw-body: ~2.5.3
     type-is: ~1.6.18
     unpipe: ~1.0.0
-  checksum: 7add892e93070136dc3fab558f8f77cc9b8cee360e8660cc724c7162d70cebe0c5ca94a0346a60e2e7442600c2357c0758bd3e4eb4d4e3a92420c9b8c90912a0
+  checksum: c3ef15619b0fb8538fb8c02737011ad07b942c6fc87604a5c92e01e239d80244383820ac63f394eb7f25b5ca07a7acc9406bb4e02d57923da6b69083bbcb6fdf
   languageName: node
   linkType: hard
 
@@ -11521,9 +11525,9 @@ __metadata:
   linkType: hard
 
 "fast-uri@npm:^3.0.1":
-  version: 3.1.8
-  resolution: "fast-uri@npm:3.1.8"
-  checksum: 3319c50163d6d1265d1fd06f677e0d24a4cc4312c48c7222a0dc6641b90463c4476cb83f3c7444e0d1d0cd123d330d300ea46c48386f6924f35c34f6dd865416
+  version: 3.1.9
+  resolution: "fast-uri@npm:3.1.9"
+  checksum: 4f882cff34cb1c4099b07285e5c7a628c62ff06d91f1a5b0aeb12d8ec002080bd2095ce5eec0855949d649dd8aeeff959a6f1db0f584f29b2e3e08fbb99d37fc
   languageName: node
   linkType: hard
 
