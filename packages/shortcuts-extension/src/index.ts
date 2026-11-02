@@ -1,40 +1,58 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module shortcuts-extension
  */
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import { IEditorServices } from '@jupyterlab/codeeditor';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import {
-  IFormRenderer,
-  IFormRendererRegistry
-} from '@jupyterlab/ui-components';
+import type { IFormRenderer } from '@jupyterlab/ui-components';
+import { IFormRendererRegistry } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
-import {
-  JSONExt,
+import type {
   PartialJSONValue,
   ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-import { DisposableSet, IDisposable } from '@lumino/disposable';
+import { JSONExt } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableSet } from '@lumino/disposable';
 import { Platform } from '@lumino/domutils';
-import { CommandIDs, IShortcutsSettingsLayout, IShortcutUI } from './types';
-import { renderShortCut } from './renderer';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import React from 'react';
+
+import type { IShortcutsSettingsLayout, IShortcutUI } from './types';
+import { CommandIDs } from './types';
 
 const SHORTCUT_PLUGIN_ID = '@jupyterlab/shortcuts-extension:shortcuts';
+
+type ShortcutRendererProps = {
+  external: IShortcutUI.IExternalBundle;
+};
+
+const ShortcutRenderer = React.lazy(async () => {
+  const { renderShortCut } = await import('./renderer');
+  return {
+    default: (props: ShortcutRendererProps): React.ReactElement =>
+      renderShortCut(props)
+  };
+});
 
 function getExternalForJupyterLab(
   settingRegistry: ISettingRegistry,
   app: JupyterFrontEnd,
   translator: ITranslator,
-  actionRequested: ISignal<unknown, IShortcutUI.ActionRequest>
+  actionRequested: ISignal<unknown, IShortcutUI.ActionRequest>,
+  editorFactory?: CodeEditor.Factory
 ): IShortcutUI.IExternalBundle {
   return {
     translator,
@@ -43,7 +61,8 @@ function getExternalForJupyterLab(
         ISettingRegistry.ISettings<IShortcutsSettingsLayout>
       >,
     commandRegistry: app.commands,
-    actionRequested
+    actionRequested,
+    editorFactory
   };
 }
 
@@ -80,12 +99,13 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
   id: SHORTCUT_PLUGIN_ID,
   description: 'Adds the keyboard shortcuts editor.',
   requires: [ISettingRegistry],
-  optional: [ITranslator, IFormRendererRegistry],
+  optional: [ITranslator, IFormRendererRegistry, IEditorServices],
   activate: async (
     app: JupyterFrontEnd,
     registry: ISettingRegistry,
     translator: ITranslator | null,
-    editorRegistry: IFormRendererRegistry | null
+    editorRegistry: IFormRendererRegistry | null,
+    editorServices: IEditorServices | null
   ) => {
     const translator_ = translator ?? nullTranslator;
     const trans = translator_.load('jupyterlab');
@@ -205,17 +225,25 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
         }
       });
 
+      const editorFactory: CodeEditor.Factory | undefined = editorServices
+        ? options => editorServices.factoryService.newInlineEditor(options)
+        : undefined;
+
       const component: IFormRenderer = {
         fieldRenderer: (props: any) => {
-          return renderShortCut({
-            external: getExternalForJupyterLab(
-              registry,
-              app,
-              translator_,
-              actionRequested
-            ),
-            ...props
-          });
+          return React.createElement(
+            React.Suspense,
+            { fallback: null },
+            React.createElement(ShortcutRenderer, {
+              external: getExternalForJupyterLab(
+                registry,
+                app,
+                translator_,
+                actionRequested,
+                editorFactory
+              )
+            })
+          );
         }
       };
       editorRegistry.addRenderer(`${shortcuts.id}.shortcuts`, component);

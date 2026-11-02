@@ -22,12 +22,18 @@ TEMPLATE = """
 
 
 class ErrorHandler(ExtensionHandlerMixin, JupyterHandler):
-    def initialize(self, messages=None, name=None):
-        super().initialize(name=name)
-        self.messages = messages
+    def initialize(
+        self,
+        name: str = "",
+        *args: object,
+        messages: list[str] | None = None,
+        **kwargs: object,
+    ) -> None:
+        super().initialize(name, *args, **kwargs)
+        self.messages = messages or []
 
     @web.authenticated
     @web.removeslash
-    def get(self):
+    def get(self) -> None:
         msgs = [f"<h2>{msg}</h2>" for msg in self.messages]
         self.write(TEMPLATE.format(messages="\n".join(msgs)))

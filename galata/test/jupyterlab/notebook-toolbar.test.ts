@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, IJupyterLabPageFixture, test } from '@jupyterlab/galata';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
 
 const fileName = 'notebook.ipynb';
 
@@ -69,6 +70,12 @@ async function addWidgetsInNotebookToolbar(
 }
 
 test.describe('Notebook Toolbar', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS
+    }
+  });
+
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew(fileName);
     await populateNotebook(page);
@@ -151,6 +158,58 @@ test.describe('Notebook Toolbar', () => {
     await page.notebook.selectCells(2);
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
+  });
+});
+
+test.describe('Notebook Toolbar using system clipboard', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:tracker': {
+        useSystemClipboardForCells: true
+      }
+    }
+  });
+
+  test.beforeEach(async ({ page }) => {
+    await page.notebook.createNew(fileName);
+    await populateNotebook(page);
+  });
+
+  test('Copy-Paste cell', async ({ page }) => {
+    const imageName = 'copy-paste-cell.png';
+    await page.notebook.selectCells(2);
+    await page.notebook.clickToolbarItem('copy');
+    await page.notebook.selectCells(0);
+    await page.notebook.clickToolbarItem('paste');
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
+
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
+  });
+
+  test('Cut cell', async ({ page }) => {
+    const imageName = 'cut-cell.png';
+    await page.notebook.selectCells(1);
+    await page.notebook.clickToolbarItem('cut');
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
+
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
+  });
+
+  test('Paste cell', async ({ page }) => {
+    // Cut cell to populate clipboard
+    await page.notebook.selectCells(0);
+    await page.notebook.clickToolbarItem('cut');
+
+    const imageName = 'paste-cell.png';
+    await page.notebook.selectCells(1);
+    await page.notebook.clickToolbarItem('paste');
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
+
+    await expect(
+      page.locator('.jp-Notebook-cell.jp-mod-active .jp-cell-toolbar')
+    ).toBeVisible();
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 });
@@ -335,10 +394,65 @@ test.describe('Reactive toolbar', () => {
       .first();
     await checkboxLabel.click();
 
-    await page.locator('div.lm-TabBar-tabLabel >> text=Notebook.ipynb').click();
+    await page.activity.activateTab('Notebook.ipynb');
     const saveLocator = toolbar.locator('[data-jp-item-name="save"]');
     await expect(saveLocator).toHaveCount(0, { timeout: 1000 });
 
-    expect(await toolbar.screenshot()).toMatchSnapshot(imageName);
+    await expect(toolbar).toHaveScreenshot(imageName);
   });
+
+  test('Hiding an item should bring back the items from the popup', async ({
+    page
+  }) => {
+    const toolbar = page.locator('.jp-NotebookPanel-toolbar');
+    const opener = toolbar.locator('.jp-Toolbar-responsive-opener');
+    const item = toolbar.locator('[data-jp-item-name="restart-and-run"]');
+    // Wide enough to push the next items to the popup, not to go there itself.
+    await item.evaluate(node => {
+      node.style.minWidth = '350px';
+    });
+    await expect(opener).toBeVisible();
+
+    await item.evaluate(node => {
+      node.style.display = 'none';
+    });
+
+    await expect(opener).toBeHidden();
+  });
+
+  test('Adding padding to an item should move items to the popup', async ({
+    page
+  }) => {
+    const toolbar = page.locator('.jp-NotebookPanel-toolbar');
+    const opener = toolbar.locator('.jp-Toolbar-responsive-opener');
+    await expect(opener).toBeHidden();
+
+    await toolbar
+      .locator('[data-jp-item-name="restart-and-run"]')
+      .evaluate(node => {
+        node.style.paddingRight = '600px';
+      });
+
+    await expect(opener).toBeVisible();
+  });
+});
+
+test('Reactive toolbar should move items to the popup when the kernel name gets longer', async ({
+  page
+}) => {
+  await page.notebook.createNew(fileName, { kernel: null });
+  // At this width "No Kernel" fits in the toolbar, "Python 3 (ipykernel)" does not.
+  await page.sidebar.setWidth(430);
+  const toolbar = page.locator('.jp-NotebookPanel-toolbar');
+  const opener = toolbar.locator('.jp-Toolbar-responsive-opener');
+  await expect(opener).toBeHidden();
+
+  await toolbar.getByTitle('Switch kernel').click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByRole('combobox').selectOption('{"name":"python3"}');
+  await dialog
+    .getByRole('button', { name: 'Select Kernel', exact: true })
+    .click();
+
+  await expect(opener).toBeVisible();
 });

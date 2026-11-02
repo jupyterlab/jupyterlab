@@ -1,9 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { ReactiveToolbar, Spinner, Toolbar } from '@jupyterlab/ui-components';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { Toolbar } from '@jupyterlab/ui-components';
+import { ReactiveToolbar, Spinner } from '@jupyterlab/ui-components';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { BoxLayout, BoxPanel, Widget } from '@lumino/widgets';
 import { DOMUtils } from './domutils';
 import { Printing } from './printing';
@@ -325,7 +327,7 @@ export namespace MainAreaWidget {
     /**
      * An optional promise for when the content is ready to be revealed.
      */
-    reveal?: Promise<any>;
+    reveal?: Promise<unknown>;
 
     /**
      * The application language translator.
@@ -358,6 +360,6 @@ export namespace MainAreaWidget {
     /**
      * An optional promise for when the content is ready to be revealed.
      */
-    reveal?: Promise<any>;
+    reveal?: Promise<unknown>;
   }
 }

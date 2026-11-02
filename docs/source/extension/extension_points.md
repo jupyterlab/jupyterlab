@@ -145,6 +145,115 @@ Your command `label` function can then check the `args` it is provided for `isPa
 and return a different label in that case.
 This can be useful to make a single command flexible enough to work in multiple contexts.
 
+:::{note}
+Try this section in a browser playground:
+
+1. Click **Load Interactive Example**.
+2. In the playground editor toolbar (or command palette), run `Load Current File As Extension`.
+3. A notification appears; click **Open Command Palette**, then run `Extension Points Demo Command` from category `Common Extension Points`.
+   :::
+
+```{raw} html
+<script type="text/plain" id="jp-plugin-playground-source-extension-points">
+import { JupyterFrontEnd, JupyterFrontEndPlugin } from '@jupyterlab/application';
+
+import { ICommandPalette } from '@jupyterlab/apputils';
+
+const plugin: JupyterFrontEndPlugin<void> = {
+  id: 'extension-points-command-demo:plugin',
+  autoStart: true,
+  requires: [ICommandPalette],
+  activate: (app: JupyterFrontEnd, palette: ICommandPalette) => {
+    const commandID = 'extension-points-command-demo:toggle';
+    let toggled = false;
+
+    app.commands.addCommand(commandID, {
+      label: 'Extension Points Demo Command',
+      caption: 'Added from the interactive docs example',
+      isToggled: () => toggled,
+      execute: () => {
+        toggled = !toggled;
+      }
+    });
+
+    palette.addItem({
+      command: commandID,
+      category: 'Common Extension Points'
+    });
+
+    void app.commands.execute('apputils:notify', {
+      message: 'The example is ready. To see the command open Command Palette.',
+      type: 'success',
+      options: {
+        autoClose: false,
+        actions: [
+          {
+            label: 'Open Command Palette',
+            commandId: 'apputils:activate-command-palette',
+            displayType: 'accent'
+          }
+        ]
+      }
+    });
+  }
+};
+
+export default plugin;
+</script>
+<div
+  class="jp-plugin-playground-embed"
+  data-playground-hide="all"
+  data-playground-source-id="jp-plugin-playground-source-extension-points"
+  data-playground-file-name="index.ts"
+  data-playground-title="Common extension points interactive example"
+  data-playground-description="Interactive command registry + command palette example."
+></div>
+```
+
+```{raw} html
+<div
+  class="jp-plugin-playground-embed"
+  data-playground-hide="all"
+  data-playground-query="path=extension-examples/command-palette/src/index.ts"
+  data-playground-title="Extension examples command palette interactive example"
+  data-playground-description="Extension examples: command-palette."
+></div>
+```
+
+(command-state)=
+
+### Update the State of a Command
+
+A toolbar button calls the `isEnabled`, `isVisible`, `isToggled` and `label` functions of its command when it renders.
+It renders again only when the command registry emits `commandChanged` for the command, so call `notifyCommandChanged` with the command ID whenever one of these functions can return a different value.
+
+Most often, these functions read the current widget.
+For example, an extension adds a side panel with a button that exports the current notebook.
+The command is enabled only when a notebook is the current widget:
+
+```typescript
+app.commands.addCommand(commandID, {
+  label: 'Export Notebook',
+  isEnabled: () =>
+    tracker.currentWidget !== null &&
+    tracker.currentWidget === app.shell.currentWidget,
+  execute: () => {
+    // Export tracker.currentWidget
+  }
+});
+
+app.shell.currentChanged?.connect(() => {
+  app.commands.notifyCommandChanged(commandID);
+});
+```
+
+Here `tracker` is the {ts:interface}`notebook.INotebookTracker` token.
+Without the `currentChanged` handler, the button keeps the state it had when it was last rendered: if no notebook was open when the side panel was created, the button stays greyed out after the user opens one.
+When the current widget changes, JupyterLab notifies its own commands only.
+It notifies all commands when a notebook becomes view-only or editable, so a command that also depends on the view-only state of the current notebook needs no other handler.
+
+Pass the command ID to `notifyCommandChanged`: without an ID it notifies every command, and every command button in the application renders again.
+
 (context-menu)=
 
 ## Context Menu
@@ -206,6 +315,16 @@ app.contextMenu.addItem({
   command: commandID,
   selector: '.jp-Notebook'
 });
+```
+
+```{raw} html
+<div
+  class="jp-plugin-playground-embed"
+  data-playground-hide="menu,statusbar"
+  data-playground-query="path=extension-examples/context-menu/src/index.ts"
+  data-playground-title="Extension examples context menu interactive example"
+  data-playground-description="Extension examples: context-menu."
+></div>
 ```
 
 If you don't want JupyterLab's custom context menu to appear for your element, because you have
@@ -343,7 +462,7 @@ declaring default keyboard shortcuts for a command:
 
 Shortcuts added to the settings system will be editable by users.
 
-From Jupyterlab version 3.1 onwards, it is possible to execute multiple commands with a single shortcut.
+From JupyterLab version 3.1 onwards, it is possible to execute multiple commands with a single shortcut.
 This requires you to define a keyboard shortcut for `apputils:run-all-enabled` command:
 
 ```json
@@ -379,6 +498,16 @@ launcher.add({
 
 In addition to providing a command ID, you also provide a category in which to put your item,
 (e.g. 'Notebook', or 'Other'), as well as a rank to determine its position among other items.
+
+```{raw} html
+<div
+  class="jp-plugin-playground-embed"
+  data-playground-hide="all"
+  data-playground-query="path=extension-examples/launcher/src/index.ts"
+  data-playground-title="Extension examples launcher interactive example"
+  data-playground-description="Extension examples: launcher."
+></div>
+```
 
 (shell)=
 
@@ -443,6 +572,36 @@ The recommended ranges for this rank are:
 - 501-899: reserved for third-party extensions.
 - 900: The default rank if none is specified.
 - 1000: The JupyterLab extension manager.
+
+#### Movable accordion sections
+
+Sidebar panels can participate in the movable-sections system so users can
+relocate accordion sections between panels via the context menu. There are two
+roles — **source** (sections can be taken out) and **target** (sections can be
+dropped in). A panel can serve as both simultaneously.
+
+Take {ts:interface}`apputils.IMovableSectionRegistry` as an **optional** dependency and register your panel:
+
+```typescript
+import { IMovableSectionRegistry } from '@jupyterlab/apputils';
+
+optional: [IMovableSectionRegistry];
+activate: (app, registry: IMovableSectionRegistry | null) => {
+  if (registry) {
+    // Expose sections that can be moved out:
+    registry.registerSource('@my-org/my-ext:panel', 'My Panel', myPanel);
+    // Accept sections dropped in:
+    registry.registerTarget('@my-org/my-ext:panel', 'My Panel', myPanel);
+  }
+};
+```
+
+The label (second argument) appears in the context menu as "Move to My Panel" or
+"Move back to My Panel".
+
+**Source panels** must implement {ts:interface}`apputils.IMovableSectionSource`
+
+**Target panels** must implement {ts:interface}`apputils.IMovableSectionDestination`
 
 (mainmenu)=
 
@@ -511,13 +670,11 @@ To add a new entry in an existing menu:
 Here is the list of default menu ids:
 
 - File menu: `jp-mainmenu-file`
-
   - New file submenu: `jp-mainmenu-file-new`
 
 - Edit menu: `jp-mainmenu-edit`
 
 - View menu: `jp-mainmenu-view`
-
   - Appearance submenu: `jp-mainmenu-view-appearance`
 
 - Run menu: `jp-mainmenu-run`
@@ -882,6 +1039,8 @@ which are then provided as tokens so that other extensions may request them.
 For instance, if you want to interact with notebooks, you should request the {ts:interface}`notebook.INotebookTracker` token.
 You can then use this tracker to iterate over, filter, and search all open notebooks.
 You can also use it to be notified via signals when notebooks are added and removed from the tracker.
+Its `currentWidget` is the most recently focused notebook, and its `currentChanged` signal fires when a different notebook becomes current.
+A command that reads `currentWidget` needs a `currentChanged` handler that notifies the command registry, as described in {ref}`command-state`.
 
 Widget tracker tokens are provided for many activities in JupyterLab, including
 notebooks, consoles, text files, mime documents, and terminals.
@@ -1041,7 +1200,7 @@ Kernel subshells enable concurrent code execution within kernels that support th
 Subshells are supported by:
 
 - **ipykernel 7.0.0+** (Python kernels) - Kernels advertise support via `supported_features: ['kernel subshells']` in kernel info replies
-- Other kernels implementing [JEP 91](https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html)
+- Other kernels implementing [JEP 91](https://jupyter.org/enhancement-proposals/kernel-subshells/)
 
 **User Interface**
 
@@ -1086,7 +1245,7 @@ if (kernel.supportsSubshells) {
 }
 ```
 
-For detailed specifications, see [JEP 91](https://jupyter.org/enhancement-proposals/91-kernel-subshells/kernel-subshells.html).
+For detailed specifications, see [JEP 91](https://jupyter.org/enhancement-proposals/kernel-subshells/).
 
 ## LSP Features
 
@@ -1219,12 +1378,10 @@ the Contents API methods such as `get()` and `save()`, and optionally a custom `
 the intended use cases, and the way these are exposed in the user interface are different:
 
 - Drive:
-
   - Use case: provision of additional content, not available on the default drive.
   - UI: paths of files and directories from the drive are prefixed with the drive name and colon.
 
 - Content Provider:
-
   - Use case: modification of the protocol used for data retrieval
     (e.g., streaming of the content, real-time collaboration),
     by extending the Contents API methods for files which already

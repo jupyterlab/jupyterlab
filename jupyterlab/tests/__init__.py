@@ -19,7 +19,7 @@ def fake_client_factory():
 
         body = b""
 
-        async def fetch(*args, **kwargs):
+        async def fetch(self, *args, **kwargs):
             return Response(FakeClient.body)
 
     return FakeClient

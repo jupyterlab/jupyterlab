@@ -2,7 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import * as React from 'react';
 
 /**
@@ -19,7 +20,7 @@ export function reportInstallError(
   translator = translator || nullTranslator;
   const trans = translator.load('jupyterlab');
   const entries = [];
-  entries.push(<p>{trans.__(`An error occurred installing "${name}".`)}</p>);
+  entries.push(<p>{trans.__('An error occurred installing "%1".', name)}</p>);
   if (errorMessage) {
     entries.push(
       <p>

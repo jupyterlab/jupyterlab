@@ -7,6 +7,7 @@
 import * as path from 'path';
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import { UUID } from '@lumino/coreutils';
 
 test.describe('Notebook Tests', () => {
   test('Create New Notebook', async ({ page, tmpPath }) => {
@@ -118,12 +119,62 @@ test.describe('Notebook Tests', () => {
     const notSavedIndicator = tabList.locator('.jp-mod-dirty');
     await expect(notSavedIndicator).toHaveCount(1);
 
+    // Wait for the kernel to settle to idle because
+    // kernel initialization modifies metadata and would mark the
+    // notebook dirty again, and if it happens after assertion
+    // below but before snapshot - randomly fail the test.
+    await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
+
     await page.notebook.save();
     await expect(notSavedIndicator).toHaveCount(0);
 
     expect(await tabList.screenshot()).toMatchSnapshot(
       'notebook-tab-saved.png'
     );
+  });
+
+  test('Trust and save a notebook immediately after opening', async ({
+    page,
+    tmpPath
+  }) => {
+    const fileName = 'untrusted.ipynb';
+    const filePath = `${tmpPath}/${fileName}`;
+    const notebook = galata.Notebook.generateNotebook(
+      1,
+      'code',
+      ['display()'],
+      [
+        {
+          output_type: 'display_data',
+          data: { 'text/html': '<b>Untrusted output</b>' },
+          metadata: {}
+        }
+      ]
+    );
+    // Notebook signatures are shared across tests on the same server.
+    notebook.cells[0].id = UUID.uuid4();
+    await page.contents.uploadContent(
+      JSON.stringify(notebook),
+      'text',
+      filePath
+    );
+    await page.filebrowser.refresh();
+    await page.notebook.open(fileName);
+
+    expect(await page.notebook.trust()).toBe(true);
+    await expect(
+      page.locator('[data-icon="ui-components:trusted"]')
+    ).toBeVisible();
+    expect(await page.notebook.trust()).toBe(true);
+
+    await page.notebook.close(false);
+    await expect(page.activity.getTabLocator(fileName)).toHaveCount(0);
+    await page.notebook.open(fileName);
+    await expect(
+      page.locator('[data-icon="ui-components:trusted"]')
+    ).toBeVisible();
+    expect(await page.notebook.trust()).toBe(true);
+    await expect(page.getByRole('dialog')).toHaveCount(0);
   });
 
   test('Open and run cell by cell', async ({ page, tmpPath }) => {
@@ -229,6 +280,7 @@ test.describe('Access cells in windowed notebook', () => {
 
     await page.filebrowser.open(target);
     await page.locator('#jp-main-statusbar').getByText('Idle').waitFor();
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(50);
 
     await page.notebook.getCellLocator(12);

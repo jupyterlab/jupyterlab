@@ -1,9 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
 import { Token } from '@lumino/coreutils';
-import { ISignal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import type { ISignal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
 
 /**
  * The inspector panel token.
@@ -35,17 +34,17 @@ export namespace IInspector {
     /**
      * A signal emitted when the inspector should clear all items.
      */
-    cleared: ISignal<any, void>;
+    cleared: ISignal<IInspectable, void>;
 
     /**
      * A signal emitted when the inspectable is disposed.
      */
-    disposed: ISignal<any, void>;
+    disposed: ISignal<IInspectable, void>;
 
     /**
      * A signal emitted when an inspector value is generated.
      */
-    inspected: ISignal<any, IInspectorUpdate>;
+    inspected: ISignal<IInspectable, IInspectorUpdate>;
 
     /**
      * Test whether the inspectable has been disposed.

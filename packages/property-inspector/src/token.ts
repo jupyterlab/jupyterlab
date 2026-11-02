@@ -2,9 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Token } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { Widget } from '@lumino/widgets';
-import * as React from 'react';
+import type { IDisposable } from '@lumino/disposable';
+import type { Widget } from '@lumino/widgets';
+import type * as React from 'react';
 
 /**
  * A property inspector interface provided when registering

@@ -20,8 +20,8 @@
 }
 
 .jp-JSONEditor.jp-mod-error .jp-JSONEditor-host {
-  border-color: red;
-  outline-color: red;
+  border-color: var(--jp-error-color0);
+  outline-color: var(--jp-error-color0);
 }
 
 .jp-JSONEditor-header {

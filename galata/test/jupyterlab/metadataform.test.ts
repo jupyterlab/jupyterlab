@@ -2,14 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as path from 'path';
-import { Page } from '@playwright/test';
-import {
-  expect,
-  galata,
-  IJupyterLabPageFixture,
-  test
-} from '@jupyterlab/galata';
-import { ObservableJSON } from '@jupyterlab/observables';
+import type { APIRequestContext, Page, TestInfo } from '@playwright/test';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
+import type { ObservableJSON } from '@jupyterlab/observables';
 
 const nbFile = 'code_notebook.ipynb';
 test.use({
@@ -31,10 +27,67 @@ test.beforeAll(async ({ request, tmpPath }) => {
   );
 });
 
-test.afterAll(async ({ request, tmpPath }) => {
-  const contents = galata.newContentsHelper(request);
-  await contents.deleteDirectory(tmpPath);
-});
+/**
+ * Open the test notebook without a kernel, and wait for its content.
+ *
+ * A kernel writes `language_info` when it connects, and loading the file
+ * replaces the cells and the metadata. Both rebuild the metadata form.
+ */
+async function openNotebook(
+  page: IJupyterLabPageFixture,
+  tmpPath: string,
+  name = nbFile
+) {
+  await page.filebrowser.open(`${tmpPath}/${name}`, 'Notebook (no kernel)');
+  await page.evaluate(
+    () => window.jupyterapp.shell.currentWidget.context.ready
+  );
+}
+
+/**
+ * Upload a copy of the test notebook for a test that saves it.
+ *
+ * The other tests open the shared notebook file and expect its original
+ * content.
+ */
+async function uploadNotebookCopy(
+  request: APIRequestContext,
+  tmpPath: string,
+  testInfo: TestInfo
+): Promise<string> {
+  const name = `${testInfo.testId}.ipynb`;
+  await galata
+    .newContentsHelper(request)
+    .uploadFile(
+      path.resolve(__dirname, `./notebooks/${nbFile}`),
+      `${tmpPath}/${name}`
+    );
+  return name;
+}
+
+/**
+ * Get the notebook file content once the current notebook is saved.
+ *
+ * The context clears `dirty` after the server has written the file, and a
+ * read during the write can get an empty file.
+ */
+async function getSavedNotebook(
+  page: IJupyterLabPageFixture,
+  filePath: string
+) {
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => window.jupyterapp.shell.currentWidget.context.model.dirty
+      )
+    )
+    .toBe(false);
+  return await page.evaluate(
+    async filePath =>
+      (await window.jupyterapp.serviceManager.contents.get(filePath)).content,
+    filePath
+  );
+}
 
 /**
  * Activate notebook tools side bar.
@@ -90,12 +143,13 @@ async function openForm(
  */
 async function getFormGroup(page: IJupyterLabPageFixture) {
   const form = await openForm(page);
-  return {
-    form: form,
-    formGroup: form.locator(
-      '.jp-Collapse-contents .jp-MetadataForm fieldset > .form-group'
-    )
-  };
+  const formGroup = form.locator(
+    '.jp-Collapse-contents .jp-MetadataForm fieldset > .form-group'
+  );
+  // The fields render, and the default values are written, once the
+  // validator has loaded.
+  await formGroup.first().waitFor();
+  return { form, formGroup };
 }
 
 /*
@@ -126,6 +180,7 @@ async function getNotebookMetadata(
 test.describe('Required metadata', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
@@ -151,7 +206,7 @@ test.describe('Required metadata', () => {
   test('should display the form', async ({ page, baseURL, tmpPath }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Activate the property inspector.
     await activatePropertyInspector(page);
@@ -197,16 +252,16 @@ test.describe('Required metadata', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { form, formGroup } = await getFormGroup(page);
 
     // Error should be displayed as required field is empty.
     await expect(formGroup.locator('.validationErrors')).not.toBeEmpty();
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-required-missing.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-required-missing.png');
 
     // Relevant metadata should be empty.
     let cellMetadata = await getCellMetadata(page, 0);
@@ -228,6 +283,7 @@ test.describe('Required metadata', () => {
 test.describe('Nested metadata', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
@@ -259,7 +315,7 @@ test.describe('Nested metadata', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
@@ -287,7 +343,7 @@ test.describe('Nested metadata', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
@@ -319,6 +375,7 @@ test.describe('Nested metadata', () => {
 test.describe('Default metadata without "showModified" flag', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
@@ -357,14 +414,14 @@ test.describe('Default metadata without "showModified" flag', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
 
-    // Metadata should contains written default value.
+    // Opening the form should not write the default value.
     let cellMetadata = await getCellMetadata(page, 0);
-    expect(cellMetadata['default-written']).toBe(1);
+    expect(cellMetadata['default-written']).toBeUndefined();
 
     // Empty value should remove the metadata.
     await formGroup.locator('input').first().fill('');
@@ -395,14 +452,14 @@ test.describe('Default metadata without "showModified" flag', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
 
-    // Metadata should contains written default value.
+    // Opening the form should not write the default value.
     let cellMetadata = await getCellMetadata(page, 0);
-    expect(cellMetadata['default-written']).toBe(1);
+    expect(cellMetadata['default-written']).toBeUndefined();
 
     // Fill the first one with default should be written in metadata.
     await formGroup.locator('input').first().fill('2');
@@ -416,6 +473,7 @@ test.describe('Default metadata without "showModified" flag', () => {
 test.describe('Default metadata with "showModified" flag', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
@@ -445,14 +503,14 @@ test.describe('Default metadata with "showModified" flag', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
 
-    // Metadata should contains the default value.
+    // Opening the form should not write the default value.
     let cellMetadata = await getCellMetadata(page, 0);
-    expect(cellMetadata['value-with-default']).toBe(1);
+    expect(cellMetadata['value-with-default']).toBeUndefined();
 
     // Fill the field with non default value should display that value is different from default.
     await formGroup.locator('input').first().fill('2');
@@ -466,6 +524,7 @@ test.describe('Default metadata with "showModified" flag', () => {
 test.describe('Notebook level and cell type metadata', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
@@ -505,14 +564,14 @@ test.describe('Notebook level and cell type metadata', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM
     const { form, formGroup } = await getFormGroup(page);
 
     // There should be 2 fields displayed.
     await expect(formGroup).toHaveCount(2);
-    expect(await form.screenshot()).toMatchSnapshot('metadata-level.png');
+    expect.soft(await form.screenshot()).toMatchSnapshot('metadata-level.png');
 
     // Metadata should be empty.
     let cellMetadata = await getCellMetadata(page, 0);
@@ -541,7 +600,7 @@ test.describe('Notebook level and cell type metadata', () => {
     let form, formGroup;
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Close the sidebar to avoid clicking on the cell toolbar when expecting
     // clicking in the cell editor.
@@ -552,18 +611,18 @@ test.describe('Notebook level and cell type metadata', () => {
     await page.notebook.selectCells((await page.notebook.getCellCount()) - 1);
     ({ form, formGroup } = await getFormGroup(page));
     await expect(formGroup).toHaveCount(1);
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-wrong-cell-type.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-wrong-cell-type.png');
 
     // Create a raw cell and select it.
     await page.notebook.addCell('raw', 'Raw cell');
     await page.notebook.selectCells((await page.notebook.getCellCount()) - 1);
     ({ form, formGroup } = await getFormGroup(page));
     await expect(formGroup).toHaveCount(1);
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-wrong-cell-type.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-wrong-cell-type.png');
 
     // Select the code cell again to retrieve full form.
     await page.notebook.selectCells(0);
@@ -578,6 +637,7 @@ test.describe('Notebook level and cell type metadata', () => {
 test.describe('Conditional metadata', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
@@ -621,7 +681,7 @@ test.describe('Conditional metadata', () => {
   test('display conditional field', async ({ page, baseURL, tmpPath }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM
     const { form, formGroup } = await getFormGroup(page);
@@ -629,16 +689,16 @@ test.describe('Conditional metadata', () => {
     // There should be 1 field displayed as condition is not met.
     await formGroup.locator('select').first().selectOption('not met');
     await expect(formGroup).toHaveCount(1);
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-condition-not-met.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-condition-not-met.png');
 
     // Met the condition, then the second field should be displayed too.
     await formGroup.locator('select').first().selectOption('met');
     await expect(formGroup).toHaveCount(2);
-    expect(await form.screenshot()).toMatchSnapshot(
-      'metadata-condition-met.png'
-    );
+    expect
+      .soft(await form.screenshot())
+      .toMatchSnapshot('metadata-condition-met.png');
 
     // If the condition is not met, only one field should be displayed.
     await formGroup.locator('select').first().selectOption('not met');
@@ -652,6 +712,7 @@ test.describe('Conditional metadata', () => {
 test.describe('UISchema', () => {
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/metadataform-extension:metadataforms': {
         metadataforms: [
           {
@@ -688,7 +749,7 @@ test.describe('UISchema', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Open and get the form DOM.
     const { form, formGroup } = await getFormGroup(page);
@@ -720,6 +781,61 @@ test.describe('UISchema', () => {
 });
 
 test.describe('Advanced tools', () => {
+  for (const notebookDraft of [
+    '{"draft":',
+    'null',
+    'true',
+    '42',
+    '"text"',
+    '[]'
+  ]) {
+    test(`should preserve both metadata drafts when saving ${notebookDraft} as notebook metadata`, async ({
+      page,
+      baseURL,
+      request,
+      tmpPath
+    }, testInfo) => {
+      const name = await uploadNotebookCopy(request, tmpPath, testInfo);
+      await page.goto(baseURL);
+      await openNotebook(page, tmpPath, name);
+      await openForm(page, 'Advanced Tools');
+
+      const cellEditor = page.locator('.jp-CellMetadataEditor .cm-content');
+      const notebookEditor = page.locator(
+        '.jp-NotebookMetadataEditor .cm-content'
+      );
+      const cellMetadata = await getCellMetadata(page);
+      const notebookMetadata = await getNotebookMetadata(page);
+      const cellDraft = JSON.stringify({ ...cellMetadata, draft: 'cell' });
+
+      await cellEditor.fill(cellDraft);
+      await notebookEditor.fill(notebookDraft);
+      await notebookEditor.press('ControlOrMeta+s');
+
+      const dialog = page.getByRole('dialog', { name: 'Invalid Metadata' });
+      await expect(dialog).toBeVisible();
+      await dialog.getByRole('button', { name: 'Close', exact: true }).click();
+      await expect(cellEditor).toHaveText(cellDraft);
+      await expect(notebookEditor).toHaveText(notebookDraft);
+      expect(await getCellMetadata(page)).toEqual(cellMetadata);
+      expect(await getNotebookMetadata(page)).toEqual(notebookMetadata);
+
+      await notebookEditor.fill(
+        JSON.stringify({ ...notebookMetadata, draft: 'notebook' })
+      );
+      await notebookEditor.press('ControlOrMeta+s');
+      await expect
+        .poll(() => getCellMetadata(page))
+        .toEqual({ ...cellMetadata, draft: 'cell' });
+      await expect
+        .poll(() => getNotebookMetadata(page))
+        .toEqual({ ...notebookMetadata, draft: 'notebook' });
+      const saved = await getSavedNotebook(page, `${tmpPath}/${name}`);
+      expect(saved.cells[0].metadata.draft).toBe('cell');
+      expect(saved.metadata.draft).toBe('notebook');
+    });
+  }
+
   test('should remove a field from cellMedata and verify it is updated', async ({
     page,
     baseURL,
@@ -727,7 +843,7 @@ test.describe('Advanced tools', () => {
   }) => {
     // Open the Notebook.
     await page.goto(baseURL);
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await openNotebook(page, tmpPath);
 
     // Activate the property inspector.
     await activatePropertyInspector(page);
@@ -755,7 +871,7 @@ test.describe('Advanced tools', () => {
       .click();
 
     // Close the sidebar
-    await page.locator('[title="Property Inspector"]').click();
+    await page.sidebar.close('right');
     // Reopen the sidebar
     await activatePropertyInspector(page);
 

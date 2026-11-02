@@ -126,8 +126,10 @@ export namespace HoverBox {
   /**
    * An interface describing anchor coordinates.
    */
-  export interface IAnchor
-    extends Pick<DOMRect, 'left' | 'right' | 'top' | 'bottom'> {}
+  export interface IAnchor extends Pick<
+    DOMRect,
+    'left' | 'right' | 'top' | 'bottom'
+  > {}
 
   /**
    * Set the visible dimensions of a hovering box anchored to an editor cursor.
@@ -173,10 +175,10 @@ export namespace HoverBox {
       privilege === 'forceAbove'
         ? false
         : privilege === 'forceBelow'
-        ? true
-        : privilege === 'above'
-        ? spaceAbove < maxHeight && spaceAbove < spaceBelow
-        : spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
+          ? true
+          : privilege === 'above'
+            ? spaceAbove < maxHeight && spaceAbove < spaceBelow
+            : spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
 
     if (renderBelow) {
       maxHeight = Math.min(spaceBelow - marginTop, maxHeight);
@@ -212,23 +214,15 @@ export namespace HoverBox {
     const initialHeight = options.size
       ? options.size.height
       : node.getBoundingClientRect().height;
-    const offsetAbove =
-      (options.offset &&
-        options.offset.vertical &&
-        options.offset.vertical.above) ||
-      0;
-    const offsetBelow =
-      (options.offset &&
-        options.offset.vertical &&
-        options.offset.vertical.below) ||
-      0;
+    const offsetAbove = options.offset?.vertical?.above ?? 0;
+    const offsetBelow = options.offset?.vertical?.below ?? 0;
     let top = renderBelow
       ? hostRect.bottom - spaceBelow + offsetBelow
       : hostRect.top + spaceAbove - initialHeight + offsetAbove;
     node.style.top = `${Math.floor(top)}px`;
 
     // Position the box horizontally.
-    const offsetHorizontal = (options.offset && options.offset.horizontal) || 0;
+    const offsetHorizontal = options.offset?.horizontal ?? 0;
     let left = anchor.left + offsetHorizontal;
 
     node.style.left = `${Math.ceil(left)}px`;

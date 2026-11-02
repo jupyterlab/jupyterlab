@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PartialJSONObject } from '@lumino/coreutils';
+import type { PartialJSONObject } from '@lumino/coreutils';
 import { posix } from 'path';
 import urlparse from 'url-parse';
 

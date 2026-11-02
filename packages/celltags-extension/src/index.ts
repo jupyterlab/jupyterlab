@@ -6,18 +6,18 @@
  */
 
 import type { FieldProps } from '@rjsf/utils';
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 
+import type { IFormRenderer } from '@jupyterlab/ui-components';
+import { IFormRendererRegistry } from '@jupyterlab/ui-components';
+
+// eslint-disable-next-line jupyter/prefer-lazy-imports
 import { CellTagField } from './celltag';
-import {
-  IFormRenderer,
-  IFormRendererRegistry
-} from '@jupyterlab/ui-components';
 
 /**
  * Registering cell tag field.

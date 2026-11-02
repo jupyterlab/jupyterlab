@@ -4,15 +4,12 @@
  */
 
 import React from 'react';
-import { FieldProps } from '@rjsf/utils';
-import { INotebookTracker } from '@jupyterlab/notebook';
+import type { FieldProps } from '@rjsf/utils';
+import type { INotebookTracker } from '@jupyterlab/notebook';
 import { addIcon, checkIcon, LabIcon } from '@jupyterlab/ui-components';
 import { reduce } from '@lumino/algorithm';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
 /**
  * The class name added to the cell-tags field.
@@ -42,6 +39,10 @@ const CELL_TAGS_ADD_CLASS = 'jp-CellTags-Add';
  * The class name added to an empty input.
  */
 const CELL_TAGS_EMPTY_CLASS = 'jp-CellTags-Empty';
+/**
+ * The class name added when the field is disabled, e.g. for a view-only notebook.
+ */
+const CELL_TAGS_DISABLED_CLASS = 'jp-mod-disabled';
 
 export class CellTagField {
   constructor(tracker: INotebookTracker, translator?: ITranslator) {
@@ -52,6 +53,9 @@ export class CellTagField {
   }
 
   addTag(props: FieldProps, tag: string) {
+    if (props.disabled || props.readonly) {
+      return;
+    }
     const data = props.formData;
     if (tag && !data.includes(tag)) {
       data.push(tag);
@@ -126,9 +130,7 @@ export class CellTagField {
       document.body.appendChild(tmp);
       event.target.style.setProperty(
         'width',
-        `calc(${
-          tmp.getBoundingClientRect().width
-        }px + var(--jp-add-tag-extra-width))`
+        `calc(${tmp.getBoundingClientRect().width}px + var(--jp-add-tag-extra-width))`
       );
       document.body.removeChild(tmp);
     }
@@ -138,6 +140,9 @@ export class CellTagField {
     props: FieldProps,
     event: React.MouseEvent<HTMLElement>
   ) {
+    if (props.disabled || props.readonly) {
+      return;
+    }
     const elem = (event.target as HTMLElement).closest('div');
     const input = elem?.childNodes[0] as HTMLInputElement;
     if (!this._editing) {
@@ -151,6 +156,9 @@ export class CellTagField {
   }
 
   private _onTagClick(props: FieldProps, tag: string) {
+    if (props.disabled || props.readonly) {
+      return;
+    }
     const data = props.formData;
     if (data.includes(tag)) {
       data.splice(data.indexOf(tag), 1);
@@ -163,11 +171,16 @@ export class CellTagField {
 
   render(props: FieldProps): JSX.Element {
     const allTags: string[] = this.pullTags();
+    const disabled = props.disabled || props.readonly;
 
     return (
-      <div className={CELL_TAGS_WIDGET_CLASS}>
+      <div
+        className={`${CELL_TAGS_WIDGET_CLASS} ${
+          disabled ? CELL_TAGS_DISABLED_CLASS : ''
+        }`}
+      >
         <div className="jp-FormGroup-fieldLabel jp-FormGroup-contentItem">
-          Cell Tags
+          {this._trans.__('Cell Tags')}
         </div>
         {allTags &&
           allTags.map((tag: string, i: number) => (
@@ -209,6 +222,7 @@ export class CellTagField {
               className={`${CELL_TAGS_ADD_CLASS} ${CELL_TAGS_EMPTY_CLASS}`}
               type="text"
               placeholder={this._trans.__('Add Tag')}
+              disabled={disabled}
               onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
                 this._onAddTagKeyDown(props, e)
               }

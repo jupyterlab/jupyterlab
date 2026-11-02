@@ -1,11 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { DebuggerDisplayRegistry } from '../../displayregistry';
-import { IDebugger, IDebuggerDisplayRegistry } from '../../tokens';
-import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
+import type { IDebugger, IDebuggerDisplayRegistry } from '../../tokens';
+import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
 /**
  * The model to keep track of the current source being displayed.

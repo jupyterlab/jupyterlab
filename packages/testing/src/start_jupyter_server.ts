@@ -2,17 +2,18 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-
 /* eslint-disable camelcase */
 // Copyright (c) Jupyter Development Team.
 
-import { ChildProcess, spawn } from 'child_process';
+import type { ChildProcess } from 'child_process';
+import { spawn } from 'child_process';
 import merge from 'deepmerge';
 import * as fs from 'fs';
 import * as path from 'path';
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import { JSONObject, PromiseDelegate, UUID } from '@lumino/coreutils';
+import type { JSONObject, JSONValue } from '@lumino/coreutils';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 import { sleep } from './common';
 
 /**
@@ -182,8 +183,11 @@ namespace Private {
   /**
    * Install a spec in the data directory.
    */
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  export function installSpec(dataDir: string, name: string, spec: any): void {
+  export function installSpec(
+    dataDir: string,
+    name: string,
+    spec: JSONValue
+  ): void {
     const specDir = path.join(dataDir, 'kernels', name);
     fs.mkdirSync(specDir, { recursive: true });
     fs.writeFileSync(path.join(specDir, 'kernel.json'), JSON.stringify(spec));
@@ -227,11 +231,13 @@ namespace Private {
 
     // Get schema content.
     const schema = {
+      // eslint-disable-next-line jupyter/no-untranslated-string -- Test settings schema.
       title: 'Theme',
       description: 'Theme manager settings.',
       properties: {
         theme: {
           type: 'string',
+          // eslint-disable-next-line jupyter/no-untranslated-string -- Test settings schema.
           title: 'Selected Theme',
           default: 'JupyterLab Light'
         }
@@ -366,7 +372,6 @@ namespace Private {
     baseUrl: string,
     startDelegate: PromiseDelegate<string>
   ): Promise<void> {
-    // eslint-disable-next-line
     while (true) {
       try {
         await fetch(URLExt.join(baseUrl, 'api'));

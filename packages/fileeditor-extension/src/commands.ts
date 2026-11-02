@@ -1,41 +1,37 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { selectAll } from '@codemirror/commands';
-import { findNext, gotoLine } from '@codemirror/search';
-import { JupyterFrontEnd } from '@jupyterlab/application';
-import {
-  Clipboard,
+import type { JupyterFrontEnd } from '@jupyterlab/application';
+import type {
   ICommandPalette,
   ISessionContextDialogs,
-  MainAreaWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
+
+import { Clipboard, MainAreaWidget } from '@jupyterlab/apputils';
+import type { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 import {
-  CodeEditor,
   CodeViewerWidget,
-  IEditorMimeTypeService,
-  IEditorServices
+  IEditorMimeTypeService
 } from '@jupyterlab/codeeditor';
-import {
+import type {
   CodeMirrorEditor,
   IEditorExtensionRegistry,
   IEditorLanguageRegistry
 } from '@jupyterlab/codemirror';
-import { ICompletionProviderManager } from '@jupyterlab/completer';
-import { IConsoleTracker } from '@jupyterlab/console';
+import type { ICompletionProviderManager } from '@jupyterlab/completer';
+import type { IConsoleTracker } from '@jupyterlab/console';
 import { MarkdownCodeBlocks, PathExt } from '@jupyterlab/coreutils';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
-import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
-import { ILauncher } from '@jupyterlab/launcher';
-import { IMainMenu } from '@jupyterlab/mainmenu';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { IDocumentWidget } from '@jupyterlab/docregistry';
+import type { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
+import type { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
+import type { ILauncher } from '@jupyterlab/launcher';
+import type { IMainMenu } from '@jupyterlab/mainmenu';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   consoleIcon,
   copyIcon,
@@ -48,9 +44,10 @@ import {
   undoIcon
 } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
-import { CommandRegistry } from '@lumino/commands';
-import { JSONObject, ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import { DisposableSet, IDisposable } from '@lumino/disposable';
+import type { CommandRegistry } from '@lumino/commands';
+import type { JSONObject, ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableSet } from '@lumino/disposable';
 
 const autoClosingBracketsNotebook = 'notebook:toggle-autoclosing-brackets';
 const autoClosingBracketsConsole = 'console:toggle-autoclosing-brackets';
@@ -311,7 +308,11 @@ export namespace Commands {
         try {
           return await settingRegistry.set(id, 'editorConfig', config);
         } catch (reason) {
-          console.error(`Failed to set ${id}: ${reason.message}`);
+          console.error(
+            `Failed to set ${id}: ${
+              reason instanceof Error ? reason.message : String(reason)
+            }`
+          );
         }
       },
       isEnabled,
@@ -363,7 +364,11 @@ export namespace Commands {
         try {
           return await settingRegistry.set(id, 'editorConfig', config);
         } catch (reason) {
-          console.error(`Failed to set ${id}: ${reason.message}`);
+          console.error(
+            `Failed to set ${id}: ${
+              reason instanceof Error ? reason.message : String(reason)
+            }`
+          );
         }
       },
       isEnabled,
@@ -435,7 +440,11 @@ export namespace Commands {
         try {
           return await settingRegistry.set(id, 'editorConfig', config);
         } catch (reason) {
-          console.error(`Failed to set ${id}: ${reason.message}`);
+          console.error(
+            `Failed to set ${id}: ${
+              reason instanceof Error ? reason.message : String(reason)
+            }`
+          );
         }
       },
       isToggled: args => {
@@ -471,7 +480,11 @@ export namespace Commands {
         try {
           return await settingRegistry.set(id, 'editorConfig', config);
         } catch (reason) {
-          console.error(`Failed to set ${id}: ${reason.message}`);
+          console.error(
+            `Failed to set ${id}: ${
+              reason instanceof Error ? reason.message : String(reason)
+            }`
+          );
         }
       },
       label: trans.__('Match Brackets'),
@@ -529,7 +542,11 @@ export namespace Commands {
         try {
           return await settingRegistry.set(id, 'editorConfig', config);
         } catch (reason) {
-          console.error(`Failed to set ${id}: ${reason.message}`);
+          console.error(
+            `Failed to set ${id}: ${
+              reason instanceof Error ? reason.message : String(reason)
+            }`
+          );
         }
       },
       label: trans.__('Auto Close Brackets in Text Editor'),
@@ -601,7 +618,11 @@ export namespace Commands {
         try {
           return await settingRegistry.set(id, 'editorConfig', config);
         } catch (reason) {
-          console.error(`Failed to set theme - ${reason.message}`);
+          console.error(
+            `Failed to set theme - ${
+              reason instanceof Error ? reason.message : String(reason)
+            }`
+          );
         }
       },
       isToggled: args =>
@@ -625,12 +646,13 @@ export namespace Commands {
 
     commands.addCommand(CommandIDs.find, {
       label: trans.__('Find…'),
-      execute: () => {
+      execute: async () => {
         const widget = tracker.currentWidget;
         if (!widget) {
           return;
         }
         const editor = widget.content.editor as CodeMirrorEditor;
+        const { findNext } = await import('@codemirror/search');
         editor.execCommand(findNext);
       },
       isEnabled,
@@ -644,7 +666,7 @@ export namespace Commands {
 
     commands.addCommand(CommandIDs.goToLine, {
       label: trans.__('Go to Line…'),
-      execute: args => {
+      execute: async args => {
         const widget = tracker.currentWidget;
         if (!widget) {
           return;
@@ -659,6 +681,7 @@ export namespace Commands {
             column: (column ?? 1) - 1
           });
         } else {
+          const { gotoLine } = await import('@codemirror/search');
           editor.execCommand(gotoLine);
         }
       },
@@ -742,7 +765,12 @@ export namespace Commands {
         widget.content.editor.replaceSelection?.(text);
       },
       isEnabled,
-      label: trans.__('Replace Selection in Editor'),
+      label: args => {
+        const text = args['text'];
+        return typeof text === 'string' && text
+          ? trans.__('Replace Selection in Editor with "%1"', text)
+          : trans.__('Replace Selection in Editor');
+      },
       describedBy: {
         args: {
           type: 'object',
@@ -947,7 +975,10 @@ export namespace Commands {
       isVisible: () => {
         const widget = tracker.currentWidget;
         return (
-          (widget && PathExt.extname(widget.context.path) === '.md') || false
+          (isEnabled() &&
+            widget &&
+            PathExt.extname(widget.context.path) === '.md') ||
+          false
         );
       },
       icon: markdownIcon,
@@ -1226,11 +1257,16 @@ export namespace Commands {
 
         // Get data from clipboard
         const clipboard = window.navigator.clipboard;
-        const clipboardData: string = await clipboard.readText();
+        try {
+          const clipboardData: string = await clipboard.readText();
 
-        if (clipboardData) {
-          // Paste data to the editor
-          editor.replaceSelection && editor.replaceSelection(clipboardData);
+          if (clipboardData) {
+            // Paste data to the editor
+            editor.replaceSelection && editor.replaceSelection(clipboardData);
+          }
+        } catch (err) {
+          // browser limitation fallback (e.g Firefox)
+          Clipboard.showPasteUnavailableDialog(trans);
         }
       },
       isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),
@@ -1478,6 +1514,8 @@ export namespace Commands {
 
     addCreateNewMarkdownCommandToPalette(palette, trans);
 
+    addMarkdownPreviewCommandToPalette(palette, trans);
+
     addChangeFontSizeCommandsToPalette(palette, trans);
   }
 
@@ -1529,6 +1567,20 @@ export namespace Commands {
     palette.addItem({
       command: CommandIDs.createNewMarkdown,
       args: { isPalette: true },
+      category: paletteCategory
+    });
+  }
+
+  /**
+   * Add a Markdown Preview command to the File Editor palette
+   */
+  export function addMarkdownPreviewCommandToPalette(
+    palette: ICommandPalette,
+    trans: TranslationBundle
+  ): void {
+    const paletteCategory = trans.__('Text Editor');
+    palette.addItem({
+      command: CommandIDs.markdownPreview,
       category: paletteCategory
     });
   }

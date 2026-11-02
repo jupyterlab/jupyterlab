@@ -1,9 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import {
+import type {
   ClientNotifications,
   ClientRequests,
   IClientRequestHandler,
@@ -15,10 +17,10 @@ import {
   IServerRequestHandler,
   IServerRequestParams,
   IServerResult,
-  Method,
   ServerNotifications,
   ServerRequests
 } from './tokens';
+import { Method } from './tokens';
 import { untilReady } from './utils';
 import {
   registerServerCapability,
@@ -35,8 +37,7 @@ import type { MessageConnection } from 'vscode-ws-jsonrpc';
  */
 class ClientRequestHandler<
   T extends keyof IClientRequestParams = keyof IClientRequestParams
-> implements IClientRequestHandler
-{
+> implements IClientRequestHandler {
   constructor(
     protected connection: MessageConnection,
     protected method: T,
@@ -65,8 +66,7 @@ class ClientRequestHandler<
  */
 class ServerRequestHandler<
   T extends keyof IServerRequestParams = keyof IServerRequestParams
-> implements IServerRequestHandler
-{
+> implements IServerRequestHandler {
   constructor(
     protected connection: MessageConnection,
     protected method: T,
@@ -181,6 +181,42 @@ enum MessageKind {
 interface IMessageLog<T extends AnyMethod = AnyMethod> {
   method: T;
   message: any;
+}
+
+interface ICancellationDisposable {
+  dispose(): void;
+}
+
+interface ISignalCancellationToken {
+  readonly isCancellationRequested: boolean;
+  onCancellationRequested(
+    listener: (event: unknown) => void,
+    thisArgs?: unknown,
+    disposables?: ICancellationDisposable[]
+  ): ICancellationDisposable;
+}
+
+function cancellationTokenFromSignal(
+  signal: AbortSignal
+): ISignalCancellationToken {
+  return {
+    get isCancellationRequested(): boolean {
+      return signal.aborted;
+    },
+    onCancellationRequested: (listener, thisArgs, disposables) => {
+      const onAbort = () => {
+        listener.call(thisArgs, undefined);
+      };
+      signal.addEventListener('abort', onAbort, { once: true });
+      const disposable = {
+        dispose: () => {
+          signal.removeEventListener('abort', onAbort);
+        }
+      };
+      disposables?.push(disposable);
+      return disposable;
+    }
+  };
 }
 
 export class LSPConnection extends LspWsConnection implements ILSPConnection {
@@ -322,6 +358,67 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
    */
   provides(capability: keyof lsp.ServerCapabilities): boolean {
     return !!(this.serverCapabilities && this.serverCapabilities[capability]);
+  }
+
+  /**
+   * Send a request to the language server.
+   */
+  async request<M extends Method.ClientRequest>(
+    method: M,
+    params: IClientRequestParams[M],
+    options: ILSPConnection.IRequestOptions = {}
+  ): Promise<IClientResult[M]> {
+    if (this.isDisposed) {
+      throw new Error('Cannot send an LSP request on a disposed connection.');
+    }
+    if (!this.isReady) {
+      throw new Error(
+        'Cannot send an LSP request before the connection is ready.'
+      );
+    }
+
+    const { signal } = options;
+    if (signal?.aborted) {
+      throw (
+        signal.reason ??
+        new DOMException('The request was aborted.', 'AbortError')
+      );
+    }
+
+    const cancellation = signal
+      ? cancellationTokenFromSignal(signal)
+      : undefined;
+    let rejectOnAbort: ((reason?: unknown) => void) | undefined;
+    const aborted = signal
+      ? new Promise<never>((_, reject) => {
+          rejectOnAbort = reject;
+        })
+      : undefined;
+    const cancel = () => {
+      rejectOnAbort?.(
+        signal?.reason ??
+          new DOMException('The request was aborted.', 'AbortError')
+      );
+    };
+    signal?.addEventListener('abort', cancel, { once: true });
+
+    this.log(MessageKind.clientRequested, { method, message: params });
+    try {
+      const response = cancellation
+        ? this.connection.sendRequest<IClientResult[M]>(
+            method,
+            params,
+            cancellation
+          )
+        : this.connection.sendRequest<IClientResult[M]>(method, params);
+      const result = aborted
+        ? await Promise.race([response, aborted])
+        : await response;
+      this.log(MessageKind.resultForClient, { method, message: result });
+      return result;
+    } finally {
+      signal?.removeEventListener('abort', cancel);
+    }
   }
 
   /**

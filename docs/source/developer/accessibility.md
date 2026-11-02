@@ -99,7 +99,7 @@ should be made:
   just JupyterLab—specifically, by JupyterLab extensions—one should be careful
   making changes to Lumino that might break downstream consumers/extensions.
 - So an additional rule of thumb is: if you can't make the fix in Lumino without
-  breaking dependants, then it might be better to make the fix in JupyterLab. In
+  breaking dependents, then it might be better to make the fix in JupyterLab. In
   this case, you might take a two-track approach, where you fix the
   accessibility issue in JupyterLab and also submit a breaking fix in Lumino
   that targets a future, major, API-breaking release/version of Lumino.

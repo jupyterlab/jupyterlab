@@ -2,10 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { VDomModel } from '@jupyterlab/ui-components';
-import { IObservableDisposable } from '@lumino/disposable';
+import type { IObservableDisposable } from '@lumino/disposable';
 import { Debouncer } from '@lumino/polling';
-import { ISignal, Signal } from '@lumino/signaling';
-import {
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type {
   IFilter,
   IFilters,
   IReplaceOptionsSupport,
@@ -81,6 +82,25 @@ export class SearchDocumentModel
    */
   get filters(): IFilters {
     return this._filters;
+  }
+
+  /**
+   * Whether the current match can be replaced.
+   */
+  get replaceEnabled(): boolean {
+    return !this.searchProvider.getCurrentMatch?.()?.readOnly;
+  }
+
+  /**
+   * Whether Replace All has a match to replace.
+   *
+   * It stays enabled when there are no matches, and when the provider does
+   * not count the matches which can be replaced.
+   */
+  get replaceAllEnabled(): boolean {
+    return (
+      !this.totalMatches || this.searchProvider.replaceableMatchesCount !== 0
+    );
   }
 
   /**
@@ -304,6 +324,9 @@ export class SearchDocumentModel
    * Replace the current match.
    */
   async replaceCurrentMatch(): Promise<void> {
+    if (!this.replaceEnabled) {
+      return;
+    }
     await this.searchProvider.replaceCurrentMatch(this._replaceText, true, {
       preserveCase: this.preserveCase,
       regularExpression: this.useRegex
@@ -359,7 +382,7 @@ export class SearchDocumentModel
       // Emit state change as the index needs to be updated
       this.stateChanged.emit();
     } catch (reason) {
-      this._parsingError = reason.toString();
+      this._parsingError = String(reason);
       this.stateChanged.emit();
       console.error(
         `Failed to parse expression ${this.searchExpression}`,

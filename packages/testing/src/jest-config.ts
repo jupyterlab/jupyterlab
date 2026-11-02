@@ -51,12 +51,7 @@ module.exports = function (baseDir: string) {
     transform: {
       '\\.svg$': '@jupyterlab/testing/lib/jest-raw-loader.js',
       // Extracted from https://github.com/kulshekhar/ts-jest/blob/v29.0.3/presets/index.js
-      '^.+\\.tsx?$': [
-        'ts-jest/legacy',
-        {
-          tsconfig: `./tsconfig.test.json`
-        }
-      ],
+      '^.+\\.tsx?$': ['ts-jest/legacy', { tsconfig: `./tsconfig.test.json` }],
       '^.+\\.jsx?$': 'babel-jest'
     },
     transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`]

@@ -1,7 +1,16 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pytest
+
+if TYPE_CHECKING:
+    from _pytest.config import Config
+    from _pytest.config.argparsing import Parser
+    from _pytest.nodes import Item
 
 pytest_plugins = [
     "pytest_jupyter.jupyter_server",
@@ -10,7 +19,7 @@ pytest_plugins = [
 ]
 
 
-def pytest_addoption(parser):
+def pytest_addoption(parser: Parser):
     """
     Adds flags for pytest.
 
@@ -21,11 +30,11 @@ def pytest_addoption(parser):
     group.addoption("--slow", action="store_true", help="Run only slow tests")
 
 
-def pytest_configure(config):
+def pytest_configure(config: Config):
     config.addinivalue_line("markers", "slow: mark test as slow to run")
 
 
-def pytest_collection_modifyitems(config, items):
+def pytest_collection_modifyitems(config: Config, items: list[Item]):
     if config.getoption("--quick"):
         skip_slow = pytest.mark.skip(reason="skipping slow test")
         for item in items:

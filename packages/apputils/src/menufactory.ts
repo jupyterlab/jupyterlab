@@ -2,12 +2,11 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-
 import { Text } from '@jupyterlab/coreutils';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { JSONExt } from '@lumino/coreutils';
-import { ContextMenu, Menu } from '@lumino/widgets';
+import type { ContextMenu, Menu } from '@lumino/widgets';
 
 /**
  * Helper functions to build a menu from the settings
@@ -103,7 +102,7 @@ export namespace MenuFactory {
     menu.addItem({
       ...newItem,
       submenu: submenu ? dataToMenu(submenu, menuFactory) : null
-    } as any);
+    } as ContextMenu.IItemOptions);
   }
 
   /**
@@ -123,7 +122,7 @@ export namespace MenuFactory {
     menu.addItem({
       ...newItem,
       submenu: submenu ? dataToMenu(submenu, menuFactory) : null
-    } as any);
+    } as Menu.IItemOptions);
   }
 
   /**

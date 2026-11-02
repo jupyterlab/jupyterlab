@@ -3,7 +3,8 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { addSemanticCommand, JupyterFrontEnd } from '@jupyterlab/application';
+import type { JupyterFrontEnd } from '@jupyterlab/application';
+import { addSemanticCommand } from '@jupyterlab/application';
 import { SemanticCommand } from '@jupyterlab/apputils';
 import { CommandRegistry } from '@lumino/commands';
 import { Widget } from '@lumino/widgets';
@@ -27,10 +28,12 @@ describe('@jupyterlab/application', () => {
       [[true, false], undefined, true],
       [[false, false], false, false],
       [[false, false], undefined, false],
-      [[false, false], true, true],
+      // Active command result wins over the default.
+      [[false, false], true, false],
       [[true, true], false, true],
       [[true, true], true, true],
       [[true, true], undefined, true],
+      // Default only applies when no command is active.
       [[], false, false],
       [[], undefined, false],
       [[], true, true]
@@ -64,10 +67,12 @@ describe('@jupyterlab/application', () => {
       [[true, false], undefined, true],
       [[false, false], false, false],
       [[false, false], undefined, false],
-      [[false, false], true, true],
+      // Active command result wins over the default.
+      [[false, false], true, false],
       [[true, true], false, true],
       [[true, true], true, true],
       [[true, true], undefined, true],
+      // Default only applies when no command is active.
       [[], false, false],
       [[], undefined, false],
       [[], true, true]
@@ -100,11 +105,13 @@ describe('@jupyterlab/application', () => {
       [[true, false], true, true],
       [[true, false], undefined, true],
       [[false, false], false, false],
-      [[false, false], undefined, true],
-      [[false, false], true, true],
+      // Active command result wins over the default.
+      [[false, false], undefined, false],
+      [[false, false], true, false],
       [[true, true], false, true],
       [[true, true], true, true],
       [[true, true], undefined, true],
+      // Default only applies when no command is active.
       [[], false, false],
       [[], undefined, true],
       [[], true, true]
@@ -301,7 +308,8 @@ describe('@jupyterlab/application', () => {
       [[true, false], true, true],
       [[true, false], undefined, true],
       [[false, false], false, false],
-      [[false, false], undefined, true],
+      // No overrides: active command result wins over the default `true`.
+      [[false, false], undefined, false],
       [[false, false], true, true],
       [[true, true], false, false],
       [[true, true], true, true],

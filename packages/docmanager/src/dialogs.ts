@@ -2,13 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { PathExt } from '@jupyterlab/coreutils';
-import { Contents } from '@jupyterlab/services';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { JSONObject } from '@lumino/coreutils';
+import type { Contents } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { JSONObject } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
-import { IDocumentManager, IDocumentManagerDialogs } from './';
+import type { IDocumentManager, IDocumentManagerDialogs } from './';
 
 /**
  * The class name added to file dialogs.
@@ -241,11 +242,15 @@ export function shouldOverwrite(
         label: trans.__('Overwrite'),
         ariaLabel: trans.__('Overwrite Existing File')
       })
-    ]
+    ],
+    skipQueue: true
   };
-  return showDialog(options).then(result => {
-    return Promise.resolve(result.button.accept);
-  });
+  // The dialog skips the launch queue, so show one prompt at a time here.
+  const answer = Private.overwritePrompts
+    .then(() => showDialog(options))
+    .then(result => result.button.accept);
+  Private.overwritePrompts = answer.catch(() => false);
+  return answer;
 }
 
 /**
@@ -254,7 +259,7 @@ export function shouldOverwrite(
  * Disallows "/", "\", and ":" in file names, as well as names with zero length.
  */
 export function isValidFileName(name: string): boolean {
-  const validNameExp = /[\/\\:]/;
+  const validNameExp = /[/\\:]/;
   return name.length > 0 && !validNameExp.test(name);
 }
 
@@ -292,6 +297,11 @@ class RenameHandler extends Widget {
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * The answer to the last overwrite prompt, which the next prompt waits for.
+   */
+  export let overwritePrompts: Promise<boolean> = Promise.resolve(true);
+
   /**
    * Create the node for a rename handler.
    */

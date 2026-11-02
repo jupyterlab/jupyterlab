@@ -30,17 +30,18 @@ test.describe('Workspaces sidebar', () => {
     await page.filebrowser.openDirectory(tmpPath);
   });
 
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
-  });
-
   test('Workspaces context menu', async ({ page }) => {
-    // Load the test workspace
+    // Load the test workspace. `filebrowser.open` cannot be used because a
+    // workspace file does not open a document tab for the helper to wait on.
+    // eslint-disable-next-line jupyter/galata-prefer-filebrowser-helper
     await page.dblclick(
       `.jp-DirListing-item span:has-text("${testWorkspace}")`
     );
-    await page.getByRole('treeitem', { name: workspaceName }).waitFor();
+    // Opening the workspace file triggers a hard page navigation (full reload);
+    // allow extra time for JupyterLab to restart and the workspace treeitem to appear.
+    await page
+      .getByRole('treeitem', { name: workspaceName })
+      .waitFor({ timeout: 15000 });
 
     await galata.Mock.mockRunners(page, new Map(), 'sessions');
 

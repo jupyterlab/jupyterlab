@@ -1,10 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt } from '@jupyterlab/coreutils';
-import * as nbformat from '@jupyterlab/nbformat';
-import { IEditorLanguageRegistry } from './token';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { IEditorLanguage, IEditorLanguageRegistry } from './token';
 
 /**
  * The mime type service for CodeMirror.
@@ -22,16 +21,17 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
   getMimeTypeByLanguage(info: nbformat.ILanguageInfoMetadata): string {
     const ext = info.file_extension || '';
     const mode = this.languages.findBest(
-      (info.codemirror_mode as any) || {
-        mimetype: info.mimetype,
-        name: info.name,
-        ext: [ext.split('.').slice(-1)[0]]
-      }
+      (info.codemirror_mode as string | IEditorLanguage | undefined) ||
+        ({
+          mime: info.mimetype,
+          name: info.name,
+          extensions: [ext.split('.').slice(-1)[0]]
+        } as unknown as IEditorLanguage)
     );
     return mode
-      ? Array.isArray(mode.mime)
-        ? mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType
-        : mode.mime
+      ? typeof mode.mime === 'string'
+        ? mode.mime
+        : (mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType)
       : IEditorMimeTypeService.defaultMimeType;
   }
 
@@ -52,9 +52,9 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
     }
     const mode = this.languages.findByFileName(path);
     return mode
-      ? Array.isArray(mode.mime)
-        ? mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType
-        : mode.mime
+      ? typeof mode.mime === 'string'
+        ? mode.mime
+        : (mode.mime[0] ?? IEditorMimeTypeService.defaultMimeType)
       : IEditorMimeTypeService.defaultMimeType;
   }
 }

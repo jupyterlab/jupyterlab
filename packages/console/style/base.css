@@ -64,6 +64,14 @@
   opacity: var(--jp-cell-collapser-not-active-hover-opacity);
 }
 
+.jp-CodeConsole-input:focus-visible,
+.jp-CodeConsole-content:focus-visible {
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
+  outline-offset: calc(-1 * var(--jp-focus-outline-width));
+}
+
 /*-----------------------------------------------------------------------------
 | Input/prompt cell
 |----------------------------------------------------------------------------*/

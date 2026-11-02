@@ -44,6 +44,14 @@
       {
         "command": "debugger:copy-to-globals",
         "selector": ".jp-DebuggerVariables-body.jp-debuggerVariables-local"
+      },
+      {
+        "command": "debugger:open-kernel-source",
+        "selector": ".jp-DebuggerKernelSource-source"
+      },
+      {
+        "command": "debugger:copy-kernel-source-path",
+        "selector": ".jp-DebuggerKernelSource-source"
       }
     ]
   },
@@ -136,6 +144,12 @@
     "showPausedOverlay": {
       "title": "Show Paused Overlay",
       "description": "Show an overlay on the editor or notebook when execution is paused in the debugger.",
+      "type": "boolean",
+      "default": true
+    },
+    "showSourcesInMainArea": {
+      "title": "Show Sources in Main Area",
+      "description": "If true, open debugger sources in main area editors instead of the sources panel.",
       "type": "boolean",
       "default": true
     }

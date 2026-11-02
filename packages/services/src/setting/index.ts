@@ -3,7 +3,7 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { DataConnector } from '@jupyterlab/statedb';
 

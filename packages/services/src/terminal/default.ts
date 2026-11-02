@@ -1,15 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
 import { URLExt } from '@jupyterlab/coreutils';
 
-import { JSONPrimitive, PromiseDelegate } from '@lumino/coreutils';
+import type { JSONPrimitive } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { ServerConnection } from '..';
 
-import * as Terminal from './terminal';
+import type * as Terminal from './terminal';
 import { TerminalAPIClient } from './restapi';
 
 /**
@@ -193,9 +194,7 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
         1e3 * (Math.pow(2, this._reconnectAttempt) - 1)
       );
       console.error(
-        `Connection lost, reconnecting in ${Math.floor(
-          timeout / 1000
-        )} seconds.`
+        `Connection lost, reconnecting in ${Math.floor(timeout / 1000)} seconds.`
       );
       this._reconnectTimeout = setTimeout(this._createSocket, timeout);
       this._reconnectAttempt += 1;
@@ -314,11 +313,18 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
     });
   };
 
-  private _onWSClose = (event: CloseEvent) => {
-    console.warn(`Terminal websocket closed: ${event.code}`);
-    if (!this.isDisposed) {
-      this._reconnect();
+  private _onWSClose = (evt: CloseEvent) => {
+    console.warn(`Terminal websocket closed: ${evt.code}`);
+
+    if (this.isDisposed) {
+      return;
     }
+
+    if (evt.code === 1000 || evt.code === 1001) {
+      return;
+    }
+
+    this._reconnect();
   };
 
   /**
@@ -380,7 +386,7 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
   private _disposed = new Signal<this, void>(this);
   private _messageReceived = new Signal<this, Terminal.IMessage>(this);
   private _name: string;
-  private _reconnectTimeout: any = null;
+  private _reconnectTimeout: ReturnType<typeof setTimeout> | undefined;
   private _ws: WebSocket | null = null;
   private _noOp = () => {
     /* no-op */

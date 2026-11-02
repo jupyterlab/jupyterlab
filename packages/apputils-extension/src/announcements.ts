@@ -2,18 +2,16 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { Notification } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
-import {
-  ConfigSection,
-  IConfigSectionManager,
-  ServerConnection
-} from '@jupyterlab/services';
+import type { ConfigSection } from '@jupyterlab/services';
+import { IConfigSectionManager, ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
@@ -44,7 +42,9 @@ async function requestAPI<T>(
   try {
     response = await ServerConnection.makeRequest(requestUrl, init, settings);
   } catch (error) {
-    throw new ServerConnection.NetworkError(error);
+    throw new ServerConnection.NetworkError(
+      error instanceof TypeError ? error : new TypeError(String(error))
+    );
   }
 
   const data = await response.json();
@@ -68,7 +68,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null,
     translator: ITranslator | null
   ): void => {
-    const CONFIG_SECTION_NAME = announcements.id.replace(/[^\w]/g, '');
+    const CONFIG_SECTION_NAME = announcements.id.replace(/\W/g, '');
 
     void Promise.all([
       app.restored,

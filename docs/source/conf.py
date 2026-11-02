@@ -32,6 +32,10 @@ from collections import ChainMap
 from functools import partial
 from pathlib import Path
 from subprocess import check_call
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sphinx.application import Sphinx
 
 HERE = Path(__file__).parent.resolve()
 
@@ -52,11 +56,39 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
+    "sphinxcontrib.mermaid",
+    "shellcheck_builder",  # Custom shellcheck builder for shell code blocks
     "typedoc_links",  # Custom extension for TypeDoc API links
 ]
 
+mermaid_version = "latest"
+
+SPELLING_BUILD_ENABLED = os.environ.get("JUPYTERLAB_SPELLING_BUILD") == "1"
+
+if SPELLING_BUILD_ENABLED:
+    extensions = [ext for ext in extensions if ext != "sphinx.ext.intersphinx"]
+    # Keep spelling runs focused on spelling failures only.
+    suppress_warnings = list(globals().get("suppress_warnings", []))
+    if "myst.xref_missing" not in suppress_warnings:
+        suppress_warnings.append("myst.xref_missing")
+    globals()["suppress_warnings"] = suppress_warnings
+
+if SPELLING_BUILD_ENABLED:
+    enchant_available = False
+    try:
+        __import__("enchant")
+    except Exception:
+        # Skip spelling extension when enchant backend is unavailable.
+        enchant_available = False
+    else:
+        enchant_available = True
+
+    if enchant_available:
+        extensions += ["sphinxcontrib.spelling"]
+
 myst_enable_extensions = ["html_image", "colon_fence", "substitution"]
 myst_heading_anchors = 3
+myst_fence_as_directive = ["mermaid"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -106,6 +138,22 @@ exclude_patterns = [
     "api/media/*.md",
 ]
 
+if "sphinxcontrib.spelling" in extensions:
+    # Sphinx consumes these values dynamically by their module-global names.
+    globals().update(
+        {
+            "spelling_word_list_filename": ["spelling_wordlist.txt"],
+            "spelling_exclude_patterns": [
+                "api/**",
+                "getting_started/changelog.md",
+            ],
+            "spelling_filters": [
+                "spelling_filters.CodeIdentifierFilter",
+            ],
+            "spelling_show_suggestions": True,
+        }
+    )
+
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
@@ -119,7 +167,7 @@ def build_api_docs(out_dir: Path):
     api_index = docs_api / "index.html"
     # is this an okay way to specify jlpm
     # without installing jupyterlab first?
-    jlpm = ["node", str(root / "jupyterlab" / "staging" / "yarn.js")]
+    jlpm = ["jlpm"]
 
     if api_index.exists():
         # avoid rebuilding docs because it takes forever
@@ -217,6 +265,32 @@ def _format_shortcuts(shortcuts: list) -> str:
     return " ".join(f"<kbd>{shortcut}</kbd>" for shortcut in shortcuts) if shortcuts else ""
 
 
+def _format_property(name: str, info: dict, required_args: set, indent: int = 0) -> str:
+    """Format a single property, recursively handling nested properties."""
+    arg_type = info.get("type", "")
+    type_str = (
+        f" (`{', '.join(arg_type) if isinstance(arg_type, list) else arg_type}`)"
+        if arg_type
+        else ""
+    )
+    required_str = " *(required)*" if name in required_args else ""
+    if "enum" in info:
+        enum_values = ", ".join('`"' + str(v) + '"`' for v in info["enum"])
+        enum_str = " - Options: " + enum_values
+    else:
+        enum_str = ""
+    desc_str = f": {info['description']}" if info.get("description") else ""
+
+    line = f"{'  ' * indent}- **{name}**{type_str}{required_str}{enum_str}{desc_str}\n"
+
+    if info.get("properties"):
+        nested_required = set(info.get("required", []))
+        for nested_name, nested_info in info["properties"].items():
+            line += _format_property(nested_name, nested_info, nested_required, indent + 1)
+
+    return line
+
+
 def _format_command_arguments(args_schema: dict) -> str:
     """Format command arguments section."""
     if "properties" not in args_schema or not args_schema["properties"]:
@@ -226,35 +300,14 @@ def _format_command_arguments(args_schema: dict) -> str:
     required_args = set(args_schema.get("required", []))
 
     for arg_name, arg_info in args_schema["properties"].items():
-        arg_desc = arg_info.get("description", "")
-        arg_type = arg_info.get("type", "")
-
-        template += f"- **{arg_name}**"
-
-        if isinstance(arg_type, list):
-            template += f" (`{', '.join(arg_type)}`)"
-        elif arg_type:
-            template += f" (`{arg_type}`)"
-
-        if arg_name in required_args:
-            template += " *(required)*"
-
-        if "enum" in arg_info:
-            enum_values = ", ".join(f'`"{v}"`' for v in arg_info["enum"])
-            template += f" - Options: {enum_values}"
-
-        if arg_desc:
-            template += f": {arg_desc}"
-
-        template += "\n"
+        template += _format_property(arg_name, arg_info, required_args)
 
     return template + "\n"
 
 
 def _format_scope_name(scope: str) -> str:
     """Format scope name for display."""
-    if scope.endswith("-extension"):
-        scope = scope[: -len("-extension")]
+    scope = scope.removesuffix("-extension")
 
     compound_suffixes = ["browser", "manager", "menu", "editor", "console", "viewer", "search"]
     for suffix in compound_suffixes:
@@ -369,7 +422,9 @@ html_favicon = "_static/logo-icon.png"
 # documentation.
 #
 html_theme_options = {
-    "announcement": '🚀 JupyterLab 4.5.0 is now available · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/installation.html">INSTALL</a> · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/changelog.html#v4-5">RELEASE NOTES</a>',
+    # The announcement will not show if https://jupyter.org/assets/banner.html is empty.
+    # See https://github.com/jupyter/jupyter.github.io#site-wide-announcement-banner
+    "announcement": "https://jupyter.org/assets/banner.html",
     "icon_links": [
         {
             "name": "jupyter.org",
@@ -407,7 +462,7 @@ html_theme_options = {
     "switcher": {
         # Trick to get the documentation version switcher to always points to the latest version without being corrected by the integrity check;
         # otherwise older versions won't list newer versions
-        "json_url": "/".join(
+        "json_url": "/".join(  # noqa: FLY002
             ("https://jupyterlab.readthedocs.io/en", "latest", "_static/switcher.json")
         ),
         "version_match": os.environ.get("READTHEDOCS_VERSION", "latest"),
@@ -524,7 +579,10 @@ epub_exclude_files = ["search.html"]
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 
-def setup(app):
+def setup(app: "Sphinx"):
+    if SPELLING_BUILD_ENABLED:
+        return
+
     # Enable Plausible.io stats
     app.add_js_file("https://plausible.io/js/pa-Tem97Eeu4LJFfSRY89aW1.js", loading_method="async")
     app.add_js_file(
@@ -535,15 +593,16 @@ def setup(app):
     dest = HERE / "getting_started/changelog.md"
     shutil.copy(str(HERE.parent.parent / "CHANGELOG.md"), str(dest))
     app.add_css_file("css/custom.css")  # may also be an URL
-    # Skip we are dealing with internationalization
+    app.add_js_file("js/plugin_playground_embed.js")
+    # Skip expensive API docs build for i18n and spelling-only builders.
     outdir = Path(app.outdir)
-    if outdir.name != "gettext":
+    if outdir.name not in {"gettext", "spelling"}:
         build_api_docs(outdir)
 
     copy_code_files(Path(app.srcdir) / SNIPPETS_FOLDER)
     tmp_files = copy_automated_screenshots(Path(app.srcdir) / IMAGES_FOLDER)
 
-    def clean_code_files(tmp_files, app, exception):
+    def clean_code_files(tmp_files: list[Path], app: "Sphinx", exception: Exception | None):
         """Remove temporary folder."""
         try:
             shutil.rmtree(str(Path(app.srcdir) / SNIPPETS_FOLDER))

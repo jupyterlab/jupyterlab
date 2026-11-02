@@ -1,25 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+import type { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
-import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import type { KernelMessage, Session } from '@jupyterlab/services';
 
-import { KernelMessage, Session } from '@jupyterlab/services';
+import type { ISharedText } from '@jupyter/ydoc';
 
-import { ISharedText } from '@jupyter/ydoc';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { Token } from '@lumino/coreutils';
 
-import { ReadonlyJSONObject, Token } from '@lumino/coreutils';
+import type { IDisposable, IObservableDisposable } from '@lumino/disposable';
 
-import { IDisposable, IObservableDisposable } from '@lumino/disposable';
+import type { ISignal, Signal } from '@lumino/signaling';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { Panel } from '@lumino/widgets';
 
-import { Panel } from '@lumino/widgets';
+import type { DebugProtocol } from '@vscode/debugprotocol';
 
-import { DebugProtocol } from '@vscode/debugprotocol';
+import type { DebuggerHandler } from './handler';
 
-import { DebuggerHandler } from './handler';
-
-import { IDebuggerSourceDisplayProvider } from './displayregistry';
+import type { IDebuggerSourceDisplayProvider } from './displayregistry';
 
 /**
  * An interface describing an application's visual debugger.
@@ -147,6 +147,7 @@ export interface IDebugger {
 
   /**
    * Requests all the loaded modules and display them.
+   * Does nothing unless the debugger is started.
    */
   displayModules(): Promise<void>;
 
@@ -531,7 +532,7 @@ export namespace IDebugger {
       /**
        * An optional hashing seed provided by the kernel.
        */
-      seed?: any;
+      seed?: string;
     };
   }
 
@@ -663,7 +664,7 @@ export namespace IDebugger {
          */
         copyToGlobals?: boolean;
         hashMethod: string;
-        hashSeed: number;
+        hashSeed: string;
         isStarted: boolean;
         /**
          * Whether the kernel supports variable rich rendering or not.
@@ -758,11 +759,10 @@ export namespace IDebugger {
    * #### Notes
    * This is experimental API
    */
-  export interface IVariableSelection
-    extends Pick<
-      DebugProtocol.Variable,
-      'name' | 'type' | 'variablesReference' | 'value'
-    > {}
+  export interface IVariableSelection extends Pick<
+    DebugProtocol.Variable,
+    'name' | 'type' | 'variablesReference' | 'value'
+  > {}
 
   /**
    * Debugger sidebar interface.

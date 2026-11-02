@@ -1,9 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
 import { ReactWidget } from '@jupyterlab/ui-components';
 import React, { useEffect, useState } from 'react';
-import { IDebugger } from '../../tokens';
+import type { IDebugger } from '../../tokens';
 
 /**
  * The body for a Callstack Panel.
@@ -45,7 +44,7 @@ const FramesComponent = ({
   const [frames, setFrames] = useState(model.frames);
   const [selected, setSelected] = useState(model.frame);
 
-  const onSelected = (frame: any): void => {
+  const onSelected = (frame: IDebugger.IStackFrame): void => {
     setSelected(frame);
     model.frame = frame;
   };

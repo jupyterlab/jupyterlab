@@ -65,7 +65,7 @@ and `deleteMetadata` (see {ts:class}`notebook.NotebookModel`
 and {ts:class}`cells.CellModel`).
 You can listen for changes in the metadata through the `sharedModel.metadataChanged` attribute
 (see [cell shared model](https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedBaseCell.html#metadataChanged)
-and [notebook shared model](https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedNotebook-1.html#metadataChanged)).
+and [notebook shared model](https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedNotebook.html#metadataChanged)).
 
 ### Notebook widget
 
@@ -102,10 +102,8 @@ corresponding to the cell models in its cell list.
 
 - Each cell widget contains an
   {ts:class}`cells.InputArea`,
-
   - which contains a
     {ts:class}`codeeditor.CodeEditorWrapper`,
-
     - which contains a JavaScript CodeMirror instance.
 
 A
@@ -229,6 +227,8 @@ following JSON snippet in your extension settings file:
 
 You may add a `rank` attribute to modify the item position (the default value is 50).
 
+The button renders the state of its command again only when the command registry is notified about the command (see {ref}`command-state`).
+
 ### Adding a widget to the notebook header
 
 Start from the extension template.
@@ -276,9 +276,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
 /**
  * A notebook widget extension that adds a widget in the notebook header (widget below the toolbar).
  */
-export class WidgetExtension
-  implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel>
-{
+export class WidgetExtension implements DocumentRegistry.IWidgetExtension<
+  NotebookPanel,
+  INotebookModel
+> {
   /**
    * Create a new extension object.
    */
@@ -336,7 +337,7 @@ Run the following commands:
 
 ```shell
 pip install -e .
-jupyter labextension develop . --overwrite
+jupyter-builder develop . --overwrite
 jupyter lab
 ```
 

@@ -4,11 +4,13 @@
 |----------------------------------------------------------------------------*/
 
 import { URLExt } from '@jupyterlab/coreutils';
-import { CommandRegistry } from '@lumino/commands';
+import type { CommandRegistry } from '@lumino/commands';
 import { PromiseDelegate, Token } from '@lumino/coreutils';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
-import { IRouter } from './tokens';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { IRouter } from './tokens';
 
 /**
  * A static class that routes URLs within the application.
@@ -56,6 +58,7 @@ export class Router implements IRouter {
    * If a matching rule's command resolves with the `stop` token during routing,
    * no further matches will execute.
    */
+  // eslint-disable-next-line jupyter/token-format
   readonly stop = new Token<void>('@jupyterlab/application:Router#stop');
 
   /**

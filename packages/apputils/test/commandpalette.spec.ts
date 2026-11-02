@@ -2,10 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ModalCommandPalette } from '@jupyterlab/apputils';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
-import { JSONObject } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
 import { MessageLoop } from '@lumino/messaging';
 import { CommandPalette, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
@@ -80,7 +81,7 @@ describe('@jupyterlab/apputils', () => {
       it('should hide and reset when ESC is pressed', () => {
         MessageLoop.sendMessage(modalPalette, Widget.Msg.ActivateRequest);
         palette.inputNode.value = 'Search string…';
-        simulate(modalPalette.node, 'keydown', { keyCode: 27 });
+        simulate(modalPalette.node, 'keydown', { key: 'Escape' });
         expect(modalPalette.isVisible).toBe(false);
         expect(palette.inputNode.value).toEqual('');
       });

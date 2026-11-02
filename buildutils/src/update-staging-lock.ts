@@ -59,14 +59,14 @@ export function upgradeLock(
   // Update the yarn.lock file recursevily at most 5 times (normally twice is enough)
   let counter = 5;
   do {
-    run('jlpm install', { cwd: options.cwd });
+    run('jlpm', { cwd: options.cwd });
   } while (
     upgradeSelectedPackages(lockFile, pkgToDescriptor, packages, pkgs) &&
     counter-- > 0
   );
 
   // Check that the yarn.lock is immutable
-  run('jlpm install --immutable', { cwd: options.cwd });
+  run('jlpm --immutable', { cwd: options.cwd });
 }
 
 /**

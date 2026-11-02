@@ -1,10 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module application-extension
  */
 
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import {
   ConnectionLost,
   IConnectionLost,
@@ -15,7 +17,6 @@ import {
   ITreePathUpdater,
   JupyterFrontEnd,
   JupyterFrontEndContextMenu,
-  JupyterFrontEndPlugin,
   JupyterLab,
   LabShell,
   LayoutRestorer,
@@ -26,6 +27,7 @@ import {
   ICommandPalette,
   IWindowResolver,
   MenuFactory,
+  Notification,
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
@@ -36,31 +38,23 @@ import {
 } from '@jupyterlab/property-inspector';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
-import { IStatusBar } from '@jupyterlab/statusbar';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
-  buildIcon,
-  ContextMenuSvg,
-  jupyterIcon,
-  RankedMenu,
-  Switch
-} from '@jupyterlab/ui-components';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ContextMenuSvg } from '@jupyterlab/ui-components';
+import { buildIcon, jupyterIcon, RankedMenu } from '@jupyterlab/ui-components';
 import { find, some } from '@lumino/algorithm';
-import {
-  JSONExt,
-  PromiseDelegate,
+import type {
+  PartialJSONValue,
+  ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-import { CommandRegistry } from '@lumino/commands';
+import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
+import type { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
-import { DockLayout, DockPanel, Widget } from '@lumino/widgets';
+import type { DockLayout, DockPanel } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { topbar } from './topbar';
-
 /**
  * Default context menu item rank
  */
@@ -86,7 +80,14 @@ namespace CommandIDs {
 
   export const closeRightTabs = 'application:close-right-tabs';
 
+  export const copyImage = 'application:copy-image';
+
   export const closeAll: string = 'application:close-all';
+
+  export const setActivityBarPosition: string =
+    'application:set-activity-bar-position';
+
+  export const moveWidget = 'application:move-widget';
 
   export const setMode: string = 'application:set-mode';
 
@@ -104,6 +105,8 @@ namespace CommandIDs {
 
   export const toggleRightArea: string = 'application:toggle-right-area';
 
+  export const toggleDownArea: string = 'application:toggle-down-area';
+
   export const toggleSideTabBar: string = 'application:toggle-side-tabbar';
 
   export const toggleSidebarWidget: string =
@@ -118,7 +121,21 @@ namespace CommandIDs {
   export const tree: string = 'router:tree';
 
   export const switchSidebar = 'sidebar:switch';
+
+  export const activateTabIndex: string = 'application:activate-tab-index';
+
+  export const splitTab = 'application:split-tab';
+
+  export const zoomInWidget = 'application:zoom-in-widget';
+
+  export const zoomOutWidget = 'application:zoom-out-widget';
+
+  export const resetWidgetZoom = 'application:reset-widget-zoom';
 }
+
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 3;
+const COPY_IMAGE_NOTIFICATION_AUTO_CLOSE = 5000;
 
 /**
  * A plugin to register the commands for the main application.
@@ -127,11 +144,12 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:commands',
   description: 'Adds commands related to the shell.',
   autoStart: true,
-  requires: [ITranslator],
+  requires: [ITranslator, ISettingRegistry],
   optional: [ILabShell, ICommandPalette],
   activate: (
     app: JupyterFrontEnd,
     translator: ITranslator,
+    settingRegistry: ISettingRegistry,
     labShell: ILabShell | null,
     palette: ICommandPalette | null
   ) => {
@@ -152,6 +170,21 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       execute: () => void 0
     });
 
+    const findWidgetById = (id: string): Widget | null => {
+      if (labShell) {
+        for (const area of ['main', 'left', 'right', 'down'] as const) {
+          const widget = find(
+            labShell.widgets(area),
+            widget => widget.id === id
+          );
+          if (widget) {
+            return widget;
+          }
+        }
+      }
+      return find(shell.widgets('main'), widget => widget.id === id) ?? null;
+    };
+
     // Returns the widget associated with the most recent contextmenu event.
     const contextMenuWidget = (): Widget | null => {
       const test = (node: HTMLElement) => !!node.dataset.id;
@@ -162,10 +195,67 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         return shell.currentWidget;
       }
 
-      return (
-        find(shell.widgets('main'), widget => widget.id === node.dataset.id) ||
-        shell.currentWidget
+      const id = node.dataset.id;
+      return id ? findWidgetById(id) : null;
+    };
+
+    const contextMenuImage = (): HTMLImageElement | undefined => {
+      const node = app.contextMenuHitTest(
+        node => node instanceof HTMLImageElement
       );
+      return node instanceof HTMLImageElement ? node : undefined;
+    };
+
+    const imageToPngBlob = async (
+      image: HTMLImageElement,
+      errorMessage: string
+    ): Promise<Blob> => {
+      const canvasBlob = (): Promise<Blob> => {
+        const canvas = document.createElement('canvas');
+        canvas.width = image.naturalWidth || image.width;
+        canvas.height = image.naturalHeight || image.height;
+
+        const context = canvas.getContext('2d');
+        if (!context || !canvas.width || !canvas.height) {
+          return Promise.reject(new Error(errorMessage));
+        }
+
+        try {
+          context.drawImage(image, 0, 0);
+        } catch {
+          return Promise.reject(new Error(errorMessage));
+        }
+
+        return new Promise<Blob>((resolve, reject) => {
+          try {
+            canvas.toBlob(blob => {
+              if (blob) {
+                resolve(blob);
+              } else {
+                reject(new Error(errorMessage));
+              }
+            }, 'image/png');
+          } catch {
+            reject(new Error(errorMessage));
+          }
+        });
+      };
+
+      const src = image.currentSrc || image.src;
+      if (!src) {
+        return canvasBlob();
+      }
+
+      try {
+        const response = await fetch(src);
+        if (!response.ok) {
+          throw new Error(errorMessage);
+        }
+        const blob = await response.blob();
+        return blob.type === 'image/png' ? blob : canvasBlob();
+      } catch {
+        return canvasBlob();
+      }
     };
 
     // Closes an array of widgets.
@@ -238,6 +328,41 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         return '';
       }
     };
+
+    const getCurrentWidget = (): Widget | null => {
+      return shell.currentWidget ?? null;
+    };
+
+    function resetWidgetZoom(widget: Widget) {
+      const target = getZoomTarget(widget);
+      if (!target) return;
+
+      target.style.removeProperty('zoom');
+    }
+
+    function getZoomTarget(widget: Widget): HTMLElement {
+      const node = widget.node;
+
+      const target = node.querySelector<HTMLElement>('.jp-zoom-target');
+      if (target) return target;
+
+      node.classList.add('jp-zoom-target');
+      return node;
+    }
+
+    function zoomActiveWidget(widget: Widget, delta: number) {
+      const target = getZoomTarget(widget);
+      if (!target) return;
+
+      const current = Number(
+        (target.style as CSSStyleDeclaration & { zoom?: string }).zoom || 1
+      );
+
+      const next = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, current + delta));
+
+      (target.style as CSSStyleDeclaration & { zoom?: string }).zoom =
+        String(next);
+    }
 
     // Sets tab focus on the element
     function setTabFocus(focusElement: HTMLElement | null) {
@@ -312,6 +437,132 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    commands.addCommand(CommandIDs.copyImage, {
+      label: trans.__('Copy Image'),
+      caption: trans.__('Copy image to clipboard'),
+      execute: async () => {
+        const image = contextMenuImage();
+        if (!image) {
+          return;
+        }
+
+        try {
+          if (
+            !navigator.clipboard?.write ||
+            typeof ClipboardItem === 'undefined'
+          ) {
+            throw new Error(
+              trans.__('Image copying is not supported in this browser.')
+            );
+          }
+
+          if (!image.complete) {
+            throw new Error(trans.__('Could not copy image.'));
+          }
+
+          const errorMessage = trans.__(
+            'Could not copy image. Browser security restrictions may prevent copying images loaded from another origin.'
+          );
+          const blob = await imageToPngBlob(image, errorMessage);
+
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': blob })
+          ]);
+        } catch (reason) {
+          const error =
+            reason instanceof Error
+              ? reason
+              : new Error(trans.__('Could not copy image.'));
+          Notification.error(error.message, {
+            autoClose: COPY_IMAGE_NOTIFICATION_AUTO_CLOSE
+          });
+        }
+      },
+      isEnabled: () =>
+        !!contextMenuImage() &&
+        !!navigator.clipboard?.write &&
+        typeof ClipboardItem !== 'undefined',
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
+    commands.addCommand(CommandIDs.zoomInWidget, {
+      label: trans.__('Zoom In Active Widget'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: () => {
+        const widget = getCurrentWidget();
+        if (widget) {
+          zoomActiveWidget(widget, 0.1);
+        }
+      }
+    });
+
+    commands.addCommand(CommandIDs.zoomOutWidget, {
+      label: trans.__('Zoom Out Active Widget'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: () => {
+        const widget = getCurrentWidget();
+        if (widget) {
+          zoomActiveWidget(widget, -0.1);
+        }
+      }
+    });
+
+    commands.addCommand(CommandIDs.resetWidgetZoom, {
+      label: trans.__('Reset Widget Zoom'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: () => {
+        const widget = getCurrentWidget();
+        if (widget) {
+          resetWidgetZoom(widget);
+        }
+      }
+    });
+
+    commands.addCommand(CommandIDs.toggleFullscreenMode, {
+      label: trans.__('Fullscreen Mode'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: () => {
+        if (
+          document.fullscreenElement === null ||
+          document.fullscreenElement === undefined
+        ) {
+          document.documentElement.requestFullscreen().catch(reason => {
+            console.error('Failed to enter fullscreen mode.', reason);
+          });
+        } else if (document.fullscreenElement !== null) {
+          document.exitFullscreen().catch(reason => {
+            console.error('Failed to exit fullscreen mode.', reason);
+          });
+        }
+      },
+      isToggled: () => document.fullscreenElement !== null
+    });
+
     shell.currentChanged?.connect(() => {
       [
         CommandIDs.close,
@@ -370,6 +621,35 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         },
         execute: () => {
           labShell.activatePreviousTabBar();
+        }
+      });
+
+      commands.addCommand(CommandIDs.activateTabIndex, {
+        label: args =>
+          args.index === -1
+            ? trans.__('Activate Last Tab')
+            : typeof args.index === 'number' && args.index >= 0
+              ? trans.__('Activate Tab %1', args.index + 1)
+              : trans.__('Activate Tab by Index'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              index: {
+                type: 'number',
+                description: trans.__(
+                  'The zero-based index of the tab to activate in the current tab bar; a negative index counts from the end, so -1 is the last tab'
+                )
+              }
+            },
+            required: ['index']
+          }
+        },
+        execute: args => {
+          const index = args['index'];
+          if (typeof index === 'number') {
+            labShell.activateTab(index);
+          }
         }
       });
 
@@ -447,6 +727,28 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         isEnabled: () => !labShell.isEmpty('right')
       });
 
+      commands.addCommand(CommandIDs.toggleDownArea, {
+        label: trans.__('Show Down Area'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
+        execute: () => {
+          if (labShell.downCollapsed) {
+            labShell.expandDown();
+          } else {
+            labShell.collapseDown();
+            if (labShell.currentWidget) {
+              labShell.activateById(labShell.currentWidget.id);
+            }
+          }
+        },
+        isToggled: () => !labShell.downCollapsed,
+        isEnabled: () => !labShell.isEmpty('down')
+      });
+
       commands.addCommand(CommandIDs.toggleSidebarWidget, {
         label: args =>
           args === undefined ||
@@ -454,14 +756,14 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           args.index === undefined
             ? trans.__('Toggle Sidebar Element')
             : args.side === 'right'
-            ? trans.__(
-                'Toggle Element %1 in Right Sidebar',
-                parseInt(args.index as string, 10) + 1
-              )
-            : trans.__(
-                'Toggle Element %1 in Left Sidebar',
-                parseInt(args.index as string, 10) + 1
-              ),
+              ? trans.__(
+                  'Toggle Element %1 in Right Sidebar',
+                  parseInt(args.index as string, 10) + 1
+                )
+              : trans.__(
+                  'Toggle Element %1 in Left Sidebar',
+                  parseInt(args.index as string, 10) + 1
+                ),
         describedBy: {
           args: {
             type: 'object',
@@ -556,31 +858,6 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         },
         isToggled: () => labShell.presentationMode,
         isVisible: () => true
-      });
-
-      commands.addCommand(CommandIDs.toggleFullscreenMode, {
-        label: trans.__('Fullscreen Mode'),
-        describedBy: {
-          args: {
-            type: 'object',
-            properties: {}
-          }
-        },
-        execute: () => {
-          if (
-            document.fullscreenElement === null ||
-            document.fullscreenElement === undefined
-          ) {
-            document.documentElement.requestFullscreen().catch(reason => {
-              console.error('Failed to enter fullscreen mode.', reason);
-            });
-          } else if (document.fullscreenElement !== null) {
-            document.exitFullscreen().catch(reason => {
-              console.error('Failed to exit fullscreen mode.', reason);
-            });
-          }
-        },
-        isToggled: () => document.fullscreenElement !== null
       });
 
       commands.addCommand(CommandIDs.setMode, {
@@ -689,6 +966,107 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           // - by listening to this command execution.
         }
       });
+
+      const contextMenuTabWidget = (): Widget | null => {
+        const test = (node: HTMLElement) =>
+          node.classList.contains('lm-TabBar-tab') && !!node.dataset.id;
+
+        const node = app.contextMenuHitTest(test);
+        if (!node) {
+          return null;
+        }
+
+        const id = node.dataset.id;
+        if (!id) {
+          return null;
+        }
+
+        return find(labShell.widgets('main'), w => w.id === id) ?? null;
+      };
+
+      commands.addCommand(CommandIDs.splitTab, {
+        label: args => {
+          const direction = args?.['direction'] as
+            | 'left'
+            | 'right'
+            | 'top'
+            | 'bottom'
+            | undefined;
+
+          if (!direction) {
+            return trans.__('Split Tab');
+          }
+
+          const directionLabels: Record<string, string> = {
+            left: trans.__('Left'),
+            right: trans.__('Right'),
+            top: trans.__('Up'),
+            bottom: trans.__('Down')
+          };
+
+          return directionLabels[direction];
+        },
+        caption: trans.__('Split the current tab'),
+
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              direction: {
+                type: 'string',
+                enum: ['left', 'right', 'top', 'bottom'],
+                description: trans.__('The direction to split the tab')
+              },
+              id: {
+                type: 'string',
+                description: trans.__(
+                  'The widget ID to split. Defaults to the context menu target.'
+                )
+              }
+            },
+            required: ['direction']
+          }
+        },
+        isEnabled: () => {
+          const widget = contextMenuTabWidget();
+          if (!widget) {
+            return false;
+          }
+
+          if (!(labShell instanceof LabShell)) {
+            return false;
+          }
+
+          const tabBar = labShell.getMainAreaTabBar(widget);
+          if (!tabBar) {
+            return false;
+          }
+
+          // Disable if only one tab in this area
+          return tabBar.titles.length > 1;
+        },
+        execute: args => {
+          const direction = args?.['direction'] as
+            | 'left'
+            | 'right'
+            | 'top'
+            | 'bottom';
+
+          // Get the widget from its id if provided.
+          let widget = args?.['id']
+            ? find(labShell.widgets('main'), value => value.id === args?.['id'])
+            : null;
+
+          // Get the widget from the context menu hit test.
+          if (!widget) {
+            widget = contextMenuTabWidget();
+          }
+
+          if (widget && direction) {
+            labShell.moveTab(widget, direction);
+          }
+        }
+      });
     }
 
     if (palette) {
@@ -704,10 +1082,14 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         CommandIDs.toggleHeader,
         CommandIDs.toggleLeftArea,
         CommandIDs.toggleRightArea,
+        CommandIDs.toggleDownArea,
         CommandIDs.togglePresentationMode,
         CommandIDs.toggleFullscreenMode,
         CommandIDs.toggleMode,
-        CommandIDs.resetLayout
+        CommandIDs.resetLayout,
+        CommandIDs.zoomInWidget,
+        CommandIDs.zoomOutWidget,
+        CommandIDs.resetWidgetZoom
       ].forEach(command => palette.addItem({ command, category }));
 
       ['right', 'left'].forEach(side => {
@@ -718,6 +1100,146 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         });
       });
     }
+
+    function getWidgetFromEvent(event: WheelEvent): Widget | null {
+      const target = event.target as HTMLElement;
+      if (!target) return null;
+
+      // closest lumino widget node
+      const node = target.closest<HTMLElement>('.lm-Widget');
+      if (!node) return null;
+
+      for (const widget of shell.widgets('main')) {
+        if (widget.node.contains(node)) {
+          return widget;
+        }
+      }
+
+      return null;
+    }
+
+    let zoomOnWheel = false;
+    let activityBarPosition: ILabShell.ActivityBarPosition = 'side';
+
+    settingRegistry
+      .load('@jupyterlab/application-extension:shell')
+      .then(settings => {
+        zoomOnWheel = settings.get('zoomOnWheel').composite as boolean;
+        activityBarPosition = settings.get('activityBarPosition')
+          .composite as ILabShell.ActivityBarPosition;
+
+        settings.changed.connect(() => {
+          zoomOnWheel = settings.get('zoomOnWheel').composite as boolean;
+          const newPosition = settings.get('activityBarPosition')
+            .composite as ILabShell.ActivityBarPosition;
+          if (newPosition !== activityBarPosition) {
+            activityBarPosition = newPosition;
+            commands.notifyCommandChanged(CommandIDs.setActivityBarPosition);
+          }
+        });
+
+        commands.addCommand(CommandIDs.setActivityBarPosition, {
+          label: args => {
+            const position = args['position'] as string;
+            const displayName =
+              position === 'side'
+                ? trans.__('Side')
+                : position === 'top'
+                  ? trans.__('Top')
+                  : position === 'bottom'
+                    ? trans.__('Bottom')
+                    : '';
+            if (!displayName) {
+              return trans.__('Set Activity Bar Position');
+            }
+            return args['isPalette']
+              ? trans.__('Activity Bar Position: %1', displayName)
+              : displayName;
+          },
+          caption: trans.__(
+            'Position of the side activity bars (side, top, or bottom).'
+          ),
+          describedBy: {
+            args: {
+              type: 'object',
+              properties: {
+                position: {
+                  type: 'string',
+                  oneOf: [
+                    { const: 'side', title: trans.__('Side') },
+                    { const: 'top', title: trans.__('Top') },
+                    { const: 'bottom', title: trans.__('Bottom') }
+                  ],
+                  description: trans.__('The activity bar position')
+                },
+                isPalette: {
+                  type: 'boolean',
+                  description: trans.__(
+                    'Whether the command is being called from the palette'
+                  )
+                }
+              },
+              required: ['position']
+            }
+          },
+          isToggled: args => args['position'] === activityBarPosition,
+          execute: args => {
+            const position = args['position'] as string;
+            if (
+              position !== 'side' &&
+              position !== 'top' &&
+              position !== 'bottom'
+            ) {
+              throw new Error(`Unsupported activity bar position: ${position}`);
+            }
+            return settings.set('activityBarPosition', position);
+          }
+        });
+
+        if (palette) {
+          (['side', 'top', 'bottom'] as const).forEach(position => {
+            palette.addItem({
+              command: CommandIDs.setActivityBarPosition,
+              category,
+              args: { position, isPalette: true }
+            });
+          });
+        }
+      })
+      .catch(reason => {
+        console.error('Failed to load shell settings.', reason);
+      });
+
+    // since event.ctrlKey can be true when ctrl key is not physically held,
+    // we need to track the physical ctrl key state with keydown/keyup events and only trigger zoom when ctrl key is physically held down.
+    let isCtrlKeyPhysicallyHeld = false;
+
+    window.addEventListener('keydown', e => {
+      if (e.key === 'Control') isCtrlKeyPhysicallyHeld = true;
+    });
+    window.addEventListener('keyup', e => {
+      if (e.key === 'Control') isCtrlKeyPhysicallyHeld = false;
+    });
+    window.addEventListener('blur', () => {
+      isCtrlKeyPhysicallyHeld = false;
+    });
+
+    window.addEventListener(
+      'wheel',
+      event => {
+        if (!zoomOnWheel) return;
+        if (!event.ctrlKey || !isCtrlKeyPhysicallyHeld) return;
+        // zoom in/out the widget under the mouse pointer.
+        const widget = getWidgetFromEvent(event);
+        if (!widget) return;
+
+        event.preventDefault();
+
+        const delta = event.deltaY < 0 ? 0.1 : -0.1;
+        zoomActiveWidget(widget, delta);
+      },
+      { passive: false, capture: true }
+    );
   }
 };
 
@@ -921,6 +1443,9 @@ const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
     function createMenu(options: ISettingRegistry.IMenu): RankedMenu {
       const menu = new RankedMenu({ ...options, commands: app.commands });
       if (options.label) {
+        // The label comes from the `jupyter.lab.menus` key of a settings
+        // schema, from which it is extracted by the schema selectors.
+        // eslint-disable-next-line jupyter/no-dynamic-translation
         menu.title.label = trans.__(options.label);
       }
       return menu;
@@ -1014,6 +1539,13 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
     settingRegistry
       .load(shell.id)
       .then(settings => {
+        // Apply the activity bar position before restoring the layout, since
+        // side area rehydration depends on the current position.
+        labShell.updateConfig({
+          activityBarPosition: settings.get('activityBarPosition')
+            .composite as ILabShell.ActivityBarPosition
+        });
+
         // Add a layer of customization to support app shell mode
         const customizedLayout = settings.composite['layout'] as any;
 
@@ -1120,8 +1652,9 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
     const set = new DisposableSet();
     const delegate = new PromiseDelegate<JupyterFrontEnd.ITreeResolver.Paths>();
 
+    // eslint-disable-next-line prefer-regex-literals
     const treePattern = new RegExp(
-      '/(lab|doc)(/workspaces/[a-zA-Z0-9-_]+)?(/tree/.*)?'
+      '/(lab|doc)(/workspaces/[\\w-]+)?(/tree/.*)?'
     );
 
     set.add(
@@ -1225,15 +1758,15 @@ const busy: JupyterFrontEndPlugin<void> = {
   requires: [ILabStatus],
   activate: async (_: JupyterFrontEnd, status: ILabStatus) => {
     status.busySignal.connect((_, isBusy) => {
-      const favicon = document.querySelector(
+      const favicon = document.querySelector<HTMLLinkElement>(
         `link[rel="icon"]${isBusy ? '.idle.favicon' : '.busy.favicon'}`
-      ) as HTMLLinkElement;
+      );
       if (!favicon) {
         return;
       }
-      const newFavicon = document.querySelector(
+      const newFavicon = document.querySelector<HTMLLinkElement>(
         `link${isBusy ? '.busy.favicon' : '.idle.favicon'}`
-      ) as HTMLLinkElement;
+      );
       if (!newFavicon) {
         return;
       }
@@ -1271,6 +1804,15 @@ const shell: JupyterFrontEndPlugin<ILabShell> = {
         (app.shell as LabShell).updateConfig(settings.composite);
         settings.changed.connect(() => {
           (app.shell as LabShell).updateConfig(settings.composite);
+        });
+
+        // Apply startMode only once after the application is restored.
+        void app.restored.then(() => {
+          const startMode = settings.get('startMode').composite as string;
+          if (startMode) {
+            (app.shell as LabShell).mode =
+              startMode === 'single' ? 'single-document' : 'multiple-document';
+          }
         });
       });
     }
@@ -1355,6 +1897,10 @@ const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
       translator
     });
     widget.title.icon = buildIcon;
+    widget.title.dataset = {
+      ...widget.title.dataset,
+      jpTabLabel: trans.__('Property Inspector')
+    };
     widget.title.caption = trans.__('Property Inspector');
     widget.id = 'jp-property-inspector';
     labshell.add(widget, 'right', { rank: 100, type: 'Property Inspector' });
@@ -1399,81 +1945,148 @@ const jupyterLogo: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * The simple interface mode switch in the status bar.
+ * The Move Widget plugin to allow moving widgets between different areas.
  */
-const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/application-extension:mode-switch',
-  description: 'Adds the interface mode switch',
-  requires: [ILabShell, ITranslator],
-  optional: [IStatusBar, ISettingRegistry],
+const moveWidgetPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:move-widget',
+  description:
+    'Adds commands and context menu items to move widgets between areas.',
+  autoStart: true,
+  requires: [ILabShell],
+  optional: [ITranslator],
   activate: (
     app: JupyterFrontEnd,
     labShell: ILabShell,
-    translator: ITranslator,
-    statusBar: IStatusBar | null,
-    settingRegistry: ISettingRegistry | null
+    translator: ITranslator | null
   ) => {
-    if (statusBar === null) {
-      // Bail early
-      return;
-    }
-    const trans = translator.load('jupyterlab');
-    const modeSwitch = new Switch();
-    modeSwitch.id = 'jp-single-document-mode';
-
-    modeSwitch.valueChanged.connect((_, args) => {
-      labShell.mode = args.newValue ? 'single-document' : 'multiple-document';
-    });
-    labShell.modeChanged.connect((_, mode) => {
-      modeSwitch.value = mode === 'single-document';
-    });
-
-    if (settingRegistry) {
-      const loadSettings = settingRegistry.load(shell.id);
-      const updateSettings = (settings: ISettingRegistry.ISettings): void => {
-        const startMode = settings.get('startMode').composite as string;
-        if (startMode) {
-          labShell.mode =
-            startMode === 'single' ? 'single-document' : 'multiple-document';
-        }
-      };
-
-      Promise.all([loadSettings, app.restored])
-        .then(([settings]) => {
-          updateSettings(settings);
-        })
-        .catch((reason: Error) => {
-          console.error(reason.message);
-        });
-    }
-
-    // Show the current file browser shortcut in its title.
-    const updateModeSwitchTitle = () => {
-      const binding = app.commands.keyBindings.find(
-        b => b.command === 'application:toggle-mode'
+    const { commands } = app;
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+    const areas = ['main', 'left', 'right', 'down'] as const;
+    type MovableWidgetArea = (typeof areas)[number];
+    const isMovableWidgetArea = (area: unknown): area is MovableWidgetArea => {
+      return (
+        typeof area === 'string' && areas.some(candidate => candidate === area)
       );
-      if (binding) {
-        const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
-        modeSwitch.caption = trans.__('Simple Interface (%1)', ks);
-      } else {
-        modeSwitch.caption = trans.__('Simple Interface');
-      }
     };
-    updateModeSwitchTitle();
-    app.commands.keyBindingChanged.connect(() => {
-      updateModeSwitchTitle();
-    });
 
-    modeSwitch.label = trans.__('Simple');
+    const findWidget = (id: string): Widget | null => {
+      for (const area of areas) {
+        const widget = find(labShell.widgets(area), w => w.id === id);
+        if (widget) {
+          return widget;
+        }
+      }
+      return null;
+    };
 
-    statusBar.registerStatusItem(modeSwitchPlugin.id, {
-      priority: 1,
-      item: modeSwitch,
-      align: 'left',
-      rank: -1
+    const contextMenuWidget = (): Widget | null => {
+      const test = (node: HTMLElement) => !!node.dataset.id;
+      const node = app.contextMenuHitTest(test);
+      if (!node) {
+        return null;
+      }
+      return findWidget(node.dataset.id!);
+    };
+
+    const resolveWidget = (args?: ReadonlyPartialJSONObject): Widget | null => {
+      const id = args?.id;
+      if (typeof id === 'string') {
+        return findWidget(id);
+      }
+      return contextMenuWidget();
+    };
+
+    const getWidgetArea = (widget: Widget): MovableWidgetArea | null => {
+      for (const area of areas) {
+        const widgetInArea = find(
+          labShell.widgets(area),
+          w => w.id === widget.id
+        );
+        if (widgetInArea) {
+          return area;
+        }
+      }
+      return null;
+    };
+
+    const moveWidgetToArea = (
+      widget: Widget,
+      targetArea: MovableWidgetArea
+    ) => {
+      // Don't move if already in target area
+      const currentArea = getWidgetArea(widget);
+      if (currentArea === targetArea) {
+        return;
+      }
+
+      // Move only the current widget. This should not update the saved
+      // type-based layout preference used for future widgets.
+      labShell.add(widget, targetArea);
+      labShell.activateById(widget.id);
+    };
+
+    // Add command for moving widgets to different areas
+    commands.addCommand(CommandIDs.moveWidget, {
+      label: args => {
+        const area = args?.area;
+        if (!isMovableWidgetArea(area)) {
+          return trans.__('Move Widget');
+        }
+        switch (area) {
+          case 'main':
+            return trans.__('Move to Main Area');
+          case 'left':
+            return trans.__('Move to Left Sidebar');
+          case 'right':
+            return trans.__('Move to Right Sidebar');
+          case 'down':
+            return trans.__('Move to Down Area');
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            area: {
+              type: 'string',
+              enum: ['main', 'left', 'right', 'down'],
+              description: trans.__('The target area to move the widget to')
+            },
+            id: {
+              type: 'string',
+              description: trans.__(
+                'The widget ID to move. Defaults to the context menu target.'
+              )
+            }
+          },
+          required: ['area']
+        }
+      },
+      isVisible: args => {
+        return isMovableWidgetArea(args?.area);
+      },
+      isEnabled: args => {
+        const area = args?.area;
+        const widget = resolveWidget(
+          args as ReadonlyPartialJSONObject | undefined
+        );
+        return (
+          widget !== null &&
+          isMovableWidgetArea(area) &&
+          getWidgetArea(widget) !== area
+        );
+      },
+      execute: args => {
+        const area = args?.area;
+        const widget = resolveWidget(
+          args as ReadonlyPartialJSONObject | undefined
+        );
+        if (widget && isMovableWidgetArea(area)) {
+          moveWidgetToArea(widget, area);
+        }
+      }
     });
-  },
-  autoStart: true
+  }
 };
 
 /**
@@ -1492,16 +2105,35 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   shell,
   status,
   info,
-  modeSwitchPlugin,
   paths,
   propertyInspector,
   jupyterLogo,
-  topbar
+  topbar,
+  moveWidgetPlugin
 ];
 
 export default plugins;
 
 namespace Private {
+  export function saveUserLayout(
+    settings: ISettingRegistry.ISettings,
+    userLayout: {
+      'single-document': ILabShell.IUserLayout;
+      'multiple-document': ILabShell.IUserLayout;
+    }
+  ): Promise<void> {
+    const layout = {
+      single: JSONExt.deepCopy(
+        userLayout['single-document'] as unknown as PartialJSONValue
+      ),
+      multiple: JSONExt.deepCopy(
+        userLayout['multiple-document'] as unknown as PartialJSONValue
+      )
+    };
+
+    return settings.set('layout', layout as PartialJSONValue);
+  }
+
   async function displayInformation(trans: TranslationBundle): Promise<void> {
     const result = await showDialog({
       title: trans.__('Information'),
@@ -1756,17 +2388,9 @@ namespace Private {
         }
 
         if (newLayout) {
-          settings
-            .set('layout', {
-              single: newLayout['single-document'],
-              multiple: newLayout['multiple-document']
-            } as any)
-            .catch(reason => {
-              console.error(
-                'Failed to save user layout customization.',
-                reason
-              );
-            });
+          saveUserLayout(settings, newLayout).catch(reason => {
+            console.error('Failed to save user layout customization.', reason);
+          });
         }
       }
     });

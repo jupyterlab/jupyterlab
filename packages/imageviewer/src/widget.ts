@@ -5,16 +5,15 @@ import { PathExt } from '@jupyterlab/coreutils';
 
 import { Printing } from '@jupyterlab/apputils';
 
-import {
-  ABCWidgetFactory,
+import type {
   DocumentRegistry,
-  DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
+import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
 
 import { PromiseDelegate } from '@lumino/coreutils';
 
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 
 import { Widget } from '@lumino/widgets';
 
@@ -22,6 +21,16 @@ import { Widget } from '@lumino/widgets';
  * The class name added to a imageviewer.
  */
 const IMAGE_CLASS = 'jp-ImageViewer';
+
+/**
+ * The class name added to an SVG imageviewer.
+ */
+const SVG_CLASS = 'jp-mod-svg';
+
+/**
+ * The MIME type for SVG images.
+ */
+const SVG_MIME_TYPE = 'image/svg+xml';
 
 /**
  * A widget for images.
@@ -35,6 +44,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
     this.context = context;
     this.node.tabIndex = 0;
     this.addClass(IMAGE_CLASS);
+    this.addClass('jp-zoom-target');
 
     this._img = document.createElement('img');
     this.node.appendChild(this._img);
@@ -106,9 +116,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
    * Dispose of resources held by the image viewer.
    */
   dispose(): void {
-    if (this._img.src) {
-      URL.revokeObjectURL(this._img.src || '');
-    }
+    this._revokeObjectUrl();
     super.dispose();
   }
 
@@ -188,15 +196,38 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
     if (!cm) {
       return;
     }
-    const oldurl = this._img.src || '';
-    let content = context.model.toString();
+    this._mimeType = cm.mimetype;
+    this.toggleClass(SVG_CLASS, this._mimeType === SVG_MIME_TYPE);
+    this._revokeObjectUrl();
+    const content = context.model.toString();
     if (cm.format === 'base64') {
       this._img.src = `data:${this._mimeType};base64,${content}`;
     } else {
-      const a = new Blob([content], { type: this._mimeType });
-      this._img.src = URL.createObjectURL(a);
+      const blob = new Blob([content], { type: this._mimeType });
+      const objectUrl = URL.createObjectURL(blob);
+      this._objectUrl = objectUrl;
+      const revokeObjectUrl = () => {
+        this._img.removeEventListener('load', revokeObjectUrl);
+        this._img.removeEventListener('error', revokeObjectUrl);
+        if (this._objectUrl === objectUrl) {
+          this._objectUrl = null;
+        }
+        URL.revokeObjectURL(objectUrl);
+      };
+      this._img.addEventListener('load', revokeObjectUrl);
+      this._img.addEventListener('error', revokeObjectUrl);
+      this._img.src = objectUrl;
     }
-    URL.revokeObjectURL(oldurl);
+  }
+
+  /**
+   * Revoke the active object URL if the image viewer has one.
+   */
+  private _revokeObjectUrl(): void {
+    if (this._objectUrl) {
+      URL.revokeObjectURL(this._objectUrl);
+      this._objectUrl = null;
+    }
   }
 
   /**
@@ -218,6 +249,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
   private _colorinversion = 0;
   private _ready = new PromiseDelegate<void>();
   private _img: HTMLImageElement;
+  private _objectUrl: string | null = null;
 }
 
 /**

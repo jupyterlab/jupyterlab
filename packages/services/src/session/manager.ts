@@ -2,13 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Poll } from '@lumino/polling';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { ServerConnection } from '../serverconnection';
-import * as Session from './session';
+import type * as Session from './session';
 import { BaseManager } from '../basemanager';
 import { SessionConnection } from './default';
 import { SessionAPIClient } from './restapi';
-import { Kernel } from '../kernel';
+import type { Kernel } from '../kernel';
 
 /**
  * An implementation of a session manager.
@@ -249,7 +250,8 @@ export class SessionManager extends BaseManager implements Session.IManager {
     let models: Session.IModel[];
     try {
       models = await this._sessionAPIClient.listRunning();
-    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       // Handle network errors, as well as cases where we are on a
       // JupyterHub and the server is not running. JupyterHub returns a
       // 503 (<2.0) or 424 (>2.0) in that case.

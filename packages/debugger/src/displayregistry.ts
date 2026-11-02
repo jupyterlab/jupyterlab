@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDebugger, IDebuggerDisplayRegistry } from './tokens';
+import type { IDebugger, IDebuggerDisplayRegistry } from './tokens';
 
 /**
  * Interface for display providers that can format debugger source paths.

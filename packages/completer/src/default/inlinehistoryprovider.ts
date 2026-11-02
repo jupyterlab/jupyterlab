@@ -7,20 +7,16 @@ import type {
 } from '../tokens';
 import type { CompletionHandler } from '../handler';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { KernelMessage } from '@jupyterlab/services';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { historyIcon, LabIcon } from '@jupyterlab/ui-components';
+import type { KernelMessage } from '@jupyterlab/services';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { LabIcon } from '@jupyterlab/ui-components';
+import { historyIcon } from '@jupyterlab/ui-components';
 
 /**
  * An example inline completion provider using history to populate suggestions.
  */
-export class HistoryInlineCompletionProvider
-  implements IInlineCompletionProvider
-{
+export class HistoryInlineCompletionProvider implements IInlineCompletionProvider {
   readonly identifier = '@jupyterlab/inline-completer:history';
 
   constructor(protected options: HistoryInlineCompletionProvider.IOptions) {
@@ -50,7 +46,13 @@ export class HistoryInlineCompletionProvider
       default: {
         // make this provider opt-in
         enabled: false,
-        maxSuggestions: 100
+        maxSuggestions: 100,
+        // Each fetch sends a `history_request` to the kernel, so wait for a
+        // short pause instead of querying on every key press. The delay is
+        // also a window in which `inline-completer:accept` has nothing to
+        // accept yet, so it is kept close to the 100 ms that still reads as
+        // an immediate response.
+        debouncerDelay: 100
       }
     };
   }
@@ -117,7 +119,10 @@ export class HistoryInlineCompletionProvider
         output: false,
         raw: true,
         hist_access_type: 'search',
-        pattern: linePrefix + '*' + (suffix ? suffix + '*' : ''),
+        pattern:
+          escapeGlob(linePrefix) +
+          '*' +
+          (suffix ? escapeGlob(suffix) + '*' : ''),
         unique: true,
         n: this._maxSuggestions
       };
@@ -159,4 +164,11 @@ export namespace HistoryInlineCompletionProvider {
   export interface IOptions {
     translator?: ITranslator;
   }
+}
+
+/**
+ * Quote literal characters with special meaning in history search patterns.
+ */
+function escapeGlob(text: string): string {
+  return text.replace(/[?*[]/g, character => `[${character}]`);
 }

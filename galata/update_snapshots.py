@@ -12,10 +12,10 @@ parser.add_argument("report", help="Path to the galata-report directory")
 args = parser.parse_args()
 
 
-def sha1(path):
+def sha1(path: Path) -> str:
     """Calculate hashes of all png files in the test/directory"""
     with open(path, "rb") as f:
-        return hashlib.sha1(f.read()).hexdigest()  # noqa: S324
+        return hashlib.file_digest(f, "sha1").hexdigest()
 
 
 filehashes = {sha1(p): p for p in Path(".").glob("**/*-snapshots/*-linux.png")}

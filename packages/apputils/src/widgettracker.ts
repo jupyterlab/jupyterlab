@@ -1,10 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IRestorable, RestorablePool } from '@jupyterlab/statedb';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
-import { FocusTracker, Widget } from '@lumino/widgets';
+import type { IRestorable } from '@jupyterlab/statedb';
+import { RestorablePool } from '@jupyterlab/statedb';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
+import { FocusTracker } from '@lumino/widgets';
 
 /**
  * A tracker that tracks widgets.
@@ -307,7 +310,7 @@ export class WidgetTracker<T extends Widget = Widget>
    * @param widget - The widget whose existence is being checked.
    */
   has(widget: Widget): boolean {
-    return this._pool.has(widget as any);
+    return this._pool.has(widget as T);
   }
 
   /**
@@ -321,7 +324,7 @@ export class WidgetTracker<T extends Widget = Widget>
    * This function should not typically be invoked by client code.
    * Its primary use case is to be invoked by a restorer.
    */
-  async restore(options?: IRestorable.IOptions<T>): Promise<any> {
+  async restore(options?: IRestorable.IOptions<T>): Promise<unknown> {
     const deferred = this._deferred;
     if (deferred) {
       this._deferred = null;

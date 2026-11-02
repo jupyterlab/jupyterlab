@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import {
@@ -112,13 +113,16 @@ export async function runCell({
             }
           })();
         } catch (reason) {
-          if (cell.isDisposed || reason.message.startsWith('Canceled')) {
+          if (
+            cell.isDisposed ||
+            (reason instanceof Error && reason.message.startsWith('Canceled'))
+          ) {
             ran = false;
           } else {
             onCellExecuted({
               cell,
               success: false,
-              error: reason
+              error: reason as KernelError
             });
             throw reason;
           }

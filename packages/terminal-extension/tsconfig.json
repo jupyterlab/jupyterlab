@@ -17,6 +17,9 @@
       "path": "../documentsearch"
     },
     {
+      "path": "../filebrowser"
+    },
+    {
       "path": "../launcher"
     },
     {
@@ -30,6 +33,12 @@
     },
     {
       "path": "../settingregistry"
+    },
+    {
+      "path": "../statedb"
+    },
+    {
+      "path": "../statusbar"
     },
     {
       "path": "../terminal"

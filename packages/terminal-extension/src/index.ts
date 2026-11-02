@@ -5,24 +5,30 @@
  * @module terminal-extension
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import {
   Clipboard,
   ICommandPalette,
   IThemeManager,
   MainAreaWidget,
+  showErrorMessage,
   WidgetTracker
 } from '@jupyterlab/apputils';
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
-import { Terminal, TerminalAPI } from '@jupyterlab/services';
+import type { IRunningSessions } from '@jupyterlab/running';
+import { IRunningSessionManagers } from '@jupyterlab/running';
+import type { Terminal } from '@jupyterlab/services';
+import { TerminalAPI } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
+import { IStateDB } from '@jupyterlab/statedb';
 import {
   ITerminal,
   ITerminalTracker,
@@ -31,11 +37,19 @@ import {
 import { ITranslator } from '@jupyterlab/translation';
 import {
   copyIcon,
+  linkIcon,
   pasteIcon,
   refreshIcon,
+  TabBarSvg,
   terminalIcon
 } from '@jupyterlab/ui-components';
-import { Menu, Widget } from '@lumino/widgets';
+import { VDomRenderer } from '@jupyterlab/ui-components';
+import { VDomModel } from '@jupyterlab/ui-components';
+import { Throttler } from '@lumino/polling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Title, Widget } from '@lumino/widgets';
+import { Menu } from '@lumino/widgets';
 import { TerminalSearchProvider } from './searchprovider';
 
 /**
@@ -43,6 +57,8 @@ import { TerminalSearchProvider } from './searchprovider';
  */
 namespace CommandIDs {
   export const copy = 'terminal:copy';
+
+  export const copyLink = 'terminal:copy-link';
 
   export const createNew = 'terminal:create-new';
 
@@ -59,7 +75,22 @@ namespace CommandIDs {
   export const setTheme = 'terminal:set-theme';
 
   export const shutdown = 'terminal:shut-down';
+
+  export const openFolderInTerminal = 'terminal:open-folder-in-terminal';
 }
+
+/**
+ * The duration in milliseconds to display the escape hint.
+ */
+const ESCAPE_HINT_DISPLAY_MS = 1500;
+
+const TERMINAL_TITLES_STATE_DB_ID = '@jupyterlab/terminal-extension:titles';
+
+type TerminalTitleState = Record<string, string>;
+
+const TERMINAL_OPTION_KEYS = new Set<string>(
+  Object.keys(ITerminal.defaultOptions)
+);
 
 /**
  * The default terminal extension.
@@ -71,21 +102,86 @@ const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
   provides: ITerminalTracker,
   requires: [ISettingRegistry, ITranslator],
   optional: [
+    IStateDB,
     ICommandPalette,
     ILauncher,
     ILayoutRestorer,
     IMainMenu,
     IThemeManager,
     IRunningSessionManagers,
-    ISearchProviderRegistry
+    ISearchProviderRegistry,
+    IStatusBar
   ],
   autoStart: true
 };
 
 /**
- * Export the plugin as default.
+ * A plugin to add the "Open in Terminal" command to the file browser context menu.
  */
-export default plugin;
+const openFolderInTerminalPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/terminal-extension:open-folder-in-terminal',
+  description: 'Adds an "Open in Terminal" command for the file browser.',
+  requires: [IFileBrowserFactory, ITranslator, ITerminalTracker],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    fileBrowserFactory: IFileBrowserFactory,
+    translator: ITranslator,
+    tracker: ITerminalTracker
+  ): void => {
+    if (!app.serviceManager.terminals.isAvailable()) {
+      return;
+    }
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+
+    commands.addCommand(CommandIDs.openFolderInTerminal, {
+      label: trans.__('Open in Terminal'),
+      icon: terminalIcon.bindprops({ stylesheet: 'menuItem' }),
+      execute: async () => {
+        const { tracker } = fileBrowserFactory;
+        const widget = tracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+
+        const items = Array.from(widget.selectedItems());
+        if (items.length === 0) {
+          return;
+        }
+
+        for (const item of items) {
+          // Only open a terminal for directories.
+          if (item.type !== 'directory') {
+            continue;
+          }
+          try {
+            // Open one terminal for each selected directory.
+            await commands.execute(CommandIDs.createNew, {
+              cwd: item.path
+            });
+          } catch (error) {
+            void showErrorMessage(
+              trans.__('Failed to open new terminal'),
+              error as Error
+            );
+          }
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+  }
+};
+
+/**
+ * Export the plugins as default.
+ */
+export default [plugin, openFolderInTerminalPlugin];
 
 /**
  * Activate the terminal plugin.
@@ -94,13 +190,15 @@ function activate(
   app: JupyterFrontEnd,
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
+  stateDB: IStateDB<TerminalTitleState> | null,
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
   restorer: ILayoutRestorer | null,
   mainMenu: IMainMenu | null,
   themeManager: IThemeManager | null,
   runningSessionManagers: IRunningSessionManagers | null,
-  searchRegistry: ISearchProviderRegistry | null
+  searchRegistry: ISearchProviderRegistry | null,
+  statusBar: IStatusBar | null
 ): ITerminalTracker {
   const trans = translator.load('jupyterlab');
   const { serviceManager, commands } = app;
@@ -109,6 +207,22 @@ function activate(
   const tracker = new WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>({
     namespace
   });
+  const escapeHintStatus = statusBar
+    ? new EscapeHintStatus({
+        text: trans.__('Press Escape twice to leave terminal focus.')
+      })
+    : null;
+  let clearEscapeHintTimeout: number | null = null;
+
+  if (statusBar && escapeHintStatus) {
+    statusBar.registerStatusItem('@jupyterlab/terminal-extension:escape-hint', {
+      item: escapeHintStatus,
+      align: 'middle',
+      rank: 10,
+      isActive: () => escapeHintStatus.model.isActive,
+      activeStateChanged: escapeHintStatus.model.stateChanged
+    });
+  }
 
   // Bail if there are no terminals available.
   if (!serviceManager.terminals.isAvailable()) {
@@ -137,8 +251,13 @@ function activate(
     // Update the cached options by doing a shallow copy of key/values.
     // This is needed because options is passed and used in addcommand-palette and needs
     // to reflect the current cached values.
-    Object.keys(settings.composite).forEach((key: keyof ITerminal.IOptions) => {
-      (options as any)[key] = settings.composite[key];
+    Object.keys(options).forEach(key => {
+      Reflect.deleteProperty(options, key);
+    });
+    Object.entries(settings.composite).forEach(([key, value]) => {
+      if (Private.isTerminalOption(key)) {
+        Object.assign(options, { [key]: value });
+      }
     });
   }
 
@@ -187,7 +306,27 @@ function activate(
     });
   });
 
-  addCommands(app, tracker, settingRegistry, translator, options);
+  const signaler = runningSessionManagers
+    ? new RunningTerminalSignaler(serviceManager.terminals, tracker, stateDB)
+    : null;
+  addCommands(app, tracker, settingRegistry, translator, options, signaler);
+
+  tracker.widgetAdded.connect((_, widget) => {
+    widget.content.escapeHintRequested.connect(() => {
+      if (!escapeHintStatus) {
+        return;
+      }
+
+      if (clearEscapeHintTimeout !== null) {
+        window.clearTimeout(clearEscapeHintTimeout);
+      }
+      escapeHintStatus.model.setActive(true);
+      clearEscapeHintTimeout = window.setTimeout(() => {
+        escapeHintStatus.model.setActive(false);
+        clearEscapeHintTimeout = null;
+      }, ESCAPE_HINT_DISPLAY_MS);
+    });
+  });
 
   if (mainMenu) {
     // Add "Terminal Theme" menu below "Theme" menu.
@@ -278,8 +417,8 @@ function activate(
   }
 
   // Add a sessions manager if the running extension is available
-  if (runningSessionManagers) {
-    addRunningSessionManager(runningSessionManagers, app, translator);
+  if (runningSessionManagers && signaler) {
+    addRunningSessionManager(runningSessionManagers, app, translator, signaler);
   }
 
   if (searchRegistry) {
@@ -295,7 +434,8 @@ function activate(
 function addRunningSessionManager(
   managers: IRunningSessionManagers,
   app: JupyterFrontEnd,
-  translator: ITranslator
+  translator: ITranslator,
+  signaler: RunningTerminalSignaler
 ) {
   const trans = translator.load('jupyterlab');
   const manager = app.serviceManager.terminals;
@@ -311,7 +451,7 @@ function addRunningSessionManager(
       return terminalIcon;
     }
     label() {
-      return `terminals/${this._model.name}`;
+      return signaler.label(this._model.name);
     }
     shutdown() {
       return manager.shutdown(this._model.name);
@@ -327,13 +467,177 @@ function addRunningSessionManager(
       Array.from(manager.running()).map(model => new RunningTerminal(model)),
     shutdownAll: () => manager.shutdownAll(),
     refreshRunning: () => manager.refreshRunning(),
-    runningChanged: manager.runningChanged,
+    runningChanged: signaler.runningChanged,
     shutdownLabel: trans.__('Shut Down'),
     shutdownAllLabel: trans.__('Shut Down All'),
     shutdownAllConfirmationText: trans.__(
       'Are you sure you want to permanently shut down all running terminals?'
     )
   });
+}
+
+class RunningTerminalSignaler {
+  constructor(
+    manager: Terminal.IManager,
+    tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>,
+    stateDB: IStateDB<TerminalTitleState> | null
+  ) {
+    this._stateDB = stateDB;
+    this._saveTitlesThrottler = new Throttler(() => this._saveTitlesNow(), {
+      limit: 1000,
+      edge: 'trailing'
+    });
+    this._ready = this._loadTitles(manager).catch(reason => {
+      console.warn('Failed to load terminal title state.', reason);
+    });
+    manager.runningChanged.connect(this._onRunningChanged, this);
+    tracker.widgetAdded.connect((_, widget) => {
+      this._watchWidget(widget);
+      this._emitRunningChanged();
+    });
+    tracker.forEach(widget => this._watchWidget(widget));
+  }
+
+  get runningChanged(): ISignal<this, void> {
+    return this._runningChanged;
+  }
+
+  label(name: string): string {
+    return this._titles.get(name) ?? `terminals/${name}`;
+  }
+
+  async title(name: string): Promise<string | undefined> {
+    await this._ready;
+    return this._titles.get(name);
+  }
+
+  private _watchWidget(widget: MainAreaWidget<ITerminal.ITerminal>): void {
+    if (this._widgets.has(widget)) {
+      return;
+    }
+
+    this._widgets.add(widget);
+    widget.disposed.connect(this._unwatchWidget, this);
+    void widget.revealed.then(
+      () => {
+        if (widget.isDisposed) {
+          return;
+        }
+        widget.title.changed.connect(this._syncWidgetTitle, this);
+        this._syncWidgetTitle(widget.title);
+      },
+      () => {
+        // MainAreaWidget displays terminal initialization errors.
+      }
+    );
+  }
+
+  private _unwatchWidget(widget: MainAreaWidget<ITerminal.ITerminal>): void {
+    widget.title.changed.disconnect(this._syncWidgetTitle, this);
+    widget.disposed.disconnect(this._unwatchWidget, this);
+    this._widgets.delete(widget);
+    this._emitRunningChanged();
+  }
+
+  private _syncWidgetTitle(title: Title<Widget>): void {
+    void this._ready.then(() => {
+      const widget = Array.from(this._widgets).find(
+        widget => widget === title.owner
+      );
+      if (!widget || widget.isDisposed) {
+        return;
+      }
+
+      const name = widget.content.session.name;
+      const label = TabBarSvg.titleLabel(widget.title);
+      if (this._titles.get(name) === label) {
+        return;
+      }
+
+      this._titles.set(name, label);
+      this._saveTitles();
+      this._emitRunningChanged();
+    });
+  }
+
+  private _onRunningChanged(
+    manager: Terminal.IManager,
+    _models: Terminal.IModel[]
+  ): void {
+    void this._ready.then(() => {
+      if (this._pruneTitles(manager.running())) {
+        this._saveTitles();
+      }
+      this._emitRunningChanged();
+    });
+  }
+
+  private async _loadTitles(manager: Terminal.IManager): Promise<void> {
+    if (!this._stateDB) {
+      return;
+    }
+
+    const saved = await this._stateDB.fetch(TERMINAL_TITLES_STATE_DB_ID);
+    const savedTitles = Private.terminalTitleEntries(saved);
+    if (savedTitles.length === 0) {
+      return;
+    }
+
+    for (const [name, label] of savedTitles) {
+      if (!this._titles.has(name)) {
+        this._titles.set(name, label);
+      }
+    }
+    await manager.ready;
+    if (this._pruneTitles(manager.running())) {
+      this._saveTitles();
+    }
+    this._emitRunningChanged();
+  }
+
+  private _pruneTitles(models: Iterable<Terminal.IModel>): boolean {
+    const names = new Set(Array.from(models, model => model.name));
+    let changed = false;
+    for (const name of this._titles.keys()) {
+      if (!names.has(name)) {
+        this._titles.delete(name);
+        changed = true;
+      }
+    }
+    return changed;
+  }
+
+  private _saveTitles(): void {
+    void this._saveTitlesThrottler.invoke();
+  }
+
+  private _saveTitlesNow(): void {
+    if (!this._stateDB) {
+      return;
+    }
+
+    const titles: TerminalTitleState = {};
+    for (const [name, label] of this._titles) {
+      titles[name] = label;
+    }
+
+    void this._stateDB
+      .save(TERMINAL_TITLES_STATE_DB_ID, titles)
+      .catch(reason => {
+        console.warn('Failed to save terminal title state.', reason);
+      });
+  }
+
+  private _emitRunningChanged(): void {
+    this._runningChanged.emit(void 0);
+  }
+
+  private _stateDB: IStateDB<TerminalTitleState> | null;
+  private _ready: Promise<void>;
+  private _saveTitlesThrottler: Throttler;
+  private _titles = new Map<string, string>();
+  private _widgets = new Set<MainAreaWidget<ITerminal.ITerminal>>();
+  private _runningChanged = new Signal<this, void>(this);
 }
 
 /**
@@ -344,7 +648,8 @@ function addCommands(
   tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>,
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
-  options: Partial<ITerminal.IOptions>
+  options: Partial<ITerminal.IOptions>,
+  signaler: RunningTerminalSignaler | null
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands, serviceManager } = app;
@@ -367,6 +672,7 @@ function addCommands(
         : undefined;
 
       let session;
+      let initialTitle: string | undefined;
       if (name) {
         const models = await TerminalAPI.listRunning(
           serviceManager.serverSettings
@@ -374,6 +680,7 @@ function addCommands(
         if (models.map(d => d.name).includes(name)) {
           // we are restoring a terminal widget and the corresponding terminal exists
           // let's connect to it
+          initialTitle = await signaler?.title(name);
           session = serviceManager.terminals.connectTo({ model: { name } });
         } else {
           // we are restoring a terminal widget but the corresponding terminal was closed
@@ -389,10 +696,11 @@ function addCommands(
         session = await serviceManager.terminals.startNew({ cwd: localPath });
       }
 
-      const term = new XTerm(session, options, translator);
+      const term = new XTerm(session, { ...options, initialTitle }, translator);
 
       term.title.icon = terminalIcon;
-      term.title.label = '...';
+
+      term.title.label = initialTitle ?? '...';
 
       const main = new MainAreaWidget({ content: term, reveal: term.ready });
       app.shell.add(main, 'main', { type: 'Terminal' });
@@ -468,7 +776,8 @@ function addCommands(
           current.content.activate();
         }
       } catch (err) {
-        Private.showErrorMessage(err);
+        const error = err instanceof Error ? err : new Error(String(err));
+        Private.showErrorMessage(error);
       }
     },
     icon: args =>
@@ -535,6 +844,57 @@ function addCommands(
   });
 
   /**
+   * Get the terminal widget the context menu was opened over, falling back
+   * to the current terminal.
+   */
+  const contextMenuTerminal =
+    (): MainAreaWidget<ITerminal.ITerminal> | null => {
+      const hitNode = app.contextMenuHitTest(node =>
+        node.classList.contains('jp-Terminal')
+      );
+      if (hitNode) {
+        const widget = tracker.find(value => value.content.node === hitNode);
+        if (widget) {
+          return widget;
+        }
+      }
+      return tracker.currentWidget;
+    };
+
+  /**
+   * Get the URI of the link the context menu was opened over, or `null` if
+   * the context menu was not opened over a link.
+   */
+  const contextMenuLink = (): string | null => {
+    const content = contextMenuTerminal()?.content;
+    return content instanceof XTerm ? content.contextMenuLink : null;
+  };
+
+  /**
+   * Add copy link command
+   */
+  commands.addCommand(CommandIDs.copyLink, {
+    execute: () => {
+      const link = contextMenuLink();
+
+      if (link) {
+        Clipboard.copyToSystem(link);
+      }
+    },
+    isEnabled: () => Boolean(contextMenuLink()),
+    // Only show the command when the context menu was opened over a link.
+    isVisible: () => Boolean(contextMenuLink()),
+    icon: linkIcon.bindprops({ stylesheet: 'menuItem' }),
+    label: trans.__('Copy Link Address'),
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
+  /**
    * Add paste command
    */
   commands.addCommand(CommandIDs.paste, {
@@ -591,11 +951,12 @@ function addCommands(
     label: trans.__('Increase Terminal Font Size'),
     execute: async () => {
       const { fontSize } = options;
-      if (fontSize && fontSize < 72) {
+      if (fontSize !== undefined && fontSize < 72) {
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize + 1);
         } catch (err) {
-          Private.showErrorMessage(err);
+          const error = err instanceof Error ? err : new Error(String(err));
+          Private.showErrorMessage(error);
         }
       }
     },
@@ -611,11 +972,12 @@ function addCommands(
     label: trans.__('Decrease Terminal Font Size'),
     execute: async () => {
       const { fontSize } = options;
-      if (fontSize && fontSize > 9) {
+      if (fontSize !== undefined && fontSize > 9) {
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize - 1);
         } catch (err) {
-          Private.showErrorMessage(err);
+          const error = err instanceof Error ? err : new Error(String(err));
+          Private.showErrorMessage(error);
         }
       }
     },
@@ -639,10 +1001,14 @@ function addCommands(
         return trans.__('Set terminal theme to the provided `theme`.');
       }
       const theme = args['theme'] as string;
+      const rawTheme = theme[0].toLocaleUpperCase() + theme.slice(1);
       const displayName =
         theme in themeDisplayedName
           ? themeDisplayedName[theme as keyof typeof themeDisplayedName]
-          : trans.__(theme[0].toUpperCase() + theme.slice(1));
+          : // Fallback for themes outside `themeDisplayedName`, so there is no
+            // literal to extract.
+            // eslint-disable-next-line jupyter/no-dynamic-translation
+            trans.__(rawTheme);
       return args['isPalette']
         ? trans.__('Use Terminal Theme: %1', displayName)
         : displayName;
@@ -658,8 +1024,8 @@ function addCommands(
         await settingRegistry.set(plugin.id, 'theme', theme);
         commands.notifyCommandChanged(CommandIDs.setTheme);
       } catch (err) {
-        console.log(err);
-        Private.showErrorMessage(err);
+        const error = err instanceof Error ? err : new Error(String(err));
+        Private.showErrorMessage(error);
       }
     },
     describedBy: {
@@ -701,9 +1067,67 @@ function addCommands(
  */
 namespace Private {
   /**
+   * Whether a setting key is a terminal widget option.
+   */
+  export function isTerminalOption(
+    key: string
+  ): key is keyof ITerminal.IOptions {
+    return TERMINAL_OPTION_KEYS.has(key);
+  }
+
+  /**
+   * Get valid terminal title entries from persisted state.
+   */
+  export function terminalTitleEntries(state: unknown): [string, string][] {
+    if (typeof state !== 'object' || state === null || Array.isArray(state)) {
+      return [];
+    }
+
+    return Object.entries(state).filter(
+      (entry): entry is [string, string] => typeof entry[1] === 'string'
+    );
+  }
+
+  /**
    *  Utility function for consistent error reporting
    */
   export function showErrorMessage(error: Error): void {
     console.error(`Failed to configure ${plugin.id}: ${error.message}`);
+  }
+}
+
+class EscapeHintModel extends VDomModel {
+  get isActive(): boolean {
+    return this._isActive;
+  }
+
+  setActive(active: boolean): void {
+    if (this._isActive === active) {
+      return;
+    }
+    this._isActive = active;
+    this.stateChanged.emit(undefined);
+  }
+
+  private _isActive = false;
+}
+
+class EscapeHintStatus extends VDomRenderer<EscapeHintModel> {
+  constructor(options: EscapeHintStatus.IOptions) {
+    super(new EscapeHintModel());
+    this._text = options.text;
+    this.addClass('jp-mod-highlighted');
+  }
+
+  render() {
+    return TextItem({ source: this._text });
+  }
+
+  private _text: string;
+}
+
+namespace EscapeHintStatus {
+  export interface IOptions {
+    text: string;
   }
 }

@@ -2,13 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Widget } from '@lumino/widgets';
-import {
+import type {
   IHTMLSearchMatch,
   ISearchProvider,
   ISearchProviderRegistry
 } from '../tokens';
 import { SearchProvider } from '../searchprovider';
-import { ITranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 
 export const FOUND_CLASSES = ['cm-string', 'cm-overlay', 'cm-searching'];
 const SELECTED_CLASSES = ['CodeMirror-selectedtext', 'jp-current-match'];
@@ -368,9 +368,11 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   async endQuery(): Promise<void> {
     this._mutationObserver.disconnect();
     this._markNodes.forEach(el => {
-      const parent = el.parentNode!;
-      parent.replaceChild(document.createTextNode(el.textContent!), el);
-      parent.normalize();
+      const parent = el.parentNode;
+      if (parent) {
+        parent.replaceChild(document.createTextNode(el.textContent!), el);
+        parent.normalize();
+      }
     });
     this._markNodes = [];
     this._matches = [];

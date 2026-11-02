@@ -1,18 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { SessionContext, ToolbarRegistry } from '@jupyterlab/apputils';
 import {
   createToolbarFactory,
-  SessionContext,
   SessionContextDialogs,
   Toolbar,
-  ToolbarRegistry,
   ToolbarWidgetRegistry
 } from '@jupyterlab/apputils';
-import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
-import { IDataConnector } from '@jupyterlab/statedb';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { SettingRegistry } from '@jupyterlab/settingregistry';
+import type { IDataConnector } from '@jupyterlab/statedb';
 import { framePromise, JupyterServer } from '@jupyterlab/testing';
-import { ITranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';

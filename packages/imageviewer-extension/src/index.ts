@@ -5,18 +5,18 @@
  * @module imageviewer-extension
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import {
-  IImageTracker,
-  ImageViewer,
-  ImageViewerFactory
-} from '@jupyterlab/imageviewer';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import type { ImageViewer } from '@jupyterlab/imageviewer';
+import { IImageTracker, ImageViewerFactory } from '@jupyterlab/imageviewer';
 import { ITranslator } from '@jupyterlab/translation';
 
 /**
@@ -63,7 +63,7 @@ const TEXT_FILE_TYPES = ['svg', 'xbm'];
 /**
  * The test pattern for text file types in paths.
  */
-const TEXT_FILE_REGEX = new RegExp(`[.](${TEXT_FILE_TYPES.join('|')})$`);
+const TEXT_FILE_REGEX = new RegExp(`\\.(?:${TEXT_FILE_TYPES.join('|')})$`);
 
 /**
  * The image file handler extension.
@@ -96,7 +96,10 @@ function activate(
   const namespace = 'image-widget';
 
   function onWidgetCreated(
-    sender: any,
+    sender: DocumentRegistry.IWidgetFactory<
+      IDocumentWidget<ImageViewer, DocumentRegistry.IModel>,
+      DocumentRegistry.IModel
+    >,
     widget: IDocumentWidget<ImageViewer, DocumentRegistry.IModel>
   ) {
     // Notify the widget tracker if restore data needs to update.

@@ -3,7 +3,7 @@
 
 import { expect, galata, test } from '@jupyterlab/galata';
 import * as path from 'path';
-import { Locator } from '@playwright/test';
+import type { Locator } from '@playwright/test';
 
 const fileName = 'mermaid_diagrams.ipynb';
 

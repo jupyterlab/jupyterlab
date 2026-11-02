@@ -1,21 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { SourceChange } from '@jupyter/ydoc';
+import type { SourceChange } from '@jupyter/ydoc';
 import { CompletionHandler } from './handler';
-import {
+import type {
   CompletionTriggerKind,
   ICompletionContext,
   ICompletionProvider,
   IInlineCompleterSettings,
   IInlineCompletionList,
   IInlineCompletionProvider,
-  InlineCompletionTriggerKind,
   IProviderReconciliator
 } from './tokens';
-import { Completer } from './widget';
+import { InlineCompletionTriggerKind } from './tokens';
+import type { Completer } from './widget';
 import { Signal } from '@lumino/signaling';
-import { isHintableMimeType } from './utils';
+import { isContinuousHintingChange, isHintableMimeType } from './utils';
 
 // Shorthand for readability.
 export type InlineResult =
@@ -320,13 +320,7 @@ export class ProviderReconciliator implements IProviderReconciliator {
       return false;
     }
 
-    return (
-      !completerIsVisible &&
-      (changed.sourceChange == null ||
-        changed.sourceChange.some(
-          delta => delta.insert != null && delta.insert.length > 0
-        ))
-    );
+    return !completerIsVisible && isContinuousHintingChange(changed);
   }
 
   private _resolveFactory = (

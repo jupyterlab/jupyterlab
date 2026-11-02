@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as nbformat from '@jupyterlab/nbformat';
+import type * as nbformat from '@jupyterlab/nbformat';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 import { OutputModel } from '@jupyterlab/rendermime';
 

@@ -1,18 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DocumentWidget } from '@jupyterlab/docregistry';
+import type { DocumentWidget } from '@jupyterlab/docregistry';
 
-import { FileEditor } from '@jupyterlab/fileeditor';
+import type { FileEditor } from '@jupyterlab/fileeditor';
 
-import { IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
 import { EditorHandler } from '../handlers/editor';
 
-import { IDebugger } from '../tokens';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { IDebugger } from '../tokens';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { DebuggerPausedOverlay } from './pausedoverlay';
 
 /**
@@ -62,7 +63,7 @@ export class FileHandler implements IDisposable {
       } else if (event.event === 'continued' || event.event === 'terminated') {
         void this._pausedOverlay.hide();
       }
-    });
+    }, this);
 
     if (this._debuggerService.hasStoppedThreads()) {
       void this._pausedOverlay.show();

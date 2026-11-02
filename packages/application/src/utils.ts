@@ -4,9 +4,10 @@
  */
 
 import { SemanticCommand } from '@jupyterlab/apputils';
-import { nullTranslator, TranslationBundle } from '@jupyterlab/translation';
-import { CommandRegistry } from '@lumino/commands';
-import { JupyterFrontEnd } from './frontend';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { CommandRegistry } from '@lumino/commands';
+import type { JupyterFrontEnd } from './frontend';
 
 export interface ISemanticCommandDefault {
   /**
@@ -167,26 +168,21 @@ export function createSemanticCommand(
     caption: concatenateTexts('caption'),
     isEnabled: () => {
       const isEnabled = reduceAttribute('isEnabled');
-      return (
-        (isEnabled.length > 0 &&
-          !isEnabled.some(enabled => enabled === false)) ||
-        (defaultValues.isEnabled ?? false)
-      );
+      return isEnabled.length > 0
+        ? !isEnabled.some(enabled => enabled === false)
+        : (defaultValues.isEnabled ?? false);
     },
     isToggled: () => {
       const isToggled = reduceAttribute('isToggled');
-      return (
-        isToggled.some(enabled => enabled === true) ||
-        (defaultValues.isToggled ?? false)
-      );
+      return isToggled.length > 0
+        ? isToggled.some(enabled => enabled === true)
+        : (defaultValues.isToggled ?? false);
     },
     isVisible: () => {
       const isVisible = reduceAttribute('isVisible');
-      return (
-        (isVisible.length > 0 &&
-          !isVisible.some(visible => visible === false)) ||
-        (defaultValues.isVisible ?? true)
-      );
+      return isVisible.length > 0
+        ? !isVisible.some(visible => visible === false)
+        : (defaultValues.isVisible ?? true);
     },
     execute: async () => {
       const widget = shell.currentWidget;
@@ -197,7 +193,7 @@ export function createSemanticCommand(
         commandId => commandId !== null && commands.isEnabled(commandId)
       );
 
-      let result: any = null;
+      let result: unknown = null;
       if (toExecute.length > 0) {
         for (const commandId of toExecute) {
           const args = { [SemanticCommand.WIDGET]: widget!.id };
@@ -217,7 +213,7 @@ export function createSemanticCommand(
 
   function reduceAttribute(
     attribute: keyof CommandRegistry.ICommandOptions
-  ): any[] {
+  ): unknown[] {
     const widget = shell.currentWidget;
     const commandIds = commandList.map(cmd =>
       widget !== null ? cmd.getActiveCommandId(widget) : null

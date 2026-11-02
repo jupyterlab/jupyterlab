@@ -14,11 +14,11 @@ const rspack = require('@rspack/core');
 const merge = require('webpack-merge').default;
 const BundleAnalyzerPlugin =
   require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const baseConfig = require('@jupyterlab/builder/lib/webpack.config.base');
+const baseConfig = require('@jupyter/builder/lib/webpack.config.base');
 const { ModuleFederationPlugin } = rspack.container;
 
-const Build = require('@jupyterlab/builder').Build;
-const WPPlugin = require('@jupyterlab/builder').WPPlugin;
+const Build = require('@jupyter/builder').Build;
+const WPPlugin = require('@jupyter/builder').WPPlugin;
 const packageData = require('./package.json');
 
 // Handle the extensions.
@@ -70,21 +70,17 @@ if (outputDir !== buildDir) {
 // Set up variables for the watch mode ignore plugins
 const watched = {};
 const ignoreCache = Object.create(null);
-let watchNodeModules = false;
 Object.keys(jlab.linkedPackages).forEach(function (name) {
   if (name in watched) {
     return;
   }
-  let localPkgPath = '';
+  let localPkgPath = ''; // eslint-disable-line no-useless-assignment
   try {
     localPkgPath = require.resolve(path.join(name, 'package.json'));
-  } catch (e) {
+  } catch {
     return;
   }
   watched[name] = path.dirname(localPkgPath);
-  if (localPkgPath.indexOf('node_modules') !== -1) {
-    watchNodeModules = true;
-  }
 });
 
 // Set up source-map-loader to look in watched lib dirs
@@ -102,7 +98,7 @@ function maybeSync(localPath, name, rest) {
   let stats;
   try {
     stats = fs.statSync(localPath);
-  } catch (e) {
+  } catch {
     return;
   }
 
@@ -277,6 +273,21 @@ const plugins = [
 ];
 
 if (process.env.WEBPACK_BUNDLE_ANALYZER) {
+  // rspack 2.0: stats.toJson() without args no longer includes assets/modules/chunks.
+  // webpack-bundle-analyzer calls it without args, so patch the stats object before it runs.
+  plugins.push({
+    apply(compiler) {
+      compiler.hooks.done.tapAsync(
+        'PatchStatsForBundleAnalyzer',
+        (stats, callback) => {
+          const original = stats.toJson.bind(stats);
+          stats.toJson = options =>
+            original(options ?? { assets: true, modules: true, chunks: true });
+          callback();
+        }
+      );
+    }
+  });
   plugins.push(
     new BundleAnalyzerPlugin({
       analyzerMode: 'static',

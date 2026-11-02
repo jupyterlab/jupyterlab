@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Session } from '@jupyterlab/services';
+import type { Session } from '@jupyterlab/services';
 
 import { createSession } from '@jupyterlab/docregistry/lib/testutils';
 
@@ -11,11 +11,11 @@ import { find } from '@lumino/algorithm';
 
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
-import { DebugProtocol } from '@vscode/debugprotocol';
+import type { DebugProtocol } from '@vscode/debugprotocol';
 
 import { Debugger } from '../src/debugger';
 
-import { IDebugger } from '../src/tokens';
+import type { IDebugger } from '../src/tokens';
 
 const server = new JupyterServer();
 
@@ -89,6 +89,20 @@ describe('Debugger.Session', () => {
       });
       await debugSession.stop();
       expect(reply.body.sourcePath).toContain('.py');
+    });
+  });
+
+  describe('#connection', () => {
+    it('should not block requests made before the connection is reassigned', async () => {
+      const debugSession = new Debugger.Session({
+        connection,
+        config
+      });
+      const pending = debugSession.restoreState();
+      debugSession.connection = connection;
+      const reply = await pending;
+      expect(reply.success).toBe(true);
+      debugSession.dispose();
     });
   });
 

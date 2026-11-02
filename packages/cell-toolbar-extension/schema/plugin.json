@@ -5,6 +5,10 @@
   "jupyter.lab.toolbars": {
     "Cell": [
       {
+        "name": "non-editable-cell",
+        "command": "notebook:make-cell-editable"
+      },
+      {
         "name": "duplicate-cell",
         "command": "notebook:duplicate-below"
       },
@@ -19,7 +23,7 @@
         "command": "notebook:insert-cell-below"
       },
       {
-        "command": "notebook:delete-cell",
+        "command": "cell-toolbar:delete",
         "icon": "ui-components:delete",
         "name": "delete-cell"
       }
@@ -30,6 +34,12 @@
     "showToolbar": {
       "title": "Show cell toolbar",
       "description": "Show a toolbar inside the active cell, if there is enough room for one",
+      "type": "boolean",
+      "default": true
+    },
+    "askCellDeleteConfirmation": {
+      "title": "Delete confirmation",
+      "description": "Whether to ask for confirmation when deleting a cell via the toolbar.",
       "type": "boolean",
       "default": true
     },
@@ -84,7 +94,10 @@
         "type": {
           "title": "Item type",
           "type": "string",
-          "enum": ["command", "spacer"]
+          "oneOf": [
+            { "const": "command", "title": "Command" },
+            { "const": "spacer", "title": "Spacer" }
+          ]
         },
         "rank": {
           "title": "Item rank",

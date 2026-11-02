@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IMermaidManager, IMermaidMarkdown } from './tokens';
+import type { IMermaidManager, IMermaidMarkdown } from './tokens';
 
 /**
  * An implementation of mermaid fenced code blocks in markdown.

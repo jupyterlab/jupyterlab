@@ -8,12 +8,12 @@
     "context": [
       {
         "command": "shortcuts:edit-keybinding",
-        "selector": ".jp-Shortcuts-ShortcutKeysContainer",
+        "selector": ".jp-Shortcuts-ShortcutContainer",
         "rank": 0
       },
       {
         "command": "shortcuts:delete-keybinding",
-        "selector": ".jp-Shortcuts-ShortcutKeysContainer",
+        "selector": ".jp-Shortcuts-ShortcutContainer",
         "rank": 1
       },
       {

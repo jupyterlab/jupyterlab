@@ -2,7 +2,6 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-
 import { program as commander } from 'commander';
 import * as crypto from 'crypto';
 import * as fs from 'fs-extra';
@@ -12,7 +11,7 @@ import * as utils from './utils';
 // Specify the program signature.
 commander
   .description('Prepare the Python package for release')
-  .action(async (options: any) => {
+  .action(async () => {
     utils.exitOnUncaughtException();
 
     const distDir = './dist';

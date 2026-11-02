@@ -7,7 +7,8 @@ import {
   EditorExtensionRegistry
 } from '@jupyterlab/codemirror';
 import { YFile } from '@jupyter/ydoc';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 

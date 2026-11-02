@@ -1,10 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IWidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
+import type { IWidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
 import { Token } from '@lumino/coreutils';
-import { JsonSettingEditor as JSONSettingEditor } from './jsonsettingeditor';
-import { SettingsEditor } from './settingseditor';
+import type { JsonSettingEditor as JSONSettingEditor } from './jsonsettingeditor';
+import type { SettingsEditor } from './settingseditor';
 
 /**
  * The setting editor tracker token.
@@ -29,11 +29,13 @@ export const IJSONSettingEditorTracker = new Token<IJSONSettingEditorTracker>(
 /**
  * A class that tracks the setting editor.
  */
-export interface IJSONSettingEditorTracker
-  extends IWidgetTracker<MainAreaWidget<JSONSettingEditor>> {}
+export interface IJSONSettingEditorTracker extends IWidgetTracker<
+  MainAreaWidget<JSONSettingEditor>
+> {}
 
 /**
  * A class that tracks the setting editor.
  */
-export interface ISettingEditorTracker
-  extends IWidgetTracker<MainAreaWidget<SettingsEditor>> {}
+export interface ISettingEditorTracker extends IWidgetTracker<
+  MainAreaWidget<SettingsEditor>
+> {}

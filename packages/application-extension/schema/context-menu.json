@@ -93,7 +93,11 @@
         "type": {
           "description": "Item type",
           "type": "string",
-          "enum": ["command", "submenu", "separator"],
+          "oneOf": [
+            { "const": "command", "title": "Command" },
+            { "const": "submenu", "title": "Submenu" },
+            { "const": "separator", "title": "Separator" }
+          ],
           "default": "command"
         },
         "rank": {

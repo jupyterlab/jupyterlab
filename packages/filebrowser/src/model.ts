@@ -1,22 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { IChangedArgs, PageConfig, PathExt } from '@jupyterlab/coreutils';
-import { IDocumentManager, shouldOverwrite } from '@jupyterlab/docmanager';
-import { Contents, KernelSpec, Session } from '@jupyterlab/services';
-import { IStateDB } from '@jupyterlab/statedb';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { IFilterBoxProps, IScore } from '@jupyterlab/ui-components';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { compareVersions, PageConfig, PathExt } from '@jupyterlab/coreutils';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
+import { shouldOverwrite } from '@jupyterlab/docmanager';
+import type { Contents, KernelSpec, Session } from '@jupyterlab/services';
+import type { IStateDB } from '@jupyterlab/statedb';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { IFilterBoxProps, IScore } from '@jupyterlab/ui-components';
 import { ArrayExt, filter } from '@lumino/algorithm';
-import { PromiseDelegate, ReadonlyJSONObject } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import { isPathWithinRoot } from './utils';
 
 /**
  * The default duration of the auto-refresh in ms
@@ -60,6 +63,7 @@ export class FileBrowserModel implements IDisposable {
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this._driveName = options.driveName || '';
+    this._root = options.root || '';
     this._allowFileUploads = options.allowFileUploads ?? true;
     this._model = {
       path: this.rootPath,
@@ -73,7 +77,10 @@ export class FileBrowserModel implements IDisposable {
       format: 'text'
     };
     this._state = options.state || null;
-    const refreshInterval = options.refreshInterval || DEFAULT_REFRESH_INTERVAL;
+    const refreshInterval =
+      options.refreshInterval === undefined || options.refreshInterval === 0
+        ? DEFAULT_REFRESH_INTERVAL
+        : options.refreshInterval;
 
     const { services } = options.manager;
     services.contents.fileChanged.connect(this.onFileChanged, this);
@@ -146,6 +153,15 @@ export class FileBrowserModel implements IDisposable {
    */
   get rootPath(): string {
     return this._driveName ? this._driveName + ':' : '';
+  }
+
+  /**
+   * Get the navigation root path.
+   *
+   * When set, navigation is restricted to this path and its subdirectories.
+   */
+  get root(): string {
+    return this._root;
   }
 
   /**
@@ -240,10 +256,20 @@ export class FileBrowserModel implements IDisposable {
    * @returns A promise with the contents of the directory.
    */
   async cd(path = '.'): Promise<void> {
+    const isRefresh = path === '.';
     if (path !== '.') {
       path = this.manager.services.contents.resolvePath(this._model.path, path);
     } else {
       path = this._pendingPath || this._model.path;
+    }
+    // Check if navigation is restricted and the path is outside the root
+    if (!isPathWithinRoot(path, this._root)) {
+      if (isRefresh) {
+        // During refresh, if current path is outside root, navigate to root
+        path = this._root;
+      } else {
+        return;
+      }
     }
     if (this._pending) {
       // Collapse requests to the same directory.
@@ -288,14 +314,19 @@ export class FileBrowserModel implements IDisposable {
       .catch(error => {
         this._pendingPath = null;
         this._pending = null;
-        if (error.response && error.response.status === 404 && path !== '/') {
+        const fallbackPath = this._root || '/';
+        if (
+          error.response &&
+          error.response.status === 404 &&
+          path !== fallbackPath
+        ) {
           error.message = this._trans.__(
             'Directory not found: "%1"',
             this._model.path
           );
           console.error(error);
           this._connectionFailure.emit(error);
-          return this.cd('/');
+          return this.cd(fallbackPath);
         } else {
           this._connectionFailure.emit(error);
         }
@@ -417,8 +448,9 @@ export class FileBrowserModel implements IDisposable {
     // instead of Jupyter Notebook.
     const serverVersion = PageConfig.getNotebookVersion();
     const supportsChunked =
-      serverVersion < [4, 0, 0] /* Jupyter Server */ ||
-      serverVersion >= [5, 1, 0]; /* Jupyter Notebook >= 5.1.0 */
+      compareVersions(serverVersion, [4, 0, 0]) < 0 /* Jupyter Server */ ||
+      compareVersions(serverVersion, [5, 1, 0]) >=
+        0; /* Jupyter Notebook >= 5.1.0 */
     const largeFile = file.size > LARGE_FILE_SIZE;
 
     if (largeFile && !supportsChunked) {
@@ -432,7 +464,10 @@ export class FileBrowserModel implements IDisposable {
     }
 
     const err = 'File not uploaded';
-    if (largeFile && !(await this._shouldUploadLarge(file))) {
+    if (
+      largeFile &&
+      !(await this._prompt(() => this._shouldUploadLarge(file)))
+    ) {
       throw 'Cancelled large file upload';
     }
     await this._uploadCheckDisposed();
@@ -440,13 +475,23 @@ export class FileBrowserModel implements IDisposable {
     await this._uploadCheckDisposed();
     if (
       this._items.find(i => i.name === file.name) &&
-      !(await shouldOverwrite(file.name))
+      !(await this._prompt(() => shouldOverwrite(file.name)))
     ) {
       throw err;
     }
     await this._uploadCheckDisposed();
     const chunkedUpload = supportsChunked && file.size > CHUNK_SIZE;
     return await this._upload(file, chunkedUpload, path);
+  }
+
+  /**
+   * Show upload prompts one at a time. They skip the dialog launch queue, so
+   * concurrent uploads would otherwise open them all at once.
+   */
+  private _prompt(show: () => Promise<boolean>): Promise<boolean> {
+    const answer = this._prompts.then(show);
+    this._prompts = answer.catch(() => false);
+    return answer;
   }
 
   private async _shouldUploadLarge(file: File): Promise<boolean> {
@@ -459,7 +504,8 @@ export class FileBrowserModel implements IDisposable {
       buttons: [
         Dialog.cancelButton({ label: this._trans.__('Cancel') }),
         Dialog.warnButton({ label: this._trans.__('Upload') })
-      ]
+      ],
+      skipQueue: true
     });
     return button.accept;
   }
@@ -508,14 +554,7 @@ export class FileBrowserModel implements IDisposable {
     };
 
     if (!chunked) {
-      try {
-        return await uploadInner(file);
-      } catch (err) {
-        ArrayExt.removeFirstWhere(this._uploads, uploadIndex => {
-          return file.name === uploadIndex.path;
-        });
-        throw err;
-      }
+      return await uploadInner(file);
     }
 
     let finalModel: Contents.IModel | undefined;
@@ -533,7 +572,7 @@ export class FileBrowserModel implements IDisposable {
       const chunk = lastChunk ? -1 : end / CHUNK_SIZE;
 
       const newUpload = { path, progress: start / file.size };
-      this._uploads.splice(this._uploads.indexOf(upload));
+      ArrayExt.removeFirstOf(this._uploads, upload);
       this._uploads.push(newUpload);
       this._uploadChanged.emit({
         name: 'update',
@@ -546,9 +585,7 @@ export class FileBrowserModel implements IDisposable {
       try {
         currentModel = await uploadInner(file.slice(start, end), chunk);
       } catch (err) {
-        ArrayExt.removeFirstWhere(this._uploads, uploadIndex => {
-          return file.name === uploadIndex.path;
-        });
+        ArrayExt.removeFirstOf(this._uploads, upload);
 
         this._uploadChanged.emit({
           name: 'failure',
@@ -564,7 +601,7 @@ export class FileBrowserModel implements IDisposable {
       }
     }
 
-    this._uploads.splice(this._uploads.indexOf(upload));
+    ArrayExt.removeFirstOf(this._uploads, upload);
     this._uploadChanged.emit({
       name: 'finish',
       newValue: null,
@@ -633,10 +670,10 @@ export class FileBrowserModel implements IDisposable {
       prefix + PathExt.dirname(oldValue.path) === path
         ? oldValue
         : newValue &&
-          newValue.path &&
-          prefix + PathExt.dirname(newValue.path) === path
-        ? newValue
-        : undefined;
+            newValue.path &&
+            prefix + PathExt.dirname(newValue.path) === path
+          ? newValue
+          : undefined;
 
     // If either the old value or the new value is in the current path, update.
     if (value) {
@@ -670,10 +707,12 @@ export class FileBrowserModel implements IDisposable {
   private _paths = new Set<string>();
   private _pending: Promise<void> | null = null;
   private _pendingPath: string | null = null;
+  private _prompts: Promise<boolean> = Promise.resolve(true);
   private _refreshed = new Signal<this, void>(this);
   private _sessions: Session.IModel[] = [];
   private _state: IStateDB | null = null;
   private _driveName: string;
+  private _root: string;
   private _allowFileUploads: boolean;
   private _isDisposed = false;
   private _restored = new PromiseDelegate<void>();
@@ -710,6 +749,18 @@ export namespace FileBrowserModel {
      * A document manager instance.
      */
     manager: IDocumentManager;
+
+    /**
+     * The root path for navigation restriction.
+     *
+     * When set, navigation will be restricted to this path and its
+     * subdirectories. Users will not be able to navigate above this path.
+     *
+     * The model applies this restriction in the browser, so it is not a
+     * security boundary. The contents API still serves any path under the
+     * server root.
+     */
+    root?: string;
 
     /**
      * The time interval for browser refreshing, in ms.
@@ -757,6 +808,13 @@ export class TogglableHiddenFileBrowserModel extends FileBrowserModel {
     return this._includeHiddenFiles
       ? super.items()
       : filter(super.items(), value => !value.name.startsWith('.'));
+  }
+
+  /**
+   * Whether hidden files are currently included.
+   */
+  get includeHiddenFiles(): boolean {
+    return this._includeHiddenFiles;
   }
 
   /**

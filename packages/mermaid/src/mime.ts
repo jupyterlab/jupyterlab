@@ -7,14 +7,15 @@
  * @module mermaid-extension
  */
 
+import type { IMermaidManager } from './tokens';
+import { MERMAID_CLASS, MERMAID_MIME_TYPE, WARNING_CLASS } from './tokens';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import {
-  IMermaidManager,
-  MERMAID_CLASS,
-  MERMAID_MIME_TYPE,
-  WARNING_CLASS
-} from './tokens';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { PromiseDelegate } from '@lumino/coreutils';
+  JSONExt,
+  PromiseDelegate,
+  type ReadonlyPartialJSONObject,
+  type ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
 const SVG_MIME = 'image/svg+xml';
@@ -77,8 +78,11 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
 
     // capture the version of mermaid used
     const version = manager.getMermaidVersion();
+    const existingMetadata = model.metadata[MERMAID_MIME_TYPE];
     const mermaidMetadata = {
-      ...((model.metadata[MERMAID_MIME_TYPE] as Record<string, any>) || {}),
+      ...(Private.isReadonlyPartialJSONObject(existingMetadata)
+        ? existingMetadata
+        : {}),
       version
     };
     const metadata = {
@@ -106,6 +110,14 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
   }
 
   private _mimeType: string;
+}
+
+namespace Private {
+  export function isReadonlyPartialJSONObject(
+    value: ReadonlyPartialJSONValue | undefined
+  ): value is ReadonlyPartialJSONObject {
+    return value !== undefined && JSONExt.isObject(value);
+  }
 }
 
 /**

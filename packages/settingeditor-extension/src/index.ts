@@ -2,17 +2,17 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module settingeditor-extension
  */
 
-import {
-  ILabStatus,
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabStatus, ILayoutRestorer } from '@jupyterlab/application';
 import {
   Dialog,
   ICommandPalette,
@@ -34,7 +34,10 @@ import {
   IJSONSettingEditorTracker,
   ISettingEditorTracker
 } from '@jupyterlab/settingeditor/lib/tokens';
-import { JsonSettingEditor, SettingsEditor } from '@jupyterlab/settingeditor';
+import type {
+  JsonSettingEditor,
+  SettingsEditor
+} from '@jupyterlab/settingeditor';
 import { IPluginManager } from '@jupyterlab/pluginmanager';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -46,7 +49,7 @@ import {
   settingsIcon,
   undoIcon
 } from '@jupyterlab/ui-components';
-import { IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
 import {
   ImportSettingsDialogBodyWidget,
   ImportSettingsWidget
@@ -169,7 +172,7 @@ function activate(
         toSkip,
         translator,
         status,
-        query: args.query as string
+        query: args.query!
       })
     });
 
@@ -530,16 +533,16 @@ function activateJSON(
             if (settingsEntries.length) {
               const successCount =
                 settingsEntries.length - errorUploading.length;
-              const successMessage = trans.__(
-                `Imported settings across ${successCount} ${
-                  successCount === 1 ? 'category' : 'categories'
-                } successfully.`
+              const successMessage = trans._n(
+                'Imported settings across %1 category successfully.',
+                'Imported settings across %1 categories successfully.',
+                successCount
               );
               const failureMessage = errorUploading.length
-                ? trans.__(
-                    `Failed to upload settings for the following ${
-                      errorUploading.length
-                    } ${errorUploading.length === 1 ? 'plugin' : 'plugins'}`
+                ? trans._n(
+                    'Failed to upload settings for the following %1 plugin',
+                    'Failed to upload settings for the following %1 plugins',
+                    errorUploading.length
                   )
                 : '';
 
@@ -569,7 +572,10 @@ function activateJSON(
           app.shell.add(widget, 'main');
           app.shell.activateById(widget.id);
         } catch (error) {
-          await showErrorMessage('Failed to import settings', error);
+          await showErrorMessage(
+            'Failed to import settings',
+            error instanceof Error ? error : String(error)
+          );
         }
       });
 

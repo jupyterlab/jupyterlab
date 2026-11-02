@@ -3,11 +3,12 @@
 
 import { Poll } from '@lumino/polling';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { ServerConnection } from '..';
 
-import * as Terminal from './terminal';
+import type * as Terminal from './terminal';
 import { BaseManager } from '../basemanager';
 import { TerminalAPIClient } from './restapi';
 import { TerminalConnection } from './default';
@@ -217,7 +218,8 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
     let models: Terminal.IModel[];
     try {
       models = await this._terminalAPIClient.listRunning();
-    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       // Handle network errors, as well as cases where we are on a
       // JupyterHub and the server is not running. JupyterHub returns a
       // 503 (<2.0) or 424 (>2.0) in that case.

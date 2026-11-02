@@ -1,0 +1,308 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import { simulate } from 'simulate-event';
+import { ContentsManager, Drive } from '@jupyterlab/services';
+import { Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
+import { PathNavigator } from '../src/pathnavigator';
+import type { FileBrowserModel } from '../src/model';
+
+const flushPromises = (): Promise<void> =>
+  new Promise(resolve => setTimeout(resolve, 0));
+
+let scrollIntoViewSpy: jest.SpyInstance;
+
+// jsdom does not implement scrollIntoView.
+beforeAll(() => {
+  Element.prototype.scrollIntoView =
+    Element.prototype.scrollIntoView ?? (() => {});
+  scrollIntoViewSpy = jest
+    .spyOn(Element.prototype, 'scrollIntoView')
+    .mockImplementation(() => {});
+});
+
+afterAll(() => {
+  scrollIntoViewSpy.mockRestore();
+});
+const DIRS = ['alpha', 'beta', 'gamma'];
+const REMOTE_DIRS = ['delta'];
+
+// Path helpers of a real contents manager, with an additional drive.
+const contentsManager = new ContentsManager();
+contentsManager.addDrive(new Drive({ name: 'remote' }));
+
+/**
+ * Create a minimal mock of FileBrowserModel that satisfies PathNavigator.
+ */
+function mockModel(
+  overrides: {
+    path?: string;
+    root?: string;
+    getResult?: Array<{ name: string; type: string }>;
+  } = {}
+): { model: FileBrowserModel; cdCalls: string[] } {
+  const cdCalls: string[] = [];
+  const getResult =
+    overrides.getResult ?? DIRS.map(n => ({ name: n, type: 'directory' }));
+  const refreshed = new Signal<FileBrowserModel, void>({} as FileBrowserModel);
+  const model = {
+    path: overrides.path ?? '',
+    root: overrides.root ?? '',
+    refreshed,
+    manager: {
+      services: {
+        contents: {
+          localPath: (p: string) => contentsManager.localPath(p),
+          resolvePath: (root: string, p: string) =>
+            contentsManager.resolvePath(root, p),
+          get: async (path: string, _opts: unknown) => ({
+            type: 'directory',
+            content: contentsManager.driveName(path)
+              ? REMOTE_DIRS.map(n => ({ name: n, type: 'directory' }))
+              : getResult
+          })
+        }
+      }
+    },
+    cd: jest.fn(async (path: string) => {
+      cdCalls.push(path);
+    })
+  } as unknown as FileBrowserModel;
+  return { model, cdCalls };
+}
+
+const createdNavigators: PathNavigator[] = [];
+
+function makeNavigator(
+  overrides: {
+    path?: string;
+    root?: string;
+    getResult?: Array<{ name: string; type: string }>;
+  } = {}
+): {
+  navigator: PathNavigator;
+  cdCalls: string[];
+  closedCount: { value: number };
+} {
+  const { model, cdCalls } = mockModel(overrides);
+  const closedCount = { value: 0 };
+
+  const navigator = new PathNavigator({ model });
+  navigator.closed.connect(() => {
+    closedCount.value++;
+  });
+
+  Widget.attach(navigator, document.body);
+  createdNavigators.push(navigator);
+
+  return { navigator, cdCalls, closedCount };
+}
+
+function inputEl(navigator: PathNavigator): HTMLInputElement {
+  return navigator.node.querySelector('input') as HTMLInputElement;
+}
+
+function suggestionItems(navigator: PathNavigator): HTMLElement[] {
+  return Array.from(navigator.node.querySelectorAll('ul > *')) as HTMLElement[];
+}
+
+function keydown(el: HTMLElement, key: string): void {
+  simulate(el, 'keydown', { key });
+}
+
+afterEach(() => {
+  while (createdNavigators.length > 0) {
+    const nav = createdNavigators.pop()!;
+    if (nav.isAttached) {
+      Widget.detach(nav);
+    }
+    nav.dispose();
+  }
+});
+
+describe('PathNavigator', () => {
+  describe('#constructor()', () => {
+    it('should create a node with class jp-PathNavigator', () => {
+      const { navigator } = makeNavigator();
+      expect(navigator.node.classList.contains('jp-PathNavigator')).toBe(true);
+    });
+  });
+
+  describe('#open()', () => {
+    it('should prefill input with model path + /', () => {
+      const { navigator } = makeNavigator({ path: 'some/path' });
+      navigator.open();
+      expect(inputEl(navigator).value).toBe('some/path/');
+    });
+
+    it('should leave input empty when model path is empty', () => {
+      const { navigator } = makeNavigator({ path: '' });
+      navigator.open();
+      expect(inputEl(navigator).value).toBe('');
+    });
+  });
+
+  describe('suggestions', () => {
+    it('should render sorted directory suggestions', async () => {
+      const { navigator } = makeNavigator();
+      navigator.open();
+      await flushPromises();
+      const items = suggestionItems(navigator);
+      expect(items.map(li => li.textContent)).toEqual([
+        'alpha',
+        'beta',
+        'gamma'
+      ]);
+    });
+
+    it('should filter suggestions by typed prefix', async () => {
+      const { navigator } = makeNavigator();
+      navigator.open();
+      await flushPromises();
+      inputEl(navigator).value = 'b';
+      simulate(inputEl(navigator), 'input');
+      await flushPromises();
+      expect(suggestionItems(navigator).map(li => li.textContent)).toEqual([
+        'beta'
+      ]);
+    });
+
+    it('should show no suggestions when no match', async () => {
+      const { navigator } = makeNavigator();
+      navigator.open();
+      await flushPromises();
+      inputEl(navigator).value = 'zzz';
+      simulate(inputEl(navigator), 'input');
+      await flushPromises();
+      expect(suggestionItems(navigator).length).toBe(0);
+    });
+
+    it('should suggest directories within the model root', async () => {
+      const { navigator } = makeNavigator({
+        path: 'projects/demo',
+        root: 'projects/demo'
+      });
+      navigator.open();
+      await flushPromises();
+      expect(suggestionItems(navigator).map(li => li.textContent)).toEqual([
+        'alpha',
+        'beta',
+        'gamma'
+      ]);
+    });
+
+    it.each(['', '/', 'projects/', 'projects/demo/../', 'projects/demo-old/'])(
+      'should not suggest directories outside the model root for %j',
+      async value => {
+        const { navigator } = makeNavigator({
+          path: 'projects/demo',
+          root: 'projects/demo'
+        });
+        navigator.open();
+        await flushPromises();
+        inputEl(navigator).value = value;
+        simulate(inputEl(navigator), 'input');
+        await flushPromises();
+        expect(suggestionItems(navigator)).toHaveLength(0);
+      }
+    );
+
+    it('should suggest directories from the drive of the model path', async () => {
+      const { navigator } = makeNavigator({ path: 'remote:projects/demo' });
+      navigator.open();
+      await flushPromises();
+      expect(suggestionItems(navigator).map(li => li.textContent)).toEqual([
+        'delta'
+      ]);
+    });
+  });
+
+  describe('keyboard navigation', () => {
+    it('should call model.cd and close on Enter', async () => {
+      const { navigator, cdCalls, closedCount } = makeNavigator();
+      navigator.open();
+      inputEl(navigator).value = 'my/path';
+      keydown(inputEl(navigator), 'Enter');
+      await flushPromises();
+      expect(cdCalls).toEqual(['/my/path']);
+      expect(closedCount.value).toBe(1);
+    });
+
+    it('should close on Escape without navigating', () => {
+      const { navigator, cdCalls, closedCount } = makeNavigator();
+      navigator.open();
+      keydown(inputEl(navigator), 'Escape');
+      expect(cdCalls).toEqual([]);
+      expect(closedCount.value).toBe(1);
+    });
+
+    it('should highlight first suggestion on ArrowDown', async () => {
+      const { navigator } = makeNavigator();
+      navigator.open();
+      await flushPromises();
+      keydown(inputEl(navigator), 'ArrowDown');
+      const items = suggestionItems(navigator);
+      expect(items[0].classList.contains('jp-mod-active')).toBe(true);
+    });
+
+    it('should wrap to last suggestion on ArrowUp from start', async () => {
+      const { navigator } = makeNavigator();
+      navigator.open();
+      await flushPromises();
+      keydown(inputEl(navigator), 'ArrowUp');
+      const items = suggestionItems(navigator);
+      expect(items[items.length - 1].classList.contains('jp-mod-active')).toBe(
+        true
+      );
+    });
+
+    it('should complete sole match on Tab', async () => {
+      const { navigator } = makeNavigator();
+      navigator.open();
+      await flushPromises();
+      inputEl(navigator).value = 'b';
+      simulate(inputEl(navigator), 'input');
+      await flushPromises();
+      keydown(inputEl(navigator), 'Tab');
+      expect(inputEl(navigator).value).toBe('beta/');
+    });
+
+    it('should complete longest common prefix on Tab with multiple matches', async () => {
+      const { navigator } = makeNavigator({
+        getResult: ['alpha', 'almond'].map(name => ({
+          name,
+          type: 'directory'
+        }))
+      });
+      navigator.open();
+      await flushPromises();
+      keydown(inputEl(navigator), 'Tab');
+      expect(inputEl(navigator).value).toBe('al');
+    });
+  });
+
+  describe('suggestion mousedown', () => {
+    it('should call model.cd and close', async () => {
+      const { navigator, cdCalls, closedCount } = makeNavigator({
+        getResult: [{ name: 'alpha', type: 'directory' }]
+      });
+      navigator.open();
+      await flushPromises();
+      const li = suggestionItems(navigator)[0];
+      simulate(li, 'mousedown');
+      await flushPromises();
+      expect(cdCalls).toEqual(['/alpha']);
+      expect(closedCount.value).toBe(1);
+    });
+  });
+
+  describe('blur', () => {
+    it('should close on input blur', () => {
+      const { navigator, closedCount } = makeNavigator();
+      navigator.open();
+      simulate(inputEl(navigator), 'blur');
+      expect(closedCount.value).toBe(1);
+    });
+  });
+});

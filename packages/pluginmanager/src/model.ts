@@ -2,19 +2,18 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { JupyterLab } from '@jupyterlab/application';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
 import { VDomModel } from '@jupyterlab/ui-components';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { PromiseDelegate } from '@lumino/coreutils';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
 import { PluginInUseMessage, PluginRequiredMessage } from './dialogs';
 
@@ -93,6 +92,7 @@ export namespace PluginListModel {
   /** A subset of `JupyterLab.IInfo` interface (defined to reduce API surface) */
   export interface IPluginData {
     readonly availablePlugins: JupyterLab.IPluginInfo[];
+    readonly availablePluginsChanged?: ISignal<unknown, void>;
   }
   /**
    * The initialization options for a plugins list model.
@@ -133,6 +133,10 @@ export class PluginListModel extends VDomModel {
     this._query = options.query || '';
     this._isDisclaimed = options.isDisclaimed ?? false;
     this._extraLockedPlugins = options.extraLockedPlugins ?? [];
+    this._pluginData.availablePluginsChanged?.connect(
+      this._onAvailablePluginsChanged,
+      this
+    );
     this.refresh()
       .then(() => this._ready.resolve())
       .catch(e => this._ready.reject(e));
@@ -141,6 +145,20 @@ export class PluginListModel extends VDomModel {
 
   get available(): ReadonlyArray<IEntry> {
     return [...this._available.values()];
+  }
+
+  /**
+   * Dispose the plugin list model.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._pluginData.availablePluginsChanged?.disconnect(
+      this._onAvailablePluginsChanged,
+      this
+    );
+    super.dispose();
   }
 
   /**
@@ -348,7 +366,7 @@ export class PluginListModel extends VDomModel {
     // Ensure action is removed when resolved
     const remove = () => {
       const i = this._pendingActions.indexOf(pending);
-      this._pendingActions.splice(i, 1);
+      void this._pendingActions.splice(i, 1);
       this.stateChanged.emit(undefined);
     };
     pending.then(remove, remove);
@@ -393,7 +411,7 @@ export class PluginListModel extends VDomModel {
         })
       );
     } catch (reason) {
-      this.statusError = reason.toString();
+      this.statusError = String(reason);
     } finally {
       this._isLoading = false;
       this.stateChanged.emit();
@@ -421,6 +439,13 @@ export class PluginListModel extends VDomModel {
     return false;
   }
 
+  private _onAvailablePluginsChanged(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    void this.refresh();
+  }
+
   /**
    * Call the plugin API
    *
@@ -444,7 +469,9 @@ export class PluginListModel extends VDomModel {
         settings
       );
     } catch (error) {
-      throw new ServerConnection.NetworkError(error);
+      throw new ServerConnection.NetworkError(
+        error instanceof TypeError ? error : new TypeError(String(error))
+      );
     }
 
     let data: any = await response.text();

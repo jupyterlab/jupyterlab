@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { IDisposable } from '@lumino/disposable';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import type { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 
 /**
@@ -18,7 +18,10 @@ export class SaveHandler implements IDisposable {
   constructor(options: SaveHandler.IOptions) {
     this._context = options.context;
     this._isConnectedCallback = options.isConnectedCallback || (() => true);
-    const interval = options.saveInterval || 120;
+    const interval =
+      options.saveInterval === undefined || options.saveInterval === 0
+        ? 120
+        : options.saveInterval;
     this._minInterval = interval * 1000;
     this._interval = this._minInterval;
     // Restart the timer when the contents model is updated.

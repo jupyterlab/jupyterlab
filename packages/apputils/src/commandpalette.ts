@@ -4,8 +4,9 @@
 |----------------------------------------------------------------------------*/
 
 import { searchIcon } from '@jupyterlab/ui-components';
-import { Message } from '@lumino/messaging';
-import { CommandPalette, Panel, Widget } from '@lumino/widgets';
+import type { Message } from '@lumino/messaging';
+import type { CommandPalette } from '@lumino/widgets';
+import { Panel, Widget } from '@lumino/widgets';
 
 /**
  * Class name identifying the input group with search icon.
@@ -28,7 +29,7 @@ export class ModalCommandPalette extends Panel {
       if (this.isAttached && this.isVisible) {
         this.hideAndReset();
       }
-    });
+    }, this);
     // required to properly receive blur and focus events;
     // selection of items with mouse may not work without this.
     this.node.tabIndex = 0;
@@ -158,8 +159,8 @@ export class ModalCommandPalette extends Panel {
    */
   protected _evtKeydown(event: KeyboardEvent): void {
     // Check for escape key
-    switch (event.keyCode) {
-      case 27: // Escape.
+    switch (event.key) {
+      case 'Escape':
         event.stopPropagation();
         event.preventDefault();
         this.hideAndReset();

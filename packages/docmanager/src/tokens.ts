@@ -1,14 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
-import { ISessionContext } from '@jupyterlab/apputils';
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
+import type { ISessionContext } from '@jupyterlab/apputils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import type { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
 import { Token } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
 
 /**
  * The document registry token.
@@ -142,6 +144,21 @@ export interface IDocumentManagerDialogs {
 }
 
 /**
+ * State changes emitted by {@link IDocumentManager.stateChanged}.
+ */
+export type IDocumentManagerStateChange =
+  | IChangedArgs<
+      boolean,
+      boolean,
+      'autosave' | 'confirmClosingDocument' | 'renameUntitledFileOnSave'
+    >
+  | IChangedArgs<
+      number,
+      number,
+      'autosaveInterval' | 'lastModifiedCheckMargin'
+    >;
+
+/**
  * The interface for a document manager.
  */
 export interface IDocumentManager extends IDisposable {
@@ -188,7 +205,7 @@ export interface IDocumentManager extends IDisposable {
   /**
    * Signal triggered when an attribute changes.
    */
-  readonly stateChanged: ISignal<IDocumentManager, IChangedArgs<any>>;
+  readonly stateChanged: ISignal<IDocumentManager, IDocumentManagerStateChange>;
 
   /**
    * Clone a widget.
@@ -290,6 +307,7 @@ export interface IDocumentManager extends IDisposable {
    * @param path - The file path to use.
    *
    * @param widgetName - The name of the widget factory to use. 'default' will use the default widget.
+   * `null` will look for a widget of the preferred factories first, then for a widget of any factory.
    *
    * @returns The found widget, or `undefined`.
    *
@@ -338,6 +356,8 @@ export interface IDocumentManager extends IDisposable {
    * @param path - The file path to open.
    *
    * @param widgetName - The name of the widget factory to use. 'default' will use the default widget.
+   * If not given, reveals the widget found by `findWidget(path, null)`, or opens the default widget
+   * when there is none.
    *
    * @param kernel - An optional kernel name/id to override the default.
    *

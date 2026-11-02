@@ -1,17 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
-import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import {
-  Cell,
-  CodeCell,
-  ICodeCellModel,
-  MarkdownCell,
-  RawCell
-} from '@jupyterlab/cells';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { CellType, IMimeBundle } from '@jupyterlab/nbformat';
+  type ISessionContext,
+  Notification,
+  type SessionContext
+} from '@jupyterlab/apputils';
+import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
+import type { ICodeCellModel } from '@jupyterlab/cells';
+import { Cell, CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type {
+  CellType,
+  ICell,
+  ICodeCell,
+  IDisplayData,
+  IExecuteResult,
+  IMimeBundle
+} from '@jupyterlab/nbformat';
 import {
   KernelError,
   Notebook,
@@ -19,9 +25,12 @@ import {
   NotebookModel,
   StaticNotebook
 } from '@jupyterlab/notebook';
-import { Stdin } from '@jupyterlab/outputarea';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ISharedCodeCell } from '@jupyter/ydoc';
+import type { Stdin } from '@jupyterlab/outputarea';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { Kernel } from '@jupyterlab/services';
+import { KernelMessage } from '@jupyterlab/services';
+import type { IExecutionState, ISharedCodeCell } from '@jupyter/ydoc';
+import type { YNotebook } from '@jupyter/ydoc';
 import {
   acceptDialog,
   dismissDialog,
@@ -30,15 +39,214 @@ import {
   sleep,
   waitForDialog
 } from '@jupyterlab/testing';
-import { JSONArray, JSONObject, UUID } from '@lumino/coreutils';
+import type { JSONArray, JSONObject, MimeData } from '@lumino/coreutils';
+import { UUID } from '@lumino/coreutils';
 import * as utils from './utils';
 import uncoalescedOp from './uncoalesced_op.json';
 
+declare global {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  interface Window {
+    __clipboardTrustPoc?: number;
+  }
+}
+
 const ERROR_INPUT = 'a = foo';
+const READ_ONLY_SPLIT_ERROR = 'The cell is read-only and cannot be split.';
+const READ_ONLY_MERGE_ERROR = 'The cell is read-only and cannot be merged.';
+const READ_ONLY_NOTIFICATION_AUTO_CLOSE = 5000;
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
+const STDOUT_TYPE = 'application/vnd.jupyter.stdout';
+const SCRIPTED_HTML =
+  '<pre><script>window.__clipboardTrustPoc=1;</script></pre>';
+
+type ScriptedHTMLOutputType = 'display_data' | 'execute_result';
+
+function createScriptedHTMLCodeCell(
+  outputType: ScriptedHTMLOutputType,
+  trusted: boolean
+): ICodeCell {
+  const output: IDisplayData | IExecuteResult =
+    outputType === 'display_data'
+      ? {
+          output_type: outputType,
+          data: { 'text/html': SCRIPTED_HTML },
+          metadata: {}
+        }
+      : {
+          output_type: outputType,
+          execution_count: 7,
+          data: { 'text/html': SCRIPTED_HTML },
+          metadata: {}
+        };
+
+  return {
+    cell_type: 'code',
+    execution_count: 7,
+    metadata: { trusted },
+    outputs: [output],
+    source: ''
+  };
+}
+
+function setExternalSystemClipboardData(mime: string, data: unknown): void {
+  const clipboard = utils.systemClipboard as typeof utils.systemClipboard & {
+    fallback: MimeData;
+  };
+  clipboard.clear();
+  clipboard.fallback.setData(mime, data);
+}
 
 const server = new JupyterServer();
+
+function withNotificationError(action: () => void, message: string): void {
+  const notificationError = jest
+    .spyOn(Notification, 'error')
+    .mockImplementation(() => '');
+  try {
+    action();
+    expect(notificationError).toHaveBeenCalledTimes(1);
+    expect(notificationError).toHaveBeenCalledWith(message, {
+      autoClose: READ_ONLY_NOTIFICATION_AUTO_CLOSE
+    });
+  } finally {
+    notificationError.mockRestore();
+  }
+}
+
+function waitForExecutionState(cell: CodeCell, state: IExecutionState) {
+  return new Promise<void>(resolve => {
+    cell.model.sharedModel.changed.connect((_, change) => {
+      if (change.executionStateChange?.newValue === state) {
+        resolve();
+      }
+    });
+  });
+}
+
+function createResolvedFuture(
+  executionCount = 1
+): Kernel.IShellFuture<
+  KernelMessage.IExecuteRequestMsg,
+  KernelMessage.IExecuteReplyMsg
+> {
+  const done = Promise.resolve(
+    KernelMessage.createMessage<KernelMessage.IExecuteReplyMsg>({
+      channel: 'shell',
+      msgType: 'execute_reply',
+      session: UUID.uuid4(),
+      content: {
+        status: 'ok',
+        execution_count: executionCount,
+        user_expressions: {},
+        payload: []
+      }
+    })
+  );
+  return {
+    done,
+    onIOPub: () => undefined,
+    onReply: () => undefined,
+    onStdin: () => undefined,
+    dispose: () => undefined
+  } as unknown as Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  >;
+}
+
+function createPendingFuture(): {
+  future: Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  >;
+  resolve: (executionCount?: number) => void;
+} {
+  let resolveDone: (msg: KernelMessage.IExecuteReplyMsg) => void = () => {
+    return;
+  };
+  const done = new Promise<KernelMessage.IExecuteReplyMsg>(resolve => {
+    resolveDone = resolve;
+  });
+  const future = {
+    done,
+    onIOPub: () => undefined,
+    onReply: () => undefined,
+    onStdin: () => undefined,
+    dispose: () => undefined
+  } as unknown as Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  >;
+  return {
+    future,
+    resolve: (executionCount = 1) => {
+      resolveDone(
+        KernelMessage.createMessage<KernelMessage.IExecuteReplyMsg>({
+          channel: 'shell',
+          msgType: 'execute_reply',
+          session: UUID.uuid4(),
+          content: {
+            status: 'ok',
+            execution_count: executionCount,
+            user_expressions: {},
+            payload: []
+          }
+        })
+      );
+    }
+  };
+}
+
+function createStreamMessage(text: string): KernelMessage.IStreamMsg {
+  return KernelMessage.createMessage<KernelMessage.IStreamMsg>({
+    channel: 'iopub',
+    msgType: 'stream',
+    session: UUID.uuid4(),
+    content: {
+      name: 'stdout',
+      text
+    }
+  });
+}
+
+function createClearOutputMessage(wait = true): KernelMessage.IClearOutputMsg {
+  return KernelMessage.createMessage<KernelMessage.IClearOutputMsg>({
+    channel: 'iopub',
+    msgType: 'clear_output',
+    session: UUID.uuid4(),
+    content: {
+      wait
+    }
+  });
+}
+
+/**
+ * Poll until the first stream output of a cell reaches at least `minLength`
+ * characters, returning the stream text from the output model.
+ *
+ * #### Notes
+ * After a move or undo the cell is reconstructed and its initial output models
+ * are created during `OutputAreaModel` construction, before `list.changed` is
+ * connected. As a result, in-place stream growth updates the output model data
+ * but does not emit `OutputAreaModel.changed`, so waiting on that signal is
+ * unreliable. Polling the output model is deterministic for these cases.
+ */
+async function waitForStreamOutput(
+  cell: CodeCell,
+  minLength: number
+): Promise<string> {
+  for (let i = 0; i < 100; i++) {
+    const text =
+      (cell.outputArea.model.get(0)?.data[STDOUT_TYPE] as string) ?? '';
+    if (text.length >= minLength) {
+      return text;
+    }
+    await sleep(100);
+  }
+  throw new Error('Timed out waiting for stream output');
+}
 
 beforeAll(async () => {
   await server.start();
@@ -89,10 +297,43 @@ describe('@jupyterlab/notebook', () => {
       widget.activeCellIndex = 0;
     });
 
+    function createDOMRect(height: number): DOMRect {
+      return {
+        x: 0,
+        y: 0,
+        width: 0,
+        height,
+        top: 0,
+        right: 0,
+        bottom: height,
+        left: 0,
+        toJSON: () => ''
+      } as DOMRect;
+    }
+
+    function mockViewportHeight(height: number) {
+      jest
+        .spyOn(widget.outerNode, 'clientHeight', 'get')
+        .mockReturnValue(height);
+    }
+
+    function mockCellHeight(cell: Cell, height: number) {
+      jest
+        .spyOn(cell.node, 'getBoundingClientRect')
+        .mockReturnValue(createDOMRect(height));
+    }
+
+    function mockScrollToItem() {
+      return jest.spyOn(widget, 'scrollToItem').mockResolvedValue(undefined);
+    }
+
     afterEach(() => {
+      jest.restoreAllMocks();
       widget.model?.dispose();
       widget.dispose();
       utils.clipboard.clear();
+      utils.systemClipboard.clear();
+      delete window.__clipboardTrustPoc;
     });
 
     afterAll(async () => {
@@ -260,6 +501,17 @@ describe('@jupyterlab/notebook', () => {
         expect(prev.model.sharedModel.getSource()).toBe('');
       });
 
+      it('should be a no-op if the active cell is not editable', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const count = widget.widgets.length;
+        withNotificationError(() => {
+          widget.activeCell!.model.setMetadata('editable', false);
+          NotebookActions.splitCell(widget);
+          expect(widget.widgets.length).toBe(count);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_SPLIT_ERROR);
+      });
+
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.splitCell(widget);
@@ -384,6 +636,17 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
       });
 
+      it('should be a no-op if the active cell is not editable', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const count = widget.widgets.length;
+        withNotificationError(() => {
+          widget.activeCell!.model.setMetadata('editable', false);
+          NotebookActions.mergeCells(widget);
+          expect(widget.widgets.length).toBe(count);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_MERGE_ERROR);
+      });
+
       it('should select the previous cell if there is only one cell selected and mergeAbove is true', () => {
         widget.activeCellIndex = 1;
         let source = widget.activeCell!.model.sharedModel.getSource();
@@ -399,6 +662,42 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.mergeCells(widget, true);
         expect(widget.widgets.length).toBe(cellNumber);
         expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+      });
+
+      it('should be a no-op if any merged cell is not editable', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const cellNumber = widget.widgets.length;
+        withNotificationError(() => {
+          widget.widgets[1].model.setMetadata('editable', false);
+          NotebookActions.mergeCells(widget);
+          expect(widget.widgets.length).toBe(cellNumber);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_MERGE_ERROR);
+      });
+
+      it('should be a no-op if a selected cell is not editable', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const cellNumber = widget.widgets.length;
+        withNotificationError(() => {
+          const cell = widget.widgets[2];
+          cell.model.setMetadata('editable', false);
+          widget.select(cell);
+          NotebookActions.mergeCells(widget);
+          expect(widget.widgets.length).toBe(cellNumber);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_MERGE_ERROR);
+      });
+
+      it('should be a no-op when mergeAbove is true and previous cell is not editable', () => {
+        widget.activeCellIndex = 1;
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        const cellNumber = widget.widgets.length;
+        withNotificationError(() => {
+          widget.widgets[0].model.setMetadata('editable', false);
+          NotebookActions.mergeCells(widget, true);
+          expect(widget.widgets.length).toBe(cellNumber);
+          expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+        }, READ_ONLY_MERGE_ERROR);
       });
 
       it('should clear the outputs of a code cell', () => {
@@ -546,6 +845,17 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.mode).toBe('command');
       });
 
+      it('should prefer scrolling to the start when the next active cell is taller than the viewport', () => {
+        widget.activeCellIndex = 1;
+        mockViewportHeight(200);
+        mockCellHeight(widget.widgets[2], 400);
+        const scrollSpy = mockScrollToItem();
+
+        NotebookActions.deleteCells(widget);
+
+        expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, 'start');
+      });
+
       it('should activate the cell after the last selected cell', () => {
         widget.activeCellIndex = 4;
         const prev = widget.widgets[2];
@@ -592,6 +902,211 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count);
         expect(widget.widgets[1].model.sharedModel.getSource()).toBe(source);
+      });
+    });
+
+    describe('Collapsed heading operations', () => {
+      it('copy should include children of selected collapsed heading', () => {
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: 'code1',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code2',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        // Explicitly select the heading
+        widget.select(heading);
+        NotebookActions.copy(widget);
+
+        const data = utils.clipboard.getData(JUPYTER_CELL_MIME);
+        expect(data.length).toBe(3); // heading + 2 children
+      });
+
+      it('cut should include children of selected collapsed heading', () => {
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: 'code1',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code2',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        const initialCount = widget.widgets.length;
+
+        // Explicitly select the heading
+        widget.select(heading);
+        NotebookActions.cut(widget);
+
+        // Should have deleted heading + 2 children + added 1 new cell
+        expect(widget.widgets.length).toBe(initialCount - 2);
+      });
+
+      it('delete should include children of active collapsed heading', () => {
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: 'code1',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code2',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code3',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        const initialCount = widget.widgets.length;
+
+        widget.activeCellIndex = 0;
+        NotebookActions.deleteCells(widget);
+
+        // Should have deleted heading + 2 children only
+        expect(widget.widgets.length).toBe(initialCount - 3);
+      });
+
+      it('activating collapsed heading should not select children', () => {
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: 'code1',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code2',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+
+        // Activate the heading
+        widget.activeCellIndex = 0;
+
+        // Children should NOT be selected from activation alone
+        expect(widget.isSelected(widget.widgets[1])).toBe(false);
+        expect(widget.isSelected(widget.widgets[2])).toBe(false);
+
+        // But active cell should be the heading
+        expect(widget.activeCell).toBe(heading);
+      });
+
+      it('toggling collapse should not change explicit selection', () => {
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            {
+              cell_type: 'code',
+              source: 'code1',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code2',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            },
+            {
+              cell_type: 'code',
+              source: 'code3',
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const heading = widget.widgets[0] as MarkdownCell;
+        heading.numberChildNodes = 2;
+
+        // Select only code3
+        widget.select(widget.widgets[3]);
+        const initialSelectedCount = widget.selectedCells.length;
+
+        // Toggle collapse
+        heading.headingCollapsed = true;
+
+        // Selection should remain unchanged
+        expect(widget.selectedCells.length).toBe(initialSelectedCount);
+        expect(widget.isSelected(widget.widgets[3])).toBe(true);
       });
     });
 
@@ -1334,11 +1849,66 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#replaceSelection()', () => {
+      it.each(['<- ', '%>% '])(
+        'should replace the selection with %s in an editable cell',
+        text => {
+          const cell = widget.activeCell!;
+          cell.model.sharedModel.setSource('x');
+          cell.editor!.setSelection({
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 1 }
+          });
+
+          NotebookActions.replaceSelection(widget, text);
+
+          expect(cell.model.sharedModel.getSource()).toBe(text);
+        }
+      );
+
+      it.each(['<- ', '%>% '])(
+        'should not insert %s into a read-only cell',
+        text => {
+          const cell = widget.activeCell!;
+          cell.model.sharedModel.setSource('x');
+          cell.model.setMetadata('editable', false);
+          expect(cell.readOnly).toBe(true);
+
+          NotebookActions.replaceSelection(widget, text);
+
+          expect(cell.model.sharedModel.getSource()).toBe('x');
+        }
+      );
+
+      it('should respect a read-only view without editable metadata', () => {
+        const cell = widget.activeCell!;
+        cell.model.sharedModel.setSource('x');
+        cell.syncEditable = false;
+        cell.readOnly = true;
+        expect(cell.model.getMetadata('editable')).toBeUndefined();
+
+        NotebookActions.replaceSelection(widget, '<- ');
+
+        expect(cell.model.sharedModel.getSource()).toBe('x');
+      });
+    });
+
     describe('#selectAbove()', () => {
       it('should select the cell above the active cell', () => {
         widget.activeCellIndex = 1;
         NotebookActions.selectAbove(widget);
         expect(widget.activeCellIndex).toBe(0);
+      });
+
+      it('should prefer scrolling to the start when moving up into a cell taller than the viewport', () => {
+        widget.activeCellIndex = 2;
+        mockViewportHeight(200);
+        mockCellHeight(widget.widgets[1], 400);
+        const scrollSpy = mockScrollToItem();
+
+        NotebookActions.selectAbove(widget);
+
+        expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, 'start');
       });
 
       it('should be a no-op if there is no model', () => {
@@ -1376,6 +1946,26 @@ describe('@jupyterlab/notebook', () => {
       it('should select the cell below the active cell', () => {
         NotebookActions.selectBelow(widget);
         expect(widget.activeCellIndex).toBe(1);
+      });
+
+      it('should keep the auto alignment heuristic when moving down into a cell smaller than the viewport', () => {
+        mockViewportHeight(400);
+        mockCellHeight(widget.widgets[1], 200);
+        const scrollSpy = mockScrollToItem();
+
+        NotebookActions.selectBelow(widget);
+
+        expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, undefined);
+      });
+
+      it('should prefer scrolling to the start when moving down into a cell taller than the viewport', () => {
+        mockViewportHeight(200);
+        mockCellHeight(widget.widgets[1], 400);
+        const scrollSpy = mockScrollToItem();
+
+        NotebookActions.selectBelow(widget);
+
+        expect(scrollSpy).toHaveBeenCalledWith(1, 'auto', 0, 'start');
       });
 
       it('should be a no-op if there is no model', () => {
@@ -1598,6 +2188,147 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.undo(widget);
         expect(widget.model!.cells.get(0).sharedModel.getSource()).toBe(source);
       });
+
+      it('should preserve execution state and output for a running cell', async () => {
+        const finalOutput = '0\n1\n2\n3\n4\n';
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        const cellId = cell.model.id;
+        cell.model.sharedModel.setSource(
+          'import time\nfor i in range(5):\n    print(i)\n    time.sleep(1)'
+        );
+
+        const executionStarted = waitForExecutionState(cell, 'running');
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await executionStarted;
+
+        // Wait for at least one output to arrive before moving.
+        await signalToPromise(cell.outputArea.model.changed);
+
+        // Wait for one more print to go to buffer - reproduces an issue where
+        // content streamed while the cell was being moved would be lost.
+        await sleep(1500);
+
+        NotebookActions.moveDown(widget);
+        const cellAfterMove = widget.widgets[1] as CodeCell;
+        expect(cellAfterMove.model.id).toBe(cellId);
+
+        // Cell should still be running with partial output.
+        const output = cellAfterMove.outputArea.model.get(0);
+        expect(finalOutput.startsWith(output.data[STDOUT_TYPE] as string)).toBe(
+          true
+        );
+        expect(output.data[STDOUT_TYPE]).not.toBe(finalOutput);
+        expect(cellAfterMove.model.executionState).toBe('running');
+        expect(cellAfterMove.model.executionCount).toBe(null);
+
+        // Wait for execution to complete.
+        const inIdleState = waitForExecutionState(cellAfterMove, 'idle');
+        await Promise.all([inIdleState, executionCompleted]);
+        expect(output.data[STDOUT_TYPE]).toBe(finalOutput);
+        expect(cellAfterMove.model.executionState).toBe('idle');
+        expect(cellAfterMove.model.executionCount).not.toBe(null);
+      }, 20000);
+
+      it('should not lose outputs received after first move when moving a second time', async () => {
+        const finalOutput = '0\n1\n2\n3\n4\n';
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        const cellId = cell.model.id;
+        cell.model.sharedModel.setSource(
+          'import time\nfor i in range(5):\n    print(i)\n    time.sleep(1)'
+        );
+
+        const executionStarted = waitForExecutionState(cell, 'running');
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await executionStarted;
+
+        // Wait for first output before first move.
+        await signalToPromise(cell.outputArea.model.changed);
+
+        NotebookActions.moveDown(widget);
+        const cellAfterFirstMove = widget.widgets[1] as CodeCell;
+
+        // Wait for another output to arrive while at the moved position.
+        // (Poll rather than wait on `model.changed`, which does not fire for
+        // in-place stream growth of a reconstructed cell's initial outputs.)
+        const outputAfterFirstMove = await waitForStreamOutput(
+          cellAfterFirstMove,
+          '0\n1\n'.length
+        );
+        // Verify at least one extra print arrived after the first move.
+        expect(outputAfterFirstMove.length).toBeGreaterThan('0\n'.length);
+
+        // Move a second time.
+        NotebookActions.moveDown(widget);
+        const cellAfterSecondMove = widget.widgets[2] as CodeCell;
+        expect(cellAfterSecondMove.model.id).toBe(cellId);
+
+        // Outputs received after the first move must survive the second move.
+        const output = cellAfterSecondMove.outputArea.model.get(0);
+        expect(output.data[STDOUT_TYPE]).toBe(outputAfterFirstMove);
+
+        // Wait for execution to complete.
+        const inIdleState = waitForExecutionState(cellAfterSecondMove, 'idle');
+        await Promise.all([inIdleState, executionCompleted]);
+        expect(output.data[STDOUT_TYPE]).toBe(finalOutput);
+        expect(cellAfterSecondMove.model.executionState).toBe('idle');
+        expect(cellAfterSecondMove.model.executionCount).not.toBe(null);
+      }, 20000);
+
+      it('should not touch the undo stack when the move is a no-op', async () => {
+        // Create a previous, unrelated undo item (a real move of a cell that
+        // is not running).
+        widget.activeCellIndex = 0;
+        NotebookActions.moveDown(widget);
+
+        const undoManager = (widget.model!.sharedModel as YNotebook)
+          .undoManager;
+        undoManager.stopCapturing();
+
+        // Run the bottom cell so it has an in-flight execution future, which
+        // would otherwise be captured and written onto the undo stack.
+        const lastIndex = widget.widgets.length - 1;
+        const cell = widget.widgets[lastIndex] as CodeCell;
+        widget.activeCellIndex = lastIndex;
+        cell.model.sharedModel.setSource('import time\ntime.sleep(2)');
+
+        const executionStarted = waitForExecutionState(cell, 'running');
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await executionStarted;
+
+        const topItem = undoManager.undoStack[undoManager.undoStack.length - 1];
+        const stackLengthBefore = undoManager.undoStack.length;
+        const metaSizeBefore = topItem.meta.size;
+
+        // Moving the bottom cell "down" is a no-op: `Notebook.moveCell` returns
+        // early because the bounded target equals the source index. The wrapper
+        // must mirror that and avoid attaching execution metadata to the
+        // unrelated previous undo item.
+        widget.activeCellIndex = lastIndex;
+        NotebookActions.moveDown(widget);
+
+        expect(undoManager.undoStack.length).toBe(stackLengthBefore);
+        expect(undoManager.undoStack[undoManager.undoStack.length - 1]).toBe(
+          topItem
+        );
+        expect(topItem.meta.size).toBe(metaSizeBefore);
+
+        // The running cell keeps its future and finishes normally.
+        const inIdleState = waitForExecutionState(cell, 'idle');
+        await Promise.all([inIdleState, executionCompleted]);
+        expect(cell.model.executionState).toBe('idle');
+        expect(cell.model.executionCount).not.toBe(null);
+      }, 20000);
     });
 
     describe('#copy()', () => {
@@ -1808,6 +2539,39 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.widgets.length).toBe(count - 2);
       });
 
+      it('should paste code cells without outputs when stripOutputs is true', () => {
+        const cell = widget.activeCell as CodeCell;
+        cell.model.outputs.add({
+          output_type: 'stream',
+          name: 'stdout',
+          text: ['some output']
+        });
+        expect(cell.model.outputs.length).toBeGreaterThan(0);
+        NotebookActions.copy(widget);
+        widget.activeCellIndex = 1;
+        NotebookActions.paste(widget, 'below', { stripOutputs: true });
+        const pastedCell = widget.widgets[2] as CodeCell;
+        expect(pastedCell).toBeInstanceOf(CodeCell);
+        expect(pastedCell.model.outputs.length).toBe(0);
+        expect(pastedCell.model.executionCount).toBeNull();
+        expect(pastedCell.model.sharedModel.getSource()).toBe(
+          cell.model.sharedModel.getSource()
+        );
+      });
+
+      it('should preserve trusted outputs pasted from the application clipboard', () => {
+        utils.clipboard.setData(JUPYTER_CELL_MIME, [
+          createScriptedHTMLCodeCell('display_data', true)
+        ]);
+
+        NotebookActions.paste(widget);
+
+        const pastedCell = widget.widgets[1] as CodeCell;
+        expect(pastedCell).toBeInstanceOf(CodeCell);
+        expect(pastedCell.model.trusted).toBe(true);
+        expect(pastedCell.model.outputs.get(0).trusted).toBe(true);
+      });
+
       it('should emit a signal with cut action', async () => {
         let signals: Notebook.IPastedCells[] = [];
         widget.cellsPasted.connect(
@@ -1930,6 +2694,153 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count - 2);
       });
+
+      it.each<ScriptedHTMLOutputType>(['display_data', 'execute_result'])(
+        'should not trust %s outputs pasted from a system clipboard',
+        async outputType => {
+          window.__clipboardTrustPoc = 0;
+          setExternalSystemClipboardData(JUPYTER_CELL_MIME, [
+            createScriptedHTMLCodeCell(outputType, true)
+          ]);
+
+          await NotebookActions.pasteFromSystemClipboard(widget);
+          await sleep();
+
+          const pastedCell = widget.widgets[1] as CodeCell;
+          expect(pastedCell).toBeInstanceOf(CodeCell);
+          expect(pastedCell.model.trusted).toBe(false);
+          expect(pastedCell.model.getMetadata('trusted')).toBe(false);
+          expect(pastedCell.model.outputs.get(0).trusted).toBe(false);
+          expect(
+            pastedCell.node.querySelector('.jp-RenderedHTML script')
+          ).toBeNull();
+          expect(window.__clipboardTrustPoc).toBe(0);
+        }
+      );
+
+      it('should preserve trusted outputs pasted from another local notebook', async () => {
+        const widget2 = new Notebook({
+          rendermime,
+          contentFactory: utils.createNotebookFactory(),
+          mimeTypeService: utils.mimeTypeService,
+          notebookConfig: {
+            ...StaticNotebook.defaultNotebookConfig,
+            windowingMode: 'none'
+          }
+        });
+        const model2 = new NotebookModel();
+        model2.fromJSON({
+          cells: [createScriptedHTMLCodeCell('display_data', true)],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 1
+        });
+        widget2.model = model2;
+        model2.sharedModel.clearUndoHistory();
+
+        try {
+          widget2.activeCellIndex = 0;
+          await NotebookActions.copyToSystemClipboard(widget2);
+          await NotebookActions.pasteFromSystemClipboard(widget);
+
+          const pastedCell = widget.widgets[1] as CodeCell;
+          expect(pastedCell).toBeInstanceOf(CodeCell);
+          expect(pastedCell.model.trusted).toBe(true);
+          expect(pastedCell.model.getMetadata('trusted')).toBe(true);
+          expect(pastedCell.model.outputs.get(0).trusted).toBe(true);
+        } finally {
+          model2.dispose();
+          widget2.dispose();
+        }
+      });
+
+      it('should keep untrusted code cells pasted from a system clipboard untrusted', async () => {
+        window.__clipboardTrustPoc = 0;
+        setExternalSystemClipboardData(JUPYTER_CELL_MIME, [
+          createScriptedHTMLCodeCell('display_data', false)
+        ]);
+
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        await sleep();
+
+        const pastedCell = widget.widgets[1] as CodeCell;
+        expect(pastedCell).toBeInstanceOf(CodeCell);
+        expect(pastedCell.model.trusted).toBe(false);
+        expect(pastedCell.model.getMetadata('trusted')).toBe(false);
+        expect(pastedCell.model.outputs.get(0).trusted).toBe(false);
+        expect(window.__clipboardTrustPoc).toBe(0);
+      });
+
+      it('should normalize trust metadata on every cell pasted from a system clipboard', async () => {
+        window.__clipboardTrustPoc = 0;
+        const markdownCell: ICell = {
+          cell_type: 'markdown',
+          metadata: { trusted: true },
+          source: 'markdown'
+        };
+        const rawCell: ICell = {
+          cell_type: 'raw',
+          metadata: { trusted: true },
+          source: 'raw'
+        };
+        setExternalSystemClipboardData(JUPYTER_CELL_MIME, [
+          createScriptedHTMLCodeCell('display_data', true),
+          markdownCell,
+          rawCell
+        ]);
+
+        await NotebookActions.pasteFromSystemClipboard(widget);
+        await sleep();
+
+        const pastedCodeCell = widget.widgets[1] as CodeCell;
+        const pastedMarkdownCell = widget.widgets[2] as MarkdownCell;
+        const pastedRawCell = widget.widgets[3] as RawCell;
+        expect(pastedCodeCell).toBeInstanceOf(CodeCell);
+        expect(pastedCodeCell.model.trusted).toBe(false);
+        expect(pastedCodeCell.model.getMetadata('trusted')).toBe(false);
+        expect(pastedMarkdownCell).toBeInstanceOf(MarkdownCell);
+        expect(pastedMarkdownCell.model.getMetadata('trusted')).toBeUndefined();
+        expect(pastedRawCell).toBeInstanceOf(RawCell);
+        expect(pastedRawCell.model.getMetadata('trusted')).toBeUndefined();
+        expect(window.__clipboardTrustPoc).toBe(0);
+      });
+
+      it('should normalize missing trust metadata on code cells pasted from a system clipboard', async () => {
+        const codeCell = createScriptedHTMLCodeCell(
+          'display_data',
+          true
+        ) as Partial<ICodeCell>;
+        delete codeCell.metadata;
+        setExternalSystemClipboardData(JUPYTER_CELL_MIME, [
+          codeCell as ICodeCell
+        ]);
+
+        await NotebookActions.pasteFromSystemClipboard(widget);
+
+        const pastedCell = widget.widgets[1] as CodeCell;
+        expect(pastedCell).toBeInstanceOf(CodeCell);
+        expect(pastedCell.model.trusted).toBe(false);
+        expect(pastedCell.model.getMetadata('trusted')).toBe(false);
+      });
+
+      it('should strip code outputs without preserving trust from a system clipboard', async () => {
+        window.__clipboardTrustPoc = 0;
+        setExternalSystemClipboardData(JUPYTER_CELL_MIME, [
+          createScriptedHTMLCodeCell('execute_result', true)
+        ]);
+
+        await NotebookActions.pasteFromSystemClipboard(widget, 'below', {
+          stripOutputs: true
+        });
+
+        const pastedCell = widget.widgets[1] as CodeCell;
+        expect(pastedCell).toBeInstanceOf(CodeCell);
+        expect(pastedCell.model.trusted).toBe(false);
+        expect(pastedCell.model.getMetadata('trusted')).toBe(false);
+        expect(pastedCell.model.outputs.length).toBe(0);
+        expect(pastedCell.model.executionCount).toBeNull();
+        expect(window.__clipboardTrustPoc).toBe(0);
+      });
     });
 
     describe('#undo()', () => {
@@ -1961,6 +2872,795 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.undo(widget);
         expect(widget.widgets.length).toBe(count - 1);
       });
+
+      it('should undo a merge after split', () => {
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        cell.model.sharedModel.setSource('foo\nbar');
+
+        const editor = cell.editor as CodeEditor.IEditor;
+        editor.setCursorPosition(editor.getPositionAt(4)!); // Split after 'foo\n'
+        NotebookActions.splitCell(widget);
+        expect(widget.widgets[0].model.sharedModel.getSource()).toBe('foo');
+        expect(widget.widgets[1].model.sharedModel.getSource()).toBe('bar');
+        const count = widget.widgets.length;
+
+        // Separate undo capture - otherwise we would need to wait 500ms
+        // for timeout to prevent split and merge from being combined into a single entry
+        (widget.model!.sharedModel as YNotebook).undoManager.stopCapturing();
+
+        widget.activeCellIndex = 0;
+        NotebookActions.mergeCells(widget, false, false);
+        expect(widget.widgets[0].model.sharedModel.getSource()).toBe(
+          'foo\nbar'
+        );
+
+        NotebookActions.undo(widget);
+        expect(widget.widgets.length).toBe(count);
+        expect(widget.widgets[0].model.sharedModel.getSource()).toBe('foo');
+        expect(widget.widgets[1].model.sharedModel.getSource()).toBe('bar');
+      });
+
+      it.each([
+        { interrupt: true, secondCellExpectedState: 'idle' as const },
+        { interrupt: false, secondCellExpectedState: 'running' as const }
+      ])(
+        'should preserve execution state and output after undoing a merge (interrupt: $interrupt)',
+        async ({
+          interrupt,
+          secondCellExpectedState
+        }: {
+          interrupt: boolean;
+          secondCellExpectedState: 'idle' | 'running';
+        }) => {
+          const cell = widget.widgets[0] as CodeCell;
+          widget.activeCellIndex = 0;
+          const initialSource =
+            'import time\nfor i in range(5):\n    print(i)\n    time.sleep(1)';
+          cell.model.sharedModel.setSource(initialSource);
+
+          const executionStarted = waitForExecutionState(cell, 'running');
+          const executionCompleted = NotebookActions.run(
+            widget,
+            ipySessionContext
+          );
+          await executionStarted;
+
+          // The cell is marked running before the kernel receives the request.
+          await waitForStreamOutput(cell, 1);
+
+          // Split the first cell
+          const editor = cell.editor as CodeEditor.IEditor;
+          widget.activeCellIndex = 0;
+          editor.setCursorPosition(editor.getPositionAt(12)!); // Split after 'import time\n'
+          NotebookActions.splitCell(widget);
+          const firstSplitCell = widget.widgets[0] as CodeCell;
+          const secondSplitCell = widget.widgets[1] as CodeCell;
+          expect(firstSplitCell.model.sharedModel.getSource()).toBe(
+            'import time'
+          );
+          expect(secondSplitCell.model.sharedModel.getSource()).toBe(
+            'for i in range(5):\n    print(i)\n    time.sleep(1)'
+          );
+          expect(firstSplitCell.model.sharedModel.executionState).toBe('idle');
+          expect(secondSplitCell.model.sharedModel.executionState).toBe(
+            'running'
+          );
+
+          // Separate undo capture - otherwise we would need to wait 500ms
+          // for timeout to prevent split and merge from being combined into a single entry
+          (widget.model!.sharedModel as YNotebook).undoManager.stopCapturing();
+
+          // Merge cells
+          widget.activeCellIndex = 0;
+          NotebookActions.mergeCells(widget, false, false);
+          const mergedCell = widget.widgets[0] as CodeCell;
+          expect(mergedCell.model.sharedModel.getSource()).toBe(initialSource);
+
+          const kernel = ipySessionContext.session?.kernel;
+          expect(kernel).toBeTruthy();
+
+          if (interrupt) {
+            await kernel!.interrupt();
+            expect(await executionCompleted).toBe(false);
+            expect(mergedCell.model.sharedModel.executionState).toBe('idle');
+          }
+
+          // Undo the merge (which splits the cells again)
+          NotebookActions.undo(widget);
+          const firstCellModelAfterUndo = (widget.widgets[0] as CodeCell).model
+            .sharedModel;
+          const secondCellModelAfterUndo = (widget.widgets[1] as CodeCell).model
+            .sharedModel;
+          expect(firstCellModelAfterUndo.getSource()).toBe('import time');
+          expect(secondCellModelAfterUndo.getSource()).toBe(
+            'for i in range(5):\n    print(i)\n    time.sleep(1)'
+          );
+          expect(firstCellModelAfterUndo.executionState).toBe('idle');
+          expect(secondCellModelAfterUndo.executionState).toBe(
+            secondCellExpectedState
+          );
+
+          if (!interrupt) {
+            const secondCellAfterUndo = widget.widgets[1] as CodeCell;
+            // Verify output keeps arriving in the reconnected cell.
+            const previousOutput =
+              (secondCellAfterUndo.outputArea.model.get(0)?.data[
+                STDOUT_TYPE
+              ] as string) ?? '';
+            await waitForStreamOutput(
+              secondCellAfterUndo,
+              previousOutput.length + 1
+            );
+            const output = secondCellAfterUndo.outputArea.model.get(0);
+
+            const finalOutput = '0\n1\n2\n3\n4\n';
+            expect(
+              finalOutput.startsWith(output.data[STDOUT_TYPE] as string)
+            ).toBe(true);
+            expect(output.data[STDOUT_TYPE]).not.toBe(finalOutput);
+            expect(secondCellAfterUndo.model.executionState).toBe('running');
+            expect(secondCellAfterUndo.model.executionCount).toBe(null);
+
+            await executionCompleted;
+            expect(output.data[STDOUT_TYPE]).toBe(finalOutput);
+            expect(secondCellAfterUndo.model.executionState).toBe('idle');
+            expect(secondCellAfterUndo.model.executionCount).not.toBe(null);
+          }
+        },
+        20000
+      );
+
+      it('should preserve execution state and output after undoing a cell type change', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        const finalOutput = '0\n1\n2\n3\n4\n';
+        widget.activeCellIndex = 0;
+        const initialSource =
+          'import time\nfor i in range(5):\n    print(i)\n    time.sleep(1)';
+        cell.model.sharedModel.setSource(initialSource);
+
+        const executionStarted = waitForExecutionState(cell, 'running');
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await executionStarted;
+
+        await signalToPromise(cell.outputArea.model.changed);
+        const outputBefore = cell.outputArea.model.get(0);
+        expect(outputBefore.data[STDOUT_TYPE]).not.toBe(finalOutput);
+
+        NotebookActions.changeCellType(widget, 'markdown');
+
+        // Wait for one print to go to buffer - reproduces an issue where content
+        // streamed while the cell was removed would be lost.
+        await sleep(1500);
+
+        // Undo cell type change
+        NotebookActions.undo(widget);
+        const cellAfterUndo = widget.widgets[0] as CodeCell;
+        expect(cellAfterUndo).toBeInstanceOf(CodeCell);
+
+        // Right now the cell is still executing so we should not see
+        // the final output just yet (only its prefix),
+        // and we should not see the execution count number yet.
+        const output = cellAfterUndo.outputArea.model.get(0);
+        expect(finalOutput.startsWith(output.data[STDOUT_TYPE] as string)).toBe(
+          true
+        );
+        expect(output.data[STDOUT_TYPE]).not.toBe(finalOutput);
+        expect(cellAfterUndo.model.executionState).toBe('running');
+        expect(cellAfterUndo.model.executionCount).toBe(null);
+
+        // Wait for cell to complete execution
+        const inIdleState = waitForExecutionState(cellAfterUndo, 'idle');
+        await Promise.all([inIdleState, executionCompleted]);
+        expect(output.data[STDOUT_TYPE]).toBe(finalOutput);
+
+        expect(cellAfterUndo.model.executionState).toBe('idle');
+        expect(cellAfterUndo.model.executionCount).not.toBe(null);
+      }, 20000);
+
+      it.each(['type change', 'merge'])(
+        'should restore finished output without a notification after undoing a %s',
+        async action => {
+          const initialVisibleOutput = 'before\n';
+          const finalOutput = 'after\n';
+          const cell = widget.widgets[0] as CodeCell;
+          widget.activeCellIndex = 0;
+          cell.model.outputs.clear();
+          cell.model.outputs.add({
+            output_type: 'stream',
+            name: 'stdout',
+            text: initialVisibleOutput
+          });
+          const future = createResolvedFuture(1);
+          cell.outputArea.reattachFuture(future);
+          if (action === 'merge') {
+            NotebookActions.mergeCells(widget);
+          } else {
+            NotebookActions.changeCellType(widget, 'markdown');
+          }
+
+          // Simulate output that arrived while the cell widget was replaced.
+          void future.onIOPub(createClearOutputMessage());
+          void future.onIOPub(createStreamMessage(finalOutput));
+          await Promise.resolve();
+
+          const notificationInfo = jest
+            .spyOn(Notification, 'info')
+            .mockImplementation(() => '');
+          try {
+            NotebookActions.undo(widget);
+            expect(notificationInfo).not.toHaveBeenCalled();
+
+            const cellAfterUndo = widget.widgets[0] as CodeCell;
+            expect(cellAfterUndo).toBeInstanceOf(CodeCell);
+            expect(
+              cellAfterUndo.outputArea.model.get(0).data[STDOUT_TYPE]
+            ).toBe(finalOutput);
+          } finally {
+            notificationInfo.mockRestore();
+          }
+        }
+      );
+
+      it('should preserve execution state and output after undoing a cell deletion', async () => {
+        const finalOutput = '0\n1\n2\n3\n4\n';
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        const cellId = cell.model.id;
+        const initialSource =
+          'import time\nfor i in range(5):\n    print(i)\n    time.sleep(1)';
+        cell.model.sharedModel.setSource(initialSource);
+
+        const executionStarted = waitForExecutionState(cell, 'running');
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await executionStarted;
+
+        NotebookActions.deleteCells(widget);
+
+        // Undo cell deletion and find the relevant cell
+        NotebookActions.undo(widget);
+        const cellAfterUndo = widget.widgets.find(
+          w => w.model.id === cellId
+        ) as CodeCell;
+        expect(cellAfterUndo).toBeInstanceOf(CodeCell);
+
+        await signalToPromise(cellAfterUndo.outputArea.model.changed);
+        const output = cellAfterUndo.outputArea.model.get(0);
+
+        // The cell should still be executing and output should not be final
+        expect(finalOutput.startsWith(output.data[STDOUT_TYPE] as string)).toBe(
+          true
+        );
+        expect(output.data[STDOUT_TYPE]).not.toBe(finalOutput);
+        expect(cellAfterUndo.model.executionState).toBe('running');
+        expect(cellAfterUndo.model.executionCount).toBe(null);
+
+        // Wait for cell to complete execution
+        await executionCompleted;
+        // Verify outputs kept arriving even after undo reconnected the future.
+        expect(output.data[STDOUT_TYPE]).toBe(finalOutput);
+        expect(cellAfterUndo.model.executionState).toBe('idle');
+        expect(cellAfterUndo.model.executionCount).not.toBe(null);
+      }, 20000);
+
+      it('should keep restored output and allow applying newer buffered output after undoing a cell deletion', async () => {
+        const initialVisibleOutput = 'before\n';
+        const finalOutput = 'after\n';
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        const cellId = cell.model.id;
+        cell.model.outputs.clear();
+        cell.model.outputs.add({
+          output_type: 'stream',
+          name: 'stdout',
+          text: initialVisibleOutput
+        });
+        const future = createResolvedFuture(2);
+        cell.outputArea.reattachFuture(future);
+
+        NotebookActions.deleteCells(widget);
+        // Simulate output that arrived while the cell was deleted.
+        void future.onIOPub(createClearOutputMessage());
+        void future.onIOPub(createStreamMessage(finalOutput));
+        await Promise.resolve();
+
+        const notificationInfo = jest
+          .spyOn(Notification, 'info')
+          .mockImplementation(() => '');
+        try {
+          NotebookActions.undo(widget);
+
+          const cellAfterUndo = widget.widgets.find(
+            w => w.model.id === cellId
+          ) as CodeCell;
+          expect(cellAfterUndo).toBeInstanceOf(CodeCell);
+
+          // Default view keeps the output as it was when the cell was deleted.
+          expect(cellAfterUndo.outputArea.model.get(0).data[STDOUT_TYPE]).toBe(
+            initialVisibleOutput
+          );
+          expect(notificationInfo).toHaveBeenCalledTimes(1);
+
+          const showNewOutputsAction =
+            notificationInfo.mock.calls[0][1]?.actions?.[0];
+          expect(showNewOutputsAction?.label).toBe('Show new outputs');
+          showNewOutputsAction?.callback(new MouseEvent('click'));
+          await Promise.resolve();
+
+          expect(cellAfterUndo.outputArea.model.get(0).data[STDOUT_TYPE]).toBe(
+            finalOutput
+          );
+          expect(cellAfterUndo.model.executionCount).toBe(2);
+        } finally {
+          notificationInfo.mockRestore();
+        }
+      });
+
+      it.each(['stream', 'display'])(
+        'should reconnect a finished deleted cell for later %s output',
+        async outputType => {
+          const cell = widget.widgets[0] as CodeCell;
+          const cellId = cell.model.id;
+          const future = createResolvedFuture();
+          cell.outputArea.future = future;
+          const displayMessage = (update: boolean) => {
+            const content = {
+              data: { 'text/plain': update ? 'after' : 'before' },
+              metadata: {},
+              transient: { display_id: 'restored-display' }
+            };
+            return update
+              ? KernelMessage.createMessage<KernelMessage.IUpdateDisplayDataMsg>(
+                  {
+                    channel: 'iopub',
+                    msgType: 'update_display_data',
+                    session: UUID.uuid4(),
+                    content
+                  }
+                )
+              : KernelMessage.createMessage<KernelMessage.IDisplayDataMsg>({
+                  channel: 'iopub',
+                  msgType: 'display_data',
+                  session: UUID.uuid4(),
+                  content
+                });
+          };
+          if (outputType === 'display') {
+            void future.onIOPub(displayMessage(false));
+          } else {
+            void future.onIOPub(createStreamMessage('before'));
+          }
+          NotebookActions.deleteCells(widget);
+          await future.done;
+          NotebookActions.undo(widget);
+
+          const restored = widget.widgets.find(
+            w => w.model.id === cellId
+          ) as CodeCell;
+          expect(restored.outputArea.future).toBe(future);
+          void future.onIOPub(
+            outputType === 'display'
+              ? displayMessage(true)
+              : createStreamMessage('after')
+          );
+          expect(
+            restored.model.outputs.get(0).data[
+              outputType === 'display' ? 'text/plain' : STDOUT_TYPE
+            ]
+          ).toBe(outputType === 'display' ? 'after' : 'beforeafter');
+        }
+      );
+
+      it.each(['redo', 'delete'])(
+        'should preserve pending finished output through another %s and undo',
+        async action => {
+          const cell = widget.widgets[0] as CodeCell;
+          const cellId = cell.model.id;
+          const future = createResolvedFuture();
+          cell.outputArea.future = future;
+          void future.onIOPub(createStreamMessage('before'));
+          NotebookActions.deleteCells(widget);
+          void future.onIOPub(createStreamMessage('after'));
+          await future.done;
+
+          const notificationInfo = jest
+            .spyOn(Notification, 'info')
+            .mockImplementation(() => '');
+          try {
+            NotebookActions.undo(widget);
+            const oldAction = notificationInfo.mock.calls[0][1]!.actions![0];
+            if (action === 'redo') {
+              NotebookActions.redo(widget);
+            } else {
+              widget.activeCellIndex = widget.widgets.findIndex(
+                w => w.model.id === cellId
+              );
+              NotebookActions.deleteCells(widget);
+            }
+            void future.onIOPub(createStreamMessage('later'));
+            NotebookActions.undo(widget);
+            expect(notificationInfo).toHaveBeenCalledTimes(2);
+            expect(() =>
+              oldAction.callback(new MouseEvent('click'))
+            ).not.toThrow();
+
+            const restored = widget.widgets.find(
+              w => w.model.id === cellId
+            ) as CodeCell;
+            expect(restored.model.outputs.get(0).data[STDOUT_TYPE]).toBe(
+              'before'
+            );
+            notificationInfo.mock.calls[1][1]!.actions![0].callback(
+              new MouseEvent('click')
+            );
+            expect(restored.model.outputs.get(0).data[STDOUT_TYPE]).toBe(
+              'beforeafterlater'
+            );
+          } finally {
+            notificationInfo.mockRestore();
+          }
+        }
+      );
+
+      it('should dismiss a pending output notification when its cell is disposed', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        const future = createResolvedFuture();
+        cell.outputArea.future = future;
+        NotebookActions.deleteCells(widget);
+        void future.onIOPub(createStreamMessage('after'));
+        await future.done;
+        const notificationInfo = jest
+          .spyOn(Notification, 'info')
+          .mockImplementation(() => 'pending-output');
+        const notificationDismiss = jest
+          .spyOn(Notification, 'dismiss')
+          .mockImplementation(() => undefined);
+        try {
+          NotebookActions.undo(widget);
+          const action = notificationInfo.mock.calls[0][1]!.actions![0];
+          widget.dispose();
+          expect(notificationDismiss).toHaveBeenCalledWith('pending-output');
+          expect(() => action.callback(new MouseEvent('click'))).not.toThrow();
+        } finally {
+          notificationInfo.mockRestore();
+          notificationDismiss.mockRestore();
+        }
+      });
+
+      it('should dispose a pending output future when the restored cell is rerun', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        const cellId = cell.model.id;
+        cell.model.sharedModel.setSource(
+          "from IPython.display import display\nimport time\nrerun_display = display('before', display_id=True)\ntime.sleep(1)\nrerun_display.update('after')"
+        );
+        const execution = NotebookActions.run(widget, ipySessionContext);
+        for (let i = 0; i < 100 && cell.model.outputs.length === 0; i++) {
+          await sleep(20);
+        }
+        expect(cell.model.outputs.get(0).data['text/plain']).toBe("'before'");
+        const future = cell.outputArea.future;
+        NotebookActions.deleteCells(widget);
+        await execution;
+        await future.done;
+        NotebookActions.undo(widget);
+        const restored = widget.widgets.find(
+          w => w.model.id === cellId
+        ) as CodeCell;
+        expect(restored.model.outputs.get(0).data['text/plain']).toBe(
+          "'before'"
+        );
+        const notification = Notification.manager.notifications.find(n =>
+          n.options.actions?.some(a => a.label === 'Show new outputs')
+        );
+        expect(notification).toBeDefined();
+        const originalHandler = future.onIOPub;
+        const oldHandler = jest.fn(originalHandler);
+        try {
+          restored.model.sharedModel.setSource("print('rerun')");
+          widget.activeCellIndex = widget.widgets.indexOf(restored);
+          await NotebookActions.run(widget, ipySessionContext);
+          expect(future.isDisposed).toBe(true);
+          expect(Notification.manager.notifications).not.toContain(
+            notification
+          );
+          notification!.options.actions![0].callback(new MouseEvent('click'));
+          expect(restored.model.outputs.get(0).data[STDOUT_TYPE]).toBe(
+            'rerun\n'
+          );
+          future.onIOPub = oldHandler;
+          await ipySessionContext.session!.kernel!.requestExecute({
+            code: "rerun_display.update('later')"
+          }).done;
+          expect(oldHandler).not.toHaveBeenCalled();
+        } finally {
+          future.dispose();
+        }
+      });
+
+      it('should keep newer output available after the toast closes', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        const cellId = cell.model.id;
+        const future = createResolvedFuture();
+        cell.outputArea.future = future;
+        void future.onIOPub(createStreamMessage('before'));
+        NotebookActions.deleteCells(widget);
+        void future.onIOPub(createStreamMessage('after'));
+        await future.done;
+        const notificationInfo = jest.spyOn(Notification, 'info');
+        jest.useFakeTimers();
+        try {
+          NotebookActions.undo(widget);
+          jest.advanceTimersByTime(60000);
+          const notification = Notification.manager.notifications.find(
+            n => n.id === notificationInfo.mock.results[0].value
+          );
+          expect(notification).toBeDefined();
+          notification!.options.actions![0].callback(new MouseEvent('click'));
+          const restored = widget.widgets.find(
+            w => w.model.id === cellId
+          ) as CodeCell;
+          expect(restored.model.outputs.get(0).data[STDOUT_TYPE]).toBe(
+            'beforeafter'
+          );
+        } finally {
+          jest.useRealTimers();
+          notificationInfo.mockRestore();
+        }
+      });
+
+      it('should reconnect future output when the newer-output notification is closed', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        const cellId = cell.model.id;
+        const future = createResolvedFuture();
+        cell.outputArea.future = future;
+        void future.onIOPub(createStreamMessage('before'));
+        NotebookActions.deleteCells(widget);
+        void future.onIOPub(createStreamMessage('after'));
+        await future.done;
+        const notificationInfo = jest.spyOn(Notification, 'info');
+        try {
+          NotebookActions.undo(widget);
+          Notification.manager.dismiss(notificationInfo.mock.results[0].value);
+          const restored = widget.widgets.find(
+            w => w.model.id === cellId
+          ) as CodeCell;
+          expect(restored.outputArea.future).toBe(future);
+          void future.onIOPub(createStreamMessage('later'));
+          expect(restored.model.outputs.get(0).data[STDOUT_TYPE]).toBe(
+            'beforelater'
+          );
+        } finally {
+          notificationInfo.mockRestore();
+        }
+      });
+
+      it.each([0, 1, 2, 3])(
+        'should preserve pending output through a move and %s undo/redo actions',
+        async historyActions => {
+          const cell = widget.widgets[0] as CodeCell;
+          const cellId = cell.model.id;
+          const future = createResolvedFuture();
+          cell.outputArea.future = future;
+          void future.onIOPub(createStreamMessage('before'));
+          NotebookActions.deleteCells(widget);
+          void future.onIOPub(createClearOutputMessage());
+          void future.onIOPub(createStreamMessage('after'));
+          await future.done;
+          const notificationInfo = jest
+            .spyOn(Notification, 'info')
+            .mockImplementation(() => '');
+          try {
+            NotebookActions.undo(widget);
+            const oldAction = notificationInfo.mock.calls[0][1]!.actions![0];
+            NotebookActions.moveCells(widget, 0, 2);
+            for (let i = 0; i < historyActions; i++) {
+              if (i % 2 === 0) {
+                NotebookActions.undo(widget);
+              } else {
+                NotebookActions.redo(widget);
+              }
+            }
+            const restored = widget.widgets.find(
+              w => w.model.id === cellId
+            ) as CodeCell;
+            oldAction.callback(new MouseEvent('click'));
+            expect(restored.model.outputs.get(0).data[STDOUT_TYPE]).toBe(
+              'before'
+            );
+            expect(notificationInfo).toHaveBeenCalledTimes(historyActions + 2);
+            const calls = notificationInfo.mock.calls;
+            calls[calls.length - 1][1]!.actions![0].callback(
+              new MouseEvent('click')
+            );
+            expect(restored.model.outputs.get(0).data[STDOUT_TYPE]).toBe(
+              'after'
+            );
+            expect(restored.outputArea.future).toBe(future);
+          } finally {
+            notificationInfo.mockRestore();
+          }
+        }
+      );
+
+      it.each(['clear', 'remove'])(
+        'should update pending display targets when outputs change (%s)',
+        async action => {
+          const cell = widget.widgets[0] as CodeCell;
+          const cellId = cell.model.id;
+          const future = createResolvedFuture();
+          cell.outputArea.future = future;
+          for (const displayId of ['first', 'second']) {
+            void future.onIOPub(
+              KernelMessage.createMessage<KernelMessage.IDisplayDataMsg>({
+                channel: 'iopub',
+                msgType: 'display_data',
+                session: UUID.uuid4(),
+                content: {
+                  data: { 'text/plain': displayId },
+                  metadata: {},
+                  transient: { display_id: displayId }
+                }
+              })
+            );
+          }
+          NotebookActions.deleteCells(widget);
+          void future.onIOPub(createStreamMessage('after'));
+          await future.done;
+          const notificationInfo = jest.spyOn(Notification, 'info');
+          try {
+            NotebookActions.undo(widget);
+            const restored = widget.widgets.find(
+              w => w.model.id === cellId
+            ) as CodeCell;
+            if (action === 'clear') {
+              widget.activeCellIndex = widget.widgets.indexOf(restored);
+              NotebookActions.clearOutputs(widget);
+            } else {
+              restored.model.outputs.remove(0);
+            }
+            Notification.manager.dismiss(
+              notificationInfo.mock.results[0].value
+            );
+            for (const displayId of ['first', 'second']) {
+              void future.onIOPub(
+                KernelMessage.createMessage<KernelMessage.IUpdateDisplayDataMsg>(
+                  {
+                    channel: 'iopub',
+                    msgType: 'update_display_data',
+                    session: UUID.uuid4(),
+                    content: {
+                      data: { 'text/plain': `${displayId} updated` },
+                      metadata: {},
+                      transient: { display_id: displayId }
+                    }
+                  }
+                )
+              );
+            }
+            expect(restored.model.outputs.length).toBe(
+              action === 'clear' ? 0 : 1
+            );
+            expect(restored.model.outputs.get(0)?.data['text/plain']).toBe(
+              action === 'clear' ? undefined : 'second updated'
+            );
+          } finally {
+            notificationInfo.mockRestore();
+          }
+        }
+      );
+
+      it('should keep stream output contiguous across repeated deletion undo', async () => {
+        const initialVisibleOutput = '0\n1\n2\n3\n4\n5\n';
+        const firstBufferedOutput = '6\n7\n8\n9\n10\n';
+        const secondBufferedOutput = '11\n12\n13\n14\n15\n16\n';
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        const cellId = cell.model.id;
+        cell.model.outputs.clear();
+        cell.model.outputs.add({
+          output_type: 'stream',
+          name: 'stdout',
+          text: initialVisibleOutput
+        });
+        const { future, resolve } = createPendingFuture();
+        cell.outputArea.reattachFuture(future);
+
+        NotebookActions.deleteCells(widget);
+        void future.onIOPub(createStreamMessage(firstBufferedOutput));
+        NotebookActions.undo(widget);
+
+        let cellAfterUndo = widget.widgets.find(
+          w => w.model.id === cellId
+        ) as CodeCell;
+        expect(cellAfterUndo.outputArea.model.get(0).data[STDOUT_TYPE]).toBe(
+          initialVisibleOutput + firstBufferedOutput
+        );
+
+        NotebookActions.redo(widget);
+        void future.onIOPub(createStreamMessage(secondBufferedOutput));
+        NotebookActions.undo(widget);
+
+        cellAfterUndo = widget.widgets.find(
+          w => w.model.id === cellId
+        ) as CodeCell;
+        expect(cellAfterUndo.outputArea.model.get(0).data[STDOUT_TYPE]).toBe(
+          initialVisibleOutput + firstBufferedOutput + secondBufferedOutput
+        );
+
+        resolve(3);
+        await future.done;
+      });
+
+      it('should preserve execution state and output through move undo/redo of a running cell', async () => {
+        const finalOutput = '0\n1\n2\n3\n4\n';
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        const cellId = cell.model.id;
+        // A one-second cadence keeps the cell streaming well past the move and
+        // the undo, so the output received after the move (the output at risk
+        // of being rolled back) is deterministically present.
+        cell.model.sharedModel.setSource(
+          'import time\nfor i in range(5):\n    print(i)\n    time.sleep(1)'
+        );
+
+        const executionStarted = waitForExecutionState(cell, 'running');
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await executionStarted;
+
+        // Wait for at least one output to arrive before moving.
+        await waitForStreamOutput(cell, '0\n'.length);
+
+        NotebookActions.moveDown(widget);
+        const cellAfterMove = widget.widgets[1] as CodeCell;
+        expect(cellAfterMove.model.id).toBe(cellId);
+
+        // Wait until more output arrives at the moved position (the output at
+        // risk of being rolled back by the undo).
+        await waitForStreamOutput(cellAfterMove, '0\n1\n'.length);
+        // Capture synchronously, immediately before the undo, so it matches
+        // the snapshot the undo takes.
+        const outputAfterMove = cellAfterMove.outputArea.model.get(0).data[
+          STDOUT_TYPE
+        ] as string;
+
+        // Undo the move.
+        NotebookActions.undo(widget);
+        const cellAfterUndo = widget.widgets[0] as CodeCell;
+        expect(cellAfterUndo.model.id).toBe(cellId);
+
+        // All outputs accumulated up to the undo must survive it.
+        expect(cellAfterUndo.outputArea.model.length).toBeGreaterThan(0);
+        const output = cellAfterUndo.outputArea.model.get(0);
+        expect(output.data[STDOUT_TYPE]).toBe(outputAfterMove);
+        expect(cellAfterUndo.model.executionState).toBe('running');
+        expect(cellAfterUndo.model.executionCount).toBe(null);
+
+        NotebookActions.redo(widget);
+        const cellAfterRedo = widget.widgets[1] as CodeCell;
+        expect(cellAfterRedo.model.id).toBe(cellId);
+        expect(cellAfterRedo.outputArea.model.get(0).data[STDOUT_TYPE]).toBe(
+          outputAfterMove
+        );
+        expect(cellAfterRedo.model.executionState).toBe('running');
+
+        // Wait for execution to complete; the final output must be intact.
+        const inIdleState = waitForExecutionState(cellAfterRedo, 'idle');
+        await Promise.all([inIdleState, executionCompleted]);
+        expect(cellAfterRedo.outputArea.model.get(0).data[STDOUT_TYPE]).toBe(
+          finalOutput
+        );
+        expect(cellAfterRedo.model.executionState).toBe('idle');
+        expect(cellAfterRedo.model.executionCount).not.toBe(null);
+      }, 20000);
     });
 
     describe('#redo()', () => {
@@ -2167,6 +3867,22 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell).toBeInstanceOf(MarkdownCell);
       });
 
+      it('should be undoable', () => {
+        widget.activeCell!.model.sharedModel.setSource('# foo');
+        expect(widget.activeCell!.model.type).toBe('code');
+        NotebookActions.setMarkdownHeader(widget, 3);
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(
+          '### foo'
+        );
+        expect(widget.activeCell!.model.type).toBe('markdown');
+        const index = widget.activeCellIndex;
+        NotebookActions.undo(widget);
+        // TODO: find a way to avoid index drift on undo
+        widget.activeCellIndex = index;
+        expect(widget.activeCell!.model.type).toBe('code');
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe('# foo');
+      });
+
       it('should be clamped between 1 and 6', () => {
         NotebookActions.setMarkdownHeader(widget, -1);
         expect(
@@ -2202,6 +3918,78 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#selectLastModifiedCell() and #selectNextModifiedCell()', () => {
+      beforeEach(async () => {
+        const model = new NotebookModel();
+        widget.model = model;
+        for (let i = 0; i < 3; i++) {
+          model.sharedModel.insertCell(i, {
+            cell_type: 'code',
+            source: ''
+          });
+        }
+      });
+
+      function editCell(index: number, source: string) {
+        widget.activeCellIndex = index;
+        const cell = widget.activeCell!;
+        cell.model.sharedModel.setSource(source);
+      }
+
+      it('should push on edit and select last modified cell', async () => {
+        editCell(0, 'edit 1');
+        editCell(1, 'edit 2');
+        widget.activeCellIndex = 2;
+
+        await NotebookActions.selectLastModifiedCell(widget);
+        expect(widget.activeCellIndex).toBe(1);
+
+        await NotebookActions.selectLastModifiedCell(widget);
+        expect(widget.activeCellIndex).toBe(0);
+      });
+
+      it('should allow forward navigation to next modified cell', async () => {
+        editCell(0, 'edit 1');
+        editCell(1, 'edit 2');
+        widget.activeCellIndex = 2;
+
+        await NotebookActions.selectLastModifiedCell(widget); // select 1
+        await NotebookActions.selectLastModifiedCell(widget); // then 0
+
+        await NotebookActions.selectNextModifiedCell(widget); // back to 1
+        expect(widget.activeCellIndex).toBe(1);
+      });
+
+      it('should clear forward stack on new edit', async () => {
+        editCell(0, 'edit 1');
+        editCell(1, 'edit 2');
+        widget.activeCellIndex = 2;
+
+        await NotebookActions.selectLastModifiedCell(widget); // selects 1
+        await NotebookActions.selectLastModifiedCell(widget); // selects 0
+
+        // Make an edit while at index 0 to clear the forward stack
+        editCell(0, 'edit 3');
+        await NotebookActions.selectNextModifiedCell(widget);
+        // Should stay at 0
+        expect(widget.activeCellIndex).toBe(0);
+      });
+
+      it('should skip active cell and disposed cells', async () => {
+        editCell(0, 'edit 1');
+        editCell(1, 'edit 2');
+
+        // Remove cell 1
+        widget.activeCellIndex = 1;
+        NotebookActions.deleteCells(widget);
+
+        widget.activeCellIndex = 1; // Now index 1 is the cell 2
+        await NotebookActions.selectLastModifiedCell(widget);
+        // Should skip deleted cell 1 and select cell 0
+        expect(widget.activeCellIndex).toBe(0);
+      });
+    });
+
     describe('#trust()', () => {
       it('should trust the notebook cells if the user accepts', async () => {
         const model = widget.model!;
@@ -2210,7 +3998,7 @@ describe('@jupyterlab/notebook', () => {
         expect(cell.trusted).not.toBe(true);
         const promise = NotebookActions.trust(widget);
         await acceptDialog();
-        await promise;
+        await expect(promise).resolves.toEqual({ trusted: true });
         expect(cell.trusted).toBe(true);
       });
 
@@ -2221,13 +4009,15 @@ describe('@jupyterlab/notebook', () => {
         expect(cell.trusted).not.toBe(true);
         const promise = NotebookActions.trust(widget);
         await dismissDialog();
-        await promise;
+        await expect(promise).resolves.toEqual({ trusted: false });
         expect(cell.trusted).not.toBe(true);
       });
 
       it('should be a no-op if the model is `null`', async () => {
         widget.model = null;
-        await expect(NotebookActions.trust(widget)).resolves.not.toThrow();
+        await expect(NotebookActions.trust(widget)).resolves.toEqual({
+          trusted: false
+        });
       });
 
       it('should show a dialog if all cells are trusted', async () => {
@@ -2240,7 +4030,7 @@ describe('@jupyterlab/notebook', () => {
         }
         const promise = NotebookActions.trust(widget);
         await acceptDialog();
-        await expect(promise).resolves.not.toThrow();
+        await expect(promise).resolves.toEqual({ trusted: true });
       });
     });
   });

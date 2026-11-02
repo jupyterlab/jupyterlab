@@ -1,28 +1,27 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { Cell, CellModel } from '@jupyterlab/cells';
-import {
-  Completer,
-  CompleterModel,
+import type {
   CompletionHandler,
-  CompletionProviderManager,
-  ContextCompleterProvider,
   ICompletionContext,
   ICompletionProvider,
   IInlineCompleterActions,
   IInlineCompleterSettings,
-  IInlineCompletionProvider,
+  IInlineCompletionProvider
+} from '@jupyterlab/completer';
+import {
+  Completer,
+  CompleterModel,
+  CompletionProviderManager,
+  ContextCompleterProvider,
   InlineCompleter,
   ProviderReconciliator
 } from '@jupyterlab/completer';
 import { Context } from '@jupyterlab/docregistry';
-import {
-  INotebookModel,
-  NotebookModelFactory,
-  NotebookPanel
-} from '@jupyterlab/notebook';
+import type { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
+import { NotebookModelFactory } from '@jupyterlab/notebook';
 import { ServiceManager } from '@jupyterlab/services';
 import { createStandaloneCell } from '@jupyter/ydoc';
 import { nullTranslator } from '@jupyterlab/translation';

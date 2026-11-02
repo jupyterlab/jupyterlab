@@ -13,8 +13,8 @@ import {
 } from '@jupyterlab/ui-components';
 import React, { useEffect, useId, useRef, useState } from 'react';
 import { searchIcon } from '@jupyterlab/ui-components';
-import { IWorkspacesModel } from '@jupyterlab/workspaces';
-import { ITranslator } from '@jupyterlab/translation';
+import type { IWorkspacesModel } from '@jupyterlab/workspaces';
+import type { ITranslator } from '@jupyterlab/translation';
 
 interface IWorkspaceSelectorProps {
   currentWorkspace: string;
@@ -139,7 +139,7 @@ export class WorkspaceSelectorWidget extends ReactWidget {
     props.model.refreshed.connect(() => {
       this._identifiers = props.model.identifiers;
       this.update();
-    });
+    }, this);
   }
 
   render(): JSX.Element {

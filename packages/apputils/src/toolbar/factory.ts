@@ -3,15 +3,18 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { IObservableList, ObservableList } from '@jupyterlab/observables';
-import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
-import { Toolbar } from '@jupyterlab/ui-components';
+import type { IObservableList } from '@jupyterlab/observables';
+import { ObservableList } from '@jupyterlab/observables';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { SettingRegistry } from '@jupyterlab/settingregistry';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import type { Toolbar } from '@jupyterlab/ui-components';
 import { findIndex } from '@lumino/algorithm';
-import { JSONExt, PartialJSONObject } from '@lumino/coreutils';
-import { Widget } from '@lumino/widgets';
+import type { PartialJSONObject } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
+import type { Widget } from '@lumino/widgets';
 import { Dialog, showDialog } from '../dialog';
-import { IToolbarWidgetRegistry, ToolbarRegistry } from '../tokens';
+import type { IToolbarWidgetRegistry, ToolbarRegistry } from '../tokens';
 
 /**
  * Default toolbar item rank
@@ -106,7 +109,8 @@ async function setToolbarItems(
       schema.properties![propertyId].default =
         SettingRegistry.reconcileToolbarItems(
           pluginDefaults,
-          schema.properties![propertyId].default as any[],
+          schema.properties![propertyId]
+            .default as ISettingRegistry.IToolbarItem[],
           true
         )!.sort(
           (a, b) =>
@@ -166,7 +170,7 @@ async function setToolbarItems(
       }
     });
   } catch (error) {
-    if (error.name === 'TransformError') {
+    if (error instanceof Error && error.name === 'TransformError') {
       // Assume the existing transformer is the toolbar builder transformer
       // from another factory set up.
       listenPlugin = false;
@@ -182,7 +186,7 @@ async function setToolbarItems(
   // React to customization by the user
   settings.changed.connect(() => {
     const newItems: ISettingRegistry.IToolbarItem[] =
-      (settings.composite[propertyId] as any) ?? [];
+      (settings.composite[propertyId] as ISettingRegistry.IToolbarItem[]) ?? [];
 
     transferSettings(newItems);
   });
@@ -196,7 +200,9 @@ async function setToolbarItems(
   };
 
   // Initialize the toolbar
-  transferSettings((settings.composite[propertyId] as any) ?? []);
+  transferSettings(
+    (settings.composite[propertyId] as ISettingRegistry.IToolbarItem[]) ?? []
+  );
 
   // React to plugin changes if no other transformer exists, otherwise bail.
   if (!listenPlugin) {
@@ -254,7 +260,8 @@ export function createToolbarFactory(
   propertyId: string = 'toolbar'
 ): (widget: Widget) => IObservableList<ToolbarRegistry.IToolbarItem> {
   const items = new ObservableList<ISettingRegistry.IToolbarItem>({
-    itemCmp: (a, b) => JSONExt.deepEqual(a as any, b as any)
+    itemCmp: (a, b) =>
+      JSONExt.deepEqual(a as PartialJSONObject, b as PartialJSONObject)
   });
 
   // Get toolbar definition from the settings

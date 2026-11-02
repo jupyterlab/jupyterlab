@@ -1,15 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { IDocumentWidget } from '@jupyterlab/docregistry';
 import {
   ABCWidgetFactory,
   Base64ModelFactory,
   DocumentRegistry,
-  DocumentWidget,
-  IDocumentWidget
+  DocumentWidget
 } from '@jupyterlab/docregistry';
 import { UUID } from '@lumino/coreutils';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
 import { Widget } from '@lumino/widgets';
 
 class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
@@ -568,6 +569,42 @@ describe('docregistry/registry', () => {
         expect(registry.defaultRenderedWidgetFactory('a.md')).toBe(mdFactory);
       });
 
+      it('should return the default rendered widget factory when a different default widget factory exists', () => {
+        const editorFactory = new WidgetFactory({
+          name: 'editor',
+          fileTypes: ['markdown'],
+          defaultFor: ['markdown']
+        });
+        const mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileTypes: ['markdown'],
+          defaultRendered: ['markdown']
+        });
+        registry.addWidgetFactory(editorFactory);
+        registry.addWidgetFactory(mdFactory);
+        expect(registry.defaultWidgetFactory('a.md')).toBe(editorFactory);
+        expect(registry.defaultRenderedWidgetFactory('a.md')).toBe(mdFactory);
+      });
+
+      it('should prefer a user override to the default rendered widget factory', () => {
+        const editorFactory = new WidgetFactory({
+          name: 'editor',
+          fileTypes: ['markdown'],
+          defaultFor: ['markdown']
+        });
+        const mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileTypes: ['markdown'],
+          defaultRendered: ['markdown']
+        });
+        registry.addWidgetFactory(editorFactory);
+        registry.addWidgetFactory(mdFactory);
+        registry.setDefaultWidgetFactory('markdown', 'editor');
+        expect(registry.defaultRenderedWidgetFactory('a.md')).toBe(
+          editorFactory
+        );
+      });
+
       it('should get the default widget factory if no default rendered factory is registered', () => {
         const gFactory = new WidgetFactory({
           name: 'global',
@@ -734,6 +771,30 @@ describe('docregistry/registry', () => {
           type: 'notebook'
         });
         expect(customNotebookType.name).toBe('test_ipynb');
+      });
+
+      it('should consider both pattern and content type', () => {
+        registry.addFileType({
+          name: 'node_modules_directory',
+          contentType: 'directory',
+          pattern: '^node_modules'
+        });
+
+        registry.addFileType({
+          name: 'node_modules_notebook',
+          contentType: 'notebook',
+          pattern: '^node_modules'
+        });
+        const nodeModuleDirFt = registry.getFileTypeForModel({
+          path: '/foo/node_modules',
+          type: 'directory'
+        });
+        expect(nodeModuleDirFt.name).toBe('node_modules_directory');
+        const nodeModuleNbFt = registry.getFileTypeForModel({
+          path: '/foo/node_modules.ipynb',
+          type: 'notebook'
+        });
+        expect(nodeModuleNbFt.name).toBe('node_modules_notebook');
       });
 
       it('should handle a python file', () => {

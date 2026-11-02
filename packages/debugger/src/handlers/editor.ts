@@ -1,38 +1,30 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
-
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
 
-import { IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
-import { ISharedText, SourceChange } from '@jupyter/ydoc';
+import type { ISharedText, SourceChange } from '@jupyter/ydoc';
 
+import type { Line, Range, StateEffectType } from '@codemirror/state';
 import {
   Compartment,
-  Line,
   Prec,
-  Range,
   RangeSet,
   StateEffect,
-  StateEffectType,
   StateField
 } from '@codemirror/state';
 
-import {
-  Decoration,
-  DecorationSet,
-  EditorView,
-  gutter,
-  GutterMarker
-} from '@codemirror/view';
+import type { DecorationSet } from '@codemirror/view';
+import { Decoration, EditorView, gutter, GutterMarker } from '@codemirror/view';
 
-import { IDebugger } from '../tokens';
+import type { IDebugger } from '../tokens';
 import {
   breakpointIcon,
   selectedBreakpointIcon
@@ -64,8 +56,9 @@ export class EditorHandler implements IDisposable {
     this._debuggerService = options.debuggerService;
     this._editor = options.getEditor;
 
+    this._src.changed.connect(this._onSharedModelChanged, this);
     this._editorMonitor = new ActivityMonitor({
-      signal: this._src.changed,
+      signal: this._sourceChanged,
       timeout: EDITOR_CHANGED_TIMEOUT
     });
     this._editorMonitor.activityStopped.connect(() => {
@@ -79,7 +72,7 @@ export class EditorHandler implements IDisposable {
         return;
       }
       this._addBreakpointsToEditor();
-    });
+    }, this);
 
     this._debuggerService.model.breakpoints.restored.connect(async () => {
       const editor = this.editor;
@@ -87,13 +80,14 @@ export class EditorHandler implements IDisposable {
         return;
       }
       this._addBreakpointsToEditor();
-    });
+    }, this);
 
     this._debuggerService.model.breakpoints.selectedChanged.connect(
       (_, breakpoint) => {
         this._selectedBreakpoint = breakpoint;
         this._addBreakpointsToEditor();
-      }
+      },
+      this
     );
 
     this._debuggerService.model.callstack.currentFrameChanged.connect(
@@ -113,7 +107,8 @@ export class EditorHandler implements IDisposable {
             }
           }
         }
-      }
+      },
+      this
     );
 
     this._breakpointEffect = StateEffect.define<
@@ -270,6 +265,19 @@ export class EditorHandler implements IDisposable {
   }
 
   /**
+   * Handle a change of the shared model, ignoring changes that leave the
+   * source unchanged, such as outputs or execution count.
+   */
+  private _onSharedModelChanged(
+    sender: ISharedText,
+    change: SourceChange
+  ): void {
+    if (change.sourceChange) {
+      this._sourceChanged.emit();
+    }
+  }
+
+  /**
    * Send the breakpoints from the editor UI via the debug service.
    */
   private _sendEditorBreakpoints(): void {
@@ -304,8 +312,7 @@ export class EditorHandler implements IDisposable {
     let clickedLine = editor.state.doc.lineAt(position);
     let clickedLineNumber = clickedLine.number;
     let targetLine: Line | undefined = undefined;
-    let isLineEmpty: boolean =
-      false; /* is true is the clicked line of code is empty */
+    let isLineEmpty: boolean = false; /* is true is the clicked line of code is empty */
     if (clickedLine.text.trim() === '') {
       isLineEmpty = true;
       while (clickedLineNumber > 1) {
@@ -473,7 +480,8 @@ export class EditorHandler implements IDisposable {
   private _gutter: Compartment;
   private _highlightDeco: Decoration;
   private _highlightState: StateField<DecorationSet>;
-  private _editorMonitor: ActivityMonitor<ISharedText, SourceChange>;
+  private _editorMonitor: ActivityMonitor<this, void>;
+  private _sourceChanged = new Signal<this, void>(this);
   private _path: string;
   private _src: ISharedText;
   private _selectedBreakpoint: IDebugger.IBreakpoint | null;
@@ -530,11 +538,20 @@ export namespace EditorHandler {
     line: number,
     scrollLogicalPosition: ScrollLogicalPosition | false = 'nearest'
   ): void {
+    const lineCount = editor.lineCount;
+
+    if (line < 1 || line > lineCount) {
+      console.warn(
+        `Line ${line} is not in the document which contains ${lineCount} lines`
+      );
+      return;
+    }
+
     clearHighlight(editor);
     const cmEditor = editor as CodeMirrorEditor;
     const linePos = cmEditor.doc.line(line).from;
 
-    const effects: StateEffect<any>[] = [
+    const effects: StateEffect<unknown>[] = [
       _highlightEffect.of({ pos: [linePos] })
     ];
 

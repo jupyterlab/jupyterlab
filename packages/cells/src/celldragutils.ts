@@ -9,10 +9,10 @@
  * Notebook widgets.
  */
 
-import { ICodeCellModel } from './model';
-import { Cell } from './widget';
+import type { ICodeCellModel } from './model';
+import type { Cell } from './widget';
 import { h, VirtualDOM } from '@lumino/virtualdom';
-import * as nbformat from '@jupyterlab/nbformat';
+import type * as nbformat from '@jupyterlab/nbformat';
 
 /**
  * Constants for drag
@@ -146,7 +146,7 @@ export namespace CellDragUtils {
       const executionCount = (activeCell.model as ICodeCellModel)
         .executionCount;
       promptNumber = ' ';
-      if (executionCount) {
+      if (executionCount !== null) {
         promptNumber = executionCount.toString();
       }
     } else {

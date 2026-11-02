@@ -5,8 +5,9 @@
 
 import { ellipsesIcon } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
-import { Message } from '@lumino/messaging';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { Message } from '@lumino/messaging';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
 /**
  * The CSS class added to placeholders.

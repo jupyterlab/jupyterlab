@@ -1,29 +1,30 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ISessionContext, WidgetTracker } from '@jupyterlab/apputils';
-import * as nbformat from '@jupyterlab/nbformat';
-import { IObservableString } from '@jupyterlab/observables';
-import { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { Kernel, KernelMessage } from '@jupyterlab/services';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import {
+import type { ISessionContext } from '@jupyterlab/apputils';
+import { WidgetTracker } from '@jupyterlab/apputils';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { IObservableString } from '@jupyterlab/observables';
+import type { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { Kernel } from '@jupyterlab/services';
+import { KernelMessage } from '@jupyterlab/services';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type {
   JSONObject,
-  PromiseDelegate,
   ReadonlyJSONObject,
-  ReadonlyPartialJSONObject,
-  UUID
+  ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-import { Message } from '@lumino/messaging';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
+import type { Message } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-import { IOutputAreaModel } from './model';
+import type { IOutputAreaModel } from './model';
+import type { IPageHandler } from './tokens';
 
 /**
  * The class name added to an output area widget.
@@ -110,6 +111,7 @@ export class OutputArea extends Widget {
     this._translator = options.translator ?? nullTranslator;
     this._inputHistoryScope = options.inputHistoryScope ?? 'global';
     this._showInputPlaceholder = options.showInputPlaceholder ?? true;
+    this._pageHandler = options.pageHandler ?? null;
 
     const model = (this.model = options.model);
     for (
@@ -127,7 +129,8 @@ export class OutputArea extends Widget {
             event: IObservableString.IChangedArgs
           ) => {
             this._setOutput(i, output);
-          }
+          },
+          this
         );
       }
     }
@@ -192,6 +195,16 @@ export class OutputArea extends Widget {
       KernelMessage.IExecuteReplyMsg
     >
   ) {
+    this._setFuture(value, true);
+  }
+
+  private _setFuture(
+    value: Kernel.IShellFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >,
+    clear: boolean
+  ) {
     // Bail if the model is disposed.
     if (this.model.isDisposed) {
       throw Error('Model is disposed');
@@ -213,14 +226,16 @@ export class OutputArea extends Widget {
         // even if caught on the `done` promise level before.
       });
 
-    this.model.clear();
+    if (clear) {
+      this.model.clear();
 
-    // Make sure there were no input widgets.
-    if (this.widgets.length) {
-      this._clear();
-      this.outputLengthChanged.emit(
-        Math.min(this.model.length, this._maxNumberOutputs)
-      );
+      // Make sure there were no input widgets.
+      if (this.widgets.length) {
+        this._clear();
+        this.outputLengthChanged.emit(
+          Math.min(this.model.length, this._maxNumberOutputs)
+        );
+      }
     }
 
     // Handle published messages.
@@ -282,9 +297,69 @@ export class OutputArea extends Widget {
       this._future.dispose();
       this._future = null!;
     }
+    if (this._promptOverlay) {
+      this._promptOverlay.removeEventListener(
+        'click',
+        this._onPromptOverlayClick
+      );
+      this._promptOverlay = null;
+    }
     this._displayIdMap.clear();
     this._outputTracker.dispose();
     super.dispose();
+  }
+
+  /**
+   * Detach the kernel future from this output area without disposing it.
+   *
+   * Clears the message handlers on the future so this output area can be
+   * safely disposed without terminating the in-flight execution. The returned
+   * future can be re-attached to a new output area via `reattachFuture` method.
+   *
+   * Returns `null` if no future is currently attached.
+   */
+  detachFuture(): Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  > | null {
+    const future = this._future;
+    if (!future) {
+      return null;
+    }
+    future.onIOPub = () => undefined;
+    future.onReply = () => undefined;
+    future.onStdin = () => undefined;
+    this._future = null!;
+    return future;
+  }
+
+  /**
+   * Display id targets for the current outputs, copied on get and set.
+   */
+  get displayIdMap(): ReadonlyMap<string, readonly number[]> {
+    return Private.cloneDisplayIdMap(this._displayIdMap);
+  }
+  set displayIdMap(value: ReadonlyMap<string, readonly number[]>) {
+    this._displayIdMap = Private.cloneDisplayIdMap(value);
+  }
+
+  /**
+   * Reattach the kernel future, without clearing the existing output model.
+   *
+   * This is useful when a cell gets deleted by a user but user later decides
+   * to undo the deletion, as it allows to keep the output data flowing.
+   */
+  reattachFuture(
+    future: Kernel.IShellFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >,
+    displayIdMap?: ReadonlyMap<string, readonly number[]>
+  ) {
+    if (displayIdMap) {
+      this.displayIdMap = displayIdMap;
+    }
+    this._setFuture(future, false);
   }
 
   /**
@@ -294,6 +369,7 @@ export class OutputArea extends Widget {
     sender: IOutputAreaModel,
     args: IOutputAreaModel.ChangedArgs
   ): void {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (args.type) {
       case 'add':
         const output = args.newValues[0];
@@ -306,7 +382,8 @@ export class OutputArea extends Widget {
               event: IObservableString.IChangedArgs
             ) => {
               this._setOutput(args.newIndex, output);
-            }
+            },
+            this
           );
         }
         break;
@@ -317,16 +394,36 @@ export class OutputArea extends Widget {
             this._clear();
           } else {
             // range of items removed from model
-            // remove widgets corresponding to removed model items
+            // remove widgets corresponding to removed visible model items
             const startIndex = args.oldIndex;
-            for (
-              let i = 0;
-              i < args.oldValues.length && startIndex < this.widgets.length;
-              ++i
-            ) {
+            let outputWidgetCount = this._outputModelWidgetCount();
+            const count = Math.min(
+              args.oldValues.length,
+              Math.max(0, outputWidgetCount - startIndex)
+            );
+            for (let i = 0; i < count; ++i) {
               const widget = this.widgets[startIndex];
               widget.parent = null;
               widget.dispose();
+            }
+            outputWidgetCount -= count;
+
+            if (this.model.length <= this._maxNumberOutputs) {
+              this.widgets
+                .find(widget => this._isTrimmedOutputsWidget(widget))
+                ?.dispose();
+            }
+
+            const targetOutputCount = Math.min(
+              this.model.length,
+              this._maxNumberOutputs
+            );
+            while (outputWidgetCount < targetOutputCount) {
+              this._insertOutput(
+                outputWidgetCount,
+                this.model.get(outputWidgetCount)
+              );
+              outputWidgetCount++;
             }
 
             // apply item offset to target model item indices in _displayIdMap
@@ -368,35 +465,18 @@ export class OutputArea extends Widget {
   private _addPromptOverlay() {
     const overlay = document.createElement('div');
     overlay.className = OUTPUT_PROMPT_OVERLAY;
-    overlay.addEventListener('click', () => {
-      this._toggleScrolling.emit();
-    });
+    overlay.addEventListener('click', this._onPromptOverlayClick);
     this.node.appendChild(overlay);
-
-    // Update overlay height so it always matches the output panel.
-    // TODO: use CSS anchor positionning level once fully supported in all browsers
-    const resize = () => {
-      const panel = this.node.querySelector(
-        '.jp-OutputArea-child'
-      ) as HTMLElement;
-      if (panel) {
-        overlay.style.height = `${Math.max(
-          panel.getBoundingClientRect().height,
-          this.node.getBoundingClientRect().height
-        )}px`;
-      }
-    };
-    const observer = new ResizeObserver(resize);
-    observer.observe(this.node);
-
-    this.disposed.connect(() => {
-      observer.disconnect();
-    });
+    this._promptOverlay = overlay;
 
     requestAnimationFrame(() => {
       this._initialize.emit();
     });
   }
+
+  private _onPromptOverlayClick = (): void => {
+    this._toggleScrolling.emit();
+  };
 
   /**
    * Update indices in _displayIdMap in response to element remove from model items
@@ -432,7 +512,7 @@ export class OutputArea extends Widget {
     change: number | void
   ): void {
     const outputLength = Math.min(this.model.length, this._maxNumberOutputs);
-    if (change) {
+    if (change !== undefined) {
       if (change >= this._maxNumberOutputs) {
         // Bail early
         return;
@@ -478,7 +558,7 @@ export class OutputArea extends Widget {
     // to prevent this jitter.
     const rect = this.node.getBoundingClientRect();
     this.node.style.minHeight = `${rect.height}px`;
-    if (this._minHeightTimeout) {
+    if (this._minHeightTimeout !== null) {
       window.clearTimeout(this._minHeightTimeout);
     }
     this._minHeightTimeout = window.setTimeout(() => {
@@ -524,10 +604,6 @@ export class OutputArea extends Widget {
     input.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(input);
 
-    // Increase number of outputs to display the result up to the input request.
-    if (this.model.length >= this.maxNumberOutputs) {
-      this.maxNumberOutputs = this.model.length;
-    }
     this._inputRequested.emit(input);
 
     // Get the input node to ensure focus after updating the model upon user reply.
@@ -676,6 +752,28 @@ export class OutputArea extends Widget {
   }
 
   /**
+   * Count layout widgets that map directly to output model indices.
+   */
+  private _outputModelWidgetCount(): number {
+    const boundary = this.widgets.findIndex(
+      widget =>
+        widget.hasClass(OUTPUT_AREA_STDIN_ITEM_CLASS) ||
+        this._isTrimmedOutputsWidget(widget)
+    );
+    return boundary === -1 ? this.widgets.length : boundary;
+  }
+
+  /**
+   * Whether a layout widget wraps the trimmed outputs marker.
+   */
+  private _isTrimmedOutputsWidget(widget: Widget): boolean {
+    return (
+      widget instanceof Panel &&
+      widget.widgets.some(child => child instanceof Private.TrimmedOutputs)
+    );
+  }
+
+  /**
    * Create an output item with a prompt and actual output
    *
    * @returns a rendered widget, or null if we cannot render
@@ -734,8 +832,9 @@ export class OutputArea extends Widget {
     const msgType = msg.header.msg_type;
     let output: nbformat.IOutput;
     const transient = ((msg.content as any).transient || {}) as JSONObject;
-    const displayId = transient['display_id'] as string;
+    const displayId = Private.getDisplayId(transient);
     let targets: number[] | undefined;
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (msgType) {
       case 'execute_result':
       case 'display_data':
@@ -751,7 +850,7 @@ export class OutputArea extends Widget {
       }
       case 'update_display_data':
         output = { ...msg.content, output_type: 'display_data' };
-        targets = this._displayIdMap.get(displayId);
+        targets = displayId ? this._displayIdMap.get(displayId) : undefined;
         if (targets) {
           for (const index of targets) {
             model.set(index, output);
@@ -797,10 +896,16 @@ export class OutputArea extends Widget {
     if (!pages.length) {
       return;
     }
-    const page = JSON.parse(JSON.stringify(pages[0]));
+
+    const page = pages[0] as ReadonlyJSONObject;
+    if (this._pageHandler?.handlePage(page)) {
+      return;
+    }
+
+    const pageData = JSON.parse(JSON.stringify(page));
     const output: nbformat.IOutput = {
       output_type: 'display_data',
-      data: (page as any).data as nbformat.IMimeBundle,
+      data: (pageData as any).data as nbformat.IMimeBundle,
       metadata: {}
     };
     model.add(output);
@@ -844,6 +949,7 @@ export class OutputArea extends Widget {
   private _inputRequested = new Signal<OutputArea, IStdin>(this);
   private _toggleScrolling = new Signal<OutputArea, void>(this);
   private _initialize = new Signal<OutputArea, void>(this);
+  private _promptOverlay: HTMLDivElement | null = null;
   private _outputTracker = new WidgetTracker<Widget>({
     namespace: UUID.uuid4()
   });
@@ -851,6 +957,7 @@ export class OutputArea extends Widget {
   private _inputHistoryScope: 'global' | 'session' = 'global';
   private _pendingInput: boolean = false;
   private _showInputPlaceholder: boolean = true;
+  private _pageHandler: IPageHandler | null = null;
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -930,6 +1037,11 @@ export namespace OutputArea {
      * Whether to show placeholder text in standard input
      */
     showInputPlaceholder?: boolean;
+
+    /**
+     * Optional handler for pager payloads (`source: page`).
+     */
+    pageHandler?: IPageHandler;
   }
 
   /**
@@ -1411,6 +1523,29 @@ export namespace Stdin {
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * Clone display id indices.
+   */
+  export function cloneDisplayIdMap(
+    displayIdMap: ReadonlyMap<string, readonly number[]>
+  ): Map<string, number[]> {
+    const clone = new Map<string, number[]>();
+    displayIdMap.forEach((indices, displayId) => {
+      clone.set(displayId, [...indices]);
+    });
+    return clone;
+  }
+
+  /**
+   * Get a display id from transient output data.
+   */
+  export function getDisplayId(
+    transient?: ReadonlyPartialJSONObject
+  ): string | undefined {
+    const displayId = transient?.['display_id'];
+    return typeof displayId === 'string' ? displayId : undefined;
+  }
+
   /**
    * Create the node for an InputWidget.
    */

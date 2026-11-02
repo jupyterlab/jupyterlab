@@ -1,10 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import { PathExt } from '@jupyterlab/coreutils';
-import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
+import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
-import { Contents, ServiceManager } from '@jupyterlab/services';
+import type { Contents, ServiceManager } from '@jupyterlab/services';
 import {
   acceptDialog,
   dismissDialog,
@@ -210,7 +211,7 @@ describe('@jupyterlab/filebrowser', () => {
       const files = result.value!;
       expect(files.length).toBe(1);
       expect(files[0].type).toBe('notebook');
-      expect(files[0].name).toEqual(expect.stringMatching(/Untitled.*.ipynb/));
+      expect(files[0].name).toEqual(expect.stringMatching(/Untitled.*\.ipynb/));
 
       document.body.removeChild(node);
     });
@@ -258,7 +259,7 @@ describe('@jupyterlab/filebrowser', () => {
       const files = result.value!;
       expect(files.length).toBe(1);
       expect(files[0].type).toBe('notebook');
-      expect(files[0].name).toEqual(expect.stringMatching(/Untitled.*.ipynb/));
+      expect(files[0].name).toEqual(expect.stringMatching(/Untitled.*\.ipynb/));
 
       document.body.removeChild(node);
     });
@@ -320,7 +321,7 @@ describe('@jupyterlab/filebrowser', () => {
       const files = result.value!;
       expect(files.length).toBe(1);
       expect(files[0].type).toBe('notebook');
-      expect(files[0].name).toEqual(expect.stringMatching(/Untitled.*.ipynb/));
+      expect(files[0].name).toEqual(expect.stringMatching(/Untitled.*\.ipynb/));
 
       const fileDirectory = PathExt.dirname(files[0].path);
       expect(fileDirectory).toEqual(testDirectory);

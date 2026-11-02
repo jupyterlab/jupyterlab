@@ -6,7 +6,7 @@ channels:
 
 dependencies:
   # runtimes
-  - nodejs >=20,<21
+  - nodejs >=24,<25
   - python =3.11
   # package managers
   - pip
@@ -14,13 +14,14 @@ dependencies:
   # build
   - hatch-jupyter-builder >=0.3.2
   - hatchling >=1.5.0
+  - jupyter-builder >=1.1.1
   # run
-  - async-lru >=1.0.0
-  - httpx >=0.25.0,<1
+  - async-lru >=1.0.3
+  - httpx2 >=2,<3
   - ipykernel
   - jinja2 >=3.0.3
   - jupyter_core
-  - jupyter_server >=2.4.0,<3
+  - jupyter_server >=2.19.0,<3
   - jupyter-lsp >=2.0.0
   - jupyterlab_server >=2.19.0,<3
   - notebook-shim >=0.2
@@ -40,7 +41,7 @@ dependencies:
   - requests-cache
   - virtualenv
   # dev
-  - bump2version
+  - bump-my-version >=1,<2
   - hatch
   - pre-commit
   - pytest-cov
@@ -57,3 +58,6 @@ dependencies:
   - jsonschema-with-format-nongpl
   - jupyter-collaboration >= 2.0.1
   - jupyter_events >=0.7.0
+  # language packs
+  - jupyterlab-language-pack-fr-fr
+  - jupyterlab-language-pack-zh-cn

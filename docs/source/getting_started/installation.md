@@ -32,6 +32,14 @@ If you use `mamba`, you can install it with:
 mamba install -c conda-forge jupyterlab
 ```
 
+## uv
+
+If you use `uv`, you can install it with:
+
+```bash
+uv tool install jupyterlab --with pip
+```
+
 ## pip
 
 If you use `pip`, you can install it with:

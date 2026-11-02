@@ -4,7 +4,9 @@
 # Distributed under the terms of the Modified BSD License.
 
 import os
+import subprocess
 import sys
+from collections.abc import Sequence
 from copy import copy
 
 from jupyter_core.application import JupyterApp, base_aliases, base_flags
@@ -30,7 +32,6 @@ from .commands import (
     unlock_extension,
     update_extension,
 )
-from .federated_labextensions import build_labextension, develop_labextension_py, watch_labextension
 from .labapp import LabApp
 
 flags = dict(base_flags)
@@ -151,13 +152,13 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
     )
 
     @default("labextensions_path")
-    def _default_labextensions_path(self):
+    def _default_labextensions_path(self) -> list[str]:
         lab = LabApp()
         lab.load_config_file()
         return lab.labextensions_path + lab.extra_labextensions_path
 
     @default("splice_source")
-    def _default_splice_source(self):
+    def _default_splice_source(self) -> bool:
         version = get_app_version(AppOptions(app_dir=self.app_dir))
         return version.endswith("-spliced")
 
@@ -182,15 +183,15 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
                     app_options=app_options,
                 )
 
-    def run_task(self):
+    def run_task(self) -> bool | None:
         pass
 
-    def deprecation_warning(self, msg):
+    def deprecation_warning(self, msg: str) -> None:
         return self.log.warning(
             f"\033[33m(Deprecated) {msg}\n\n{LABEXTENSION_COMMAND_WARNING} \033[0m"
         )
 
-    def _log_format_default(self):
+    def _log_format_default(self) -> str:
         """A default format for messages"""
         return "%(message)s"
 
@@ -214,7 +215,7 @@ class InstallLabExtensionApp(BaseExtensionApp):
 
     pin = Unicode("", config=True, help="Pin this version with a certain alias")
 
-    def run_task(self):
+    def run_task(self) -> bool:
         self.deprecation_warning(
             "Installing extensions with the jupyter labextension install command is now deprecated and will be removed in a future major version of JupyterLab."
         )
@@ -236,109 +237,13 @@ class InstallLabExtensionApp(BaseExtensionApp):
         )
 
 
-class DevelopLabExtensionApp(BaseExtensionApp):
-    description = "(developer) Develop labextension"
-    flags = develop_flags
-
-    user = Bool(False, config=True, help="Whether to do a user install")
-    sys_prefix = Bool(True, config=True, help="Use the sys.prefix as the prefix")
-    overwrite = Bool(False, config=True, help="Whether to overwrite files")
-    symlink = Bool(True, config=False, help="Whether to use a symlink")
-
-    labextensions_dir = Unicode(
-        "",
-        config=True,
-        help="Full path to labextensions dir (probably use prefix or user)",
-    )
-
-    def run_task(self):
-        """Add config for this labextension"""
-        self.extra_args = self.extra_args or [os.getcwd()]
-        for arg in self.extra_args:
-            develop_labextension_py(
-                arg,
-                user=self.user,
-                sys_prefix=self.sys_prefix,
-                labextensions_dir=self.labextensions_dir,
-                logger=self.log,
-                overwrite=self.overwrite,
-                symlink=self.symlink,
-            )
-
-
-class BuildLabExtensionApp(BaseExtensionApp):
-    description = "(developer) Build labextension"
-
-    static_url = Unicode("", config=True, help="Sets the url for static assets when building")
-
-    development = Bool(False, config=True, help="Build in development mode")
-
-    source_map = Bool(False, config=True, help="Generate source maps")
-
-    core_path = Unicode(
-        os.path.join(HERE, "staging"),
-        config=True,
-        help="Directory containing core application package.json file",
-    )
-
-    aliases = {
-        "static-url": "BuildLabExtensionApp.static_url",
-        "development": "BuildLabExtensionApp.development",
-        "source-map": "BuildLabExtensionApp.source_map",
-        "core-path": "BuildLabExtensionApp.core_path",
-    }
-
-    def run_task(self):
-        self.extra_args = self.extra_args or [os.getcwd()]
-        build_labextension(
-            self.extra_args[0],
-            logger=self.log,
-            development=self.development,
-            static_url=self.static_url or None,
-            source_map=self.source_map,
-            core_path=self.core_path or None,
-        )
-
-
-class WatchLabExtensionApp(BaseExtensionApp):
-    description = "(developer) Watch labextension"
-
-    development = Bool(True, config=True, help="Build in development mode")
-
-    source_map = Bool(False, config=True, help="Generate source maps")
-
-    core_path = Unicode(
-        os.path.join(HERE, "staging"),
-        config=True,
-        help="Directory containing core application package.json file",
-    )
-
-    aliases = {
-        "core-path": "WatchLabExtensionApp.core_path",
-        "development": "WatchLabExtensionApp.development",
-        "source-map": "WatchLabExtensionApp.source_map",
-    }
-
-    def run_task(self):
-        self.extra_args = self.extra_args or [os.getcwd()]
-        labextensions_path = self.labextensions_path
-        watch_labextension(
-            self.extra_args[0],
-            labextensions_path,
-            logger=self.log,
-            development=self.development,
-            source_map=self.source_map,
-            core_path=self.core_path or None,
-        )
-
-
 class UpdateLabExtensionApp(BaseExtensionApp):
     description = "Update labextension(s)"
     flags = update_flags
 
     all = Bool(False, config=True, help="Whether to update all extensions")
 
-    def run_task(self):
+    def run_task(self) -> bool:
         self.deprecation_warning(
             "Updating extensions with the jupyter labextension update command is now deprecated and will be removed in a future major version of JupyterLab."
         )
@@ -368,7 +273,7 @@ class LinkLabExtensionApp(BaseExtensionApp):
     """
     should_build = Bool(True, config=True, help="Whether to build the app after the action")
 
-    def run_task(self):
+    def run_task(self) -> bool:
         self.extra_args = self.extra_args or [os.getcwd()]
         options = AppOptions(
             app_dir=self.app_dir,
@@ -382,7 +287,7 @@ class LinkLabExtensionApp(BaseExtensionApp):
 class UnlinkLabExtensionApp(BaseExtensionApp):
     description = "Unlink packages by name or path"
 
-    def run_task(self):
+    def run_task(self) -> bool:
         self.extra_args = self.extra_args or [os.getcwd()]
         options = AppOptions(
             app_dir=self.app_dir,
@@ -399,7 +304,7 @@ class UninstallLabExtensionApp(BaseExtensionApp):
 
     all = Bool(False, config=True, help="Whether to uninstall all extensions")
 
-    def run_task(self):
+    def run_task(self) -> bool:
         self.deprecation_warning(
             "Uninstalling extensions with the jupyter labextension uninstall command is now deprecated and will be removed in a future major version of JupyterLab."
         )
@@ -547,13 +452,56 @@ class CheckLabExtensionsApp(BaseExtensionApp):
             self.exit(1)
 
 
+class BuildLabExtensionAlias(BaseExtensionApp):
+    """Compatibility alias: delegates to 'jupyter-builder build'."""
+
+    description = "(deprecated) Build labextension - use 'jupyter-builder build' instead"
+
+    def parse_command_line(self, argv: Sequence[str] | None = None):
+        # Capture raw args before traitlets can consume them
+        self._builder_args = list(argv or [])
+
+    def start(self):
+        self.log.warning(
+            "\033[33m(Deprecated) 'jupyter labextension build' is deprecated, use 'jupyter-builder build' instead.\n \033[0m"
+        )
+        sys.exit(subprocess.call(["jupyter-builder", "build"] + self._builder_args))  # noqa S603 S607
+
+
+class DevelopLabExtensionAlias(BaseExtensionApp):
+    """Compatibility alias: delegates to 'jupyter-builder develop'."""
+
+    description = "(deprecated) Develop labextension - use 'jupyter-builder develop' instead"
+
+    def parse_command_line(self, argv: Sequence[str] | None = None):
+        self._builder_args = list(argv or [])
+
+    def start(self):
+        self.log.warning(
+            "\033[33m(Deprecated) 'jupyter labextension develop' is deprecated, use 'jupyter-builder develop' instead.\n \033[0m"
+        )
+        sys.exit(subprocess.call(["jupyter-builder", "develop"] + self._builder_args))  # noqa S603 S607
+
+
+class WatchLabExtensionAlias(BaseExtensionApp):
+    """Compatibility alias: delegates to 'jupyter-builder watch'."""
+
+    description = "(deprecated) Watch labextension - use 'jupyter-builder watch' instead"
+
+    def parse_command_line(self, argv: Sequence[str] | None = None):
+        self._builder_args = list(argv or [])
+
+    def start(self):
+        self.log.warning(
+            "\033[33m(Deprecated) 'jupyter labextension watch' is deprecated, use 'jupyter-builder watch' instead.\n \033[0m"
+        )
+        sys.exit(subprocess.call(["jupyter-builder", "watch"] + self._builder_args))  # noqa S603 S607
+
+
 _EXAMPLES = """
 jupyter labextension list                        # list all configured labextensions
 jupyter labextension install <extension name>    # install a labextension
 jupyter labextension uninstall <extension name>  # uninstall a labextension
-jupyter labextension develop                     # (developer) develop a prebuilt labextension
-jupyter labextension build                       # (developer) build a prebuilt labextension
-jupyter labextension watch                       # (developer) watch a prebuilt labextension
 """
 
 
@@ -577,9 +525,9 @@ class LabExtensionApp(JupyterApp):
         "lock": (LockLabExtensionsApp, "Lock labextension(s)"),
         "unlock": (UnlockLabExtensionsApp, "Unlock labextension(s)"),
         "check": (CheckLabExtensionsApp, "Check labextension(s)"),
-        "develop": (DevelopLabExtensionApp, "(developer) Develop labextension(s)"),
-        "build": (BuildLabExtensionApp, "(developer) Build labextension"),
-        "watch": (WatchLabExtensionApp, "(developer) Watch labextension"),
+        "build": (BuildLabExtensionAlias, "(deprecated) Build labextension"),
+        "develop": (DevelopLabExtensionAlias, "(deprecated) Develop labextension"),
+        "watch": (WatchLabExtensionAlias, "(deprecated) Watch labextension"),
     }
 
     def start(self):

@@ -3,12 +3,12 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ITranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { SidePanel } from '@jupyterlab/ui-components';
 import { Panel, Widget } from '@lumino/widgets';
 import { TableOfContentsWidget } from './treeview';
-import { TableOfContents } from './tokens';
-import { Message } from '@lumino/messaging';
+import type { TableOfContents } from './tokens';
+import type { Message } from '@lumino/messaging';
 
 /**
  * Table of contents sidebar panel.

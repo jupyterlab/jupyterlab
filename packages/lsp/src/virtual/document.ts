@@ -1,17 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { IDisposable } from '@lumino/disposable';
-import { IDocumentInfo } from '../ws-connection/types';
-import { IPosition } from '../positioning';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IDisposable } from '@lumino/disposable';
+import type { IDocumentInfo } from '../ws-connection/types';
+import type { IPosition } from '../positioning';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { Document, ILSPCodeExtractorsManager } from '../tokens';
+import type { Document, ILSPCodeExtractorsManager } from '../tokens';
 import { DocumentConnectionManager } from '../connection_manager';
-import { IForeignCodeExtractor } from '../extractors/types';
-import { LanguageIdentifier } from '../lsp';
-import {
+import type { IForeignCodeExtractor } from '../extractors/types';
+import type { LanguageIdentifier } from '../lsp';
+import type {
   IEditorPosition,
   IRootPosition,
   ISourcePosition,
@@ -447,6 +449,9 @@ export class VirtualDocument implements IDisposable {
     this.sourceLines.clear();
     this.unusedStandaloneDocuments.clear();
     this.virtualLines.clear();
+    this._editorToSourceLine.clear();
+    // Assigned on first update, so it may not exist yet.
+    this._editorToSourceLineNew?.clear();
 
     // just to be sure - if anything is accessed after disposal (it should not) we
     // will get altered by errors in the console AND this will limit memory leaks
@@ -641,8 +646,8 @@ export class VirtualDocument implements IDisposable {
       this.sourceLines.set(this.lastSourceLine + i, {
         editorLine: i,
         editorShift: {
-          line: editorShift.line - (virtualShift?.line || 0),
-          column: i === 0 ? editorShift.column - (virtualShift?.column || 0) : 0
+          line: editorShift.line - (virtualShift?.line ?? 0),
+          column: i === 0 ? editorShift.column - (virtualShift?.column ?? 0) : 0
         },
         // TODO: move those to a new abstraction layer (DocumentBlock class)
         editor: ceEditor,

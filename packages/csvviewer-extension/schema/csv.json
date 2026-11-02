@@ -4,7 +4,10 @@
   "jupyter.lab.setting-icon": "ui-components:spreadsheet",
   "jupyter.lab.setting-icon-label": "CSV Viewer",
   "jupyter.lab.toolbars": {
-    "CSVTable": [{ "name": "delimiter", "rank": 10 }]
+    "CSVTable": [
+      { "name": "delimiter", "rank": 10 },
+      { "name": "comment", "rank": 20 }
+    ]
   },
   "jupyter.lab.transform": true,
   "properties": {
@@ -59,7 +62,10 @@
         "type": {
           "title": "Item type",
           "type": "string",
-          "enum": ["command", "spacer"]
+          "oneOf": [
+            { "const": "command", "title": "Command" },
+            { "const": "spacer", "title": "Spacer" }
+          ]
         },
         "rank": {
           "title": "Item rank",
