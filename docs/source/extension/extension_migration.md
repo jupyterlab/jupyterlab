@@ -16,6 +16,13 @@
   whole. Each such plugin is named in a browser console warning. To keep it enabled, list
   the plugin ids to disable in `disabledExtensions` instead of the package name.
 
+- In each copy of an icon that `LabIcon` renders, the ids that the svg refers to itself
+  (through `url(#...)`, `href`, `aria-labelledby` or `aria-describedby`) now get a suffix
+  such as `-3`. This keeps gradients, clip paths and masks working when the same icon is
+  shown more than once. Other ids keep their value. CSS or code that selects one of the
+  renamed elements by id no longer matches it: select it by a class, or through the
+  `data-icon` attribute of the rendered svg, for example `svg[data-icon="my-pkg:logo"] .accent`.
+
 ### API updates
 
 - The JSON Lines renderer plugin was renamed from `@jupyterlab/json-lines-extension:factory`

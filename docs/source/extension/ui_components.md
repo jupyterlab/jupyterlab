@@ -155,6 +155,19 @@ export const fooIcon = new LabIcon({
 });
 ```
 
+### Ids inside your svg
+
+If your svg refers to its own elements by id, as gradients, clip paths,
+masks and `<use>` elements do, each copy of the icon that `LabIcon`
+renders gets its own copy of those ids, with a suffix such as `-3`.
+This keeps every copy working when the icon is shown more than once.
+The ids that count are those used in `url(#...)`, `href`,
+`aria-labelledby` and `aria-describedby`; other ids keep their value.
+
+To style or find an element inside an icon, select it by a class or
+through the `data-icon` attribute of the rendered svg, for example
+`svg[data-icon="barpkg:foo"] .accent`.
+
 ### Sync icon color to JupyterLab theme
 
 ```{raw} html
