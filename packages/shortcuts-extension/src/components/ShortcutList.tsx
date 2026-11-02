@@ -24,8 +24,6 @@ export interface IShortcutListProps {
   currentSort: IShortcutUI.ColumnId;
   sortDirection: IShortcutUI.SortDirection;
   translator: ITranslator;
-  /** Optional new-shortcut row rendered as the first tbody row. */
-  newShortcutRow?: React.ReactNode;
 }
 
 /** React component for list of shortcuts */
@@ -87,7 +85,6 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
             </tr>
           </thead>
           <tbody>
-            {this.props.newShortcutRow}
             {this.props.shortcuts.map((shortcut: IShortcutTarget) => {
               return (
                 <ShortcutItem

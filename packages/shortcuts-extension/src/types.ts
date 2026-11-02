@@ -251,9 +251,9 @@ export interface IShortcutUI {
     options: ICustomOptions
   ): Promise<boolean>;
   /**
-   * Toggles showing add command row.
+   * Open the dialog for adding a new shortcut.
    */
-  toggleAddCommandRow(): void;
+  openAddShortcutDialog(): Promise<void>;
 }
 
 /**
