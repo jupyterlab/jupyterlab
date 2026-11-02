@@ -1338,5 +1338,22 @@ describe('filebrowser/listing', () => {
         dirListing.onItemOpened.disconnect(fileOpened);
       });
     });
+
+    describe('#setTimestampFormat', () => {
+      it('should update timestamp format', () => {
+        const modifiedElement = dirListing.node.querySelector(
+          '.jp-DirListing-itemModified'
+        );
+        expect(modifiedElement).not.toBeNull();
+        const initialText = modifiedElement!.textContent;
+
+        dirListing.setTimestampFormat('absolute');
+        const absoluteText = modifiedElement!.textContent;
+        expect(absoluteText).not.toBe(initialText);
+
+        dirListing.setTimestampFormat('relative');
+        expect(modifiedElement!.textContent).toBe(initialText);
+      });
+    });
   });
 });
