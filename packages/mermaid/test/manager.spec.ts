@@ -27,6 +27,22 @@ describe('@jupyterlab/mermaid', () => {
         expect(manager.mockMermaid.currentTheme).toBe('dark');
         manager.dispose();
       });
+
+      it('should not emit themeChanged when the theme manager reloads the same theme', async () => {
+        const themes = new MockThemeManager();
+        const manager = new MockMermaidManager({
+          themes: themes.asThemeManager()
+        });
+        let emitted = false;
+        manager.themeChanged.connect(() => {
+          emitted = true;
+        });
+
+        // The theme manager reloads the current theme on a font size change.
+        await themes.setTheme('JupyterLab Light');
+        expect(emitted).toBe(false);
+        manager.dispose();
+      });
     });
 
     describe('#themeChanged', () => {
@@ -93,10 +109,9 @@ describe('@jupyterlab/mermaid', () => {
             'data-theme="default"'
           );
 
-          // Switch theme to dark
+          // Switch theme to dark, and let the refresh it starts finish
           await themes.setTheme('JupyterLab Dark');
-          // Wait for async refreshDiagrams
-          await manager.refreshDiagrams();
+          await new Promise(resolve => setTimeout(resolve, 0));
 
           expect(decodeURIComponent(diagramEl.innerHTML)).toContain(
             'data-theme="dark"'
@@ -125,7 +140,7 @@ describe('@jupyterlab/mermaid', () => {
 
         try {
           await themes.setTheme('JupyterLab Dark');
-          await manager.refreshDiagrams();
+          await new Promise(resolve => setTimeout(resolve, 0));
 
           const code = container.querySelector(`.${MERMAID_CODE_CLASS}`);
           expect(code).not.toBeNull();

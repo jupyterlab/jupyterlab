@@ -115,7 +115,10 @@ export class MockMermaidManager extends MermaidManager {
     return 'x.x.x';
   }
 
-  initialize(sender?: unknown, args?: unknown): void {
+  initialize(
+    sender?: IThemeManager,
+    args?: IChangedArgs<string, string | null>
+  ): void {
     if (this._themes) {
       const jpTheme = this._themes.theme;
       this.mockMermaid.currentTheme =

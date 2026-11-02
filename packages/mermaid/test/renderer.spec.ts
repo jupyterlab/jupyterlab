@@ -90,10 +90,34 @@ describe('@jupyterlab/mermaid', () => {
         // Wait a tick for async renderModel triggered by themeChanged
         await new Promise(resolve => setTimeout(resolve, 20));
 
-        expect(model.data[SVG_MIME]).toContain('data-theme="dark"');
         expect(decodeURIComponent(renderer.node.innerHTML)).toContain(
           'data-theme="dark"'
         );
+        renderer.dispose();
+      });
+
+      it('should keep the stored SVG when the theme changes', async () => {
+        const renderer = new RenderedMermaid({
+          latexTypesetter: null,
+          linkHandler: null,
+          mimeType: MERMAID_MIME_TYPE,
+          resolver: null,
+          sanitizer: {
+            sanitize: (s: string) => s
+          }
+        });
+        const model = new MimeModel({
+          data: { [MERMAID_MIME_TYPE]: GOOD_MERMAID }
+        });
+        await renderer.renderModel(model);
+        const svg = model.data[SVG_MIME];
+
+        MERMAID_MANAGER.mockMermaid.currentTheme = 'dark';
+        MERMAID_MANAGER.initialize();
+        await new Promise(resolve => setTimeout(resolve, 20));
+
+        // Changing the stored SVG would mark the notebook as modified.
+        expect(model.data[SVG_MIME]).toBe(svg);
         renderer.dispose();
       });
 
@@ -153,8 +177,10 @@ describe('@jupyterlab/mermaid', () => {
         MERMAID_MANAGER.initialize();
         await new Promise(resolve => setTimeout(resolve, 20));
 
-        // After disposal, model must remain untouched
-        expect(model.data[SVG_MIME]).toContain('data-theme="default"');
+        // After disposal, the diagram must remain untouched
+        expect(decodeURIComponent(renderer.node.innerHTML)).toContain(
+          'data-theme="default"'
+        );
       });
     });
   });

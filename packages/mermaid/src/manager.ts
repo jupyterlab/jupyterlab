@@ -6,7 +6,7 @@ import type MermaidElkType from '@mermaid-js/layout-elk';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { type ISignal, Signal } from '@lumino/signaling';
 
-import { LruCache } from '@jupyterlab/coreutils';
+import { type IChangedArgs, LruCache } from '@jupyterlab/coreutils';
 
 import type { IThemeManager } from '@jupyterlab/apputils';
 
@@ -129,10 +129,18 @@ export class MermaidManager implements IMermaidManager {
   /**
    * Handle (re)-initializing mermaid based on external values.
    */
-  initialize(sender?: unknown, args?: unknown): void {
-    this._refreshId++;
+  initialize(
+    sender?: IThemeManager,
+    args?: IChangedArgs<string, string | null>
+  ): void {
     this._diagrams.clear();
     Private.initMermaid();
+    // The theme manager also reloads the current theme on every change of its
+    // settings, such as a font size change, which does not affect the diagrams.
+    if (args && args.oldValue === args.newValue) {
+      return;
+    }
+    this._refreshId++;
     this._themeChanged.emit();
     void this.refreshDiagrams();
   }

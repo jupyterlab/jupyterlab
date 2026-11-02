@@ -38,13 +38,16 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
     this._mimeType = options.mimeType;
     this.addClass(MERMAID_CLASS);
     if (RenderedMermaid._manager) {
-      RenderedMermaid._manager.themeChanged.connect(this._onThemeChanged, this);
+      RenderedMermaid._manager.themeChanged?.connect(
+        this._onThemeChanged,
+        this
+      );
     } else {
       void RenderedMermaid._managerReady.promise.then(manager => {
         if (this.isDisposed) {
           return;
         }
-        manager.themeChanged.connect(this._onThemeChanged, this);
+        manager.themeChanged?.connect(this._onThemeChanged, this);
       });
     }
   }
@@ -66,7 +69,7 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
       return;
     }
     if (RenderedMermaid._manager) {
-      RenderedMermaid._manager.themeChanged.disconnect(
+      RenderedMermaid._manager.themeChanged?.disconnect(
         this._onThemeChanged,
         this
       );
@@ -79,6 +82,16 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
    * Render mermaid text-based diagrams into this widget's node.
    */
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+    await this._render(model, true);
+  }
+
+  /**
+   * Render the diagram, and store the SVG in the model if `updateModel` is set.
+   */
+  private async _render(
+    model: IRenderMime.IMimeModel,
+    updateModel: boolean
+  ): Promise<void> {
     this._mimeModel = model;
     const renderId = ++this._renderId;
 
@@ -114,6 +127,10 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
       child.cloneNode(true)
     );
     this.node.replaceChildren(...children);
+
+    if (!updateModel) {
+      return;
+    }
 
     // capture the version of mermaid used
     const version = manager.getMermaidVersion();
@@ -151,7 +168,8 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
   private _onThemeChanged(): void {
     this._lastRendered = null;
     if (this._mimeModel) {
-      void this.renderModel(this._mimeModel);
+      // Storing the SVG of the new theme would mark the document as modified.
+      void this._render(this._mimeModel, false);
     }
   }
 
