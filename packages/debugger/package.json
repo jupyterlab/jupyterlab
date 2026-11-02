@@ -31,6 +31,7 @@
     "lib/**/*.d.ts",
     "lib/**/*.js.map",
     "lib/**/*.js",
+    "kernelSourcesFilters.json",
     "schema/*.json",
     "style/**/*.css",
     "style/index.js",
