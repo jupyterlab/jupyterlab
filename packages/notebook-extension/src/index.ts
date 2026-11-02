@@ -5933,9 +5933,8 @@ namespace Private {
 
   /**
    * Whether the notebook is view-only (declared read-only by the server).
-   * When args contains a widgetId (set by toolbar button creation), checks that
-   * specific notebook rather than the currently focused one, so toolbar buttons
-   * on non-focused notebooks reflect their own viewOnly state.
+   * Notebook and cell toolbar buttons pass their panel id as `widgetId`;
+   * without it, the current notebook is checked.
    */
   export function isViewOnly(
     tracker: INotebookTracker,

@@ -303,41 +303,30 @@ describe('@jupyterlab/application', () => {
       expect(commands.isToggled(id)).toEqual(expected);
     });
 
-    it('isVisible with widgetId bypasses getActiveCommandId and evaluates all command ids with args', () => {
+    it('should check isVisible of every command when args hold a widget id', () => {
       const notebookWidget = new Widget();
+      notebookWidget.id = 'notebook';
 
-      // This entry is only "active" (selected by getActiveCommandId) when the
-      // current widget is notebookWidget. When another widget is focused, e.g. a
-      // console, getActiveCommandId returns null for this semantic command.
       semanticCommands.add({
         id: 'cmd-1',
         isEnabled: (w: Widget) => w === notebookWidget
       });
-      // The underlying command is args-aware: it hides itself for a different widget.
       commands.addCommand('cmd-1', {
         execute: () => null,
         isVisible: (args: any) => args?.widgetId === notebookWidget.id
       });
       addSemanticCommand({ id, commands, shell, semanticCommands });
 
-      // Without widgetId: shell.currentWidget (undefined here) is not
-      // notebookWidget, so getActiveCommandId returns null → no active command →
-      // falls back to the default isVisible (true).  This is the incorrect
-      // pre-fix behaviour: the button appears visible regardless of context.
+      // Without a widget id, cmd-1 is not active for the current widget
       expect(commands.isVisible(id)).toBe(true);
-
-      // With widgetId: the bypass path evaluates cmd-1 directly with args,
-      // so the result correctly reflects the notebook's own visibility state.
       expect(commands.isVisible(id, { widgetId: notebookWidget.id })).toBe(
         true
       );
       expect(commands.isVisible(id, { widgetId: 'other-widget' })).toBe(false);
     });
 
-    it('forwards args to sub-commands via reduceAttribute for isEnabled', () => {
+    it('should pass args to isEnabled of the active command', () => {
       // Simulates a command that becomes disabled when a notebook is read-only.
-      // The fix ensures args (including widgetId) are forwarded through
-      // reduceAttribute so the sub-command can inspect them.
       commands.addCommand('cmd-1', {
         execute: () => null,
         isEnabled: (args: any) => !args?.viewOnly
