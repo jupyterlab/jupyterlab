@@ -10,15 +10,6 @@ import * as path from 'path';
 const writableNotebook = 'notebook-writable.ipynb';
 const readonlyNotebook = 'notebook-readonly.ipynb';
 
-const READONLY_HIDDEN_ITEMS = [
-  'save',
-  'insert',
-  'cut',
-  'paste',
-  'run',
-  'clear-all',
-  'run-cell'
-];
 const ALWAYS_VISIBLE_ITEMS = ['copy'];
 const WRITABLE_ONLY_ITEMS = [
   'save',
@@ -41,7 +32,7 @@ async function assertReadonlyToolbar(
       toolbar.locator(`[data-jp-item-name="${name}"]`)
     ).toBeVisible();
   }
-  for (const name of READONLY_HIDDEN_ITEMS) {
+  for (const name of WRITABLE_ONLY_ITEMS) {
     await expect(
       toolbar.locator(`[data-jp-item-name="${name}"]`)
     ).not.toBeVisible();

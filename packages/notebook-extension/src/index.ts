@@ -32,6 +32,7 @@ import {
   showDialog,
   showErrorMessage,
   Toolbar,
+  ToolbarRegistry,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import type { IMapChange } from '@jupyter/ydoc';
@@ -150,7 +151,6 @@ import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import type { ContextMenu, Menu, Widget } from '@lumino/widgets';
 import { Panel } from '@lumino/widgets';
-import { CellBarExtension } from '@jupyterlab/cell-toolbar';
 import React from 'react';
 import { cellExecutor } from './cellexecutor';
 import { logNotebookOutput } from './nboutput';
@@ -1812,7 +1812,7 @@ function activateWidgetFactory(
     // Pass the panel id so that the buttons act on their own notebook
     toolbarFactory = (panel: NotebookPanel) =>
       panelToolbarFactory(panel, {
-        [CellBarExtension.WIDGET_ID_ARG]: panel.id
+        [ToolbarRegistry.WIDGET_ID_ARG]: panel.id
       });
   }
 
@@ -2940,11 +2940,10 @@ function getCurrent(
   let widget: NotebookPanel | null = null;
 
   // Check for panelId in args (used by cell toolbars)
-  if (args[CellBarExtension.WIDGET_ID_ARG]) {
+  if (args[ToolbarRegistry.WIDGET_ID_ARG]) {
     widget =
-      tracker.find(
-        panel => panel.id === args[CellBarExtension.WIDGET_ID_ARG]
-      ) ?? null;
+      tracker.find(panel => panel.id === args[ToolbarRegistry.WIDGET_ID_ARG]) ??
+      null;
   } else if (args[SemanticCommand.WIDGET]) {
     widget =
       tracker.find(panel => panel.id === args[SemanticCommand.WIDGET]) ?? null;
@@ -3179,7 +3178,7 @@ function addCommands(
               'Whether to activate the notebook after execution'
             )
           },
-          widgetId: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
             type: 'string',
             description: trans.__('The ID of the notebook panel')
           }
@@ -3398,7 +3397,7 @@ function addCommands(
             description:
               'Whether the command is being executed from the toolbar'
           },
-          widgetId: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
             type: 'string',
             description: trans.__('The ID of the notebook panel')
           }
@@ -3595,7 +3594,7 @@ function addCommands(
               'Whether to activate the notebook after execution'
             )
           },
-          widgetId: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
             type: 'string',
             description: trans.__('The ID of the notebook panel')
           }
@@ -3670,7 +3669,7 @@ function addCommands(
             description:
               'Whether the command is being executed from the toolbar'
           },
-          widgetId: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
             type: 'string',
             description: trans.__('The ID of the notebook panel')
           }
@@ -3790,7 +3789,7 @@ function addCommands(
               'Whether to activate the notebook after execution'
             )
           },
-          widgetId: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
             type: 'string',
             description: trans.__('The ID of the notebook panel')
           }
@@ -3842,7 +3841,7 @@ function addCommands(
               'Whether to activate the notebook after execution'
             )
           },
-          widgetId: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
             type: 'string',
             description: trans.__('The ID of the notebook panel')
           }
@@ -3892,7 +3891,7 @@ function addCommands(
               'Whether to activate the notebook after execution'
             )
           },
-          widgetId: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
             type: 'string',
             description: trans.__('The ID of the notebook panel')
           }
@@ -3982,7 +3981,7 @@ function addCommands(
               'Whether to activate the notebook after execution'
             )
           },
-          widgetId: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
             type: 'string',
             description: trans.__('The ID of the notebook panel')
           }
@@ -4127,7 +4126,7 @@ function addCommands(
               'Whether to activate the notebook after execution'
             )
           },
-          widgetId: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
             type: 'string',
             description: trans.__('The ID of the notebook panel')
           }
@@ -4421,7 +4420,7 @@ function addCommands(
             description:
               'Whether the command is being executed from the toolbar'
           },
-          widgetId: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
             type: 'string',
             description: trans.__('The ID of the notebook panel')
           }
@@ -4452,7 +4451,7 @@ function addCommands(
             description:
               'Whether the command is being executed from the toolbar'
           },
-          widgetId: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
             type: 'string',
             description: trans.__('The ID of the notebook panel')
           }
@@ -4726,7 +4725,7 @@ function addCommands(
               'Whether to activate the notebook after execution'
             )
           },
-          widgetId: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
             type: 'string',
             description: trans.__('The ID of the notebook panel')
           }
@@ -4791,7 +4790,7 @@ function addCommands(
               'Whether to activate the notebook after execution'
             )
           },
-          widgetId: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
             type: 'string',
             description: trans.__('The ID of the notebook panel')
           }
@@ -5941,8 +5940,10 @@ namespace Private {
     tracker: INotebookTracker,
     args: ReadonlyPartialJSONObject
   ): boolean {
-    if (args.widgetId) {
-      const w = tracker.find(nb => nb.id === args.widgetId);
+    if (args[ToolbarRegistry.WIDGET_ID_ARG]) {
+      const w = tracker.find(
+        nb => nb.id === args[ToolbarRegistry.WIDGET_ID_ARG]
+      );
       return w?.viewOnly === true;
     }
     return tracker.currentWidget?.viewOnly === true;
