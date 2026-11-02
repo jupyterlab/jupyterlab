@@ -206,11 +206,17 @@ namespace Private {
   export class ShowAllActivityBody extends Widget {
     constructor(trans: TranslationBundle) {
       super();
-      const paragraphs = trans
-        .__(
-          'This console will also show code that other clients run on the same kernel, such as collaborators or other notebooks and consoles, together with its output.\n\nThat output is treated as trusted. If it contains JavaScript or HTML, it will run in your browser with the same access as your own code, without asking you first.\n\nOnly continue if you trust everyone who can run code on this kernel.'
+      const paragraphs = [
+        trans.__(
+          'This console will also show code that other clients run on the same kernel, such as collaborators or other notebooks and consoles, together with its output.'
+        ),
+        trans.__(
+          'Output of code run by other clients is treated as trusted. If it contains JavaScript or HTML, it will run in your browser with the same access as your own code, without asking you first.'
+        ),
+        trans.__(
+          'Only continue if you trust everyone who can run code on this kernel.'
         )
-        .split('\n\n');
+      ];
       for (const text of paragraphs) {
         const p = document.createElement('p');
         p.textContent = text;
