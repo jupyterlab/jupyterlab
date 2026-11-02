@@ -138,7 +138,6 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
 /* Shortcut Item Style */
 .jp-Shortcuts-Cell {
   padding: 6px 12px;
-  width: 20%;
   vertical-align: middle;
 }
 
@@ -191,7 +190,6 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
 .jp-Shortcuts-ShortcutCell {
   display: flex;
   align-items: center;
-  min-width: max-content;
   flex-wrap: wrap;
 }
 
@@ -210,10 +208,6 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
 
 .jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut {
   background-color: var(--jp-layout-color2);
-}
-
-.jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell:first-of-type {
-  width: 40%;
 }
 
 .jp-Shortcuts-Row button.jp-Shortcuts-Plus:focus-visible,
@@ -240,7 +234,7 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
 
 .jp-Shortcuts-ShortcutContainer {
   display: inline-flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
   border-radius: var(--jp-border-radius);
   padding: 3px;
@@ -318,13 +312,26 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
 
 /* Shortcut List Style */
 .jp-Shortcuts-ShortcutList {
-  width: 100%;
-  max-width: 1600px;
+  max-width: 90rem;
   /* separate + spacing 0: sticky header borders/shadows behave predictably */
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
   border: var(--jp-border-width) solid var(--jp-border-color1);
+}
+
+/* Fixed columns stay compact; Shortcut absorbs remaining width. */
+.jp-Shortcuts-Col {
+  width: 10rem;
+}
+
+.jp-Shortcuts-Col-selector {
+  width: 18rem;
+}
+
+.jp-Shortcuts-Col-shortcut {
+  min-width: 18rem;
+  width: auto;
 }
 
 /* No nested overflow: the settings panel (.jp-SettingsPanel) is the scrollport. */

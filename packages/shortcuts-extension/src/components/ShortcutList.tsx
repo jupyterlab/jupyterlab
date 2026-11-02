@@ -65,6 +65,15 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
               'Keyboard shortcuts. Column header buttons sort the table.'
             )}
           </caption>
+          <colgroup>
+            <col className="jp-Shortcuts-Col" />
+            <col className="jp-Shortcuts-Col" />
+            <col className="jp-Shortcuts-Col-shortcut" />
+            <col className="jp-Shortcuts-Col" />
+            {this.props.showSelectors && (
+              <col className="jp-Shortcuts-Col-selector" />
+            )}
+          </colgroup>
           <thead>
             <tr className="jp-Shortcuts-HeaderRow">
               {this.getTitleHeader(trans.__('Category'), 'category')}
