@@ -129,12 +129,6 @@ export class MockMermaidManager extends MermaidManager {
 }
 
 export class MockThemeManager {
-  private _theme: string = 'JupyterLab Light';
-  private _themeChanged = new Signal<
-    IThemeManager,
-    IChangedArgs<string, string | null>
-  >(this as unknown as IThemeManager);
-
   get theme(): string {
     return this._theme;
   }
@@ -163,6 +157,12 @@ export class MockThemeManager {
   asThemeManager(): IThemeManager {
     return this as unknown as IThemeManager;
   }
+
+  private _theme: string = 'JupyterLab Light';
+  private _themeChanged = new Signal<
+    IThemeManager,
+    IChangedArgs<string, string | null>
+  >(this as unknown as IThemeManager);
 }
 
 export const MERMAID_MANAGER = new MockMermaidManager();

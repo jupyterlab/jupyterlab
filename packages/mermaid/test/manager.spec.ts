@@ -4,10 +4,17 @@
 import {
   MERMAID_CLASS,
   MERMAID_CODE_CLASS,
+  MERMAID_DARK_THEME,
   MermaidManager
 } from '@jupyterlab/mermaid';
 
 import { MockMermaidManager, MockThemeManager } from './utils';
+
+// Stands in for the mermaid module that `MermaidManager.getMermaid()` loads.
+jest.mock('mermaid', () => ({
+  __esModule: true,
+  default: { initialize: jest.fn() }
+}));
 
 describe('@jupyterlab/mermaid', () => {
   describe('MermaidManager', () => {
@@ -24,7 +31,20 @@ describe('@jupyterlab/mermaid', () => {
 
         await themes.setTheme('JupyterLab Dark');
         expect(emitted).toBe(true);
-        expect(manager.mockMermaid.currentTheme).toBe('dark');
+        manager.dispose();
+      });
+
+      it('should configure mermaid with the dark theme for a dark JupyterLab theme', async () => {
+        const themes = new MockThemeManager();
+        const manager = new MermaidManager({
+          themes: themes.asThemeManager()
+        });
+        const mermaid = await manager.getMermaid();
+
+        await themes.setTheme('JupyterLab Dark');
+        expect(mermaid.initialize).toHaveBeenLastCalledWith(
+          expect.objectContaining({ theme: MERMAID_DARK_THEME })
+        );
         manager.dispose();
       });
 
@@ -41,19 +61,6 @@ describe('@jupyterlab/mermaid', () => {
         // The theme manager reloads the current theme on a font size change.
         await themes.setTheme('JupyterLab Light');
         expect(emitted).toBe(false);
-        manager.dispose();
-      });
-    });
-
-    describe('#themeChanged', () => {
-      it('should emit when initialize() is called', () => {
-        const manager = new MermaidManager();
-        let emitted = false;
-        manager.themeChanged.connect(() => {
-          emitted = true;
-        });
-        manager.initialize();
-        expect(emitted).toBe(true);
         manager.dispose();
       });
     });

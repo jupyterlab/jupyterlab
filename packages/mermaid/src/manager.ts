@@ -28,9 +28,6 @@ import {
 export class MermaidManager implements IMermaidManager {
   protected _diagrams: LruCache<string, HTMLElement>;
   protected _themes: IThemeManager | null;
-  private _themeChanged = new Signal<this, void>(this);
-  private _isDisposed = false;
-  private _refreshId = 0;
 
   constructor(options: MermaidManager.IOptions = {}) {
     this._diagrams = new LruCache({ maxSize: options.maxCacheSize ?? null });
@@ -73,7 +70,6 @@ export class MermaidManager implements IMermaidManager {
       return;
     }
     this._isDisposed = true;
-    Signal.disconnectReceiver(this);
     Signal.clearData(this);
     this._diagrams.clear();
   }
@@ -324,6 +320,10 @@ export class MermaidManager implements IMermaidManager {
 
     return figure;
   }
+
+  private _themeChanged = new Signal<this, void>(this);
+  private _isDisposed = false;
+  private _refreshId = 0;
 }
 
 /**

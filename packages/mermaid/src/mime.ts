@@ -27,8 +27,6 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
   protected static _manager: IMermaidManager | null = null;
   protected static _managerReady = new PromiseDelegate<IMermaidManager>();
   protected _lastRendered: string | null = null;
-  private _mimeModel: IRenderMime.IMimeModel | null = null;
-  private _renderId = 0;
 
   /**
    * Create a new widget for rendering Mermaid.
@@ -59,23 +57,6 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
     }
     RenderedMermaid._manager = manager;
     RenderedMermaid._managerReady.resolve(manager);
-  }
-
-  /**
-   * Dispose of the resources held by the widget.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    if (RenderedMermaid._manager) {
-      RenderedMermaid._manager.themeChanged?.disconnect(
-        this._onThemeChanged,
-        this
-      );
-    }
-    this._mimeModel = null;
-    super.dispose();
   }
 
   /**
@@ -174,6 +155,8 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
   }
 
   private _mimeType: string;
+  private _mimeModel: IRenderMime.IMimeModel | null = null;
+  private _renderId = 0;
 }
 
 namespace Private {
