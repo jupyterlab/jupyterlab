@@ -21,11 +21,13 @@ export class CustomOptionsDialog extends Dialog<ICustomOptions> {
     const { shortcut, translator, editorFactory } = options;
     const trans = translator.load('jupyterlab');
 
+    // Defer until after super(): body may invoke checkValidation during setup.
+    let checkValidation = (): void => undefined;
     const body = new CustomOptionsDialogBody({
       shortcut,
       translator,
       editorFactory,
-      checkValidation: () => this._checkValidation(),
+      checkValidation: () => checkValidation(),
       readOnly: options.readOnly
     });
 
@@ -43,6 +45,9 @@ export class CustomOptionsDialog extends Dialog<ICustomOptions> {
       body,
       buttons
     });
+
+    checkValidation = () => this._checkValidation();
+    this._checkValidation();
   }
 
   /**

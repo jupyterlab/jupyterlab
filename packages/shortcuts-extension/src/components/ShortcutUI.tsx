@@ -6,12 +6,10 @@
 
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { CommandRegistry } from '@lumino/commands';
-import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
 import { Platform } from '@lumino/domutils';
 import * as React from 'react';
-import { NewShortcutItem } from './NewShortcutItem';
-import { ShortcutItem } from './ShortcutItem';
+import { NewShortcutDialog } from './ShortcutAddDialog';
 import { ShortcutList } from './ShortcutList';
 import { TopNav } from './TopNav';
 import { ShortcutRegistry } from '../registry';
@@ -43,8 +41,6 @@ export interface IShortcutUIState {
   showSelectors: boolean;
   currentSort: IShortcutUI.ColumnId;
   sortDirection: IShortcutUI.SortDirection;
-  showAddCommand: boolean;
-  newShortcut: IShortcutTarget;
 }
 
 /** Top level React component for widget */
@@ -54,20 +50,6 @@ export class ShortcutUI
 {
   constructor(props: IShortcutUIProps) {
     super(props);
-    this._newShortcutItem = new NewShortcutItem({
-      showSelectors: false,
-      findConflictsFor: (keys: string[], selector: string) => {
-        if (this.state.shortcutRegistry) {
-          return this.state.shortcutRegistry.findConflictsFor(keys, selector);
-        } else {
-          console.error(
-            'Cannot search for keybinding conflicts at this time: registry is not ready'
-          );
-          return [];
-        }
-      },
-      external: this.props.external
-    });
 
     this.state = {
       shortcutRegistry: null,
@@ -76,14 +58,8 @@ export class ShortcutUI
       searchQuery: '',
       showSelectors: false,
       currentSort: 'category',
-      sortDirection: 'ascending',
-      showAddCommand: false,
-      newShortcut: this._newShortcutItem.shortcut
+      sortDirection: 'ascending'
     };
-
-    this._newShortcutItem.changed.connect(() => {
-      this.setState({ newShortcut: { ...this._newShortcutItem.shortcut } });
-    });
   }
 
   /** Fetch shortcut list on mount */
@@ -430,10 +406,36 @@ export class ShortcutUI
   };
 
   /**
-   * Toggle showing add command row.
+   * Open the dialog for adding a new shortcut.
    */
-  toggleAddCommandRow = async (): Promise<void> => {
-    this.setState({ showAddCommand: !this.state.showAddCommand });
+  openAddShortcutDialog = async (): Promise<void> => {
+    if (!this.props.external.editorFactory) {
+      console.error('Cannot build the add shortcut form');
+      return;
+    }
+    if (!this.state.shortcutRegistry) {
+      console.error(
+        'Cannot add a shortcut at this time: registry is not ready'
+      );
+      return;
+    }
+
+    const dialog = new NewShortcutDialog({
+      translator: this.props.external.translator,
+      editorFactory: this.props.external.editorFactory,
+      commandRegistry: this.props.external.commandRegistry,
+      findConflictsFor: (keys: string[], selector: string) => {
+        if (this.state.shortcutRegistry) {
+          return this.state.shortcutRegistry.findConflictsFor(keys, selector);
+        }
+        return [];
+      }
+    });
+
+    const result = await dialog.launch();
+    if (result.button.accept && result.value) {
+      await this.saveNewShortcut(result.value);
+    }
   };
 
   /**
@@ -493,25 +495,20 @@ export class ShortcutUI
   }
 
   /**
-   * Save a new shortcut:
-   * - creates keybindings for the command
-   * - adds the args to the shortcut commands
+   * Persist a new shortcut from the add dialog.
    */
-  saveNewShortcut = async (): Promise<void> => {
-    const shortcut = { ...this.state.newShortcut, args: undefined };
-    for (let keybinding of shortcut.keybindings) {
-      await this.addKeybinding(shortcut, keybinding.keys);
-    }
-
-    const created = await this.setCustomOptions(shortcut, {
-      selector: shortcut.selector,
-      args: this.state.newShortcut.args as ReadonlyJSONObject
-    });
-
-    if (created) {
-      this._newShortcutItem.reset();
-      void this.toggleAddCommandRow();
-    }
+  saveNewShortcut = async (value: NewShortcutDialog.IValue): Promise<void> => {
+    const shortcut: IShortcutTarget = {
+      id: `${value.command}-${value.selector}`,
+      command: value.command,
+      category: value.category,
+      label: value.label,
+      selector: value.selector,
+      keybindings: [],
+      args: value.args,
+      userDefined: true
+    };
+    await this.addKeybinding(shortcut, value.keys);
   };
 
   render(): JSX.Element | null {
@@ -524,8 +521,7 @@ export class ShortcutUI
           updateSearchQuery={this.updateSearchQuery}
           toggleSelectors={this.toggleSelectors}
           showSelectors={this.state.showSelectors}
-          showAddCommand={this.state.showAddCommand}
-          toggleAddCommandRow={this.toggleAddCommandRow}
+          openAddShortcutDialog={this.openAddShortcutDialog}
           translator={this.props.external.translator}
         />
         <ShortcutList
@@ -554,27 +550,12 @@ export class ShortcutUI
           currentSort={this.state.currentSort}
           sortDirection={this.state.sortDirection}
           translator={this.props.external.translator}
-          newShortcutRow={
-            this.state.showAddCommand ? (
-              <ShortcutItem
-                key="new-shortcut"
-                {...this._newShortcutItem}
-                shortcut={this.state.newShortcut}
-                newShortcutUtils={{
-                  searchQuery: this.state.searchQuery,
-                  updateCommand: this._newShortcutItem.updateCommand,
-                  saveShortcut: this.saveNewShortcut
-                }}
-              />
-            ) : null
-          }
         />
       </div>
     );
   }
 
   private _isMounted = false;
-  private _newShortcutItem: NewShortcutItem;
   private _settings: ISettingRegistry.ISettings<IShortcutsSettingsLayout> | null =
     null;
 }
