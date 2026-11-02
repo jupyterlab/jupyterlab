@@ -394,6 +394,34 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     return this._svgElement;
   }
 
+  protected get svgInnerHTML(): string | null {
+    if (this._svgInnerHTML === undefined) {
+      if (this.svgElement === null) {
+        // the svg element resolved to null, mark this null too
+        this._svgInnerHTML = null;
+      } else {
+        this._svgInnerHTML = this.svgElement.innerHTML;
+      }
+    }
+
+    return this._svgInnerHTML;
+  }
+
+  protected get svgReactAttrs(): { [key: string]: string | null } | null {
+    if (this._svgReactAttrs === undefined) {
+      if (this.svgElement === null) {
+        // the svg element resolved to null, mark this null too
+        this._svgReactAttrs = null;
+      } else {
+        this._svgReactAttrs = getReactAttrs(this.svgElement, {
+          ignore: ['data-icon-id']
+        });
+      }
+    }
+
+    return this._svgReactAttrs;
+  }
+
   get svgstr(): string {
     return this._svgstr;
   }
@@ -408,6 +436,8 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
 
     // empty the svg parsing intermediates cache
     this._svgElement = undefined;
+    this._svgInnerHTML = undefined;
+    this._svgReactAttrs = undefined;
 
     // update icon elements created using .element method
     document
@@ -458,19 +488,25 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
         const Tag = tag ?? React.Fragment;
 
         const svgData = React.useMemo(() => {
+          const svgElement = this.svgElement;
           // ensure that svg html is valid
-          if (!this.svgElement) {
+          if (!(svgElement && this.svgInnerHTML && this.svgReactAttrs)) {
             // bail if failing silently
             return null;
           }
 
-          const svgElement = Private.cloneSvgElement(this.svgElement);
-          const svgReactAttrs = getReactAttrs(svgElement, {
-            ignore: ['data-icon-id']
-          });
+          if (!Private.hasIdReferences(svgElement)) {
+            // all copies can share the same markup
+            return {
+              svgReactAttrs: this.svgReactAttrs,
+              svgInnerHTML: this.svgInnerHTML
+            };
+          }
+
+          const clone = Private.cloneSvgElement(svgElement);
           return {
-            svgReactAttrs,
-            svgInnerHTML: svgElement.innerHTML
+            svgReactAttrs: getReactAttrs(clone, { ignore: ['data-icon-id'] }),
+            svgInnerHTML: clone.innerHTML
           };
         }, [id]);
         if (!svgData) {
@@ -631,6 +667,11 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    *   - null: a valid, but empty, value
    */
   protected _svgElement: HTMLElement | null | undefined = undefined;
+  protected _svgInnerHTML: string | null | undefined = undefined;
+  protected _svgReactAttrs:
+    | { [key: string]: string | null }
+    | null
+    | undefined = undefined;
 }
 
 /**
@@ -753,12 +794,41 @@ namespace Private {
   const URL_ID_CANDIDATE = 'url(';
   const ID_SELECTOR_REFERENCE_TEMPLATE = (id: string) =>
     new RegExp(`(^|[\\s>+~,(])#${escapeRegExp(id)}(?=[\\s>+~,.:\\[{)])`, 'gm');
+  // XML cannot contain this character, so it cannot clash with svg content
+  const SUFFIX_PLACEHOLDER = '\u0000';
+  const idReferencesCache = new WeakMap<Element, IIdReferences | null>();
   let idSuffixCounter = 0;
+
+  /**
+   * The ids that an svg references itself, found once per parsed svg.
+   */
+  interface IIdReferences {
+    /**
+     * Index of each element with a referenced id (0 is the svg node, then
+     * document order), and its id with the suffix placeholder.
+     */
+    ids: [number, string][];
+    /**
+     * Index of each element holding a reference, the attribute name (null
+     * for the text of a style element), and its value with the placeholder.
+     */
+    references: [number, string | null, string][];
+  }
 
   export function cloneSvgElement(svgElement: HTMLElement): HTMLElement {
     const clone = svgElement.cloneNode(true) as HTMLElement;
-    uniquifySvgIds(clone);
+    const references = getIdReferences(svgElement);
+    if (references) {
+      uniquifySvgIds(clone, references);
+    }
     return clone;
+  }
+
+  /**
+   * Whether each copy of the svg needs its own ids.
+   */
+  export function hasIdReferences(svgElement: HTMLElement): boolean {
+    return getIdReferences(svgElement) !== null;
   }
 
   export function blankElement({
@@ -879,142 +949,125 @@ namespace Private {
     }
   }
 
-  function uniquifySvgIds(svgNode: HTMLElement): void {
-    const idMap = new Map<string, string>();
+  function uniquifySvgIds(
+    svgNode: HTMLElement,
+    references: IIdReferences
+  ): void {
     idSuffixCounter =
       idSuffixCounter >= Number.MAX_SAFE_INTEGER ? 1 : idSuffixCounter + 1;
-    const suffix = idSuffixCounter.toString(36);
-    let hasId = false;
+    const suffix = `-${idSuffixCounter.toString(36)}`;
+    const nodes = svgNode.getElementsByTagName('*');
+    const nodeAt = (index: number) =>
+      index === 0 ? svgNode : nodes[index - 1];
+    const withSuffix = (value: string) =>
+      value.split(SUFFIX_PLACEHOLDER).join(suffix);
 
-    walkSvgElements(svgNode, node => {
-      if (!node.hasAttribute('id')) {
-        return;
+    for (const [index, id] of references.ids) {
+      nodeAt(index).setAttribute('id', withSuffix(id));
+    }
+    for (const [index, name, value] of references.references) {
+      if (name === null) {
+        nodeAt(index).textContent = withSuffix(value);
+      } else {
+        nodeAt(index).setAttribute(name, withSuffix(value));
       }
+    }
+  }
+
+  function getIdReferences(svgElement: HTMLElement): IIdReferences | null {
+    let references = idReferencesCache.get(svgElement);
+    if (references === undefined) {
+      references = findIdReferences(svgElement);
+      idReferencesCache.set(svgElement, references);
+    }
+    return references;
+  }
+
+  /**
+   * Find the ids that the svg references through `url(#...)`, `href` or
+   * `aria-labelledby`/`aria-describedby`. Other ids keep their value in every
+   * copy, so that CSS and animation timing that use them keep working.
+   */
+  function findIdReferences(svgNode: HTMLElement): IIdReferences | null {
+    const nodes = [svgNode, ...Array.from(svgNode.getElementsByTagName('*'))];
+    const ids = new Set<string>();
+    for (const node of nodes) {
       const id = node.getAttribute('id');
-      if (!id) {
-        return;
-      }
-      hasId = true;
-      let mapped = idMap.get(id);
-      if (!mapped) {
-        mapped = `${id}-${suffix}`;
-        idMap.set(id, mapped);
-      }
-      node.setAttribute('id', mapped);
-    });
-
-    if (!hasId) {
-      return;
-    }
-
-    walkSvgElements(svgNode, node => {
-      rewriteIdReferences(node, idMap);
-    });
-  }
-
-  function rewriteIdReferences(
-    node: Element,
-    idMap: Map<string, string>
-  ): void {
-    const attrs = node.attributes;
-    for (let i = 0; i < attrs.length; i++) {
-      const attr = attrs[i];
-      const name = attr.name;
-      const value = attr.value;
-
-      if (name === 'href' || name === 'xlink:href') {
-        if (value.startsWith('#')) {
-          const mapped = idMap.get(value.slice(1));
-          if (mapped) {
-            node.setAttribute(name, `#${mapped}`);
-          }
-        }
-        continue;
-      }
-
-      if (name === 'aria-labelledby' || name === 'aria-describedby') {
-        const nextValue = value
-          .split(/\s+/)
-          .filter(Boolean)
-          .map(id => idMap.get(id) ?? id)
-          .join(' ');
-        if (nextValue !== value) {
-          node.setAttribute(name, nextValue);
-        }
-        continue;
-      }
-
-      if (!value.includes(URL_ID_CANDIDATE)) {
-        continue;
-      }
-
-      const nextValue = replaceUrlIdReferences(value, idMap);
-
-      if (nextValue !== value) {
-        node.setAttribute(name, nextValue);
+      if (id) {
+        ids.add(id);
       }
     }
-
-    if (node.tagName.toLowerCase() === 'style') {
-      const styleText = node.textContent;
-      if (!styleText) {
-        return;
-      }
-
-      let nextStyleText = styleText;
-      if (styleText.includes(URL_ID_CANDIDATE)) {
-        nextStyleText = replaceUrlIdReferences(nextStyleText, idMap);
-      }
-      if (nextStyleText.includes('#')) {
-        nextStyleText = replaceStyleIdSelectors(nextStyleText, idMap);
-      }
-
-      if (nextStyleText !== styleText) {
-        node.textContent = nextStyleText;
-      }
+    if (!ids.size) {
+      return null;
     }
-  }
 
-  function replaceUrlIdReferences(
-    text: string,
-    idMap: Map<string, string>
-  ): string {
-    return text.replace(URL_ID_REFERENCE, (full, quote, id) => {
-      const mapped = idMap.get(id);
-      return mapped ? `url(${quote}#${mapped}${quote})` : full;
-    });
-  }
-
-  function replaceStyleIdSelectors(
-    styleText: string,
-    idMap: Map<string, string>
-  ): string {
-    let nextStyleText = styleText;
-    idMap.forEach((mapped, id) => {
-      nextStyleText = nextStyleText.replace(
-        ID_SELECTOR_REFERENCE_TEMPLATE(id),
-        `$1#${mapped}`
+    const referenced = new Set<string>();
+    const reference = (id: string) => {
+      referenced.add(id);
+      return `${id}${SUFFIX_PLACEHOLDER}`;
+    };
+    const replaceUrls = (text: string) =>
+      text.replace(URL_ID_REFERENCE, (full, quote, id) =>
+        ids.has(id) ? `url(${quote}#${reference(id)}${quote})` : full
       );
+
+    const references: [number, string | null, string][] = [];
+    const styles: [number, string, string][] = [];
+    nodes.forEach((node, index) => {
+      for (const { name, value } of Array.from(node.attributes)) {
+        let nextValue = value;
+        if (name === 'href' || name === 'xlink:href') {
+          if (value.startsWith('#') && ids.has(value.slice(1))) {
+            nextValue = `#${reference(value.slice(1))}`;
+          }
+        } else if (name === 'aria-labelledby' || name === 'aria-describedby') {
+          const tokens = value.split(/\s+/).filter(Boolean);
+          if (tokens.some(id => ids.has(id))) {
+            nextValue = tokens
+              .map(id => (ids.has(id) ? reference(id) : id))
+              .join(' ');
+          }
+        } else if (value.includes(URL_ID_CANDIDATE)) {
+          nextValue = replaceUrls(value);
+        }
+        if (nextValue !== value) {
+          references.push([index, name, nextValue]);
+        }
+      }
+      if (node.tagName.toLowerCase() === 'style' && node.textContent) {
+        styles.push([index, node.textContent, replaceUrls(node.textContent)]);
+      }
     });
-    return nextStyleText;
+
+    // selectors can only be rewritten once all referenced ids are known
+    for (const [index, text, urlsReplaced] of styles) {
+      let nextText = urlsReplaced;
+      referenced.forEach(id => {
+        nextText = nextText.replace(
+          ID_SELECTOR_REFERENCE_TEMPLATE(id),
+          (full, prefix) => `${prefix}#${id}${SUFFIX_PLACEHOLDER}`
+        );
+      });
+      if (nextText !== text) {
+        references.push([index, null, nextText]);
+      }
+    }
+
+    if (!referenced.size) {
+      return null;
+    }
+    const referencedIds: [number, string][] = [];
+    nodes.forEach((node, index) => {
+      const id = node.getAttribute('id');
+      if (id && referenced.has(id)) {
+        referencedIds.push([index, `${id}${SUFFIX_PLACEHOLDER}`]);
+      }
+    });
+    return { ids: referencedIds, references };
   }
 
   function escapeRegExp(text: string): string {
     return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  }
-
-  function walkSvgElements(
-    svgNode: HTMLElement,
-    onElement: (node: Element) => void
-  ): void {
-    onElement(svgNode);
-
-    const walker = document.createTreeWalker(svgNode, NodeFilter.SHOW_ELEMENT);
-    let node = walker.nextNode();
-    while (node) {
-      onElement(node as Element);
-      node = walker.nextNode();
-    }
   }
 
   /**

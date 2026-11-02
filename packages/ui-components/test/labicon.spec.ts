@@ -38,6 +38,25 @@ const styleSelectorIcon = new LabIcon({
   svgstr: styleSelectorSvgstr
 });
 
+const rootIdSvgstr = `<svg id="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+<path fill="#fff" d="M0 0h10v10H0z"/>
+</svg>`;
+
+const rootIdIcon = new LabIcon({
+  name: 'test-ui-components:root-id',
+  svgstr: rootIdSvgstr
+});
+
+const animationSvgstr = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+<circle cx="4" cy="12" r="3"><animate id="fade0" attributeName="opacity" begin="0;fade1.end" dur="0.75s" values="1;0.2"/></circle>
+<circle cx="20" cy="12" r="3"><animate id="fade1" attributeName="opacity" begin="fade0.begin+0.3s" dur="0.75s" values="1;0.2"/></circle>
+</svg>`;
+
+const animationIcon = new LabIcon({
+  name: 'test-ui-components:animation',
+  svgstr: animationSvgstr
+});
+
 describe('@jupyterlab/ui-components', () => {
   describe('svg import', () => {
     it('should hold a string with the raw contents of an svg', () => {
@@ -195,6 +214,32 @@ describe('@jupyterlab/ui-components', () => {
           firstContainer.remove();
           secondContainer.remove();
         }
+      });
+
+      it('should keep unreferenced ids in .element() renders', () => {
+        const svg = rootIdIcon.element({ tag: null });
+
+        expect(svg.getAttribute('id')).toBe('logo');
+      });
+
+      it('should keep unreferenced ids in React renders', () => {
+        const markup = ReactDOMServer.renderToStaticMarkup(
+          React.createElement(rootIdIcon.react, { tag: null })
+        );
+        const svg = new DOMParser()
+          .parseFromString(markup, 'text/html')
+          .querySelector('svg');
+
+        expect(svg?.getAttribute('id')).toBe('logo');
+      });
+
+      it('should keep ids used by animation timing', () => {
+        const svg = animationIcon.element({ tag: null });
+        const ids = Array.from(svg.querySelectorAll('animate')).map(animate =>
+          animate.getAttribute('id')
+        );
+
+        expect(ids).toEqual(['fade0', 'fade1']);
       });
     });
   });
