@@ -228,6 +228,91 @@ describe('@jupyterlab/apputils', () => {
           await promptPromise.catch(() => {});
         });
 
+        describe('with focus in the body', () => {
+          let bodyDialog: Dialog<unknown>;
+          let prompt: Promise<Dialog.IResult<unknown>>;
+
+          afterEach(async () => {
+            bodyDialog.dispose();
+            await prompt.catch(() => {});
+          });
+
+          const launchWithBody = async (
+            body: React.ReactElement
+          ): Promise<HTMLElement> => {
+            bodyDialog = new Dialog({ body });
+            prompt = bodyDialog.launch();
+            await waitForDialog();
+            const target = bodyDialog.node.querySelector<HTMLElement>(
+              '[data-testid="target"]'
+            )!;
+            target.focus();
+            return target;
+          };
+
+          // Returns whether the dialog canceled the event.
+          const press = (target: HTMLElement, key: string): boolean =>
+            !target.dispatchEvent(generate('keydown', { key }));
+
+          it('should leave the enter key to a link', async () => {
+            const target = await launchWithBody(
+              <a href="#target" data-testid="target">
+                link
+              </a>
+            );
+
+            expect(press(target, 'Enter')).toBe(false);
+            expect(bodyDialog.isVisible).toBe(true);
+          });
+
+          it('should leave the enter key to a button', async () => {
+            const target = await launchWithBody(
+              <button data-testid="target">button</button>
+            );
+
+            expect(press(target, 'Enter')).toBe(false);
+            expect(bodyDialog.isVisible).toBe(true);
+          });
+
+          it('should leave the enter key to a textarea', async () => {
+            const target = await launchWithBody(
+              <textarea data-testid="target" />
+            );
+
+            expect(press(target, 'Enter')).toBe(false);
+            expect(bodyDialog.isVisible).toBe(true);
+          });
+
+          it('should leave the enter key to a code editor', async () => {
+            const target = await launchWithBody(
+              <div contentEditable tabIndex={0} data-testid="target" />
+            );
+
+            expect(press(target, 'Enter')).toBe(false);
+            expect(bodyDialog.isVisible).toBe(true);
+          });
+
+          it('should accept on enter key within a text input', async () => {
+            const target = await launchWithBody(
+              <input type="text" data-testid="target" />
+            );
+
+            expect(press(target, 'Enter')).toBe(true);
+            expect((await prompt).button.accept).toBe(true);
+          });
+
+          it('should not move focus to the footer on arrow keys', async () => {
+            const target = await launchWithBody(
+              <button data-testid="target">button</button>
+            );
+
+            expect(press(target, 'ArrowRight')).toBe(false);
+            expect(document.activeElement).toBe(target);
+            expect(press(target, 'ArrowLeft')).toBe(false);
+            expect(document.activeElement).toBe(target);
+          });
+        });
+
         it('should resolve with currently focused button', async () => {
           const dialog = new TestDialog({
             buttons: [
