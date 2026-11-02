@@ -13,6 +13,7 @@ import {
   GOOD_MERMAID,
   MERMAID_MANAGER,
   MERMAID_RENDERER,
+  MERMAID_THEMES,
   MERMAID_VERSION_ATTR,
   SVG_DATA_ATTR,
   SVG_MIME
@@ -38,9 +39,8 @@ describe('@jupyterlab/mermaid', () => {
     });
 
     describe('#renderModel()', () => {
-      beforeEach(() => {
-        MERMAID_MANAGER.mockMermaid.currentTheme = 'default';
-        MERMAID_MANAGER.initialize();
+      beforeEach(async () => {
+        await MERMAID_THEMES.setTheme('JupyterLab Light');
       });
 
       it('should attach an SVG and version if parsing succeeds', async () => {
@@ -84,8 +84,7 @@ describe('@jupyterlab/mermaid', () => {
         );
 
         // Change theme and trigger initialize
-        MERMAID_MANAGER.mockMermaid.currentTheme = 'dark';
-        MERMAID_MANAGER.initialize();
+        await MERMAID_THEMES.setTheme('JupyterLab Dark');
 
         // Wait a tick for async renderModel triggered by themeChanged
         await new Promise(resolve => setTimeout(resolve, 20));
@@ -112,11 +111,80 @@ describe('@jupyterlab/mermaid', () => {
         await renderer.renderModel(model);
         const svg = model.data[SVG_MIME];
 
-        MERMAID_MANAGER.mockMermaid.currentTheme = 'dark';
-        MERMAID_MANAGER.initialize();
+        await MERMAID_THEMES.setTheme('JupyterLab Dark');
         await new Promise(resolve => setTimeout(resolve, 20));
 
         // Changing the stored SVG would mark the notebook as modified.
+        expect(model.data[SVG_MIME]).toBe(svg);
+        renderer.dispose();
+      });
+
+      it('should store the SVG in the default theme when the theme is dark', async () => {
+        await MERMAID_THEMES.setTheme('JupyterLab Dark');
+        const renderer = new RenderedMermaid({
+          latexTypesetter: null,
+          linkHandler: null,
+          mimeType: MERMAID_MIME_TYPE,
+          resolver: null,
+          sanitizer: {
+            sanitize: (s: string) => s
+          }
+        });
+        const model = new MimeModel({
+          data: { [MERMAID_MIME_TYPE]: GOOD_MERMAID }
+        });
+        await renderer.renderModel(model);
+
+        expect(decodeURIComponent(renderer.node.innerHTML)).toContain(
+          'data-theme="dark"'
+        );
+        // Exports show the stored SVG, so it must not depend on the theme.
+        expect(model.data[SVG_MIME]).toContain('data-theme="default"');
+        renderer.dispose();
+      });
+
+      it('should render once for the default theme', async () => {
+        const renderer = new RenderedMermaid({
+          latexTypesetter: null,
+          linkHandler: null,
+          mimeType: MERMAID_MIME_TYPE,
+          resolver: null,
+          sanitizer: {
+            sanitize: (s: string) => s
+          }
+        });
+        const model = new MimeModel({
+          data: { [MERMAID_MIME_TYPE]: 'flowchart LR\n  once --> stored\n' }
+        });
+        const render = jest.spyOn(MERMAID_MANAGER.mockMermaid, 'render');
+        try {
+          await renderer.renderModel(model);
+
+          // In the default theme, the SVG drawn on the page is also the stored one.
+          expect(render).toHaveBeenCalledTimes(1);
+        } finally {
+          render.mockRestore();
+          renderer.dispose();
+        }
+      });
+
+      it('should keep an SVG stored in the model', async () => {
+        const renderer = new RenderedMermaid({
+          latexTypesetter: null,
+          linkHandler: null,
+          mimeType: MERMAID_MIME_TYPE,
+          resolver: null,
+          sanitizer: {
+            sanitize: (s: string) => s
+          }
+        });
+        const svg = '<svg data-stored="true"></svg>';
+        const model = new MimeModel({
+          data: { [MERMAID_MIME_TYPE]: GOOD_MERMAID, [SVG_MIME]: svg }
+        });
+        await renderer.renderModel(model);
+
+        // Changing the stored SVG would mark the notebook as modified on open.
         expect(model.data[SVG_MIME]).toBe(svg);
         renderer.dispose();
       });
@@ -138,12 +206,10 @@ describe('@jupyterlab/mermaid', () => {
         expect(model.data[SVG_MIME]).toContain('data-theme="default"');
 
         // Theme changes
-        MERMAID_MANAGER.mockMermaid.currentTheme = 'dark';
-        MERMAID_MANAGER.initialize();
+        await MERMAID_THEMES.setTheme('JupyterLab Dark');
 
         // Explicitly re-rendering the same Mermaid source must not return stale content
         await renderer.renderModel(model);
-        expect(model.data[SVG_MIME]).toContain('data-theme="dark"');
         expect(decodeURIComponent(renderer.node.innerHTML)).toContain(
           'data-theme="dark"'
         );
@@ -152,9 +218,8 @@ describe('@jupyterlab/mermaid', () => {
     });
 
     describe('#dispose()', () => {
-      beforeEach(() => {
-        MERMAID_MANAGER.mockMermaid.currentTheme = 'default';
-        MERMAID_MANAGER.initialize();
+      beforeEach(async () => {
+        await MERMAID_THEMES.setTheme('JupyterLab Light');
       });
 
       it('should disconnect and not update after disposal', async () => {
@@ -173,8 +238,7 @@ describe('@jupyterlab/mermaid', () => {
         await renderer.renderModel(model);
 
         renderer.dispose();
-        MERMAID_MANAGER.mockMermaid.currentTheme = 'dark';
-        MERMAID_MANAGER.initialize();
+        await MERMAID_THEMES.setTheme('JupyterLab Dark');
         await new Promise(resolve => setTimeout(resolve, 20));
 
         // After disposal, the diagram must remain untouched

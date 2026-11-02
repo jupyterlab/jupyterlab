@@ -79,7 +79,7 @@ export class MockMermaid {
       throw new Error('Intentionally failed');
     }
     return {
-      svg: `<svg data-theme="${this.currentTheme}"></svg>`,
+      svg: `<svg id="${id}" data-theme="${this.currentTheme}"></svg>`,
       diagramType: 'mock-diagram'
     };
   }
@@ -165,7 +165,11 @@ export class MockThemeManager {
   >(this as unknown as IThemeManager);
 }
 
-export const MERMAID_MANAGER = new MockMermaidManager();
+export const MERMAID_THEMES = new MockThemeManager();
+
+export const MERMAID_MANAGER = new MockMermaidManager({
+  themes: MERMAID_THEMES.asThemeManager()
+});
 RenderedMermaid.manager = MERMAID_MANAGER;
 
 export const MERMAID_RENDERER = new RenderedMermaid({

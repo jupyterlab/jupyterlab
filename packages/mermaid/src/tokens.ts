@@ -54,7 +54,10 @@ export interface IMermaidManager {
   /**
    * Render mermaid source to an SVG string with extracted metadata.
    */
-  renderSvg(text: string): Promise<IMermaidManager.IRenderInfo>;
+  renderSvg(
+    text: string,
+    options?: IMermaidManager.IRenderOptions
+  ): Promise<IMermaidManager.IRenderInfo>;
 
   /**
    * Render and cache mermaid source as a figure of an image, or a unsuccessful parser message.
@@ -71,6 +74,17 @@ export interface IMermaidManager {
  * A namespace for the mermaid manager.
  */
 export namespace IMermaidManager {
+  /**
+   * Options for rendering a mermaid text-based diagram.
+   */
+  export interface IRenderOptions {
+    /**
+     * The mermaid theme to use instead of the one that follows the JupyterLab
+     * theme. A theme set in the diagram source still takes precedence.
+     */
+    theme?: MermaidConfig['theme'];
+  }
+
   /**
    * The results of a successful rendering of a mermaid text-based diagram.
    */

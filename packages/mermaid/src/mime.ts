@@ -8,7 +8,12 @@
  */
 
 import type { IMermaidManager } from './tokens';
-import { MERMAID_CLASS, MERMAID_MIME_TYPE, WARNING_CLASS } from './tokens';
+import {
+  MERMAID_CLASS,
+  MERMAID_DEFAULT_THEME,
+  MERMAID_MIME_TYPE,
+  WARNING_CLASS
+} from './tokens';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import {
   JSONExt,
@@ -127,18 +132,27 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
       [MERMAID_MIME_TYPE]: mermaidMetadata
     };
 
-    // if available, set the fully-rendered SVG
-    const img = figure.querySelector('img');
-
-    if (img) {
-      const svg = decodeURIComponent(img.src.split(',')[1]);
-      const oldSvg = model.data[SVG_MIME];
-      if (svg !== oldSvg) {
-        model.setData({
-          data: { ...model.data, [SVG_MIME]: svg },
-          metadata
-        });
+    if (figure.querySelector('img')) {
+      // Keep a stored SVG, so that rendering again does not modify the document.
+      if (model.data[SVG_MIME] !== undefined) {
+        return;
       }
+      // Exports show the stored SVG, so it does not follow the JupyterLab theme.
+      let svg: string;
+      try {
+        ({ svg } = await manager.renderSvg(text, {
+          theme: MERMAID_DEFAULT_THEME
+        }));
+      } catch {
+        return;
+      }
+      if (this.isDisposed || renderId !== this._renderId) {
+        return;
+      }
+      model.setData({
+        data: { ...model.data, [SVG_MIME]: svg },
+        metadata
+      });
     } else {
       const dataWithoutSvg = { ...model.data };
       delete dataWithoutSvg[SVG_MIME];

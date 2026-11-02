@@ -5,6 +5,7 @@ import {
   MERMAID_CLASS,
   MERMAID_CODE_CLASS,
   MERMAID_DARK_THEME,
+  MERMAID_DEFAULT_THEME,
   MermaidManager
 } from '@jupyterlab/mermaid';
 
@@ -129,6 +130,34 @@ describe('@jupyterlab/mermaid', () => {
         }
       });
 
+      it('should not redraw diagrams outside rendered Markdown', async () => {
+        const themes = new MockThemeManager();
+        const manager = new MockMermaidManager({
+          themes: themes.asThemeManager()
+        });
+        const figure = await manager.renderFigure('graph TD; A --> B;');
+
+        // The node of a `RenderedMermaid` widget, which redraws itself
+        const node = document.createElement('div');
+        node.className = MERMAID_CLASS;
+        node.replaceChildren(
+          ...Array.from(figure.childNodes).map(c => c.cloneNode(true))
+        );
+        document.body.appendChild(node);
+
+        try {
+          await themes.setTheme('JupyterLab Dark');
+          await new Promise(resolve => setTimeout(resolve, 0));
+
+          expect(decodeURIComponent(node.innerHTML)).toContain(
+            'data-theme="default"'
+          );
+        } finally {
+          node.remove();
+          manager.dispose();
+        }
+      });
+
       it('should preserve accessible attributes and code after refresh', async () => {
         const themes = new MockThemeManager();
         const manager = new MockMermaidManager({
@@ -138,12 +167,15 @@ describe('@jupyterlab/mermaid', () => {
         const text = 'graph TD; A --> B;';
         const figure = await manager.renderFigure(text);
 
+        const markdown = document.createElement('div');
+        markdown.className = 'jp-RenderedMarkdown';
         const container = document.createElement('div');
         container.className = MERMAID_CLASS;
         container.replaceChildren(
           ...Array.from(figure.childNodes).map(c => c.cloneNode(true))
         );
-        document.body.appendChild(container);
+        markdown.appendChild(container);
+        document.body.appendChild(markdown);
 
         try {
           await themes.setTheme('JupyterLab Dark');
@@ -156,7 +188,7 @@ describe('@jupyterlab/mermaid', () => {
             'data-theme="dark"'
           );
         } finally {
-          container.remove();
+          markdown.remove();
           manager.dispose();
         }
       });
@@ -171,12 +203,15 @@ describe('@jupyterlab/mermaid', () => {
           'graph TD; A["<img src=x onerror=alert(1)>"] --> B;';
         const initialFigure = await manager.renderFigure(maliciousText);
 
+        const markdown = document.createElement('div');
+        markdown.className = 'jp-RenderedMarkdown';
         const container = document.createElement('div');
         container.className = MERMAID_CLASS;
         container.replaceChildren(
           ...Array.from(initialFigure.childNodes).map(c => c.cloneNode(true))
         );
-        document.body.appendChild(container);
+        markdown.appendChild(container);
+        document.body.appendChild(markdown);
 
         try {
           await themes.setTheme('JupyterLab Dark');
@@ -191,9 +226,55 @@ describe('@jupyterlab/mermaid', () => {
             expect(img.getAttribute('onerror')).toBeNull();
           }
         } finally {
-          container.remove();
+          markdown.remove();
           manager.dispose();
         }
+      });
+    });
+
+    describe('#renderSvg()', () => {
+      it('should render with the theme given in the options', async () => {
+        const themes = new MockThemeManager();
+        const manager = new MockMermaidManager({
+          themes: themes.asThemeManager()
+        });
+        await themes.setTheme('JupyterLab Dark');
+
+        const info = await manager.renderSvg('graph TD; A --> B;', {
+          theme: MERMAID_DEFAULT_THEME
+        });
+        expect(info.svg).toContain('data-theme="default"');
+        manager.dispose();
+      });
+
+      it('should render with the theme of the user interface after a render with another theme', async () => {
+        const themes = new MockThemeManager();
+        const manager = new MockMermaidManager({
+          themes: themes.asThemeManager()
+        });
+        await themes.setTheme('JupyterLab Dark');
+        await manager.renderSvg('graph TD; A --> B;', {
+          theme: MERMAID_DEFAULT_THEME
+        });
+
+        const info = await manager.renderSvg('graph TD; C --> D;');
+        expect(info.svg).toContain('data-theme="dark"');
+        manager.dispose();
+      });
+
+      it('should render the same SVG for the same source every time', async () => {
+        const manager = new MockMermaidManager();
+        const text = 'graph TD; A --> B;';
+        const first = await manager.renderSvg(text);
+        await manager.renderSvg('graph TD; C --> D;');
+        // Clears the cached renders
+        manager.initialize();
+
+        // A stored SVG that changed with the render order would mark the
+        // notebook as modified.
+        const second = await manager.renderSvg(text);
+        expect(second.svg).toBe(first.svg);
+        manager.dispose();
       });
     });
 
