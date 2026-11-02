@@ -609,13 +609,32 @@ front: matter
       }
     );
 
+    const tocHeadings = async (src: string) => {
+      const languages: IEditorLanguageRegistry = new EditorLanguageRegistry();
+      const parser: IMarkdownParser = createMarkdownParser(languages);
+      return TableOfContentsUtils.filterHeadings(
+        await TableOfContentsUtils.Markdown.parseHeadings(src, parser),
+        {
+          maximalDepth: 6,
+          numberHeaders: true
+        }
+      );
+    };
+
     it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
       // A line of `=` or `-` inside a `$$` block is LaTeX, not a setext heading
       // underline. See https://github.com/jupyterlab/jupyterlab/issues/19816
       ['$$\n\\text{This}\n=\n\\text{broken.}\n$$', []],
       ['$$\nTitle\n---\n$$', []],
-      ['$$\na\n=\nb\n$$', []],
-      // Math inside a heading must survive masking and read as authored.
+      ['$$\na\n=\nb\n$$', []]
+    ])(
+      'should not read a setext heading inside a math block in %s',
+      async (src, headers) => {
+        expect(await tocHeadings(src)).toEqual(headers);
+      }
+    );
+
+    it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
       [
         '# Title $x=1$',
         [
@@ -624,20 +643,6 @@ front: matter
             level: 1,
             line: 0,
             raw: '# Title $x=1$',
-            prefix: '1. ',
-            skip: false
-          }
-        ]
-      ],
-      // Math must not shift the line number of the headings that follow it.
-      [
-        '$$\na\n=\nb\n$$\n\n# Title',
-        [
-          {
-            text: 'Title',
-            level: 1,
-            line: 6,
-            raw: '# Title',
             prefix: '1. ',
             skip: false
           }
@@ -657,7 +662,49 @@ front: matter
           }
         ]
       ],
-      // A `---` line right after math underlines it, as in the renderer.
+      // `*` inside math is not emphasis.
+      [
+        '# Title $x*y*z$',
+        [
+          {
+            text: 'Title $x*y*z$',
+            level: 1,
+            line: 0,
+            raw: '# Title $x*y*z$',
+            prefix: '1. ',
+            skip: false
+          }
+        ]
+      ]
+    ])(
+      'should keep the math of a heading as written in %s',
+      async (src, headers) => {
+        expect(await tocHeadings(src)).toEqual(headers);
+      }
+    );
+
+    it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
+      [
+        '$$\na\n=\nb\n$$\n\n# Title',
+        [
+          {
+            text: 'Title',
+            level: 1,
+            line: 6,
+            raw: '# Title',
+            prefix: '1. ',
+            skip: false
+          }
+        ]
+      ]
+    ])(
+      'should return the source line of a heading after a math block in %s',
+      async (src, headers) => {
+        expect(await tocHeadings(src)).toEqual(headers);
+      }
+    );
+
+    it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
       [
         '$$\nx = 1\n$$\n---',
         [
@@ -670,53 +717,26 @@ front: matter
             skip: false
           }
         ]
+      ],
+      // A `=` line inside the math does not split the heading in two.
+      [
+        '$$\n\\text{This}\n=\n\\text{broken.}\n$$\n---',
+        [
+          {
+            text: '$$\n\\text{This}\n=\n\\text{broken.}\n$$',
+            level: 2,
+            line: 0,
+            raw: '$$\n\\text{This}\n=\n\\text{broken.}\n$$\n---',
+            prefix: '0.1. ',
+            skip: false
+          }
+        ]
       ]
     ])(
-      'should not read a setext heading inside a math block in %s',
+      'should read a `---` line after a math block as an underline in %s',
       async (src, headers) => {
-        const languages: IEditorLanguageRegistry = new EditorLanguageRegistry();
-        const parser: IMarkdownParser = createMarkdownParser(languages);
-        const headings = TableOfContentsUtils.filterHeadings(
-          await TableOfContentsUtils.Markdown.parseHeadings(src, parser),
-          {
-            maximalDepth: 6,
-            numberHeaders: true
-          }
-        );
-        expect(headings).toHaveLength(headers.length);
-        for (let i = 0; i < headers.length; i++) {
-          expect(headings[i]).toEqual(headers[i]);
-        }
+        expect(await tocHeadings(src)).toEqual(headers);
       }
     );
-
-    it('should read a math block underlined by `---` as one heading', async () => {
-      const languages: IEditorLanguageRegistry = new EditorLanguageRegistry();
-      const parser: IMarkdownParser = createMarkdownParser(languages);
-      const src = '$$\n\\text{This}\n=\n\\text{broken.}\n$$\n---';
-      const headings = await TableOfContentsUtils.Markdown.parseHeadings(
-        src,
-        parser
-      );
-      expect(headings).toEqual([
-        {
-          text: '$$\n\\text{This}\n=\n\\text{broken.}\n$$',
-          level: 2,
-          line: 0,
-          raw: src,
-          skip: false
-        }
-      ]);
-    });
-
-    it('should not read emphasis inside math in a heading', async () => {
-      const languages: IEditorLanguageRegistry = new EditorLanguageRegistry();
-      const parser: IMarkdownParser = createMarkdownParser(languages);
-      const headings = await TableOfContentsUtils.Markdown.parseHeadings(
-        '# Title $x*y*z$',
-        parser
-      );
-      expect(headings.map(heading => heading.text)).toEqual(['Title $x*y*z$']);
-    });
   });
 });
