@@ -689,5 +689,34 @@ front: matter
         }
       }
     );
+
+    it('should read a math block underlined by `---` as one heading', async () => {
+      const languages: IEditorLanguageRegistry = new EditorLanguageRegistry();
+      const parser: IMarkdownParser = createMarkdownParser(languages);
+      const src = '$$\n\\text{This}\n=\n\\text{broken.}\n$$\n---';
+      const headings = await TableOfContentsUtils.Markdown.parseHeadings(
+        src,
+        parser
+      );
+      expect(headings).toEqual([
+        {
+          text: '$$\n\\text{This}\n=\n\\text{broken.}\n$$',
+          level: 2,
+          line: 0,
+          raw: src,
+          skip: false
+        }
+      ]);
+    });
+
+    it('should not read emphasis inside math in a heading', async () => {
+      const languages: IEditorLanguageRegistry = new EditorLanguageRegistry();
+      const parser: IMarkdownParser = createMarkdownParser(languages);
+      const headings = await TableOfContentsUtils.Markdown.parseHeadings(
+        '# Title $x*y*z$',
+        parser
+      );
+      expect(headings.map(heading => heading.text)).toEqual(['Title $x*y*z$']);
+    });
   });
 });
