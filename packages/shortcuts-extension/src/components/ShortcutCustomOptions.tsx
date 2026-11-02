@@ -21,13 +21,13 @@ export class CustomOptionsDialog extends Dialog<ICustomOptions> {
     const { shortcut, translator, editorFactory } = options;
     const trans = translator.load('jupyterlab');
 
-    const body = new CustomOptionsDialogBody(
+    const body = new CustomOptionsDialogBody({
       shortcut,
       translator,
       editorFactory,
-      () => this._checkValidation(),
-      options.readOnly
-    );
+      checkValidation: () => this._checkValidation(),
+      readOnly: options.readOnly
+    });
 
     const buttons: Dialog.IButton[] = [];
     if (options.readOnly) {
@@ -73,23 +73,32 @@ export class CustomOptionsDialog extends Dialog<ICustomOptions> {
 }
 
 /**
- * Body widget for the custom options dialog.
+ * Options for {@link CustomOptionsDialogBody}.
  */
-class CustomOptionsDialogBody
+export interface ICustomOptionsDialogBodyOptions {
+  shortcut: IShortcutTarget;
+  translator: ITranslator;
+  editorFactory: CodeEditor.Factory;
+  checkValidation: () => void;
+  readOnly: boolean;
+}
+
+/**
+ * Body widget for selector and arguments fields.
+ *
+ * Used by {@link CustomOptionsDialog} and reusable in the add-shortcut dialog.
+ */
+export class CustomOptionsDialogBody
   extends Widget
   implements Dialog.IBodyWidget<ICustomOptions>
 {
   private _selectorInput: HTMLInputElement;
   private _editorWidget?: JSONEditorWidget;
 
-  constructor(
-    shortcut: IShortcutTarget,
-    translator: ITranslator,
-    editorFactory: CodeEditor.Factory,
-    checkValidation: () => void,
-    readOnly: boolean
-  ) {
+  constructor(options: ICustomOptionsDialogBodyOptions) {
     super();
+    const { shortcut, translator, editorFactory, checkValidation, readOnly } =
+      options;
     const trans = translator.load('jupyterlab');
 
     this.addClass('jp-Shortcuts-CustomOptionsDialogBody');
@@ -105,7 +114,7 @@ class CustomOptionsDialogBody
 
     this._selectorInput = document.createElement('input');
     this._selectorInput.type = 'text';
-    this._selectorInput.disabled = readOnly ?? false;
+    this._selectorInput.disabled = readOnly;
     this._selectorInput.value = shortcut.selector;
     this._selectorInput.className = 'jp-mod-styled';
 
