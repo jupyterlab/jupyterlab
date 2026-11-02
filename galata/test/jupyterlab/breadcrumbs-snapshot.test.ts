@@ -85,6 +85,9 @@ test.describe('Adaptive Breadcrumbs Snapshots', () => {
     // Wait for the path input and suggestions to appear
     const input = page.locator('.jp-PathNavigator > input');
     await input.waitFor({ state: 'visible' });
+    // The editor focuses the input and moves the caret to the end in the next
+    // animation frame, so filling earlier can append to the prefilled path.
+    await expect(input).toBeFocused();
 
     // Clear and type the parent path to show all sibling directories
     await input.fill(`${tmpPath}/`);
