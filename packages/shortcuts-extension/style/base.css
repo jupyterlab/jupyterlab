@@ -267,7 +267,6 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
   display: flex;
   align-items: center;
   padding: 6px 12px;
-  position: absolute;
   height: 100%;
   width: 100%;
   box-sizing: border-box;
