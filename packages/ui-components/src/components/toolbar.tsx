@@ -327,6 +327,10 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
+      case 'pointerdown':
+      case 'keydown':
+        this._focusBeforeClick = document.activeElement;
+        break;
       case 'click':
         this.handleClick(event);
         break;
@@ -342,6 +346,9 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     // Stop propagating the click outside the toolbar
     event.stopPropagation();
 
+    const focusBeforeClick = this._focusBeforeClick;
+    this._focusBeforeClick = null;
+
     // Clicking a label focuses the corresponding control
     // that is linked with `for` attribute, so let it be.
     if (event.target instanceof HTMLLabelElement) {
@@ -356,6 +363,16 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
       return;
     }
 
+    // If this click moved the focus out of the toolbar, for example to a menu,
+    // let it be. The focus is on the body when the click did not focus anything.
+    if (
+      focusBeforeClick !== null &&
+      document.activeElement !== focusBeforeClick &&
+      document.activeElement !== document.body
+    ) {
+      return;
+    }
+
     // Otherwise, activate the parent widget, which may take focus if desired.
     if (this.parent) {
       this.parent.activate();
@@ -367,6 +384,8 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('click', this);
+    this.node.addEventListener('pointerdown', this);
+    this.node.addEventListener('keydown', this);
   }
 
   /**
@@ -374,9 +393,12 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    */
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
+    this.node.removeEventListener('pointerdown', this);
+    this.node.removeEventListener('keydown', this);
   }
 
   noFocusOnClick: boolean;
+  private _focusBeforeClick: Element | null = null;
 }
 
 /**
