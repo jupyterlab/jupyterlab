@@ -170,6 +170,9 @@ export class ShortcutItem extends React.Component<
       return (
         <td className="jp-Shortcuts-Cell" colSpan={2}>
           <HTMLSelect
+            id="jp-Shortcuts-NewCommand"
+            name="shortcut-command"
+            aria-label={this._trans.__('Select a command')}
             value={this.props.shortcut.command}
             options={[
               { value: '', label: this._trans.__('Select a command') },
