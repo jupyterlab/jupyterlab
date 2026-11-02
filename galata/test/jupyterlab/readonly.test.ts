@@ -10,9 +10,23 @@ import * as path from 'path';
 const writableNotebook = 'notebook-writable.ipynb';
 const readonlyNotebook = 'notebook-readonly.ipynb';
 
-const READONLY_HIDDEN_ITEMS = ['save', 'insert', 'cut', 'paste', 'run'];
+const READONLY_HIDDEN_ITEMS = [
+  'save',
+  'insert',
+  'cut',
+  'paste',
+  'run',
+  'clear-all'
+];
 const ALWAYS_VISIBLE_ITEMS = ['copy'];
-const WRITABLE_ONLY_ITEMS = ['save', 'insert', 'cut', 'paste', 'run'];
+const WRITABLE_ONLY_ITEMS = [
+  'save',
+  'insert',
+  'cut',
+  'paste',
+  'run',
+  'clear-all'
+];
 
 async function assertReadonlyToolbar(
   page: IJupyterLabPageFixture
@@ -93,7 +107,17 @@ test.describe('test readonly status', () => {
 test.describe('Notebook toolbar visibility with read-only and writable notebooks', () => {
   test.use({
     mockSettings: {
-      ...galata.DEFAULT_SETTINGS
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:panel': {
+        toolbar: [
+          {
+            name: 'clear-all',
+            command: 'editmenu:clear-all',
+            icon: 'ui-components:clear',
+            rank: 34
+          }
+        ]
+      }
     }
   });
 

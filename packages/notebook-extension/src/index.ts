@@ -3417,8 +3417,8 @@ function addCommands(
 
       return current.context.sessionContext.shutdown();
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3613,8 +3613,8 @@ function addCommands(
         return NotebookActions.clearAllOutputs(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -3632,8 +3632,8 @@ function addCommands(
         return NotebookActions.clearOutputs(current.content);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4918,8 +4918,8 @@ function addCommands(
         }
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4940,8 +4940,8 @@ function addCommands(
         }
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
@@ -4958,8 +4958,8 @@ function addCommands(
         return sessionDialogs.selectKernel(current.context.sessionContext);
       }
     },
-    isEnabled: () => isEnabled() && !Private.isViewOnly(tracker),
-    isVisible: () => !Private.isViewOnly(tracker),
+    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
         type: 'object',
