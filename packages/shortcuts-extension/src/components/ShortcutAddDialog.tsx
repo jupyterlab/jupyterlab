@@ -60,7 +60,8 @@ export class NewShortcutDialog extends Dialog<NewShortcutDialog.IValue> {
       buttons: [
         Dialog.cancelButton({ label: trans.__('Cancel') }),
         Dialog.okButton({ label: trans.__('Save') })
-      ]
+      ],
+      focusNodeSelector: '#jp-Shortcuts-AddDialog-command'
     });
 
     checkValidation = () => this._checkValidation();
