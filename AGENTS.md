@@ -61,6 +61,7 @@ We welcome contributions made with AI and expect them to be of the highest quali
 
 - **Do**: Include tests for changes in behavior; a change such as a typo fix in a comment needs none
 - **Do**: Prefer Jest tests (`packages/*/test/`), and use Galata (Playwright, `galata/test/`) when the behavior needs a browser
+- **Do**: Name each Jest `describe` group after the code that it tests: the class, then each member as `#property` or `#method()`, as in `describe('#element()')` inside `describe('LabIcon')`. Write the behavior in the `it('should ...')` text, and do not add groups named after a topic, such as `describe('id references')`
 - **Don't**: Add a test that costs more to maintain than the change is worth. Examples are a test that needs a new dependency, and a 1000-line Jest harness for a two-line fix. Write a short Galata test or no test instead, and say why in the description
 - **Do**: Add a Playwright screenshot test when a visual regression is likely. Crop the screenshot to the smallest area that still shows a reviewer the change in context, and follow "Good Practices for Integration tests" in `docs/source/developer/contributing.md`
 - **Do**: Commit reference images only if you made them on Linux. If CI makes different ones, use the CI versions, as described in "Visual Regression and UI Tests" in `docs/source/developer/contributing.md`
