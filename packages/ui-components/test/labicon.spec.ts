@@ -59,6 +59,34 @@ const animationIcon = new LabIcon({
   svgstr: animationSvgstr
 });
 
+function getIconIdData(svg: Element): {
+  clipPathId: string;
+  clipPathRef: string;
+} {
+  const clipPathId = svg.querySelector('clipPath')?.getAttribute('id');
+  const clipPathRef = svg.querySelector('g')?.getAttribute('clip-path');
+
+  if (!clipPathId || !clipPathRef) {
+    throw new Error('Test fixture svg is missing clipPath id references');
+  }
+
+  return { clipPathId, clipPathRef };
+}
+
+function getStyleGradientData(svg: Element): {
+  gradientId: string;
+  styleText: string;
+} {
+  const gradientId = svg.querySelector('linearGradient')?.getAttribute('id');
+  const styleText = svg.querySelector('style')?.textContent;
+
+  if (!gradientId || !styleText) {
+    throw new Error('Style-based gradient test fixture did not render');
+  }
+
+  return { gradientId, styleText };
+}
+
 describe('@jupyterlab/ui-components', () => {
   describe('svg import', () => {
     it('should hold a string with the raw contents of an svg', () => {
@@ -69,7 +97,7 @@ describe('@jupyterlab/ui-components', () => {
   });
 
   describe('LabIcon', () => {
-    describe('attribute .svgstr', () => {
+    describe('#svgstr', () => {
       it('should hold a string with the raw contents of an svg', () => {
         expect(
           fooIcon.svgstr.startsWith(
@@ -77,39 +105,47 @@ describe('@jupyterlab/ui-components', () => {
           )
         ).toBe(true);
       });
+
+      it('should keep unique ids when replacing rendered elements after svgstr updates', () => {
+        const updateIcon = new LabIcon({
+          name: 'test-ui-components:style-gradient-update',
+          svgstr: styleGradientSvgstr
+        });
+        const firstContainer = document.createElement('div');
+        const secondContainer = document.createElement('div');
+        document.body.appendChild(firstContainer);
+        document.body.appendChild(secondContainer);
+
+        try {
+          updateIcon.element({ container: firstContainer });
+          updateIcon.element({ container: secondContainer });
+
+          updateIcon.svgstr = styleGradientSvgstr;
+
+          const firstUpdatedSvg = firstContainer.querySelector('svg');
+          const secondUpdatedSvg = secondContainer.querySelector('svg');
+          if (!firstUpdatedSvg || !secondUpdatedSvg) {
+            throw new Error('Updated icon render did not produce svg markup');
+          }
+
+          const firstStyle = getStyleGradientData(firstUpdatedSvg);
+          const secondStyle = getStyleGradientData(secondUpdatedSvg);
+
+          expect(firstStyle.gradientId).not.toEqual(secondStyle.gradientId);
+          expect(firstUpdatedSvg.getAttribute('style')).toBe(
+            `--jp-icon-ref-gradient0:url(#${firstStyle.gradientId})`
+          );
+          expect(secondUpdatedSvg.getAttribute('style')).toBe(
+            `--jp-icon-ref-gradient0:url(#${secondStyle.gradientId})`
+          );
+        } finally {
+          firstContainer.remove();
+          secondContainer.remove();
+        }
+      });
     });
 
-    describe('id references', () => {
-      function getIconIdData(svg: Element): {
-        clipPathId: string;
-        clipPathRef: string;
-      } {
-        const clipPathId = svg.querySelector('clipPath')?.getAttribute('id');
-        const clipPathRef = svg.querySelector('g')?.getAttribute('clip-path');
-
-        if (!clipPathId || !clipPathRef) {
-          throw new Error('Test fixture svg is missing clipPath id references');
-        }
-
-        return { clipPathId, clipPathRef };
-      }
-
-      function getStyleGradientData(svg: Element): {
-        gradientId: string;
-        styleText: string;
-      } {
-        const gradientId = svg
-          .querySelector('linearGradient')
-          ?.getAttribute('id');
-        const styleText = svg.querySelector('style')?.textContent;
-
-        if (!gradientId || !styleText) {
-          throw new Error('Style-based gradient test fixture did not render');
-        }
-
-        return { gradientId, styleText };
-      }
-
+    describe('#element()', () => {
       it('should create unique ids for each .element() render', () => {
         const firstSvg = fooIcon.element({ tag: null });
         const secondSvg = fooIcon.element({ tag: null });
@@ -190,6 +226,46 @@ describe('@jupyterlab/ui-components', () => {
         ]);
       });
 
+      it('should keep unreferenced ids in .element() renders', () => {
+        const svg = rootIdIcon.element({ tag: null });
+
+        expect(svg.getAttribute('id')).toBe('logo');
+      });
+
+      it('should keep ids used by animation timing', () => {
+        const svg = animationIcon.element({ tag: null });
+        const ids = Array.from(svg.querySelectorAll('animate')).map(animate =>
+          animate.getAttribute('id')
+        );
+
+        expect(ids).toEqual(['fade0', 'fade1']);
+      });
+
+      it('should not give a renamed id the value of another id of the svg', () => {
+        const used = fooIcon
+          .element({ tag: null })
+          .querySelector('clipPath')!
+          .getAttribute('id')!
+          .slice('clip0-'.length);
+        const next = (parseInt(used, 36) + 1).toString(36);
+        // Adobe XD names a shape after its filter, as "Rectangle_1-2"
+        const icon = new LabIcon({
+          name: 'test-ui-components:taken-suffix',
+          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+<defs><filter id="shadow"><feGaussianBlur stdDeviation="1"/></filter></defs>
+<g filter="url(#shadow)"><rect id="shadow-${next}" width="10" height="10"/></g>
+</svg>`
+        });
+
+        const svg = icon.element({ tag: null });
+
+        expect(svg.querySelector('filter')!.getAttribute('id')).not.toBe(
+          `shadow-${next}`
+        );
+      });
+    });
+
+    describe('#react', () => {
       it('should set the custom properties of each React copy on its svg', () => {
         const markup = ReactDOMServer.renderToStaticMarkup(
           React.createElement(styleGradientIcon.react, { tag: null })
@@ -231,50 +307,6 @@ describe('@jupyterlab/ui-components', () => {
         expect(second.clipPathRef).toEqual(`url(#${second.clipPathId})`);
       });
 
-      it('should keep unique ids when replacing rendered elements after svgstr updates', () => {
-        const updateIcon = new LabIcon({
-          name: 'test-ui-components:style-gradient-update',
-          svgstr: styleGradientSvgstr
-        });
-        const firstContainer = document.createElement('div');
-        const secondContainer = document.createElement('div');
-        document.body.appendChild(firstContainer);
-        document.body.appendChild(secondContainer);
-
-        try {
-          updateIcon.element({ container: firstContainer });
-          updateIcon.element({ container: secondContainer });
-
-          updateIcon.svgstr = styleGradientSvgstr;
-
-          const firstUpdatedSvg = firstContainer.querySelector('svg');
-          const secondUpdatedSvg = secondContainer.querySelector('svg');
-          if (!firstUpdatedSvg || !secondUpdatedSvg) {
-            throw new Error('Updated icon render did not produce svg markup');
-          }
-
-          const firstStyle = getStyleGradientData(firstUpdatedSvg);
-          const secondStyle = getStyleGradientData(secondUpdatedSvg);
-
-          expect(firstStyle.gradientId).not.toEqual(secondStyle.gradientId);
-          expect(firstUpdatedSvg.getAttribute('style')).toBe(
-            `--jp-icon-ref-gradient0:url(#${firstStyle.gradientId})`
-          );
-          expect(secondUpdatedSvg.getAttribute('style')).toBe(
-            `--jp-icon-ref-gradient0:url(#${secondStyle.gradientId})`
-          );
-        } finally {
-          firstContainer.remove();
-          secondContainer.remove();
-        }
-      });
-
-      it('should keep unreferenced ids in .element() renders', () => {
-        const svg = rootIdIcon.element({ tag: null });
-
-        expect(svg.getAttribute('id')).toBe('logo');
-      });
-
       it('should keep unreferenced ids in React renders', () => {
         const markup = ReactDOMServer.renderToStaticMarkup(
           React.createElement(rootIdIcon.react, { tag: null })
@@ -286,40 +318,6 @@ describe('@jupyterlab/ui-components', () => {
         expect(svg?.getAttribute('id')).toBe('logo');
       });
 
-      it('should keep ids used by animation timing', () => {
-        const svg = animationIcon.element({ tag: null });
-        const ids = Array.from(svg.querySelectorAll('animate')).map(animate =>
-          animate.getAttribute('id')
-        );
-
-        expect(ids).toEqual(['fade0', 'fade1']);
-      });
-
-      it('should not give a renamed id the value of another id of the svg', () => {
-        const used = fooIcon
-          .element({ tag: null })
-          .querySelector('clipPath')!
-          .getAttribute('id')!
-          .slice('clip0-'.length);
-        const next = (parseInt(used, 36) + 1).toString(36);
-        // Adobe XD names a shape after its filter, as "Rectangle_1-2"
-        const icon = new LabIcon({
-          name: 'test-ui-components:taken-suffix',
-          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-<defs><filter id="shadow"><feGaussianBlur stdDeviation="1"/></filter></defs>
-<g filter="url(#shadow)"><rect id="shadow-${next}" width="10" height="10"/></g>
-</svg>`
-        });
-
-        const svg = icon.element({ tag: null });
-
-        expect(svg.querySelector('filter')!.getAttribute('id')).not.toBe(
-          `shadow-${next}`
-        );
-      });
-    });
-
-    describe('#react', () => {
       it('should show an svg replaced before the component subscribed', async () => {
         const icon = new LabIcon({
           name: 'test-ui-components:replaced-early',
