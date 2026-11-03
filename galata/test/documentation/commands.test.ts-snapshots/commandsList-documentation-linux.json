@@ -5262,7 +5262,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
