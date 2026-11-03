@@ -311,6 +311,18 @@ test('Cell toolbar items follow the active cell of their own notebook', async ({
   await expect(
     panel!.locator('.jp-cell-toolbar [data-command="notebook:move-cell-up"]')
   ).toHaveAttribute('aria-disabled', 'false');
+
+  // and the run all above and run all below commands, given the id of the
+  // first notebook, follow its active cell
+  const widgetId = await panel!.getAttribute('id');
+  const isEnabled = (command: string) =>
+    page.evaluate(
+      ({ command, widgetId }) =>
+        window.jupyterapp.commands.isEnabled(command, { widgetId }),
+      { command, widgetId }
+    );
+  expect(await isEnabled('notebook:run-all-above')).toBe(true);
+  expect(await isEnabled('notebook:run-all-below')).toBe(false);
 });
 
 test('Restart and clear outputs acts on the notebook given by its widget id', async ({

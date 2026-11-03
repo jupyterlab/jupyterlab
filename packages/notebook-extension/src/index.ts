@@ -3005,8 +3005,10 @@ function addCommands(
     }
   };
 
-  const isEnabledAndSingleSelected = (): boolean => {
-    return Private.isEnabledAndSingleSelected(shell, tracker);
+  const isEnabledAndSingleSelected = (
+    args: ReadonlyPartialJSONObject = {}
+  ): boolean => {
+    return Private.isEnabledAndSingleSelected(shell, tracker, args);
   };
 
   const refreshCellCollapsed = (notebook: Notebook): void => {
@@ -3032,8 +3034,10 @@ function addCommands(
     }
   };
 
-  const isEnabledAndHeadingSelected = (): boolean => {
-    return Private.isEnabledAndHeadingSelected(shell, tracker);
+  const isEnabledAndHeadingSelected = (
+    args: ReadonlyPartialJSONObject = {}
+  ): boolean => {
+    return Private.isEnabledAndHeadingSelected(shell, tracker, args);
   };
 
   const executePaste = async (
@@ -3319,10 +3323,12 @@ function addCommands(
     isEnabled: args => {
       // Can't run above if there are multiple cells selected,
       // or if we are at the top of the notebook.
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return (
         !Private.isViewOnly(tracker, args) &&
-        isEnabledAndSingleSelected() &&
-        tracker.currentWidget!.content.activeCellIndex !== 0
+        isEnabledAndSingleSelected(args) &&
+        current !== null &&
+        current.content.activeCellIndex !== 0
       );
     },
     isVisible: args => !Private.isViewOnly(tracker, args),
@@ -3352,12 +3358,14 @@ function addCommands(
     isEnabled: args => {
       // Can't run below if there are multiple cells selected,
       // or if we are at the bottom of the notebook.
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return (
         !Private.isViewOnly(tracker, args) &&
-        isEnabledAndSingleSelected() &&
-        (tracker.currentWidget!.content.widgets.length === 1 ||
-          tracker.currentWidget!.content.activeCellIndex !==
-            tracker.currentWidget!.content.widgets.length - 1)
+        isEnabledAndSingleSelected(args) &&
+        current !== null &&
+        (current.content.widgets.length === 1 ||
+          current.content.activeCellIndex !==
+            current.content.widgets.length - 1)
       );
     },
     isVisible: args => !Private.isViewOnly(tracker, args),
@@ -3545,7 +3553,7 @@ function addCommands(
       }
     },
     isEnabled: args =>
-      !Private.isViewOnly(tracker, args) && isEnabledAndSingleSelected(),
+      !Private.isViewOnly(tracker, args) && isEnabledAndSingleSelected(args),
     isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
@@ -5497,7 +5505,7 @@ function addCommands(
       }
     },
     isEnabled: args =>
-      isEnabledAndHeadingSelected() && !Private.isViewOnly(tracker, args),
+      isEnabledAndHeadingSelected(args) && !Private.isViewOnly(tracker, args),
     isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
@@ -5646,8 +5654,8 @@ function addCommands(
       const current = tracker.currentWidget;
       return !!current;
     },
-    isToggled: () => {
-      const current = tracker.currentWidget;
+    isToggled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return current?.content.scrollbar ?? false;
     },
     describedBy: {
@@ -5938,15 +5946,22 @@ namespace Private {
 
   /**
    * Whether there is an notebook active, with a single selected cell.
+   * Notebook and cell toolbar buttons pass their panel id as `widgetId`;
+   * without it, the current notebook is checked.
    */
   export function isEnabledAndSingleSelected(
     shell: JupyterFrontEnd.IShell,
-    tracker: INotebookTracker
+    tracker: INotebookTracker,
+    args: ReadonlyPartialJSONObject = {}
   ): boolean {
     if (!Private.isEnabled(shell, tracker)) {
       return false;
     }
-    const { content } = tracker.currentWidget!;
+    const current = getCurrent(tracker, shell, { ...args, activate: false });
+    if (!current) {
+      return false;
+    }
+    const { content } = current;
     const index = content.activeCellIndex;
     // If there are selections that are not the active cell,
     // this command is confusing, so disable it.
@@ -5960,15 +5975,22 @@ namespace Private {
 
   /**
    * Whether there is an notebook active, with a single selected cell.
+   * Notebook and cell toolbar buttons pass their panel id as `widgetId`;
+   * without it, the current notebook is checked.
    */
   export function isEnabledAndHeadingSelected(
     shell: JupyterFrontEnd.IShell,
-    tracker: INotebookTracker
+    tracker: INotebookTracker,
+    args: ReadonlyPartialJSONObject = {}
   ): boolean {
     if (!Private.isEnabled(shell, tracker)) {
       return false;
     }
-    const { content } = tracker.currentWidget!;
+    const current = getCurrent(tracker, shell, { ...args, activate: false });
+    if (!current) {
+      return false;
+    }
+    const { content } = current;
     const index = content.activeCellIndex;
     if (!(content.activeCell instanceof MarkdownCell)) {
       return false;
