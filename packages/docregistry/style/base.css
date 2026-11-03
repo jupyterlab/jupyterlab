@@ -6,3 +6,19 @@
 .jp-MimeDocument {
   outline: none;
 }
+
+/* The children managed by the StackedLayout are absolutely positioned, so the
+ * error banner is floated on top of the rendered content at the top of the
+ * widget rather than participating in the normal flow. */
+.jp-MimeDocument-errorBanner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  padding: 4px 12px;
+  color: var(--jp-ui-inverse-font-color1);
+  background-color: var(--jp-error-color1);
+  font-size: var(--jp-ui-font-size1);
+  white-space: pre-wrap;
+}
