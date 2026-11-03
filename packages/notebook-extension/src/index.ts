@@ -2943,7 +2943,7 @@ function getCurrent(
 ): NotebookPanel | null {
   let widget: NotebookPanel | null = null;
 
-  // Check for panelId in args (used by cell toolbars)
+  // Check for widgetId in args (used by cell toolbars)
   if (args[ToolbarRegistry.WIDGET_ID_ARG]) {
     widget =
       tracker.find(panel => panel.id === args[ToolbarRegistry.WIDGET_ID_ARG]) ??
