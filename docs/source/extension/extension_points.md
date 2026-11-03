@@ -863,7 +863,7 @@ function activatePlugin(
 
     if (settingRegistry) {
       // Create the factory
-      toolbarFactory = createToolbarFactory(
+      const panelToolbarFactory = createToolbarFactory(
         toolbarRegistry,
         settingRegistry,
         // Factory name
@@ -872,6 +872,11 @@ function activatePlugin(
         '@jupyterlab/notebook-extension:panel',
         translator
       );
+      // Pass the panel id so that the buttons act on their own notebook
+      toolbarFactory = (panel: NotebookPanel) =>
+        panelToolbarFactory(panel, {
+          [ToolbarRegistry.WIDGET_ID_ARG]: panel.id
+        });
     }
   }
 
@@ -890,6 +895,34 @@ function activatePlugin(
 The registry `addFactory` method allows an extension to provide special widget for a unique pair
 (factory name, toolbar item name). Then the helper `createToolbarFactory` can be used to extract the
 toolbar definition from the settings and build the factory to pass to the widget factory.
+
+The factory returned by {ts:function}`apputils.createToolbarFactory` takes optional command arguments as its second parameter. It adds them to the arguments of every command item, and the `args` set by an item take precedence over them. The notebook panel toolbar and the cell toolbar pass the id of the notebook panel this way, under the {ts:variable}`apputils.ToolbarRegistry.WIDGET_ID_ARG` key. In a split view, a button can belong to a notebook that does not have the focus. A command placed in these toolbars should therefore find its notebook from that argument, both to act on it and to compute its state. In this example, `tracker` is the {ts:interface}`notebook.INotebookTracker`:
+
+```typescript
+// The notebook of the toolbar button, or the current notebook when the
+// command runs from a menu, the command palette or a keyboard shortcut
+function getNotebook(args: ReadonlyPartialJSONObject): NotebookPanel | null {
+  const widgetId = args[ToolbarRegistry.WIDGET_ID_ARG];
+  if (widgetId) {
+    return tracker.find(panel => panel.id === widgetId) ?? null;
+  }
+  return tracker.currentWidget;
+}
+
+app.commands.addCommand('my-extension:clear-outputs', {
+  label: 'Clear All Outputs',
+  isEnabled: args => {
+    const notebook = getNotebook(args);
+    return notebook !== null && !notebook.viewOnly;
+  },
+  execute: args => {
+    const notebook = getNotebook(args);
+    if (notebook) {
+      NotebookActions.clearAllOutputs(notebook.content);
+    }
+  }
+});
+```
 
 The default toolbar items can be defined across multiple extensions by providing an entry in the `"jupyter.lab.toolbars"`
 mapping. For example for the notebook panel:
