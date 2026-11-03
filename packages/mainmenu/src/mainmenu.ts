@@ -473,48 +473,40 @@ export class MainMenu extends MenuBar implements IMainMenu {
   }
 
   /**
-   * Collapse the main menu if its items do not fit in the window, and expand
-   * it otherwise, in `auto` collapse mode.
+   * Collapse the main menu if it does not fit next to the widgets around it,
+   * and expand it otherwise, in `auto` collapse mode.
    */
   private _fitCollapsed(): void {
-    if (this._collapseMode !== 'auto') {
+    if (this._collapseMode !== 'auto' || !this.parent?.isVisible) {
       return;
     }
-    if (this.isVisible) {
-      // Keep the width the items need, to know when to expand them again.
-      this._itemsWidth = 0;
-      for (const item of this.contentNode.children) {
-        this._itemsWidth += item.getBoundingClientRect().width;
-      }
-    }
-    const bar = this._collapsed ? this.collapsedMenuBar : this;
-    if (!bar.isVisible) {
-      return;
-    }
-    // Both menu bars start at the same place, so the result does not depend
-    // on which one is shown.
-    const right = bar.node.getBoundingClientRect().left + this._itemsWidth;
-    const collapsed = right > document.documentElement.clientWidth;
-    if (collapsed !== this._collapsed) {
-      this._setCollapsed(collapsed);
-      if (!collapsed) {
-        // Measure the items again, as they may have changed while hidden.
-        this._fitCollapsed();
-      }
-    }
+    // Show the menu bar to measure it, as a hidden one has no size. If it
+    // stays collapsed, it is hidden again before the browser paints.
+    this.show();
+    const end = Math.min(
+      this.node.getBoundingClientRect().right,
+      document.documentElement.clientWidth
+    );
+    const itemsEnd =
+      this.contentNode.lastElementChild?.getBoundingClientRect().right ?? 0;
+    // Allow 1px of subpixel rounding. The menu bar does not shrink in a row:
+    // its siblings overflow instead.
+    const row = this.parent.node.parentElement;
+    const collapsed =
+      itemsEnd > end + 1 || (row !== null && row.scrollWidth > row.clientWidth);
+    this._setCollapsed(collapsed);
   }
 
   /**
    * Show either the main menu or the collapsed menu bar.
    */
   private _setCollapsed(value: boolean): void {
-    if (this._collapsed === value) {
-      return;
-    }
-    this._collapsed = value;
     this.setHidden(value);
     this.collapsedMenuBar.setHidden(!value);
-    this._collapsedChanged.emit(value);
+    if (this._collapsed !== value) {
+      this._collapsed = value;
+      this._collapsedChanged.emit(value);
+    }
   }
 
   /**
@@ -538,7 +530,6 @@ export class MainMenu extends MenuBar implements IMainMenu {
   private _collapseMode: MainMenu.CollapseMode = 'never';
   private _commands: CommandRegistry;
   private _items: Private.IRankItem[] = [];
-  private _itemsWidth = 0;
   private _editMenu: EditMenu;
   private _fileMenu: FileMenu;
   private _helpMenu: HelpMenu;
@@ -558,7 +549,8 @@ export namespace MainMenu {
    *
    * - `never`: always show the main menu.
    * - `always`: always collapse the main menu.
-   * - `auto`: collapse the main menu while its items do not fit in the window.
+   * - `auto`: collapse the main menu while it does not fit next to the widgets
+   *   around it.
    */
   export type CollapseMode = 'never' | 'always' | 'auto';
 

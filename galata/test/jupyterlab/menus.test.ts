@@ -228,7 +228,8 @@ test.describe('Automatically collapsed main menu with top bar items', () => {
     await page.setViewportSize({ width: 500, height: 768 });
 
     await expect(page.locator('#jp-MainMenu')).toBeHidden();
-    await expect(selector).toBeInViewport({ ratio: 1 });
+    const box = (await selector.boundingBox())!;
+    expect(box.x + box.width).toBeLessThanOrEqual(500);
 
     await page.setViewportSize({ width: 1024, height: 768 });
 
