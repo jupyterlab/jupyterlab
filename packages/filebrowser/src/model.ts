@@ -572,7 +572,7 @@ export class FileBrowserModel implements IDisposable {
       const chunk = lastChunk ? -1 : end / CHUNK_SIZE;
 
       const newUpload = { path, progress: start / file.size };
-      this._uploads.splice(this._uploads.indexOf(upload));
+      ArrayExt.removeFirstOf(this._uploads, upload);
       this._uploads.push(newUpload);
       this._uploadChanged.emit({
         name: 'update',
@@ -585,9 +585,7 @@ export class FileBrowserModel implements IDisposable {
       try {
         currentModel = await uploadInner(file.slice(start, end), chunk);
       } catch (err) {
-        ArrayExt.removeFirstWhere(this._uploads, uploadIndex => {
-          return path === uploadIndex.path;
-        });
+        ArrayExt.removeFirstOf(this._uploads, upload);
 
         this._uploadChanged.emit({
           name: 'failure',
@@ -603,7 +601,7 @@ export class FileBrowserModel implements IDisposable {
       }
     }
 
-    this._uploads.splice(this._uploads.indexOf(upload));
+    ArrayExt.removeFirstOf(this._uploads, upload);
     this._uploadChanged.emit({
       name: 'finish',
       newValue: null,
