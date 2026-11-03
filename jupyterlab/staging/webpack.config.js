@@ -330,6 +330,13 @@ module.exports = [
         }
       ]
     },
+    resolve: {
+      alias: {
+        // The shared config provides `process` from `process/browser`;
+        // use a variant that does not look like Node.js to xterm.js.
+        'process/browser$': path.resolve(__dirname, 'process-shim.js')
+      }
+    },
     devtool: 'inline-source-map',
     externals: ['ws'],
     plugins
