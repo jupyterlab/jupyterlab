@@ -164,6 +164,11 @@ This keeps every copy working when the icon is shown more than once.
 The ids that count are those used in `url(#...)`, `href`,
 `aria-labelledby` and `aria-describedby`; other ids keep their value.
 
+The rules of a `<style>` element in your svg apply to the whole page.
+When they use one of these ids in `url(#...)`, each copy repeats them
+inside `@scope`, which matches the copy by its `data-icon-copy`
+attribute.
+
 To style or find an element inside an icon, select it by a class or
 through the `data-icon` attribute of the rendered svg, for example
 `svg[data-icon="barpkg:foo"] .accent`.

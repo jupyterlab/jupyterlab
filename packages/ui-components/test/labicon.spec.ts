@@ -40,6 +40,18 @@ const styleSelectorIcon = new LabIcon({
   svgstr: styleSelectorSvgstr
 });
 
+// the later rule sets the fill of the rect, and must keep doing so in a copy
+const styleRulesSvgstr = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+<style>.a{fill:url(#gradient0)}.b{fill:#0f0}</style>
+<defs><linearGradient id="gradient0"><stop offset="0" stop-color="#000"/></linearGradient></defs>
+<rect class="a b" width="10" height="10"/>
+</svg>`;
+
+const styleRulesIcon = new LabIcon({
+  name: 'test-ui-components:style-rules',
+  svgstr: styleRulesSvgstr
+});
+
 const rootIdSvgstr = `<svg id="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
 <path fill="#fff" d="M0 0h10v10H0z"/>
 </svg>`;
@@ -151,6 +163,33 @@ describe('@jupyterlab/ui-components', () => {
         expect(second.styleText).toContain(`url(#${second.gradientId})`);
         expect(second.styleText).toContain('stop-color:#123');
         expect(second.styleText).not.toContain('#gradient0 stop:first-child');
+      });
+
+      it('should repeat the style rules in the scope of each .element() copy', () => {
+        const svg = styleRulesIcon.element({ tag: null });
+        const { gradientId, styleText } = getStyleGradientData(svg);
+        const copy = svg.getAttribute('data-icon-copy');
+        const rules = `.a{fill:url(#${gradientId})}.b{fill:#0f0}`;
+
+        expect(styleText).toBe(
+          `${rules}@scope (svg[data-icon-copy="${copy}"]){ ${rules}}`
+        );
+      });
+
+      it('should repeat the style rules in the scope of each React copy', () => {
+        const markup = ReactDOMServer.renderToStaticMarkup(
+          React.createElement(styleRulesIcon.react, { tag: null })
+        );
+        const svg = new DOMParser()
+          .parseFromString(markup, 'text/html')
+          .querySelector('svg')!;
+        const { gradientId, styleText } = getStyleGradientData(svg);
+        const copy = svg.getAttribute('data-icon-copy');
+        const rules = `.a{fill:url(#${gradientId})}.b{fill:#0f0}`;
+
+        expect(styleText).toBe(
+          `${rules}@scope (svg[data-icon-copy="${copy}"]){ ${rules}}`
+        );
       });
 
       it('should create unique ids for each React render', () => {
