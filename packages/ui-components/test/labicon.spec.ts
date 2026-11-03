@@ -59,6 +59,19 @@ const animationIcon = new LabIcon({
   svgstr: animationSvgstr
 });
 
+const linkSvgstr = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 10 10" aria-labelledby="title0">
+<title id="title0">Link</title>
+<defs><linearGradient id="base0"><stop offset="0" stop-color="#000"/></linearGradient><linearGradient id="chain0" xlink:href="#base0"/><rect id="shape0" width="10" height="10" fill="url(#chain0)"/></defs>
+<use href="#shape0"/>
+</svg>`;
+
+const linkIcon = new LabIcon({
+  name: 'test-ui-components:link',
+  svgstr: linkSvgstr
+});
+
+const XLINK_NAMESPACE = 'http://www.w3.org/1999/xlink';
+
 function getIconIdData(svg: Element): {
   clipPathId: string;
   clipPathRef: string;
@@ -261,6 +274,55 @@ describe('@jupyterlab/ui-components', () => {
 
         expect(svg.querySelector('filter')!.getAttribute('id')).not.toBe(
           `shadow-${next}`
+        );
+      });
+
+      it('should point the href of each copy at its own element', () => {
+        const copies = [
+          linkIcon.element({ tag: null }),
+          linkIcon.element({ tag: null })
+        ];
+        const shapes = copies.map(svg =>
+          svg.querySelector('rect')!.getAttribute('id')
+        );
+
+        expect(shapes[0]).not.toEqual(shapes[1]);
+        expect(
+          copies.map(svg => svg.querySelector('use')!.getAttribute('href'))
+        ).toEqual(shapes.map(id => `#${id}`));
+      });
+
+      it('should keep the namespace of a renamed xlink:href', () => {
+        const copies = [
+          linkIcon.element({ tag: null }),
+          linkIcon.element({ tag: null })
+        ];
+        const bases = copies.map(svg =>
+          svg.querySelector('linearGradient')!.getAttribute('id')
+        );
+
+        expect(bases[0]).not.toEqual(bases[1]);
+        expect(
+          copies.map(svg =>
+            svg
+              .querySelectorAll('linearGradient')[1]
+              .getAttributeNS(XLINK_NAMESPACE, 'href')
+          )
+        ).toEqual(bases.map(id => `#${id}`));
+      });
+
+      it('should point the aria-labelledby of each copy at its own title', () => {
+        const copies = [
+          linkIcon.element({ tag: null }),
+          linkIcon.element({ tag: null })
+        ];
+        const titles = copies.map(svg =>
+          svg.querySelector('title')!.getAttribute('id')
+        );
+
+        expect(titles[0]).not.toEqual(titles[1]);
+        expect(copies.map(svg => svg.getAttribute('aria-labelledby'))).toEqual(
+          titles
         );
       });
     });
