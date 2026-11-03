@@ -183,6 +183,11 @@ test.describe('Notebook Toolbar using system clipboard', () => {
     await page.notebook.clickToolbarItem('copy');
     await page.notebook.selectCells(0);
     await page.notebook.clickToolbarItem('paste');
+    // The paste inserts the cell after the clipboard read.
+    await expect(page.locator('.jp-Notebook-cell')).toHaveCount(4);
+    await expect(
+      page.locator('.jp-Notebook-cell.jp-mod-active .jp-cell-toolbar')
+    ).toBeVisible();
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
@@ -201,10 +206,14 @@ test.describe('Notebook Toolbar using system clipboard', () => {
     // Cut cell to populate clipboard
     await page.notebook.selectCells(0);
     await page.notebook.clickToolbarItem('cut');
+    // The cut deletes the cell after the clipboard write.
+    await expect(page.locator('.jp-Notebook-cell')).toHaveCount(2);
 
     const imageName = 'paste-cell.png';
     await page.notebook.selectCells(1);
     await page.notebook.clickToolbarItem('paste');
+    // The paste inserts the cell after the clipboard read.
+    await expect(page.locator('.jp-Notebook-cell')).toHaveCount(3);
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
     await expect(

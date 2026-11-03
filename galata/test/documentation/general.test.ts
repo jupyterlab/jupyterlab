@@ -639,6 +639,11 @@ test.describe('General', () => {
     // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(200);
 
+    // Starting the kernel updates the outdated kernel metadata of Data.ipynb.
+    await expect(page.activity.getTabLocator('Data.ipynb')).toHaveClass(
+      /jp-mod-dirty/
+    );
+
     expect(await page.screenshot()).toMatchSnapshot('terminal_layout.png');
   });
 
