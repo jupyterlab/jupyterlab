@@ -477,6 +477,8 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
           };
 
           this._svgReplaced.connect(onSvgReplaced);
+          // the svg may have been replaced after the render and before this effect
+          onSvgReplaced();
 
           // specify cleanup callback as hook return
           return () => {
@@ -815,6 +817,10 @@ namespace Private {
      * for the text of a style element), and its value with the placeholder.
      */
     references: [number, string | null, string][];
+    /**
+     * Every id of the svg, which a renamed id must not repeat.
+     */
+    existing: Set<string>;
   }
 
   export function cloneSvgElement(svgElement: HTMLElement): HTMLElement {
@@ -955,14 +961,20 @@ namespace Private {
     svgNode: HTMLElement,
     references: IIdReferences
   ): void {
-    idSuffixCounter =
-      idSuffixCounter >= Number.MAX_SAFE_INTEGER ? 1 : idSuffixCounter + 1;
-    const suffix = `-${idSuffixCounter.toString(36)}`;
+    let suffix = '';
+    const withSuffix = (value: string) =>
+      value.split(SUFFIX_PLACEHOLDER).join(suffix);
+    // editors such as Adobe XD already name ids this way, as in "Rectangle_1-2"
+    do {
+      idSuffixCounter =
+        idSuffixCounter >= Number.MAX_SAFE_INTEGER ? 1 : idSuffixCounter + 1;
+      suffix = `-${idSuffixCounter.toString(36)}`;
+    } while (
+      references.ids.some(([, id]) => references.existing.has(withSuffix(id)))
+    );
     const nodes = svgNode.getElementsByTagName('*');
     const nodeAt = (index: number) =>
       index === 0 ? svgNode : nodes[index - 1];
-    const withSuffix = (value: string) =>
-      value.split(SUFFIX_PLACEHOLDER).join(suffix);
 
     for (const [index, id] of references.ids) {
       nodeAt(index).setAttribute('id', withSuffix(id));
@@ -1065,7 +1077,7 @@ namespace Private {
         referencedIds.push([index, `${id}${SUFFIX_PLACEHOLDER}`]);
       }
     });
-    return { ids: referencedIds, references };
+    return { ids: referencedIds, references, existing: ids };
   }
 
   function escapeRegExp(text: string): string {

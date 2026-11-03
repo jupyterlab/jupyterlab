@@ -5,7 +5,9 @@ import { LabIcon } from '@jupyterlab/ui-components';
 import * as fs from 'fs';
 import * as path from 'path';
 import React from 'react';
+import { createRoot } from 'react-dom/client';
 import ReactDOMServer from 'react-dom/server';
+import { act } from 'react-dom/test-utils';
 
 const fooSvgstr = fs.readFileSync(path.join(__dirname, 'foo.svg'), {
   encoding: 'utf8'
@@ -240,6 +242,68 @@ describe('@jupyterlab/ui-components', () => {
         );
 
         expect(ids).toEqual(['fade0', 'fade1']);
+      });
+
+      it('should not give a renamed id the value of another id of the svg', () => {
+        const used = fooIcon
+          .element({ tag: null })
+          .querySelector('clipPath')!
+          .getAttribute('id')!
+          .slice('clip0-'.length);
+        const next = (parseInt(used, 36) + 1).toString(36);
+        // Adobe XD names a shape after its filter, as "Rectangle_1-2"
+        const icon = new LabIcon({
+          name: 'test-ui-components:taken-suffix',
+          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+<defs><filter id="shadow"><feGaussianBlur stdDeviation="1"/></filter></defs>
+<g filter="url(#shadow)"><rect id="shadow-${next}" width="10" height="10"/></g>
+</svg>`
+        });
+
+        const svg = icon.element({ tag: null });
+
+        expect(svg.querySelector('filter')!.getAttribute('id')).not.toBe(
+          `shadow-${next}`
+        );
+      });
+    });
+
+    describe('#react', () => {
+      it('should show an svg replaced before the component subscribed', async () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:replaced-early',
+          svgstr:
+            '<svg xmlns="http://www.w3.org/2000/svg"><rect id="old"/></svg>'
+        });
+        // a layout effect runs after the render and before the icon's effect
+        const Replace = () => {
+          React.useLayoutEffect(() => {
+            icon.svgstr =
+              '<svg xmlns="http://www.w3.org/2000/svg"><rect id="new"/></svg>';
+          }, []);
+          return null;
+        };
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(
+              React.createElement(
+                React.Fragment,
+                null,
+                React.createElement(icon.react, { tag: null }),
+                React.createElement(Replace)
+              )
+            );
+          });
+
+          expect(host.querySelector('rect')?.getAttribute('id')).toBe('new');
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
       });
     });
   });
