@@ -17,7 +17,8 @@ import {
   createToolbarFactory,
   Dialog,
   IToolbarWidgetRegistry,
-  showDialog
+  showDialog,
+  ToolbarRegistry
 } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
@@ -41,7 +42,12 @@ const cellToolbar: JupyterFrontEndPlugin<void> = {
       describedBy: {
         args: {
           type: 'object',
-          properties: {}
+          properties: {
+            [ToolbarRegistry.WIDGET_ID_ARG]: {
+              type: 'string',
+              description: trans.__('The ID of the notebook panel')
+            }
+          }
         }
       },
       execute: async args => {

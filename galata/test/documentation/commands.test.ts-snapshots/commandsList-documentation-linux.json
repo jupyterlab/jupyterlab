@@ -1002,7 +1002,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4629,6 +4634,10 @@
         "isPalette": {
           "type": "boolean",
           "description": "Whether the command is called from the command palette"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       },
       "required": [

@@ -777,6 +777,10 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
               description: trans.__(
                 'Whether the command is called from the command palette'
               )
+            },
+            [ToolbarRegistry.WIDGET_ID_ARG]: {
+              type: 'string',
+              description: trans.__('The ID of the notebook panel')
             }
           },
           required: ['format']
@@ -3551,7 +3555,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
