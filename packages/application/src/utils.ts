@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { SemanticCommand } from '@jupyterlab/apputils';
+import { SemanticCommand, ToolbarRegistry } from '@jupyterlab/apputils';
 import type { TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { CommandRegistry } from '@lumino/commands';
@@ -182,7 +182,10 @@ export function createSemanticCommand(
     },
     isVisible: args => {
       let isVisible: unknown[];
-      if (args?.[SemanticCommand.WIDGET] || args?.['widgetId']) {
+      if (
+        args?.[SemanticCommand.WIDGET] ||
+        args?.[ToolbarRegistry.WIDGET_ID_ARG]
+      ) {
         // When a specific widget is identified, bypass getActiveCommandId (which
         // relies on global focus state) and let each command's own isVisible decide.
         isVisible = commandList
@@ -225,7 +228,7 @@ export function createSemanticCommand(
   function getWidget(args?: ReadonlyPartialJSONObject): Widget | null {
     const widgetId =
       (args?.[SemanticCommand.WIDGET] as string | undefined) ??
-      (args?.['widgetId'] as string | undefined);
+      (args?.[ToolbarRegistry.WIDGET_ID_ARG] as string | undefined);
     if (widgetId) {
       for (const widget of shell.widgets()) {
         if (widget.id === widgetId) {
