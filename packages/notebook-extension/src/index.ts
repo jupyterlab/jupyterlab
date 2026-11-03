@@ -3220,6 +3220,10 @@ function addCommands(
             description: trans.__(
               'Whether to activate the notebook after execution'
             )
+          },
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -3259,6 +3263,10 @@ function addCommands(
             description: trans.__(
               'Whether to activate the notebook after execution'
             )
+          },
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -3285,7 +3293,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -3318,7 +3331,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -3353,7 +3371,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -3370,7 +3393,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -3421,7 +3449,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -3454,7 +3487,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -3487,6 +3525,10 @@ function addCommands(
           [CommandLinker.TRUST_BOUNDARY_ID_ARG]: {
             type: 'string',
             description: trans.__('The notebook trust boundary ID')
+          },
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -3546,6 +3588,10 @@ function addCommands(
             description: trans.__(
               'Whether to activate the notebook after execution'
             )
+          },
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -3617,7 +3663,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -3636,7 +3687,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -3695,7 +3751,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -3717,7 +3778,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -3739,7 +3805,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -3933,6 +4004,10 @@ function addCommands(
             description: trans.__(
               'Whether to activate the notebook after execution'
             )
+          },
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -4015,6 +4090,10 @@ function addCommands(
             description: trans.__(
               'Whether to activate the notebook after execution'
             )
+          },
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -4067,6 +4146,10 @@ function addCommands(
             type: 'boolean',
             description:
               'Whether the command is being executed from the toolbar'
+          },
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -4189,7 +4272,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4238,7 +4326,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4284,7 +4377,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4303,7 +4401,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4341,7 +4444,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4367,7 +4475,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4393,7 +4506,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4472,7 +4590,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4488,7 +4611,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4506,7 +4634,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4524,7 +4657,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4544,7 +4682,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4564,7 +4707,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4581,7 +4729,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4598,7 +4751,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4615,7 +4773,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4632,7 +4795,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4649,7 +4817,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4666,7 +4839,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4830,6 +5008,10 @@ function addCommands(
             description: trans.__(
               'Whether to activate the notebook after execution'
             )
+          },
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -4848,7 +5030,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4865,7 +5052,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4883,7 +5075,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4901,7 +5098,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4923,7 +5125,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4945,7 +5152,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4963,7 +5175,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -4986,6 +5203,10 @@ function addCommands(
             description: trans.__(
               'Whether to activate the notebook after execution'
             )
+          },
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -5010,7 +5231,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5032,7 +5258,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5054,7 +5285,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5076,7 +5312,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5098,7 +5339,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5120,7 +5366,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5142,7 +5393,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5160,7 +5416,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5178,7 +5439,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5196,7 +5462,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5214,7 +5485,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5232,7 +5508,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5250,7 +5531,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5268,7 +5554,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5286,7 +5577,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5320,6 +5616,10 @@ function addCommands(
             description: trans.__(
               'Whether to activate the notebook after execution'
             )
+          },
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -5340,7 +5640,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5358,7 +5663,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5376,7 +5686,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5413,6 +5728,10 @@ function addCommands(
           isMenu: {
             type: 'boolean',
             description: trans.__('Whether the command is called from a menu')
+          },
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -5431,7 +5750,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5450,7 +5774,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5469,7 +5798,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5496,6 +5830,10 @@ function addCommands(
           text: {
             type: 'string',
             description: trans.__('Text to replace the selection with')
+          },
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -5516,7 +5854,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5533,7 +5876,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5550,7 +5898,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5605,6 +5958,10 @@ function addCommands(
             description: trans.__(
               'Whether to activate the notebook after execution'
             )
+          },
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
           }
         }
       }
@@ -5623,7 +5980,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5640,7 +6002,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
@@ -5666,7 +6033,12 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the notebook panel')
+          }
+        }
       }
     }
   });
