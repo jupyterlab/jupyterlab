@@ -157,6 +157,25 @@ describe('@jupyterlab/ui-components', () => {
         expect(second.styleText).not.toContain('#gradient0 stop:first-child');
       });
 
+      it('should rewrite an inline style ID selector that follows another rule', () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:style-selector-minified',
+          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+<style>.a{fill:url(#gradient0)}#gradient0 stop:first-child{stop-color:#123}</style>
+<defs><linearGradient id="gradient0"><stop offset="0" stop-color="#000"/></linearGradient></defs>
+<rect class="a" width="10" height="10"/>
+</svg>`
+        });
+
+        const { gradientId, styleText } = getStyleGradientData(
+          icon.element({ tag: null })
+        );
+
+        expect(styleText).toBe(
+          `.a{fill:var(--jp-icon-ref-gradient0)}#${gradientId} stop:first-child{stop-color:#123}`
+        );
+      });
+
       it('should keep the style rules the same in every .element() copy', () => {
         const first = getStyleGradientData(
           styleGradientIcon.element({ tag: null })

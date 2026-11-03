@@ -800,8 +800,13 @@ namespace Private {
   // the search takes time linear in the length of the text
   const URL_ID_REFERENCE = /url\(\s*(['"]?)#([^\s'"()]+)\1\s*\)/g;
   const URL_ID_CANDIDATE = 'url(';
+  // a selector also follows the end of a rule, a block or a comment, as in
+  // minified CSS
   const ID_SELECTOR_REFERENCE_TEMPLATE = (id: string) =>
-    new RegExp(`(^|[\\s>+~,(])#${escapeRegExp(id)}(?=[\\s>+~,.:\\[{)])`, 'gm');
+    new RegExp(
+      `(^|[\\s>+~,(){};/])#${escapeRegExp(id)}(?=[\\s>+~,.:\\[{)])`,
+      'gm'
+    );
   // XML cannot contain this character, so it cannot clash with svg content
   const SUFFIX_PLACEHOLDER = '\u0000';
   const REFERENCE_PROPERTY_PREFIX = '--jp-icon-ref-';

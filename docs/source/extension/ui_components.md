@@ -165,9 +165,10 @@ The ids that count are those used in `url(#...)`, `href`,
 `aria-labelledby` and `aria-describedby`; other ids keep their value.
 
 The rules of a `<style>` element in your svg apply to the whole page,
-so they stay the same in every copy: a `url(#gradient)` in them becomes
-`var(--jp-icon-ref-gradient)`, and each copy sets that custom property
-on its svg to its own id.
+so a `url(#gradient)` in them becomes `var(--jp-icon-ref-gradient)`,
+and each copy sets that custom property on its svg to its own id. A
+selector that names a renamed id, such as `#gradient stop`, gets the
+suffix of each copy, so that rule differs from copy to copy.
 
 To style or find an element inside an icon, select it by a class or
 through the `data-icon` attribute of the rendered svg, for example
