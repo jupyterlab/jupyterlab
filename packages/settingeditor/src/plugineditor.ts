@@ -13,7 +13,7 @@ import { JSONExt } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
-import { StackedLayout, Widget } from '@lumino/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 import { RawEditor } from './raweditor';
 import type { JsonSettingEditor } from './jsonsettingeditor';
 
@@ -40,11 +40,7 @@ export class PluginEditor extends Widget {
     this.translator = translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
 
-    // TODO: Remove this layout. We were using this before when we
-    // when we had a way to switch between the raw and table editor
-    // Now, the raw editor is the only child and probably could merged into
-    // this class directly in the future.
-    const layout = (this.layout = new StackedLayout());
+    const layout = (this.layout = new PanelLayout());
     const { onSaveError } = Private;
 
     this.raw = this._rawEditor = new RawEditor({
