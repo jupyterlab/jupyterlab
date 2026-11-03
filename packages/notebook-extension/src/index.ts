@@ -3537,12 +3537,13 @@ function addCommands(
   commands.addCommand(CommandIDs.restartClear, {
     label: trans.__('Restart Kernel and Clear Outputs of All Cells…'),
     caption: trans.__('Restart the kernel and clear all outputs of all cells'),
-    execute: async () => {
+    execute: async args => {
       const restarted: boolean = await commands.execute(CommandIDs.restart, {
+        ...args,
         activate: false
       });
       if (restarted) {
-        await commands.execute(CommandIDs.clearAllOutputs);
+        await commands.execute(CommandIDs.clearAllOutputs, args);
       }
     },
     isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
