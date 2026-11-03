@@ -4471,7 +4471,6 @@ __metadata:
     "@jupyter/ydoc": ^4.0.0
     "@jupyterlab/application": ^4.7.0-beta.0
     "@jupyterlab/apputils": ^4.8.0-beta.0
-    "@jupyterlab/cell-toolbar": ^4.7.0-beta.0
     "@jupyterlab/cells": ^4.7.0-beta.0
     "@jupyterlab/codeeditor": ^4.7.0-beta.0
     "@jupyterlab/codemirror": ^4.7.0-beta.0
