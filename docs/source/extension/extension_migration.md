@@ -16,12 +16,14 @@
   whole. Each such plugin is named in a browser console warning. To keep it enabled, list
   the plugin ids to disable in `disabledExtensions` instead of the package name.
 
-- In each copy of an icon that `LabIcon` renders, the ids that the svg refers to itself
-  (through `url(#...)`, `href`, `aria-labelledby` or `aria-describedby`) now get a suffix
-  such as `-3`. This keeps gradients, clip paths and masks working when the same icon is
-  shown more than once. Other ids keep their value. CSS or code that selects one of the
-  renamed elements by id no longer matches it: select it by a class, or through the
-  `data-icon` attribute of the rendered svg, for example `svg[data-icon="my-pkg:logo"] .accent`.
+- In each copy of an icon that `LabIcon` renders, the IDs that the SVG refers to now get a
+  suffix: `id="shine"` and `fill="url(#shine)"` become `id="shine-3"` and `fill="url(#shine-3)"`.
+  Without this suffix, the other copies could render without their gradient, clip path or
+  mask when the first copy on the page is hidden. Only the IDs named in `url(#...)`, `href`,
+  `xlink:href`, `aria-labelledby` or `aria-describedby` change. A selector outside the SVG
+  that names a renamed ID, in CSS or in code, no longer matches the element: give the
+  element a class, and select it through the `data-icon` attribute of the rendered SVG, for
+  example `svg[data-icon="my-pkg:logo"] .accent`. See {ref}`labicon-svg-ids`.
 
 ### API updates
 

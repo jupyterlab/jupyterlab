@@ -155,23 +155,68 @@ export const fooIcon = new LabIcon({
 });
 ```
 
-### Ids inside your svg
+(labicon-svg-ids)=
 
-If your svg refers to its own elements by id, as gradients, clip paths,
-masks and `<use>` elements do, each copy of the icon that `LabIcon`
-renders gets its own copy of those ids, with a suffix such as `-3`.
-This keeps every copy working when the icon is shown more than once.
-The ids that count are those used in `url(#...)`, `href`,
-`aria-labelledby` and `aria-describedby`; other ids keep their value.
+### IDs inside your SVG
 
-The rules of a `<style>` element in your svg apply to the whole page,
-so a `url(#gradient)` in them becomes `var(--jp-icon-ref-gradient)`,
-and each copy sets that custom property on its svg to its own id. A
-selector that names a renamed id, such as `#gradient stop`, gets the
-suffix of each copy, so that rule differs from copy to copy.
+A shape in an SVG uses a gradient by referring to its ID:
 
-To style or find an element inside an icon, select it by a class or
-through the `data-icon` attribute of the rendered svg, for example
+```xml
+<linearGradient id="shine">...</linearGradient>
+<path fill="url(#shine)" d="..." />
+```
+
+The browser resolves `url(#shine)` to the first element on the page
+with the ID `shine`. So if two copies of an icon kept the same IDs,
+both copies would use the gradient of the first copy. When the first
+copy is hidden with `display: none`, the second copy could render
+without the gradient. References to clip paths and masks, and the
+`href` of a `<use>` element, are resolved in the same way.
+
+For this reason, `LabIcon` renames these IDs in each copy of the icon
+that it renders. It adds a suffix such as `-3` to each ID and to each
+reference to it. One rendered copy of the SVG above has:
+
+```xml
+<linearGradient id="shine-3">...</linearGradient>
+<path fill="url(#shine-3)" d="..." />
+```
+
+Only the IDs named in `url(#...)`, `href`, `xlink:href`,
+`aria-labelledby` or `aria-describedby` change. Other IDs keep their
+value.
+
+The rules of a `<style>` element in your SVG apply to the whole page.
+If each copy put its own ID into a rule, the rule of the last copy on
+the page would apply to all copies. Instead, a `url(#...)` in a rule
+becomes a custom property, and each copy sets this property on its
+root `<svg>`:
+
+```xml
+<!-- your SVG -->
+<svg xmlns="http://www.w3.org/2000/svg">
+  <style>.logo { fill: url(#shine) }</style>
+  ...
+</svg>
+
+<!-- one rendered copy -->
+<svg xmlns="http://www.w3.org/2000/svg" style="--jp-icon-ref-shine:url(#shine-3)">
+  <style>.logo { fill: var(--jp-icon-ref-shine) }</style>
+  ...
+</svg>
+```
+
+A selector in these rules that names a renamed ID, such as
+`#shine stop`, gets the suffix of each copy, so the rule still matches
+the element in every copy. Classes are not renamed, so a rule for
+`.logo` applies to every element on the page with that class,
+including those of other icons. Give your classes names that only your
+icon uses.
+
+The suffix depends on the order in which icons are rendered, so a
+selector outside the SVG cannot name a renamed ID. To style or find an
+element of the icon from outside the SVG, give it a class and select
+it through the `data-icon` attribute of the rendered SVG, for example
 `svg[data-icon="barpkg:foo"] .accent`.
 
 ### Sync icon color to JupyterLab theme
