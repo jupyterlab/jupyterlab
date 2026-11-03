@@ -313,6 +313,66 @@ test('Cell toolbar items follow the active cell of their own notebook', async ({
   ).toHaveAttribute('aria-disabled', 'false');
 });
 
+test('Restart and clear outputs acts on the notebook given by its widget id', async ({
+  page,
+  tmpPath
+}) => {
+  const notebook = JSON.stringify({
+    cells: [
+      {
+        cell_type: 'code',
+        execution_count: 1,
+        id: 'cell-0',
+        metadata: {},
+        outputs: [{ output_type: 'stream', name: 'stdout', text: ['out\n'] }],
+        source: 'print("out")'
+      }
+    ],
+    metadata: {
+      kernelspec: {
+        display_name: 'Python 3 (ipykernel)',
+        language: 'python',
+        name: 'python3'
+      }
+    },
+    nbformat: 4,
+    nbformat_minor: 5
+  });
+  await page.contents.uploadContent(
+    notebook,
+    'text',
+    `${tmpPath}/target.ipynb`
+  );
+  await page.contents.uploadContent(notebook, 'text', `${tmpPath}/other.ipynb`);
+
+  // Given two notebooks with an output side by side, the second one focused
+  await page.notebook.openByPath(`${tmpPath}/target.ipynb`);
+  await page.notebook.activate('target.ipynb');
+  await page.evaluate(async path => {
+    await window.jupyterapp.commands.execute('docmanager:open', {
+      path,
+      options: { mode: 'split-right' }
+    });
+  }, `${tmpPath}/other.ipynb`);
+  await page.notebook.activate('other.ipynb');
+  const target = await page.activity.getPanelLocator('target.ipynb');
+  const other = await page.activity.getPanelLocator('other.ipynb');
+
+  // When the command runs with the widget id of the first notebook
+  const widgetId = await target!.getAttribute('id');
+  const executed = page.evaluate(async widgetId => {
+    await window.jupyterapp.commands.execute('notebook:restart-clear-output', {
+      widgetId
+    });
+  }, widgetId);
+  await page.locator('.jp-Dialog .jp-mod-accept').click();
+  await executed;
+
+  // Then only the first notebook loses its output
+  await expect(target!.locator('.jp-OutputArea-output')).toHaveCount(0);
+  await expect(other!.locator('.jp-OutputArea-output')).toHaveCount(1);
+});
+
 test.describe('Notebook command in the top bar', () => {
   test.use({
     mockSettings: {
