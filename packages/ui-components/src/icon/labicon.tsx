@@ -501,20 +501,23 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
             // all copies can share the same markup
             return {
               svgReactAttrs: this.svgReactAttrs,
-              svgInnerHTML: this.svgInnerHTML
+              svgInnerHTML: this.svgInnerHTML,
+              svgStyle: undefined
             };
           }
 
-          const clone = Private.cloneSvgElement(svgElement);
+          const { clone, properties } = Private.cloneSvg(svgElement);
           return {
             svgReactAttrs: getReactAttrs(clone, { ignore: ['data-icon-id'] }),
-            svgInnerHTML: clone.innerHTML
+            svgInnerHTML: clone.innerHTML,
+            // getReactAttrs skips the style attribute that holds the properties
+            svgStyle: Object.keys(properties).length ? properties : undefined
           };
         }, [id]);
         if (!svgData) {
           return <></>;
         }
-        const { svgReactAttrs, svgInnerHTML } = svgData;
+        const { svgReactAttrs, svgInnerHTML, svgStyle } = svgData;
 
         const svgProps = { ...svgReactAttrs };
         if (!tag) {
@@ -531,6 +534,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
         const svgComponent = (
           <svg
             {...svgProps}
+            style={svgStyle as React.CSSProperties | undefined}
             dangerouslySetInnerHTML={{ __html: svgInnerHTML }}
             ref={ref as React.Ref<SVGSVGElement>}
           />
@@ -800,8 +804,7 @@ namespace Private {
     new RegExp(`(^|[\\s>+~,(])#${escapeRegExp(id)}(?=[\\s>+~,.:\\[{)])`, 'gm');
   // XML cannot contain this character, so it cannot clash with svg content
   const SUFFIX_PLACEHOLDER = '\u0000';
-  const COPY_ATTRIBUTE = 'data-icon-copy';
-  const COPY_SCOPE = `@scope (svg[${COPY_ATTRIBUTE}="${SUFFIX_PLACEHOLDER}"])`;
+  const REFERENCE_PROPERTY_PREFIX = '--jp-icon-ref-';
   const idReferencesCache = new WeakMap<Element, IIdReferences | null>();
   let idSuffixCounter = 0;
 
@@ -823,15 +826,29 @@ namespace Private {
      * Every id of the svg, which a renamed id must not repeat.
      */
     existing: Set<string>;
+    /**
+     * The custom property that a style element reads for each id it uses in
+     * `url(#...)`, and its value with the placeholder.
+     */
+    properties: [string, string][];
   }
 
   export function cloneSvgElement(svgElement: HTMLElement): HTMLElement {
+    return cloneSvg(svgElement).clone;
+  }
+
+  /**
+   * Clone the svg with ids of its own, and give the values of the custom
+   * properties that the clone sets on its root.
+   */
+  export function cloneSvg(svgElement: HTMLElement): {
+    clone: HTMLElement;
+    properties: { [name: string]: string };
+  } {
     const clone = svgElement.cloneNode(true) as HTMLElement;
     const references = getIdReferences(svgElement);
-    if (references) {
-      uniquifySvgIds(clone, references);
-    }
-    return clone;
+    const properties = references ? uniquifySvgIds(clone, references) : {};
+    return { clone, properties };
   }
 
   /**
@@ -962,7 +979,7 @@ namespace Private {
   function uniquifySvgIds(
     svgNode: HTMLElement,
     references: IIdReferences
-  ): void {
+  ): { [name: string]: string } {
     let suffix = '';
     const withSuffix = (value: string) =>
       value.split(SUFFIX_PLACEHOLDER).join(suffix);
@@ -988,6 +1005,11 @@ namespace Private {
         nodeAt(index).setAttribute(name, withSuffix(value));
       }
     }
+    const properties: { [name: string]: string } = {};
+    for (const [name, value] of references.properties) {
+      properties[name] = withSuffix(value);
+    }
+    return properties;
   }
 
   function getIdReferences(svgElement: HTMLElement): IIdReferences | null {
@@ -1026,6 +1048,21 @@ namespace Private {
       text.replace(URL_ID_REFERENCE, (full, quote, id) =>
         ids.has(id) ? `url(${quote}#${reference(id)}${quote})` : full
       );
+    // the rules of a style element apply to the whole page, so they stay the
+    // same in every copy: a url() there reads the renamed id from a custom
+    // property that each copy sets on its root
+    const properties = new Map<string, string>();
+    const replaceStyleUrls = (text: string) =>
+      text.replace(URL_ID_REFERENCE, (full, quote, id) => {
+        if (!ids.has(id)) {
+          return full;
+        }
+        // keep only characters that a custom property name allows
+        const name =
+          REFERENCE_PROPERTY_PREFIX + id.replace(/[^\w\u0080-\uffff-]/g, '_');
+        properties.set(name, `url(#${reference(id)})`);
+        return `var(${name})`;
+      });
 
     const references: [number, string | null, string][] = [];
     const styles: [number, string, string][] = [];
@@ -1051,17 +1088,17 @@ namespace Private {
         }
       }
       if (node.tagName.toLowerCase() === 'style' && node.textContent) {
-        styles.push([index, node.textContent, replaceUrls(node.textContent)]);
+        styles.push([
+          index,
+          node.textContent,
+          replaceStyleUrls(node.textContent)
+        ]);
       }
     });
 
     // selectors can only be rewritten once all referenced ids are known
-    let scoped = false;
     for (const [index, text, urlsReplaced] of styles) {
-      let nextText = scopeRules(urlsReplaced);
-      if (nextText !== urlsReplaced) {
-        scoped = true;
-      }
+      let nextText = urlsReplaced;
       referenced.forEach(id => {
         nextText = nextText.replace(
           ID_SELECTOR_REFERENCE_TEMPLATE(id),
@@ -1072,8 +1109,21 @@ namespace Private {
         references.push([index, null, nextText]);
       }
     }
-    if (scoped) {
-      references.push([0, COPY_ATTRIBUTE, SUFFIX_PLACEHOLDER]);
+    if (properties.size) {
+      const declarations = Array.from(properties)
+        .map(([name, value]) => `${name}:${value}`)
+        .join(';');
+      // a url() in the style attribute of the root may have rewritten it
+      const rootStyle = references.find(
+        ([index, name]) => index === 0 && name === 'style'
+      );
+      const style = rootStyle?.[2] ?? svgNode.getAttribute('style');
+      const value = style ? `${style};${declarations}` : declarations;
+      if (rootStyle) {
+        rootStyle[2] = value;
+      } else {
+        references.push([0, 'style', value]);
+      }
     }
 
     if (!referenced.size) {
@@ -1086,57 +1136,12 @@ namespace Private {
         referencedIds.push([index, `${id}${SUFFIX_PLACEHOLDER}`]);
       }
     });
-    return { ids: referencedIds, references, existing: ids };
-  }
-
-  /**
-   * Repeat the rules of a style element inside `@scope` when they use a
-   * renamed id in `url(#...)`: the rules apply to the whole page, so the last
-   * copy's rules would win in every copy. All rules are repeated to keep their
-   * order. Browsers without `@scope` skip the repeat.
-   */
-  function scopeRules(css: string): string {
-    if (!css.includes(SUFFIX_PLACEHOLDER)) {
-      return css;
-    }
-    // if a block, comment or string is left open, the repeat becomes part of it
-    let depth = 0;
-    for (let i = 0; i < css.length; i++) {
-      const end = skipCssToken(css, i);
-      if (end < 0) {
-        return css;
-      } else if (end > i) {
-        i = end;
-      } else if (css[i] === '{') {
-        depth++;
-      } else if (css[i] === '}' && --depth < 0) {
-        return css;
-      }
-    }
-    return depth === 0 ? `${css}${COPY_SCOPE}{ ${css}}` : css;
-  }
-
-  // the index of the last character of a comment, string or escape that
-  // starts at `i`, `i` if none does, or -1 if it is not closed
-  function skipCssToken(css: string, i: number): number {
-    if (css[i] === '\\') {
-      return i + 1 < css.length ? i + 1 : -1;
-    }
-    if (css.startsWith('/*', i)) {
-      const end = css.indexOf('*/', i + 2);
-      return end < 0 ? -1 : end + 1;
-    }
-    if (css[i] === '"' || css[i] === "'") {
-      for (let j = i + 1; j < css.length; j++) {
-        if (css[j] === '\\') {
-          j++;
-        } else if (css[j] === css[i]) {
-          return j;
-        }
-      }
-      return -1;
-    }
-    return i;
+    return {
+      ids: referencedIds,
+      references,
+      existing: ids,
+      properties: Array.from(properties)
+    };
   }
 
   function escapeRegExp(text: string): string {

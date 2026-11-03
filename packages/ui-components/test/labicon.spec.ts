@@ -40,18 +40,6 @@ const styleSelectorIcon = new LabIcon({
   svgstr: styleSelectorSvgstr
 });
 
-// the later rule sets the fill of the rect, and must keep doing so in a copy
-const styleRulesSvgstr = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-<style>.a{fill:url(#gradient0)}.b{fill:#0f0}</style>
-<defs><linearGradient id="gradient0"><stop offset="0" stop-color="#000"/></linearGradient></defs>
-<rect class="a b" width="10" height="10"/>
-</svg>`;
-
-const styleRulesIcon = new LabIcon({
-  name: 'test-ui-components:style-rules',
-  svgstr: styleRulesSvgstr
-});
-
 const rootIdSvgstr = `<svg id="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
 <path fill="#fff" d="M0 0h10v10H0z"/>
 </svg>`;
@@ -136,11 +124,11 @@ describe('@jupyterlab/ui-components', () => {
         expect(first.clipPathRef).toEqual(`url(#${first.clipPathId})`);
         expect(second.clipPathRef).toEqual(`url(#${second.clipPathId})`);
         expect(firstStyle.gradientId).not.toEqual(secondStyle.gradientId);
-        expect(firstStyle.styleText).toContain(
-          `url(#${firstStyle.gradientId})`
+        expect(firstStyleSvg.getAttribute('style')).toBe(
+          `--jp-icon-ref-gradient0:url(#${firstStyle.gradientId})`
         );
-        expect(secondStyle.styleText).toContain(
-          `url(#${secondStyle.gradientId})`
+        expect(secondStyleSvg.getAttribute('style')).toBe(
+          `--jp-icon-ref-gradient0:url(#${secondStyle.gradientId})`
         );
       });
 
@@ -153,42 +141,47 @@ describe('@jupyterlab/ui-components', () => {
         expect(first.styleText).toContain(
           `#${first.gradientId} stop:first-child`
         );
-        expect(first.styleText).toContain(`url(#${first.gradientId})`);
+        expect(firstSvg.getAttribute('style')).toBe(
+          `--jp-icon-ref-gradient0:url(#${first.gradientId})`
+        );
         expect(first.styleText).toContain('stop-color:#123');
         expect(first.styleText).not.toContain('#gradient0 stop:first-child');
 
         expect(second.styleText).toContain(
           `#${second.gradientId} stop:first-child`
         );
-        expect(second.styleText).toContain(`url(#${second.gradientId})`);
+        expect(secondSvg.getAttribute('style')).toBe(
+          `--jp-icon-ref-gradient0:url(#${second.gradientId})`
+        );
         expect(second.styleText).toContain('stop-color:#123');
         expect(second.styleText).not.toContain('#gradient0 stop:first-child');
       });
 
-      it('should repeat the style rules in the scope of each .element() copy', () => {
-        const svg = styleRulesIcon.element({ tag: null });
-        const { gradientId, styleText } = getStyleGradientData(svg);
-        const copy = svg.getAttribute('data-icon-copy');
-        const rules = `.a{fill:url(#${gradientId})}.b{fill:#0f0}`;
-
-        expect(styleText).toBe(
-          `${rules}@scope (svg[data-icon-copy="${copy}"]){ ${rules}}`
+      it('should keep the style rules the same in every .element() copy', () => {
+        const first = getStyleGradientData(
+          styleGradientIcon.element({ tag: null })
         );
+        const second = getStyleGradientData(
+          styleGradientIcon.element({ tag: null })
+        );
+
+        expect([first.styleText, second.styleText]).toEqual([
+          '.a{fill:var(--jp-icon-ref-gradient0)}',
+          '.a{fill:var(--jp-icon-ref-gradient0)}'
+        ]);
       });
 
-      it('should repeat the style rules in the scope of each React copy', () => {
+      it('should set the custom properties of each React copy on its svg', () => {
         const markup = ReactDOMServer.renderToStaticMarkup(
-          React.createElement(styleRulesIcon.react, { tag: null })
+          React.createElement(styleGradientIcon.react, { tag: null })
         );
         const svg = new DOMParser()
           .parseFromString(markup, 'text/html')
           .querySelector('svg')!;
-        const { gradientId, styleText } = getStyleGradientData(svg);
-        const copy = svg.getAttribute('data-icon-copy');
-        const rules = `.a{fill:url(#${gradientId})}.b{fill:#0f0}`;
+        const { gradientId } = getStyleGradientData(svg);
 
-        expect(styleText).toBe(
-          `${rules}@scope (svg[data-icon-copy="${copy}"]){ ${rules}}`
+        expect(svg.getAttribute('style')).toBe(
+          `--jp-icon-ref-gradient0:url(#${gradientId})`
         );
       });
 
@@ -245,11 +238,11 @@ describe('@jupyterlab/ui-components', () => {
           const secondStyle = getStyleGradientData(secondUpdatedSvg);
 
           expect(firstStyle.gradientId).not.toEqual(secondStyle.gradientId);
-          expect(firstStyle.styleText).toContain(
-            `url(#${firstStyle.gradientId})`
+          expect(firstUpdatedSvg.getAttribute('style')).toBe(
+            `--jp-icon-ref-gradient0:url(#${firstStyle.gradientId})`
           );
-          expect(secondStyle.styleText).toContain(
-            `url(#${secondStyle.gradientId})`
+          expect(secondUpdatedSvg.getAttribute('style')).toBe(
+            `--jp-icon-ref-gradient0:url(#${secondStyle.gradientId})`
           );
         } finally {
           firstContainer.remove();
