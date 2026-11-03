@@ -370,3 +370,14 @@ Be cautious when editing metadata directly, as incorrect values may
 affect notebook behavior. If something goes wrong, use the revert icon
 to undo your changes before committing them.
 ```
+
+### Link Handling
+
+Links in Markdown cells that point to local files resolve differently depending on whether they start with a leading slash:
+
+- A path starting with `/` (e.g. `/foo/bar/baz.py`) resolves relative to the server's root URL.
+- A path without a leading slash (e.g. `foo/bar/baz.py` or `./foo/bar/baz.py`) resolves relative to the notebook's own location.
+
+```{tip}
+If a link to a local file isn't opening as expected, try toggling the leading slash.
+```
