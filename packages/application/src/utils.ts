@@ -255,8 +255,8 @@ export function createSemanticCommand(
   function concatenateTexts(
     attribute: 'label' | 'caption'
   ): string | CommandRegistry.CommandFunc<string> | undefined {
-    return () => {
-      const texts = (reduceAttribute(attribute) as string[]).map(
+    return args => {
+      const texts = (reduceAttribute(attribute, args) as string[]).map(
         (text, textIndex) =>
           attribute == 'caption' && textIndex > 0
             ? text.toLocaleLowerCase()
