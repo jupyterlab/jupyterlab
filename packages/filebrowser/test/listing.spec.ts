@@ -835,6 +835,45 @@ describe('filebrowser/listing', () => {
       });
     });
 
+    describe('last modified column', () => {
+      const ITEM_MODIFIED_CLASS = 'jp-DirListing-itemModified';
+
+      it('should update the relative time when the column is resized', async () => {
+        const itemNode = dirListing.contentNode.children[0] as HTMLElement;
+        const modifiedCell = itemNode.querySelector(
+          `.${ITEM_MODIFIED_CLASS}`
+        ) as HTMLElement;
+
+        expect(modifiedCell).not.toBeNull();
+
+        // The contents manager mock stamps `last_modified` with the current
+        // time on every save, so set a stable past timestamp directly on the
+        // model to make the rendered strings differ between date styles.
+        const firstItem = [...dirListing.sortedItems()].find(
+          item => item.type !== 'directory'
+        );
+        expect(firstItem).toBeDefined();
+        (firstItem as any).last_modified = new Date(2020, 0, 1).toISOString();
+
+        const renderedValues: string[] = [];
+
+        // jsdom has no layout, so the column width measured from the DOM is
+        // always 0. Drive the recorded column size, which is what the
+        // adaptive date style is computed from, and go through the resize
+        // path to trigger the re-render.
+        const dirListingAny = dirListing as any;
+        for (const width of [90, 110, 300]) {
+          dirListingAny._columnSizes['last_modified'] = width;
+          dirListing.onResize(new Widget.ResizeMessage(200, 300));
+          await framePromise();
+          renderedValues.push(modifiedCell.textContent ?? '');
+        }
+
+        // The widths map to the narrow, short, and long date styles.
+        expect(new Set(renderedValues).size).toBe(3);
+      });
+    });
+
     describe('date created column', () => {
       const ITEM_CREATED_CLASS = 'jp-DirListing-itemCreated';
       const CREATED_ID_CLASS = 'jp-id-created';
