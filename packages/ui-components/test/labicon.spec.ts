@@ -356,6 +356,51 @@ describe('@jupyterlab/ui-components', () => {
           host.remove();
         }
       });
+
+      it('should keep the ids of a copy when it renders again', async () => {
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(
+              React.createElement(fooIcon.react, { tag: null, className: 'a' })
+            );
+          });
+          const id = host.querySelector('clipPath')!.getAttribute('id');
+          await act(async () => {
+            root.render(
+              React.createElement(fooIcon.react, { tag: null, className: 'b' })
+            );
+          });
+
+          expect(host.querySelector('svg')?.getAttribute('class')).toBe('b');
+          expect(host.querySelector('clipPath')?.getAttribute('id')).toBe(id);
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
+
+      it('should not set data-icon-id on a copy with its own ids', async () => {
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(React.createElement(fooIcon.react, { tag: null }));
+          });
+
+          expect(host.querySelector('svg')?.hasAttribute('data-icon-id')).toBe(
+            false
+          );
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
     });
   });
 });
