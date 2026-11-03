@@ -203,6 +203,39 @@ test.describe('Automatically collapsed main menu', () => {
   });
 });
 
+test.describe('Automatically collapsed main menu with top bar items', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/mainmenu-extension:menu-bar': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/mainmenu-extension:menu-bar'],
+        collapse: 'auto'
+      },
+      '@jupyterlab/application-extension:top-bar': {
+        toolbar: [{ name: 'workspaceIndicator', rank: 1000, disabled: false }]
+      }
+    }
+  });
+
+  test('Collapse the main menu when it does not fit next to the top bar items', async ({
+    page
+  }) => {
+    const selector = page.locator('.jp-WorkspaceSelector');
+    await expect(page.locator('#jp-MainMenu')).toBeVisible();
+    await expect(selector).toBeVisible();
+
+    // The menu fits in the window, but not next to the workspace selector.
+    await page.setViewportSize({ width: 500, height: 768 });
+
+    await expect(page.locator('#jp-MainMenu')).toBeHidden();
+    await expect(selector).toBeInViewport({ ratio: 1 });
+
+    await page.setViewportSize({ width: 1024, height: 768 });
+
+    await expect(page.locator('#jp-MainMenu')).toBeVisible();
+  });
+});
+
 const EXPECTED_MISSING_COMMANDS_MAINMENU = ['hub:control-panel', 'hub:logout'];
 
 test('Main menu definition must target an valid command', async ({ page }) => {
