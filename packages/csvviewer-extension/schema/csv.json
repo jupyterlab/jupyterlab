@@ -4,7 +4,10 @@
   "jupyter.lab.setting-icon": "ui-components:spreadsheet",
   "jupyter.lab.setting-icon-label": "CSV Viewer",
   "jupyter.lab.toolbars": {
-    "CSVTable": [{ "name": "delimiter", "rank": 10 }]
+    "CSVTable": [
+      { "name": "delimiter", "rank": 10 },
+      { "name": "comment", "rank": 20 }
+    ]
   },
   "jupyter.lab.transform": true,
   "properties": {

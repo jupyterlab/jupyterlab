@@ -24,6 +24,7 @@ from jupyterlab_server import (
     WorkspaceListApp,
 )
 from jupyterlab_server.config import get_static_page_config
+from jupyterlab_server.translation_utils import DEFAULT_LOCALE, SYS_LOCALE, is_valid_locale
 from notebook_shim.shim import NotebookConfigShimMixin
 from traitlets import Bool, Instance, Type, Unicode, default
 
@@ -764,6 +765,10 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         page_config["quitButton"] = self.serverapp.quit_button
         page_config["allow_hidden_files"] = self.serverapp.contents_manager.allow_hidden
         page_config["preferredPathIsHome"] = self._preferred_path_is_home()
+        # The locale that the "default" language setting resolves to
+        page_config.setdefault(
+            "serverLocale", SYS_LOCALE if is_valid_locale(SYS_LOCALE) else DEFAULT_LOCALE
+        )
         if hasattr(self.serverapp.contents_manager, "delete_to_trash"):
             page_config["delete_to_trash"] = self.serverapp.contents_manager.delete_to_trash
 

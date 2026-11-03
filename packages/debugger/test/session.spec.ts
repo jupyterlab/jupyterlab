@@ -92,6 +92,20 @@ describe('Debugger.Session', () => {
     });
   });
 
+  describe('#connection', () => {
+    it('should not block requests made before the connection is reassigned', async () => {
+      const debugSession = new Debugger.Session({
+        connection,
+        config
+      });
+      const pending = debugSession.restoreState();
+      debugSession.connection = connection;
+      const reply = await pending;
+      expect(reply.success).toBe(true);
+      debugSession.dispose();
+    });
+  });
+
   describe('#sendRequest failure', () => {
     it('should handle replies with success false', async () => {
       const debugSession = new Debugger.Session({

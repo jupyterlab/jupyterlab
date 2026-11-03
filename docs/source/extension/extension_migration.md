@@ -18,6 +18,11 @@
 
 ### API updates
 
+- The JSON Lines renderer plugin was renamed from `@jupyterlab/json-lines-extension:factory`
+  to `@jupyterlab/json-extension:json-lines-factory` to match its owning package.
+  Update references to the old plugin id in configuration, such as `disabledExtensions`,
+  `deferredExtensions` and `lockedExtensions`. The plugin has no settings to migrate.
+
 - Xterm.js, used by `@jupyterlab/terminal`, was upgraded from 5.x to 6.x, along with the
   `@xterm/addon-fit`, `@xterm/addon-search`, `@xterm/addon-web-links` and `@xterm/addon-webgl`
   addons. Notable changes for extensions that interact with the terminal:

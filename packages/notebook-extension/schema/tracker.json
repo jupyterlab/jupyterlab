@@ -380,6 +380,23 @@
   },
   "jupyter.lab.shortcuts": [
     {
+      "command": "notebook:commit-metadata-and-save",
+      "keys": ["Accel S"],
+      "selector": ".jp-MetadataEditorTool"
+    },
+    {
+      "command": "notebook:replace-selection",
+      "keys": ["Alt -"],
+      "selector": ".jp-Notebook.jp-mod-editMode [data-jp-editor-language='r']",
+      "args": { "text": "<- " }
+    },
+    {
+      "command": "notebook:replace-selection",
+      "keys": ["Accel Shift M"],
+      "selector": ".jp-Notebook.jp-mod-editMode [data-jp-editor-language='r']",
+      "args": { "text": "%>% " }
+    },
+    {
       "command": "notebook:change-cell-to-code",
       "keys": ["Y"],
       "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
@@ -798,6 +815,12 @@
       "description": "Whether to scroll heading to the document top when selecting it in the table of contents.",
       "type": "boolean",
       "default": true
+    },
+    "showLockForReadOnlyCells": {
+      "title": "Show lock icon for read-only cells",
+      "description": "Should a lock icon be shown for read-only cells",
+      "type": "boolean",
+      "default": false
     },
     "showEditorForReadOnlyMarkdown": {
       "title": "Show editor for read-only Markdown cells",

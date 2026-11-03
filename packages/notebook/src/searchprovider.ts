@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+import type { IMapChange } from '@jupyter/ydoc';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import type {
   CellSearchProvider,
@@ -138,6 +139,16 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   /**
+   * The number of matches which can be replaced.
+   */
+  get replaceableMatchesCount(): number {
+    return this._searchProviders.reduce(
+      (sum, provider) => sum + provider.replaceableMatchesCount,
+      0
+    );
+  }
+
+  /**
    * Set to true if the widget under search is read-only, false
    * if it is editable. Will be used to determine whether to show
    * the replace option.
@@ -226,11 +237,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       output: {
         title: trans.__('Search Cell Outputs'),
         description: trans.__('Search in the cell outputs.'),
-        disabledDescription: trans.__(
-          'Search in the cell outputs (not available when replace options are shown).'
-        ),
-        default: false,
-        supportReplace: false
+        default: false
       },
       selection: {
         title:
@@ -248,8 +255,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         description: trans.__(
           'Search only in the selected cells or text (depending on edit/command mode).'
         ),
-        default: false,
-        supportReplace: true
+        default: false
       }
     };
   }
@@ -361,6 +367,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._searchProviders = await Promise.all(
       cells.map(async (cell, index) => {
         const cellSearchProvider = createCellSearchProvider(cell);
+        cell.model.metadataChanged.connect(this._onCellMetadataChanged, this);
 
         await cellSearchProvider.setIsActive(
           !this._filters!.selection ||
@@ -418,6 +425,18 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   /**
+   * Get the current match, if any.
+   */
+  getCurrentMatch(): ISearchMatch | undefined {
+    if (this._currentProviderIndex === null) {
+      return undefined;
+    }
+    // The index points past the last cell after cells are deleted, until the
+    // search restarts.
+    return this._searchProviders[this._currentProviderIndex]?.getCurrentMatch();
+  }
+
+  /**
    * Replace the currently selected match with the provided text
    *
    * @param newText The replacement text.
@@ -459,7 +478,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       );
       if (searchEngine.currentMatchIndex === null) {
         // switch to next cell
-        await this.highlightNext(loop, { from: 'previous-match' });
+        await this.highlightNext(loop, {
+          from: 'previous-match',
+          skipReadOnly: true
+        });
       }
     }
 
@@ -530,6 +552,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   private _addCellProvider(index: number) {
     const cell = this.widget.content.widgets[index];
     const cellSearchProvider = createCellSearchProvider(cell);
+    cell.model.metadataChanged.connect(this._onCellMetadataChanged, this);
 
     ArrayExt.insert(this._searchProviders, index, cellSearchProvider);
 
@@ -591,6 +614,13 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._stateChanged.emit();
   }
 
+  private _onCellMetadataChanged(_: ICellModel, change: IMapChange): void {
+    if (change.key === 'editable') {
+      // The search box disables Replace for matches in read-only cells
+      this._stateChanged.emit();
+    }
+  }
+
   private async _stepNext(
     reverse = false,
     loop = false,
@@ -634,9 +664,28 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       }
 
       await activeCell.ready;
-      const editor = activeCell.editor!;
-      editor.revealPosition(editor.getPositionAt(match.position)!);
+      // Matches in the cell source come from `EditorSearchProvider` as plain
+      // `ISearchMatch` objects, without `node`. Output matches come from
+      // `GenericSearchProvider` as `IHTMLSearchMatch` objects: `node` is the
+      // text node holding the match, `position` counts from the start of that
+      // node, and that provider already scrolled the match into view.
+      if (!('node' in match)) {
+        const editor = activeCell.editor!;
+        editor.revealPosition(editor.getPositionAt(match.position)!);
+      }
       this._selectionLock = false;
+    };
+
+    const highlightInCell = async (
+      searchEngine: CellSearchProvider
+    ): Promise<ISearchMatch | undefined> => {
+      if (options?.skipReadOnly && searchEngine.isReadOnlyProvider()) {
+        // Treat it as a cell without matches, so the loop below still ends
+        return undefined;
+      }
+      return reverse
+        ? searchEngine.highlightPrevious(false, options)
+        : searchEngine.highlightNext(false, options);
     };
 
     if (this._currentProviderIndex === null) {
@@ -687,9 +736,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     do {
       const searchEngine = this._searchProviders[this._currentProviderIndex];
 
-      const match = reverse
-        ? await searchEngine.highlightPrevious(false, options)
-        : await searchEngine.highlightNext(false, options);
+      const match = await highlightInCell(searchEngine);
 
       if (match) {
         await activateNewMatch(match);
@@ -714,10 +761,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
     if (loop) {
       // try the first provider again
-      const searchEngine = this._searchProviders[startIndex];
-      const match = reverse
-        ? await searchEngine.highlightPrevious(false, options)
-        : await searchEngine.highlightNext(false, options);
+      const match = await highlightInCell(this._searchProviders[startIndex]);
       if (match) {
         await activateNewMatch(match);
         return match;

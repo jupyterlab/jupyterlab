@@ -147,6 +147,7 @@ export interface IDebugger {
 
   /**
    * Requests all the loaded modules and display them.
+   * Does nothing unless the debugger is started.
    */
   displayModules(): Promise<void>;
 

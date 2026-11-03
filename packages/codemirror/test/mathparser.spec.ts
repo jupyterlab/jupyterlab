@@ -301,6 +301,26 @@ Title
 );
 
 test(
+  'Block math $$ containing a line starting with a list marker',
+  `
+{MaBD:{maBD:$$}
+L = \\sum_i y_i
+- \\lambda w^2
+{maBD:$$}}
+`
+);
+
+test(
+  'Block math $$ containing a line starting with a quote marker',
+  `
+{MaBD:{maBD:$$}
+f(x)
+> 0
+{maBD:$$}}
+`
+);
+
+test(
   'Block math $$ interrupting a paragraph',
   `
 {P:Some text}
@@ -312,13 +332,38 @@ a
 );
 
 test(
-  'Unclosed block math $$ stops at a blank line',
+  'Block math $$ after a paragraph with $$ in a code span',
+  '\n{P:Wrap display math in {C:{c:`}$${c:`}}:}\n{MaBD:{maBD:$$}\nx^2\n{maBD:$$}}\n{P:where {Em:{e:*}x{e:*}} is a variable.}\n'
+);
+
+test(
+  'Block math $$ followed by Markdown on the closing line',
   `
 {MaBD:{maBD:$$}
+E = mc^2
+{maBD:$$}} {P:where {MaID:{maID:$}m{maID:$}} is the {Em:{e:*}mass{e:*}}.}
+`
+);
+
+test(
+  'Unclosed block math $$ is a paragraph up to a blank line',
+  `
+{P:$$
 a}
 
 {SH1:b
 {h:=}}
+`
+);
+
+test(
+  'Closing $$ of math interrupted by a list item is a paragraph',
+  `
+{P:The loss is $$
+L = \\sum_i y_i}
+{BL:{LI:{l:+} {P:\\lambda w^2}}}
+{P:$$
+where {Em:{e:*}w{e:*}} is the weight.}
 `
 );
 
@@ -333,51 +378,13 @@ where {Em:{e:*}m{e:*}} is the mass.}
 );
 
 test(
-  'Block math $$ opened mid-line containing a setext = underline',
+  'Math $$ opened mid-line containing a setext = underline',
   `
 {P:Some text {MaBD:{maBD:$$}
 a
 =
 {maBD:$$}}
 where {Em:{e:*}m{e:*}} is the mass.}
-`
-);
-
-test(
-  'Block math $$ followed by text on the closing line',
-  `
-{MaBD:{maBD:$$}
-a
-{maBD:$$}} {P:and more {Em:{e:*}text{e:*}}}
-`
-);
-
-test(
-  'Block math $$ followed by a setext heading on the closing line',
-  `
-{MaBD:{maBD:$$}
-a
-{maBD:$$}} {SH1:title
-{h:===}}
-`
-);
-
-test(
-  'Block math $$ followed by a paragraph continuing past the closing line',
-  `
-{MaBD:{maBD:$$}
-a
-{maBD:$$}} {P:and
-more}
-`
-);
-
-test(
-  'Block math $$ followed by block syntax on the closing line',
-  `
-{MaBD:{maBD:$$}
-a
-{maBD:$$}} {P:# not a heading}
 `
 );
 
@@ -391,13 +398,13 @@ a
 );
 
 test(
-  'Math $$ closed after an escaped backslash before a setext underline',
-  '\n{SH1:a {MaBD:{maBD:$$} x {Esc:\\\\}{maBD:$$}}\nb\n{h:===}}\n'
-);
-
-test(
-  'Code span containing $$ before a setext underline',
-  '\n{SH1:a {C:{c:`}$${c:`}} b\nc\n{h:===}}\n'
+  'Block math $$ containing an escaped \\$$',
+  `
+{MaBD:{maBD:$$}
+a \\$$
+b
+{maBD:$$}}
+`
 );
 
 // Block math \\[ \\]
@@ -423,38 +430,39 @@ test(
 );
 
 describe('markdown parser', () => {
-  it('should parse incrementally as from scratch around math blocks', () => {
-    const docs = [
-      '$$\na\n$$ title\n===\n\ntext',
-      'Some text $$\na\n=\n$$\nwhere *m* is\n\n$$\nb\n$$ and more\nlines',
-      '- $$\n  a\n  $$ item\n- next'
-    ];
-    for (const doc of docs) {
-      for (let pos = 0; pos <= doc.length; pos++) {
-        for (const insert of ['', 'x', '$$', '\n', '=']) {
-          const removed = insert || pos === doc.length ? 0 : 1;
-          const edited = doc.slice(0, pos) + insert + doc.slice(pos + removed);
-          const fragments = TreeFragment.applyChanges(
-            TreeFragment.addTree(ipythonParser.parse(doc)),
-            [
-              {
-                fromA: pos,
-                toA: pos + removed,
-                fromB: pos,
-                toB: pos + insert.length
-              }
-            ]
-          );
-          expect(ipythonParser.parse(edited, fragments).toString()).toEqual(
-            ipythonParser.parse(edited).toString()
-          );
-        }
-      }
-    }
-  });
-
   it('should parse empty math block $$$$ without error', () => {
     const inputText = '$$$$';
     expect(() => mixedParser.parse(inputText)).not.toThrow();
+  });
+
+  it('should reparse a list item ending with $$ math as from scratch', () => {
+    // TreeFragment.applyChanges drops unchanged ranges under 128 characters.
+    const doc = [
+      'The energy of a body at rest follows from its mass, as the list below',
+      'shows for a few cases.',
+      '',
+      '- Energy:',
+      '  $$',
+      '  E = mc^2',
+      '  $$ where $m$ is the *mass*.',
+      '1. Next step',
+      '',
+      'Text'
+    ].join('\n');
+    const edited = `${doc}x`;
+    const fragments = TreeFragment.applyChanges(
+      TreeFragment.addTree(ipythonParser.parse(doc)),
+      [
+        {
+          fromA: doc.length,
+          toA: doc.length,
+          fromB: doc.length,
+          toB: edited.length
+        }
+      ]
+    );
+    expect(ipythonParser.parse(edited, fragments).toString()).toBe(
+      ipythonParser.parse(edited).toString()
+    );
   });
 });

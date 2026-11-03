@@ -428,10 +428,13 @@ export const IToolbarWidgetRegistry = new Token<IToolbarWidgetRegistry>(
  */
 export interface ISectionEntry {
   /**
-   * Stable identifier for this section, equal to the widget's Lumino `id`.
+   * Identifier for this section, stable across reloads and unique within its
+   * source panel.
    *
-   * The move plugin uses this to persist which sections have been moved and
-   * to restore them to the correct panel on reload.
+   * The move plugin passes this value to
+   * {@link IMovableSectionSource.removeSectionById} and uses it to persist
+   * which sections have been moved and to restore them to the correct panel
+   * on reload.
    */
   readonly id: string;
 

@@ -187,15 +187,12 @@ export class DefaultSchemaValidator implements ISchemaValidator {
         ];
       }
 
-      const { column, description } = error;
-      const line = error.lineNumber;
-
       return [
         {
           instancePath: '',
           keyword: 'parse',
           schemaPath: '',
-          message: `${description} (line ${line} column ${column})`
+          message: String(error)
         }
       ];
     }
@@ -618,7 +615,7 @@ export class SettingRegistry implements ISettingRegistry {
           await this._load(await this._transform('fetch', plugin));
         } catch (errors) {
           /* Ignore silently if no transformers. */
-          if (errors[0]?.keyword !== 'unset') {
+          if (!Array.isArray(errors) || errors[0]?.keyword !== 'unset') {
             console.warn('Ignored setting registry preload errors.', errors);
           }
         }
@@ -1604,20 +1601,12 @@ namespace Private {
       for (const item in result) {
         if (props.type === 'object') {
           // Use the values that are hard-coded in the default array over the defaults for each field.
-          const reified =
-            (reifyDefault(
-              props,
-              undefined,
-              definitions
-            ) as PartialJSONObject) ??
-            result[item] ??
-            {};
-          for (const prop in reified) {
-            if ((result[item] as PartialJSONObject)?.[prop]) {
-              reified[prop] = (result[item] as PartialJSONObject)[prop];
-            }
-          }
-          result[item] = reified;
+          const reified = reifyDefault(
+            props,
+            undefined,
+            definitions
+          ) as PartialJSONObject;
+          result[item] = { ...reified, ...(result[item] as PartialJSONObject) };
         }
       }
 
