@@ -28,6 +28,26 @@ test.describe('Local links', () => {
       .toBe(`${tmpPath}/subdir`);
   });
 
+  test('Link to the root directory opens it in the file browser', async ({
+    page,
+    tmpPath
+  }) => {
+    // `tmpPath` is a folder at the server root, so `..` points to the root.
+    await page.contents.uploadContent(
+      '[go to root](..)',
+      'text',
+      `${tmpPath}/${LINK_FILE}`
+    );
+    await page.filebrowser.open(`${tmpPath}/${LINK_FILE}`, 'Markdown Preview');
+    await page.locator('.jp-MarkdownViewer').waitFor();
+
+    await page
+      .locator('.jp-MarkdownViewer a', { hasText: 'go to root' })
+      .click();
+
+    await expect.poll(() => page.filebrowser.getCurrentDirectory()).toBe('');
+  });
+
   test('File link still opens the file', async ({ page, tmpPath }) => {
     await page.contents.uploadContent('hello', 'text', `${tmpPath}/note.txt`);
     await page.contents.uploadContent(

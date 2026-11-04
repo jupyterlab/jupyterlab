@@ -71,7 +71,8 @@ function activate(
         const path = args['path'] as string | undefined | null;
         const id = args['id'] as string | undefined | null;
         const scope = (args['scope'] as string | undefined | null) || 'server';
-        if (!path) {
+        // An empty path is the server root directory, but not a kernel file.
+        if (typeof path !== 'string' || (scope === 'kernel' && !path)) {
           return;
         }
         if (scope === 'kernel') {
