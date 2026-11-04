@@ -423,6 +423,25 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       }
     };
 
+    /**
+     * Restore the debugger state, and return whether it worked: a restart, a
+     * kernel change or closing the document drops the requests it sends.
+     */
+    const restoreDebuggerState = async (
+      autoStart: boolean
+    ): Promise<boolean> => {
+      try {
+        await this._service.restoreState(autoStart);
+        return true;
+      } catch (error) {
+        console.error(
+          'Could not restore the debugger state:',
+          error instanceof Error ? error.message : String(error)
+        );
+        return false;
+      }
+    };
+
     const toggleDebugging = async (): Promise<void> => {
       // bail if the widget doesn't have focus
       if (!hasFocus()) {
@@ -454,6 +473,11 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
           'Could not toggle the debugger:',
           error instanceof Error ? error.message : String(error)
         );
+        // The button toggled itself on this click: show the state of the
+        // debugger instead.
+        if (!debugButton.isDisposed) {
+          debugButton.pressed = isDebuggerOn();
+        }
       } finally {
         this._pendingToggle = false;
       }
@@ -519,10 +543,8 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       this._service.session.connection = connection;
     }
 
-    if (isDebuggerOn()) {
-      await this._service.restoreState(true);
-    } else {
-      await this._service.restoreState(false);
+    if (!(await restoreDebuggerState(isDebuggerOn()))) {
+      return;
     }
 
     if (this._service.isStarted && !this._service.hasStoppedThreads()) {
@@ -542,7 +564,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     if (!this._service.isStarted) {
       removeHandlers();
       this._service.session.connection = this._previousConnection ?? connection;
-      await this._service.restoreState(false);
+      await restoreDebuggerState(false);
       return;
     }
 

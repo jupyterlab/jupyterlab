@@ -317,6 +317,26 @@ describe('DebuggerHandler', () => {
       expect(reply.body.isStarted).toBe(true);
     }, 30000);
 
+    it('turns the debugger button off when a restart drops the requests of a click', async () => {
+      await handler.update(fileWidget, connection);
+      const button = handler['_iconButtons'][fileWidget.id]!;
+      button.onClick();
+      while (!fileWidget.node.hasAttribute('data-jp-debugger')) {
+        await sleep(10);
+      }
+      // Stopping disconnects the slot that turns the button off on a restart.
+      button.onClick();
+      while (fileWidget.node.hasAttribute('data-jp-debugger')) {
+        await sleep(10);
+      }
+
+      // The restart drops the requests of this click.
+      button.onClick();
+      await connection.kernel!.restart();
+
+      expect(button.pressed).toBe(false);
+    }, 30000);
+
     it('lets debugger button clicks through in another document once a document is closed while the debugger starts', async () => {
       const closedConnection = await createSession({
         name: '',
@@ -348,6 +368,32 @@ describe('DebuggerHandler', () => {
       expect(fileWidget.node.hasAttribute('data-jp-debugger')).toBe(true);
       const reply = await service.session!.sendRequest('debugInfo', {});
       expect(reply.body.isStarted).toBe(true);
+    }, 30000);
+
+    it('resolves when a restart drops the requests of the update', async () => {
+      await handler.update(fileWidget, connection);
+      const restoreState = service.restoreState.bind(service);
+      let restarted: Promise<void> | undefined;
+      const spy = jest
+        .spyOn(service, 'restoreState')
+        .mockImplementationOnce(autoStart => {
+          const restored = restoreState(autoStart);
+          // Restart before the kernel can reply to the requests of the update.
+          restarted = connection.kernel!.restart();
+          return restored;
+        });
+
+      const outcome = await Promise.race([
+        handler.updateWidget(fileWidget, connection).then(
+          () => 'resolved',
+          () => 'rejected'
+        ),
+        sleep(2000).then(() => 'pending')
+      ]);
+      await restarted;
+      spy.mockRestore();
+
+      expect(outcome).toBe('resolved');
     }, 30000);
   });
 });
