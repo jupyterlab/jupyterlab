@@ -29,6 +29,10 @@
   section in the Running Sessions panel. Without it, the section ID is built from the
   translated `name`, so it changes with the display language.
 
+- Notebook panel and cell toolbar items now receive the id of their notebook panel in the `widgetId` command argument. The notebook commands use it to act on that notebook and to compute their state for it, so their buttons show the state of their own notebook while another notebook has the focus. Commands of extensions placed in these toolbars can do the same, as shown in {ref}`toolbar-registry`.
+
+- Semantic commands added with `addSemanticCommand` now pass their arguments to the `isEnabled`, `isToggled` and `isVisible` callbacks of the commands they group, and act on the widget whose id the `widgetId` argument holds. With a `widgetId` argument, a semantic command is visible only when every command it groups is visible.
+
 ### API updates
 
 - The JSON Lines renderer plugin was renamed from `@jupyterlab/json-lines-extension:factory`
@@ -50,6 +54,8 @@
   - Extensions depending on `@xterm/*` packages themselves, for example to type against the
     `Terminal.searchAddon` getter of `@jupyterlab/terminal`, should update them to the
     versions used by `@jupyterlab/terminal` (`@xterm/xterm` 6.x and the matching addons).
+
+- `ToolbarRegistry.WIDGET_ID_ARG` in `@jupyterlab/apputils` holds the name of the `widgetId` argument. `CellBarExtension.WIDGET_ID_ARG` in `@jupyterlab/cell-toolbar` is deprecated: use `ToolbarRegistry.WIDGET_ID_ARG` instead. The factory returned by `createToolbarFactory` takes the command arguments to add to every item as an optional second parameter.
 
 ## JupyterLab 4.5 to 4.6
 
