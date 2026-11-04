@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { MimeModel } from '@jupyterlab/rendermime';
+import { PromiseDelegate } from '@lumino/coreutils';
 import {
   MERMAID_CLASS,
   MERMAID_MIME_TYPE,
@@ -61,6 +62,56 @@ describe('@jupyterlab/mermaid', () => {
 
         expect(model).not.toHaveProperty(SVG_DATA_ATTR);
         expect(model).toHaveProperty(MERMAID_VERSION_ATTR);
+      });
+
+      it('should not modify a failing diagram that has no stored SVG', async () => {
+        const renderer = new RenderedMermaid({
+          latexTypesetter: null,
+          linkHandler: null,
+          mimeType: MERMAID_MIME_TYPE,
+          resolver: null,
+          sanitizer: {
+            sanitize: (s: string) => s
+          }
+        });
+        const callback = jest.fn();
+        const model = new MimeModel({
+          data: { [MERMAID_MIME_TYPE]: BAD_MERMAID },
+          metadata: { [MERMAID_MIME_TYPE]: { version: 'x.x.x' } },
+          callback
+        });
+        await renderer.renderModel(model);
+
+        // Changing the model would mark the notebook as modified on open.
+        expect(callback).not.toHaveBeenCalled();
+        renderer.dispose();
+      });
+
+      it('should store the SVG when the theme changes during the first render', async () => {
+        const renderer = new RenderedMermaid({
+          latexTypesetter: null,
+          linkHandler: null,
+          mimeType: MERMAID_MIME_TYPE,
+          resolver: null,
+          sanitizer: {
+            sanitize: (s: string) => s
+          }
+        });
+        const gate = new PromiseDelegate<void>();
+        MERMAID_MANAGER.mockMermaid.nextRenderGate = gate.promise;
+        const model = new MimeModel({
+          data: { [MERMAID_MIME_TYPE]: 'flowchart LR\n  first --> render\n' }
+        });
+
+        const rendering = renderer.renderModel(model);
+        await new Promise(resolve => setTimeout(resolve, 0));
+        await MERMAID_THEMES.setTheme('JupyterLab Dark');
+        gate.resolve();
+        await rendering;
+        await new Promise(resolve => setTimeout(resolve, 20));
+
+        expect(model.data[SVG_MIME]).toContain('data-theme="default"');
+        renderer.dispose();
       });
 
       it('should update an already-rendered diagram when theme changes', async () => {

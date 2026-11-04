@@ -68,16 +68,6 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
    * Render mermaid text-based diagrams into this widget's node.
    */
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    await this._render(model, true);
-  }
-
-  /**
-   * Render the diagram, and store the SVG in the model if `updateModel` is set.
-   */
-  private async _render(
-    model: IRenderMime.IMimeModel,
-    updateModel: boolean
-  ): Promise<void> {
     this._mimeModel = model;
     const renderId = ++this._renderId;
 
@@ -114,10 +104,6 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
     );
     this.node.replaceChildren(...children);
 
-    if (!updateModel) {
-      return;
-    }
-
     // capture the version of mermaid used
     const version = manager.getMermaidVersion();
     const existingMetadata = model.metadata[MERMAID_MIME_TYPE];
@@ -153,7 +139,10 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
         data: { ...model.data, [SVG_MIME]: svg },
         metadata
       });
-    } else {
+    } else if (
+      model.data[SVG_MIME] !== undefined ||
+      !JSONExt.deepEqual(existingMetadata ?? null, mermaidMetadata)
+    ) {
       const dataWithoutSvg = { ...model.data };
       delete dataWithoutSvg[SVG_MIME];
       model.setData({ data: dataWithoutSvg, metadata });
@@ -163,8 +152,8 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
   private _onThemeChanged(): void {
     this._lastRendered = null;
     if (this._mimeModel) {
-      // Storing the SVG of the new theme would mark the document as modified.
-      void this._render(this._mimeModel, false);
+      // This also stores the SVG when the theme changed during the first render.
+      void this.renderModel(this._mimeModel);
     }
   }
 

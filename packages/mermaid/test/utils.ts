@@ -64,6 +64,12 @@ export const SVG_XHTML_FOOTER = ['</div>', '</foreignObject>', '</svg>'];
 export class MockMermaid {
   currentTheme = 'default';
 
+  /**
+   * A promise that the next render waits for after it reads the theme, as
+   * mermaid does while it loads the code of a diagram type.
+   */
+  nextRenderGate: Promise<void> | null = null;
+
   initialize(config: { theme?: string }): void {
     if (config?.theme) {
       this.currentTheme = config.theme;
@@ -78,8 +84,14 @@ export class MockMermaid {
     if (text.includes(FAIL)) {
       throw new Error('Intentionally failed');
     }
+    const theme = this.currentTheme;
+    const gate = this.nextRenderGate;
+    this.nextRenderGate = null;
+    if (gate) {
+      await gate;
+    }
     return {
-      svg: `<svg id="${id}" data-theme="${this.currentTheme}"></svg>`,
+      svg: `<svg id="${id}" data-theme="${theme}"></svg>`,
       diagramType: 'mock-diagram'
     };
   }

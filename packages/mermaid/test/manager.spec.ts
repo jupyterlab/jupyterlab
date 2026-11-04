@@ -9,6 +9,8 @@ import {
   MermaidManager
 } from '@jupyterlab/mermaid';
 
+import { PromiseDelegate } from '@lumino/coreutils';
+
 import { MockMermaidManager, MockThemeManager } from './utils';
 
 // Stands in for the mermaid module that `MermaidManager.getMermaid()` loads.
@@ -229,6 +231,29 @@ describe('@jupyterlab/mermaid', () => {
           markdown.remove();
           manager.dispose();
         }
+      });
+    });
+
+    describe('#renderFigure()', () => {
+      it('should draw in the new theme when the theme changes during the render', async () => {
+        const themes = new MockThemeManager();
+        const manager = new MockMermaidManager({
+          themes: themes.asThemeManager()
+        });
+        const gate = new PromiseDelegate<void>();
+        manager.mockMermaid.nextRenderGate = gate.promise;
+        const text = 'graph TD; A --> B;';
+
+        const rendering = manager.renderFigure(text);
+        await new Promise(resolve => setTimeout(resolve, 0));
+        await themes.setTheme('JupyterLab Dark');
+        gate.resolve();
+        const figure = await rendering;
+
+        expect(decodeURIComponent(figure.innerHTML)).toContain(
+          'data-theme="dark"'
+        );
+        manager.dispose();
       });
     });
 

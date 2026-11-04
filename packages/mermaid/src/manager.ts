@@ -145,6 +145,7 @@ export class MermaidManager implements IMermaidManager {
   ): void {
     this._diagrams.clear();
     this._svgs.clear();
+    this._generation++;
     Private.initMermaid();
     // The theme manager also reloads the current theme on every change of its
     // settings, such as a font size change, which does not affect the diagrams.
@@ -200,6 +201,7 @@ export class MermaidManager implements IMermaidManager {
     // An id that depends only on the source keeps a stored SVG the same in
     // every session, whatever the order of renders.
     const id = `jp-mermaid-${Private.hash(text)}`;
+    const generation = this._generation;
 
     // create temporary element into which to render
     const el = document.createElement('div');
@@ -229,7 +231,11 @@ export class MermaidManager implements IMermaidManager {
       if (firstDesc) {
         info.accessibleDescription = firstDesc.textContent;
       }
-      this._svgs.set(`${rendered.theme}\n${text}`, info);
+      // `initialize()` cleared the cache during the render, which may have
+      // used the configuration from before it.
+      if (generation === this._generation) {
+        this._svgs.set(`${rendered.theme}\n${text}`, info);
+      }
       return info;
     } finally {
       el.remove();
@@ -246,6 +252,8 @@ export class MermaidManager implements IMermaidManager {
     if (output != null) {
       return output;
     }
+
+    const generation = this._generation;
 
     let className = MERMAID_CLASS;
 
@@ -270,6 +278,11 @@ export class MermaidManager implements IMermaidManager {
     }
 
     output.appendChild(result);
+
+    // The theme changed during the render: draw the diagram again in it.
+    if (generation !== this._generation) {
+      return this.renderFigure(text);
+    }
 
     // update the cache for use when rendering synchronously
     this._diagrams.set(text, output);
@@ -357,6 +370,7 @@ export class MermaidManager implements IMermaidManager {
 
   private _themeChanged = new Signal<this, void>(this);
   private _isDisposed = false;
+  private _generation = 0;
   private _refreshId = 0;
   private _svgs: LruCache<string, IMermaidManager.IRenderInfo>;
 }
