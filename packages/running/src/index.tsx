@@ -420,7 +420,6 @@ class ListWidget extends ReactWidget {
   constructor(
     private _options: {
       manager: IRunningSessions.IManager;
-      runningItems: IRunningSessions.IRunningItem[];
       filterProvider?: IFilterProvider;
       translator?: ITranslator;
       collapseToggled: ISignal<Section, boolean>;
@@ -459,17 +458,9 @@ class ListWidget extends ReactWidget {
 
   render(): JSX.Element {
     const options = this._options;
-    let cached = true;
     return (
       <UseSignal signal={this._update}>
         {() => {
-          // Cache the running items for the initial load and request from
-          // the service every subsequent load.
-          if (cached) {
-            cached = false;
-          } else {
-            options.runningItems = options.manager.running({ mode: this.mode });
-          }
           const classes = ['jp-TreeView'];
           if (this.mode === 'list') {
             classes.push('jp-mod-flat');
@@ -478,7 +469,7 @@ class ListWidget extends ReactWidget {
             <div className={CONTAINER_CLASS}>
               <TreeView className={classes.join(' ')}>
                 <List
-                  runningItems={options.runningItems}
+                  runningItems={options.manager.running({ mode: this.mode })}
                   shutdownLabel={options.manager.shutdownLabel}
                   shutdownItemIcon={options.manager.shutdownItemIcon}
                   filter={options.filterProvider?.filter}
@@ -539,7 +530,6 @@ export class Section extends PanelWithToolbar {
     }
 
     this._listWidget = new ListWidget({
-      runningItems,
       collapseToggled: this._collapseToggled,
       ...options
     });
