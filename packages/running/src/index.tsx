@@ -785,7 +785,7 @@ export class RunningSessions
     translator?: ITranslator,
     stateDB?: IStateDB | null
   ) {
-    super();
+    super({ translator });
     this.managers = managers;
     this._stateDB = stateDB ?? null;
     this.translator = translator ?? nullTranslator;
