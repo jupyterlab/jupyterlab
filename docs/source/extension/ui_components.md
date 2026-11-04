@@ -204,10 +204,14 @@ root `<svg>`:
 
 <!-- one rendered copy -->
 <svg xmlns="http://www.w3.org/2000/svg" style="--jp-icon-ref-shine:url(#shine_3)">
-  <style>.logo { fill: var(--jp-icon-ref-shine) }</style>
+  <style>.logo { fill: var(--jp-icon-ref-shine,url(#shine)) }</style>
   ...
 </svg>
 ```
+
+The `url(#shine)` after the comma is a fallback. A copy of your SVG
+that `LabIcon` did not render does not set the property, so its
+`.logo` element uses `#shine`.
 
 A selector in these rules that names a renamed ID, such as
 `#shine stop`, gets the suffix of each copy, so the rule still matches

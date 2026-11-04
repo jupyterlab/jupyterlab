@@ -221,7 +221,7 @@ describe('@jupyterlab/ui-components', () => {
         );
 
         expect(styleText).toBe(
-          `.a{fill:var(--jp-icon-ref-gradient0)}#${gradientId} stop:first-child{stop-color:#123}`
+          `.a{fill:var(--jp-icon-ref-gradient0,url(#gradient0))}#${gradientId} stop:first-child{stop-color:#123}`
         );
       });
 
@@ -234,8 +234,8 @@ describe('@jupyterlab/ui-components', () => {
         );
 
         expect([first.styleText, second.styleText]).toEqual([
-          '.a{fill:var(--jp-icon-ref-gradient0)}',
-          '.a{fill:var(--jp-icon-ref-gradient0)}'
+          '.a{fill:var(--jp-icon-ref-gradient0,url(#gradient0))}',
+          '.a{fill:var(--jp-icon-ref-gradient0,url(#gradient0))}'
         ]);
       });
 
@@ -326,6 +326,16 @@ describe('@jupyterlab/ui-components', () => {
         );
       });
 
+      it('should keep the original url() for the svg outside a copy', () => {
+        const { styleText } = getStyleGradientData(
+          styleGradientIcon.element({ tag: null })
+        );
+
+        expect(styleText).toBe(
+          '.a{fill:var(--jp-icon-ref-gradient0,url(#gradient0))}'
+        );
+      });
+
       it('should give each id that a style element uses its own custom property', () => {
         const icon = new LabIcon({
           name: 'test-ui-components:property-names',
@@ -343,7 +353,7 @@ describe('@jupyterlab/ui-components', () => {
         );
 
         expect(svg.querySelector('style')!.textContent).toBe(
-          '.p{fill:var(--jp-icon-ref-a_b)}.q{fill:var(--jp-icon-ref-a_b-2)}'
+          '.p{fill:var(--jp-icon-ref-a_b,url(#a.b))}.q{fill:var(--jp-icon-ref-a_b-2,url(#a_b))}'
         );
         expect(svg.getAttribute('style')).toBe(
           `--jp-icon-ref-a_b:url(#${dotted});--jp-icon-ref-a_b-2:url(#${underscored})`
@@ -439,6 +449,24 @@ describe('@jupyterlab/ui-components', () => {
         );
 
         expect(styleText).toBe(`[id="${gradientId}"] stop{stop-color:#123}`);
+      });
+
+      it('should rename an id that an upper case URL() refers to', () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:upper-case-url',
+          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+<defs><linearGradient id="gradient0"/></defs>
+<rect fill="URL(#gradient0)" width="10" height="10"/>
+</svg>`
+        });
+
+        const svg = icon.element({ tag: null });
+        const id = svg.querySelector('linearGradient')!.getAttribute('id');
+
+        expect(id).not.toBe('gradient0');
+        expect(svg.querySelector('rect')!.getAttribute('fill')).toBe(
+          `url(#${id})`
+        );
       });
 
       it('should point the animation timing of each copy at its own element', () => {

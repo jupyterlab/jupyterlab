@@ -797,9 +797,10 @@ export namespace LabIcon {
 
 namespace Private {
   // the id stops at "(", so a failed match ends before the next "url(" and
-  // the search takes time linear in the length of the text
-  const URL_ID_REFERENCE = /url\(\s*(['"]?)#([^\s'"()]+)\1\s*\)/g;
-  const URL_ID_CANDIDATE = 'url(';
+  // the search takes time linear in the length of the text; CSS function
+  // names ignore case, as in "URL(#a)"
+  const URL_ID_REFERENCE = /url\(\s*(['"]?)#([^\s'"()]+)\1\s*\)/gi;
+  const URL_ID_CANDIDATE = /url\(/i;
   // XML cannot contain this character, so it cannot clash with svg content
   const SUFFIX_PLACEHOLDER = '\u0000';
   const REFERENCE_PROPERTY_PREFIX = '--jp-icon-ref-';
@@ -1050,7 +1051,8 @@ namespace Private {
       );
     // the rules of a style element apply to the whole page, so they stay the
     // same in every copy: a url() there reads the renamed id from a custom
-    // property that each copy sets on its root
+    // property that each copy sets on its root, and keeps the original id for
+    // the same svg shown without LabIcon
     const properties = new Map<string, string>();
     const propertyNames = new Map<string, string>();
     const propertyName = (id: string) => {
@@ -1071,7 +1073,9 @@ namespace Private {
     };
     const replaceStyleUrls = (text: string) =>
       text.replace(URL_ID_REFERENCE, (full, quote, id) =>
-        ids.has(id) ? `var(${propertyName(id)})` : full
+        ids.has(id)
+          ? `var(${propertyName(id)},url(${quote}#${id}${quote}))`
+          : full
       );
 
     const references: [number, string | null, string][] = [];
@@ -1093,7 +1097,7 @@ namespace Private {
           }
         } else if (name === 'begin' || name === 'end') {
           timings.push([index, name, value]);
-        } else if (value.includes(URL_ID_CANDIDATE)) {
+        } else if (URL_ID_CANDIDATE.test(value)) {
           nextValue = replaceUrls(value);
         }
         if (nextValue !== value) {
