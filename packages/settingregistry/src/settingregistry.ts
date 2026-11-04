@@ -219,7 +219,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
   /**
    * Add a schema to the validator.
    *
-   * @param plugin - The plugin ID.
+   * @param key - The key of the schema.
    *
    * @param schema - The schema being added.
    *
@@ -227,7 +227,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
    * are no errors.
    *
    * #### Notes
-   * It is safe to call this function multiple times with the same plugin name.
+   * It is safe to call this function multiple times with the same key.
    */
   private _addSchema(
     key: string,

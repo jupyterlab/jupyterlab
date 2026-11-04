@@ -183,14 +183,14 @@ describe('@jupyterlab/settingregistry', () => {
           },
           type: 'object'
         };
-        const composite = {};
-        const user = {};
+        const composite = {} as JSONObject;
+        const user = {} as JSONObject;
         const raw = '{ "bar": "baz" }';
         const version = 'test';
         const plugin = { id, data: { composite, user }, raw, schema, version };
-        const errors = validator.validateData(plugin);
 
-        expect(errors).toBe(null);
+        expect(() => validator.validateData(plugin)).not.toThrow();
+        expect(plugin.data.composite.bar).toBe('baz');
       });
     });
   });
@@ -476,8 +476,9 @@ describe('@jupyterlab/settingregistry', () => {
         const id = 'my_extension:plugin';
 
         connector.schemas[id] = { type: 'object' };
-        const settings = (await registry.load(id)) as Settings;
-        expect(settings.id).toBe(id);
+        await expect(
+          registry.load(id).then(settings => settings.id)
+        ).resolves.toBe(id);
       });
 
       it('should reject with the validator error if a schema fails to register', async () => {
