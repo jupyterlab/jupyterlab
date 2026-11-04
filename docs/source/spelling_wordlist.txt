@@ -9,6 +9,7 @@ ReadTheDocs
 Gettext
 IPython
 Jupyverse
+Jupytext
 Quansight
 Yjs
 hatchling
