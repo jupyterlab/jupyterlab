@@ -109,4 +109,88 @@ test.describe('Output Scrolling', () => {
       /jp-mod-outputsScrolled/
     );
   });
+
+  test.describe('Configurable default height', () => {
+    test.use({
+      mockSettings: {
+        ...galata.DEFAULT_SETTINGS,
+        '@jupyterlab/notebook-extension:tracker': {
+          ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
+          scrolledOutputMaxHeight: '120px'
+        }
+      }
+    });
+
+    test('uses the configured default scrolled output height', async ({
+      page
+    }) => {
+      await page.notebook.selectCells(0);
+      await page.evaluate(() => {
+        return window.jupyterapp.commands.execute(
+          'notebook:enable-output-scrolling'
+        );
+      });
+      await expect(page.locator(`${cellSelector} >> nth=0`)).toHaveClass(
+        /jp-mod-outputsScrolled/
+      );
+
+      const outputArea = page.locator(
+        `${cellSelector} >> nth=0 >> .jp-Cell-outputArea`
+      );
+      await expect(outputArea).toHaveCSS('max-height', '120px');
+    });
+
+    test('updates the default height when the setting changes', async ({
+      page
+    }) => {
+      await page.notebook.selectCells(0);
+      await page.evaluate(() => {
+        return window.jupyterapp.commands.execute(
+          'notebook:enable-output-scrolling'
+        );
+      });
+
+      const outputArea = page.locator(
+        `${cellSelector} >> nth=0 >> .jp-Cell-outputArea`
+      );
+      await expect(outputArea).toHaveCSS('max-height', '120px');
+
+      await page.evaluate(async () => {
+        const settingRegistry = await window.galata.getPlugin(
+          '@jupyterlab/apputils-extension:settings'
+        );
+        const settings = await settingRegistry!.load(
+          '@jupyterlab/notebook-extension:tracker'
+        );
+        await settings.set('scrolledOutputMaxHeight', '80px');
+      });
+
+      await expect(outputArea).toHaveCSS('max-height', '80px');
+    });
+
+    test('manual resize still overrides the default height', async ({
+      page
+    }) => {
+      await page.notebook.selectCells(0);
+      await page.evaluate(() => {
+        return window.jupyterapp.commands.execute(
+          'notebook:enable-output-scrolling'
+        );
+      });
+      await expect(page.locator(`${cellSelector} >> nth=0`)).toHaveClass(
+        /jp-mod-outputsScrolled/
+      );
+
+      const outputArea = page.locator(
+        `${cellSelector} >> nth=0 >> .jp-Cell-outputArea`
+      );
+      await expect(outputArea).toHaveCSS('max-height', '120px');
+
+      await outputArea.evaluate(el => {
+        (el as HTMLElement).style.height = '50px';
+      });
+      await expect(outputArea).toHaveCSS('max-height', 'none');
+      await expect(outputArea).toHaveCSS('height', '50px');
+    });
+  });
 });
