@@ -176,7 +176,8 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
             nextLine(cx: BlockContext, line: Line, leaf: LeafBlock) {
               if (hasOpenMath(leaf.content)) {
                 held ??= leaf.parsers.filter(p => p !== parser);
-                leaf.parsers = [parser];
+                // Change the array in place: the caller is iterating over it.
+                leaf.parsers.splice(0, leaf.parsers.length, parser);
               } else if (held) {
                 leaf.parsers.push(...held);
                 held = null;
