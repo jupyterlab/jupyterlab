@@ -9,7 +9,7 @@
 import { parseMathIPython } from '@jupyterlab/codemirror';
 import { Tree, TreeFragment } from '@lezer/common';
 import type { MarkdownParser } from '@lezer/markdown';
-import { parser } from '@lezer/markdown';
+import { GFM, parser } from '@lezer/markdown';
 import { StreamLanguage } from '@codemirror/language';
 import { stexMath } from '@codemirror/legacy-modes/mode/stex';
 
@@ -389,6 +389,17 @@ where {Em:{e:*}m{e:*}} is the mass.}
 );
 
 test(
+  'Math $$ opened mid-line with a setext = underline on its first line',
+  `
+{P:Some text {MaBD:{maBD:$$}
+=
+b
+{maBD:$$}}
+where {Em:{e:*}m{e:*}} is the mass.}
+`
+);
+
+test(
   'Block math $$ opened on a line with an escaped \\$$',
   `
 {MaBD:{maBD:$$} x \\$$
@@ -433,6 +444,12 @@ describe('markdown parser', () => {
   it('should parse empty math block $$$$ without error', () => {
     const inputText = '$$$$';
     expect(() => mixedParser.parse(inputText)).not.toThrow();
+  });
+
+  it('should keep a table with $$ in a cell', () => {
+    const gfmParser = parser.configure([GFM, parseMathIPython()]);
+    const tree = gfmParser.parse('| Level | $$ |\n|---|---|\n| a | b |');
+    expect(tree.topNode.firstChild?.name).toBe('Table');
   });
 
   it('should reparse a list item ending with $$ math as from scratch', () => {
