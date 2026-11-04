@@ -199,7 +199,7 @@ describe('DebuggerHandler', () => {
     });
   });
 
-  describe('debugger button', () => {
+  describe('#updateWidget()', () => {
     const shell: { currentWidget: Widget | null } = { currentWidget: null };
     let context: Context<DocumentRegistry.ICodeModel>;
     let fileWidget: FileEditorWidget;
@@ -247,7 +247,7 @@ describe('DebuggerHandler', () => {
       context.dispose();
     });
 
-    it('ignores a second click while the debugger starts', async () => {
+    it('ignores a second click on the debugger button while the debugger starts', async () => {
       await handler.update(fileWidget, connection);
       const button = handler['_iconButtons'][fileWidget.id]!;
 
@@ -271,7 +271,7 @@ describe('DebuggerHandler', () => {
       expect(pressedAfterSecondClick).toBe(true);
     });
 
-    it('lets clicks through again once the kernel restarts while the debugger starts', async () => {
+    it('lets debugger button clicks through again once the kernel restarts while the debugger starts', async () => {
       await handler.update(fileWidget, connection);
       const button = handler['_iconButtons'][fileWidget.id]!;
 
@@ -293,7 +293,7 @@ describe('DebuggerHandler', () => {
       expect(button.pressed).toBe(true);
     });
 
-    it('lets clicks through again once the kernel restarts while the debugger starts a second time', async () => {
+    it('lets debugger button clicks through again once the kernel restarts while the debugger starts a second time', async () => {
       await handler.update(fileWidget, connection);
       const button = handler['_iconButtons'][fileWidget.id]!;
       button.onClick();
@@ -317,7 +317,7 @@ describe('DebuggerHandler', () => {
       expect(reply.body.isStarted).toBe(true);
     }, 30000);
 
-    it('lets clicks through in another document once a document is closed while the debugger starts', async () => {
+    it('lets debugger button clicks through in another document once a document is closed while the debugger starts', async () => {
       const closedConnection = await createSession({
         name: '',
         type: 'test',
