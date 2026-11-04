@@ -259,21 +259,21 @@ describe('@jupyterlab/ui-components', () => {
           .element({ tag: null })
           .querySelector('clipPath')!
           .getAttribute('id')!
-          .slice('clip0-'.length);
+          .slice('clip0_'.length);
         const next = (parseInt(used, 36) + 1).toString(36);
-        // Adobe XD names a shape after its filter, as "Rectangle_1-2"
+        // Illustrator names ids this way, as in "Layer_1"
         const icon = new LabIcon({
           name: 'test-ui-components:taken-suffix',
           svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
 <defs><filter id="shadow"><feGaussianBlur stdDeviation="1"/></filter></defs>
-<g filter="url(#shadow)"><rect id="shadow-${next}" width="10" height="10"/></g>
+<g filter="url(#shadow)"><rect id="shadow_${next}" width="10" height="10"/></g>
 </svg>`
         });
 
         const svg = icon.element({ tag: null });
 
         expect(svg.querySelector('filter')!.getAttribute('id')).not.toBe(
-          `shadow-${next}`
+          `shadow_${next}`
         );
       });
 
@@ -326,6 +326,30 @@ describe('@jupyterlab/ui-components', () => {
         );
       });
 
+      it('should give each id that a style element uses its own custom property', () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:property-names',
+          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10">
+<style>.p{fill:url(#a.b)}.q{fill:url(#a_b)}</style>
+<defs><linearGradient id="a.b"/><linearGradient id="a_b"/></defs>
+<rect class="p" width="10" height="10"/><rect class="q" x="10" width="10" height="10"/>
+</svg>`
+        });
+
+        const svg = icon.element({ tag: null });
+        const [dotted, underscored] = Array.from(
+          svg.querySelectorAll('linearGradient'),
+          gradient => gradient.getAttribute('id')
+        );
+
+        expect(svg.querySelector('style')!.textContent).toBe(
+          '.p{fill:var(--jp-icon-ref-a_b)}.q{fill:var(--jp-icon-ref-a_b-2)}'
+        );
+        expect(svg.getAttribute('style')).toBe(
+          `--jp-icon-ref-a_b:url(#${dotted});--jp-icon-ref-a_b-2:url(#${underscored})`
+        );
+      });
+
       it('should keep a colour in a style declaration that spells a renamed id', () => {
         const icon = new LabIcon({
           name: 'test-ui-components:colour-like-id',
@@ -342,6 +366,113 @@ describe('@jupyterlab/ui-components', () => {
 
         expect(gradientId).not.toBe('abc');
         expect(styleText).toBe('.c { fill: #abc }');
+      });
+
+      it('should rename an id in a selector that names an element type', () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:type-selector',
+          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+<style>linearGradient#gradient0 stop{stop-color:#123}</style>
+<defs><linearGradient id="gradient0"><stop offset="0" stop-color="#000"/></linearGradient></defs>
+<rect fill="url(#gradient0)" width="10" height="10"/>
+</svg>`
+        });
+
+        const { gradientId, styleText } = getStyleGradientData(
+          icon.element({ tag: null })
+        );
+
+        expect(styleText).toBe(
+          `linearGradient#${gradientId} stop{stop-color:#123}`
+        );
+      });
+
+      it('should rename an escaped id in a selector', () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:escaped-selector',
+          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+<style>#a\\.b stop{stop-color:#123}</style>
+<defs><linearGradient id="a.b"><stop offset="0" stop-color="#000"/></linearGradient></defs>
+<rect fill="url(#a.b)" width="10" height="10"/>
+</svg>`
+        });
+
+        const { gradientId, styleText } = getStyleGradientData(
+          icon.element({ tag: null })
+        );
+
+        expect(styleText).toBe(
+          `#a\\.b${gradientId.slice('a.b'.length)} stop{stop-color:#123}`
+        );
+      });
+
+      it('should rename an id inside an attribute selector', () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:href-selector',
+          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+<style>use[href="#shape0"]{fill:#123}</style>
+<defs><rect id="shape0" width="10" height="10"/></defs>
+<use href="#shape0"/>
+</svg>`
+        });
+
+        const svg = icon.element({ tag: null });
+        const id = svg.querySelector('rect')!.getAttribute('id');
+
+        expect(svg.querySelector('style')!.textContent).toBe(
+          `use[href="#${id}"]{fill:#123}`
+        );
+      });
+
+      it('should rename an id that an id attribute selector names', () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:id-attribute-selector',
+          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+<style>[id="gradient0"] stop{stop-color:#123}</style>
+<defs><linearGradient id="gradient0"><stop offset="0" stop-color="#000"/></linearGradient></defs>
+<rect fill="url(#gradient0)" width="10" height="10"/>
+</svg>`
+        });
+
+        const { gradientId, styleText } = getStyleGradientData(
+          icon.element({ tag: null })
+        );
+
+        expect(styleText).toBe(`[id="${gradientId}"] stop{stop-color:#123}`);
+      });
+
+      it('should point the animation timing of each copy at its own element', () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:timing',
+          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10">
+<circle id="dot0" cx="5" cy="5" r="2"><animate attributeName="r" to="5" dur="1s" begin="0s;dot0.click"/></circle>
+<use href="#dot0" x="10"/>
+</svg>`
+        });
+
+        const svg = icon.element({ tag: null });
+        const id = svg.querySelector('circle')!.getAttribute('id');
+
+        expect(svg.querySelector('animate')!.getAttribute('begin')).toBe(
+          `0s;${id}.click`
+        );
+      });
+
+      it('should keep the escape of an id in animation timing', () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:escaped-timing',
+          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10">
+<circle id="dot-0" cx="5" cy="5" r="2"><animate attributeName="r" to="5" dur="1s" begin="dot\\-0.click"/></circle>
+<use href="#dot-0" x="10"/>
+</svg>`
+        });
+
+        const svg = icon.element({ tag: null });
+        const id = svg.querySelector('circle')!.getAttribute('id')!;
+
+        expect(svg.querySelector('animate')!.getAttribute('begin')).toBe(
+          `dot\\-0${id.slice('dot-0'.length)}.click`
+        );
       });
     });
 

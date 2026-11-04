@@ -17,7 +17,7 @@
   the plugin ids to disable in `disabledExtensions` instead of the package name.
 
 - In each copy of an icon that `LabIcon` renders, the IDs that the SVG refers to now get a
-  suffix: `id="shine"` and `fill="url(#shine)"` become `id="shine-3"` and `fill="url(#shine-3)"`.
+  suffix: `id="shine"` and `fill="url(#shine)"` become `id="shine_3"` and `fill="url(#shine_3)"`.
   Without this suffix, the other copies could render without their gradient, clip path or
   mask when the first copy on the page is hidden. Only the IDs named in `url(#...)`, `href`,
   `xlink:href`, `aria-labelledby` or `aria-describedby` change. A selector outside the SVG

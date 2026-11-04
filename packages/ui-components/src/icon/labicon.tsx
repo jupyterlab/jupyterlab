@@ -800,13 +800,6 @@ namespace Private {
   // the search takes time linear in the length of the text
   const URL_ID_REFERENCE = /url\(\s*(['"]?)#([^\s'"()]+)\1\s*\)/g;
   const URL_ID_CANDIDATE = 'url(';
-  // a selector also follows the end of a rule, a block or a comment, as in
-  // minified CSS, and an id can end the selector, as in "#a{"
-  const ID_SELECTOR_REFERENCE_TEMPLATE = (id: string) =>
-    new RegExp(
-      `(^|[\\s>+~,(){};/])#${escapeRegExp(id)}(?=[\\s>+~,.:\\[{)]|$)`,
-      'gm'
-    );
   // XML cannot contain this character, so it cannot clash with svg content
   const SUFFIX_PLACEHOLDER = '\u0000';
   const REFERENCE_PROPERTY_PREFIX = '--jp-icon-ref-';
@@ -988,11 +981,13 @@ namespace Private {
     let suffix = '';
     const withSuffix = (value: string) =>
       value.split(SUFFIX_PLACEHOLDER).join(suffix);
-    // editors such as Adobe XD already name ids this way, as in "Rectangle_1-2"
+    // editors already name ids this way, as Illustrator does with "Layer_1";
+    // the separator is "_" because Chromium and WebKit cannot parse an id
+    // that holds "-" in animation timing, as in begin="dot-3.click"
     do {
       idSuffixCounter =
         idSuffixCounter >= Number.MAX_SAFE_INTEGER ? 1 : idSuffixCounter + 1;
-      suffix = `-${idSuffixCounter.toString(36)}`;
+      suffix = `_${idSuffixCounter.toString(36)}`;
     } while (
       references.ids.some(([, id]) => references.existing.has(withSuffix(id)))
     );
@@ -1057,20 +1052,31 @@ namespace Private {
     // same in every copy: a url() there reads the renamed id from a custom
     // property that each copy sets on its root
     const properties = new Map<string, string>();
-    const replaceStyleUrls = (text: string) =>
-      text.replace(URL_ID_REFERENCE, (full, quote, id) => {
-        if (!ids.has(id)) {
-          return full;
-        }
-        // keep only characters that a custom property name allows
-        const name =
+    const propertyNames = new Map<string, string>();
+    const propertyName = (id: string) => {
+      let name = propertyNames.get(id);
+      if (name === undefined) {
+        // keep only characters that a custom property name allows, and keep
+        // ids such as "a.b" and "a_b" apart
+        const base =
           REFERENCE_PROPERTY_PREFIX + id.replace(/[^\w\u0080-\uffff-]/g, '_');
+        name = base;
+        for (let n = 2; properties.has(name); n++) {
+          name = `${base}-${n}`;
+        }
+        propertyNames.set(id, name);
         properties.set(name, `url(#${reference(id)})`);
-        return `var(${name})`;
-      });
+      }
+      return name;
+    };
+    const replaceStyleUrls = (text: string) =>
+      text.replace(URL_ID_REFERENCE, (full, quote, id) =>
+        ids.has(id) ? `var(${propertyName(id)})` : full
+      );
 
     const references: [number, string | null, string][] = [];
     const styles: [number, string, string][] = [];
+    const timings: [number, string, string][] = [];
     nodes.forEach((node, index) => {
       for (const { name, value } of Array.from(node.attributes)) {
         let nextValue = value;
@@ -1085,6 +1091,8 @@ namespace Private {
               .map(id => (ids.has(id) ? reference(id) : id))
               .join(' ');
           }
+        } else if (name === 'begin' || name === 'end') {
+          timings.push([index, name, value]);
         } else if (value.includes(URL_ID_CANDIDATE)) {
           nextValue = replaceUrls(value);
         }
@@ -1101,11 +1109,36 @@ namespace Private {
       }
     });
 
-    // selectors can only be rewritten once all referenced ids are known
+    // selectors and animation timing can only be rewritten once all
+    // referenced ids are known
     for (const [index, text, urlsReplaced] of styles) {
       const nextText = renameInSelectors(urlsReplaced, referenced);
       if (nextText !== text) {
         references.push([index, null, nextText]);
+      }
+    }
+    if (timings.length && referenced.size) {
+      // timing such as begin="dot.click" follows an id renamed for another
+      // reference, also when it escapes "-" or "." as in "fade\-1.end"; ids
+      // that only timing uses keep their value
+      const timingIds = Array.from(referenced, id =>
+        Array.from(id, c =>
+          c === '-' || c === '.' ? `\\\\?\\${c}` : escapeRegExp(c)
+        ).join('')
+      );
+      const timing = new RegExp(
+        `(^|;)(\\s*)(${timingIds.join('|')})(?=\\.)`,
+        'g'
+      );
+      for (const [index, name, value] of timings) {
+        const nextValue = value.replace(
+          timing,
+          (full, separator, space, id) =>
+            `${separator}${space}${id}${SUFFIX_PLACEHOLDER}`
+        );
+        if (nextValue !== value) {
+          references.push([index, name, nextValue]);
+        }
       }
     }
     if (properties.size) {
@@ -1145,26 +1178,31 @@ namespace Private {
 
   /**
    * Add the suffix placeholder to the given ids where a selector of the style
-   * sheet names them. Declarations, where `#abc` is a colour, stay as they are.
+   * sheet names them, as in `#id`, `#a\.b` or `[id="id"]`. Declarations, where
+   * `#abc` is a colour, stay as they are.
    */
   function renameInSelectors(text: string, ids: Set<string>): string {
     if (!ids.size) {
       return text;
     }
-    const patterns = Array.from(ids, id => ({
-      id,
-      pattern: ID_SELECTOR_REFERENCE_TEMPLATE(id)
-    }));
-    const rename = (selector: string) => {
-      let renamed = selector;
-      for (const { id, pattern } of patterns) {
-        renamed = renamed.replace(
-          pattern,
-          (full, prefix) => `${prefix}#${id}${SUFFIX_PLACEHOLDER}`
-        );
-      }
-      return renamed;
-    };
+    // a selector escapes a character that an identifier cannot hold, as in "a\.b"
+    const escaped = Array.from(ids, id =>
+      Array.from(id, c =>
+        /[\w\u0080-\uffff-]/.test(c) ? c : `\\\\?${escapeRegExp(c)}`
+      ).join('')
+    );
+    const idSelector = new RegExp(
+      `#(?:${escaped.join('|')})(?![\\w\\u0080-\\uffff\\\\-])`,
+      'g'
+    );
+    const idAttribute = new RegExp(
+      `(\\[\\s*id\\s*=\\s*(["']?))(${Array.from(ids, escapeRegExp).join('|')})(?=\\2\\s*(?:[iIsS]\\s*)?\\])`,
+      'g'
+    );
+    const rename = (selector: string) =>
+      selector
+        .replace(idSelector, `$&${SUFFIX_PLACEHOLDER}`)
+        .replace(idAttribute, `$1$3${SUFFIX_PLACEHOLDER}`);
 
     let result = '';
     let start = 0;

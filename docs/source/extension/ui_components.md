@@ -174,17 +174,20 @@ without the gradient. References to clip paths and masks, and the
 `href` of a `<use>` element, are resolved in the same way.
 
 For this reason, `LabIcon` renames these IDs in each copy of the icon
-that it renders. It adds a suffix such as `-3` to each ID and to each
+that it renders. It adds a suffix such as `_3` to each ID and to each
 reference to it. One rendered copy of the SVG above has:
 
 ```xml
-<linearGradient id="shine-3">...</linearGradient>
-<path fill="url(#shine-3)" d="..." />
+<linearGradient id="shine_3">...</linearGradient>
+<path fill="url(#shine_3)" d="..." />
 ```
 
 Only the IDs named in `url(#...)`, `href`, `xlink:href`,
 `aria-labelledby` or `aria-describedby` change. Other IDs keep their
 value.
+
+Animation timing that names a renamed ID follows the rename:
+`begin="dot.click"` becomes `begin="dot_3.click"`.
 
 The rules of a `<style>` element in your SVG apply to the whole page.
 If each copy put its own ID into a rule, the rule of the last copy on
@@ -200,7 +203,7 @@ root `<svg>`:
 </svg>
 
 <!-- one rendered copy -->
-<svg xmlns="http://www.w3.org/2000/svg" style="--jp-icon-ref-shine:url(#shine-3)">
+<svg xmlns="http://www.w3.org/2000/svg" style="--jp-icon-ref-shine:url(#shine_3)">
   <style>.logo { fill: var(--jp-icon-ref-shine) }</style>
   ...
 </svg>
