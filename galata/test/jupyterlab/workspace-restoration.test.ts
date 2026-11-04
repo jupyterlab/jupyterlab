@@ -127,6 +127,44 @@ for (const view of [
       );
     });
 
+    for (const browserPath of ['', tmpPath]) {
+      test(`should preserve a directory URL with browser override ${browserPath || 'unset'}`, async ({
+        page
+      }) => {
+        const directory = `${tmpPath}/different`;
+        const query = browserPath ? `?file-browser-path=${browserPath}` : '';
+        await page.goto(`tree/${directory}${query}`);
+
+        for (let load = 0; load < 2; load++) {
+          if (load > 0) {
+            await page.reload();
+          }
+          await expect(page.locator('#filebrowser')).not.toHaveClass(
+            /jp-mod-restoring/
+          );
+          await expect(
+            page
+              .getByRole('tabpanel', { name: view.file, includeHidden: true })
+              .locator(view.selector)
+          ).toBeVisible();
+          await expect(page).toHaveURL(
+            url => url.pathname === `/lab/tree/${directory}`
+          );
+          expect(await page.filebrowser.getCurrentDirectory()).toBe(
+            browserPath || directory
+          );
+        }
+
+        await page.evaluate(async () => {
+          await window.jupyterapp.commands.execute('launcher:create');
+        });
+        await expect(page.activity.getTabLocator()).toHaveText('Launcher');
+        await expect(page).toHaveURL(
+          url => url.pathname === `/lab/tree/${browserPath || directory}`
+        );
+      });
+    }
+
     for (const selection of [
       'another tab',
       'another tab after closing the restored view',
