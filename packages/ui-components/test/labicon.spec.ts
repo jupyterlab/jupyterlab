@@ -325,6 +325,24 @@ describe('@jupyterlab/ui-components', () => {
           titles
         );
       });
+
+      it('should keep a colour in a style declaration that spells a renamed id', () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:colour-like-id',
+          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10">
+<style>.c { fill: #abc }</style>
+<defs><linearGradient id="abc"/></defs>
+<rect fill="url(#abc)" width="10" height="10"/><rect class="c" x="10" width="10" height="10"/>
+</svg>`
+        });
+
+        const { gradientId, styleText } = getStyleGradientData(
+          icon.element({ tag: null })
+        );
+
+        expect(gradientId).not.toBe('abc');
+        expect(styleText).toBe('.c { fill: #abc }');
+      });
     });
 
     describe('#react', () => {

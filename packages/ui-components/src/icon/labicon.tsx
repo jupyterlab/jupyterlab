@@ -801,10 +801,10 @@ namespace Private {
   const URL_ID_REFERENCE = /url\(\s*(['"]?)#([^\s'"()]+)\1\s*\)/g;
   const URL_ID_CANDIDATE = 'url(';
   // a selector also follows the end of a rule, a block or a comment, as in
-  // minified CSS
+  // minified CSS, and an id can end the selector, as in "#a{"
   const ID_SELECTOR_REFERENCE_TEMPLATE = (id: string) =>
     new RegExp(
-      `(^|[\\s>+~,(){};/])#${escapeRegExp(id)}(?=[\\s>+~,.:\\[{)])`,
+      `(^|[\\s>+~,(){};/])#${escapeRegExp(id)}(?=[\\s>+~,.:\\[{)]|$)`,
       'gm'
     );
   // XML cannot contain this character, so it cannot clash with svg content
@@ -1103,13 +1103,7 @@ namespace Private {
 
     // selectors can only be rewritten once all referenced ids are known
     for (const [index, text, urlsReplaced] of styles) {
-      let nextText = urlsReplaced;
-      referenced.forEach(id => {
-        nextText = nextText.replace(
-          ID_SELECTOR_REFERENCE_TEMPLATE(id),
-          (full, prefix) => `${prefix}#${id}${SUFFIX_PLACEHOLDER}`
-        );
-      });
+      const nextText = renameInSelectors(urlsReplaced, referenced);
       if (nextText !== text) {
         references.push([index, null, nextText]);
       }
@@ -1147,6 +1141,57 @@ namespace Private {
       existing: ids,
       properties: Array.from(properties)
     };
+  }
+
+  /**
+   * Add the suffix placeholder to the given ids where a selector of the style
+   * sheet names them. Declarations, where `#abc` is a colour, stay as they are.
+   */
+  function renameInSelectors(text: string, ids: Set<string>): string {
+    if (!ids.size) {
+      return text;
+    }
+    const patterns = Array.from(ids, id => ({
+      id,
+      pattern: ID_SELECTOR_REFERENCE_TEMPLATE(id)
+    }));
+    const rename = (selector: string) => {
+      let renamed = selector;
+      for (const { id, pattern } of patterns) {
+        renamed = renamed.replace(
+          pattern,
+          (full, prefix) => `${prefix}#${id}${SUFFIX_PLACEHOLDER}`
+        );
+      }
+      return renamed;
+    };
+
+    let result = '';
+    let start = 0;
+    let depth = 0;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (c === '/' && text[i + 1] === '*') {
+        const end = text.indexOf('*/', i + 2);
+        i = end < 0 ? text.length : end + 1;
+      } else if (c === '"' || c === "'") {
+        i++;
+        while (i < text.length && text[i] !== c) {
+          i += text[i] === '\\' ? 2 : 1;
+        }
+      } else if (c === '(') {
+        depth++;
+      } else if (c === ')') {
+        depth = Math.max(depth - 1, 0);
+      } else if (!depth && (c === '{' || c === '}' || c === ';')) {
+        // the text before "{" is a selector or an at-rule, the text before
+        // ";" or "}" is a declaration
+        const statement = text.slice(start, i);
+        result += (c === '{' ? rename(statement) : statement) + c;
+        start = i + 1;
+      }
+    }
+    return result + text.slice(start);
   }
 
   function escapeRegExp(text: string): string {
