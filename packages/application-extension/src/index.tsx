@@ -1247,17 +1247,20 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     let _docTreePath = '';
     let _defaultBrowserTreePath = '';
 
+    function updateUrl(treePath: string) {
+      const url = PageConfig.getUrl({ treePath });
+      const path = URLExt.parse(url).pathname;
+      if (path !== window.location.pathname) {
+        router.navigate(path, { skipRouting: true });
+      }
+      PageConfig.setOption('treePath', treePath);
+    }
+
     function updateTreePath(treePath: string) {
       // Wait for tree resolver to finish before updating the path because it use the PageConfig['treePath']
       void treeResolver.paths.then(() => {
         _defaultBrowserTreePath = treePath;
-        if (!_docTreePath) {
-          const url = PageConfig.getUrl({ treePath });
-          const path = URLExt.parse(url).pathname;
-          router.navigate(path, { skipRouting: true });
-          // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
-          PageConfig.setOption('treePath', treePath);
-        }
+        updateUrl(_docTreePath || treePath);
       });
     }
 
@@ -1294,15 +1297,11 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
       // Watch the path of the current widget in the main area and update the page
       // URL to reflect the change.
       app.shell.currentPathChanged.connect((_, args) => {
-        const maybeTreePath = args.newValue as string;
-        const treePath = maybeTreePath || _defaultBrowserTreePath;
-        const url = PageConfig.getUrl({ treePath: treePath });
-        const path = URLExt.parse(url).pathname;
-        router.navigate(path, { skipRouting: true });
-        // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
-        PageConfig.setOption('treePath', treePath);
-        _docTreePath = maybeTreePath;
+        _docTreePath = args.newValue;
+        updateUrl(_docTreePath || _defaultBrowserTreePath);
       });
+      // Restoration and user activations may have happened before routing.
+      _docTreePath = app.shell.currentPath ?? '';
     });
 
     // If the connection to the server is lost, handle it with the

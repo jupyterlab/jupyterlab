@@ -1,0 +1,210 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import { expect, galata, test } from '@jupyterlab/galata';
+import * as path from 'path';
+
+for (const view of [
+  {
+    file: 'simple_notebook.ipynb',
+    factory: 'Editor',
+    namespace: 'editor',
+    defaultFactory: 'Notebook',
+    defaultNamespace: 'notebook',
+    selector: '.jp-FileEditor'
+  },
+  {
+    file: 'simple.md',
+    factory: 'Markdown Preview',
+    namespace: 'markdownviewer-widget',
+    defaultFactory: 'Editor',
+    defaultNamespace: 'editor',
+    selector: '.jp-MarkdownViewer'
+  }
+]) {
+  test.describe(`Restore ${view.factory} with the default view open`, () => {
+    const tmpPath = `workspace-restoration-${view.namespace}`;
+    const filePath = `${tmpPath}/${view.file}`;
+    const current = `${view.namespace}:${filePath}`;
+    const defaultView = `${view.defaultNamespace}:${filePath}`;
+    const otherPath = `${tmpPath}/other.txt`;
+    const other = `editor:${otherPath}`;
+
+    test.use({
+      autoGoto: false,
+      tmpPath,
+      mockState: {
+        'layout-restorer:data': {
+          main: {
+            current,
+            dock: {
+              type: 'tab-area',
+              currentIndex: 1,
+              widgets: [defaultView, current, other]
+            }
+          }
+        },
+        [defaultView]: {
+          data: {
+            path: filePath,
+            factory: view.defaultFactory,
+            kernelPreference: { shouldStart: false }
+          }
+        },
+        [current]: { data: { path: filePath, factory: view.factory } },
+        [other]: { data: { path: otherPath, factory: 'Editor' } }
+      },
+      waitForApplication: async ({ baseURL }, use) => {
+        await use(async page => {
+          await page.evaluate(async () => {
+            await window.jupyterapp.restored;
+          });
+        });
+      }
+    });
+
+    test.beforeAll(async ({ request }) => {
+      const contents = galata.newContentsHelper(request);
+      await contents.uploadFile(
+        path.resolve(__dirname, 'notebooks', view.file),
+        filePath
+      );
+      await contents.uploadContent('Another tab', 'text', otherPath);
+      await contents.createDirectory(`${tmpPath}/different`);
+    });
+
+    test('should keep the restored current view for the URL file', async ({
+      page
+    }) => {
+      await page.goto(`tree/${filePath}`);
+      await expect(page.locator('#filebrowser')).not.toHaveClass(
+        /jp-mod-restoring/
+      );
+
+      const content = page
+        .getByRole('tabpanel', { name: view.file, includeHidden: true })
+        .locator(view.selector);
+      await expect(content).toBeVisible();
+      await expect(page.activity.getTabLocator()).toHaveAttribute(
+        'data-id',
+        await content.evaluate(node => node.closest('.jp-MainAreaWidget')!.id)
+      );
+      expect(await page.filebrowser.getCurrentDirectory()).toBe(tmpPath);
+      await expect(page).toHaveURL(
+        url => url.pathname === `/lab/tree/${filePath}`
+      );
+
+      await page.reload();
+      await expect(page.locator('#filebrowser')).not.toHaveClass(
+        /jp-mod-restoring/
+      );
+      await expect(content).toBeVisible();
+      await expect(page).toHaveURL(
+        url => url.pathname === `/lab/tree/${filePath}`
+      );
+    });
+
+    test('should keep the document URL with a different file browser path', async ({
+      page
+    }) => {
+      await page.goto(
+        `tree/${filePath}?file-browser-path=${tmpPath}/different`
+      );
+      await expect(page.locator('#filebrowser')).not.toHaveClass(
+        /jp-mod-restoring/
+      );
+
+      await expect(
+        page
+          .getByRole('tabpanel', { name: view.file, includeHidden: true })
+          .locator(view.selector)
+      ).toBeVisible();
+      expect(await page.filebrowser.getCurrentDirectory()).toBe(
+        `${tmpPath}/different`
+      );
+      await expect(page).toHaveURL(
+        url => url.pathname === `/lab/tree/${filePath}`
+      );
+    });
+
+    for (const selection of [
+      'another tab',
+      'another tab after closing the restored view',
+      'an extension widget'
+    ]) {
+      test(`should keep ${selection} activated before routing finishes`, async ({
+        page
+      }) => {
+        let finishSave: () => void;
+        const saving = new Promise<void>(resolve => {
+          finishSave = resolve;
+        });
+        // Keep routing pending after layout restoration, independently of timing.
+        await page.route(/\/api\/workspaces\//, async route => {
+          if (route.request().method() === 'PUT') {
+            await saving;
+          }
+          await route.fallback();
+        });
+
+        try {
+          await page.goto(`tree/${filePath}`);
+          await expect(page.locator('#filebrowser')).toHaveClass(
+            /jp-mod-restoring/
+          );
+          if (selection === 'an extension widget') {
+            await page.evaluate(async () => {
+              await window.jupyterapp.restored;
+              await window.jupyterapp.commands.execute('launcher:create');
+            });
+          } else {
+            if (selection === 'another tab after closing the restored view') {
+              await page.activity
+                .getTabLocator()
+                .locator('.lm-TabBar-tabCloseIcon')
+                .click();
+              await expect(
+                page
+                  .getByRole('tabpanel', {
+                    name: view.file,
+                    includeHidden: true
+                  })
+                  .locator(view.selector)
+              ).toHaveCount(0);
+            }
+            await page.activity.getTabLocator('other.txt').click();
+            await expect(page.activity.getTabLocator()).toHaveText('other.txt');
+          }
+        } finally {
+          finishSave!();
+        }
+
+        await expect(page.locator('#filebrowser')).not.toHaveClass(
+          /jp-mod-restoring/
+        );
+        await expect(page.activity.getTabLocator()).toHaveText(
+          selection === 'an extension widget' ? 'Launcher' : 'other.txt'
+        );
+        await expect(page).toHaveURL(
+          url =>
+            url.pathname ===
+            `/lab/tree/${selection === 'an extension widget' ? tmpPath : otherPath}`
+        );
+      });
+    }
+
+    test('should activate a different URL file even if it is already open', async ({
+      page
+    }) => {
+      await page.goto(`tree/${otherPath}`);
+      await expect(page.locator('#filebrowser')).not.toHaveClass(
+        /jp-mod-restoring/
+      );
+
+      await expect(page.activity.getTabLocator()).toHaveText('other.txt');
+      await expect(page).toHaveURL(
+        url => url.pathname === `/lab/tree/${otherPath}`
+      );
+    });
+  });
+}

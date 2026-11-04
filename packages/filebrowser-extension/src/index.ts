@@ -242,7 +242,10 @@ const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
     void Promise.all([app.restored, browser.model.restored]).then(() => {
       if (treePathUpdater) {
         browser.model.pathChanged.connect((sender, args) => {
-          treePathUpdater(args.newValue);
+          // The initial URL is synchronized once its target has been handled.
+          if (!browser.hasClass('jp-mod-restoring')) {
+            treePathUpdater(args.newValue);
+          }
         });
       }
     });
@@ -390,7 +393,8 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
     ITranslator,
     IDefaultFileBrowserRenderer,
     IMovableSectionRegistry,
-    IStateDB
+    IStateDB,
+    ITreePathUpdater
   ],
   activate: async (
     app: JupyterFrontEnd,
@@ -401,7 +405,8 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
     translator: ITranslator | null,
     renderer: IDefaultFileBrowserRenderer | null,
     registry: IMovableSectionRegistry | null,
-    stateDB: IStateDB | null
+    stateDB: IStateDB | null,
+    treePathUpdater: ITreePathUpdater | null
   ): Promise<IDefaultFileBrowser> => {
     const { commands } = app;
     const trans = (translator ?? nullTranslator).load('jupyterlab');
@@ -494,7 +499,7 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
       commands,
       router,
       tree,
-      app,
+      treePathUpdater,
       labShell
     );
     return defaultBrowser;
@@ -2146,7 +2151,7 @@ namespace Private {
     commands: CommandRegistry,
     router: IRouter | null,
     tree: JupyterFrontEnd.ITreeResolver | null,
-    app: JupyterFrontEnd,
+    treePathUpdater: ITreePathUpdater | null,
     labShell: ILabShell | null
   ): Promise<void> {
     const restoring = 'jp-mod-restoring';
@@ -2156,9 +2161,17 @@ namespace Private {
     if (!router) {
       await browser.model.restore(browser.id);
       await browser.model.refresh();
+      treePathUpdater?.(browser.model.path);
       browser.removeClass(restoring);
       return;
     }
+
+    const { manager } = browser.model;
+    // Capture the path before later interactions can dispose the restored widget.
+    const restoredPath = labShell?.restored.then(layout => {
+      const widget = layout.mainArea?.currentWidget;
+      return widget ? manager.contextForWidget(widget)?.path : undefined;
+    });
 
     const listener = async () => {
       router.routed.disconnect(listener);
@@ -2168,7 +2181,12 @@ namespace Private {
         // Restore the model without populating it.
         await browser.model.restore(browser.id, false);
         if (paths.file) {
-          await commands.execute(CommandIDs.openPath, {
+          const command =
+            (await restoredPath) ===
+            manager.services.contents.normalize(paths.file)
+              ? CommandIDs.goToPath
+              : CommandIDs.openPath;
+          await commands.execute(command, {
             path: paths.file,
             dontShowBrowser: true
           });
@@ -2183,6 +2201,7 @@ namespace Private {
         await browser.model.restore(browser.id);
         await browser.model.refresh();
       }
+      treePathUpdater?.(browser.model.path);
       browser.removeClass(restoring);
 
       if (labShell?.isEmpty('main')) {
