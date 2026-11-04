@@ -805,8 +805,13 @@ namespace Private {
   const SUFFIX_PLACEHOLDER = '\u0000';
   const REFERENCE_PROPERTY_PREFIX = '--jp-icon-ref-';
   const XLINK_NAMESPACE = 'http://www.w3.org/1999/xlink';
+  // an extension that imports LabIcon through a deep path bundles its own
+  // copy of this module, so all copies take suffixes from one counter on the
+  // window; keep this key and its meaning the same in later versions
+  const SUFFIX_COUNTER = Symbol.for(
+    '@jupyterlab/ui-components:LabIcon.idSuffixCounter'
+  );
   const idReferencesCache = new WeakMap<Element, IIdReferences | null>();
-  let idSuffixCounter = 0;
 
   /**
    * The ids that an svg references itself, found once per parsed svg.
@@ -983,13 +988,15 @@ namespace Private {
     let suffix = '';
     const withSuffix = (value: string) =>
       value.split(SUFFIX_PLACEHOLDER).join(suffix);
+    const counterHost = window as unknown as Record<symbol, number | undefined>;
     // editors already name ids this way, as Illustrator does with "Layer_1";
     // the separator is "_" because Chromium and WebKit cannot parse an id
     // that holds "-" in animation timing, as in begin="dot-3.click"
     do {
-      idSuffixCounter =
-        idSuffixCounter >= Number.MAX_SAFE_INTEGER ? 1 : idSuffixCounter + 1;
-      suffix = `_${idSuffixCounter.toString(36)}`;
+      const counter = counterHost[SUFFIX_COUNTER] ?? 0;
+      const next = counter >= Number.MAX_SAFE_INTEGER ? 1 : counter + 1;
+      counterHost[SUFFIX_COUNTER] = next;
+      suffix = `_${next.toString(36)}`;
     } while (
       references.ids.some(([, id]) => references.existing.has(withSuffix(id)))
     );
