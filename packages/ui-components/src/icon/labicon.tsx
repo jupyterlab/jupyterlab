@@ -804,6 +804,7 @@ namespace Private {
   // XML cannot contain this character, so it cannot clash with svg content
   const SUFFIX_PLACEHOLDER = '\u0000';
   const REFERENCE_PROPERTY_PREFIX = '--jp-icon-ref-';
+  const XLINK_NAMESPACE = 'http://www.w3.org/1999/xlink';
   const idReferencesCache = new WeakMap<Element, IIdReferences | null>();
   let idSuffixCounter = 0;
 
@@ -1082,9 +1083,14 @@ namespace Private {
     const styles: [number, string, string][] = [];
     const timings: [number, string, string][] = [];
     nodes.forEach((node, index) => {
-      for (const { name, value } of Array.from(node.attributes)) {
+      for (const attribute of Array.from(node.attributes)) {
+        const { name, value } = attribute;
         let nextValue = value;
-        if (name === 'href' || name === 'xlink:href') {
+        if (
+          attribute.localName === 'href' &&
+          (attribute.namespaceURI === null ||
+            attribute.namespaceURI === XLINK_NAMESPACE)
+        ) {
           if (value.startsWith('#') && ids.has(value.slice(1))) {
             nextValue = `#${reference(value.slice(1))}`;
           }
