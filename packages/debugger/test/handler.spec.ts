@@ -19,6 +19,8 @@ import { FileEditor, FileEditorWidget } from '@jupyterlab/fileeditor';
 
 import type { Session } from '@jupyterlab/services';
 
+import { SessionAPI } from '@jupyterlab/services';
+
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 
 import { JupyterServer, signalToPromise, sleep } from '@jupyterlab/testing';
@@ -44,6 +46,19 @@ class TestDocumentWidget extends Widget {
     this.id = UUID.uuid4();
   }
   toolbar = new Toolbar();
+}
+
+/**
+ * Wait until the debug handler marks the widget, for at most five seconds.
+ */
+async function waitForDebugHandler(widget: Widget): Promise<void> {
+  const deadline = Date.now() + 5000;
+  while (
+    !widget.node.hasAttribute('data-jp-debugger') &&
+    Date.now() < deadline
+  ) {
+    await sleep(10);
+  }
 }
 
 const server = new JupyterServer();
@@ -185,15 +200,20 @@ describe('DebuggerHandler', () => {
   });
 
   describe('debugger button', () => {
+    const shell: { currentWidget: Widget | null } = { currentWidget: null };
     let context: Context<DocumentRegistry.ICodeModel>;
     let fileWidget: FileEditorWidget;
 
-    beforeEach(() => {
-      context = new Context({
+    const createContext = (): Context<DocumentRegistry.ICodeModel> =>
+      new Context({
         manager: new ServiceManagerMock(),
         factory: new TextModelFactory(),
         path: UUID.uuid4() + '.py'
       });
+
+    const createFileWidget = (
+      context: Context<DocumentRegistry.ICodeModel>
+    ): FileEditorWidget => {
       const editorFactory = new CodeMirrorEditorFactory();
       const content = new FileEditor({
         factory: options => editorFactory.newDocumentEditor(options),
@@ -202,11 +222,17 @@ describe('DebuggerHandler', () => {
         ),
         context
       });
-      fileWidget = new FileEditorWidget({ content, context });
+      return new FileEditorWidget({ content, context });
+    };
+
+    beforeEach(() => {
+      context = createContext();
+      fileWidget = createFileWidget(context);
       // Clicks are ignored unless the widget is the current one.
+      shell.currentWidget = fileWidget;
       handler = new DebuggerHandler({
         type: 'file',
-        shell: { currentWidget: fileWidget } as any,
+        shell: shell as any,
         service
       });
     });
@@ -249,7 +275,7 @@ describe('DebuggerHandler', () => {
       await handler.update(fileWidget, connection);
       const button = handler['_iconButtons'][fileWidget.id]!;
 
-      // The restart drops the requests of this click, which never settles.
+      // The restart drops the requests of this click.
       button.onClick();
       await connection.kernel!.restart();
       // The handler turns the button off once it has seen the restart.
@@ -266,5 +292,62 @@ describe('DebuggerHandler', () => {
       expect(service.isStarted).toBe(true);
       expect(button.pressed).toBe(true);
     });
+
+    it('lets clicks through again once the kernel restarts while the debugger starts a second time', async () => {
+      await handler.update(fileWidget, connection);
+      const button = handler['_iconButtons'][fileWidget.id]!;
+      button.onClick();
+      while (!fileWidget.node.hasAttribute('data-jp-debugger')) {
+        await sleep(10);
+      }
+      // Stopping disconnects the slots the handler connected to the session.
+      button.onClick();
+      while (fileWidget.node.hasAttribute('data-jp-debugger')) {
+        await sleep(10);
+      }
+
+      // The restart drops the requests of this click.
+      button.onClick();
+      await connection.kernel!.restart();
+      button.onClick();
+      await waitForDebugHandler(fileWidget);
+
+      expect(fileWidget.node.hasAttribute('data-jp-debugger')).toBe(true);
+      const reply = await service.session!.sendRequest('debugInfo', {});
+      expect(reply.body.isStarted).toBe(true);
+    }, 30000);
+
+    it('lets clicks through in another document once a document is closed while the debugger starts', async () => {
+      const closedConnection = await createSession({
+        name: '',
+        type: 'test',
+        path: UUID.uuid4()
+      });
+      await closedConnection.changeKernel({ name: 'python3' });
+      const closedContext = createContext();
+      const closedWidget = createFileWidget(closedContext);
+      shell.currentWidget = closedWidget;
+      await handler.update(closedWidget, closedConnection);
+
+      // Closing the document disposes its session connection, which drops
+      // the requests of this click.
+      handler['_iconButtons'][closedWidget.id]!.onClick();
+      closedWidget.dispose();
+      closedContext.dispose();
+      closedConnection.dispose();
+      await SessionAPI.shutdownSession(
+        closedConnection.id,
+        closedConnection.serverSettings
+      );
+
+      shell.currentWidget = fileWidget;
+      await handler.update(fileWidget, connection);
+      handler['_iconButtons'][fileWidget.id]!.onClick();
+      await waitForDebugHandler(fileWidget);
+
+      expect(fileWidget.node.hasAttribute('data-jp-debugger')).toBe(true);
+      const reply = await service.session!.sendRequest('debugInfo', {});
+      expect(reply.body.isStarted).toBe(true);
+    }, 30000);
   });
 });

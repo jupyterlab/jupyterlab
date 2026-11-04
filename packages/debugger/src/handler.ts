@@ -150,7 +150,6 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     // connection missed by the explicit disconnects via
     // `Signal.clearData(this)`.
     const kernelChanged = (): void => {
-      this._dropPendingToggle(connection);
       void this.updateWidget(widget, connection);
     };
     const kernelChangedHandler = this._kernelChangedHandlers[widget.id];
@@ -166,7 +165,6 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       status: Kernel.Status
     ): void => {
       if (status.endsWith('restarting')) {
-        this._dropPendingToggle(connection);
         void this.updateWidget(widget, connection);
       }
     };
@@ -438,8 +436,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
         debugButton.pressed = !debugButton.pressed;
         return;
       }
-      const pendingToggle = { connection };
-      this._pendingToggle = pendingToggle;
+      this._pendingToggle = true;
       try {
         if (isDebuggerOn()) {
           await stopDebugger();
@@ -450,10 +447,15 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
           createHandler();
           updateIconButtonState(debugButton, true);
         }
+      } catch (error) {
+        // A restart, a kernel change or closing the document drops the debug
+        // requests of this click.
+        console.error(
+          'Could not toggle the debugger:',
+          error instanceof Error ? error.message : String(error)
+        );
       } finally {
-        if (this._pendingToggle === pendingToggle) {
-          this._pendingToggle = null;
-        }
+        this._pendingToggle = false;
       }
     };
 
@@ -549,23 +551,11 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     this._previousConnection = connection;
   }
 
-  /**
-   * Let clicks through again once the kernel of a pending toggle restarts or
-   * changes: its debug requests are dropped then, and it may never settle.
-   */
-  private _dropPendingToggle(connection: Session.ISessionConnection): void {
-    if (this._pendingToggle?.connection === connection) {
-      this._pendingToggle = null;
-    }
-  }
-
   private _type: DebuggerHandler.SessionType;
   private _shell: JupyterFrontEnd.IShell;
   private _service: IDebugger;
   private _previousConnection: Session.ISessionConnection | null;
-  private _pendingToggle: {
-    connection: Session.ISessionConnection;
-  } | null = null;
+  private _pendingToggle = false;
   private _activeWidget:
     | DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
     | null;
