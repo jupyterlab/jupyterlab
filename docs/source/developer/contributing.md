@@ -244,8 +244,6 @@ furthers the goals of the Jupyter project.
 
 ### Labels Used by Triagers
 
-All new bugs and enhancement requests have the `status:Needs Triage` label.
-
 On a regular basis, Jupyter contributors (triage reviewers or triagers)
 review JupyterLab issues tagged
 with `status:Needs Triage`, starting with the oldest, and determine
