@@ -175,7 +175,12 @@ test.describe('Section reordering', () => {
     await page.keyboard.press('ArrowDown');
     await expect(titles.nth(1)).toBeFocused();
     await page.keyboard.press('Tab');
-    await expect(titles.nth(2)).toBeFocused();
+    const body = page.locator(
+      `#${await titles.nth(1).getAttribute('aria-controls')}`
+    );
+    await expect
+      .poll(() => body.evaluate(node => node.contains(document.activeElement)))
+      .toBe(true);
 
     await toggleReordering(page, titles.first());
     await expect(

@@ -260,9 +260,15 @@ export class AccordionPanelReorderer
       const index = slot > current ? slot - 1 : slot;
       if (index !== current) {
         this._panel.insertWidget(index, widget);
-        // Lumino moves the titles visually without updating their DOM order.
-        for (const title of this._panel.titles) {
-          this._panel.node.appendChild(title);
+        // Lumino only repositions the section, so move its title, body and
+        // handle to keep the Tab order the same as the visual order.
+        const next = this._panel.titles[index + 1] ?? null;
+        for (const node of [
+          this._panel.titles[index],
+          widget.node,
+          this._panel.handles[index]
+        ]) {
+          this._panel.node.insertBefore(node, next);
         }
         this._reordered.emit(widget);
       }

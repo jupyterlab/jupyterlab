@@ -2563,12 +2563,21 @@ namespace Private {
               const targetWidgets = w.content.widgets.map(wi =>
                 savedWidgets.has(wi) ? ordered[savedIndex++] : wi
               );
-              targetWidgets.forEach((wi, index) => {
+              for (const [index, wi] of targetWidgets.entries()) {
+                if (w.content.widgets[index] === wi) {
+                  continue;
+                }
                 w.content.insertWidget(index, wi);
-              });
-              // Keep keyboard navigation in the restored visual order.
-              for (const title of w.content.titles) {
-                w.content.node.appendChild(title);
+                // Lumino only repositions the section, so move its title, body
+                // and handle to keep the Tab order the same as the visual order.
+                const next = w.content.titles[index + 1] ?? null;
+                for (const node of [
+                  w.content.titles[index],
+                  wi.node,
+                  w.content.handles[index]
+                ]) {
+                  w.content.node.insertBefore(node, next);
+                }
               }
             }
             const sizes = w.content.relativeSizes();

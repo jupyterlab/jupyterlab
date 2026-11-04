@@ -1006,6 +1006,53 @@ describe('LabShell', () => {
       );
     });
 
+    it.each([
+      { name: 'an unchanged order', widgetIds: ['a', 'b', 'c'] },
+      { name: 'a new order', widgetIds: ['c', 'a', 'b'] }
+    ])(
+      'should keep each section title before its body when restoring $name',
+      async ({ widgetIds }) => {
+        const restorer = new LayoutRestorer({
+          connector: new StateDB(),
+          first: Promise.resolve<void>(void 0),
+          registry: new CommandRegistry()
+        });
+        const { panel, content } = createPanel();
+        restorer.add(panel, panel.id);
+        shell.add(panel, 'left');
+        shell.activateById(panel.id);
+        await restorer.restored;
+        const layout = shell.saveLayout();
+        await restorer.save({
+          ...layout,
+          leftArea: {
+            ...layout.leftArea!,
+            widgetStates: {
+              sidebar: { sizes: null, expansionStates: null, widgetIds }
+            }
+          }
+        });
+        await shell.restoreLayout('multiple-document', restorer);
+
+        const order = Array.from(content.node.children)
+          .filter(
+            node =>
+              node.classList.contains('lm-AccordionPanel-title') ||
+              node.getAttribute('role') === 'region'
+          )
+          .map(node =>
+            node.getAttribute('role') === 'region'
+              ? `body ${node.id}`
+              : `title ${node.getAttribute('aria-controls')}`
+          );
+        const expected: string[] = [];
+        for (const id of widgetIds) {
+          expected.push(`title ${id}`, `body ${id}`);
+        }
+        expect(order).toEqual(expected);
+      }
+    );
+
     it('should restore the layout of the shell', async () => {
       const restorer = new LayoutRestorer({
         connector: new StateDB(),
