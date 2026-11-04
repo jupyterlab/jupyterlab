@@ -16,6 +16,19 @@
   whole. Each such plugin is named in a browser console warning. To keep it enabled, list
   the plugin ids to disable in `disabledExtensions` instead of the package name.
 
+- Users can reorder the sections of a `SidePanel` with the default accordion content, and
+  the workspace saves the order, the collapsed state and the size of each section with the
+  section ID. Give each section an explicit ID that is unique in the page and the same in
+  every session, for example `section.id = 'my-extension-panel-settings'`. A section
+  without an explicit ID gets a new generated ID in every session: the panel comes back in
+  its original order, and the collapsed states and sizes are restored by position, so after
+  a reorder they can be applied to the wrong sections. See
+  {ref}`reordering accordion sections <reordering-sections>`.
+
+- `IRunningSessions.IManager` has a new optional `id`. It sets the ID of the manager's
+  section in the Running Sessions panel. Without it, the section ID is built from the
+  translated `name`, so it changes with the display language.
+
 ### API updates
 
 - The JSON Lines renderer plugin was renamed from `@jupyterlab/json-lines-extension:factory`
