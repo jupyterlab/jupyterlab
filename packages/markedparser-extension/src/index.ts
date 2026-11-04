@@ -281,12 +281,12 @@ namespace Private {
     }
     const headings = new Array<IMarkdownHeadingToken>();
     // Hide math from the lexer, as `renderMarkdown` does, but not single `$`
-    // math that spans a heading line: those `$` are dollar amounts, and the
-    // editor shows the heading between them.
+    // math that spans lines: those `$` are often dollar amounts, and the
+    // editor shows any heading on those lines.
     const { text, math } = removeMath(content, mathParseOptions);
     const tokens = _marked.lexer(
       text.replace(/@@(\d+)@@/g, (placeholder: string, index: string) =>
-        spansHeading(math[Number(index)])
+        spansLines(math[Number(index)])
           ? restoreMath(placeholder, math)
           : placeholder
       )
@@ -329,10 +329,10 @@ namespace Private {
   }
 
   /**
-   * Whether math in single `$` spans a `#` heading line.
+   * Whether math in single `$` spans more than one line.
    */
-  function spansHeading(math: string): boolean {
-    return /^\$[^$]/.test(math) && /\n {0,3}#{1,6}[ \t\n]/.test(math);
+  function spansLines(math: string): boolean {
+    return /^\$[^$]/.test(math) && math.includes('\n');
   }
 
   /**

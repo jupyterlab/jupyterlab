@@ -634,9 +634,7 @@ front: matter
         // underline. See https://github.com/jupyterlab/jupyterlab/issues/19816
         ['$$\n\\text{This}\n=\n\\text{broken.}\n$$', []],
         ['$$\nTitle\n---\n$$', []],
-        ['$$\na\n=\nb\n$$', []],
-        // The same holds for math in single `$`.
-        ['$\na\n=\nb\n$', []]
+        ['$$\na\n=\nb\n$$', []]
       ])(
         'should not read a setext heading inside a math block in %s',
         async (src, headers) => {
@@ -770,9 +768,35 @@ front: matter
               skip: false
             }
           ]
+        ],
+        [
+          '## Revenue ($M)\nQ1 revenue was $5M.',
+          [
+            {
+              text: 'Revenue ($M)',
+              level: 2,
+              line: 0,
+              raw: '## Revenue ($M)',
+              prefix: '0.1. ',
+              skip: false
+            }
+          ]
+        ],
+        [
+          'Pricing (US$)\n===\nThe basic plan costs $5.',
+          [
+            {
+              text: 'Pricing (US$)',
+              level: 1,
+              line: 0,
+              raw: 'Pricing (US$)\n===',
+              prefix: '1. ',
+              skip: false
+            }
+          ]
         ]
       ])(
-        'should keep a heading between two dollar amounts in %s',
+        'should keep a heading next to dollar amounts in %s',
         async (src, headers) => {
           expect(await tocHeadings(src)).toEqual(headers);
         }
