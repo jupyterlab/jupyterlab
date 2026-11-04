@@ -12,6 +12,7 @@ Jupyverse
 Quansight
 Yjs
 hatchling
+Snakemake
 
 # Common technical terms in docs
 frontend
