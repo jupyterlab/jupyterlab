@@ -2153,6 +2153,9 @@ namespace Private {
 
   /**
    * Resolve an `open-with` value to a widget factory name.
+   *
+   * Returns `undefined`, which opens the default viewer, when no widget
+   * factory, file type or file extension matches the value.
    */
   export function resolveOpenWithFactory(
     docRegistry: DocumentRegistry,
@@ -2175,11 +2178,15 @@ namespace Private {
           value => value.toLowerCase() === extension.toLowerCase()
         )
       );
-    if (!fileType) {
-      return openWith;
+    const name = fileType
+      ? docRegistry.preferredWidgetFactories(fileType)[0]?.name
+      : undefined;
+    if (!name) {
+      console.warn(
+        `No viewer matches open-with value "${openWith}", using the default viewer.`
+      );
     }
-
-    return docRegistry.preferredWidgetFactories(fileType)[0]?.name ?? openWith;
+    return name;
   }
 
   /**

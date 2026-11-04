@@ -1648,7 +1648,10 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
 
           const query = URLExt.queryStringToObject(args.search ?? '');
           const browser = query['file-browser-path'] || '';
-          const factory = query['open-with'] || undefined;
+          // `URLSearchParams` also decodes `+` to a space, as in `Markdown+Preview`.
+          const factory =
+            new URLSearchParams(args.search ?? '').get('open-with') ||
+            undefined;
 
           // Remove tree resolver-only parameters from the parsed query object.
           delete query['file-browser-path'];

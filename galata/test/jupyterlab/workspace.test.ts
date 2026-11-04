@@ -135,6 +135,28 @@ test.describe('Workspace', () => {
     ).toBeVisible();
   });
 
+  test('should open the default viewer for an unknown `open-with` value', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.goto(`tree/${tmpPath}/${nbFile}?open-with=unknown-viewer`);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-Notebook')
+    ).toHaveCount(1);
+  });
+
+  test('should decode `+` as a space in the `open-with` value', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.goto(`tree/${tmpPath}/${mdFile}?open-with=Markdown+Preview`);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MarkdownViewer')
+    ).toHaveCount(1);
+  });
+
   test('should open a file from `tree` url if workspace is not empty', async ({
     page,
     tmpPath

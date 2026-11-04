@@ -43,7 +43,11 @@ http(s)://<server:port>/<lab-location>/lab/tree/path/to/notebook.ipynb?open-with
 ```
 
 The available viewers depend on the installed extensions and registered document
-factories.
+factories. A widget factory name can differ from the item in the “Open With”
+submenu: the CSV viewer is listed as “CSV Viewer”, but its factory name is
+`CSVTable`. Opening a Markdown file with `ipynb` needs an extension that converts
+the file to a notebook, such as Jupytext. When the value matches no viewer, the
+file opens in its default viewer.
 
 ## Linking Notebook Sections
 
