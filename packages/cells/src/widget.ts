@@ -1380,7 +1380,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
         } else if (mdType) {
           const mdHeading = await TableOfContentsUtils.Markdown.parseHeadings(
             m.data[mdType] as string,
-            this._rendermime.markdownParser
+            this._rendermime.markdownParser,
+            this._rendermime.latexTypesetter?.mathParseOptions
           );
 
           headings.push(
@@ -2279,7 +2280,8 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       const source = this.model.sharedModel.getSource();
       const headings = await TableOfContentsUtils.Markdown.parseHeadings(
         source,
-        this._rendermime.markdownParser
+        this._rendermime.markdownParser,
+        this._rendermime.latexTypesetter?.mathParseOptions
       );
       if (!this.isDisposed && source !== this.model.sharedModel.getSource()) {
         // The source changed while it was parsed: parse it again.

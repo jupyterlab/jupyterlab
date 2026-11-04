@@ -220,9 +220,14 @@ export interface IMarkdownParser extends IRenderMime.IMarkdownParser {
    * Parse markdown and extract heading metadata.
    *
    * @param source - The markdown string to parse.
+   * @param mathParseOptions - How math is found in the source, as for the
+   *   typesetter that renders it; the default delimiters when omitted.
    * @returns - A promise of heading metadata.
    */
-  getHeadingTokens?: (source: string) => Promise<IMarkdownHeadingToken[]>;
+  getHeadingTokens?: (
+    source: string,
+    mathParseOptions?: IRenderMime.ILatexTypesetter.IMathParseOptions
+  ) => Promise<IMarkdownHeadingToken[]>;
 }
 
 /**
