@@ -609,134 +609,136 @@ front: matter
       }
     );
 
-    const tocHeadings = async (src: string) => {
-      const languages: IEditorLanguageRegistry = new EditorLanguageRegistry();
-      const parser: IMarkdownParser = createMarkdownParser(languages);
-      return TableOfContentsUtils.filterHeadings(
-        await TableOfContentsUtils.Markdown.parseHeadings(src, parser),
-        {
-          maximalDepth: 6,
-          numberHeaders: true
+    describe('#parseHeadings', () => {
+      const tocHeadings = async (src: string) => {
+        const languages: IEditorLanguageRegistry = new EditorLanguageRegistry();
+        const parser: IMarkdownParser = createMarkdownParser(languages);
+        return TableOfContentsUtils.filterHeadings(
+          await TableOfContentsUtils.Markdown.parseHeadings(src, parser),
+          {
+            maximalDepth: 6,
+            numberHeaders: true
+          }
+        );
+      };
+
+      it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
+        // A line of `=` or `-` inside a `$$` block is LaTeX, not a setext heading
+        // underline. See https://github.com/jupyterlab/jupyterlab/issues/19816
+        ['$$\n\\text{This}\n=\n\\text{broken.}\n$$', []],
+        ['$$\nTitle\n---\n$$', []],
+        ['$$\na\n=\nb\n$$', []]
+      ])(
+        'should not read a setext heading inside a math block in %s',
+        async (src, headers) => {
+          expect(await tocHeadings(src)).toEqual(headers);
         }
       );
-    };
 
-    it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
-      // A line of `=` or `-` inside a `$$` block is LaTeX, not a setext heading
-      // underline. See https://github.com/jupyterlab/jupyterlab/issues/19816
-      ['$$\n\\text{This}\n=\n\\text{broken.}\n$$', []],
-      ['$$\nTitle\n---\n$$', []],
-      ['$$\na\n=\nb\n$$', []]
-    ])(
-      'should not read a setext heading inside a math block in %s',
-      async (src, headers) => {
-        expect(await tocHeadings(src)).toEqual(headers);
-      }
-    );
+      it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
+        [
+          '# Title $x=1$',
+          [
+            {
+              text: 'Title $x=1$',
+              level: 1,
+              line: 0,
+              raw: '# Title $x=1$',
+              prefix: '1. ',
+              skip: false
+            }
+          ]
+        ],
+        // The heading source keeps `<`, `>` and `&`, which `removeMath` escapes.
+        [
+          '# Case $n > 0$',
+          [
+            {
+              text: 'Case $n > 0$',
+              level: 1,
+              line: 0,
+              raw: '# Case $n > 0$',
+              prefix: '1. ',
+              skip: false
+            }
+          ]
+        ],
+        // `*` inside math is not emphasis.
+        [
+          '# Title $x*y*z$',
+          [
+            {
+              text: 'Title $x*y*z$',
+              level: 1,
+              line: 0,
+              raw: '# Title $x*y*z$',
+              prefix: '1. ',
+              skip: false
+            }
+          ]
+        ]
+      ])(
+        'should keep the math of a heading as written in %s',
+        async (src, headers) => {
+          expect(await tocHeadings(src)).toEqual(headers);
+        }
+      );
 
-    it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
-      [
-        '# Title $x=1$',
+      it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
         [
-          {
-            text: 'Title $x=1$',
-            level: 1,
-            line: 0,
-            raw: '# Title $x=1$',
-            prefix: '1. ',
-            skip: false
-          }
+          '$$\na\n=\nb\n$$\n\n# Title',
+          [
+            {
+              text: 'Title',
+              level: 1,
+              line: 6,
+              raw: '# Title',
+              prefix: '1. ',
+              skip: false
+            }
+          ]
         ]
-      ],
-      // The heading source keeps `<`, `>` and `&`, which `removeMath` escapes.
-      [
-        '# Case $n > 0$',
-        [
-          {
-            text: 'Case $n > 0$',
-            level: 1,
-            line: 0,
-            raw: '# Case $n > 0$',
-            prefix: '1. ',
-            skip: false
-          }
-        ]
-      ],
-      // `*` inside math is not emphasis.
-      [
-        '# Title $x*y*z$',
-        [
-          {
-            text: 'Title $x*y*z$',
-            level: 1,
-            line: 0,
-            raw: '# Title $x*y*z$',
-            prefix: '1. ',
-            skip: false
-          }
-        ]
-      ]
-    ])(
-      'should keep the math of a heading as written in %s',
-      async (src, headers) => {
-        expect(await tocHeadings(src)).toEqual(headers);
-      }
-    );
+      ])(
+        'should return the source line of a heading after a math block in %s',
+        async (src, headers) => {
+          expect(await tocHeadings(src)).toEqual(headers);
+        }
+      );
 
-    it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
-      [
-        '$$\na\n=\nb\n$$\n\n# Title',
+      it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
         [
-          {
-            text: 'Title',
-            level: 1,
-            line: 6,
-            raw: '# Title',
-            prefix: '1. ',
-            skip: false
-          }
-        ]
-      ]
-    ])(
-      'should return the source line of a heading after a math block in %s',
-      async (src, headers) => {
-        expect(await tocHeadings(src)).toEqual(headers);
-      }
-    );
-
-    it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
-      [
-        '$$\nx = 1\n$$\n---',
+          '$$\nx = 1\n$$\n---',
+          [
+            {
+              text: '$$\nx = 1\n$$',
+              level: 2,
+              line: 0,
+              raw: '$$\nx = 1\n$$\n---',
+              prefix: '0.1. ',
+              skip: false
+            }
+          ]
+        ],
+        // A `=` line inside the math does not split the heading in two.
         [
-          {
-            text: '$$\nx = 1\n$$',
-            level: 2,
-            line: 0,
-            raw: '$$\nx = 1\n$$\n---',
-            prefix: '0.1. ',
-            skip: false
-          }
+          '$$\n\\text{This}\n=\n\\text{broken.}\n$$\n---',
+          [
+            {
+              text: '$$\n\\text{This}\n=\n\\text{broken.}\n$$',
+              level: 2,
+              line: 0,
+              raw: '$$\n\\text{This}\n=\n\\text{broken.}\n$$\n---',
+              prefix: '0.1. ',
+              skip: false
+            }
+          ]
         ]
-      ],
-      // A `=` line inside the math does not split the heading in two.
-      [
-        '$$\n\\text{This}\n=\n\\text{broken.}\n$$\n---',
-        [
-          {
-            text: '$$\n\\text{This}\n=\n\\text{broken.}\n$$',
-            level: 2,
-            line: 0,
-            raw: '$$\n\\text{This}\n=\n\\text{broken.}\n$$\n---',
-            prefix: '0.1. ',
-            skip: false
-          }
-        ]
-      ]
-    ])(
-      'should read a `---` line after a math block as an underline in %s',
-      async (src, headers) => {
-        expect(await tocHeadings(src)).toEqual(headers);
-      }
-    );
+      ])(
+        'should read a `---` line after a math block as an underline in %s',
+        async (src, headers) => {
+          expect(await tocHeadings(src)).toEqual(headers);
+        }
+      );
+    });
   });
 });
