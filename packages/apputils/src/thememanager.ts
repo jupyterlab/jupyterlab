@@ -563,8 +563,13 @@ export class ThemeManager implements IThemeManager {
         });
 
         // Need to force a redraw of the app here to avoid a Chrome rendering
-        // bug that can leave the scrollbars in an invalid state
-        this._host.hide();
+        // bug that can leave the scrollbars in an invalid state. Skip it before
+        // the host is attached: nothing is drawn yet, and a host attached while
+        // hidden gets its first layout from `show()`, which sizes children
+        // before their parents and loses the relative sizes of split panels.
+        if (this._host.isAttached) {
+          this._host.hide();
+        }
 
         // If we hide/show the widget too quickly, no redraw will happen.
         // requestAnimationFrame delays until after the next frame render.

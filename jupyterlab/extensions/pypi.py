@@ -15,7 +15,7 @@ import sys
 import tempfile
 import xmlrpc.client
 from collections.abc import Awaitable, Callable
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from functools import partial
 from itertools import groupby
 from os import environ
@@ -268,7 +268,7 @@ class PyPIExtensionManager(ExtensionManager):
         self._rpc_client = xmlrpc.client.ServerProxy(
             self.base_url, transport=xmlrpc_transport_override
         )
-        self.__last_all_packages_request_time = datetime.now(tz=timezone.utc) - timedelta(
+        self.__last_all_packages_request_time = datetime.now(tz=UTC) - timedelta(
             seconds=self.cache_timeout * 1.01
         )
         self.__all_packages_cache: list[tuple[str, str]] | None = None
@@ -535,7 +535,7 @@ class PyPIExtensionManager(ExtensionManager):
     async def __get_all_extensions(self) -> list[tuple[str, str]]:
         all_packages_cache = self.__all_packages_cache
         if all_packages_cache is None or datetime.now(
-            tz=timezone.utc
+            tz=UTC
         ) > self.__last_all_packages_request_time + timedelta(seconds=self.cache_timeout):
             self.log.debug("Requesting PyPI.org RPC API for prebuilt JupyterLab extensions.")
             browse = cast(
@@ -569,7 +569,7 @@ class PyPIExtensionManager(ExtensionManager):
                     all_packages_cache.append((name, result))
 
             self.__all_packages_cache = all_packages_cache
-            self.__last_all_packages_request_time = datetime.now(tz=timezone.utc)
+            self.__last_all_packages_request_time = datetime.now(tz=UTC)
 
         return all_packages_cache
 

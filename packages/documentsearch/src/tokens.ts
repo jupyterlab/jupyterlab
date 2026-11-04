@@ -416,8 +416,8 @@ export interface ISearchProvider extends IBaseSearchProvider {
   /**
    * The number of matches which can be replaced, if known.
    *
-   * The search box disables Replace All when there are matches but none of
-   * them can be replaced.
+   * The search box disables Replace All, and Replace while no match is
+   * current, when there are matches but none of them can be replaced.
    */
   readonly replaceableMatchesCount?: number | null;
 }

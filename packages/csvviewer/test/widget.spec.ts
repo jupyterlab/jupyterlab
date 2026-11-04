@@ -4,12 +4,18 @@
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Context, TextModelFactory } from '@jupyterlab/docregistry';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
-import { signalToPromise } from '@jupyterlab/testing';
+import { framePromise, signalToPromise } from '@jupyterlab/testing';
 import { UUID } from '@lumino/coreutils';
-import type { CellRenderer } from '@lumino/datagrid';
-import { DataGrid, DataModel, JSONModel } from '@lumino/datagrid';
+import type { TextRenderer } from '@lumino/datagrid';
+import { CellRenderer, DataGrid, DataModel, JSONModel } from '@lumino/datagrid';
+import { MessageLoop } from '@lumino/messaging';
 import type { TextRenderConfig } from '../src';
-import { CSVViewer, DSVModel, GridSearchService } from '../src';
+import {
+  CSVDocumentWidget,
+  CSVViewer,
+  DSVModel,
+  GridSearchService
+} from '../src';
 
 const FRUITS = `fruit,colour,price
 apple,red,1.20
@@ -125,6 +131,222 @@ describe('csvviewer/widget', () => {
       });
     });
 
+    describe('comment rows', () => {
+      let viewerContext: Context<DocumentRegistry.IModel>;
+      let widget: CSVViewer;
+      let renderer: TextRenderer;
+      const cell = {
+        region: 'body',
+        row: 0,
+        column: 0,
+        value: '# note, with a comma',
+        metadata: { comment: true, merged: true }
+      } as unknown as CellRenderer.CellConfig;
+
+      beforeEach(async () => {
+        viewerContext = createContext();
+        await viewerContext.initialize(true);
+        viewerContext.model.fromString('# note, with a comma\nid,name\n1,a');
+        widget = new CSVViewer({ context: viewerContext });
+        await widget.ready;
+        widget.rendererConfig = { ...RENDER_CONFIG, commentColor: 'teal' };
+        await framePromise();
+        const grid = Array.from(widget.children())[0] as DataGrid;
+        renderer = grid.cellRenderers.get(cell) as TextRenderer;
+      });
+
+      afterEach(() => {
+        widget.dispose();
+        viewerContext.dispose();
+      });
+
+      it('should draw comment rows in italic', () => {
+        expect(CellRenderer.resolveOption(renderer.font, cell)).toMatch(
+          /^italic /
+        );
+      });
+
+      it('should draw comment rows in the comment color', () => {
+        expect(CellRenderer.resolveOption(renderer.textColor, cell)).toBe(
+          'teal'
+        );
+      });
+
+      it('should align merged comment rows to the left', () => {
+        expect(
+          CellRenderer.resolveOption(renderer.horizontalAlignment, cell)
+        ).toBe('left');
+      });
+
+      it('should keep the alignment of split comment rows', () => {
+        const split = {
+          ...cell,
+          metadata: { comment: true }
+        } as CellRenderer.CellConfig;
+        expect(
+          CellRenderer.resolveOption(renderer.horizontalAlignment, split)
+        ).toBe('right');
+      });
+    });
+
+    describe('column sizes', () => {
+      let viewerContext: Context<DocumentRegistry.IModel>;
+      let widget: CSVViewer;
+      let grid: DataGrid;
+
+      beforeEach(async () => {
+        viewerContext = createContext();
+        await viewerContext.initialize(true);
+        viewerContext.model.fromString(
+          '# export\nid,name;label,value\n1,Alice;Bob,42'
+        );
+        widget = new CSVViewer({ context: viewerContext });
+        await widget.ready;
+        grid = Array.from(widget.children())[0] as DataGrid;
+        grid.resizeColumn('body', 0, 240);
+        grid.resizeColumn('body', 1, 320);
+        MessageLoop.flush();
+      });
+
+      afterEach(() => {
+        widget.dispose();
+        viewerContext.dispose();
+        jest.useRealTimers();
+      });
+
+      it.each(['comment', 'delimiter'] as const)(
+        'should preserve resized columns when changing the %s',
+        async option => {
+          expect(grid.columnSize('body', 0)).toBe(240);
+          expect(grid.columnSize('body', 1)).toBe(320);
+          const oldModel = grid.dataModel;
+          const changed = signalToPromise(widget.dataChanged);
+          widget[option] = option === 'comment' ? '#' : ';';
+          await expect(changed).resolves.toEqual([widget, undefined]);
+          await framePromise();
+          MessageLoop.flush();
+
+          expect(grid.dataModel).not.toBe(oldModel);
+          expect(grid.dataModel!.columnCount('body')).toBe(
+            option === 'comment' ? 3 : 2
+          );
+          expect(grid.dataModel!.data('column-header', 0, 0)).toBe(
+            option === 'comment' ? 'id' : '# export'
+          );
+          expect(grid.columnSize('body', 0)).toBe(240);
+          expect(grid.columnSize('body', 1)).toBe(320);
+        }
+      );
+
+      it('should restore widths when columns return after a delimiter change', async () => {
+        widget.delimiter = '|';
+        await framePromise();
+        MessageLoop.flush();
+        expect(grid.columnCount('body')).toBe(1);
+        expect(grid.columnSize('body', 0)).toBe(240);
+
+        widget.delimiter = ',';
+        await framePromise();
+        MessageLoop.flush();
+        expect(grid.columnCount('body')).toBe(3);
+        expect(grid.columnSize('body', 0)).toBe(240);
+        expect(grid.columnSize('body', 1)).toBe(320);
+        expect(grid.columnSize('body', 2)).toBe(grid.defaultSizes.columnWidth);
+      });
+
+      it('should preserve widths when changing both options together', async () => {
+        widget.delimiter = ';';
+        widget.comment = '#';
+        await framePromise();
+        MessageLoop.flush();
+        expect(grid.dataModel!.data('column-header', 0, 0)).toBe('id,name');
+        expect(grid.columnSize('body', 0)).toBe(240);
+        expect(grid.columnSize('body', 1)).toBe(320);
+      });
+
+      it('should preserve widths when changing options before pending resizes finish', async () => {
+        const oldModel = grid.dataModel;
+        widget.delimiter = ';';
+        for (let i = 0; i < 20 && grid.dataModel === oldModel; i++) {
+          await Promise.resolve();
+        }
+        expect(grid.dataModel).not.toBe(oldModel);
+        widget.comment = '#';
+        await framePromise();
+        MessageLoop.flush();
+        expect(grid.dataModel!.data('column-header', 0, 0)).toBe('id,name');
+        expect(grid.columnSize('body', 0)).toBe(240);
+        expect(grid.columnSize('body', 1)).toBe(320);
+      });
+
+      it('should preserve widths of columns discovered during delayed parsing', async () => {
+        widget.dispose();
+        viewerContext.model.fromString(
+          '# export\nid,name\n' + '1,Alice\n'.repeat(500) + '2,Bob,extra'
+        );
+        widget = new CSVViewer({ context: viewerContext });
+        await widget.ready;
+        grid = Array.from(widget.children())[0] as DataGrid;
+        await (grid.dataModel as DSVModel).ready;
+        grid.resizeColumn('body', 0, 240);
+        grid.resizeColumn('body', 2, 320);
+        MessageLoop.flush();
+        expect(grid.columnSize('body', 2)).toBe(320);
+
+        jest.useFakeTimers({ doNotFake: ['requestAnimationFrame'] });
+        widget.comment = '#';
+        await framePromise();
+        MessageLoop.flush();
+        expect(grid.columnCount('body')).toBe(2);
+        grid.resizeColumn('body', 0, 280);
+        MessageLoop.flush();
+        const changed = signalToPromise(widget.dataChanged);
+        jest.runOnlyPendingTimers();
+        await expect(changed).resolves.toEqual([widget, undefined]);
+        await (grid.dataModel as DSVModel).ready;
+        MessageLoop.flush();
+
+        expect(grid.columnCount('body')).toBe(3);
+        expect(grid.columnSize('body', 0)).toBe(280);
+        expect(grid.columnSize('body', 2)).toBe(320);
+      });
+    });
+
+    describe('#delimiter', () => {
+      it('should default to comma when not specified', () => {
+        const widget = new CSVViewer({ context });
+        expect(widget.delimiter).toBe(',');
+        widget.dispose();
+      });
+
+      it('should use provided delimiter when specified in options', () => {
+        const widget = new CSVViewer({ context, delimiter: ';' });
+        expect(widget.delimiter).toBe(';');
+        widget.dispose();
+      });
+
+      it('should accept tab as delimiter', () => {
+        const widget = new CSVViewer({ context, delimiter: '\t' });
+        expect(widget.delimiter).toBe('\t');
+        widget.dispose();
+      });
+
+      it('should parse the file with the delimiter from the options', async () => {
+        const viewerContext = createContext();
+        viewerContext.model.fromString('id;name\n1;Alpha');
+        await viewerContext.initialize(true);
+        const widget = new CSVViewer({
+          context: viewerContext,
+          delimiter: ';'
+        });
+        await widget.ready;
+        const grid = Array.from(widget.children())[0] as DataGrid;
+        expect((grid.dataModel as DSVModel).columnCount('body')).toBe(2);
+        widget.dispose();
+        viewerContext.dispose();
+      });
+    });
+
     describe('#dispose()', () => {
       it('should dispose of the resources held by the widget', () => {
         const widget = new CSVViewer({ context });
@@ -183,6 +405,27 @@ describe('csvviewer/widget', () => {
           widget,
           undefined
         ]);
+        widget.dispose();
+      });
+    });
+  });
+
+  describe('CSVDocumentWidget', () => {
+    describe('#constructor()', () => {
+      it('should create the content with the delimiter', () => {
+        const widget = new CSVDocumentWidget({ context, delimiter: ';' });
+        expect(widget.content.delimiter).toBe(';');
+        widget.dispose();
+      });
+
+      it('should set the delimiter of the content it is given', () => {
+        const content = new CSVViewer({ context });
+        const widget = new CSVDocumentWidget({
+          content,
+          context,
+          delimiter: ';'
+        });
+        expect(content.delimiter).toBe(';');
         widget.dispose();
       });
     });

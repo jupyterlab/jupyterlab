@@ -344,8 +344,7 @@ test.describe('Workspace', () => {
       .locator('.jp-WorkspaceSelector-item:has-text("default")')
       .click();
 
-    const url = page.url();
-    expect(url).toContain('/workspaces/default');
+    await expect(page).toHaveURL(/\/workspaces\/default/);
   });
 });
 
