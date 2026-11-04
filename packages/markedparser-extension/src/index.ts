@@ -273,9 +273,17 @@ namespace Private {
       _marked = await initializeMarked(options);
     }
     const headings = new Array<IMarkdownHeadingToken>();
-    // Hide math from the lexer, as `renderMarkdown` does.
+    // Hide math from the lexer, as `renderMarkdown` does, but not single `$`
+    // math that spans a heading line: those `$` are dollar amounts, and the
+    // editor shows the heading between them.
     const { text, math } = removeMath(content);
-    const tokens = _marked.lexer(text);
+    const tokens = _marked.lexer(
+      text.replace(/@@(\d+)@@/g, (placeholder: string, index: string) =>
+        spansHeading(math[Number(index)])
+          ? restoreMath(placeholder, math)
+          : placeholder
+      )
+    );
 
     // Extract heading tokens and compute line numbers
     // Include three token types that may contain headings:
@@ -311,6 +319,13 @@ namespace Private {
     return token.tokens.some(
       (t: Tokens.Generic) => t.type === 'html' && containsHeadingTag(t.raw)
     );
+  }
+
+  /**
+   * Whether math in single `$` spans a `#` heading line.
+   */
+  function spansHeading(math: string): boolean {
+    return /^\$[^$]/.test(math) && /\n {0,3}#{1,6}[ \t\n]/.test(math);
   }
 
   /**
