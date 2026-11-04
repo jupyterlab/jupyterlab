@@ -41,6 +41,7 @@ export interface IMermaidManager {
    * A signal emitted when the theme changes and rendered diagrams should be redrawn.
    */
   readonly themeChanged?: ISignal<this, void>;
+
   /**
    * Get the (potentially uninitialized) mermaid module.
    */
