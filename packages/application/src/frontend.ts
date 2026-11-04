@@ -415,12 +415,14 @@ export namespace JupyterFrontEnd {
     /**
      * The browser and file paths if the tree resolver encountered and handled
      * a tree URL or `null` if not. Empty string paths should be ignored.
-     * The optional factory should be used to open the file path.
+     * `openWith` holds the value of the `open-with` query parameter: a widget
+     * factory name, a file type name or a file extension. Pass it as the
+     * `factory` argument of `filebrowser:open-path`, which resolves it.
      */
     export type Paths = {
       browser: string;
       file: string;
-      factory?: string;
+      openWith?: string;
     } | null;
   }
 }

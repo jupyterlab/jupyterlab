@@ -170,7 +170,12 @@ test.describe('Workspace', () => {
       `${baseURL}/lab/tree/${tmpPath}/${mdFile}?open-with=Markdown+Preview`
     );
     await second.waitForURL(/\/lab\/workspaces\/auto-/);
-    await second.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
+    // The URL changes before the page reloads, so wait for the reloaded page
+    // to open the file rather than for the splash screen of the first one.
+    await second
+      .locator('#jp-main-dock-panel .jp-MainAreaWidget')
+      .first()
+      .waitFor();
 
     await expect(
       second.locator('#jp-main-dock-panel .jp-MarkdownViewer')

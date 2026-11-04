@@ -2232,7 +2232,7 @@ namespace Private {
           await commands.execute(CommandIDs.openPath, {
             path: paths.file,
             dontShowBrowser: true,
-            factory: paths.factory
+            factory: paths.openWith
           });
         }
         if (paths.browser) {

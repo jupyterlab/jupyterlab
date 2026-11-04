@@ -42,6 +42,12 @@ editor, `json` for the JSON viewer, and `ipynb` for the notebook viewer:
 http(s)://<server:port>/<lab-location>/lab/tree/path/to/notebook.ipynb?open-with=txt
 ```
 
+A space in a widget factory name can be written as `+` or `%20`:
+
+```none
+http(s)://<server:port>/<lab-location>/lab/tree/path/to/README.md?open-with=Markdown+Preview
+```
+
 The available viewers depend on the installed extensions and registered document
 factories. A widget factory name can differ from the item in the “Open With”
 submenu: the CSV viewer is listed as “CSV Viewer”, but its factory name is

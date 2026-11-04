@@ -1682,11 +1682,7 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
           // A `+` stands for a space, as in `Markdown+Preview`. Replace it after
           // decoding, because the redirect of a second tab to an `auto-`
           // workspace encodes `+` as `%2B`.
-          const factory = query['open-with']?.replace(/\+/g, ' ') || undefined;
-
-          // Remove tree resolver-only parameters from the parsed query object.
-          delete query['file-browser-path'];
-          delete query['open-with'];
+          const openWith = query['open-with']?.replace(/\+/g, ' ') || undefined;
 
           // Clean up artifacts immediately upon routing.
           set.dispose();
@@ -1694,7 +1690,7 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
           delegate.resolve({
             browser,
             file: PageConfig.getOption('treePath'),
-            factory
+            openWith
           });
         }
       })
