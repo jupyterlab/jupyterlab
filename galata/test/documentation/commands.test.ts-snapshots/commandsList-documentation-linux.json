@@ -1002,7 +1002,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4034,7 +4039,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4046,7 +4056,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4058,7 +4073,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4070,7 +4090,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4082,7 +4107,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4094,7 +4124,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4106,7 +4141,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4118,7 +4158,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4130,7 +4175,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4142,7 +4192,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4154,7 +4209,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4164,7 +4224,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4174,7 +4239,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4184,7 +4254,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4194,7 +4269,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4206,7 +4286,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4238,6 +4323,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4249,7 +4338,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4363,6 +4457,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4374,7 +4472,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4395,6 +4498,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4406,7 +4513,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4416,7 +4528,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4434,6 +4551,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4445,7 +4566,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4457,7 +4583,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4469,7 +4600,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4481,7 +4617,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4503,6 +4644,10 @@
         "isPalette": {
           "type": "boolean",
           "description": "Whether the command is called from the command palette"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       },
       "required": [
@@ -4519,7 +4664,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4531,7 +4681,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4543,7 +4698,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4555,7 +4715,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4569,6 +4734,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4580,7 +4749,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4590,7 +4764,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4600,7 +4779,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4610,7 +4794,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4626,6 +4815,10 @@
         "toolbar": {
           "type": "boolean",
           "description": "Whether the command is being executed from the toolbar"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4643,6 +4836,10 @@
         "toolbar": {
           "type": "boolean",
           "description": "Whether the command is being executed from the toolbar"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4656,7 +4853,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4668,7 +4870,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4682,6 +4889,10 @@
         "toolbar": {
           "type": "boolean",
           "description": "Whether the command is being executed from the toolbar"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4697,6 +4908,10 @@
         "toolbar": {
           "type": "boolean",
           "description": "Whether the command is being executed from the toolbar"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4710,7 +4925,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4722,7 +4942,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4734,7 +4959,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4754,6 +4984,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4775,6 +5009,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4788,7 +5026,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4800,7 +5043,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4812,7 +5060,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4824,7 +5077,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4838,6 +5096,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4853,6 +5115,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4874,6 +5140,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4885,7 +5155,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4895,7 +5170,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4905,7 +5185,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4917,7 +5202,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4927,7 +5217,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4943,6 +5238,10 @@
         "text": {
           "type": "string",
           "description": "Text to replace the selection with"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4958,6 +5257,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -4969,7 +5272,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -4983,6 +5291,10 @@
         "toolbar": {
           "type": "boolean",
           "description": "Whether the command is being executed from the toolbar"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -5002,6 +5314,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -5013,7 +5329,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -5023,7 +5344,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -5033,7 +5359,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -5049,6 +5380,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -5066,6 +5401,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -5087,6 +5426,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -5110,7 +5453,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -5120,7 +5468,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -5130,7 +5483,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -5140,7 +5498,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -5160,7 +5523,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -5170,7 +5538,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -5180,7 +5553,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -5190,7 +5568,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -5210,7 +5593,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -5222,7 +5610,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -5236,6 +5629,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -5262,7 +5659,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -5272,7 +5674,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -5286,6 +5693,10 @@
         "isMenu": {
           "type": "boolean",
           "description": "Whether the command is called from a menu"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -5303,6 +5714,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -5314,7 +5729,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -5328,6 +5748,10 @@
         "commandLinkerTrustBoundaryId": {
           "type": "string",
           "description": "The notebook trust boundary ID"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
@@ -5339,7 +5763,12 @@
     "shortcuts": [],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -5351,7 +5780,12 @@
     ],
     "args": {
       "type": "object",
-      "properties": {}
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
     }
   },
   {
@@ -6006,6 +6440,10 @@
         "activate": {
           "type": "boolean",
           "description": "Whether to activate the notebook after execution"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
         }
       }
     }
