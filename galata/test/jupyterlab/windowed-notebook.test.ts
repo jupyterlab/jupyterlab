@@ -480,6 +480,52 @@ test('should display cells below on scrolling after inserting a cell on top', as
   await expect(lastCell).toBeVisible();
 });
 
+test('should not scroll back to a newly inserted cell when scrolling away', async ({
+  page,
+  tmpPath,
+  browserName
+}) => {
+  test.skip(browserName === 'firefox', 'Needs fixing on Firefox');
+  // Regression test against the windowing snapback issue:
+  // https://github.com/jupyterlab/jupyterlab/issues/20373
+  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+
+  const notebook = (await page.notebook.getNotebookInPanelLocator())!;
+  const firstCell = notebook.locator('.jp-Cell[data-windowed-list-index="1"]');
+  const lastCell = notebook.locator('.jp-Cell[data-windowed-list-index="18"]');
+  await firstCell.waitFor();
+
+  // Select the first cell and insert a new cell below it.
+  await page.notebook.selectCells(0);
+  await page.keyboard.press('b');
+  const newCell = notebook.locator('.jp-Cell[data-windowed-list-index="1"]');
+  await newCell.waitFor();
+
+  const bbox = (await notebook.boundingBox())!;
+
+  // Position cursor in the center of the notebook for reliable scrolling
+  await page.mouse.move(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
+  // Immediately scroll away from the new cell, towards cells that have
+  // never been rendered, so their measured sizes differ from estimates.
+  await page.mouse.wheel(0, 3000);
+  await page.mouse.wheel(0, 3000);
+
+  // Scroll down to reveal the last cell.
+  await Promise.all([
+    newCell.waitFor({ state: 'hidden' }),
+    lastCell.waitFor()
+  ]);
+
+  // Allow time for a late resize-driven scrollback to fire, if any.
+  // eslint-disable-next-line playwright/no-wait-for-timeout
+  await page.waitForTimeout(500);
+
+  // The view must stay where the user scrolled, not snap back to the
+  // newly inserted cell.
+  await expect(newCell).toBeHidden();
+  await expect(lastCell).toBeVisible();
+});
+
 test('should center on next cell after rendering markdown cell and advancing', async ({
   page,
   tmpPath,
