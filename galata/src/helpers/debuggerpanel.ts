@@ -38,26 +38,40 @@ export class DebuggerHelper {
    * @param name Notebook name
    */
   async switchOn(name?: string): Promise<void> {
-    const toolbar = await this.notebook.getToolbarLocator(name);
-    if (!toolbar) {
+    if (name && !(await this.notebook.activate(name))) {
+      return;
+    }
+
+    const panel = await this.notebook.activity.getPanelLocator(name);
+    const toolbar = panel?.locator('.jp-Toolbar').first();
+    if (!panel || !toolbar) {
       return;
     }
     const button = toolbar.locator('.jp-DebuggerBugButton');
-    await waitForCondition(async () => (await button.count()) === 1);
-    await waitForCondition(
-      async () => (await button!.isDisabled()) === false,
-      2000
-    );
+    await toolbar
+      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
+      .waitFor();
 
-    if (!(await this.isOn(name))) {
-      await button!.click();
+    // The handler marks the panel once the debugger is started. The button
+    // shows as pressed as soon as it is clicked, and the handler drops a
+    // click that comes while it is still updating the panel, so click again
+    // when the mark does not appear and the debugger is not started.
+    const started = panel.and(this.page.locator('[data-jp-debugger="true"]'));
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (
+        (await started.count()) === 0 &&
+        (attempt === 0 || !(await this._isStarted()))
+      ) {
+        await button.click();
+      }
+      try {
+        await started.waitFor({ state: 'attached', timeout: 10000 });
+        return;
+      } catch {
+        // Check again whether the click was dropped.
+      }
     }
-    try {
-      await waitForCondition(async () => await this.isOn(name), 2000);
-    } catch (error) {
-      // Retry
-      await this.switchOn(name);
-    }
+    await started.waitFor({ state: 'attached' });
   }
 
   /**
@@ -203,5 +217,14 @@ export class DebuggerHelper {
   private async _getPanel(selector: string): Promise<Locator> {
     const panel = this.sidebar.getContentPanelLocator('right');
     return panel.locator(selector);
+  }
+
+  private async _isStarted(): Promise<boolean> {
+    return this.page.evaluate(async () => {
+      const service = await window.galata.getPlugin(
+        '@jupyterlab/debugger-extension:service'
+      );
+      return service?.isStarted ?? false;
+    });
   }
 }

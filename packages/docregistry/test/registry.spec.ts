@@ -569,6 +569,42 @@ describe('docregistry/registry', () => {
         expect(registry.defaultRenderedWidgetFactory('a.md')).toBe(mdFactory);
       });
 
+      it('should return the default rendered widget factory when a different default widget factory exists', () => {
+        const editorFactory = new WidgetFactory({
+          name: 'editor',
+          fileTypes: ['markdown'],
+          defaultFor: ['markdown']
+        });
+        const mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileTypes: ['markdown'],
+          defaultRendered: ['markdown']
+        });
+        registry.addWidgetFactory(editorFactory);
+        registry.addWidgetFactory(mdFactory);
+        expect(registry.defaultWidgetFactory('a.md')).toBe(editorFactory);
+        expect(registry.defaultRenderedWidgetFactory('a.md')).toBe(mdFactory);
+      });
+
+      it('should prefer a user override to the default rendered widget factory', () => {
+        const editorFactory = new WidgetFactory({
+          name: 'editor',
+          fileTypes: ['markdown'],
+          defaultFor: ['markdown']
+        });
+        const mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileTypes: ['markdown'],
+          defaultRendered: ['markdown']
+        });
+        registry.addWidgetFactory(editorFactory);
+        registry.addWidgetFactory(mdFactory);
+        registry.setDefaultWidgetFactory('markdown', 'editor');
+        expect(registry.defaultRenderedWidgetFactory('a.md')).toBe(
+          editorFactory
+        );
+      });
+
       it('should get the default widget factory if no default rendered factory is registered', () => {
         const gFactory = new WidgetFactory({
           name: 'global',

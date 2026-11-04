@@ -1486,7 +1486,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
         } else {
           this._onWSClose(evt);
         }
-      } catch (err) {
+      } catch (err: any) {
         // Try again, if there is a network failure
         // Handle network errors, as well as cases where we are on a
         // JupyterHub and the server is not running. JupyterHub returns a
@@ -1789,7 +1789,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
       );
       validate.validateMessage(msg);
     } catch (error) {
-      error.message = `Kernel message validation error: ${error.message}`;
+      if (error instanceof Error) {
+        error.message = `Kernel message validation error: ${error.message}`;
+      }
       // We throw the error so that it bubbles up to the top, and displays the right stack.
       throw error;
     }
