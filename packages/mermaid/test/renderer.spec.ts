@@ -219,6 +219,35 @@ describe('@jupyterlab/mermaid', () => {
         }
       });
 
+      it('should render a document once in a dark theme', async () => {
+        await MERMAID_THEMES.setTheme('JupyterLab Dark');
+        // Let the renderers of the previous tests redraw in the dark theme.
+        await new Promise(resolve => setTimeout(resolve, 20));
+        const renderer = new RenderedMermaid({
+          latexTypesetter: null,
+          linkHandler: null,
+          mimeType: MERMAID_MIME_TYPE,
+          resolver: null,
+          sanitizer: {
+            sanitize: (s: string) => s
+          }
+        });
+        // As built by `MimeContent`, which keeps only the source from `setData()`
+        const model = new MimeModel({
+          data: { [MERMAID_MIME_TYPE]: 'flowchart LR\n  document --> view\n' },
+          metadata: { fragment: '' }
+        });
+        const render = jest.spyOn(MERMAID_MANAGER.mockMermaid, 'render');
+        try {
+          await renderer.renderModel(model);
+
+          expect(render).toHaveBeenCalledTimes(1);
+        } finally {
+          render.mockRestore();
+          renderer.dispose();
+        }
+      });
+
       it('should keep an SVG stored in the model', async () => {
         const renderer = new RenderedMermaid({
           latexTypesetter: null,

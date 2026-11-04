@@ -104,6 +104,12 @@ export class RenderedMermaid extends Widget implements IRenderMime.IRenderer {
     );
     this.node.replaceChildren(...children);
 
+    // A document view, such as the `.mmd` viewer, builds a new model for every
+    // render and keeps only the source from `setData()`.
+    if (Private.isDocumentModel(model)) {
+      return;
+    }
+
     // capture the version of mermaid used
     const version = manager.getMermaidVersion();
     const existingMetadata = model.metadata[MERMAID_MIME_TYPE];
@@ -167,6 +173,14 @@ namespace Private {
     value: ReadonlyPartialJSONValue | undefined
   ): value is ReadonlyPartialJSONObject {
     return value !== undefined && JSONExt.isObject(value);
+  }
+
+  /**
+   * Whether the model comes from a document view, which passes the URI
+   * fragment of the document in `metadata.fragment`.
+   */
+  export function isDocumentModel(model: IRenderMime.IMimeModel): boolean {
+    return 'fragment' in model.metadata;
   }
 }
 
