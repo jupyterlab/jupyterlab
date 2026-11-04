@@ -1246,6 +1246,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     // 2) path of the default browser if the active main area widget isn't a document.
     let _docTreePath = '';
     let _defaultBrowserTreePath = '';
+    const restored = app.shell.restored.then(() => app.shell.currentPath);
 
     function updateUrl(treePath: string) {
       const url = PageConfig.getUrl({ treePath });
@@ -1258,10 +1259,19 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
 
     function updateTreePath(treePath: string) {
       // Wait for tree resolver to finish before updating the path because it use the PageConfig['treePath']
-      void treeResolver.paths.then(() => {
-        _defaultBrowserTreePath = treePath;
-        updateUrl(_docTreePath || treePath);
-      });
+      void Promise.all([treeResolver.paths, restored]).then(
+        ([paths, restoredPath]) => {
+          _defaultBrowserTreePath = treePath;
+          if (
+            !_docTreePath ||
+            (paths?.file &&
+              app.serviceManager.contents.normalize(paths.file) ===
+                restoredPath)
+          ) {
+            updateUrl(_docTreePath || treePath);
+          }
+        }
+      );
     }
 
     // Requiring the window resolver guarantees that the application extension
