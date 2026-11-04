@@ -338,13 +338,17 @@ namespace Private {
   /**
    * Put back the math source hidden by `removeMath`, undoing the HTML
    * escaping it applies, so that the result matches the Markdown source.
+   * Text such as `@@1` right before a placeholder forms a `@@n@@` that has
+   * no math; it is kept as written.
    */
   function restoreMath(text: string, math: string[]): string {
-    return text.replace(/@@(\d+)@@/g, (_match: string, index: string) =>
-      math[Number(index)]
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&amp;/g, '&')
+    return text.replace(
+      /@@(\d+)@@/g,
+      (match: string, index: string) =>
+        math[Number(index)]
+          ?.replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&amp;/g, '&') ?? match
     );
   }
 }

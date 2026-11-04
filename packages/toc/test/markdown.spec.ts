@@ -825,6 +825,35 @@ front: matter
           );
         }
       );
+
+      it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
+        [
+          '# Title\n\nuser@@1$x$ b\n\n## Next',
+          [
+            {
+              text: 'Title',
+              level: 1,
+              line: 0,
+              raw: '# Title',
+              prefix: '1. ',
+              skip: false
+            },
+            {
+              text: 'Next',
+              level: 2,
+              line: 4,
+              raw: '## Next',
+              prefix: '1.1. ',
+              skip: false
+            }
+          ]
+        ]
+      ])(
+        'should keep the headings when `@@` and digits come right before math in %s',
+        async (src, headers) => {
+          await expect(tocHeadings(src)).resolves.toEqual(headers);
+        }
+      );
     });
   });
 });
