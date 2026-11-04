@@ -876,5 +876,11 @@
   "zipp.compat.overlay",
   "zipp.compat.py310",
   "zipp.compat.py313",
-  "zipp.glob"
+  "zipp.glob",
+  "_sysconfigdata__linux_aarch64-linux-gnu",
+  "_sysconfigdata__linux_x86_64-linux-gnu",
+  "configparser",
+  "platformdirs.unix",
+  "psutil._pslinux",
+  "sitecustomize"
 ]
