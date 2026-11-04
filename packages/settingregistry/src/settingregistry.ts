@@ -152,8 +152,9 @@ export class DefaultSchemaValidator implements ISchemaValidator {
     plugin: ISettingRegistry.IPlugin,
     populate = true
   ): ISchemaValidator.IError[] | null {
-    const validate = this._validator.getSchema(plugin.id);
-    const compose = this._composer.getSchema(plugin.id);
+    const key = Private.schemaKey(plugin.id);
+    const validate = this._validator.getSchema(key);
+    const compose = this._composer.getSchema(key);
 
     // If the schemas do not exist, add them to the validator and continue.
     if (!validate || !compose) {
@@ -166,7 +167,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
         return [{ instancePath: 'type', keyword, schemaPath: '', message }];
       }
 
-      const errors = this._addSchema(plugin.id, plugin.schema);
+      const errors = this._addSchema(key, plugin.schema);
 
       return errors || this.validateData(plugin);
     }
@@ -229,7 +230,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
    * It is safe to call this function multiple times with the same plugin name.
    */
   private _addSchema(
-    plugin: string,
+    key: string,
     schema: ISettingRegistry.ISchema
   ): ISchemaValidator.IError[] | null {
     const composer = this._composer;
@@ -247,12 +248,12 @@ export class DefaultSchemaValidator implements ISchemaValidator {
     }
 
     // Remove if schema already exists.
-    composer.removeSchema(plugin);
-    validator.removeSchema(plugin);
+    composer.removeSchema(key);
+    validator.removeSchema(key);
 
     // Add schema to the validator and composer.
-    composer.addSchema(schema, plugin);
-    validator.addSchema(schema, plugin);
+    composer.addSchema(schema, key);
+    validator.addSchema(schema, key);
 
     return null;
   }
@@ -586,6 +587,10 @@ export class SettingRegistry implements ISettingRegistry {
     try {
       await this._validate(data);
     } catch (errors) {
+      // A schema can fail to register, which throws instead of returning errors.
+      if (!Array.isArray(errors)) {
+        throw errors;
+      }
       const output = [`Validating ${plugin} failed:`];
 
       (errors as ISchemaValidator.IError[]).forEach((error, index) => {
@@ -1403,6 +1408,15 @@ export namespace Settings {
  * A namespace for private module data.
  */
 namespace Private {
+  /**
+   * Convert a plugin id into a key valid as a JSON schema id.
+   *
+   * A schema id must be a URI, so `my_extension:plugin` cannot be used as is.
+   */
+  export function schemaKey(plugin: string): string {
+    return `jupyterlab-plugin:${encodeURIComponent(plugin)}`;
+  }
+
   /**
    * The default indentation level, uses spaces instead of tabs.
    */

@@ -172,6 +172,26 @@ describe('@jupyterlab/settingregistry', () => {
         expect(plugin.data.user.bar).toBeUndefined();
         expect(plugin.data.composite.bar).toBe(schema.properties!.bar.default);
       });
+
+      it('should accept a plugin ID that is not a valid schema URI', () => {
+        const id = 'my_extension:plugin';
+        const validator = new DefaultSchemaValidator();
+        const schema: ISettingRegistry.ISchema = {
+          additionalProperties: false,
+          properties: {
+            bar: { type: 'string' }
+          },
+          type: 'object'
+        };
+        const composite = {};
+        const user = {};
+        const raw = '{ "bar": "baz" }';
+        const version = 'test';
+        const plugin = { id, data: { composite, user }, raw, schema, version };
+        const errors = validator.validateData(plugin);
+
+        expect(errors).toBe(null);
+      });
     });
   });
 
@@ -450,6 +470,31 @@ describe('@jupyterlab/settingregistry', () => {
           failed = true;
         }
         expect(failed).toBe(true);
+      });
+
+      it('should load a plugin whose ID is not a valid schema URI', async () => {
+        const id = 'my_extension:plugin';
+
+        connector.schemas[id] = { type: 'object' };
+        const settings = (await registry.load(id)) as Settings;
+        expect(settings.id).toBe(id);
+      });
+
+      it('should reject with the validator error if a schema fails to register', async () => {
+        const id = 'foo';
+        const failure = new Error('schema registration failed');
+        const failing = new SettingRegistry({
+          connector,
+          timeout,
+          validator: {
+            validateData: () => {
+              throw failure;
+            }
+          }
+        });
+
+        connector.schemas[id] = { type: 'object' };
+        await expect(failing.load(id)).rejects.toBe(failure);
       });
     });
 
