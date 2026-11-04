@@ -4,6 +4,7 @@
  */
 
 import { JSONExt } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
 import type { Context } from '@jupyterlab/docregistry';
 import type { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
 import { NotebookTools, NotebookTracker } from '@jupyterlab/notebook';
@@ -195,35 +196,6 @@ describe('metadataform/form simple', () => {
     );
   });
 
-  it('should not update metadata coming from a form built for another cell', async () => {
-    const metadataForm = await buildForm();
-    const content = tracker.currentWidget!.content;
-    const firstCell = content.widgets[0];
-
-    // Switch to another code cell.
-    content.activeCellIndex = 3;
-    const secondCell = tracker.activeCell!;
-    expect(secondCell).not.toBe(firstCell);
-
-    // Data carried from the first cell's form must not be written to the
-    // second cell.
-    metadataForm.updateMetadata(
-      { '/cell-metadata': 'stale value' },
-      undefined,
-      firstCell
-    );
-    expect(secondCell.model!.getMetadata('cell-metadata')).toBeUndefined();
-
-    // The same write applies when that cell is active again.
-    content.activeCellIndex = 0;
-    metadataForm.updateMetadata(
-      { '/cell-metadata': 'test value' },
-      undefined,
-      firstCell
-    );
-    expect(firstCell.model!.getMetadata('cell-metadata')).toBe('test value');
-  });
-
   it('should bind the form callbacks to the cell the form was built for', async () => {
     const metadataForm = await buildForm();
     const content = tracker.currentWidget!.content;
@@ -297,6 +269,45 @@ describe('metadataform/form simple', () => {
     } finally {
       obsolete.dispose();
     }
+  });
+
+  it('should not write from a form mounted again after the active cell changed', async () => {
+    // A field that fills an empty value when it mounts, as the environment
+    // widget of pixi-kernel does.
+    const FillOnMount = (props: FieldProps): JSX.Element => {
+      const { formData, onChange } = props;
+      React.useEffect(() => {
+        if (!formData) onChange('filled');
+      }, [formData, onChange]);
+      return React.createElement('span');
+    };
+    const metadataForm = new MetadataFormWidget({
+      metadataSchema: JSONExt.deepCopy(schema),
+      metaInformation,
+      uiSchema: {
+        '/cell-metadata': { 'ui:field': FillOnMount }
+      } as unknown as MetadataForm.IUiSchema,
+      pluginId: 'test-plugin'
+    });
+    notebookTools.addSection({ sectionName: 'testSchema', tool: metadataForm });
+    metadataForm.notebookTools = notebookTools;
+    // The section is collapsed, so the form is not rebuilt for another cell.
+    Widget.attach(notebookTools, document.body);
+    metadataForm.updateMetadata({}, true);
+    await sleep(100);
+    await metadataForm.form!.renderPromise;
+    const content = tracker.currentWidget!.content;
+    content.activeCellIndex = 3;
+    const secondCell = tracker.activeCell!;
+
+    // The Property Inspector detaches and attaches the notebook tools when
+    // another notebook gets the focus, which mounts the form again.
+    Widget.detach(notebookTools);
+    Widget.attach(notebookTools, document.body);
+    await sleep(100);
+    await metadataForm.form!.renderPromise;
+
+    expect(secondCell.model.getMetadata('cell-metadata')).toBeUndefined();
   });
 
   it('should update notebook metadata', async () => {

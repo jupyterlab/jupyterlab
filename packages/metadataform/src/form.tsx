@@ -62,8 +62,15 @@ export class FormWidget extends ReactWidget {
       reload?: boolean
     ): void => {
       const owner = this._props.metadataFormWidget;
+      // A replaced form must not write, nor a hidden form that was not rebuilt
+      // when the active cell changed: the Property Inspector mounts it again
+      // when another notebook gets the focus.
       if (owner.isDisposed || owner.form !== this) return;
-      owner.updateMetadata(formData, reload, this._sourceCell);
+      const activeCell = owner.notebookTools?.activeCell;
+      if (this._sourceCell && activeCell?.model !== this._sourceCell.model) {
+        return;
+      }
+      owner.updateMetadata(formData, reload);
     };
     const formContext = {
       defaultFormData: this._props.settings.default(),

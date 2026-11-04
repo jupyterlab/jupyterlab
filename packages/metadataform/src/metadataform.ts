@@ -134,8 +134,6 @@ export class MetadataFormWidget
    *
    * @param formData - the cell metadata set in the form.
    * @param reload - whether to update the form after updating the metadata.
-   * @param sourceCell - the cell the form data belongs to. When provided,
-   * the update is skipped if that cell is no longer the active one.
    *
    * ## Notes
    * Metadata are updated from root only. If some metadata is nested,
@@ -146,8 +144,7 @@ export class MetadataFormWidget
    */
   updateMetadata = (
     formData: ReadonlyPartialJSONObject,
-    reload?: boolean,
-    sourceCell?: NotebookTools['activeCell']
+    reload?: boolean
   ): void => {
     if (this.notebookTools == undefined) return;
 
@@ -156,11 +153,6 @@ export class MetadataFormWidget
 
     const cell = this.notebookTools.activeCell;
     if (cell == null) return;
-
-    // Do not write data from a form that was built for another cell,
-    // e.g. when pending form initialization is flushed while switching
-    // or closing tabs.
-    if (sourceCell != null && cell.model !== sourceCell.model) return;
 
     this._updatingMetadata = true;
 
