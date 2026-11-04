@@ -277,6 +277,30 @@ describe('@jupyterlab/ui-components', () => {
         );
       });
 
+      it('should not repeat an id that another copy of this module gave', () => {
+        // an extension that imports LabIcon through a deep path bundles its
+        // own copy of this module
+        const load = (): typeof LabIcon => {
+          let copy: typeof LabIcon | undefined;
+          jest.isolateModules(() => {
+            copy =
+              require('@jupyterlab/ui-components/lib/icon/labicon').LabIcon;
+          });
+          return copy!;
+        };
+        const ids = [load(), load()].map(Copy =>
+          new Copy({
+            name: 'test-ui-components:module-copy',
+            svgstr: fooSvgstr
+          })
+            .element({ tag: null })
+            .querySelector('clipPath')!
+            .getAttribute('id')
+        );
+
+        expect(ids[0]).not.toEqual(ids[1]);
+      });
+
       it('should point the href of each copy at its own element', () => {
         const copies = [
           linkIcon.element({ tag: null }),
@@ -309,6 +333,26 @@ describe('@jupyterlab/ui-components', () => {
               .getAttributeNS(XLINK_NAMESPACE, 'href')
           )
         ).toEqual(bases.map(id => `#${id}`));
+      });
+
+      it('should rename an id that an XLink href with another prefix refers to', () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:xlink-prefix',
+          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" xmlns:x="http://www.w3.org/1999/xlink" viewBox="0 0 10 10">
+<defs><linearGradient id="base0"><stop offset="0" stop-color="#000"/></linearGradient><linearGradient id="chain0" x:href="#base0"/></defs>
+<rect fill="url(#chain0)" width="10" height="10"/>
+</svg>`
+        });
+
+        const svg = icon.element({ tag: null });
+        const [base, chain] = Array.from(
+          svg.querySelectorAll('linearGradient')
+        );
+
+        expect(base.getAttribute('id')).not.toBe('base0');
+        expect(chain.getAttributeNS(XLINK_NAMESPACE, 'href')).toBe(
+          `#${base.getAttribute('id')}`
+        );
       });
 
       it('should point the aria-labelledby of each copy at its own title', () => {
@@ -392,6 +436,7 @@ describe('@jupyterlab/ui-components', () => {
           icon.element({ tag: null })
         );
 
+        expect(gradientId).not.toBe('gradient0');
         expect(styleText).toBe(
           `linearGradient#${gradientId} stop{stop-color:#123}`
         );
@@ -411,6 +456,7 @@ describe('@jupyterlab/ui-components', () => {
           icon.element({ tag: null })
         );
 
+        expect(gradientId).not.toBe('a.b');
         expect(styleText).toBe(
           `#a\\.b${gradientId.slice('a.b'.length)} stop{stop-color:#123}`
         );
@@ -429,6 +475,7 @@ describe('@jupyterlab/ui-components', () => {
         const svg = icon.element({ tag: null });
         const id = svg.querySelector('rect')!.getAttribute('id');
 
+        expect(id).not.toBe('shape0');
         expect(svg.querySelector('style')!.textContent).toBe(
           `use[href="#${id}"]{fill:#123}`
         );
@@ -448,6 +495,7 @@ describe('@jupyterlab/ui-components', () => {
           icon.element({ tag: null })
         );
 
+        expect(gradientId).not.toBe('gradient0');
         expect(styleText).toBe(`[id="${gradientId}"] stop{stop-color:#123}`);
       });
 
@@ -481,6 +529,7 @@ describe('@jupyterlab/ui-components', () => {
         const svg = icon.element({ tag: null });
         const id = svg.querySelector('circle')!.getAttribute('id');
 
+        expect(id).not.toBe('dot0');
         expect(svg.querySelector('animate')!.getAttribute('begin')).toBe(
           `0s;${id}.click`
         );
@@ -498,6 +547,7 @@ describe('@jupyterlab/ui-components', () => {
         const svg = icon.element({ tag: null });
         const id = svg.querySelector('circle')!.getAttribute('id')!;
 
+        expect(id).not.toBe('dot-0');
         expect(svg.querySelector('animate')!.getAttribute('begin')).toBe(
           `dot\\-0${id.slice('dot-0'.length)}.click`
         );
