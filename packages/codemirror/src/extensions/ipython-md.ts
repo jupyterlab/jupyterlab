@@ -167,19 +167,20 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
           );
           return true;
         },
-        // Lines inside open `$$` math are LaTeX, so hold back the other leaf
-        // parsers, which would read a line of `=` as a setext underline.
+        // Lines inside open `$$` math are LaTeX, so hold back the setext
+        // heading parser, which would read a line of `=` as an underline.
+        // `before` places that parser right after this one.
         before: 'SetextHeading',
         leaf: (): LeafBlockParser => {
-          let held: LeafBlockParser[] | null = null;
+          let held: LeafBlockParser | null = null;
           const parser: LeafBlockParser = {
             nextLine(cx: BlockContext, line: Line, leaf: LeafBlock) {
+              // Change the array in place: the caller is iterating over it.
+              const next = leaf.parsers.indexOf(parser) + 1;
               if (hasOpenMath(leaf.content)) {
-                held ??= leaf.parsers.filter(p => p !== parser);
-                // Change the array in place: the caller is iterating over it.
-                leaf.parsers.splice(0, leaf.parsers.length, parser);
+                held ??= leaf.parsers.splice(next, 1)[0] ?? null;
               } else if (held) {
-                leaf.parsers.push(...held);
+                leaf.parsers.splice(next, 0, held);
                 held = null;
               }
               return false;
