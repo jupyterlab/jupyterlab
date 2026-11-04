@@ -157,6 +157,27 @@ test.describe('Workspace', () => {
     ).toHaveCount(1);
   });
 
+  test('should decode `+` in the `open-with` value in a second tab', async ({
+    baseURL,
+    page,
+    tmpPath
+  }) => {
+    // The first tab holds the default workspace, so the second tab is
+    // redirected to an `auto-` workspace. That redirect rewrites the query.
+    await page.goto();
+    const second = await page.context().newPage();
+    await second.goto(
+      `${baseURL}/lab/tree/${tmpPath}/${mdFile}?open-with=Markdown+Preview`
+    );
+    await second.waitForURL(/\/lab\/workspaces\/auto-/);
+    await second.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
+
+    await expect(
+      second.locator('#jp-main-dock-panel .jp-MarkdownViewer')
+    ).toHaveCount(1);
+    await second.close();
+  });
+
   test('should open a file from `tree` url if workspace is not empty', async ({
     page,
     tmpPath
