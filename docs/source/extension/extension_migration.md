@@ -20,9 +20,10 @@
   the workspace saves the order, the collapsed state and the size of each section with the
   section ID. Give each section an explicit ID that is unique in the page and the same in
   every session, for example `section.id = 'my-extension-panel-settings'`. A section
-  without an explicit ID gets a new generated ID in every session: the panel comes back in
-  its original order, and the collapsed states and sizes are restored by position, so after
-  a reorder they can be applied to the wrong sections. See
+  without an explicit ID gets a new generated ID in every session, so the workspace saves
+  its title label instead. After the label changes, for example with the display language,
+  the next reload shows the panel in its original order and can apply the saved collapsed
+  states and sizes to the wrong sections. See
   {ref}`reordering accordion sections <reordering-sections>`.
 
 - `IRunningSessions.IManager` has a new optional `id`. It sets the ID of the manager's

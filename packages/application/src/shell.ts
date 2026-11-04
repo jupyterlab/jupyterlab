@@ -343,7 +343,8 @@ export namespace ILabShell {
         readonly expansionStates: Array<boolean> | null;
 
         /**
-         * Stable widget IDs in display order, when available.
+         * Section IDs in display order, when available. A section whose ID
+         * Lumino generated is saved as `label:` followed by its title label.
          */
         readonly widgetIds?: string[];
       };
@@ -2476,7 +2477,7 @@ namespace Private {
       const widgetStates: ILabShell.ISideArea['widgetStates'] = {};
       this._stackedPanel.widgets.forEach((w: SidePanel) => {
         if (w.id && w.content instanceof SplitPanel) {
-          const widgetIds = w.content.widgets.map(wi => wi.id);
+          const widgetIds = w.content.widgets.map(wi => Private.sectionKey(wi));
           widgetStates[w.id] = {
             sizes: w.content.relativeSizes() as number[],
             expansionStates: w.content.widgets.map(wi => !wi.isHidden),
@@ -2548,7 +2549,9 @@ namespace Private {
           if (w.id && w.content instanceof SplitPanel) {
             const state = data.widgetStates[w.id] ?? {};
             const widgets = new Map(
-              w.content.widgets.filter(wi => wi.id).map(wi => [wi.id, wi])
+              w.content.widgets
+                .filter(wi => wi.id)
+                .map(wi => [Private.sectionKey(wi), wi])
             );
             // Older extensions may recreate sections with generated IDs.
             const widgetIds = state.widgetIds?.some(id => widgets.has(id))
@@ -2584,7 +2587,7 @@ namespace Private {
             w.content.widgets.forEach((wi, widx) => {
               const savedIndex = widgetIds
                 ? wi.id
-                  ? widgetIds.indexOf(wi.id)
+                  ? widgetIds.indexOf(Private.sectionKey(wi))
                   : -1
                 : widx;
               const expansion = state.expansionStates?.[savedIndex];
@@ -2942,6 +2945,19 @@ namespace Private {
     private _shell: ILabShell;
     private _selected: boolean = false;
   }
+
+  /**
+   * Key of a sidebar section in the saved layout: its ID, or its title label
+   * when Lumino generated the ID, because a generated ID changes in every session.
+   */
+  export function sectionKey(widget: Widget): string {
+    return GENERATED_ID.test(widget.id)
+      ? `label:${widget.title.label}`
+      : widget.id;
+  }
+
+  const GENERATED_ID =
+    /^id-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
   export class RestorableSplitPanel extends SplitPanel {
     /**

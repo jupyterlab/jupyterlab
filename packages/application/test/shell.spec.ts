@@ -1053,6 +1053,92 @@ describe('LabShell', () => {
       }
     );
 
+    describe('with sections that have no explicit ID', () => {
+      // Lumino gives such sections a new generated ID in every session.
+      const reload = async (
+        sections: { label: string; id?: string }[],
+        change: (content: AccordionPanel) => void
+      ) => {
+        const state = new StateDB();
+        const createRestorer = () =>
+          new LayoutRestorer({
+            connector: state,
+            first: Promise.resolve<void>(void 0),
+            registry: new CommandRegistry()
+          });
+        const createSections = () => {
+          const panel = new SidePanel();
+          panel.id = 'sidebar';
+          for (const { label, id } of sections) {
+            const widget = new Widget();
+            if (id) {
+              widget.id = id;
+            }
+            widget.title.label = label;
+            panel.addWidget(widget);
+          }
+          return { panel, content: panel.content as AccordionPanel };
+        };
+        const restorer = createRestorer();
+        const { panel, content } = createSections();
+        restorer.add(panel, panel.id);
+        shell.add(panel, 'left');
+        shell.activateById(panel.id);
+        await restorer.restored;
+        change(content);
+        await restorer.save(shell.saveLayout());
+
+        const restoredShell = new LabShell();
+        Widget.attach(restoredShell, document.body);
+        try {
+          const restored = createSections();
+          const restoredRestorer = createRestorer();
+          restoredRestorer.add(restored.panel, restored.panel.id);
+          restoredShell.add(restored.panel, 'left');
+          await restoredShell.restoreLayout(
+            'multiple-document',
+            restoredRestorer
+          );
+          return restored.content.widgets.map(widget => ({
+            label: widget.title.label,
+            collapsed: widget.isHidden
+          }));
+        } finally {
+          restoredShell.dispose();
+        }
+      };
+      const unnamed = [{ label: 'a' }, { label: 'b' }, { label: 'c' }];
+
+      it('should restore the section order', async () => {
+        const restored = await reload(unnamed, content => {
+          content.insertWidget(0, content.widgets[2]);
+        });
+        expect(restored.map(section => section.label)).toEqual(['c', 'a', 'b']);
+      });
+
+      it('should restore the collapsed state of a moved section', async () => {
+        const restored = await reload(unnamed, content => {
+          content.insertWidget(0, content.widgets[2]);
+          content.collapse(0);
+        });
+        expect(restored.find(section => section.label === 'c')).toEqual({
+          label: 'c',
+          collapsed: true
+        });
+      });
+
+      it('should restore the collapsed state next to sections with explicit IDs', async () => {
+        const restored = await reload(
+          [{ label: 'a', id: 'a' }, { label: 'b' }, { label: 'c', id: 'c' }],
+          content => content.collapse(1)
+        );
+        expect(restored.find(section => section.label === 'b')).toEqual({
+          label: 'b',
+          collapsed: true
+        });
+      });
+    });
+
     it('should restore the layout of the shell', async () => {
       const restorer = new LayoutRestorer({
         connector: new StateDB(),

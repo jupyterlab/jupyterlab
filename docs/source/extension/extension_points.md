@@ -597,10 +597,12 @@ panel.addWidget(settings);
 app.shell.add(panel, 'left');
 ```
 
-A section without an explicit ID gets a new generated ID in every session. The
-panel then comes back in its original order, and the collapsed states and sizes
-are restored by position, so after a reorder a collapsed state or a size can be
-applied to the wrong section.
+A section without an explicit ID gets a new generated ID in every session, so
+the workspace saves its title label instead. The section then keeps its place
+and state only while its label is unique in the panel and the same in every
+session. A translated label changes with the display language, so the first
+reload after a language change shows the panel in its original order and can
+apply the saved collapsed states and sizes to the wrong sections.
 
 #### Movable accordion sections
 
