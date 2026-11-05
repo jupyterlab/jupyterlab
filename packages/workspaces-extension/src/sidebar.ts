@@ -80,6 +80,7 @@ export const workspacesSidebar: JupyterFrontEndPlugin<void> = {
       private _workspace: Workspace.IWorkspace;
     }
     managers.add({
+      id: 'jp-running-workspaces',
       name: trans.__('Workspaces'),
       supportsMultipleViews: false,
       running: () => {

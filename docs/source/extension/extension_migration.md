@@ -16,6 +16,25 @@
   whole. Each such plugin is named in a browser console warning. To keep it enabled, list
   the plugin ids to disable in `disabledExtensions` instead of the package name.
 
+- Users can reorder the sections of a `SidePanel` with the default accordion content, and
+  the workspace saves the order, the collapsed state and the size of each section with the
+  section ID. Give each section an explicit ID that is unique in the page and the same in
+  every session, for example `section.id = 'my-extension-panel-settings'`. A section
+  without an explicit ID gets a new generated ID in every session, so the workspace saves
+  its title label instead. After the label changes, for example with the display language,
+  the next reload shows the panel in its original order and can apply the saved collapsed
+  states and sizes to the wrong sections. See
+  {ref}`reordering accordion sections <reordering-sections>`.
+
+- Reordering changes the index of each `SidePanel` section. Code that passes a fixed
+  index to the `expand()` or `collapse()` method of the accordion, for example
+  `expand(0)`, then acts on another section. Get the index of the section widget with
+  `panel.widgets.indexOf(widget)` instead.
+
+- `IRunningSessions.IManager` has a new optional `id`. It sets the ID of the manager's
+  section in the Running Sessions panel. Without it, the section ID is built from the
+  translated `name`, so it changes with the display language.
+
 - Notebook panel and cell toolbar items now receive the id of their notebook panel in the `widgetId` command argument. The notebook commands use it to act on that notebook and to compute their state for it, so their buttons show the state of their own notebook while another notebook has the focus. Commands of extensions placed in these toolbars can do the same, as shown in {ref}`toolbar-registry`.
 
 - Semantic commands added with `addSemanticCommand` now pass their arguments to the `isEnabled`, `isToggled` and `isVisible` callbacks of the commands they group, and act on the widget whose id the `widgetId` argument holds. With a `widgetId` argument, a semantic command is visible only when every command it groups is visible.
