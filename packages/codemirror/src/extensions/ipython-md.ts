@@ -83,11 +83,11 @@ function mathDelimiters(text: string, from = 0): number[] {
  * Whether a line opens `$$` display math that it does not also close.
  */
 function opensMathBlock(line: Line): boolean {
-  if (line.indent - line.baseIndent >= 4) {
-    return false;
-  }
-  const delimiters = mathDelimiters(line.text, line.pos);
-  return delimiters.length === 1 && delimiters[0] === line.pos;
+  return (
+    line.indent - line.baseIndent < 4 &&
+    line.text.startsWith('$$', line.pos) &&
+    mathDelimiters(line.text, line.pos).length === 1
+  );
 }
 
 /**
