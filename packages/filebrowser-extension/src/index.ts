@@ -46,6 +46,7 @@ import {
   Uploader
 } from '@jupyterlab/filebrowser';
 import type { Contents } from '@jupyterlab/services';
+import { ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -73,9 +74,10 @@ import {
   stopIcon,
   textEditorIcon
 } from '@jupyterlab/ui-components';
-import { map } from '@lumino/algorithm';
+import { find, map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import type { ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 import type { AccordionPanel, ContextMenu } from '@lumino/widgets';
 
 /**
@@ -499,21 +501,28 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
     }
 
     defaultBrowser.addClass(RESTORING_CLASS);
+    const navigated = new PromiseDelegate<ITreePathUpdater.IBrowserState>();
     const restored = Private.restoreBrowser(
       defaultBrowser,
       commands,
       router,
       tree,
-      labShell
+      labShell,
+      fileBrowserFactory,
+      translator ?? nullTranslator,
+      state => navigated.resolve(state)
     )
       .catch(error => {
         console.error('Failed to restore the file browser.', error);
         return { path: defaultBrowser.model.path };
       })
+      .then(state => {
+        navigated.resolve(state);
+        return state;
+      })
       .finally(() => defaultBrowser.removeClass(RESTORING_CLASS));
-    if (treePathUpdater?.deferUntil) {
-      treePathUpdater.deferUntil(restored);
-    } else if (treePathUpdater) {
+    treePathUpdater?.deferUntil?.(navigated.promise);
+    if (treePathUpdater) {
       void restored.then(({ path }) => treePathUpdater(path));
     }
     return defaultBrowser;
@@ -2158,7 +2167,11 @@ namespace Private {
     path: string,
     browser: FileBrowser,
     factory: IFileBrowserFactory,
-    translator: ITranslator
+    translator: ITranslator,
+    onResolved?: (
+      item: Contents.IModel,
+      directory: string
+    ) => void | Promise<void>
   ): Promise<Contents.IModel> {
     const trans = translator.load('jupyterlab');
     const browserForPath = Private.getBrowserForPath(path, browser, factory);
@@ -2172,11 +2185,13 @@ namespace Private {
     const item = await services.contents.get(path, { content: false });
     const { model } = browserForPath;
     await model.restored;
-    if (item.type === 'directory') {
-      await model.cd(`/${localPath}`);
-    } else {
-      await model.cd(`/${PathExt.dirname(localPath)}`);
-    }
+    const directory =
+      item.type === 'directory' ? localPath : PathExt.dirname(localPath);
+    await onResolved?.(
+      item,
+      browserForPath === browser ? directory : browser.model.path
+    );
+    await model.cd(`/${directory}`);
     return item;
   }
 
@@ -2226,7 +2241,10 @@ namespace Private {
     commands: CommandRegistry,
     router: IRouter | null,
     tree: JupyterFrontEnd.ITreeResolver | null,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    fileBrowserFactory: IFileBrowserFactory,
+    translator: ITranslator,
+    onNavigated: (state: ITreePathUpdater.IBrowserState) => void
   ): Promise<ITreePathUpdater.IBrowserState> {
     if (!router) {
       await browser.model.restore(browser.id);
@@ -2235,12 +2253,19 @@ namespace Private {
     }
 
     const { manager } = browser.model;
-    // Capture the path before later interactions can dispose the restored widget.
+    // Capture the restored view before later interactions can dispose it.
     const restoredDocument = labShell?.restored.then(layout => {
       const widget = layout.mainArea?.currentWidget;
+      const path = widget ? manager.contextForWidget(widget)?.path : undefined;
       return {
         widget,
-        path: widget ? manager.contextForWidget(widget)?.path : undefined
+        path,
+        factory: path
+          ? find(
+              manager.registry.widgetFactories(),
+              factory => manager.findWidget(path, factory.name) === widget
+            )?.name
+          : undefined
       };
     });
 
@@ -2254,11 +2279,21 @@ namespace Private {
 
     let document: ITreePathUpdater.IBrowserState['document'];
     const paths = await tree?.paths;
+    const contents = manager.services.contents;
+    const browserPath =
+      paths?.browser && !contents.driveName(paths.browser)
+        ? contents.normalize(paths.browser)
+        : undefined;
+    const onPathReady = (path: string) => {
+      onNavigated({ path: browserPath ?? path, document });
+    };
     if (paths?.file || paths?.browser) {
       // Restore the model without populating it.
       await browser.model.restore(browser.id, false);
       if (paths.file) {
-        const normalized = manager.services.contents.normalize(paths.file);
+        const trailingSlash = paths.file !== '/' && paths.file.endsWith('/');
+        const path = trailingSlash ? paths.file.slice(0, -1) : paths.file;
+        const normalized = contents.normalize(path);
         const restored = await restoredDocument;
         const restoredWidget = restored?.widget;
         const factory = Private.resolveOpenWithFactory(
@@ -2268,23 +2303,63 @@ namespace Private {
         const alreadyRestored =
           restoredWidget &&
           restored.path === normalized &&
-          (!paths.openWith ||
-            (factory &&
-              manager.findWidget(normalized, factory) === restoredWidget));
-        const widget: unknown = await commands.execute(
-          alreadyRestored ? CommandIDs.goToPath : CommandIDs.openPath,
-          {
-            path: paths.file,
-            dontShowBrowser: true,
-            factory
-          }
-        );
+          (!paths.openWith || (factory && restored.factory === factory));
         if (alreadyRestored) {
           document = { path: normalized, widget: restoredWidget };
-        } else if (widget instanceof DocumentWidget) {
-          document = { path: widget.context.path, widget };
+        }
+        let pathResolved = false;
+        try {
+          await Private.navigateToPath(
+            path,
+            browser,
+            fileBrowserFactory,
+            translator,
+            async (item, directory) => {
+              if (trailingSlash && item.type !== 'directory') {
+                throw new Error(`Path ${path}/ is not a directory`);
+              }
+              if (item.type !== 'directory' && !alreadyRestored) {
+                const widget: unknown = await commands.execute(
+                  'docmanager:open',
+                  {
+                    path,
+                    factory
+                  }
+                );
+                if (widget instanceof DocumentWidget) {
+                  document = { path: widget.context.path, widget };
+                }
+                // Let the requested document's activation reach the shell.
+                await new Promise<number>(resolve =>
+                  requestAnimationFrame(resolve)
+                );
+              }
+              onPathReady(directory);
+              pathResolved = true;
+            }
+          );
+        } catch (error) {
+          if (pathResolved || alreadyRestored) {
+            console.warn(
+              `${CommandIDs.goToPath} failed to go to: ${path}`,
+              error
+            );
+          } else {
+            const trans = translator.load('jupyterlab');
+            if (
+              error instanceof ServerConnection.ResponseError &&
+              error.response.status === 404
+            ) {
+              error.message = trans.__('Could not find path: %1', path);
+            }
+            await showErrorMessage(
+              trans.__('Cannot open'),
+              error instanceof Error ? error : String(error)
+            );
+          }
         }
       }
+      onPathReady(browser.model.path);
       if (paths.browser) {
         await commands.execute(CommandIDs.openPath, {
           path: paths.browser,

@@ -31,7 +31,7 @@ import {
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import {
   IPropertyInspectorProvider,
   SideBarPropertyInspectorProvider
@@ -1301,9 +1301,24 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
 
     function updateTreePath(treePath: string) {
       void ready.then(() => {
+        if (treePath === _defaultBrowserTreePath) {
+          return;
+        }
         _defaultBrowserTreePath = treePath;
         if (!_docTreePath) {
           updateUrl(treePath, 'file-browser-path');
+        } else {
+          const current = new URL(window.location.href);
+          if (current.searchParams.has('file-browser-path')) {
+            if (treePath === PathExt.dirname(_docTreePath)) {
+              current.searchParams.delete('file-browser-path');
+            } else {
+              current.searchParams.set('file-browser-path', treePath || '/');
+            }
+            router.navigate(current.pathname + current.search + current.hash, {
+              skipRouting: true
+            });
+          }
         }
       });
     }
