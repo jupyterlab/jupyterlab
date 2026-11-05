@@ -65,10 +65,7 @@ test.describe('Local links', () => {
     await expect(page.activity.getTabLocator('note.txt')).toBeVisible();
   });
 
-  test('Missing file link shows an error dialog', async ({
-    page,
-    tmpPath
-  }) => {
+  test('Missing file link shows an error dialog', async ({ page, tmpPath }) => {
     await page.contents.uploadContent(
       '[missing link](missing-file.txt)',
       'text',
@@ -83,6 +80,8 @@ test.describe('Local links', () => {
 
     const dialog = page.locator('.jp-Dialog');
     await expect(dialog).toBeVisible();
-    await expect(dialog.locator('.jp-Dialog-header')).toHaveText('Path Not Found');
+    await expect(dialog.locator('.jp-Dialog-header')).toHaveText(
+      'Path Not Found'
+    );
   });
 });
