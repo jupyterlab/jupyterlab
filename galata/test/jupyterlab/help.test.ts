@@ -5,6 +5,7 @@
 
 import { expect, test } from '@jupyterlab/galata';
 import { readFile } from 'fs/promises';
+import * as path from 'path';
 
 import { isBlank, isValidJSON } from './utils';
 
@@ -52,6 +53,49 @@ test('Switch back and forth to an iframe', async ({ page }) => {
   await expect(
     page.locator('.jp-MarkdownCell .jp-InputArea-editor')
   ).toHaveText(cellContent);
+});
+
+test.describe('Kernel help menu items', () => {
+  const aboutKernel = /^About the .* Kernel$/;
+  const notebook = path.resolve(__dirname, './notebooks/simple_notebook.ipynb');
+
+  test.beforeEach(async ({ page, tmpPath }) => {
+    await page.contents.uploadFile(notebook, `${tmpPath}/first.ipynb`);
+    await page.notebook.openByPath(`${tmpPath}/first.ipynb`);
+    await page.notebook.activate('first.ipynb');
+    // The items are added when the kernel answers.
+    await expect(
+      page.locator('#jp-main-statusbar >> text=Idle').first()
+    ).toHaveCount(1);
+  });
+
+  test('Show the items in a second notebook of the same kernel', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.contents.uploadFile(notebook, `${tmpPath}/second.ipynb`);
+    await page.notebook.openByPath(`${tmpPath}/second.ipynb`);
+    await page.notebook.activate('second.ipynb');
+
+    await page.menu.openLocator('Help');
+    await expect(
+      page.locator('.lm-Menu-itemLabel', { hasText: aboutKernel })
+    ).toBeVisible();
+  });
+
+  test('Keep the items after the kernel is shut down', async ({ page }) => {
+    await page.menu.clickMenuItem('Kernel>Shut Down Kernel');
+    await expect(
+      page.locator('#jp-main-statusbar >> text=No Kernel').first()
+    ).toHaveCount(1);
+    await page.activity.activateTab('Launcher');
+    await page.activity.activateTab('first.ipynb');
+
+    await page.menu.openLocator('Help');
+    await expect(
+      page.locator('.lm-Menu-itemLabel', { hasText: aboutKernel })
+    ).toBeVisible();
+  });
 });
 
 test.describe('Licenses', () => {

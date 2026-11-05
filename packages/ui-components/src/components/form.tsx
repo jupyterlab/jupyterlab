@@ -614,7 +614,7 @@ export interface IFormComponentProps<T = ReadonlyJSONObject>
   /**
    *
    */
-  onChange: (e: IChangeEvent<T>) => any;
+  onChange: (e: IChangeEvent<T>, id?: string) => any;
   /**
    *
    */

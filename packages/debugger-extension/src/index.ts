@@ -409,7 +409,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
 
     if (palette) {
       palette.addItem({
-        category: 'Notebook Operations',
+        category: trans.__('Notebook Operations'),
         command: Debugger.CommandIDs.restartDebug
       });
     }
@@ -1167,6 +1167,48 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     }
 
+    const getKernelSourcePath = (): string | null => {
+      const node = app.contextMenuHitTest(element =>
+        element.classList.contains('jp-DebuggerKernelSource-source')
+      );
+      return node?.title || null;
+    };
+
+    commands.addCommand(CommandIDs.openKernelSource, {
+      label: trans.__('Open'),
+      caption: trans.__('Open the kernel source'),
+      isEnabled: () => !!sourceViewer,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: async () => {
+        const path = getKernelSourcePath();
+        if (path) {
+          await commands.execute(CommandIDs.openSource, { path });
+        }
+      }
+    });
+
+    commands.addCommand(CommandIDs.copyKernelSourcePath, {
+      label: trans.__('Copy Path'),
+      caption: trans.__('Copy the path of the kernel source to the clipboard'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: () => {
+        const path = getKernelSourcePath();
+        if (path) {
+          Clipboard.copyToSystem(path);
+        }
+      }
+    });
+
     commands.addCommand(CommandIDs.debugContinue, {
       label: () => {
         return service.hasStoppedThreads()
@@ -1266,7 +1308,8 @@ const main: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.pauseOnExceptions, {
-      label: args => (args.filter as string) || 'Breakpoints on exception',
+      label: args =>
+        (args.filter as string) || trans.__('Breakpoints on exception'),
       caption: args => (args.description as string) ?? '',
       isToggled: args =>
         service.session?.isPausingOnException(args.filter as string) || false,

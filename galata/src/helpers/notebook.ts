@@ -469,25 +469,32 @@ export class NotebookHelper {
    * @returns Whether the action succeeded or not.
    */
   async trust(): Promise<boolean> {
-    if (
-      (await this.isAnyActive()) &&
-      (await this.page
-        .locator('[data-icon="ui-components:not-trusted"]')
-        .count()) === 1
-    ) {
-      await this.page.keyboard.press('Control+Shift+C');
-      await this.page.getByPlaceholder('SEARCH', { exact: true }).fill('trust');
-      await this.page.getByText('Trust Notebook').click();
-      await this.page.getByRole('button', { name: 'Trust' }).click();
-
-      return (
-        (await this.page
-          .locator('[data-icon="ui-components:trusted"]')
-          .count()) === 1
-      );
+    if (!(await this.isAnyActive())) {
+      return true;
     }
 
-    return true;
+    const trusted = await this.page.evaluate(async () => {
+      const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+      await panel.context.ready;
+      return Array.from(panel.content.model!.cells).every(cell => cell.trusted);
+    });
+    if (trusted) {
+      return true;
+    }
+
+    // The command resolves after confirmation and saving the notebook.
+    const [result] = await Promise.all([
+      this.page.evaluate<{ trusted: boolean }>(() =>
+        window.jupyterapp.commands.execute('notebook:trust')
+      ),
+      this.page
+        .getByRole('button', {
+          name: 'Confirm Trusting this notebook',
+          exact: true
+        })
+        .click()
+    ]);
+    return result.trusted;
   }
 
   /**
@@ -606,8 +613,13 @@ export class NotebookHelper {
    *
    * @deprecated You should use locator instead {@link getCellLocator}
    */
-  async getCell(cellIndex: number): Promise<ElementHandle<Element> | null> {
-    return (await this.getCellLocator(cellIndex))?.elementHandle() ?? null;
+  async getCell(
+    cellIndex: number,
+    name?: string
+  ): Promise<ElementHandle<Element> | null> {
+    return (
+      (await this.getCellLocator(cellIndex, name))?.elementHandle() ?? null
+    );
   }
 
   /**
@@ -617,8 +629,11 @@ export class NotebookHelper {
    * @param name Notebook name
    * @returns Handle to the cell
    */
-  async getCellLocator(cellIndex: number): Promise<Locator | null> {
-    const notebook = await this.getNotebookInPanelLocator();
+  async getCellLocator(
+    cellIndex: number,
+    name?: string
+  ): Promise<Locator | null> {
+    const notebook = await this.getNotebookInPanelLocator(name);
     if (!notebook) {
       return null;
     }
@@ -1082,17 +1097,18 @@ export class NotebookHelper {
    */
   async clickCellGutter(
     cellIndex: number,
-    lineNumber: number
+    lineNumber: number,
+    name?: string
   ): Promise<boolean> {
     if (lineNumber < 1) {
       return false;
     }
 
-    if (!(await this.isCellGutterPresent(cellIndex))) {
+    if (!(await this.isCellGutterPresent(cellIndex, name))) {
       return false;
     }
 
-    const cell = await this.getCellLocator(cellIndex);
+    const cell = await this.getCellLocator(cellIndex, name);
     return this._clickOnGutter(cell!, lineNumber);
   }
 
@@ -1101,8 +1117,11 @@ export class NotebookHelper {
    *
    * @param cellIndex
    */
-  async isCellGutterPresent(cellIndex: number): Promise<boolean> {
-    const cell = await this.getCellLocator(cellIndex);
+  async isCellGutterPresent(
+    cellIndex: number,
+    name?: string
+  ): Promise<boolean> {
+    const cell = await this.getCellLocator(cellIndex, name);
     if (!cell) {
       return false;
     }
@@ -1114,8 +1133,10 @@ export class NotebookHelper {
    *
    * @param cellIndex
    */
-  waitForCellGutter(cellIndex: number): Promise<void> {
-    return Utils.waitForCondition(() => this.isCellGutterPresent(cellIndex));
+  waitForCellGutter(cellIndex: number, name?: string): Promise<void> {
+    return Utils.waitForCondition(() =>
+      this.isCellGutterPresent(cellIndex, name)
+    );
   }
 
   /**
@@ -1157,7 +1178,7 @@ export class NotebookHelper {
     if (!(panel && (await panel.count()))) {
       return false;
     }
-    return (await panel.locator('.cm-gutters')?.isVisible()) !== null;
+    return await panel.locator('.cm-gutters').isVisible();
   }
 
   /**

@@ -5,10 +5,10 @@
 import { program as commander } from 'commander';
 import semver from 'semver';
 import path from 'path';
+import { bumpWorkspaceVersions } from './bump-workspaces';
 import * as utils from './utils';
 
 interface IBumpJSOptions {
-  force?: boolean;
   dryRun?: boolean;
 }
 
@@ -21,10 +21,9 @@ export function getDeps(
 ): Set<string> {
   const deps: Set<string> = new Set();
   for (const name in lut) {
-    if ('@jupyterlab/' + pkgName in lut[name]) {
-      const otherName = name.replace('@jupyterlab/', '');
-      deps.add(otherName);
-      const otherDeps = getDeps(otherName, lut);
+    if (pkgName in lut[name]) {
+      deps.add(name);
+      const otherDeps = getDeps(name, lut);
       otherDeps.forEach(dep => {
         deps.add(dep);
       });
@@ -37,35 +36,41 @@ export function getDeps(
 commander
   .description('Bump the major version of JS package(s)')
   .arguments('<package> [others...]')
-  .option('--force', 'Force the upgrade')
   .option('--dry-run', 'Show what would be executed')
   .action((pkg: string, others: Array<string>, options: IBumpJSOptions) => {
     utils.exitOnUncaughtException();
     others.push(pkg);
+
+    // Create a lut of the dependencies and versions of the public packages
+    const lut: { [key: string]: { [key: string]: string } } = {};
+    const versions: { [key: string]: string } = {};
+    utils.getYarnPaths().forEach(pkgPath => {
+      const data = utils.readJSONFile(path.join(pkgPath, 'package.json'));
+      if (data.private !== true) {
+        lut[data.name] = data.dependencies || {};
+        versions[data.name] = data.version;
+      }
+    });
+
     const toBump: Set<string> = new Set();
     const ignoreBump: Set<string> = new Set();
-    const maybeBump = (pkg: string) => {
-      if (pkg in toBump || pkg in ignoreBump) {
+    const maybeBump = (name: string) => {
+      if (toBump.has(name) || ignoreBump.has(name)) {
         return;
       }
-      const version = utils.getJSVersion(pkg);
+      const version = versions[name];
+      if (!version) {
+        throw new Error(`${name} is not a public workspace package`);
+      }
       if (semver.minor(version) === 0 && semver.prerelease(version)) {
-        console.warn(`${pkg} has already been bumped`);
-        ignoreBump.add(pkg);
+        console.warn(`${name} has already been bumped`);
+        ignoreBump.add(name);
       } else {
-        toBump.add(pkg);
+        toBump.add(name);
       }
     };
     others.forEach(pkg => {
-      maybeBump(pkg);
-    });
-
-    // Create a lut of dependencies
-    const lut: { [key: string]: { [key: string]: string } } = {};
-    utils.getCorePaths().forEach(corePath => {
-      const pkgDataPath = path.join(corePath, 'package.json');
-      const data = utils.readJSONFile(pkgDataPath);
-      lut[data.name] = data.dependencies || {};
+      maybeBump(`@jupyterlab/${pkg}`);
     });
 
     // Look for dependencies of bumped packages
@@ -92,18 +97,13 @@ commander
         'Cannot bump JS packages until we switch to prerelease mode'
       );
     }
-    const pkgs = Array.from(toBump).join(',');
-    let cmd = `lerna version premajor --preid=${preId} --force-publish=${pkgs} --no-push`;
-    if (options.force) {
-      cmd += ' --yes';
-    }
-
     if (options.dryRun) {
-      console.debug('Would run:');
-      console.debug(cmd);
+      console.debug('Would bump:');
+      console.debug(Array.from(toBump).join('\n'));
       return;
     }
-    utils.run(cmd);
+    bumpWorkspaceVersions('premajor', { preid: preId, packages: toBump });
+    utils.postbump(false);
   });
 
 commander.parse(process.argv);
