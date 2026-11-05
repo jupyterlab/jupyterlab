@@ -1361,10 +1361,13 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
           _defaultBrowserTreePath = browser.path;
           if (
             (directoryLink && _docTreePath) ||
-            (document?.alreadyRestored && document.path !== _docTreePath) ||
+            (document &&
+              (document.path !== _docTreePath ||
+                (paths?.openWith &&
+                  document.widget !== app.shell.currentWidget))) ||
             (!paths?.file && !_docTreePath)
           ) {
-            updateUrl(_docTreePath || _defaultBrowserTreePath);
+            updateUrl(_docTreePath || _defaultBrowserTreePath, 'open-with');
           }
         }
         app.shell.currentPathChanged.connect((_, args) => {

@@ -2253,7 +2253,6 @@ namespace Private {
     });
 
     let document: ITreePathUpdater.IBrowserState['document'];
-    let fragmentTarget: unknown;
     const paths = await tree?.paths;
     if (paths?.file || paths?.browser) {
       // Restore the model without populating it.
@@ -2261,21 +2260,29 @@ namespace Private {
       if (paths.file) {
         const normalized = manager.services.contents.normalize(paths.file);
         const restored = await restoredDocument;
+        const restoredWidget = restored?.widget;
+        const factory = Private.resolveOpenWithFactory(
+          manager.registry,
+          paths.openWith
+        );
         const alreadyRestored =
-          !paths.openWith && restored?.path === normalized;
+          restoredWidget &&
+          restored.path === normalized &&
+          (!paths.openWith ||
+            (factory &&
+              manager.findWidget(normalized, factory) === restoredWidget));
         const widget: unknown = await commands.execute(
           alreadyRestored ? CommandIDs.goToPath : CommandIDs.openPath,
           {
             path: paths.file,
             dontShowBrowser: true,
-            factory: paths.openWith
+            factory
           }
         );
-        fragmentTarget = alreadyRestored ? restored?.widget : widget;
         if (alreadyRestored) {
-          document = { path: normalized, alreadyRestored };
+          document = { path: normalized, widget: restoredWidget };
         } else if (widget instanceof DocumentWidget) {
-          document = { path: widget.context.path, alreadyRestored };
+          document = { path: widget.context.path, widget };
         }
       }
       if (paths.browser) {
@@ -2292,19 +2299,24 @@ namespace Private {
     if (labShell?.isEmpty('main')) {
       void commands.execute('launcher:create');
     }
-    const target = fragmentTarget;
+    const target = document?.widget;
     if (location.hash && target instanceof DocumentWidget) {
-      void target.revealed.then(
-        () => {
-          // Let the tab's activation and layout finish before scrolling.
-          requestAnimationFrame(() => {
+      void target.revealed
+        .then(
+          async () => {
+            // Let the tab's activation and layout finish before scrolling.
+            await new Promise<number>(resolve =>
+              requestAnimationFrame(resolve)
+            );
             if (target.isVisible && !target.isDisposed) {
-              target.setFragment(location.hash);
+              return target.setFragment(location.hash);
             }
-          });
-        },
-        () => undefined
-      );
+          },
+          () => undefined
+        )
+        .catch(error =>
+          console.error('Failed to open the document fragment.', error)
+        );
     }
     return { path: browser.model.path, document };
   }

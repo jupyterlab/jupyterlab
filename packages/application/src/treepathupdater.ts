@@ -4,6 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import { Token } from '@lumino/coreutils';
+import type { Widget } from '@lumino/widgets';
 
 /**
  * The tree path updater token.
@@ -37,7 +38,7 @@ export namespace ITreePathUpdater {
      */
     document?: {
       path: string;
-      alreadyRestored: boolean;
+      widget: Widget;
     };
   }
 }
