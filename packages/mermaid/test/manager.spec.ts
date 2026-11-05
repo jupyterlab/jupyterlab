@@ -195,6 +195,120 @@ describe('@jupyterlab/mermaid', () => {
         }
       });
 
+      it('should redraw a diagram in the new theme when its Markdown is added to the document again', async () => {
+        const themes = new MockThemeManager();
+        const manager = new MockMermaidManager({
+          themes: themes.asThemeManager()
+        });
+
+        // Render the initial figure (light theme)
+        const text = 'graph TD; A --> B;';
+        const figure = await manager.renderFigure(text);
+
+        // A markdown container imitating a Markdown cell in edit mode: its
+        // rendered widget is detached, so the diagram is not in the document.
+        const markdown = document.createElement('div');
+        markdown.className = 'jp-RenderedMarkdown';
+        markdown.innerHTML = figure.outerHTML;
+        document.body.appendChild(markdown);
+
+        try {
+          expect(decodeURIComponent(markdown.innerHTML)).toContain(
+            'data-theme="default"'
+          );
+
+          // Detach, as showEditor() does for a cell in edit mode.
+          markdown.remove();
+
+          // Switch theme while the diagram is detached.
+          await themes.setTheme('JupyterLab Dark');
+          await new Promise(resolve => setTimeout(resolve, 0));
+          expect(decodeURIComponent(markdown.innerHTML)).toContain(
+            'data-theme="default"'
+          );
+
+          // Show the cell again: the diagram must be redrawn in the new theme.
+          document.body.appendChild(markdown);
+          for (let i = 0; i < 50; i++) {
+            if (
+              decodeURIComponent(markdown.innerHTML).includes(
+                'data-theme="dark"'
+              )
+            ) {
+              break;
+            }
+            await new Promise(resolve => setTimeout(resolve, 10));
+          }
+
+          expect(decodeURIComponent(markdown.innerHTML)).toContain(
+            'data-theme="dark"'
+          );
+        } finally {
+          markdown.remove();
+          manager.dispose();
+        }
+      });
+
+      it('should not redraw a diagram already drawn in the current theme when its Markdown is added to the document', async () => {
+        const themes = new MockThemeManager();
+        const manager = new MockMermaidManager({
+          themes: themes.asThemeManager()
+        });
+
+        const text = 'graph TD; A --> B;';
+        const figure = await manager.renderFigure(text);
+        const renderSpy = jest.spyOn(manager, 'renderFigure');
+
+        const markdown = document.createElement('div');
+        markdown.className = 'jp-RenderedMarkdown';
+        markdown.innerHTML = figure.outerHTML;
+        document.body.appendChild(markdown);
+
+        try {
+          await new Promise(resolve => setTimeout(resolve, 0));
+          await new Promise(resolve => setTimeout(resolve, 0));
+          expect(renderSpy).not.toHaveBeenCalled();
+          expect(decodeURIComponent(markdown.innerHTML)).toContain(
+            'data-theme="default"'
+          );
+        } finally {
+          markdown.remove();
+          manager.dispose();
+        }
+      });
+
+      it('should not redraw diagrams after the manager is disposed', async () => {
+        const themes = new MockThemeManager();
+        const manager = new MockMermaidManager({
+          themes: themes.asThemeManager()
+        });
+
+        const text = 'graph TD; A --> B;';
+        const figure = await manager.renderFigure(text);
+
+        const markdown = document.createElement('div');
+        markdown.className = 'jp-RenderedMarkdown';
+        markdown.innerHTML = figure.outerHTML;
+        document.body.appendChild(markdown);
+        markdown.remove();
+
+        await themes.setTheme('JupyterLab Dark');
+        await new Promise(resolve => setTimeout(resolve, 0));
+        manager.dispose();
+
+        document.body.appendChild(markdown);
+        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        try {
+          expect(decodeURIComponent(markdown.innerHTML)).toContain(
+            'data-theme="default"'
+          );
+        } finally {
+          markdown.remove();
+        }
+      });
+
       it('should not interpret HTML meta-characters in diagram source as HTML elements', async () => {
         const themes = new MockThemeManager();
         const manager = new MockMermaidManager({
