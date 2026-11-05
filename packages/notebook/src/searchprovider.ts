@@ -931,8 +931,14 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       clearTimeout(this._delayedActiveCellChangeHandler);
       this._delayedActiveCellChangeHandler = null;
     }
-    // Selection can change before the active cell changes in the same event.
+    if (this._cellSelectionChangePending) {
+      return;
+    }
+    // Selection can change before the active cell changes in the same event,
+    // and entering edit mode deselects the cells one by one: handle it once.
+    this._cellSelectionChangePending = true;
     await Promise.resolve();
+    this._cellSelectionChangePending = false;
     await this._updateCellSelection();
     if (this._currentProviderIndex === null) {
       // For consistency we set the first cell in selection as current provider.
@@ -996,4 +1002,5 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   private _selectionSearchMode: 'cells' | 'text' = 'cells';
   private _selectionLock: boolean = false;
   private _searchActive: boolean = false;
+  private _cellSelectionChangePending = false;
 }

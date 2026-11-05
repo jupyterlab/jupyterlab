@@ -47,6 +47,26 @@ for (const cellIndex of [0, 1, 2]) {
   });
 }
 
+for (const cellIndex of [0, 1, 2]) {
+  test(`Search counter after clicking the editor of cell ${cellIndex}`, async ({
+    page
+  }) => {
+    const counter = page.locator('.jp-DocumentSearch-index-counter');
+    const firstCell = await page.notebook.getCellLocator(0);
+    await firstCell!.locator('.jp-InputPrompt').click();
+    await page.keyboard.press('Shift+ArrowDown');
+    await page.keyboard.press('Shift+ArrowDown');
+    await expect(counter).toHaveText('1/3');
+
+    const cell = await page.notebook.getCellLocator(cellIndex);
+    // Click after the text, away from the search box over the first cell
+    await cell!.locator('.cm-content').click({ position: { x: 60, y: 8 } });
+
+    await expect(counter).toHaveText('1/1');
+    await expect(cell!.locator('.jp-current-match')).toHaveText('with');
+  });
+}
+
 test('Extending cell selection preserves the current match', async ({
   page
 }) => {

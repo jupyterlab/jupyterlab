@@ -135,7 +135,7 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
-    describe('cell selection changes', () => {
+    describe('#filtersChanged', () => {
       beforeEach(() => {
         panel.model!.sharedModel.deleteCellRange(0, 2);
         panel.model!.sharedModel.insertCells(0, [
@@ -169,6 +169,41 @@ describe('@jupyterlab/notebook', () => {
           const collapsed = signalToPromise(provider.filtersChanged);
           panel.content.deselectAll();
           panel.content.activeCellIndex = cellIndex;
+          await collapsed;
+          await provider.cellChangeHandled;
+
+          expect(provider.currentMatchIndex).toBe(0);
+          expect(observed.at(-1)).toEqual({ current: 0, count: 1 });
+          expect(await provider.replaceCurrentMatch('replaced')).toBe(true);
+          expect(
+            panel.model!.cells.get(cellIndex).sharedModel.getSource()
+          ).toBe('replaced');
+          await provider.endQuery();
+        }
+      );
+
+      it.each([0, 1, 2])(
+        'should notify with the current match after the editor of cell %i takes focus',
+        async cellIndex => {
+          await provider.startQuery(/test/, { selection: true });
+          const selected = signalToPromise(provider.filtersChanged);
+          panel.content.extendContiguousSelectionTo(2);
+          await selected;
+
+          const observed: { current: number | null; count: number | null }[] =
+            [];
+          provider.filtersChanged.connect(() => {
+            observed.push({
+              current: provider.currentMatchIndex,
+              count: provider.matchesCount
+            });
+          });
+
+          // Focus in an editor activates its cell, then edit mode deselects
+          // the selected cells one by one.
+          const collapsed = signalToPromise(provider.filtersChanged);
+          panel.content.activeCellIndex = cellIndex;
+          panel.content.mode = 'edit';
           await collapsed;
           await provider.cellChangeHandled;
 
