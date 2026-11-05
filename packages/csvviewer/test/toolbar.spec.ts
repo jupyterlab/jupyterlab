@@ -41,6 +41,13 @@ describe('csvviewer/toolbar', () => {
         expect(widget.selectNode.value).toBe(wanted);
         widget.dispose();
       });
+
+      it('should show a delimiter that is not listed', () => {
+        delimiter = ':';
+        const widget = new CSVDelimiter({ widget: mockViewer() });
+        expect(widget.selectNode.value).toBe(':');
+        widget.dispose();
+      });
     });
 
     describe('#delimiterChanged', () => {

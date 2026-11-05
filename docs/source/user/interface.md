@@ -136,6 +136,21 @@ the left, right, top, or bottom of the panel:
 The work area has a single current activity. The tab for the current activity is
 marked with a colored top border (blue by default).
 
+### Switching Tabs by Index
+
+You can switch to a specific tab in the current tab bar using {kbd}`Ctrl+Alt`
+({kbd}`Cmd+Option` on macOS) and a number from {kbd}`1` to {kbd}`8`, where
+{kbd}`1` is the first tab. {kbd}`Ctrl+Alt+9` ({kbd}`Cmd+Option+9` on macOS)
+activates the last tab in the current tab bar. When the main area is split into
+multiple panes, these shortcuts only switch tabs within the current pane. If the
+numbered tab does not exist in that pane, the shortcut does nothing.
+
+On Windows, {kbd}`Ctrl+Alt` also acts as {kbd}`AltGr`. If your keyboard layout
+types a character for {kbd}`AltGr` and a number, such as `[` and `]` on a German
+keyboard, the shortcut with that number types the character instead of switching
+tabs. You can assign other keys in the
+{ref}`keyboard shortcuts settings <user-shortcuts>`.
+
 (tabs)=
 
 ## Tabs and Simple Interface Mode

@@ -6,7 +6,7 @@ channels:
 
 dependencies:
   # runtimes
-  - nodejs >=20,<21
+  - nodejs >=24,<25
   - python =3.11
   # package managers
   - pip
@@ -14,6 +14,7 @@ dependencies:
   # build
   - hatch-jupyter-builder >=0.3.2
   - hatchling >=1.5.0
+  - jupyter-builder >=1.1.1
   # run
   - async-lru >=1.0.3
   - httpx2 >=2,<3

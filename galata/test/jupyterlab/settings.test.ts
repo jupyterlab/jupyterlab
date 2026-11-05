@@ -686,6 +686,9 @@ test('Setting for "Show Filter Bar by Default" should work on reload', async ({
 
   await page.reload({ waitForIsReady: false });
   await expect(filterBox).toBeVisible();
+  // Wait for the restored settings editor. Running the command earlier opens
+  // a second editor, or the restored one later resets the query.
+  await page.locator('.jp-SettingsPanel').waitFor();
   await page.evaluate(() =>
     window.jupyterapp.commands.execute('settingeditor:open', {
       query: 'Show Filter Bar by Default'
