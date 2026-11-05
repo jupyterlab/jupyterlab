@@ -1306,6 +1306,9 @@ export class WindowedList<
     // wheel, stops the list from scrolling back to the last requested
     // item. The type check excludes the synthetic onScroll call made
     // when windowing is toggled, which carries no event type.
+    // When the list requests an offset past the end (such as the last
+    // item plus a margin), the browser scrolls only to the end, so the
+    // comparison limits the offset to the end.
     if (
       event.type === 'scroll' &&
       !this._scrollUpdateWasRequested &&
