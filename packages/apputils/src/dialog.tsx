@@ -468,7 +468,7 @@ export class Dialog<T> extends Widget {
         break;
       }
       case 'Enter': {
-        const activeEl = document.activeElement;
+        const activeEl = Private.deepActiveElement();
         let index = -1;
 
         if (activeEl instanceof HTMLButtonElement) {
@@ -1243,6 +1243,20 @@ namespace Private {
       '[tabindex]'
     ].join(',');
     return node.querySelectorAll(candidateSelectors)[0] as HTMLElement;
+  }
+
+  /**
+   * The focused element, looked up through open shadow roots.
+   *
+   * For a web component such as `<jp-search>`, `document.activeElement` is
+   * the host, and the focused `<input>` is in its shadow root.
+   */
+  export function deepActiveElement(): Element | null {
+    let el = document.activeElement;
+    while (el?.shadowRoot?.activeElement) {
+      el = el.shadowRoot.activeElement;
+    }
+    return el;
   }
 
   /**

@@ -321,6 +321,38 @@ describe('@jupyterlab/apputils', () => {
             expect(bodyDialog.isDisposed).toBe(true);
             expect((await prompt).button.accept).toBe(true);
           });
+
+          it('should accept on enter key within the input of a web component', async () => {
+            // Such as the <jp-search> of a FilterBox, whose <input> sits in a
+            // shadow root, so that `document.activeElement` is the host.
+            if (!customElements.get('test-shadow-field')) {
+              customElements.define(
+                'test-shadow-field',
+                class extends HTMLElement {
+                  constructor() {
+                    super();
+                    this.attachShadow({ mode: 'open' }).appendChild(
+                      document.createElement('input')
+                    );
+                  }
+                }
+              );
+            }
+            const host = await launchWithBody(
+              React.createElement('test-shadow-field', {
+                'data-testid': 'target'
+              })
+            );
+            const input = host.shadowRoot!.querySelector('input')!;
+            input.focus();
+
+            expect(
+              !input.dispatchEvent(
+                generate('keydown', { key: 'Enter', composed: true })
+              )
+            ).toBe(true);
+            expect((await prompt).button.accept).toBe(true);
+          });
         });
 
         it('should resolve with currently focused button', async () => {
