@@ -35,6 +35,23 @@ async function typeInto(input: HTMLInputElement, value: string): Promise<void> {
   await sleep(100);
 }
 
+/**
+ * A text field that fills an empty value when it mounts, as the environment
+ * widget of pixi-kernel does.
+ */
+function FillOnMount(props: FieldProps): JSX.Element {
+  const { formData, idSchema, onChange } = props;
+  React.useEffect(() => {
+    if (!formData) onChange('filled');
+  }, [formData, onChange]);
+  return React.createElement('input', {
+    id: idSchema.$id,
+    value: formData ?? '',
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) =>
+      onChange(event.target.value)
+  });
+}
+
 beforeAll(async () => {
   await server.start();
 }, 30000);
@@ -274,15 +291,6 @@ describe('metadataform/form simple', () => {
   });
 
   it('should not write from a form mounted again after the active cell changed', async () => {
-    // A field that fills an empty value when it mounts, as the environment
-    // widget of pixi-kernel does.
-    const FillOnMount = (props: FieldProps): JSX.Element => {
-      const { formData, onChange } = props;
-      React.useEffect(() => {
-        if (!formData) onChange('filled');
-      }, [formData, onChange]);
-      return React.createElement('span');
-    };
     const metadataForm = new MetadataFormWidget({
       metadataSchema: JSONExt.deepCopy(schema),
       metaInformation,
@@ -307,15 +315,18 @@ describe('metadataform/form simple', () => {
     Widget.detach(notebookTools);
     Widget.attach(notebookTools, document.body);
     await sleep(100);
-    await metadataForm.form!.renderPromise;
+    await metadataForm.form?.renderPromise;
 
     expect(secondCell.model.getMetadata('cell-metadata')).toBeUndefined();
   });
 
-  async function buildVisibleForm(): Promise<MetadataFormWidget> {
+  async function buildVisibleForm(
+    uiSchema?: MetadataForm.IUiSchema
+  ): Promise<MetadataFormWidget> {
     const metadataForm = new MetadataFormWidget({
       metadataSchema: JSONExt.deepCopy(schema),
       metaInformation,
+      uiSchema,
       pluginId: 'test-plugin'
     });
     notebookTools.addSection({ sectionName: 'testSchema', tool: metadataForm });
@@ -366,6 +377,26 @@ describe('metadataform/form simple', () => {
     )!;
     await typeInto(input, 'edited');
     expect(secondCell.model.getMetadata('cell-metadata')).toBe('edited');
+  });
+
+  it('should not overwrite an edit when a hidden form is attached again', async () => {
+    const metadataForm = await buildVisibleForm({
+      '/cell-metadata': { 'ui:field': FillOnMount }
+    } as unknown as MetadataForm.IUiSchema);
+    const model = tracker.activeCell!.model;
+    const input = metadataForm.node.querySelector<HTMLInputElement>(
+      'input[id$="_/cell-metadata"]'
+    )!;
+    await typeInto(input, 'edited');
+
+    // A collapsed sidebar hides the form, and the Property Inspector attaches
+    // it again when another document and then the notebook get the focus.
+    notebookTools.hide();
+    Widget.detach(notebookTools);
+    Widget.attach(notebookTools, document.body);
+    await sleep(100);
+
+    expect(model.getMetadata('cell-metadata')).toBe('edited');
   });
 
   it('should update notebook metadata', async () => {
