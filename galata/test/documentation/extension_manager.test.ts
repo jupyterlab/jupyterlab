@@ -83,7 +83,7 @@ test.describe('Extension Manager', () => {
     ).toBeVisible();
     await sidebar.getByRole('button', { name: 'Yes', exact: true }).click();
     await expect(
-      sidebar.getByText('Language Packs', { exact: true })
+      sidebar.getByText('Search Results', { exact: true })
     ).toBeVisible();
     const french = sidebar.getByRole('link', {
       name: 'jupyterlab-language-pack-fr-FR'

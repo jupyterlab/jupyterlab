@@ -171,10 +171,6 @@ interface IExtensionManagerMetadata {
    * Whether the extension manager can enable/disable extensions (default true).
    */
   can_manage?: boolean;
-  /**
-   * Whether the available package list is limited to language packs.
-   */
-  language_packs_only?: boolean;
 }
 
 /**
@@ -220,7 +216,6 @@ export class ListModel extends VDomModel {
     this.name = metadata.name ?? trans.__('Extension');
     this.canInstall = metadata.can_install ?? false;
     this.canManage = metadata.can_manage ?? true;
-    this.languagePacksOnly = metadata.language_packs_only ?? false;
     this.installPath = metadata.install_path ?? null;
     this._installed = [];
     this._lastSearchResult = [];
@@ -250,11 +245,6 @@ export class ListModel extends VDomModel {
    * pure listing with no actions at all.
    */
   readonly canManage: boolean;
-
-  /**
-   * Whether the available package list is limited to language packs.
-   */
-  readonly languagePacksOnly: boolean;
 
   /**
    * Extensions installation path.
@@ -490,7 +480,7 @@ export class ListModel extends VDomModel {
    */
   async refresh(): Promise<void> {
     await this.refreshInstalled(true);
-    if (this.languagePacksOnly && this.isDisclaimed) {
+    if (this.name === 'PyPI' && this.isDisclaimed) {
       await this._debouncedSearch.invoke(true);
     }
   }

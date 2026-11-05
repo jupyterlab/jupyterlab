@@ -228,7 +228,7 @@ class PyPIExtensionManager(ExtensionManager):
     @property
     def metadata(self) -> ExtensionManagerMetadata:
         """Extension manager metadata."""
-        return ExtensionManagerMetadata("PyPI", True, sys.prefix, language_packs_only=True)
+        return ExtensionManagerMetadata("PyPI", True, sys.prefix)
 
     @override
     async def is_install_allowed(self, name: str, version: str | None = None) -> bool:

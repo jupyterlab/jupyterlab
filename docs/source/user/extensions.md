@@ -93,8 +93,8 @@ The Extension Manager is in the {ref}`left sidebar <left-sidebar>`.
 :align: center
 :class: jp-screenshot
 
-**Figure:** The default view has a name filter, a link to PyPI, and sections for
-installed extensions and available language packs.
+**Figure:** The default view has a search field, a link to PyPI, and sections for
+installed and discoverable packages.
 :::
 
 ### Disclaimer
@@ -130,9 +130,10 @@ your screen.
 
 ### Finding Extensions
 
-The "Language Packs" section lists the available JupyterLab language packs.
-Use the name filter to narrow the list, or open it from **Settings → Language →
-Install more languages…**. The filter also applies to the "Installed" section.
+The "Discover" section lists the available JupyterLab language packs. The search
+field filters both the available packs and the "Installed" section by name.
+**Settings → Language → Install more languages…** opens the Extension Manager
+with the language pack search filled in.
 
 ```{image} ../images/extensions-search.png
 :align: center

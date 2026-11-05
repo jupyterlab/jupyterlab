@@ -161,13 +161,11 @@ class ExtensionManagerMetadata:
         name: Extension manager name to be displayed
         can_install: Whether the extension manager can un-/install packages (default False)
         install_path: Installation path for the extensions (default None); e.g. environment path
-        language_packs_only: Whether the available package list is limited to language packs
     """
 
     name: str
     can_install: bool = False
     install_path: str | None = None
-    language_packs_only: bool = False
 
 
 @dataclass

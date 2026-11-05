@@ -44,7 +44,7 @@
   margin: 4px 10px;
 }
 
-.jp-extensionmanager-browse a {
+.jp-extensionmanager-browse > a {
   color: var(--jp-content-link-color);
   text-decoration: underline;
   text-transform: none;

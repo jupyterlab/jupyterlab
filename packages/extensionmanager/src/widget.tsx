@@ -378,11 +378,7 @@ class Header extends ReactWidget {
         </div>
         <FilterBox
           initialQuery={this.model.query || undefined}
-          placeholder={
-            this.model.languagePacksOnly
-              ? this.trans.__('Filter by name')
-              : this.trans.__('Search extensions')
-          }
+          placeholder={this.trans.__('Search extensions')}
           // A read-only manager only filters locally, so no disclaimer is needed.
           disabled={this.model.canInstall && !this.model.isDisclaimed}
           updateFilter={(fn, query) => {
@@ -391,7 +387,7 @@ class Header extends ReactWidget {
           useFuzzyFilter={false}
           inputRef={this.searchInputRef}
         />
-        {this.model.languagePacksOnly && (
+        {this.model.name === 'PyPI' && (
           <div className="jp-extensionmanager-browse">
             <a
               href="https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Prebuilt"
@@ -651,11 +647,9 @@ class SearchResult extends ReactWidget {
   }
 
   update(): void {
-    this.title.label = this.model.languagePacksOnly
-      ? this.trans.__('Language Packs')
-      : this.model.query
-        ? this.trans.__('Search Results')
-        : this.trans.__('Discover');
+    this.title.label = this.model.query
+      ? this.trans.__('Search Results')
+      : this.trans.__('Discover');
     super.update();
   }
 }
