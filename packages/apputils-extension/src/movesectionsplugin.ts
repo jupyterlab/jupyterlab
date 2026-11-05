@@ -19,7 +19,7 @@ import type {
   ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-import type { AccordionLayout, AccordionPanel, Widget } from '@lumino/widgets';
+import type { AccordionPanel, Widget } from '@lumino/widgets';
 
 /**
  * State DB key for persisting moved sections.
@@ -176,14 +176,6 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       );
     };
 
-    // Re-appending all titles in logical to fix keyboard Tab navigation.
-    const syncTitleDOMOrder = (accordion: AccordionPanel): void => {
-      const layout = accordion.layout as AccordionLayout;
-      for (const title of layout.titles) {
-        accordion.node.appendChild(title);
-      }
-    };
-
     const setupAccordionDrag = (accordion: AccordionPanel): void => {
       if (dragSetupDone.has(accordion)) {
         return;
@@ -220,7 +212,16 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
           const target = Math.max(0, Math.min(index, total - 1));
           if (accordion.widgets[target] !== widget) {
             accordion.insertWidget(target, widget);
-            syncTitleDOMOrder(accordion);
+            // Lumino only repositions the section, so move its title, body
+            // and handle to keep the Tab order the same as the visual order.
+            const next = accordion.titles[target + 1] ?? null;
+            for (const node of [
+              accordion.titles[target],
+              widget.node,
+              accordion.handles[target]
+            ]) {
+              accordion.node.insertBefore(node, next);
+            }
           }
         }
 

@@ -34,6 +34,7 @@ interface ISavedWorkspace {
     'layout-restorer:data'?: {
       left?: Pick<ILabShell.ISideArea, 'widgetStates'>;
     };
+    'section-mover:layout'?: Record<string, { index?: number }[]>;
   };
 }
 const showSourcesCases: ShowSourcesCase[] = [
@@ -403,6 +404,55 @@ test.describe('Section reordering', () => {
     await startDrag(page, titles.first(), titles.nth(1));
     await page.mouse.up();
     await expect(labels).toHaveText([initialLabels[1], initialLabels[0]]);
+  });
+
+  test('should keep the Tab order of reordered file browser sections after reload', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('jp-running-sessions');
+    await page
+      .locator('#jp-running-sessions .lm-AccordionPanel-title')
+      .filter({ hasText: 'Open Tabs' })
+      .click({ button: 'right' });
+    await page
+      .locator('[data-command="apputils:move-section-to"]')
+      .filter({ hasText: 'File Browser' })
+      .click();
+    await page.sidebar.openTab('filebrowser');
+    const titles = page.locator(
+      '.jp-FileBrowser-accordion .lm-AccordionPanel-title'
+    );
+    const labels = titles.locator('.lm-AccordionPanel-titleLabel');
+    await expect(titles).toHaveCount(2);
+    const initialLabels = await labels.allTextContents();
+    await toggleReordering(page, titles.first());
+    const saved = page.waitForResponse(response => {
+      if (
+        response.request().method() !== 'PUT' ||
+        !galata.Routes.workspaces.test(response.url())
+      ) {
+        return false;
+      }
+      const workspace = response.request().postDataJSON() as ISavedWorkspace;
+      return Object.values(workspace.data['section-mover:layout'] ?? {}).some(
+        sections => sections.some(section => section.index === 0)
+      );
+    });
+    await startDrag(page, titles.first(), titles.nth(1));
+    await page.mouse.up();
+    await saved;
+    await page.reload();
+    await page.sidebar.openTab('filebrowser');
+    await expect(labels).toHaveText([initialLabels[1], initialLabels[0]]);
+
+    await titles.first().focus();
+    await page.keyboard.press('Tab');
+    const body = page.locator(
+      `#${await titles.first().getAttribute('aria-controls')}`
+    );
+    await expect
+      .poll(() => body.evaluate(node => node.contains(document.activeElement)))
+      .toBe(true);
   });
 
   test('should retain the search section handle when its title changes', async ({
