@@ -222,8 +222,10 @@ export class AccordionPanelReorderer
       return;
     }
     const horizontal = this._panel.orientation === 'horizontal';
+    const last = this._panel.widgets[titles.length - 1];
+    // After the last section, the line goes below its body when it is expanded.
     const rect = (
-      titles[slot] ?? titles[titles.length - 1]
+      titles[slot] ?? (last.isHidden ? titles[titles.length - 1] : last.node)
     ).getBoundingClientRect();
     const panelRect = this._panel.node.getBoundingClientRect();
     const edge = horizontal
@@ -235,6 +237,13 @@ export class AccordionPanelReorderer
         : rect.bottom;
     this._indicator.style.left = horizontal ? `${edge - panelRect.left}px` : '';
     this._indicator.style.top = horizontal ? '' : `${edge - panelRect.top}px`;
+    // Draw the line before the far edge, so that it stays inside the panel.
+    this._indicator.style.transform =
+      slot < titles.length
+        ? ''
+        : horizontal
+          ? 'translateX(-100%)'
+          : 'translateY(-100%)';
     this._indicator.style.display = 'block';
   }
 

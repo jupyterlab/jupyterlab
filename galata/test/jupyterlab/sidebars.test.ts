@@ -354,6 +354,30 @@ test.describe('Section reordering', () => {
     await expect(panel).not.toHaveClass(/jp-mod-dragging/);
   });
 
+  test('should show the drop indicator below an expanded last section', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('jp-running-sessions');
+    const panel = page.locator('#jp-running-sessions .jp-SidePanel-content');
+    const titles = panel.locator('.lm-AccordionPanel-title');
+    const last = titles.last();
+    if ((await last.getAttribute('aria-expanded')) === 'false') {
+      await last.locator('.lm-AccordionPanel-titleLabel').click();
+    }
+    const body = page.locator(`#${await last.getAttribute('aria-controls')}`);
+    await toggleReordering(page, titles.first());
+    await startDrag(page, titles.first(), body);
+    const indicator = await panel
+      .locator('.jp-AccordionPanel-dropIndicator')
+      .boundingBox();
+    const bodyBox = await body.boundingBox();
+    await page.mouse.up();
+    expect(indicator!.y + indicator!.height).toBeCloseTo(
+      bodyBox!.y + bodyBox!.height,
+      0
+    );
+  });
+
   test('should handle sections added to an unlocked file browser and recreated accordions', async ({
     page
   }) => {
