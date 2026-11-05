@@ -120,6 +120,12 @@ describe('@jupyterlab/coreutils', () => {
           b: '1'
         });
       });
+
+      it('should keep a malformed escape as written', () => {
+        const parse = () => URLExt.queryStringToObject('?q=100%&a=b=%');
+        expect(parse).not.toThrow();
+        expect(parse()).toEqual({ q: '100%', a: 'b=%' });
+      });
     });
 
     describe('.isLocal()', () => {

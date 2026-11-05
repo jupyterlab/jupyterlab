@@ -117,6 +117,9 @@ export namespace URLExt {
 
   /**
    * Return a parsed object that represents the values in a query string.
+   *
+   * #### Notes
+   * A value with a malformed escape, such as `100%`, is kept as written.
    */
   export function queryStringToObject(value: string): {
     [key: string]: string | undefined;
@@ -132,7 +135,11 @@ export namespace URLExt {
           const value = i === -1 ? '' : val.slice(i + 1);
 
           if (key.length > 0) {
-            acc[key] = decodeURIComponent(value);
+            try {
+              acc[key] = decodeURIComponent(value);
+            } catch {
+              acc[key] = value;
+            }
           }
 
           return acc;
