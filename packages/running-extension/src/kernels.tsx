@@ -144,6 +144,7 @@ export async function addKernelRunningSessionManager(
   // services are ready, so that the position of the pane does not depend on
   // the server response time.
   managers.add({
+    id: 'jp-running-kernels',
     name: trans.__('Kernels'),
     supportsMultipleViews: true,
     running: (options: { mode: 'tree' | 'list' }) => {

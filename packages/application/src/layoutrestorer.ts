@@ -484,6 +484,7 @@ export class LayoutRestorer implements ILayoutRestorer {
         [id: string]: {
           sizes: number[] | null;
           expansionStates: boolean[] | null;
+          widgetIds?: string[];
         };
       };
     }
@@ -531,6 +532,7 @@ export class LayoutRestorer implements ILayoutRestorer {
       [id: string]: {
         sizes: number[] | null;
         expansionStates: boolean[] | null;
+        widgetIds?: string[];
       };
     };
     return {
