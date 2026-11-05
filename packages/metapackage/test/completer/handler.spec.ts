@@ -6,17 +6,22 @@ import type { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import type { Signal } from '@lumino/signaling';
 import type {
   ICompletionContext,
-  ICompletionProvider
+  ICompletionProvider,
+  IInlineCompletionContext,
+  IInlineCompletionProvider
 } from '@jupyterlab/completer';
 import {
   Completer,
   CompleterModel,
   CompletionHandler,
   CompletionTriggerKind,
+  InlineCompleter,
+  InlineCompletionTriggerKind,
   ProviderReconciliator
 } from '@jupyterlab/completer';
 import { isHintableMimeType } from '@jupyterlab/completer/lib/utils';
 import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
+import { nullTranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 import type { ISharedFile, ISharedText, SourceChange } from '@jupyter/ydoc';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
@@ -80,6 +85,23 @@ class FooCompletionProvider implements ICompletionProvider {
       return false;
     }
     return this._continuousHint;
+  }
+}
+
+class FooInlineCompletionProvider implements IInlineCompletionProvider {
+  readonly name = 'Foo inline completion provider';
+  readonly identifier = 'FooInlineCompletionProvider';
+  requests: Array<{
+    request: CompletionHandler.IRequest;
+    trigger: InlineCompletionTriggerKind;
+  }> = [];
+
+  async fetch(
+    request: CompletionHandler.IRequest,
+    context: IInlineCompletionContext
+  ) {
+    this.requests.push({ request, trigger: context.triggerKind });
+    return { items: [{ insertText: 'suggestion' }] };
   }
 }
 
@@ -474,6 +496,124 @@ describe('@jupyterlab/completer', () => {
         expect(model.completionItems()).toHaveLength(0);
         fetch.mockRestore();
         shouldShow.mockRestore();
+      });
+    });
+
+    describe('#continuousInline', () => {
+      let anchor: CodeEditorWrapper;
+      let provider: FooInlineCompletionProvider;
+      let inlineCompleter: InlineCompleter;
+      let handler: CompletionHandler;
+
+      beforeEach(() => {
+        anchor = createEditorWidget();
+        Widget.attach(anchor, document.body);
+        provider = new FooInlineCompletionProvider();
+        inlineCompleter = new InlineCompleter({
+          model: new InlineCompleter.Model(),
+          trans: nullTranslator.load('test')
+        });
+        handler = new CompletionHandler({
+          reconciliator: new ProviderReconciliator({
+            context: { editor: anchor.editor } as ICompletionContext,
+            providers: [],
+            inlineProviders: [provider],
+            inlineProvidersSettings: {
+              [provider.identifier]: {
+                enabled: true,
+                autoFillInMiddle: false,
+                debouncerDelay: 0,
+                timeout: 1000
+              }
+            },
+            timeout: 0
+          }),
+          completer: new Completer({
+            editor: null,
+            model: new CompleterModel()
+          }),
+          inlineCompleter
+        });
+        handler.editor = anchor.editor;
+      });
+
+      afterEach(() => {
+        inlineCompleter.model?.dispose();
+        inlineCompleter.dispose();
+        handler.completer.dispose();
+        handler.dispose();
+        anchor.dispose();
+      });
+
+      it('should automatically request inline completion on an empty line', async () => {
+        anchor.editor.model.sharedModel.setSource('x');
+        await new Promise(process.nextTick);
+        provider.requests.length = 0;
+
+        anchor.editor.setCursorPosition({ line: 0, column: 1 });
+        anchor.editor.newIndentedLine();
+        await new Promise(process.nextTick);
+
+        expect(provider.requests).toEqual([
+          {
+            request: {
+              text: 'x\n',
+              offset: 2,
+              mimeType: 'text/plain'
+            },
+            trigger: InlineCompletionTriggerKind.Automatic
+          }
+        ]);
+      });
+
+      it('should automatically request inline completion on a whitespace-only line', async () => {
+        anchor.editor.model.sharedModel.setSource('xx');
+        await new Promise(process.nextTick);
+        provider.requests.length = 0;
+
+        anchor.editor.setCursorPosition({ line: 0, column: 2 });
+        anchor.editor.model.sharedModel.updateSource(0, 2, '  ');
+        await new Promise(process.nextTick);
+
+        expect(provider.requests).toEqual([
+          {
+            request: {
+              text: '  ',
+              offset: 2,
+              mimeType: 'text/plain'
+            },
+            trigger: InlineCompletionTriggerKind.Automatic
+          }
+        ]);
+      });
+
+      it('should discard an older automatic inline response', async () => {
+        const resolvers: Array<
+          (value: { items: Array<{ insertText: string }> }) => void
+        > = [];
+        jest.spyOn(provider, 'fetch').mockImplementation(
+          () =>
+            new Promise(resolve => {
+              resolvers.push(resolve);
+            })
+        );
+
+        anchor.editor.model.sharedModel.setSource('x');
+        await new Promise(process.nextTick);
+        anchor.editor.setCursorPosition({ line: 0, column: 1 });
+        anchor.editor.model.sharedModel.updateSource(0, 1, ' ');
+        await new Promise(process.nextTick);
+        expect(resolvers).toHaveLength(2);
+
+        resolvers[0]({ items: [{ insertText: 'stale' }] });
+        await new Promise(process.nextTick);
+        expect(inlineCompleter.model?.completions).toBeNull();
+
+        resolvers[1]({ items: [{ insertText: 'current' }] });
+        await new Promise(process.nextTick);
+        expect(inlineCompleter.model?.completions?.items).toMatchObject([
+          { insertText: 'current' }
+        ]);
       });
     });
 
