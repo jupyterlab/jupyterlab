@@ -27,6 +27,7 @@ from jupyterlab_server.config import get_static_page_config
 from notebook_shim.shim import NotebookConfigShimMixin
 from traitlets import Bool, Instance, Type, Unicode, default
 from traitlets.config import Config
+from traitlets.config.application import catch_config_error
 
 from ._version import __version__
 from .commands import (
@@ -694,6 +695,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             return self.override_theme_url
         return ""
 
+    @catch_config_error
     def _link_jupyter_server_extension(self, serverapp: ServerApp) -> None:
         # The base class loads the config files before it applies the server config
         # and the command line, so read raise_config_file_errors from them first.

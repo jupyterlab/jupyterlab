@@ -843,6 +843,28 @@ def test_raise_config_file_errors_stops_server(jp_configurable_serverapp, jp_con
     assert exit_info.value.code == 1
 
 
+@pytest.mark.parametrize(
+    ("file_name", "line"),
+    [
+        ("jupyter_server_config.py", 'c.LabApp.raise_config_file_errors = "false"'),
+        ("jupyter_server_config.py", 'c.LabApp.expose_app_in_browser = "true"'),
+        ("jupyter_server_config.py", "c.LabApp.colaborative = True"),
+        ("jupyter_lab_config.py", 'c.ServerApp.port = "8889"'),
+    ],
+)
+def test_invalid_config_value_stops_server(
+    jp_configurable_serverapp, jp_config_dir, file_name, line
+):
+    (jp_config_dir / file_name).write_text(line)
+
+    with pytest.raises(SystemExit) as exit_info:
+        jp_configurable_serverapp(
+            config={"ServerApp": {"jpserver_extensions": {"jupyterlab": True}}}
+        )
+
+    assert exit_info.value.code == 1
+
+
 def test_raise_config_file_errors_disabled_from_command_line(
     jp_configurable_serverapp, jp_config_dir
 ):
