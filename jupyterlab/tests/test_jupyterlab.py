@@ -820,7 +820,7 @@ def test_raise_config_file_errors_on_invalid_config(tmp_path):
     bad_config.write_text("c.LabApp.broken_syntax = [")
 
     app = LabApp(config_file=str(bad_config))
-    with pytest.raises(SyntaxError):
+    with pytest.raises(SystemExit):
         app.load_config_file()
 
 
@@ -830,3 +830,28 @@ def test_raise_config_file_errors_suppressed_when_disabled(tmp_path):
 
     app = LabApp(config_file=str(bad_config), raise_config_file_errors=False)
     app.load_config_file()
+
+
+def test_raise_config_file_errors_stops_server(jp_configurable_serverapp, jp_config_dir):
+    (jp_config_dir / "jupyter_lab_config.py").write_text("c.LabApp.broken_syntax = [")
+
+    with pytest.raises(SystemExit) as exit_info:
+        jp_configurable_serverapp(
+            config={"ServerApp": {"jpserver_extensions": {"jupyterlab": True}}}
+        )
+
+    assert exit_info.value.code == 1
+
+
+def test_raise_config_file_errors_disabled_from_command_line(
+    jp_configurable_serverapp, jp_config_dir
+):
+    (jp_config_dir / "jupyter_lab_config.py").write_text("c.LabApp.broken_syntax = [")
+
+    serverapp = jp_configurable_serverapp(
+        config={"ServerApp": {"jpserver_extensions": {"jupyterlab": True}}},
+        argv=["--LabApp.raise_config_file_errors=False", "--LabApp.expose_app_in_browser=True"],
+    )
+
+    app = serverapp.extension_manager.extension_points[LabApp.name].app
+    assert app.expose_app_in_browser is True
