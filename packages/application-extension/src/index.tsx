@@ -1279,15 +1279,18 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     let _defaultBrowserTreePath = '';
     let browserRestored: Promise<ITreePathUpdater.IBrowserState> | undefined;
 
-    function updateUrl(treePath: string, browserChanged = false) {
+    function updateUrl(
+      treePath: string,
+      parameterToClear?: 'file-browser-path' | 'open-with'
+    ) {
       const url = PageConfig.getUrl({ treePath });
       const path = URLExt.parse(url).pathname;
       if (path !== window.location.pathname) {
         router.navigate(path, { skipRouting: true });
-      } else if (browserChanged) {
+      } else if (parameterToClear) {
         const current = new URL(window.location.href);
-        if (current.searchParams.has('file-browser-path')) {
-          current.searchParams.delete('file-browser-path');
+        if (current.searchParams.has(parameterToClear)) {
+          current.searchParams.delete(parameterToClear);
           router.navigate(path + current.search + current.hash, {
             skipRouting: true
           });
@@ -1300,7 +1303,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
       void ready.then(() => {
         _defaultBrowserTreePath = treePath;
         if (!_docTreePath) {
-          updateUrl(treePath, true);
+          updateUrl(treePath, 'file-browser-path');
         }
       });
     }
@@ -1336,18 +1339,28 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
       PageConfig.setOption('mode', args as string);
     });
 
-    const ready = Promise.all([treeResolver.paths, app.shell.restored]).then(
+    let mainAreaChanged = false;
+    const onStartupCurrentChanged = () => {
+      mainAreaChanged = true;
+    };
+    const shellRestored = app.shell.restored.then(() => {
+      app.shell.currentChanged.connect(onStartupCurrentChanged);
+    });
+    const ready = Promise.all([treeResolver.paths, shellRestored]).then(
       async ([paths]) => {
         const browser = await browserRestored;
+        app.shell.currentChanged.disconnect(onStartupCurrentChanged);
         const document = browser?.document;
+        const directoryLink = browser && paths?.file && !document;
         // A directory link follows the browser until the main area changes.
         _docTreePath =
-          browser && paths?.file && !document
+          directoryLink && !mainAreaChanged
             ? ''
             : (app.shell.currentPath ?? '');
         if (browser) {
           _defaultBrowserTreePath = browser.path;
           if (
+            (directoryLink && _docTreePath) ||
             (document?.alreadyRestored && document.path !== _docTreePath) ||
             (!paths?.file && !_docTreePath)
           ) {
@@ -1356,7 +1369,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
         }
         app.shell.currentPathChanged.connect((_, args) => {
           _docTreePath = args.newValue;
-          updateUrl(_docTreePath || _defaultBrowserTreePath);
+          updateUrl(_docTreePath || _defaultBrowserTreePath, 'open-with');
         });
       }
     );
