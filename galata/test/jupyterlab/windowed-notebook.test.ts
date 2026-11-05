@@ -482,10 +482,8 @@ test('should display cells below on scrolling after inserting a cell on top', as
 
 test('should not scroll back to a newly inserted cell when scrolling away', async ({
   page,
-  tmpPath,
-  browserName
+  tmpPath
 }) => {
-  test.skip(browserName === 'firefox', 'Needs fixing on Firefox');
   // Regression test against the windowing snapback issue:
   // https://github.com/jupyterlab/jupyterlab/issues/20373
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
@@ -499,7 +497,7 @@ test('should not scroll back to a newly inserted cell when scrolling away', asyn
   await page.notebook.selectCells(0);
   await page.keyboard.press('b');
   const newCell = notebook.locator('.jp-Cell[data-windowed-list-index="1"]');
-  await newCell.waitFor();
+  await expect(newCell).toHaveClass(/jp-mod-active/);
 
   const bbox = (await notebook.boundingBox())!;
 
@@ -507,14 +505,8 @@ test('should not scroll back to a newly inserted cell when scrolling away', asyn
   await page.mouse.move(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
   // Immediately scroll away from the new cell, towards cells that have
   // never been rendered, so their measured sizes differ from estimates.
+  // One wheel event only: a second one would undo a scroll back.
   await page.mouse.wheel(0, 3000);
-  await page.mouse.wheel(0, 3000);
-
-  // Scroll down to reveal the last cell.
-  await Promise.all([
-    newCell.waitFor({ state: 'hidden' }),
-    lastCell.waitFor()
-  ]);
 
   // Allow time for a late resize-driven scrollback to fire, if any.
   // eslint-disable-next-line playwright/no-wait-for-timeout
