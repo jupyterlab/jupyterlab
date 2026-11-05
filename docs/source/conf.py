@@ -230,7 +230,7 @@ def copy_automated_screenshots(temp_folder: Path) -> list[Path]:
     src = root / AUTOMATED_SCREENSHOTS_FOLDER
 
     copied_files = []
-    for img in src.rglob("*.png"):
+    for img in src.rglob("*-documentation-linux.png"):
         target = temp_folder / (img.name.replace("-documentation-linux", ""))
         shutil.copyfile(str(img), str(target))
         copied_files.append(target)
