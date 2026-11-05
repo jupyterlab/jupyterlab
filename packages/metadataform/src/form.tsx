@@ -5,6 +5,8 @@
  * @module metadataform
  */
 
+/* global WeakRef */
+
 import { ReactWidget } from '@jupyterlab/apputils';
 import type { NotebookTools } from '@jupyterlab/notebook';
 import { FormComponent } from '@jupyterlab/ui-components';
@@ -35,10 +37,11 @@ export class FormWidget extends ReactWidget {
     const rootId =
       (props.uiSchema['ui:rootFieldId'] as unknown as string) || this._idPrefix;
     this._fields = Private.createFields(rootId);
-    // The cell this form is built for. Captured at construction time so a
-    // stale form can be recognized later.
-    this._sourceCell =
-      props.metadataFormWidget.notebookTools?.activeCell ?? null;
+    // The model of the cell this form is built for, held weakly so that the
+    // form does not keep a closed notebook in memory. Captured at
+    // construction time so a stale form can be recognized later.
+    const cell = props.metadataFormWidget.notebookTools?.activeCell;
+    this._sourceModel = cell ? new WeakRef(cell.model) : null;
     if (Private.getValidator() === null) {
       void Private.ensureValidator().then(() => {
         if (!this.isDisposed) {
@@ -67,7 +70,10 @@ export class FormWidget extends ReactWidget {
       // when another notebook gets the focus.
       if (owner.isDisposed || owner.form !== this) return;
       const activeCell = owner.notebookTools?.activeCell;
-      if (this._sourceCell && activeCell?.model !== this._sourceCell.model) {
+      if (
+        this._sourceModel &&
+        activeCell?.model !== this._sourceModel.deref()
+      ) {
         return;
       }
       owner.updateMetadata(formData, reload);
@@ -104,7 +110,9 @@ export class FormWidget extends ReactWidget {
   private _props: MetadataForm.IProps;
   private _idPrefix: string;
   private _fields: { SchemaField: Field; NullField: Field };
-  private _sourceCell: NotebookTools['activeCell'] = null;
+  private _sourceModel: WeakRef<
+    NonNullable<NotebookTools['activeCell']>['model']
+  > | null = null;
 }
 
 /**
