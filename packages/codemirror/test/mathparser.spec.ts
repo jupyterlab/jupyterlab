@@ -400,6 +400,17 @@ where {Em:{e:*}m{e:*}} is the mass.}
 );
 
 test(
+  'Math $$ opened mid-line containing a setext - underline',
+  `
+{P:Some text {MaBD:{maBD:$$}
+a
+---
+{maBD:$$}}
+where {Em:{e:*}m{e:*}} is the mass.}
+`
+);
+
+test(
   'Block math $$ opened on a line with an escaped \\$$',
   `
 {MaBD:{maBD:$$} x \\$$
