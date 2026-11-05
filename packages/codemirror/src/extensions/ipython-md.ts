@@ -182,6 +182,8 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
         before: 'SetextHeading',
         leaf: (): LeafBlockParser => {
           let held: LeafBlockParser | null = null;
+          let scanned = 0;
+          let open = false;
           const parser: LeafBlockParser = {
             nextLine(cx: BlockContext, line: Line, leaf: LeafBlock) {
               // Change the array in place: the caller is iterating over it.
@@ -190,8 +192,19 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
                 leaf.parsers.splice(next, 0, held);
                 held = null;
               }
-              if (isSetextUnderline(line) && hasOpenMath(leaf.content)) {
-                held = leaf.parsers.splice(next, 1)[0] ?? null;
+              if (isSetextUnderline(line)) {
+                // Text with no `$` and no backtick keeps the count of `$$`.
+                const { content } = leaf;
+                if (
+                  content.indexOf('$', scanned) >= 0 ||
+                  content.indexOf('`', scanned) >= 0
+                ) {
+                  open = hasOpenMath(content);
+                }
+                scanned = content.length;
+                if (open) {
+                  held = leaf.parsers.splice(next, 1)[0] ?? null;
+                }
               }
               return false;
             },

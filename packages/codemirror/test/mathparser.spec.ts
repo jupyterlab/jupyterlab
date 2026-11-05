@@ -429,6 +429,27 @@ b
 `
 );
 
+test(
+  'Math $$ opened mid-line containing two setext = underlines',
+  `
+{P:Some text {MaBD:{maBD:$$}
+=
+a
+=
+{maBD:$$}}}
+`
+);
+
+test(
+  'Setext = underline after $$ math opened and closed mid-paragraph',
+  `
+{SH1:Some text {MaBD:{maBD:$$}
+=
+{maBD:$$}} and more
+{h:=}}
+`
+);
+
 // Block math \\[ \\]
 
 test(
