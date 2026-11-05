@@ -289,6 +289,58 @@ describe('filebrowser/listing', () => {
         expect(dirListing['_clipboard'].length).toBe(0);
         expect(dirListing['_isCut']).toBe(false);
       });
+
+      it('should remove successfully moved files from clipboard on partial cut failure', async () => {
+        dirListing.selectNext();
+        dirListing.selectNext(true);
+        dirListing.cut();
+        const clipboard = [...dirListing['_clipboard']];
+        expect(clipboard.length).toBe(2);
+
+        jest
+          .spyOn(dirListing.model.manager, 'rename')
+          .mockImplementation(async (oldPath: string) => {
+            if (oldPath === clipboard[1]) {
+              throw { response: { status: 409 } };
+            }
+            return {} as any;
+          });
+
+        const pastePromise = dirListing.paste();
+        await dismissDialog();
+        await pastePromise;
+
+        expect(dirListing['_clipboard']).toEqual([clipboard[1]]);
+        expect(dirListing['_isCut']).toBe(true);
+      });
+
+      it('should not clear newer clipboard if cut or copy occurs while paste is pending', async () => {
+        dirListing.selectNext();
+        dirListing.cut();
+        const firstClipboard = [...dirListing['_clipboard']];
+        expect(firstClipboard.length).toBe(1);
+
+        let resolveRename: () => void = () => void 0;
+        const renamePromise = new Promise<any>(resolve => {
+          resolveRename = () => resolve({} as any);
+        });
+        jest
+          .spyOn(dirListing.model.manager, 'rename')
+          .mockImplementation(() => renamePromise);
+
+        const pastePromise = dirListing.paste();
+
+        dirListing.selectNext();
+        dirListing.cut();
+        const secondClipboard = [...dirListing['_clipboard']];
+        expect(secondClipboard).not.toEqual(firstClipboard);
+
+        resolveRename();
+        await pastePromise;
+
+        expect(dirListing['_clipboard']).toEqual(secondClipboard);
+        expect(dirListing['_isCut']).toBe(true);
+      });
     });
 
     describe('#_handleMultiSelect', () => {
