@@ -176,97 +176,76 @@ export namespace NotebookTrustStatus {
           this._onActiveCellChanged,
           this
         );
-        oldNotebook.modelChanged.disconnect(this._onNotebookModelChanged, this);
-        this._disconnectCells();
+
+        oldNotebook.modelChanged.disconnect(this._onModelChanged, this);
       }
 
-      const oldState = this._getAllState();
       this._notebook = model;
-      if (this._notebook === null) {
-        this._trustedCells = 0;
-        this._totalCells = 0;
-        this._activeCellTrusted = false;
-      } else {
+      if (this._notebook !== null) {
         // Add listeners
         this._notebook.activeCellChanged.connect(
           this._onActiveCellChanged,
           this
         );
-        this._notebook.modelChanged.connect(this._onNotebookModelChanged, this);
-        this._updateNotebookModel(this._notebook);
+        this._notebook.modelChanged.connect(this._onModelChanged, this);
       }
 
-      this._triggerChange(oldState, this._getAllState());
+      this._onModelChanged();
     }
 
     /**
-     * When the notebook model changes, update the trust state.
+     * When the notebook model changes, follow the cells of the new model.
+     *
+     * Only cell additions, removals and trust changes are followed, so that
+     * editing a cell does not count the cells again.
      */
-    private _onNotebookModelChanged(notebook: Notebook): void {
-      const oldState = this._getAllState();
-      this._updateNotebookModel(notebook);
-      this._triggerChange(oldState, this._getAllState());
+    private _onModelChanged(): void {
+      const oldModel = this._model;
+      // Disposing a model disconnects its cells.
+      if (oldModel !== null && !oldModel.isDisposed) {
+        oldModel.cells.changed.disconnect(this._onCellsChanged, this);
+        for (const cell of oldModel.cells) {
+          cell.stateChanged.disconnect(this._onCellStateChanged, this);
+        }
+      }
+
+      this._model = this._notebook?.model ?? null;
+      if (this._model !== null) {
+        this._model.cells.changed.connect(this._onCellsChanged, this);
+        for (const cell of this._model.cells) {
+          cell.stateChanged.connect(this._onCellStateChanged, this);
+        }
+      }
+
+      this._update();
     }
 
     /**
-     * When the notebook cells change, update the trust state.
+     * When cells are added or removed, update the trust state.
      */
     private _onCellsChanged(
-      _sender: INotebookModel['cells'],
+      _cells: INotebookModel['cells'],
       change: IObservableList.IChangedArgs<ICellModel>
     ): void {
-      const oldState = this._getAllState();
-
-      switch (change.type) {
-        case 'add':
-          this._addCells(change.newIndex, change.newValues);
-          break;
-        case 'remove':
-          this._removeCells(change.oldIndex, change.oldValues.length);
-          break;
-        case 'set':
-          this._removeCells(change.oldIndex, change.oldValues.length);
-          this._addCells(change.newIndex, change.newValues);
-          break;
-        case 'clear':
-          this._removeCells(0, this._cells.length);
-          break;
-        case 'move': {
-          const cells = this._cells.splice(
-            change.oldIndex,
-            change.oldValues.length
-          );
-          this._cells.splice(change.newIndex, 0, ...cells);
-          break;
+      // Removed cells are disposed, which disconnects them.
+      if (change.type === 'add') {
+        for (const cell of change.newValues) {
+          cell.stateChanged.connect(this._onCellStateChanged, this);
         }
-        default:
-          break;
       }
-
-      this._triggerChange(oldState, this._getAllState());
+      this._update();
     }
 
     /**
-     * When a cell state changes, update any trust state derived from it.
+     * When the trust of a cell changes, update the trust state.
      */
     private _onCellStateChanged(
-      cell: ICellModel,
+      _cell: ICellModel,
       change: IChangedArgs<unknown>
     ): void {
-      if (change.name !== 'trusted') {
-        return;
+      if (change.name === 'trusted') {
+        this._update();
       }
-
-      const oldState = this._getAllState();
-      const wasTrusted = !!change.oldValue;
-      const isTrusted = !!change.newValue;
-
-      if (cell.type === 'code' && wasTrusted !== isTrusted) {
-        this._trustedCells += isTrusted ? 1 : -1;
-      }
-      this._activeCellTrusted =
-        this._notebook?.activeCell?.model.trusted ?? false;
-      this._triggerChange(oldState, this._getAllState());
     }
 
     /**
@@ -283,15 +262,18 @@ export namespace NotebookTrustStatus {
     }
 
     /**
-     * Given notebook cells, figure out how many of the code cells are trusted.
+     * Given a notebook model, figure out how many of the code cells are trusted.
      */
-    private _deriveCellTrustState(cells: Iterable<ICellModel>): {
+    private _deriveCellTrustState(model: INotebookModel | null): {
       total: number;
       trusted: number;
     } {
+      if (model === null) {
+        return { total: 0, trusted: 0 };
+      }
       let total = 0;
       let trusted = 0;
-      for (const cell of cells) {
+      for (const cell of model.cells) {
         if (cell.type !== 'code') {
           continue;
         }
@@ -304,63 +286,24 @@ export namespace NotebookTrustStatus {
     }
 
     /**
+     * Count the trusted code cells and read the trust of the active cell.
+     */
+    private _update(): void {
+      const oldState = this._getAllState();
+      const { total, trusted } = this._deriveCellTrustState(this._model);
+
+      this._totalCells = total;
+      this._trustedCells = trusted;
+      this._activeCellTrusted =
+        this._notebook?.activeCell?.model.trusted ?? false;
+      this._triggerChange(oldState, this._getAllState());
+    }
+
+    /**
      * Get the current state of the model.
      */
     private _getAllState(): [number, number, boolean] {
       return [this._trustedCells, this._totalCells, this.activeCellTrusted];
-    }
-
-    private _addCells(index: number, cells: ICellModel[]): void {
-      this._cells.splice(index, 0, ...cells);
-      for (const cell of cells) {
-        cell.stateChanged.connect(this._onCellStateChanged, this);
-        if (cell.type === 'code') {
-          this._totalCells++;
-          if (cell.trusted) {
-            this._trustedCells++;
-          }
-        }
-      }
-    }
-
-    private _removeCells(index: number, count: number): void {
-      const cells = this._cells.splice(index, count);
-      for (const cell of cells) {
-        cell.stateChanged.disconnect(this._onCellStateChanged, this);
-        if (cell.type === 'code') {
-          this._totalCells--;
-          if (cell.trusted) {
-            this._trustedCells--;
-          }
-        }
-      }
-    }
-
-    private _updateNotebookModel(notebook: Notebook): void {
-      this._disconnectCells();
-      this._activeCellTrusted = notebook.activeCell
-        ? notebook.activeCell.model.trusted
-        : false;
-
-      this._cellList = notebook.model?.cells ?? null;
-      this._cells = this._cellList ? Array.from(this._cellList) : [];
-      const { total, trusted } = this._deriveCellTrustState(this._cells);
-
-      this._totalCells = total;
-      this._trustedCells = trusted;
-      this._cellList?.changed.connect(this._onCellsChanged, this);
-      this._cells.forEach(cell => {
-        cell.stateChanged.connect(this._onCellStateChanged, this);
-      });
-    }
-
-    private _disconnectCells(): void {
-      this._cellList?.changed.disconnect(this._onCellsChanged, this);
-      this._cells.forEach(cell => {
-        cell.stateChanged.disconnect(this._onCellStateChanged, this);
-      });
-      this._cellList = null;
-      this._cells = [];
     }
 
     /**
@@ -383,7 +326,6 @@ export namespace NotebookTrustStatus {
     private _totalCells: number = 0;
     private _activeCellTrusted: boolean = false;
     private _notebook: Notebook | null = null;
-    private _cellList: INotebookModel['cells'] | null = null;
-    private _cells: ICellModel[] = [];
+    private _model: INotebookModel | null = null;
   }
 }

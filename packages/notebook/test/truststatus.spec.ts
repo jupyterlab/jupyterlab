@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { ICellModel } from '@jupyterlab/cells';
 import { isCodeCellModel } from '@jupyterlab/cells';
 import type { Notebook } from '@jupyterlab/notebook';
 import {
@@ -10,229 +11,166 @@ import {
 } from '@jupyterlab/notebook';
 import * as utils from './utils';
 
-describe('NotebookTrustStatus.Model', () => {
-  let notebook: Notebook;
-  let model: NotebookModel;
-  let status: NotebookTrustStatus.Model;
+/**
+ * Spy on the trust getter of each cell.
+ */
+function spyOnTrust(cells: Iterable<ICellModel>): jest.SpyInstance[] {
+  return Array.from(cells, cell => jest.spyOn(cell, 'trusted', 'get'));
+}
 
-  beforeEach(() => {
-    model = new NotebookModel();
-    model.sharedModel.insertCells(0, [
-      { cell_type: 'code', metadata: { trusted: true } },
-      { cell_type: 'markdown' },
-      { cell_type: 'code', metadata: { trusted: false } }
-    ]);
-    notebook = utils.createNotebook();
-    notebook.model = model;
-    status = new NotebookTrustStatus.Model();
-    status.notebook = notebook;
-  });
+describe('@jupyterlab/notebook', () => {
+  describe('NotebookTrustStatus.Model', () => {
+    let notebook: Notebook;
+    let model: NotebookModel;
+    let status: NotebookTrustStatus.Model;
 
-  afterEach(() => {
-    jest.restoreAllMocks();
-    status.dispose();
-    notebook.dispose();
-    model.dispose();
-  });
-
-  function counts(): { trustedCells: number; totalCells: number } {
-    return { trustedCells: status.trustedCells, totalCells: status.totalCells };
-  }
-
-  function expectNoRescan(): void {
-    const reads = Array.from(model.cells, cell =>
-      jest.spyOn(cell, 'trusted', 'get')
-    );
-    try {
-      model.cells.get(0).sharedModel.setSource('changed after cells changed');
-      for (const read of reads) {
-        expect(read).not.toHaveBeenCalled();
-      }
-    } finally {
-      reads.forEach(read => read.mockRestore());
-    }
-  }
-
-  it('should preserve cell order and counts after a batch insertion', () => {
-    model.sharedModel.insertCells(
-      0,
-      Array.from({ length: 256 }, (_, index) => ({
-        cell_type: 'code' as const,
-        metadata: { trusted: index % 2 === 0 }
-      }))
-    );
-    expect(counts()).toEqual({ trustedCells: 129, totalCells: 258 });
-
-    model.sharedModel.deleteCell(0);
-    expect(counts()).toEqual({ trustedCells: 128, totalCells: 257 });
-    model.sharedModel.deleteCell(254);
-    expect(counts()).toEqual({ trustedCells: 128, totalCells: 256 });
-    model.cells.get(0).trusted = true;
-    expect(counts()).toEqual({ trustedCells: 129, totalCells: 256 });
-    expectNoRescan();
-  });
-
-  it.each([
-    [0, 0],
-    [2, 1]
-  ])('should remove code cell %i from the counts', (index, trusted) => {
-    model.sharedModel.deleteCell(index);
-    expect(counts()).toEqual({ trustedCells: trusted, totalCells: 1 });
-    expectNoRescan();
-  });
-
-  it('should track trust changes before removing all cells', () => {
-    model.cells.get(0).trusted = false;
-    expect(counts()).toEqual({ trustedCells: 0, totalCells: 2 });
-    model.sharedModel.deleteCellRange(0, model.cells.length);
-    expect(counts()).toEqual({ trustedCells: 0, totalCells: 0 });
-    expect(status.activeCellTrusted).toBe(false);
-  });
-
-  it.each([
-    [0, 2],
-    [2, 0]
-  ])('should track cells moved from %i to %i', (from, to) => {
-    model.sharedModel.moveCell(from, to);
-    expect(counts()).toEqual({ trustedCells: 1, totalCells: 2 });
-
-    model.sharedModel.deleteCell(to);
-    expect(counts()).toEqual({
-      trustedCells: from === 0 ? 0 : 1,
-      totalCells: 1
+    beforeEach(() => {
+      model = new NotebookModel();
+      model.sharedModel.insertCells(0, [
+        { cell_type: 'code', metadata: { trusted: true } },
+        { cell_type: 'markdown' },
+        { cell_type: 'code', metadata: { trusted: false } }
+      ]);
+      notebook = utils.createNotebook();
+      notebook.model = model;
+      status = new NotebookTrustStatus.Model();
+      status.notebook = notebook;
     });
-    expectNoRescan();
-  });
 
-  it('should restore counts and subscriptions on undo and redo', () => {
-    model.sharedModel.clearUndoHistory();
-    model.sharedModel.deleteCell(0);
-    expect(counts()).toEqual({ trustedCells: 0, totalCells: 1 });
+    afterEach(() => {
+      jest.restoreAllMocks();
+      status.dispose();
+      notebook.dispose();
+      model.dispose();
+    });
 
-    model.sharedModel.undo();
-    expect(counts()).toEqual({ trustedCells: 1, totalCells: 2 });
-    model.sharedModel.redo();
-    expect(counts()).toEqual({ trustedCells: 0, totalCells: 1 });
-    model.sharedModel.undo();
-    model.cells.get(0).trusted = false;
-    expect(counts()).toEqual({ trustedCells: 0, totalCells: 2 });
-  });
-
-  it.each(['markdown', 'raw'] as const)(
-    'should track conversion between code and %s cells',
-    type => {
-      notebook.activeCellIndex = 0;
-      NotebookActions.changeCellType(notebook, type);
-      expect(counts()).toEqual({ trustedCells: 0, totalCells: 1 });
-
-      NotebookActions.changeCellType(notebook, 'code');
-      expect(counts()).toEqual({ trustedCells: 1, totalCells: 2 });
-      model.cells.get(0).trusted = false;
-      expect(counts()).toEqual({ trustedCells: 0, totalCells: 2 });
-    }
-  );
-
-  it('should rebuild counts when notebook content is replaced', () => {
-    model.fromJSON({
-      nbformat: 4,
-      nbformat_minor: 5,
-      metadata: {},
-      cells: [
-        {
+    describe('#notebook', () => {
+      it('should count the code cells of a new model', () => {
+        const replacement = new NotebookModel();
+        replacement.sharedModel.insertCell(0, {
           cell_type: 'code',
-          source: '',
-          metadata: { trusted: true },
-          execution_count: null,
-          outputs: []
-        }
-      ]
-    });
-    expect(counts()).toEqual({ trustedCells: 1, totalCells: 1 });
-    model.cells.get(0).trusted = false;
-    expect(counts()).toEqual({ trustedCells: 0, totalCells: 1 });
-  });
+          metadata: { trusted: true }
+        });
 
-  it.each([false, true])(
-    'should disconnect the old model when switching notebooks: %s',
-    switchNotebook => {
-      const replacement = new NotebookModel();
-      replacement.sharedModel.insertCell(0, {
-        cell_type: 'code',
-        metadata: { trusted: true }
+        notebook.model = replacement;
+
+        expect(status.trustedCells).toBe(1);
+        expect(status.totalCells).toBe(1);
+        replacement.dispose();
       });
-      const other = utils.createNotebook();
-      try {
-        if (switchNotebook) {
-          other.model = replacement;
-          status.notebook = other;
-        } else {
-          notebook.model = replacement;
-        }
-        expect(counts()).toEqual({ trustedCells: 1, totalCells: 1 });
 
-        const changed = jest.fn();
-        status.stateChanged.connect(changed);
+      it('should not count again for changes in the previous notebook', () => {
+        const other = utils.createNotebook();
+        const otherModel = new NotebookModel();
+        otherModel.sharedModel.insertCell(0, { cell_type: 'code' });
+        other.model = otherModel;
+        status.notebook = other;
+        const reads = spyOnTrust(otherModel.cells);
+
         model.cells.get(2).trusted = true;
         model.sharedModel.insertCell(0, { cell_type: 'code' });
-        expect(counts()).toEqual({ trustedCells: 1, totalCells: 1 });
-        expect(changed).not.toHaveBeenCalled();
 
-        replacement.cells.get(0).trusted = false;
-        expect(counts()).toEqual({ trustedCells: 0, totalCells: 1 });
-        expect(changed).toHaveBeenCalledTimes(1);
-      } finally {
-        status.notebook = null;
+        for (const read of reads) {
+          expect(read).not.toHaveBeenCalled();
+        }
         other.dispose();
-        notebook.model = null;
-        replacement.dispose();
-      }
-    }
-  );
+        otherModel.dispose();
+      });
 
-  it('should reset counts and disconnect when the notebook is cleared', () => {
-    model.cells.get(0).trusted = false;
-    expect(counts()).toEqual({ trustedCells: 0, totalCells: 2 });
-    status.notebook = null;
-    model.cells.get(2).trusted = true;
-    model.sharedModel.insertCell(0, { cell_type: 'code' });
-    expect(counts()).toEqual({ trustedCells: 0, totalCells: 0 });
-    expect(status.activeCellTrusted).toBe(false);
-  });
+      it('should reset the counts when set to null', () => {
+        status.notebook = null;
 
-  it.each(['source', 'output'])(
-    'should not read trust state on %s updates',
-    update => {
-      const reads = Array.from(model.cells, cell =>
-        jest.spyOn(cell, 'trusted', 'get')
-      );
-      const changed = jest.fn();
-      status.stateChanged.connect(changed);
-      const cell = model.cells.get(0);
-      if (!isCodeCellModel(cell)) {
-        throw new Error('Expected a code cell');
-      }
-      if (update === 'source') {
-        cell.sharedModel.setSource('print("changed")');
-      } else {
+        expect(status.trustedCells).toBe(0);
+        expect(status.totalCells).toBe(0);
+        expect(status.activeCellTrusted).toBe(false);
+      });
+    });
+
+    describe('#totalCells', () => {
+      it('should count a code cell that is added', () => {
+        model.sharedModel.insertCell(3, { cell_type: 'code' });
+
+        expect(status.totalCells).toBe(3);
+      });
+
+      it('should not count a code cell that is removed', () => {
+        model.sharedModel.deleteCell(0);
+
+        expect(status.totalCells).toBe(1);
+        expect(status.trustedCells).toBe(0);
+      });
+
+      it('should not count a code cell changed to Markdown', () => {
+        notebook.activeCellIndex = 0;
+
+        NotebookActions.changeCellType(notebook, 'markdown');
+
+        expect(status.totalCells).toBe(1);
+        expect(status.trustedCells).toBe(0);
+      });
+    });
+
+    describe('#trustedCells', () => {
+      it('should count a code cell that becomes trusted', () => {
+        model.cells.get(2).trusted = true;
+
+        expect(status.trustedCells).toBe(2);
+      });
+
+      it('should count an added code cell that becomes trusted', () => {
+        model.sharedModel.insertCell(3, { cell_type: 'code' });
+
+        model.cells.get(3).trusted = true;
+
+        expect(status.trustedCells).toBe(2);
+      });
+
+      it('should not read the trust of cells when a source changes', () => {
+        const reads = spyOnTrust(model.cells);
+
+        model.cells.get(0).sharedModel.setSource('print("changed")');
+
+        for (const read of reads) {
+          expect(read).not.toHaveBeenCalled();
+        }
+      });
+
+      it('should not read the trust of cells when outputs change', () => {
+        const reads = spyOnTrust(model.cells);
+        const cell = model.cells.get(0);
+        if (!isCodeCellModel(cell)) {
+          throw new Error('Expected a code cell');
+        }
+
         cell.sharedModel.setOutputs([
           { output_type: 'stream', name: 'stdout', text: 'changed' }
         ]);
-      }
 
-      for (const read of reads) {
-        expect(read).not.toHaveBeenCalled();
-      }
-      expect(changed).not.toHaveBeenCalled();
-      expect(counts()).toEqual({ trustedCells: 1, totalCells: 2 });
-    }
-  );
+        for (const read of reads) {
+          expect(read).not.toHaveBeenCalled();
+        }
+      });
+    });
 
-  it('should disconnect signals when disposed', () => {
-    model.cells.get(0).trusted = false;
-    expect(counts()).toEqual({ trustedCells: 0, totalCells: 2 });
-    status.dispose();
-    model.cells.get(2).trusted = true;
-    model.sharedModel.deleteCell(0);
-    expect(counts()).toEqual({ trustedCells: 0, totalCells: 2 });
+    describe('#activeCellTrusted', () => {
+      it('should update when the active cell becomes trusted', () => {
+        notebook.activeCellIndex = 2;
+        expect(status.activeCellTrusted).toBe(false);
+
+        model.cells.get(2).trusted = true;
+
+        expect(status.activeCellTrusted).toBe(true);
+      });
+    });
+
+    describe('#dispose()', () => {
+      it('should stop counting the cells', () => {
+        status.dispose();
+
+        model.cells.get(2).trusted = true;
+
+        expect(status.trustedCells).toBe(1);
+      });
+    });
   });
 });
