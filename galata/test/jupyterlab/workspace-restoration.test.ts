@@ -70,7 +70,7 @@ for (const view of [
         filePath
       );
       await contents.uploadContent('Another tab', 'text', otherPath);
-      await contents.createDirectory(`${tmpPath}/different`);
+      await contents.createDirectory(`${tmpPath}/different/child`);
     });
 
     test('should keep the restored current view for the URL file', async ({
@@ -155,12 +155,40 @@ for (const view of [
           );
         }
 
+        const child = `${directory}/child`;
+        await page.sidebar.open('left');
+        if (browserPath) {
+          await page.evaluate(path => {
+            return window.jupyterapp.commands.execute(
+              'filebrowser:go-to-path',
+              {
+                path,
+                dontShowBrowser: true
+              }
+            );
+          }, directory);
+          await expect(page).toHaveURL(
+            url =>
+              url.pathname === `/lab/tree/${directory}` &&
+              !url.searchParams.has('file-browser-path')
+          );
+        }
+        expect(await page.filebrowser.openDirectory(child)).toBe(true);
+        await expect(page).toHaveURL(
+          url => url.pathname === `/lab/tree/${child}`
+        );
+        await page.reload();
+        await expect(page.locator('#filebrowser')).not.toHaveClass(
+          /jp-mod-restoring/
+        );
+        expect(await page.filebrowser.getCurrentDirectory()).toBe(child);
+
         await page.evaluate(async () => {
           await window.jupyterapp.commands.execute('launcher:create');
         });
         await expect(page.activity.getTabLocator()).toHaveText('Launcher');
         await expect(page).toHaveURL(
-          url => url.pathname === `/lab/tree/${browserPath || directory}`
+          url => url.pathname === `/lab/tree/${child}`
         );
       });
     }

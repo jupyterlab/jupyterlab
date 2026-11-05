@@ -160,7 +160,52 @@ for (const factory of ['Editor', 'Notebook']) {
           await page.waitForURL(previousURL);
           const historyLength = await page.evaluate(() => history.length);
 
-          await page.goto(`tree/${target}${fragment}`);
+          if (factory === 'Notebook') {
+            await page.addInitScript(() => {
+              Object.defineProperty(window, 'jupyterapp', {
+                configurable: true,
+                set(app: typeof window.jupyterapp) {
+                  Object.defineProperty(window, 'jupyterapp', {
+                    configurable: true,
+                    writable: true,
+                    value: app
+                  });
+                  const restoreLayout = app.shell.restoreLayout.bind(app.shell);
+                  const release = new Promise<void>(resolve => {
+                    window.addEventListener(
+                      'test:restore-layout',
+                      () => resolve(),
+                      {
+                        once: true
+                      }
+                    );
+                  });
+                  app.shell.restoreLayout = async (...args) => {
+                    await release;
+                    return restoreLayout(...args);
+                  };
+                  app.commands.commandExecuted.connect((_, { id, result }) => {
+                    if (id === 'router:tree') {
+                      void result.then(() => {
+                        document.documentElement.dataset.treeResolved = 'true';
+                      });
+                    }
+                  });
+                }
+              });
+            });
+            const navigation = page.goto(`tree/${target}${fragment}`);
+            await expect(page.locator('html')).toHaveAttribute(
+              'data-tree-resolved',
+              'true'
+            );
+            await page.evaluate(() => {
+              window.dispatchEvent(new Event('test:restore-layout'));
+            });
+            await navigation;
+          } else {
+            await page.goto(`tree/${target}${fragment}`);
+          }
           await expect(page.locator('#filebrowser')).not.toHaveClass(
             /jp-mod-restoring/
           );
@@ -171,6 +216,11 @@ for (const factory of ['Editor', 'Notebook']) {
             url =>
               url.pathname === `/lab/tree/${target}` && url.hash === fragment
           );
+          if (factory === 'Notebook') {
+            await expect(
+              page.locator('.jp-Cell[data-windowed-list-index="19"]')
+            ).toBeInViewport();
+          }
           expect(await page.evaluate(() => history.length)).toBe(
             historyLength + 1
           );
