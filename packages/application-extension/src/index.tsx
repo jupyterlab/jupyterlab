@@ -1679,14 +1679,19 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
 
           const query = URLExt.queryStringToObject(args.search ?? '');
           const browser = query['file-browser-path'] || '';
-
-          // Remove the file browser path from the query string.
-          delete query['file-browser-path'];
+          // A `+` stands for a space, as in `Markdown+Preview`. Replace it after
+          // decoding, because the redirect of a second tab to an `auto-`
+          // workspace encodes `+` as `%2B`.
+          const openWith = query['open-with']?.replace(/\+/g, ' ') || undefined;
 
           // Clean up artifacts immediately upon routing.
           set.dispose();
 
-          delegate.resolve({ browser, file: PageConfig.getOption('treePath') });
+          delegate.resolve({
+            browser,
+            file: PageConfig.getOption('treePath'),
+            openWith
+          });
         }
       })
     );

@@ -4,10 +4,11 @@
 import { LabShell, LayoutRestorer } from '@jupyterlab/application';
 import { StateDB } from '@jupyterlab/statedb';
 import { framePromise } from '@jupyterlab/testing';
+import { SidePanel } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import type { Message } from '@lumino/messaging';
 import type { DockPanel } from '@lumino/widgets';
-import { Widget } from '@lumino/widgets';
+import { AccordionPanel, SplitPanel, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 
 class ContentWidget extends Widget {
@@ -856,6 +857,23 @@ describe('LabShell', () => {
   });
 
   describe('#saveLayout', () => {
+    it.each([
+      ['', ''],
+      ['duplicate', 'duplicate']
+    ])('should omit ambiguous section identities for %j', (...ids) => {
+      const panel = new SidePanel({ content: new SplitPanel() });
+      panel.id = 'sidebar';
+      for (const id of ids) {
+        const section = new Widget();
+        section.id = id;
+        panel.addWidget(section);
+      }
+      shell.add(panel, 'left');
+      expect(
+        shell.saveLayout().leftArea?.widgetStates[panel.id]
+      ).not.toHaveProperty('widgetIds');
+    });
+
     it('should save the layout of the shell', () => {
       const foo = new Widget();
       foo.id = 'foo';
@@ -868,6 +886,258 @@ describe('LabShell', () => {
   });
 
   describe('#restoreLayout', () => {
+    const createPanel = (ids = ['a', 'b', 'c']) => {
+      const content = new AccordionPanel();
+      const panel = new SidePanel({ content });
+      panel.id = 'sidebar';
+      for (const id of ids) {
+        const widget = new Widget();
+        widget.id = id;
+        widget.title.label = id;
+        panel.addWidget(widget);
+      }
+      return { panel, content };
+    };
+
+    it.each(['left', 'right'] as const)(
+      'should restore section order, expansion and sizes in the %s sidebar',
+      async area => {
+        const state = new StateDB();
+        const createRestorer = () =>
+          new LayoutRestorer({
+            connector: state,
+            first: Promise.resolve<void>(void 0),
+            registry: new CommandRegistry()
+          });
+        const restorer = createRestorer();
+        const { panel, content } = createPanel();
+        restorer.add(panel, panel.id);
+        shell.add(panel, area);
+        shell.activateById(panel.id);
+        await restorer.restored;
+        content.insertWidget(0, content.widgets[2]);
+        content.collapse(0);
+        content.setRelativeSizes([0, 2, 3]);
+        const sizes = content.relativeSizes();
+        await restorer.save(shell.saveLayout());
+
+        const restoredShell = new LabShell();
+        Widget.attach(restoredShell, document.body);
+        try {
+          const restoredRestorer = createRestorer();
+          const restored = createPanel();
+          const restoreSizes = jest.spyOn(restored.content, 'setRelativeSizes');
+          restoredRestorer.add(restored.panel, restored.panel.id);
+          restoredShell.add(restored.panel, area);
+          await restoredShell.restoreLayout(
+            'multiple-document',
+            restoredRestorer
+          );
+
+          expect(restored.content.widgets.map(widget => widget.id)).toEqual([
+            'c',
+            'a',
+            'b'
+          ]);
+          expect(
+            restored.content.widgets.map(widget => widget.isHidden)
+          ).toEqual([true, false, false]);
+          expect(restoreSizes).toHaveBeenLastCalledWith(sizes);
+          expect(
+            Array.from(
+              restored.content.node.querySelectorAll(
+                '.lm-AccordionPanel-titleLabel'
+              )
+            ).map(node => node.textContent)
+          ).toEqual(['c', 'a', 'b']);
+        } finally {
+          restoredShell.dispose();
+        }
+      }
+    );
+
+    it.each([
+      { name: 'legacy layouts', widgetIds: undefined },
+      { name: 'missing and new sections', widgetIds: ['c', 'missing', 'a'] },
+      {
+        name: 'unrecognized generated IDs',
+        widgetIds: ['old-a', 'old-b', 'old-c']
+      }
+    ])('should restore section states for $name', async ({ widgetIds }) => {
+      const byId = widgetIds?.includes('c') ?? false;
+      const restorer = new LayoutRestorer({
+        connector: new StateDB(),
+        first: Promise.resolve<void>(void 0),
+        registry: new CommandRegistry()
+      });
+      const { panel, content } = createPanel(['a', 'new', 'c']);
+      restorer.add(panel, panel.id);
+      shell.add(panel, 'left');
+      shell.activateById(panel.id);
+      await restorer.restored;
+      const layout = shell.saveLayout();
+      await restorer.save({
+        ...layout,
+        leftArea: {
+          ...layout.leftArea!,
+          widgetStates: {
+            sidebar: {
+              sizes: [1, 2, 3],
+              expansionStates: [false, true, true],
+              ...(widgetIds ? { widgetIds } : {})
+            }
+          }
+        }
+      });
+      const newSize = content.relativeSizes()[1];
+      const restoreSizes = jest.spyOn(content, 'setRelativeSizes');
+      await shell.restoreLayout('multiple-document', restorer);
+
+      expect(content.widgets.map(widget => widget.id)).toEqual(
+        byId ? ['c', 'new', 'a'] : ['a', 'new', 'c']
+      );
+      expect(content.widgets.map(widget => widget.isHidden)).toEqual([
+        true,
+        false,
+        false
+      ]);
+      expect(restoreSizes).toHaveBeenLastCalledWith(
+        byId ? [1, newSize, 3] : [1, 2, 3]
+      );
+    });
+
+    it.each([
+      { name: 'an unchanged order', widgetIds: ['a', 'b', 'c'] },
+      { name: 'a new order', widgetIds: ['c', 'a', 'b'] }
+    ])(
+      'should keep each section title before its body when restoring $name',
+      async ({ widgetIds }) => {
+        const restorer = new LayoutRestorer({
+          connector: new StateDB(),
+          first: Promise.resolve<void>(void 0),
+          registry: new CommandRegistry()
+        });
+        const { panel, content } = createPanel();
+        restorer.add(panel, panel.id);
+        shell.add(panel, 'left');
+        shell.activateById(panel.id);
+        await restorer.restored;
+        const layout = shell.saveLayout();
+        await restorer.save({
+          ...layout,
+          leftArea: {
+            ...layout.leftArea!,
+            widgetStates: {
+              sidebar: { sizes: null, expansionStates: null, widgetIds }
+            }
+          }
+        });
+        await shell.restoreLayout('multiple-document', restorer);
+
+        const order = Array.from(content.node.children)
+          .filter(
+            node =>
+              node.classList.contains('lm-AccordionPanel-title') ||
+              node.getAttribute('role') === 'region'
+          )
+          .map(node =>
+            node.getAttribute('role') === 'region'
+              ? `body ${node.id}`
+              : `title ${node.getAttribute('aria-controls')}`
+          );
+        const expected: string[] = [];
+        for (const id of widgetIds) {
+          expected.push(`title ${id}`, `body ${id}`);
+        }
+        expect(order).toEqual(expected);
+      }
+    );
+
+    // Lumino gives a section without an explicit ID a new generated ID in
+    // every session.
+    const reload = async (
+      sections: { label: string; id?: string }[],
+      change: (content: AccordionPanel) => void
+    ) => {
+      const state = new StateDB();
+      const createRestorer = () =>
+        new LayoutRestorer({
+          connector: state,
+          first: Promise.resolve<void>(void 0),
+          registry: new CommandRegistry()
+        });
+      const createSections = () => {
+        const panel = new SidePanel();
+        panel.id = 'sidebar';
+        for (const { label, id } of sections) {
+          const widget = new Widget();
+          if (id) {
+            widget.id = id;
+          }
+          widget.title.label = label;
+          panel.addWidget(widget);
+        }
+        return { panel, content: panel.content as AccordionPanel };
+      };
+      const restorer = createRestorer();
+      const { panel, content } = createSections();
+      restorer.add(panel, panel.id);
+      shell.add(panel, 'left');
+      shell.activateById(panel.id);
+      await restorer.restored;
+      change(content);
+      await restorer.save(shell.saveLayout());
+
+      const restoredShell = new LabShell();
+      Widget.attach(restoredShell, document.body);
+      try {
+        const restored = createSections();
+        const restoredRestorer = createRestorer();
+        restoredRestorer.add(restored.panel, restored.panel.id);
+        restoredShell.add(restored.panel, 'left');
+        await restoredShell.restoreLayout(
+          'multiple-document',
+          restoredRestorer
+        );
+        return restored.content.widgets.map(widget => ({
+          label: widget.title.label,
+          collapsed: widget.isHidden
+        }));
+      } finally {
+        restoredShell.dispose();
+      }
+    };
+    const unnamed = [{ label: 'a' }, { label: 'b' }, { label: 'c' }];
+
+    it('should restore the order of sections without an explicit ID', async () => {
+      const restored = await reload(unnamed, content => {
+        content.insertWidget(0, content.widgets[2]);
+      });
+      expect(restored.map(section => section.label)).toEqual(['c', 'a', 'b']);
+    });
+
+    it('should restore the collapsed state of a moved section without an explicit ID', async () => {
+      const restored = await reload(unnamed, content => {
+        content.insertWidget(0, content.widgets[2]);
+        content.collapse(0);
+      });
+      expect(restored.find(section => section.label === 'c')).toEqual({
+        label: 'c',
+        collapsed: true
+      });
+    });
+
+    it('should restore the collapsed state of a section without an explicit ID next to sections with one', async () => {
+      const restored = await reload(
+        [{ label: 'a', id: 'a' }, { label: 'b' }, { label: 'c', id: 'c' }],
+        content => content.collapse(1)
+      );
+      expect(restored.find(section => section.label === 'b')).toEqual({
+        label: 'b',
+        collapsed: true
+      });
+    });
+
     it('should restore the layout of the shell', async () => {
       const restorer = new LayoutRestorer({
         connector: new StateDB(),

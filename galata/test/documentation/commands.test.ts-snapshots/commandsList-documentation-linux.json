@@ -917,6 +917,16 @@
     }
   },
   {
+    "id": "apputils:toggle-section-reordering",
+    "label": "Enable Section Reordering",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "apputils:update-notification",
     "label": "Update a notification",
     "caption": "Notification is described by {id: string, message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.",
@@ -2762,6 +2772,10 @@
         "dontShowBrowser": {
           "type": "boolean",
           "description": "Whether to avoid showing the file browser"
+        },
+        "factory": {
+          "type": "string",
+          "description": "The widget factory, file type, or file extension used to open a file"
         }
       }
     }

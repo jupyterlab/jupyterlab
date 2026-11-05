@@ -131,6 +131,10 @@ semicolon-separated values:
 While tab-separated value files can be read by the grid viewer, it currently does not automatically recognize `.tsv` files.
 To view, you must change the extension to `.csv` and set the delimiter to tabs.
 
+To open every CSV file with another delimiter, such as a semicolon, change **Default delimiter**
+in the CSV Viewer settings (_Settings > Settings Editor > CSV Viewer_). The delimiter
+selector in the viewer toolbar still changes the delimiter of an open file.
+
 (edit-csv)=
 
 To edit a CSV file as a text file, right-click on the file in the file
