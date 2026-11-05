@@ -715,8 +715,13 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       }
     };
 
+    // For a cell without headings, `getCellHeadings` returns the headings of
+    // the section the cell is in, which belong to another cell.
+    const getOwnHeadings = (cell: Cell) =>
+      model.getCellHeadings(cell).filter(heading => heading.cellRef === cell);
+
     const findHeadingElement = async (cell: Cell): Promise<void> => {
-      const headings = model.getCellHeadings(cell);
+      const headings = getOwnHeadings(cell);
       const attribute =
         (this.sanitizer.allowNamedProperties ?? false)
           ? 'id'
@@ -734,7 +739,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
         })
       );
 
-      const current = model.getCellHeadings(cell);
+      const current = getOwnHeadings(cell);
       if (
         current.length !== headings.length ||
         current.some((heading, i) => heading !== headings[i])

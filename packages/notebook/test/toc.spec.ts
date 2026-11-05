@@ -265,25 +265,33 @@ describe('@jupyterlab/notebook', () => {
       expect(numbering()).toHaveLength(1);
     });
 
-    it('keeps identical headings in a cell apart when it is rendered again', async () => {
+    it('maps identical headings of a cell to their own elements', async () => {
+      const expectScrollToSecondHeading = async () => {
+        const [first, second] = Array.from(
+          cell.node.querySelectorAll<HTMLElement>('h1')
+        );
+        first.scrollIntoView = jest.fn();
+        second.scrollIntoView = jest.fn();
+        model.setActiveHeading(model.headings[1]);
+        await new Promise(resolve => setTimeout(resolve, 0));
+        expect(first.scrollIntoView).not.toHaveBeenCalled();
+        expect(second.scrollIntoView).toHaveBeenCalledWith({ block: 'start' });
+      };
+
+      // The headings of a cell without headings are those of its section
+      panel.model!.sharedModel.insertCells(1, [
+        { cell_type: 'markdown', source: 'text' }
+      ]);
       await renderAgain('# heading\n\n# heading');
       await model.refresh();
       await waitFor(() => numbering().length === 2);
+      expect(model.headings).toHaveLength(2);
+      await expectScrollToSecondHeading();
 
       // Without changes, the cell keeps its elements and their numbering
       await renderAgain();
       await new Promise(resolve => setTimeout(resolve, 0));
-
-      const [first, second] = Array.from(
-        cell.node.querySelectorAll<HTMLElement>('h1')
-      );
-      first.scrollIntoView = jest.fn();
-      second.scrollIntoView = jest.fn();
-      model.setActiveHeading(model.headings[1]);
-      await new Promise(resolve => setTimeout(resolve, 0));
-
-      expect(first.scrollIntoView).not.toHaveBeenCalled();
-      expect(second.scrollIntoView).toHaveBeenCalledWith({ block: 'start' });
+      await expectScrollToSecondHeading();
     });
   });
 });
