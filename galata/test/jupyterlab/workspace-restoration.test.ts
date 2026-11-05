@@ -72,6 +72,11 @@ for (const view of [
         filePath
       );
       await contents.uploadContent('Another tab', 'text', otherPath);
+      await contents.uploadContent(
+        'Linked tab',
+        'text',
+        `${tmpPath}/target.txt`
+      );
       await contents.createDirectory(`${tmpPath}/different/child`);
     });
 
@@ -238,46 +243,58 @@ for (const view of [
       });
     }
 
-    test('should update the URL when a tab is selected while a directory link loads', async ({
-      page
-    }) => {
-      const directory = `${tmpPath}/different`;
-      const isListing = (url: URL) =>
-        url.pathname.endsWith(`/api/contents/${directory}`) &&
-        url.searchParams.get('content') === '1';
-      let finishListing: () => void;
-      const listing = new Promise<void>(resolve => {
-        finishListing = resolve;
-      });
-      await page.route(isListing, async route => {
-        await listing;
-        await route.fallback();
-      });
+    for (const link of ['directory', 'file']) {
+      test(`should update the URL when a tab is selected while a ${link} link loads its folder`, async ({
+        page
+      }) => {
+        const directory = `${tmpPath}/different`;
+        const url =
+          link === 'directory'
+            ? `tree/${directory}`
+            : `tree/${tmpPath}/target.txt?file-browser-path=${directory}`;
+        const isListing = (url: URL) =>
+          url.pathname.endsWith(`/api/contents/${directory}`) &&
+          url.searchParams.get('content') === '1';
+        let finishListing: () => void;
+        const listing = new Promise<void>(resolve => {
+          finishListing = resolve;
+        });
+        await page.route(isListing, async route => {
+          await listing;
+          await route.fallback();
+        });
 
-      try {
-        await Promise.all([
-          page.waitForRequest(request => isListing(new URL(request.url()))),
-          page.goto(`tree/${directory}`)
-        ]);
-        await expect(page.locator('#filebrowser')).toHaveClass(
+        try {
+          await Promise.all([
+            page.waitForRequest(request => isListing(new URL(request.url()))),
+            page.goto(url)
+          ]);
+          await expect(page.locator('#filebrowser')).toHaveClass(
+            /jp-mod-restoring/
+          );
+          if (link === 'file') {
+            await expect(page.activity.getTabLocator()).toHaveText(
+              'target.txt'
+            );
+          }
+          await page.activity.getTabLocator('other.txt').click();
+          await expect(page.activity.getTabLocator()).toHaveText('other.txt');
+        } finally {
+          finishListing!();
+        }
+
+        await expect(page.locator('#filebrowser')).not.toHaveClass(
           /jp-mod-restoring/
         );
-        await page.activity.getTabLocator('other.txt').click();
-        await expect(page.activity.getTabLocator()).toHaveText('other.txt');
-      } finally {
-        finishListing!();
-      }
-
-      await expect(page.locator('#filebrowser')).not.toHaveClass(
-        /jp-mod-restoring/
-      );
-      await expect(page).toHaveURL(
-        url => url.pathname === `/lab/tree/${otherPath}`
-      );
-    });
+        await expect(page).toHaveURL(
+          url => url.pathname === `/lab/tree/${otherPath}`
+        );
+      });
+    }
 
     for (const selection of [
       'another tab',
+      'another tab with the requested view already selected',
       'another tab after closing the restored view',
       'an extension widget'
     ]) {
@@ -297,7 +314,11 @@ for (const view of [
         });
 
         try {
-          await page.goto(`tree/${filePath}`);
+          const query =
+            selection === 'another tab with the requested view already selected'
+              ? `?open-with=${encodeURIComponent(view.factory)}`
+              : '';
+          await page.goto(`tree/${filePath}${query}`);
           await expect(page.locator('#filebrowser')).toHaveClass(
             /jp-mod-restoring/
           );
@@ -341,6 +362,20 @@ for (const view of [
         );
       });
     }
+
+    test('should activate a different requested view of the restored file', async ({
+      page
+    }) => {
+      await page.goto(`tree/${filePath}?open-with=${view.defaultFactory}`);
+      await expect(page.locator('#filebrowser')).not.toHaveClass(
+        /jp-mod-restoring/
+      );
+      await expect(
+        page
+          .getByRole('tabpanel', { name: view.file, includeHidden: true })
+          .locator(view.defaultSelector)
+      ).toBeVisible();
+    });
 
     test('should activate a different URL file even if it is already open', async ({
       page
