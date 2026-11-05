@@ -113,7 +113,10 @@ function activate(
             }
           })
           .catch(error => {
-            void showErrorMessage(trans.__('Path Not Found'), error);
+            if (error?.response?.status === 404) {
+              error.message = trans.__('Could not find path: %1', path);
+            }
+            void showErrorMessage(trans.__('Cannot open'), error);
           });
       },
       describedBy: {

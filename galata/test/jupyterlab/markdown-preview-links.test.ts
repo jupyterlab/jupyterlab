@@ -80,8 +80,9 @@ test.describe('Local links', () => {
 
     const dialog = page.locator('.jp-Dialog');
     await expect(dialog).toBeVisible();
-    await expect(dialog.locator('.jp-Dialog-header')).toHaveText(
-      'Path Not Found'
+    await expect(dialog.locator('.jp-Dialog-header')).toHaveText('Cannot open');
+    await expect(dialog.locator('.jp-Dialog-body')).toHaveText(
+      `Could not find path: ${tmpPath}/missing-file.txt`
     );
   });
 });
