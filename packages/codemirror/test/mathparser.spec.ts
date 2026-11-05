@@ -463,6 +463,12 @@ describe('markdown parser', () => {
     expect(tree.topNode.firstChild?.name).toBe('Table');
   });
 
+  it('should keep a table with $$ in a cell when GFM is configured last', () => {
+    const gfmParser = parser.configure([parseMathIPython(), GFM]);
+    const tree = gfmParser.parse('Level | $$\n--- | ---\na | b');
+    expect(tree.topNode.firstChild?.name).toBe('Table');
+  });
+
   it('should reparse a list item ending with $$ math as from scratch', () => {
     // TreeFragment.applyChanges drops unchanged ranges under 128 characters.
     const doc = [
