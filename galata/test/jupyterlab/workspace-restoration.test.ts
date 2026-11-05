@@ -11,6 +11,7 @@ for (const view of [
     namespace: 'editor',
     defaultFactory: 'Notebook',
     defaultNamespace: 'notebook',
+    defaultSelector: '.jp-Notebook',
     selector: '.jp-FileEditor'
   },
   {
@@ -19,6 +20,7 @@ for (const view of [
     namespace: 'markdownviewer-widget',
     defaultFactory: 'Editor',
     defaultNamespace: 'editor',
+    defaultSelector: '.jp-FileEditor',
     selector: '.jp-MarkdownViewer'
   }
 ]) {
@@ -127,6 +129,49 @@ for (const view of [
       );
     });
 
+    test('should keep the selected view after leaving the URL viewer', async ({
+      page
+    }) => {
+      await page.goto(
+        `tree/${filePath}?open-with=${encodeURIComponent(view.factory)}`
+      );
+      await expect(page.locator('#filebrowser')).not.toHaveClass(
+        /jp-mod-restoring/
+      );
+      await expect(page).toHaveURL(
+        url => url.searchParams.get('open-with') === view.factory
+      );
+
+      const defaultContent = page
+        .getByRole('tabpanel', { name: view.file, includeHidden: true })
+        .locator(view.defaultSelector);
+      const id = await defaultContent.evaluate(
+        node => node.closest('.jp-MainAreaWidget')!.id
+      );
+      const saved = page.waitForResponse(
+        response =>
+          new URL(response.url()).pathname.includes('/api/workspaces/') &&
+          response.request().method() === 'PUT' &&
+          !!response
+            .request()
+            .postData()
+            ?.includes(`"current":"${defaultView}"`)
+      );
+      await page.activity
+        .getTabLocator(view.file)
+        .and(page.locator(`[data-id="${id}"]`))
+        .click();
+      await expect(defaultContent).toBeVisible();
+      await saved;
+
+      await page.reload();
+      await expect(page.locator('#filebrowser')).not.toHaveClass(
+        /jp-mod-restoring/
+      );
+      await expect(defaultContent).toBeVisible();
+      await expect(page).toHaveURL(url => !url.searchParams.has('open-with'));
+    });
+
     for (const browserPath of ['', tmpPath]) {
       test(`should preserve a directory URL with browser override ${browserPath || 'unset'}`, async ({
         page
@@ -192,6 +237,44 @@ for (const view of [
         );
       });
     }
+
+    test('should update the URL when a tab is selected while a directory link loads', async ({
+      page
+    }) => {
+      const directory = `${tmpPath}/different`;
+      const isListing = (url: URL) =>
+        url.pathname.endsWith(`/api/contents/${directory}`) &&
+        url.searchParams.get('content') === '1';
+      let finishListing: () => void;
+      const listing = new Promise<void>(resolve => {
+        finishListing = resolve;
+      });
+      await page.route(isListing, async route => {
+        await listing;
+        await route.fallback();
+      });
+
+      try {
+        await Promise.all([
+          page.waitForRequest(request => isListing(new URL(request.url()))),
+          page.goto(`tree/${directory}`)
+        ]);
+        await expect(page.locator('#filebrowser')).toHaveClass(
+          /jp-mod-restoring/
+        );
+        await page.activity.getTabLocator('other.txt').click();
+        await expect(page.activity.getTabLocator()).toHaveText('other.txt');
+      } finally {
+        finishListing!();
+      }
+
+      await expect(page.locator('#filebrowser')).not.toHaveClass(
+        /jp-mod-restoring/
+      );
+      await expect(page).toHaveURL(
+        url => url.pathname === `/lab/tree/${otherPath}`
+      );
+    });
 
     for (const selection of [
       'another tab',
