@@ -303,6 +303,57 @@ describe('@jupyterlab/application', () => {
       expect(commands.isToggled(id)).toEqual(expected);
     });
 
+    it('should check isVisible of every command when args hold a widget id', () => {
+      const notebookWidget = new Widget();
+      notebookWidget.id = 'notebook';
+
+      semanticCommands.add({
+        id: 'cmd-1',
+        isEnabled: (w: Widget) => w === notebookWidget
+      });
+      commands.addCommand('cmd-1', {
+        execute: () => null,
+        isVisible: (args: any) => args?.widgetId === notebookWidget.id
+      });
+      addSemanticCommand({ id, commands, shell, semanticCommands });
+
+      // Without a widget id, cmd-1 is not active for the current widget
+      expect(commands.isVisible(id)).toBe(true);
+      expect(commands.isVisible(id, { widgetId: notebookWidget.id })).toBe(
+        true
+      );
+      expect(commands.isVisible(id, { widgetId: 'other-widget' })).toBe(false);
+    });
+
+    it('should pass args to isEnabled of the active command', () => {
+      // Simulates a command that becomes disabled when a notebook is read-only.
+      commands.addCommand('cmd-1', {
+        execute: () => null,
+        isEnabled: (args: any) => !args?.viewOnly
+      });
+      semanticCommands.add({ id: 'cmd-1' });
+      addSemanticCommand({ id, commands, shell, semanticCommands });
+
+      expect(commands.isEnabled(id, { viewOnly: false })).toBe(true);
+      expect(commands.isEnabled(id, { viewOnly: true })).toBe(false);
+    });
+
+    it('should pass args to the caption of the active command', () => {
+      // Simulates a caption that counts the cells selected in the notebook
+      // given by the toolbar arguments.
+      commands.addCommand('cmd-1', {
+        execute: () => null,
+        caption: (args: any) =>
+          args?.selected === 2 ? 'Run these 2 cells' : 'Run this cell'
+      });
+      semanticCommands.add({ id: 'cmd-1' });
+      addSemanticCommand({ id, commands, shell, semanticCommands });
+
+      expect(commands.caption(id, { selected: 2 })).toEqual(
+        'Run these 2 cells'
+      );
+    });
+
     it.each([
       [[true, false], false, false],
       [[true, false], true, true],

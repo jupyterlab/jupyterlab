@@ -220,6 +220,40 @@ export default plugin;
 ></div>
 ```
 
+(command-state)=
+
+### Update the State of a Command
+
+A toolbar button calls the `isEnabled`, `isVisible`, `isToggled` and `label` functions of its command when it renders.
+It renders again only when the command registry emits `commandChanged` for the command, so call `notifyCommandChanged` with the command ID whenever one of these functions can return a different value.
+
+Most often, these functions read the current widget.
+For example, an extension adds a side panel with a button that exports the current notebook.
+The command is enabled only when a notebook is the current widget:
+
+```typescript
+app.commands.addCommand(commandID, {
+  label: 'Export Notebook',
+  isEnabled: () =>
+    tracker.currentWidget !== null &&
+    tracker.currentWidget === app.shell.currentWidget,
+  execute: () => {
+    // Export tracker.currentWidget
+  }
+});
+
+app.shell.currentChanged?.connect(() => {
+  app.commands.notifyCommandChanged(commandID);
+});
+```
+
+Here `tracker` is the {ts:interface}`notebook.INotebookTracker` token.
+Without the `currentChanged` handler, the button keeps the state it had when it was last rendered: if no notebook was open when the side panel was created, the button stays greyed out after the user opens one.
+When the current widget changes, JupyterLab notifies its own commands only.
+It notifies all commands when a notebook becomes view-only or editable, so a command that also depends on the view-only state of the current notebook needs no other handler.
+
+Pass the command ID to `notifyCommandChanged`: without an ID it notifies every command, and every command button in the application renders again.
+
 (context-menu)=
 
 ## Context Menu
@@ -539,6 +573,37 @@ The recommended ranges for this rank are:
 - 900: The default rank if none is specified.
 - 1000: The JupyterLab extension manager.
 
+(reordering-sections)=
+
+#### Reordering accordion sections
+
+Users can reorder the sections of a {ts:class}`ui-components.SidePanel` after
+they select **Enable Section Reordering** in the context menu of a section
+header. The workspace saves the order, the collapsed state and the size of each
+section with the section ID. The shell applies them to the sections that the
+panel has when the layout is restored, so add the sections when your plugin
+activates. Give each section an explicit ID that is unique in the page and the
+same in every session:
+
+```typescript
+const panel = new SidePanel();
+panel.id = 'my-extension-panel';
+
+const settings = new Widget();
+settings.id = 'my-extension-panel-settings';
+settings.title.label = 'Settings';
+panel.addWidget(settings);
+
+app.shell.add(panel, 'left');
+```
+
+A section without an explicit ID gets a new generated ID in every session, so
+the workspace saves its title label instead. The section then keeps its place
+and state only while its label is unique in the panel and the same in every
+session. A translated label changes with the display language, so the first
+reload after a language change shows the panel in its original order and can
+apply the saved collapsed states and sizes to the wrong sections.
+
 #### Movable accordion sections
 
 Sidebar panels can participate in the movable-sections system so users can
@@ -829,7 +894,7 @@ function activatePlugin(
 
     if (settingRegistry) {
       // Create the factory
-      toolbarFactory = createToolbarFactory(
+      const panelToolbarFactory = createToolbarFactory(
         toolbarRegistry,
         settingRegistry,
         // Factory name
@@ -838,6 +903,11 @@ function activatePlugin(
         '@jupyterlab/notebook-extension:panel',
         translator
       );
+      // Pass the panel id so that the buttons act on their own notebook
+      toolbarFactory = (panel: NotebookPanel) =>
+        panelToolbarFactory(panel, {
+          [ToolbarRegistry.WIDGET_ID_ARG]: panel.id
+        });
     }
   }
 
@@ -856,6 +926,34 @@ function activatePlugin(
 The registry `addFactory` method allows an extension to provide special widget for a unique pair
 (factory name, toolbar item name). Then the helper `createToolbarFactory` can be used to extract the
 toolbar definition from the settings and build the factory to pass to the widget factory.
+
+The factory returned by {ts:function}`apputils.createToolbarFactory` takes optional command arguments as its second parameter. It adds them to the arguments of every command item, and the `args` set by an item take precedence over them. The notebook panel toolbar and the cell toolbar pass the id of the notebook panel this way, under the {ts:variable}`apputils.ToolbarRegistry.WIDGET_ID_ARG` key. In a split view, a button can belong to a notebook that does not have the focus. A command placed in these toolbars should therefore find its notebook from that argument, both to act on it and to compute its state. In this example, `tracker` is the {ts:interface}`notebook.INotebookTracker`:
+
+```typescript
+// The notebook of the toolbar button, or the current notebook when the
+// command runs from a menu, the command palette or a keyboard shortcut
+function getNotebook(args: ReadonlyPartialJSONObject): NotebookPanel | null {
+  const widgetId = args[ToolbarRegistry.WIDGET_ID_ARG];
+  if (widgetId) {
+    return tracker.find(panel => panel.id === widgetId) ?? null;
+  }
+  return tracker.currentWidget;
+}
+
+app.commands.addCommand('my-extension:clear-outputs', {
+  label: 'Clear All Outputs',
+  isEnabled: args => {
+    const notebook = getNotebook(args);
+    return notebook !== null && !notebook.viewOnly;
+  },
+  execute: args => {
+    const notebook = getNotebook(args);
+    if (notebook) {
+      NotebookActions.clearAllOutputs(notebook.content);
+    }
+  }
+});
+```
 
 The default toolbar items can be defined across multiple extensions by providing an entry in the `"jupyter.lab.toolbars"`
 mapping. For example for the notebook panel:
@@ -1005,6 +1103,8 @@ which are then provided as tokens so that other extensions may request them.
 For instance, if you want to interact with notebooks, you should request the {ts:interface}`notebook.INotebookTracker` token.
 You can then use this tracker to iterate over, filter, and search all open notebooks.
 You can also use it to be notified via signals when notebooks are added and removed from the tracker.
+Its `currentWidget` is the most recently focused notebook, and its `currentChanged` signal fires when a different notebook becomes current.
+A command that reads `currentWidget` needs a `currentChanged` handler that notifies the command registry, as described in {ref}`command-state`.
 
 Widget tracker tokens are provided for many activities in JupyterLab, including
 notebooks, consoles, text files, mime documents, and terminals.

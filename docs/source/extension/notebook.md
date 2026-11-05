@@ -227,6 +227,8 @@ following JSON snippet in your extension settings file:
 
 You may add a `rank` attribute to modify the item position (the default value is 50).
 
+The button renders the state of its command again only when the command registry is notified about the command (see {ref}`command-state`).
+
 ### Adding a widget to the notebook header
 
 Start from the extension template.

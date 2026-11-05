@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig } from '@jupyterlab/coreutils';
-import { JupyterServer, testEmission } from '@jupyterlab/testing';
+import { JupyterServer, sleep, testEmission } from '@jupyterlab/testing';
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
 import type WebSocket from 'ws';
 import type { Kernel, KernelManager, KernelSpec } from '../../src';
@@ -790,6 +790,62 @@ describe('Kernel.IKernel', () => {
         await restart;
         await tester.waitForRequestType('execute_request');
         expect(tester.requestOrder.slice(0, 2)).toEqual([
+          'kernel_info_request',
+          'execute_request'
+        ]);
+      } finally {
+        future?.dispose();
+        await tester.shutdown();
+        tester.dispose();
+      }
+    });
+
+    it('should send messages to the restarted kernel when the restart starts while connecting', async () => {
+      const tester = new RequestOrderKernelTester();
+      const kernel = await tester.start();
+      let future:
+        | Kernel.IShellFuture<
+            KernelMessage.IExecuteRequestMsg,
+            KernelMessage.IExecuteReplyMsg
+          >
+        | undefined;
+
+      try {
+        tester.requestOrder = [];
+
+        const restartResponse = new PromiseDelegate<Response>();
+        const oldFetch = tester.serverSettings.fetch;
+        (tester.serverSettings as any).fetch = () => {
+          (tester.serverSettings as any).fetch = oldFetch;
+          return restartResponse.promise;
+        };
+
+        const oldKernelIdle = testEmission(kernel.anyMessage, {
+          find: (_, args) =>
+            args.direction === 'recv' &&
+            KernelMessage.isStatusMsg(args.msg) &&
+            args.msg.content.execution_state === 'idle'
+        });
+
+        // The websocket opens while the restart request is still pending, so
+        // the old kernel answers the kernel info request.
+        const connected = kernel.reconnect();
+        const restart = kernel.restart();
+        await connected;
+        await oldKernelIdle;
+        await sleep();
+
+        future = kernel.requestExecute({ code: 'foo' });
+
+        restartResponse.resolve(
+          new Response(JSON.stringify({ id: kernel.id, name: kernel.name }), {
+            status: 200
+          })
+        );
+        await restart;
+        await tester.waitForRequestType('execute_request');
+        expect(tester.requestOrder).toEqual([
+          'kernel_info_request',
           'kernel_info_request',
           'execute_request'
         ]);
