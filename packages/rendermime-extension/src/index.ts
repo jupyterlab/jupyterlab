@@ -11,7 +11,7 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ISanitizer } from '@jupyterlab/apputils';
+import { ISanitizer, showErrorMessage } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import type { IRenderMime } from '@jupyterlab/rendermime';
 import {
@@ -111,6 +111,9 @@ function activate(
             if (widget && id) {
               widget.setFragment(id);
             }
+          })
+          .catch(error => {
+            void showErrorMessage(trans.__('Path Not Found'), error);
           });
       },
       describedBy: {
