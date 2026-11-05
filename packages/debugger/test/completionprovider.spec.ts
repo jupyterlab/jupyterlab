@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { ICompletionContext } from '@jupyterlab/completer';
+import { CompletionTriggerKind } from '@jupyterlab/completer';
 import type { IDebugger } from '../src/tokens';
 import { Widget } from '@lumino/widgets';
 import { DebuggerCompletionProvider } from '../src/completionprovider';
@@ -143,15 +144,15 @@ describe('DebuggerCompletionProvider', () => {
       ).toBe(false);
     });
 
-    it('should return true for the default "." trigger character', () => {
+    it('should wait for explicit invocation after a dot in the Debug Console', () => {
       expect(
         provider.shouldShowContinuousHint(false, {
           sourceChange: [{ insert: '.' }]
         })
-      ).toBe(true);
+      ).toBe(false);
     });
 
-    it('should honour trigger characters declared by the adapter', () => {
+    it('should wait for explicit invocation even if the adapter declares triggers', () => {
       const custom = new DebuggerCompletionProvider({
         debuggerService: mockService({
           session: mockSession({ completionTriggerCharacters: ['['] })
@@ -162,8 +163,7 @@ describe('DebuggerCompletionProvider', () => {
         custom.shouldShowContinuousHint(false, {
           sourceChange: [{ insert: '[' }]
         })
-      ).toBe(true);
-      // The default "." does not apply when the adapter declares its own.
+      ).toBe(false);
       expect(
         custom.shouldShowContinuousHint(false, {
           sourceChange: [{ insert: '.' }]
@@ -193,6 +193,34 @@ describe('DebuggerCompletionProvider', () => {
   });
 
   describe('#fetch()', () => {
+    it('should skip automatic requests that could evaluate an attribute', async () => {
+      const sendRequest = jest.fn().mockResolvedValue({
+        success: true,
+        body: { targets: [{ label: 'upper' }] }
+      });
+      const provider = new DebuggerCompletionProvider({
+        debuggerService: mockService({
+          frame: { id: 1 },
+          session: mockSession({ sendRequest })
+        })
+      });
+      const request = { text: 'report.result.', offset: 14 };
+      const automatic = await provider.fetch(
+        request,
+        context,
+        CompletionTriggerKind.TriggerCharacter
+      );
+      expect(automatic.items).toEqual([]);
+      expect(sendRequest).not.toHaveBeenCalled();
+
+      const explicit = await provider.fetch(
+        request,
+        context,
+        CompletionTriggerKind.Invoked
+      );
+      expect(explicit.items.map(item => item.label)).toEqual(['upper']);
+    });
+
     it('should return an empty reply when there is no session', async () => {
       const provider = new DebuggerCompletionProvider({
         debuggerService: mockService()

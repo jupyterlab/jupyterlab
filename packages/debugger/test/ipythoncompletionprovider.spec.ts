@@ -237,15 +237,15 @@ describe('DebuggerIPythonCompletionProvider', () => {
       }
     );
 
-    it('should return true for the default "." DAP trigger character', () => {
+    it('should not trigger a request when typing a dot', () => {
       expect(
         provider.shouldShowContinuousHint(false, {
           sourceChange: [{ insert: '.' }]
         })
-      ).toBe(true);
+      ).toBe(false);
     });
 
-    it('should combine adapter trigger characters with quotes', () => {
+    it('should trigger on quotes and ignore adapter trigger characters', () => {
       const custom = new DebuggerIPythonCompletionProvider({
         debuggerService: mockService({
           session: mockSession({ completionTriggerCharacters: ['['] })
@@ -256,13 +256,12 @@ describe('DebuggerIPythonCompletionProvider', () => {
         custom.shouldShowContinuousHint(false, {
           sourceChange: [{ insert: '[' }]
         })
-      ).toBe(true);
+      ).toBe(false);
       expect(
         custom.shouldShowContinuousHint(false, {
           sourceChange: [{ insert: "'" }]
         })
       ).toBe(true);
-      // The default "." does not apply when the adapter declares its own.
       expect(
         custom.shouldShowContinuousHint(false, {
           sourceChange: [{ insert: '.' }]

@@ -139,6 +139,26 @@ describe('Debugger completion providers integration test', () => {
       expect(await provider().isApplicable(context)).toBe(true);
     });
 
+    it('should complete keys when a frame variable shadows locals', async () => {
+      const evaluate = (expression: string) =>
+        session.sendRequest('evaluate', {
+          expression,
+          frameId: service.model.callstack.frame?.id,
+          context: 'repl'
+        });
+      await evaluate("locals = {'alpha': 1}");
+      try {
+        const text = "locals['al";
+        const reply = await provider().fetch(
+          { text, offset: text.length },
+          context
+        );
+        expect(reply.items.map(item => item.label)).toContain('alpha');
+      } finally {
+        await evaluate('del locals');
+      }
+    });
+
     it('should complete dictionary keys', async () => {
       const reply = await provider().fetch(
         { text: "data['", offset: 6 },
