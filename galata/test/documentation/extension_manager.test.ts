@@ -105,6 +105,36 @@ test.describe('Extension Manager', () => {
     ).toMatchSnapshot('extensions_search.png');
   });
 
+  test('Retry language pack search after PyPI is unavailable', async ({
+    page
+  }) => {
+    await page.route(galata.Routes.extensions, route => {
+      const { searchParams } = new URL(route.request().url());
+      if (searchParams.has('query') && searchParams.get('refresh') !== '1') {
+        return route.fulfill({
+          status: 503,
+          json: { message: 'PyPI is temporarily unavailable.' }
+        });
+      }
+      return route.fallback();
+    });
+
+    await page.goto();
+    await page.sidebar.openTab('extensionmanager.main-view');
+    const sidebar = page.locator('.jp-extensionmanager-view');
+    await sidebar.getByRole('button', { name: 'Yes', exact: true }).click();
+    await expect(
+      sidebar.getByText(/PyPI is temporarily unavailable/)
+    ).toBeVisible();
+
+    await sidebar
+      .getByRole('button', { name: 'Refresh extensions list' })
+      .click();
+    await expect(
+      sidebar.getByRole('link', { name: 'jupyterlab-language-pack-fr-FR' })
+    ).toBeVisible();
+  });
+
   test('Update button', async ({ page }) => {
     await page.goto();
     await openExtensionSidebar(page);

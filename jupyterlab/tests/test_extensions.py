@@ -413,11 +413,12 @@ async def test_ExtensionManager_uninstall():
 )
 async def test_pypi_language_pack_pagination_skips_unavailable_packs(monkeypatch):
     manager = PyPIExtensionManager()
+    unavailable = True
 
     async def get(url, *, headers):
         if url.endswith("/jupyterlab-language-pack-et-EE/json"):
             return httpx2.Response(404)
-        if url.endswith("/jupyterlab-language-pack-ja-JP/json"):
+        if unavailable and url.endswith("/jupyterlab-language-pack-ja-JP/json"):
             raise httpx2.ConnectError("Connection refused")
         return httpx2.Response(
             200,
@@ -447,6 +448,35 @@ async def test_pypi_language_pack_pagination_skips_unavailable_packs(monkeypatch
     second_page, pages_count = await manager.list_extensions("", page=2, per_page=1)
     assert [pack.name for pack in second_page] == ["jupyterlab-language-pack-fr-FR"]
     assert pages_count == 2
+
+    unavailable = False
+    _, pages_count = await manager.list_extensions("", per_page=1)
+    assert pages_count == 3
+
+
+@pytest.mark.parametrize(
+    "failure",
+    (
+        httpx2.ConnectError("Connection refused"),
+        httpx2.Response(503, request=httpx2.Request("GET", "https://pypi.org/pypi")),
+    ),
+)
+@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ("jupyterlab-language-pack-fr-FR",))
+async def test_pypi_language_pack_search_recovers(monkeypatch, failure):
+    manager = PyPIExtensionManager()
+    get = AsyncMock(
+        side_effect=[failure, httpx2.Response(200, json={"info": {"version": "1.0.0"}})]
+    )
+    monkeypatch.setattr(manager._httpx_client, "get", get)
+
+    with pytest.raises(web.HTTPError) as error:
+        await manager.list_extensions("fr-FR")
+    assert error.value.status_code == 503
+
+    packs, _ = await manager.list_extensions("fr-FR")
+    assert [pack.name for pack in packs] == ["jupyterlab-language-pack-fr-FR"]
+    await manager.list_extensions("fr-FR")
+    assert get.await_count == 2
 
 
 async def test_PyPiExtensionManager_custom_server_url():
