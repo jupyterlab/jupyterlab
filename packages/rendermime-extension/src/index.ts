@@ -11,7 +11,7 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ISanitizer } from '@jupyterlab/apputils';
+import { ISanitizer, showErrorMessage } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import type { IRenderMime } from '@jupyterlab/rendermime';
 import {
@@ -111,6 +111,12 @@ function activate(
             if (widget && id) {
               widget.setFragment(id);
             }
+          })
+          .catch(error => {
+            if (error?.response?.status === 404) {
+              error.message = trans.__('Could not find path: %1', path);
+            }
+            void showErrorMessage(trans.__('Cannot open'), error);
           });
       },
       describedBy: {
