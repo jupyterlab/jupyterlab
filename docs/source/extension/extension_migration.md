@@ -26,6 +26,11 @@
   states and sizes to the wrong sections. See
   {ref}`reordering accordion sections <reordering-sections>`.
 
+- Reordering changes the index of each `SidePanel` section. Code that passes a fixed
+  index to the `expand()` or `collapse()` method of the accordion, for example
+  `expand(0)`, then acts on another section. Get the index of the section widget with
+  `panel.widgets.indexOf(widget)` instead.
+
 - `IRunningSessions.IManager` has a new optional `id`. It sets the ID of the manager's
   section in the Running Sessions panel. Without it, the section ID is built from the
   translated `name`, so it changes with the display language.
