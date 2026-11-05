@@ -9,7 +9,7 @@
 import { parseMathIPython } from '@jupyterlab/codemirror';
 import { Tree, TreeFragment } from '@lezer/common';
 import type { MarkdownParser } from '@lezer/markdown';
-import { parser } from '@lezer/markdown';
+import { GFM, parser } from '@lezer/markdown';
 import { StreamLanguage } from '@codemirror/language';
 import { stexMath } from '@codemirror/legacy-modes/mode/stex';
 
@@ -377,6 +377,97 @@ where {Em:{e:*}m{e:*}} is the mass.}
 `
 );
 
+test(
+  'Math $$ opened mid-line containing a setext = underline',
+  `
+{P:Some text {MaBD:{maBD:$$}
+a
+=
+{maBD:$$}}
+where {Em:{e:*}m{e:*}} is the mass.}
+`
+);
+
+test(
+  'Math $$ opened mid-line with a setext = underline on its first line',
+  `
+{P:Some text {MaBD:{maBD:$$}
+=
+b
+{maBD:$$}}
+where {Em:{e:*}m{e:*}} is the mass.}
+`
+);
+
+test(
+  'Math $$ opened mid-line containing a setext - underline',
+  `
+{P:Some text {MaBD:{maBD:$$}
+a
+---
+{maBD:$$}}
+where {Em:{e:*}m{e:*}} is the mass.}
+`
+);
+
+test(
+  'Block math $$ opened on a line with an escaped \\$$',
+  `
+{MaBD:{maBD:$$} x \\$$
+a
+{maBD:$$}}
+`
+);
+
+test(
+  'Block math $$ containing an escaped \\$$',
+  `
+{MaBD:{maBD:$$}
+a \\$$
+b
+{maBD:$$}}
+`
+);
+
+test(
+  'Math $$ opened mid-line containing two setext = underlines',
+  `
+{P:Some text {MaBD:{maBD:$$}
+=
+a
+=
+{maBD:$$}}}
+`
+);
+
+test(
+  'Setext = underline after $$ math opened and closed mid-paragraph',
+  `
+{SH1:Some text {MaBD:{maBD:$$}
+=
+{maBD:$$}} and more
+{h:=}}
+`
+);
+
+test(
+  'Block math $$ opened on a line with $$ in a code span',
+  '\n{MaBD:{maBD:$$} `$$`\na\n{maBD:$$}}\n'
+);
+
+test(
+  'Block math $$ containing $$ in a code span',
+  '\n{MaBD:{maBD:$$}\na `$$` b\n{maBD:$$}}\n'
+);
+
+test(
+  'Setext heading text with an unpaired $$ is a paragraph',
+  `
+{P:Making $$ with Python
+===}
+`
+);
+
 // Block math \\[ \\]
 
 test(
@@ -403,6 +494,18 @@ describe('markdown parser', () => {
   it('should parse empty math block $$$$ without error', () => {
     const inputText = '$$$$';
     expect(() => mixedParser.parse(inputText)).not.toThrow();
+  });
+
+  it('should keep a table with $$ in a cell', () => {
+    const gfmParser = parser.configure([GFM, parseMathIPython()]);
+    const tree = gfmParser.parse('| Level | $$ |\n|---|---|\n| a | b |');
+    expect(tree.topNode.firstChild?.name).toBe('Table');
+  });
+
+  it('should keep a table with $$ in a cell when GFM is configured last', () => {
+    const gfmParser = parser.configure([parseMathIPython(), GFM]);
+    const tree = gfmParser.parse('Level | $$\n--- | ---\na | b');
+    expect(tree.topNode.firstChild?.name).toBe('Table');
   });
 
   it('should reparse a list item ending with $$ math as from scratch', () => {
