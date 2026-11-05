@@ -473,7 +473,11 @@ export class Dialog<T> extends Widget {
 
         if (activeEl instanceof HTMLButtonElement) {
           index = this._buttonNodes.indexOf(activeEl);
-        } else if (Private.submitsOnEnter(activeEl)) {
+        } else if (
+          // Enter sent to the dialog node itself, as `acceptDialog()` does.
+          event.target === this.node ||
+          Private.submitsOnEnter(activeEl)
+        ) {
           index = this._defaultButton;
         }
         // Other elements, such as links and editors, handle Enter themselves.

@@ -311,6 +311,16 @@ describe('@jupyterlab/apputils', () => {
             expect(press(target, 'ArrowLeft')).toBe(false);
             expect(document.activeElement).toBe(target);
           });
+
+          it('should accept on enter key sent to the dialog node', async () => {
+            // As `acceptDialog()` from `@jupyterlab/testing` does.
+            await launchWithBody(<div tabIndex={0} data-testid="target" />);
+
+            simulate(bodyDialog.node, 'keydown', { key: 'Enter' });
+
+            expect(bodyDialog.isDisposed).toBe(true);
+            expect((await prompt).button.accept).toBe(true);
+          });
         });
 
         it('should resolve with currently focused button', async () => {
