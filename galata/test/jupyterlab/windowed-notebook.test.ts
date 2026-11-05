@@ -490,7 +490,6 @@ test('should not scroll back to a newly inserted cell when scrolling away', asyn
 
   const notebook = (await page.notebook.getNotebookInPanelLocator())!;
   const firstCell = notebook.locator('.jp-Cell[data-windowed-list-index="1"]');
-  const lastCell = notebook.locator('.jp-Cell[data-windowed-list-index="18"]');
   await firstCell.waitFor();
 
   // Select the first cell and insert a new cell below it.
@@ -513,9 +512,9 @@ test('should not scroll back to a newly inserted cell when scrolling away', asyn
   await page.waitForTimeout(500);
 
   // The view must stay where the user scrolled, not snap back to the
-  // newly inserted cell.
-  await expect(newCell).toBeHidden();
-  await expect(lastCell).toBeVisible();
+  // newly inserted cell. Firefox scrolls at most one page per wheel event,
+  // so the new cell can stay rendered just above the view.
+  await expect(newCell).not.toBeInViewport();
 });
 
 test('should center on next cell after rendering markdown cell and advancing', async ({
