@@ -23,6 +23,8 @@ export interface ISerializer<T> {
 
 /**
  * An observable list that supports undo/redo.
+ *
+ * @deprecated since 4.7.0, will be removed in 5.0. Observable lists with undo/redo are no longer used by JupyterLab core since document models migrated to Yjs.
  */
 export interface IObservableUndoableList<T> extends IObservableList<T> {
   /**
@@ -66,6 +68,8 @@ export interface IObservableUndoableList<T> extends IObservableList<T> {
 
 /**
  * A concrete implementation of an observable undoable list.
+ *
+ * @deprecated since 4.7.0, will be removed in 5.0. Observable lists with undo/redo are no longer used by JupyterLab core since document models migrated to Yjs.
  */
 export class ObservableUndoableList<T>
   extends ObservableList<T>
@@ -297,6 +301,8 @@ export class ObservableUndoableList<T>
 export namespace ObservableUndoableList {
   /**
    * A default, identity serializer.
+   *
+   * @deprecated since 4.7.0, will be removed in 5.0. Observable lists with undo/redo are no longer used by JupyterLab core since document models migrated to Yjs.
    */
   export class IdentitySerializer<
     T extends JSONValue

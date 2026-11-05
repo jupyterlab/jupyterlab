@@ -22,6 +22,8 @@
 
 ### API updates
 
+- `ObservableUndoableList`, `IObservableUndoableList`, and `ObservableUndoableList.IdentitySerializer` from `@jupyterlab/observables` are deprecated since 4.7.0 and will be removed in JupyterLab 5.0. Observable lists with undo/redo are no longer used by JupyterLab core since document models migrated to Yjs in JupyterLab 4.x. Consequently, `IModelDB.createList` and `ModelDB.createList` are also deprecated.
+
 - The JSON Lines renderer plugin was renamed from `@jupyterlab/json-lines-extension:factory`
   to `@jupyterlab/json-extension:json-lines-factory` to match its owning package.
   Update references to the old plugin id in configuration, such as `disabledExtensions`,
