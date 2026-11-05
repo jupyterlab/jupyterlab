@@ -8,7 +8,12 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import type { IFileSystemDirectoryEntryOptions } from '@jupyterlab/testing';
-import { framePromise, signalToPromise } from '@jupyterlab/testing';
+import {
+  acceptDialog,
+  dismissDialog,
+  framePromise,
+  signalToPromise
+} from '@jupyterlab/testing';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import expect from 'expect';
@@ -230,6 +235,59 @@ describe('filebrowser/listing', () => {
         await newNamePromise;
         const itemNode = dirListing['_items'][0];
         expect(itemNode.contains(document.activeElement)).toBe(true);
+      });
+    });
+
+    describe('#paste()', () => {
+      it('should prompt to overwrite when pasting cut item over existing file', async () => {
+        jest.spyOn(dirListing.model.manager, 'rename').mockRejectedValueOnce({
+          response: { status: 409 }
+        });
+        const overwriteSpy = jest
+          .spyOn(dirListing.model.manager, 'overwrite')
+          .mockResolvedValue({} as any);
+
+        dirListing.selectNext();
+        dirListing.cut();
+        expect(dirListing['_clipboard'].length).toBeGreaterThan(0);
+
+        const pastePromise = dirListing.paste();
+        await acceptDialog();
+        await pastePromise;
+
+        expect(overwriteSpy).toHaveBeenCalled();
+        expect(dirListing['_clipboard'].length).toBe(0);
+        expect(dirListing['_isCut']).toBe(false);
+        overwriteSpy.mockRestore();
+      });
+
+      it('should preserve clipboard if paste operation fails or is cancelled', async () => {
+        jest.spyOn(dirListing.model.manager, 'rename').mockRejectedValueOnce({
+          response: { status: 409 }
+        });
+
+        dirListing.selectNext();
+        dirListing.cut();
+        const originalClipboard = [...dirListing['_clipboard']];
+        expect(originalClipboard.length).toBeGreaterThan(0);
+
+        const pastePromise = dirListing.paste();
+        await dismissDialog();
+        await pastePromise;
+
+        expect(dirListing['_clipboard']).toEqual(originalClipboard);
+        expect(dirListing['_isCut']).toBe(true);
+      });
+
+      it('should clear clipboard after successful cut and paste', async () => {
+        dirListing.selectNext();
+        dirListing.cut();
+        expect(dirListing['_clipboard'].length).toBeGreaterThan(0);
+
+        await dirListing.paste();
+
+        expect(dirListing['_clipboard'].length).toBe(0);
+        expect(dirListing['_isCut']).toBe(false);
       });
     });
 
