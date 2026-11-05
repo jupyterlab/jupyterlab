@@ -436,6 +436,28 @@ test.describe('Scrollback cancellation', () => {
     await forceCellResize(page, notebook);
     await expectNoScrollback(page, firstCell, secondCell);
   });
+
+  test('should not scroll back to the active cell when the scroll was not caused by user input', async ({
+    page,
+    tmpPath
+  }) => {
+    const { notebook, firstCell, secondCell } = await armScrollback(
+      page,
+      tmpPath
+    );
+
+    // The table of contents, links to headings and search scroll the
+    // notebook directly, as this script does.
+    const outer = notebook.locator('.jp-WindowedPanel-outer');
+    const scrolled = await outer.evaluate(node => {
+      node.scrollTop += 1200;
+      return node.scrollTop;
+    });
+    expect(scrolled).toBeGreaterThan(1000);
+
+    await forceCellResize(page, notebook);
+    await expectNoScrollback(page, firstCell, secondCell);
+  });
 });
 
 test('should detach a markdown code cell when scrolling out of the viewport', async ({
