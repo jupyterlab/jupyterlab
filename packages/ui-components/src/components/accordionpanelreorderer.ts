@@ -36,6 +36,30 @@ export class AccordionPanelReorderer
     return this._instances.get(node);
   }
 
+  /**
+   * Whether drag reordering is enabled in every accordion panel.
+   */
+  static get enabled(): boolean {
+    return this._enabled;
+  }
+  static set enabled(value: boolean) {
+    if (value === this._enabled) {
+      return;
+    }
+    this._enabled = value;
+    this._enabledChanged.emit(value);
+  }
+
+  /**
+   * A signal emitted when drag reordering is enabled or disabled.
+   */
+  static get enabledChanged(): ISignal<
+    typeof AccordionPanelReorderer,
+    boolean
+  > {
+    return this._enabledChanged;
+  }
+
   private constructor(
     private _panel: AccordionPanel,
     translator: ITranslator
@@ -61,20 +85,6 @@ export class AccordionPanelReorderer
       _panel.node.addEventListener(type, this);
     }
     _panel.disposed.connect(this.dispose, this);
-  }
-
-  /**
-   * Whether drag reordering is enabled for all managed accordion panels.
-   */
-  get enabled(): boolean {
-    return !this.isDisposed && AccordionPanelReorderer._enabled;
-  }
-  set enabled(value: boolean) {
-    if (this.isDisposed || value === AccordionPanelReorderer._enabled) {
-      return;
-    }
-    AccordionPanelReorderer._enabled = value;
-    AccordionPanelReorderer._enabledChanged.emit();
   }
 
   /**
@@ -135,7 +145,7 @@ export class AccordionPanelReorderer
     if (event.type === 'pointerdown') {
       const target = event.target;
       if (
-        !this.enabled ||
+        !AccordionPanelReorderer.enabled ||
         this._pointerId !== null ||
         pointer.button !== 0 ||
         !(target instanceof HTMLElement) ||
@@ -179,8 +189,11 @@ export class AccordionPanelReorderer
   }
 
   private _onEnabledChanged(): void {
-    this._panel.toggleClass('jp-mod-reorderable', this.enabled);
-    if (!this.enabled) {
+    this._panel.toggleClass(
+      'jp-mod-reorderable',
+      AccordionPanelReorderer.enabled
+    );
+    if (!AccordionPanelReorderer.enabled) {
       this._endDrag();
     }
     this._updateHandles();
@@ -289,7 +302,10 @@ export class AccordionPanelReorderer
     AccordionPanelReorderer
   >();
   private static _enabled = false;
-  private static _enabledChanged = new Signal<object, void>({});
+  private static _enabledChanged = new Signal<
+    typeof AccordionPanelReorderer,
+    boolean
+  >(AccordionPanelReorderer);
   private _trans: TranslationBundle;
   private _observer: MutationObserver;
   private _indicator = document.createElement('div');

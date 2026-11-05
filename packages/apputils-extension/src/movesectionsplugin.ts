@@ -78,12 +78,9 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       label: trans.__('Enable Section Reordering'),
       describedBy: { args: { type: 'object', properties: {} } },
       isVisible: () => contextReorderer() !== undefined,
-      isToggled: () => contextReorderer()?.enabled ?? false,
+      isToggled: () => AccordionPanelReorderer.enabled,
       execute: () => {
-        const reorderer = contextReorderer();
-        if (reorderer) {
-          reorderer.enabled = !reorderer.enabled;
-        }
+        AccordionPanelReorderer.enabled = !AccordionPanelReorderer.enabled;
       }
     });
     app.contextMenu.addItem({
