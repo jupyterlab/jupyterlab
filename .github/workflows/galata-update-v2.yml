@@ -524,7 +524,7 @@ jobs:
           elif [ "$SNAPSHOT_PR_ACTION" = "updated" ]; then
             BODY="I updated the PR ${SNAPSHOT_PR_URL} with the latest snapshots from [run ${ASSETS_RUN_ID}](${ASSETS_RUN_URL})."
           else
-            BODY="I created the PR ${SNAPSHOT_PR_URL} with snapshots from [run ${ASSETS_RUN_ID}](${ASSETS_RUN_URL})."
+            BODY="I created the PR ${SNAPSHOT_PR_URL} with snapshots from [run ${ASSETS_RUN_ID}](${ASSETS_RUN_URL}). Please merge it into your branch to update the snapshots in this PR."
           fi
 
           # Maintainers paste these commands into a shell, and the contributor
@@ -536,7 +536,7 @@ jobs:
             [[ "$PR_HEAD_REF" =~ ^[A-Za-z0-9._/-]+$ ]]; then
             printf -v BODY '%s\n' "$BODY" '' \
               '<details>' \
-              '<summary>For maintainers: push the snapshot commit to this pull request</summary>' \
+              '<summary>Maintainers (optional): push the snapshot commit directly</summary>' \
               '' \
               'Run these commands in any clone of JupyterLab. They do not check out files, and the push skips the pre-push hook, so code from either fork does not run. The push fails if the pull request does not allow edits from maintainers, or if the branch has new commits.' \
               '' \
