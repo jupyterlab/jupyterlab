@@ -107,7 +107,7 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
   readonly identifier = 'DebuggerIPythonCompletionProvider';
   readonly name: string;
   // Slightly higher rank than DebuggerCompletionProvider (1000) so that
-  // shouldShowContinuousHint controls auto-trigger for quote/DAP chars.
+  // shouldShowContinuousHint controls auto-trigger for quotes.
   readonly rank = 1001;
 
   constructor(protected options: DebuggerIPythonCompletionProvider.IOptions) {
@@ -161,12 +161,8 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
         sourceChange.some(delta => delta.insert != null)
       );
     }
-    const dapTriggerChars = this._debuggerService.session?.capabilities
-      ?.completionTriggerCharacters ?? ['.'];
-    // Add quote characters to trigger dict-key completions automatically.
-    const triggerChars = new Set([...dapTriggerChars, "'", '"']);
     return sourceChange.some(
-      delta => delta.insert != null && triggerChars.has(delta.insert)
+      delta => delta.insert === "'" || delta.insert === '"'
     );
   }
 
@@ -340,9 +336,8 @@ export namespace DebuggerIPythonCompletionProvider {
     debuggerService: IDebugger;
     translator?: ITranslator;
     /**
-     * Whether the completion context is the Debug Console, where quotes and
-     * the adapter's trigger characters open the completer. By default, no
-     * context is.
+     * Whether the completion context is the Debug Console, where quotes
+     * open the completer. By default, no context is.
      */
     isDebugConsole?: (context?: ICompletionContext) => boolean;
   }

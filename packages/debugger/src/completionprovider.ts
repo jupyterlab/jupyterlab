@@ -3,12 +3,12 @@
 
 import type { SourceChange } from '@jupyter/ydoc';
 import type {
-  CompletionTriggerKind,
   ICompletionContext,
   ICompletionProvider
 } from '@jupyterlab/completer';
 import type { CompletionHandler } from '@jupyterlab/completer';
 import {
+  CompletionTriggerKind,
   isContinuousHintingChange,
   isHintableMimeType
 } from '@jupyterlab/completer';
@@ -46,36 +46,18 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
   }
 
   /**
-   * In the Debug Console, trigger completion automatically when one of the
-   * adapter's `completionTriggerCharacters` is typed (defaults to `['.']`).
-   * Elsewhere, such as in a notebook while paused, use the default heuristic
-   * of the completer, because only the highest ranked provider is asked.
+   * Keep the default heuristic for other providers outside the Debug Console.
    */
   shouldShowContinuousHint(
     completerIsVisible: boolean,
     changed: SourceChange,
     context?: ICompletionContext
   ): boolean {
-    if (!this._isDebugConsole(context)) {
-      return (
-        isHintableMimeType(context?.editor?.model.mimeType ?? '') &&
-        !completerIsVisible &&
-        isContinuousHintingChange(changed)
-      );
-    }
-    // The visible completer already filters its items on typing;
-    // triggering another fetch would only cause redundant requests.
-    if (completerIsVisible) {
-      return false;
-    }
-    const { sourceChange } = changed;
-    if (!sourceChange || sourceChange.some(delta => delta.delete != null)) {
-      return false;
-    }
-    const triggerChars = this._debuggerService.session?.capabilities
-      ?.completionTriggerCharacters ?? ['.'];
-    return sourceChange.some(
-      delta => delta.insert != null && triggerChars.includes(delta.insert)
+    return (
+      !this._isDebugConsole(context) &&
+      isHintableMimeType(context?.editor?.model.mimeType ?? '') &&
+      !completerIsVisible &&
+      isContinuousHintingChange(changed)
     );
   }
 
@@ -85,10 +67,11 @@ export class DebuggerCompletionProvider implements ICompletionProvider {
   async fetch(
     request: CompletionHandler.IRequest,
     context: ICompletionContext,
-    trigger?: CompletionTriggerKind
+    trigger = CompletionTriggerKind.Invoked
   ): Promise<CompletionHandler.ICompletionItemsReply> {
     const session = this._debuggerService.session;
-    if (!session) {
+    // The adapter can evaluate expressions and run property getters.
+    if (!session || trigger !== CompletionTriggerKind.Invoked) {
       return { start: 0, end: 0, items: [] };
     }
     // Inside a string literal (such as a dictionary key or a path) the names
@@ -182,9 +165,8 @@ export namespace DebuggerCompletionProvider {
     debuggerService: IDebugger;
     translator?: ITranslator;
     /**
-     * Whether the completion context is the Debug Console, where the
-     * adapter's trigger characters open the completer. By default, no
-     * context is.
+     * Whether the completion context is the Debug Console, where DAP
+     * completions require explicit invocation. By default, no context is.
      */
     isDebugConsole?: (context?: ICompletionContext) => boolean;
   }
