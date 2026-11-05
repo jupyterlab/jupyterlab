@@ -300,7 +300,6 @@ jobs:
     environment: update-snapshots
     outputs:
       branch-name: ${{ steps.create-branch.outputs.branch-name }}
-      commit-sha: ${{ steps.create-branch.outputs.commit-sha }}
     permissions:
       contents: read # to fetch the pull request head
     env:
@@ -391,7 +390,6 @@ jobs:
           git diff --cached --name-status
           # We do not want pre-commit to run in case if user code modifies it
           git commit -m "Update snapshots" --no-verify
-          echo "commit-sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
         working-directory: repo
 
       - name: Ensure fork exists
@@ -505,7 +503,7 @@ jobs:
           HAS_CHANGES: ${{ needs.prepare-snapshots.outputs.has-changes }}
           CREATE_BRANCH_RESULT: ${{ needs.create-branch.result }}
           OPEN_PR_RESULT: ${{ needs.open-pr.result }}
-          SNAPSHOT_SHA: ${{ needs.create-branch.outputs.commit-sha }}
+          SNAPSHOT_BRANCH: ${{ needs.create-branch.outputs.branch-name }}
           PR_HEAD_REPO: ${{ needs.get-snapshot-updates.outputs.pr-head-repo }}
           PR_HEAD_REF: ${{ needs.get-snapshot-updates.outputs.pr-head-ref }}
           REPO_NAME: ${{ github.event.repository.name }}
@@ -531,9 +529,9 @@ jobs:
 
           # Maintainers paste these commands into a shell, and the contributor
           # chooses the branch name, so each value may only hold characters that
-          # no shell interprets. With an empty commit SHA, the push would delete the branch.
+          # no shell interprets.
           if [ "$OPEN_PR_RESULT" = "success" ] &&
-            [[ "$SNAPSHOT_SHA" =~ ^[0-9a-f]{40}$ ]] &&
+            [[ "$SNAPSHOT_BRANCH" =~ ^[A-Za-z0-9._/-]+$ ]] &&
             [[ "$PR_HEAD_REPO" =~ ^[A-Za-z0-9-]+/[A-Za-z0-9._-]+$ ]] &&
             [[ "$PR_HEAD_REF" =~ ^[A-Za-z0-9._/-]+$ ]]; then
             printf -v BODY '%s\n' "$BODY" '' \
@@ -543,8 +541,8 @@ jobs:
               'Run these commands in any clone of JupyterLab. They do not check out files, and the push skips the pre-push hook, so code from either fork does not run. The push fails if the pull request does not allow edits from maintainers, or if the branch has new commits.' \
               '' \
               '```bash' \
-              "git fetch https://github.com/galata-snapshots-bot/${REPO_NAME}.git ${SNAPSHOT_SHA}" \
-              "git push --no-verify https://github.com/${PR_HEAD_REPO}.git ${SNAPSHOT_SHA}:refs/heads/${PR_HEAD_REF}" \
+              "git fetch https://github.com/galata-snapshots-bot/${REPO_NAME}.git ${SNAPSHOT_BRANCH}" \
+              "git push --no-verify https://github.com/${PR_HEAD_REPO}.git FETCH_HEAD:refs/heads/${PR_HEAD_REF}" \
               '```' \
               '' \
               '</details>'
