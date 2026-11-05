@@ -46,6 +46,8 @@
   document. Extensions that use it directly should use the promise-based rendering
   methods and follow the [MathJax 4 migration guide](https://docs.mathjax.org/en/latest/upgrading/whats-new-4.0.html).
   JupyterLab continues to bundle the TeX font and the previously enabled TeX packages.
+  Standalone applications that instantiate `MathJaxTypesetter` should import
+  `@jupyterlab/mathjax-extension/style/index.css` to load the bundled fonts.
 
 - `ObservableUndoableList`, `IObservableUndoableList`, and `ObservableUndoableList.IdentitySerializer` from `@jupyterlab/observables` are deprecated since 4.7.0 and will be removed in JupyterLab 5.0. Observable lists with undo/redo are no longer used by JupyterLab core since document models migrated to Yjs in JupyterLab 4.x. Consequently, `IModelDB.createList` and `ModelDB.createList` are also deprecated.
 
