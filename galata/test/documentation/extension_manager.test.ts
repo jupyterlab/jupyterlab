@@ -15,6 +15,10 @@ test.use({
   viewport: { height: 720, width: 1280 }
 });
 
+test.beforeEach(async ({ page }) => {
+  await stubGitHubUserIcons(page);
+});
+
 test.describe('Extension Manager', () => {
   test.beforeEach(async ({ page }) => {
     // Mock get extensions list
@@ -76,8 +80,6 @@ test.describe('Extension Manager', () => {
   });
 
   test('Search', async ({ page }) => {
-    await stubGitHubUserIcons(page);
-
     await page.goto();
 
     await openExtensionSidebar(page);
@@ -388,4 +390,17 @@ async function openExtensionSidebar(page: IJupyterLabPageFixture) {
     .waitFor();
 
   await page.sidebar.setWidth();
+
+  // Screenshots do not wait for images, and the avatars load after the lists.
+  await page.waitForFunction(() => {
+    const avatars = Array.from(
+      document.querySelectorAll<HTMLImageElement>(
+        '.jp-extensionmanager-entry img'
+      )
+    );
+    return (
+      avatars.length > 0 &&
+      avatars.every(img => img.complete && img.naturalWidth > 0)
+    );
+  });
 }
