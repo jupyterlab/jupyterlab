@@ -1,0 +1,665 @@
+<script>
+/* =========================================================
+ *  واجهة نظام إدارة المشروعات الخيرية — نمط Dynamics 365
+ * ========================================================= */
+const ICONS = {
+  menu: 'M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z',
+  home: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z',
+  folder: 'M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z',
+  book: 'M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z',
+  receipt: 'M18 17H6v-2h12v2zm0-4H6v-2h12v2zm0-4H6V7h12v2zM3 22l1.5-1.5L6 22l1.5-1.5L9 22l1.5-1.5L12 22l1.5-1.5L15 22l1.5-1.5L18 22l1.5-1.5L21 22V2l-1.5 1.5L18 2l-1.5 1.5L15 2l-1.5 1.5L12 2l-1.5 1.5L9 2 7.5 3.5 6 2 4.5 3.5 3 2v20z',
+  tag: 'M21.41 11.58l-9-9A2 2 0 0 0 11 2H4a2 2 0 0 0-2 2v7c0 .55.22 1.05.59 1.42l9 9a2 2 0 0 0 2.82 0l7-7a2 2 0 0 0 0-2.84zM5.5 7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z',
+  users: 'M16 11a3 3 0 1 0-.01-6.01A3 3 0 0 0 16 11zm-8 0a3 3 0 1 0-.01-6.01A3 3 0 0 0 8 11zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z',
+  history: 'M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6a7 7 0 1 1 2.06 4.94l-1.42 1.42A9 9 0 1 0 13 3zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z',
+  add: 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z',
+  edit: 'M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z',
+  del: 'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z',
+  refresh: 'M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z',
+  save: 'M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-4-4zm-5 16a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm3-10H5V5h10v4z',
+  saveclose: 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z',
+  back: 'M4 11h12.17l-5.59-5.59L12 4l8 8-8 8-1.41-1.41L16.17 13H4z',
+  export: 'M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z',
+  search: 'M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z',
+  key: 'M12.65 10A6 6 0 1 0 7 18a6 6 0 0 0 5.65-4H17v4h4v-4h2v-4H12.65zM7 14a2 2 0 1 1 0-4 2 2 0 0 1 0 4z',
+  logout: 'M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5a2 2 0 0 0-2 2v4h2V5h14v14H5v-4H3v4a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z',
+  lock: 'M18 8h-1V6A5 5 0 0 0 7 6v2H6a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2zm-6 9a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm3.1-9H8.9V6a3.1 3.1 0 0 1 6.2 0v2z'
+};
+const icon = (n) => `<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n] || ''}"/></svg>`;
+const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const PAGE_SIZE = 50;
+
+const S = { token: null, boot: null, view: null, rows: [], sel: new Set(), search: '', sort: null, pageNo: 1, viewId: 'default', form: null };
+
+/* ---------------- أدوات عامة ---------------- */
+function store(k, v) { try { v === undefined ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, v); } catch (e) {} }
+function load(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
+
+let loadingCount = 0;
+function loading(d) { loadingCount = Math.max(0, loadingCount + d); $('#progress').classList.toggle('on', loadingCount > 0); }
+
+function api(fn, ...args) {
+  return new Promise((resolve, reject) => {
+    loading(1);
+    google.script.run
+      .withSuccessHandler(r => {
+        loading(-1);
+        if (!r) return reject(new Error('لا توجد استجابة من الخادم.'));
+        if (r.ok) return resolve(r.data);
+        if (r.auth) { endSession(); showLogin(r.error); }
+        reject(new Error(r.error));
+      })
+      .withFailureHandler(e => { loading(-1); reject(new Error((e && e.message) || 'خطأ في الاتصال بالخادم.')); })[fn](...args);
+  });
+}
+
+function toast(msg, type = '') {
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  $('#toasts').appendChild(t);
+  setTimeout(() => t.remove(), type === 'err' ? 6000 : 3500);
+}
+
+function dialog(html, onReady) {
+  const root = $('#modalRoot');
+  root.innerHTML = `<div class="overlay"><div class="dialog" role="dialog" aria-modal="true">${html}</div></div>`;
+  const dlg = $('.dialog', root);
+  const close = () => { root.innerHTML = ''; };
+  if (onReady) onReady(dlg, close);
+  const first = $('input, button.primary, button.danger', dlg);
+  if (first) first.focus();
+  return close;
+}
+
+function confirmDlg(title, msg, okText = 'موافق', danger = false) {
+  return new Promise(res => {
+    dialog(`<h2>${esc(title)}</h2><p>${esc(msg)}</p>
+      <div class="actions"><button class="btn ${danger ? 'danger' : 'primary'}" data-ok>${esc(okText)}</button><button class="btn" data-no>إلغاء</button></div>`,
+      (d, close) => {
+        $('[data-ok]', d).onclick = () => { close(); res(true); };
+        $('[data-no]', d).onclick = () => { close(); res(false); };
+      });
+  });
+}
+
+function hydrateIcons(root = document) { $$('[data-icon]', root).forEach(el => { el.innerHTML = icon(el.dataset.icon) + el.innerHTML; el.removeAttribute('data-icon'); }); }
+
+const can = (page, action) => !!(S.boot && (S.boot.perms[page] || []).includes(action));
+const cfgOf = (entity) => S.boot.entities[entity];
+const pageOf = (key) => S.boot.pages.find(p => p.key === key);
+
+/* ---------------- الدخول ---------------- */
+function showLogin(msg) {
+  $('#app').classList.add('hidden');
+  $('#login').classList.remove('hidden');
+  $('#lgErr').textContent = msg || '';
+  $('#lgPass').value = '';
+  setTimeout(() => $('#lgUser').focus(), 50);
+}
+function endSession() { S.token = null; S.boot = null; store('tk'); }
+
+$('#loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  $('#lgErr').textContent = '';
+  const btn = $('#loginForm button');
+  btn.disabled = true;
+  try {
+    const r = await api('apiLogin', $('#lgUser').value, $('#lgPass').value);
+    S.token = r.token; store('tk', r.token);
+    await boot();
+  } catch (err) { $('#lgErr').textContent = err.message; }
+  finally { btn.disabled = false; }
+});
+
+async function boot() {
+  S.boot = await api('apiBootstrap', S.token);
+  $('#login').classList.add('hidden');
+  $('#app').classList.remove('hidden');
+  const u = S.boot.user;
+  $('#appTitle').textContent = S.boot.app.name;
+  $('#loginApp').textContent = S.boot.app.name;
+  $('#avatarBtn').textContent = (u.fullName || u.username || '?').trim().charAt(0);
+  $('#avatarBtn').title = u.fullName;
+  $('#ddName').textContent = u.fullName;
+  $('#ddMail').textContent = u.email + ' — ' + (u.isAdmin ? 'مدير النظام' : 'مستخدم');
+  renderSitemap();
+  const first = S.boot.pages.find(p => !p.phase && can(p.key, 'view'));
+  if (!first) { $('#main').innerHTML = '<div class="empty">لا توجد لديك صلاحيات على أي صفحة. تواصل مع مدير النظام.</div>'; }
+  else navigate(first.key);
+  if (u.mustChangePassword) changePasswordDlg(true);
+}
+
+async function logout() {
+  if (!(await leaveForm())) return;
+  try { await api('apiLogout', S.token); } catch (e) {}
+  endSession();
+  showLogin();
+}
+
+/* ---------------- الخريطة الجانبية ---------------- */
+function renderSitemap() {
+  let html = '', lastGroup = '';
+  S.boot.pages.forEach(p => {
+    if (!can(p.key, 'view') && !(p.phase && S.boot.user.isAdmin)) return;
+    if (p.group !== lastGroup) { html += `<div class="nav-group">${esc(p.group)}</div>`; lastGroup = p.group; }
+    html += `<button class="nav-item" data-page="${p.key}" ${p.phase ? 'disabled title="ستتوفر في المرحلة الثانية"' : ''}>
+      ${icon(p.icon)}<span class="nav-label">${esc(p.title)}</span>${p.phase ? '<span class="badge nav-label">قريباً</span>' : ''}</button>`;
+  });
+  const nav = $('#sitemap');
+  nav.innerHTML = html;
+  $$('.nav-item', nav).forEach(b => b.onclick = () => navigate(b.dataset.page));
+  if (window.innerWidth <= 760) nav.classList.add('collapsed');
+}
+
+function setActiveNav(key) {
+  $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === key));
+  const p = pageOf(key);
+  $('#areaTitle').textContent = p ? p.title : '';
+  if (window.innerWidth <= 760) $('#sitemap').classList.add('collapsed');
+}
+
+async function navigate(key) {
+  if (!(await leaveForm())) return;
+  setActiveNav(key);
+  if (key === 'dashboard') return openDashboard();
+  if (S.boot.entities[key]) return openList(key);
+}
+
+/* ---------------- لوحة المعلومات ---------------- */
+async function openDashboard() {
+  S.view = { type: 'dashboard' }; S.form = null;
+  const main = $('#main');
+  main.innerHTML = `<div class="cmdbar"><button class="cmd" id="dRef">${icon('refresh')}<span>تحديث</span></button></div><div class="content"><div class="empty">جارٍ التحميل…</div></div>`;
+  $('#dRef').onclick = openDashboard;
+  try {
+    const d = await api('apiDashboard', S.token);
+    const max = Math.max(1, ...d.byGroup.map(g => g.value));
+    const pc = cfgOf('projects');
+    $('.content', main).innerHTML = `
+      <div class="view-head"><div class="view-title">مرحباً، ${esc(S.boot.user.fullName)}</div></div>
+      <div class="cards">${d.cards.map(c => `<div class="card" data-go="${c.page}"><small>${esc(c.label)}</small><b>${c.value}</b></div>`).join('')}</div>
+      ${can('projects', 'view') ? `<div class="sections">
+        <div class="section"><h3>المشروعات حسب المجموعة</h3>
+          ${d.byGroup.length ? d.byGroup.map(g => `<div class="bar-row"><span>${esc(g.label)}</span><div class="bar"><span style="width:${g.value / max * 100}%"></span></div><b>${g.value}</b></div>`).join('') : '<div class="empty">لا توجد مشروعات بعد</div>'}
+        </div>
+        <div class="section"><h3>أحدث المشروعات</h3>
+          ${d.recent.length ? `<table class="grid"><tbody>${d.recent.map(p => `<tr data-open="${esc(p.ProjectId)}"><td class="link">${esc(p.ProjectId)}</td><td>${esc(p.Description)}</td><td>${esc(p.ProjectGroup)}</td></tr>`).join('')}</tbody></table>` : '<div class="empty">—</div>'}
+        </div></div>` : ''}`;
+    $$('[data-go]', main).forEach(c => c.onclick = () => navigate(c.dataset.go));
+    $$('[data-open]', main).forEach(r => r.onclick = () => { setActiveNav('projects'); openForm('projects', r.dataset.open); });
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+/* ---------------- عرض القوائم (Grid) ---------------- */
+function viewsFor(entity) {
+  const cfg = cfgOf(entity);
+  const views = [];
+  const hasActive = cfg.fields.some(f => f.name === 'IsActive');
+  if (hasActive) views.push({ id: 'default', label: (entity === 'users' ? 'المستخدمون النشطون' : cfg.plural + ' النشطة'), fn: r => r.IsActive });
+  views.push({ id: 'all', label: 'كل ' + cfg.plural, fn: () => true });
+  if (hasActive) views.push({ id: 'inactive', label: 'غير النشطة', fn: r => !r.IsActive });
+  if (entity === 'lookups') {
+    const types = cfg.fields.find(f => f.name === 'LookupType').source.static;
+    types.forEach(t => views.push({ id: 't_' + t.v, label: t.l, fn: r => r.LookupType === t.v }));
+  }
+  if (!hasActive) views[0].id = 'default';
+  return views;
+}
+
+async function openList(entity, keepState) {
+  const cfg = cfgOf(entity);
+  S.form = null;
+  if (!keepState || !S.view || S.view.entity !== entity) {
+    S.view = { type: 'list', entity }; S.sel = new Set(); S.search = ''; S.sort = null; S.pageNo = 1; S.viewId = 'default';
+  }
+  S.view.type = 'list';
+  const main = $('#main');
+  const ro = cfg.readOnly;
+  main.innerHTML = `
+    <div class="cmdbar">
+      ${!ro && can(cfg.page, 'add') ? `<button class="cmd" id="cNew">${icon('add')}<span>جديد</span></button>` : ''}
+      ${!ro ? `<button class="cmd" id="cEdit" disabled>${icon('edit')}<span>${can(cfg.page, 'edit') ? 'تحرير' : 'فتح'}</span></button>` : ''}
+      ${!ro && can(cfg.page, 'delete') ? `<button class="cmd danger" id="cDel" disabled>${icon('del')}<span>حذف</span></button>` : ''}
+      <span class="cmd-sep"></span>
+      <button class="cmd" id="cRef">${icon('refresh')}<span>تحديث</span></button>
+      <button class="cmd" id="cExp">${icon('export')}<span>تصدير إلى Excel</span></button>
+    </div>
+    <div class="content">
+      <div class="view-head">
+        <div class="view-title">${icon(cfg.icon)}<span class="chip"><select id="viewSel">${viewsFor(entity).map(v => `<option value="${v.id}">${esc(v.label)}</option>`).join('')}</select></span></div>
+        <div class="search">${icon('search')}<input id="q" placeholder="البحث في هذا العرض" value="${esc(S.search)}"></div>
+      </div>
+      <div class="grid-wrap" id="gridWrap"><div class="empty">جارٍ التحميل…</div></div>
+    </div>`;
+  $('#viewSel').value = S.viewId;
+  $('#viewSel').onchange = (e) => { S.viewId = e.target.value; S.pageNo = 1; S.sel.clear(); renderGrid(); };
+  let qt; $('#q').oninput = (e) => { clearTimeout(qt); qt = setTimeout(() => { S.search = e.target.value; S.pageNo = 1; renderGrid(); }, 200); };
+  if ($('#cNew')) $('#cNew').onclick = () => openForm(entity, null);
+  if ($('#cEdit')) $('#cEdit').onclick = () => { const k = [...S.sel][0]; if (k != null) openForm(entity, k); };
+  if ($('#cDel')) $('#cDel').onclick = () => deleteRecords(entity, [...S.sel]);
+  $('#cRef').onclick = () => loadRows(entity);
+  $('#cExp').onclick = () => exportCsv(entity);
+  await loadRows(entity);
+}
+
+async function loadRows(entity) {
+  try {
+    S.rows = await api('apiList', S.token, entity);
+    const keys = new Set(S.rows.map(r => String(r[cfgOf(entity).key])));
+    S.sel = new Set([...S.sel].filter(k => keys.has(k)));
+    if (S.view && S.view.entity === entity && S.view.type === 'list') renderGrid();
+  } catch (e) {
+    toast(e.message, 'err');
+    const gw = $('#gridWrap'); if (gw) gw.innerHTML = `<div class="empty">${esc(e.message)}</div>`;
+  }
+}
+
+function displayValue(f, v) {
+  if (f.type === 'checkbox') return v ? '<span class="yes">نعم</span>' : '<span class="no">لا</span>';
+  if (v === '' || v == null) return '';
+  if (f.type === 'select' && f.source) {
+    if (f.source.static) { const o = f.source.static.find(x => x.v === v); return esc(o ? o.l : v); }
+    if (f.source.entity === 'accounts') { const o = (S.boot.options.accounts || []).find(x => x.v === String(v)); return esc(o ? o.l : v); }
+  }
+  if (f.type === 'number' && typeof v === 'number') return v.toLocaleString('en-US');
+  return esc(v);
+}
+
+function filteredRows(entity) {
+  const cfg = cfgOf(entity);
+  const view = viewsFor(entity).find(v => v.id === S.viewId) || viewsFor(entity)[0];
+  const cols = cfg.fields.filter(f => f.list);
+  const q = S.search.trim().toLowerCase();
+  let rows = S.rows.filter(view.fn);
+  if (q) rows = rows.filter(r => cols.some(f => String(r[f.name] == null ? '' : r[f.name]).toLowerCase().includes(q)));
+  if (S.sort) {
+    const { f, dir } = S.sort;
+    rows = rows.slice().sort((a, b) => {
+      const x = a[f], y = b[f];
+      const c = (typeof x === 'number' && typeof y === 'number') ? x - y : String(x).localeCompare(String(y), 'ar', { numeric: true });
+      return c * dir;
+    });
+  }
+  return rows;
+}
+
+function renderGrid() {
+  const entity = S.view.entity, cfg = cfgOf(entity);
+  const cols = cfg.fields.filter(f => f.list);
+  const rows = filteredRows(entity);
+  const pages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  S.pageNo = Math.min(S.pageNo, pages);
+  const start = (S.pageNo - 1) * PAGE_SIZE;
+  const pageRows = rows.slice(start, start + PAGE_SIZE);
+  const allSel = pageRows.length && pageRows.every(r => S.sel.has(String(r[cfg.key])));
+  const gw = $('#gridWrap');
+  if (!gw) return;
+  gw.innerHTML = `
+    <table class="grid"><thead><tr>
+      ${cfg.readOnly ? '' : `<th class="chk"><input type="checkbox" id="selAll" ${allSel ? 'checked' : ''} aria-label="تحديد الكل"></th>`}
+      ${cols.map(f => `<th data-sort="${f.name}">${esc(f.label)}<span class="arrow">${S.sort && S.sort.f === f.name ? (S.sort.dir > 0 ? '▲' : '▼') : ''}</span></th>`).join('')}
+    </tr></thead>
+    <tbody>${pageRows.length ? pageRows.map(r => {
+      const k = String(r[cfg.key]);
+      return `<tr data-k="${esc(k)}" class="${S.sel.has(k) ? 'sel' : ''}">
+        ${cfg.readOnly ? '' : `<td class="chk"><input type="checkbox" ${S.sel.has(k) ? 'checked' : ''} aria-label="تحديد"></td>`}
+        ${cols.map((f, i) => `<td class="${i === 0 && !cfg.readOnly ? 'link' : ''}" title="${esc(r[f.name])}">${displayValue(f, r[f.name])}</td>`).join('')}
+      </tr>`;
+    }).join('') : `<tr><td colspan="${cols.length + 1}" class="empty">لا توجد بيانات لعرضها</td></tr>`}</tbody></table>
+    <div class="grid-foot">
+      <span>${rows.length ? `${start + 1} - ${start + pageRows.length} من ${rows.length}` : '0 سجل'}${S.sel.size ? ` (${S.sel.size} محدد)` : ''}</span>
+      <span class="spacer"></span>
+      <span class="pager"><button id="pPrev" ${S.pageNo <= 1 ? 'disabled' : ''}>→ السابق</button> صفحة ${S.pageNo} من ${pages} <button id="pNext" ${S.pageNo >= pages ? 'disabled' : ''}>التالي ←</button></span>
+    </div>`;
+
+  $$('th[data-sort]', gw).forEach(th => th.onclick = () => {
+    const f = th.dataset.sort;
+    S.sort = S.sort && S.sort.f === f ? { f, dir: -S.sort.dir } : { f, dir: 1 };
+    renderGrid();
+  });
+  const selAll = $('#selAll', gw);
+  if (selAll) selAll.onchange = () => { pageRows.forEach(r => selAll.checked ? S.sel.add(String(r[cfg.key])) : S.sel.delete(String(r[cfg.key]))); renderGrid(); };
+  $$('tbody tr[data-k]', gw).forEach(tr => {
+    const k = tr.dataset.k;
+    const chk = $('input', tr);
+    if (chk) { chk.onclick = (e) => e.stopPropagation(); chk.onchange = () => { chk.checked ? S.sel.add(k) : S.sel.delete(k); renderGrid(); }; }
+    if (cfg.readOnly) return;
+    tr.onclick = (e) => {
+      if (e.target.classList.contains('link')) return openForm(entity, k);
+      S.sel = new Set([k]); renderGrid();
+    };
+    tr.ondblclick = () => openForm(entity, k);
+  });
+  $('#pPrev', gw).onclick = () => { S.pageNo--; renderGrid(); };
+  $('#pNext', gw).onclick = () => { S.pageNo++; renderGrid(); };
+  if ($('#cEdit')) $('#cEdit').disabled = S.sel.size !== 1;
+  if ($('#cDel')) $('#cDel').disabled = S.sel.size === 0;
+}
+
+async function deleteRecords(entity, keys, afterFn) {
+  if (!keys.length) return;
+  const cfg = cfgOf(entity);
+  const ok = await confirmDlg('تأكيد الحذف', `هل تريد حذف ${keys.length} ${cfg.singular}؟ لا يمكن التراجع عن هذا الإجراء.`, 'حذف', true);
+  if (!ok) return;
+  try {
+    const n = await api('apiDelete', S.token, entity, keys);
+    toast(`تم حذف ${n} سجل`, 'ok');
+    S.sel.clear();
+    if (entity === 'accounts' || entity === 'lookups') refreshOptions();
+    if (afterFn) afterFn(); else loadRows(entity);
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+function exportCsv(entity) {
+  const cfg = cfgOf(entity);
+  const cols = cfg.fields.filter(f => f.list || !f.system);
+  const rows = filteredRows(entity);
+  const cell = (v) => { const s = String(v == null ? '' : v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  const plain = (f, v) => f.type === 'checkbox' ? (v ? 'نعم' : 'لا') : v;
+  const csv = '﻿' + [cols.map(f => cell(f.label)).join(',')]
+    .concat(rows.map(r => cols.map(f => cell(plain(f, r[f.name]))).join(','))).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = `${cfg.plural}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+async function refreshOptions() {
+  try { S.boot.options = await api('apiOptions', S.token); } catch (e) {}
+}
+
+/* ---------------- النموذج (Form) ---------------- */
+async function openForm(entity, key) {
+  const cfg = cfgOf(entity);
+  let data = {};
+  if (key != null) {
+    if (!S.rows.length || !S.view || S.view.entity !== entity) {
+      try { S.rows = await api('apiList', S.token, entity); } catch (e) { return toast(e.message, 'err'); }
+    }
+    data = S.rows.find(r => String(r[cfg.key]) === String(key));
+    if (!data) return toast('السجل غير موجود.', 'err');
+    data = JSON.parse(JSON.stringify(data));
+  } else {
+    cfg.fields.forEach(f => { if (f.default !== undefined) data[f.name] = f.default; });
+    if (entity === 'users') data._perms = {};
+    if (entity === 'lookups' && S.viewId.startsWith('t_')) data.LookupType = S.viewId.slice(2);
+  }
+  if (!S.view || S.view.entity !== entity) { S.sel = new Set(); S.search = ''; S.sort = null; S.pageNo = 1; S.viewId = 'default'; }
+  S.view = { type: 'form', entity };
+  S.form = { entity, mode: key == null ? 'add' : 'edit', key, data, tab: 'general', dirty: false, notice: null };
+  renderForm();
+}
+
+function formEditable() {
+  const f = S.form, cfg = cfgOf(f.entity);
+  if (cfg.readOnly) return false;
+  return can(cfg.page, f.mode === 'add' ? 'add' : 'edit');
+}
+
+function fieldControl(f, v, editable) {
+  const ro = !editable || f.system || f.derive || (f.name === cfgOf(S.form.entity).key && S.form.mode === 'edit');
+  const attrs = `data-f="${f.name}" id="f_${f.name}" ${ro ? 'readonly disabled' : ''} ${f.required ? 'aria-required="true"' : ''}`;
+  if (f.type === 'checkbox') return `<div><input type="checkbox" ${attrs} ${v ? 'checked' : ''}></div>`;
+  if (f.type === 'textarea') return `<textarea class="ctrl" ${attrs}>${esc(v)}</textarea>`;
+  if (f.type === 'select') {
+    let opts = [];
+    if (f.source.static) opts = f.source.static;
+    else if (f.source.entity) opts = (S.boot.options[f.source.entity] || []).filter(o => !(f.source.entity === S.form.entity && o.v === String(S.form.key)));
+    else if (f.source.lookup) opts = S.boot.options['lookup_' + f.source.lookup] || [];
+    const has = v === '' || v == null || opts.some(o => o.v === String(v));
+    return `<select class="ctrl" ${attrs}><option value="">--- اختر ---</option>
+      ${!has ? `<option value="${esc(v)}" selected>${esc(v)} (غير نشط)</option>` : ''}
+      ${opts.map(o => `<option value="${esc(o.v)}" ${String(v) === o.v ? 'selected' : ''}>${esc(o.l)}</option>`).join('')}</select>`;
+  }
+  const type = { number: 'number', date: 'date', email: 'email', password: 'password' }[f.type] || 'text';
+  return `<input class="ctrl" type="${type}" ${attrs} value="${esc(v)}" ${f.type === 'password' ? 'autocomplete="new-password"' : ''}>`;
+}
+
+function fieldRow(f, v, editable, hint) {
+  return `<div class="field"><label for="f_${f.name}">${esc(f.label)}${f.required && editable && !f.system ? '<span class="req">*</span>' : ''}</label>
+    ${fieldControl(f, v, editable)}${hint ? `<div class="hint">${esc(hint)}</div>` : ''}</div>`;
+}
+
+function renderForm() {
+  const F = S.form, cfg = cfgOf(F.entity), d = F.data;
+  const editable = formEditable();
+  const isUsers = F.entity === 'users';
+  const title = F.mode === 'add' ? `${cfg.singular} جديد` : (d[cfg.titleField] || d[cfg.key]);
+  const tabs = [{ id: 'general', label: 'عام' }];
+  if (isUsers) tabs.push({ id: 'perms', label: 'الصلاحيات' });
+  if (F.mode === 'edit') tabs.push({ id: 'system', label: 'معلومات النظام' });
+
+  const main = $('#main');
+  main.innerHTML = `
+    <div class="cmdbar">
+      <button class="cmd" id="fBack" title="رجوع">${icon('back')}</button>
+      ${editable ? `<button class="cmd" id="fSave">${icon('save')}<span>حفظ</span></button>
+        <button class="cmd" id="fSaveClose">${icon('saveclose')}<span>حفظ وإغلاق</span></button>` : ''}
+      ${can(cfg.page, 'add') && !cfg.readOnly ? `<button class="cmd" id="fNew">${icon('add')}<span>جديد</span></button>` : ''}
+      ${F.mode === 'edit' && can(cfg.page, 'delete') && !cfg.readOnly ? `<button class="cmd danger" id="fDel">${icon('del')}<span>حذف</span></button>` : ''}
+      ${F.mode === 'edit' ? `<span class="cmd-sep"></span><button class="cmd" id="fRef">${icon('refresh')}<span>تحديث</span></button>` : ''}
+    </div>
+    ${F.notice ? `<div class="notice ${F.notice.type}">${esc(F.notice.msg)}</div>` : ''}
+    ${!editable ? `<div class="notice info">${icon('lock')} هذا السجل للقراءة فقط وفق صلاحياتك.</div>` : ''}
+    <div class="form-head">
+      <div class="fh-row">
+        <div class="fh-icon">${icon(cfg.icon)}</div>
+        <div><div class="fh-title">${esc(title)}${F.dirty ? ' <span class="fh-sub">- غير محفوظ</span>' : ''}</div><div class="fh-sub">${esc(cfg.singular)}</div></div>
+        ${F.mode === 'edit' ? `<div class="fh-meta">${headerMeta(cfg, d)}</div>` : ''}
+      </div>
+      <div class="tabs">${tabs.map(t => `<button class="tab ${F.tab === t.id ? 'active' : ''}" data-tab="${t.id}">${t.label}</button>`).join('')}</div>
+    </div>
+    <div class="content" id="formBody"></div>`;
+
+  const body = $('#formBody');
+  if (F.tab === 'general') body.innerHTML = generalTab(cfg, d, editable);
+  else if (F.tab === 'perms') body.innerHTML = permsTab(d, editable);
+  else body.innerHTML = `<div class="sections"><div class="section"><h3>معلومات النظام</h3>
+    ${cfg.fields.filter(f => f.system).map(f => fieldRow(f, d[f.name], false)).join('')}</div></div>`;
+
+  $$('.tab', main).forEach(t => t.onclick = () => { collectForm(); F.tab = t.dataset.tab; renderForm(); });
+  $('#fBack').onclick = async () => { if (await leaveForm()) openList(F.entity, true); };
+  if ($('#fSave')) $('#fSave').onclick = () => saveForm(false);
+  if ($('#fSaveClose')) $('#fSaveClose').onclick = () => saveForm(true);
+  if ($('#fNew')) $('#fNew').onclick = async () => { if (await leaveForm()) openForm(F.entity, null); };
+  if ($('#fDel')) $('#fDel').onclick = () => deleteRecords(F.entity, [String(F.key)], () => { S.form = null; openList(F.entity, true); });
+  if ($('#fRef')) $('#fRef').onclick = async () => { if (await leaveForm()) { await loadRows(F.entity); openForm(F.entity, F.key); } };
+
+  bindFormInputs(body);
+}
+
+function headerMeta(cfg, d) {
+  const created = cfg.fields.find(f => f.system && /^Created(At|DateTime)$/.test(f.name));
+  return [created && `<div><small>${esc(created.label)}</small>${esc(d[created.name])}</div>`,
+    d.ModifiedAt && `<div><small>آخر تعديل</small>${esc(d.ModifiedAt)}</div>`].filter(Boolean).join('');
+}
+
+function generalTab(cfg, d, editable) {
+  const fields = cfg.fields.filter(f => !f.system);
+  const groups = {};
+  fields.forEach(f => { const s = f.section || 'معلومات عامة'; (groups[s] = groups[s] || []).push(f); });
+  let html = '<div class="sections">';
+  Object.keys(groups).forEach(s => {
+    html += `<div class="section"><h3>${esc(s)}</h3>${groups[s].map(f => fieldRow(f, d[f.name], editable)).join('')}`;
+    if (S.form.entity === 'users' && s === 'الحالة والأمان') html += passwordFields(editable);
+    html += '</div>';
+  });
+  return html + '</div>';
+}
+
+function passwordFields(editable) {
+  if (!editable) return '';
+  const add = S.form.mode === 'add';
+  const d = S.form.data;
+  return fieldRow({ name: 'Password', label: add ? 'كلمة المرور' : 'كلمة مرور جديدة', type: 'password', required: add }, d.Password || '', true,
+      add ? '8 أحرف على الأقل وتحتوي على حروف وأرقام — تُحفظ مشفرة' : 'اتركها فارغة إذا لا تريد تغييرها')
+    + fieldRow({ name: 'ConfirmPassword', label: 'تأكيد كلمة المرور', type: 'password', required: add }, d.ConfirmPassword || '', true);
+}
+
+function permsTab(d, editable) {
+  const acts = S.boot.actions;
+  const admin = !!d.IsAdmin;
+  const perms = d._perms || {};
+  const dis = !editable || admin ? 'disabled' : '';
+  const pages = S.boot.pages;
+  const colAll = (a) => { const ps = pages.filter(p => p.actions.includes(a)); return ps.length && ps.every(p => admin || (perms[p.key] || []).includes(a)); };
+  return `<div class="section">
+    <h3>صلاحيات المستخدم على مستوى الصفحة والإجراء</h3>
+    ${admin ? '<div class="notice info" style="margin-bottom:8px">مدير النظام يملك جميع الصلاحيات تلقائياً.</div>' : ''}
+    <div style="overflow:auto"><table class="perm"><thead><tr><th>الصفحة</th>
+      ${acts.map(a => `<th><label><input type="checkbox" data-col="${a.key}" ${colAll(a.key) ? 'checked' : ''} ${dis}> ${esc(a.label)}</label></th>`).join('')}
+      <th>الكل</th></tr></thead><tbody>
+      ${pages.map(p => {
+        const has = (a) => admin || (perms[p.key] || []).includes(a);
+        const rowAll = p.actions.every(has);
+        return `<tr class="${p.phase ? 'p2' : ''}"><td>${esc(p.title)}</td>
+          ${acts.map(a => p.actions.includes(a.key)
+            ? `<td><input type="checkbox" data-p="${p.key}" data-a="${a.key}" ${has(a.key) ? 'checked' : ''} ${dis} aria-label="${esc(p.title + ' - ' + a.label)}"></td>`
+            : '<td class="na">—</td>').join('')}
+          <td><input type="checkbox" data-row="${p.key}" ${rowAll ? 'checked' : ''} ${dis}></td></tr>`;
+      }).join('')}
+    </tbody></table></div>
+    <div class="hint" style="margin-top:8px">منح أي إجراء (إضافة/تعديل/حذف/ترحيل) يمنح صلاحية العرض تلقائياً.</div>
+  </div>`;
+}
+
+function setPerm(page, action, on) {
+  const P = S.form.data._perms = S.form.data._perms || {};
+  const pg = pageOf(page);
+  let list = new Set(P[page] || []);
+  if (on) { list.add(action); if (action !== 'view') list.add('view'); }
+  else { list.delete(action); if (action === 'view') list = new Set(); }
+  P[page] = pg.actions.filter(a => list.has(a));
+}
+
+function bindFormInputs(body) {
+  const F = S.form;
+  $$('[data-f]', body).forEach(el => {
+    const ev = el.type === 'checkbox' || el.tagName === 'SELECT' ? 'change' : 'input';
+    el.addEventListener(ev, () => {
+      el.classList.remove('invalid');
+      if (F.notice) { F.notice = null; const n = $('.notice.err'); if (n) n.remove(); }
+      collectForm();
+      if (!F.dirty) { F.dirty = true; const t = $('.fh-title'); if (t) t.insertAdjacentHTML('beforeend', ' <span class="fh-sub">- غير محفوظ</span>'); }
+      // تعبئة الحقول المشتقة (مثل اسم الحساب)
+      const cfg = cfgOf(F.entity);
+      cfg.fields.filter(f => f.derive && f.derive.from === el.dataset.f).forEach(f => {
+        const o = (S.boot.options[f.derive.entity] || []).find(x => x.v === el.value);
+        F.data[f.name] = o ? o.name : '';
+        const t = $('#f_' + f.name); if (t) t.value = F.data[f.name];
+      });
+    });
+  });
+  // مصفوفة الصلاحيات
+  const markDirty = () => { F.dirty = true; renderForm(); };
+  $$('[data-p]', body).forEach(c => c.onchange = () => { setPerm(c.dataset.p, c.dataset.a, c.checked); markDirty(); });
+  $$('[data-row]', body).forEach(c => c.onchange = () => { pageOf(c.dataset.row).actions.forEach(a => setPerm(c.dataset.row, a, c.checked)); markDirty(); });
+  $$('[data-col]', body).forEach(c => c.onchange = () => {
+    S.boot.pages.filter(p => p.actions.includes(c.dataset.col)).forEach(p => setPerm(p.key, c.dataset.col, c.checked)); markDirty();
+  });
+}
+
+function collectForm() {
+  const F = S.form;
+  if (!F) return;
+  $$('#formBody [data-f]').forEach(el => {
+    if (el.disabled) return;
+    F.data[el.dataset.f] = el.type === 'checkbox' ? el.checked : el.value;
+  });
+}
+
+function validateForm() {
+  const F = S.form, cfg = cfgOf(F.entity);
+  const missing = cfg.fields.filter(f => f.required && !f.system && !f.derive && !(f.name === cfg.key && cfg.autoKey) &&
+    (F.data[f.name] === '' || F.data[f.name] == null));
+  if (F.entity === 'users' && F.mode === 'add' && !F.data.Password) missing.push({ name: 'Password', label: 'كلمة المرور' });
+  if (missing.length) {
+    if (F.tab !== 'general') { F.tab = 'general'; renderForm(); }
+    missing.forEach(f => { const el = $('#f_' + f.name); if (el) el.classList.add('invalid'); });
+    const first = $('#f_' + missing[0].name); if (first) first.focus();
+    return 'الحقول التالية مطلوبة: ' + missing.map(f => f.label).join('، ');
+  }
+  if (F.entity === 'users' && F.data.Password && F.data.Password !== F.data.ConfirmPassword) return 'كلمة المرور وتأكيدها غير متطابقين.';
+  return null;
+}
+
+async function saveForm(close) {
+  const F = S.form;
+  collectForm();
+  const err = validateForm();
+  if (err) { F.notice = { type: 'err', msg: err }; return renderFormKeepTab(); }
+  const btns = $$('.cmdbar .cmd'); btns.forEach(b => b.disabled = true);
+  try {
+    const rec = Object.assign({}, F.data);
+    const saved = await api('apiSave', S.token, F.entity, rec, F.mode, F.key);
+    const cfg = cfgOf(F.entity);
+    const k = String(saved[cfg.key]);
+    const i = S.rows.findIndex(r => String(r[cfg.key]) === (F.mode === 'add' ? k : String(F.key)));
+    if (i >= 0) S.rows[i] = saved; else S.rows.push(saved);
+    if (F.entity === 'accounts' || F.entity === 'lookups') await refreshOptions();
+    if (F.entity === 'users' && String(saved.UserId) === String(S.boot.user.id)) {
+      S.boot = await api('apiBootstrap', S.token); renderSitemap(); setActiveNav('users');
+    }
+    toast('تم الحفظ بنجاح', 'ok');
+    if (close) { S.form = null; return openList(F.entity, true); }
+    S.form = { entity: F.entity, mode: 'edit', key: k, data: JSON.parse(JSON.stringify(saved)), tab: F.tab, dirty: false, notice: null };
+    renderForm();
+  } catch (e) {
+    F.notice = { type: 'err', msg: e.message };
+    renderFormKeepTab();
+  }
+}
+
+function renderFormKeepTab() { renderForm(); const n = $('.notice.err'); if (n) n.scrollIntoView({ block: 'nearest' }); }
+
+async function leaveForm() {
+  if (!S.form || !S.form.dirty) return true;
+  collectForm();
+  const ok = await confirmDlg('تغييرات غير محفوظة', 'لديك تغييرات غير محفوظة في هذا السجل. هل تريد المتابعة وتجاهلها؟', 'تجاهل التغييرات', true);
+  if (ok) S.form.dirty = false;
+  return ok;
+}
+
+/* ---------------- تغيير كلمة المرور ---------------- */
+function changePasswordDlg(forced) {
+  dialog(`<h2>تغيير كلمة المرور</h2>
+    ${forced ? '<p>يجب تغيير كلمة المرور المؤقتة قبل المتابعة.</p>' : ''}
+    <label>كلمة المرور الحالية<input type="password" id="cpOld" autocomplete="current-password"></label>
+    <label>كلمة المرور الجديدة<input type="password" id="cpNew" autocomplete="new-password"></label>
+    <label>تأكيد كلمة المرور الجديدة<input type="password" id="cpConf" autocomplete="new-password"></label>
+    <div class="form-error" id="cpErr"></div>
+    <div class="actions"><button class="btn primary" id="cpOk">حفظ</button>${forced ? '<button class="btn" id="cpOut">تسجيل الخروج</button>' : '<button class="btn" id="cpNo">إلغاء</button>'}</div>`,
+    (d, close) => {
+      $('#cpOk', d).onclick = async () => {
+        $('#cpErr', d).textContent = '';
+        try {
+          await api('apiChangePassword', S.token, $('#cpOld', d).value, $('#cpNew', d).value, $('#cpConf', d).value);
+          S.boot.user.mustChangePassword = false;
+          close(); toast('تم تغيير كلمة المرور', 'ok');
+        } catch (e) { $('#cpErr', d).textContent = e.message; }
+      };
+      if ($('#cpNo', d)) $('#cpNo', d).onclick = close;
+      if ($('#cpOut', d)) $('#cpOut', d).onclick = () => { close(); logout(); };
+    });
+}
+
+/* ---------------- الربط العام ---------------- */
+hydrateIcons();
+$('#navToggle').onclick = () => $('#sitemap').classList.toggle('collapsed');
+$('#avatarBtn').onclick = (e) => { e.stopPropagation(); $('#userDrop').classList.toggle('hidden'); };
+document.addEventListener('click', (e) => { if (!e.target.closest('.usermenu')) $('#userDrop').classList.add('hidden'); });
+$('#btnLogout').onclick = () => { $('#userDrop').classList.add('hidden'); logout(); };
+$('#btnChangePw').onclick = () => { $('#userDrop').classList.add('hidden'); changePasswordDlg(false); };
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && S.form && formEditable()) { e.preventDefault(); saveForm(false); }
+  if (e.key === 'Escape' && $('#modalRoot').innerHTML) { const no = $('#modalRoot [data-no], #cpNo'); if (no) no.click(); }
+});
+
+(async function start() {
+  S.token = load('tk');
+  if (!S.token) return showLogin();
+  try { await boot(); } catch (e) { endSession(); showLogin(); }
+})();
+</script>

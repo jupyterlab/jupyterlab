@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <?!= include('Styles'); ?>
+</head>
+<body>
+  <div id="progress" class="progress"><span></span><span></span><span></span><span></span><span></span></div>
+
+  <!-- شاشة الدخول -->
+  <section id="login" class="login hidden">
+    <form id="loginForm" class="login-card" autocomplete="on">
+      <div class="login-brand"><span class="logo">ج</span><div><b id="loginApp">نظام إدارة المشروعات الخيرية</b><small>تسجيل الدخول</small></div></div>
+      <label>اسم المستخدم<input id="lgUser" name="username" autocomplete="username" required></label>
+      <label>كلمة المرور<input id="lgPass" name="password" type="password" autocomplete="current-password" required></label>
+      <div id="lgErr" class="form-error"></div>
+      <button class="btn primary block" type="submit">دخول</button>
+    </form>
+  </section>
+
+  <!-- التطبيق -->
+  <div id="app" class="hidden">
+    <header class="topbar">
+      <button class="tb-btn" id="navToggle" title="القائمة" data-icon="menu"></button>
+      <span class="tb-title" id="appTitle"></span>
+      <span class="tb-sep"></span>
+      <span class="tb-area" id="areaTitle"></span>
+      <span class="spacer"></span>
+      <div class="usermenu">
+        <button class="avatar" id="avatarBtn" title=""></button>
+        <div class="dropdown hidden" id="userDrop">
+          <div class="dd-head"><b id="ddName"></b><small id="ddMail"></small></div>
+          <button id="btnChangePw"><i data-icon="key"></i>تغيير كلمة المرور</button>
+          <button id="btnLogout"><i data-icon="logout"></i>تسجيل الخروج</button>
+        </div>
+      </div>
+    </header>
+    <div class="shell">
+      <nav class="sitemap" id="sitemap"></nav>
+      <main class="main" id="main"></main>
+    </div>
+  </div>
+
+  <div id="modalRoot"></div>
+  <div id="toasts" class="toasts"></div>
+
+  <?!= include('App'); ?>
+</body>
+</html>
