@@ -482,7 +482,7 @@ describe('@jupyterlab/apputils', () => {
         };
       }
 
-      it('should recreate and track widgets from saved command arguments', async () => {
+      it('should recreate widgets from saved arguments and persist changes', async () => {
         const data = { id: 'saved-widget', label: 'Saved title' };
         await state.save(`${namespace}:${data.id}`, { data });
         await state.save('another-tracker:ignored', {
@@ -492,15 +492,22 @@ describe('@jupyterlab/apputils', () => {
         await tracker.restore(createRestoreOptions());
 
         expect(tracker.size).toBe(1);
-        const widget = tracker.find(widget => widget.id === data.id);
-        expect(widget).toBe(widgets[0]);
-        expect(widget?.title.label).toBe(data.label);
+        const [widget] = widgets;
+        expect(tracker.find(widget => widget.id === data.id)).toBe(widget);
+        expect(widget.title.label).toBe(data.label);
         expect(await state.fetch(`${namespace}:${data.id}`)).toEqual({ data });
         await expect(tracker.restored).resolves.toBeUndefined();
+
+        widget.title.label = 'Updated title';
+        await tracker.save(widget);
+        expect(await state.fetch(`${namespace}:${data.id}`)).toEqual({
+          data: { ...data, label: 'Updated title' }
+        });
       });
 
-      it('should wait for prerequisites and command completion', async () => {
-        const ready = new PromiseDelegate<void>();
+      it('should wait for all prerequisites and command completion', async () => {
+        const appReady = new PromiseDelegate<void>();
+        const extensionReady = new PromiseDelegate<void>();
         const commandGate = new PromiseDelegate<void>();
         const nextTurn = () =>
           new Promise<void>(resolve => setTimeout(resolve, 0));
@@ -509,7 +516,7 @@ describe('@jupyterlab/apputils', () => {
 
         let commandStarted = false;
         let trackerRestored = false;
-        const restored = tracker.restored.then(() => {
+        void tracker.restored.then(() => {
           trackerRestored = true;
         });
         const restoring = tracker.restore({
@@ -517,22 +524,27 @@ describe('@jupyterlab/apputils', () => {
             commandStarted = true;
             return commandGate.promise;
           }),
-          when: ready.promise
+          when: [appReady.promise, extensionReady.promise]
         });
 
         await nextTurn();
-        const startedBeforeReady = commandStarted;
-        ready.resolve(undefined);
+        const startedBeforeAppReady = commandStarted;
+        appReady.resolve(undefined);
         await nextTurn();
-        const startedAfterReady = commandStarted;
+        const startedBeforeExtensionReady = commandStarted;
+        extensionReady.resolve(undefined);
+        await nextTurn();
+        const startedAfterExtensionReady = commandStarted;
         const restoredBeforeCommandCompleted = trackerRestored;
 
         commandGate.resolve(undefined);
-        await Promise.all([restored, restoring]);
+        await restoring;
 
-        expect(startedBeforeReady).toBe(false);
-        expect(startedAfterReady).toBe(true);
+        expect(startedBeforeAppReady).toBe(false);
+        expect(startedBeforeExtensionReady).toBe(false);
+        expect(startedAfterExtensionReady).toBe(true);
         expect(restoredBeforeCommandCompleted).toBe(false);
+        expect(trackerRestored).toBe(true);
         expect(tracker.size).toBe(1);
       });
 
