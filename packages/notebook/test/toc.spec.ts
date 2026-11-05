@@ -1,12 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { IWidgetTracker } from '@jupyterlab/apputils';
 import { Sanitizer } from '@jupyterlab/apputils';
-import type { Cell } from '@jupyterlab/cells';
+import type { Cell, MarkdownCell } from '@jupyterlab/cells';
 import type { Context } from '@jupyterlab/docregistry';
 import type {
   INotebookModel,
+  INotebookTracker,
   KernelError,
   NotebookPanel
 } from '@jupyterlab/notebook';
@@ -17,6 +17,8 @@ import {
 } from '@jupyterlab/notebook';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 import { signalToPromise } from '@jupyterlab/testing';
+import { TableOfContents } from '@jupyterlab/toc';
+import { Widget } from '@lumino/widgets';
 import * as utils from './utils';
 
 class TestKernelError extends Error {
@@ -174,41 +176,72 @@ describe('@jupyterlab/notebook', () => {
   });
 
   describe('NotebookToCFactory', () => {
-    it('refreshes the heading element after a cell is re-rendered', async () => {
-      const context = await NBTestUtils.createMockContext(false);
-      const panel = utils.createNotebookPanel(context);
+    const sanitizer = new Sanitizer();
+    let context: Context<INotebookModel>;
+    let panel: NotebookPanel;
+    let cell: MarkdownCell;
+    let model: NotebookToCModel;
+
+    beforeEach(async () => {
+      context = await NBTestUtils.createMockContext(false);
+      panel = utils.createNotebookPanel(context);
       panel.model!.sharedModel.insertCells(0, [
         { cell_type: 'markdown', source: '# heading' }
       ]);
-
-      const cell = panel.content.widgets[0];
+      // Markdown cells only render once attached
+      Widget.attach(panel, document.body);
+      cell = panel.content.widgets[0] as MarkdownCell;
       cell.inViewport = true;
+      await new Promise(resolve => setTimeout(resolve, 50));
 
-      const rendermime = utils.defaultRenderMime();
       const factory = new NotebookToCFactory(
-        { has: () => true } as unknown as IWidgetTracker<NotebookPanel>,
-        rendermime.markdownParser,
+        { has: () => true } as unknown as INotebookTracker,
+        panel.content.rendermime.markdownParser,
         sanitizer,
         undefined
       );
-      const model = factory.createNew(panel);
+      model = factory.createNew(panel, {
+        ...TableOfContents.defaultConfig,
+        numberHeaders: true
+      }) as NotebookToCModel;
       await model.refresh();
       await new Promise(resolve => setTimeout(resolve, 0));
+    });
 
+    afterEach(() => {
+      panel.dispose();
+      context.dispose();
+    });
+
+    it('scrolls to the current heading element after it was replaced', async () => {
       const heading = model.headings[0];
       const initialHeading = cell.node.querySelector('h1');
       expect(initialHeading).not.toBeNull();
       const currentHeading = initialHeading!.cloneNode(true) as HTMLElement;
       initialHeading!.replaceWith(currentHeading);
-      const scrollIntoView = jest
-        .spyOn(currentHeading, 'scrollIntoView')
-        .mockImplementation(() => undefined);
+      // jsdom does not implement scrollIntoView
+      const scrollIntoView = jest.fn();
+      currentHeading.scrollIntoView = scrollIntoView;
 
       model.setActiveHeading(heading);
       await new Promise(resolve => setTimeout(resolve, 0));
 
       expect(scrollIntoView).toHaveBeenCalledWith({ block: 'start' });
-      context.dispose();
+    });
+
+    it('numbers the heading again after its cell is re-rendered', async () => {
+      const numbering = () => cell.node.querySelector('h1 > .numbering-entry');
+      expect(numbering()).not.toBeNull();
+
+      cell.rendered = false;
+      await signalToPromise(cell.renderedChanged);
+      cell.model.sharedModel.setSource('# heading\n\nsome text');
+      cell.rendered = true;
+      await signalToPromise(cell.renderedChanged);
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      expect(cell.node.querySelector('h1')).not.toBeNull();
+      expect(numbering()).not.toBeNull();
     });
   });
 });

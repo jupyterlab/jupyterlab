@@ -768,6 +768,13 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       // Create a new mapping
       headingToElement = new WeakMap<INotebookHeading, Element | null>();
 
+      for (const cell of widget.content.widgets) {
+        if (cell instanceof MarkdownCell) {
+          // No-op if already connected
+          cell.renderedChanged.connect(onMarkdownCellRendered);
+        }
+      }
+
       return Promise.all(
         widget.content.widgets.map(cell => findHeadingElement(cell))
       );
@@ -816,6 +823,14 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       }
     };
 
+    const onMarkdownCellRendered = (cell: MarkdownCell, rendered: boolean) => {
+      if (rendered) {
+        // Rendering replaces the heading elements: map the new ones,
+        // which also restores their numbering.
+        findHeadingElement(cell).catch(console.warn);
+      }
+    };
+
     void widget.context.ready.then(() => {
       onHeadingsChanged(model)?.catch(console.warn);
 
@@ -832,6 +847,11 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
         widget.content.cellInViewportChanged.disconnect(
           onCellInViewportChanged
         );
+        for (const cell of widget.content.widgets) {
+          if (cell instanceof MarkdownCell) {
+            cell.renderedChanged.disconnect(onMarkdownCellRendered);
+          }
+        }
       });
     });
 
