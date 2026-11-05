@@ -947,6 +947,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       );
       this._currentProviderIndex = firstSelectedCellIndex;
     }
+    // Search the new selection before choosing a current match in it.
+    await this._setEnginesSelectionSearchMode();
     await this._ensureCurrentMatch();
     this._filtersChanged.emit();
   }

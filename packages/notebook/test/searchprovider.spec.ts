@@ -216,6 +216,43 @@ describe('@jupyterlab/notebook', () => {
           await provider.endQuery();
         }
       );
+
+      it('should notify with the current match after extending a line selection to cells', async () => {
+        panel.model!.cells.get(0).sharedModel.setSource('abc\ntest');
+        panel.model!.cells.get(1).sharedModel.setSource('');
+        panel.content.mode = 'edit';
+        await setSelections(panel.content.activeCell!.editor!, [
+          {
+            uuid: 'main-selection',
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 3 }
+          }
+        ]);
+        await provider.startQuery(/test/, { selection: true });
+        expect(provider.matchesCount).toBe(0);
+
+        const observed: { current: number | null; count: number | null }[] = [];
+        provider.filtersChanged.connect(() => {
+          observed.push({
+            current: provider.currentMatchIndex,
+            count: provider.matchesCount
+          });
+        });
+
+        // Shift-click on the prompt of the empty cell below
+        const extended = signalToPromise(provider.filtersChanged);
+        panel.content.extendContiguousSelectionTo(1);
+        await extended;
+        await provider.cellChangeHandled;
+
+        expect(provider.currentMatchIndex).toBe(0);
+        expect(observed.at(-1)).toEqual({ current: 0, count: 1 });
+        expect(await provider.replaceCurrentMatch('replaced')).toBe(true);
+        expect(panel.model!.cells.get(0).sharedModel.getSource()).toBe(
+          'abc\nreplaced'
+        );
+        await provider.endQuery();
+      });
     });
 
     describe('#replaceableMatchesCount', () => {
