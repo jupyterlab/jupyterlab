@@ -40,6 +40,16 @@
   font-weight: normal;
 }
 
+.jp-extensionmanager-browse {
+  margin: 4px 10px;
+}
+
+.jp-extensionmanager-browse a {
+  color: var(--jp-content-link-color);
+  text-decoration: underline;
+  text-transform: none;
+}
+
 .jp-extensionmanager-disclaimer {
   padding: 0 8px;
   min-height: 160px;
