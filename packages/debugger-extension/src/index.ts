@@ -1469,12 +1469,13 @@ const debuggerCompletions: JupyterFrontEndPlugin<void> = {
   description: 'Provides debugger-based completions.',
   autoStart: true,
   requires: [IDebugger, ICompletionProviderManager],
-  optional: [ITranslator],
+  optional: [ITranslator, ISettingRegistry],
   activate: (
     app: JupyterFrontEnd,
     debuggerService: IDebugger,
     completionManager: ICompletionProviderManager,
-    translator: ITranslator | null
+    translator: ITranslator | null,
+    settingRegistry: ISettingRegistry | null
   ): void => {
     const isDebugConsole = (context?: ICompletionContext) =>
       !!context?.widget.hasClass('jp-DebugConsole');
@@ -1492,6 +1493,31 @@ const debuggerCompletions: JupyterFrontEndPlugin<void> = {
       isDebugConsole
     });
     completionManager.registerProvider(ipythonProvider);
+
+    if (settingRegistry) {
+      void app.restored
+        .then(async () => {
+          const settings = await settingRegistry.load(
+            '@jupyterlab/completer-extension:manager'
+          );
+          const providers = settings.get('availableProviders').user;
+          if (
+            providers &&
+            typeof providers === 'object' &&
+            'DebuggerCompletionProvider' in providers &&
+            !('DebuggerIPythonCompletionProvider' in providers)
+          ) {
+            const rank = providers.DebuggerCompletionProvider;
+            if (typeof rank === 'number') {
+              await settings.set('availableProviders', {
+                ...providers,
+                DebuggerIPythonCompletionProvider: rank < 0 ? rank : rank + 1
+              });
+            }
+          }
+        })
+        .catch(console.error);
+    }
   }
 };
 
