@@ -77,6 +77,16 @@ test.describe('Table of Contents scrolling to heading', () => {
   test('Notebook scrolls to a heading after its cell was edited', async ({
     page
   }) => {
+    // The ToC numbers a heading once it has mapped it to its element
+    await page
+      .getByRole('button', { name: 'Show heading number in the document' })
+      .click();
+    await expect(
+      page
+        .locator('.jp-Notebook h2', { hasText: 'another one' })
+        .locator('.numbering-entry')
+    ).toHaveText('1.2.');
+
     // Rendering the edited cell replaces its heading element
     await page.notebook.enterCellEditingMode(2);
     await page.keyboard.press('ControlOrMeta+End');
@@ -105,7 +115,7 @@ test.describe('Table of Contents scrolling to heading', () => {
     await waitForNotebookScrollEnd(page);
     const expected = await headingOffset('a subtitle');
 
-    // Without the fix, the heading stays below the previous section
+    // The heading of the edited cell is scrolled to the same place
     await toc.getByText('another one').click();
     await waitForNotebookScrollEnd(page);
     const offset = await headingOffset('another one');
