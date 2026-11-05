@@ -450,6 +450,24 @@ test(
 `
 );
 
+test(
+  'Block math $$ opened on a line with $$ in a code span',
+  '\n{MaBD:{maBD:$$} `$$`\na\n{maBD:$$}}\n'
+);
+
+test(
+  'Block math $$ containing $$ in a code span',
+  '\n{MaBD:{maBD:$$}\na `$$` b\n{maBD:$$}}\n'
+);
+
+test(
+  'Setext heading text with an unpaired $$ is a paragraph',
+  `
+{P:Making $$ with Python
+===}
+`
+);
+
 // Block math \\[ \\]
 
 test(
