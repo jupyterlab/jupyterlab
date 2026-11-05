@@ -1,0 +1,381 @@
+<script>
+/* =========================================================
+ *  المرحلة الثانية: السندات (رأس + سطور)، الترحيل، الطباعة، أرصدة المشروعات
+ *  تعتمد على الأدوات المعرّفة في App.html (S, api, icon, esc, $ ...)
+ *  ودالة calcDoc_ المشتركة مع الخادم.
+ * ========================================================= */
+const CUR = [['KWD', 'دينار', 3], ['USD', 'دولار', 2], ['DJF', 'فرنك', 0]];
+/** قيمة هذا السند بكل عملة بعد تحويله بمتوسط سعر تحويلات المشروع */
+function voucherEq(b, h) {
+  const t = { KWD: h.TotalKWD || 0, USD: h.TotalUSD || 0, DJF: h.TotalDJF || 0 };
+  if (!b || !b.rUSD || !b.rDJF) return t;
+  const kwd = t.KWD + t.USD / b.rUSD + t.DJF / b.rDJF;
+  return { KWD: kwd, USD: kwd * b.rUSD, DJF: kwd * b.rDJF };
+}
+const todayStr = () => { const d = new Date(), p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`; };
+
+function newLine(cfg) {
+  const l = {};
+  cfg.lines.fields.forEach(f => { l[f.name] = f.default !== undefined ? f.default : ''; });
+  return l;
+}
+
+async function openDoc(entity, key) {
+  const cfg = cfgOf(entity);
+  if (!S.view || S.view.entity !== entity) { S.sel = new Set(); S.search = ''; S.sort = null; S.pageNo = 1; S.viewId = 'default'; }
+  let header, lines, balance = null;
+  if (key != null) {
+    try {
+      const d = await api('apiGetDoc', S.token, entity, key);
+      header = d.header; lines = d.lines; balance = d.balance || null;
+    } catch (e) { return toast(e.message, 'err'); }
+  } else {
+    header = { Status: 'Draft', Date: todayStr() };
+    lines = [newLine(cfg)];
+  }
+  S.view = { type: 'form', entity };
+  S.form = { entity, doc: true, mode: key == null ? 'add' : 'edit', key, data: header, lines, balance, tab: 'general', dirty: false, notice: null };
+  renderDoc();
+}
+
+function docPosted() { return S.form && S.form.data.Status === 'Posted'; }
+function docEditable() {
+  const F = S.form, cfg = cfgOf(F.entity);
+  return !docPosted() && can(cfg.page, F.mode === 'add' ? 'add' : 'edit');
+}
+
+function optionsFor(f) {
+  if (f.source.static) return f.source.static;
+  if (f.source.entity) return S.boot.options[f.source.entity] || [];
+  if (f.source.lookup) return S.boot.options['lookup_' + f.source.lookup] || [];
+  return [];
+}
+
+function lineCell(f, l, i, editable) {
+  const v = l[f.name];
+  const isNum = f.type === 'number';
+  if (f.name === 'LineId') return `<td class="ro num">${i + 1}</td>`;
+  if (!editable || f.calc || f.derive) {
+    const shown = isNum ? fmtNum(v, f.decimals || 0) : displayValue(f, v);
+    return `<td class="ro ${isNum ? 'num' : ''}" data-lc="${f.name}" data-i="${i}">${shown}</td>`;
+  }
+  const a = `class="ctrl ${isNum ? 'num' : ''}" data-lf="${f.name}" data-i="${i}" aria-label="${esc(f.label)} - سطر ${i + 1}"`;
+  if (f.type === 'select') {
+    const opts = optionsFor(f);
+    const has = v === '' || v == null || opts.some(o => o.v === String(v));
+    return `<td><select ${a}><option value="">--- اختر ---</option>
+      ${!has ? `<option value="${esc(v)}" selected>${esc(v)}</option>` : ''}
+      ${opts.map(o => `<option value="${esc(o.v)}" ${String(v) === o.v ? 'selected' : ''}>${esc(o.l)}</option>`).join('')}</select></td>`;
+  }
+  if (isNum) {
+    const step = f.decimals ? (1 / Math.pow(10, f.decimals)).toFixed(f.decimals) : 1;
+    return `<td><input type="number" min="0" step="${step}" ${a} value="${esc(v)}"></td>`;
+  }
+  return `<td><input type="text" ${a} value="${esc(v)}"></td>`;
+}
+
+function renderDoc() {
+  const F = S.form, cfg = cfgOf(F.entity), d = F.data;
+  const editable = docEditable();
+  const posted = docPosted();
+  const title = F.mode === 'add' ? `${cfg.singular} جديد` : d[cfg.key];
+  const L = cfg.lines;
+  const tabs = [{ id: 'general', label: 'عام' }];
+  if (F.mode === 'edit') tabs.push({ id: 'system', label: 'معلومات النظام' });
+
+  const main = $('#main');
+  main.innerHTML = `
+    <div class="cmdbar">
+      <button class="cmd" id="fBack" title="رجوع">${icon('back')}</button>
+      ${editable ? `<button class="cmd" id="fSave">${icon('save')}<span>حفظ</span></button>
+        <button class="cmd" id="fSaveClose">${icon('saveclose')}<span>حفظ وإغلاق</span></button>` : ''}
+      ${can(cfg.page, 'add') ? `<button class="cmd" id="fNew">${icon('add')}<span>جديد</span></button>` : ''}
+      ${F.mode === 'edit' && !posted && can(cfg.page, 'delete') ? `<button class="cmd danger" id="fDel">${icon('del')}<span>حذف</span></button>` : ''}
+      ${F.mode === 'edit' && !posted && can(cfg.page, 'post') ? `<span class="cmd-sep"></span><button class="cmd" id="fPost">${icon('post')}<span>ترحيل</span></button>` : ''}
+      ${posted && can(cfg.page, 'post') && S.boot.user.isAdmin ? `<span class="cmd-sep"></span><button class="cmd" id="fUnpost">${icon('unpost')}<span>إلغاء الترحيل</span></button>` : ''}
+      ${F.mode === 'edit' ? `<span class="cmd-sep"></span><button class="cmd" id="fPrint">${icon('print')}<span>طباعة</span></button>
+        <button class="cmd" id="fRef">${icon('refresh')}<span>تحديث</span></button>` : ''}
+    </div>
+    ${F.notice ? `<div class="notice ${F.notice.type}">${esc(F.notice.msg)}</div>` : ''}
+    ${posted ? `<div class="notice ok">${icon('lock')} هذا السند مرحّل${d.PostedAt ? ' بتاريخ ' + esc(d.PostedAt) : ''}${d.PostedBy ? ' بواسطة ' + esc(d.PostedBy) : ''} ولا يمكن تعديله أو حذفه.</div>`
+      : (!editable ? `<div class="notice info">${icon('lock')} هذا السند للقراءة فقط وفق صلاحياتك.</div>` : '')}
+    <div class="form-head">
+      <div class="fh-row">
+        <div class="fh-icon">${icon(cfg.icon)}</div>
+        <div><div class="fh-title">${esc(title)}${F.dirty ? ' <span class="fh-sub">- غير محفوظ</span>' : ''}</div>
+          <div class="fh-sub">${esc(cfg.singular)} · ${displayValue(cfg.fields.find(f => f.name === 'Status'), d.Status || 'Draft')}</div></div>
+        <div class="fh-meta" id="fhTotals"></div>
+      </div>
+      <div class="tabs">${tabs.map(t => `<button class="tab ${F.tab === t.id ? 'active' : ''}" data-tab="${t.id}">${t.label}</button>`).join('')}</div>
+    </div>
+    <div class="content" id="formBody"></div>`;
+
+  const body = $('#formBody');
+  if (F.tab === 'system') {
+    body.innerHTML = `<div class="sections"><div class="section"><h3>معلومات النظام</h3>
+      ${cfg.fields.filter(f => f.system).map(f => fieldRow(f, d[f.name], false)).join('')}</div></div>`;
+  } else {
+    const cols = L.fields;
+    body.innerHTML = generalTab(cfg, d, editable) + `
+      <div class="lines-wrap">
+        <div class="lines-head"><h3>سطور السند (${F.lines.length})</h3><span class="spacer"></span>
+          ${editable ? `<button class="btn" id="addLine">${icon('add')} إضافة سطر</button>` : ''}</div>
+        <div class="lines-scroll"><table class="lines">
+          <thead><tr>${cols.map(f => `<th style="min-width:${f.width || 100}px">${esc(f.label)}${f.required && editable && !f.derive ? '<span class="req" style="color:var(--danger)">*</span>' : ''}</th>`).join('')}${editable ? '<th></th>' : ''}</tr></thead>
+          <tbody>${F.lines.length ? F.lines.map((l, i) => `<tr>${cols.map(f => lineCell(f, l, i, editable)).join('')}
+              ${editable ? `<td><button class="row-del" data-del="${i}" title="حذف السطر" aria-label="حذف السطر ${i + 1}">${icon('del')}</button></td>` : ''}</tr>`).join('')
+            : `<tr><td colspan="${cols.length + 1}" class="empty">لا توجد سطور</td></tr>`}</tbody>
+          ${F.entity === 'receipts' ? `<tfoot><tr>${cols.map((f, i) => i === 0 ? '<td>الإجمالي</td>'
+            : (f.type === 'number' && f.name !== 'LineId' ? `<td class="num" data-tot="${f.name}"></td>` : '<td></td>')).join('')}${editable ? '<td></td>' : ''}</tr></tfoot>` : ''}
+        </table></div>
+      </div>
+      <div class="totals" id="totals"></div>`;
+  }
+
+  $$('.tab', main).forEach(t => t.onclick = () => { collectDoc(); F.tab = t.dataset.tab; renderDoc(); });
+  $('#fBack').onclick = async () => { if (await leaveForm()) openList(F.entity, true); };
+  if ($('#fSave')) $('#fSave').onclick = () => saveDoc(false);
+  if ($('#fSaveClose')) $('#fSaveClose').onclick = () => saveDoc(true);
+  if ($('#fNew')) $('#fNew').onclick = async () => { if (await leaveForm()) openDoc(F.entity, null); };
+  if ($('#fDel')) $('#fDel').onclick = () => deleteRecords(F.entity, [String(F.key)], () => { S.form = null; openList(F.entity); });
+  if ($('#fPost')) $('#fPost').onclick = () => postDoc(false);
+  if ($('#fUnpost')) $('#fUnpost').onclick = () => postDoc(true);
+  if ($('#fPrint')) $('#fPrint').onclick = printDoc;
+  if ($('#fRef')) $('#fRef').onclick = async () => { if (await leaveForm()) openDoc(F.entity, F.key); };
+
+  if (F.tab === 'general') bindDoc(body, editable);
+  recalcDoc();
+}
+
+function markDocDirty() {
+  const F = S.form;
+  if (F.notice) { F.notice = null; const n = $('.notice.err'); if (n) n.remove(); }
+  if (!F.dirty) { F.dirty = true; const t = $('.fh-title'); if (t) t.insertAdjacentHTML('beforeend', ' <span class="fh-sub">- غير محفوظ</span>'); }
+}
+
+function bindDoc(body, editable) {
+  const F = S.form, cfg = cfgOf(F.entity);
+  bindFormInputs(body); // حقول الرأس + الحقول المشتقة
+  $$('[data-f]', body).forEach(el => {
+    el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', () => {
+      recalcDoc();
+      if (F.entity === 'payments' && el.dataset.f === 'ProjectId') loadBalance();
+    });
+  });
+  if (!editable) return;
+  $$('[data-lf]', body).forEach(el => {
+    el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', () => {
+      el.classList.remove('invalid');
+      const i = Number(el.dataset.i), l = F.lines[i];
+      l[el.dataset.lf] = el.value;
+      // الحقول المشتقة داخل السطر (حساب المشروع / اسم الحساب)
+      cfg.lines.fields.filter(f => f.derive && f.derive.from === el.dataset.lf).forEach(f => {
+        const o = (S.boot.options[f.derive.entity] || []).find(x => x.v === el.value);
+        l[f.name] = o ? (o[f.derive.field] != null ? o[f.derive.field] : '') : '';
+        const c = $(`[data-lc="${f.name}"][data-i="${i}"]`); if (c) c.textContent = l[f.name];
+      });
+      markDocDirty();
+      recalcDoc();
+    });
+  });
+  const add = $('#addLine', body);
+  if (add) add.onclick = () => {
+    collectDoc(); F.lines.push(newLine(cfg)); F.dirty = true; renderDoc();
+    const last = $$('.lines tbody tr').pop(); const first = last && $('[data-lf]', last); if (first) first.focus();
+  };
+  $$('[data-del]', body).forEach(b => b.onclick = () => {
+    collectDoc(); F.lines.splice(Number(b.dataset.del), 1); F.dirty = true; renderDoc();
+  });
+}
+
+function collectDoc() {
+  const F = S.form;
+  if (!F) return;
+  collectForm();
+  $$('#formBody [data-lf]').forEach(el => { const l = F.lines[Number(el.dataset.i)]; if (l) l[el.dataset.lf] = el.value; });
+}
+
+/** يعيد الحساب محلياً (نفس دالة الخادم) ويحدّث الحقول المحسوبة والإجماليات */
+function recalcDoc() {
+  const F = S.form, cfg = cfgOf(F.entity);
+  const h = Object.assign({}, F.data);
+  const ls = F.lines.map(l => Object.assign({}, l));
+  calcDoc_(F.entity, h, ls);
+  F.calc = h;
+  cfg.fields.filter(f => f.calc).forEach(f => { const el = $('#f_' + f.name); if (el) el.value = fmtNum(h[f.name], f.decimals || 0); });
+  ls.forEach((l, i) => cfg.lines.fields.filter(f => f.calc && f.name !== 'LineId').forEach(f => {
+    const c = $(`[data-lc="${f.name}"][data-i="${i}"]`); if (c) c.textContent = fmtNum(l[f.name], f.decimals || 0);
+  }));
+  $$('[data-tot]').forEach(td => { const f = cfg.lines.fields.find(x => x.name === td.dataset.tot); td.textContent = fmtNum(ls.reduce((s, l) => s + (Number(l[f.name]) || 0), 0), f.decimals || 0); });
+  renderTotals();
+}
+
+function renderTotals() {
+  const F = S.form, h = F.calc || {};
+  const box = $('#totals'), meta = $('#fhTotals');
+  if (meta) meta.innerHTML = CUR.map(([c, n, d]) => `<div><small>إجمالي ${n}</small>${fmtNum(h['Total' + c], d)}</div>`).join('');
+  if (!box) return;
+  if (F.entity === 'receipts') {
+    const cards = CUR.map(([c, n, d]) => {
+      const diff = h._diff ? h._diff[c] : 0;
+      return `<div class="tot ${diff === 0 && F.lines.length ? 'ok' : 'bad'}"><h4>${n}</h4>
+        <div class="r"><span>قيمة التحويل</span><b>${fmtNum(F.data['Transfer' + c] || 0, d)}</b></div>
+        <div class="r"><span>إجمالي السطور</span><b>${fmtNum(h['Total' + c], d)}</b></div>
+        <div class="r"><span>الفرق</span><b class="${diff === 0 ? 'good' : 'diff'}">${diff === 0 ? '✓ 0' : fmtNum(diff, d)}</b></div></div>`;
+    }).join('');
+    box.innerHTML = cards + `<div class="tot ${h._balanced ? 'ok' : 'bad'}"><h4>حالة التوازن</h4>
+      <div class="r"><b class="${h._balanced ? 'good' : 'diff'}">${h._balanced ? '✓ متوازن — جاهز للترحيل' : '✗ غير متوازن: يجب أن يساوي إجمالي السطور قيمة التحويل بكل عملة'}</b></div></div>`;
+  } else {
+    const b = F.balance;
+    box.innerHTML = `<div class="tot"><h4>إجمالي السند</h4>${CUR.map(([c, n, d]) => `<div class="r"><span>${n}</span><b>${fmtNum(h['Total' + c], d)}</b></div>`).join('')}</div>`
+      + (b ? (() => { const eq = voucherEq(b, h); return `<div class="tot ${CUR.some(([c]) => (b['bal' + c] - eq[c]) < 0) ? 'bad' : 'ok'}"><h4>رصيد المشروع (من السندات المرحّلة)</h4>
+        <div class="r"><span></span><span>متاح / بعد هذا السند</span></div>
+        ${CUR.map(([c, n, d]) => { const after = b['bal' + c] - eq[c]; return `<div class="r"><span>${n}</span><b>${fmtNum(b['bal' + c], d)} / <span class="${after < 0 ? 'diff' : 'good'}">${fmtNum(after, d)}</span></b></div>`; }).join('')}
+        <div class="r"><small class="fh-sub">يُحوَّل الصرف بمتوسط سعر التحويلات الواردة للمشروع</small></div></div>`; })()
+        : `<div class="tot"><h4>رصيد المشروع</h4><div class="r"><span>اختر المشروع لعرض الرصيد المتاح</span></div></div>`);
+  }
+}
+
+async function loadBalance() {
+  const F = S.form;
+  const pid = F.data.ProjectId;
+  if (!pid) { F.balance = null; return renderTotals(); }
+  try { F.balance = await api('apiProjectBalance', S.token, pid, F.key || ''); } catch (e) { F.balance = null; }
+  if (S.form === F) renderTotals();
+}
+
+function validateDoc() {
+  const F = S.form, cfg = cfgOf(F.entity);
+  const headErr = validateForm();
+  if (headErr) return headErr;
+  const inputFields = cfg.lines.fields.filter(f => !f.calc && !f.derive);
+  const used = F.lines.map((l, i) => ({ l, i })).filter(({ l }) => inputFields.some(f => f.default === undefined && l[f.name] !== '' && l[f.name] != null));
+  if (!used.length) return 'أضف سطراً واحداً على الأقل.';
+  for (const { l, i } of used) {
+    for (const f of inputFields) {
+      const v = l[f.name];
+      const bad = (f.required && (v === '' || v == null)) || (f.positive && v !== '' && !(Number(v) > 0));
+      if (bad) {
+        const el = $(`[data-lf="${f.name}"][data-i="${i}"]`); if (el) { el.classList.add('invalid'); el.focus(); }
+        return `السطر ${i + 1}: ${f.positive && v !== '' ? 'يجب أن يكون "' + f.label + '" أكبر من صفر' : 'الحقل مطلوب: ' + f.label}`;
+      }
+    }
+  }
+  return null;
+}
+
+function applyDocResult(d) {
+  const F = S.form, cfg = cfgOf(F.entity);
+  const k = String(d.header[cfg.key]);
+  const i = S.rows.findIndex(r => String(r[cfg.key]) === k);
+  if (i >= 0) S.rows[i] = d.header; else S.rows.push(d.header);
+  S.form = { entity: F.entity, doc: true, mode: 'edit', key: k, data: d.header, lines: d.lines, balance: d.balance || null, tab: F.tab, dirty: false, notice: null };
+}
+
+async function saveDoc(close) {
+  const F = S.form;
+  collectDoc();
+  const err = validateDoc();
+  if (err) { F.notice = { type: 'err', msg: err }; renderDoc(); return; }
+  $$('.cmdbar .cmd').forEach(b => b.disabled = true);
+  try {
+    const d = await api('apiSaveDoc', S.token, F.entity, Object.assign({}, F.data), F.lines.map(l => Object.assign({}, l)), F.mode, F.key);
+    applyDocResult(d);
+    toast(`تم حفظ السند ${S.form.key}`, 'ok');
+    if (close) { S.form = null; return openList(F.entity, true); }
+    renderDoc();
+  } catch (e) { F.notice = { type: 'err', msg: e.message }; renderDoc(); }
+}
+
+async function postDoc(unpost) {
+  const F = S.form, h = F.calc || {};
+  if (F.dirty) return toast('احفظ التغييرات أولاً قبل الترحيل.', 'err');
+  let msg;
+  if (unpost) msg = 'سيعود السند إلى حالة "مسودة" ويمكن تعديله، وسيُستبعد من أرصدة المشروعات. متابعة؟';
+  else {
+    if (F.entity === 'receipts' && !h._balanced) { F.notice = { type: 'err', msg: 'لا يمكن الترحيل: إجمالي السطور لا يساوي قيمة التحويل بكل عملة.' }; return renderDoc(); }
+    msg = 'بعد الترحيل لا يمكن تعديل السند أو حذفه، ويدخل في أرصدة المشروعات. متابعة؟';
+    if (F.entity === 'payments' && F.balance) {
+      const eq = voucherEq(F.balance, h);
+      if (CUR.some(([c]) => (F.balance['bal' + c] - eq[c]) < 0)) msg = 'تنبيه: مبلغ الصرف يتجاوز رصيد المشروع المتاح. ' + msg;
+    }
+  }
+  if (!(await confirmDlg(unpost ? 'إلغاء الترحيل' : 'ترحيل السند', msg, unpost ? 'إلغاء الترحيل' : 'ترحيل', !!unpost))) return;
+  try {
+    const d = await api('apiPostDoc', S.token, F.entity, F.key, !!unpost);
+    applyDocResult(d);
+    toast(unpost ? 'تم إلغاء الترحيل' : 'تم ترحيل السند', 'ok');
+    renderDoc();
+  } catch (e) { F.notice = { type: 'err', msg: e.message }; renderDoc(); }
+}
+
+/* ---------------- الطباعة ---------------- */
+function printDoc() {
+  const F = S.form, cfg = cfgOf(F.entity), d = F.data, h = F.calc || d;
+  const plain = (f, v) => { const t = document.createElement('div'); t.innerHTML = displayValue(f, v); return esc(t.textContent); };
+  const headFields = cfg.fields.filter(f => !f.system && !f.hidden && f.name !== 'Status');
+  const cols = cfg.lines.fields;
+  const html = `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>${esc(cfg.singular)} ${esc(d[cfg.key])}</title>
+    <style>body{font-family:'Segoe UI',Tahoma,sans-serif;font-size:12px;margin:24px;color:#000}h1{font-size:20px;margin:0}
+    .top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #002050;padding-bottom:8px;margin-bottom:12px}
+    table{width:100%;border-collapse:collapse;margin-bottom:12px}td,th{border:1px solid #999;padding:4px 6px;text-align:right}
+    th{background:#eee}.hd td{border:0;padding:3px 6px}.hd td:nth-child(odd){color:#555;width:16%}.n{direction:ltr;text-align:left}
+    .sig{display:flex;justify-content:space-around;margin-top:48px}.sig div{text-align:center;width:22%;border-top:1px solid #000;padding-top:4px}
+    .stamp{font-weight:700;color:${d.Status === 'Posted' ? '#107c10' : '#a4262c'}}@media print{body{margin:10mm}}</style></head><body>
+    <div class="top"><div><b>${esc(S.boot.app.orgName)}</b><h1>${esc(cfg.singular)}</h1></div>
+      <div>رقم: <b>${esc(d[cfg.key])}</b><br><span class="stamp">${d.Status === 'Posted' ? 'مرحّل' : 'مسودة — غير مرحّل'}</span></div></div>
+    <table class="hd"><tr>${headFields.map((f, i) => `<td>${esc(f.label)}</td><td><b>${f.type === 'number' ? fmtNum(h[f.name], f.decimals || 0) : plain(f, d[f.name])}</b></td>${i % 3 === 2 ? '</tr><tr>' : ''}`).join('')}</tr></table>
+    <table><thead><tr>${cols.map(f => `<th>${esc(f.label)}</th>`).join('')}</tr></thead><tbody>
+      ${F.lines.map((l, i) => `<tr>${cols.map(f => f.name === 'LineId' ? `<td>${i + 1}</td>` : `<td class="${f.type === 'number' ? 'n' : ''}">${f.type === 'number' ? fmtNum(l[f.name], f.decimals || 0) : plain(f, l[f.name])}</td>`).join('')}</tr>`).join('')}
+    </tbody></table>
+    <table style="width:auto"><tr><th>العملة</th>${CUR.map(([, n]) => `<th>${n}</th>`).join('')}</tr>
+      <tr><td>الإجمالي</td>${CUR.map(([c, , dd]) => `<td class="n">${fmtNum(h['Total' + c], dd)}</td>`).join('')}</tr></table>
+    <div class="sig"><div>أعدّه</div><div>راجعه</div><div>اعتمده</div>${F.entity === 'payments' ? '<div>المستلم</div>' : ''}</div>
+    <p style="color:#777;margin-top:24px">طُبع بواسطة ${esc(S.boot.user.fullName)} — ${new Date().toLocaleString('en-GB')}</p>
+    <script>window.onload=function(){window.print();}<\/script></body></html>`;
+  const w = window.open('', '_blank');
+  if (!w) return toast('اسمح بالنوافذ المنبثقة لهذا الموقع لتتمكن من الطباعة.', 'err');
+  w.document.open(); w.document.write(html); w.document.close();
+}
+
+/* ---------------- تقرير أرصدة المشروعات ---------------- */
+async function openBalances() {
+  S.view = { type: 'balances', entity: 'balances' }; S.form = null;
+  const main = $('#main');
+  main.innerHTML = `
+    <div class="cmdbar"><button class="cmd" id="bRef">${icon('refresh')}<span>تحديث</span></button>
+      <button class="cmd" id="bExp">${icon('export')}<span>تصدير إلى Excel</span></button></div>
+    <div class="content">
+      <div class="view-head"><div class="view-title">${icon('chart')} أرصدة المشروعات <span class="fh-sub">(من السندات المرحّلة فقط — المصروف محوّل بمتوسط سعر التحويلات الواردة لكل مشروع)</span></div>
+        <div class="search">${icon('search')}<input id="bq" placeholder="بحث عن مشروع"></div></div>
+      <div class="grid-wrap" id="balWrap"><div class="empty">جارٍ التحميل…</div></div>
+    </div>`;
+  let rows = [];
+  const cols = [['ProjectId', 'المشروع'], ['Description', 'الوصف'], ['ProjectGroup', 'المجموعة']];
+  const nums = [];
+  CUR.forEach(([c, n, d]) => { nums.push(['in' + c, `وارد ${n}`, d], ['out' + c, `مصروف ${n}`, d], ['bal' + c, `رصيد ${n}`, d]); });
+  const filtered = () => { const q = $('#bq').value.trim().toLowerCase(); return rows.filter(r => !q || cols.some(([k]) => String(r[k] || '').toLowerCase().includes(q))); };
+  const draw = () => {
+    const list = filtered();
+    const sum = k => list.reduce((s, r) => s + (Number(r[k]) || 0), 0);
+    $('#balWrap').innerHTML = `<table class="grid"><thead><tr>${cols.map(([, l]) => `<th>${l}</th>`).join('')}${nums.map(([, l]) => `<th>${l}</th>`).join('')}</tr></thead>
+      <tbody>${list.length ? list.map(r => `<tr data-p="${esc(r.ProjectId)}">${cols.map(([k], i) => `<td class="${i === 0 ? 'link' : ''}">${esc(r[k])}</td>`).join('')}
+        ${nums.map(([k, , d]) => `<td class="num ${k.startsWith('bal') && r[k] < 0 ? 'diff' : ''}" style="${k.startsWith('bal') ? 'font-weight:600' : ''}${k.startsWith('bal') && r[k] < 0 ? ';color:var(--danger)' : ''}">${fmtNum(r[k], d)}</td>`).join('')}</tr>`).join('')
+        : `<tr><td colspan="${cols.length + nums.length}" class="empty">لا توجد مشروعات</td></tr>`}</tbody>
+      <tfoot><tr style="font-weight:700;background:#f3f2f1"><td colspan="${cols.length}">الإجمالي</td>${nums.map(([k, , d]) => `<td class="num">${fmtNum(sum(k), d)}</td>`).join('')}</tr></tfoot></table>`;
+    if (can('projects', 'view')) $$('#balWrap tr[data-p]').forEach(tr => tr.onclick = () => { setActiveNav('projects'); openForm('projects', tr.dataset.p); });
+  };
+  const loadB = async () => { try { rows = await api('apiBalances', S.token); draw(); } catch (e) { toast(e.message, 'err'); } };
+  $('#bq').oninput = draw;
+  $('#bRef').onclick = loadB;
+  $('#bExp').onclick = () => {
+    const cell = v => { const s = String(v == null ? '' : v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const csv = '﻿' + [cols.concat(nums).map(c => cell(c[1])).join(',')]
+      .concat(filtered().map(r => cols.concat(nums).map(c => cell(r[c[0]])).join(','))).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'أرصدة المشروعات.csv'; document.body.appendChild(a); a.click(); a.remove();
+  };
+  await loadB();
+}
+</script>

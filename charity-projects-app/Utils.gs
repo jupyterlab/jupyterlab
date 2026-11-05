@@ -82,9 +82,31 @@ function updateObj_(name, existing, obj) {
   writeRow_(sh, existing._row, headers_(sh), obj, existing);
 }
 
+/** حذف صفوف مع تجميع الصفوف المتتالية في عملية واحدة */
 function deleteRows_(name, rowIndexes) {
+  if (!rowIndexes.length) return;
   var sh = sheet_(name);
-  rowIndexes.slice().sort(function (a, b) { return b - a; }).forEach(function (r) { sh.deleteRow(r); });
+  var rows = rowIndexes.slice().sort(function (a, b) { return b - a; });
+  var start = rows[0], count = 1;
+  for (var i = 1; i <= rows.length; i++) {
+    if (i < rows.length && rows[i] === start - 1) { start = rows[i]; count++; continue; }
+    sh.deleteRows(start, count);
+    if (i < rows.length) { start = rows[i]; count = 1; }
+  }
+}
+
+/** إضافة عدة صفوف دفعة واحدة */
+function appendObjs_(name, objs) {
+  if (!objs.length) return;
+  var sh = sheet_(name);
+  var headers = headers_(sh);
+  var r = sh.getLastRow() + 1;
+  var need = r + objs.length - 1 - sh.getMaxRows();
+  if (need > 0) sh.insertRowsAfter(sh.getMaxRows(), need + 50);
+  var values = objs.map(function (o) { return headers.map(function (h) { return o[h] === undefined || o[h] === null ? '' : o[h]; }); });
+  var rng = sh.getRange(r, 1, values.length, headers.length);
+  rng.setNumberFormats(values.map(function (row) { return row.map(formatFor_); }));
+  rng.setValues(values);
 }
 
 function nextId_(rows, key) {

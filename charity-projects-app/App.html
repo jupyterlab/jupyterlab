@@ -22,6 +22,11 @@ const ICONS = {
   search: 'M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z',
   key: 'M12.65 10A6 6 0 1 0 7 18a6 6 0 0 0 5.65-4H17v4h4v-4h2v-4H12.65zM7 14a2 2 0 1 1 0-4 2 2 0 0 1 0 4z',
   logout: 'M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5a2 2 0 0 0-2 2v4h2V5h14v14H5v-4H3v4a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z',
+  payment: 'M21 18v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1h-9a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h9zm-9-2h10V8H12v8zm4-2.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z',
+  chart: 'M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z',
+  post: 'M2.01 21L23 12 2.01 3 2 10l15 2-15 2z',
+  unpost: 'M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62A7.95 7.95 0 0 1 12.5 10.5c3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z',
+  print: 'M19 8H5a3 3 0 0 0-3 3v6h4v4h12v-4h4v-6a3 3 0 0 0-3-3zm-3 11H8v-5h8v5zm3-7a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm-1-9H6v4h12V3z',
   lock: 'M18 8h-1V6A5 5 0 0 0 7 6v2H6a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2zm-6 9a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm3.1-9H8.9V6a3.1 3.1 0 0 1 6.2 0v2z'
 };
 const icon = (n) => `<svg class="ic" viewBox="0 0 24 24"><path d="${ICONS[n] || ''}"/></svg>`;
@@ -29,6 +34,7 @@ const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 const PAGE_SIZE = 50;
+const fmtNum = (v, d) => (v === '' || v == null || isNaN(Number(v))) ? '' : Number(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
 
 const S = { token: null, boot: null, view: null, rows: [], sel: new Set(), search: '', sort: null, pageNo: 1, viewId: 'default', form: null };
 
@@ -164,6 +170,7 @@ async function navigate(key) {
   if (!(await leaveForm())) return;
   setActiveNav(key);
   if (key === 'dashboard') return openDashboard();
+  if (key === 'balances') return openBalances();
   if (S.boot.entities[key]) return openList(key);
 }
 
@@ -179,7 +186,7 @@ async function openDashboard() {
     const pc = cfgOf('projects');
     $('.content', main).innerHTML = `
       <div class="view-head"><div class="view-title">مرحباً، ${esc(S.boot.user.fullName)}</div></div>
-      <div class="cards">${d.cards.map(c => `<div class="card" data-go="${c.page}"><small>${esc(c.label)}</small><b>${c.value}</b></div>`).join('')}</div>
+      <div class="cards">${d.cards.map(c => `<div class="card" data-go="${c.page}"><small>${esc(c.label)}</small><b>${c.value}</b>${c.sub ? `<small>${esc(c.sub)}</small>` : ''}</div>`).join('')}</div>
       ${can('projects', 'view') ? `<div class="sections">
         <div class="section"><h3>المشروعات حسب المجموعة</h3>
           ${d.byGroup.length ? d.byGroup.map(g => `<div class="bar-row"><span>${esc(g.label)}</span><div class="bar"><span style="width:${g.value / max * 100}%"></span></div><b>${g.value}</b></div>`).join('') : '<div class="empty">لا توجد مشروعات بعد</div>'}
@@ -204,6 +211,8 @@ function viewsFor(entity) {
     const types = cfg.fields.find(f => f.name === 'LookupType').source.static;
     types.forEach(t => views.push({ id: 't_' + t.v, label: t.l, fn: r => r.LookupType === t.v }));
   }
+  const st = cfg.fields.find(f => f.name === 'Status');
+  if (st) st.source.static.forEach(o => views.push({ id: 's_' + o.v, label: 'سندات ' + o.l, fn: r => r.Status === o.v }));
   if (!hasActive) views[0].id = 'default';
   return views;
 }
@@ -257,12 +266,14 @@ async function loadRows(entity) {
 }
 
 function displayValue(f, v) {
+  if (f.name === 'Status' && f.source && f.source.static) return v === 'Posted' ? '<span class="st posted">مرحّل</span>' : '<span class="st draft">مسودة</span>';
   if (f.type === 'checkbox') return v ? '<span class="yes">نعم</span>' : '<span class="no">لا</span>';
   if (v === '' || v == null) return '';
   if (f.type === 'select' && f.source) {
     if (f.source.static) { const o = f.source.static.find(x => x.v === v); return esc(o ? o.l : v); }
-    if (f.source.entity === 'accounts') { const o = (S.boot.options.accounts || []).find(x => x.v === String(v)); return esc(o ? o.l : v); }
+    if (f.source.entity) { const o = (S.boot.options[f.source.entity] || []).find(x => x.v === String(v)); return esc(o ? o.l : v); }
   }
+  if (f.type === 'number' && f.decimals != null) return fmtNum(v, f.decimals);
   if (f.type === 'number' && typeof v === 'number') return v.toLocaleString('en-US');
   return esc(v);
 }
@@ -347,7 +358,7 @@ async function deleteRecords(entity, keys, afterFn) {
     const n = await api('apiDelete', S.token, entity, keys);
     toast(`تم حذف ${n} سجل`, 'ok');
     S.sel.clear();
-    if (entity === 'accounts' || entity === 'lookups') refreshOptions();
+    if (['accounts', 'lookups', 'projects'].includes(entity)) refreshOptions();
     if (afterFn) afterFn(); else loadRows(entity);
   } catch (e) { toast(e.message, 'err'); }
 }
@@ -373,6 +384,7 @@ async function refreshOptions() {
 /* ---------------- النموذج (Form) ---------------- */
 async function openForm(entity, key) {
   const cfg = cfgOf(entity);
+  if (cfg.doc) return openDoc(entity, key);
   let data = {};
   if (key != null) {
     if (!S.rows.length || !S.view || S.view.entity !== entity) {
@@ -399,7 +411,7 @@ function formEditable() {
 }
 
 function fieldControl(f, v, editable) {
-  const ro = !editable || f.system || f.derive || (f.name === cfgOf(S.form.entity).key && S.form.mode === 'edit');
+  const ro = !editable || f.system || f.derive || f.readonly || f.calc || (f.name === cfgOf(S.form.entity).key && S.form.mode === 'edit');
   const attrs = `data-f="${f.name}" id="f_${f.name}" ${ro ? 'readonly disabled' : ''} ${f.required ? 'aria-required="true"' : ''}`;
   if (f.type === 'checkbox') return `<div><input type="checkbox" ${attrs} ${v ? 'checked' : ''}></div>`;
   if (f.type === 'textarea') return `<textarea class="ctrl" ${attrs}>${esc(v)}</textarea>`;
@@ -413,8 +425,10 @@ function fieldControl(f, v, editable) {
       ${!has ? `<option value="${esc(v)}" selected>${esc(v)} (غير نشط)</option>` : ''}
       ${opts.map(o => `<option value="${esc(o.v)}" ${String(v) === o.v ? 'selected' : ''}>${esc(o.l)}</option>`).join('')}</select>`;
   }
+  if (f.calc && f.type === 'number') return `<input class="ctrl num" type="text" ${attrs} value="${esc(fmtNum(v, f.decimals || 0))}">`;
   const type = { number: 'number', date: 'date', email: 'email', password: 'password' }[f.type] || 'text';
-  return `<input class="ctrl" type="${type}" ${attrs} value="${esc(v)}" ${f.type === 'password' ? 'autocomplete="new-password"' : ''}>`;
+  const step = f.type === 'number' && f.decimals != null ? `step="${f.decimals ? (1 / Math.pow(10, f.decimals)).toFixed(f.decimals) : 1}" min="0"` : '';
+  return `<input class="ctrl ${f.type === 'number' ? 'num' : ''}" type="${type}" ${attrs} ${step} value="${esc(v)}" placeholder="${esc(f.placeholder || '')}" ${f.type === 'password' ? 'autocomplete="new-password"' : ''}>`;
 }
 
 function fieldRow(f, v, editable, hint) {
@@ -423,6 +437,7 @@ function fieldRow(f, v, editable, hint) {
 }
 
 function renderForm() {
+  if (S.form && S.form.doc) return renderDoc();
   const F = S.form, cfg = cfgOf(F.entity), d = F.data;
   const editable = formEditable();
   const isUsers = F.entity === 'users';
@@ -477,7 +492,7 @@ function headerMeta(cfg, d) {
 }
 
 function generalTab(cfg, d, editable) {
-  const fields = cfg.fields.filter(f => !f.system);
+  const fields = cfg.fields.filter(f => !f.system && !f.hidden);
   const groups = {};
   fields.forEach(f => { const s = f.section || 'معلومات عامة'; (groups[s] = groups[s] || []).push(f); });
   let html = '<div class="sections">';
@@ -547,7 +562,7 @@ function bindFormInputs(body) {
       const cfg = cfgOf(F.entity);
       cfg.fields.filter(f => f.derive && f.derive.from === el.dataset.f).forEach(f => {
         const o = (S.boot.options[f.derive.entity] || []).find(x => x.v === el.value);
-        F.data[f.name] = o ? o.name : '';
+        F.data[f.name] = o ? (o[f.derive.field] != null ? o[f.derive.field] : o.name) : '';
         const t = $('#f_' + f.name); if (t) t.value = F.data[f.name];
       });
     });
@@ -598,7 +613,7 @@ async function saveForm(close) {
     const k = String(saved[cfg.key]);
     const i = S.rows.findIndex(r => String(r[cfg.key]) === (F.mode === 'add' ? k : String(F.key)));
     if (i >= 0) S.rows[i] = saved; else S.rows.push(saved);
-    if (F.entity === 'accounts' || F.entity === 'lookups') await refreshOptions();
+    if (['accounts', 'lookups', 'projects'].includes(F.entity)) await refreshOptions();
     if (F.entity === 'users' && String(saved.UserId) === String(S.boot.user.id)) {
       S.boot = await api('apiBootstrap', S.token); renderSitemap(); setActiveNav('users');
     }

@@ -72,7 +72,8 @@ function apiBootstrap(token) {
       var c = ENTITIES[k];
       entities[k] = {
         name: k, page: c.page, key: c.key, autoKey: !!c.autoKey, titleField: c.titleField, singular: c.singular,
-        plural: c.plural, icon: c.icon, readOnly: !!c.readOnly, custom: !!c.custom, fields: c.fields
+        plural: c.plural, icon: c.icon, readOnly: !!c.readOnly, custom: !!c.custom, fields: c.fields,
+        doc: !!c.doc, lines: c.lines || null
       };
     });
     return {
@@ -99,7 +100,11 @@ function buildOptions_() {
   var opts = {};
   opts.accounts = readTable_('ChartOfAccounts')
     .filter(function (r) { return r.IsActive === '' || isTrue_(r.IsActive); })
-    .map(function (r) { return { v: String(r.AccountId), l: String(r.AccountId) + ' - ' + r.AccountName, name: r.AccountName }; });
+    .map(function (r) { return { v: String(r.AccountId), l: String(r.AccountId) + ' - ' + r.AccountName, name: r.AccountName, AccountName: r.AccountName }; });
+  opts.projects = readTable_('Projects').map(function (r) {
+    return { v: String(r.ProjectId), l: String(r.ProjectId) + ' - ' + r.Description, name: r.Description,
+      Description: r.Description, AccountId: String(r.AccountId), AccountName: r.AccountName };
+  });
   LOOKUP_TYPES.forEach(function (t) { opts['lookup_' + t.v] = []; });
   readTable_('Lookups').forEach(function (r) {
     if (!isTrue_(r.IsActive)) return;
@@ -124,6 +129,12 @@ function apiDashboard(token) {
         .sort(function (a, b) { return b.value - a.value; });
       out.recent = projects.slice(-6).reverse().map(function (p) { return serialize_(ENTITIES.projects, p); });
     }
+    [['receipts', 'Receipts', 'سندات التحويل'], ['payments', 'Payments', 'سندات الصرف']].forEach(function (d) {
+      if (!can_(u, d[0], 'view')) return;
+      var rows = readTable_(d[1]);
+      var drafts = rows.filter(function (r) { return r.Status !== 'Posted'; }).length;
+      out.cards.push({ label: d[2], value: rows.length, sub: drafts ? drafts + ' مسودة بانتظار الترحيل' : 'كلها مرحّلة', page: d[0] });
+    });
     if (can_(u, 'accounts', 'view')) out.cards.push({ label: 'الحسابات', value: readTable_('ChartOfAccounts').length, page: 'accounts' });
     if (can_(u, 'lookups', 'view')) out.cards.push({ label: 'عناصر القوائم', value: readTable_('Lookups').length, page: 'lookups' });
     if (can_(u, 'users', 'view')) out.cards.push({ label: 'المستخدمون', value: readTable_('Users').length, page: 'users' });
@@ -156,6 +167,7 @@ function apiSave(token, entity, rec, mode, origKey) {
     var u = requireUser_(token);
     var cfg = entityCfg_(entity);
     if (cfg.readOnly) throw new Error('هذه الصفحة للعرض فقط.');
+    if (cfg.doc) throw new Error('استخدم apiSaveDoc لحفظ السندات.');
     if (mode !== 'add' && mode !== 'edit') throw new Error('إجراء غير صحيح.');
     requirePerm_(u, cfg.page, mode);
     rec = rec || {};
@@ -272,6 +284,7 @@ function apiDelete(token, entity, keys) {
     return withLock_(function () {
       var rows = readTable_(cfg.sheet);
       var targets = rows.filter(function (r) { return keys.indexOf(String(r[cfg.key])) >= 0; });
+      if (cfg.doc) return deleteDocs_(u, entity, cfg, targets);
       if (entity === 'users') checkUserDelete_(u, rows, targets);
       targets.forEach(function (t) { checkRefs_(cfg, t); });
       deleteRows_(cfg.sheet, targets.map(function (t) { return t._row; }));
@@ -289,8 +302,7 @@ function checkRefs_(cfg, rec) {
       if (!match) return;
     }
     var val = String(rec[ref.match || cfg.key]);
-    var t = ENTITIES[ref.entity];
-    var used = readTable_(t.sheet).filter(function (r) { return String(r[ref.field]) === val; }).length;
+    var used = readTable_(ref.sheet || ENTITIES[ref.entity].sheet).filter(function (r) { return String(r[ref.field]) === val; }).length;
     if (used) {
       throw new Error('لا يمكن حذف "' + (rec[cfg.titleField] || val) + '" لأنه مستخدم في ' + used + ' ' + ref.label +
         '. يمكنك إلغاء تفعيله بدلاً من الحذف.');

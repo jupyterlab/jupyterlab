@@ -32,10 +32,17 @@ function setupApp() {
       cfg.fields.filter(function (f) { return f.text; }).map(function (f) { return f.name; }));
   });
 
-  // شيتات المرحلة الثانية (الهيكل فقط)
-  Object.keys(PHASE2_SHEETS).forEach(function (name) {
-    var d = PHASE2_SHEETS[name];
-    ensureSheet_(ss, name, d.columns, d.labels, ['DocumentNumber', 'AccountId', 'ProjectId']);
+  // شيتات المرحلة الثانية: السندات (رأس + سطور)
+  ['receipts', 'payments'].forEach(function (k) {
+    var cfg = ENTITIES[k], L = cfg.lines;
+    ensureSheet_(ss, cfg.sheet,
+      cfg.fields.map(function (f) { return f.name; }),
+      cfg.fields.map(function (f) { return f.label; }),
+      cfg.fields.filter(function (f) { return f.text; }).map(function (f) { return f.name; }));
+    ensureSheet_(ss, L.sheet,
+      [L.fk].concat(L.fields.map(function (f) { return f.name; })),
+      ['رقم السند'].concat(L.fields.map(function (f) { return f.label; })),
+      [L.fk].concat(L.fields.filter(function (f) { return f.text; }).map(function (f) { return f.name; })));
   });
 
   seedAdmin_();
