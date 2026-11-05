@@ -284,13 +284,7 @@ namespace Private {
     // math that spans lines: those `$` are often dollar amounts, and the
     // editor shows any heading on those lines.
     const { text, math } = removeMath(content, mathParseOptions);
-    const tokens = _marked.lexer(
-      text.replace(/@@(\d+)@@/g, (placeholder: string, index: string) =>
-        spansLines(math[Number(index)])
-          ? restoreMath(placeholder, math)
-          : placeholder
-      )
-    );
+    const tokens = _marked.lexer(restoreMath(text, math, spansLines));
 
     // Extract heading tokens and compute line numbers
     // Include three token types that may contain headings:
@@ -336,19 +330,35 @@ namespace Private {
   }
 
   /**
-   * Put back the math source hidden by `removeMath`, undoing the HTML
-   * escaping it applies, so that the result matches the Markdown source.
-   * Text such as `@@1` right before a placeholder forms a `@@n@@` that has
-   * no math; it is kept as written.
+   * Put back the math source hidden by `removeMath` that `filter` accepts,
+   * undoing the HTML escaping it applies, so that the result matches the
+   * Markdown source.
    */
-  function restoreMath(text: string, math: string[]): string {
-    return text.replace(
-      /@@(\d+)@@/g,
-      (match: string, index: string) =>
-        math[Number(index)]
-          ?.replace(/&lt;/g, '<')
-          .replace(/&gt;/g, '>')
-          .replace(/&amp;/g, '&') ?? match
-    );
+  function restoreMath(
+    text: string,
+    math: string[],
+    filter: (source: string) => boolean = () => true
+  ): string {
+    const placeholder = /@@(\d+)@@/g;
+    let restored = '';
+    let end = 0;
+    let match: RegExpExecArray | null;
+    while ((match = placeholder.exec(text)) !== null) {
+      const source: string | undefined = math[Number(match[1])];
+      if (source === undefined) {
+        // Text such as `@@1` right before a placeholder forms a `@@n@@` that
+        // has no math: look for the placeholder from the next character.
+        placeholder.lastIndex = match.index + 1;
+      } else if (filter(source)) {
+        restored +=
+          text.slice(end, match.index) +
+          source
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;/g, '&');
+        end = placeholder.lastIndex;
+      }
+    }
+    return restored + text.slice(end);
   }
 }

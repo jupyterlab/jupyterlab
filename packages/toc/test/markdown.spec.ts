@@ -847,6 +847,40 @@ front: matter
               skip: false
             }
           ]
+        ],
+        [
+          '# Title\n\nuser@@1$$\na\n=\nb\n$$\n\n## Next',
+          [
+            {
+              text: 'Title',
+              level: 1,
+              line: 0,
+              raw: '# Title',
+              prefix: '1. ',
+              skip: false
+            },
+            {
+              text: 'Next',
+              level: 2,
+              line: 8,
+              raw: '## Next',
+              prefix: '1.1. ',
+              skip: false
+            }
+          ]
+        ],
+        [
+          'user@@1$5\n# Heading\nand $10',
+          [
+            {
+              text: 'Heading',
+              level: 1,
+              line: 1,
+              raw: '# Heading',
+              prefix: '1. ',
+              skip: false
+            }
+          ]
         ]
       ])(
         'should keep the headings when `@@` and digits come right before math in %s',
