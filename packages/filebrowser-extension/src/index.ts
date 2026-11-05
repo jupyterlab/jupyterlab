@@ -30,7 +30,10 @@ import {
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
-import { getAvailableKernelFileTypes } from '@jupyterlab/docregistry';
+import {
+  DocumentWidget,
+  getAvailableKernelFileTypes
+} from '@jupyterlab/docregistry';
 import {
   FileBrowser,
   FileUploadStatus,
@@ -80,6 +83,7 @@ import type { AccordionPanel, ContextMenu } from '@lumino/widgets';
  */
 const FILE_BROWSER_FACTORY = 'FileBrowser';
 const FILE_BROWSER_PLUGIN_ID = '@jupyterlab/filebrowser-extension:browser';
+const RESTORING_CLASS = 'jp-mod-restoring';
 
 /**
  * The command IDs used by the file browser plugin.
@@ -243,7 +247,7 @@ const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
       if (treePathUpdater) {
         browser.model.pathChanged.connect((sender, args) => {
           // The initial URL is synchronized once its target has been handled.
-          if (!browser.hasClass('jp-mod-restoring')) {
+          if (!browser.hasClass(RESTORING_CLASS)) {
             treePathUpdater(args.newValue);
           }
         });
@@ -494,14 +498,24 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
       });
     }
 
-    void Private.restoreBrowser(
+    defaultBrowser.addClass(RESTORING_CLASS);
+    const restored = Private.restoreBrowser(
       defaultBrowser,
       commands,
       router,
       tree,
-      treePathUpdater,
       labShell
-    );
+    )
+      .catch(error => {
+        console.error('Failed to restore the file browser.', error);
+        return { path: defaultBrowser.model.path };
+      })
+      .finally(() => defaultBrowser.removeClass(RESTORING_CLASS));
+    if (treePathUpdater?.deferUntil) {
+      treePathUpdater.deferUntil(restored);
+    } else if (treePathUpdater) {
+      void restored.then(({ path }) => treePathUpdater(path));
+    }
     return defaultBrowser;
   }
 };
@@ -2151,64 +2165,82 @@ namespace Private {
     commands: CommandRegistry,
     router: IRouter | null,
     tree: JupyterFrontEnd.ITreeResolver | null,
-    treePathUpdater: ITreePathUpdater | null,
     labShell: ILabShell | null
-  ): Promise<void> {
-    const restoring = 'jp-mod-restoring';
-
-    browser.addClass(restoring);
-
+  ): Promise<ITreePathUpdater.IBrowserState> {
     if (!router) {
       await browser.model.restore(browser.id);
       await browser.model.refresh();
-      treePathUpdater?.(browser.model.path);
-      browser.removeClass(restoring);
-      return;
+      return { path: browser.model.path };
     }
 
     const { manager } = browser.model;
     // Capture the path before later interactions can dispose the restored widget.
-    const restoredPath = labShell?.restored.then(layout => {
+    const restoredDocument = labShell?.restored.then(layout => {
       const widget = layout.mainArea?.currentWidget;
-      return widget ? manager.contextForWidget(widget)?.path : undefined;
+      return {
+        widget,
+        path: widget ? manager.contextForWidget(widget)?.path : undefined
+      };
     });
 
-    const listener = async () => {
-      router.routed.disconnect(listener);
+    const location = await new Promise<IRouter.ILocation>(resolve => {
+      const listener = (_: IRouter, location: IRouter.ILocation) => {
+        router.routed.disconnect(listener);
+        resolve(location);
+      };
+      router.routed.connect(listener);
+    });
 
-      const paths = await tree?.paths;
-      if (paths?.file || paths?.browser) {
-        // Restore the model without populating it.
-        await browser.model.restore(browser.id, false);
-        if (paths.file) {
-          const command =
-            (await restoredPath) ===
-            manager.services.contents.normalize(paths.file)
-              ? CommandIDs.goToPath
-              : CommandIDs.openPath;
-          await commands.execute(command, {
-            path: paths.file,
-            dontShowBrowser: true
-          });
+    let document: ITreePathUpdater.IBrowserState['document'];
+    let fragmentTarget: unknown;
+    const paths = await tree?.paths;
+    if (paths?.file || paths?.browser) {
+      // Restore the model without populating it.
+      await browser.model.restore(browser.id, false);
+      if (paths.file) {
+        const normalized = manager.services.contents.normalize(paths.file);
+        const restored = await restoredDocument;
+        const alreadyRestored = restored?.path === normalized;
+        const widget: unknown = await commands.execute(
+          alreadyRestored ? CommandIDs.goToPath : CommandIDs.openPath,
+          { path: paths.file, dontShowBrowser: true }
+        );
+        fragmentTarget = alreadyRestored ? restored?.widget : widget;
+        if (alreadyRestored) {
+          document = { path: normalized, alreadyRestored };
+        } else if (widget instanceof DocumentWidget) {
+          document = { path: widget.context.path, alreadyRestored };
         }
-        if (paths.browser) {
-          await commands.execute(CommandIDs.openPath, {
-            path: paths.browser,
-            dontShowBrowser: true
-          });
-        }
-      } else {
-        await browser.model.restore(browser.id);
-        await browser.model.refresh();
       }
-      treePathUpdater?.(browser.model.path);
-      browser.removeClass(restoring);
+      if (paths.browser) {
+        await commands.execute(CommandIDs.openPath, {
+          path: paths.browser,
+          dontShowBrowser: true
+        });
+      }
+    } else {
+      await browser.model.restore(browser.id);
+      await browser.model.refresh();
+    }
 
-      if (labShell?.isEmpty('main')) {
-        void commands.execute('launcher:create');
-      }
-    };
-    router.routed.connect(listener);
+    if (labShell?.isEmpty('main')) {
+      void commands.execute('launcher:create');
+    }
+    const target = fragmentTarget;
+    if (location.hash && target instanceof DocumentWidget) {
+      void target.revealed.then(
+        () => {
+          // Let the tab's activation and layout finish before scrolling.
+          requestAnimationFrame(() => {
+            if (target.isVisible && !target.isDisposed) {
+              target.setFragment(location.hash);
+            }
+          });
+        },
+        () => undefined
+      );
+    }
+    return { path: browser.model.path, document };
   }
 
   export namespace OpenWith {

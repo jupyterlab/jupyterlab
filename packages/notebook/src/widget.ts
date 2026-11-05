@@ -1068,8 +1068,10 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           ) {
             // Update height estimate in the view model
             const height = cell.node.getBoundingClientRect().height;
-            this.viewModel.setEstimatedWidgetSize(cell.model.id, height);
-            cell.node.style.containIntrinsicSize = `auto ${height}px`;
+            if (height > 0) {
+              this.viewModel.setEstimatedWidgetSize(cell.model.id, height);
+              cell.node.style.containIntrinsicSize = `auto ${height}px`;
+            }
           }
         }
       }

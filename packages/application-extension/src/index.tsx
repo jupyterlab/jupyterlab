@@ -1246,32 +1246,32 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     // 2) path of the default browser if the active main area widget isn't a document.
     let _docTreePath = '';
     let _defaultBrowserTreePath = '';
-    const restored = app.shell.restored.then(() => app.shell.currentPath);
+    let browserRestored: Promise<ITreePathUpdater.IBrowserState> | undefined;
 
-    function updateUrl(treePath: string) {
+    function updateUrl(treePath: string, browserChanged = false) {
       const url = PageConfig.getUrl({ treePath });
       const path = URLExt.parse(url).pathname;
       if (path !== window.location.pathname) {
         router.navigate(path, { skipRouting: true });
+      } else if (browserChanged) {
+        const current = new URL(window.location.href);
+        if (current.searchParams.has('file-browser-path')) {
+          current.searchParams.delete('file-browser-path');
+          router.navigate(path + current.search + current.hash, {
+            skipRouting: true
+          });
+        }
       }
       PageConfig.setOption('treePath', treePath);
     }
 
     function updateTreePath(treePath: string) {
-      // Wait for tree resolver to finish before updating the path because it use the PageConfig['treePath']
-      void Promise.all([treeResolver.paths, restored]).then(
-        ([paths, restoredPath]) => {
-          _defaultBrowserTreePath = treePath;
-          if (
-            !_docTreePath ||
-            (paths?.file &&
-              app.serviceManager.contents.normalize(paths.file) ===
-                restoredPath)
-          ) {
-            updateUrl(_docTreePath || treePath);
-          }
+      void ready.then(() => {
+        _defaultBrowserTreePath = treePath;
+        if (!_docTreePath) {
+          updateUrl(treePath, true);
         }
-      );
+      });
     }
 
     // Requiring the window resolver guarantees that the application extension
@@ -1295,6 +1295,9 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     // Watch the mode and update the page URL to /lab or /doc to reflect the
     // change.
     app.shell.modeChanged.connect((_, args: DockPanel.Mode) => {
+      if (args === PageConfig.getOption('mode')) {
+        return;
+      }
       const url = PageConfig.getUrl({ mode: args as string });
       const path = URLExt.parse(url).pathname;
       router.navigate(path, { skipRouting: true });
@@ -1302,17 +1305,30 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
       PageConfig.setOption('mode', args as string);
     });
 
-    // Wait for tree resolver to finish before updating the path because it use the PageConfig['treePath']
-    void treeResolver.paths.then(() => {
-      // Watch the path of the current widget in the main area and update the page
-      // URL to reflect the change.
-      app.shell.currentPathChanged.connect((_, args) => {
-        _docTreePath = args.newValue;
-        updateUrl(_docTreePath || _defaultBrowserTreePath);
-      });
-      // Restoration and user activations may have happened before routing.
-      _docTreePath = app.shell.currentPath ?? '';
-    });
+    const ready = Promise.all([treeResolver.paths, app.shell.restored]).then(
+      async ([paths]) => {
+        const browser = await browserRestored;
+        const document = browser?.document;
+        // A directory link follows the browser until the main area changes.
+        _docTreePath =
+          browser && paths?.file && !document
+            ? ''
+            : (app.shell.currentPath ?? '');
+        if (browser) {
+          _defaultBrowserTreePath = browser.path;
+          if (
+            (document?.alreadyRestored && document.path !== _docTreePath) ||
+            (!paths?.file && !_docTreePath)
+          ) {
+            updateUrl(_docTreePath || _defaultBrowserTreePath);
+          }
+        }
+        app.shell.currentPathChanged.connect((_, args) => {
+          _docTreePath = args.newValue;
+          updateUrl(_docTreePath || _defaultBrowserTreePath);
+        });
+      }
+    );
 
     // If the connection to the server is lost, handle it with the
     // connection lost handler.
@@ -1396,7 +1412,11 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
         }).then(result => (result.button.accept ? build() : undefined));
       });
     }
-    return updateTreePath;
+    return Object.assign(updateTreePath, {
+      deferUntil(restored: Promise<ITreePathUpdater.IBrowserState>) {
+        browserRestored = restored;
+      }
+    });
   },
   autoStart: true
 };
