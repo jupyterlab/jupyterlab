@@ -409,7 +409,7 @@ export class DirListing extends Widget {
     }
 
     const basePath = this._model.path;
-    const promises: Promise<Contents.IModel>[] = [];
+    const promises: Promise<Contents.IModel | null>[] = [];
 
     for (const path of this._clipboard) {
       if (this._isCut) {
@@ -417,29 +417,31 @@ export class DirListing extends Widget {
         const parts = localPath.split('/');
         const name = parts[parts.length - 1];
         const newPath = PathExt.join(basePath, name);
-        promises.push(this._model.manager.rename(path, newPath));
+        promises.push(renameFile(this._manager, path, newPath));
       } else {
         promises.push(this._model.manager.copy(path, basePath));
       }
     }
 
-    // Remove any cut modifiers.
-    for (const item of this._items) {
-      item.classList.remove(CUT_CLASS);
-    }
-
-    this._clipboard.length = 0;
-    this._isCut = false;
-    this.removeClass(CLIPBOARD_CLASS);
     return Promise.all(promises)
       .then(() => {
+        // Remove any cut modifiers.
+        for (const item of this._items) {
+          item.classList.remove(CUT_CLASS);
+        }
+
+        this._clipboard.length = 0;
+        this._isCut = false;
+        this.removeClass(CLIPBOARD_CLASS);
         return undefined;
       })
       .catch(error => {
-        void showErrorMessage(
-          this._trans._p('showErrorMessage', 'Paste Error'),
-          error
-        );
+        if (error !== 'File not renamed') {
+          void showErrorMessage(
+            this._trans._p('showErrorMessage', 'Paste Error'),
+            error instanceof Error ? error : String(error)
+          );
+        }
       });
   }
 
