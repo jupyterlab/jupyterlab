@@ -121,6 +121,8 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    * #### Notes
    * This will use the manager's server settings and ignore any server
    * settings passed in the options.
+   *
+   * The manager's `commsOverSubshells` is used unless the options give one.
    */
   connectTo(
     options: Omit<Kernel.IKernelConnection.IOptions, 'serverSettings'>
@@ -138,11 +140,11 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
       }
     }
 
-    options.commsOverSubshells = this._commsOverSubshells;
-
     const kernelConnection = new KernelConnection({
       handleComms,
       ...options,
+      commsOverSubshells:
+        options.commsOverSubshells ?? this._commsOverSubshells,
       serverSettings: this.serverSettings,
       kernelAPIClient: this._kernelAPIClient,
       kernelSpecAPIClient: this._kernelSpecAPIClient,
@@ -282,7 +284,8 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
     let models: Kernel.IModel[];
     try {
       models = await this._kernelAPIClient.listRunning();
-    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       // Handle network errors, as well as cases where we are on a
       // JupyterHub and the server is not running. JupyterHub returns a
       // 503 (<2.0) or 424 (>2.0) in that case.

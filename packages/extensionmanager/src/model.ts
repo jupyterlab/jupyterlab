@@ -57,7 +57,7 @@ export interface IEntry {
   /**
    * The latest version of the extension.
    */
-  latest_version: string;
+  latest_version: string | null;
 
   /**
    * The installed version of the extension.
@@ -345,7 +345,7 @@ export class ListModel extends VDomModel {
    *
    * Setting its value triggers a new search.
    *
-   * ### Note
+   * #### Notes
    * First page is 1.
    */
   get page(): number {
@@ -468,7 +468,7 @@ export class ListModel extends VDomModel {
       const extensions = await this.fetchInstalled(force);
       this._installed = extensions.sort(Private.installedComparator);
     } catch (reason) {
-      this.installedError = reason.toString();
+      this.installedError = String(reason);
     } finally {
       this._isLoadingInstalledExtensions = false;
       this.stateChanged.emit();
@@ -535,7 +535,7 @@ export class ListModel extends VDomModel {
         pkg => !installedNames.includes(pkg.name)
       );
     } catch (reason) {
-      this.searchError = reason.toString();
+      this.searchError = String(reason);
     } finally {
       this._isSearching = false;
       this.stateChanged.emit();
@@ -701,7 +701,9 @@ export namespace ListModel {
    *
    * @param entry The entry to check.
    */
-  export function entryHasUpdate(entry: IEntry): boolean {
+  export function entryHasUpdate(
+    entry: IEntry
+  ): entry is IEntry & { latest_version: string } {
     if (!entry.installed || !entry.latest_version) {
       return false;
     }
@@ -753,7 +755,9 @@ namespace Private {
         settings
       );
     } catch (error) {
-      throw new ServerConnection.NetworkError(error);
+      throw new ServerConnection.NetworkError(
+        error instanceof TypeError ? error : new TypeError(String(error))
+      );
     }
 
     let data: any = await response.text();
@@ -761,7 +765,7 @@ namespace Private {
     if (data.length > 0) {
       try {
         data = JSON.parse(data);
-      } catch (error) {
+      } catch {
         console.log('Not a JSON response body.', response);
       }
     }

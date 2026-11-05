@@ -551,13 +551,16 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._updateStatus('restarting');
     this._clearKernelState();
     this._isRestarting = true;
+    this._isRestartRequestPending = true;
     try {
       await this._kernelAPIClient.restart(this.id);
+      this._isRestartRequestPending = false;
       // Reconnect to the kernel to address cases where kernel ports
       // have changed during the restart.
       await this.reconnect();
     } catch (error) {
       this._isRestarting = false;
+      this._isRestartRequestPending = false;
       throw error;
     }
     this.hasPendingInput = false;
@@ -1486,7 +1489,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
         } else {
           this._onWSClose(evt);
         }
-      } catch (err) {
+      } catch (err: any) {
         // Try again, if there is a network failure
         // Handle network errors, as well as cases where we are on a
         // JupyterHub and the server is not running. JupyterHub returns a
@@ -1548,7 +1551,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     if (this.status !== 'dead') {
       if (connectionStatus === 'connected') {
-        let restarting = this._isRestarting;
+        // A websocket that opened before the restart request returned may
+        // reach the old kernel, so its replies must not end the restart.
+        let restarting = this._isRestarting && !this._isRestartRequestPending;
 
         // Send a kernel info request to make sure we send at least one
         // message to get kernel status back. Always request kernel info
@@ -1789,7 +1794,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
       );
       validate.validateMessage(msg);
     } catch (error) {
-      error.message = `Kernel message validation error: ${error.message}`;
+      if (error instanceof Error) {
+        error.message = `Kernel message validation error: ${error.message}`;
+      }
       // We throw the error so that it bubbles up to the top, and displays the right stack.
       throw error;
     }
@@ -1848,6 +1855,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _connectionStatus: Kernel.ConnectionStatus = 'connecting';
   private _kernelSession = '';
   private _isRestarting = false;
+  private _isRestartRequestPending = false;
   private _clientId: string;
   private _isDisposed = false;
   /**

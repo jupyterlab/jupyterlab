@@ -9,9 +9,11 @@ ReadTheDocs
 Gettext
 IPython
 Jupyverse
+Jupytext
 Quansight
 Yjs
 hatchling
+Snakemake
 
 # Common technical terms in docs
 frontend

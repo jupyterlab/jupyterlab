@@ -34,7 +34,9 @@
   outline: 0;
 }
 
-.jp-DocumentSearch-button-wrapper:disabled > .jp-DocumentSearch-button-content {
+.jp-DocumentSearch-button-wrapper:disabled > .jp-DocumentSearch-button-content,
+.jp-DocumentSearch-replace-button-wrapper:disabled
+  > .jp-DocumentSearch-button-content {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -220,10 +222,6 @@ button:not(:disabled) > .jp-DocumentSearch-up-down-button:active {
   grid-template-columns: 1fr 1fr;
   align-items: center;
   justify-items: stretch;
-}
-
-.jp-DocumentSearch-search-filter-disabled {
-  color: var(--jp-ui-font-color2);
 }
 
 .jp-DocumentSearch-search-filter {

@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import { expect, galata, test } from '@jupyterlab/galata';
+import type { NotebookPanel } from '@jupyterlab/notebook';
 import type { Locator } from '@playwright/test';
 import * as path from 'path';
 
@@ -76,6 +77,13 @@ test('should not update height when hiding', async ({ page, tmpPath }) => {
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
   const notebook = await page.notebook.getNotebookInPanelLocator();
   let initialHeight = 0;
+
+  // Off-screen cells are rendered when the browser is idle, which updates the
+  // estimated height of the notebook; on a busy runner this can take seconds.
+  await page.waitForFunction(() => {
+    const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+    return panel.content.widgets.every(cell => !cell.isPlaceholder());
+  });
 
   // Wait to ensure the rendering logic is stable: poll the inner height
   // every 600ms until two consecutive reads agree
@@ -513,7 +521,7 @@ test('should rendered injected styles of out-of-viewport cells', async ({
   tmpPath
 }) => {
   await page.notebook.openByPath(`${tmpPath}/${injectionFile}`);
-  await page.notebook.trust();
+  expect(await page.notebook.trust()).toBe(true);
 
   // Check the cell is out of the viewport
   await expect
@@ -552,7 +560,7 @@ test('should rendered injected HTML scripts of out-of-viewport cells', async ({
   tmpPath
 }) => {
   await page.notebook.openByPath(`${tmpPath}/${injectionFile}`);
-  await page.notebook.trust();
+  expect(await page.notebook.trust()).toBe(true);
 
   // Check the cell is out of the viewport
   await expect
@@ -573,7 +581,7 @@ test('should rendered injected JavaScript snippets of out-of-viewport cells', as
   tmpPath
 }) => {
   await page.notebook.openByPath(`${tmpPath}/${injectionFile}`);
-  await page.notebook.trust();
+  expect(await page.notebook.trust()).toBe(true);
 
   // Check the cell is out of the viewport
   await expect

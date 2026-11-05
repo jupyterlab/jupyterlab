@@ -858,7 +858,7 @@ export class SessionContext implements ISessionContext {
           const session = manager.connectTo({ model });
           this._handleNewSession(session);
         } catch (err) {
-          void this._handleSessionError(err);
+          void this._handleSessionError(err as ServerConnection.ResponseError);
           return Promise.reject(err);
         }
       }
@@ -961,7 +961,7 @@ export class SessionContext implements ISessionContext {
         await this._session.changeKernel(model);
       } catch (err) {
         this._isChangingKernel = false;
-        void this._handleSessionError(err);
+        void this._handleSessionError(err as ServerConnection.ResponseError);
         throw err;
       }
       this._isChangingKernel = false;
@@ -1006,7 +1006,7 @@ export class SessionContext implements ISessionContext {
       }
       return this._handleNewSession(session);
     } catch (err) {
-      void this._handleSessionError(err);
+      void this._handleSessionError(err as ServerConnection.ResponseError);
       throw err;
     }
   }

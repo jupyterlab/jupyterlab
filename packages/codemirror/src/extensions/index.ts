@@ -3,6 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+export * from './commandRegistry';
 export * from './customStyle';
 export * from './ipython-md';
 export * from './rulers';
