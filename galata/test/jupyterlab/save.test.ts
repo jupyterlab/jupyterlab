@@ -25,6 +25,11 @@ for (const type of ['Text', 'Notebook', 'Markdown']) {
       await page.click('.jp-Dialog >> button >> text=Select');
     }
 
+    // Save is enabled once the document has loaded, and an open menu does
+    // not update its items.
+    await page.waitForFunction(() =>
+      window.jupyterapp.commands.isEnabled('docmanager:save')
+    );
     await page.menu.clickMenuItem(
       type === 'Markdown' ? `File>Save ${type} File` : `File>Save ${type}`
     );
