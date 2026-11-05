@@ -6,7 +6,7 @@ import { NotebookSearchProvider } from '@jupyterlab/notebook';
 import type { Context } from '@jupyterlab/docregistry';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
-import { signalToPromise } from '@jupyterlab/testing';
+import { framePromise, signalToPromise } from '@jupyterlab/testing';
 import * as utils from './utils';
 import type { IReplaceOptions } from '@jupyterlab/documentsearch';
 import type { CodeCellModel } from '@jupyterlab/cells';
