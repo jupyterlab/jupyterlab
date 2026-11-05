@@ -399,6 +399,29 @@ describe('metadataform/form simple', () => {
     expect(model.getMetadata('cell-metadata')).toBe('edited');
   });
 
+  it('should not log an error when added to an expanded section', () => {
+    notebookTools.addSection({ sectionName: 'expanded' });
+    Widget.attach(notebookTools, document.body);
+    const collapser = (notebookTools.layout as PanelLayout).widgets.find(
+      widget => widget instanceof Collapser
+    ) as Collapser;
+    collapser.collapsed = false;
+    const error = jest.spyOn(console, 'error');
+    try {
+      notebookTools.addItem({
+        section: 'expanded',
+        tool: new MetadataFormWidget({
+          metadataSchema: JSONExt.deepCopy(schema),
+          metaInformation,
+          pluginId: 'test-plugin'
+        })
+      });
+      expect(error).not.toHaveBeenCalled();
+    } finally {
+      error.mockRestore();
+    }
+  });
+
   it('should update notebook metadata', async () => {
     const metadataForm = await buildForm();
     expect(

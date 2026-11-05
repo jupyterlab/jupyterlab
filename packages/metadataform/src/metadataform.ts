@@ -375,6 +375,7 @@ export class MetadataFormWidget
    * Update the form with current cell metadata, and remove inconsistent fields.
    */
   private _update(): void {
+    if (this.notebookTools == undefined) return;
     const notebook = this.notebookTools.activeNotebookPanel;
 
     const cell = this.notebookTools.activeCell;
