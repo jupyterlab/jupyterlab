@@ -91,6 +91,14 @@ function opensMathBlock(line: Line): boolean {
 }
 
 /**
+ * Whether the line, from its first non-space character, is a setext heading
+ * underline.
+ */
+function isSetextUnderline(line: Line): boolean {
+  return /^(?:=+|-+)\s*$/.test(line.text.slice(line.pos));
+}
+
+/**
  * Whether text has a `$$` that it does not close.
  */
 function hasOpenMath(text: string): boolean {
@@ -167,9 +175,9 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
           );
           return true;
         },
-        // A line of `=` or `-` inside open `$$` math is LaTeX, so hold back the
+        // A setext underline inside open `$$` math is LaTeX, so hold back the
         // setext heading parser for that line. Scanning the leaf for open math
-        // on every line would take quadratic time, so only such lines are
+        // on every line would take quadratic time, so only underlines are
         // checked. `before` places that parser right after this one.
         before: 'SetextHeading',
         leaf: (): LeafBlockParser => {
@@ -182,8 +190,7 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
                 leaf.parsers.splice(next, 0, held);
                 held = null;
               }
-              const ch = line.text[line.pos];
-              if ((ch === '=' || ch === '-') && hasOpenMath(leaf.content)) {
+              if (isSetextUnderline(line) && hasOpenMath(leaf.content)) {
                 held = leaf.parsers.splice(next, 1)[0] ?? null;
               }
               return false;
