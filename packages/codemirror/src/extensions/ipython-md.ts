@@ -178,7 +178,9 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
         // A setext underline inside open `$$` math is LaTeX, so hold back the
         // setext heading parser for that line. Scanning the leaf for open math
         // on every line would take quadratic time, so only underlines are
-        // checked. `before` places that parser right after this one.
+        // checked. `before` places that parser right after this one, unless an
+        // extension configured later also adds a parser before `SetextHeading`:
+        // GFM's table parser then sits in between.
         before: 'SetextHeading',
         leaf: (): LeafBlockParser => {
           let held: LeafBlockParser | null = null;
