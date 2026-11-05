@@ -805,6 +805,7 @@ namespace Private {
   const SUFFIX_PLACEHOLDER = '\u0000';
   const REFERENCE_PROPERTY_PREFIX = '--jp-icon-ref-';
   const XLINK_NAMESPACE = 'http://www.w3.org/1999/xlink';
+  const ANIMATION_VALUES = ['values', 'from', 'to', 'by'];
   // an extension that imports LabIcon through a deep path bundles its own
   // copy of this module, so all copies take suffixes from one counter on the
   // window; keep this key and its meaning the same in later versions
@@ -1110,6 +1111,16 @@ namespace Private {
           }
         } else if (name === 'begin' || name === 'end') {
           timings.push([index, name, value]);
+        } else if (
+          ANIMATION_VALUES.includes(name) &&
+          /(?:^|:)href$/.test(node.getAttribute('attributeName') ?? '')
+        ) {
+          // an animation of href, as in values="#frame1;#frame2"
+          nextValue = value.replace(
+            /(^|;)(\s*)#([^;\s]+)/g,
+            (full, separator, space, id) =>
+              ids.has(id) ? `${separator}${space}#${reference(id)}` : full
+          );
         } else if (URL_ID_CANDIDATE.test(value)) {
           nextValue = replaceUrls(value);
         }
@@ -1205,7 +1216,7 @@ namespace Private {
     // a selector escapes a character that an identifier cannot hold, as in "a\.b"
     const escaped = Array.from(ids, id =>
       Array.from(id, c =>
-        /[\w\u0080-\uffff-]/.test(c) ? c : `\\\\?${escapeRegExp(c)}`
+        /[\w\u0080-\uffff-]/.test(c) ? c : `\\\\${escapeRegExp(c)}`
       ).join('')
     );
     const idSelector = new RegExp(
@@ -1216,9 +1227,19 @@ namespace Private {
       `(\\[\\s*id\\s*=\\s*(["']?))(${Array.from(ids, escapeRegExp).join('|')})(?=\\2\\s*(?:[iIsS]\\s*)?\\])`,
       'g'
     );
+    // inside a quoted attribute value, as in [href="#a.b"], the id is not escaped
+    const quotedId = new RegExp(
+      `^(["'])#(?:${Array.from(ids, escapeRegExp).join('|')})(?=\\1$)`
+    );
     const rename = (selector: string) =>
       selector
-        .replace(idSelector, `$&${SUFFIX_PLACEHOLDER}`)
+        .split(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/)
+        .map((part, i) =>
+          i % 2
+            ? part.replace(quotedId, `$&${SUFFIX_PLACEHOLDER}`)
+            : part.replace(idSelector, `$&${SUFFIX_PLACEHOLDER}`)
+        )
+        .join('')
         .replace(idAttribute, `$1$3${SUFFIX_PLACEHOLDER}`);
 
     let result = '';

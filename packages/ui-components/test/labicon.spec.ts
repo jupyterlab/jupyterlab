@@ -552,6 +552,64 @@ describe('@jupyterlab/ui-components', () => {
           `dot\\-0${id.slice('dot-0'.length)}.click`
         );
       });
+
+      it('should point an animated href of each copy at its own element', () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:animated-href',
+          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+<defs><symbol id="frame1"/><symbol id="frame2"/></defs>
+<use href="#frame1"><animate attributeName="href" values="#frame1;#frame2" dur="1s"/></use>
+</svg>`
+        });
+
+        const svg = icon.element({ tag: null });
+        const [first, second] = Array.from(
+          svg.querySelectorAll('symbol'),
+          symbol => symbol.getAttribute('id')
+        );
+
+        expect(first).not.toBe('frame1');
+        expect(svg.querySelector('animate')!.getAttribute('values')).toBe(
+          `#${first};#${second}`
+        );
+      });
+
+      it('should keep a selector of an id and a class that spells a renamed id', () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:id-and-class',
+          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+<style>#a.b{fill:#123}</style>
+<defs><linearGradient id="a.b"/></defs>
+<rect fill="url(#a.b)" width="5" height="10"/><rect id="a" class="b" x="5" width="5" height="10"/>
+</svg>`
+        });
+
+        const svg = icon.element({ tag: null });
+
+        expect(
+          svg.querySelector('linearGradient')!.getAttribute('id')
+        ).not.toBe('a.b');
+        expect(svg.querySelector('style')!.textContent).toBe('#a.b{fill:#123}');
+      });
+
+      it('should rename a dotted id inside a quoted attribute selector', () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:dotted-href-selector',
+          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+<style>use[href="#a.b"]{fill:#123}</style>
+<defs><rect id="a.b" width="10" height="10"/></defs>
+<use href="#a.b"/>
+</svg>`
+        });
+
+        const svg = icon.element({ tag: null });
+        const id = svg.querySelector('rect')!.getAttribute('id');
+
+        expect(id).not.toBe('a.b');
+        expect(svg.querySelector('style')!.textContent).toBe(
+          `use[href="#${id}"]{fill:#123}`
+        );
+      });
     });
 
     describe('#react', () => {

@@ -215,10 +215,12 @@ that `LabIcon` did not render does not set the property, so its
 
 A selector in these rules that names a renamed ID, such as
 `#shine stop`, gets the suffix of each copy, so the rule still matches
-the element in every copy. Classes are not renamed, so a rule for
-`.logo` applies to every element on the page with that class,
-including those of other icons. Give your classes names that only your
-icon uses.
+the element in every copy. A rule that excludes a renamed ID, as in
+`circle:not(#dot)`, also matches that element in the other copies,
+because the rule of each copy excludes only its own ID. Classes are not
+renamed, so a rule for `.logo` applies to every element on the page with
+that class, including those of other icons. Give your classes names that
+only your icon uses.
 
 The suffix depends on the order in which icons are rendered, so a
 selector outside the SVG cannot name a renamed ID. To style or find an
