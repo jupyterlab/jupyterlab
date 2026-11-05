@@ -715,47 +715,58 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       }
     };
 
-    const findHeadingElement = (cell: Cell): Promise<void> => {
-      return Promise.all(
-        model.getCellHeadings(cell).map(async heading => {
+    const findHeadingElement = async (cell: Cell): Promise<void> => {
+      const headings = model.getCellHeadings(cell);
+      const attribute =
+        (this.sanitizer.allowNamedProperties ?? false)
+          ? 'id'
+          : 'data-jupyter-id';
+      const selectors = await Promise.all(
+        headings.map(async heading => {
           const elementId = await getIdForHeading(
             heading,
             this.parser!,
             this.sanitizer
           );
-
-          const attribute =
-            (this.sanitizer.allowNamedProperties ?? false)
-              ? 'id'
-              : 'data-jupyter-id';
-          const selector = elementId
+          return elementId
             ? `h${heading.level}[${attribute}="${CSS.escape(elementId)}"]`
             : `h${heading.level}`;
-
-          if (heading.outputIndex !== undefined) {
-            // Code cell
-            headingToElement.set(
-              heading,
-              TableOfContentsUtils.addPrefix(
-                (heading.cellRef as CodeCell).outputArea.widgets[
-                  heading.outputIndex
-                ].node,
-                selector,
-                heading.prefix ?? ''
-              )
-            );
-          } else {
-            headingToElement.set(
-              heading,
-              TableOfContentsUtils.addPrefix(
-                heading.cellRef.node,
-                selector,
-                heading.prefix ?? ''
-              )
-            );
-          }
         })
-      ).then(() => undefined);
+      );
+
+      const current = model.getCellHeadings(cell);
+      if (
+        current.length !== headings.length ||
+        current.some((heading, i) => heading !== headings[i])
+      ) {
+        // The headings changed in the meantime and will be mapped again
+        return;
+      }
+
+      // Update the numbering in one synchronous step, so that calls for the
+      // same cell cannot interleave. `addPrefix` numbers the first matching
+      // element without a number, which keeps identical headings apart
+      // only if the cell's numbering was cleared first.
+      TableOfContentsUtils.clearNumbering(cell.node);
+      headings.forEach((heading, i) => {
+        // Headings in code cell outputs are looked up in their output
+        const container =
+          heading.outputIndex === undefined
+            ? heading.cellRef.node
+            : (heading.cellRef as CodeCell).outputArea.widgets[
+                heading.outputIndex
+              ]?.node;
+        headingToElement.set(
+          heading,
+          container
+            ? TableOfContentsUtils.addPrefix(
+                container,
+                selectors[i],
+                heading.prefix ?? ''
+              )
+            : null
+        );
+      });
     };
 
     const onHeadingsChanged = (model: NotebookToCModel) => {

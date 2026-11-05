@@ -182,6 +182,34 @@ describe('@jupyterlab/notebook', () => {
     let cell: MarkdownCell;
     let model: NotebookToCModel;
 
+    const numbering = () => cell.node.querySelectorAll('h1 > .numbering-entry');
+
+    /**
+     * Wait until a condition holds. Rendering a cell emits no signal
+     * when it is done.
+     */
+    const waitFor = async (condition: () => boolean): Promise<void> => {
+      for (let i = 0; !condition(); i++) {
+        if (i === 100) {
+          throw new Error('Condition not met within 1 s');
+        }
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+    };
+
+    /**
+     * Render a cell again, as Shift+Enter does after editing it.
+     */
+    const renderAgain = async (source?: string): Promise<void> => {
+      cell.rendered = false;
+      await signalToPromise(cell.renderedChanged);
+      if (source !== undefined) {
+        cell.model.sharedModel.setSource(source);
+      }
+      cell.rendered = true;
+      await signalToPromise(cell.renderedChanged);
+    };
+
     beforeEach(async () => {
       context = await NBTestUtils.createMockContext(false);
       panel = utils.createNotebookPanel(context);
@@ -192,7 +220,7 @@ describe('@jupyterlab/notebook', () => {
       Widget.attach(panel, document.body);
       cell = panel.content.widgets[0] as MarkdownCell;
       cell.inViewport = true;
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await waitFor(() => cell.node.querySelector('h1') !== null);
 
       const factory = new NotebookToCFactory(
         { has: () => true } as unknown as INotebookTracker,
@@ -205,7 +233,7 @@ describe('@jupyterlab/notebook', () => {
         numberHeaders: true
       }) as NotebookToCModel;
       await model.refresh();
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await waitFor(() => numbering().length === 1);
     });
 
     afterEach(() => {
@@ -230,18 +258,32 @@ describe('@jupyterlab/notebook', () => {
     });
 
     it('numbers the heading again after its cell is re-rendered', async () => {
-      const numbering = () => cell.node.querySelector('h1 > .numbering-entry');
-      expect(numbering()).not.toBeNull();
-
-      cell.rendered = false;
-      await signalToPromise(cell.renderedChanged);
-      cell.model.sharedModel.setSource('# heading\n\nsome text');
-      cell.rendered = true;
-      await signalToPromise(cell.renderedChanged);
+      await renderAgain('# heading\n\nsome text');
       await new Promise(resolve => setTimeout(resolve, 0));
 
       expect(cell.node.querySelector('h1')).not.toBeNull();
-      expect(numbering()).not.toBeNull();
+      expect(numbering()).toHaveLength(1);
+    });
+
+    it('keeps identical headings in a cell apart when it is rendered again', async () => {
+      await renderAgain('# heading\n\n# heading');
+      await model.refresh();
+      await waitFor(() => numbering().length === 2);
+
+      // Without changes, the cell keeps its elements and their numbering
+      await renderAgain();
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      const [first, second] = Array.from(
+        cell.node.querySelectorAll<HTMLElement>('h1')
+      );
+      first.scrollIntoView = jest.fn();
+      second.scrollIntoView = jest.fn();
+      model.setActiveHeading(model.headings[1]);
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      expect(first.scrollIntoView).not.toHaveBeenCalled();
+      expect(second.scrollIntoView).toHaveBeenCalledWith({ block: 'start' });
     });
   });
 });
