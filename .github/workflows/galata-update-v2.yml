@@ -300,6 +300,7 @@ jobs:
     environment: update-snapshots
     outputs:
       branch-name: ${{ steps.create-branch.outputs.branch-name }}
+      commit-sha: ${{ steps.create-branch.outputs.commit-sha }}
     permissions:
       contents: read # to fetch the pull request head
     env:
@@ -390,6 +391,7 @@ jobs:
           git diff --cached --name-status
           # We do not want pre-commit to run in case if user code modifies it
           git commit -m "Update snapshots" --no-verify
+          echo "commit-sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
         working-directory: repo
 
       - name: Ensure fork exists
@@ -503,6 +505,10 @@ jobs:
           HAS_CHANGES: ${{ needs.prepare-snapshots.outputs.has-changes }}
           CREATE_BRANCH_RESULT: ${{ needs.create-branch.result }}
           OPEN_PR_RESULT: ${{ needs.open-pr.result }}
+          SNAPSHOT_SHA: ${{ needs.create-branch.outputs.commit-sha }}
+          PR_HEAD_REPO: ${{ needs.get-snapshot-updates.outputs.pr-head-repo }}
+          PR_HEAD_REF: ${{ needs.get-snapshot-updates.outputs.pr-head-ref }}
+          REPO_NAME: ${{ github.event.repository.name }}
         run: |
           RUN_URL="${SERVER_URL}/${REPOSITORY}/actions/runs/${RUN_ID}"
           ASSETS_RUN_URL="${SERVER_URL}/${REPOSITORY}/actions/runs/${ASSETS_RUN_ID}"
@@ -523,7 +529,33 @@ jobs:
             BODY="I created the PR ${SNAPSHOT_PR_URL} with snapshots from [run ${ASSETS_RUN_ID}](${ASSETS_RUN_URL})."
           fi
 
-          echo "body=$BODY" >> "$GITHUB_OUTPUT"
+          # Maintainers paste these commands into a shell, and the contributor
+          # chooses the branch name, so each value may only hold characters that
+          # no shell interprets. With an empty commit SHA, the push would delete the branch.
+          if [ "$OPEN_PR_RESULT" = "success" ] &&
+            [[ "$SNAPSHOT_SHA" =~ ^[0-9a-f]{40}$ ]] &&
+            [[ "$PR_HEAD_REPO" =~ ^[A-Za-z0-9-]+/[A-Za-z0-9._-]+$ ]] &&
+            [[ "$PR_HEAD_REF" =~ ^[A-Za-z0-9._/-]+$ ]]; then
+            printf -v BODY '%s\n' "$BODY" '' \
+              '<details>' \
+              '<summary>For maintainers: push the snapshot commit to this pull request</summary>' \
+              '' \
+              'Run these commands in any clone of JupyterLab. They do not check out files, and the push skips the pre-push hook, so code from either fork does not run. The push fails if the pull request does not allow edits from maintainers, or if the branch has new commits.' \
+              '' \
+              '```bash' \
+              "git fetch https://github.com/galata-snapshots-bot/${REPO_NAME}.git ${SNAPSHOT_SHA}" \
+              "git push --no-verify https://github.com/${PR_HEAD_REPO}.git ${SNAPSHOT_SHA}:refs/heads/${PR_HEAD_REF}" \
+              '```' \
+              '' \
+              '</details>'
+          fi
+
+          DELIMITER="EOF_$(openssl rand -hex 16)"
+          {
+            echo "body<<${DELIMITER}"
+            echo "$BODY"
+            echo "${DELIMITER}"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Comment back on the PR
         env:
