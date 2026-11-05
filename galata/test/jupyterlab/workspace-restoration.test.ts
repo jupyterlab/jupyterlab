@@ -132,6 +132,25 @@ for (const view of [
       await expect(page).toHaveURL(
         url => url.pathname === `/lab/tree/${filePath}`
       );
+      for (const directory of [`${tmpPath}/different/child`, tmpPath]) {
+        await page.evaluate(path => {
+          return window.jupyterapp.commands.execute('filebrowser:go-to-path', {
+            path,
+            dontShowBrowser: true
+          });
+        }, directory);
+        await expect(page).toHaveURL(
+          url =>
+            url.pathname === `/lab/tree/${filePath}` &&
+            url.searchParams.get('file-browser-path') ===
+              (directory === tmpPath ? null : directory)
+        );
+        await page.reload();
+        await expect(page.locator('#filebrowser')).not.toHaveClass(
+          /jp-mod-restoring/
+        );
+        expect(await page.filebrowser.getCurrentDirectory()).toBe(directory);
+      }
     });
 
     test('should keep the selected view after leaving the URL viewer', async ({
@@ -277,8 +296,18 @@ for (const view of [
               'target.txt'
             );
           }
+          const saved = page.waitForResponse(
+            response =>
+              new URL(response.url()).pathname.includes('/api/workspaces/') &&
+              response.request().method() === 'PUT' &&
+              !!response.request().postData()?.includes(`"current":"${other}"`)
+          );
           await page.activity.getTabLocator('other.txt').click();
           await expect(page.activity.getTabLocator()).toHaveText('other.txt');
+          await saved;
+          await expect(page).toHaveURL(
+            url => url.pathname === `/lab/tree/${otherPath}`
+          );
         } finally {
           finishListing!();
         }
@@ -289,13 +318,38 @@ for (const view of [
         await expect(page).toHaveURL(
           url => url.pathname === `/lab/tree/${otherPath}`
         );
+        await page.reload();
+        await expect(page.locator('#filebrowser')).not.toHaveClass(
+          /jp-mod-restoring/
+        );
+        await expect(page.activity.getTabLocator()).toHaveText('other.txt');
       });
     }
+
+    test('should open the URL file when its folder listing fails', async ({
+      page
+    }) => {
+      await page.route(
+        url =>
+          url.pathname.endsWith(`/api/contents/${tmpPath}`) &&
+          url.searchParams.get('content') === '1',
+        route => route.fulfill({ status: 403, json: { message: 'Forbidden' } })
+      );
+      await page.goto(`tree/${tmpPath}/target.txt`);
+      await expect(page.locator('#filebrowser')).not.toHaveClass(
+        /jp-mod-restoring/
+      );
+      await expect(page.activity.getTabLocator()).toHaveText('target.txt');
+      await expect(page).toHaveURL(
+        url => url.pathname === `/lab/tree/${tmpPath}/target.txt`
+      );
+    });
 
     for (const selection of [
       'another tab',
       'another tab with the requested view already selected',
       'another tab after closing the restored view',
+      'another tab after closing the requested view',
       'an extension widget'
     ]) {
       test(`should keep ${selection} activated before routing finishes`, async ({
@@ -314,10 +368,9 @@ for (const view of [
         });
 
         try {
-          const query =
-            selection === 'another tab with the requested view already selected'
-              ? `?open-with=${encodeURIComponent(view.factory)}`
-              : '';
+          const query = selection.includes('requested view')
+            ? `?open-with=${encodeURIComponent(view.factory)}`
+            : '';
           await page.goto(`tree/${filePath}${query}`);
           await expect(page.locator('#filebrowser')).toHaveClass(
             /jp-mod-restoring/
@@ -328,7 +381,7 @@ for (const view of [
               await window.jupyterapp.commands.execute('launcher:create');
             });
           } else {
-            if (selection === 'another tab after closing the restored view') {
+            if (selection.includes('after closing')) {
               await page.activity
                 .getTabLocator()
                 .locator('.lm-TabBar-tabCloseIcon')
