@@ -398,7 +398,10 @@ export class Dialog<T> extends Widget {
       case 'ArrowLeft': {
         const activeEl = document.activeElement;
 
-        if (activeEl instanceof HTMLButtonElement) {
+        if (
+          activeEl instanceof HTMLButtonElement &&
+          this._buttonNodes.includes(activeEl)
+        ) {
           let idx = this._buttonNodes.indexOf(activeEl) - 1;
 
           // Handle a left arrows on the first button
@@ -416,7 +419,10 @@ export class Dialog<T> extends Widget {
       case 'ArrowRight': {
         const activeEl = document.activeElement;
 
-        if (activeEl instanceof HTMLButtonElement) {
+        if (
+          activeEl instanceof HTMLButtonElement &&
+          this._buttonNodes.includes(activeEl)
+        ) {
           let idx = this._buttonNodes.indexOf(activeEl) + 1;
 
           // Handle a right arrows on the last button
@@ -442,18 +448,25 @@ export class Dialog<T> extends Widget {
         break;
       }
       case 'Enter': {
-        event.stopPropagation();
-        event.preventDefault();
+        const activeEl = Private.deepActiveElement();
+        let index = -1;
 
-        const activeEl = document.activeElement;
-
-        if (activeEl instanceof HTMLButtonElement) {
-          const index = this._buttonNodes.indexOf(activeEl);
-          if (index !== -1) {
-            this.resolve(index);
-          }
-        } else if (!(activeEl instanceof HTMLTextAreaElement)) {
-          const index = this._defaultButton;
+        if (
+          activeEl instanceof HTMLButtonElement &&
+          this._buttonNodes.includes(activeEl)
+        ) {
+          index = this._buttonNodes.indexOf(activeEl);
+        } else if (
+          // Enter sent to the dialog node itself, as `acceptDialog()` does.
+          event.target === this.node ||
+          Private.submitsOnEnter(activeEl)
+        ) {
+          index = this._defaultButton;
+        }
+        // Other elements, such as links and editors, handle Enter themselves.
+        if (index !== -1) {
+          event.stopPropagation();
+          event.preventDefault();
           this.resolve(index);
         }
         break;
@@ -897,6 +910,9 @@ export namespace Dialog {
       const handleKeyDown = (event: React.KeyboardEvent) => {
         const { key } = event;
         if (key === 'Enter' || key === ' ') {
+          // Keep the browser from passing the key on to the element that
+          // gets the focus back when the dialog closes.
+          event.preventDefault();
           reject();
         }
       };
@@ -1180,5 +1196,32 @@ namespace Private {
       '[tabindex]'
     ].join(',');
     return node.querySelectorAll(candidateSelectors)[0] as HTMLElement;
+  }
+
+  /**
+   * The focused element, looked up through open shadow roots.
+   *
+   * For a web component such as `<jp-search>`, `document.activeElement` is
+   * the host, and the focused `<input>` is in its shadow root.
+   */
+  export function deepActiveElement(): Element | null {
+    let el = document.activeElement;
+    while (el?.shadowRoot?.activeElement) {
+      el = el.shadowRoot.activeElement;
+    }
+    return el;
+  }
+
+  /**
+   * Whether Enter in the element submits the dialog, as it submits a form.
+   *
+   * Button-like inputs are excluded because the browser activates them on Enter.
+   */
+  export function submitsOnEnter(el: Element | null): boolean {
+    return (
+      el instanceof HTMLSelectElement ||
+      (el instanceof HTMLInputElement &&
+        !['button', 'submit', 'reset', 'image'].includes(el.type))
+    );
   }
 }
