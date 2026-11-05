@@ -855,3 +855,16 @@ def test_raise_config_file_errors_disabled_from_command_line(
 
     app = serverapp.extension_manager.extension_points[LabApp.name].app
     assert app.expose_app_in_browser is True
+
+
+def test_labextension_list_skips_config_file_errors(jp_environ, jp_config_dir):
+    (jp_config_dir / "jupyter_lab_config.py").write_text("c.LabApp.broken_syntax = [")
+
+    result = subprocess.run(
+        [sys.executable, "-m", "jupyterlab.labextensions", "list"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
