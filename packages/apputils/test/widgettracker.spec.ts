@@ -5,6 +5,7 @@ import { WidgetTracker } from '@jupyterlab/apputils';
 import { type IRestorable, StateDB } from '@jupyterlab/statedb';
 import { signalToPromise, testEmission } from '@jupyterlab/testing';
 import { CommandRegistry } from '@lumino/commands';
+import { PromiseDelegate } from '@lumino/coreutils';
 import { Panel, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 
@@ -450,13 +451,17 @@ describe('@jupyterlab/apputils', () => {
       });
 
       function createRestoreOptions(
-        connector: StateDB = state
+        connector: StateDB = state,
+        beforeCreate?: () => Promise<void>
       ): IRestorable.IOptions<Widget> {
         const registry = new CommandRegistry();
         registry.addCommand('test:restore', {
           execute: async args => {
             if (typeof args.id !== 'string' || typeof args.label !== 'string') {
               throw new Error('Invalid saved widget');
+            }
+            if (beforeCreate) {
+              await beforeCreate();
             }
             const widget = createWidget();
             widget.id = args.id;
@@ -492,6 +497,43 @@ describe('@jupyterlab/apputils', () => {
         expect(widget?.title.label).toBe(data.label);
         expect(await state.fetch(`${namespace}:${data.id}`)).toEqual({ data });
         await expect(tracker.restored).resolves.toBeUndefined();
+      });
+
+      it('should wait for prerequisites and command completion', async () => {
+        const ready = new PromiseDelegate<void>();
+        const commandGate = new PromiseDelegate<void>();
+        const nextTurn = () =>
+          new Promise<void>(resolve => setTimeout(resolve, 0));
+        const data = { id: 'saved-widget', label: 'Saved title' };
+        await state.save(`${namespace}:${data.id}`, { data });
+
+        let commandStarted = false;
+        let trackerRestored = false;
+        const restored = tracker.restored.then(() => {
+          trackerRestored = true;
+        });
+        const restoring = tracker.restore({
+          ...createRestoreOptions(state, () => {
+            commandStarted = true;
+            return commandGate.promise;
+          }),
+          when: ready.promise
+        });
+
+        await nextTurn();
+        const startedBeforeReady = commandStarted;
+        ready.resolve(undefined);
+        await nextTurn();
+        const startedAfterReady = commandStarted;
+        const restoredBeforeCommandCompleted = trackerRestored;
+
+        commandGate.resolve(undefined);
+        await Promise.all([restored, restoring]);
+
+        expect(startedBeforeReady).toBe(false);
+        expect(startedAfterReady).toBe(true);
+        expect(restoredBeforeCommandCompleted).toBe(false);
+        expect(tracker.size).toBe(1);
       });
 
       it('should prefer deferred options', async () => {
