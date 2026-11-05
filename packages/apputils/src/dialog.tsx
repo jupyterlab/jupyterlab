@@ -471,7 +471,10 @@ export class Dialog<T> extends Widget {
         const activeEl = Private.deepActiveElement();
         let index = -1;
 
-        if (activeEl instanceof HTMLButtonElement) {
+        if (
+          activeEl instanceof HTMLButtonElement &&
+          this._buttonNodes.includes(activeEl)
+        ) {
           index = this._buttonNodes.indexOf(activeEl);
         } else if (
           // Enter sent to the dialog node itself, as `acceptDialog()` does.

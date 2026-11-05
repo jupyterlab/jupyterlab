@@ -322,6 +322,15 @@ describe('@jupyterlab/apputils', () => {
             expect((await prompt).button.accept).toBe(true);
           });
 
+          it('should accept on enter key sent to the dialog node with a body button focused', async () => {
+            await launchWithBody(<button data-testid="target">button</button>);
+
+            simulate(bodyDialog.node, 'keydown', { key: 'Enter' });
+
+            expect(bodyDialog.isDisposed).toBe(true);
+            expect((await prompt).button.accept).toBe(true);
+          });
+
           it('should accept on enter key within the input of a web component', async () => {
             // Such as the <jp-search> of a FilterBox, whose <input> sits in a
             // shadow root, so that `document.activeElement` is the host.
