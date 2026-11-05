@@ -64,4 +64,25 @@ test.describe('Local links', () => {
 
     await expect(page.activity.getTabLocator('note.txt')).toBeVisible();
   });
+
+  test('Missing file link shows an error dialog', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.contents.uploadContent(
+      '[missing link](missing-file.txt)',
+      'text',
+      `${tmpPath}/${LINK_FILE}`
+    );
+    await page.filebrowser.open(`${tmpPath}/${LINK_FILE}`, 'Markdown Preview');
+    await page.locator('.jp-MarkdownViewer').waitFor();
+
+    await page
+      .locator('.jp-MarkdownViewer a', { hasText: 'missing link' })
+      .click();
+
+    const dialog = page.locator('.jp-Dialog');
+    await expect(dialog).toBeVisible();
+    await expect(dialog.locator('.jp-Dialog-header')).toHaveText('Path Not Found');
+  });
 });
