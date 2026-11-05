@@ -328,6 +328,14 @@ export class MetadataFormWidget
   }
 
   /**
+   * Update the form when the widget is attached while visible: the active cell
+   * may have changed while the Property Inspector showed another document.
+   */
+  protected onAfterAttach(msg: Message): void {
+    if (this.isVisible) this._update();
+  }
+
+  /**
    * Handle a change to the active cell.
    */
   protected onActiveCellChanged(msg: Message): void {

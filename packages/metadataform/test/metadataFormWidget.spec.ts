@@ -4,6 +4,7 @@
  */
 
 import { JSONExt } from '@lumino/coreutils';
+import type { PanelLayout } from '@lumino/widgets';
 import { Widget } from '@lumino/widgets';
 import type { Context } from '@jupyterlab/docregistry';
 import type { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
@@ -13,6 +14,7 @@ import {
   NBTestUtils
 } from '@jupyterlab/notebook/lib/testutils';
 import { JupyterServer, sleep } from '@jupyterlab/testing';
+import { Collapser } from '@jupyterlab/ui-components';
 import type { FieldProps } from '@rjsf/utils';
 import React from 'react';
 import type { MetadataForm } from '../src';
@@ -308,6 +310,62 @@ describe('metadataform/form simple', () => {
     await metadataForm.form!.renderPromise;
 
     expect(secondCell.model.getMetadata('cell-metadata')).toBeUndefined();
+  });
+
+  async function buildVisibleForm(): Promise<MetadataFormWidget> {
+    const metadataForm = new MetadataFormWidget({
+      metadataSchema: JSONExt.deepCopy(schema),
+      metaInformation,
+      pluginId: 'test-plugin'
+    });
+    notebookTools.addSection({ sectionName: 'testSchema', tool: metadataForm });
+    metadataForm.notebookTools = notebookTools;
+    Widget.attach(notebookTools, document.body);
+    const collapser = (notebookTools.layout as PanelLayout).widgets.find(
+      widget => widget instanceof Collapser && widget.contains(metadataForm)
+    ) as Collapser;
+    // Expanding the section shows the form, which builds it.
+    collapser.collapsed = false;
+    await sleep(100);
+    await metadataForm.form!.renderPromise;
+    return metadataForm;
+  }
+
+  it('should show the metadata of the active cell when attached again', async () => {
+    const content = tracker.currentWidget!.content;
+    content.widgets[3].model.setMetadata('cell-metadata', 'second');
+    const metadataForm = await buildVisibleForm();
+
+    // The Property Inspector detaches the notebook tools while another
+    // document has the focus.
+    Widget.detach(notebookTools);
+    content.activeCellIndex = 3;
+    Widget.attach(notebookTools, document.body);
+    await sleep(100);
+    await metadataForm.form!.renderPromise;
+
+    const input = metadataForm.node.querySelector<HTMLInputElement>(
+      'input[id$="_/cell-metadata"]'
+    )!;
+    expect(input.value).toBe('second');
+  });
+
+  it('should write an edit to the active cell after being attached again', async () => {
+    const content = tracker.currentWidget!.content;
+    const metadataForm = await buildVisibleForm();
+
+    Widget.detach(notebookTools);
+    content.activeCellIndex = 3;
+    const secondCell = tracker.activeCell!;
+    Widget.attach(notebookTools, document.body);
+    await sleep(100);
+    await metadataForm.form!.renderPromise;
+
+    const input = metadataForm.node.querySelector<HTMLInputElement>(
+      'input[id$="_/cell-metadata"]'
+    )!;
+    await typeInto(input, 'edited');
+    expect(secondCell.model.getMetadata('cell-metadata')).toBe('edited');
   });
 
   it('should update notebook metadata', async () => {
