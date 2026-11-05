@@ -1527,12 +1527,10 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
         restartBtn
       ],
       checkbox: {
-        label: trans.__(
-          'Do not ask me again until %1 is closed.',
-          sessionContext.name
-        ),
+        label: trans.__('Do not ask me again for now.'),
         caption: trans.__(
-          'To never ask, enable "Skip kernel restart Dialog" in the Kernel dialogs settings.'
+          'Applies until %1 is closed or the page is reloaded. To never ask, enable "Skip kernel restart Dialog" in the Kernel dialogs settings.',
+          sessionContext.name
         )
       }
     });
