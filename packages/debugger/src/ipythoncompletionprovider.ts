@@ -201,14 +201,14 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
     // back in this reply (debugpy only returns values for expressions, not
     // for multi-line code, which it execs) and nothing is ever defined in
     // the paused frame - the variables panel and completions stay clean.
-    // The frame's namespace is captured by the lambda defaults, which are
-    // evaluated in the frame; JSON.stringify makes the helper definition a
-    // valid single-line Python string literal.
+    // Get the builtins from a temporary generator's frame, where variables
+    // in the paused frame cannot shadow the helpers. The lambda's default
+    // captures the evaluation frame before entering the scratch namespace.
     const expression =
-      `(lambda ns={}, frame_locals=locals(), frame_globals=globals(): ` +
-      `(exec(${JSON.stringify(HELPER_DEFINITION)}, ns), ` +
+      `(lambda ns={}, frame=(None for _ in ()).gi_frame.f_builtins['__import__']('inspect').currentframe(): ` +
+      `(frame.f_builtins['exec'](${JSON.stringify(HELPER_DEFINITION)}, ns), ` +
       `ns[${JSON.stringify(HELPER_NAME)}](` +
-      `${textLiteral}, ${offset}, frame_locals, frame_globals, ` +
+      `${textLiteral}, ${offset}, frame.f_locals, frame.f_globals, ` +
       `${attribute ? 'True' : 'False'}))[1])()`;
 
     try {

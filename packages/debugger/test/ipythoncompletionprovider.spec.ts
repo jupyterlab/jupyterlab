@@ -336,7 +336,7 @@ describe('DebuggerIPythonCompletionProvider', () => {
       // A single expression (eval mode), not a multi-line block.
       expect(expression).not.toContain('\n');
       expect(expression).toContain(
-        `("df['", 4, frame_locals, frame_globals, False)`
+        `("df['", 4, frame.f_locals, frame.f_globals, False)`
       );
     });
 
@@ -378,7 +378,7 @@ describe('DebuggerIPythonCompletionProvider', () => {
       expect(reply.items.map(item => item.label)).toEqual(['capitalize']);
       expect(reply.start).toBe(text.length - 3);
       const { expression } = sendRequest.mock.calls[0][1];
-      expect(expression).toContain('frame_locals, frame_globals, True)');
+      expect(expression).toContain('frame.f_locals, frame.f_globals, True)');
     });
 
     it('should not complete attributes after a quote which opens a string', async () => {
@@ -391,7 +391,7 @@ describe('DebuggerIPythonCompletionProvider', () => {
       const text = "open('.git";
       await provider.fetch({ text, offset: text.length }, { widget, editor });
       const { expression } = sendRequest.mock.calls[0][1];
-      expect(expression).toContain('frame_locals, frame_globals, False)');
+      expect(expression).toContain('frame.f_locals, frame.f_globals, False)');
     });
 
     it('should return an empty reply when the request is unsuccessful', async () => {
