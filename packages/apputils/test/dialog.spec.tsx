@@ -355,6 +355,27 @@ describe('@jupyterlab/apputils', () => {
           });
         });
 
+        it('should cancel the enter key on the close button', async () => {
+          const closable = new Dialog({ title: 'foo', hasClose: true });
+          const prompt = closable.launch();
+          await waitForDialog();
+          await closable.ready;
+          const closeButton = closable.node.querySelector<HTMLElement>(
+            '.jp-Dialog-close-button'
+          )!;
+          closeButton.focus();
+
+          // Otherwise the browser passes the key on to the element that gets
+          // the focus back when the dialog closes, such as the button that
+          // opened it, or an editor that then gets a new line.
+          const event = generate('keydown', { key: 'Enter' });
+          closeButton.dispatchEvent(event);
+
+          expect(event.defaultPrevented).toBe(true);
+          closable.dispose();
+          await prompt.catch(() => {});
+        });
+
         it('should resolve with currently focused button', async () => {
           const dialog = new TestDialog({
             buttons: [

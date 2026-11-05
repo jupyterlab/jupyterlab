@@ -954,6 +954,9 @@ export namespace Dialog {
       const handleKeyDown = (event: React.KeyboardEvent) => {
         const { key } = event;
         if (key === 'Enter' || key === ' ') {
+          // Keep the browser from passing the key on to the element that
+          // gets the focus back when the dialog closes.
+          event.preventDefault();
           reject();
         }
       };
