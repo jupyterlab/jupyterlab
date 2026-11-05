@@ -482,9 +482,21 @@ test.describe('Section reordering', () => {
   test('should retain the search section handle when its title changes', async ({
     page
   }) => {
+    await page.route('**/*', async (route, request) => {
+      if (!request.isNavigationRequest()) {
+        return route.fallback();
+      }
+      const response = await route.fetch();
+      const body = (await response.text()).replace(
+        /"language_packs_only":\s*true/,
+        '"language_packs_only": false'
+      );
+      return route.fulfill({ response, body });
+    });
     await page.route(galata.Routes.extensions, route =>
       route.fulfill({ json: [] })
     );
+    await page.goto();
     await page.sidebar.openTab('extensionmanager.main-view');
     const panel = page.locator('.jp-extensionmanager-view');
     await toggleReordering(
@@ -530,7 +542,7 @@ test.describe('Section reordering', () => {
     await panel.locator('.jp-extensionmanager-disclaimer-enable').click();
     await expect(warning).toHaveAttribute('aria-expanded', 'false');
     await expect(installed).toHaveAttribute('aria-expanded', 'true');
-    await expect(titles.filter({ hasText: 'Discover' })).toHaveAttribute(
+    await expect(titles.filter({ hasText: 'Language Packs' })).toHaveAttribute(
       'aria-expanded',
       'true'
     );
@@ -764,7 +776,7 @@ const elementAriaLabels = {
   'extensionmanager.main-view': [
     'Warning Section',
     'Installed Section',
-    'Discover Section'
+    'Language Packs Section'
   ]
 };
 

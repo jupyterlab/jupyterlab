@@ -486,6 +486,16 @@ export class ListModel extends VDomModel {
   }
 
   /**
+   * Refresh the installed list and, for PyPI, the available language packs.
+   */
+  async refresh(): Promise<void> {
+    await this.refreshInstalled(true);
+    if (this.languagePacksOnly && this.isDisclaimed) {
+      await this._debouncedSearch.invoke(true);
+    }
+  }
+
+  /**
    * Fetch the list of installed extensions.
    *
    * @param force Force refreshing the list of installed packages
@@ -695,7 +705,7 @@ export class ListModel extends VDomModel {
   private _installed: IEntry[];
   private _lastSearchResult: IEntry[];
   private _pendingActions: Promise<any>[] = [];
-  private _debouncedSearch: Debouncer<void, void>;
+  private _debouncedSearch: Debouncer<void, void, [force?: boolean]>;
 }
 
 /**

@@ -13,6 +13,7 @@ import sys
 import tempfile
 from collections.abc import Awaitable, Callable
 from functools import partial
+from http import HTTPStatus
 from os import environ
 from pathlib import Path
 from subprocess import CalledProcessError, run
@@ -28,6 +29,7 @@ from packaging.specifiers import InvalidSpecifier, SpecifierSet
 from packaging.utils import InvalidName, canonicalize_name
 from packaging.version import InvalidVersion, Version
 from packaging.version import parse as parse_version
+from tornado.web import HTTPError
 from traitlets import CFloat, CInt, Unicode, config
 
 if sys.version_info >= (3, 12):
@@ -136,29 +138,31 @@ async def _fetch_package_metadata(
         base_url + f"/{name}/json",
         headers={"Content-Type": "application/json"},
     )
-    if response.status_code < 400:  # noqa PLR2004
-        response_data: object = json.loads(response.text)
-        data = _json_object(_json_object(response_data).get("info"))
-
-        # Keep minimal information to limit cache size
-        return {
-            k: data.get(k)
-            for k in [
-                "author",
-                "bugtrack_url",
-                "docs_url",
-                "home_page",
-                "license",
-                "package_url",
-                "project_url",
-                "project_urls",
-                "requires_python",
-                "summary",
-                "version",
-            ]
-        }
-    else:
+    if response.status_code == HTTPStatus.NOT_FOUND:
         return {}
+    if not response.is_success:
+        response.raise_for_status()
+
+    response_data: object = json.loads(response.text)
+    data = _json_object(_json_object(response_data).get("info"))
+
+    # Keep minimal information to limit cache size
+    return {
+        k: data.get(k)
+        for k in [
+            "author",
+            "bugtrack_url",
+            "docs_url",
+            "home_page",
+            "license",
+            "package_url",
+            "project_url",
+            "project_urls",
+            "requires_python",
+            "summary",
+            "version",
+        ]
+    }
 
 
 # Known language packs from https://github.com/jupyterlab/language-packs
@@ -314,6 +318,24 @@ class PyPIExtensionManager(ExtensionManager):
         )
         self._package_metadata_cache_expires = monotonic() + self.cache_timeout
 
+    @override
+    async def _get_extensions_page(
+        self, query: str | None, page: int, per_page: int
+    ) -> tuple[dict[str, ExtensionPackage], int]:
+        if query is None:
+            return await super()._get_extensions_page(query, page, per_page)
+        # Cache metadata per pack so a partial search can recover on the next request.
+        extensions, last_page = await self.list_packages(query, page, per_page)
+        return extensions, last_page or 1
+
+    @override
+    async def refresh(self, query: str | None, page: int, per_page: int) -> None:
+        """Refresh installed extensions or invalidate cached language pack metadata."""
+        if query is None:
+            await super().refresh(query, page, per_page)
+        else:
+            self._configure_package_metadata_cache()
+
     async def list_packages(
         self, query: str, page: int, per_page: int
     ) -> tuple[dict[str, ExtensionPackage], int | None]:
@@ -329,9 +351,13 @@ class PyPIExtensionManager(ExtensionManager):
         )
 
         matches = []
+        failed = False
         for name, data in zip(names, packages, strict=True):
             if isinstance(data, BaseException):
+                if not isinstance(data, Exception):
+                    raise data
                 self.log.debug("Failed to fetch language pack metadata for %s: %s", name, data)
+                failed = True
                 continue
             latest_version = _metadata_string(data, "version")
             if not latest_version:
@@ -386,6 +412,12 @@ class PyPIExtensionManager(ExtensionManager):
             )
 
             matches.append(extension)
+
+        if failed and not matches:
+            raise HTTPError(
+                HTTPStatus.SERVICE_UNAVAILABLE,
+                "Could not load language packs from PyPI. Try refreshing the extensions list.",
+            )
 
         start = (page - 1) * per_page
         extensions = {pack.name: pack for pack in matches[start : start + per_page]}
