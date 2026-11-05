@@ -17,10 +17,7 @@ import type {
 import { LruCache } from '@jupyterlab/coreutils';
 import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 import { IMarkdownParser, removeMath } from '@jupyterlab/rendermime';
-import type {
-  IMarkdownHeadingToken,
-  IRenderMime
-} from '@jupyterlab/rendermime';
+import type { IMarkdownHeadingToken } from '@jupyterlab/rendermime';
 import { IMermaidMarkdown } from '@jupyterlab/mermaid';
 
 import type {
@@ -69,11 +66,8 @@ export function createMarkdownParser(
     render: (content: string): Promise<string> => {
       return Private.render(content, languages, options);
     },
-    getHeadingTokens: (
-      content: string,
-      mathParseOptions?: IRenderMime.ILatexTypesetter.IMathParseOptions
-    ): Promise<IMarkdownHeadingToken[]> => {
-      return Private.getHeadingTokens(content, options, mathParseOptions);
+    getHeadingTokens: (content: string): Promise<IMarkdownHeadingToken[]> => {
+      return Private.getHeadingTokens(content, options);
     }
   };
 }
@@ -274,8 +268,7 @@ namespace Private {
    */
   export async function getHeadingTokens(
     content: string,
-    options?: IRenderOptions,
-    mathParseOptions?: IRenderMime.ILatexTypesetter.IMathParseOptions
+    options?: IRenderOptions
   ): Promise<IMarkdownHeadingToken[]> {
     if (!_marked) {
       _marked = await initializeMarked(options);
@@ -284,7 +277,7 @@ namespace Private {
     // Hide math from the lexer, as `renderMarkdown` does, but not single `$`
     // math that spans lines: those `$` are often dollar amounts, and the
     // editor shows any heading on those lines.
-    const { text, math } = removeMath(content, mathParseOptions);
+    const { text, math } = removeMath(content);
     const tokens = _marked.lexer(restoreMath(text, math, spansLines));
 
     // Extract heading tokens and compute line numbers

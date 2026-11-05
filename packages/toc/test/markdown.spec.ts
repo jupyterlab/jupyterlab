@@ -4,7 +4,7 @@
 import { TableOfContentsUtils } from '@jupyterlab/toc';
 import { Sanitizer } from '@jupyterlab/apputils';
 import { createMarkdownParser } from '@jupyterlab/markedparser-extension';
-import type { IMarkdownParser, IRenderMime } from '@jupyterlab/rendermime';
+import type { IMarkdownParser } from '@jupyterlab/rendermime';
 import type { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 import { EditorLanguageRegistry } from '@jupyterlab/codemirror';
 
@@ -610,18 +610,11 @@ front: matter
     );
 
     describe('#parseHeadings', () => {
-      const tocHeadings = async (
-        src: string,
-        mathParseOptions?: IRenderMime.ILatexTypesetter.IMathParseOptions
-      ) => {
+      const tocHeadings = async (src: string) => {
         const languages: IEditorLanguageRegistry = new EditorLanguageRegistry();
         const parser: IMarkdownParser = createMarkdownParser(languages);
         return TableOfContentsUtils.filterHeadings(
-          await TableOfContentsUtils.Markdown.parseHeadings(
-            src,
-            parser,
-            mathParseOptions
-          ),
+          await TableOfContentsUtils.Markdown.parseHeadings(src, parser),
           {
             maximalDepth: 6,
             numberHeaders: true
@@ -799,30 +792,6 @@ front: matter
         'should keep a heading next to dollar amounts in %s',
         async (src, headers) => {
           expect(await tocHeadings(src)).toEqual(headers);
-        }
-      );
-
-      it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
-        [
-          '## Prices from $5 *up to* $10',
-          [
-            {
-              text: 'Prices from $5 up to $10',
-              level: 2,
-              line: 0,
-              raw: '## Prices from $5 *up to* $10',
-              prefix: '0.1. ',
-              skip: false
-            }
-          ]
-        ],
-        ['It costs $5.\n$$\na\n=\nb\n$$', []]
-      ])(
-        'should read a single `$` as text with `dollarInlineMath: false` in %s',
-        async (src, headers) => {
-          expect(await tocHeadings(src, { dollarInlineMath: false })).toEqual(
-            headers
-          );
         }
       );
 

@@ -1108,31 +1108,6 @@ describe('cells/widget', () => {
         const headings = await widget.getHeadings();
         expect(headings.map(heading => heading.text)).toEqual(['Heading 1']);
       });
-
-      it('should give the typesetter math options to the parser', async () => {
-        const calls: unknown[][] = [];
-        const markdownParser: IMarkdownParser = {
-          render: async source => source,
-          getHeadingTokens: async (...args: unknown[]) => {
-            calls.push(args);
-            return [];
-          }
-        };
-        const mathParseOptions = { dollarInlineMath: false };
-        const widget = new MarkdownCell({
-          model: new MarkdownCellModel(),
-          rendermime: rendermime.clone({
-            markdownParser,
-            latexTypesetter: { typeset: () => undefined, mathParseOptions }
-          }),
-          contentFactory,
-          placeholder: false
-        });
-        widget.initializeState();
-        widget.model.sharedModel.setSource('# Price');
-        await widget.getHeadings();
-        expect(calls[calls.length - 1]).toEqual(['# Price', mathParseOptions]);
-      });
     });
 
     describe('#rendered', () => {

@@ -3,7 +3,6 @@
 
 import type { IWidgetTracker } from '@jupyterlab/apputils';
 import type { IMarkdownParser, IRenderMime } from '@jupyterlab/rendermime';
-import { RenderedCommon } from '@jupyterlab/rendermime';
 import type { TableOfContents } from '@jupyterlab/toc';
 import {
   TableOfContentsFactory,
@@ -73,13 +72,9 @@ export class MarkdownViewerTableOfContentsModel extends TableOfContentsModel<
    */
   protected async getHeadings(): Promise<IMarkdownViewerHeading[] | null> {
     const content = this.widget.context.model.toString();
-    const { renderer } = this.widget.content;
     const headings = await TableOfContentsUtils.Markdown.parseHeadings(
       content,
-      this.parser,
-      renderer instanceof RenderedCommon
-        ? renderer.latexTypesetter?.mathParseOptions
-        : undefined
+      this.parser
     );
     const filteredHeadings = TableOfContentsUtils.filterHeadings(headings, {
       ...this.configuration,
