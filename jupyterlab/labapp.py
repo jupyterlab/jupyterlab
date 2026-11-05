@@ -541,7 +541,11 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     raise_config_file_errors = Bool(
         True,
         config=True,
-        help="Whether to fail fast when config files have errors.",
+        help=(
+            "Whether to stop when a config file has an error. Set it on the command line "
+            "or in jupyter_server_config.py: a value in jupyter_lab_config.py has no effect, "
+            "because that file is loaded after this option is read."
+        ),
     )
 
     core_mode = Bool(
@@ -703,6 +707,8 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         if "raise_config_file_errors" in own_config:
             value = own_config["raise_config_file_errors"]
             self._load_config(Config({"LabApp": {"raise_config_file_errors": value}}))
+            # Otherwise notebook_shim warns that ServerApp has an option of the same name
+            serverapp.config["LabApp"].pop("raise_config_file_errors", None)
         super()._link_jupyter_server_extension(serverapp)
 
     def load_config_file(self, suppress_errors: bool = True) -> None:  # type: ignore[override]
