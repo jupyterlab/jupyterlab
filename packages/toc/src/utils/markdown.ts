@@ -3,7 +3,11 @@
 
 import { Sanitizer } from '@jupyterlab/apputils';
 import type { IMarkdownParser } from '@jupyterlab/rendermime';
-import { renderMarkdown } from '@jupyterlab/rendermime';
+import {
+  removeMath,
+  renderMarkdown,
+  replaceMath
+} from '@jupyterlab/rendermime';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import type { TableOfContents } from '../tokens';
 
@@ -93,7 +97,9 @@ export async function parseHeadings(
   // as this provides a clean and reliable way to retrieve the headings.
   const parseHeadings = await Promise.all(
     headingTokens.map(async token => {
-      const renderedHtml = await parser.render(token.raw);
+      // Hide math from the parser, as `renderMarkdown` does.
+      const { text, math } = removeMath(token.raw);
+      const renderedHtml = replaceMath(await parser.render(text), math);
       const dom = new DOMParser().parseFromString(renderedHtml, 'text/html');
       const htmlHeadings = Array.from(
         dom.querySelectorAll('h1, h2, h3, h4, h5, h6')

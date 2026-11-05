@@ -16,7 +16,7 @@ import type {
 } from '@jupyterlab/application';
 import { LruCache } from '@jupyterlab/coreutils';
 import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
-import { IMarkdownParser } from '@jupyterlab/rendermime';
+import { IMarkdownParser, removeMath } from '@jupyterlab/rendermime';
 import type { IMarkdownHeadingToken } from '@jupyterlab/rendermime';
 import { IMermaidMarkdown } from '@jupyterlab/mermaid';
 
@@ -274,7 +274,11 @@ namespace Private {
       _marked = await initializeMarked(options);
     }
     const headings = new Array<IMarkdownHeadingToken>();
-    const tokens = _marked.lexer(content);
+    // Hide math from the lexer, as `renderMarkdown` does, but not single `$`
+    // math that spans lines: those `$` are often dollar amounts, and the
+    // editor shows any heading on those lines.
+    const { text, math } = removeMath(content);
+    const tokens = _marked.lexer(restoreMath(text, math, spansLines));
 
     // Extract heading tokens and compute line numbers
     // Include three token types that may contain headings:
@@ -283,17 +287,18 @@ namespace Private {
     // - paragraph: Only paragraphs with nested HTML tokens (inline html tags) that might contain embedded headings (<span><h1>Title</h1></span>)
     let currentLine = 0;
     for (const token of tokens) {
+      const raw = restoreMath(token.raw, math);
       if (
         token.type === 'heading' ||
         (token.type === 'html' && containsHeadingTag(token.raw)) ||
         (token.type === 'paragraph' && containsInlineHeading(token))
       ) {
         headings.push({
-          raw: token.raw,
+          raw,
           line: currentLine
         });
       }
-      currentLine += token.raw.split('\n').length - 1;
+      currentLine += raw.split('\n').length - 1;
     }
 
     return headings;
@@ -309,5 +314,45 @@ namespace Private {
     return token.tokens.some(
       (t: Tokens.Generic) => t.type === 'html' && containsHeadingTag(t.raw)
     );
+  }
+
+  /**
+   * Whether math in single `$` spans more than one line.
+   */
+  function spansLines(math: string): boolean {
+    return /^\$[^$]/.test(math) && math.includes('\n');
+  }
+
+  /**
+   * Put back the math source hidden by `removeMath` that `filter` accepts,
+   * undoing the HTML escaping it applies, so that the result matches the
+   * Markdown source.
+   */
+  function restoreMath(
+    text: string,
+    math: string[],
+    filter: (source: string) => boolean = () => true
+  ): string {
+    const placeholder = /@@(\d+)@@/g;
+    let restored = '';
+    let end = 0;
+    let match: RegExpExecArray | null;
+    while ((match = placeholder.exec(text)) !== null) {
+      const source: string | undefined = math[Number(match[1])];
+      if (source === undefined) {
+        // Text such as `@@1` right before a placeholder forms a `@@n@@` that
+        // has no math: look for the placeholder from the next character.
+        placeholder.lastIndex = match.index + 1;
+      } else if (filter(source)) {
+        restored +=
+          text.slice(end, match.index) +
+          source
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;/g, '&');
+        end = placeholder.lastIndex;
+      }
+    }
+    return restored + text.slice(end);
   }
 }
