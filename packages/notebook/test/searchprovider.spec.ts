@@ -145,6 +145,12 @@ describe('@jupyterlab/notebook', () => {
         ]);
         panel.content.activeCellIndex = 0;
         panel.content.mode = 'command';
+        // The handlers run on 0 ms timers and the tests wait for frames
+        jest.useRealTimers();
+      });
+
+      afterEach(() => {
+        jest.useFakeTimers();
       });
 
       it.each([0, 1, 2])(
@@ -154,6 +160,7 @@ describe('@jupyterlab/notebook', () => {
           const selected = signalToPromise(provider.filtersChanged);
           panel.content.extendContiguousSelectionTo(2);
           await selected;
+          await framePromise();
           expect(provider.matchesCount).toBe(3);
 
           const observed: { current: number | null; count: number | null }[] =
@@ -170,7 +177,7 @@ describe('@jupyterlab/notebook', () => {
           panel.content.deselectAll();
           panel.content.activeCellIndex = cellIndex;
           await collapsed;
-          await provider.cellChangeHandled;
+          await framePromise();
 
           expect(provider.currentMatchIndex).toBe(0);
           expect(observed.at(-1)).toEqual({ current: 0, count: 1 });
@@ -189,6 +196,7 @@ describe('@jupyterlab/notebook', () => {
           const selected = signalToPromise(provider.filtersChanged);
           panel.content.extendContiguousSelectionTo(2);
           await selected;
+          await framePromise();
 
           const observed: { current: number | null; count: number | null }[] =
             [];
@@ -205,7 +213,7 @@ describe('@jupyterlab/notebook', () => {
           panel.content.activeCellIndex = cellIndex;
           panel.content.mode = 'edit';
           await collapsed;
-          await provider.cellChangeHandled;
+          await framePromise();
 
           expect(provider.currentMatchIndex).toBe(0);
           expect(observed.at(-1)).toEqual({ current: 0, count: 1 });
@@ -241,9 +249,10 @@ describe('@jupyterlab/notebook', () => {
 
         // Shift-click on the prompt of the empty cell below
         const extended = signalToPromise(provider.filtersChanged);
+        panel.content.mode = 'command';
         panel.content.extendContiguousSelectionTo(1);
         await extended;
-        await provider.cellChangeHandled;
+        await framePromise();
 
         expect(provider.currentMatchIndex).toBe(0);
         expect(observed.at(-1)).toEqual({ current: 0, count: 1 });
