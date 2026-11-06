@@ -3011,6 +3011,13 @@ function addCommands(
     return Private.isEnabledAndSingleSelected(shell, tracker, args);
   };
 
+  const isKernelLocked = (): boolean => {
+    return (
+      tracker.currentWidget?.context.sessionContext.kernelPreference.locked ===
+      true
+    );
+  };
+
   const refreshCellCollapsed = (notebook: Notebook): void => {
     for (const cell of notebook.widgets) {
       if (cell instanceof MarkdownCell && cell.headingCollapsed) {
@@ -3141,6 +3148,9 @@ function addCommands(
         commands.notifyCommandChanged(CommandIDs.selectLastModifiedCell);
         commands.notifyCommandChanged(CommandIDs.selectNextModifiedCell);
       }
+    });
+    panel.context.sessionContext.kernelPreferenceChanged.connect(() => {
+      commands.notifyCommandChanged(CommandIDs.changeKernel);
     });
   });
 
@@ -4948,7 +4958,8 @@ function addCommands(
         return sessionDialogs.selectKernel(current.context.sessionContext);
       }
     },
-    isEnabled: args => isEnabled() && !Private.isViewOnly(tracker, args),
+    isEnabled: args =>
+      isEnabled() && !Private.isViewOnly(tracker, args) && !isKernelLocked(),
     isVisible: args => !Private.isViewOnly(tracker, args),
     describedBy: {
       args: {
