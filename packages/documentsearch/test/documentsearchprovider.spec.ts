@@ -101,7 +101,11 @@ describe('documentsearch/genericsearchprovider', () => {
       it.each([
         [/z/, '<pre><svg>z</svg></pre>'],
         [/y/, '<pre><svg><text>y</text></svg></pre>'],
-        [/x/, '<pre><svg><text x="5" y="15" fill="red">x</text></svg></pre>']
+        [/x/, '<pre><svg><text x="5" y="15" fill="red">x</text></svg></pre>'],
+        [
+          /1/,
+          '<pre><mjx-assistive-mml><math><mn>1</mn></math></mjx-assistive-mml></pre>'
+        ]
       ])(
         'should ignore %s in unsupported fragment %s',
         async (query, content) => {

@@ -84,7 +84,10 @@ export class HTMLSearchEngine {
      * unnecessary overhead.
      */
     svg: true,
-    SVG: true
+    SVG: true,
+    // The visually hidden MathML copy that MathJax adds to each formula for
+    // screen readers would count each match in the formula a second time.
+    'MJX-ASSISTIVE-MML': true
   };
 
   /**
