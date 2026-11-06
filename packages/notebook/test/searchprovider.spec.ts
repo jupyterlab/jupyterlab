@@ -593,6 +593,28 @@ describe('@jupyterlab/notebook', () => {
         const source2 = panel.model!.cells.get(2).sharedModel.getSource();
         expect(source2).toBe('bar test2');
       });
+
+      it('should not skip a match when a read-only Markdown cell is active', async () => {
+        panel.content.notebookConfig = {
+          ...panel.content.notebookConfig,
+          showEditorForReadOnlyMarkdown: false
+        };
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          {
+            cell_type: 'markdown',
+            source: 'notes',
+            metadata: { editable: false }
+          },
+          { cell_type: 'code', source: 'test1 test2 test3' }
+        ]);
+        panel.content.activeCellIndex = 0;
+        await provider.startQuery(/test\d/, undefined);
+        expect(provider.currentMatchIndex).toBe(0);
+
+        await provider.replaceCurrentMatch('bar');
+        expect(provider.currentMatchIndex).toBe(0);
+      });
     });
 
     describe('#replaceAllMatches()', () => {
