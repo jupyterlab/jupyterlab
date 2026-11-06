@@ -4842,6 +4842,7 @@ __metadata:
     "@jupyterlab/application": ^4.7.0-beta.0
     "@jupyterlab/apputils": ^4.8.0-beta.0
     "@jupyterlab/codeeditor": ^4.7.0-beta.0
+    "@jupyterlab/documentsearch": ^4.7.0-beta.0
     "@jupyterlab/pluginmanager": ^4.7.0-beta.0
     "@jupyterlab/rendermime": ^4.7.0-beta.0
     "@jupyterlab/settingeditor": ^4.7.0-beta.0
@@ -4860,9 +4861,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/settingeditor@workspace:packages/settingeditor"
   dependencies:
+    "@jupyter/ydoc": ^4.0.0
     "@jupyterlab/application": ^4.7.0-beta.0
     "@jupyterlab/apputils": ^4.8.0-beta.0
     "@jupyterlab/codeeditor": ^4.7.0-beta.0
+    "@jupyterlab/codemirror": ^4.7.0-beta.0
+    "@jupyterlab/documentsearch": ^4.7.0-beta.0
     "@jupyterlab/inspector": ^4.7.0-beta.0
     "@jupyterlab/rendermime": ^4.7.0-beta.0
     "@jupyterlab/settingregistry": ^4.7.0-beta.0
