@@ -72,6 +72,9 @@ const notebooks: Record<string, string> = {
   'markdown-height-px-wide.ipynb': notebook(
     markdownCell(`<img src="${IMAGE}" height="2165px">`)
   ),
+  'markdown-height-percent.ipynb': notebook(
+    markdownCell(`<img src="${IMAGE}" height="50%">`)
+  ),
   'markdown-style.ipynb': notebook(
     markdownCell(`<div class="gallery"><img src="${IMAGE}"></div>`)
   )
@@ -144,6 +147,8 @@ test.describe('Image size', () => {
         return box.height - box.width / IMAGE_RATIO;
       })
       .toBeCloseTo(0, 0);
+    // The height from the metadata makes the image wider than its data.
+    expect((await image.boundingBox())!.width).toBeGreaterThan(IMAGE_WIDTH);
   });
 
   test('Show a Markdown image at the height from its attribute', async ({
@@ -201,6 +206,17 @@ test.describe('Image size', () => {
         return box.height - box.width / IMAGE_RATIO;
       })
       .toBeCloseTo(0, 0);
+  });
+
+  test('Show a Markdown image with a height in percent at the size of its data', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.notebook.openByPath(`${tmpPath}/markdown-height-percent.ipynb`);
+
+    const box = await loadedImageBox(page.locator('.jp-RenderedMarkdown img'));
+
+    expect(box.width).toBeCloseTo(IMAGE_WIDTH, 0);
   });
 
   test('Let a style sheet set the height of a Markdown image', async ({
