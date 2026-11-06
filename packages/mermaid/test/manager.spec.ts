@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Sanitizer } from '@jupyterlab/apputils';
 import {
   MERMAID_CLASS,
   MERMAID_CODE_CLASS,
@@ -18,6 +19,16 @@ jest.mock('mermaid', () => ({
   __esModule: true,
   default: { initialize: jest.fn() }
 }));
+
+/**
+ * Create rendered Markdown that shows a figure, sanitized as in a Markdown cell.
+ */
+function renderedMarkdown(figure: HTMLElement): HTMLElement {
+  const markdown = document.createElement('div');
+  markdown.className = 'jp-RenderedMarkdown';
+  markdown.innerHTML = new Sanitizer().sanitize(figure.outerHTML);
+  return markdown;
+}
 
 describe('@jupyterlab/mermaid', () => {
   describe('MermaidManager', () => {
@@ -89,6 +100,55 @@ describe('@jupyterlab/mermaid', () => {
         manager.initialize();
         expect(manager.getCachedFigure(text)).toBeNull();
         manager.dispose();
+      });
+
+      it('should redraw a diagram in the new theme when its Markdown is added to the document again', async () => {
+        const themes = new MockThemeManager();
+        const manager = new MockMermaidManager({
+          themes: themes.asThemeManager()
+        });
+        // Not in the document, as in a Markdown cell in edit mode.
+        const markdown = renderedMarkdown(
+          await manager.renderFigure('graph TD; A --> B;')
+        );
+        // The cell that shows the Markdown again is in the document.
+        const cell = document.createElement('div');
+        document.body.appendChild(cell);
+
+        try {
+          await themes.setTheme('JupyterLab Dark');
+          cell.appendChild(markdown);
+          await new Promise(resolve => setTimeout(resolve, 0));
+
+          expect(decodeURIComponent(markdown.innerHTML)).toContain(
+            'data-theme="dark"'
+          );
+        } finally {
+          cell.remove();
+          manager.dispose();
+        }
+      });
+
+      it('should not redraw a diagram drawn in the current theme when its Markdown is added to the document', async () => {
+        const themes = new MockThemeManager();
+        const manager = new MockMermaidManager({
+          themes: themes.asThemeManager()
+        });
+        const text = 'graph TD; A --> B;';
+        await manager.renderFigure(text);
+        await themes.setTheme('JupyterLab Dark');
+        const markdown = renderedMarkdown(await manager.renderFigure(text));
+        const renderSpy = jest.spyOn(manager, 'renderFigure');
+
+        try {
+          document.body.appendChild(markdown);
+          await new Promise(resolve => setTimeout(resolve, 0));
+
+          expect(renderSpy).not.toHaveBeenCalled();
+        } finally {
+          markdown.remove();
+          manager.dispose();
+        }
       });
     });
 
@@ -188,6 +248,33 @@ describe('@jupyterlab/mermaid', () => {
           expect(code?.textContent).toBe(text);
           expect(decodeURIComponent(container.innerHTML)).toContain(
             'data-theme="dark"'
+          );
+        } finally {
+          markdown.remove();
+          manager.dispose();
+        }
+      });
+
+      it('should redraw a refreshed diagram in the next theme when its Markdown is added to the document again', async () => {
+        const themes = new MockThemeManager();
+        const manager = new MockMermaidManager({
+          themes: themes.asThemeManager()
+        });
+        const markdown = renderedMarkdown(
+          await manager.renderFigure('graph TD; A --> B;')
+        );
+        document.body.appendChild(markdown);
+
+        try {
+          await themes.setTheme('JupyterLab Dark');
+          await new Promise(resolve => setTimeout(resolve, 0));
+          markdown.remove();
+          await themes.setTheme('JupyterLab Light');
+          document.body.appendChild(markdown);
+          await new Promise(resolve => setTimeout(resolve, 0));
+
+          expect(decodeURIComponent(markdown.innerHTML)).toContain(
+            'data-theme="default"'
           );
         } finally {
           markdown.remove();
@@ -354,6 +441,29 @@ describe('@jupyterlab/mermaid', () => {
 
         manager.initialize();
         expect(emitted).toBe(false);
+      });
+
+      it('should not redraw a diagram when its Markdown is added to the document after disposal', async () => {
+        const themes = new MockThemeManager();
+        const manager = new MockMermaidManager({
+          themes: themes.asThemeManager()
+        });
+        const markdown = renderedMarkdown(
+          await manager.renderFigure('graph TD; A --> B;')
+        );
+        await themes.setTheme('JupyterLab Dark');
+        manager.dispose();
+
+        try {
+          document.body.appendChild(markdown);
+          await new Promise(resolve => setTimeout(resolve, 0));
+
+          expect(decodeURIComponent(markdown.innerHTML)).toContain(
+            'data-theme="default"'
+          );
+        } finally {
+          markdown.remove();
+        }
       });
     });
   });
