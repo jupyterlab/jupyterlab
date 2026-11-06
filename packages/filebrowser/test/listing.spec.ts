@@ -257,6 +257,14 @@ describe('filebrowser/listing', () => {
     });
 
     describe('#paste()', () => {
+      // Opens a new folder, so that the cut items move when they are pasted.
+      async function openNewFolder(): Promise<void> {
+        const folder = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+        await dirListing.model.cd(folder.path);
+      }
+
       it('should prompt to overwrite when pasting cut item over existing file', async () => {
         jest.spyOn(dirListing.model.manager, 'rename').mockRejectedValueOnce({
           response: { status: 409 }
@@ -268,6 +276,7 @@ describe('filebrowser/listing', () => {
         dirListing.selectNext();
         dirListing.cut();
         expect(dirListing['_clipboard'].length).toBeGreaterThan(0);
+        await openNewFolder();
 
         const pastePromise = dirListing.paste();
         await acceptDialog();
@@ -288,6 +297,7 @@ describe('filebrowser/listing', () => {
         dirListing.cut();
         const originalClipboard = [...dirListing['_clipboard']];
         expect(originalClipboard.length).toBeGreaterThan(0);
+        await openNewFolder();
 
         const pastePromise = dirListing.paste();
         await dismissDialog();
@@ -306,6 +316,7 @@ describe('filebrowser/listing', () => {
         dirListing.selectNext();
         dirListing.cut();
         const originalClipboard = [...dirListing['_clipboard']];
+        await openNewFolder();
 
         const pastePromise = dirListing.paste();
         await dismissDialog();
@@ -318,6 +329,7 @@ describe('filebrowser/listing', () => {
       it('should ignore a second paste while the first is pending', async () => {
         dirListing.selectNext();
         dirListing.cut();
+        await openNewFolder();
         let resolveRename: () => void = () => void 0;
         const renamePromise = new Promise<any>(resolve => {
           resolveRename = () => resolve({} as any);
@@ -338,6 +350,7 @@ describe('filebrowser/listing', () => {
         dirListing.selectNext();
         dirListing.cut();
         expect(dirListing['_clipboard'].length).toBeGreaterThan(0);
+        await openNewFolder();
 
         await dirListing.paste();
 
@@ -351,6 +364,7 @@ describe('filebrowser/listing', () => {
         dirListing.cut();
         const clipboard = [...dirListing['_clipboard']];
         expect(clipboard.length).toBe(2);
+        await openNewFolder();
 
         jest
           .spyOn(dirListing.model.manager, 'rename')
@@ -374,6 +388,7 @@ describe('filebrowser/listing', () => {
         dirListing.cut();
         const firstClipboard = [...dirListing['_clipboard']];
         expect(firstClipboard.length).toBe(1);
+        await openNewFolder();
 
         let resolveRename: () => void = () => void 0;
         const renamePromise = new Promise<any>(resolve => {
@@ -385,6 +400,7 @@ describe('filebrowser/listing', () => {
 
         const pastePromise = dirListing.paste();
 
+        await dirListing.model.cd('/');
         dirListing.selectNext();
         dirListing.cut();
         const secondClipboard = [...dirListing['_clipboard']];
@@ -395,6 +411,16 @@ describe('filebrowser/listing', () => {
 
         expect(dirListing['_clipboard']).toEqual(secondClipboard);
         expect(dirListing['_isCut']).toBe(true);
+      });
+
+      it('should not move an item pasted into its own folder', async () => {
+        const renameSpy = jest.spyOn(dirListing.model.manager, 'rename');
+        dirListing.selectNext();
+        dirListing.cut();
+
+        await dirListing.paste();
+
+        expect(renameSpy).not.toHaveBeenCalled();
       });
     });
 

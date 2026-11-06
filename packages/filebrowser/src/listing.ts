@@ -431,7 +431,10 @@ export class DirListing extends Widget {
         const parts = localPath.split('/');
         const name = parts[parts.length - 1];
         const newPath = PathExt.join(basePath, name);
-        await renameFile(this._manager, path, newPath);
+        // Some drives delete an item that is renamed onto itself.
+        if (newPath !== path) {
+          await renameFile(this._manager, path, newPath);
+        }
       } else {
         await this._model.manager.copy(path, basePath);
       }
