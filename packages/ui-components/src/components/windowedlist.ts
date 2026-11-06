@@ -1674,8 +1674,13 @@ export class WindowedList<
     // of the browser-native scroll anchoring, which has to be disabled in
     // full windowing mode. The sizes must be read before `setWidgetSize`.
     let scrollCompensation = 0;
+    let scrollOffset = 0;
     if (this.viewModel.windowingActive && this._scrollToItem === null) {
-      const scrollOffset = this.viewModel.scrollOffset;
+      // The view model offset trails the scroller until its `scroll` event
+      // runs, so start from the scroller unless the list has a scroll pending.
+      scrollOffset = this._scrollUpdateWasRequested
+        ? this.viewModel.scrollOffset
+        : this._outerElement.scrollTop;
       for (const { index, size } of newSizes) {
         const [offset, oldSize] = this.viewModel.getSpan(index, index);
         if (offset + oldSize <= scrollOffset) {
@@ -1687,7 +1692,7 @@ export class WindowedList<
     // If some sizes changed
     if (this.viewModel.setWidgetSize(newSizes)) {
       if (scrollCompensation !== 0) {
-        this.viewModel.scrollOffset += scrollCompensation;
+        this.viewModel.scrollOffset = scrollOffset + scrollCompensation;
         this._scrollUpdateWasRequested = true;
       }
       this._scrollBackToItemOnResize();
