@@ -71,6 +71,7 @@ dialogs
 discoverability
 discoverable
 divs
+docstrings
 dropdown
 eg
 emacs
