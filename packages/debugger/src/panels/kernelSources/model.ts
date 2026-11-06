@@ -159,7 +159,7 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
     this._changed.emit(this._filteredKernelSources);
   }
 
-  private _hiddenSources: Set<string> = new Set();
+  private _hiddenSources: Set<string>;
   private _hideNativeSources = false;
   private _filteredKernelSources: IDebugger.KernelSource[] | null = null;
   private _filter = '';

@@ -1070,7 +1070,7 @@ export namespace IDebugger {
       /**
        * Whether to hide native sources.
        */
-      hideNativeSources: boolean;
+      hideNativeSources?: boolean;
 
       /**
        * Signal emitted when the kernel sources have changed.

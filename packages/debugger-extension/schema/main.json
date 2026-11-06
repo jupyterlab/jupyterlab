@@ -129,7 +129,7 @@
       "type": "string",
       "default": ""
     },
-    "hideNativeFilteredKernelSources": {
+    "hideNativeSources": {
       "title": "Hide the kernel's own sources",
       "description": "Hide the modules that the Python kernel loads for its own use, such as IPython, debugpy and the standard library modules json and asyncio. They stay hidden when your code imports them and when they match the filter.",
       "type": "boolean",
