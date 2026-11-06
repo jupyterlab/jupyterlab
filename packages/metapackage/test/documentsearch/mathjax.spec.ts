@@ -29,6 +29,22 @@ describe('@jupyterlab/documentsearch', () => {
           host.remove();
         }
       );
+
+      it.each([
+        [/\./g, ['…']],
+        [/a/gi, ['Ａ', 'Ａ']]
+      ])(
+        'should cover each character of a formula once for %s',
+        async (query, expected) => {
+          const host = document.createElement('div');
+          host.textContent = '$1, \\ldots, n$ $\\text{ＡＡ}$';
+          document.body.appendChild(host);
+          await new MathJaxTypesetter().typeset(host);
+          const matches = await HTMLSearchEngine.search(query, host);
+          expect(matches.map(match => match.text)).toEqual(expected);
+          host.remove();
+        }
+      );
     });
   });
 });

@@ -38,6 +38,25 @@ const FUNCTION_FORMULA =
   '<mjx-mo><mjx-c>\u2061</mjx-c></mjx-mo><mjx-mi><mjx-c>𝑥</mjx-c></mjx-mi>' +
   '</mjx-math></mjx-container>';
 
+/**
+ * The DOM of `$1, \ldots, n$` typeset by MathJax, whose ellipsis becomes
+ * three dots when normalized.
+ */
+const ELLIPSIS_FORMULA =
+  '<mjx-container class="MathJax" jax="CHTML"><mjx-math aria-hidden="true">' +
+  '<mjx-mn><mjx-c>1</mjx-c></mjx-mn><mjx-mo><mjx-c>,</mjx-c></mjx-mo>' +
+  '<mjx-mo><mjx-c>…</mjx-c></mjx-mo><mjx-mo><mjx-c>,</mjx-c></mjx-mo>' +
+  '<mjx-mi><mjx-c>𝑛</mjx-c></mjx-mi></mjx-math></mjx-container>';
+
+/**
+ * The DOM of `$\text{ＡＡ}$` typeset by MathJax, which puts characters that
+ * its font lacks in one text node.
+ */
+const TEXT_RUN_FORMULA =
+  '<mjx-container class="MathJax" jax="CHTML"><mjx-math aria-hidden="true">' +
+  '<mjx-mtext><mjx-utext>ＡＡ</mjx-utext></mjx-mtext></mjx-math>' +
+  '</mjx-container>';
+
 describe('documentsearch/genericsearchprovider', () => {
   describe('HTMLSearchEngine', () => {
     describe('#search()', () => {
@@ -179,6 +198,20 @@ describe('documentsearch/genericsearchprovider', () => {
         await provider.startQuery(/\bsin\b/);
         expect(provider.matchesCount).toBe(1);
       });
+
+      it('should highlight each character of a text node of a formula', async () => {
+        widget.node.innerHTML = `<p>${TEXT_RUN_FORMULA}</p>`;
+        await provider.startQuery(/a/i);
+        expect(widget.node.querySelector('mjx-utext')!.innerHTML).toEqual(
+          mark('Ａ') + mark('Ａ')
+        );
+      });
+
+      it('should count the dots of an ellipsis in a formula as one match', async () => {
+        widget.node.innerHTML = `<p>${ELLIPSIS_FORMULA}</p>`;
+        await provider.startQuery(/\./);
+        expect(provider.matchesCount).toBe(1);
+      });
     });
 
     describe('#highlightNext()', () => {
@@ -208,7 +241,9 @@ describe('documentsearch/genericsearchprovider', () => {
         [/y/, '<pre>xy<span>z</span></pre>'],
         [/z/, '<pre>xy<span>z</span></pre>'],
         [/10/, `<p>${formula()}</p>`],
-        [/x=10/, `<p>${formula()}</p>`]
+        [/x=10/, `<p>${formula()}</p>`],
+        [/a/i, `<p>${TEXT_RUN_FORMULA}</p>`],
+        [/\./, `<p>${ELLIPSIS_FORMULA}</p>`]
       ])(
         'should restore highlighted %s fragment in %s',
         async (query, content) => {

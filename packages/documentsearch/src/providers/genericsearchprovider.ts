@@ -511,19 +511,27 @@ function elementInViewport(el: HTMLElement): boolean {
  * 𝑥 for x. The text of the formula joins its characters in the form typed
  * in a query (see `normalizeFormulaText`), without the hidden MathML copy
  * and the spaces of line break opportunities. A match that spans several
- * text nodes lists them in `parts`, and a character that the query matches
- * only in part, such as 𝑥 for x, is matched as a whole.
+ * text nodes lists them in `parts`.
+ *
+ * Each character is normalized on its own, so that a match covers whole
+ * characters of the formula: a query for x covers 𝑥, and a query for one
+ * dot covers the whole `…`. Matches that would cover the same character,
+ * such as the three dots of `…`, are joined into one, so that no character
+ * is marked twice.
  *
  * @param query - Regular expression to search, with the global flag
  * @param formula - The `mjx-container` element of the formula
  * @returns The list of matches
  */
 function searchFormula(query: RegExp, formula: Element): IHTMLSearchMatch[] {
-  const pieces: {
+  // One unit per character (code point) of the text nodes of the formula,
+  // with its range in its text node (`from`, `to`) and in `text`.
+  const units: {
     node: Text;
+    from: number;
+    to: number;
     start: number;
     end: number;
-    exact: boolean;
   }[] = [];
   let text = '';
   const walker = document.createTreeWalker(formula, NodeFilter.SHOW_TEXT, {
@@ -543,18 +551,25 @@ function searchFormula(query: RegExp, formula: Element): IHTMLSearchMatch[] {
   });
   let node: Node | null;
   while ((node = walker.nextNode()) !== null) {
-    const data = (node as Text).data;
-    const normalized = normalizeFormulaText(data);
-    pieces.push({
-      node: node as Text,
-      start: text.length,
-      end: text.length + normalized.length,
-      exact: normalized === data
-    });
-    text += normalized;
+    let from = 0;
+    for (const character of (node as Text).data) {
+      const normalized = normalizeFormulaText(character);
+      units.push({
+        node: node as Text,
+        from,
+        to: from + character.length,
+        start: text.length,
+        end: text.length + normalized.length
+      });
+      text += normalized;
+      from += character.length;
+    }
   }
 
-  const matches: IHTMLSearchMatch[] = [];
+  // The first and last unit of each match
+  const ranges: { first: number; last: number }[] = [];
+  // Matches come in order, so the units before `cursor` stay behind
+  let cursor = 0;
   query.lastIndex = 0;
   let match: RegExpExecArray | null;
   while ((match = query.exec(text)) !== null) {
@@ -565,37 +580,51 @@ function searchFormula(query: RegExp, formula: Element): IHTMLSearchMatch[] {
       query.lastIndex += 1;
       continue;
     }
-    const parts: IHTMLSearchMatch[] = [];
-    for (const piece of pieces) {
-      if (
-        piece.start === piece.end ||
-        piece.end <= start ||
-        piece.start >= end
-      ) {
-        continue;
-      }
-      const from = piece.exact ? Math.max(start, piece.start) - piece.start : 0;
-      const to = piece.exact
-        ? Math.min(end, piece.end) - piece.start
-        : piece.node.data.length;
-      parts.push({
-        text: piece.node.data.slice(from, to),
-        position: from,
-        node: piece.node
-      });
+    while (cursor < units.length && units[cursor].end <= start) {
+      cursor += 1;
     }
-    if (parts.length === 1) {
-      matches.push(parts[0]);
-    } else if (parts.length > 1) {
-      matches.push({
-        text: parts.map(part => part.text).join(''),
-        position: parts[0].position,
-        node: parts[0].node,
-        parts
-      });
+    const first = cursor;
+    let last = first;
+    while (last + 1 < units.length && units[last + 1].start < end) {
+      last += 1;
+    }
+    const previous = ranges[ranges.length - 1];
+    if (previous && first <= previous.last) {
+      previous.last = Math.max(previous.last, last);
+    } else {
+      ranges.push({ first, last });
     }
   }
-  return matches;
+
+  return ranges.map(({ first, last }) => {
+    // One part per text node, from the first unit of the match in that node
+    // to its last
+    const parts: IHTMLSearchMatch[] = [];
+    for (let index = first; index <= last; index++) {
+      const unit = units[index];
+      const part = parts[parts.length - 1];
+      if (part && part.node === unit.node) {
+        parts[parts.length - 1] = {
+          ...part,
+          text: unit.node.data.slice(part.position, unit.to)
+        };
+      } else {
+        parts.push({
+          text: unit.node.data.slice(unit.from, unit.to),
+          position: unit.from,
+          node: unit.node
+        });
+      }
+    }
+    return parts.length === 1
+      ? parts[0]
+      : {
+          text: parts.map(part => part.text).join(''),
+          position: parts[0].position,
+          node: parts[0].node,
+          parts
+        };
+  });
 }
 
 /**
