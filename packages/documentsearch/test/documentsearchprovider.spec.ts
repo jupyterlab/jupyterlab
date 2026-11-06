@@ -2,13 +2,56 @@
 // Distributed under the terms of the Modified BSD License.
 import {
   FOUND_CLASSES,
-  GenericSearchProvider
+  GenericSearchProvider,
+  HTMLSearchEngine
 } from '@jupyterlab/documentsearch';
 import { Widget } from '@lumino/widgets';
 
 const MATCH_CLASSES = FOUND_CLASSES.join(' ');
 
+function mark(text: string): string {
+  return `<mark class="${MATCH_CLASSES}">${text}</mark>`;
+}
+
+/**
+ * The DOM of `$x = 10$` typeset by MathJax: a text node per character, a line
+ * break opportunity after x, and the hidden MathML copy.
+ */
+function formula(x = '𝑥', equals = '=', one = '1', zero = '0'): string {
+  return (
+    '<mjx-container class="MathJax" jax="CHTML"><mjx-math aria-hidden="true">' +
+    `<mjx-mi><mjx-c>${x}</mjx-c></mjx-mi><mjx-break> </mjx-break>` +
+    `<mjx-mo><mjx-c>${equals}</mjx-c></mjx-mo>` +
+    `<mjx-mn><mjx-c>${one}</mjx-c><mjx-c>${zero}</mjx-c></mjx-mn></mjx-math>` +
+    '<mjx-assistive-mml><math><mi>x</mi><mo>=</mo><mn>10</mn></math>' +
+    '</mjx-assistive-mml></mjx-container>'
+  );
+}
+
+/**
+ * The DOM of `$\sin x$` typeset by MathJax, with the invisible function
+ * application after `sin`.
+ */
+const FUNCTION_FORMULA =
+  '<mjx-container class="MathJax" jax="CHTML"><mjx-math aria-hidden="true">' +
+  '<mjx-mi><mjx-c>s</mjx-c><mjx-c>i</mjx-c><mjx-c>n</mjx-c></mjx-mi>' +
+  '<mjx-mo><mjx-c>\u2061</mjx-c></mjx-mo><mjx-mi><mjx-c>𝑥</mjx-c></mjx-mi>' +
+  '</mjx-math></mjx-container>';
+
 describe('documentsearch/genericsearchprovider', () => {
+  describe('HTMLSearchEngine', () => {
+    describe('#search()', () => {
+      it('should list the text nodes of a match in a formula', async () => {
+        const node = document.createElement('div');
+        node.innerHTML = `<p>${formula()}</p>`;
+        const matches = await HTMLSearchEngine.search(/10/g, node);
+        expect(
+          matches.map(match => match.parts?.map(part => part.text))
+        ).toEqual([['1', '0']]);
+      });
+    });
+  });
+
   describe('GenericSearchProvider', () => {
     let provider: GenericSearchProvider;
     let widget: Widget;
@@ -114,6 +157,40 @@ describe('documentsearch/genericsearchprovider', () => {
           expect(widget.node.innerHTML).toEqual(content);
         }
       );
+
+      it.each([
+        [/10/, formula('𝑥', '=', mark('1'), mark('0'))],
+        [/x/i, formula(mark('𝑥'))],
+        [/x=10/, formula(mark('𝑥'), mark('='), mark('1'), mark('0'))]
+      ])('should highlight %s in a formula', async (query, expected) => {
+        widget.node.innerHTML = `<p>${formula()}</p>`;
+        await provider.startQuery(query);
+        expect(widget.node.firstElementChild!.innerHTML).toEqual(expected);
+      });
+
+      it('should count a match that spans several text nodes once', async () => {
+        widget.node.innerHTML = `<p>${formula()}</p>`;
+        await provider.startQuery(/10/);
+        expect(provider.matchesCount).toBe(1);
+      });
+
+      it('should find a function name in a formula as a whole word', async () => {
+        widget.node.innerHTML = `<p>${FUNCTION_FORMULA}</p>`;
+        await provider.startQuery(/\bsin\b/);
+        expect(provider.matchesCount).toBe(1);
+      });
+    });
+
+    describe('#highlightNext()', () => {
+      it('should select every text node of the current match', async () => {
+        widget.node.innerHTML = `<p>${formula()}</p>`;
+        await provider.startQuery(/10/);
+        await provider.highlightNext();
+        const selected = Array.from(widget.node.querySelectorAll('mark'), m =>
+          m.classList.contains('jp-current-match')
+        );
+        expect(selected).toEqual([true, true]);
+      });
     });
 
     describe('#endQuery()', () => {
@@ -129,7 +206,9 @@ describe('documentsearch/genericsearchprovider', () => {
         [/z/, '<pre>x<span>y</span>z</pre>'],
         [/x/, '<pre>xy<span>z</span></pre>'],
         [/y/, '<pre>xy<span>z</span></pre>'],
-        [/z/, '<pre>xy<span>z</span></pre>']
+        [/z/, '<pre>xy<span>z</span></pre>'],
+        [/10/, `<p>${formula()}</p>`],
+        [/x=10/, `<p>${formula()}</p>`]
       ])(
         'should restore highlighted %s fragment in %s',
         async (query, content) => {

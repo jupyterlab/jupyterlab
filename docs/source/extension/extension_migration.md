@@ -54,6 +54,8 @@
   does, to keep the unused New Computer Modern font data and the build path out of
   the bundle.
 
+- `HTMLSearchEngine.search` from `@jupyterlab/documentsearch` searches each MathJax formula as one text, because MathJax 4 puts each character of a formula in its own text node. A match in a formula can span several text nodes: its `node` and `position` give its start, its `text` holds the whole match, and the new optional `parts` property of `IHTMLSearchMatch` lists one match per text node. Code that highlights `text.length` characters of `node` should highlight each of the `parts` instead.
+
 - `ObservableUndoableList`, `IObservableUndoableList`, and `ObservableUndoableList.IdentitySerializer` from `@jupyterlab/observables` are deprecated since 4.7.0 and will be removed in JupyterLab 5.0. Observable lists with undo/redo are no longer used by JupyterLab core since document models migrated to Yjs in JupyterLab 4.x. Consequently, `IModelDB.createList` and `ModelDB.createList` are also deprecated.
 
 - The JSON Lines renderer plugin was renamed from `@jupyterlab/json-lines-extension:factory`
