@@ -305,7 +305,10 @@ module.exports = [
         // MathJax imports its default font, New Computer Modern, even when the
         // output uses another font. Point it at the TeX font that JupyterLab
         // uses, so the unused font data is not bundled.
-        '#default-font': '@mathjax/mathjax-tex-font/mjs'
+        '#default-font': '@mathjax/mathjax-tex-font/mjs',
+        // MathJax reads its root from `import.meta.url`, which would put the
+        // absolute path of the build folder into the bundle.
+        '#root/root.js': '@jupyterlab/mathjax-extension/lib/mathjaxroot.js'
       }
     },
     entry: {
