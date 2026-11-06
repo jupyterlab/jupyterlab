@@ -21,13 +21,15 @@ export class CustomOptionsDialog extends Dialog<ICustomOptions> {
     const { shortcut, translator, editorFactory } = options;
     const trans = translator.load('jupyterlab');
 
-    const body = new CustomOptionsDialogBody(
+    // Defer until after super(): body may invoke checkValidation during setup.
+    let checkValidation = (): void => undefined;
+    const body = new CustomOptionsDialogBody({
       shortcut,
       translator,
       editorFactory,
-      () => this._checkValidation(),
-      options.readOnly
-    );
+      checkValidation: () => checkValidation(),
+      readOnly: options.readOnly
+    });
 
     const buttons: Dialog.IButton[] = [];
     if (options.readOnly) {
@@ -43,6 +45,9 @@ export class CustomOptionsDialog extends Dialog<ICustomOptions> {
       body,
       buttons
     });
+
+    checkValidation = () => this._checkValidation();
+    this._checkValidation();
   }
 
   /**
@@ -73,23 +78,32 @@ export class CustomOptionsDialog extends Dialog<ICustomOptions> {
 }
 
 /**
- * Body widget for the custom options dialog.
+ * Options for {@link CustomOptionsDialogBody}.
  */
-class CustomOptionsDialogBody
+export interface ICustomOptionsDialogBodyOptions {
+  shortcut: IShortcutTarget;
+  translator: ITranslator;
+  editorFactory: CodeEditor.Factory;
+  checkValidation: () => void;
+  readOnly: boolean;
+}
+
+/**
+ * Body widget for selector and arguments fields.
+ *
+ * Used by {@link CustomOptionsDialog} and reusable in the add-shortcut dialog.
+ */
+export class CustomOptionsDialogBody
   extends Widget
   implements Dialog.IBodyWidget<ICustomOptions>
 {
   private _selectorInput: HTMLInputElement;
   private _editorWidget?: JSONEditorWidget;
 
-  constructor(
-    shortcut: IShortcutTarget,
-    translator: ITranslator,
-    editorFactory: CodeEditor.Factory,
-    checkValidation: () => void,
-    readOnly: boolean
-  ) {
+  constructor(options: ICustomOptionsDialogBodyOptions) {
     super();
+    const { shortcut, translator, editorFactory, checkValidation, readOnly } =
+      options;
     const trans = translator.load('jupyterlab');
 
     this.addClass('jp-Shortcuts-CustomOptionsDialogBody');
@@ -105,7 +119,7 @@ class CustomOptionsDialogBody
 
     this._selectorInput = document.createElement('input');
     this._selectorInput.type = 'text';
-    this._selectorInput.disabled = readOnly ?? false;
+    this._selectorInput.disabled = readOnly;
     this._selectorInput.value = shortcut.selector;
     this._selectorInput.className = 'jp-mod-styled';
 
@@ -174,6 +188,7 @@ class CustomOptionsDialogBody
 class JSONEditorWidget extends Widget {
   private _editor: CodeEditor.IEditor;
   private _checkValidation: () => void;
+  private _editorHostNode: HTMLDivElement;
 
   constructor(
     initialArgs: Record<string, unknown>,
@@ -183,22 +198,29 @@ class JSONEditorWidget extends Widget {
     super();
     this.addClass('jp-JSONEditor');
     this._checkValidation = checkValidation;
-    const editorHostNode = document.createElement('div');
-    editorHostNode.className = 'jp-JSONEditor-host';
+    this._editorHostNode = document.createElement('div');
+    this._editorHostNode.className = 'jp-JSONEditor-host';
 
     const model = new CodeEditor.Model({ mimeType: 'application/json' });
     const content = JSON.stringify(initialArgs, null, 2);
     model.sharedModel.setSource(content);
 
     this._editor = editorFactory({
-      host: editorHostNode,
+      host: this._editorHostNode,
       model,
       config: {
         readOnly: false
       }
     });
 
-    this.node.appendChild(editorHostNode);
+    this.node.appendChild(this._editorHostNode);
+
+    // CodeMirror binds Tab to indent; in dialogs Tab should move focus instead.
+    this._editorHostNode.addEventListener(
+      'keydown',
+      this._onEditorKeydown,
+      true
+    );
 
     this._editor.model.sharedModel.changed.connect(this._validateJSON, this);
   }
@@ -224,10 +246,22 @@ class JSONEditorWidget extends Widget {
     this._checkValidation();
   };
 
+  private _onEditorKeydown = (event: KeyboardEvent): void => {
+    if (event.key === 'Tab') {
+      // Stop before CodeMirror; leave default so focus advances.
+      event.stopPropagation();
+    }
+  };
+
   /**
    * Dispose of the resources.
    */
   dispose(): void {
+    this._editorHostNode.removeEventListener(
+      'keydown',
+      this._onEditorKeydown,
+      true
+    );
     this._editor.model.sharedModel.changed.disconnect(this._validateJSON, this);
     this._editor.dispose();
     super.dispose();

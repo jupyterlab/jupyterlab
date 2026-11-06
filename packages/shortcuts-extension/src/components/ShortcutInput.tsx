@@ -43,6 +43,17 @@ export interface IShortcutInputProps {
   displayInput: boolean;
   placeholder: string;
   translator: ITranslator;
+  /**
+   * When true, do not persist on Submit and keep the capture open for a parent
+   * dialog to commit later. Hides the Submit control and reports keys via
+   * {@link onKeysChange}.
+   */
+  deferPersist?: boolean;
+  /**
+   * Called when the captured key sequence changes (deferred mode and after edits).
+   * Keys omit empty segments; may be incomplete while modifiers are held.
+   */
+  onKeysChange?: (keys: string[]) => void;
 }
 
 export interface IShortcutInputState {
@@ -89,7 +100,10 @@ export class ShortcutInput extends React.Component<
   }
 
   componentDidMount(): void {
-    this._inputRef.current?.focus();
+    // In dialog mode the parent owns initial focus (e.g. command select).
+    if (!this._deferPersist) {
+      this._inputRef.current?.focus();
+    }
     // Defer so aria-live announces; initial mount content is often skipped.
     this._announceStartRaf = requestAnimationFrame(() => {
       this._announceStartRaf = null;
@@ -123,6 +137,24 @@ export class ShortcutInput extends React.Component<
     });
   }
 
+  private get _deferPersist(): boolean {
+    return !!this.props.deferPersist;
+  }
+
+  private _capturedKeys(
+    keys: string[] = this.state.keys,
+    currentChain: string = this.state.currentChain
+  ): string[] {
+    return [...keys, currentChain].filter(key => key !== '');
+  }
+
+  private _emitKeysChange(
+    keys: string[] = this.state.keys,
+    currentChain: string = this.state.currentChain
+  ): void {
+    this.props.onKeysChange?.(this._capturedKeys(keys, currentChain));
+  }
+
   private _overwriteConflicts = async (
     conflicts: IShortcutTarget[],
     keys: string[]
@@ -133,6 +165,11 @@ export class ShortcutInput extends React.Component<
       isAvailable: true,
       activeConflicts: []
     });
+    if (this._deferPersist) {
+      // Defer deleting conflicting bindings until the parent dialog saves.
+      this._emitKeysChange(keys, '');
+      return;
+    }
     await this._handleOverwrite(conflicts, keys);
     this._closeAfterSubmit();
   };
@@ -143,7 +180,35 @@ export class ShortcutInput extends React.Component<
     this.props.onCloseAfterSubmit?.();
   };
 
+  private _resetCapture = (): void => {
+    this._clearIdleTimer();
+    this.setState(
+      {
+        value: '',
+        userInput: '',
+        keys: [],
+        currentChain: '',
+        selected: true,
+        isAvailable: true,
+        isFunctional: false,
+        activeConflicts: [],
+        phase: 'capturing',
+        timerRunning: false,
+        announceCaptureStart: true
+      },
+      () => {
+        this.props.clearConflict();
+        this._emitKeysChange([], '');
+      }
+    );
+  };
+
   private _cancel = (): void => {
+    if (this._deferPersist) {
+      this._resetCapture();
+      this.props.onCloseAfterCancel?.();
+      return;
+    }
     this._clearIdleTimer();
     this.props.toggleInput();
     this.props.onCloseAfterCancel?.();
@@ -182,6 +247,11 @@ export class ShortcutInput extends React.Component<
   };
 
   handleSubmit = async () => {
+    if (this._deferPersist) {
+      // Persistence is owned by the parent dialog Save action.
+      this._emitKeysChange();
+      return;
+    }
     if (!this.state.isAvailable && this.state.activeConflicts.length > 0) {
       const keys = [...this.state.keys, this.state.currentChain];
       await this._overwriteConflicts(this.state.activeConflicts, keys);
@@ -254,12 +324,15 @@ export class ShortcutInput extends React.Component<
       value = '';
       keys = [];
       currentChain = '';
-      this.setState({
-        value: value,
-        userInput: userInput,
-        keys: keys,
-        currentChain: currentChain
-      });
+      this.setState(
+        {
+          value: value,
+          userInput: userInput,
+          keys: keys,
+          currentChain: currentChain
+        },
+        () => this._emitKeysChange([], '')
+      );
     } else if (event.key !== 'CapsLock') {
       const lastKey = userInput
         .substr(userInput.lastIndexOf(' ') + 1, userInput.length)
@@ -435,6 +508,7 @@ export class ShortcutInput extends React.Component<
       },
       () => {
         this._emitConflicts(conflicts);
+        this._emitKeysChange(keys, currentChain);
         this._resetIdleTimer();
       }
     );
@@ -544,35 +618,36 @@ export class ShortcutInput extends React.Component<
           >
             {conflictMessage}
           </div>
-          {hasConflict ? (
-            <button
-              ref={this._submitRef}
-              type="button"
-              className={`jp-Button jp-mod-styled jp-mod-warn jp-Shortcuts-Overwrite${
-                !this.state.isFunctional ? ' jp-mod-defunc-Submit' : ''
-              }`}
-              disabled={!this.state.isFunctional}
-              onClick={this.handleSubmit}
-              title={trans.__('Overwrite')}
-              aria-label={trans.__('Overwrite')}
-            >
-              {trans.__('Overwrite')}
-            </button>
-          ) : (
-            <button
-              ref={this._submitRef}
-              type="button"
-              className={`jp-Button jp-mod-styled jp-Shortcuts-Submit jp-mod-accept jp-Shortcuts-Icon${
-                !this.state.isFunctional ? ' jp-mod-defunc-Submit' : ''
-              }`}
-              disabled={!this.state.isFunctional}
-              onClick={this.handleSubmit}
-              title={trans.__('Save shortcut')}
-              aria-label={trans.__('Save shortcut')}
-            >
-              <checkIcon.react tag={null} />
-            </button>
-          )}
+          {!this._deferPersist &&
+            (hasConflict ? (
+              <button
+                ref={this._submitRef}
+                type="button"
+                className={`jp-Button jp-mod-styled jp-mod-warn jp-Shortcuts-Overwrite${
+                  !this.state.isFunctional ? ' jp-mod-defunc-Submit' : ''
+                }`}
+                disabled={!this.state.isFunctional}
+                onClick={this.handleSubmit}
+                title={trans.__('Overwrite')}
+                aria-label={trans.__('Overwrite')}
+              >
+                {trans.__('Overwrite')}
+              </button>
+            ) : (
+              <button
+                ref={this._submitRef}
+                type="button"
+                className={`jp-Button jp-mod-styled jp-Shortcuts-Submit jp-mod-accept jp-Shortcuts-Icon${
+                  !this.state.isFunctional ? ' jp-mod-defunc-Submit' : ''
+                }`}
+                disabled={!this.state.isFunctional}
+                onClick={this.handleSubmit}
+                title={trans.__('Save shortcut')}
+                aria-label={trans.__('Save shortcut')}
+              >
+                <checkIcon.react tag={null} />
+              </button>
+            ))}
         </div>
         <p id={this._hintId} className="jp-Shortcuts-CaptureHint">
           {captureHint}
@@ -582,6 +657,10 @@ export class ShortcutInput extends React.Component<
   }
 
   private _handleBlur = (): void => {
+    if (this._deferPersist) {
+      // Keep capture mounted while the parent dialog owns focus movement.
+      return;
+    }
     if (this._blurRaf !== null) {
       cancelAnimationFrame(this._blurRaf);
     }

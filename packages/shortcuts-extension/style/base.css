@@ -112,8 +112,7 @@
 }
 
 button.jp-mod-styled.jp-Shortcuts-Overwrite.jp-mod-defunc-Submit,
-button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit,
-button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
+button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
   cursor: not-allowed;
   background-color: transparent;
   color: var(--jp-content-font-color3);
@@ -138,23 +137,7 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
 /* Shortcut Item Style */
 .jp-Shortcuts-Cell {
   padding: 6px 12px;
-  display: table-cell;
-  width: 20%;
   vertical-align: middle;
-}
-
-.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell .jp-HTMLSelect {
-  position: relative;
-  max-width: 300px;
-}
-
-.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell .jp-HTMLSelect select {
-  max-width: 300px;
-  white-space: pre-wrap;
-}
-
-.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell .jp-HTMLSelect svg {
-  top: 4px;
 }
 
 .jp-Shortcuts-Cell button {
@@ -184,15 +167,13 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
 }
 
 .jp-Shortcuts-AddShortcut.jp-mod-styled .jp-icon3[fill],
-.jp-Shortcuts-Cell button.jp-Shortcuts-Icon .jp-icon3[fill],
-.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-SaveNew .jp-icon3[fill] {
+.jp-Shortcuts-Cell button.jp-Shortcuts-Icon .jp-icon3[fill] {
   fill: currentcolor;
 }
 
 .jp-Shortcuts-ShortcutCell {
   display: flex;
   align-items: center;
-  min-width: max-content;
   flex-wrap: wrap;
 }
 
@@ -201,24 +182,12 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
 }
 
 .jp-Shortcuts-Row {
-  width: 100%;
-  display: table-row;
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
   vertical-align: middle;
   background-color: var(--jp-layout-color0);
 }
 
-.jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut {
-  background-color: var(--jp-layout-color2);
-}
-
-.jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut
-  .jp-Shortcuts-Cell:first-of-type {
-  display: none;
-}
-
-.jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell:nth-child(2) {
-  width: 40%;
+.jp-Shortcuts-ShortcutList tbody .jp-Shortcuts-Cell {
+  border-top: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 .jp-Shortcuts-Row button.jp-Shortcuts-Plus:focus-visible,
@@ -238,9 +207,14 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
   position: relative;
 }
 
+.jp-Shortcuts-RowWithConflict > .jp-Shortcuts-Cell {
+  padding: 0;
+  position: relative;
+}
+
 .jp-Shortcuts-ShortcutContainer {
   display: inline-flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
   border-radius: var(--jp-border-radius);
   padding: 3px;
@@ -267,7 +241,6 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
   display: flex;
   align-items: center;
   padding: 6px 12px;
-  position: absolute;
   height: 100%;
   width: 100%;
   box-sizing: border-box;
@@ -318,33 +291,83 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
 
 /* Shortcut List Style */
 .jp-Shortcuts-ShortcutList {
-  width: 100%;
-  display: table;
-  border-collapse: collapse;
-}
-
-.jp-Shortcuts-ShortcutListContainer {
-  overflow-y: scroll;
+  max-width: 90rem;
+  /* separate + spacing 0: sticky header borders/shadows behave predictably */
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
   border: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
+/* Fixed columns stay compact; Shortcut absorbs remaining width. */
+.jp-Shortcuts-Col {
+  width: 10rem;
+}
+
+.jp-Shortcuts-Col-selector {
+  width: 18rem;
+}
+
+.jp-Shortcuts-Col-shortcut {
+  min-width: 18rem;
+  width: auto;
+}
+
+/* No nested overflow: the settings panel (.jp-SettingsPanel) is the scrollport. */
+.jp-Shortcuts-ShortcutListContainer {
+  overflow: visible;
+}
+
+.jp-Shortcuts-ShortcutList thead th.jp-Shortcuts-Cell {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+  font-weight: bold;
+  font-size: var(--jp-ui-font-size1);
+  padding-top: 10px;
+  padding-bottom: 10px;
+  text-align: left;
+  /* box-shadow sticks with the header; avoids collapsed-border quirks */
+  box-shadow: 0 var(--jp-border-width) 0 0 var(--jp-border-color1);
+}
+
+.jp-Shortcuts-ShortcutList thead th.jp-Shortcuts-Cell button {
+  /* To compensate for the padding */
+  margin-left: -5px;
+}
+
 /* Shortcut Title Item Style */
-.jp-Shortcuts-Header {
+button.jp-Shortcuts-Header {
   display: flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  font-weight: bold;
+  text-align: left;
   cursor: pointer;
+  color: inherit;
 }
 
-.jp-Shortcuts-Header:hover .jp-ShortcutTitleItem-sortButton .jp-icon3[fill],
-.jp-Shortcuts-Header:focus .jp-ShortcutTitleItem-sortButton .jp-icon3[fill] {
-  fill: var(--jp-ui-font-color0);
+.jp-Shortcuts-SortButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
 }
 
-.jp-Shortcuts-Header:active .jp-ShortcutTitleItem-sortButton {
-  outline: none;
+.jp-Shortcuts-SortButton svg {
+  display: block;
 }
 
 .jp-Shortcuts-CurrentHeader .jp-icon3[fill] {
-  fill: var(--jp-ui-font-color0);
+  fill: var(--jp-ui-font-color1);
+}
+
+button.jp-Shortcuts-Header:focus-visible {
+  outline: var(--jp-focus-outline-width) solid var(--jp-focus-outline-color);
 }
 
 /* Shortcut UI Style */
@@ -368,6 +391,7 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
   box-sizing: border-box;
   font-size: var(--jp-ui-font-size1);
   background-color: var(--jp-layout-color0);
+  margin-bottom: 24px;
 }
 
 .jp-Shortcuts-TopNav > .jp-FilterBox {
@@ -412,26 +436,40 @@ button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
   outline-offset: 1px;
 }
 
-.jp-Shortcuts-HeaderRowContainer {
-  padding-right: 14px;
-}
-
-.jp-Shortcuts-HeaderRow {
-  font-weight: bold;
-  font-size: var(--jp-ui-font-size1);
-  background-color: var(--jp-layout-color0);
-  width: 100%;
-  z-index: 1;
-  display: table;
-  padding: 10px 0;
-}
-
 .jp-Shortcuts-CustomOptionsDialogBody {
   padding: 12px;
   display: flex;
   flex-direction: column;
 }
 
+.jp-Shortcuts-AddDialogBody {
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-Shortcuts-AddDialog-capture .jp-Shortcuts-InputBox,
+.jp-Shortcuts-AddDialog-capture .jp-Shortcuts-InputBox-controls,
+.jp-Shortcuts-AddDialog-capture .jp-Shortcuts-Input,
+.jp-Shortcuts-AddDialog-container select.jp-mod-styled {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.jp-Shortcuts-AddDialog-conflict {
+  color: var(--jp-error-color1);
+  min-height: 1.2em;
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-Shortcuts-AddDialogBody .jp-Shortcuts-CustomOptionsDialogBody {
+  padding: 0;
+}
+
+.jp-Shortcuts-AddDialogBody .jp-Shortcuts-CustomOptionDialog-container {
+  height: auto;
+}
+
+.jp-Shortcuts-AddDialog-container,
 .jp-Shortcuts-CustomOptionDialog-container {
   display: flex;
   flex-direction: column;
@@ -441,6 +479,11 @@ button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
   padding: 12px;
 }
 
+.jp-Shortcuts-AddDialog-container {
+  padding-bottom: 0;
+}
+
+.jp-Shortcuts-AddDialog-container .jp-Dialog-label,
 .jp-Shortcuts-CustomOptionDialog-container label {
   margin: 0;
   font-weight: bold;

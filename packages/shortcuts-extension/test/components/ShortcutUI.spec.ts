@@ -78,8 +78,6 @@ describe('@jupyterlab/shortcut-extension', () => {
       getSettings = jest.fn(async () => settings);
       const ready = new PromiseDelegate<void>();
       const element = React.createElement(ShortcutUI, {
-        height: 1000,
-        width: 1000,
         ref: el => {
           if (el) {
             shortcutUI = el;
