@@ -191,6 +191,23 @@ export async function renderImage(
     // `height: auto` from the style sheet then keeps this ratio, not the
     // ratio of the image data.
     img.style.aspectRatio = `${width} / ${height}`;
+  } else if (typeof height === 'number') {
+    // With a height alone, `max-width` narrows a wide image but keeps its
+    // height, so take a width from the ratio of the image data once it loads.
+    img.addEventListener(
+      'load',
+      () => {
+        if (img.naturalHeight > 0) {
+          const derived = Math.max(
+            1,
+            Math.round((height * img.naturalWidth) / img.naturalHeight)
+          );
+          img.width = derived;
+          img.style.aspectRatio = `${derived} / ${height}`;
+        }
+      },
+      { once: true }
+    );
   }
 
   if (needsBackground === 'light') {
