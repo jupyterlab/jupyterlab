@@ -120,7 +120,11 @@ export class SettingEditorSearchProvider
    * Report whether or not this provider has the ability to search on the given object
    */
   static isApplicable(domain: Widget): domain is SettingEditorPanel {
-    return false;
+    return (
+      domain instanceof MainAreaWidget &&
+      domain.content instanceof JsonSettingEditor &&
+      domain.content.source instanceof CodeMirrorEditor
+    );
   }
 
   /**

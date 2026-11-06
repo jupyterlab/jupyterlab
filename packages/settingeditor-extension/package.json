@@ -42,6 +42,7 @@
     "@jupyterlab/application": "^4.7.0-beta.0",
     "@jupyterlab/apputils": "^4.8.0-beta.0",
     "@jupyterlab/codeeditor": "^4.7.0-beta.0",
+    "@jupyterlab/documentsearch": "^4.7.0-beta.0",
     "@jupyterlab/pluginmanager": "^4.7.0-beta.0",
     "@jupyterlab/rendermime": "^4.7.0-beta.0",
     "@jupyterlab/settingeditor": "^4.7.0-beta.0",
