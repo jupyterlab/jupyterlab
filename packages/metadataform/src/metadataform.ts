@@ -296,19 +296,28 @@ export class MetadataFormWidget
   };
 
   /**
-   * Set the content of the widget.
+   * Set the content of the widget, and dispose of the content that it
+   * replaces, unless that is the placeholder.
    */
   protected setContent(content: Widget | null): void {
     const layout = this.layout as SingletonLayout;
-    if (layout.widget) {
-      layout.widget.removeClass('jp-MetadataForm-content');
-      layout.removeWidget(layout.widget);
+    const previous = layout.widget;
+    if (previous) {
+      previous.removeClass('jp-MetadataForm-content');
+      layout.removeWidget(previous);
     }
     if (!content) {
       content = this._placeholder;
     }
     content.addClass('jp-MetadataForm-content');
     layout.widget = content;
+    // A form created before the validator loaded renders when the validator
+    // arrives, unless the form is disposed. A replaced form would then render
+    // into its detached node and move shared field widgets, such as the active
+    // cell tool, out of the form on screen.
+    if (previous && previous !== this._placeholder && previous !== content) {
+      previous.dispose();
+    }
   }
 
   /**
