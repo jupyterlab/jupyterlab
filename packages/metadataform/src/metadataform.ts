@@ -323,6 +323,20 @@ export class MetadataFormWidget
   }
 
   /**
+   * Update the form when the widget is attached while visible: the active cell
+   * may have changed while the Property Inspector showed another document.
+   * Drop a hidden form instead, so that its outdated data does not mount again.
+   */
+  protected onAfterAttach(msg: Message): void {
+    if (this.isVisible) {
+      this._update();
+    } else if (this._form) {
+      this._form = undefined;
+      this.setContent(null);
+    }
+  }
+
+  /**
    * Handle a change to the active cell.
    */
   protected onActiveCellChanged(msg: Message): void {
@@ -356,6 +370,7 @@ export class MetadataFormWidget
    * Update the form with current cell metadata, and remove inconsistent fields.
    */
   private _update(): void {
+    if (this.notebookTools == undefined) return;
     const notebook = this.notebookTools.activeNotebookPanel;
 
     const cell = this.notebookTools.activeCell;
