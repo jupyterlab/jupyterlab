@@ -387,6 +387,17 @@ class Header extends ReactWidget {
           useFuzzyFilter={false}
           inputRef={this.searchInputRef}
         />
+        {this.model.name === 'PyPI' && (
+          <div className="jp-extensionmanager-browse">
+            <a
+              href="https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Prebuilt"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {this.trans.__('Browse extensions on PyPI')}
+            </a>
+          </div>
+        )}
 
         <div
           className={`jp-extensionmanager-pending ${
@@ -683,10 +694,8 @@ export class ExtensionsPanel extends SidePanel {
       new ToolbarButton({
         icon: refreshIcon,
         onClick: () => {
-          model.refreshInstalled(true).catch(reason => {
-            console.error(
-              `Failed to refresh the installed extensions list:\n${reason}`
-            );
+          model.refresh().catch(reason => {
+            console.error(`Failed to refresh the extensions list:\n${reason}`);
           });
         },
         tooltip: this.trans.__('Refresh extensions list')
