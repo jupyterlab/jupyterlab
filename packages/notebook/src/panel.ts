@@ -318,24 +318,30 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       return;
     }
     const locked = model.kernelLocked;
-    const preference = this.context.sessionContext.kernelPreference;
-    if (preference.locked !== locked) {
-      this.context.sessionContext.kernelPreference = {
+    let preference = {
+      ...this.context.sessionContext.kernelPreference,
+      locked
+    };
+    // Keep the preferred kernel in sync with the locked kernelspec.
+    if (locked && model.defaultKernelName) {
+      preference = {
         ...preference,
-        locked
+        name: model.defaultKernelName,
+        language: model.defaultKernelLanguage
       };
     }
+    this.context.sessionContext.kernelPreference = preference;
   }
 
   /**
    * Handle a change to the notebook metadata by propagating the `kernel_lock`
-   * field into the kernel preference.
+   * and `kernelspec` fields into the kernel preference.
    */
   private _onModelMetadataChanged(
     sender: INotebookModel,
     change: IMapChange
   ): void {
-    if (change.key === 'kernel_lock') {
+    if (change.key === 'kernel_lock' || change.key === 'kernelspec') {
       this._updateKernelLockPreference();
     }
   }

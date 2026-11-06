@@ -1486,8 +1486,14 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       };
     }
 
+    // A notebook with a locked kernel can only start its required kernel when none is running.
     if (wasLocked && locked === true) {
-      return;
+      const startsRequired =
+        sessionContext.hasNoKernel &&
+        model?.name === sessionContext.kernelPreference.name;
+      if (!startsRequired) {
+        return;
+      }
     }
 
     if (model === null && !sessionContext.hasNoKernel) {
@@ -2009,7 +2015,7 @@ namespace Private {
     options: SessionContext.IKernelSearch
   ): string | null {
     const { specs, preference } = options;
-    const { name, language, canStart, autoStartDefault } = preference;
+    const { name, language, canStart, autoStartDefault, locked } = preference;
 
     if (!specs || canStart === false) {
       return null;
@@ -2026,6 +2032,11 @@ namespace Private {
       if (specName === name) {
         return name;
       }
+    }
+
+    // If kernel is locked don't use other kernel.
+    if (locked) {
+      return null;
     }
 
     // Bail if there is no language.
