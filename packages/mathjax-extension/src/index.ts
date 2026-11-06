@@ -301,9 +301,27 @@ namespace Private {
       static addFontURLs(): void {
         // Font faces are bundled through fonts.css.
       }
+
+      /**
+       * The TeX font gives 1.198em as the `\big` size of 13 delimiters, such
+       * as `(`, `[` and `{`. That is below the 1.2em that `\big` asks for, so
+       * `\big(` draws the `\Big(` glyph.
+       *
+       * Works around https://github.com/mathjax/MathJax/issues/3622. Drop this
+       * method and its test when migrating to MathJax 4.2.
+       */
+      static fixBigDelimiters(): void {
+        for (const delimiter of Object.values(this.defaultDelimiters)) {
+          const sizes = 'sizes' in delimiter ? delimiter.sizes : undefined;
+          if (sizes?.[1] === 1.198) {
+            sizes[1] = 1.2;
+          }
+        }
+      }
     }
     // The mhchem arrows and bonds are in a separate font extension.
     LocalFont.addExtension(MathJaxMhchemFontExtension);
+    LocalFont.fixBigDelimiters();
 
     // Share the output jax so delimiter configurations use the same stylesheet.
     const chtml = new CHTML({ fontData: new LocalFont() });

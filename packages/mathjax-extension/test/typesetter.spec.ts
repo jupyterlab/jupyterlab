@@ -113,6 +113,20 @@ describe('@jupyterlab/mathjax-extension', () => {
         expect(host.querySelector('mjx-utext')).toBeNull();
       });
 
+      // Tests the workaround for https://github.com/mathjax/MathJax/issues/3622.
+      // Drop this test with the workaround when migrating to MathJax 4.2.
+      it('should draw `\\big(` and `\\Big(` with different glyphs', async () => {
+        const host = document.createElement('div');
+        host.textContent = '$\\big( \\Big($';
+        document.body.appendChild(host);
+        await typesetter.typeset(host);
+        const [big, Big] = Array.from(
+          host.querySelectorAll('mjx-math mjx-c'),
+          c => c.className
+        );
+        expect(big).not.toBe(Big);
+      });
+
       it('should share output styles across delimiter configurations', async () => {
         const other = new MathJaxTypesetter({ dollarInlineMath: false });
 
