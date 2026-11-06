@@ -3,9 +3,11 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+import { Time } from '@jupyterlab/coreutils';
 import type { IDocumentManagerDialogs } from '@jupyterlab/docmanager';
 import {
   DocumentManager,
+  DocumentManagerDialogs,
   renameDialog,
   renameFile
 } from '@jupyterlab/docmanager';
@@ -17,8 +19,12 @@ import {
   TextModelFactory
 } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
-import type { ServiceManager } from '@jupyterlab/services';
-import { dismissDialog, waitForDialog } from '@jupyterlab/testing';
+import type { Contents, ServiceManager } from '@jupyterlab/services';
+import {
+  acceptDialog,
+  dismissDialog,
+  waitForDialog
+} from '@jupyterlab/testing';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { Widget } from '@lumino/widgets';
 import { UUID } from '@lumino/coreutils';
@@ -82,19 +88,13 @@ describe('docregistry/dialog', () => {
       it('should throw error on no status', async () => {
         alreadyExistsError.response = {};
         await expect(
-          Promise.all([
-            dismissDialog(),
-            renameFile(manager, 'foo.ipynb', 'bar.ipynb')
-          ])
+          renameFile(manager, 'foo.ipynb', 'bar.ipynb')
         ).rejects.toBe(alreadyExistsError);
       });
       it('should throw error on not 409 status', async () => {
         alreadyExistsError.response.status = 408;
         await expect(
-          Promise.all([
-            dismissDialog(),
-            renameFile(manager, 'foo.ipynb', 'bar.ipynb')
-          ])
+          renameFile(manager, 'foo.ipynb', 'bar.ipynb')
         ).rejects.toBe(alreadyExistsError);
       });
     });
@@ -207,5 +207,131 @@ describe('docmanager/custom-dialogs', () => {
     await manager.closeFile(path);
 
     expect(customDialogs.saveBeforeCloseCalled).toBe(true);
+  });
+});
+
+describe('docmanager/default-dialogs', () => {
+  const dialogs = new DocumentManagerDialogs();
+  const checkpoints: Contents.ICheckpointModel[] = [
+    { id: 'newer', last_modified: '2025-10-16T12:00:00.000Z' },
+    { id: 'older', last_modified: '2025-10-15T12:00:00.000Z' }
+  ];
+
+  const dialogBody = () => document.querySelector('.jp-Dialog-body')!;
+
+  describe('#reload()', () => {
+    it('should reload when accepted', async () => {
+      const result = dialogs.reload({ type: 'Notebook' });
+      await waitForDialog();
+      expect(dialogBody().textContent).toBe(
+        'Are you sure you want to reload the Notebook from the disk?'
+      );
+      await acceptDialog();
+      expect(await result).toEqual({ shouldReload: true });
+    });
+
+    it('should not reload when dismissed', async () => {
+      const result = dialogs.reload({ type: 'Notebook' });
+      await dismissDialog();
+      expect(await result).toEqual({ shouldReload: false });
+    });
+  });
+
+  describe('#delete()', () => {
+    it('should delete when accepted', async () => {
+      const result = dialogs.delete({ path: 'folder/data.csv' });
+      await waitForDialog();
+      expect(dialogBody().textContent).toBe(
+        'Are you sure you want to delete folder/data.csv'
+      );
+      await acceptDialog();
+      expect(await result).toEqual({ shouldDelete: true });
+    });
+
+    it('should not delete when dismissed', async () => {
+      const result = dialogs.delete({ path: 'folder/data.csv' });
+      await dismissDialog();
+      expect(await result).toEqual({ shouldDelete: false });
+    });
+  });
+
+  describe('#chooseCheckpoint()', () => {
+    it('should return the selected checkpoint', async () => {
+      const result = dialogs.chooseCheckpoint({
+        checkpoints,
+        fileType: 'Notebook'
+      });
+      await waitForDialog();
+      const select =
+        document.querySelector<HTMLSelectElement>('.jp-Dialog select')!;
+      const date = checkpoints[1].last_modified;
+      expect(select.options[1].textContent).toBe(
+        `1. ${Time.format(date)} (${Time.formatHuman(date)})`
+      );
+      select.value = select.options[1].value;
+      await acceptDialog();
+      expect((await result).checkpoint).toBe(checkpoints[1]);
+    });
+
+    it('should return no checkpoint when dismissed', async () => {
+      const result = dialogs.chooseCheckpoint({
+        checkpoints,
+        fileType: 'Notebook'
+      });
+      await dismissDialog();
+      expect((await result).checkpoint).toBeUndefined();
+    });
+  });
+
+  describe('#revert()', () => {
+    it('should revert when accepted', async () => {
+      const result = dialogs.revert({
+        checkpoint: checkpoints[0],
+        fileType: 'Notebook'
+      });
+      await waitForDialog();
+      expect(dialogBody().textContent).toContain(
+        'Are you sure you want to revert the Notebook to checkpoint? This cannot be undone.'
+      );
+      expect(dialogBody().textContent).toContain(
+        Time.format(checkpoints[0].last_modified)
+      );
+      await acceptDialog();
+      expect(await result).toEqual({ shouldRevert: true });
+    });
+
+    it('should not revert when dismissed', async () => {
+      const result = dialogs.revert({
+        checkpoint: checkpoints[0],
+        fileType: 'Notebook'
+      });
+      await dismissDialog();
+      expect(await result).toEqual({ shouldRevert: false });
+    });
+  });
+
+  describe('#renameOnSave()', () => {
+    it('should return the new name and the checkbox state', async () => {
+      const result = dialogs.renameOnSave({ name: 'untitled.txt' });
+      await waitForDialog();
+      const input = dialogBody().querySelector('input')!;
+      expect(input.value).toBe('untitled.txt');
+      input.value = 'notes.txt';
+      document.querySelector<HTMLInputElement>(
+        '.jp-Dialog-checkbox input'
+      )!.checked = true;
+      await acceptDialog();
+      expect(await result).toEqual({
+        accepted: true,
+        newName: 'notes.txt',
+        doNotAskAgain: true
+      });
+    });
+
+    it('should not rename when dismissed', async () => {
+      const result = dialogs.renameOnSave({ name: 'untitled.txt' });
+      await dismissDialog();
+      expect((await result).accepted).toBe(false);
+    });
   });
 });
