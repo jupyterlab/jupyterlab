@@ -66,6 +66,9 @@ const notebooks: Record<string, string> = {
   'markdown-wide.ipynb': notebook(
     markdownCell(`<img src="${IMAGE}" width="1530" height="2165">`)
   ),
+  'markdown-height-wide.ipynb': notebook(
+    markdownCell(`<img src="${IMAGE}" height="2165">`)
+  ),
   'markdown-style.ipynb': notebook(
     markdownCell(`<div class="gallery"><img src="${IMAGE}"></div>`)
   )
@@ -161,6 +164,23 @@ test.describe('Image size', () => {
 
     expect(box.width).toBeLessThan(1530);
     expect(box.height).toBeCloseTo(box.width / IMAGE_RATIO, 0);
+  });
+
+  test('Keep the aspect ratio of a Markdown image with only a height wider than the notebook', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.notebook.openByPath(`${tmpPath}/markdown-height-wide.ipynb`);
+    const image = page.locator('.jp-RenderedMarkdown img');
+    await loadedImageBox(image);
+
+    // The width comes from the image data after its load event.
+    await expect
+      .poll(async () => {
+        const box = (await image.boundingBox())!;
+        return box.height - box.width / IMAGE_RATIO;
+      })
+      .toBeCloseTo(0, 0);
   });
 
   test('Let a style sheet set the height of a Markdown image', async ({

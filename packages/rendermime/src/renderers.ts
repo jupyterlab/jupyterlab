@@ -192,22 +192,7 @@ export async function renderImage(
     // ratio of the image data.
     img.style.aspectRatio = `${width} / ${height}`;
   } else if (typeof height === 'number') {
-    // With a height alone, `max-width` narrows a wide image but keeps its
-    // height, so take a width from the ratio of the image data once it loads.
-    img.addEventListener(
-      'load',
-      () => {
-        if (img.naturalHeight > 0) {
-          const derived = Math.max(
-            1,
-            Math.round((height * img.naturalWidth) / img.naturalHeight)
-          );
-          img.width = derived;
-          img.style.aspectRatio = `${derived} / ${height}`;
-        }
-      },
-      { once: true }
-    );
+    Private.fitHeightOnlyImage(img, height);
   }
 
   if (needsBackground === 'light') {
@@ -2118,7 +2103,39 @@ namespace Private {
       if (!imgs[i].alt) {
         imgs[i].alt = trans.__('Image');
       }
+      const height = Number(imgs[i].getAttribute('height'));
+      if (height > 0 && !imgs[i].hasAttribute('width')) {
+        fitHeightOnlyImage(imgs[i], height);
+      }
     }
+  }
+
+  /**
+   * Give an image with a height and no width the width that keeps the ratio
+   * of its data, once it loads.
+   *
+   * #### Notes
+   * With a height alone, `max-width` narrows a wide image but keeps its
+   * height, while with both sizes `height: auto` follows the narrowed width.
+   */
+  export function fitHeightOnlyImage(
+    img: HTMLImageElement,
+    height: number
+  ): void {
+    img.addEventListener(
+      'load',
+      () => {
+        if (img.naturalHeight > 0) {
+          const derived = Math.max(
+            1,
+            Math.round((height * img.naturalWidth) / img.naturalHeight)
+          );
+          img.width = derived;
+          img.style.aspectRatio = `${derived} / ${height}`;
+        }
+      },
+      { once: true }
+    );
   }
 
   /**
