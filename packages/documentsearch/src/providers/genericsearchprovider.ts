@@ -368,9 +368,11 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   async endQuery(): Promise<void> {
     this._mutationObserver.disconnect();
     this._markNodes.forEach(el => {
-      const parent = el.parentNode!;
-      parent.replaceChild(document.createTextNode(el.textContent!), el);
-      parent.normalize();
+      const parent = el.parentNode;
+      if (parent) {
+        parent.replaceChild(document.createTextNode(el.textContent!), el);
+        parent.normalize();
+      }
     });
     this._markNodes = [];
     this._matches = [];

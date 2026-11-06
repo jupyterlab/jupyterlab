@@ -18,13 +18,15 @@ test.use({
 test('Limit cell outputs', async ({ page }) => {
   await page.notebook.createNew();
 
-  await page.locator(
-    '.jp-Cell-inputArea >> .cm-editor >> .cm-content[contenteditable="true"]'
-  ).fill(`from IPython.display import display, Markdown
+  await page.notebook.setCell(
+    0,
+    'code',
+    `from IPython.display import display, Markdown
 
 for i in range(10):
     display(Markdown('_Markdown_ **text**'))
-`);
+`
+  );
 
   await page.notebook.run();
 
@@ -34,9 +36,10 @@ for i in range(10):
   );
 });
 
-test("Don't limit cell outputs if input is requested", async ({ page }) => {
+test('Limit cell outputs even when input is requested', async ({ page }) => {
   await page.notebook.createNew();
 
+  // eslint-disable-next-line jupyter/galata-prefer-notebook-cell-helper -- Preserve Python indentation; setCell types through editor auto-indentation.
   await page.locator(
     '.jp-Cell-inputArea >> .cm-editor >> .cm-content[contenteditable="true"]'
   ).fill(`from IPython.display import display, Markdown
@@ -47,10 +50,12 @@ for i in range(10):
 input('Your age:')
 `);
 
+  await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
   await page.menu.clickMenuItem('Run>Run All Cells');
   await page.locator('.jp-Stdin >> text=Your age:').waitFor();
-  expect(await page.locator('.jp-RenderedMarkdown').count()).toBeGreaterThan(
-    MAX_OUTPUTS
+  await expect(page.locator('.jp-RenderedMarkdown')).toHaveCount(MAX_OUTPUTS);
+  await expect(page.locator('.jp-TrimmedOutputs')).toHaveText(
+    'Show more outputs'
   );
 
   await page.keyboard.press('Enter');
@@ -59,6 +64,7 @@ input('Your age:')
 test('Display input value', async ({ page }) => {
   await page.notebook.createNew();
 
+  // eslint-disable-next-line jupyter/galata-prefer-notebook-cell-helper -- Preserve Python indentation; setCell types through editor auto-indentation.
   await page.locator(
     '.jp-Cell-inputArea >> .cm-editor >> .cm-content[contenteditable="true"]'
   ).fill(`from IPython.display import display, Markdown
@@ -72,6 +78,7 @@ for i in range(10):
     display(Markdown('_Markdown_ **text**'))
 `);
 
+  await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
   await page.menu.clickMenuItem('Run>Run All Cells');
   await page.locator('.jp-Stdin >> text=Your age:').waitFor();
 

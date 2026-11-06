@@ -532,7 +532,9 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
             resolved = true;
             transform.resolve({ type: 'overwrite', contents: saved.data });
           }
-        } catch ({ message }) {
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : String(error);
           console.warn(`Fetching workspace "${workspace}" failed.`, message);
 
           // If the workspace does not exist, cancel the data transformation
@@ -844,6 +846,8 @@ const sanitizer: JupyterFrontEndPlugin<IRenderMime.ISanitizer> = {
         .composite as Array<string>;
 
       const autolink = setting.get('autolink').composite as boolean;
+      const incrementalAutolink = setting.get('incrementalAutolink')
+        .composite as boolean;
       const allowNamedProperties = setting.get('allowNamedProperties')
         .composite as boolean;
       const allowCommandLinker = setting.get('allowCommandLinker')
@@ -854,6 +858,7 @@ const sanitizer: JupyterFrontEndPlugin<IRenderMime.ISanitizer> = {
       }
 
       sanitizer.setAutolink(autolink);
+      sanitizer.setIncrementalAutolink(incrementalAutolink);
       sanitizer.setAllowNamedProperties(allowNamedProperties);
       sanitizer.setAllowCommandLinker(allowCommandLinker);
     };

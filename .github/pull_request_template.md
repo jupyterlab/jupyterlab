@@ -13,13 +13,13 @@ https://github.com/jupyterlab/jupyterlab/blob/main/CONTRIBUTING.md
 
 ## Code changes
 
-<!-- Describe the code changes and how they address the issue. -->
+<!-- State what a reviewer needs to know before reading the diff: API changes, design choices, changed behavior, and any unrelated changes. Reviewers read the code, so do not list files or tests. -->
 
 ## User-facing changes
 
 <!-- Describe any visual or user interaction changes and how they address the issue. -->
 
-<!-- For visual changes, include before and after screenshots or GIF/mp4/other video demo here. -->
+<!-- For visual changes, include before and after screenshots. For interaction changes, include a video or GIF. -->
 
 ## Backwards-incompatible changes
 

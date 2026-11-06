@@ -381,7 +381,8 @@ class InputNumberDialog extends InputDialogBase<number> {
     super(options);
 
     this._input.type = 'number';
-    this._input.value = options.value ? options.value.toString() : '0';
+    this._input.value =
+      options.value !== undefined ? options.value.toString() : '0';
   }
 
   /**

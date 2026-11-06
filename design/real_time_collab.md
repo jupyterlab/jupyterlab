@@ -28,7 +28,7 @@ During the RTC sessions, the participants are focused on the following aspects o
 work:
 
 - Collaborative editing of content.
-- Side channel live discussions (Bluejeans, appear.in, phonecalls).
+- Side channel live discussions (Bluejeans, appear.in, phone calls).
 - Discussion and exploration of results.
 
 All individuals in the collaboration already have access to the files (Git/GitHub).

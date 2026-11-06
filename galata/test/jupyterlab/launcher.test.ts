@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import { waitForLauncherIcons } from './utils';
 
 test.use({
   autoGoto: false,
@@ -38,6 +39,7 @@ test.describe('Dynamic Text Spacing', () => {
       expect(height).toEqual(expectedValue + 'px');
     }
 
+    await waitForLauncherIcons(page);
     const imageName = 'launcher-card-label-height.png';
     expect(
       await page.locator('.jp-Launcher-content').screenshot()

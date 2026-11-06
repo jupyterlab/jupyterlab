@@ -97,7 +97,7 @@ export class HTMLSelect extends React.Component<IHTMLSelectProps> {
             tag: 'span',
             stylesheet: 'select',
             right: '4px',
-            top: '8px',
+            top: '4px',
             ...iconProps
           }}
         />

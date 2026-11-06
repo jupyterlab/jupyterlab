@@ -48,6 +48,10 @@ export interface IKeybinding {
    * Whether this keybinding comes from default values (schema or default overrides), or is set by user.
    */
   readonly isDefault: boolean;
+  /**
+   * Whether to prevent default action of the keyboard events during sequence matching.
+   */
+  readonly preventDefault?: boolean;
 }
 
 /**

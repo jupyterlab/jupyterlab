@@ -1,12 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-(window as any).__webpack_public_path__ = URLExt.join(
-  PageConfig.getBaseUrl(),
-  'example/'
-);
+(
+  window as unknown as Window & { __webpack_public_path__: string }
+).__webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'example/');
 
 // Import style through JS file to deduplicate them.
 import './style';
@@ -38,7 +35,7 @@ import { nullTranslator, TranslationManager } from '@jupyterlab/translation';
 
 import type { IYText } from '@jupyter/ydoc';
 
-async function main(): Promise<any> {
+async function main(): Promise<void> {
   const translator = new TranslationManager();
   await translator.fetch('default');
   const trans = translator.load('jupyterlab');
@@ -129,8 +126,9 @@ function startApp(
     languages
   });
   const mimeTypeService = new CodeMirrorMimeTypeService(languages);
-  const editorFactory = factoryService.newInlineEditor;
-  const contentFactory = new ConsolePanel.ContentFactory({ editorFactory });
+  const contentFactory = new ConsolePanel.ContentFactory({
+    editorFactory: factoryService.newInlineEditor
+  });
 
   const consolePanel = new ConsolePanel({
     rendermime,

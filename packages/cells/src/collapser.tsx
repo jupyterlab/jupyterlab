@@ -2,13 +2,11 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { ReactWidget } from '@jupyterlab/ui-components';
-import { ElementExt } from '@lumino/domutils';
 
 import * as React from 'react';
 
+import { scrollCellIntoView } from './utils';
 import type { Cell, CodeCell } from './widget';
 
 /**
@@ -58,7 +56,7 @@ export abstract class Collapser extends ReactWidget {
   /**
    * Render the collapser with the virtual DOM.
    */
-  protected render(): React.ReactElement<any> {
+  protected render(): React.ReactElement {
     const childClass = COLLAPSER_CHILD_CLASS;
     return <div className={childClass} onClick={e => this.handleClick(e)} />;
   }
@@ -137,12 +135,8 @@ export class OutputCollapser extends Collapser {
     const cell = this.parent?.parent as CodeCell | undefined | null;
     if (cell) {
       cell.outputHidden = !cell.outputHidden;
-      /* Scroll cell into view after output collapse */
       if (cell.outputHidden) {
-        let area = cell.parent?.node;
-        if (area) {
-          ElementExt.scrollIntoViewIfNeeded(area, cell.node);
-        }
+        scrollCellIntoView(cell);
       }
     }
     /* We need this until we watch the cell state */

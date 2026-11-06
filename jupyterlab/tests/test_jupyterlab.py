@@ -42,6 +42,7 @@ from jupyterlab.commands import (
     update_extension,
 )
 from jupyterlab.coreconfig import CoreConfig, _get_default_core_data
+from jupyterlab.labapp import LabApp
 
 here = os.path.dirname(os.path.abspath(__file__))
 
@@ -718,7 +719,7 @@ class TestExtension(AppHandlerTest):
         def _mock_install(self, name, *args, **kwargs):
             assert name in ("mockextension", "mockextension@1.1.0")
             if name == "mockextension@1.1.0":
-                raise Success()
+                raise Success
             return orig_install(self, name, *args, **kwargs)
 
         p1 = patch.object(commands, "_fetch_package_metadata", _mock_metadata)
@@ -807,3 +808,85 @@ def test_load_extension(jp_serverapp, make_lab_app):
     app._link_jupyter_server_extension(jp_serverapp)
     app.initialize()
     sys.stderr = stderr
+
+
+def test_raise_config_file_errors_default():
+    app = LabApp()
+    assert app.raise_config_file_errors is True
+
+
+def test_raise_config_file_errors_on_invalid_config(tmp_path):
+    bad_config = tmp_path / "jupyter_lab_config.py"
+    bad_config.write_text("c.LabApp.broken_syntax = [")
+
+    app = LabApp(config_file=str(bad_config))
+    with pytest.raises(SystemExit):
+        app.load_config_file()
+
+
+def test_raise_config_file_errors_suppressed_when_disabled(tmp_path):
+    bad_config = tmp_path / "jupyter_lab_config.py"
+    bad_config.write_text("c.LabApp.broken_syntax = [")
+
+    app = LabApp(config_file=str(bad_config), raise_config_file_errors=False)
+    app.load_config_file()
+
+
+def test_raise_config_file_errors_stops_server(jp_configurable_serverapp, jp_config_dir):
+    (jp_config_dir / "jupyter_lab_config.py").write_text("c.LabApp.broken_syntax = [")
+
+    with pytest.raises(SystemExit) as exit_info:
+        jp_configurable_serverapp(
+            config={"ServerApp": {"jpserver_extensions": {"jupyterlab": True}}}
+        )
+
+    assert exit_info.value.code == 1
+
+
+@pytest.mark.parametrize(
+    ("file_name", "line"),
+    [
+        ("jupyter_server_config.py", 'c.LabApp.raise_config_file_errors = "false"'),
+        ("jupyter_server_config.py", 'c.LabApp.expose_app_in_browser = "true"'),
+        ("jupyter_server_config.py", "c.LabApp.colaborative = True"),
+        ("jupyter_lab_config.py", 'c.ServerApp.port = "8889"'),
+    ],
+)
+def test_invalid_config_value_stops_server(
+    jp_configurable_serverapp, jp_config_dir, file_name, line
+):
+    (jp_config_dir / file_name).write_text(line)
+
+    with pytest.raises(SystemExit) as exit_info:
+        jp_configurable_serverapp(
+            config={"ServerApp": {"jpserver_extensions": {"jupyterlab": True}}}
+        )
+
+    assert exit_info.value.code == 1
+
+
+def test_raise_config_file_errors_disabled_from_command_line(
+    jp_configurable_serverapp, jp_config_dir
+):
+    (jp_config_dir / "jupyter_lab_config.py").write_text("c.LabApp.broken_syntax = [")
+
+    serverapp = jp_configurable_serverapp(
+        config={"ServerApp": {"jpserver_extensions": {"jupyterlab": True}}},
+        argv=["--LabApp.raise_config_file_errors=False", "--LabApp.expose_app_in_browser=True"],
+    )
+
+    app = serverapp.extension_manager.extension_points[LabApp.name].app
+    assert app.expose_app_in_browser is True
+
+
+def test_labextension_list_skips_config_file_errors(jp_environ, jp_config_dir):
+    (jp_config_dir / "jupyter_lab_config.py").write_text("c.LabApp.broken_syntax = [")
+
+    result = subprocess.run(
+        [sys.executable, "-m", "jupyterlab.labextensions", "list"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr

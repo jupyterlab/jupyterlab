@@ -1,14 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-export function log(content: any): void {
+export function log(content: unknown): void {
   const el = document.getElementById('output');
-  if (typeof content !== 'string') {
-    content = JSON.stringify(content);
-  }
+  const text = typeof content === 'string' ? content : JSON.stringify(content);
   if (el) {
-    el.textContent = el.textContent + '\n' + content;
+    el.textContent = el.textContent + '\n' + text;
   }
-  console.debug(content);
+  console.debug(text);
 }

@@ -44,15 +44,15 @@ test.describe('Advanced Plugin Manager', () => {
     const disclaimerCheckbox = page.locator(DISCLAIMER_SELECTOR);
     const pluginCheckbox = page.locator(FIRST_PLUGIN_SELECTOR);
 
-    expect(await disclaimerCheckbox.isChecked()).toEqual(false);
-    expect(await pluginCheckbox.isDisabled()).toEqual(true);
-    expect(await pluginCheckbox.isChecked()).toEqual(true);
+    await expect(disclaimerCheckbox).not.toBeChecked();
+    await expect(pluginCheckbox).toBeDisabled();
+    await expect(pluginCheckbox).toBeChecked();
 
     await disclaimerCheckbox.check();
 
-    expect(await disclaimerCheckbox.isChecked()).toEqual(true);
-    expect(await pluginCheckbox.isDisabled()).toEqual(false);
-    expect(await pluginCheckbox.isChecked()).toEqual(true);
+    await expect(disclaimerCheckbox).toBeChecked();
+    await expect(pluginCheckbox).toBeEnabled();
+    await expect(pluginCheckbox).toBeChecked();
   });
 
   test('Warns if plugin to be disabled is used by other plugins', async ({
@@ -115,7 +115,7 @@ test.describe('Advanced Plugin Manager', () => {
     const pluginCheckbox = page.locator(FIRST_PLUGIN_SELECTOR);
 
     await disclaimerCheckbox.check();
-    expect(await pluginCheckbox.isDisabled()).toEqual(true);
+    await expect(pluginCheckbox).toBeDisabled();
 
     const lockIcon = page.locator('[data-icon="ui-components:lock"]');
     await expect(lockIcon).toHaveCount(1);

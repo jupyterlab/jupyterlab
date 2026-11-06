@@ -535,7 +535,7 @@ export class InlineCompleter extends Widget {
     }
 
     const host =
-      (editor.host.closest('.jp-MainAreaWidget > .lm-Widget') as HTMLElement) ||
+      editor.host.closest<HTMLElement>('.jp-MainAreaWidget > .lm-Widget') ??
       editor.host;
 
     let anchor: DOMRect;
@@ -811,7 +811,7 @@ export namespace InlineCompleter {
           }
           completions.items = items;
         } else {
-          if (!change.retain) {
+          if (change.retain === undefined || change.retain === 0) {
             this._completions = null;
           }
         }

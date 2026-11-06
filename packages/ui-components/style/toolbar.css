@@ -93,7 +93,6 @@ button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
 
 .jp-Toolbar-responsive-popup.jp-ThemedContainer {
   position: absolute;
-  height: fit-content;
   border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
   box-shadow: var(--jp-toolbar-box-shadow);
   background: var(--jp-toolbar-background);

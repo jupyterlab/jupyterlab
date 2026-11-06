@@ -3,14 +3,18 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+from __future__ import annotations
+
 import dataclasses
 import json
 import os
 import sys
+from typing import TYPE_CHECKING, cast
 
 from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_flags
 from jupyter_server._version import version_info as jpserver_version_info
 from jupyter_server.serverapp import flags
+from jupyter_server.utils import ApiPath, to_os_path
 from jupyter_server.utils import url_path_join as ujoin
 from jupyterlab_server import (
     LabServerApp,
@@ -20,8 +24,11 @@ from jupyterlab_server import (
     WorkspaceListApp,
 )
 from jupyterlab_server.config import get_static_page_config
+from jupyterlab_server.translation_utils import DEFAULT_LOCALE, SYS_LOCALE, is_valid_locale
 from notebook_shim.shim import NotebookConfigShimMixin
 from traitlets import Bool, Instance, Type, Unicode, default
+from traitlets.config import Config
+from traitlets.config.application import catch_config_error
 
 from ._version import __version__
 from .commands import (
@@ -58,6 +65,11 @@ from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import ExtensionHandler, extensions_handler_path
 from .handlers.plugin_manager_handler import PluginHandler, plugins_handler_path
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from jupyter_server.serverapp import ServerApp
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -159,7 +171,7 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
 
     name = Unicode("JupyterLab", config=True, help="The name of the built application")
 
-    version = Unicode("", config=True, help="The version of the built application")
+    version = cast("str", Unicode("", config=True, help="The version of the built application"))
 
     dev_build = Bool(
         None,
@@ -307,7 +319,7 @@ class LabWorkspaceExportApp(WorkspaceExportApp):
     version = version
 
     @default("workspaces_dir")
-    def _default_workspaces_dir(self):
+    def _default_workspaces_dir(self) -> str:
         return get_workspaces_dir()
 
 
@@ -315,7 +327,7 @@ class LabWorkspaceImportApp(WorkspaceImportApp):
     version = version
 
     @default("workspaces_dir")
-    def _default_workspaces_dir(self):
+    def _default_workspaces_dir(self) -> str:
         return get_workspaces_dir()
 
 
@@ -323,7 +335,7 @@ class LabWorkspaceListApp(WorkspaceListApp):
     version = version
 
     @default("workspaces_dir")
-    def _default_workspaces_dir(self):
+    def _default_workspaces_dir(self) -> str:
         return get_workspaces_dir()
 
 
@@ -388,11 +400,11 @@ class LabLicensesApp(LicensesApp):
     }
 
     @default("app_dir")
-    def _default_app_dir(self):
+    def _default_app_dir(self) -> str:
         return get_app_dir()
 
     @default("static_dir")
-    def _default_static_dir(self):
+    def _default_static_dir(self) -> str:
         return pjoin(self.app_dir, "static")
 
 
@@ -519,13 +531,23 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         help=("The override url for static lab theme assets, typically a CDN."),
     )
 
-    app_dir = Unicode(None, config=True, help="The app directory to launch JupyterLab from.")
+    app_dir = Unicode("", config=True, help="The app directory to launch JupyterLab from.")
 
     user_settings_dir = Unicode(
         get_user_settings_dir(), config=True, help="The directory for user settings."
     )
 
     workspaces_dir = Unicode(get_workspaces_dir(), config=True, help="The directory for workspaces")
+
+    raise_config_file_errors = Bool(
+        True,
+        config=True,
+        help=(
+            "Whether to stop when a config file has an error. Set it on the command line "
+            "or in jupyter_server_config.py: a value in jupyter_lab_config.py has no effect, "
+            "because that file is loaded after this option is read."
+        ),
+    )
 
     core_mode = Bool(
         False,
@@ -622,7 +644,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     )
 
     @default("app_dir")
-    def _default_app_dir(self):
+    def _default_app_dir(self) -> str:
         app_dir = get_app_dir()
         if self.core_mode:
             app_dir = HERE
@@ -631,48 +653,80 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         return app_dir
 
     @default("app_settings_dir")
-    def _default_app_settings_dir(self):
+    def _default_app_settings_dir(self) -> str:
         return pjoin(self.app_dir, "settings")
 
     @default("app_version")
-    def _default_app_version(self):
+    def _default_app_version(self) -> str:
         return app_version
 
     @default("cache_files")
-    def _default_cache_files(self):
+    def _default_cache_files(self) -> bool:
         return False
 
     @default("schemas_dir")
-    def _default_schemas_dir(self):
+    def _default_schemas_dir(self) -> str:
         return pjoin(self.app_dir, "schemas")
 
     @default("templates_dir")
-    def _default_templates_dir(self):
+    def _default_templates_dir(self) -> str:
         return pjoin(self.app_dir, "static")
 
     @default("themes_dir")
-    def _default_themes_dir(self):
+    def _default_themes_dir(self) -> str:
         if self.override_theme_url:
             return ""
         return pjoin(self.app_dir, "themes")
 
     @default("static_dir")
-    def _default_static_dir(self):
+    def _default_static_dir(self) -> str:
         return pjoin(self.app_dir, "static")
 
     @default("static_url_prefix")
-    def _default_static_url_prefix(self):
+    def _default_static_url_prefix(self) -> str:
         if self.override_static_url:
             return self.override_static_url
         else:
+            serverapp = self.serverapp
+            if serverapp is None:
+                msg = "LabApp requires a linked server application"
+                raise RuntimeError(msg)
             static_url = f"/static/{self.name}/"
-            return ujoin(self.serverapp.base_url, static_url)
+            return ujoin(serverapp.base_url, static_url)
 
     @default("theme_url")
-    def _default_theme_url(self):
+    def _default_theme_url(self) -> str:
         if self.override_theme_url:
             return self.override_theme_url
         return ""
+
+    @catch_config_error
+    def _link_jupyter_server_extension(self, serverapp: ServerApp) -> None:
+        # The base class loads the config files before it applies the server config
+        # and the command line, so read raise_config_file_errors from them first.
+        own_config = self._find_my_config(serverapp.config)
+        if "raise_config_file_errors" in own_config:
+            value = own_config["raise_config_file_errors"]
+            self._load_config(Config({"LabApp": {"raise_config_file_errors": value}}))
+            # Otherwise notebook_shim warns that ServerApp has an option of the same name
+            serverapp.config["LabApp"].pop("raise_config_file_errors", None)
+        super()._link_jupyter_server_extension(serverapp)
+
+    def load_config_file(self, suppress_errors: bool = True) -> None:  # type: ignore[override]
+        """Load the config files, and exit when one of them has an error.
+
+        The server only logs exceptions raised while it links an extension,
+        so exit to stop it, as traitlets does for invalid config values.
+        """
+        try:
+            super().load_config_file(suppress_errors)
+        except Exception:
+            self.log.critical(
+                "Stopping because a config file has an error. Fix the file, or pass "
+                "--LabApp.raise_config_file_errors=False to skip it.",
+                exc_info=True,
+            )
+            self.exit(1)
 
     def initialize_templates(self):
         # Determine which model to run JupyterLab
@@ -724,6 +778,20 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         super()._prepare_templates()
         self.jinja2_env.globals.update(custom_css=self.custom_css)
 
+    def _preferred_path_is_home(self) -> bool:
+        """Whether the preferred path resolves to the user's home directory."""
+        if self.serverapp is None:
+            return False
+        try:
+            contents_manager = self.serverapp.contents_manager
+            preferred_dir = to_os_path(
+                ApiPath(contents_manager.preferred_dir),
+                contents_manager.root_dir,
+            )
+            return os.path.samefile(preferred_dir, os.path.expanduser("~"))
+        except (AttributeError, OSError):
+            return False
+
     def initialize_handlers(self):  # noqa
         handlers = []
 
@@ -738,6 +806,11 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         page_config["exposeAppInBrowser"] = self.expose_app_in_browser
         page_config["quitButton"] = self.serverapp.quit_button
         page_config["allow_hidden_files"] = self.serverapp.contents_manager.allow_hidden
+        page_config["preferredPathIsHome"] = self._preferred_path_is_home()
+        # The locale that the "default" language setting resolves to
+        page_config.setdefault(
+            "serverLocale", SYS_LOCALE if is_valid_locale(SYS_LOCALE) else DEFAULT_LOCALE
+        )
         if hasattr(self.serverapp.contents_manager, "delete_to_trash"):
             page_config["delete_to_trash"] = self.serverapp.contents_manager.delete_to_trash
 
@@ -803,7 +876,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             entry_point = EXT_MANAGERS.get(provider)
             if entry_point is None:
                 self.log.error(f"Extension Manager: No manager defined for provider '{provider}'.")
-                raise NotImplementedError()
+                raise NotImplementedError
             else:
                 self.log.info(f"Extension Manager is '{provider}'.")
             manager_factory = entry_point.load()
@@ -867,7 +940,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                             app_options=app_options,
                             ext_options={
                                 "lock_rules": lock_rules,
-                                "all_locked": self.lock_all_plugins,
+                                "lock_all": self.lock_all_plugins,
                             },
                             parent=self,
                         )
@@ -920,7 +993,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         self.handlers.extend(handlers)
         super().initialize_handlers()
 
-    def initialize(self, argv=None):
+    def initialize(self, argv: Sequence[str] | None = None):
         """Subclass because the ExtensionApp.initialize() method does not take arguments"""
         super().initialize()
         if self.collaborative:

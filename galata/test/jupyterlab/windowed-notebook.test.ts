@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import { expect, galata, test } from '@jupyterlab/galata';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import type { NotebookPanel } from '@jupyterlab/notebook';
 import type { Locator } from '@playwright/test';
 import * as path from 'path';
 
@@ -68,7 +70,7 @@ test('should update displayed cells on resize', async ({ page, tmpPath }) => {
   );
   await resizeHandle.dragTo(page.locator('#jp-main-statusbar'));
 
-  // The cell should be visible aqain
+  // The cell should be visible again
   await expect.soft(cell).toBeVisible();
 });
 
@@ -76,16 +78,26 @@ test('should not update height when hiding', async ({ page, tmpPath }) => {
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
   const notebook = await page.notebook.getNotebookInPanelLocator();
   let initialHeight = 0;
-  let previousHeight = 0;
-  let counter = 0;
 
-  // Wait to ensure the rendering logic is stable.
-  do {
-    previousHeight = initialHeight;
-    await page.waitForTimeout(600);
+  // Off-screen cells are rendered when the browser is idle, which updates the
+  // estimated height of the notebook; on a busy runner this can take seconds.
+  await page.waitForFunction(() => {
+    const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+    return panel.content.widgets.every(cell => !cell.isPlaceholder());
+  });
 
-    initialHeight = await getInnerHeight(notebook!);
-  } while (previousHeight !== initialHeight && counter++ < 10);
+  // Wait to ensure the rendering logic is stable: poll the inner height
+  // every 600ms until two consecutive reads agree
+  await expect
+    .poll(
+      async () => {
+        const previousHeight = initialHeight;
+        initialHeight = await getInnerHeight(notebook!);
+        return initialHeight === previousHeight;
+      },
+      { intervals: [600], timeout: 6000 }
+    )
+    .toBe(true);
 
   expect.soft(initialHeight).toBeGreaterThan(0);
 
@@ -118,7 +130,7 @@ test('should hide first inactive code cell when scrolling down', async ({
   ]);
 
   // Check the content contains only the output
-  expect(await firstCell.textContent()).toEqual('[16]:local link\n');
+  await expect(firstCell).toHaveText('[16]:local link\n');
 });
 
 test('should reattached inactive code cell when scrolling back into the viewport', async ({
@@ -289,12 +301,14 @@ test.describe('Scrolling on keyboard interaction when active editor is above the
       for (let i = 0; i < testCase.times; i++) {
         await page.keyboard.press(testCase.key);
         // Allow for small delay between pressing keys
+        // eslint-disable-next-line playwright/no-wait-for-timeout
         await page.waitForTimeout(100);
       }
 
       if (testCase.showCell === 'neither') {
         // For negative test case we need to add an explicit timeout to test
         // against the possibility of the scroll happening with a small delay.
+        // eslint-disable-next-line playwright/no-wait-for-timeout
         await page.waitForTimeout(400);
         await expect(firstCell).toBeHidden();
         await expect(secondCell).toBeHidden();
@@ -305,6 +319,145 @@ test.describe('Scrolling on keyboard interaction when active editor is above the
       }
     });
   }
+});
+
+test.describe('Scrollback cancellation', () => {
+  /**
+   * Arm the scrollback anchor: type into the active editor which is above
+   * the viewport, which scrolls back to the active cell and keeps the
+   * scrollback target armed for the next few seconds (renewed on cell
+   * resizes, e.g. those caused by re-rendering of windowed cells).
+   */
+  const armScrollback = async (
+    page: IJupyterLabPageFixture,
+    tmpPath: string
+  ) => {
+    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+
+    await page.notebook.selectCells(0);
+    await page.notebook.enterCellEditingMode(0);
+    const notebook = (await page.notebook.getNotebookInPanelLocator())!;
+    const firstCell = notebook.locator(
+      '.jp-Cell[data-windowed-list-index="0"]'
+    );
+    const secondCell = notebook.locator(
+      '.jp-Cell[data-windowed-list-index="1"]'
+    );
+    await firstCell.waitFor();
+    await secondCell.waitFor();
+
+    // Position the mouse in the bounding box to allow for scrolling with mouse wheel
+    const bbox = (await notebook.boundingBox())!;
+    await page.mouse.move(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
+
+    await scrollAwayWithWheel(page, firstCell, secondCell);
+
+    // Typing scrolls back to the active cell and arms the scrollback anchor.
+    await page.keyboard.type('T');
+    await firstCell.waitFor({ state: 'visible' });
+
+    return { notebook, firstCell, secondCell };
+  };
+
+  /**
+   * Scroll down with the wheel until the first and second cell get hidden:
+   * the scroll distance performed for a wheel event differs between browsers.
+   */
+  const scrollAwayWithWheel = async (
+    page: IJupyterLabPageFixture,
+    firstCell: Locator,
+    secondCell: Locator
+  ) => {
+    await Promise.all([
+      firstCell.waitFor({ state: 'hidden' }),
+      secondCell.waitFor({ state: 'hidden' }),
+      (async () => {
+        for (let i = 0; i < 8; i++) {
+          await page.mouse.wheel(0, 1200);
+          // eslint-disable-next-line playwright/no-wait-for-timeout
+          await page.waitForTimeout(150);
+          if ((await firstCell.isHidden()) && (await secondCell.isHidden())) {
+            return;
+          }
+        }
+      })()
+    ]);
+  };
+
+  /**
+   * Force a resize of a stably rendered cell: this is what triggers the
+   * scrollback (an armed anchor scrolls the view back to the active cell
+   * on any cell resize, as happens when a cell above streams output).
+   */
+  const forceCellResize = async (
+    page: IJupyterLabPageFixture,
+    notebook: Locator
+  ) => {
+    // Let the windowed rendering settle so the resized cell stays observed.
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await page.waitForTimeout(400);
+    await notebook.locator('.jp-WindowedPanel-outer').evaluate(node => {
+      const cells = node.querySelectorAll(
+        '.jp-WindowedPanel-viewport .jp-Cell'
+      );
+      const mid = cells[Math.floor(cells.length / 2)] as HTMLElement;
+      mid.style.minHeight = `${mid.clientHeight + 300}px`;
+    });
+  };
+
+  /**
+   * Check that the view does not scroll back to the active cell,
+   * waiting long enough to cover the delayed scrollback paths
+   * (`scrollend` events and their 750 ms fallback timer).
+   */
+  const expectNoScrollback = async (
+    page: IJupyterLabPageFixture,
+    firstCell: Locator,
+    secondCell: Locator
+  ) => {
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await page.waitForTimeout(1000);
+    await expect(firstCell).toBeHidden();
+    await expect(secondCell).toBeHidden();
+  };
+
+  test('should not scroll back to the active cell after scrolling away with the wheel', async ({
+    page,
+    tmpPath
+  }) => {
+    const { notebook, firstCell, secondCell } = await armScrollback(
+      page,
+      tmpPath
+    );
+
+    // Scroll away with the wheel; this should cancel the scrollback.
+    await scrollAwayWithWheel(page, firstCell, secondCell);
+
+    await forceCellResize(page, notebook);
+    await expectNoScrollback(page, firstCell, secondCell);
+  });
+
+  test('should not scroll back to the active cell when the scroll was not caused by user input', async ({
+    page,
+    tmpPath
+  }) => {
+    const { notebook, firstCell, secondCell } = await armScrollback(
+      page,
+      tmpPath
+    );
+
+    // The table of contents, links to headings and search scroll the
+    // notebook directly, as this script does.
+    const outer = notebook.locator('.jp-WindowedPanel-outer');
+    const scrolled = await outer.evaluate(node => {
+      node.scrollTop += 1200;
+      return node.scrollTop;
+    });
+    expect(scrolled).toBeGreaterThan(1000);
+
+    await forceCellResize(page, notebook);
+    await expectNoScrollback(page, firstCell, secondCell);
+  });
 });
 
 test('should detach a markdown code cell when scrolling out of the viewport', async ({
@@ -355,6 +508,8 @@ test('should reattach a markdown code cell when scrolling back into the viewport
     page.mouse.wheel(0, 1200)
   ]);
 
+  // Wait for the windowing engine to finish detaching the now-hidden cell
+  // eslint-disable-next-line playwright/no-wait-for-timeout
   await page.waitForTimeout(400);
 
   await page.mouse.wheel(0, -1200);
@@ -384,9 +539,7 @@ test('should remove all cells including hidden outputs artifacts', async ({
   await page.keyboard.press('d');
 
   // Check that the notebook only contains one cell
-  expect(await h!.locator('.jp-WindowedPanel-inner')!.textContent()).toEqual(
-    '[ ]:'
-  );
+  await expect(h!.locator('.jp-WindowedPanel-inner')!).toHaveText('[ ]:');
 
   // Check there are no hidden cells
   let found = true;
@@ -453,6 +606,43 @@ test('should display cells below on scrolling after inserting a cell on top', as
   await expect(lastCell).toBeVisible();
 });
 
+test('should not scroll back to a newly inserted cell when scrolling away', async ({
+  page,
+  tmpPath
+}) => {
+  // Regression test against the windowing snapback issue:
+  // https://github.com/jupyterlab/jupyterlab/issues/20373
+  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+
+  const notebook = (await page.notebook.getNotebookInPanelLocator())!;
+  const firstCell = notebook.locator('.jp-Cell[data-windowed-list-index="1"]');
+  await firstCell.waitFor();
+
+  // Select the first cell and insert a new cell below it.
+  await page.notebook.selectCells(0);
+  await page.keyboard.press('b');
+  const newCell = notebook.locator('.jp-Cell[data-windowed-list-index="1"]');
+  await expect(newCell).toHaveClass(/jp-mod-active/);
+
+  const bbox = (await notebook.boundingBox())!;
+
+  // Position cursor in the center of the notebook for reliable scrolling
+  await page.mouse.move(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
+  // Immediately scroll away from the new cell, towards cells that have
+  // never been rendered, so their measured sizes differ from estimates.
+  // One wheel event only: a second one would undo a scroll back.
+  await page.mouse.wheel(0, 3000);
+
+  // Allow time for a late resize-driven scrollback to fire, if any.
+  // eslint-disable-next-line playwright/no-wait-for-timeout
+  await page.waitForTimeout(500);
+
+  // The view must stay where the user scrolled, not snap back to the
+  // newly inserted cell. Firefox scrolls at most one page per wheel event,
+  // so the new cell can stay rendered just above the view.
+  await expect(newCell).not.toBeInViewport();
+});
+
 test('should center on next cell after rendering markdown cell and advancing', async ({
   page,
   tmpPath,
@@ -494,7 +684,7 @@ test('should rendered injected styles of out-of-viewport cells', async ({
   tmpPath
 }) => {
   await page.notebook.openByPath(`${tmpPath}/${injectionFile}`);
-  await page.notebook.trust();
+  expect(await page.notebook.trust()).toBe(true);
 
   // Check the cell is out of the viewport
   await expect
@@ -533,7 +723,7 @@ test('should rendered injected HTML scripts of out-of-viewport cells', async ({
   tmpPath
 }) => {
   await page.notebook.openByPath(`${tmpPath}/${injectionFile}`);
-  await page.notebook.trust();
+  expect(await page.notebook.trust()).toBe(true);
 
   // Check the cell is out of the viewport
   await expect
@@ -554,7 +744,7 @@ test('should rendered injected JavaScript snippets of out-of-viewport cells', as
   tmpPath
 }) => {
   await page.notebook.openByPath(`${tmpPath}/${injectionFile}`);
-  await page.notebook.trust();
+  expect(await page.notebook.trust()).toBe(true);
 
   // Check the cell is out of the viewport
   await expect

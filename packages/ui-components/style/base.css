@@ -172,6 +172,10 @@
   padding: 6px;
 }
 
+.jp-HTMLSelect {
+  position: relative;
+}
+
 .jp-HTMLSelect.jp-DefaultStyle {
   /* Leave space for the focus outline */
   padding: 0 2px;
