@@ -461,6 +461,7 @@ function addRunningSessionManager(
   }
 
   managers.add({
+    id: 'jp-running-terminals',
     name: trans.__('Terminals'),
     supportsMultipleViews: false,
     running: () =>

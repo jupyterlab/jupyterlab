@@ -9,6 +9,7 @@ import type {
   DelimiterType,
   InlineContext,
   LeafBlock,
+  LeafBlockParser,
   Line,
   MarkdownConfig,
   NodeSpec
@@ -85,8 +86,16 @@ function opensMathBlock(line: Line): boolean {
   return (
     line.indent - line.baseIndent < 4 &&
     line.text.startsWith('$$', line.pos) &&
-    !line.text.includes('$$', line.pos + 2)
+    mathDelimiters(line.text, line.pos).length === 1
   );
+}
+
+/**
+ * Whether the line, from its first non-space character, is a setext heading
+ * underline.
+ */
+function isSetextUnderline(line: Line): boolean {
+  return /^(?:=+|-+)\s*$/.test(line.text.slice(line.pos));
 }
 
 /**
@@ -131,7 +140,7 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
           let content = line.text.slice(line.pos);
           // Like the renderer, do not let math run past a blank line.
           while (cx.nextLine() && line.next != -1) {
-            const close = line.text.indexOf('$$', line.pos);
+            const close = mathDelimiters(line.text, line.pos)[0] ?? -1;
             if (close < 0) {
               to = cx.lineStart + line.text.length;
               // Replace quote markers with spaces, as lezer does for paragraphs.
@@ -165,6 +174,45 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
             cx.elt('Paragraph', from, to, cx.parser.parseInline(content, from))
           );
           return true;
+        },
+        // A setext underline inside open `$$` math is LaTeX, so hold back the
+        // setext heading parser for that line. Scanning the leaf for open math
+        // on every line would take quadratic time, so only underlines are
+        // checked. `before` places that parser right after this one, unless an
+        // extension configured later also adds a parser before `SetextHeading`:
+        // GFM's table parser then sits in between.
+        before: 'SetextHeading',
+        leaf: (): LeafBlockParser => {
+          let held: LeafBlockParser | null = null;
+          let scanned = 0;
+          let open = false;
+          const parser: LeafBlockParser = {
+            nextLine(cx: BlockContext, line: Line, leaf: LeafBlock) {
+              // Change the array in place: the caller is iterating over it.
+              const next = leaf.parsers.indexOf(parser) + 1;
+              if (held) {
+                leaf.parsers.splice(next, 0, held);
+                held = null;
+              }
+              if (isSetextUnderline(line)) {
+                // Text with no `$` and no backtick keeps the count of `$$`.
+                const { content } = leaf;
+                if (
+                  content.indexOf('$', scanned) >= 0 ||
+                  content.indexOf('`', scanned) >= 0
+                ) {
+                  open = hasOpenMath(content);
+                }
+                scanned = content.length;
+                if (open) {
+                  held = leaf.parsers.splice(next, 1)[0] ?? null;
+                }
+              }
+              return false;
+            },
+            finish: () => false
+          };
+          return parser;
         },
         // A `$$` line that closes inline math opened earlier in the paragraph
         // must not start a new block.
