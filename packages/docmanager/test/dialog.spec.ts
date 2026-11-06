@@ -71,12 +71,32 @@ describe('docregistry/dialog', () => {
           ])
         ).rejects.toBe(alreadyExistsError);
       });
+      it('should throw error on no response', async () => {
+        delete alreadyExistsError.response;
+        await expect(
+          Promise.all([
+            dismissDialog(),
+            renameFile(manager, 'foo.ipynb', 'bar.ipynb')
+          ])
+        ).rejects.toBe(alreadyExistsError);
+      });
       it('should throw error on not 409 status', async () => {
         alreadyExistsError.response.status = 408;
         await expect(
           Promise.all([
             dismissDialog(),
             renameFile(manager, 'foo.ipynb', 'bar.ipynb')
+          ])
+        ).rejects.toBe(alreadyExistsError);
+      });
+      it('should not offer to overwrite a directory', async () => {
+        const directory = await services.contents.newUntitled({
+          type: 'directory'
+        });
+        await expect(
+          Promise.all([
+            dismissDialog(),
+            renameFile(manager, 'foo.ipynb', directory.path)
           ])
         ).rejects.toBe(alreadyExistsError);
       });

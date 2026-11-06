@@ -8,7 +8,12 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import type { IFileSystemDirectoryEntryOptions } from '@jupyterlab/testing';
-import { framePromise, signalToPromise } from '@jupyterlab/testing';
+import {
+  acceptDialog,
+  dismissDialog,
+  framePromise,
+  signalToPromise
+} from '@jupyterlab/testing';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import expect from 'expect';
@@ -230,6 +235,192 @@ describe('filebrowser/listing', () => {
         await newNamePromise;
         const itemNode = dirListing['_items'][0];
         expect(itemNode.contains(document.activeElement)).toBe(true);
+      });
+    });
+
+    describe('#copy()', () => {
+      it('should make paste() copy the items after a cut', async () => {
+        dirListing.selectNext();
+        dirListing.cut();
+        dirListing.selectNext();
+        dirListing.copy();
+        const renameSpy = jest.spyOn(dirListing.model.manager, 'rename');
+        const copySpy = jest
+          .spyOn(dirListing.model.manager, 'copy')
+          .mockResolvedValue({} as any);
+
+        await dirListing.paste();
+
+        expect(copySpy).toHaveBeenCalledTimes(1);
+        expect(renameSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('#paste()', () => {
+      // Opens a new folder, so that the cut items move when they are pasted.
+      async function openNewFolder(): Promise<void> {
+        const folder = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+        await dirListing.model.cd(folder.path);
+      }
+
+      it('should prompt to overwrite when pasting cut item over existing file', async () => {
+        jest.spyOn(dirListing.model.manager, 'rename').mockRejectedValueOnce({
+          response: { status: 409 }
+        });
+        const overwriteSpy = jest
+          .spyOn(dirListing.model.manager, 'overwrite')
+          .mockResolvedValue({} as any);
+
+        dirListing.selectNext();
+        dirListing.cut();
+        expect(dirListing['_clipboard'].length).toBeGreaterThan(0);
+        await openNewFolder();
+
+        const pastePromise = dirListing.paste();
+        await acceptDialog();
+        await pastePromise;
+
+        expect(overwriteSpy).toHaveBeenCalled();
+        expect(dirListing['_clipboard'].length).toBe(0);
+        expect(dirListing['_isCut']).toBe(false);
+        overwriteSpy.mockRestore();
+      });
+
+      it('should keep the clipboard when the overwrite is cancelled', async () => {
+        jest.spyOn(dirListing.model.manager, 'rename').mockRejectedValueOnce({
+          response: { status: 409 }
+        });
+
+        dirListing.selectNext();
+        dirListing.cut();
+        const originalClipboard = [...dirListing['_clipboard']];
+        expect(originalClipboard.length).toBeGreaterThan(0);
+        await openNewFolder();
+
+        const pastePromise = dirListing.paste();
+        await dismissDialog();
+        await pastePromise;
+
+        expect(dirListing['_clipboard']).toEqual(originalClipboard);
+        expect(dirListing['_isCut']).toBe(true);
+      });
+
+      it('should keep the clipboard when the paste fails', async () => {
+        jest.spyOn(dirListing.model.manager, 'rename').mockRejectedValueOnce({
+          response: { status: 500 },
+          message: 'Server error'
+        });
+
+        dirListing.selectNext();
+        dirListing.cut();
+        const originalClipboard = [...dirListing['_clipboard']];
+        await openNewFolder();
+
+        const pastePromise = dirListing.paste();
+        await dismissDialog();
+        await pastePromise;
+
+        expect(dirListing['_clipboard']).toEqual(originalClipboard);
+        expect(dirListing['_isCut']).toBe(true);
+      });
+
+      it('should ignore a second paste while the first is pending', async () => {
+        dirListing.selectNext();
+        dirListing.cut();
+        await openNewFolder();
+        let resolveRename: () => void = () => void 0;
+        const renamePromise = new Promise<any>(resolve => {
+          resolveRename = () => resolve({} as any);
+        });
+        const renameSpy = jest
+          .spyOn(dirListing.model.manager, 'rename')
+          .mockImplementation(() => renamePromise);
+
+        const firstPaste = dirListing.paste();
+        const secondPaste = dirListing.paste();
+        resolveRename();
+        await Promise.all([firstPaste, secondPaste]);
+
+        expect(renameSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should clear clipboard after successful cut and paste', async () => {
+        dirListing.selectNext();
+        dirListing.cut();
+        expect(dirListing['_clipboard'].length).toBeGreaterThan(0);
+        await openNewFolder();
+
+        await dirListing.paste();
+
+        expect(dirListing['_clipboard'].length).toBe(0);
+        expect(dirListing['_isCut']).toBe(false);
+      });
+
+      it('should remove successfully moved files from clipboard on partial cut failure', async () => {
+        dirListing.selectNext();
+        dirListing.selectNext(true);
+        dirListing.cut();
+        const clipboard = [...dirListing['_clipboard']];
+        expect(clipboard.length).toBe(2);
+        await openNewFolder();
+
+        jest
+          .spyOn(dirListing.model.manager, 'rename')
+          .mockImplementation(async (oldPath: string) => {
+            if (oldPath === clipboard[1]) {
+              throw { response: { status: 409 } };
+            }
+            return {} as any;
+          });
+
+        const pastePromise = dirListing.paste();
+        await dismissDialog();
+        await pastePromise;
+
+        expect(dirListing['_clipboard']).toEqual([clipboard[1]]);
+        expect(dirListing['_isCut']).toBe(true);
+      });
+
+      it('should not clear newer clipboard if cut or copy occurs while paste is pending', async () => {
+        dirListing.selectNext();
+        dirListing.cut();
+        const firstClipboard = [...dirListing['_clipboard']];
+        expect(firstClipboard.length).toBe(1);
+        await openNewFolder();
+
+        let resolveRename: () => void = () => void 0;
+        const renamePromise = new Promise<any>(resolve => {
+          resolveRename = () => resolve({} as any);
+        });
+        jest
+          .spyOn(dirListing.model.manager, 'rename')
+          .mockImplementation(() => renamePromise);
+
+        const pastePromise = dirListing.paste();
+
+        await dirListing.model.cd('/');
+        dirListing.selectNext();
+        dirListing.cut();
+        const secondClipboard = [...dirListing['_clipboard']];
+        expect(secondClipboard).not.toEqual(firstClipboard);
+
+        resolveRename();
+        await pastePromise;
+
+        expect(dirListing['_clipboard']).toEqual(secondClipboard);
+        expect(dirListing['_isCut']).toBe(true);
+      });
+
+      it('should not move an item pasted into its own folder', async () => {
+        const renameSpy = jest.spyOn(dirListing.model.manager, 'rename');
+        dirListing.selectNext();
+        dirListing.cut();
+
+        await dirListing.paste();
+
+        expect(renameSpy).not.toHaveBeenCalled();
       });
     });
 
