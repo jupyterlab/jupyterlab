@@ -900,7 +900,7 @@
     },
     "preserveCellMetadataForCopiedCells": {
       "title": "Preserve cell metadata of copied cells",
-      "description": "When enabled, the copied and pasted cells will preserve all their cell metadata.",
+      "description": "When enabled, the copied and pasted cells will preserve their `deletable` cell metadata.",
       "type": "boolean",
       "default": false
     },
