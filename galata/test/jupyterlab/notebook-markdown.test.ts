@@ -94,6 +94,11 @@ test.describe('Notebook Markdown', () => {
     await cell!.scrollIntoViewIfNeeded();
     const output = cell!.locator('.jp-RenderedMermaid');
     await output.waitFor();
+    // Scroll the cell into the middle of the viewport, so that the last row
+    // of the screenshot does not show the border below the notebook.
+    await cell!.evaluate(element => {
+      element.scrollIntoView({ block: 'center', inline: 'nearest' });
+    });
     expect(await cell!.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -103,6 +108,11 @@ test.describe('Notebook Markdown', () => {
     await cell!.scrollIntoViewIfNeeded();
     const output = cell!.locator('.jp-RenderedMermaid');
     await output.waitFor();
+    // Scroll the cell into the middle of the viewport, so that the last row
+    // of the screenshot does not show the border below the notebook.
+    await cell!.evaluate(element => {
+      element.scrollIntoView({ block: 'center', inline: 'nearest' });
+    });
     expect(await cell!.screenshot()).toMatchSnapshot(imageName);
   });
 });
