@@ -506,9 +506,7 @@
 }
 
 .jp-RenderedHTMLCommon img,
-.jp-RenderedImage img,
-.jp-RenderedHTMLCommon svg,
-.jp-RenderedSVG svg {
+.jp-RenderedImage img {
   max-width: 100%;
 }
 
@@ -518,9 +516,14 @@
  * style sheet of an output can still set the height.
  */
 .jp-RenderedHTMLCommon img:where(:not([height]), [width]),
-.jp-RenderedImage img:where(:not([height]), [width]),
-.jp-RenderedHTMLCommon svg:where(:not([height]), [width]),
-.jp-RenderedSVG svg:where(:not([height]), [width]) {
+.jp-RenderedImage img:where(:not([height]), [width]) {
+  height: auto;
+}
+
+/* An svg keeps a lone `height` attribute even with `height: auto`. */
+.jp-RenderedHTMLCommon svg,
+.jp-RenderedSVG svg {
+  max-width: 100%;
   height: auto;
 }
 
