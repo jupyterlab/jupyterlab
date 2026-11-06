@@ -197,6 +197,7 @@
   "@jupyterlab/services-extension:workspace-manager": "The workspace manager plugin.",
   "@jupyterlab/settingeditor-extension:form-ui": "Adds the interactive settings editor and provides its tracker.",
   "@jupyterlab/settingeditor-extension:plugin": "Adds the JSON settings editor and provides its tracker.",
+  "@jupyterlab/settingeditor-extension:search": "Adds search capability to the Advanced Settings editor.",
   "@jupyterlab/shortcuts-extension:shortcuts": "Adds the keyboard shortcuts editor.",
   "@jupyterlab/statusbar-extension:plugin": "Provides the application status bar.",
   "@jupyterlab/terminal-extension:open-folder-in-terminal": "Adds an \"Open in Terminal\" command for the file browser.",
