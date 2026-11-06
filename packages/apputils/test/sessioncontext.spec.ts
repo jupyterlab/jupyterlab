@@ -411,6 +411,20 @@ describe('@jupyterlab/apputils', () => {
         expect(result).toBe(true);
       });
 
+      it('should not start a kernel of the same language when the locked one is unavailable', async () => {
+        const installed = specsManager.specs!.default;
+        sessionContext.kernelPreference = {
+          name: 'not-a-real-kernel',
+          language: specsManager.specs!.kernelspecs[installed]!.language,
+          autoStartDefault: false,
+          locked: true
+        };
+
+        const result = await sessionContext.initialize();
+        expect(result).toBe(true);
+        expect(sessionContext.session?.kernel).toBeFalsy();
+      });
+
       it('should be a no-op if the shouldStart kernelPreference is false', async () => {
         sessionContext.kernelPreference = { shouldStart: false };
         const result = await sessionContext.initialize();
@@ -728,6 +742,27 @@ describe('@jupyterlab/apputils', () => {
         ).toBe(spec.name);
       });
 
+      it('should not pick another kernel when the locked one is unavailablee', () => {
+        const spec =
+          specsManager.specs!.kernelspecs[specsManager.specs!.default]!;
+        const kernelspecs: any = {};
+
+        kernelspecs[spec.name] = spec;
+        expect(
+          SessionContext.getDefaultKernel({
+            specs: {
+              default: spec.name,
+              kernelspecs
+            },
+            preference: {
+              name: 'foo',
+              language: spec.language,
+              locked: true
+            }
+          })
+        ).toBeNull();
+      });
+
       it('should return null if a language matches twice', () => {
         const spec =
           specsManager.specs!.kernelspecs[specsManager.specs!.default]!;
@@ -882,6 +917,59 @@ describe('@jupyterlab/apputils', () => {
         // The selected kernel must be applied, and the lock set.
         expect(sessionContext.session?.kernel?.name).toBe(defaultName);
         expect(sessionContext.kernelPreference.locked).toBe(true);
+      });
+
+      it('should start the locked kernel when no kernel is running', async () => {
+        // A locked kernel choice with no kernel running.
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          locked: true,
+          shouldStart: false
+        };
+        await sessionContext.initialize();
+        expect(sessionContext.hasNoKernel).toBe(true);
+
+        const select = sessionContextDialogs.selectKernel(sessionContext);
+        await waitForDialog();
+        const dropdown = document.querySelector<HTMLSelectElement>(
+          '.jp-Dialog-body select'
+        )!;
+
+        // Select the locked kernel and keep the lock.
+        const lockedName = specsManager.specs!.default;
+        dropdown.value = JSON.stringify({ name: lockedName });
+        await acceptDialog();
+        await select;
+
+        expect(sessionContext.session?.kernel?.name).toBe(lockedName);
+        expect(sessionContext.kernelPreference.locked).toBe(true);
+      });
+
+      it('should not start another kernel when the kernel is locked', async () => {
+        // A locked kernel choice with no kernel running.
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          locked: true,
+          shouldStart: false
+        };
+        await sessionContext.initialize();
+        expect(sessionContext.hasNoKernel).toBe(true);
+
+        const select = sessionContextDialogs.selectKernel(sessionContext);
+        await waitForDialog();
+        const dropdown = document.querySelector<HTMLSelectElement>(
+          '.jp-Dialog-body select'
+        )!;
+
+        // Select a kernel other than the locked one and keep the lock.
+        const otherName = Object.keys(specsManager.specs!.kernelspecs).find(
+          name => name !== specsManager.specs!.default
+        )!;
+        dropdown.value = JSON.stringify({ name: otherName });
+        await acceptDialog();
+        await select;
+
+        expect(sessionContext.session?.kernel).toBeFalsy();
       });
 
       it('should show warning when a locked kernel is unavailable', async () => {

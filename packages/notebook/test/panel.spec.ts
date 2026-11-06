@@ -3,7 +3,7 @@
 
 import type { Context } from '@jupyterlab/docregistry';
 import { initNotebookContext } from '@jupyterlab/notebook/lib/testutils';
-import { JupyterServer } from '@jupyterlab/testing';
+import { JupyterServer, testEmission } from '@jupyterlab/testing';
 import { Toolbar } from '@jupyterlab/ui-components';
 import type { INotebookModel } from '@jupyterlab/notebook';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
@@ -177,7 +177,7 @@ describe('@jupyterlab/notebook', () => {
         await context.initialize(true);
         await context.ready;
 
-        // Locking through the kernel digalog must be written to the notebook metadata.
+        // Locking through the kernel dialog must be written to the notebook metadata.
         context.sessionContext.kernelPreference = {
           ...context.sessionContext.kernelPreference,
           locked: true
@@ -190,6 +190,36 @@ describe('@jupyterlab/notebook', () => {
         };
         expect(panel.model!.kernelLocked).toBe(false);
       });
+
+      it('should restart the locked kernel after switching, locking and shutting down', async () => {
+        context.dispose();
+        context = await initNotebookContext({ startKernel: true });
+        const panel = utils.createNotebookPanel(context);
+        await context.ready;
+        const sessionContext = context.sessionContext;
+        const first = sessionContext.session!.kernel!.name;
+        const specs = sessionContext.specsManager.specs!;
+        const second = Object.keys(specs.kernelspecs).find(
+          name => name !== first
+        )!;
+
+        // Switch to another kernel, then lock it.
+        const specUpdated = testEmission(panel.model!.metadataChanged, {
+          find: () => panel.model!.defaultKernelName === second
+        });
+        await sessionContext.changeKernel({ name: second });
+        await specUpdated;
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          locked: true
+        };
+        // The restart should use the locked kernel.
+        await sessionContext.shutdown();
+        await sessionContext.startKernel();
+
+        expect(sessionContext.session?.kernel?.name).toBe(second);
+        expect(panel.model!.kernelLocked).toBe(true);
+      }, 30000);
     });
 
     describe('.ContentFactory', () => {
