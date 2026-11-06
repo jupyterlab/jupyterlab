@@ -573,6 +573,37 @@ The recommended ranges for this rank are:
 - 900: The default rank if none is specified.
 - 1000: The JupyterLab extension manager.
 
+(reordering-sections)=
+
+#### Reordering accordion sections
+
+Users can reorder the sections of a {ts:class}`ui-components.SidePanel` after
+they select **Enable Section Reordering** in the context menu of a section
+header. The workspace saves the order, the collapsed state and the size of each
+section with the section ID. The shell applies them to the sections that the
+panel has when the layout is restored, so add the sections when your plugin
+activates. Give each section an explicit ID that is unique in the page and the
+same in every session:
+
+```typescript
+const panel = new SidePanel();
+panel.id = 'my-extension-panel';
+
+const settings = new Widget();
+settings.id = 'my-extension-panel-settings';
+settings.title.label = 'Settings';
+panel.addWidget(settings);
+
+app.shell.add(panel, 'left');
+```
+
+A section without an explicit ID gets a new generated ID in every session, so
+the workspace saves its title label instead. The section then keeps its place
+and state only while its label is unique in the panel and the same in every
+session. A translated label changes with the display language, so the first
+reload after a language change shows the panel in its original order and can
+apply the saved collapsed states and sizes to the wrong sections.
+
 #### Movable accordion sections
 
 Sidebar panels can participate in the movable-sections system so users can

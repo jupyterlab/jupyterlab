@@ -1527,7 +1527,14 @@ function addCommands(
         if (item.type === 'directory') {
           return;
         }
-        return commands.execute('docmanager:open', { path });
+        const widgetFactory = Private.resolveOpenWithFactory(
+          registry,
+          (args.factory as string) || undefined
+        );
+        return commands.execute('docmanager:open', {
+          path,
+          factory: widgetFactory
+        });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (reason: any) {
         if (reason.response && reason.response.status === 404) {
@@ -1550,6 +1557,12 @@ function addCommands(
           dontShowBrowser: {
             type: 'boolean',
             description: trans.__('Whether to avoid showing the file browser')
+          },
+          factory: {
+            type: 'string',
+            description: trans.__(
+              'The widget factory, file type, or file extension used to open a file'
+            )
           }
         }
       }
@@ -2149,6 +2162,44 @@ namespace Private {
   }
 
   /**
+   * Resolve an `open-with` value to a widget factory name.
+   *
+   * Returns `undefined`, which opens the default viewer, when no widget
+   * factory, file type or file extension matches the value.
+   */
+  export function resolveOpenWithFactory(
+    docRegistry: DocumentRegistry,
+    openWith: string | undefined
+  ): string | undefined {
+    if (!openWith) {
+      return undefined;
+    }
+
+    const factory = docRegistry.getWidgetFactory(openWith);
+    if (factory) {
+      return factory.name;
+    }
+
+    const extension = openWith.startsWith('.') ? openWith : `.${openWith}`;
+    const fileType =
+      docRegistry.getFileType(openWith) ??
+      Array.from(docRegistry.fileTypes()).find(fileType =>
+        fileType.extensions.some(
+          value => value.toLowerCase() === extension.toLowerCase()
+        )
+      );
+    const name = fileType
+      ? docRegistry.preferredWidgetFactories(fileType)[0]?.name
+      : undefined;
+    if (!name) {
+      console.warn(
+        `No viewer matches open-with value "${openWith}", using the default viewer.`
+      );
+    }
+    return name;
+  }
+
+  /**
    * Restores file browser state and overrides state if tree resolver resolves.
    */
   export async function restoreBrowser(
@@ -2180,7 +2231,8 @@ namespace Private {
         if (paths.file) {
           await commands.execute(CommandIDs.openPath, {
             path: paths.file,
-            dontShowBrowser: true
+            dontShowBrowser: true,
+            factory: paths.openWith
           });
         }
         if (paths.browser) {

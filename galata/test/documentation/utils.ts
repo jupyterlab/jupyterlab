@@ -157,15 +157,22 @@ export async function boundsAround(
   return { x: left, y: top, width: right - left, height: bottom - top };
 }
 
+/**
+ * Serve the GitHub avatars of extension authors from local copies, so that
+ * screenshots do not depend on github.com. Other users get the Jupyter logo.
+ */
 export async function stubGitHubUserIcons(page: Page): Promise<void> {
-  // stub out github user icons
-  // only first and last icon for now
-  // logic in @jupyterlab/extensionmanager/src/models::ListEntry#translateSearchResult
   await page.route('https://github.com/*.png*', async (route, request) => {
+    const user = path.basename(new URL(request.url()).pathname, '.png');
+    const avatar = path.resolve(__dirname, `./data/github-avatars/${user}.png`);
     return route.fulfill({
       status: 200,
       contentType: 'image/png',
-      body: fs.readFileSync(path.resolve(__dirname, './data/jupyter.png'))
+      body: fs.readFileSync(
+        fs.existsSync(avatar)
+          ? avatar
+          : path.resolve(__dirname, './data/jupyter.png')
+      )
     });
   });
 }

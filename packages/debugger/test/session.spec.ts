@@ -5,7 +5,7 @@ import type { Session } from '@jupyterlab/services';
 
 import { createSession } from '@jupyterlab/docregistry/lib/testutils';
 
-import { JupyterServer, signalToPromises } from '@jupyterlab/testing';
+import { JupyterServer, signalToPromises, sleep } from '@jupyterlab/testing';
 
 import { find } from '@lumino/algorithm';
 
@@ -102,6 +102,26 @@ describe('Debugger.Session', () => {
       debugSession.connection = connection;
       const reply = await pending;
       expect(reply.success).toBe(true);
+      debugSession.dispose();
+    });
+
+    it('should fail pending requests when the kernel restarts before replying', async () => {
+      const debugSession = new Debugger.Session({
+        connection,
+        config
+      });
+      const settled = debugSession.restoreState().then(
+        () => 'resolved',
+        () => 'rejected'
+      );
+      // The restart disposes the request that the connection setter sent,
+      // before the kernel can reply to it.
+      await connection.kernel!.restart();
+      const outcome = await Promise.race([
+        settled,
+        sleep(2000).then(() => 'pending')
+      ]);
+      expect(outcome).toBe('rejected');
       debugSession.dispose();
     });
   });
