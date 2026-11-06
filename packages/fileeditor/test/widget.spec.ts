@@ -229,6 +229,21 @@ describe('fileeditorcodewrapper', () => {
         cursor = widget.editor.getCursorPosition();
         expect(cursor.line).toBe(2);
       });
+
+      it.each(['#line', '#line=', '#line=invalid'])(
+        'should ignore %s',
+        async fragment => {
+          await context.initialize(true);
+          await documentWidget.setFragment('#line=2');
+
+          await expect(
+            documentWidget.setFragment(fragment)
+          ).resolves.toBeUndefined();
+          expect(documentWidget.content.editor.getCursorPosition().line).toBe(
+            2
+          );
+        }
+      );
     });
   });
 

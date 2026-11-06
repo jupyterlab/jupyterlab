@@ -31,7 +31,7 @@ import {
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import {
   IPropertyInspectorProvider,
   SideBarPropertyInspectorProvider
@@ -1277,17 +1277,48 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     // 2) path of the default browser if the active main area widget isn't a document.
     let _docTreePath = '';
     let _defaultBrowserTreePath = '';
+    let browserRestored: Promise<ITreePathUpdater.IBrowserState> | undefined;
+
+    function updateUrl(
+      treePath: string,
+      parameterToClear?: 'file-browser-path' | 'open-with'
+    ) {
+      const url = PageConfig.getUrl({ treePath });
+      const path = URLExt.parse(url).pathname;
+      if (path !== window.location.pathname) {
+        router.navigate(path, { skipRouting: true });
+      } else if (parameterToClear) {
+        const current = new URL(window.location.href);
+        if (current.searchParams.has(parameterToClear)) {
+          current.searchParams.delete(parameterToClear);
+          router.navigate(path + current.search + current.hash, {
+            skipRouting: true
+          });
+        }
+      }
+      PageConfig.setOption('treePath', treePath);
+    }
 
     function updateTreePath(treePath: string) {
-      // Wait for tree resolver to finish before updating the path because it use the PageConfig['treePath']
-      void treeResolver.paths.then(() => {
+      void ready.then(() => {
+        if (treePath === _defaultBrowserTreePath) {
+          return;
+        }
         _defaultBrowserTreePath = treePath;
         if (!_docTreePath) {
-          const url = PageConfig.getUrl({ treePath });
-          const path = URLExt.parse(url).pathname;
-          router.navigate(path, { skipRouting: true });
-          // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
-          PageConfig.setOption('treePath', treePath);
+          updateUrl(treePath, 'file-browser-path');
+        } else {
+          const current = new URL(window.location.href);
+          if (current.searchParams.has('file-browser-path')) {
+            if (treePath === PathExt.dirname(_docTreePath)) {
+              current.searchParams.delete('file-browser-path');
+            } else {
+              current.searchParams.set('file-browser-path', treePath || '/');
+            }
+            router.navigate(current.pathname + current.search + current.hash, {
+              skipRouting: true
+            });
+          }
         }
       });
     }
@@ -1313,6 +1344,9 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     // Watch the mode and update the page URL to /lab or /doc to reflect the
     // change.
     app.shell.modeChanged.connect((_, args: DockPanel.Mode) => {
+      if (args === PageConfig.getOption('mode')) {
+        return;
+      }
       const url = PageConfig.getUrl({ mode: args as string });
       const path = URLExt.parse(url).pathname;
       router.navigate(path, { skipRouting: true });
@@ -1320,21 +1354,43 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
       PageConfig.setOption('mode', args as string);
     });
 
-    // Wait for tree resolver to finish before updating the path because it use the PageConfig['treePath']
-    void treeResolver.paths.then(() => {
-      // Watch the path of the current widget in the main area and update the page
-      // URL to reflect the change.
-      app.shell.currentPathChanged.connect((_, args) => {
-        const maybeTreePath = args.newValue as string;
-        const treePath = maybeTreePath || _defaultBrowserTreePath;
-        const url = PageConfig.getUrl({ treePath: treePath });
-        const path = URLExt.parse(url).pathname;
-        router.navigate(path, { skipRouting: true });
-        // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
-        PageConfig.setOption('treePath', treePath);
-        _docTreePath = maybeTreePath;
-      });
+    let mainAreaChanged = false;
+    const onStartupCurrentChanged = () => {
+      mainAreaChanged = true;
+    };
+    const shellRestored = app.shell.restored.then(() => {
+      app.shell.currentChanged.connect(onStartupCurrentChanged);
     });
+    const ready = Promise.all([treeResolver.paths, shellRestored]).then(
+      async ([paths]) => {
+        const browser = await browserRestored;
+        app.shell.currentChanged.disconnect(onStartupCurrentChanged);
+        const document = browser?.document;
+        const directoryLink = browser && paths?.file && !document;
+        // A directory link follows the browser until the main area changes.
+        _docTreePath =
+          directoryLink && !mainAreaChanged
+            ? ''
+            : (app.shell.currentPath ?? '');
+        if (browser) {
+          _defaultBrowserTreePath = browser.path;
+          if (
+            (directoryLink && _docTreePath) ||
+            (document &&
+              (document.path !== _docTreePath ||
+                (paths?.openWith &&
+                  document.widget !== app.shell.currentWidget))) ||
+            (!paths?.file && !_docTreePath)
+          ) {
+            updateUrl(_docTreePath || _defaultBrowserTreePath, 'open-with');
+          }
+        }
+        app.shell.currentPathChanged.connect((_, args) => {
+          _docTreePath = args.newValue;
+          updateUrl(_docTreePath || _defaultBrowserTreePath, 'open-with');
+        });
+      }
+    );
 
     // If the connection to the server is lost, handle it with the
     // connection lost handler.
@@ -1418,7 +1474,11 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
         }).then(result => (result.button.accept ? build() : undefined));
       });
     }
-    return updateTreePath;
+    return Object.assign(updateTreePath, {
+      deferUntil(restored: Promise<ITreePathUpdater.IBrowserState>) {
+        browserRestored = restored;
+      }
+    });
   },
   autoStart: true
 };
