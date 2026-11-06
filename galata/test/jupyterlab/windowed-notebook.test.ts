@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import { expect, galata, test } from '@jupyterlab/galata';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
 import type { Locator } from '@playwright/test';
 import * as path from 'path';
 
@@ -289,19 +290,6 @@ test.describe('Scrolling on keyboard interaction when active editor is above the
       for (let i = 0; i < testCase.times; i++) {
         await page.keyboard.press(testCase.key);
         // Allow for small delay between pressing keys
-        if (i === 0 && testCase.key === 'PageDown' && testCase.times === 10) {
-          // TODO: for some reason the notebook scrolls back to the selected cell after a few seconds.
-          // The exact mechanism is not clear but it is easily reproducible with the test case
-          // "Show neither cell on pressing PageDown 10 times" by commenting out the timeout below,
-          // and decreasing the timeout for each iteration (say down to 10ms).
-          // It might be unrelated to this test, but instead a different bug in the windowing
-          // logic where some stale request remains beyond its intended lifetime
-          // (i.e. when user requested a different scroll).
-          // This could be related related to the scrollback logic; PR #18973 demonstrated
-          // a potential fix, however it made the scrollback test for full windowing flaky
-          // ("should keep active cell when a cell above generates a lot of output").
-          await page.waitForTimeout(3000);
-        }
         await page.waitForTimeout(100);
       }
 
@@ -318,6 +306,142 @@ test.describe('Scrolling on keyboard interaction when active editor is above the
       }
     });
   }
+});
+
+test.describe('Scrollback cancellation', () => {
+  /**
+   * Arm the scrollback anchor: type into the active editor which is above
+   * the viewport, which scrolls back to the active cell and keeps the
+   * scrollback target armed for the next few seconds (renewed on cell
+   * resizes, e.g. those caused by re-rendering of windowed cells).
+   */
+  const armScrollback = async (
+    page: IJupyterLabPageFixture,
+    tmpPath: string
+  ) => {
+    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+
+    await page.notebook.selectCells(0);
+    await page.notebook.enterCellEditingMode(0);
+    const notebook = (await page.notebook.getNotebookInPanelLocator())!;
+    const firstCell = notebook.locator(
+      '.jp-Cell[data-windowed-list-index="0"]'
+    );
+    const secondCell = notebook.locator(
+      '.jp-Cell[data-windowed-list-index="1"]'
+    );
+    await firstCell.waitFor();
+    await secondCell.waitFor();
+
+    // Position the mouse in the bounding box to allow for scrolling with mouse wheel
+    const bbox = (await notebook.boundingBox())!;
+    await page.mouse.move(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
+
+    await scrollAwayWithWheel(page, firstCell, secondCell);
+
+    // Typing scrolls back to the active cell and arms the scrollback anchor.
+    await page.keyboard.type('T');
+    await firstCell.waitFor({ state: 'visible' });
+
+    return { notebook, firstCell, secondCell };
+  };
+
+  /**
+   * Scroll down with the wheel until the first and second cell get hidden:
+   * the scroll distance performed for a wheel event differs between browsers.
+   */
+  const scrollAwayWithWheel = async (
+    page: IJupyterLabPageFixture,
+    firstCell: Locator,
+    secondCell: Locator
+  ) => {
+    await Promise.all([
+      firstCell.waitFor({ state: 'hidden' }),
+      secondCell.waitFor({ state: 'hidden' }),
+      (async () => {
+        for (let i = 0; i < 8; i++) {
+          await page.mouse.wheel(0, 1200);
+          await page.waitForTimeout(150);
+          if ((await firstCell.isHidden()) && (await secondCell.isHidden())) {
+            return;
+          }
+        }
+      })()
+    ]);
+  };
+
+  /**
+   * Force a resize of a stably rendered cell: this is what triggers the
+   * scrollback (an armed anchor scrolls the view back to the active cell
+   * on any cell resize, as happens when a cell above streams output).
+   */
+  const forceCellResize = async (
+    page: IJupyterLabPageFixture,
+    notebook: Locator
+  ) => {
+    // Let the windowed rendering settle so the resized cell stays observed.
+    await page.waitForTimeout(400);
+    await notebook.locator('.jp-WindowedPanel-outer').evaluate(node => {
+      const cells = node.querySelectorAll(
+        '.jp-WindowedPanel-viewport .jp-Cell'
+      );
+      const mid = cells[Math.floor(cells.length / 2)] as HTMLElement;
+      mid.style.minHeight = `${mid.clientHeight + 300}px`;
+    });
+  };
+
+  /**
+   * Check that the view does not scroll back to the active cell,
+   * waiting long enough to cover the delayed scrollback paths
+   * (`scrollend` events and their 750 ms fallback timer).
+   */
+  const expectNoScrollback = async (
+    page: IJupyterLabPageFixture,
+    firstCell: Locator,
+    secondCell: Locator
+  ) => {
+    await page.waitForTimeout(1000);
+    await expect(firstCell).toBeHidden();
+    await expect(secondCell).toBeHidden();
+  };
+
+  test('should not scroll back to the active cell after scrolling away with the wheel', async ({
+    page,
+    tmpPath
+  }) => {
+    const { notebook, firstCell, secondCell } = await armScrollback(
+      page,
+      tmpPath
+    );
+
+    // Scroll away with the wheel; this should cancel the scrollback.
+    await scrollAwayWithWheel(page, firstCell, secondCell);
+
+    await forceCellResize(page, notebook);
+    await expectNoScrollback(page, firstCell, secondCell);
+  });
+
+  test('should not scroll back to the active cell when the scroll was not caused by user input', async ({
+    page,
+    tmpPath
+  }) => {
+    const { notebook, firstCell, secondCell } = await armScrollback(
+      page,
+      tmpPath
+    );
+
+    // The table of contents, links to headings and search scroll the
+    // notebook directly, as this script does.
+    const outer = notebook.locator('.jp-WindowedPanel-outer');
+    const scrolled = await outer.evaluate(node => {
+      node.scrollTop += 1200;
+      return node.scrollTop;
+    });
+    expect(scrolled).toBeGreaterThan(1000);
+
+    await forceCellResize(page, notebook);
+    await expectNoScrollback(page, firstCell, secondCell);
+  });
 });
 
 test('should detach a markdown code cell when scrolling out of the viewport', async ({
@@ -464,6 +588,42 @@ test('should display cells below on scrolling after inserting a cell on top', as
     lastCell.waitFor()
   ]);
   await expect(lastCell).toBeVisible();
+});
+
+test('should not scroll back to a newly inserted cell when scrolling away', async ({
+  page,
+  tmpPath
+}) => {
+  // Regression test against the windowing snapback issue:
+  // https://github.com/jupyterlab/jupyterlab/issues/20373
+  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+
+  const notebook = (await page.notebook.getNotebookInPanelLocator())!;
+  const firstCell = notebook.locator('.jp-Cell[data-windowed-list-index="1"]');
+  await firstCell.waitFor();
+
+  // Select the first cell and insert a new cell below it.
+  await page.notebook.selectCells(0);
+  await page.keyboard.press('b');
+  const newCell = notebook.locator('.jp-Cell[data-windowed-list-index="1"]');
+  await expect(newCell).toHaveClass(/jp-mod-active/);
+
+  const bbox = (await notebook.boundingBox())!;
+
+  // Position cursor in the center of the notebook for reliable scrolling
+  await page.mouse.move(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
+  // Immediately scroll away from the new cell, towards cells that have
+  // never been rendered, so their measured sizes differ from estimates.
+  // One wheel event only: a second one would undo a scroll back.
+  await page.mouse.wheel(0, 3000);
+
+  // Allow time for a late resize-driven scrollback to fire, if any.
+  await page.waitForTimeout(500);
+
+  // The view must stay where the user scrolled, not snap back to the
+  // newly inserted cell. Firefox scrolls at most one page per wheel event,
+  // so the new cell can stay rendered just above the view.
+  await expect(newCell).not.toBeInViewport();
 });
 
 test('should center on next cell after rendering markdown cell and advancing', async ({

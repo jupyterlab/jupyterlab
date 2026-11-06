@@ -1302,6 +1302,24 @@ export class WindowedList<
     const { clientHeight, scrollHeight, scrollTop } =
       event.currentTarget as HTMLDivElement;
 
+    // A scroll that the list did not request, such as one with the mouse
+    // wheel, stops the list from scrolling back to the last requested
+    // item. The type check excludes the synthetic onScroll call made
+    // when windowing is toggled, which carries no event type.
+    // When the list requests an offset past the end (such as the last
+    // item plus a margin), the browser scrolls only to the end, so the
+    // comparison limits the offset to the end.
+    if (
+      event.type === 'scroll' &&
+      !this._scrollUpdateWasRequested &&
+      Math.abs(
+        Math.min(this.viewModel.scrollOffset, scrollHeight - clientHeight) -
+          scrollTop
+      ) > 1
+    ) {
+      this._scrollToItem = null;
+    }
+
     // TBC Firefox is emitting two events one with 1px diff then the _real_ scroll
     if (
       !this._scrollUpdateWasRequested &&
