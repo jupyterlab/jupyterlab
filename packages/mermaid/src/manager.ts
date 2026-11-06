@@ -480,9 +480,7 @@ namespace Private {
         )
       )
     );
-    return diagrams.filter(
-      diagram => diagram.dataset.jpMermaidTheme !== theme
-    );
+    return diagrams.filter(diagram => diagram.dataset.jpMermaidTheme !== theme);
   }
 
   /**
