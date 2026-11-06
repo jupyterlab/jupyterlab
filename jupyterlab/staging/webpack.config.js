@@ -301,6 +301,14 @@ if (process.env.WEBPACK_BUNDLE_ANALYZER) {
 module.exports = [
   merge(baseConfig, {
     mode: 'development',
+    resolve: {
+      alias: {
+        // MathJax imports its default font, New Computer Modern, even when the
+        // output uses another font. Point it at the TeX font that JupyterLab
+        // uses, so the unused font data is not bundled.
+        '#default-font': '@mathjax/mathjax-tex-font/mjs'
+      }
+    },
     entry: {
       main: ['./publicpath', entryPoint]
     },
