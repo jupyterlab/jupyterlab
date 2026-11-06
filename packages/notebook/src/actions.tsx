@@ -1398,33 +1398,37 @@ export namespace NotebookActions {
    * Copy the selected cell(s) data to a clipboard.
    *
    * @param notebook - The target notebook widget.
-   * @param preserveMetadata - Whether to preserve cell metadata.
+   * @param options - Optional. Set `preserveMetadata: true` to keep the metadata of copied cells.
    */
   export function copy(
     notebook: Notebook,
-    preserveMetadata: boolean = false
+    options?: { preserveMetadata?: boolean }
   ): void {
-    Private.copyOrCut(notebook, false, preserveMetadata);
+    Private.copyOrCut(notebook, false, options?.preserveMetadata);
   }
 
   /**
    * Copy the selected cell(s) data to the system clipboard.
    *
    * @param notebook - The target notebook widget.
-   * @param preserveMetadata - Whether to preserve cell metadata.
+   * @param options - Optional. Set `preserveMetadata: true` to keep the metadata of copied cells.
    */
   export async function copyToSystemClipboard(
     notebook: Notebook,
-    preserveMetadata: boolean = false
+    options?: { preserveMetadata?: boolean }
   ): Promise<void> {
-    await Private.copyOrCutToSystemClipboard(notebook, false, preserveMetadata);
+    await Private.copyOrCutToSystemClipboard(
+      notebook,
+      false,
+      options?.preserveMetadata
+    );
   }
 
   /**
    * Cut the selected cell data to a clipboard.
    *
    * @param notebook - The target notebook widget.
-   * @param preserveMetadata - Whether to preserve cell metadata.
+   * @param options - Optional. Set `preserveMetadata: true` to keep the metadata of copied cells.
    *
    * #### Notes
    * This action can be undone.
@@ -1432,16 +1436,16 @@ export namespace NotebookActions {
    */
   export function cut(
     notebook: Notebook,
-    preserveMetadata: boolean = false
+    options?: { preserveMetadata?: boolean }
   ): void {
-    Private.copyOrCut(notebook, true, preserveMetadata);
+    Private.copyOrCut(notebook, true, options?.preserveMetadata);
   }
 
   /**
    * Cut the selected cell data to the system clipboard.
    *
    * @param notebook - The target notebook widget.
-   * @param preserveMetadata - Whether to preserve cell metadata.
+   * @param options - Optional. Set `preserveMetadata: true` to keep the metadata of copied cells.
    *
    * #### Notes
    * This action can be undone.
@@ -1449,9 +1453,13 @@ export namespace NotebookActions {
    */
   export async function cutToSystemClipboard(
     notebook: Notebook,
-    preserveMetadata: boolean = false
+    options?: { preserveMetadata?: boolean }
   ): Promise<void> {
-    await Private.copyOrCutToSystemClipboard(notebook, true, preserveMetadata);
+    await Private.copyOrCutToSystemClipboard(
+      notebook,
+      true,
+      options?.preserveMetadata
+    );
   }
 
   /**
@@ -1542,7 +1550,7 @@ export namespace NotebookActions {
    *   'above' adds cells above the active cell, and
    *   'replace' removes the currently selected cells and adds cells in their place.
    *
-   * @param preserveMetadata - Whether to preserve cell metadata in the duplicated cells.
+   * @param options - Optional. Set `preserveMetadata: true` to keep the metadata of duplicated cells.
    *
    * #### Notes
    * The last pasted cell becomes the active cell.
@@ -1552,9 +1560,9 @@ export namespace NotebookActions {
   export function duplicate(
     notebook: Notebook,
     mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below',
-    preserveMetadata: boolean = false
+    options?: { preserveMetadata?: boolean }
   ): void {
-    const values = Private.selectedCells(notebook, preserveMetadata);
+    const values = Private.selectedCells(notebook, options?.preserveMetadata);
 
     if (!values || values.length === 0) {
       return;
@@ -3162,6 +3170,8 @@ namespace Private {
    * @param notebook - The target notebook widget.
    *
    * @param cut - True if the cells should be cut, false if they should be copied.
+   *
+   * @param preserveMetadata - Whether to preserve cell metadata in the copied cells.
    */
   export function copyOrCut(
     notebook: Notebook,

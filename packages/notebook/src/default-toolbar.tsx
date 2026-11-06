@@ -141,12 +141,11 @@ export namespace ToolbarItems {
           'preserveCellMetadataForCopiedCells'
         ).composite as boolean;
         if (settings?.get('useSystemClipboardForCells').composite as boolean) {
-          await NotebookActions.cutToSystemClipboard(
-            panel.content,
+          await NotebookActions.cutToSystemClipboard(panel.content, {
             preserveMetadata
-          );
+          });
         } else {
-          NotebookActions.cut(panel.content, preserveMetadata);
+          NotebookActions.cut(panel.content, { preserveMetadata });
         }
       },
       tooltip: trans.__('Cut the selected cells')
@@ -172,12 +171,11 @@ export namespace ToolbarItems {
           'preserveCellMetadataForCopiedCells'
         ).composite as boolean;
         if (settings?.get('useSystemClipboardForCells').composite as boolean) {
-          await NotebookActions.copyToSystemClipboard(
-            panel.content,
+          await NotebookActions.copyToSystemClipboard(panel.content, {
             preserveMetadata
-          );
+          });
         } else {
-          NotebookActions.copy(panel.content, preserveMetadata);
+          NotebookActions.copy(panel.content, { preserveMetadata });
         }
       },
       tooltip: trans.__('Copy the selected cells')

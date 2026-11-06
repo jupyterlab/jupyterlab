@@ -2102,7 +2102,7 @@ describe('@jupyterlab/notebook', () => {
         widget.widgets
           .filter(cell => widget.isSelectedOrActive(cell))
           .forEach(cell => cell.model.setMetadata('deletable', false));
-        NotebookActions.copy(widget, true);
+        NotebookActions.copy(widget, { preserveMetadata: true });
         const data = utils.clipboard.getData(JUPYTER_CELL_MIME) as JSONArray;
         data.map(cell => {
           expect((cell as JSONObject).metadata).toHaveProperty(
@@ -2146,7 +2146,9 @@ describe('@jupyterlab/notebook', () => {
         const next = widget.widgets[1];
         widget.select(next);
         next.model.setMetadata('deletable', false);
-        await NotebookActions.copyToSystemClipboard(widget, false);
+        await NotebookActions.copyToSystemClipboard(widget, {
+          preserveMetadata: false
+        });
         const data = (await utils.systemClipboard.getData(
           JUPYTER_CELL_MIME
         )) as JSONArray;
@@ -2164,7 +2166,9 @@ describe('@jupyterlab/notebook', () => {
         widget.widgets
           .filter(cell => widget.isSelectedOrActive(cell))
           .forEach(cell => cell.model.setMetadata('deletable', false));
-        await NotebookActions.copyToSystemClipboard(widget, true);
+        await NotebookActions.copyToSystemClipboard(widget, {
+          preserveMetadata: true
+        });
         const data = (await utils.systemClipboard.getData(
           JUPYTER_CELL_MIME
         )) as JSONArray;
@@ -2219,7 +2223,7 @@ describe('@jupyterlab/notebook', () => {
         const next = widget.widgets[1];
         widget.select(next);
         next.model.setMetadata('deletable', false);
-        NotebookActions.cut(widget, false);
+        NotebookActions.cut(widget, { preserveMetadata: false });
         const data = utils.clipboard.getData(JUPYTER_CELL_MIME) as JSONArray;
         data.map(cell => {
           expect(
@@ -2235,7 +2239,7 @@ describe('@jupyterlab/notebook', () => {
         widget.widgets
           .filter(cell => widget.isSelectedOrActive(cell))
           .forEach(cell => cell.model.setMetadata('deletable', false));
-        NotebookActions.cut(widget, true);
+        NotebookActions.cut(widget, { preserveMetadata: true });
         const data = utils.clipboard.getData(JUPYTER_CELL_MIME) as JSONArray;
         data.map(cell => {
           expect((cell as JSONObject).metadata).toHaveProperty(
@@ -2291,7 +2295,9 @@ describe('@jupyterlab/notebook', () => {
         const next = widget.widgets[1];
         widget.select(next);
         next.model.setMetadata('deletable', false);
-        await NotebookActions.cutToSystemClipboard(widget, false);
+        await NotebookActions.cutToSystemClipboard(widget, {
+          preserveMetadata: false
+        });
         const data = (await utils.systemClipboard.getData(
           JUPYTER_CELL_MIME
         )) as JSONArray;
@@ -2309,7 +2315,9 @@ describe('@jupyterlab/notebook', () => {
         widget.widgets
           .filter(cell => widget.isSelectedOrActive(cell))
           .forEach(cell => cell.model.setMetadata('deletable', false));
-        await NotebookActions.cutToSystemClipboard(widget, true);
+        await NotebookActions.cutToSystemClipboard(widget, {
+          preserveMetadata: true
+        });
         const data = (await utils.systemClipboard.getData(
           JUPYTER_CELL_MIME
         )) as JSONArray;
@@ -2326,7 +2334,7 @@ describe('@jupyterlab/notebook', () => {
       it('should delete metadata.deletable', () => {
         widget.activeCellIndex = 0;
         widget.activeCell!.model.setMetadata('deletable', false);
-        NotebookActions.duplicate(widget, 'below', false);
+        NotebookActions.duplicate(widget, 'below', { preserveMetadata: false });
         expect(
           widget.activeCell!.model.getMetadata('deletable')
         ).toBeUndefined();
@@ -2335,7 +2343,7 @@ describe('@jupyterlab/notebook', () => {
       it('should preserve all cell metadata', () => {
         widget.activeCellIndex = 0;
         widget.activeCell!.model.setMetadata('deletable', false);
-        NotebookActions.duplicate(widget, 'below', true);
+        NotebookActions.duplicate(widget, 'below', { preserveMetadata: true });
         expect(widget.activeCell!.model.toJSON().metadata).toHaveProperty(
           'deletable',
           false
