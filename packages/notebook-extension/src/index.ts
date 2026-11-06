@@ -3489,9 +3489,8 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        const preserveMetadata = settings?.get(
-          'preserveCellMetadataForCopiedCells'
-        ).composite as boolean;
+        const preserveMetadata = settings?.get('preserveDeletableOnCopy')
+          .composite as boolean;
         if (settings?.get('useSystemClipboardForCells').composite as boolean) {
           return await NotebookActions.cutToSystemClipboard(current.content, {
             preserveMetadata
@@ -3542,9 +3541,8 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        const preserveMetadata = settings?.get(
-          'preserveCellMetadataForCopiedCells'
-        ).composite as boolean;
+        const preserveMetadata = settings?.get('preserveDeletableOnCopy')
+          .composite as boolean;
         if (settings?.get('useSystemClipboardForCells').composite as boolean) {
           return await NotebookActions.copyToSystemClipboard(current.content, {
             preserveMetadata
@@ -3677,9 +3675,8 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        const preserveMetadata = settings?.get(
-          'preserveCellMetadataForCopiedCells'
-        ).composite as boolean;
+        const preserveMetadata = settings?.get('preserveDeletableOnCopy')
+          .composite as boolean;
         NotebookActions.duplicate(current.content, 'belowSelected', {
           preserveMetadata
         });

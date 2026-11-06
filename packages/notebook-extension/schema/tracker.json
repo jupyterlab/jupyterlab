@@ -898,8 +898,8 @@
       "type": "boolean",
       "default": false
     },
-    "preserveCellMetadataForCopiedCells": {
-      "title": "Preserve cell metadata of copied cells",
+    "preserveDeletableOnCopy": {
+      "title": "Preserve `deletable` cell metadata of copied cells",
       "description": "When enabled, the copied and pasted cells will preserve their `deletable` cell metadata.",
       "type": "boolean",
       "default": false

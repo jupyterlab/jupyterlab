@@ -137,9 +137,8 @@ export namespace ToolbarItems {
     return new ToolbarButton({
       icon: cutIcon,
       onClick: async () => {
-        const preserveMetadata = settings?.get(
-          'preserveCellMetadataForCopiedCells'
-        ).composite as boolean;
+        const preserveMetadata = settings?.get('preserveDeletableOnCopy')
+          .composite as boolean;
         if (settings?.get('useSystemClipboardForCells').composite as boolean) {
           await NotebookActions.cutToSystemClipboard(panel.content, {
             preserveMetadata
@@ -167,9 +166,8 @@ export namespace ToolbarItems {
     return new ToolbarButton({
       icon: copyIcon,
       onClick: async () => {
-        const preserveMetadata = settings?.get(
-          'preserveCellMetadataForCopiedCells'
-        ).composite as boolean;
+        const preserveMetadata = settings?.get('preserveDeletableOnCopy')
+          .composite as boolean;
         if (settings?.get('useSystemClipboardForCells').composite as boolean) {
           await NotebookActions.copyToSystemClipboard(panel.content, {
             preserveMetadata
