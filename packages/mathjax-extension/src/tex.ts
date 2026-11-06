@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+/* eslint-disable jupyter/prefer-lazy-imports -- index.ts loads this module with import() */
+
 import { Loader } from '@mathjax/src/mjs/components/loader.js';
 
 import '@mathjax/src/mjs/input/tex/base/BaseConfiguration.js';
