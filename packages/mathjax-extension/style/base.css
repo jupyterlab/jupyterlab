@@ -4,3 +4,10 @@
 |----------------------------------------------------------------------------*/
 
 @import './fonts.css';
+
+/* MathJax 4 sets `line-height: 0` on mjx-math only, so without this rule the
+   container applies the paragraph line height to its scaled-up font size and
+   makes every line with inline math taller than the others. */
+mjx-container[jax='CHTML'] {
+  line-height: 0;
+}
