@@ -3777,10 +3777,14 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
+        const preserveMetadata = settings?.get('preserveDeletableOnCopy')
+          .composite as boolean;
         if (settings?.get('useSystemClipboardForCells').composite as boolean) {
-          return await NotebookActions.cutToSystemClipboard(current.content);
+          return await NotebookActions.cutToSystemClipboard(current.content, {
+            preserveMetadata
+          });
         }
-        return NotebookActions.cut(current.content);
+        return NotebookActions.cut(current.content, { preserveMetadata });
       }
     },
     icon: args => (args.toolbar ? cutIcon : undefined),
@@ -3828,10 +3832,14 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
+        const preserveMetadata = settings?.get('preserveDeletableOnCopy')
+          .composite as boolean;
         if (settings?.get('useSystemClipboardForCells').composite as boolean) {
-          return await NotebookActions.copyToSystemClipboard(current.content);
+          return await NotebookActions.copyToSystemClipboard(current.content, {
+            preserveMetadata
+          });
         }
-        return NotebookActions.copy(current.content);
+        return NotebookActions.copy(current.content, { preserveMetadata });
       }
     },
     icon: args => (args.toolbar ? copyIcon : undefined),
@@ -3964,7 +3972,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        NotebookActions.duplicate(current.content, 'belowSelected');
+        const preserveMetadata = settings?.get('preserveDeletableOnCopy')
+          .composite as boolean;
+        NotebookActions.duplicate(current.content, 'belowSelected', {
+          preserveMetadata
+        });
       }
     },
     icon: args => (args.toolbar ? duplicateIcon : undefined),
