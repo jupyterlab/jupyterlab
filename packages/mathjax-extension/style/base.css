@@ -11,3 +11,12 @@
 mjx-container[jax='CHTML'] {
   line-height: 0;
 }
+
+/* MJX-TEX-ZERO, the first font of every MathJax 4 font family, has a descent
+   of 0.75em. A formula on the last line of a Markdown cell or an output
+   therefore overflows the box by one or two pixels, and `overflow: auto` shows
+   a vertical scrollbar for it. */
+.jp-MarkdownOutput.jp-RenderedHTMLCommon:has(mjx-container),
+.jp-OutputArea-output:has(mjx-container) {
+  overflow-y: hidden;
+}
