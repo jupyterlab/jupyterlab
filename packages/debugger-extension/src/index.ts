@@ -849,6 +849,11 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
         if (kernel && filters[kernel]) {
           sidebar.variables.filter = new Set<string>(filters[kernel]);
         }
+
+        service.model.kernelSources.hideNativeSources = settings.get(
+          'hideNativeSources'
+        ).composite as boolean;
+
         const kernelSourcesFilter = settings.get('defaultKernelSourcesFilter')
           .composite as string;
         sidebar.kernelSources.filter = kernelSourcesFilter;
