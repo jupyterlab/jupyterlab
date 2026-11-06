@@ -241,7 +241,7 @@ describe('metadataform/form simple', () => {
     props.formContext.updateMetadata({ '/cell-metadata': 'stale field' }, true);
     expect(secondCell.model!.getMetadata('cell-metadata')).toBeUndefined();
 
-    // Both paths write again once the original cell is active.
+    // A change in the form writes again once the original cell is active.
     content.activeCellIndex = 0;
     await typeInto(input, 'fresh value');
     expect(firstCell.model!.getMetadata('cell-metadata')).toBe('fresh value');

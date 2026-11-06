@@ -65,9 +65,9 @@ export class FormWidget extends ReactWidget {
       reload?: boolean
     ): void => {
       const owner = this._props.metadataFormWidget;
-      // A replaced form must not write, nor a hidden form that was not rebuilt
-      // when the active cell changed: the Property Inspector mounts it again
-      // when another notebook gets the focus.
+      // A replaced form must not write, nor a form that stayed hidden while the
+      // active cell changed: its fields can still write later, for example when
+      // a request finishes.
       if (owner.isDisposed || owner.form !== this) return;
       const activeCell = owner.notebookTools?.activeCell;
       if (
