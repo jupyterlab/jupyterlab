@@ -2103,7 +2103,9 @@ namespace Private {
       if (!imgs[i].alt) {
         imgs[i].alt = trans.__('Image');
       }
-      const height = Number(imgs[i].getAttribute('height'));
+      const value = imgs[i].getAttribute('height') ?? '';
+      // Browsers read `300px` as 300, and `50%` as a share of the parent.
+      const height = value.includes('%') ? 0 : parseFloat(value);
       if (height > 0 && !imgs[i].hasAttribute('width')) {
         fitHeightOnlyImage(imgs[i], height);
       }
@@ -2126,12 +2128,15 @@ namespace Private {
       'load',
       () => {
         if (img.naturalHeight > 0) {
+          // A style sheet can also set the height, or a maximum height, so
+          // use the height the image is shown at when it is in the document.
+          const shown = parseFloat(getComputedStyle(img).height) || height;
           const derived = Math.max(
             1,
-            Math.round((height * img.naturalWidth) / img.naturalHeight)
+            Math.round((shown * img.naturalWidth) / img.naturalHeight)
           );
           img.width = derived;
-          img.style.aspectRatio = `${derived} / ${height}`;
+          img.style.aspectRatio = `${derived} / ${shown}`;
         }
       },
       { once: true }

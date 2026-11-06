@@ -69,6 +69,9 @@ const notebooks: Record<string, string> = {
   'markdown-height-wide.ipynb': notebook(
     markdownCell(`<img src="${IMAGE}" height="2165">`)
   ),
+  'markdown-height-px-wide.ipynb': notebook(
+    markdownCell(`<img src="${IMAGE}" height="2165px">`)
+  ),
   'markdown-style.ipynb': notebook(
     markdownCell(`<div class="gallery"><img src="${IMAGE}"></div>`)
   )
@@ -171,6 +174,23 @@ test.describe('Image size', () => {
     tmpPath
   }) => {
     await page.notebook.openByPath(`${tmpPath}/markdown-height-wide.ipynb`);
+    const image = page.locator('.jp-RenderedMarkdown img');
+    await loadedImageBox(image);
+
+    // The width comes from the image data after its load event.
+    await expect
+      .poll(async () => {
+        const box = (await image.boundingBox())!;
+        return box.height - box.width / IMAGE_RATIO;
+      })
+      .toBeCloseTo(0, 0);
+  });
+
+  test('Keep the aspect ratio of a Markdown image with only a height in pixels wider than the notebook', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.notebook.openByPath(`${tmpPath}/markdown-height-px-wide.ipynb`);
     const image = page.locator('.jp-RenderedMarkdown img');
     await loadedImageBox(image);
 
