@@ -94,6 +94,11 @@ test.describe('Notebook Markdown', () => {
     await cell!.scrollIntoViewIfNeeded();
     const output = cell!.locator('.jp-RenderedMermaid');
     await output.waitFor();
+    // Scroll the cell into the middle of the viewport, so that the last row
+    // of the screenshot does not show the border below the notebook.
+    await cell!.evaluate(element => {
+      element.scrollIntoView({ block: 'center', inline: 'nearest' });
+    });
     expect(await cell!.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -103,6 +108,11 @@ test.describe('Notebook Markdown', () => {
     await cell!.scrollIntoViewIfNeeded();
     const output = cell!.locator('.jp-RenderedMermaid');
     await output.waitFor();
+    // Scroll the cell into the middle of the viewport, so that the last row
+    // of the screenshot does not show the border below the notebook.
+    await cell!.evaluate(element => {
+      element.scrollIntoView({ block: 'center', inline: 'nearest' });
+    });
     expect(await cell!.screenshot()).toMatchSnapshot(imageName);
   });
 });
@@ -142,5 +152,34 @@ test.describe('Notebook Markdown Editing', () => {
     const cellTextAfterUnwrap = await page.notebook.getCellTextInput(0);
     expect(cellTextAfterUnwrap).not.toContain('**Bold**');
     expect(cellTextAfterUnwrap).toBe('Bold text');
+  });
+});
+
+test.describe('Notebook Markdown Math', () => {
+  test('Do not make cells that end with inline math scrollable', async ({
+    page
+  }) => {
+    await page.notebook.createNew();
+    await page.notebook.setCell(0, 'markdown', '$7+7=14$');
+    await page.notebook.addCell('markdown', '$\\frac{a}{b}$');
+    await page.notebook.addCell('markdown', '$\\int_0^1 f(x)\\,dx$');
+    for (const index of [0, 1, 2]) {
+      await page.notebook.runCell(index);
+    }
+    await expect(page.locator('.jp-MarkdownOutput mjx-container')).toHaveCount(
+      3
+    );
+    await page.evaluate(() => document.fonts.ready);
+
+    const scrollable = await page
+      .locator('.jp-MarkdownOutput')
+      .evaluateAll(nodes =>
+        nodes.map(
+          node =>
+            /auto|scroll/.test(getComputedStyle(node).overflowY) &&
+            node.scrollHeight > node.clientHeight
+        )
+      );
+    expect(scrollable).toEqual([false, false, false]);
   });
 });

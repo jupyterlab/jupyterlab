@@ -5,7 +5,18 @@
 
 @import './fonts.css';
 
-/* This can be removed after upgrading to MathJax 4, as the issue will be fixed in the new version */
-mjx-assistive-mml {
-  bottom: 0;
+/* MathJax 4 sets `line-height: 0` on mjx-math only, so without this rule the
+   container applies the paragraph line height to its scaled-up font size and
+   makes every line with inline math taller than the others. */
+mjx-container[jax='CHTML'] {
+  line-height: 0;
+}
+
+/* MJX-TEX-ZERO, the first font of every MathJax 4 font family, has a descent
+   of 0.75em. A formula on the last line of a Markdown cell or an output
+   therefore overflows the box by one or two pixels, and `overflow: auto` shows
+   a vertical scrollbar for it. */
+.jp-MarkdownOutput.jp-RenderedHTMLCommon:has(mjx-container),
+.jp-OutputArea-output:has(mjx-container) {
+  overflow-y: hidden;
 }
