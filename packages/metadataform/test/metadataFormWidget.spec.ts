@@ -184,6 +184,18 @@ describe('metadataform/form simple', () => {
     ).toHaveLength(2);
   });
 
+  it('should dispose of the form that it replaces', async () => {
+    const metadataForm = await buildForm();
+    const replaced = metadataForm.form!;
+
+    metadataForm.updateMetadata({}, true);
+
+    expect(metadataForm.form).not.toBe(replaced);
+    // A form created before the validator loaded renders when the validator
+    // arrives, unless the form is disposed.
+    expect(replaced.isDisposed).toBe(true);
+  });
+
   it('should update cell metadata', async () => {
     const metadataForm = await buildForm();
     expect(
