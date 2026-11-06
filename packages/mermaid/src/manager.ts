@@ -147,56 +147,6 @@ export class MermaidManager implements IMermaidManager {
   }
 
   /**
-   * Redraw diagrams drawn in another theme when their Markdown is added to
-   * the document again.
-   */
-  private async _onDomChanged(records: MutationRecord[]): Promise<void> {
-    if (this._isDisposed) {
-      return;
-    }
-    const selector = Private.staleDiagramSelector(Private.uiTheme());
-    const stale = new Set<HTMLElement>();
-    for (const record of records) {
-      for (const node of Array.from(record.addedNodes)) {
-        if (!(node instanceof HTMLElement)) {
-          continue;
-        }
-        if (node.matches(selector)) {
-          stale.add(node);
-        }
-        for (const diagram of Array.from(
-          node.querySelectorAll<HTMLElement>(selector)
-        )) {
-          stale.add(diagram);
-        }
-      }
-    }
-    for (const diagram of stale) {
-      if (this._isDisposed) {
-        return;
-      }
-      // The diagram may have been removed again since it was added.
-      if (diagram.isConnected) {
-        await this.refreshDiagrams(diagram);
-      }
-    }
-  }
-
-  /**
-   * Start redrawing diagrams drawn in another theme when their Markdown is
-   * added to the document again.
-   */
-  private _observeDocument(): void {
-    if (this._isDisposed || this._observer || typeof document === 'undefined') {
-      return;
-    }
-    this._observer = new MutationObserver(records => {
-      void this._onDomChanged(records);
-    });
-    this._observer.observe(document.body, { childList: true, subtree: true });
-  }
-
-  /**
    * Handle (re)-initializing mermaid based on external values.
    */
   initialize(
@@ -434,6 +384,56 @@ export class MermaidManager implements IMermaidManager {
     }
 
     return figure;
+  }
+
+  /**
+   * Redraw diagrams drawn in another theme when their Markdown is added to
+   * the document again.
+   */
+  private async _onDomChanged(records: MutationRecord[]): Promise<void> {
+    if (this._isDisposed) {
+      return;
+    }
+    const selector = Private.staleDiagramSelector(Private.uiTheme());
+    const stale = new Set<HTMLElement>();
+    for (const record of records) {
+      for (const node of Array.from(record.addedNodes)) {
+        if (!(node instanceof HTMLElement)) {
+          continue;
+        }
+        if (node.matches(selector)) {
+          stale.add(node);
+        }
+        for (const diagram of Array.from(
+          node.querySelectorAll<HTMLElement>(selector)
+        )) {
+          stale.add(diagram);
+        }
+      }
+    }
+    for (const diagram of stale) {
+      if (this._isDisposed) {
+        return;
+      }
+      // The diagram may have been removed again since it was added.
+      if (diagram.isConnected) {
+        await this.refreshDiagrams(diagram);
+      }
+    }
+  }
+
+  /**
+   * Start redrawing diagrams drawn in another theme when their Markdown is
+   * added to the document again.
+   */
+  private _observeDocument(): void {
+    if (this._isDisposed || this._observer || typeof document === 'undefined') {
+      return;
+    }
+    this._observer = new MutationObserver(records => {
+      void this._onDomChanged(records);
+    });
+    this._observer.observe(document.body, { childList: true, subtree: true });
   }
 
   private _themeChanged = new Signal<this, void>(this);
