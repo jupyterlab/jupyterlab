@@ -207,9 +207,18 @@ export function renameFile(
   oldPath: string,
   newPath: string
 ): Promise<Contents.IModel | null> {
-  return manager.rename(oldPath, newPath).catch(error => {
+  return manager.rename(oldPath, newPath).catch(async error => {
     if (error?.response?.status !== 409) {
       // if it's not caused by an already existing file, rethrow
+      throw error;
+    }
+
+    // Overwriting a directory would replace its content instead of merging
+    // into it, so keep the error.
+    const existing = await manager.services.contents
+      .get(newPath, { content: false })
+      .catch(() => null);
+    if (existing?.type === 'directory') {
       throw error;
     }
 
