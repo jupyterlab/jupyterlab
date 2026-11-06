@@ -6,7 +6,10 @@
  * @module metadataform
  */
 
+/* global WeakRef */
+
 import { ReactWidget } from '@jupyterlab/apputils';
+import type { NotebookTools } from '@jupyterlab/notebook';
 import { FormComponent } from '@jupyterlab/ui-components';
 import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import type { IChangeEvent } from '@rjsf/core';
@@ -27,6 +30,11 @@ export class FormWidget extends ReactWidget {
     super();
     this.addClass('jp-FormWidget');
     this._props = props;
+    // The model of the cell this form is built for, held weakly so that the
+    // form does not keep a closed notebook in memory. Captured at
+    // construction time so a stale form can be recognized later.
+    const cell = props.metadataFormWidget.notebookTools?.activeCell;
+    this._sourceModel = cell ? new WeakRef(cell.model) : null;
   }
 
   /**
@@ -34,9 +42,27 @@ export class FormWidget extends ReactWidget {
    * @returns - The rendered form
    */
   render(): JSX.Element {
+    const updateMetadata = (
+      formData: ReadonlyPartialJSONObject,
+      reload?: boolean
+    ): void => {
+      const owner = this._props.metadataFormWidget;
+      // A replaced form must not write, nor a form that stayed hidden while the
+      // active cell changed: its fields can still write later, for example when
+      // a request finishes.
+      if (owner.isDisposed || owner.form !== this) return;
+      const activeCell = owner.notebookTools?.activeCell;
+      if (
+        this._sourceModel &&
+        activeCell?.model !== this._sourceModel.deref()
+      ) {
+        return;
+      }
+      owner.updateMetadata(formData, reload);
+    };
     const formContext = {
       defaultFormData: this._props.settings.default(),
-      updateMetadata: this._props.metadataFormWidget.updateMetadata
+      updateMetadata
     };
     return (
       <FormComponent
@@ -48,7 +74,7 @@ export class FormWidget extends ReactWidget {
         liveValidate
         idPrefix={`jp-MetadataForm-${this._props.pluginId}`}
         onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
-          this._props.metadataFormWidget.updateMetadata(e.formData || {});
+          updateMetadata(e.formData || {});
         }}
         compact={true}
         showModifiedFromDefault={this._props.showModified}
@@ -58,4 +84,7 @@ export class FormWidget extends ReactWidget {
   }
 
   private _props: MetadataForm.IProps;
+  private _sourceModel: WeakRef<
+    NonNullable<NotebookTools['activeCell']>['model']
+  > | null = null;
 }
