@@ -17,13 +17,18 @@
   the plugin ids to disable in `disabledExtensions` instead of the package name.
 
 - In each copy of an icon that `LabIcon` renders, the IDs that the SVG refers to now get a
-  suffix: `id="shine"` and `fill="url(#shine)"` become `id="shine_3"` and `fill="url(#shine_3)"`.
-  Without this suffix, the other copies could render without their gradient, clip path or
-  mask when the first copy on the page is hidden. Only the IDs named in `url(#...)`, `href`,
-  `xlink:href`, `aria-labelledby` or `aria-describedby` change. A selector outside the SVG
-  that names a renamed ID, in CSS or in code, no longer matches the element: give the
-  element a class, and select it through the `data-icon` attribute of the rendered SVG, for
-  example `svg[data-icon="my-pkg:logo"] .accent`. See {ref}`labicon-svg-ids`.
+  suffix: `id="shine"` and `fill="url(#shine)"` become `id="shine_3"` and
+  `fill="url(#shine_3)"`. Without this suffix, the other copies could render without their
+  gradient, clip path or mask when the first copy on the page is hidden. The rules of a
+  `<style>` element in the SVG now style only elements of the copies of that icon. A rule can
+  still depend on the page, such as the theme attribute that JupyterLab sets on `<body>`, but a
+  part of its selector that names an ID of the SVG must match inside the copy. The names that
+  the SVG gives to layers get a suffix too. An `animation` in the SVG names a copy of its
+  `@keyframes` rule with such a suffix, so `animationName` gives the new name. A selector
+  outside the SVG that names a renamed ID, in CSS or in code, no longer matches the element:
+  give the element a class, and select it through the `data-icon` attribute of the rendered
+  SVG, for example `svg[data-icon="my-pkg:logo"] .accent`. A React copy now keeps the `style`
+  attribute of the root `<svg>`, as a copy from `element()` does. See {ref}`labicon-svg-ids`.
 
 - Notebook panel and cell toolbar items now receive the id of their notebook panel in the `widgetId` command argument. The notebook commands use it to act on that notebook and to compute their state for it, so their buttons show the state of their own notebook while another notebook has the focus. Commands of extensions placed in these toolbars can do the same, as shown in {ref}`toolbar-registry`.
 

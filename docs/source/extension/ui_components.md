@@ -182,45 +182,105 @@ reference to it. One rendered copy of the SVG above has:
 <path fill="url(#shine_3)" d="..." />
 ```
 
-Only the IDs named in `url(#...)`, `href`, `xlink:href`,
-`aria-labelledby` or `aria-describedby` change. Other IDs keep their
+An SVG refers to an ID in `url(#...)` in any attribute or rule, in
+`href` and `xlink:href`, in an attribute that lists IDs such as
+`aria-labelledby`, in animation timing such as `begin="dot.click"`,
+and in the values of an animation of `href`. Each of these references
+follows the rename. IDs that the SVG does not refer to keep their
 value.
 
-Animation timing that names a renamed ID follows the rename:
-`begin="dot.click"` becomes `begin="dot_3.click"`.
+`LabIcon` rewrites the rules of a `<style>` element in your SVG once,
+so that every copy has the same rules. A rule styles only elements of
+the copies of your icon, and elements that code adds to a copy, so two
+icons can use the same class names. It matches them as in the SVG
+shown inline on the page, with the same specificity:
 
-The rules of a `<style>` element in your SVG apply to the whole page.
-If each copy put its own ID into a rule, the rule of the last copy on
-the page would apply to all copies. Instead, a `url(#...)` in a rule
-becomes a custom property, and each copy sets this property on its
-root `<svg>`:
+- The parts of a selector before the element that a rule styles can
+  match elements of the page. So a rule can follow the theme attribute
+  that JupyterLab sets on `<body>`, as in
+  `[data-jp-theme-light='true'] .accent`. A part that names an ID of
+  your SVG, such as `#shine` in `#shine stop`, or that reads an
+  attribute that the rename changes, such as `[href="#shine"]`, must
+  match inside the copy, and so must each part of `:has()`. `LabIcon`
+  marks the elements of the copies with a `data-icon-scope` attribute.
+- A `url(#shine)` in a rule reads a custom property, which each copy
+  sets in the `style` attribute of its root `<svg>` to its own ID, such
+  as `url(#shine_3)`. Code that sets this attribute again, as with
+  `svg.style.cssText = '...'`, removes the custom properties: the rule
+  then reads `url(#shine)`, which no copy has, so a fill or a stroke
+  that uses it paints nothing. `svg.style.setProperty()` keeps them.
+- A selector that names a renamed ID, such as `#shine stop`, matches
+  the element in every copy. For this, the element keeps its original
+  ID in a `data-original-id` attribute, which the selector also checks.
+  A selector that reads another attribute that the rename changes, such
+  as `use[href="#shine"]`, works in the same way.
+- The names that your SVG gives to layers are local to the icon, as its
+  IDs are: `LabIcon` adds a suffix to them, as in `base-jp-icon-2`.
+  Each `@keyframes` rule gets a copy with such a name, as in
+  `pulse-jp-icon-2`, and the `animation` of a rule or of a `style`
+  attribute of the SVG names the copy. So `animationName` in animation
+  events and in the computed style gives the new name. The original
+  rule keeps its name for page CSS and for a custom property that names
+  it, as in `--spin: pulse`. An `animation` that holds `var()` also uses
+  the original rule when the name is a keyword of `animation` or of
+  `steps()`, such as `linear` or `end`.
+- The initial value of a `@property` that names an ID applies in each
+  copy through a layer of the style sheet, so a value of the property
+  that a page ancestor sets does not reach the copy.
+
+A copy still differs from the SVG shown inline:
+
+- `:root` selects the root `<svg>` of the copy, and so do `:scope` and
+  `&` where they would select `:root`, as at the top level of the sheet.
+- Some names that a style sheet defines are the same for the whole
+  page, as for any style sheet: those of `@property`, `@function`,
+  `@font-face`, `@counter-style`, `@font-palette-values` and
+  `@position-try`, and the original names of `@keyframes`. Give these
+  names a prefix that only your icon uses.
+- In a style rule with a list of selectors, the declarations between
+  two nested rules take the highest specificity of the list. So do the
+  declarations of an at-rule inside the style rule, such as `@media`.
+- The rules of a sheet that `@import` loads apply to the whole page, and
+  a rule there that names a renamed ID does not match it.
+- Markup that React renders on the server, as with
+  `renderToStaticMarkup`, has only the custom properties of the `style`
+  attribute of the root `<svg>`. So a `url()` in a rule still names an
+  element of the copy, but the other declarations of the attribute are
+  missing. When React hydrates this markup, the root gets the `style`
+  attribute of a new copy, whose IDs the markup does not have, so a fill
+  or a stroke that a rule gives with `url()` does not paint.
+- When the `svgstr` of an icon changes, a React copy keeps its `<svg>`.
+  The declarations of the new `style` attribute of the root replace
+  those of the old one, and a style that code set on the `<svg>` stays,
+  unless the old or the new attribute names the same property. If only
+  the old or only the new SVG has a `style` attribute on its root or a
+  rule that names an ID with `url()`, React renders a new `<svg>`
+  instead. A ref of the copy then gets `null` and then the new element,
+  and the styles that code set on the old `<svg>` are not on the new one.
+- In `jsdom`, as in Jest tests of an extension, no style sheet is parsed.
+  So the rules are not rewritten, and an ID that only a `<style>` names
+  keeps its value.
+
+For example, `LabIcon` renders this SVG:
 
 ```xml
-<!-- your SVG -->
 <svg xmlns="http://www.w3.org/2000/svg">
-  <style>.logo { fill: url(#shine) }</style>
-  ...
-</svg>
-
-<!-- one rendered copy -->
-<svg xmlns="http://www.w3.org/2000/svg" style="--jp-icon-ref-shine:url(#shine_3)">
-  <style>.logo { fill: var(--jp-icon-ref-shine,url(#shine)) }</style>
-  ...
+  <style>#shine stop { stop-color: gold } .logo { fill: url(#shine) }</style>
+  <linearGradient id="shine">...</linearGradient>
+  <path class="logo" d="..." />
 </svg>
 ```
 
-The `url(#shine)` after the comma is a fallback. A copy of your SVG
-that `LabIcon` did not render does not set the property, so its
-`.logo` element uses `#shine`.
+as copies such as:
 
-A selector in these rules that names a renamed ID, such as
-`#shine stop`, gets the suffix of each copy, so the rule still matches
-the element in every copy. A rule that excludes a renamed ID, as in
-`circle:not(#dot)`, also matches that element in the other copies,
-because the rule of each copy excludes only its own ID. Classes are not
-renamed, so a rule for `.logo` applies to every element on the page with
-that class, including those of other icons. Give your classes names that
-only your icon uses.
+```xml
+<svg xmlns="http://www.w3.org/2000/svg" data-icon-scope="2" style='--jp-icon-ref-2-0: url("#shine_3");'>
+  <style data-icon-scope="2">:is(#shine, [data-original-id="shine"]):where([data-icon-scope="2"], [data-icon-scope="2"] *) stop:where([data-icon-scope="2"], [data-icon-scope="2"] *) { stop-color: gold; }
+.logo:where([data-icon-scope="2"], [data-icon-scope="2"] *) { fill: var(--jp-icon-ref-2-0,url("#shine")); }</style>
+  <linearGradient id="shine_3" data-icon-scope="2" data-original-id="shine">...</linearGradient>
+  <path class="logo" d="..." data-icon-scope="2" />
+</svg>
+```
 
 The suffix depends on the order in which icons are rendered, so a
 selector outside the SVG cannot name a renamed ID. To style or find an

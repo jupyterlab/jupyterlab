@@ -29,17 +29,6 @@ const styleGradientIcon = new LabIcon({
   svgstr: styleGradientSvgstr
 });
 
-const styleSelectorSvgstr = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-<style>#gradient0 stop:first-child{stop-color:#123}.a{fill:url(#gradient0)}</style>
-<defs><linearGradient id="gradient0"><stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#fff"/></linearGradient></defs>
-<rect class="a" width="10" height="10"/>
-</svg>`;
-
-const styleSelectorIcon = new LabIcon({
-  name: 'test-ui-components:style-selector',
-  svgstr: styleSelectorSvgstr
-});
-
 const rootIdSvgstr = `<svg id="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
 <path fill="#fff" d="M0 0h10v10H0z"/>
 </svg>`;
@@ -120,9 +109,13 @@ describe('@jupyterlab/ui-components', () => {
       });
 
       it('should keep unique ids when replacing rendered elements after svgstr updates', () => {
+        const svgstr = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+<defs><linearGradient id="gradient0"><stop offset="0" stop-color="#000"/></linearGradient></defs>
+<rect fill="url(#gradient0)" width="10" height="10"/>
+</svg>`;
         const updateIcon = new LabIcon({
-          name: 'test-ui-components:style-gradient-update',
-          svgstr: styleGradientSvgstr
+          name: 'test-ui-components:gradient-update',
+          svgstr
         });
         const firstContainer = document.createElement('div');
         const secondContainer = document.createElement('div');
@@ -133,24 +126,23 @@ describe('@jupyterlab/ui-components', () => {
           updateIcon.element({ container: firstContainer });
           updateIcon.element({ container: secondContainer });
 
-          updateIcon.svgstr = styleGradientSvgstr;
+          updateIcon.svgstr = svgstr;
 
-          const firstUpdatedSvg = firstContainer.querySelector('svg');
-          const secondUpdatedSvg = secondContainer.querySelector('svg');
-          if (!firstUpdatedSvg || !secondUpdatedSvg) {
-            throw new Error('Updated icon render did not produce svg markup');
-          }
-
-          const firstStyle = getStyleGradientData(firstUpdatedSvg);
-          const secondStyle = getStyleGradientData(secondUpdatedSvg);
-
-          expect(firstStyle.gradientId).not.toEqual(secondStyle.gradientId);
-          expect(firstUpdatedSvg.getAttribute('style')).toBe(
-            `--jp-icon-ref-gradient0:url(#${firstStyle.gradientId})`
+          const copies = [firstContainer, secondContainer].map(container => {
+            const svg = container.querySelector('svg');
+            if (!svg) {
+              throw new Error('Updated icon render did not produce svg markup');
+            }
+            return svg;
+          });
+          const ids = copies.map(svg =>
+            svg.querySelector('linearGradient')!.getAttribute('id')
           );
-          expect(secondUpdatedSvg.getAttribute('style')).toBe(
-            `--jp-icon-ref-gradient0:url(#${secondStyle.gradientId})`
-          );
+
+          expect(ids[0]).not.toEqual(ids[1]);
+          expect(
+            copies.map(svg => svg.querySelector('rect')!.getAttribute('fill'))
+          ).toEqual(ids.map(id => `url(#${id})`));
         } finally {
           firstContainer.remove();
           secondContainer.remove();
@@ -164,79 +156,10 @@ describe('@jupyterlab/ui-components', () => {
         const secondSvg = fooIcon.element({ tag: null });
         const first = getIconIdData(firstSvg);
         const second = getIconIdData(secondSvg);
-        const firstStyleSvg = styleGradientIcon.element({ tag: null });
-        const secondStyleSvg = styleGradientIcon.element({ tag: null });
-        const firstStyle = getStyleGradientData(firstStyleSvg);
-        const secondStyle = getStyleGradientData(secondStyleSvg);
 
         expect(first.clipPathId).not.toEqual(second.clipPathId);
         expect(first.clipPathRef).toEqual(`url(#${first.clipPathId})`);
         expect(second.clipPathRef).toEqual(`url(#${second.clipPathId})`);
-        expect(firstStyle.gradientId).not.toEqual(secondStyle.gradientId);
-        expect(firstStyleSvg.getAttribute('style')).toBe(
-          `--jp-icon-ref-gradient0:url(#${firstStyle.gradientId})`
-        );
-        expect(secondStyleSvg.getAttribute('style')).toBe(
-          `--jp-icon-ref-gradient0:url(#${secondStyle.gradientId})`
-        );
-      });
-
-      it('should rewrite inline style ID selectors when ids are uniquified', () => {
-        const firstSvg = styleSelectorIcon.element({ tag: null });
-        const secondSvg = styleSelectorIcon.element({ tag: null });
-        const first = getStyleGradientData(firstSvg);
-        const second = getStyleGradientData(secondSvg);
-
-        expect(first.styleText).toContain(
-          `#${first.gradientId} stop:first-child`
-        );
-        expect(firstSvg.getAttribute('style')).toBe(
-          `--jp-icon-ref-gradient0:url(#${first.gradientId})`
-        );
-        expect(first.styleText).toContain('stop-color:#123');
-        expect(first.styleText).not.toContain('#gradient0 stop:first-child');
-
-        expect(second.styleText).toContain(
-          `#${second.gradientId} stop:first-child`
-        );
-        expect(secondSvg.getAttribute('style')).toBe(
-          `--jp-icon-ref-gradient0:url(#${second.gradientId})`
-        );
-        expect(second.styleText).toContain('stop-color:#123');
-        expect(second.styleText).not.toContain('#gradient0 stop:first-child');
-      });
-
-      it('should rewrite an inline style ID selector that follows another rule', () => {
-        const icon = new LabIcon({
-          name: 'test-ui-components:style-selector-minified',
-          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-<style>.a{fill:url(#gradient0)}#gradient0 stop:first-child{stop-color:#123}</style>
-<defs><linearGradient id="gradient0"><stop offset="0" stop-color="#000"/></linearGradient></defs>
-<rect class="a" width="10" height="10"/>
-</svg>`
-        });
-
-        const { gradientId, styleText } = getStyleGradientData(
-          icon.element({ tag: null })
-        );
-
-        expect(styleText).toBe(
-          `.a{fill:var(--jp-icon-ref-gradient0,url(#gradient0))}#${gradientId} stop:first-child{stop-color:#123}`
-        );
-      });
-
-      it('should keep the style rules the same in every .element() copy', () => {
-        const first = getStyleGradientData(
-          styleGradientIcon.element({ tag: null })
-        );
-        const second = getStyleGradientData(
-          styleGradientIcon.element({ tag: null })
-        );
-
-        expect([first.styleText, second.styleText]).toEqual([
-          '.a{fill:var(--jp-icon-ref-gradient0,url(#gradient0))}',
-          '.a{fill:var(--jp-icon-ref-gradient0,url(#gradient0))}'
-        ]);
       });
 
       it('should keep unreferenced ids in .element() renders', () => {
@@ -245,13 +168,16 @@ describe('@jupyterlab/ui-components', () => {
         expect(svg.getAttribute('id')).toBe('logo');
       });
 
-      it('should keep ids used by animation timing', () => {
+      it('should rename an id that only animation timing refers to', () => {
         const svg = animationIcon.element({ tag: null });
-        const ids = Array.from(svg.querySelectorAll('animate')).map(animate =>
+        const ids = Array.from(svg.querySelectorAll('animate'), animate =>
           animate.getAttribute('id')
         );
 
-        expect(ids).toEqual(['fade0', 'fade1']);
+        expect(ids[0]).toMatch(/^fade0_[0-9a-z]+$/);
+        expect(svg.querySelector('animate')!.getAttribute('begin')).toBe(
+          `0;${ids[1]}.end`
+        );
       });
 
       it('should not give a renamed id the value of another id of the svg', () => {
@@ -370,133 +296,67 @@ describe('@jupyterlab/ui-components', () => {
         );
       });
 
-      it('should keep the original url() for the svg outside a copy', () => {
-        const { styleText } = getStyleGradientData(
-          styleGradientIcon.element({ tag: null })
-        );
-
-        expect(styleText).toBe(
-          '.a{fill:var(--jp-icon-ref-gradient0,url(#gradient0))}'
-        );
-      });
-
-      it('should give each id that a style element uses its own custom property', () => {
+      it.each([
+        'aria-activedescendant',
+        'aria-controls',
+        'aria-describedby',
+        'aria-details',
+        'aria-errormessage',
+        'aria-flowto',
+        'aria-labelledby',
+        'aria-owns',
+        'commandfor',
+        'for',
+        'form',
+        'headers',
+        'interestfor',
+        'itemref',
+        'list',
+        'popovertarget'
+      ])('should point %s of each copy at its own element', attribute => {
         const icon = new LabIcon({
-          name: 'test-ui-components:property-names',
-          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10">
-<style>.p{fill:url(#a.b)}.q{fill:url(#a_b)}</style>
-<defs><linearGradient id="a.b"/><linearGradient id="a_b"/></defs>
-<rect class="p" width="10" height="10"/><rect class="q" x="10" width="10" height="10"/>
-</svg>`
-        });
-
-        const svg = icon.element({ tag: null });
-        const [dotted, underscored] = Array.from(
-          svg.querySelectorAll('linearGradient'),
-          gradient => gradient.getAttribute('id')
-        );
-
-        expect(svg.querySelector('style')!.textContent).toBe(
-          '.p{fill:var(--jp-icon-ref-a_b,url(#a.b))}.q{fill:var(--jp-icon-ref-a_b-2,url(#a_b))}'
-        );
-        expect(svg.getAttribute('style')).toBe(
-          `--jp-icon-ref-a_b:url(#${dotted});--jp-icon-ref-a_b-2:url(#${underscored})`
-        );
-      });
-
-      it('should keep a colour in a style declaration that spells a renamed id', () => {
-        const icon = new LabIcon({
-          name: 'test-ui-components:colour-like-id',
-          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10">
-<style>.c { fill: #abc }</style>
-<defs><linearGradient id="abc"/></defs>
-<rect fill="url(#abc)" width="10" height="10"/><rect class="c" x="10" width="10" height="10"/>
-</svg>`
-        });
-
-        const { gradientId, styleText } = getStyleGradientData(
-          icon.element({ tag: null })
-        );
-
-        expect(gradientId).not.toBe('abc');
-        expect(styleText).toBe('.c { fill: #abc }');
-      });
-
-      it('should rename an id in a selector that names an element type', () => {
-        const icon = new LabIcon({
-          name: 'test-ui-components:type-selector',
+          name: `test-ui-components:id-list-${attribute}`,
           svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-<style>linearGradient#gradient0 stop{stop-color:#123}</style>
-<defs><linearGradient id="gradient0"><stop offset="0" stop-color="#000"/></linearGradient></defs>
-<rect fill="url(#gradient0)" width="10" height="10"/>
-</svg>`
-        });
-
-        const { gradientId, styleText } = getStyleGradientData(
-          icon.element({ tag: null })
-        );
-
-        expect(gradientId).not.toBe('gradient0');
-        expect(styleText).toBe(
-          `linearGradient#${gradientId} stop{stop-color:#123}`
-        );
-      });
-
-      it('should rename an escaped id in a selector', () => {
-        const icon = new LabIcon({
-          name: 'test-ui-components:escaped-selector',
-          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-<style>#a\\.b stop{stop-color:#123}</style>
-<defs><linearGradient id="a.b"><stop offset="0" stop-color="#000"/></linearGradient></defs>
-<rect fill="url(#a.b)" width="10" height="10"/>
-</svg>`
-        });
-
-        const { gradientId, styleText } = getStyleGradientData(
-          icon.element({ tag: null })
-        );
-
-        expect(gradientId).not.toBe('a.b');
-        expect(styleText).toBe(
-          `#a\\.b${gradientId.slice('a.b'.length)} stop{stop-color:#123}`
-        );
-      });
-
-      it('should rename an id inside an attribute selector', () => {
-        const icon = new LabIcon({
-          name: 'test-ui-components:href-selector',
-          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-<style>use[href="#shape0"]{fill:#123}</style>
-<defs><rect id="shape0" width="10" height="10"/></defs>
-<use href="#shape0"/>
+<rect id="shape0" width="10" height="10"/><g ${attribute}="shape0 other"/>
 </svg>`
         });
 
         const svg = icon.element({ tag: null });
         const id = svg.querySelector('rect')!.getAttribute('id');
 
-        expect(id).not.toBe('shape0');
-        expect(svg.querySelector('style')!.textContent).toBe(
-          `use[href="#${id}"]{fill:#123}`
+        expect(id).toMatch(/^shape0_[0-9a-z]+$/);
+        expect(svg.querySelector('g')!.getAttribute(attribute)).toBe(
+          `${id} other`
         );
       });
 
-      it('should rename an id that an id attribute selector names', () => {
+      it('should split a list of ids at any space', () => {
         const icon = new LabIcon({
-          name: 'test-ui-components:id-attribute-selector',
+          name: 'test-ui-components:id-list-tab',
           svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-<style>[id="gradient0"] stop{stop-color:#123}</style>
-<defs><linearGradient id="gradient0"><stop offset="0" stop-color="#000"/></linearGradient></defs>
-<rect fill="url(#gradient0)" width="10" height="10"/>
+<rect id="shape0" width="10" height="10"/><g aria-owns="other&#9;shape0"/>
 </svg>`
         });
 
-        const { gradientId, styleText } = getStyleGradientData(
-          icon.element({ tag: null })
-        );
+        const svg = icon.element({ tag: null });
 
-        expect(gradientId).not.toBe('gradient0');
-        expect(styleText).toBe(`[id="${gradientId}"] stop{stop-color:#123}`);
+        expect(svg.querySelector('g')!.getAttribute('aria-owns')).toMatch(
+          /^other\tshape0_[0-9a-z]+$/
+        );
+      });
+
+      it('should rename an id that the style attribute of the svg names', () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:root-style-url',
+          svgstr:
+            '<svg xmlns="http://www.w3.org/2000/svg" style="fill:url(#gradient0)"><linearGradient id="gradient0"/></svg>'
+        });
+
+        const svg = icon.element({ tag: null });
+        const id = svg.querySelector('linearGradient')!.getAttribute('id');
+
+        expect(id).toMatch(/^gradient0_[0-9a-z]+$/);
+        expect(svg.getAttribute('style')).toBe(`fill:url(#${id})`);
       });
 
       it('should rename an id that an upper case URL() refers to', () => {
@@ -513,8 +373,42 @@ describe('@jupyterlab/ui-components', () => {
 
         expect(id).not.toBe('gradient0');
         expect(svg.querySelector('rect')!.getAttribute('fill')).toBe(
-          `url(#${id})`
+          `URL(#${id})`
         );
+      });
+
+      it('should rename an id that a url() names with an escape', () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:escaped-url',
+          svgstr: String.raw`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+<defs><linearGradient id="a.b"/></defs>
+<rect fill="url(#a\.b)" width="10" height="10"/>
+</svg>`
+        });
+
+        const svg = icon.element({ tag: null });
+        const id = svg.querySelector('linearGradient')!.getAttribute('id')!;
+
+        expect(id).toMatch(/^a\.b_[0-9a-z]+$/);
+        expect(svg.querySelector('rect')!.getAttribute('fill')).toBe(
+          String.raw`url(#a\.b${id.slice('a.b'.length)})`
+        );
+      });
+
+      it('should rename an id that an href with spaces names', () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:href-spaces',
+          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+<defs><rect id="shape0" width="10" height="10"/></defs>
+<use href=" #shape0 "/>
+</svg>`
+        });
+
+        const svg = icon.element({ tag: null });
+        const id = svg.querySelector('rect')!.getAttribute('id');
+
+        expect(id).toMatch(/^shape0_[0-9a-z]+$/);
+        expect(svg.querySelector('use')!.getAttribute('href')).toBe(` #${id} `);
       });
 
       it('should point the animation timing of each copy at its own element', () => {
@@ -574,59 +468,113 @@ describe('@jupyterlab/ui-components', () => {
         );
       });
 
-      it('should keep a selector of an id and a class that spells a renamed id', () => {
+      it('should point an animated XLink href of each copy at its own element', () => {
         const icon = new LabIcon({
-          name: 'test-ui-components:id-and-class',
-          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-<style>#a.b{fill:#123}</style>
-<defs><linearGradient id="a.b"/></defs>
-<rect fill="url(#a.b)" width="5" height="10"/><rect id="a" class="b" x="5" width="5" height="10"/>
+          name: 'test-ui-components:animated-xlink-href',
+          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 10 10">
+<defs><symbol id="frame1"/></defs>
+<use><set attributeName="xlink:href" to="#frame1"/></use>
 </svg>`
         });
 
         const svg = icon.element({ tag: null });
+        const id = svg.querySelector('symbol')!.getAttribute('id');
 
-        expect(
-          svg.querySelector('linearGradient')!.getAttribute('id')
-        ).not.toBe('a.b');
-        expect(svg.querySelector('style')!.textContent).toBe('#a.b{fill:#123}');
+        expect(id).toMatch(/^frame1_[0-9a-z]+$/);
+        expect(svg.querySelector('set')!.getAttribute('to')).toBe(`#${id}`);
       });
 
-      it('should rename a dotted id inside a quoted attribute selector', () => {
+      it('should keep an offset of animation timing that starts with the digit of an id', () => {
         const icon = new LabIcon({
-          name: 'test-ui-components:dotted-href-selector',
+          name: 'test-ui-components:timing-offset',
           svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-<style>use[href="#a.b"]{fill:#123}</style>
-<defs><rect id="a.b" width="10" height="10"/></defs>
-<use href="#a.b"/>
+<rect id="0" width="10" height="10"><animate attributeName="x" to="5" dur="1s" begin="0.5s"/></rect>
+<use href="#0"/>
 </svg>`
         });
 
         const svg = icon.element({ tag: null });
-        const id = svg.querySelector('rect')!.getAttribute('id');
 
-        expect(id).not.toBe('a.b');
-        expect(svg.querySelector('style')!.textContent).toBe(
-          `use[href="#${id}"]{fill:#123}`
+        expect(svg.querySelector('animate')!.getAttribute('begin')).toBe(
+          '0.5s'
         );
+      });
+
+      it('should keep the text of a style element when the browser gives no style sheet', () => {
+        // jsdom parses no style sheet in a document without a window
+        const { styleText } = getStyleGradientData(
+          styleGradientIcon.element({ tag: null })
+        );
+
+        expect(styleText).toBe('.a{fill:url(#gradient0)}');
+      });
+
+      it('should keep an id that only a style element names when the browser gives no style sheet', () => {
+        const { gradientId } = getStyleGradientData(
+          styleGradientIcon.element({ tag: null })
+        );
+
+        expect(gradientId).toBe('gradient0');
+      });
+
+      it('should render an svg with a percent sign that starts no escape', () => {
+        const icon = new LabIcon({
+          name: 'test:percent',
+          svgstr:
+            '<svg xmlns="http://www.w3.org/2000/svg"><stop offset="50%"/></svg>'
+        });
+        let offset: string | null | undefined;
+
+        expect(() => {
+          offset = icon
+            .element({ tag: null })
+            .querySelector('stop')
+            ?.getAttribute('offset');
+        }).not.toThrow();
+        expect(offset).toBe('50%');
+      });
+
+      it('should decode the escapes of a data URL with a percent sign that starts no escape', () => {
+        const icon = new LabIcon({
+          name: 'test:percent-data-url',
+          svgstr:
+            'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cstop offset=%2250%%22/%3E%3C/svg%3E'
+        });
+
+        const stop = icon.element({ tag: null }).querySelector('stop');
+
+        expect(stop?.getAttribute('offset')).toBe('50%');
+      });
+
+      it('should decode an escape of a character of several bytes', () => {
+        const icon = new LabIcon({
+          name: 'test:multibyte-escape',
+          svgstr:
+            'data:image/svg+xml,' +
+            encodeURIComponent(
+              '<svg xmlns="http://www.w3.org/2000/svg"><title>café 50%</title></svg>'
+            )
+        });
+
+        const svg = icon.element({ tag: null });
+
+        expect(svg.querySelector('title')?.textContent).toBe('café 50%');
+      });
+
+      it('should keep an escape that is not UTF-8', () => {
+        const icon = new LabIcon({
+          name: 'test:latin-1-escape',
+          svgstr:
+            '<svg xmlns="http://www.w3.org/2000/svg"><a href="https://example.com/caf%E9"/></svg>'
+        });
+
+        const link = icon.element({ tag: null }).querySelector('a');
+
+        expect(link?.getAttribute('href')).toBe('https://example.com/caf%E9');
       });
     });
 
     describe('#react', () => {
-      it('should set the custom properties of each React copy on its svg', () => {
-        const markup = ReactDOMServer.renderToStaticMarkup(
-          React.createElement(styleGradientIcon.react, { tag: null })
-        );
-        const svg = new DOMParser()
-          .parseFromString(markup, 'text/html')
-          .querySelector('svg')!;
-        const { gradientId } = getStyleGradientData(svg);
-
-        expect(svg.getAttribute('style')).toBe(
-          `--jp-icon-ref-gradient0:url(#${gradientId})`
-        );
-      });
-
       it('should create unique ids for each React render', () => {
         const firstMarkup = ReactDOMServer.renderToStaticMarkup(
           React.createElement(fooIcon.react, { tag: null })
@@ -728,6 +676,282 @@ describe('@jupyterlab/ui-components', () => {
         }
       });
 
+      it('should keep the style of the root of an svg without references', async () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:react-root-style',
+          svgstr:
+            '<svg xmlns="http://www.w3.org/2000/svg" style="opacity:0.5"><rect/></svg>'
+        });
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(React.createElement(icon.react, { tag: null }));
+          });
+
+          expect(host.querySelector('svg')?.getAttribute('style')).toBe(
+            'opacity:0.5'
+          );
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
+
+      it('should give a copy the style of the root before the layout effects of its parent run', async () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:root-style-layout',
+          svgstr:
+            '<svg xmlns="http://www.w3.org/2000/svg" style="opacity: 0.5 !important"><rect/></svg>'
+        });
+        let style: string | null | undefined;
+        // layout effects run after the refs of their children are attached,
+        // and before passive effects
+        const Parent = () => {
+          const ref = React.useRef<SVGElement>(null);
+          React.useLayoutEffect(() => {
+            style = ref.current?.getAttribute('style');
+          }, []);
+          return React.createElement(icon.react, { tag: null, ref });
+        };
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(React.createElement(Parent));
+          });
+
+          expect(style).toBe('opacity: 0.5 !important');
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
+
+      it('should keep the priority of a declaration of the root after a render that changes its custom properties', async () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:root-style-priority',
+          svgstr:
+            '<svg xmlns="http://www.w3.org/2000/svg" style="--test-a: 1; opacity: 0.5 !important"><rect/></svg>'
+        });
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(React.createElement(icon.react, { tag: null }));
+          });
+          await act(async () => {
+            icon.svgstr =
+              '<svg xmlns="http://www.w3.org/2000/svg" style="--test-a: 2; opacity: 0.25 !important"><rect/></svg>';
+          });
+
+          expect(host.querySelector('svg')?.getAttribute('style')).toBe(
+            '--test-a: 2; opacity: 0.25 !important'
+          );
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
+
+      it('should give a copy rendered on the server the custom properties of the root', () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:server-root-style',
+          svgstr:
+            '<svg xmlns="http://www.w3.org/2000/svg" style="--test-a: 1; opacity: 0.5"><rect/></svg>'
+        });
+
+        const markup = ReactDOMServer.renderToStaticMarkup(
+          React.createElement(icon.react, { tag: null })
+        );
+        const svg = new DOMParser()
+          .parseFromString(markup, 'text/html')
+          .querySelector('svg');
+
+        expect(svg?.getAttribute('style')).toBe('--test-a:1');
+      });
+
+      it('should keep a style that code sets on the svg of a copy when the copy renders again', async () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:style-set-by-code',
+          svgstr:
+            '<svg xmlns="http://www.w3.org/2000/svg" style="--test-a: 1"><rect/></svg>'
+        });
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(
+              React.createElement(icon.react, { tag: null, className: 'a' })
+            );
+          });
+          host.querySelector('svg')!.style.setProperty('opacity', '0.5');
+          await act(async () => {
+            root.render(
+              React.createElement(icon.react, { tag: null, className: 'b' })
+            );
+          });
+
+          expect(
+            host.querySelector('svg')?.style.getPropertyValue('opacity')
+          ).toBe('0.5');
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
+
+      it('should keep a style that code sets on the svg of a copy when the svg is replaced', async () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:style-set-by-code-replaced',
+          svgstr:
+            '<svg xmlns="http://www.w3.org/2000/svg" style="opacity:0.5"><rect/></svg>'
+        });
+        const ref = React.createRef<SVGElement>();
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(React.createElement(icon.react, { tag: null, ref }));
+          });
+          ref.current?.style.setProperty('cursor', 'pointer');
+          await act(async () => {
+            icon.svgstr =
+              '<svg xmlns="http://www.w3.org/2000/svg" style="opacity:0.25"><rect/></svg>';
+          });
+
+          expect(ref.current?.style.getPropertyValue('cursor')).toBe('pointer');
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
+
+      it('should join a style that code sets to the style of a replaced svg without an empty declaration', async () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:style-set-by-code-joined',
+          svgstr:
+            '<svg xmlns="http://www.w3.org/2000/svg" style="opacity:0.5"><rect/></svg>'
+        });
+        const ref = React.createRef<SVGElement>();
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(React.createElement(icon.react, { tag: null, ref }));
+          });
+          ref.current?.style.setProperty('cursor', 'pointer');
+          await act(async () => {
+            icon.svgstr =
+              '<svg xmlns="http://www.w3.org/2000/svg" style="opacity:0.25"><rect/></svg>';
+          });
+
+          expect(ref.current?.getAttribute('style')).not.toContain(';;');
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
+
+      it('should give a copy the value of a replaced svg for a property that code set as important', async () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:important-style-replaced',
+          svgstr:
+            '<svg xmlns="http://www.w3.org/2000/svg" style="opacity:0.5"><rect/></svg>'
+        });
+        const ref = React.createRef<SVGElement>();
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(React.createElement(icon.react, { tag: null, ref }));
+          });
+          ref.current?.style.setProperty('cursor', 'pointer', 'important');
+          await act(async () => {
+            icon.svgstr =
+              '<svg xmlns="http://www.w3.org/2000/svg" style="opacity:0.5; cursor: move"><rect/></svg>';
+          });
+
+          // jsdom lets a later declaration win over an important one, so
+          // check that the attribute holds only the declarations of the svg
+          expect(ref.current?.getAttribute('style')).toBe(
+            'opacity:0.5; cursor: move'
+          );
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
+
+      it('should give a copy each custom property of a replaced svg once', async () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:custom-property-replaced',
+          svgstr:
+            '<svg xmlns="http://www.w3.org/2000/svg" style="--test-a: 1"><rect/></svg>'
+        });
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(React.createElement(icon.react, { tag: null }));
+          });
+          await act(async () => {
+            icon.svgstr =
+              '<svg xmlns="http://www.w3.org/2000/svg" style="--test-b: 2"><rect/></svg>';
+          });
+
+          expect(host.querySelector('svg')?.getAttribute('style')).toBe(
+            '--test-b: 2'
+          );
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
+
+      it('should keep a style that a callback ref sets on the svg of a copy', async () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:style-set-by-ref',
+          svgstr:
+            '<svg xmlns="http://www.w3.org/2000/svg" style="opacity:0.25"><rect/></svg>'
+        });
+        const ref = (node: SVGElement | null) => {
+          node?.style.setProperty('opacity', '0.5');
+        };
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(React.createElement(icon.react, { tag: null, ref }));
+          });
+
+          expect(
+            host.querySelector('svg')?.style.getPropertyValue('opacity')
+          ).toBe('0.5');
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
+
       it('should not set data-icon-id on a copy with its own ids', async () => {
         const host = document.createElement('div');
         document.body.appendChild(host);
@@ -741,6 +965,288 @@ describe('@jupyterlab/ui-components', () => {
           expect(host.querySelector('svg')?.hasAttribute('data-icon-id')).toBe(
             false
           );
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
+
+      it('should give the svg of a copy to a ref object', async () => {
+        const ref = React.createRef<SVGElement>();
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(React.createElement(fooIcon.react, { tag: null, ref }));
+          });
+
+          expect(ref.current).toBe(host.querySelector('svg'));
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
+
+      it('should not call a callback ref again when the svg is replaced', async () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:ref-replaced',
+          svgstr:
+            '<svg xmlns="http://www.w3.org/2000/svg" style="opacity:0.5"><rect/></svg>'
+        });
+        const nodes: (SVGElement | null)[] = [];
+        const ref = (node: SVGElement | null) => {
+          nodes.push(node);
+        };
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(React.createElement(icon.react, { tag: null, ref }));
+          });
+          await act(async () => {
+            icon.svgstr =
+              '<svg xmlns="http://www.w3.org/2000/svg" style="opacity:0.25"><rect/></svg>';
+          });
+
+          expect(nodes).toEqual([host.querySelector('svg')]);
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
+
+      it('should give a copy the style of a replaced svg', async () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:style-replaced',
+          svgstr:
+            '<svg xmlns="http://www.w3.org/2000/svg" style="opacity:0.5"><rect/></svg>'
+        });
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(React.createElement(icon.react, { tag: null }));
+          });
+          await act(async () => {
+            icon.svgstr =
+              '<svg xmlns="http://www.w3.org/2000/svg" style="fill-opacity:0.25"><rect/></svg>';
+          });
+
+          expect(host.querySelector('svg')?.getAttribute('style')).toBe(
+            'fill-opacity:0.25'
+          );
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
+
+      it('should remove the style of a copy when the replaced svg has none', async () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:style-removed',
+          svgstr:
+            '<svg xmlns="http://www.w3.org/2000/svg" style="opacity:0.5"><rect/></svg>'
+        });
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(React.createElement(icon.react, { tag: null }));
+          });
+          await act(async () => {
+            icon.svgstr =
+              '<svg xmlns="http://www.w3.org/2000/svg"><rect/></svg>';
+          });
+
+          expect(host.querySelector('svg')?.hasAttribute('style')).toBe(false);
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
+
+      it('should give the svg of a copy to a ref that changes', async () => {
+        const first = React.createRef<SVGElement>();
+        const second = React.createRef<SVGElement>();
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(
+              React.createElement(fooIcon.react, { tag: null, ref: first })
+            );
+          });
+          await act(async () => {
+            root.render(
+              React.createElement(fooIcon.react, { tag: null, ref: second })
+            );
+          });
+
+          expect(second.current).toBe(host.querySelector('svg'));
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
+
+      it('should give the svg of a copy with a root style to a ref that changes', async () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:styled-ref-changes',
+          svgstr:
+            '<svg xmlns="http://www.w3.org/2000/svg" style="opacity:0.5"><rect/></svg>'
+        });
+        const first = React.createRef<SVGElement>();
+        const second = React.createRef<SVGElement>();
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(
+              React.createElement(icon.react, { tag: null, ref: first })
+            );
+          });
+          await act(async () => {
+            root.render(
+              React.createElement(icon.react, { tag: null, ref: second })
+            );
+          });
+
+          expect(second.current).toBe(host.querySelector('svg'));
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
+
+      it('should keep the style of a replaced svg when the ref of a copy changes', async () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:style-replaced-ref-changes',
+          svgstr:
+            '<svg xmlns="http://www.w3.org/2000/svg" style="opacity:0.5"><rect/></svg>'
+        });
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(
+              React.createElement(icon.react, { tag: null, ref: () => null })
+            );
+          });
+          await act(async () => {
+            icon.svgstr =
+              '<svg xmlns="http://www.w3.org/2000/svg" style="opacity:0.25"><rect/></svg>';
+          });
+          await act(async () => {
+            root.render(
+              React.createElement(icon.react, { tag: null, ref: () => null })
+            );
+          });
+
+          expect(host.querySelector('svg')?.getAttribute('style')).toBe(
+            'opacity:0.25'
+          );
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
+
+      it('should not call a callback ref again when a copy without a root style renders again', async () => {
+        const nodes: (SVGElement | null)[] = [];
+        const ref = (node: SVGElement | null) => {
+          nodes.push(node);
+        };
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(
+              React.createElement(fooIcon.react, {
+                tag: null,
+                ref,
+                className: 'a'
+              })
+            );
+          });
+          await act(async () => {
+            root.render(
+              React.createElement(fooIcon.react, {
+                tag: null,
+                ref,
+                className: 'b'
+              })
+            );
+          });
+
+          expect(nodes).toEqual([host.querySelector('svg')]);
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
+
+      it('should give a callback ref a new svg when only the replaced svg has a root style', async () => {
+        const icon = new LabIcon({
+          name: 'test-ui-components:switch-kind',
+          svgstr: '<svg xmlns="http://www.w3.org/2000/svg"><rect/></svg>'
+        });
+        const nodes: (SVGElement | null)[] = [];
+        const ref = (node: SVGElement | null) => {
+          nodes.push(node);
+        };
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(React.createElement(icon.react, { tag: null, ref }));
+          });
+          const first = host.querySelector('svg');
+          await act(async () => {
+            icon.svgstr =
+              '<svg xmlns="http://www.w3.org/2000/svg" style="opacity:0.5"><rect/></svg>';
+          });
+          const second = host.querySelector('svg');
+
+          expect(nodes).toEqual([first, null, second]);
+        } finally {
+          act(() => root.unmount());
+          host.remove();
+        }
+      });
+
+      it('should give the svg of a copy to a callback ref', async () => {
+        const nodes: (SVGElement | null)[] = [];
+        const ref = (node: SVGElement | null) => {
+          nodes.push(node);
+        };
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const root = createRoot(host);
+
+        try {
+          await act(async () => {
+            root.render(React.createElement(fooIcon.react, { tag: null, ref }));
+          });
+
+          expect(nodes).toEqual([host.querySelector('svg')]);
         } finally {
           act(() => root.unmount());
           host.remove();

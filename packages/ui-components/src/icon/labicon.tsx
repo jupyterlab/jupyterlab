@@ -17,6 +17,21 @@ import blankSvgstr from '../../style/debug/blank.svg';
 import refreshSvgstr from '../../style/icons/toolbar/refresh.svg';
 import { LabIconStyle } from '../style';
 import { classes, getReactAttrs } from '../utils';
+import type { ISelectorContext } from './svgstyle';
+import {
+  addInitialValues,
+  edit,
+  parseStyleSheet,
+  renameAnimations,
+  renameDefinitions,
+  rewriteDeclarations,
+  rewriteSelectors,
+  serializeStyleSheet,
+  setStyleText,
+  styleText,
+  urlReferences,
+  XLINK_NAMESPACE
+} from './svgstyle';
 
 export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   /** *********
@@ -502,22 +517,22 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
             return {
               svgReactAttrs: this.svgReactAttrs,
               svgInnerHTML: this.svgInnerHTML,
-              svgStyle: undefined
+              ...Private.rootStyle(svgElement)
             };
           }
 
-          const { clone, properties } = Private.cloneSvg(svgElement);
+          const clone = Private.cloneSvgElement(svgElement);
           return {
             svgReactAttrs: getReactAttrs(clone, { ignore: ['data-icon-id'] }),
             svgInnerHTML: clone.innerHTML,
-            // getReactAttrs skips the style attribute that holds the properties
-            svgStyle: Object.keys(properties).length ? properties : undefined
+            ...Private.rootStyle(clone)
           };
         }, [id]);
         if (!svgData) {
           return <></>;
         }
-        const { svgReactAttrs, svgInnerHTML, svgStyle } = svgData;
+        const { svgReactAttrs, svgInnerHTML, svgStyle, svgProperties } =
+          svgData;
 
         const svgProps = { ...svgReactAttrs };
         if (!tag) {
@@ -531,14 +546,24 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
           });
         }
 
-        const svgComponent = (
-          <svg
-            {...svgProps}
-            style={svgStyle as React.CSSProperties | undefined}
-            dangerouslySetInnerHTML={{ __html: svgInnerHTML }}
-            ref={ref as React.Ref<SVGSVGElement>}
-          />
-        );
+        // getReactAttrs skips the style attribute, so an svg that has one
+        // renders through StyledSvg
+        const svgComponent =
+          svgStyle === null ? (
+            <svg
+              {...svgProps}
+              dangerouslySetInnerHTML={{ __html: svgInnerHTML }}
+              ref={ref as React.Ref<SVGSVGElement>}
+            />
+          ) : (
+            <Private.StyledSvg
+              {...svgProps}
+              svgStyle={svgStyle}
+              svgProperties={svgProperties}
+              dangerouslySetInnerHTML={{ __html: svgInnerHTML }}
+              ref={ref as React.Ref<SVGSVGElement>}
+            />
+          );
 
         if (container) {
           Private.initContainer({ container, className, styleProps, title });
@@ -616,6 +641,8 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
         // mark as a decorative
         svgElement.setAttribute('aria-hidden', 'true');
       }
+
+      Private.prepareSvg(svgElement);
     }
 
     return svgElement;
@@ -796,15 +823,27 @@ export namespace LabIcon {
 }
 
 namespace Private {
-  // the id stops at "(", so a failed match ends before the next "url(" and
-  // the search takes time linear in the length of the text; CSS function
-  // names ignore case, as in "URL(#a)"
-  const URL_ID_REFERENCE = /url\(\s*(['"]?)#([^\s'"()]+)\1\s*\)/gi;
-  const URL_ID_CANDIDATE = /url\(/i;
   // XML cannot contain this character, so it cannot clash with svg content
   const SUFFIX_PLACEHOLDER = '\u0000';
-  const REFERENCE_PROPERTY_PREFIX = '--jp-icon-ref-';
-  const XLINK_NAMESPACE = 'http://www.w3.org/1999/xlink';
+  // the attributes whose value is an id or a list of ids
+  const ID_LIST_ATTRIBUTES = new Set([
+    'aria-activedescendant',
+    'aria-controls',
+    'aria-describedby',
+    'aria-details',
+    'aria-errormessage',
+    'aria-flowto',
+    'aria-labelledby',
+    'aria-owns',
+    'commandfor',
+    'for',
+    'form',
+    'headers',
+    'interestfor',
+    'itemref',
+    'list',
+    'popovertarget'
+  ]);
   const ANIMATION_VALUES = ['values', 'from', 'to', 'by'];
   // an extension that imports LabIcon through a deep path bundles its own
   // copy of this module, so all copies take suffixes from one counter on the
@@ -812,57 +851,151 @@ namespace Private {
   const SUFFIX_COUNTER = Symbol.for(
     '@jupyterlab/ui-components:LabIcon.idSuffixCounter'
   );
-  const idReferencesCache = new WeakMap<Element, IIdReferences | null>();
+  const plans = new WeakMap<Element, IPlan>();
 
   /**
-   * The ids that an svg references itself, found once per parsed svg.
+   * The changes that each copy of an svg makes.
    */
-  interface IIdReferences {
+  interface IPlan {
     /**
-     * Index of each element with a referenced id (0 is the svg node, then
-     * document order), and its id with the suffix placeholder.
+     * Index of each element to change (0 is the svg node, then document
+     * order), the name of an attribute, and its value with the suffix
+     * placeholder.
      */
-    ids: [number, string][];
-    /**
-     * Index of each element holding a reference, the attribute name (null
-     * for the text of a style element), and its value with the placeholder.
-     */
-    references: [number, string | null, string][];
-    /**
-     * Every id of the svg, which a renamed id must not repeat.
-     */
+    attributes: [number, string, string][];
+    /** The ids of the svg and of its selectors, which no new id may repeat. */
     existing: Set<string>;
-    /**
-     * The custom property that a style element reads for each id it uses in
-     * `url(#...)`, and its value with the placeholder.
-     */
+    /** The custom properties of a copy for its style elements. */
     properties: [string, string][];
   }
 
-  export function cloneSvgElement(svgElement: HTMLElement): HTMLElement {
-    return cloneSvg(svgElement).clone;
+  /**
+   * Make on the svg the changes that are the same in every copy, and keep
+   * the changes that each copy makes.
+   */
+  export function prepareSvg(svgElement: Element): void {
+    const plan = planCopies(svgElement);
+    if (plan) {
+      plans.set(svgElement, plan);
+    }
   }
 
   /**
-   * Clone the svg with ids of its own, and give the values of the custom
-   * properties that the clone sets on its root.
+   * Clone the svg with ids and custom properties of its own.
    */
-  export function cloneSvg(svgElement: HTMLElement): {
-    clone: HTMLElement;
-    properties: { [name: string]: string };
-  } {
+  export function cloneSvgElement(svgElement: HTMLElement): HTMLElement {
     const clone = svgElement.cloneNode(true) as HTMLElement;
-    const references = getIdReferences(svgElement);
-    const properties = references ? uniquifySvgIds(clone, references) : {};
-    return { clone, properties };
+    const plan = plans.get(svgElement);
+    if (plan) {
+      uniquifySvgIds(clone, plan);
+    }
+    return clone;
   }
 
   /**
    * Whether each copy of the svg needs its own ids.
    */
   export function hasIdReferences(svgElement: HTMLElement): boolean {
-    return getIdReferences(svgElement) !== null;
+    return plans.has(svgElement);
   }
+
+  /**
+   * The text of the style attribute of the root of an svg, and its custom
+   * properties as a React style, if it has any.
+   */
+  export function rootStyle(svg: HTMLElement): {
+    svgStyle: string | null;
+    svgProperties?: React.CSSProperties;
+  } {
+    const svgStyle = svg.getAttribute('style');
+    if (svgStyle === null) {
+      return { svgStyle };
+    }
+    let svgProperties: { [name: string]: string } | undefined;
+    for (const name of Array.from(svg.style)) {
+      if (name.startsWith('--')) {
+        (svgProperties ??= {})[name] = svg.style.getPropertyValue(name);
+      }
+    }
+    return { svgStyle, svgProperties };
+  }
+
+  const rootStyles = new WeakMap<Element, string>();
+
+  /**
+   * Give the root of a React copy the text of the style attribute of its svg.
+   * A style that code set stays, unless the previous or the new text names
+   * its property.
+   */
+  function setRootStyle(svg: SVGSVGElement | null, text: string): void {
+    if (!svg || rootStyles.get(svg) === text) {
+      return;
+    }
+    const previous = rootStyles.get(svg);
+    rootStyles.set(svg, text);
+    if (previous === undefined) {
+      svg.setAttribute('style', text);
+      return;
+    }
+    // remove the properties of the new text too: the style prop has set
+    // its custom properties already
+    const parsed = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'svg'
+    );
+    for (const declarations of [previous, text]) {
+      parsed.setAttribute('style', declarations);
+      for (const name of Array.from(parsed.style)) {
+        svg.style.removeProperty(name);
+      }
+    }
+    const rest = svg.style.cssText;
+    svg.setAttribute('style', rest ? `${rest} ${text}` : text);
+  }
+
+  /**
+   * The properties of the svg of a React copy whose root has a style.
+   */
+  export interface IStyledSvgProps extends React.SVGAttributes<SVGSVGElement> {
+    /** The text of the style attribute of the root. */
+    svgStyle: string;
+    /** Its custom properties, which markup rendered on the server keeps. */
+    svgProperties?: React.CSSProperties;
+  }
+
+  /**
+   * The svg of a React copy whose root has a style attribute. Its ref sets the
+   * attribute text, with !important and the shorthands that hold var(), when
+   * the svg attaches, before the first paint. An effect sets a new text,
+   * because React warns about a layout effect on the server.
+   */
+  export const StyledSvg = React.forwardRef(
+    (
+      { svgStyle, svgProperties, ...props }: IStyledSvgProps,
+      ref: React.ForwardedRef<SVGSVGElement>
+    ) => {
+      const svgNode = React.useRef<SVGSVGElement | null>(null);
+      const styleText = React.useRef(svgStyle);
+      styleText.current = svgStyle;
+      React.useEffect(() => {
+        setRootStyle(svgNode.current, svgStyle);
+      }, [svgStyle]);
+      const svgRef = React.useCallback(
+        (svg: SVGSVGElement | null) => {
+          svgNode.current = svg;
+          setRootStyle(svg, styleText.current);
+          if (typeof ref === 'function') {
+            return ref(svg);
+          } else if (ref) {
+            ref.current = svg;
+          }
+        },
+        [ref]
+      );
+      return <svg {...props} style={svgProperties} ref={svgRef} />;
+    }
+  );
+  StyledSvg.displayName = 'LabIconStyledSvg';
 
   export function blankElement({
     className = '',
@@ -982,296 +1115,314 @@ namespace Private {
     }
   }
 
-  function uniquifySvgIds(
-    svgNode: HTMLElement,
-    references: IIdReferences
-  ): { [name: string]: string } {
+  function uniquifySvgIds(svgNode: HTMLElement, plan: IPlan): void {
     let suffix = '';
     const withSuffix = (value: string) =>
       value.split(SUFFIX_PLACEHOLDER).join(suffix);
-    const counterHost = window as unknown as Record<symbol, number | undefined>;
     // editors already name ids this way, as Illustrator does with "Layer_1";
     // the separator is "_" because Chromium and WebKit cannot parse an id
     // that holds "-" in animation timing, as in begin="dot-3.click"
     do {
-      const counter = counterHost[SUFFIX_COUNTER] ?? 0;
-      const next = counter >= Number.MAX_SAFE_INTEGER ? 1 : counter + 1;
-      counterHost[SUFFIX_COUNTER] = next;
-      suffix = `_${next.toString(36)}`;
+      suffix = `_${nextCount().toString(36)}`;
     } while (
-      references.ids.some(([, id]) => references.existing.has(withSuffix(id)))
+      plan.attributes.some(
+        ([, name, value]) =>
+          name === 'id' && plan.existing.has(withSuffix(value))
+      )
     );
     const nodes = svgNode.getElementsByTagName('*');
-    const nodeAt = (index: number) =>
-      index === 0 ? svgNode : nodes[index - 1];
-
-    for (const [index, id] of references.ids) {
-      nodeAt(index).setAttribute('id', withSuffix(id));
+    for (const [index, name, value] of plan.attributes) {
+      const node = index === 0 ? svgNode : nodes[index - 1];
+      node.setAttribute(name, withSuffix(value));
     }
-    for (const [index, name, value] of references.references) {
-      if (name === null) {
-        nodeAt(index).textContent = withSuffix(value);
-      } else {
-        nodeAt(index).setAttribute(name, withSuffix(value));
-      }
+    for (const [name, value] of plan.properties) {
+      svgNode.style.setProperty(name, withSuffix(value));
     }
-    const properties: { [name: string]: string } = {};
-    for (const [name, value] of references.properties) {
-      properties[name] = withSuffix(value);
-    }
-    return properties;
-  }
-
-  function getIdReferences(svgElement: HTMLElement): IIdReferences | null {
-    let references = idReferencesCache.get(svgElement);
-    if (references === undefined) {
-      references = findIdReferences(svgElement);
-      idReferencesCache.set(svgElement, references);
-    }
-    return references;
   }
 
   /**
-   * Find the ids that the svg references through `url(#...)`, `href` or
-   * `aria-labelledby`/`aria-describedby`. Other ids keep their value in every
-   * copy, so that CSS and animation timing that use them keep working.
+   * The next value of the counter that all copies of this module share.
    */
-  function findIdReferences(svgNode: HTMLElement): IIdReferences | null {
-    const nodes = [svgNode, ...Array.from(svgNode.getElementsByTagName('*'))];
-    const ids = new Set<string>();
+  function nextCount(): number {
+    const host = window as unknown as Record<symbol, number | undefined>;
+    const count = host[SUFFIX_COUNTER] ?? 0;
+    const next = count >= Number.MAX_SAFE_INTEGER ? 1 : count + 1;
+    host[SUFFIX_COUNTER] = next;
+    return next;
+  }
+
+  /**
+   * Find every id that the svg refers to and the attributes that each copy
+   * changes, and rewrite the style elements of the svg for its copies.
+   */
+  function planCopies(svg: Element): IPlan | null {
+    const nodes = [svg, ...Array.from(svg.getElementsByTagName('*'))];
+    const existing = new Set<string>();
     for (const node of nodes) {
       const id = node.getAttribute('id');
       if (id) {
-        ids.add(id);
+        existing.add(id);
       }
     }
-    if (!ids.size) {
+    const styleNodes = nodes.filter(node => node.localName === 'style');
+    if (!existing.size && !styleNodes.length) {
       return null;
     }
-
     const referenced = new Set<string>();
-    const reference = (id: string) => {
-      referenced.add(id);
-      return `${id}${SUFFIX_PLACEHOLDER}`;
-    };
-    const replaceUrls = (text: string) =>
-      text.replace(URL_ID_REFERENCE, (full, quote, id) =>
-        ids.has(id) ? `url(${quote}#${reference(id)}${quote})` : full
-      );
-    // the rules of a style element apply to the whole page, so they stay the
-    // same in every copy: a url() there reads the renamed id from a custom
-    // property that each copy sets on its root, and keeps the original id for
-    // the same svg shown without LabIcon
-    const properties = new Map<string, string>();
-    const propertyNames = new Map<string, string>();
-    const propertyName = (id: string) => {
-      let name = propertyNames.get(id);
-      if (name === undefined) {
-        // keep only characters that a custom property name allows, and keep
-        // ids such as "a.b" and "a_b" apart
-        const base =
-          REFERENCE_PROPERTY_PREFIX + id.replace(/[^\w\u0080-\uffff-]/g, '_');
-        name = base;
-        for (let n = 2; properties.has(name); n++) {
-          name = `${base}-${n}`;
-        }
-        propertyNames.set(id, name);
-        properties.set(name, `url(#${reference(id)})`);
+    const refer = (id: string): boolean => {
+      if (!existing.has(id)) {
+        return false;
       }
-      return name;
+      referenced.add(id);
+      return true;
     };
-    const replaceStyleUrls = (text: string) =>
-      text.replace(URL_ID_REFERENCE, (full, quote, id) =>
-        ids.has(id)
-          ? `var(${propertyName(id)},url(${quote}#${id}${quote}))`
-          : full
-      );
-
-    const references: [number, string | null, string][] = [];
-    const styles: [number, string, string][] = [];
-    const timings: [number, string, string][] = [];
+    const scope = styleNodes.length ? nextCount().toString() : '';
+    const styles = parseStyles(nodes, styleNodes, scope);
+    const changed = renameReferences(nodes, refer);
+    const properties = rewriteStyleUrls(styles, refer, scope);
+    // every id that a reference names gets the suffix, also one that only a
+    // style element names
     nodes.forEach((node, index) => {
+      const id = node.getAttributeNode('id');
+      if (id && referenced.has(id.value)) {
+        changed.push([index, id, id.value + SUFFIX_PLACEHOLDER]);
+      }
+    });
+    if (styles.length) {
+      const context: ISelectorContext = {
+        scope,
+        ids: new Set(existing),
+        renamed: new Set(
+          changed.filter(([, a]) => a.name === 'id').map(([, a]) => a.value)
+        ),
+        changed: new Set(changed.map(([, a]) => keyOf(a).toLowerCase())),
+        read: new Set(),
+        named: existing,
+        namespaces: new Map()
+      };
+      if (properties.size) {
+        // the root of a copy sets its custom properties in its style
+        context.changed.add('style');
+      }
+      rewriteStyleRules(nodes, styles, context, changed);
+    }
+    if (!referenced.size) {
+      return null;
+    }
+    return {
+      attributes: changed.map(([index, attribute, value]) => [
+        index,
+        attribute.name,
+        value
+      ]),
+      existing,
+      properties: Array.from(properties.values())
+    };
+  }
+
+  /**
+   * Each attribute that refers to an id for which `refer` holds, and its
+   * value in a copy, with the suffix placeholder after each id.
+   */
+  function renameReferences(
+    nodes: Element[],
+    refer: (id: string) => boolean
+  ): [number, Attr, string][] {
+    // as in href="#a"; Chromium ignores the spaces around it
+    const renameFragment = (value: string) => {
+      const trimmed = value.trim();
+      const end = value.indexOf(trimmed) + trimmed.length;
+      return trimmed[0] === '#' && refer(trimmed.slice(1))
+        ? value.slice(0, end) + SUFFIX_PLACEHOLDER + value.slice(end)
+        : value;
+    };
+    const changed: [number, Attr, string][] = [];
+    nodes.forEach((node, index) => {
+      const animated = node.getAttribute('attributeName');
+      const animatesHref = animated === 'href' || !!animated?.endsWith(':href');
       for (const attribute of Array.from(node.attributes)) {
         const { name, value } = attribute;
-        let nextValue = value;
+        let next = value;
         if (
           attribute.localName === 'href' &&
           (attribute.namespaceURI === null ||
             attribute.namespaceURI === XLINK_NAMESPACE)
         ) {
-          if (value.startsWith('#') && ids.has(value.slice(1))) {
-            nextValue = `#${reference(value.slice(1))}`;
-          }
-        } else if (name === 'aria-labelledby' || name === 'aria-describedby') {
-          const tokens = value.split(/\s+/).filter(Boolean);
-          if (tokens.some(id => ids.has(id))) {
-            nextValue = tokens
-              .map(id => (ids.has(id) ? reference(id) : id))
-              .join(' ');
-          }
-        } else if (name === 'begin' || name === 'end') {
-          timings.push([index, name, value]);
-        } else if (
-          ANIMATION_VALUES.includes(name) &&
-          /(?:^|:)href$/.test(node.getAttribute('attributeName') ?? '')
-        ) {
-          // an animation of href, as in values="#frame1;#frame2"
-          nextValue = value.replace(
-            /(^|;)(\s*)#([^;\s]+)/g,
-            (full, separator, space, id) =>
-              ids.has(id) ? `${separator}${space}#${reference(id)}` : full
+          next = renameFragment(value);
+        } else if (ID_LIST_ATTRIBUTES.has(name)) {
+          next = value.replace(/[^\t\n\f\r ]+/g, id =>
+            refer(id) ? id + SUFFIX_PLACEHOLDER : id
           );
-        } else if (URL_ID_CANDIDATE.test(value)) {
-          nextValue = replaceUrls(value);
+        } else if (name === 'begin' || name === 'end') {
+          next = value
+            .split(';')
+            .map(part => renameTiming(part, refer))
+            .join(';');
+        } else if (animatesHref && ANIMATION_VALUES.includes(name)) {
+          // an animation of href, as in values="#frame1;#frame2"
+          next = value.split(';').map(renameFragment).join(';');
+        } else if (value.includes('(')) {
+          next = edit(
+            value,
+            urlReferences(value, refer).map(({ idEnd }) => [
+              idEnd,
+              idEnd,
+              SUFFIX_PLACEHOLDER
+            ])
+          );
         }
-        if (nextValue !== value) {
-          references.push([index, name, nextValue]);
+        if (next !== value) {
+          changed.push([index, attribute, next]);
         }
-      }
-      if (node.tagName.toLowerCase() === 'style' && node.textContent) {
-        styles.push([
-          index,
-          node.textContent,
-          replaceStyleUrls(node.textContent)
-        ]);
       }
     });
-
-    // selectors and animation timing can only be rewritten once all
-    // referenced ids are known
-    for (const [index, text, urlsReplaced] of styles) {
-      const nextText = renameInSelectors(urlsReplaced, referenced);
-      if (nextText !== text) {
-        references.push([index, null, nextText]);
-      }
-    }
-    if (timings.length && referenced.size) {
-      // timing such as begin="dot.click" follows an id renamed for another
-      // reference, also when it escapes "-" or "." as in "fade\-1.end"; ids
-      // that only timing uses keep their value
-      const timingIds = Array.from(referenced, id =>
-        Array.from(id, c =>
-          c === '-' || c === '.' ? `\\\\?\\${c}` : escapeRegExp(c)
-        ).join('')
-      );
-      const timing = new RegExp(
-        `(^|;)(\\s*)(${timingIds.join('|')})(?=\\.)`,
-        'g'
-      );
-      for (const [index, name, value] of timings) {
-        const nextValue = value.replace(
-          timing,
-          (full, separator, space, id) =>
-            `${separator}${space}${id}${SUFFIX_PLACEHOLDER}`
-        );
-        if (nextValue !== value) {
-          references.push([index, name, nextValue]);
-        }
-      }
-    }
-    if (properties.size) {
-      const declarations = Array.from(properties)
-        .map(([name, value]) => `${name}:${value}`)
-        .join(';');
-      // a url() in the style attribute of the root may have rewritten it
-      const rootStyle = references.find(
-        ([index, name]) => index === 0 && name === 'style'
-      );
-      const style = rootStyle?.[2] ?? svgNode.getAttribute('style');
-      const value = style ? `${style};${declarations}` : declarations;
-      if (rootStyle) {
-        rootStyle[2] = value;
-      } else {
-        references.push([0, 'style', value]);
-      }
-    }
-
-    if (!referenced.size) {
-      return null;
-    }
-    const referencedIds: [number, string][] = [];
-    nodes.forEach((node, index) => {
-      const id = node.getAttribute('id');
-      if (id && referenced.has(id)) {
-        referencedIds.push([index, `${id}${SUFFIX_PLACEHOLDER}`]);
-      }
-    });
-    return {
-      ids: referencedIds,
-      references,
-      existing: ids,
-      properties: Array.from(properties)
-    };
+    return changed;
   }
 
   /**
-   * Add the suffix placeholder to the given ids where a selector of the style
-   * sheet names them, as in `#id`, `#a\.b` or `[id="id"]`. Declarations, where
-   * `#abc` is a colour, stay as they are.
+   * Add the placeholder after the id that a SMIL timing value names, as in
+   * "dot.click+1s" or "a\.b.end": the id ends at the first "." that no "\"
+   * escapes. An offset, as in "0.5s" or "-1s", names no id.
    */
-  function renameInSelectors(text: string, ids: Set<string>): string {
-    if (!ids.size) {
-      return text;
+  function renameTiming(value: string, refer: (id: string) => boolean): string {
+    const start = value.indexOf(value.trim());
+    if ('0123456789+-.'.includes(value[start] ?? '0')) {
+      return value;
     }
-    // a selector escapes a character that an identifier cannot hold, as in "a\.b"
-    const escaped = Array.from(ids, id =>
-      Array.from(id, c =>
-        /[\w\u0080-\uffff-]/.test(c) ? c : `\\\\${escapeRegExp(c)}`
-      ).join('')
-    );
-    const idSelector = new RegExp(
-      `#(?:${escaped.join('|')})(?![\\w\\u0080-\\uffff\\\\-])`,
-      'g'
-    );
-    const idAttribute = new RegExp(
-      `(\\[\\s*id\\s*=\\s*(["']?))(${Array.from(ids, escapeRegExp).join('|')})(?=\\2\\s*(?:[iIsS]\\s*)?\\])`,
-      'g'
-    );
-    // inside a quoted attribute value, as in [href="#a.b"], the id is not escaped
-    const quotedId = new RegExp(
-      `^(["'])#(?:${Array.from(ids, escapeRegExp).join('|')})(?=\\1$)`
-    );
-    const rename = (selector: string) =>
-      selector
-        .split(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/)
-        .map((part, i) =>
-          i % 2
-            ? part.replace(quotedId, `$&${SUFFIX_PLACEHOLDER}`)
-            : part.replace(idSelector, `$&${SUFFIX_PLACEHOLDER}`)
-        )
-        .join('')
-        .replace(idAttribute, `$1$3${SUFFIX_PLACEHOLDER}`);
-
-    let result = '';
-    let start = 0;
-    let depth = 0;
-    for (let i = 0; i < text.length; i++) {
-      const c = text[i];
-      if (c === '/' && text[i + 1] === '*') {
-        const end = text.indexOf('*/', i + 2);
-        i = end < 0 ? text.length : end + 1;
-      } else if (c === '"' || c === "'") {
-        i++;
-        while (i < text.length && text[i] !== c) {
-          i += text[i] === '\\' ? 2 : 1;
-        }
-      } else if (c === '(') {
-        depth++;
-      } else if (c === ')') {
-        depth = Math.max(depth - 1, 0);
-      } else if (!depth && (c === '{' || c === '}' || c === ';')) {
-        // the text before "{" is a selector or an at-rule, the text before
-        // ";" or "}" is a declaration
-        const statement = text.slice(start, i);
-        result += (c === '{' ? rename(statement) : statement) + c;
-        start = i + 1;
+    let id = '';
+    for (let i = start; i < value.length; i++) {
+      if (value[i] === '.') {
+        return refer(id)
+          ? value.slice(0, i) + SUFFIX_PLACEHOLDER + value.slice(i)
+          : value;
       }
+      id += value[i] === '\\' ? (value[++i] ?? '') : value[i];
     }
-    return result + text.slice(start);
+    return value;
   }
 
-  function escapeRegExp(text: string): string {
-    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  /**
+   * A style element of the svg that the browser parses, its style sheet, and
+   * the rules that give initial values of registered properties.
+   */
+  interface IStyle {
+    node: Element;
+    sheet: CSSStyleSheet;
+    keyframes: Map<string, string>;
+    initialValues: string[];
+  }
+
+  /**
+   * Parse the style elements of the svg, with the names that they define for
+   * keyframes and layers made local to the icon, also in the style attributes
+   * of the svg. jsdom parses none: then a style keeps its text, and an id that
+   * only a style names keeps its value.
+   */
+  function parseStyles(
+    nodes: Element[],
+    styleNodes: Element[],
+    scope: string
+  ): IStyle[] {
+    const [texts, keyframes] = renameDefinitions(
+      styleNodes.map(styleText),
+      scope,
+      nodes[0].getAttribute('data-icon-scope')
+    );
+    const styles: IStyle[] = [];
+    styleNodes.forEach((node, index) => {
+      const sheet = parseStyleSheet(texts[index]);
+      if (sheet) {
+        styles.push({ node, sheet, keyframes, initialValues: [] });
+      }
+    });
+    if (styles.length && keyframes.size) {
+      for (const node of nodes) {
+        if (node instanceof SVGElement || node instanceof HTMLElement) {
+          renameAnimations(node.style, keyframes);
+        }
+      }
+    }
+    return styles;
+  }
+
+  /**
+   * Make each url() of the rules that names an id read the id of a copy from
+   * a custom property, which the copy sets on its root. Give the name and the
+   * value of each property.
+   */
+  function rewriteStyleUrls(
+    styles: IStyle[],
+    refer: (id: string) => boolean,
+    scope: string
+  ): Map<string, [string, string]> {
+    const properties = new Map<string, [string, string]>();
+    const rewriteUrls = (text: string) =>
+      edit(
+        text,
+        urlReferences(text, refer).map(({ id, start, end, idEnd }) => {
+          let property = properties.get(id);
+          if (!property) {
+            const url =
+              text.slice(start, idEnd) +
+              SUFFIX_PLACEHOLDER +
+              text.slice(idEnd, end);
+            property = [`--jp-icon-ref-${scope}-${properties.size}`, url];
+            properties.set(id, property);
+          }
+          // the url() itself where the root has no custom properties
+          return [start, end, `var(${property[0]},${text.slice(start, end)})`];
+        })
+      );
+    for (const style of styles) {
+      style.initialValues = rewriteDeclarations(
+        style.sheet,
+        rewriteUrls,
+        scope,
+        style.keyframes
+      );
+    }
+    return properties;
+  }
+
+  /**
+   * An attribute is known by its name, or by "xlink-" and its local name.
+   */
+  function keyOf(attribute: Attr): string {
+    return attribute.namespaceURI === XLINK_NAMESPACE
+      ? `xlink-${attribute.localName}`
+      : attribute.name;
+  }
+
+  /**
+   * Rewrite the rules so that they style only elements of the copies, as they
+   * style the svg shown inline. The rules are the same in every copy.
+   */
+  function rewriteStyleRules(
+    nodes: Element[],
+    styles: IStyle[],
+    context: ISelectorContext,
+    changed: [number, Attr, string][]
+  ): void {
+    for (const { node, sheet, initialValues } of styles) {
+      rewriteSelectors(sheet, context);
+      addInitialValues(sheet, context.scope, initialValues);
+      setStyleText(node, serializeStyleSheet(sheet));
+    }
+    for (const node of nodes) {
+      node.setAttribute('data-icon-scope', context.scope);
+    }
+    // a selector that reads an attribute that copies change reads its value
+    // in the svg from data-original-*
+    for (const [index, attribute] of changed) {
+      const key = keyOf(attribute);
+      if (context.read.has(key.toLowerCase())) {
+        nodes[index].setAttribute(`data-original-${key}`, attribute.value);
+      }
+    }
+    const rootStyle = nodes[0].getAttribute('style');
+    if (rootStyle !== null && context.read.has('style')) {
+      nodes[0].setAttribute('data-original-style', rootStyle);
+    }
   }
 
   /**
@@ -1289,7 +1440,16 @@ namespace Private {
   export function svgstrShim(svgstr: string, strict: boolean = true): string {
     // decode any uri escaping, condense leading/lagging whitespace,
     // then match to raw svg string
-    const [, base64, raw] = decodeURIComponent(svgstr)
+    // each run of escapes on its own, so that a "%" that starts no escape, as
+    // in offset="50%", leaves the escapes around it to be decoded
+    const decoded = svgstr.replace(/(?:%[\da-f]{2})+/gi, run => {
+      try {
+        return decodeURIComponent(run);
+      } catch {
+        return run;
+      }
+    });
+    const [, base64, raw] = decoded
       .replace(
         // \s includes \n, so />\s*\n/ is ambiguous and causes super-linear backtracking.
         // The explicit list is \s minus \n, ensuring only one way to reach the \n.
