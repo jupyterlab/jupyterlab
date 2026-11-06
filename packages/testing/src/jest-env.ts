@@ -19,5 +19,7 @@ export default class FixJSDOMEnvironment extends JSDOMEnvironment {
     this.global.Response = Response;
     // While jsdom has it's own File, it clashes with instance checks in fetch, so we use one from Node.js
     this.global.File = File;
+    // FIXME https://github.com/jsdom/jsdom/issues/3363
+    this.global.structuredClone = structuredClone;
   }
 }
