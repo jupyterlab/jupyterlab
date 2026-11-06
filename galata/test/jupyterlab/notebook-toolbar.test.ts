@@ -183,6 +183,11 @@ test.describe('Notebook Toolbar using system clipboard', () => {
     await page.notebook.clickToolbarItem('copy');
     await page.notebook.selectCells(0);
     await page.notebook.clickToolbarItem('paste');
+    // The paste inserts the cell after the clipboard read.
+    await expect(page.locator('.jp-Notebook-cell')).toHaveCount(4);
+    await expect(
+      page.locator('.jp-Notebook-cell.jp-mod-active .jp-cell-toolbar')
+    ).toBeVisible();
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
@@ -201,10 +206,14 @@ test.describe('Notebook Toolbar using system clipboard', () => {
     // Cut cell to populate clipboard
     await page.notebook.selectCells(0);
     await page.notebook.clickToolbarItem('cut');
+    // The cut deletes the cell after the clipboard write.
+    await expect(page.locator('.jp-Notebook-cell')).toHaveCount(2);
 
     const imageName = 'paste-cell.png';
     await page.notebook.selectCells(1);
     await page.notebook.clickToolbarItem('paste');
+    // The paste inserts the cell after the clipboard read.
+    await expect(page.locator('.jp-Notebook-cell')).toHaveCount(3);
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
     await expect(
@@ -254,6 +263,162 @@ test('Toolbar items act on owner widget', async ({ page }) => {
   const classlistEnd = await tab1.getAttribute('class');
   expect(classlistEnd.split(' ')).toContain('jp-mod-current');
   expect(await page.notebook.getCellCount()).toEqual(2);
+});
+
+test('Cell toolbar items follow the active cell of their own notebook', async ({
+  page,
+  tmpPath
+}) => {
+  const notebook = (sources: string[]) =>
+    JSON.stringify({
+      cells: sources.map((source, index) => ({
+        cell_type: 'code',
+        execution_count: null,
+        id: `cell-${index}`,
+        metadata: {},
+        outputs: [],
+        source
+      })),
+      metadata: {
+        kernelspec: {
+          display_name: 'Python 3 (ipykernel)',
+          language: 'python',
+          name: 'python3'
+        }
+      },
+      nbformat: 4,
+      nbformat_minor: 5
+    });
+  await page.contents.uploadContent(
+    notebook(['a = 1', 'b = 2']),
+    'text',
+    `${tmpPath}/two-cells.ipynb`
+  );
+  await page.contents.uploadContent(
+    notebook(['c = 3']),
+    'text',
+    `${tmpPath}/one-cell.ipynb`
+  );
+
+  // Given the second cell of a notebook active and a single-cell notebook
+  // next to it
+  await page.notebook.openByPath(`${tmpPath}/two-cells.ipynb`);
+  await page.notebook.activate('two-cells.ipynb');
+  await page.notebook.selectCells(1);
+  await page.evaluate(async path => {
+    await window.jupyterapp.commands.execute('docmanager:open', {
+      path,
+      options: { mode: 'split-right' }
+    });
+  }, `${tmpPath}/one-cell.ipynb`);
+
+  // When the single-cell notebook has the focus
+  await page.notebook.activate('one-cell.ipynb');
+
+  // Then the cell toolbar of the first notebook still allows moving its cell up
+  const panel = await page.activity.getPanelLocator('two-cells.ipynb');
+  await expect(
+    panel!.locator('.jp-cell-toolbar [data-command="notebook:move-cell-up"]')
+  ).toHaveAttribute('aria-disabled', 'false');
+
+  // and the run all above and run all below commands, given the id of the
+  // first notebook, follow its active cell
+  const widgetId = await panel!.getAttribute('id');
+  const isEnabled = (command: string) =>
+    page.evaluate(
+      ({ command, widgetId }) =>
+        window.jupyterapp.commands.isEnabled(command, { widgetId }),
+      { command, widgetId }
+    );
+  expect(await isEnabled('notebook:run-all-above')).toBe(true);
+  expect(await isEnabled('notebook:run-all-below')).toBe(false);
+});
+
+test('Restart and clear outputs acts on the notebook given by its widget id', async ({
+  page,
+  tmpPath
+}) => {
+  const notebook = JSON.stringify({
+    cells: [
+      {
+        cell_type: 'code',
+        execution_count: 1,
+        id: 'cell-0',
+        metadata: {},
+        outputs: [{ output_type: 'stream', name: 'stdout', text: ['out\n'] }],
+        source: 'print("out")'
+      }
+    ],
+    metadata: {
+      kernelspec: {
+        display_name: 'Python 3 (ipykernel)',
+        language: 'python',
+        name: 'python3'
+      }
+    },
+    nbformat: 4,
+    nbformat_minor: 5
+  });
+  await page.contents.uploadContent(
+    notebook,
+    'text',
+    `${tmpPath}/target.ipynb`
+  );
+  await page.contents.uploadContent(notebook, 'text', `${tmpPath}/other.ipynb`);
+
+  // Given two notebooks with an output side by side, the second one focused
+  await page.notebook.openByPath(`${tmpPath}/target.ipynb`);
+  await page.notebook.activate('target.ipynb');
+  await page.evaluate(async path => {
+    await window.jupyterapp.commands.execute('docmanager:open', {
+      path,
+      options: { mode: 'split-right' }
+    });
+  }, `${tmpPath}/other.ipynb`);
+  await page.notebook.activate('other.ipynb');
+  const target = await page.activity.getPanelLocator('target.ipynb');
+  const other = await page.activity.getPanelLocator('other.ipynb');
+
+  // When the command runs with the widget id of the first notebook
+  const widgetId = await target!.getAttribute('id');
+  const executed = page.evaluate(async widgetId => {
+    await window.jupyterapp.commands.execute('notebook:restart-clear-output', {
+      widgetId
+    });
+  }, widgetId);
+  await page.locator('.jp-Dialog .jp-mod-accept').click();
+  await executed;
+
+  // Then only the first notebook loses its output
+  await expect(target!.locator('.jp-OutputArea-output')).toHaveCount(0);
+  await expect(other!.locator('.jp-OutputArea-output')).toHaveCount(1);
+});
+
+test.describe('Notebook command in the top bar', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/application-extension:top-bar': {
+        toolbar: [
+          {
+            name: 'insert-cell',
+            command: 'notebook:insert-cell-below',
+            rank: 5
+          }
+        ]
+      }
+    }
+  });
+
+  test('should act on the current notebook', async ({ page }) => {
+    await page.notebook.createNew(fileName);
+
+    await page
+      .locator('#jp-top-bar [data-command="notebook:insert-cell-below"]')
+      .click();
+
+    expect(await page.notebook.getCellCount()).toEqual(2);
+  });
 });
 
 test.describe('Reactive toolbar', () => {
@@ -400,4 +565,59 @@ test.describe('Reactive toolbar', () => {
 
     await expect(toolbar).toHaveScreenshot(imageName);
   });
+
+  test('Hiding an item should bring back the items from the popup', async ({
+    page
+  }) => {
+    const toolbar = page.locator('.jp-NotebookPanel-toolbar');
+    const opener = toolbar.locator('.jp-Toolbar-responsive-opener');
+    const item = toolbar.locator('[data-jp-item-name="restart-and-run"]');
+    // Wide enough to push the next items to the popup, not to go there itself.
+    await item.evaluate(node => {
+      node.style.minWidth = '350px';
+    });
+    await expect(opener).toBeVisible();
+
+    await item.evaluate(node => {
+      node.style.display = 'none';
+    });
+
+    await expect(opener).toBeHidden();
+  });
+
+  test('Adding padding to an item should move items to the popup', async ({
+    page
+  }) => {
+    const toolbar = page.locator('.jp-NotebookPanel-toolbar');
+    const opener = toolbar.locator('.jp-Toolbar-responsive-opener');
+    await expect(opener).toBeHidden();
+
+    await toolbar
+      .locator('[data-jp-item-name="restart-and-run"]')
+      .evaluate(node => {
+        node.style.paddingRight = '600px';
+      });
+
+    await expect(opener).toBeVisible();
+  });
+});
+
+test('Reactive toolbar should move items to the popup when the kernel name gets longer', async ({
+  page
+}) => {
+  await page.notebook.createNew(fileName, { kernel: null });
+  // At this width "No Kernel" fits in the toolbar, "Python 3 (ipykernel)" does not.
+  await page.sidebar.setWidth(430);
+  const toolbar = page.locator('.jp-NotebookPanel-toolbar');
+  const opener = toolbar.locator('.jp-Toolbar-responsive-opener');
+  await expect(opener).toBeHidden();
+
+  await toolbar.getByTitle('Switch kernel').click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByRole('combobox').selectOption('{"name":"python3"}');
+  await dialog
+    .getByRole('button', { name: 'Select Kernel', exact: true })
+    .click();
+
+  await expect(opener).toBeVisible();
 });

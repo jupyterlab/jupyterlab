@@ -447,7 +447,7 @@ jupyter lab build
 ### Frequent issues
 
 :::{important}
-On Windows, symbolic links need to be activated on Windows 10 or above for Python version 3.8 or higher
+On Windows, symbolic links need to be activated on Windows 10 or above
 by activating the 'Developer Mode'. That may not be allowed by your administrators.
 See [Activate Developer Mode on Windows](https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development)
 for instructions.
@@ -578,6 +578,35 @@ function to get a `Promise` for a `requestAnimationFrame`. We
 sometimes have to set a sentinel value inside a `Promise` and then
 check that the sentinel was set if we need a promise to run without
 blocking.
+
+#### Grouping Tests
+
+Group the tests of a spec file by the code that they test. The outer
+`describe` names the package, the next one names the class, and the
+innermost one names the member under test, as `#property` or
+`#method()`. For example, in `packages/notebook/test/model.spec.ts`:
+
+```typescript
+describe('@jupyterlab/notebook', () => {
+  describe('NotebookModel', () => {
+    describe('#constructor()', () => {
+      it('should create a notebook model', () => {
+        // ...
+      });
+    });
+
+    describe('#metadataChanged', () => {
+      it('should be emitted when a metadata field changes', () => {
+        // ...
+      });
+    });
+  });
+});
+```
+
+Write the behavior in the `it('should ...')` text. Instead of a group
+named after a topic, such as `describe('id references')`, put each test
+under the member that it tests.
 
 ## Internationalization
 
@@ -862,8 +891,8 @@ provides additional architecture information.
 
 ## The NPM Packages
 
-The repository consists of many npm packages that are managed using the
-lerna build tool. The npm package source files are in the `packages/`
+The repository consists of many npm packages that are managed as Yarn
+workspaces. The npm package source files are in the `packages/`
 subdirectory.
 
 ### Build the NPM Packages from Source

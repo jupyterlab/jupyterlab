@@ -867,7 +867,7 @@ export class SessionContext implements ISessionContext {
           const session = manager.connectTo({ model });
           this._handleNewSession(session);
         } catch (err) {
-          void this._handleSessionError(err);
+          void this._handleSessionError(err as ServerConnection.ResponseError);
           return Promise.reject(err);
         }
       }
@@ -970,7 +970,7 @@ export class SessionContext implements ISessionContext {
         await this._session.changeKernel(model);
       } catch (err) {
         this._isChangingKernel = false;
-        void this._handleSessionError(err);
+        void this._handleSessionError(err as ServerConnection.ResponseError);
         throw err;
       }
       this._isChangingKernel = false;
@@ -1015,7 +1015,7 @@ export class SessionContext implements ISessionContext {
       }
       return this._handleNewSession(session);
     } catch (err) {
-      void this._handleSessionError(err);
+      void this._handleSessionError(err as ServerConnection.ResponseError);
       throw err;
     }
   }
@@ -1566,9 +1566,10 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
         restartBtn
       ],
       checkbox: {
-        label: trans.__('Do not ask me again.'),
+        label: trans.__('Do not ask me again for now.'),
         caption: trans.__(
-          'If checked, the kernel will restart without confirmation prompt in the future; you can change this back in the settings.'
+          'Applies until %1 is closed or the page is reloaded. To never ask, enable "Skip kernel restart Dialog" in the Kernel dialogs settings.',
+          sessionContext.name
         )
       }
     });

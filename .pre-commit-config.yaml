@@ -20,7 +20,6 @@ repos:
       - id: debug-statements
       - id: check-builtin-literals
       - id: trailing-whitespace
-        exclude: .bumpversion.cfg
       - id: check-merge-conflict
       - id: check-symlinks
       - id: mixed-line-ending
