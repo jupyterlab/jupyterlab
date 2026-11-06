@@ -414,6 +414,17 @@ export class DirListing extends Widget {
     const pathsToPaste = [...this._clipboard];
     const pasteRevision = this._clipboardRevision;
 
+    // Remove any cut modifiers.
+    for (const item of this._items) {
+      item.classList.remove(CUT_CLASS);
+    }
+
+    // Empty the clipboard while pasting, so that pasting again before this
+    // paste ends does not move or copy the same items a second time.
+    this._clipboard.length = 0;
+    this._isCut = false;
+    this.removeClass(CLIPBOARD_CLASS);
+
     const operations = pathsToPaste.map(async path => {
       if (isCut) {
         const localPath = this._manager.services.contents.localPath(path);
@@ -448,31 +459,11 @@ export class DirListing extends Widget {
       }
     }
 
-    if (isCut) {
-      this._items.forEach((itemNode, i) => {
-        const item = this._sortedItems[i];
-        if (item && successfulPaths.has(item.path)) {
-          itemNode.classList.remove(CUT_CLASS);
-        }
-      });
-    }
-
+    // Put back the items that were not pasted, unless a cut or a copy
+    // replaced them in the meantime.
     if (this._clipboardRevision === pasteRevision) {
-      if (isCut) {
-        this._clipboard = this._clipboard.filter(
-          path => !successfulPaths.has(path)
-        );
-        if (this._clipboard.length === 0) {
-          this._isCut = false;
-          this.removeClass(CLIPBOARD_CLASS);
-          for (const item of this._items) {
-            item.classList.remove(CUT_CLASS);
-          }
-        }
-      } else if (successfulPaths.size === pathsToPaste.length) {
-        this._clipboard.length = 0;
-        this.removeClass(CLIPBOARD_CLASS);
-      }
+      this._clipboard = pathsToPaste.filter(path => !successfulPaths.has(path));
+      this._isCut = isCut && this._clipboard.length > 0;
     }
 
     if (errors.length > 0) {

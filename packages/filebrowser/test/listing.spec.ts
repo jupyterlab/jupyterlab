@@ -238,6 +238,24 @@ describe('filebrowser/listing', () => {
       });
     });
 
+    describe('#copy()', () => {
+      it('should make paste() copy the items after a cut', async () => {
+        dirListing.selectNext();
+        dirListing.cut();
+        dirListing.selectNext();
+        dirListing.copy();
+        const renameSpy = jest.spyOn(dirListing.model.manager, 'rename');
+        const copySpy = jest
+          .spyOn(dirListing.model.manager, 'copy')
+          .mockResolvedValue({} as any);
+
+        await dirListing.paste();
+
+        expect(copySpy).toHaveBeenCalledTimes(1);
+        expect(renameSpy).not.toHaveBeenCalled();
+      });
+    });
+
     describe('#paste()', () => {
       it('should prompt to overwrite when pasting cut item over existing file', async () => {
         jest.spyOn(dirListing.model.manager, 'rename').mockRejectedValueOnce({
@@ -261,7 +279,7 @@ describe('filebrowser/listing', () => {
         overwriteSpy.mockRestore();
       });
 
-      it('should preserve clipboard if paste operation fails or is cancelled', async () => {
+      it('should keep the clipboard when the overwrite is cancelled', async () => {
         jest.spyOn(dirListing.model.manager, 'rename').mockRejectedValueOnce({
           response: { status: 409 }
         });
@@ -277,6 +295,43 @@ describe('filebrowser/listing', () => {
 
         expect(dirListing['_clipboard']).toEqual(originalClipboard);
         expect(dirListing['_isCut']).toBe(true);
+      });
+
+      it('should keep the clipboard when the paste fails', async () => {
+        jest.spyOn(dirListing.model.manager, 'rename').mockRejectedValueOnce({
+          response: { status: 500 },
+          message: 'Server error'
+        });
+
+        dirListing.selectNext();
+        dirListing.cut();
+        const originalClipboard = [...dirListing['_clipboard']];
+
+        const pastePromise = dirListing.paste();
+        await dismissDialog();
+        await pastePromise;
+
+        expect(dirListing['_clipboard']).toEqual(originalClipboard);
+        expect(dirListing['_isCut']).toBe(true);
+      });
+
+      it('should ignore a second paste while the first is pending', async () => {
+        dirListing.selectNext();
+        dirListing.cut();
+        let resolveRename: () => void = () => void 0;
+        const renamePromise = new Promise<any>(resolve => {
+          resolveRename = () => resolve({} as any);
+        });
+        const renameSpy = jest
+          .spyOn(dirListing.model.manager, 'rename')
+          .mockImplementation(() => renamePromise);
+
+        const firstPaste = dirListing.paste();
+        const secondPaste = dirListing.paste();
+        resolveRename();
+        await Promise.all([firstPaste, secondPaste]);
+
+        expect(renameSpy).toHaveBeenCalledTimes(1);
       });
 
       it('should clear clipboard after successful cut and paste', async () => {
