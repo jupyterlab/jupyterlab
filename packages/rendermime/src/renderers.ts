@@ -186,6 +186,11 @@ export async function renderImage(
   if (typeof width === 'number') {
     img.width = width;
   }
+  if (typeof width === 'number' && typeof height === 'number') {
+    // `height: auto` from the style sheet then keeps this ratio, not the
+    // ratio of the image data.
+    img.style.aspectRatio = `${width} / ${height}`;
+  }
 
   if (needsBackground === 'light') {
     img.classList.add('jp-needs-light-background');
