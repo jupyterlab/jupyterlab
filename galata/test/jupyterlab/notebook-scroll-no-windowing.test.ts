@@ -353,9 +353,9 @@ test.describe('Notebook scroll on execution (no windowing)', () => {
       return window.jupyterapp.commands.execute('notebook:clear-cell-output');
     });
 
-    // Position the viewport over the top of the third cell (which has
-    // a long existing output, providing space to scroll into)
-    await positionCellPartiallyBelowViewport(page, notebook!, thirdCell!, 1);
+    // Show the top of the third cell at the bottom of the viewport. Its long
+    // existing output, taller than the viewport, provides space to scroll into.
+    await positionCellPartiallyBelowViewport(page, notebook!, thirdCell!, 0.2);
 
     // Start running the second cell with advance, without waiting for it
     const execution = page.evaluate(() => {
