@@ -111,17 +111,20 @@ describe('@jupyterlab/mermaid', () => {
         const markdown = renderedMarkdown(
           await manager.renderFigure('graph TD; A --> B;')
         );
+        // The cell that shows the Markdown again is in the document.
+        const cell = document.createElement('div');
+        document.body.appendChild(cell);
 
         try {
           await themes.setTheme('JupyterLab Dark');
-          document.body.appendChild(markdown);
+          cell.appendChild(markdown);
           await new Promise(resolve => setTimeout(resolve, 0));
 
           expect(decodeURIComponent(markdown.innerHTML)).toContain(
             'data-theme="dark"'
           );
         } finally {
-          markdown.remove();
+          cell.remove();
           manager.dispose();
         }
       });
