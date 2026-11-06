@@ -278,7 +278,8 @@ namespace Private {
       { SafeHandler },
       { HTMLHandler },
       { browserAdaptor },
-      { AssistiveMmlHandler }
+      { AssistiveMmlHandler },
+      { MathJaxMhchemFontExtension }
     ] = await Promise.all([
       import('@mathjax/src/mjs/mathjax.js'),
       import('@mathjax/src/mjs/output/chtml.js'),
@@ -288,7 +289,8 @@ namespace Private {
       import('@mathjax/src/mjs/ui/safe/SafeHandler.js'),
       import('@mathjax/src/mjs/handlers/html/HTMLHandler.js'),
       import('@mathjax/src/mjs/adaptors/browserAdaptor.js'),
-      import('@mathjax/src/mjs/a11y/assistive-mml.js')
+      import('@mathjax/src/mjs/a11y/assistive-mml.js'),
+      import('@mathjax/mathjax-mhchem-font-extension/mjs/chtml.js')
     ]);
 
     mathjax.handlers.register(
@@ -300,6 +302,8 @@ namespace Private {
         // Font faces are bundled through fonts.css.
       }
     }
+    // The mhchem arrows and bonds are in a separate font extension.
+    LocalFont.addExtension(MathJaxMhchemFontExtension);
 
     // Share the output jax so delimiter configurations use the same stylesheet.
     const chtml = new CHTML({ fontData: new LocalFont() });

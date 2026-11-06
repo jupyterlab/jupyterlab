@@ -104,6 +104,15 @@ describe('@jupyterlab/mathjax-extension', () => {
         );
       });
 
+      it('should draw mhchem reaction arrows with a bundled font', async () => {
+        const host = document.createElement('div');
+        host.textContent = '$\\ce{A -> B <=> C}$';
+        document.body.appendChild(host);
+        await typesetter.typeset(host);
+        expect(host.querySelector('mjx-container')).not.toBeNull();
+        expect(host.querySelector('mjx-utext')).toBeNull();
+      });
+
       it('should share output styles across delimiter configurations', async () => {
         const other = new MathJaxTypesetter({ dollarInlineMath: false });
 

@@ -4181,6 +4181,7 @@ __metadata:
     "@jupyterlab/rendermime": ^4.7.0-beta.0
     "@jupyterlab/testing": ^4.7.0-beta.0
     "@jupyterlab/translation": ^4.7.0-beta.0
+    "@mathjax/mathjax-mhchem-font-extension": ^4.1.1
     "@mathjax/mathjax-tex-font": ^4.1.1
     "@mathjax/src": ^4.1.1
     "@types/jest": ^29.2.0
@@ -5709,6 +5710,13 @@ __metadata:
   version: 1.0.2
   resolution: "@marijn/find-cluster-break@npm:1.0.2"
   checksum: 0d836de25e04d58325813401ef3c2d34caf040da985a5935fcbc9d84e7b47a21bdb15f57d70c2bf0960bd29ed3dbbb1afd00cdd0fc4fafbee7fd0ffe7d508ae1
+  languageName: node
+  linkType: hard
+
+"@mathjax/mathjax-mhchem-font-extension@npm:^4.1.1":
+  version: 4.1.3
+  resolution: "@mathjax/mathjax-mhchem-font-extension@npm:4.1.3"
+  checksum: dbcaaa90e7e4c44f8f8ee3da257b5cb77862c9a6bd6b1901f477ebaf10af5036c8cbf0b172032958f0a800c6e71ed838516f7055f7b28d6d6a2305d07e04ec8f
   languageName: node
   linkType: hard
 

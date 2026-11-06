@@ -156,3 +156,17 @@
   src: url('~@mathjax/mathjax-tex-font/chtml/woff2/mjx-tex-s4.woff2')
     format('woff2');
 }
+
+@font-face /* MJX-MHC-M */ {
+  font-display: swap;
+  font-family: MJX-MHC-M;
+  src: url('~@mathjax/mathjax-mhchem-font-extension/chtml/woff2/mjx-mhc-m.woff2')
+    format('woff2');
+}
+
+@font-face /* MJX-MHC-N */ {
+  font-display: swap;
+  font-family: MJX-MHC-N;
+  src: url('~@mathjax/mathjax-mhchem-font-extension/chtml/woff2/mjx-mhc-n.woff2')
+    format('woff2');
+}

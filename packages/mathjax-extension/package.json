@@ -51,6 +51,7 @@
     "@jupyterlab/application": "^4.7.0-beta.0",
     "@jupyterlab/rendermime": "^4.7.0-beta.0",
     "@jupyterlab/translation": "^4.7.0-beta.0",
+    "@mathjax/mathjax-mhchem-font-extension": "^4.1.1",
     "@mathjax/mathjax-tex-font": "^4.1.1",
     "@mathjax/src": "^4.1.1"
   },
