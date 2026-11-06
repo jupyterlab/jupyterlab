@@ -153,7 +153,7 @@ export class ProviderReconciliator implements IProviderReconciliator {
    * the response for a completer request before timeout,
    * the result of this provider will be ignored.
    *
-   * @param {CompletionHandler.IRequest} request - The completion request.
+   * @param request - The completion request.
    */
   async fetch(
     request: CompletionHandler.IRequest,

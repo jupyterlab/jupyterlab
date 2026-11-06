@@ -475,7 +475,7 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
       if (props.showModifiedFromDefault) {
         /**
          * Determine if the field has been modified.
-         * Schema Id is formatted as 'root_<field name>.<nested field name>'
+         * Schema Id is formatted as `root_<field name>.<nested field name>`
          * This logic parses out the field name to find the default value
          * before determining if the field has been modified.
          */

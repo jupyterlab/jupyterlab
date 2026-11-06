@@ -46,9 +46,6 @@ export interface INotebookTools extends Widget {
   addSection(options: NotebookTools.IAddSectionOptions): void;
 }
 
-/**
- * The namespace for NotebookTools class statics.
- */
 export namespace INotebookTools {
   /**
    * The options used to add an item to the notebook tools.
@@ -139,9 +136,6 @@ export interface INotebookTracker extends IWidgetTracker<NotebookPanel> {
   readonly selectionChanged: ISignal<this, void>;
 }
 
-/**
- * Notebook cell executor namespace
- */
 export namespace INotebookCellExecutor {
   /**
    * Execution options for notebook cell executor.

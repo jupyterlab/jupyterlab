@@ -61,7 +61,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   /**
    * Set provider timeout.
    *
-   * @param {number} timeout - value of timeout in millisecond.
+   * @param timeout - value of timeout in millisecond.
    */
   setTimeout(timeout: number): void {
     this._timeout = timeout;
@@ -98,7 +98,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   /**
    * Register a completer provider with the manager.
    *
-   * @param {ICompletionProvider} provider - the provider to be registered.
+   * @param provider - the provider to be registered.
    */
   registerProvider(provider: ICompletionProvider): void {
     const identifier = provider.identifier;
@@ -140,7 +140,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
    * Activate the providers by id, the list of ids is populated from user setting.
    * The non-existing providers will be discarded.
    *
-   * @param {Array<string>} providerIds - Array of strings with ids of provider
+   * @param providerIds - Array of strings with ids of provider
    */
   activateProvider(providerIds: Array<string>): void {
     this._activeProviders = new Set([]);
@@ -237,7 +237,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   /**
    * Activate `select` command in the widget with provided id.
    *
-   * @param {string} id - the id of notebook panel, console panel or code editor.
+   * @param id - the id of notebook panel, console panel or code editor.
    */
   select(id: string): void {
     const handler = this._panelHandlers.get(id);
@@ -318,7 +318,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
    * The `isApplicable` method of provider is used to filter out the providers
    * which can not be used with provided context.
    *
-   * @param {ICompletionContext} completerContext - the current completer context
+   * @param completerContext - the current completer context
    */
   private async generateReconciliator(
     completerContext: ICompletionContext
@@ -354,8 +354,8 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   /**
    * Helper to dispose the completer handler on widget disposed event.
    *
-   * @param {string} id - id of the widget
-   * @param {CompletionHandler} handler - the handler to be disposed.
+   * @param id - id of the widget
+   * @param handler - the handler to be disposed.
    */
   private disposeHandler(id: string, handler: CompletionHandler) {
     handler.completer.model?.dispose();

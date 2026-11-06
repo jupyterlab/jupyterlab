@@ -180,7 +180,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
   /**
    * Create a new mime model.  This is a convenience method.
    *
-   * @options - The options used to create the model.
+   * @param options - The options used to create the model.
    *
    * @returns A new mime model.
    */
@@ -754,12 +754,12 @@ namespace Private {
   export type RankPair = { readonly id: number; readonly rank: number };
 
   /**
-   * A type alias for a mapping of mime type -> rank pair.
+   * A type alias for a mapping of mime type → rank pair.
    */
   export type RankMap = { [key: string]: RankPair };
 
   /**
-   * A type alias for a mapping of mime type -> ordered factories.
+   * A type alias for a mapping of mime type → ordered factories.
    */
   export type FactoryMap = { [key: string]: IRenderMime.IRendererFactory };
 

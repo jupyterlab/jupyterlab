@@ -4,6 +4,7 @@
  */
 
 const fs = require('fs');
+const { OptionDefaults } = require('typedoc');
 
 // Most of the -extension packages are useless as their
 // public API is the plugins array. Add them only if they
@@ -83,7 +84,12 @@ const entryPoints = packages
 module.exports = {
   entryPoints,
   entryPointStrategy: 'packages',
+  packageOptions: {
+    // JSON schema constraints emitted by json-schema-to-typescript.
+    blockTags: [...OptionDefaults.blockTags, '@minItems']
+  },
   treatValidationWarningsAsErrors: process.env.CI === 'true',
+  treatWarningsAsErrors: process.env.CI === 'true',
   includeVersion: false,
   externalSymbolLinkMappings: {
     '@codemirror/language': {
@@ -238,6 +244,7 @@ module.exports = {
     }
   },
   githubPages: false,
+  highlightLanguages: [...OptionDefaults.highlightLanguages, 'python', 'jsx'],
   navigationLinks: {
     Jupyter: 'https://jupyter.org',
     GitHub: 'https://github.com/jupyterlab/jupyterlab'

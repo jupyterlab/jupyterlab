@@ -44,8 +44,8 @@ export class BreakpointsBody extends ReactWidget {
 /**
  * A React component to display a list of breakpoints.
  *
- * @param {object} props The component props.
- * @param props.model The model for the breakpoints.
+ * @param props The component props.
+ * - `model`: The model for the breakpoints.
  * @returns A JSX element.
  */
 const BreakpointsComponent = ({
@@ -116,9 +116,9 @@ const BreakpointsComponent = ({
 /**
  * A React Component to display breakpoints grouped by source file.
  *
- * @param {object} props The component props.
- * @param props.breakpoints The list of breakpoints.
- * @param props.model The model for the breakpoints.
+ * @param props The component props.
+ * - `breakpoints`: The list of breakpoints.
+ * - `model`: The model for the breakpoints.
  * @returns A JSX element.
  */
 const BreakpointCellComponent = ({
@@ -157,9 +157,9 @@ const BreakpointCellComponent = ({
 /**
  * A React Component to display a single breakpoint.
  *
- * @param {object} props The component props.
- * @param props.breakpoint The breakpoint.
- * @param props.model The model for the breakpoints.
+ * @param props The component props.
+ * - `breakpoint`: The breakpoint.
+ * - `model`: The model for the breakpoints.
  * @returns A JSX element.
  */
 const BreakpointComponent = ({
