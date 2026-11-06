@@ -506,7 +506,21 @@
 }
 
 .jp-RenderedHTMLCommon img,
-.jp-RenderedImage img,
+.jp-RenderedImage img {
+  max-width: 100%;
+}
+
+/*
+ * Keep `height: auto`, which keeps the aspect ratio when `max-width` shrinks an
+ * image, unless only a height is given. `:where()` adds no specificity, so the
+ * style sheet of an output can still set the height.
+ */
+.jp-RenderedHTMLCommon img:where(:not([height]), [width]),
+.jp-RenderedImage img:where(:not([height]), [width]) {
+  height: auto;
+}
+
+/* An svg keeps a lone `height` attribute even with `height: auto`. */
 .jp-RenderedHTMLCommon svg,
 .jp-RenderedSVG svg {
   max-width: 100%;
