@@ -475,6 +475,34 @@ describe('@jupyterlab/completer', () => {
         fetch.mockRestore();
         shouldShow.mockRestore();
       });
+
+      it('should replace typed prefix without duplicate characters when text contains surrogate pairs', async () => {
+        const text = 'print("🔬 XRD ANALYSIS PROGRAM 🔬")\n\nwaterfall = 1\nwa';
+        const want =
+          'print("🔬 XRD ANALYSIS PROGRAM 🔬")\n\nwaterfall = 1\nwaterfall';
+        handler.editor!.model.sharedModel.setSource(text);
+        anchor.node.focus();
+        await new Promise(process.nextTick);
+
+        anchor.editor.setCursorPosition({ line: 3, column: 2 });
+        handler.completer.reset();
+
+        const pending =
+          Promise.resolve<CompletionHandler.ICompletionItemsReply>({
+            start: 51,
+            end: 53,
+            items: [{ label: 'waterfall' }]
+          });
+        const fetch = jest.spyOn(provider, 'fetch').mockReturnValue(pending);
+
+        handler.invoke();
+        await new Promise(process.nextTick);
+        await new Promise(process.nextTick);
+
+        (handler.completer.selected as any).emit('waterfall');
+        expect(handler.editor!.model.sharedModel.getSource()).toBe(want);
+        fetch.mockRestore();
+      });
     });
 
     it('should update cursor position after autocomplete on empty word', () => {
