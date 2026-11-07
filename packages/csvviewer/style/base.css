@@ -13,7 +13,8 @@
   font-size: var(--jp-ui-font-size1);
 }
 
-.jp-CSVDelimiter {
+.jp-CSVDelimiter,
+.jp-CSVComment {
   display: flex;
   flex: 0 0 auto;
   flex-direction: row;
@@ -23,14 +24,16 @@
   z-index: 1;
 }
 
-.jp-CSVDelimiter .jp-CSVDelimiter-label {
+.jp-CSVDelimiter .jp-CSVDelimiter-label,
+.jp-CSVComment .jp-CSVComment-label {
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
   padding-left: 8px;
   padding-right: 8px;
 }
 
-.jp-CSVDelimiter .jp-CSVDelimiter-dropdown {
+.jp-CSVDelimiter .jp-CSVDelimiter-dropdown,
+.jp-CSVComment .jp-CSVComment-dropdown {
   flex: 0 0 auto;
   vertical-align: middle;
   border-radius: 0;
@@ -40,7 +43,8 @@
   margin-bottom: 2px;
 }
 
-.jp-CSVDelimiter .jp-CSVDelimiter-dropdown select.jp-mod-styled {
+.jp-CSVDelimiter .jp-CSVDelimiter-dropdown select.jp-mod-styled,
+.jp-CSVComment .jp-CSVComment-dropdown select.jp-mod-styled {
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
   font-size: var(--jp-ui-font-size1);
