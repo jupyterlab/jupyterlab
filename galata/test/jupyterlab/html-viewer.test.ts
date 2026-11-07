@@ -107,6 +107,15 @@ test.describe('HTML Viewer', () => {
       'preserved'
     );
   });
+
+  test('should rerender when explicitly refreshed', async ({ page }) => {
+    const iframe = page.locator('.jp-HTMLViewer iframe').first();
+    const initialUrl = await iframe.getAttribute('src');
+    expect(initialUrl).toMatch(/^blob:/);
+
+    await page.getByRole('button', { name: 'Rerender HTML Document' }).click();
+    await expect.poll(() => iframe.getAttribute('src')).not.toBe(initialUrl);
+  });
 });
 
 async function waitForFrame(
