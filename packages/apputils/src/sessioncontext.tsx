@@ -282,7 +282,9 @@ export namespace ISessionContext {
     readonly shouldStart?: boolean;
 
     /**
-     * Reuse an existing session on the current path (default `true`).
+     * Connect to an existing session on the current path when the context is
+     * initialized (default `true`). Selecting a kernel later changes the kernel
+     * of that session instead of starting a second session on the path.
      */
     readonly shouldReuse?: boolean;
 
@@ -850,9 +852,7 @@ export class SessionContext implements ISessionContext {
     const shouldConnectToPathSession = preference.shouldReuse !== false;
 
     if (shouldConnectToPathSession) {
-      const model = find(manager.running(), item => {
-        return item.path === this._path;
-      });
+      const model = this._findPathSession();
       if (model) {
         try {
           const session = manager.connectTo({ model });
@@ -974,6 +974,8 @@ export class SessionContext implements ISessionContext {
     // the kernel finishes starting.
     // We later switch to the real path below.
     // Use the correct directory so the kernel will be started in that directory.
+    // The request is claimed before the first `await` below, so that a caller
+    // that preempts this one is seen by the checks on `_pendingSessionRequest`.
     const dirName =
       PathExt.dirname(this._path) ||
       (this._driveName ? `${this._driveName}:` : '');
@@ -983,6 +985,45 @@ export class SessionContext implements ISessionContext {
     ));
     try {
       this._statusChanged.emit('starting');
+
+      // The document may have been opened without connecting to the session
+      // that the server already has for this path (`shouldReuse: false`).
+      // Change the kernel of that session instead of starting a second one on
+      // the same path: the server lists sessions in the order they were
+      // created, so a later page load would connect to the older session and
+      // leave this document on a kernel that it does not control.
+      // Any other preference has already connected to the session on the path
+      // while initializing, so only this one needs the extra lookup.
+      if (this.kernelPreference.shouldReuse === false) {
+        await this.sessionManager.refreshRunning();
+        // Handle a preempt.
+        if (this._pendingSessionRequest !== requestId) {
+          return null;
+        }
+        const pathSessionModel = this._findPathSession();
+        if (pathSessionModel && !this._session && !this._isTerminating) {
+          const pathSession = this.sessionManager.connectTo({
+            model: pathSessionModel
+          });
+          let reused = false;
+          try {
+            this._isChangingKernel = true;
+            await pathSession.changeKernel(model);
+            reused = true;
+          } catch (err) {
+            // The session may have been shut down since the refresh above;
+            // start a new one instead.
+            console.warn('Could not reuse the session on the path.', err);
+            pathSession.dispose();
+          } finally {
+            this._isChangingKernel = false;
+          }
+          if (reused) {
+            return this._handleNewSession(pathSession);
+          }
+        }
+      }
+
       const session = await this.sessionManager.startNew({
         path: requestId,
         type: this._type,
@@ -1009,6 +1050,16 @@ export class SessionContext implements ISessionContext {
       void this._handleSessionError(err as ServerConnection.ResponseError);
       throw err;
     }
+  }
+
+  /**
+   * Find the session that the server lists for the current path, if any.
+   */
+  private _findPathSession(): Session.IModel | undefined {
+    return find(
+      this.sessionManager.running(),
+      model => model.path === this._path
+    );
   }
 
   /**
