@@ -46,7 +46,6 @@ import {
   Uploader
 } from '@jupyterlab/filebrowser';
 import type { Contents } from '@jupyterlab/services';
-import { ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -77,7 +76,6 @@ import {
 import { find, map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import type { ReadonlyPartialJSONValue } from '@lumino/coreutils';
-import { PromiseDelegate } from '@lumino/coreutils';
 import type { AccordionPanel, ContextMenu } from '@lumino/widgets';
 
 /**
@@ -501,29 +499,19 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
     }
 
     defaultBrowser.addClass(RESTORING_CLASS);
-    const navigated = new PromiseDelegate<ITreePathUpdater.IBrowserState>();
     const restored = Private.restoreBrowser(
       defaultBrowser,
       commands,
       router,
       tree,
-      labShell,
-      fileBrowserFactory,
-      translator ?? nullTranslator,
-      state => navigated.resolve(state)
+      labShell
     )
       .catch(error => {
         console.error('Failed to restore the file browser.', error);
-        return { path: defaultBrowser.model.path };
-      })
-      .then(state => {
-        navigated.resolve(state);
-        return state;
       })
       .finally(() => defaultBrowser.removeClass(RESTORING_CLASS));
-    treePathUpdater?.deferUntil?.(navigated.promise);
     if (treePathUpdater) {
-      void restored.then(({ path }) => treePathUpdater(path));
+      void restored.then(() => treePathUpdater(defaultBrowser.model.path));
     }
     return defaultBrowser;
   }
@@ -2167,11 +2155,7 @@ namespace Private {
     path: string,
     browser: FileBrowser,
     factory: IFileBrowserFactory,
-    translator: ITranslator,
-    onResolved?: (
-      item: Contents.IModel,
-      directory: string
-    ) => void | Promise<void>
+    translator: ITranslator
   ): Promise<Contents.IModel> {
     const trans = translator.load('jupyterlab');
     const browserForPath = Private.getBrowserForPath(path, browser, factory);
@@ -2185,13 +2169,11 @@ namespace Private {
     const item = await services.contents.get(path, { content: false });
     const { model } = browserForPath;
     await model.restored;
-    const directory =
-      item.type === 'directory' ? localPath : PathExt.dirname(localPath);
-    await onResolved?.(
-      item,
-      browserForPath === browser ? directory : browser.model.path
-    );
-    await model.cd(`/${directory}`);
+    if (item.type === 'directory') {
+      await model.cd(`/${localPath}`);
+    } else {
+      await model.cd(`/${PathExt.dirname(localPath)}`);
+    }
     return item;
   }
 
@@ -2241,15 +2223,12 @@ namespace Private {
     commands: CommandRegistry,
     router: IRouter | null,
     tree: JupyterFrontEnd.ITreeResolver | null,
-    labShell: ILabShell | null,
-    fileBrowserFactory: IFileBrowserFactory,
-    translator: ITranslator,
-    onNavigated: (state: ITreePathUpdater.IBrowserState) => void
-  ): Promise<ITreePathUpdater.IBrowserState> {
+    labShell: ILabShell | null
+  ): Promise<void> {
     if (!router) {
       await browser.model.restore(browser.id);
       await browser.model.refresh();
-      return { path: browser.model.path };
+      return;
     }
 
     const { manager } = browser.model;
@@ -2277,89 +2256,35 @@ namespace Private {
       router.routed.connect(listener);
     });
 
-    let document: ITreePathUpdater.IBrowserState['document'];
     const paths = await tree?.paths;
-    const contents = manager.services.contents;
-    const browserPath =
-      paths?.browser && !contents.driveName(paths.browser)
-        ? contents.normalize(paths.browser)
-        : undefined;
-    const onPathReady = (path: string) => {
-      onNavigated({ path: browserPath ?? path, document });
-    };
+    let target: unknown;
     if (paths?.file || paths?.browser) {
       // Restore the model without populating it.
       await browser.model.restore(browser.id, false);
       if (paths.file) {
-        const trailingSlash = paths.file !== '/' && paths.file.endsWith('/');
-        const path = trailingSlash ? paths.file.slice(0, -1) : paths.file;
-        const normalized = contents.normalize(path);
         const restored = await restoredDocument;
-        const restoredWidget = restored?.widget;
         const factory = Private.resolveOpenWithFactory(
           manager.registry,
           paths.openWith
         );
         const alreadyRestored =
-          restoredWidget &&
-          restored.path === normalized &&
+          restored?.widget &&
+          restored.path === manager.services.contents.normalize(paths.file) &&
           (!paths.openWith || (factory && restored.factory === factory));
         if (alreadyRestored) {
-          document = { path: normalized, widget: restoredWidget };
-        }
-        let pathResolved = false;
-        try {
-          await Private.navigateToPath(
-            path,
-            browser,
-            fileBrowserFactory,
-            translator,
-            async (item, directory) => {
-              if (trailingSlash && item.type !== 'directory') {
-                throw new Error(`Path ${path}/ is not a directory`);
-              }
-              if (item.type !== 'directory' && !alreadyRestored) {
-                const widget: unknown = await commands.execute(
-                  'docmanager:open',
-                  {
-                    path,
-                    factory
-                  }
-                );
-                if (widget instanceof DocumentWidget) {
-                  document = { path: widget.context.path, widget };
-                }
-                // Let the requested document's activation reach the shell.
-                await new Promise<number>(resolve =>
-                  requestAnimationFrame(resolve)
-                );
-              }
-              onPathReady(directory);
-              pathResolved = true;
-            }
-          );
-        } catch (error) {
-          if (pathResolved || alreadyRestored) {
-            console.warn(
-              `${CommandIDs.goToPath} failed to go to: ${path}`,
-              error
-            );
-          } else {
-            const trans = translator.load('jupyterlab');
-            if (
-              error instanceof ServerConnection.ResponseError &&
-              error.response.status === 404
-            ) {
-              error.message = trans.__('Could not find path: %1', path);
-            }
-            await showErrorMessage(
-              trans.__('Cannot open'),
-              error instanceof Error ? error : String(error)
-            );
-          }
+          target = restored.widget;
+          await commands.execute(CommandIDs.goToPath, {
+            path: paths.file,
+            dontShowBrowser: true
+          });
+        } else {
+          target = await commands.execute(CommandIDs.openPath, {
+            path: paths.file,
+            dontShowBrowser: true,
+            factory: paths.openWith
+          });
         }
       }
-      onPathReady(browser.model.path);
       if (paths.browser) {
         await commands.execute(CommandIDs.openPath, {
           path: paths.browser,
@@ -2374,17 +2299,17 @@ namespace Private {
     if (labShell?.isEmpty('main')) {
       void commands.execute('launcher:create');
     }
-    const target = document?.widget;
     if (location.hash && target instanceof DocumentWidget) {
-      void target.revealed
+      const widget = target;
+      void widget.revealed
         .then(
           async () => {
             // Let the tab's activation and layout finish before scrolling.
             await new Promise<number>(resolve =>
               requestAnimationFrame(resolve)
             );
-            if (target.isVisible && !target.isDisposed) {
-              return target.setFragment(location.hash);
+            if (widget.isVisible && !widget.isDisposed) {
+              return widget.setFragment(location.hash);
             }
           },
           () => undefined
@@ -2393,7 +2318,6 @@ namespace Private {
           console.error('Failed to open the document fragment.', error)
         );
     }
-    return { path: browser.model.path, document };
   }
 
   export namespace OpenWith {

@@ -106,6 +106,17 @@ for (const factory of ['Editor', 'Notebook']) {
 
     for (const alreadyOpen of factory === 'Editor' ? [false, true] : [true]) {
       test.describe(`Link to a different ${alreadyOpen ? 'open' : 'unopened'} file`, () => {
+        if (factory === 'Notebook') {
+          // Isolate startup routing from the hidden-cell sizing bug (#20430).
+          test.use({
+            mockSettings: {
+              ...galata.DEFAULT_SETTINGS,
+              '@jupyterlab/notebook-extension:tracker': {
+                windowingMode: 'none'
+              }
+            }
+          });
+        }
         test.use({
           mockState: async ({ browserName, tmpPath }, use) => {
             const previous = previousFileName(browserName);
@@ -195,9 +206,8 @@ for (const factory of ['Editor', 'Notebook']) {
               });
             });
             const navigation = page.goto(`tree/${target}${fragment}`);
-            await expect(page.locator('html')).toHaveAttribute(
-              'data-tree-resolved',
-              'true'
+            await page.waitForFunction(
+              () => document.documentElement.dataset.treeResolved === 'true'
             );
             await page.evaluate(() => {
               window.dispatchEvent(new Event('test:restore-layout'));
