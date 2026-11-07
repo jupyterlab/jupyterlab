@@ -546,11 +546,13 @@ export class BreadCrumbs extends Widget {
       }
       if (index !== -1) {
         const hitElement = breadcrumbElements[index];
-        // Don't allow dropping on the current path
+        // Don't allow dropping on the current path. The root and preferred
+        // breadcrumbs store their path with a leading slash.
         const currentPath = this._model.manager.services.contents.localPath(
           this._model.path
         );
-        if (hitElement.dataset.path !== currentPath) {
+        const hitPath = PathExt.removeSlash(hitElement.dataset.path ?? '');
+        if (hitPath !== currentPath) {
           hitElement.classList.add(DROP_TARGET_CLASS);
           event.preventDefault();
           event.stopPropagation();
@@ -646,7 +648,7 @@ export class BreadCrumbs extends Widget {
       const name = PathExt.basename(localPath);
       const newPath = PathExt.join(destinationPath, name);
       // Skip files that are not moving.
-      if (newPath === oldPath || newPath === localPath) {
+      if (newPath === localPath) {
         continue;
       }
       promises.push(renameFile(manager, oldPath, newPath));
