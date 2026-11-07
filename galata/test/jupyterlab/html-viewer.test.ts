@@ -79,6 +79,12 @@ test.describe('HTML Viewer', () => {
     const firstIframe = page.locator('.jp-HTMLViewer iframe').first();
     const initialUrl = await firstIframe.getAttribute('src');
     expect(initialUrl).toMatch(/^blob:/);
+    const firstFrame = await waitForFrame(page, {
+      url: url => url.protocol == 'blob:'
+    });
+    await firstFrame.locator('body').evaluate(body => {
+      body.dataset.viewerState = 'preserved';
+    });
 
     await page.getByRole('listitem', { name: secondFileName }).dblclick();
 
@@ -88,9 +94,18 @@ test.describe('HTML Viewer', () => {
     await page.getByRole('tab', { name: fileName }).click();
     await expect(firstIframe).toBeVisible();
 
-    // Give any update request posted while showing the tab time to run.
-    await page.waitForTimeout(250);
+    // Wait for the next frame after the tab is visible, without a fixed delay.
+    await firstIframe.evaluate(
+      () =>
+        new Promise<void>(resolve => {
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+        })
+    );
     await expect(firstIframe).toHaveAttribute('src', initialUrl!);
+    await expect(firstFrame.locator('body')).toHaveAttribute(
+      'data-viewer-state',
+      'preserved'
+    );
   });
 });
 

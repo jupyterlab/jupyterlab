@@ -34,6 +34,11 @@ const RENDER_TIMEOUT = 1000;
  */
 const CSS_CLASS = 'jp-HTMLViewer';
 
+/**
+ * Track explicit refresh requests without adding methods to the viewer API.
+ */
+const refreshRequested = new WeakSet<HTMLViewer>();
+
 const UNTRUSTED_LINK_STYLE = (options: { warning: string }) => `<style>
 a[target="_blank"],
 area[target="_blank"],
@@ -135,14 +140,6 @@ export class HTMLViewer
   }
 
   /**
-   * Force the HTML document to be rendered again.
-   */
-  refresh(): void {
-    this._forceRender = true;
-    this.update();
-  }
-
-  /**
    * Dispose of resources held by the html viewer.
    */
   dispose(): void {
@@ -163,10 +160,14 @@ export class HTMLViewer
     if (this._renderPending) {
       return;
     }
-    const force = this._forceRender;
-    this._forceRender = false;
+    const force = refreshRequested.delete(this);
     this._renderPending = true;
-    void this._renderModel(force).then(() => (this._renderPending = false));
+    void this._renderModel(force).then(() => {
+      this._renderPending = false;
+      if (refreshRequested.has(this)) {
+        this.update();
+      }
+    });
   }
 
   /**
@@ -232,7 +233,6 @@ export class HTMLViewer
   }
 
   protected translator: ITranslator;
-  private _forceRender = false;
   private _renderPending = false;
   private _renderedData: string | null = null;
   private _parser = new DOMParser();
@@ -295,7 +295,8 @@ export namespace ToolbarItems {
       onClick: async () => {
         if (!widget.context.model.dirty) {
           await widget.context.revert();
-          widget.refresh();
+          refreshRequested.add(widget);
+          widget.update();
         }
       },
       tooltip: trans.__('Rerender HTML Document')
