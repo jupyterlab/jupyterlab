@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import { Sanitizer } from '@jupyterlab/apputils';
-import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
+import { LruCache, PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ServerConnection } from '@jupyterlab/services';
 import type { Contents } from '@jupyterlab/services';
@@ -12,6 +12,27 @@ import { nullTranslator } from '@jupyterlab/translation';
 import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { MimeModel } from './mimemodel';
 import type { IRenderMimeRegistry } from './tokens';
+
+/**
+ * How long the result of a path resolution stays usable, in milliseconds.
+ *
+ * A file named in an output may be created after it was rendered.
+ */
+const RESOLVE_PATH_CACHE_TTL = 60 * 1000;
+
+/**
+ * How many resolved paths one resolver keeps.
+ */
+const RESOLVE_PATH_CACHE_SIZE = 500;
+
+/**
+ * How many path resolutions one resolver runs at a time.
+ *
+ * Browsers allow about six connections per host, and an output can hold
+ * thousands of distinct path-like strings; leaving connections free keeps such
+ * an output from delaying the rest of the application.
+ */
+const RESOLVE_PATH_LANES = 4;
 
 /**
  * An object which manages mime renderer factories.
@@ -420,15 +441,28 @@ export namespace RenderMimeRegistry {
      * - path understood and known by kernel (if such a path exists).
      * Returns `null` if there is no file matching provided path in neither
      * kernel nor jupyter-server contents manager.
+     *
+     * #### Notes
+     * Results are cached: resolution asks the server, and an output can hold
+     * thousands of path-like strings.
      */
     async resolvePath(
       path: string
     ): Promise<IRenderMime.IResolvedLocation | null> {
-      const resolved = await this._resolvePathUsingServerApi(path);
-      if (resolved !== undefined) {
-        return resolved;
+      const kernelId = this._getKernelId?.() ?? '';
+      if (kernelId !== this._resolvePathCacheKernelId) {
+        // A path can resolve to a file which only the kernel can see.
+        this._resolvePathCache.clear();
+        this._resolvePathCacheKernelId = kernelId;
       }
-      return this._resolvePathUsingLegacyHeuristics(path);
+      const cached = this._resolvePathCache.get(path);
+      if (
+        cached &&
+        (cached.pending || Date.now() - cached.time < RESOLVE_PATH_CACHE_TTL)
+      ) {
+        return cached.result;
+      }
+      return this._resolveAndRememberPath(path);
     }
 
     /**
@@ -444,6 +478,64 @@ export namespace RenderMimeRegistry {
         }
         throw error;
       }
+    }
+
+    /**
+     * Resolve a path and keep the result for the callers which follow.
+     */
+    private _resolveAndRememberPath(
+      path: string
+    ): Promise<IRenderMime.IResolvedLocation | null> {
+      const entry: Private.IResolvePathCacheEntry = {
+        pending: true,
+        time: Date.now(),
+        result: this._resolveInLane(path)
+      };
+      entry.result = entry.result.then(
+        result => {
+          entry.pending = false;
+          entry.time = Date.now();
+          return result;
+        },
+        error => {
+          // A failed lookup does not show whether the file exists, so it is
+          // reported as unresolved and left expired: a server hiccup must not
+          // hide a link until the entry ages out.
+          console.warn(`Could not resolve location of ${path}`, error);
+          entry.pending = false;
+          entry.time = 0;
+          return null;
+        }
+      );
+      this._resolvePathCache.set(path, entry);
+      return entry.result;
+    }
+
+    /**
+     * Resolve a path in one of the lanes, each of which runs the resolutions
+     * given to it one after another.
+     */
+    private _resolveInLane(
+      path: string
+    ): Promise<IRenderMime.IResolvedLocation | null> {
+      const lane = (this._resolvePathLane + 1) % RESOLVE_PATH_LANES;
+      this._resolvePathLane = lane;
+      const result = this._resolvePathLanes[lane].then(() =>
+        this._resolveUncachedPath(path)
+      );
+      // A rejection must not stop the lane from taking the next resolution.
+      this._resolvePathLanes[lane] = result.catch(() => undefined);
+      return result;
+    }
+
+    private async _resolveUncachedPath(
+      path: string
+    ): Promise<IRenderMime.IResolvedLocation | null> {
+      const resolved = await this._resolvePathUsingServerApi(path);
+      if (resolved !== undefined) {
+        return resolved;
+      }
+      return this._resolvePathUsingLegacyHeuristics(path);
     }
 
     private async _resolvePathUsingServerApi(
@@ -462,8 +554,7 @@ export namespace RenderMimeRegistry {
 
       let response = await this._makeResolvePathRequest(params);
       if (!response) {
-        console.warn(`Could not resolve location of ${path} using server API`);
-        return null;
+        throw new Error(`Could not reach the server to resolve ${path}`);
       }
 
       if (response.status === 404) {
@@ -471,8 +562,9 @@ export namespace RenderMimeRegistry {
         return undefined;
       }
       if (!response.ok) {
-        console.warn(`Could not resolve location of ${path} using server API`);
-        return null;
+        throw new Error(
+          `Server answered ${response.status} when resolving ${path}`
+        );
       }
       this._resolvePathApiAvailable = true;
 
@@ -498,8 +590,7 @@ export namespace RenderMimeRegistry {
         // Prefer server-scoped paths when both scopes are available.
         return resolved.find(item => item.scope === 'server') ?? resolved[0];
       } catch {
-        console.warn(`Could not resolve location of ${path} using server API`);
-        return null;
+        throw new Error(`Could not read the resolution of ${path}`);
       }
     }
 
@@ -537,10 +628,15 @@ export namespace RenderMimeRegistry {
             path: response.path,
             scope: 'server'
           };
-        } catch {
-          // The file seems like it should be on the server but is not.
-          console.warn(`Could not resolve location of ${path} on server`);
-          return null;
+        } catch (error) {
+          if (
+            error instanceof ServerConnection.ResponseError &&
+            error.response.status === 404
+          ) {
+            // The file seems like it should be on the server but is not.
+            return null;
+          }
+          throw error;
         }
       }
       // The file is not accessible from jupyter-server but maybe it is
@@ -558,6 +654,16 @@ export namespace RenderMimeRegistry {
     private _contents: Contents.IManager;
     private _getKernelId?: () => string | null | undefined;
     private _resolvePathApiAvailable: boolean | null = null;
+    private _resolvePathCache = new LruCache<
+      string,
+      Private.IResolvePathCacheEntry
+    >({ maxSize: RESOLVE_PATH_CACHE_SIZE });
+    private _resolvePathCacheKernelId = '';
+    private _resolvePathLanes: Promise<unknown>[] = Array.from(
+      { length: RESOLVE_PATH_LANES },
+      () => Promise.resolve()
+    );
+    private _resolvePathLane = 0;
   }
 
   /**
@@ -609,6 +715,24 @@ namespace Private {
   export interface IResolvePathResponse {
     resolved?: unknown[];
     unresolved?: unknown[];
+  }
+
+  /**
+   * A remembered path resolution.
+   */
+  export interface IResolvePathCacheEntry {
+    /**
+     * The resolution, shared by every caller asking for the same path.
+     */
+    result: Promise<IRenderMime.IResolvedLocation | null>;
+    /**
+     * When the request finished, or when it started while it is pending.
+     */
+    time: number;
+    /**
+     * Whether the request is still in flight; a pending entry never expires.
+     */
+    pending: boolean;
   }
 
   export function isResolvedLocation(
