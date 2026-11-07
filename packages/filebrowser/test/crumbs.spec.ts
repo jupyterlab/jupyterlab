@@ -15,6 +15,8 @@ import expect from 'expect';
 import { simulate } from 'simulate-event';
 import { BreadCrumbs, FileBrowserModel } from '../src';
 import { PageConfig } from '@jupyterlab/coreutils';
+import { MimeData } from '@lumino/coreutils';
+import type { Drag } from '@lumino/dragdrop';
 
 const BREADCRUMB_ROOT_CLASS = 'jp-BreadCrumbs-home';
 const BREADCRUMB_PREFERRED_CLASS = 'jp-BreadCrumbs-preferred';
@@ -243,6 +245,106 @@ describe('filebrowser/model', () => {
           await promise;
           // Should navigate back to the preferred path on preferred breadcrumb click
           expect(model.path).toBe(path);
+        });
+      });
+
+      describe('lm-drop', () => {
+        it('should ignore dropping a file onto its current directory breadcrumb', async () => {
+          Widget.attach(crumbs, document.body);
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          const rename = jest.spyOn(manager, 'rename');
+          const mimeData = new MimeData();
+          mimeData.setData('application/x-jupyter-icontents', [
+            `${path}/file.txt`
+          ]);
+
+          const items = crumbs.node.querySelectorAll(ITEM_QUERY);
+          const currentCrumb = items[3] as HTMLElement;
+          currentCrumb.classList.add('jp-mod-dropTarget');
+          const event = {
+            type: 'lm-drop',
+            proposedAction: 'move',
+            dropAction: 'none',
+            mimeData,
+            target: currentCrumb,
+            preventDefault: jest.fn(),
+            stopPropagation: jest.fn()
+          } as unknown as Drag.Event;
+
+          try {
+            crumbs.handleEvent(event);
+            expect(rename).not.toHaveBeenCalled();
+          } finally {
+            rename.mockRestore();
+            Widget.detach(crumbs);
+          }
+        });
+
+        it('should ignore dropping a root file onto the root breadcrumb', async () => {
+          await model.cd('');
+          Widget.attach(crumbs, document.body);
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          const rename = jest.spyOn(manager, 'rename');
+          const mimeData = new MimeData();
+          mimeData.setData('application/x-jupyter-icontents', ['file.txt']);
+
+          const rootElement = crumbs.node.querySelector(
+            `.${BREADCRUMB_ROOT_CLASS}`
+          ) as HTMLElement;
+          rootElement.classList.add('jp-mod-dropTarget');
+          const event = {
+            type: 'lm-drop',
+            proposedAction: 'move',
+            dropAction: 'none',
+            mimeData,
+            target: rootElement,
+            preventDefault: jest.fn(),
+            stopPropagation: jest.fn()
+          } as unknown as Drag.Event;
+
+          try {
+            crumbs.handleEvent(event);
+            expect(rename).not.toHaveBeenCalled();
+          } finally {
+            rename.mockRestore();
+            Widget.detach(crumbs);
+          }
+        });
+
+        it('should move a file when dropped onto a different directory breadcrumb', async () => {
+          Widget.attach(crumbs, document.body);
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          const rename = jest
+            .spyOn(manager, 'rename')
+            .mockResolvedValue(null as any);
+          const mimeData = new MimeData();
+          mimeData.setData('application/x-jupyter-icontents', [
+            `${path}/file.txt`
+          ]);
+
+          const items = crumbs.node.querySelectorAll(ITEM_QUERY);
+          const parentCrumb = items[1] as HTMLElement;
+          parentCrumb.classList.add('jp-mod-dropTarget');
+          const event = {
+            type: 'lm-drop',
+            proposedAction: 'move',
+            dropAction: 'none',
+            mimeData,
+            target: parentCrumb,
+            preventDefault: jest.fn(),
+            stopPropagation: jest.fn()
+          } as unknown as Drag.Event;
+
+          try {
+            crumbs.handleEvent(event);
+            expect(rename).toHaveBeenCalledWith(
+              `${path}/file.txt`,
+              `${first}/file.txt`
+            );
+          } finally {
+            rename.mockRestore();
+            Widget.detach(crumbs);
+          }
         });
       });
     });

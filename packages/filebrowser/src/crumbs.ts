@@ -642,8 +642,13 @@ export class BreadCrumbs extends Widget {
     const promises: Promise<Contents.IModel | null>[] = [];
     const oldPaths = event.mimeData.getData(CONTENTS_MIME) as string[];
     for (const oldPath of oldPaths) {
-      const name = PathExt.basename(oldPath);
+      const localPath = manager.services.contents.localPath(oldPath);
+      const name = PathExt.basename(localPath);
       const newPath = PathExt.join(destinationPath, name);
+      // Skip files that are not moving.
+      if (newPath === oldPath || newPath === localPath) {
+        continue;
+      }
       promises.push(renameFile(manager, oldPath, newPath));
     }
     void Promise.all(promises).catch(err => {
