@@ -2467,7 +2467,15 @@ function activateNotebookHandler(
   if (restorer) {
     void restorer.restore(tracker, {
       command: 'docmanager:open',
-      args: panel => ({ path: panel.context.path, factory: FACTORY }),
+      args: panel => {
+        // Restore the kernel too: other sessions can share the notebook path.
+        const id = panel.sessionContext.session?.kernel?.id;
+        return {
+          path: panel.context.path,
+          factory: FACTORY,
+          ...(id ? { kernel: { id } } : {})
+        };
+      },
       name: panel => panel.context.path,
       when: services.ready
     });
@@ -2520,6 +2528,11 @@ function activateNotebookHandler(
     // `Signal.clearData(this)`, which removes it when the panel is closed.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);
+    }, widget);
+    widget.sessionContext.kernelChanged.connect((_, { oldValue, newValue }) => {
+      if (oldValue?.id !== newValue?.id) {
+        void tracker.save(widget);
+      }
     }, widget);
     // Add the notebook panel to the tracker.
     void tracker.add(widget);

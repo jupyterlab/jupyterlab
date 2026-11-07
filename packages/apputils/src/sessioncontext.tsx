@@ -14,7 +14,6 @@ import type {
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
-import { find } from '@lumino/algorithm';
 import { JSONExt, PromiseDelegate, UUID } from '@lumino/coreutils';
 import type { IDisposable, IObservableDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
@@ -721,18 +720,18 @@ export class SessionContext implements ISessionContext {
       return true;
     }
 
+    const name = Private.getDefaultKernel({
+      specs: this.specsManager.specs,
+      sessions: this.sessionManager.running(),
+      preference
+    });
     let options: Partial<Kernel.IModel> | undefined;
     if (preference.id) {
-      options = { id: preference.id };
-    } else {
-      const name = Private.getDefaultKernel({
-        specs: this.specsManager.specs,
-        sessions: this.sessionManager.running(),
-        preference
-      });
-      if (name) {
-        options = { name };
-      }
+      // The server starts a new kernel when this one is no longer running,
+      // such as after a server restart; the name makes it the preferred one.
+      options = name ? { id: preference.id, name } : { id: preference.id };
+    } else if (name) {
+      options = { name };
     }
 
     if (options) {
@@ -814,7 +813,8 @@ export class SessionContext implements ISessionContext {
    *
    * #### Notes
    * If a server session exists on the current path, we will connect to it
-   * unless `kernelPreference.shouldReuse === false`.
+   * unless `kernelPreference.shouldReuse === false`. If there are several, we
+   * connect to the one running the preferred kernel id, if any.
    * If preferences include disabling `canStart` or `shouldStart`, no
    * server session will be started.
    * If a kernel id is given, we attempt to start a session with that id.
@@ -850,9 +850,16 @@ export class SessionContext implements ISessionContext {
     const shouldConnectToPathSession = preference.shouldReuse !== false;
 
     if (shouldConnectToPathSession) {
-      const model = find(manager.running(), item => {
-        return item.path === this._path;
-      });
+      // The server can list several sessions for one path, oldest first.
+      // Prefer the one running the preferred kernel, such as the kernel that
+      // a restored document used before the page was reloaded.
+      const pathSessions = Array.from(manager.running()).filter(
+        item => item.path === this._path
+      );
+      const model =
+        pathSessions.find(
+          item => !!preference.id && item.kernel?.id === preference.id
+        ) ?? pathSessions[0];
       if (model) {
         try {
           const session = manager.connectTo({ model });
