@@ -1247,7 +1247,7 @@ describe('@jupyterlab/notebook', () => {
         await provider.endQuery();
       });
 
-      it('should report the correct selected-cell count when provider is created with two cells already selected (issue #8015)', () => {
+      it('should report the correct selected-cell count when provider is created with two cells already selected', () => {
         // Arrange: put the notebook in command mode and select both cells
         // before the search provider is instantiated, mimicking the
         // user workflow: Shift+Up selects cells → Ctrl+F opens search.
@@ -1257,8 +1257,6 @@ describe('@jupyterlab/notebook', () => {
         panel.content.select(panel.content.widgets[1]);
 
         // Act: create a fresh provider now that the selection is in place.
-        // The original code hard-coded _selectedCells = 1 and never
-        // initialised it synchronously, so getFilters() would always read 1.
         const freshProvider = new NotebookSearchProvider(panel);
         const filters = freshProvider.getFilters();
 

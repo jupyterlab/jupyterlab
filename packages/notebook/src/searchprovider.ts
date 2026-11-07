@@ -66,10 +66,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._filtersChanged.connect(this._setEnginesSelectionSearchMode, this);
 
     // Synchronously initialize _selectedCells from the widget's current
-    // selection state.  The reactive path (_onCellSelectionChanged →
+    // selection state. The reactive path (_onCellSelectionChanged →
     // _updateCellSelection) only fires on future changes, so without this
     // initialization a provider created while multiple cells are already
-    // selected would always report "Search in 1 Selected Cell" (issue #8015).
+    // selected would always report "Search in 1 Selected Cell".
     let initialSelectedCells = 0;
     for (const cell of this.widget.content.widgets) {
       if (this.widget.content.isSelectedOrActive(cell)) {
