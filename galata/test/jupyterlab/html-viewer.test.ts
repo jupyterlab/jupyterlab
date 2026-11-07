@@ -54,7 +54,12 @@ test.describe('HTML Viewer', () => {
   });
 
   test('should allow links for trusted file', async ({ page }) => {
+    const iframe = page.locator('.jp-HTMLViewer iframe').first();
+    const untrustedUrl = await iframe.getAttribute('src');
+    expect(untrustedUrl).toMatch(/^blob:/);
     await page.getByRole('button', { name: 'Trust HTML' }).click();
+    // Changing the iframe sandbox must reload the document even if its source is unchanged.
+    await expect.poll(() => iframe.getAttribute('src')).not.toBe(untrustedUrl);
     const frame = await waitForFrame(page, {
       url: url => url.protocol == 'blob:'
     });
