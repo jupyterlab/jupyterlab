@@ -54,10 +54,7 @@ import {
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
-import type {
-  DocumentRegistry,
-  IDocumentWidget
-} from '@jupyterlab/docregistry';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import {
   IDefaultFileBrowser,
@@ -430,7 +427,8 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   requires: [
     INotebookWidgetFactory,
     IEditorExtensionRegistry,
-    INotebookCellExecutor
+    INotebookCellExecutor,
+    IEditorLanguageRegistry
   ],
   optional: [
     ICommandPalette,
@@ -2252,6 +2250,7 @@ function activateNotebookHandler(
   factory: NotebookWidgetFactory.IFactory,
   extensions: IEditorExtensionRegistry,
   executor: INotebookCellExecutor,
+  languages: IEditorLanguageRegistry,
   palette: ICommandPalette | null,
   defaultBrowser: IDefaultFileBrowser | null,
   launcher: ILauncher | null,
@@ -2663,7 +2662,8 @@ function activateNotebookHandler(
   const createNew = async (
     cwd: string,
     kernelId: string,
-    kernelName: string
+    kernelName: string,
+    languageInfo?: nbformat.ILanguageInfoMetadata
   ) => {
     const model = await commands.execute('docmanager:new-untitled', {
       path: cwd,
@@ -2673,9 +2673,16 @@ function activateNotebookHandler(
       const widget = (await commands.execute('docmanager:open', {
         path: model.path,
         factory: FACTORY,
-        kernel: { id: kernelId, name: kernelName }
-      })) as unknown as IDocumentWidget;
+        kernel: { id: kernelId, name: kernelName },
+        ...(languageInfo && {
+          kernelPreference: { shouldStart: false, shouldReuse: false }
+        })
+      })) as unknown as NotebookPanel;
       widget.isUntitled = true;
+      if (languageInfo) {
+        await widget.context.ready;
+        widget.content.model?.setMetadata('language_info', languageInfo);
+      }
       return widget;
     }
   };
@@ -2697,12 +2704,29 @@ function activateNotebookHandler(
     },
     caption: trans.__('Create a new notebook'),
     icon: args => (args['isPalette'] ? undefined : notebookIcon),
-    execute: args => {
+    execute: async args => {
       const currentBrowser =
         filebrowserFactory?.tracker.currentWidget ?? defaultBrowser;
       const cwd = (args['cwd'] as string) || (currentBrowser?.model.path ?? '');
       const kernelId = (args['kernelId'] as string) || '';
       const kernelName = (args['kernelName'] as string) || '';
+      if (args['noKernel']) {
+        const items = languages
+          .getLanguages()
+          .map(language => language.name)
+          .sort((a, b) => a.localeCompare(b));
+        const result = await InputDialog.getItem({
+          title: trans.__('Select Notebook Language'),
+          label: trans.__('Language'),
+          items,
+          okLabel: trans.__('Create'),
+          cancelLabel: trans.__('Cancel')
+        });
+        if (!result.button.accept || !result.value) {
+          return;
+        }
+        return createNew(cwd, '', '', { name: result.value });
+      }
       return createNew(cwd, kernelId, kernelName);
     },
     describedBy: {
@@ -2722,6 +2746,12 @@ function activateNotebookHandler(
           kernelName: {
             type: 'string',
             description: trans.__('Kernel name to use for the new notebook')
+          },
+          noKernel: {
+            type: 'boolean',
+            description: trans.__(
+              'Choose a language and create the notebook without a kernel'
+            )
           },
           isLauncher: {
             type: 'boolean',
@@ -2748,6 +2778,13 @@ function activateNotebookHandler(
 
   // Add a launcher item if the launcher is available.
   if (launcher) {
+    launcher.add({
+      command: CommandIDs.createNew,
+      args: { isLauncher: true, noKernel: true },
+      category: trans.__('Notebook'),
+      rank: 1,
+      kernelIconUrl: `data:image/svg+xml,${encodeURIComponent(notebookIcon.svgstr)}`
+    });
     void services.ready.then(() => {
       let disposables: DisposableSet | null = null;
       const onSpecsChanged = () => {
