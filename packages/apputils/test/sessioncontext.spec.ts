@@ -379,6 +379,50 @@ describe('@jupyterlab/apputils', () => {
         other.dispose();
       });
 
+      it('should connect to the path session that runs the preferred kernel', async () => {
+        const first = await sessionManager.startNew({
+          name: '',
+          path,
+          type: 'test'
+        });
+        // The server reuses the session of a path when asked to start one
+        // there, so start the second session elsewhere and move it.
+        const second = await sessionManager.startNew({
+          name: '',
+          path: UUID.uuid4(),
+          type: 'test'
+        });
+        await second.setPath(path);
+        try {
+          await sessionManager.refreshRunning();
+          const onPath = Array.from(sessionManager.running())
+            .filter(model => model.path === path)
+            .map(model => model.id);
+          expect(onPath).toEqual([first.id, second.id]);
+
+          sessionContext.kernelPreference = {
+            ...sessionContext.kernelPreference,
+            id: second.kernel!.id
+          };
+          await sessionContext.initialize();
+          expect(sessionContext.session?.id).toBe(second.id);
+        } finally {
+          await Promise.all([first.shutdown(), second.shutdown()]);
+          first.dispose();
+          second.dispose();
+        }
+      });
+
+      it('should start the preferred kernel by name if the kernel id is not running', async () => {
+        sessionContext.kernelPreference = {
+          id: UUID.uuid4(),
+          name: 'ipython'
+        };
+        await sessionContext.initialize();
+        expect(specsManager.specs!.default).not.toBe('ipython');
+        expect(sessionContext.session?.kernel?.name).toBe('ipython');
+      });
+
       it('should connect to an existing kernel', async () => {
         // Shut down and dispose the session so it can be re-instantiated.
         await sessionContext.shutdown();
