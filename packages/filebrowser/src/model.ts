@@ -489,10 +489,7 @@ export class FileBrowserModel implements IDisposable {
       }
       await this._uploadCheckDisposed();
     }
-    if (
-      fileExists &&
-      !(await this._prompt(() => shouldOverwrite(file.name)))
-    ) {
+    if (fileExists && !(await this._prompt(() => shouldOverwrite(file.name)))) {
       throw err;
     }
     await this._uploadCheckDisposed();
