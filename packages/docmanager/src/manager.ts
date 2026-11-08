@@ -533,11 +533,12 @@ export class DocumentManager implements IDocumentManager {
 
     try {
       await this.deleteFile(newPath);
-    } finally {
-      // no-op
+      return await this.rename(tempPath, newPath);
+    } catch (error) {
+      // Move the file back, so that it does not stay under the temporary name.
+      await this.rename(tempPath, oldPath);
+      throw error;
     }
-
-    return await this.rename(tempPath, newPath);
   }
 
   /**
