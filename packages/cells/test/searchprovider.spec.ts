@@ -12,6 +12,8 @@ import {
 } from '@jupyterlab/cells';
 import { NBTestUtils } from '@jupyterlab/cells/lib/testutils';
 import { defaultRenderMime } from '@jupyterlab/rendermime/lib/testutils';
+import { framePromise } from '@jupyterlab/testing';
+import { Widget } from '@lumino/widgets';
 
 /**
  * Create a code cell which was never rendered, like the cells a windowed
@@ -33,16 +35,21 @@ function createPlaceholderCell(editable = true): CodeCell {
 }
 
 /**
- * Create a read-only Markdown cell, which starts rendered.
+ * Create a Markdown cell with the given source, which starts rendered.
  */
-function createReadOnlyMarkdownCell(
-  showEditorForReadOnlyMarkdown: boolean
+function createMarkdownCell(
+  source: string,
+  options: {
+    editable?: boolean;
+    showEditorForReadOnlyMarkdown?: boolean;
+  } = {}
 ): MarkdownCell {
+  const { editable = true, showEditorForReadOnlyMarkdown = true } = options;
   const model = new MarkdownCellModel({
     sharedModel: createStandaloneCell({
       cell_type: 'markdown',
-      source: 'test1 test2',
-      metadata: { editable: false }
+      source,
+      metadata: editable ? {} : { editable: false }
     }) as YMarkdownCell
   });
   return new MarkdownCell({
@@ -52,6 +59,27 @@ function createReadOnlyMarkdownCell(
     placeholder: false,
     showEditorForReadOnlyMarkdown
   }).initializeState();
+}
+
+/**
+ * Create a read-only Markdown cell, which starts rendered.
+ */
+function createReadOnlyMarkdownCell(
+  showEditorForReadOnlyMarkdown: boolean
+): MarkdownCell {
+  return createMarkdownCell('test1 test2', {
+    editable: false,
+    showEditorForReadOnlyMarkdown
+  });
+}
+
+/**
+ * Text of the match currently marked in the rendered cell, if any.
+ */
+function renderedCurrentMatch(cell: MarkdownCell): string | null {
+  return (
+    cell.renderer.node.querySelector('.jp-current-match')?.textContent ?? null
+  );
 }
 
 describe('cells/searchprovider', () => {
@@ -128,13 +156,102 @@ describe('cells/searchprovider', () => {
       provider.dispose();
     });
 
-    it('should unrender a read-only cell which shows its editor', async () => {
+    it('should unrender a read-only cell which shows its editor for a match the rendered text does not show', async () => {
+      cell = createMarkdownCell(
+        'See the [docs](https://example.com) for details.',
+        { editable: false, showEditorForReadOnlyMarkdown: true }
+      );
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/example/, {});
+
+      const match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'example', readOnly: true });
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
+    it('should keep a read-only cell which shows its editor rendered for a match the rendered text shows', async () => {
       cell = createReadOnlyMarkdownCell(true);
+      Widget.attach(cell, document.body);
+      await framePromise();
       const provider = createCellSearchProvider(cell);
       await provider.startQuery(/test\d/, {});
 
-      await provider.highlightNext();
+      const match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'test1', readOnly: true });
+      expect(cell.rendered).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+      provider.dispose();
+    });
+
+    it('should mark the current match in the rendered text', async () => {
+      cell = createReadOnlyMarkdownCell(false);
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+
+      let match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'test1', readOnly: true });
+      let current = provider.getCurrentMatch();
+      expect(current && 'node' in current).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+
+      match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'test2', readOnly: true });
+      expect(renderedCurrentMatch(cell)).toBe('test2');
+
+      match = await provider.highlightPrevious();
+      expect(match).toMatchObject({ text: 'test1', readOnly: true });
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+      provider.dispose();
+    });
+
+    it('should step through visible and hidden matches in source order', async () => {
+      cell = createMarkdownCell(
+        'The lists are [here](https://example.com/lists) and the lists grow.',
+        { editable: false, showEditorForReadOnlyMarkdown: true }
+      );
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/lists/, {});
+
+      let match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'lists', readOnly: true });
+      expect(cell.rendered).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe('lists');
+      let current = provider.getCurrentMatch();
+      expect(current && 'node' in current).toBe(true);
+
+      match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'lists', readOnly: true });
       expect(cell.rendered).toBe(false);
+      current = provider.getCurrentMatch();
+      expect(current && 'node' in current).toBe(false);
+
+      match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'lists', readOnly: true });
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
+    it('should not unrender a read-only cell which cannot unrender for a match the rendered text does not show', async () => {
+      cell = createMarkdownCell(
+        'See the [docs](https://example.com) for details.',
+        { editable: false, showEditorForReadOnlyMarkdown: false }
+      );
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/example/, {});
+
+      const match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'example', readOnly: true });
+      expect(cell.rendered).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe(null);
       provider.dispose();
     });
   });
