@@ -1068,8 +1068,11 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           ) {
             // Update height estimate in the view model
             const height = cell.node.getBoundingClientRect().height;
-            this.viewModel.setEstimatedWidgetSize(cell.model.id, height);
-            cell.node.style.containIntrinsicSize = `auto ${height}px`;
+            // Cells in hidden notebooks do not have a measurable height.
+            if (height > 0) {
+              this.viewModel.setEstimatedWidgetSize(cell.model.id, height);
+              cell.node.style.containIntrinsicSize = `auto ${height}px`;
+            }
           }
         }
       }
@@ -2495,6 +2498,16 @@ export class Notebook extends StaticNotebook {
 
     if (element == null) {
       element = cell.node;
+    }
+
+    if (this.notebookConfig.windowingMode === 'contentVisibility') {
+      // Render around the target before aligning it using the actual sizes.
+      element.scrollIntoView({ block: 'center' });
+      await new Promise<void>(resolve => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => resolve());
+        });
+      });
     }
 
     // Scroll notebook to set the target on top.
