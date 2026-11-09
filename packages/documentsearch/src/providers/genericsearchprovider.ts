@@ -124,7 +124,6 @@ export class HTMLSearchEngine {
     const matches: IHTMLSearchMatch[] = [];
     // Formulas are searched as a whole when the walker reaches their first
     // text node; `accepted` holds the formula of the node it last accepted.
-    const searchedFormulas = new Set<Element>();
     const accepted = { formula: null as Element | null };
     const walker = document.createTreeWalker(rootNode, NodeFilter.SHOW_TEXT, {
       acceptNode: node => {
@@ -142,9 +141,6 @@ export class HTMLSearchEngine {
           parentElement = parentElement.parentElement!;
         }
         if (formula) {
-          if (searchedFormulas.has(formula)) {
-            return NodeFilter.FILTER_REJECT;
-          }
           accepted.formula = formula;
           return NodeFilter.FILTER_ACCEPT;
         }
@@ -159,8 +155,14 @@ export class HTMLSearchEngine {
     while ((node = walker.nextNode()) !== null) {
       const formula = accepted.formula;
       if (formula) {
-        searchedFormulas.add(formula);
         matches.push(...searchFormula(query, formula));
+        // Continue from the last node of the formula, so that the walker
+        // does not visit the other text nodes of the formula
+        let last: Node = formula;
+        while (last.lastChild) {
+          last = last.lastChild;
+        }
+        walker.currentNode = last;
         continue;
       }
       // Reset query index
