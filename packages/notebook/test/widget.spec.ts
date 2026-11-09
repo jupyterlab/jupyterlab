@@ -1261,6 +1261,36 @@ describe('@jupyter/notebook', () => {
       });
     });
 
+    describe('#setFragment()', () => {
+      it('finds headings in markdown cells before they are rendered', async () => {
+        const widget = createWidget();
+        widget.model!.fromJSON({
+          cells: [
+            {
+              cell_type: 'markdown',
+              source: '## Target section',
+              metadata: {}
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        const cell = widget.widgets[0] as MarkdownCell;
+        Widget.attach(widget, document.body);
+        await framePromise();
+        cell.rendered = false;
+        const getHeadingsSpy = jest.spyOn(cell, 'getHeadings');
+
+        await widget.setFragment('#target-section');
+
+        expect(getHeadingsSpy).toHaveBeenCalled();
+        getHeadingsSpy.mockRestore();
+        widget.dispose();
+      });
+    });
+
     describe('#select()', () => {
       it('should select a cell widget', () => {
         const widget = createActiveWidget();
