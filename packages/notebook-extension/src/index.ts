@@ -1770,7 +1770,11 @@ function activateWidgetFactory(
 
   // Register notebook toolbar widgets
   toolbarRegistry.addFactory<NotebookPanel>(FACTORY, 'save', panel =>
-    DocToolbarItems.createSaveButton(commands, panel.context.fileChanged)
+    DocToolbarItems.createSaveButton(
+      commands,
+      panel.context.fileChanged,
+      panel
+    )
   );
   toolbarRegistry.addFactory<NotebookPanel>(FACTORY, 'cellType', panel =>
     ToolbarItems.createCellTypeItem(panel, translator)

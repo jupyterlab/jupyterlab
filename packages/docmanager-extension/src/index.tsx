@@ -647,7 +647,8 @@ export namespace ToolbarItems {
    */
   export function createSaveButton(
     commands: CommandRegistry,
-    fileChanged: ISignal<any, Omit<Contents.IModel, 'content'>>
+    fileChanged: ISignal<any, Omit<Contents.IModel, 'content'>>,
+    widget?: Widget
   ): Widget {
     return addCommandToolbarButtonClass(
       ReactWidget.create(
@@ -657,7 +658,7 @@ export namespace ToolbarItems {
               commands={commands}
               id={CommandIDs.save}
               label={''}
-              args={{ toolbar: true }}
+              args={{ toolbar: true, widgetId: widget?.id }}
             />
           )}
         </UseSignal>
@@ -711,9 +712,8 @@ function addCommands(
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
   const category = trans.__('File Operations');
-  const isEnabled = () => {
-    const { currentWidget } = shell;
-    return !!(currentWidget && docManager.contextForWidget(currentWidget));
+  const isEnabled = (widget = shell.currentWidget) => {
+    return !!(widget && docManager.contextForWidget(widget));
   };
 
   const isWritable = () => {
@@ -723,6 +723,19 @@ function addCommands(
     }
     const context = docManager.contextForWidget(currentWidget);
     return !!context?.contentsModel?.writable;
+  };
+
+  const targetWidget = (args: ReadonlyPartialJSONObject) => {
+    const widgetId = args.widgetId;
+    if (typeof widgetId !== 'string') {
+      return shell.currentWidget;
+    }
+    for (const widget of shell.widgets('main')) {
+      if (widget.id === widgetId) {
+        return widget;
+      }
+    }
+    return shell.currentWidget;
   };
 
   const readonlyNotification = (contextPath: string) => {
@@ -1088,9 +1101,11 @@ function addCommands(
     }
   });
 
-  const caption = () => {
-    if (shell.currentWidget) {
-      if (!isWritable()) {
+  const caption = (args: ReadonlyPartialJSONObject) => {
+    const widget = targetWidget(args);
+    if (widget) {
+      const context = docManager.contextForWidget(widget);
+      if (!context?.contentsModel?.writable) {
         return trans.__(
           `Document is read-only. "Save" is disabled; use "Save as…" instead`
         );
@@ -1107,13 +1122,17 @@ function addCommands(
     caption,
     icon: args => (args.toolbar ? saveIcon : undefined),
     isEnabled: args => {
+      const widget = targetWidget(args);
+      const writable = widget
+        ? !!docManager.contextForWidget(widget)?.contentsModel?.writable
+        : false;
       if (args._luminoEvent) {
         return (args._luminoEvent as ReadonlyPartialJSONObject).type ===
           'keybinding'
-          ? true
-          : isWritable();
+          ? !!shell.currentWidget
+          : writable;
       } else {
-        return isWritable();
+        return writable;
       }
     },
     describedBy: {
@@ -1127,15 +1146,19 @@ function addCommands(
           _luminoEvent: {
             type: 'object',
             description: 'The lumino event object'
+          },
+          widgetId: {
+            type: 'string',
+            description: 'The widget whose document should be saved'
           }
         }
       }
     },
     execute: async args => {
       // Checks that shell.currentWidget is valid:
-      const widget = shell.currentWidget;
+      const widget = targetWidget(args);
       const context = docManager.contextForWidget(widget!);
-      if (isEnabled()) {
+      if (isEnabled(widget)) {
         if (!context) {
           return showDialog({
             title: trans.__('Cannot Save'),
