@@ -715,11 +715,13 @@ export namespace CompletionHandler {
       CompletionHandler.ICompletionItem
   > {
     /**
-     * The starting index for the substring being replaced by completion.
+     * The starting index for the substring being replaced by completion,
+     * as a JavaScript string index (UTF-16 code units).
      */
     start: number;
     /**
-     * The end index for the substring being replaced by completion.
+     * The end index for the substring being replaced by completion,
+     * as a JavaScript string index (UTF-16 code units).
      */
     end: number;
     /**
@@ -761,7 +763,9 @@ export namespace CompletionHandler {
    */
   export interface IRequest {
     /**
-     * The cursor offset position within the text being completed.
+     * The cursor offset position within the text being completed, as a
+     * JavaScript string index (UTF-16 code units) like CodeMirror positions.
+     * Kernel messages count code points: use `Text.jsIndexToCharIndex`.
      */
     offset: number;
 
