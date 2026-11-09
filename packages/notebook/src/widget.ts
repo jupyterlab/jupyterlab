@@ -2492,22 +2492,15 @@ export class Notebook extends StaticNotebook {
     }
     let { cell, element } = result;
 
+    // Scroll anchoring is enabled only for the active cell.
+    this.activeCellIndex = this.widgets.indexOf(cell);
+
     if (!cell.inViewport) {
       await this.scrollToCell(cell, 'center');
     }
 
     if (element == null) {
       element = cell.node;
-    }
-
-    if (this.notebookConfig.windowingMode === 'contentVisibility') {
-      // Render around the target before aligning it using the actual sizes.
-      element.scrollIntoView({ block: 'center' });
-      await new Promise<void>(resolve => {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => resolve());
-        });
-      });
     }
 
     // Scroll notebook to set the target on top.
