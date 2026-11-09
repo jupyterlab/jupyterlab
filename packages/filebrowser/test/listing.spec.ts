@@ -388,6 +388,26 @@ describe('filebrowser/listing', () => {
         );
       });
 
+      it('should paste into the current directory after Escape', async () => {
+        const contents = dirListing.model.manager.services.contents;
+        const source = [...dirListing.sortedItems()][0];
+        const destination = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+        await dirListing.selectItemByName(source.name);
+        dirListing.cut();
+        await dirListing.selectItemByName(destination.name, true);
+
+        simulate(dirListing.node, 'keydown', { key: 'Escape' });
+        expect([...dirListing.selectedItems()]).toHaveLength(0);
+        await dirListing.paste();
+
+        await expect(
+          contents.get(`${destination.path}/${source.name}`)
+        ).rejects.toBeTruthy();
+        expect((await contents.get(source.path)).name).toBe(source.name);
+      });
+
       it('should prompt to overwrite when pasting cut item over existing file', async () => {
         jest.spyOn(dirListing.model.manager, 'rename').mockRejectedValueOnce({
           response: { status: 409 }

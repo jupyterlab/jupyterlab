@@ -1975,6 +1975,17 @@ export class DirListing extends Widget {
         }
         return;
       }
+      case 'Escape': {
+        // Clear the selection, so that paste uses the current directory.
+        if (Object.keys(this.selection).length === 0) {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        this.clearSelectedItems();
+        this.update();
+        return;
+      }
       case 'ArrowUp':
         this._handleArrowY(event, -1);
         return;
