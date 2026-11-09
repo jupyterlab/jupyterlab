@@ -254,5 +254,60 @@ describe('cells/searchprovider', () => {
       expect(renderedCurrentMatch(cell)).toBe(null);
       provider.dispose();
     });
+
+    it('should not flag a rendered match in an editable cell as read-only', async () => {
+      cell = createMarkdownCell('test1 test2');
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+
+      const match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'test1', readOnly: false });
+      expect(cell.rendered).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+      expect(provider.getCurrentMatch()?.readOnly).toBe(false);
+      provider.dispose();
+    });
+
+    it('should flag a rendered match in a non-editable cell as read-only', async () => {
+      cell = createReadOnlyMarkdownCell(true);
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+
+      const match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'test1', readOnly: true });
+      expect(cell.rendered).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+      expect(provider.getCurrentMatch()?.readOnly).toBe(true);
+      provider.dispose();
+    });
+
+    it('should re-highlight the same source match when the cell is un-rendered mid-search', async () => {
+      cell = createMarkdownCell('test1 test2');
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+
+      await provider.highlightNext();
+      const match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'test2' });
+      expect(cell.rendered).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe('test2');
+
+      // Simulate a double-click into edit mode while searching.
+      cell.rendered = false;
+      await framePromise();
+
+      expect(cell.rendered).toBe(false);
+      const current = provider.getCurrentMatch();
+      expect(current).toMatchObject({ text: 'test2' });
+      expect(current && 'node' in current).toBe(false);
+      expect(provider.currentMatchIndex).toBe(1);
+      provider.dispose();
+    });
   });
 });
