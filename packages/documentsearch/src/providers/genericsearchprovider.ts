@@ -527,7 +527,8 @@ function elementInViewport(el: HTMLElement): boolean {
  */
 function searchFormula(query: RegExp, formula: Element): IHTMLSearchMatch[] {
   // One unit per character (code point) of the text nodes of the formula,
-  // with its range in its text node (`from`, `to`) and in `text`.
+  // with its range in its text node (`from`, `to`) and in `text` (`start`,
+  // `end`).
   const units: {
     node: Text;
     from: number;
@@ -555,18 +556,23 @@ function searchFormula(query: RegExp, formula: Element): IHTMLSearchMatch[] {
   while ((node = walker.nextNode()) !== null) {
     let from = 0;
     for (const character of (node as Text).data) {
-      const normalized = normalizeFormulaText(character);
-      units.push({
-        node: node as Text,
-        from,
-        to: from + character.length,
-        start: text.length,
-        end: text.length + normalized.length
-      });
-      text += normalized;
-      from += character.length;
+      const to = from + character.length;
+      units.push({ node: node as Text, from, to, start: 0, end: 0 });
+      from = to;
     }
   }
+  // The normalized form of a function application depends on the character
+  // after it, so pass the next character too
+  const characterOf = (unit: (typeof units)[number] | undefined) =>
+    unit ? unit.node.data.slice(unit.from, unit.to) : '';
+  units.forEach((unit, index) => {
+    unit.start = text.length;
+    text += normalizeFormulaText(
+      characterOf(unit),
+      characterOf(units[index + 1])
+    );
+    unit.end = text.length;
+  });
 
   // The first and last unit of each match
   const ranges: { first: number; last: number }[] = [];
@@ -630,18 +636,25 @@ function searchFormula(query: RegExp, formula: Element): IHTMLSearchMatch[] {
 }
 
 /**
- * Turn the characters of a formula into the characters typed in a query.
+ * Turn a character of a formula into the characters typed in a query.
  *
  * NFKC turns mathematical symbols into letters and digits (𝑥 into x, ℝ into
  * R). The minus sign, the asterisk operator and the prime become their ASCII
- * forms, and the invisible function application that MathJax adds after a
- * function name, such as `sin`, becomes a space.
+ * forms. MathJax adds an invisible function application after a function
+ * name, such as `sin`. It becomes a space when a letter or a digit follows,
+ * so that the text of `\sin x` is `sin x`, and is dropped otherwise, so that
+ * the text of `\sin(x)` is `sin(x)`.
+ *
+ * @param character - The character to normalize
+ * @param next - The character that follows it in the formula, if any
  */
-function normalizeFormulaText(text: string): string {
-  return text
+function normalizeFormulaText(character: string, next = ''): string {
+  if (character === '\u2061') {
+    return /^[\p{L}\p{N}]/u.test(normalizeFormulaText(next)) ? ' ' : '';
+  }
+  return character
     .normalize('NFKC')
     .replace(/\u2212/g, '-')
     .replace(/\u2217/g, '*')
-    .replace(/\u2032/g, "'")
-    .replace(/\u2061/g, ' ');
+    .replace(/\u2032/g, "'");
 }

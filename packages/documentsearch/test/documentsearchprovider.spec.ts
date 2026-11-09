@@ -39,6 +39,17 @@ const FUNCTION_FORMULA =
   '</mjx-math></mjx-container>';
 
 /**
+ * The DOM of `$\sin(x)$` typeset by MathJax, with the invisible function
+ * application between `sin` and the parenthesis.
+ */
+const APPLIED_FUNCTION_FORMULA =
+  '<mjx-container class="MathJax" jax="CHTML"><mjx-math aria-hidden="true">' +
+  '<mjx-mi><mjx-c>s</mjx-c><mjx-c>i</mjx-c><mjx-c>n</mjx-c></mjx-mi>' +
+  '<mjx-mo><mjx-c>\u2061</mjx-c></mjx-mo><mjx-mo><mjx-c>(</mjx-c></mjx-mo>' +
+  '<mjx-mi><mjx-c>𝑥</mjx-c></mjx-mi><mjx-mo><mjx-c>)</mjx-c></mjx-mo>' +
+  '</mjx-math></mjx-container>';
+
+/**
  * The DOM of `$1, \ldots, n$` typeset by MathJax, whose ellipsis becomes
  * three dots when normalized.
  */
@@ -199,6 +210,12 @@ describe('documentsearch/genericsearchprovider', () => {
         expect(provider.matchesCount).toBe(1);
       });
 
+      it('should find a function applied to a parenthesis in a formula', async () => {
+        widget.node.innerHTML = `<p>${APPLIED_FUNCTION_FORMULA}</p>`;
+        await provider.startQuery(/sin\(x\)/);
+        expect(provider.matchesCount).toBe(1);
+      });
+
       it('should highlight each character of a text node of a formula', async () => {
         widget.node.innerHTML = `<p>${TEXT_RUN_FORMULA}</p>`;
         await provider.startQuery(/a/i);
@@ -243,7 +260,8 @@ describe('documentsearch/genericsearchprovider', () => {
         [/10/, `<p>${formula()}</p>`],
         [/x=10/, `<p>${formula()}</p>`],
         [/a/i, `<p>${TEXT_RUN_FORMULA}</p>`],
-        [/\./, `<p>${ELLIPSIS_FORMULA}</p>`]
+        [/\./, `<p>${ELLIPSIS_FORMULA}</p>`],
+        [/sin\(x\)/, `<p>${APPLIED_FUNCTION_FORMULA}</p>`]
       ])(
         'should restore highlighted %s fragment in %s',
         async (query, content) => {

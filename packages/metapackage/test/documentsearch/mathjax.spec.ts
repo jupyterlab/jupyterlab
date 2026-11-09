@@ -31,6 +31,22 @@ describe('@jupyterlab/documentsearch', () => {
       );
 
       it.each([
+        [/sin\(x\)/g, ['sin\u2061(𝑥)']],
+        [/\bsin\b/g, ['sin']]
+      ])(
+        'should find %s in a function applied to a parenthesis',
+        async (query, expected) => {
+          const host = document.createElement('div');
+          host.textContent = '$\\sin(x)$';
+          document.body.appendChild(host);
+          await new MathJaxTypesetter().typeset(host);
+          const matches = await HTMLSearchEngine.search(query, host);
+          expect(matches.map(match => match.text)).toEqual(expected);
+          host.remove();
+        }
+      );
+
+      it.each([
         [/\./g, ['…']],
         [/a/gi, ['Ａ', 'Ａ']]
       ])(
