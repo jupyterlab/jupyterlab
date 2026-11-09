@@ -14,11 +14,18 @@ mjx-container[jax='CHTML'] {
 
 /* The text box of each formula character extends below the character, and on
    the last line of a Markdown cell or an output it adds a vertical scrollbar.
-   Clip it 2px outside the character, as the MathJax clip-path does, so that
-   only the characters themselves count as overflow. */
-mjx-container[jax='CHTML'] mjx-c {
-  overflow: clip;
-  overflow-clip-margin: 2px;
+   Clip it 2px outside the character, so that only the characters themselves
+   count as overflow.
+
+   WebKit does not support `overflow-clip-margin`, and it puts the baseline of
+   a clipped inline-block at the bottom of the box. There the rule would raise
+   every character that extends below the baseline, such as g or ∫, so it
+   applies only where the margin is supported. */
+@supports (overflow-clip-margin: 2px) {
+  mjx-container[jax='CHTML'] mjx-c {
+    overflow: clip;
+    overflow-clip-margin: 2px;
+  }
 }
 
 /* The vertical padding of a breakable formula does not change the layout, but
