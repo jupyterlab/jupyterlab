@@ -303,6 +303,91 @@ describe('filebrowser/listing', () => {
         expect(moved.name).toBe(source.name);
       });
 
+      it('should paste into the current directory from the menu of the empty area', async () => {
+        const contents = dirListing.model.manager.services.contents;
+        const source = [...dirListing.sortedItems()][0];
+        const destination = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+
+        await dirListing.selectItemByName(source.name);
+        dirListing.cut();
+        await dirListing.selectItemByName(destination.name);
+
+        // Right-click below the last item.
+        simulate(dirListing.contentNode, 'mousedown', { button: 2 });
+        await dirListing.paste();
+
+        await expect(
+          contents.get(`${destination.path}/${source.name}`)
+        ).rejects.toBeTruthy();
+        expect((await contents.get(source.path)).name).toBe(source.name);
+      });
+
+      it('should paste into the right-clicked folder of a multi-selection', async () => {
+        const contents = dirListing.model.manager.services.contents;
+        const source = [...dirListing.sortedItems()][0];
+        const first = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+        const second = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+        const nodeFor = (path: string) =>
+          dirListing.contentNode.children[
+            [...dirListing.sortedItems()].findIndex(item => item.path === path)
+          ] as HTMLElement;
+
+        await dirListing.selectItemByName(source.name);
+        dirListing.cut();
+
+        // Select both folders; the second one gets the focus.
+        await dirListing.selectItemByName(first.name, true);
+        simulate(nodeFor(second.path), 'mousedown', { ctrlKey: true });
+        simulate(document.body, 'mouseup', { ctrlKey: true });
+
+        simulate(nodeFor(first.path), 'mousedown', { button: 2 });
+        await dirListing.paste();
+
+        const moved = await contents.get(`${first.path}/${source.name}`);
+        expect(moved.name).toBe(source.name);
+      });
+
+      it('should paste into the current directory when a file is selected', async () => {
+        const [source, other] = [...dirListing.sortedItems()];
+        await dirListing.selectItemByName(source.name);
+        dirListing.copy();
+        await dirListing.selectItemByName(other.name);
+        const copySpy = jest
+          .spyOn(dirListing.model.manager, 'copy')
+          .mockResolvedValue({} as any);
+
+        await dirListing.paste();
+
+        expect(copySpy).toHaveBeenCalledWith(
+          source.path,
+          dirListing.model.path
+        );
+      });
+
+      it('should paste into the current directory when the selected folder is copied', async () => {
+        const folder = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+        await dirListing.selectItemByName(folder.name);
+        dirListing.copy();
+        const copySpy = jest
+          .spyOn(dirListing.model.manager, 'copy')
+          .mockResolvedValue({} as any);
+
+        await dirListing.paste();
+
+        expect(copySpy).toHaveBeenCalledWith(
+          folder.path,
+          dirListing.model.path
+        );
+      });
+
       it('should prompt to overwrite when pasting cut item over existing file', async () => {
         jest.spyOn(dirListing.model.manager, 'rename').mockRejectedValueOnce({
           response: { status: 409 }

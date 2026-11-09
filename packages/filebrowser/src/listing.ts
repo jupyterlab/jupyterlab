@@ -1682,8 +1682,16 @@ export class DirListing extends Widget {
     }
 
     let index = Private.hitTestNodes(this._items, event);
+    const newContext = (IS_MAC && event.ctrlKey) || event.button === 2;
 
     if (index === -1) {
+      // A context menu opened on the empty area acts on the current directory,
+      // so clear the selection that paste would otherwise use as destination.
+      if (newContext && this.contentNode.contains(event.target as Node)) {
+        this.clearSelectedItems();
+        this.update();
+        return;
+      }
       // Left mouse press for drag or resize start.
       if (event.button === 0) {
         const resizeHandle = event.target;
@@ -1731,7 +1739,6 @@ export class DirListing extends Widget {
     }
 
     // Check for clearing a context menu.
-    const newContext = (IS_MAC && event.ctrlKey) || event.button === 2;
     if (newContext) {
       return;
     }
@@ -2438,6 +2445,10 @@ export class DirListing extends Widget {
       // Handle a 'soft' selection
     } else if (path in this.selection && selected.length > 1) {
       this._softSelection = path;
+      // Paste uses the focused item, so focus the item the menu is opened on.
+      if (event.button === 2 || (IS_MAC && event.ctrlKey)) {
+        this._focusItem(index);
+      }
 
       // Default to selecting the only the item.
     } else {
