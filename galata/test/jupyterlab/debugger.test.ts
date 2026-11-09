@@ -180,6 +180,33 @@ for (const c of showSourcesCases) {
       }
     });
 
+    test('Activate the cell the debugger stops in', async ({
+      page,
+      tmpPath
+    }) => {
+      const notebookName = 'code_notebook.ipynb';
+      openedDocument = notebookName;
+      openedDocumentIsNotebook = true;
+      await openNotebook(page, tmpPath, notebookName);
+
+      await page.debugger.switchOn(notebookName);
+      await page.sidebar.openTab('jp-debugger-sidebar');
+
+      expect(await page.notebook.activate(notebookName)).toBe(true);
+      await page.notebook.waitForCellGutter(0, notebookName);
+      expect(await page.notebook.clickCellGutter(0, 2, notebookName)).toBe(
+        true
+      );
+      await page.debugger.waitForBreakPoints();
+
+      // `runCell` presses Shift+Enter, which makes the new cell below active.
+      expect(await page.notebook.runCell(0, { wait: false })).toBe(true);
+      await page.debugger.waitForCallStack();
+
+      const cell = (await page.notebook.getCellLocator(0, notebookName))!;
+      await expect(cell).toHaveClass(/jp-mod-active/);
+    });
+
     test('Rich variables inspector', async ({ page, tmpPath }) => {
       await page.contents.uploadFile(
         path.resolve(__dirname, './notebooks/WidgetArch.png'),
