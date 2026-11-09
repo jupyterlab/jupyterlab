@@ -85,9 +85,10 @@ for i in range(10):
   await page.keyboard.type('42');
   await page.keyboard.press('Enter');
 
-  expect(await page.locator('.jp-RenderedMarkdown').count()).toBeGreaterThan(
-    MAX_OUTPUTS
-  );
+  // The outputs displayed after the input arrive after Enter is pressed.
+  await expect
+    .poll(() => page.locator('.jp-RenderedMarkdown').count())
+    .toBeGreaterThan(MAX_OUTPUTS);
   await expect(page.locator('.jp-RenderedText').first()).toHaveText(
     'Your age: 42'
   );
