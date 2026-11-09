@@ -8,6 +8,13 @@
   font-family: MJX-TEX-ZERO;
   src: url('~@mathjax/mathjax-tex-font/chtml/woff2/mjx-tex-zero.woff2')
     format('woff2');
+
+  /* MathJax lists this font first in each formula, and the 0.75em ascent and
+     descent of its text box, which base.css clips on characters, still extend
+     breakable formulas below the line. Equal values keep the baseline, and 70%
+     keeps the selection highlight of characters close to the original. */
+  ascent-override: 70%;
+  descent-override: 70%;
 }
 
 @font-face /* MJX-BRK */ {

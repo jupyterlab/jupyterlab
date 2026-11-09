@@ -12,11 +12,17 @@ mjx-container[jax='CHTML'] {
   line-height: 0;
 }
 
-/* MJX-TEX-ZERO, the first font of every MathJax 4 font family, has a descent
-   of 0.75em. A formula on the last line of a Markdown cell or an output
-   therefore overflows the box by one or two pixels, and `overflow: auto` shows
-   a vertical scrollbar for it. */
-.jp-MarkdownOutput.jp-RenderedHTMLCommon:has(mjx-container),
-.jp-OutputArea-output:has(mjx-container) {
-  overflow-y: hidden;
+/* The text box of each formula character extends below the character, and on
+   the last line of a Markdown cell or an output it adds a vertical scrollbar.
+   Clip it 2px outside the character, as the MathJax clip-path does, so that
+   only the characters themselves count as overflow. */
+mjx-container[jax='CHTML'] mjx-c {
+  overflow: clip;
+  overflow-clip-margin: 2px;
+}
+
+/* The vertical padding of a breakable formula does not change the layout, but
+   extends below the line in the same way. */
+mjx-container[jax='CHTML'] mjx-math[breakable] {
+  padding-block: 0;
 }
