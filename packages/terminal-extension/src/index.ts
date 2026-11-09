@@ -674,6 +674,7 @@ function addCommands(
       let session;
       let initialTitle: string | undefined;
       if (name) {
+        await serviceManager.terminals.ready;
         await serviceManager.terminals.refreshRunning();
         const names = Array.from(
           serviceManager.terminals.running(),
