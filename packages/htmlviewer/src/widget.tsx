@@ -35,7 +35,8 @@ const RENDER_TIMEOUT = 1000;
 const CSS_CLASS = 'jp-HTMLViewer';
 
 /**
- * Track explicit refresh requests without adding methods to the viewer API.
+ * Viewers whose next render must reload the document, even if the rendered
+ * HTML is unchanged: after a Refresh click or a trust change.
  */
 const refreshRequested = new WeakSet<HTMLViewer>();
 
@@ -128,7 +129,9 @@ export class HTMLViewer
     } else {
       this.content.sandbox = [...Private.common, ...Private.untrusted];
     }
-    this.update(); // Force a refresh.
+    // A new sandbox applies only when the iframe loads a document.
+    refreshRequested.add(this);
+    this.update();
     this._trustedChanged.emit(value);
   }
 
