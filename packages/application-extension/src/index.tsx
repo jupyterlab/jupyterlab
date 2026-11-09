@@ -1278,6 +1278,27 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     let _docTreePath = '';
     let _defaultBrowserTreePath = '';
 
+    /**
+     * Set or delete a query parameter that the page URL already has.
+     */
+    function updateQuery(name: string, value?: string) {
+      const { pathname, search, hash } = window.location;
+      // Not `URLSearchParams`: it writes a space as `+`, which the tree
+      // resolver reads as a plus sign.
+      const query = URLExt.queryStringToObject(search);
+      if (query[name] === undefined) {
+        return;
+      }
+      if (value === undefined) {
+        delete query[name];
+      } else {
+        query[name] = value;
+      }
+      router.navigate(pathname + URLExt.objectToQueryString(query) + hash, {
+        skipRouting: true
+      });
+    }
+
     function updateUrl(
       treePath: string,
       parameterToClear?: 'file-browser-path' | 'open-with'
@@ -1287,13 +1308,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
       if (path !== window.location.pathname) {
         router.navigate(path, { skipRouting: true });
       } else if (parameterToClear) {
-        const current = new URL(window.location.href);
-        if (current.searchParams.has(parameterToClear)) {
-          current.searchParams.delete(parameterToClear);
-          router.navigate(path + current.search + current.hash, {
-            skipRouting: true
-          });
-        }
+        updateQuery(parameterToClear);
       }
       PageConfig.setOption('treePath', treePath);
     }
@@ -1307,17 +1322,12 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
         if (!_docTreePath) {
           updateUrl(treePath, 'file-browser-path');
         } else {
-          const current = new URL(window.location.href);
-          if (current.searchParams.has('file-browser-path')) {
-            if (treePath === PathExt.dirname(_docTreePath)) {
-              current.searchParams.delete('file-browser-path');
-            } else {
-              current.searchParams.set('file-browser-path', treePath || '/');
-            }
-            router.navigate(current.pathname + current.search + current.hash, {
-              skipRouting: true
-            });
-          }
+          updateQuery(
+            'file-browser-path',
+            treePath === PathExt.dirname(_docTreePath)
+              ? undefined
+              : treePath || '/'
+          );
         }
       });
     }

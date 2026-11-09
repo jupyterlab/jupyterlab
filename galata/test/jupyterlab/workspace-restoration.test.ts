@@ -78,6 +78,7 @@ for (const view of [
         `${tmpPath}/target.txt`
       );
       await contents.createDirectory(`${tmpPath}/different/child`);
+      await contents.createDirectory(`${tmpPath}/different/with space+plus`);
     });
 
     test('should keep the restored current view for the URL file', async ({
@@ -132,7 +133,10 @@ for (const view of [
       await expect(page).toHaveURL(
         url => url.pathname === `/lab/tree/${filePath}`
       );
-      for (const directory of [`${tmpPath}/different/child`, tmpPath]) {
+      for (const directory of [
+        `${tmpPath}/different/with space+plus`,
+        tmpPath
+      ]) {
         await page.evaluate(path => {
           return window.jupyterapp.commands.execute('filebrowser:go-to-path', {
             path,
