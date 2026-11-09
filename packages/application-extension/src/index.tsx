@@ -1283,20 +1283,29 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
      */
     function updateQuery(name: string, value?: string) {
       const { pathname, search, hash } = window.location;
-      // Not `URLSearchParams`: it writes a space as `+`, which the tree
-      // resolver reads as a plus sign.
-      const query = URLExt.queryStringToObject(search);
-      if (query[name] === undefined) {
+      // Edit the `key=value` pairs as written, so that the other parameters
+      // keep their exact text. `URLSearchParams` would write a space as `+`,
+      // which the tree resolver reads as a plus sign. A parse into an object
+      // would use names from the URL as property names.
+      const pairs: string[] = [];
+      let found = false;
+      for (const pair of search.slice(1).split('&')) {
+        if (pair.split('=', 1)[0] !== name) {
+          if (pair) {
+            pairs.push(pair);
+          }
+        } else if (!found) {
+          found = true;
+          if (value !== undefined) {
+            pairs.push(`${name}=${encodeURIComponent(value)}`);
+          }
+        }
+      }
+      if (!found) {
         return;
       }
-      if (value === undefined) {
-        delete query[name];
-      } else {
-        query[name] = value;
-      }
-      router.navigate(pathname + URLExt.objectToQueryString(query) + hash, {
-        skipRouting: true
-      });
+      const query = pairs.length ? `?${pairs.join('&')}` : '';
+      router.navigate(pathname + query + hash, { skipRouting: true });
     }
 
     function updateUrl(
