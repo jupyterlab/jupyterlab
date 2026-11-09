@@ -179,13 +179,23 @@ export class HTMLViewer
    * Render HTML in IFrame into this widget's node.
    */
   private async _renderModel(force = false): Promise<void> {
-    let data = this.context.model.toString();
-    data = await this._setupDocument(data);
-
-    if (!force && data === this._renderedData) {
+    const source = this.context.model.toString();
+    const path = this.context.path;
+    const trusted = this.trusted;
+    // Compare the inputs, so that showing the tab again does not parse
+    // and serialize the whole document.
+    const rendered = this._rendered;
+    if (
+      !force &&
+      rendered !== null &&
+      rendered.source === source &&
+      rendered.path === path &&
+      rendered.trusted === trusted
+    ) {
       return;
     }
-    this._renderedData = data;
+    const data = await this._setupDocument(source);
+    this._rendered = { source, path, trusted };
 
     // Set the new iframe url.
     const blob = new Blob([data], { type: 'text/html' });
@@ -239,7 +249,7 @@ export class HTMLViewer
 
   protected translator: ITranslator;
   private _renderPending = false;
-  private _renderedData: string | null = null;
+  private _rendered: Private.IRenderedDocument | null = null;
   private _parser = new DOMParser();
   private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null =
     null;
@@ -348,6 +358,15 @@ namespace Private {
     'allow-scripts',
     'allow-popups'
   ];
+
+  /**
+   * The inputs of the document shown in an HTML viewer.
+   */
+  export interface IRenderedDocument {
+    source: string;
+    path: string;
+    trusted: boolean;
+  }
 
   /**
    * Namespace for TrustedButton.

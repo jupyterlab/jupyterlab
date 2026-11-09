@@ -113,6 +113,40 @@ test.describe('HTML Viewer', () => {
     );
   });
 
+  test('should not parse an unchanged document when its tab is shown', async ({
+    page
+  }) => {
+    // Count the parses of the test document, which links to GitHub.
+    await page.evaluate(() => {
+      const parse = DOMParser.prototype.parseFromString;
+      (window as any).htmlViewerParses = 0;
+      DOMParser.prototype.parseFromString = function (string, type) {
+        if (string.includes('https://github.com')) {
+          (window as any).htmlViewerParses++;
+        }
+        return parse.call(this, string, type);
+      };
+    });
+    await page.getByRole('listitem', { name: secondFileName }).dblclick();
+    await expect(page.locator('.jp-HTMLViewer iframe').nth(1)).toHaveAttribute(
+      'src',
+      /^blob:/
+    );
+    await page.evaluate(() => ((window as any).htmlViewerParses = 0));
+
+    await page.getByRole('tab', { name: fileName }).click();
+    const firstIframe = page.locator('.jp-HTMLViewer iframe').first();
+    await expect(firstIframe).toBeVisible();
+    // The viewer handles the update request of the tab show in the next frame.
+    await firstIframe.evaluate(
+      () =>
+        new Promise<void>(resolve => {
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+        })
+    );
+    expect(await page.evaluate(() => (window as any).htmlViewerParses)).toBe(0);
+  });
+
   test('should rerender when explicitly refreshed', async ({ page }) => {
     const iframe = page.locator('.jp-HTMLViewer iframe').first();
     const initialUrl = await iframe.getAttribute('src');
