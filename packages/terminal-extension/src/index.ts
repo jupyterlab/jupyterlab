@@ -25,7 +25,6 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 import type { IRunningSessions } from '@jupyterlab/running';
 import { IRunningSessionManagers } from '@jupyterlab/running';
 import type { Terminal } from '@jupyterlab/services';
-import { TerminalAPI } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -675,10 +674,12 @@ function addCommands(
       let session;
       let initialTitle: string | undefined;
       if (name) {
-        const models = await TerminalAPI.listRunning(
-          serviceManager.serverSettings
+        await serviceManager.terminals.refreshRunning();
+        const names = Array.from(
+          serviceManager.terminals.running(),
+          model => model.name
         );
-        if (models.map(d => d.name).includes(name)) {
+        if (names.includes(name)) {
           // we are restoring a terminal widget and the corresponding terminal exists
           // let's connect to it
           initialTitle = await signaler?.title(name);
