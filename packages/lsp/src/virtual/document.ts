@@ -449,6 +449,9 @@ export class VirtualDocument implements IDisposable {
     this.sourceLines.clear();
     this.unusedStandaloneDocuments.clear();
     this.virtualLines.clear();
+    this._editorToSourceLine.clear();
+    // Assigned on first update, so it may not exist yet.
+    this._editorToSourceLineNew?.clear();
 
     // just to be sure - if anything is accessed after disposal (it should not) we
     // will get altered by errors in the console AND this will limit memory leaks

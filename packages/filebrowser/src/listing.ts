@@ -394,6 +394,7 @@ export class DirListing extends Widget {
    * Copy the selected items.
    */
   copy(): void {
+    this._isCut = false;
     this._copy();
   }
 
@@ -402,10 +403,10 @@ export class DirListing extends Widget {
    *
    * @returns A promise that resolves when the operation is complete.
    */
-  paste(): Promise<void> {
+  async paste(): Promise<void> {
     if (!this._clipboard.length) {
       this._isCut = false;
-      return Promise.resolve(undefined);
+      return;
     }
 
     let basePath = this._model.path;
@@ -428,38 +429,71 @@ export class DirListing extends Widget {
       }
     }
 
-    const promises: Promise<Contents.IModel>[] = [];
-
-    for (const path of this._clipboard) {
-      if (this._isCut) {
-        const localPath = this._manager.services.contents.localPath(path);
-        const parts = localPath.split('/');
-        const name = parts[parts.length - 1];
-        const newPath = PathExt.join(basePath, name);
-        promises.push(this._model.manager.rename(path, newPath));
-      } else {
-        promises.push(this._model.manager.copy(path, basePath));
-      }
-    }
+    const isCut = this._isCut;
+    const pathsToPaste = [...this._clipboard];
+    const pasteRevision = this._clipboardRevision;
 
     // Remove any cut modifiers.
     for (const item of this._items) {
       item.classList.remove(CUT_CLASS);
     }
 
+    // Empty the clipboard while pasting, so that pasting again before this
+    // paste ends does not move or copy the same items a second time.
     this._clipboard.length = 0;
     this._isCut = false;
     this.removeClass(CLIPBOARD_CLASS);
-    return Promise.all(promises)
-      .then(() => {
-        return undefined;
+
+    const operations = pathsToPaste.map(async path => {
+      if (isCut) {
+        const localPath = this._manager.services.contents.localPath(path);
+        const parts = localPath.split('/');
+        const name = parts[parts.length - 1];
+        const newPath = PathExt.join(basePath, name);
+        // Some drives delete an item that is renamed onto itself.
+        if (newPath !== path) {
+          await renameFile(this._manager, path, newPath);
+        }
+      } else {
+        await this._model.manager.copy(path, basePath);
+      }
+      return path;
+    });
+
+    const results = await Promise.all(
+      operations.map(async op => {
+        try {
+          const value = await op;
+          return { status: 'fulfilled' as const, value };
+        } catch (reason) {
+          return { status: 'rejected' as const, reason };
+        }
       })
-      .catch(error => {
-        void showErrorMessage(
-          this._trans._p('showErrorMessage', 'Paste Error'),
-          error
-        );
-      });
+    );
+    const successfulPaths = new Set<string>();
+    const errors: unknown[] = [];
+
+    for (const result of results) {
+      if (result.status === 'fulfilled') {
+        successfulPaths.add(result.value);
+      } else if (result.reason !== 'File not renamed') {
+        errors.push(result.reason);
+      }
+    }
+
+    // Put back the items that were not pasted, unless a cut or a copy
+    // replaced them in the meantime.
+    if (this._clipboardRevision === pasteRevision) {
+      this._clipboard = pathsToPaste.filter(path => !successfulPaths.has(path));
+      this._isCut = isCut && this._clipboard.length > 0;
+    }
+
+    if (errors.length > 0) {
+      void showErrorMessage(
+        this._trans._p('showErrorMessage', 'Paste Error'),
+        errors[0] instanceof Error ? errors[0] : String(errors[0])
+      );
+    }
   }
 
   /**
@@ -2240,12 +2274,19 @@ export class DirListing extends Widget {
         promises.push(renameFile(manager, path, newPath));
       }
     }
-    Promise.all(promises).catch(error => {
-      void showErrorMessage(
-        this._trans._p('showErrorMessage', 'Error while copying/moving files'),
-        error
-      );
-    });
+    // Report a failure once every move is done, so that it does not open
+    // under a later prompt.
+    Promise.all(promises.map(promise => promise.catch(() => undefined)))
+      .then(() => Promise.all(promises))
+      .catch(error => {
+        void showErrorMessage(
+          this._trans._p(
+            'showErrorMessage',
+            'Error while copying/moving files'
+          ),
+          error
+        );
+      });
   }
 
   /**
@@ -2551,6 +2592,7 @@ export class DirListing extends Widget {
     for (const item of this.selectedItems()) {
       this._clipboard.push(item.path);
     }
+    this._clipboardRevision++;
   }
 
   /**
@@ -2644,7 +2686,7 @@ export class DirListing extends Widget {
         if (error !== 'File not renamed') {
           void showErrorMessage(
             this._trans._p('showErrorMessage', 'Rename Error'),
-            error
+            error instanceof Error ? error : String(error)
           );
         }
         finalFilename = original;
@@ -2829,6 +2871,7 @@ export class DirListing extends Widget {
   private _isCut = false;
   private _prevPath = '';
   private _clipboard: string[] = [];
+  private _clipboardRevision = 0;
   private _manager: IDocumentManager;
   private _softSelection = '';
   protected selection: { [key: string]: boolean } = Object.create(null);

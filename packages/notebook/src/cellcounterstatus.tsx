@@ -16,7 +16,7 @@ import {
   VDomRenderer
 } from '@jupyterlab/ui-components';
 import React from 'react';
-import type { Notebook } from '.';
+import type { INotebookModel, Notebook } from '.';
 
 /**
  * A namespace for CellNumberFormComponent statics.
@@ -406,12 +406,13 @@ export namespace CellCounterStatus {
       const oldNotebook = this._notebook;
       if (oldNotebook) {
         oldNotebook.activeCellChanged.disconnect(this._onChanged, this);
-        oldNotebook.modelContentChanged.disconnect(this._onChanged, this);
+        oldNotebook.modelChanged.disconnect(this._onModelChanged, this);
         oldNotebook.selectionChanged.disconnect(this._onChanged, this);
       }
 
       const oldState = this._getAllState();
       this._notebook = notebook;
+      this._followCells();
 
       if (!this._notebook) {
         this._activeCell = 0;
@@ -420,7 +421,7 @@ export namespace CellCounterStatus {
         this._totalCells = 0;
       } else {
         this._notebook.activeCellChanged.connect(this._onChanged, this);
-        this._notebook.modelContentChanged.connect(this._onChanged, this);
+        this._notebook.modelChanged.connect(this._onModelChanged, this);
         this._notebook.selectionChanged.connect(this._onChanged, this);
         this._updateStateFromNotebook(this._notebook);
       }
@@ -459,10 +460,33 @@ export namespace CellCounterStatus {
     /**
      * React to notebook changes by refreshing the tracked state.
      */
-    private _onChanged(notebook: Notebook): void {
+    private _onChanged(): void {
+      if (!this._notebook) {
+        return;
+      }
       const oldState = this._getAllState();
-      this._updateStateFromNotebook(notebook);
+      this._updateStateFromNotebook(this._notebook);
       this._triggerChange(oldState, this._getAllState());
+    }
+
+    /**
+     * When the notebook model changes, follow the cells of the new model.
+     */
+    private _onModelChanged(): void {
+      this._followCells();
+      this._onChanged();
+    }
+
+    /**
+     * Listen to additions and removals of cells, which change the count.
+     *
+     * Edits of cell contents are not followed, because they do not change
+     * the count or the selection.
+     */
+    private _followCells(): void {
+      this._cells?.changed.disconnect(this._onChanged, this);
+      this._cells = this._notebook?.model?.cells ?? null;
+      this._cells?.changed.connect(this._onChanged, this);
     }
 
     private _updateStateFromNotebook(notebook: Notebook): void {
@@ -519,5 +543,6 @@ export namespace CellCounterStatus {
     private _selectionEnd = 0;
     private _totalCells = 0;
     private _notebook: Notebook | null = null;
+    private _cells: INotebookModel['cells'] | null = null;
   }
 }

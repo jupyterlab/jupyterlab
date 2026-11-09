@@ -88,6 +88,8 @@ import { InputPlaceholder, OutputPlaceholder } from './placeholder';
 
 import { ResizeHandle } from './resizeHandle';
 
+import { scrollCellIntoView } from './utils';
+
 /**
  * The CSS class added to cell widgets.
  */
@@ -370,6 +372,23 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   }
 
   /**
+   * Whether the cell is being displayed in view-only mode.
+   *
+   * This state is transient and is not persisted to the notebook model.
+   */
+  get viewOnly(): boolean {
+    return this._viewOnly;
+  }
+
+  set viewOnly(value: boolean) {
+    if (this._viewOnly === value) {
+      return;
+    }
+    this._viewOnly = value;
+    this.update();
+  }
+
+  /**
    * Whether the cell is a placeholder that defer rendering
    *
    * #### Notes
@@ -566,11 +585,16 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       return;
     }
     this._resizeDebouncer.dispose();
+    const input = this._input;
+    const inputPlaceholder = this._inputPlaceholder;
     this._input = null!;
     this._model = null!;
     this._inputWrapper = null!;
     this._inputPlaceholder = null!;
     super.dispose();
+    // Dispose the input widget that may have been swapped out of the layout.
+    input?.dispose();
+    inputPlaceholder?.dispose();
   }
 
   /**
@@ -696,9 +720,12 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     if (!this._model) {
       return;
     }
-    // Handle read only state.
-    if (this.editor?.getOption('readOnly') !== this._readOnly) {
-      this.editor?.setOption('readOnly', this._readOnly);
+
+    // Handle read-only and view-only states.
+    const readOnly = this._readOnly || this._viewOnly;
+
+    if (this.editor?.getOption('readOnly') !== readOnly) {
+      this.editor?.setOption('readOnly', readOnly);
     }
   }
 
@@ -776,6 +803,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   private _model: T;
   private _placeholder: boolean;
   private _readOnly = false;
+  private _viewOnly = false;
   private _ready = new PromiseDelegate<void>();
   private _resizeDebouncer = new Debouncer(() => {
     this._displayChanged.emit();
@@ -1122,6 +1150,9 @@ export class CodeCell extends Cell<ICodeCellModel> {
     output.addClass(CELL_OUTPUT_AREA_CLASS);
     output.toggleScrolling.connect(() => {
       this.outputsScrolled = !this.outputsScrolled;
+      if (this.outputsScrolled) {
+        scrollCellIntoView(this);
+      }
     });
     output.initialize.connect(() => {
       this.updatePromptOverlayIcon();
@@ -1349,7 +1380,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
         } else if (mdType) {
           const mdHeading = await TableOfContentsUtils.Markdown.parseHeadings(
             m.data[mdType] as string,
-            this._rendermime.markdownParser
+            this._rendermime.markdownParser,
+            this._rendermime.latexTypesetter?.mathParseOptions
           );
 
           headings.push(
@@ -1614,11 +1646,16 @@ export class CodeCell extends Cell<ICodeCellModel> {
       'keydown',
       this._detectCaretMovementInOuput
     );
+    const output = this._output;
+    const outputPlaceholder = this._outputPlaceholder;
     this._rendermime = null!;
     this._output = null!;
     this._outputWrapper = null!;
     this._outputPlaceholder = null!;
     super.dispose();
+    // Dispose the output widget that may have been swapped out of the layout.
+    output.dispose();
+    outputPlaceholder?.dispose();
   }
 
   /**
@@ -2239,11 +2276,17 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * This method caches the result after the first call to avoid redundant parsing.
    **/
   async getHeadings(): Promise<Cell.IHeading[]> {
-    if (!this._headingsCache) {
+    while (!this._headingsCache) {
+      const source = this.model.sharedModel.getSource();
       const headings = await TableOfContentsUtils.Markdown.parseHeadings(
-        this.model.sharedModel.getSource(),
-        this._rendermime.markdownParser
+        source,
+        this._rendermime.markdownParser,
+        this._rendermime.latexTypesetter?.mathParseOptions
       );
+      if (!this.isDisposed && source !== this.model.sharedModel.getSource()) {
+        // The source changed while it was parsed: parse it again.
+        continue;
+      }
       this._headingsCache = headings.map(h => {
         return { ...h, type: Cell.HeadingType.Markdown };
       });
@@ -2624,7 +2667,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _rendermime: IRenderMimeRegistry;
   private _rendered = true;
   private _renderedChanged = new Signal<this, boolean>(this);
-  private _showEditorForReadOnlyMarkdown = true;
+  private _showEditorForReadOnlyMarkdown = false;
   private _cachedHeadingText = '';
   private _headingResolved: boolean = false;
   private _emptyPlaceholder: string;
@@ -2658,7 +2701,7 @@ export namespace MarkdownCell {
   /**
    * Default value for showEditorForReadOnlyMarkdown.
    */
-  export const defaultShowEditorForReadOnlyMarkdown = true;
+  export const defaultShowEditorForReadOnlyMarkdown = false;
 }
 
 /** ****************************************************************************

@@ -15,6 +15,10 @@ test.use({
   viewport: { height: 720, width: 1280 }
 });
 
+test.beforeEach(async ({ page }) => {
+  await stubGitHubUserIcons(page);
+});
+
 test.describe('Extension Manager', () => {
   test.beforeEach(async ({ page }) => {
     // Mock get extensions list
@@ -59,7 +63,7 @@ test.describe('Extension Manager', () => {
   test('Warning', async ({ page }) => {
     await page.goto();
 
-    await page.click('[title="Extension Manager"]');
+    await page.sidebar.openTab('extensionmanager.main-view');
     expect(
       await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 400 } })
     ).toMatchSnapshot('extensions_disabled.png');
@@ -76,8 +80,6 @@ test.describe('Extension Manager', () => {
   });
 
   test('Search', async ({ page }) => {
-    await stubGitHubUserIcons(page);
-
     await page.goto();
 
     await openExtensionSidebar(page);
@@ -370,7 +372,7 @@ test.describe('Filtered Extension Manager', () => {
 });
 
 async function openExtensionSidebar(page: IJupyterLabPageFixture) {
-  await page.click('[title="Extension Manager"]');
+  await page.sidebar.openTab('extensionmanager.main-view');
 
   await Promise.all([
     page.waitForResponse(new RegExp(`${galata.Routes.extensions}?refresh=0`)),
@@ -388,4 +390,17 @@ async function openExtensionSidebar(page: IJupyterLabPageFixture) {
     .waitFor();
 
   await page.sidebar.setWidth();
+
+  // Screenshots do not wait for images, and the avatars load after the lists.
+  await page.waitForFunction(() => {
+    const avatars = Array.from(
+      document.querySelectorAll<HTMLImageElement>(
+        '.jp-extensionmanager-entry img'
+      )
+    );
+    return (
+      avatars.length > 0 &&
+      avatars.every(img => img.complete && img.naturalWidth > 0)
+    );
+  });
 }

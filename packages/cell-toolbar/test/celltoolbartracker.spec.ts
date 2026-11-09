@@ -4,10 +4,10 @@
 |----------------------------------------------------------------------------*/
 import {
   createToolbarFactory,
+  ToolbarRegistry,
   ToolbarWidgetRegistry
 } from '@jupyterlab/apputils';
 import { CellBarExtension, CellToolbarTracker } from '@jupyterlab/cell-toolbar';
-import type { ToolbarRegistry } from '@jupyterlab/apputils';
 import type { NotebookPanel } from '@jupyterlab/notebook';
 import { NotebookTracker } from '@jupyterlab/notebook';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
@@ -166,7 +166,7 @@ describe('@jupyterlab/cell-toolbar', () => {
       const getPanel = (args: any) => {
         return (
           notebookTracker.find(
-            panel => panel.id === args[CellBarExtension.WIDGET_ID_ARG]
+            panel => panel.id === args[ToolbarRegistry.WIDGET_ID_ARG]
           ) ?? null
         );
       };
