@@ -121,6 +121,23 @@ test.describe('HTML Viewer', () => {
     await page.getByRole('button', { name: 'Rerender HTML Document' }).click();
     await expect.poll(() => iframe.getAttribute('src')).not.toBe(initialUrl);
   });
+
+  test('should not render before the file is loaded', async ({ page }) => {
+    // Hold the file contents back, so that the tab is shown before they arrive.
+    await page.route(/\/api\/contents\/.*test-2\.html\?/, async route => {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await route.continue();
+    });
+    await page.getByRole('listitem', { name: secondFileName }).dblclick();
+
+    const iframe = page.locator('.jp-HTMLViewer iframe').nth(1);
+    await expect(iframe).toHaveAttribute('src', /^blob:/);
+    const firstUrl = await iframe.getAttribute('src');
+    await expect(
+      iframe.contentFrame().getByRole('link', { name: 'GitHub' })
+    ).toBeVisible();
+    await expect(iframe).toHaveAttribute('src', firstUrl!);
+  });
 });
 
 async function waitForFrame(

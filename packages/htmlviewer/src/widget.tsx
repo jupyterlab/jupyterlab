@@ -157,7 +157,9 @@ export class HTMLViewer
    * Handle and update request.
    */
   protected onUpdateRequest(): void {
-    if (this._renderPending) {
+    // The layout requests an update when the tab is shown, also before the
+    // file is loaded. The constructor renders once the context is ready.
+    if (this._renderPending || !this.context.isReady) {
       return;
     }
     const force = refreshRequested.delete(this);
