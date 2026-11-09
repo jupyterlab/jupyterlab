@@ -177,72 +177,114 @@ test.describe('Notebook scroll on navigation (content visibility)', () => {
     }
   });
 
-  test('should follow a cell-ID link to a notebook restored in a background tab on the first click', async ({
-    page,
-    tmpPath
-  }) => {
-    const targetName = 'target.ipynb';
-    const sourceName = 'links.ipynb';
-    const cellCount = 100;
-    const targetIndex = 80;
-    const notebook = {
-      nbformat: 4,
-      nbformat_minor: 5,
-      metadata: {}
-    };
-    await page.contents.uploadContent(
-      JSON.stringify({
-        ...notebook,
-        cells: Array.from({ length: cellCount }, (_, index) => ({
-          cell_type: 'code',
-          id: `cell-${index}`,
-          metadata: {},
-          source: `# Cell ${index}\nvalue = ${index}\nprint(value)`,
-          execution_count: null,
-          outputs: []
-        }))
-      }),
-      'text',
-      `${tmpPath}/${targetName}`
-    );
-    await page.contents.uploadContent(
-      JSON.stringify({
-        ...notebook,
-        cells: [
-          {
-            cell_type: 'markdown',
-            id: 'link',
+  for (const [cellType, fragment] of [
+    ['code', 'cell-id'],
+    ['markdown', 'cell-id'],
+    ['markdown', 'heading']
+  ] as const) {
+    test(`should follow a ${fragment} link to a ${cellType} cell in a restored background notebook on the first click`, async ({
+      page,
+      tmpPath
+    }) => {
+      const targetName = 'target.ipynb';
+      const sourceName = 'links.ipynb';
+      const cellCount = 100;
+      const targetIndex = 80;
+      const notebook = {
+        nbformat: 4,
+        nbformat_minor: 5,
+        metadata: {}
+      };
+      await page.contents.uploadContent(
+        JSON.stringify({
+          ...notebook,
+          cells: Array.from({ length: cellCount }, (_, index) => ({
+            cell_type: cellType,
+            id: `cell-${index}`,
             metadata: {},
-            source: `[Go to target cell](${targetName}#cell-id=cell-${targetIndex})`
-          }
-        ]
-      }),
-      'text',
-      `${tmpPath}/${sourceName}`
-    );
+            source:
+              cellType === 'code'
+                ? `# Cell ${index}\nvalue = ${index}\nprint(value)`
+                : `## Cell ${index}\n\nContent of cell ${index}.`,
+            ...(cellType === 'code'
+              ? { execution_count: null, outputs: [] }
+              : {})
+          }))
+        }),
+        'text',
+        `${tmpPath}/${targetName}`
+      );
+      await page.contents.uploadContent(
+        JSON.stringify({
+          ...notebook,
+          cells: [
+            {
+              cell_type: 'markdown',
+              id: 'link',
+              metadata: {},
+              source: [targetIndex, 20]
+                .map(
+                  index =>
+                    `[Go to cell ${index}](${targetName}#${fragment}=${fragment === 'cell-id' ? `cell-${index}` : `Cell-${index}`})`
+                )
+                .join('\n\n')
+            }
+          ]
+        }),
+        'text',
+        `${tmpPath}/${sourceName}`
+      );
 
-    await page.goto();
+      await page.goto();
 
-    const targetNotebook = page.locator('.jp-NotebookPanel').filter({
-      has: page.locator(`[data-windowed-list-index="${cellCount - 1}"]`)
-    });
-    await expect(targetNotebook.locator('.cm-editor')).toHaveCount(cellCount);
-    await expect(targetNotebook).toBeHidden();
-    expect(
-      await targetNotebook
-        .locator('.jp-Cell')
-        .evaluateAll(cells =>
-          cells.map(cell => getComputedStyle(cell).containIntrinsicSize)
+      const targetNotebook = page.locator('.jp-NotebookPanel').filter({
+        has: page.locator(`[data-windowed-list-index="${cellCount - 1}"]`)
+      });
+      await expect(
+        targetNotebook.locator(
+          cellType === 'code' ? '.cm-editor' : '.jp-MarkdownOutput'
         )
-    ).not.toContain('auto 0px');
+      ).toHaveCount(cellCount);
+      await expect(targetNotebook).toBeHidden();
+      expect(
+        await targetNotebook
+          .locator('.jp-Cell')
+          .evaluateAll(cells =>
+            cells.map(cell => getComputedStyle(cell).containIntrinsicSize)
+          )
+      ).not.toContain('auto 0px');
 
-    await page.getByRole('link', { name: 'Go to target cell' }).click();
+      for (const index of [targetIndex, 20]) {
+        await page.activity.activateTab(sourceName);
+        await page.getByRole('link', { name: `Go to cell ${index}` }).click();
 
-    await expect(targetNotebook).toBeVisible();
-    await expect(
-      targetNotebook.locator(`[data-windowed-list-index="${targetIndex}"]`)
-    ).toBeInViewport({ ratio: 0.99 });
-  });
+        await expect(targetNotebook).toBeVisible();
+        const targetCell = targetNotebook.locator(
+          `[data-windowed-list-index="${index}"]`
+        );
+        const targetElement =
+          fragment === 'heading' ? targetCell.locator('h2') : targetCell;
+        await expect(targetCell).toHaveClass(/jp-mod-active/);
+        await expect(targetElement).toBeInViewport({ ratio: 0.99 });
+
+        const previousCell = targetNotebook.locator(
+          `[data-windowed-list-index="${index - 1}"]`
+        );
+        const height = await previousCell.evaluate(
+          cell => cell.getBoundingClientRect().height
+        );
+        await previousCell.evaluate((cell, height) => {
+          cell.style.minHeight = `${height + 200}px`;
+        }, height);
+        await expect
+          .poll(() =>
+            previousCell.evaluate(cell => cell.getBoundingClientRect().height)
+          )
+          .toBeGreaterThan(height + 199);
+        await expect(targetElement).toBeInViewport({ ratio: 0.99 });
+      }
+    });
+  }
 });
 
 test.describe('Notebook scroll on dragging cells (with windowing)', () => {
