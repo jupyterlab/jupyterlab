@@ -3,7 +3,7 @@
 
 import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
 import { expect, galata, test } from '@jupyterlab/galata';
-import { stubGitHubUserIcons } from './utils';
+import { boundsAround, stubGitHubUserIcons } from './utils';
 import { default as extensionsList } from './data/extensions.json';
 import { default as languagePacks } from './data/extensions-search-all.json';
 import { JSONExt } from '@lumino/coreutils';
@@ -370,9 +370,14 @@ test.describe('Filtered Extension Manager', () => {
 
     await openExtensionSidebar(page);
 
+    const clip = await boundsAround(
+      page,
+      [page.locator('.jp-extensionmanager-view .jp-SidePanel-content')],
+      0
+    );
     expect(
       await page.screenshot({
-        clip: { x: 33, y: 100, width: 250, height: 280 }
+        clip: { ...clip, height: 280 }
       })
     ).toMatchSnapshot('extensions_blocked_list.png');
   });
@@ -397,9 +402,14 @@ test.describe('Filtered Extension Manager', () => {
 
     await openExtensionSidebar(page);
 
+    const clip = await boundsAround(
+      page,
+      [page.locator('.jp-extensionmanager-view .jp-SidePanel-content')],
+      0
+    );
     expect(
       await page.screenshot({
-        clip: { x: 33, y: 100, width: 250, height: 280 }
+        clip: { ...clip, height: 280 }
       })
     ).toMatchSnapshot('extensions_allowed_list.png');
   });
