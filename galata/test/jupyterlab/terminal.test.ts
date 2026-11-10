@@ -300,12 +300,16 @@ test.describe('Terminal', () => {
       await page.terminal.runCommand('echo before-switch', { terminal });
       await expect(terminal).toContainText('before-switch');
 
-      // Hide the terminal while its input has focus, then show it again.
+      // Hide the terminal while its input has focus. The new launcher then
+      // takes the focus, and the terminal redraws its rows while hidden.
       await page
         .locator('#jp-main-dock-panel .lm-TabBar-addButton')
         .first()
         .click();
-      await expect(terminal).toBeHidden();
+      // Wait for the focus to leave the terminal instead of waiting for the
+      // terminal to be hidden: reading the size of a hidden element makes
+      // Firefox lay it out, which prevents the bug from showing.
+      await expect(terminal.locator(TERMINAL_INPUT_SELECTOR)).not.toBeFocused();
       await page.locator(TERMINAL_TAB_LABEL_SELECTOR).click();
 
       await expect(terminal).toBeVisible();
