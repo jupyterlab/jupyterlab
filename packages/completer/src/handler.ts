@@ -15,7 +15,6 @@ import {
   COMPLETER_ENABLED_CLASS,
   COMPLETER_LINE_BEGINNING_CLASS
 } from '@jupyterlab/codeeditor';
-import { Text } from '@jupyterlab/coreutils';
 import type { IDataConnector } from '@jupyterlab/statedb';
 import type { LabIcon } from '@jupyterlab/ui-components';
 import type { IDisposable } from '@lumino/disposable';
@@ -578,7 +577,7 @@ export class CompletionHandler implements IDisposable {
   ): CompletionHandler.IRequest {
     const text = editor.model.sharedModel.getSource();
     const mimeType = editor.model.mimeType;
-    const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
+    const offset = editor.getOffsetAt(position);
     return { text, offset, mimeType };
   }
 
@@ -591,7 +590,6 @@ export class CompletionHandler implements IDisposable {
     end: number
   ): Completer.IModel | null {
     const model = this.completer.model;
-    const text = state.text;
 
     if (!model) {
       return null;
@@ -601,8 +599,8 @@ export class CompletionHandler implements IDisposable {
     model.original = state;
     // Update the cursor.
     model.cursor = {
-      start: Text.charIndexToJsIndex(start, text),
-      end: Text.charIndexToJsIndex(end, text)
+      start,
+      end
     };
     return model;
   }
@@ -717,11 +715,13 @@ export namespace CompletionHandler {
       CompletionHandler.ICompletionItem
   > {
     /**
-     * The starting index for the substring being replaced by completion.
+     * The starting index for the substring being replaced by completion,
+     * as a JavaScript string index (UTF-16 code units).
      */
     start: number;
     /**
-     * The end index for the substring being replaced by completion.
+     * The end index for the substring being replaced by completion,
+     * as a JavaScript string index (UTF-16 code units).
      */
     end: number;
     /**
@@ -763,7 +763,9 @@ export namespace CompletionHandler {
    */
   export interface IRequest {
     /**
-     * The cursor offset position within the text being completed.
+     * The cursor offset position within the text being completed, as a
+     * JavaScript string index (UTF-16 code units) like CodeMirror positions.
+     * Kernel messages count code points: use `Text.jsIndexToCharIndex`.
      */
     offset: number;
 
