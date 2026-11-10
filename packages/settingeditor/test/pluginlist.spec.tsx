@@ -4,7 +4,10 @@ import { PluginList } from '../src/pluginlist';
 import { signalToPromise } from '@jupyterlab/coreutils';
 import { framePromise, simulate } from '@jupyterlab/testing';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { updateFilterFunction } from '@jupyterlab/ui-components';
+import {
+  FormRendererRegistry,
+  updateFilterFunction
+} from '@jupyterlab/ui-components';
 import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { TestConnector, TestRegistry } from './utils';
@@ -335,8 +338,58 @@ describe('@jupyterlab/settingeditor', () => {
           props
         );
         expect(matches).toEqual([
+          'Breadcrumbs',
           'Minimum breadcrumbs left items',
           'minimumLeftItems'
+        ]);
+      });
+    });
+
+    describe('#setFilter()', () => {
+      const pluginId = 'plugin-editor';
+
+      beforeEach(async () => {
+        connector.schemas[pluginId] = {
+          type: 'object',
+          title: 'Editor',
+          properties: {
+            cellConfig: {
+              title: 'Cell Configuration',
+              type: 'object',
+              default: {}
+            }
+          }
+        };
+        await registry.load(pluginId);
+      });
+
+      it('should match properties provided by a form renderer', async () => {
+        const editorRegistry = new FormRendererRegistry();
+        const renderer = {
+          fieldRenderer: () => null,
+          getSchemaProperties: () => ({
+            customStyles: {
+              title: 'Custom editor styles',
+              type: 'object',
+              properties: {
+                fontSize: { title: 'Font Size', type: 'number' }
+              }
+            }
+          })
+        };
+        editorRegistry.addRenderer(`${pluginId}.cellConfig`, renderer);
+        const model = new PluginList.Model({ registry });
+        await model.ready;
+        const options = { registry, model, editorRegistry };
+        list = new PluginList(options);
+
+        list.setFilter(updateFilterFunction('font', false, false), 'font');
+
+        expect(list.filter!(registry.plugins[pluginId]!)).toEqual([
+          'Cell Configuration',
+          'Custom editor styles',
+          'Font Size',
+          'fontSize'
         ]);
       });
     });
