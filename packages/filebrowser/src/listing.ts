@@ -1685,9 +1685,23 @@ export class DirListing extends Widget {
     const newContext = (IS_MAC && event.ctrlKey) || event.button === 2;
 
     if (index === -1) {
-      // A context menu opened on the empty area acts on the current directory,
-      // so clear the selection that paste would otherwise use as destination.
-      if (newContext && this.contentNode.contains(event.target as Node)) {
+      // A click or a context menu on the empty area acts on the current
+      // directory, so clear the selection that paste would otherwise use as
+      // destination. A click with a modifier key keeps the selection, and so
+      // does a press on the scrollbar.
+      const content = this.contentNode;
+      const plainClick =
+        event.button === 0 &&
+        !event.shiftKey &&
+        !event.ctrlKey &&
+        !event.metaKey;
+      const onScrollbar =
+        event.target === content && event.offsetX >= content.clientWidth;
+      if (
+        (newContext || plainClick) &&
+        content.contains(event.target as Node) &&
+        !onScrollbar
+      ) {
         this.clearSelectedItems();
         this.update();
         return;

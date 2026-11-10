@@ -324,6 +324,48 @@ describe('filebrowser/listing', () => {
         expect((await contents.get(source.path)).name).toBe(source.name);
       });
 
+      it('should paste into the current directory after a click on the empty area', async () => {
+        const contents = dirListing.model.manager.services.contents;
+        const source = [...dirListing.sortedItems()][0];
+        const destination = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+
+        await dirListing.selectItemByName(source.name);
+        dirListing.cut();
+        await dirListing.selectItemByName(destination.name);
+
+        // Click below the last item.
+        simulate(dirListing.contentNode, 'mousedown');
+        expect([...dirListing.selectedItems()]).toHaveLength(0);
+        await dirListing.paste();
+
+        await expect(
+          contents.get(`${destination.path}/${source.name}`)
+        ).rejects.toBeTruthy();
+        expect((await contents.get(source.path)).name).toBe(source.name);
+      });
+
+      it('should keep the selection after a modifier click or a scrollbar press on the empty area', async () => {
+        const content = dirListing.contentNode;
+        const source = [...dirListing.sortedItems()][0];
+        await dirListing.selectItemByName(source.name);
+
+        simulate(content, 'mousedown', { ctrlKey: true });
+        simulate(content, 'mousedown', { metaKey: true });
+        simulate(content, 'mousedown', { shiftKey: true });
+
+        // jsdom has no layout, so give the press the sizes of a scrollbar.
+        Object.defineProperty(content, 'clientWidth', { value: 185 });
+        const press = new MouseEvent('mousedown', { bubbles: true });
+        Object.defineProperty(press, 'offsetX', { value: 196 });
+        content.dispatchEvent(press);
+
+        expect([...dirListing.selectedItems()].map(item => item.path)).toEqual([
+          source.path
+        ]);
+      });
+
       it('should paste into the right-clicked folder of a multi-selection', async () => {
         const contents = dirListing.model.manager.services.contents;
         const source = [...dirListing.sortedItems()][0];
