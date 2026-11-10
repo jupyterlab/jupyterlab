@@ -14,17 +14,24 @@ mjx-container[jax='CHTML'] {
 
 /* The text box of each formula character extends below the character, and on
    the last line of a Markdown cell or an output it adds a vertical scrollbar.
-   Clip it 2px outside the character, so that only the characters themselves
-   count as overflow.
+   Clip it 0.2em outside the character box, so that only the characters
+   themselves count as overflow. Some glyphs extend outside their box, such as
+   the hook of the italic f, and a margin in px would cut them at large font
+   sizes.
 
-   WebKit does not support `overflow-clip-margin`, and it puts the baseline of
-   a clipped inline-block at the bottom of the box. There the rule would raise
-   every character that extends below the baseline, such as g or ∫, so it
-   applies only where the margin is supported. */
-@supports (overflow-clip-margin: 2px) {
+   WebKit does not support `overflow-clip-margin` yet: it parses the property
+   only behind the `CSSOverflowClipMarginEnabled` flag, which is off by
+   default, and does not clip with it
+   (https://bugs.webkit.org/show_bug.cgi?id=236153). WebKit also puts the
+   baseline of an inline-block with `overflow: clip` at the bottom of the box,
+   which https://github.com/w3c/csswg-drafts/issues/6212 resolved against.
+   There the rule would raise every character that extends below the
+   baseline, such as g or ∫, so it applies only where the margin is
+   supported. Check it in WebKit again when WebKit turns that flag on. */
+@supports (overflow-clip-margin: 0.2em) {
   mjx-container[jax='CHTML'] mjx-c {
     overflow: clip;
-    overflow-clip-margin: 2px;
+    overflow-clip-margin: 0.2em;
   }
 }
 
