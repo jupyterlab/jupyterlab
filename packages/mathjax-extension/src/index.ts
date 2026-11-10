@@ -155,8 +155,9 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
       execute: async () => {
         // Find the math expression the context menu was opened on; this works
         // across all typesetter instances (e.g. ones configured with
-        // different delimiters), unlike the fallback below which reflects
-        // whichever expression the default typesetter processed last.
+        // different delimiters). The fallback below copies the expression
+        // that any typesetter rendered last, because all typesetters share
+        // one output jax.
         const root = app.contextMenuHitTest(node =>
           node.classList.contains('MathJax')
         );
