@@ -291,6 +291,27 @@ test.describe('Terminal', () => {
         runningLabels.filter({ hasText: defaultTerminalTitle })
       ).toHaveCount(2);
     });
+
+    test('should show the terminal after switching back to its tab', async ({
+      page
+    }) => {
+      const terminal = page.locator(TERMINAL_SELECTOR);
+      await waitForTerminal(page);
+      await page.terminal.runCommand('echo before-switch', { terminal });
+      await expect(terminal).toContainText('before-switch');
+
+      // Hide the terminal while its input has focus, then show it again.
+      await page
+        .locator('#jp-main-dock-panel .lm-TabBar-addButton')
+        .first()
+        .click();
+      await expect(terminal).toBeHidden();
+      await page.locator(TERMINAL_TAB_LABEL_SELECTOR).click();
+
+      await expect(terminal).toBeVisible();
+      await page.terminal.runCommand('echo switched-$((6*7))', { terminal });
+      await expect(terminal).toContainText('switched-42');
+    });
   });
 
   test.describe('Theme', () => {
