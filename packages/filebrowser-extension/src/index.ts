@@ -243,16 +243,22 @@ const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
       commandPalette
     );
 
-    void Promise.all([app.restored, browser.model.restored]).then(() => {
-      if (treePathUpdater) {
-        browser.model.pathChanged.connect((sender, args) => {
-          // The initial URL is synchronized once its target has been handled.
-          if (!browser.hasClass(RESTORING_CLASS)) {
-            treePathUpdater(args.newValue);
+    // The default file browser plugin restores the browser and opens the path
+    // from the URL: report the folder once that is done, and follow it after.
+    // A default browser restored by another plugin is followed from `restored`.
+    const restoring = Private.restoring.get(browser);
+    void Promise.all([app.restored, restoring ?? browser.model.restored]).then(
+      () => {
+        if (treePathUpdater) {
+          if (restoring) {
+            treePathUpdater(browser.model.path);
           }
-        });
+          browser.model.pathChanged.connect((sender, args) => {
+            treePathUpdater(args.newValue);
+          });
+        }
       }
-    });
+    );
     return {
       openPath: CommandIDs.openPath
     };
@@ -397,8 +403,7 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
     ITranslator,
     IDefaultFileBrowserRenderer,
     IMovableSectionRegistry,
-    IStateDB,
-    ITreePathUpdater
+    IStateDB
   ],
   activate: async (
     app: JupyterFrontEnd,
@@ -409,8 +414,7 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
     translator: ITranslator | null,
     renderer: IDefaultFileBrowserRenderer | null,
     registry: IMovableSectionRegistry | null,
-    stateDB: IStateDB | null,
-    treePathUpdater: ITreePathUpdater | null
+    stateDB: IStateDB | null
   ): Promise<IDefaultFileBrowser> => {
     const { commands } = app;
     const trans = (translator ?? nullTranslator).load('jupyterlab');
@@ -510,9 +514,7 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
         console.error('Failed to restore the file browser.', error);
       })
       .finally(() => defaultBrowser.removeClass(RESTORING_CLASS));
-    if (treePathUpdater) {
-      void restored.then(() => treePathUpdater(defaultBrowser.model.path));
-    }
+    Private.restoring.set(defaultBrowser, restored);
     return defaultBrowser;
   }
 };
@@ -2117,6 +2119,10 @@ export default plugins;
  * A namespace for private module data.
  */
 namespace Private {
+  /**
+   * Restoration of the default file browser, set by its plugin.
+   */
+  export const restoring = new WeakMap<FileBrowser, Promise<void>>();
   /**
    * Get browser object given file path.
    */
