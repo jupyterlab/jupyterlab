@@ -98,6 +98,50 @@ describe('@jupyterlab/mainmenu', () => {
         expect(mainMenu.isHidden).toBe(false);
         expect(mainMenu.collapsedMenuBar.isHidden).toBe(true);
       });
+
+      describe('with an open menu', () => {
+        let command: ReturnType<CommandRegistry['addCommand']>;
+        let menu: Menu;
+
+        beforeEach(() => {
+          command = commands.addCommand('test:main-menu', {
+            label: 'Test',
+            execute: () => undefined
+          });
+          menu = new Menu({ commands });
+          menu.addItem({ command: 'test:main-menu' });
+          mainMenu.addMenu(menu);
+          Widget.attach(mainMenu, document.body);
+          Widget.attach(mainMenu.collapsedMenuBar, document.body);
+        });
+
+        afterEach(() => {
+          menu.dispose();
+          command.dispose();
+        });
+
+        it('should close the menu when the main menu is collapsed', () => {
+          mainMenu.activeMenu = menu;
+          mainMenu.openActiveMenu();
+          expect(menu.isAttached).toBe(true);
+
+          mainMenu.collapseMode = 'always';
+          expect(menu.isAttached).toBe(false);
+        });
+
+        it('should close the menus when the main menu is expanded', () => {
+          mainMenu.collapseMode = 'always';
+          mainMenu.activeMenu = menu;
+          mainMenu.openActiveMenu();
+          const collapsedMenu = mainMenu.collapsedMenuBar.menus[0];
+          expect(collapsedMenu.isAttached).toBe(true);
+          expect(menu.isAttached).toBe(true);
+
+          mainMenu.collapseMode = 'never';
+          expect(collapsedMenu.isAttached).toBe(false);
+          expect(menu.isAttached).toBe(false);
+        });
+      });
     });
 
     describe('#collapsedChanged', () => {
