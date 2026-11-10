@@ -4,6 +4,218 @@
 
 # JupyterLab Changelog
 
+## v4.7
+
+JupyterLab 4.7 includes a number of new features (described below), bug fixes, and enhancements.
+This release is compatible with extensions supporting JupyterLab 4.0.
+Extension authors are encouraged to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/latest/extension/extension_migration.html#jupyterlab-4-6-to-4-7) which lists deprecations and changes to the public API.
+
+JupyterLab 4.7 requires Python 3.11 or newer, and supports Python 3.15.
+
+### Notebook improvements
+
+Notebooks opened from files that are not writable are now shown in view-only mode. They can be read, searched and copied, but not edited or run, and no kernel starts for them. To run the code, use File → Save Notebook As… to save a copy.
+
+<img alt="A read-only notebook whose toolbar shows only the copy button, a disabled cell type selector, the read-only indicator and No Kernel"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-view-only-notebook.png"
+class="jp-screenshot">
+
+Read-only cells can now show a lock icon in the cell toolbar, and clicking the icon offers to make the cell editable. To show it, enable "Show lock icon for read-only cells" in Settings → Settings Editor → Notebook.
+
+<img alt="A read-only code cell with a lock icon at the start of its cell toolbar; its delete button is greyed out"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-cell-lock-icon.png"
+class="jp-screenshot">
+
+Read-only Markdown cells now stay rendered when you double-click them or press <kbd>Enter</kbd>. The "Show editor for read-only Markdown cells" setting brings back the read-only editor.
+
+The help that IPython shows for `object?` and `object??` can now open in a panel at the bottom of the window, as in the classic notebook, instead of in the cell output. Enable "Show Help in Bottom Panel" in the Notebook settings; it applies to code consoles too.
+
+<img alt="A notebook with the signature and the docstring of statistics.median shown in a Help panel below it"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-help-bottom-panel.png"
+class="jp-screenshot">
+
+The Common Tools section of the Property Inspector now shows the ID of the active cell, with buttons to copy the ID or a [link to the cell](https://jupyterlab.readthedocs.io/en/latest/user/notebook.html#working-with-cells).
+
+<img alt="The Common Tools section of the Property Inspector with the Cell ID field, and the copy and link buttons next to it"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-cell-id.png"
+class="jp-screenshot">
+
+The text box that `input()` opens below a running cell now has the same style as the text inputs of ipywidgets.
+
+<img alt="A cell running input() with the question and a bordered text box below it"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-stdin.png"
+class="jp-screenshot">
+
+Right-clicking an image, such as a plot in a cell output, now offers "Copy Image".
+
+<img alt="The context menu of a plot in a cell output, with Copy Image below Copy Output to Clipboard"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-copy-image.png"
+class="jp-screenshot">
+
+Undoing the deletion of a cell that finished running in the meantime now brings the cell back as it was when you deleted it. A notification offers to show the outputs that arrived since.
+
+<img alt="An animation of a running cell that is deleted, restored with Undo Cell Operation after it finished, and then given the outputs printed in the meantime by the Show new outputs button of a notification"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-undo-deleted-running-cell.gif"
+class="jp-screenshot">
+
+These smaller changes also apply to notebooks:
+
+- Searching a notebook now highlights the current match inside rendered Markdown cells, without opening their editor. The editor opens only for a match in text that the cell does not show, such as a link URL.
+- Pasted cells can now keep `deletable: false` from the copied cells: enable "Preserve `deletable` cell metadata of copied cells" in the Notebook settings.
+- Selecting a collapsed heading now selects all the cells in its section, so cut, move and delete act on the whole section.
+- In command mode, moving into a tall cell with the arrow keys now shows the top of the cell instead of the end of its output.
+- Collapsing a long output, or enabling scrolling for it, keeps the top of the cell in view.
+- Saving with <kbd>Ctrl</kbd> + <kbd>S</kbd> (<kbd>Cmd</kbd> + <kbd>S</kbd> on macOS) while editing metadata in the Property Inspector now saves the metadata edits too, instead of losing them.
+- Opening the Common Tools section of the Property Inspector no longer adds default metadata, such as `editable: true`, to the cell.
+- When no export format is available, File → Save and Export Notebook As shows "Enable notebook exports", which explains how to enable exports.
+- An empty Markdown cell shows "Double-click (or press Enter) to edit" when rendered.
+- The "Do not ask me again" checkbox of the kernel restart dialog now makes clear that it only lasts until the notebook is closed or the page is reloaded. To skip the dialog everywhere, enable the "Skip kernel restart Dialog" setting.
+- The notebook and cell toolbar buttons show the state of their own notebook when several notebooks are open side by side.
+- After you undo the deletion or the insertion of a cell, the cell counter in the status bar shows the new total.
+- The Replace buttons of the search box are disabled for matches that cannot be changed, in cell outputs and in read-only cells.
+
+### Command palette
+
+While its search field is empty, the command palette now lists the commands that you [recently ran from it](https://jupyterlab.readthedocs.io/en/latest/user/commands.html#recent-commands) at the top. The "Maximum Number of Recently Used Commands" setting of the Command Palette sets how many it keeps (5 by default, 0 turns the list off), and the "Clear Recently Used Commands" command clears the list.
+
+<img alt="The command palette with Restart Kernel, Clear Outputs of All Cells and Show Line Numbers at the top, each with a recently used badge"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-command-palette-recent.png"
+class="jp-screenshot">
+
+### Performance
+
+Large and streamed text outputs, such as Python logging messages, now render faster. In the recording below, 1,000 log lines with links take 0.6 s to show, against 5.8 s in JupyterLab 4.6. In very large outputs, the links can appear shortly after the text. Text selected in a streaming output now stays selected. The "Incremental autolinking" setting of the HTML Sanitizer turns the new rendering off.
+
+<img alt="An animation comparing JupyterLab 4.6 and 4.7 on a cell that logs 1,000 lines with links and updates a progress line: 4.7 shows all of them after 0.6 s, 4.6 after 5.8 s"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-streamed-output.gif"
+class="jp-screenshot">
+
+These changes also make JupyterLab faster:
+
+- Switching tabs is faster, because hidden tabs now use the CSS `content-visibility` property by default: a switch between two notebooks took 151 ms instead of 204 ms in Edge. To go back, set "Hidden mode of main panel widgets" to "Display" in the JupyterLab Shell settings.
+- The toolbar buttons of open notebooks no longer render again when their state did not change, so with 8 notebooks open a tab switch takes 18% less main-thread time.
+- JupyterLab no longer requests translations for English, and it requests the nbconvert export formats only after the notebooks have loaded, so notebooks open sooner on servers where nbconvert is slow to import.
+- Disabled prebuilt extensions are no longer loaded at startup. They are loaded later, only to be listed in the Advanced Plugin Manager.
+- Some code now loads on first use instead of at startup, such as the Keyboard Shortcuts editor and the settings form validator, which saves 84 KB of JavaScript at startup.
+- Editing a cell in a large notebook takes less time: 1.3 ms instead of 2.9 ms per edit with 10,000 cells.
+
+### Interface customization
+
+The sections of sidebar panels, such as Running Terminals and Kernels, the Debugger and the Extension Manager, can now be [reordered](https://jupyterlab.readthedocs.io/en/latest/user/interface_customization.html#reorder-accordion-sections). Right-click a section header, select "Enable Section Reordering" and drag a section by its handle. The entry applies to all panels at once, including sections moved to the File Browser, whose handles were always shown in JupyterLab 4.6. The order, collapsed state and size of the sections are saved in the workspace.
+
+<img alt="An animation of the Running panel: Enable Section Reordering is selected in the context menu of the Kernels header, and the Terminals section is dragged by its handle above the Kernels section"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-reorder-sections.gif"
+class="jp-screenshot">
+
+### Debugger and console improvements
+
+The Kernel Sources panel now shows the modules as a tree grouped by package, with "Open" and "Copy Path" in the context menu. The new "Hide the kernel's own sources" setting of the Debugger, off by default, hides the modules that the kernel loads for itself, such as IPython and debugpy.
+
+<img alt="The Kernel Sources panel of the debugger with the dateutil, numpy and pandas packages, and pandas expanded into its subpackages"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-kernel-sources-tree.png"
+class="jp-screenshot">
+
+Completions in the Debug Console are faster, work in kernels for other languages and no longer suggest IPython magics. While the debugger is paused, names from the paused frame are completed only when you press <kbd>Tab</kbd>, also in notebooks, because completing an attribute can run code in the paused program.
+
+Code consoles can now be renamed: right-click the console tab and select ["Rename Console…"](https://jupyterlab.readthedocs.io/en/latest/user/code_console.html#rename-console).
+
+<img alt="The context menu of a console tab with the Rename Console entry"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-rename-console.png"
+class="jp-screenshot">
+
+### Markdown and math
+
+A Markdown Preview can now be searched with <kbd>Ctrl</kbd> + <kbd>F</kbd> (<kbd>Cmd</kbd> + <kbd>F</kbd> on macOS), and its context menu can copy the selected text. "Show Markdown Preview" is now in the command palette when a Markdown file is open in the editor.
+
+<img alt="A Markdown Preview with the search box showing 1/4 matches of the word data highlighted in the text"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-markdown-preview-search.png"
+class="jp-screenshot">
+
+In rendered Markdown, a link to a folder now opens the folder in the file browser instead of showing an error, and a link to a missing file now shows a dialog instead of doing nothing.
+
+Multiline `$$` math blocks in Markdown cells and files are now highlighted as LaTeX, also when they start in the middle of a paragraph.
+
+Mermaid diagrams are now redrawn when you switch between a light and a dark theme. Diagrams in cell outputs are saved in the default Mermaid theme, so exports no longer depend on the JupyterLab theme, and opening a notebook with them no longer marks it as modified.
+
+Math is now rendered with MathJax 4.1. In display math, `\\` starts a new line again, as before JupyterLab 4.0. Long inline formulas wrap at the edge of the cell, and punctuation after inline math stays on its line. A `\require` of a package that JupyterLab does not include no longer stops the other formulas from rendering.
+
+<img alt="A rendered Markdown cell with two equations on separate lines, and a long inline polynomial that wraps onto a second line"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-mathjax-4.png"
+class="jp-screenshot">
+
+The search now highlights matches inside rendered formulas, such as `sin` or `10`, in a Markdown Preview and in cell outputs.
+
+<img alt="A Markdown Preview with the search box showing 1/3 for sin, and sin highlighted in three rendered formulas"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-mathjax-search.png"
+class="jp-screenshot">
+
+"MathJax Copy Latex" in the context menu of a formula now copies that formula, instead of the formula rendered last.
+
+### File browser enhancements
+
+- "Paste" (<kbd>Ctrl</kbd> + <kbd>V</kbd>) now [pastes into the selected folder](https://jupyterlab.readthedocs.io/en/latest/user/files.html#file-copy-paste), or into the folder that the file browser shows when no folder is selected. Press <kbd>Escape</kbd> or click below the files to clear the selection.
+- <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd> now opens the file browser and moves the focus into it, instead of showing or hiding it.
+- Changing the "Show Filter Bar by Default" setting now takes effect without reloading the page.
+- The breadcrumb of the preferred directory shows the home icon when the preferred directory is your home directory.
+- Confirmation dialogs opened from a file picker, such as the Import Workspace dialog, now show on top of it.
+
+### CSV viewer
+
+The CSV viewer can now recognize comment lines: select "hash" in the new "Comment" selector of the toolbar, and lines starting with `#` are shown in italics instead of being read as the header or as data. The search now shows the number of matches and the current match.
+
+<img alt="A CSV file whose three comment lines are shown in italics across the rows without a row number, and the search box showing 2/5 for Oslo"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-csv-viewer.png"
+class="jp-screenshot">
+
+The new ["Default delimiter"](https://jupyterlab.readthedocs.io/en/latest/user/file_formats.html#view-csv) setting of the CSV Viewer sets the delimiter for opening files, for example `;`. The number of columns now comes from the widest of the first 500 rows, so longer rows are shown in full. Go to Line now scrolls to the right row, and editing the file in another tab keeps the column widths.
+
+### Terminal enhancements
+
+The terminal now uses xterm.js 6. Without WebGL, it falls back to the DOM renderer, because xterm.js 6 no longer includes the canvas renderer.
+
+[Hyperlinks](https://jupyterlab.readthedocs.io/en/latest/user/terminal.html#terminal-links) that programs print with the OSC 8 escape sequence now ask for confirmation in a JupyterLab dialog instead of the browser's own prompt, and open only `http` and `https` targets. Right-clicking a link offers "Copy Link Address".
+
+The Running panel now shows the [titles](https://jupyterlab.readthedocs.io/en/latest/user/terminal.html#terminal-titles) that the shell or a program sets for a terminal, as the tabs do, and keeps them when the tab is closed or the page is reloaded.
+
+<img alt="The Running panel listing a terminal named Model training under Open Tabs and Terminals, next to the terminal tab with the same title"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-terminal-title-running.png"
+class="jp-screenshot">
+
+### Keyboard shortcuts
+
+- <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>1</kbd> to <kbd>8</kbd> (<kbd>Cmd</kbd> + <kbd>Option</kbd> on macOS) [switch to the tab](https://jupyterlab.readthedocs.io/en/latest/user/interface.html#switching-tabs-by-index) at that position, and <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>9</kbd> to the last tab. On Windows layouts where <kbd>AltGr</kbd> and a digit type a character, such as German, these keys type that character instead.
+- In R editors, <kbd>Alt</kbd> + <kbd>-</kbd> inserts `<-` and <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>M</kbd> inserts `%>%` (<kbd>Option</kbd> + <kbd>-</kbd> and <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>M</kbd> on macOS), ahead of your own shortcuts on these keys. The documentation shows how to [insert `|>` instead](https://jupyterlab.readthedocs.io/en/latest/user/interface.html#shortcuts-for-r-operators).
+- <kbd>Alt</kbd> + <kbd>W</kbd> (Close Tab) and <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Q</kbd> (Close and Shut Down) now also work when the focus is in a sidebar or the status bar. Customized shortcuts for these commands are updated to match.
+- A shortcut that you define with the same keys and selector as a default shortcut now replaces the default. Since JupyterLab 4.3, the default command ran instead.
+- When no shortcut uses <kbd>Tab</kbd>, for example after you disable the completer shortcuts, <kbd>Tab</kbd> now inserts a tab or indents the line instead of moving the focus out of the editor.
+
+### Accessibility and touch screens
+
+- The plugin list of the Settings Editor can now be reached with <kbd>Tab</kbd> and browsed with the arrow keys.
+- In the Keyboard Shortcuts settings, each shortcut and the buttons next to it can now be reached with the keyboard.
+- Screen readers now announce the menu entries that can be checked as checkboxes.
+- On touch screens, menus respond to taps again, as they did before JupyterLab 4.6. The close buttons of tabs also respond to taps, and the handles between panels can be dragged.
+
+### Server and deployment
+
+- JupyterLab now stops at startup when `jupyter_lab_config.py` or `jupyter_config.py` has an error, instead of starting without that file. Invalid `LabApp` options in `jupyter_server_config.py` stop it too, while a syntax error in that file still only skips the file. To keep the old behavior, set `LabApp.raise_config_file_errors` to `False` on the command line or in `jupyter_server_config.py`. With the JupyterLab server extension, this also applies to `jupyter server`, `jupyter notebook` and JupyterHub single-user servers.
+- A `/lab/tree/` URL can choose the viewer of the file with the [`open-with` parameter](https://jupyterlab.readthedocs.io/en/latest/user/urls.html#url-tree), for example `/lab/tree/notebook.ipynb?open-with=json`.
+- The extension manager, the plugin manager and the build API now check the [authorizer](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html#authorization) of Jupyter Server. A custom authorizer that denies unknown resources must now allow `jupyterlab:extensions`, `jupyterlab:plugins` and `jupyterlab:build`.
+- A package name in `disabledExtensions` now disables all plugins of the package, also those whose ID does not start with the package name, and a browser console warning names each of them. To keep some of them enabled, list the plugin IDs instead.
+- JupyterLab now starts in browsers or frames where `window.localStorage` is not available, such as sandboxed frames.
+
+### Miscellaneous
+
+- Julia code is highlighted with a new grammar, `@plutojl/lang-julia` from the Pluto.jl project.
+- Image outputs now respect the height set in their metadata, as with `Image("plot.png", width=300, height=30)` in IPython. An `<img>` tag with only a `height` attribute is now shown at that height.
+- The Python and R file icons now use the official logos, with their gradients.
+- The Extension Manager lists language packs again, after PyPI retired the listing that it used, and links to PyPI to browse other extensions. Settings → Language → Install more languages… opens it with the language packs.
+- Searching the Settings Editor for an editor option, such as "font" or "rulers", now finds the Notebook, Code Console and CodeMirror settings and shows the matching fields.
+- Real-time collaboration no longer fails with an "Unexpected case" error after a reconnection, which could corrupt the document.
+- The file conflict dialog now names its button "Reload from Disk" instead of "Revert".
+- The limit on the number of outputs shown for a cell (`maxNumberOutputs`) now also applies while the cell waits for input.
+- With the history provider of the inline completer enabled, typing no longer sends ipykernel 7 a request for every key.
+
 ## v4.6
 
 JupyterLab 4.6 includes a number of new features (described below), bug fixes, and enhancements.
