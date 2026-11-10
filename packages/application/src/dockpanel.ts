@@ -1,6 +1,6 @@
 import { DockPanelSvg } from '@jupyterlab/ui-components';
 import type { Message } from '@lumino/messaging';
-import type { Widget } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 
 export const DEFAULT_NODE_THRESHOLD = 1000;
 export const DEFAULT_TEXT_LENGTH_THRESHOLD = 25000;
@@ -73,6 +73,21 @@ export class OptimizedDockPanelSvg extends DockPanelSvg {
   override dispose(): void {
     this._endDrag();
     super.dispose();
+  }
+
+  /**
+   * Process a message sent to the panel.
+   *
+   * @param msg - The message sent to the panel.
+   */
+  override processMessage(msg: Message): void {
+    super.processMessage(msg);
+    if (
+      msg.type === 'child-shown' &&
+      this.hiddenMode === Widget.HiddenMode.ContentVisibility
+    ) {
+      Private.requestLayout((msg as Widget.ChildMessage).child.node);
+    }
   }
 
   /**
@@ -389,6 +404,22 @@ namespace Private {
       default:
         return false;
     }
+  }
+
+  /**
+   * Make Firefox lay out the parts of a widget that changed while the widget
+   * was hidden with `content-visibility: hidden`. See Firefox bug
+   * https://bugzilla.mozilla.org/show_bug.cgi?id=2088371
+   *
+   * #### Notes
+   * Firefox gives an absolutely positioned child an empty box when its content
+   * changes while the parent is hidden, and lays it out again on show only if
+   * the parent's containment changes, which the `contain: strict` set by
+   * Lumino layouts prevents. A change of `object-fit`, which has no effect on
+   * a `div`, makes Firefox lay out the children that need it.
+   */
+  export function requestLayout(node: HTMLElement): void {
+    node.style.objectFit = node.style.objectFit === 'none' ? '' : 'none';
   }
 
   /**
