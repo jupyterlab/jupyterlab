@@ -33,6 +33,13 @@ mjx-container[jax='CHTML'] {
     overflow: clip;
     overflow-clip-margin: 0.2em;
   }
+
+  /* U+0338 draws the slash of `\not` before a symbol that has no negated
+     form, such as `\not\perp`. Its box has no width and the slash extends
+     over the symbol before it, so the clip would cut the slash. */
+  mjx-container[jax='CHTML'] mjx-c.mjx-c338 {
+    overflow: visible;
+  }
 }
 
 /* The vertical padding of a breakable formula does not change the layout, but

@@ -182,4 +182,25 @@ test.describe('Notebook Markdown Math', () => {
       );
     expect(scrollable).toEqual([false, false, false]);
   });
+
+  test('Do not cut the characters of formulas', async ({ page }) => {
+    await page.notebook.createNew();
+    await page.notebook.setCell(
+      0,
+      'markdown',
+      '$A \\not\\perp B$, $\\not\\propto$ and $\\not a$'
+    );
+    await page.notebook.runCell(0);
+    const output = page.locator('.jp-MarkdownOutput');
+    await expect(output.locator('mjx-container')).toHaveCount(3);
+    await page.evaluate(() => document.fonts.ready);
+
+    const clipped = await output.screenshot();
+    await page.addStyleTag({
+      content:
+        "mjx-container[jax='CHTML'] mjx-c { overflow: visible !important; }"
+    });
+    const unclipped = await output.screenshot();
+    expect(clipped.equals(unclipped)).toBe(true);
+  });
 });
