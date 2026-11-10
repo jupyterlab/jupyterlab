@@ -10,7 +10,7 @@ import { ReactWidget } from '@jupyterlab/apputils';
 import type { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
-import type { IScore } from '@jupyterlab/ui-components';
+import type { IFormRendererRegistry, IScore } from '@jupyterlab/ui-components';
 import {
   classes,
   FilterBox,
@@ -70,6 +70,7 @@ export class PluginList extends ReactWidget {
     this.translator = options.translator || nullTranslator;
     this.addClass('jp-PluginList');
     this._confirm = options.confirm;
+    this._editorRegistry = options.editorRegistry ?? null;
     this._model = options.model ?? new PluginList.Model(options);
     this._model.ready
       .then(() => {
@@ -456,6 +457,36 @@ export class PluginList extends ReactWidget {
   }
 
   /**
+   * Add the properties that form renderers display to the plugin schema.
+   */
+  private _getSearchableSchema(
+    plugin: ISettingRegistry.IPlugin
+  ): ISettingRegistry.ISchema {
+    const schema = plugin.schema ?? {};
+    const renderers = this._editorRegistry?.renderers;
+    if (!renderers || !schema.properties) {
+      return schema;
+    }
+    let properties: ISettingRegistry.ISchema['properties'] | null = null;
+    for (const [name, property] of Object.entries(schema.properties)) {
+      const provided =
+        renderers[`${plugin.id}.${name}`]?.getSchemaProperties?.();
+      if (!provided) {
+        continue;
+      }
+      properties = properties ?? { ...schema.properties };
+      properties[name] = {
+        ...property,
+        properties: {
+          ...(provided as { [name: string]: ISettingRegistry.IProperty }),
+          ...(property.properties ?? {})
+        }
+      };
+    }
+    return properties ? { ...schema, properties } : schema;
+  }
+
+  /**
    * Keep roving tabindex aligned when focus moves between entries via Tab.
    */
   private _evtFocusIn(event: FocusEvent): void {
@@ -578,14 +609,20 @@ export class PluginList extends ReactWidget {
       }
 
       // Finally, recurse on the properties left.
-      acc.push(
-        ...this.getFilterString(
-          filter,
-          subProps as ISettingRegistry.IProperty,
-          definitions,
-          subProps['$ref'] as string
-        )
+      const nested = this.getFilterString(
+        filter,
+        subProps as ISettingRegistry.IProperty,
+        definitions,
+        subProps['$ref'] as string
       );
+      if (nested.length > 0) {
+        // The settings form only shows fields whose title or name is listed.
+        const parent = (subProps.title as string) ?? value;
+        if (!acc.includes(parent)) {
+          acc.push(parent);
+        }
+        acc.push(...nested);
+      }
       return acc;
     }, []);
   }
@@ -605,10 +642,10 @@ export class PluginList extends ReactWidget {
         }
         const filtered = this.getFilterString(
           filter,
-          plugin.schema ?? {},
+          this._getSearchableSchema(plugin),
           plugin.schema.definitions
         );
-        return filtered;
+        return [...new Set(filtered)];
       };
     } else {
       this._filter = null;
@@ -791,6 +828,7 @@ export class PluginList extends ReactWidget {
 
   protected translator: ITranslator;
   private _changed = new Signal<this, void>(this);
+  private _editorRegistry: IFormRendererRegistry | null;
   private _errors: { [id: string]: boolean };
   private _filter: SettingsEditor.PluginSearchFilter;
   private _model: PluginList.Model;
@@ -829,6 +867,11 @@ export namespace PluginList {
      * Model for the plugin list.
      */
     model?: PluginList.Model;
+
+    /**
+     * The form renderers, whose displayed properties are also searched.
+     */
+    editorRegistry?: IFormRendererRegistry;
 
     /**
      * The setting registry for the plugin list.
