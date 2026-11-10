@@ -501,9 +501,14 @@ export class MainMenu extends MenuBar implements IMainMenu {
    * Show either the main menu or the collapsed menu bar.
    */
   private _setCollapsed(value: boolean): void {
+    const changed = this._collapsed !== value;
+    if (changed) {
+      // Hiding a menu bar does not close the menu opened from it.
+      (value ? this : this.collapsedMenuBar).childMenu?.close();
+    }
     this.setHidden(value);
     this.collapsedMenuBar.setHidden(!value);
-    if (this._collapsed !== value) {
+    if (changed) {
       this._collapsed = value;
       this._collapsedChanged.emit(value);
     }
