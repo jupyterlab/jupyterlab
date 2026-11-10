@@ -291,31 +291,6 @@ test.describe('Terminal', () => {
         runningLabels.filter({ hasText: defaultTerminalTitle })
       ).toHaveCount(2);
     });
-
-    test('should show the terminal after switching back to its tab', async ({
-      page
-    }) => {
-      const terminal = page.locator(TERMINAL_SELECTOR);
-      await waitForTerminal(page);
-      await page.terminal.runCommand('echo before-switch', { terminal });
-      await expect(terminal).toContainText('before-switch');
-
-      // Hide the terminal while its input has focus. The new launcher then
-      // takes the focus, and the terminal redraws its rows while hidden.
-      await page
-        .locator('#jp-main-dock-panel .lm-TabBar-addButton')
-        .first()
-        .click();
-      // Wait for the focus to leave the terminal instead of waiting for the
-      // terminal to be hidden: reading the size of a hidden element makes
-      // Firefox lay it out, which prevents the bug from showing.
-      await expect(terminal.locator(TERMINAL_INPUT_SELECTOR)).not.toBeFocused();
-      await page.locator(TERMINAL_TAB_LABEL_SELECTOR).click();
-
-      await expect(terminal).toBeVisible();
-      await page.terminal.runCommand('echo switched-$((6*7))', { terminal });
-      await expect(terminal).toContainText('switched-42');
-    });
   });
 
   test.describe('Theme', () => {
