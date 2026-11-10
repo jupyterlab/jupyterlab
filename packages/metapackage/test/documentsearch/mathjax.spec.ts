@@ -61,6 +61,25 @@ describe('@jupyterlab/documentsearch', () => {
           host.remove();
         }
       );
+
+      it.each([
+        // MathJax repeats `–` to draw the line of `\overline`
+        [/–/g, '$\\overline{xyz}$', []],
+        // and `←` to draw the shaft of a long arrow, which ends with `→`
+        [/←/g, '$\\xrightarrow{\\text{long label}}$', []],
+        [/→/g, '$\\xrightarrow{\\text{long label}}$', ['→']]
+      ])(
+        'should skip the repeated characters of stretchy delimiters for %s in %s',
+        async (query, source, expected) => {
+          const host = document.createElement('div');
+          host.textContent = source;
+          document.body.appendChild(host);
+          await new MathJaxTypesetter().typeset(host);
+          const matches = await HTMLSearchEngine.search(query, host);
+          expect(matches.map(match => match.text)).toEqual(expected);
+          host.remove();
+        }
+      );
     });
   });
 });

@@ -25,6 +25,13 @@ const FORMULA_ELEMENT = 'MJX-CONTAINER';
 const FORMULA_BREAK_ELEMENT = 'MJX-BREAK';
 
 /**
+ * The element of the extender of a stretchy delimiter in a formula typeset
+ * by MathJax, which repeats one character as many times as the length of the
+ * delimiter needs, such as `–` for the line of `\overline`.
+ */
+const FORMULA_EXTENDER_ELEMENT = 'MJX-EXT';
+
+/**
  * HTML search engine
  */
 export class HTMLSearchEngine {
@@ -511,9 +518,10 @@ function elementInViewport(el: HTMLElement): boolean {
  * MathJax puts each character of a formula in its own text node, so `10`
  * spans two nodes, and it draws letters as mathematical symbols, such as
  * 𝑥 for x. The text of the formula joins its characters in the form typed
- * in a query (see `normalizeFormulaText`), without the hidden MathML copy
- * and the spaces of line break opportunities. A match that spans several
- * text nodes lists them in `parts`.
+ * in a query (see `normalizeFormulaText`), without the hidden MathML copy,
+ * the spaces of line break opportunities and the repeated characters of
+ * stretchy delimiters. A match that spans several text nodes lists them in
+ * `parts`.
  *
  * Each character is normalized on its own, so that a match covers whole
  * characters of the formula: a query for x covers 𝑥, and a query for one
@@ -543,7 +551,8 @@ function searchFormula(query: RegExp, formula: Element): IHTMLSearchMatch[] {
       while (parentElement && parentElement !== formula) {
         if (
           parentElement.nodeName in HTMLSearchEngine.UNSUPPORTED_ELEMENTS ||
-          parentElement.nodeName === FORMULA_BREAK_ELEMENT
+          parentElement.nodeName === FORMULA_BREAK_ELEMENT ||
+          parentElement.nodeName === FORMULA_EXTENDER_ELEMENT
         ) {
           return NodeFilter.FILTER_REJECT;
         }
