@@ -159,15 +159,24 @@ test.describe('Notebook Markdown Math', () => {
   test('Do not make cells that end with inline math scrollable', async ({
     page
   }) => {
+    const sources = [
+      '$7+7=14$',
+      '$\\frac{a}{b}$',
+      '$\\int_0^1 f(x)\\,dx$',
+      '$\\underline{x}$',
+      '$\\underleftarrow{AB}$',
+      '$\\left|\\frac{a}{b}\\right|$'
+    ];
     await page.notebook.createNew();
-    await page.notebook.setCell(0, 'markdown', '$7+7=14$');
-    await page.notebook.addCell('markdown', '$\\frac{a}{b}$');
-    await page.notebook.addCell('markdown', '$\\int_0^1 f(x)\\,dx$');
-    for (const index of [0, 1, 2]) {
+    await page.notebook.setCell(0, 'markdown', sources[0]);
+    for (const source of sources.slice(1)) {
+      await page.notebook.addCell('markdown', source);
+    }
+    for (let index = 0; index < sources.length; index++) {
       await page.notebook.runCell(index);
     }
     await expect(page.locator('.jp-MarkdownOutput mjx-container')).toHaveCount(
-      3
+      sources.length
     );
     await page.evaluate(() => document.fonts.ready);
 
@@ -180,7 +189,7 @@ test.describe('Notebook Markdown Math', () => {
             node.scrollHeight > node.clientHeight
         )
       );
-    expect(scrollable).toEqual([false, false, false]);
+    expect(scrollable).toEqual(sources.map(() => false));
   });
 
   test('Do not cut the characters of formulas', async ({ page }) => {
@@ -188,17 +197,20 @@ test.describe('Notebook Markdown Math', () => {
     await page.notebook.setCell(
       0,
       'markdown',
-      '$A \\not\\perp B$, $\\not\\propto$ and $\\not a$'
+      '$A \\not\\perp B$, $\\not\\propto$, $\\not a$, $\\overleftarrow{AB}$, ' +
+        '$x \\xleftarrow[a]{b} y$ and ' +
+        '$\\left(\\begin{matrix}a\\\\b\\\\c\\end{matrix}\\right)$'
     );
     await page.notebook.runCell(0);
     const output = page.locator('.jp-MarkdownOutput');
-    await expect(output.locator('mjx-container')).toHaveCount(3);
+    await expect(output.locator('mjx-container')).toHaveCount(6);
     await page.evaluate(() => document.fonts.ready);
 
     const clipped = await output.screenshot();
     await page.addStyleTag({
       content:
-        "mjx-container[jax='CHTML'] mjx-c { overflow: visible !important; }"
+        "mjx-container[jax='CHTML'] :is(mjx-c, mjx-stretchy-h, mjx-stretchy-v)" +
+        ' { overflow: visible !important; }'
     });
     const unclipped = await output.screenshot();
     expect(clipped.equals(unclipped)).toBe(true);

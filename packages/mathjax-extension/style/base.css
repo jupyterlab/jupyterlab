@@ -19,6 +19,12 @@ mjx-container[jax='CHTML'] {
    the hook of the italic f, and a margin in px would cut them at large font
    sizes.
 
+   Stretchy characters, such as the line of `\underline` or a `|` made taller
+   by `\left`, hold their text outside mjx-c, so clip their boxes too. Clip
+   the whole box and not each of its parts, because the parts overlap and the
+   glyph of a part, such as the head of a long left arrow, extends outside
+   the box of the part.
+
    WebKit does not support `overflow-clip-margin` yet: it parses the property
    only behind the `CSSOverflowClipMarginEnabled` flag, which is off by
    default, and does not clip with it
@@ -29,7 +35,9 @@ mjx-container[jax='CHTML'] {
    baseline, such as g or ∫, so it applies only where the margin is
    supported. Check it in WebKit again when WebKit turns that flag on. */
 @supports (overflow-clip-margin: 0.2em) {
-  mjx-container[jax='CHTML'] mjx-c {
+  mjx-container[jax='CHTML'] mjx-c,
+  mjx-container[jax='CHTML'] mjx-stretchy-h,
+  mjx-container[jax='CHTML'] mjx-stretchy-v {
     overflow: clip;
     overflow-clip-margin: 0.2em;
   }
