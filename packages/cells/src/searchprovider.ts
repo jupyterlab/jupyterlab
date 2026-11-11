@@ -609,6 +609,18 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     if (this.model.getMetadata('editable') === false)
       return Promise.resolve(false);
 
+    if (this._currentMatchInRendered) {
+      // The position of a rendered match counts from the start of its text
+      // node: replace the source match, in the editor if the cell shows it.
+      if (this._canUnrender()) {
+        const cell = this.cell as MarkdownCell;
+        const waitForRendered = signalToPromise(cell.renderedChanged);
+        cell.rendered = false;
+        await waitForRendered;
+      }
+      this._currentMatchInRendered = false;
+    }
+
     const result = await super.replaceCurrentMatch(newText, loop, options);
     return result;
   }

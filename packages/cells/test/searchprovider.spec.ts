@@ -285,6 +285,22 @@ describe('cells/searchprovider', () => {
       provider.dispose();
     });
 
+    it('should replace the source of a match marked in the rendered text', async () => {
+      // The element puts the match in a text node of its own, at another
+      // position than in the source
+      cell = createMarkdownCell('<b>An</b> apple a day.');
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/apple/, {});
+      await provider.highlightNext();
+      expect(renderedCurrentMatch(cell)).toBe('apple');
+
+      expect(await provider.replaceCurrentMatch('pear')).toBe(true);
+      expect(cell.model.sharedModel.getSource()).toBe('<b>An</b> pear a day.');
+      provider.dispose();
+    });
+
     it('should re-highlight the same source match when the cell is un-rendered mid-search', async () => {
       cell = createMarkdownCell('test1 test2');
       Widget.attach(cell, document.body);
