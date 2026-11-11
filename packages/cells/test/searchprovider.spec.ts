@@ -222,6 +222,24 @@ describe('cells/searchprovider', () => {
       provider.dispose();
     });
 
+    it('should not skip the matches before the cursor of the hidden editor', async () => {
+      cell = createMarkdownCell('test1 test2');
+      Widget.attach(cell, document.body);
+      await framePromise();
+      // The cursor stays where it was when the cell was rendered
+      cell.editor!.setCursorPosition({ line: 0, column: 11 });
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+
+      // The notebook searches from the selection when a query starts
+      const match = await provider.highlightNext(false, {
+        from: 'selection-start'
+      });
+      expect(match?.text).toBe('test1');
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+      provider.dispose();
+    });
+
     it('should step through visible and hidden matches in source order', async () => {
       cell = createMarkdownCell(
         'The lists are [here](https://example.com/lists) and the lists grow.',

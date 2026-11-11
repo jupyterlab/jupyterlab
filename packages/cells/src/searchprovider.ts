@@ -532,7 +532,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     }
 
     return this._showCurrentMatch(
-      await super.highlightNext(loop, options),
+      await super.highlightNext(loop, this._hiddenEditorOptions(options)),
       options
     );
   }
@@ -557,7 +557,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     }
 
     return this._showCurrentMatch(
-      await super.highlightPrevious(loop, options),
+      await super.highlightPrevious(loop, this._hiddenEditorOptions(options)),
       options
     );
   }
@@ -676,6 +676,23 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   private _canUnrender(): boolean {
     const cell = this.cell as MarkdownCell;
     return !cell.readOnly || cell.showEditorForReadOnly;
+  }
+
+  /**
+   * Options to step the editor of a rendered cell, which is hidden. The user
+   * does not see its cursor, so a search from the selection starts from the
+   * start of the cell instead.
+   *
+   * @param options - Options of the step.
+   * @returns Options to step the hidden editor.
+   */
+  private _hiddenEditorOptions(
+    options?: IHighlightAdjacentMatchOptions
+  ): IHighlightAdjacentMatchOptions | undefined {
+    const from = options?.from;
+    return from === 'selection' || from === 'selection-start'
+      ? { ...options, from: 'start' }
+      : options;
   }
 
   /**
