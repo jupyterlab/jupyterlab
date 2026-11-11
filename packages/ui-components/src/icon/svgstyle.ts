@@ -473,6 +473,16 @@ export function serializeStyleSheet(sheet: CSSStyleSheet): string {
   return text;
 }
 
+/**
+ * Remove the style sheets that `parseStyleSheet` gave and that were not
+ * serialized.
+ */
+export function discardStyleSheets(): void {
+  if (cssDocument) {
+    cssDocument.head.textContent = '';
+  }
+}
+
 type RuleParent = CSSStyleSheet | CSSGroupingRule;
 
 /**

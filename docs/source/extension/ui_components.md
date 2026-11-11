@@ -266,6 +266,9 @@ A copy still differs from the SVG shown inline:
 - In `jsdom`, as in Jest tests of an extension, no style sheet is parsed.
   So the rules are not rewritten, and an ID that only a `<style>` names
   keeps its value.
+- If the browser throws while `LabIcon` rewrites the rules, every copy
+  keeps the IDs and the rules of your SVG, and the console shows a
+  warning.
 
 For example, `LabIcon` renders this SVG:
 

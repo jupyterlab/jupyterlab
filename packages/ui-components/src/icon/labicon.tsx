@@ -20,6 +20,7 @@ import { classes, getReactAttrs } from '../utils';
 import type { ISelectorContext } from './svgstyle';
 import {
   copyKeyframes,
+  discardStyleSheets,
   edit,
   parseStyleSheet,
   renameAnimations,
@@ -641,7 +642,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
         svgElement.setAttribute('aria-hidden', 'true');
       }
 
-      Private.prepareSvg(svgElement);
+      return Private.prepareSvg(svgElement);
     }
 
     return svgElement;
@@ -851,13 +852,25 @@ namespace Private {
   }
 
   /**
-   * Make on the svg the changes that are the same in every copy, and keep
-   * the changes that each copy makes.
+   * Give a copy of the svg with the changes that are the same in every copy
+   * of the icon, and keep the changes that each copy makes. A browser can
+   * throw on CSS that it serialized itself: the svg then stays as it is.
    */
-  export function prepareSvg(svgElement: Element): void {
-    const plan = planCopies(svgElement);
-    if (plan) {
-      plans.set(svgElement, plan);
+  export function prepareSvg(svgElement: HTMLElement): HTMLElement {
+    const prepared = svgElement.cloneNode(true) as HTMLElement;
+    try {
+      const plan = planCopies(prepared);
+      if (plan) {
+        plans.set(prepared, plan);
+      }
+      return prepared;
+    } catch (reason) {
+      discardStyleSheets();
+      console.warn(
+        `Failed to rewrite the CSS of the icon ${svgElement.dataset.icon}: its copies keep the ids and the style rules of its svg.`,
+        reason
+      );
+      return svgElement;
     }
   }
 

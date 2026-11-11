@@ -61,6 +61,17 @@ const linkIcon = new LabIcon({
 
 const XLINK_NAMESPACE = 'http://www.w3.org/1999/xlink';
 
+/**
+ * Another copy of the LabIcon module, with its own state.
+ */
+function loadModuleCopy(): typeof LabIcon {
+  let copy: typeof LabIcon | undefined;
+  jest.isolateModules(() => {
+    copy = require('@jupyterlab/ui-components/lib/icon/labicon').LabIcon;
+  });
+  return copy!;
+}
+
 function getIconIdData(svg: Element): {
   clipPathId: string;
   clipPathRef: string;
@@ -206,15 +217,7 @@ describe('@jupyterlab/ui-components', () => {
       it('should not repeat an id that another copy of this module gave', () => {
         // an extension that imports LabIcon through a deep path bundles its
         // own copy of this module
-        const load = (): typeof LabIcon => {
-          let copy: typeof LabIcon | undefined;
-          jest.isolateModules(() => {
-            copy =
-              require('@jupyterlab/ui-components/lib/icon/labicon').LabIcon;
-          });
-          return copy!;
-        };
-        const ids = [load(), load()].map(Copy =>
+        const ids = [loadModuleCopy(), loadModuleCopy()].map(Copy =>
           new Copy({
             name: 'test-ui-components:module-copy',
             svgstr: fooSvgstr
@@ -464,6 +467,39 @@ describe('@jupyterlab/ui-components', () => {
         );
 
         expect(gradientId).toBe('gradient0');
+      });
+
+      it('should keep the ids of an svg when the browser throws on its style element', () => {
+        // WebKit throws on the text that it gives for some @keyframes rules
+        const failure = jest
+          .spyOn(document.implementation, 'createHTMLDocument')
+          .mockImplementation(() => {
+            throw new DOMException('rejected', 'SyntaxError');
+          });
+        const warn = jest.spyOn(console, 'warn').mockImplementation();
+        let id: string | null | undefined;
+
+        try {
+          const Copy = loadModuleCopy();
+          const icon = new Copy({
+            name: 'test-ui-components:style-throws',
+            svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+<style>.a{fill:url(#gradient0)}</style>
+<defs><linearGradient id="gradient0"/></defs>
+<rect class="a" stroke="url(#gradient0)" width="10" height="10"/>
+</svg>`
+          });
+          expect(() => {
+            id = icon
+              .element({ tag: null })
+              .querySelector('linearGradient')
+              ?.getAttribute('id');
+          }).not.toThrow();
+        } finally {
+          failure.mockRestore();
+          warn.mockRestore();
+        }
+        expect(id).toBe('gradient0');
       });
 
       it('should render an svg with a percent sign that starts no escape', () => {
