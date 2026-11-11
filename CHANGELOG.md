@@ -17,13 +17,13 @@ JupyterLab 4.7 requires Python 3.11 or newer, and supports Python 3.15.
 Notebooks opened from files that are not writable are now shown in view-only mode. They can be read, searched and copied, but not edited or run, and no kernel starts for them. To run the code, use File → Save Notebook As… to save a copy.
 
 <img alt="A read-only notebook whose toolbar shows only the copy button, a disabled cell type selector, the read-only indicator and No Kernel"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-view-only-notebook.png"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.7/docs/source/getting_started/changelog_assets/4.7-view-only-notebook.png"
 class="jp-screenshot">
 
 Read-only cells can now show a lock icon in the cell toolbar, and clicking the icon offers to make the cell editable. To show it, enable "Show lock icon for read-only cells" in Settings → Settings Editor → Notebook.
 
 <img alt="A read-only code cell with a lock icon at the start of its cell toolbar; its delete button is greyed out"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-cell-lock-icon.png"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.7/docs/source/getting_started/changelog_assets/4.7-cell-lock-icon.png"
 class="jp-screenshot">
 
 Read-only Markdown cells now stay rendered when you double-click them or press <kbd>Enter</kbd>. The "Show editor for read-only Markdown cells" setting brings back the read-only editor.
@@ -31,31 +31,31 @@ Read-only Markdown cells now stay rendered when you double-click them or press <
 The help that IPython shows for `object?` and `object??` can now open in a panel at the bottom of the window, as in the classic notebook, instead of in the cell output. Enable "Show Help in Bottom Panel" in the Notebook settings; it applies to code consoles too.
 
 <img alt="A notebook with the signature and the docstring of statistics.median shown in a Help panel below it"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-help-bottom-panel.png"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.7/docs/source/getting_started/changelog_assets/4.7-help-bottom-panel.png"
 class="jp-screenshot">
 
 The Common Tools section of the Property Inspector now shows the ID of the active cell, with buttons to copy the ID or a [link to the cell](https://jupyterlab.readthedocs.io/en/latest/user/notebook.html#working-with-cells).
 
 <img alt="The Common Tools section of the Property Inspector with the Cell ID field, and the copy and link buttons next to it"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-cell-id.png"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.7/docs/source/getting_started/changelog_assets/4.7-cell-id.png"
 class="jp-screenshot">
 
 The text box that `input()` opens below a running cell now has the same style as the text inputs of ipywidgets.
 
 <img alt="A cell running input() with the question and a bordered text box below it"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-stdin.png"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.7/docs/source/getting_started/changelog_assets/4.7-stdin.png"
 class="jp-screenshot">
 
 Right-clicking an image, such as a plot in a cell output, now offers "Copy Image".
 
 <img alt="The context menu of a plot in a cell output, with Copy Image below Copy Output to Clipboard"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-copy-image.png"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.7/docs/source/getting_started/changelog_assets/4.7-copy-image.png"
 class="jp-screenshot">
 
 Undoing the deletion of a cell that finished running in the meantime now brings the cell back as it was when you deleted it. A notification offers to show the outputs that arrived since.
 
 <img alt="An animation of a running cell that is deleted, restored with Undo Cell Operation after it finished, and then given the outputs printed in the meantime by the Show new outputs button of a notification"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-undo-deleted-running-cell.gif"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.7/docs/source/getting_started/changelog_assets/4.7-undo-deleted-running-cell.gif"
 class="jp-screenshot">
 
 These smaller changes also apply to notebooks:
@@ -79,7 +79,7 @@ These smaller changes also apply to notebooks:
 While its search field is empty, the command palette now lists the commands that you [recently ran from it](https://jupyterlab.readthedocs.io/en/latest/user/commands.html#recent-commands) at the top. The "Maximum Number of Recently Used Commands" setting of the Command Palette sets how many it keeps (5 by default, 0 turns the list off), and the "Clear Recently Used Commands" command clears the list.
 
 <img alt="The command palette with Restart Kernel, Clear Outputs of All Cells and Show Line Numbers at the top, each with a recently used badge"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-command-palette-recent.png"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.7/docs/source/getting_started/changelog_assets/4.7-command-palette-recent.png"
 class="jp-screenshot">
 
 ### Performance
@@ -87,7 +87,7 @@ class="jp-screenshot">
 Large and streamed text outputs, such as Python logging messages, now render faster. In the recording below, 1,000 log lines with links take 0.6 s to show, against 5.8 s in JupyterLab 4.6. In very large outputs, the links can appear shortly after the text. Text selected in a streaming output now stays selected. The "Incremental autolinking" setting of the HTML Sanitizer turns the new rendering off.
 
 <img alt="An animation comparing JupyterLab 4.6 and 4.7 on a cell that logs 1,000 lines with links and updates a progress line: 4.7 shows all of them after 0.6 s, 4.6 after 5.8 s"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-streamed-output.gif"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.7/docs/source/getting_started/changelog_assets/4.7-streamed-output.gif"
 class="jp-screenshot">
 
 These changes also make JupyterLab faster:
@@ -104,7 +104,7 @@ These changes also make JupyterLab faster:
 The sections of sidebar panels, such as Running Terminals and Kernels, the Debugger and the Extension Manager, can now be [reordered](https://jupyterlab.readthedocs.io/en/latest/user/interface_customization.html#reorder-accordion-sections). Right-click a section header, select "Enable Section Reordering" and drag a section by its handle. The entry applies to all panels at once, including sections moved to the File Browser, whose handles were always shown in JupyterLab 4.6. The order, collapsed state and size of the sections are saved in the workspace.
 
 <img alt="An animation of the Running panel: Enable Section Reordering is selected in the context menu of the Kernels header, and the Terminals section is dragged by its handle above the Kernels section"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-reorder-sections.gif"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.7/docs/source/getting_started/changelog_assets/4.7-reorder-sections.gif"
 class="jp-screenshot">
 
 ### Debugger and console improvements
@@ -112,7 +112,7 @@ class="jp-screenshot">
 The Kernel Sources panel now shows the modules as a tree grouped by package, with "Open" and "Copy Path" in the context menu. The new "Hide the kernel's own sources" setting of the Debugger, off by default, hides the modules that the kernel loads for itself, such as IPython and debugpy.
 
 <img alt="The Kernel Sources panel of the debugger with the dateutil, numpy and pandas packages, and pandas expanded into its subpackages"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-kernel-sources-tree.png"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.7/docs/source/getting_started/changelog_assets/4.7-kernel-sources-tree.png"
 class="jp-screenshot">
 
 Completions in the Debug Console are faster, work in kernels for other languages and no longer suggest IPython magics. While the debugger is paused, names from the paused frame are completed only when you press <kbd>Tab</kbd>, also in notebooks, because completing an attribute can run code in the paused program.
@@ -120,7 +120,7 @@ Completions in the Debug Console are faster, work in kernels for other languages
 Code consoles can now be renamed: right-click the console tab and select ["Rename Console…"](https://jupyterlab.readthedocs.io/en/latest/user/code_console.html#rename-console).
 
 <img alt="The context menu of a console tab with the Rename Console entry"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-rename-console.png"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.7/docs/source/getting_started/changelog_assets/4.7-rename-console.png"
 class="jp-screenshot">
 
 ### Markdown and math
@@ -128,7 +128,7 @@ class="jp-screenshot">
 A Markdown Preview can now be searched with <kbd>Ctrl</kbd> + <kbd>F</kbd> (<kbd>Cmd</kbd> + <kbd>F</kbd> on macOS), and its context menu can copy the selected text. "Show Markdown Preview" is now in the command palette when a Markdown file is open in the editor.
 
 <img alt="A Markdown Preview with the search box showing 1/4 matches of the word data highlighted in the text"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-markdown-preview-search.png"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.7/docs/source/getting_started/changelog_assets/4.7-markdown-preview-search.png"
 class="jp-screenshot">
 
 In rendered Markdown, a link to a folder now opens the folder in the file browser instead of showing an error, and a link to a missing file now shows a dialog instead of doing nothing.
@@ -140,13 +140,13 @@ Mermaid diagrams are now redrawn when you switch between a light and a dark them
 Math is now rendered with MathJax 4.1. In display math, `\\` starts a new line again, as before JupyterLab 4.0. Long inline formulas wrap at the edge of the cell, and punctuation after inline math stays on its line. A `\require` of a package that JupyterLab does not include no longer stops the other formulas from rendering.
 
 <img alt="A rendered Markdown cell with two equations on separate lines, and a long inline polynomial that wraps onto a second line"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-mathjax-4.png"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.7/docs/source/getting_started/changelog_assets/4.7-mathjax-4.png"
 class="jp-screenshot">
 
 The search now highlights matches inside rendered formulas, such as `sin` or `10`, in a Markdown Preview and in cell outputs.
 
 <img alt="A Markdown Preview with the search box showing 1/3 for sin, and sin highlighted in three rendered formulas"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-mathjax-search.png"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.7/docs/source/getting_started/changelog_assets/4.7-mathjax-search.png"
 class="jp-screenshot">
 
 "MathJax Copy Latex" in the context menu of a formula now copies that formula, instead of the formula rendered last.
@@ -164,7 +164,7 @@ class="jp-screenshot">
 The CSV viewer can now recognize comment lines: select "hash" in the new "Comment" selector of the toolbar, and lines starting with `#` are shown in italics instead of being read as the header or as data. The search now shows the number of matches and the current match.
 
 <img alt="A CSV file whose three comment lines are shown in italics across the rows without a row number, and the search box showing 2/5 for Oslo"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-csv-viewer.png"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.7/docs/source/getting_started/changelog_assets/4.7-csv-viewer.png"
 class="jp-screenshot">
 
 The new ["Default delimiter"](https://jupyterlab.readthedocs.io/en/latest/user/file_formats.html#view-csv) setting of the CSV Viewer sets the delimiter for opening files, for example `;`. The number of columns now comes from the widest of the first 500 rows, so longer rows are shown in full. Go to Line now scrolls to the right row, and editing the file in another tab keeps the column widths.
@@ -178,7 +178,7 @@ The terminal now uses xterm.js 6. Without WebGL, it falls back to the DOM render
 The Running panel now shows the [titles](https://jupyterlab.readthedocs.io/en/latest/user/terminal.html#terminal-titles) that the shell or a program sets for a terminal, as the tabs do, and keeps them when the tab is closed or the page is reloaded.
 
 <img alt="The Running panel listing a terminal named Model training under Open Tabs and Terminals, next to the terminal tab with the same title"
-src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-terminal-title-running.png"
+src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.7/docs/source/getting_started/changelog_assets/4.7-terminal-title-running.png"
 class="jp-screenshot">
 
 ### Keyboard shortcuts
