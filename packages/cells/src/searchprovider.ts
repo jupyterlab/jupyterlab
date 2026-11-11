@@ -789,8 +789,16 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     scroll: boolean
   ): Promise<IHTMLSearchMatch | undefined> {
     const provider = this.renderedProvider;
+    const current = provider.currentMatchIndex;
+    const count = provider.matchesCount ?? 0;
     // Without a marked match, the first step forward marks the first match
-    let steps = index - (provider.currentMatchIndex ?? -1);
+    // and the first step back marks the last one: take the shorter way
+    let steps =
+      current !== null
+        ? index - current
+        : index < count - index
+          ? index + 1
+          : index - count;
     while (steps !== 0) {
       // Scroll only to the match itself, not to the matches on the way
       const options = { scroll: scroll && Math.abs(steps) === 1 };
