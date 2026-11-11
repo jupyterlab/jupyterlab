@@ -234,10 +234,11 @@ export function edit(text: string, edits: [number, number, string][]): string {
 /**
  * The selector that a rule of the copies of an icon adds to the compound
  * selectors that must match in a copy: the elements of a copy, and elements
- * added to it.
+ * added to it. It has the text that browsers serialize it to, so that
+ * `rewriteSelector` finds it in a selector of a copy given again as an svg.
  */
 function scopeFilter(scope: string): string {
-  return `:where([data-icon-scope="${scope}"],[data-icon-scope="${scope}"] *)`;
+  return `:where([data-icon-scope="${scope}"], [data-icon-scope="${scope}"] *)`;
 }
 
 /**
@@ -287,26 +288,34 @@ export interface ISelectorPlace {
  * match in a copy; other compounds can match elements of the page.
  */
 export function rewriteSelector(
-  text: string,
+  selector: string,
   context: ISelectorContext,
   place: ISelectorPlace
 ): string {
+  // the selectors of a copy that is given again as an svg name the scope of
+  // that copy: they get the scope of this icon
+  const text = selector.replace(
+    /\[data-icon-scope="\d+"\]/g,
+    `[data-icon-scope="${context.scope}"]`
+  );
   const tokens = tokenize(text);
+  const filter = scopeFilter(context.scope);
   let result = '';
   // a frame for the selector list and for each parenthesis in it, with the
   // compound selectors of it that get the filter, before a pseudo-element
   const frames = [newFrame(place.subject ? 'subject' : 'ids')];
   const endCompound = (k: number) => {
     const frame = frames[frames.length - 1];
+    const at = frame.pseudoElement < 0 ? result.length : frame.pseudoElement;
+    // a compound selector of a copy given again as an svg has the filter
     if (
       frame.open &&
       (frame.filter === 'all' ||
         frame.namesId ||
-        (frame.filter === 'subject' && isSubjectEnd(tokens, k)))
+        (frame.filter === 'subject' && isSubjectEnd(tokens, k))) &&
+      !result.slice(0, at).endsWith(filter)
     ) {
-      const at = frame.pseudoElement < 0 ? result.length : frame.pseudoElement;
-      result =
-        result.slice(0, at) + scopeFilter(context.scope) + result.slice(at);
+      result = result.slice(0, at) + filter + result.slice(at);
     }
     frame.open = false;
     frame.namesId = false;
@@ -329,7 +338,6 @@ export function rewriteSelector(
       token.type === ':' && next?.type === 'ident'
         ? next.value.toLowerCase()
         : '';
-    const rewritten = token.type === ':' ? rewrittenPart(tokens, k + 1) : '';
     if (token.type === 'function' || token.type === '(') {
       frames.push(
         newFrame(token.value.toLowerCase() === 'has' ? 'all' : 'ids')
@@ -347,12 +355,6 @@ export function rewriteSelector(
       }
       part = '::';
       k++;
-    } else if (rewritten) {
-      // a part of a copy that LabIcon rendered, given again as an svg
-      const end = closeOf(tokens, k + 1);
-      part = rewritten === 'id' ? text.slice(token.start, tokens[end].end) : '';
-      frame.namesId ||= rewritten === 'id';
-      k = end;
     } else if (
       pseudoClass === 'root' ||
       (place.scopeIsRoot && pseudoClass === 'scope')
@@ -425,51 +427,6 @@ function closeOf(tokens: IToken[], k: number): number {
 }
 
 /**
- * What the rewrite wrote at the function `tokens[k]`, in a copy given again
- * as an svg: "filter" for `scopeFilter` or the end of `scopeRoot`, "id" for a
- * renamed id or a changed attribute, or "".
- */
-function rewrittenPart(tokens: IToken[], k: number): 'filter' | 'id' | '' {
-  const name = (j: number) => tokens[j]?.value.toLowerCase() ?? '';
-  const fn = tokens[k]?.type === 'function' ? name(k) : '';
-  let j = k + 1;
-  if (fn === 'where') {
-    return tokens[j]?.type === '[' && isScopeSelector(tokens, j)
-      ? 'filter'
-      : '';
-  }
-  if (
-    fn === 'is' &&
-    tokens[j]?.type === 'hash' &&
-    tokens[j + 1]?.type === ','
-  ) {
-    j += 2;
-    while (tokens[j]?.type === 'ws') {
-      j++;
-    }
-  }
-  return fn === 'is' &&
-    tokens[j]?.type === '[' &&
-    name(j + 1).startsWith('data-original-')
-    ? 'id'
-    : '';
-}
-
-/**
- * Whether the attribute selector at `tokens[k]` is one that the rewrite
- * writes, as in `[data-icon-scope="2"]`.
- */
-function isScopeSelector(tokens: IToken[], k: number): boolean {
-  const [, name, equals, value, close] = tokens.slice(k, k + 5);
-  return (
-    name?.value.toLowerCase() === 'data-icon-scope' &&
-    equals?.type === '=' &&
-    /^\d+$/.test(value?.value ?? '') &&
-    close?.type === ']'
-  );
-}
-
-/**
  * Rewrite the attribute selector that starts at `tokens[k]`, as in
  * `[xlink|href="#a" i]`, if it reads an attribute that copies change. Return
  * the index of its closing bracket, its new text, and whether it names an id.
@@ -502,20 +459,15 @@ function rewriteAttributeSelector(
   const nameText = text.slice(name.start, name.end);
   const lowerName = name.value.toLowerCase();
   const rest = text.slice(name.end, tokens[close]?.start);
-  // the root of a copy that LabIcon rendered, given again as an svg
-  if (
-    lowerName === 'data-icon' &&
-    !rest.trim() &&
-    tokens[close + 1]?.type === ':' &&
-    rewrittenPart(tokens, close + 2) === 'filter'
-  ) {
-    return [closeOf(tokens, close + 2), scopeRoot(context.scope), false];
-  }
-  if (namespace === '' && isScopeSelector(tokens, k)) {
-    return [close, `[${nameText}="${context.scope}"]`, false];
-  }
-  if (lowerName.startsWith('data-original-')) {
-    return [close, selector, true];
+  // in a copy that is given again as an svg, this selector stands inside
+  // the one that this function wrote, for the elements without an original
+  // value: it stays as it is
+  const following = tokens
+    .slice(close + 1, close + 7)
+    .map(token => token.value.toLowerCase() || token.type)
+    .join(' ');
+  if (following.startsWith(': where : not [ data-original-')) {
+    return [close, selector, false];
   }
   // the keys of an attribute without a namespace, and of an XLink attribute
   const prefixes: string[] = [];
@@ -810,27 +762,20 @@ function selectorPlace(rule: CSSRule, subject: boolean): ISelectorPlace {
 /**
  * Give each name that the style texts of an svg define for keyframes and
  * layers a suffix of the icon, as in `pulse-jp-icon-2`, and a name to each
- * anonymous layer. A copy given again as an svg, of scope `old`, loses its old
- * suffixes. Give the new texts, and the new names of the keyframes.
+ * anonymous layer. A copy given again as an svg loses the suffixes of its
+ * earlier scope. Give the new texts, and the new names of the keyframes.
  */
 export function renameDefinitions(
   texts: string[],
-  scope: string,
-  old: string | null
+  scope: string
 ): [string[], Map<string, string>] {
   const keyframes = new Map<string, string>();
-  const oldSuffix = `-jp-icon-${old}`;
-  const rename = (name: string) => {
-    if (old !== null && name === `jp-icon-${old}`) {
-      // the layer of the initial values of registered properties
-      return `jp-icon-${scope}`;
-    }
-    const base =
-      old !== null && name.endsWith(oldSuffix)
-        ? name.slice(0, -oldSuffix.length)
-        : name;
-    return `${base}-jp-icon-${scope}`;
-  };
+  const oldSuffix = /-jp-icon-\d+$/;
+  // "jp-icon-2" is the layer of the initial values of registered properties
+  const rename = (name: string) =>
+    /^jp-icon-\d+$/.test(name)
+      ? `jp-icon-${scope}`
+      : `${name.replace(oldSuffix, '')}-jp-icon-${scope}`;
   let anonymous = 0;
   const renamed = texts.map(text => {
     const tokens = tokenize(text);
@@ -860,7 +805,7 @@ export function renameDefinitions(
         const name = text.slice(prelude[0].start, prelude[0].end);
         const close = closeOf(tokens, end);
         keyframes.set(name, rename(name));
-        if (old !== null && name.endsWith(oldSuffix)) {
+        if (oldSuffix.test(name)) {
           // a copy given again as an svg drops its old copy, as the original
           // makes a new one
           edits.push([start, tokens[close].end, '']);

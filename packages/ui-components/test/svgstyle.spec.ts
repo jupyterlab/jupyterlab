@@ -14,7 +14,7 @@ import {
 } from '../src/icon/svgstyle';
 
 const XLINK_NAMESPACE = 'http://www.w3.org/1999/xlink';
-const FILTER = ':where([data-icon-scope="s"],[data-icon-scope="s"] *)';
+const FILTER = ':where([data-icon-scope="s"], [data-icon-scope="s"] *)';
 const ROOT = '[data-icon]:where([data-icon-scope="s"])';
 // a rule outside other rules, where :scope and & stand for the root
 const TOP: ISelectorPlace = {
@@ -178,20 +178,20 @@ describe('svgstyle', () => {
 
   describe('renameDefinitions()', () => {
     it('should add a copy of keyframes with the suffix of the icon', () => {
-      expect(renameDefinitions(['@keyframes a{}'], 's', null)).toEqual([
+      expect(renameDefinitions(['@keyframes a{}'], 's')).toEqual([
         ['@keyframes a{}@keyframes a-jp-icon-s{}'],
         new Map([['a', 'a-jp-icon-s']])
       ]);
     });
 
     it('should give each part of the name of a layer the suffix of the icon', () => {
-      const [texts] = renameDefinitions(['@layer a, b.c;'], 's', null);
+      const [texts] = renameDefinitions(['@layer a, b.c;'], 's');
 
       expect(texts).toEqual(['@layer a-jp-icon-s, b-jp-icon-s.c-jp-icon-s;']);
     });
 
     it('should give a name to each anonymous layer of the style elements', () => {
-      const [texts] = renameDefinitions(['@layer{}', '@layer {}'], 's', null);
+      const [texts] = renameDefinitions(['@layer{}', '@layer {}'], 's');
 
       expect(texts).toEqual([
         '@layer jp-layer-0-jp-icon-s{}',
@@ -202,8 +202,7 @@ describe('svgstyle', () => {
     it('should rename the layer of an import', () => {
       const [texts] = renameDefinitions(
         ['@import url(a) layer(b); @import url(c) layer;'],
-        's',
-        null
+        's'
       );
 
       expect(texts).toEqual([
@@ -214,8 +213,7 @@ describe('svgstyle', () => {
     it('should replace the suffix of a copy that is given again as an svg', () => {
       const [texts] = renameDefinitions(
         ['@keyframes a{}@keyframes a-jp-icon-1{}@layer jp-icon-1;'],
-        's',
-        '1'
+        's'
       );
 
       expect(texts).toEqual([
@@ -514,7 +512,7 @@ describe('svgstyle', () => {
     it('should keep a changed attribute of a copy that is given again as an svg', () => {
       const context = selectorContext({ changed: new Set(['href']) });
       const copy =
-        ':is([data-original-href], [href]:where(:not([data-original-href]))) rect';
+        ':is([data-original-href], [href]:where(:not([data-original-href]))):where([data-icon-scope="1"], [data-icon-scope="1"] *) rect';
 
       expect(rewriteSelector(copy, context, TOP)).toBe(
         `:is([data-original-href], [href]:where(:not([data-original-href])))${FILTER} rect${FILTER}`
@@ -528,12 +526,6 @@ describe('svgstyle', () => {
       expect(rewriteSelector('#a .b, .c', context, place)).toBe(
         `#a${FILTER} .b, .c`
       );
-    });
-
-    it('should add the filter to a compound selector of an original attribute of a copy', () => {
-      expect(
-        rewriteSelector('[data-original-id="a"] rect', selectorContext(), TOP)
-      ).toBe(`[data-original-id="a"]${FILTER} rect${FILTER}`);
     });
   });
 });

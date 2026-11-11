@@ -1325,8 +1325,7 @@ namespace Private {
   ): IStyle[] {
     const [texts, keyframes] = renameDefinitions(
       styleNodes.map(styleText),
-      scope,
-      nodes[0].getAttribute('data-icon-scope')
+      scope
     );
     const styles: IStyle[] = [];
     styleNodes.forEach((node, index) => {
