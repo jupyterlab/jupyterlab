@@ -290,6 +290,24 @@ describe('@jupyterlab/settingregistry', () => {
         ]);
       });
 
+      it('should migrate a default shortcut that disables another default', () => {
+        // The shortcuts of `overrides.json` are part of the defaults.
+        const defaults = [
+          {
+            command: 'application:close',
+            keys: ['Alt W'],
+            selector: '.jp-LabShell'
+          },
+          {
+            command: 'application:close',
+            keys: ['Alt W'],
+            selector: '.jp-Activity',
+            disabled: true
+          }
+        ];
+        expect(SettingRegistry.reconcileShortcuts(defaults, [])).toEqual([]);
+      });
+
       it('should continue migrating existing selector syntax', () => {
         const shortcut = {
           command: 'other:command',
