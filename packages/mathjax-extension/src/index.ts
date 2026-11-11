@@ -6,8 +6,6 @@
  * @module mathjax-extension
  */
 
-import { PromiseDelegate } from '@lumino/coreutils';
-
 import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -15,9 +13,11 @@ import type {
 
 import { ILatexTypesetter } from '@jupyterlab/rendermime';
 
+import type { IRenderMime } from '@jupyterlab/rendermime';
+
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
-import type { MathDocument } from 'mathjax-full/js/core/MathDocument';
+import type { MathDocument } from '@mathjax/src/mjs/core/MathDocument.js';
 
 namespace CommandIDs {
   /**
@@ -40,9 +40,50 @@ namespace CommandArgs {
  * The MathJax Typesetter.
  */
 export class MathJaxTypesetter implements ILatexTypesetter {
+  /**
+   * Construct a new MathJax typesetter.
+   *
+   * @param options - Options describing how math is recognized in the source
+   *   text (see {@link MathJaxTypesetter.IOptions}).
+   */
+  constructor(options: MathJaxTypesetter.IOptions = {}) {
+    this.mathParseOptions = {
+      dollarInlineMath: options.dollarInlineMath ?? true
+    };
+  }
+
+  /**
+   * The options describing how math is recognized in the source text.
+   *
+   * Exposed so that the Markdown pre-processor (`removeMath`) and this
+   * typesetter agree on whether a single `$` introduces inline math.
+   */
+  readonly mathParseOptions: IRenderMime.ILatexTypesetter.IMathParseOptions;
+
+  /**
+   * Create a new MathJax typesetter with the given parse options.
+   *
+   * Options which are not given are inherited from this typesetter; this
+   * typesetter is left unchanged. The underlying MathDocument is shared with
+   * any other typesetter using the same options, so this is cheap to call.
+   *
+   * @param options - The parse options to apply.
+   */
+  withParseOptions(
+    options: IRenderMime.ILatexTypesetter.IMathParseOptions
+  ): MathJaxTypesetter {
+    return new MathJaxTypesetter(
+      Private.mergeParseOptions(this.mathParseOptions, options)
+    );
+  }
+
   protected async _ensureInitialized() {
     if (!this._initialized) {
-      this._mathDocument = await Private.ensureMathDocument();
+      this._mathDocument = await Private.ensureMathDocument(
+        this.mathParseOptions.dollarInlineMath === false
+          ? Private.INLINE_MATH_WITHOUT_DOLLAR
+          : Private.DEFAULT_INLINE_MATH
+      );
       this._initialized = true;
     }
   }
@@ -66,14 +107,36 @@ export class MathJaxTypesetter implements ILatexTypesetter {
       return;
     }
 
-    this._mathDocument.options.elements = [node];
-    this._mathDocument.clear().render();
-    delete this._mathDocument.options.elements;
-    Private.hardenAnchorLinks(node);
+    await this._mathDocument.whenReady(async () => {
+      this._mathDocument.options.elements = [node];
+      // Keep only the most recently rendered math items; sources for earlier
+      // expressions are retained separately for the copy command.
+      this._mathDocument.clear();
+      try {
+        await this._mathDocument.renderPromise();
+        Private.recordTexSources(this._mathDocument);
+        Private.hardenAnchorLinks(node);
+      } finally {
+        delete this._mathDocument.options.elements;
+      }
+    });
   }
 
   protected _initialized: boolean = false;
   protected _mathDocument: MathDocument<any, any, any>;
+}
+
+/**
+ * A namespace for `MathJaxTypesetter` statics.
+ */
+export namespace MathJaxTypesetter {
+  // Extends the provider-agnostic math-parsing options; MathJax-specific
+  // options can be added here later in backward-compatible fashion.
+  /**
+   * Options for constructing a {@link MathJaxTypesetter}.
+   */
+  export interface IOptions
+    extends IRenderMime.ILatexTypesetter.IMathParseOptions {}
 }
 
 /**
@@ -90,6 +153,19 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
 
     app.commands.addCommand(CommandIDs.copy, {
       execute: async () => {
+        // Find the math expression the context menu was opened on; this works
+        // across all typesetter instances (e.g. ones configured with
+        // different delimiters). The fallback below copies the expression
+        // that any typesetter rendered last, because all typesetters share
+        // one output jax.
+        const root = app.contextMenuHitTest(node =>
+          node.classList.contains('MathJax')
+        );
+        const tex = root ? Private.getTexSource(root) : undefined;
+        if (tex !== undefined) {
+          await navigator.clipboard.writeText(tex);
+          return;
+        }
         const md = await typesetter.mathDocument();
         const oJax: any = md.outputJax;
         await navigator.clipboard.writeText(oJax.math.math);
@@ -105,17 +181,24 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
 
     app.commands.addCommand(CommandIDs.scale, {
       execute: async (args: CommandArgs.scale) => {
-        const md = await typesetter.mathDocument();
         const scale = args['scale'] || 1.0;
-        md.outputJax.options.scale = scale;
-        md.rerender();
+        // Scale all documents so that every typesetter instance (e.g. ones
+        // configured with different delimiters) is affected alike; remember
+        // the scale so that documents created later inherit it too.
+        Private.setScale(scale);
+        for (const md of await Private.getMathDocuments()) {
+          await md.whenReady(async () => {
+            md.outputJax.options.scale = scale;
+            await md.rerenderPromise();
+            Private.recordTexSources(md);
 
-        // Harden only the re-rendered anchors
-        for (const math of md.math) {
-          const root = math.typesetRoot as HTMLElement | null;
-          if (root) {
-            Private.hardenAnchorLinks(root);
-          }
+            for (const math of md.math) {
+              const root = math.typesetRoot as HTMLElement | null;
+              if (root) {
+                Private.hardenAnchorLinks(root);
+              }
+            }
+          });
         }
       },
       label: args =>
@@ -145,74 +228,220 @@ export default mathJaxPlugin;
  * A namespace for module-private functionality.
  */
 namespace Private {
-  let _loading: PromiseDelegate<MathDocument<any, any, any>> | null = null;
+  /**
+   * The default delimiters for inline math.
+   */
+  export const DEFAULT_INLINE_MATH: [string, string][] = [
+    ['$', '$'],
+    ['\\(', '\\)']
+  ];
 
-  export async function ensureMathDocument(): Promise<
-    MathDocument<any, any, any>
-  > {
-    if (!_loading) {
-      _loading = new PromiseDelegate();
+  /**
+   * Merge parse options, where an `undefined` value in `overrides` means
+   * "keep the current value" rather than "reset to the default".
+   */
+  export function mergeParseOptions(
+    base: IRenderMime.ILatexTypesetter.IMathParseOptions,
+    overrides: IRenderMime.ILatexTypesetter.IMathParseOptions
+  ): IRenderMime.ILatexTypesetter.IMathParseOptions {
+    const merged: Record<string, unknown> = { ...base };
+    for (const [key, value] of Object.entries(overrides)) {
+      if (value !== undefined) {
+        merged[key] = value;
+      }
+    }
+    return merged as IRenderMime.ILatexTypesetter.IMathParseOptions;
+  }
 
-      void import('mathjax-full/js/input/tex/require/RequireConfiguration');
+  /**
+   * The inline math delimiters with the single `$` pair removed, so that `$`
+   * is rendered literally.
+   */
+  export const INLINE_MATH_WITHOUT_DOLLAR: [string, string][] = [
+    ['\\(', '\\)']
+  ];
 
-      const [
-        { mathjax },
-        { CHTML },
-        { TeX },
-        { TeXFont },
-        { AllPackages },
-        { SafeHandler },
-        { HTMLHandler },
-        { browserAdaptor },
-        { AssistiveMmlHandler }
-      ] = await Promise.all([
-        import('mathjax-full/js/mathjax'),
-        import('mathjax-full/js/output/chtml'),
-        import('mathjax-full/js/input/tex'),
-        import('mathjax-full/js/output/chtml/fonts/tex'),
-        import('mathjax-full/js/input/tex/AllPackages'),
-        import('mathjax-full/js/ui/safe/SafeHandler'),
-        import('mathjax-full/js/handlers/html/HTMLHandler'),
-        import('mathjax-full/js/adaptors/browserAdaptor'),
-        import('mathjax-full/js/a11y/assistive-mml')
-      ]);
+  /**
+   * Load the MathJax modules and register the document handler.
+   *
+   * The heavy dynamic imports and the (global, one-time) handler registration
+   * are shared across all typesetters; only the per-instance document is built
+   * separately in {@link createMathDocument}. The returned bundle's type is
+   * inferred so no MathJax types need to be imported explicitly.
+   */
+  async function loadModules() {
+    const [
+      { mathjax },
+      { CHTML },
+      { TeX },
+      { MathJaxTexFont },
+      { TEX_PACKAGES },
+      { SafeHandler },
+      { HTMLHandler },
+      { browserAdaptor },
+      { AssistiveMmlHandler },
+      { MathJaxMhchemFontExtension }
+    ] = await Promise.all([
+      import('@mathjax/src/mjs/mathjax.js'),
+      import('@mathjax/src/mjs/output/chtml.js'),
+      import('@mathjax/src/mjs/input/tex.js'),
+      import('@mathjax/mathjax-tex-font/mjs/chtml.js'),
+      import('./tex'),
+      import('@mathjax/src/mjs/ui/safe/SafeHandler.js'),
+      import('@mathjax/src/mjs/handlers/html/HTMLHandler.js'),
+      import('@mathjax/src/mjs/adaptors/browserAdaptor.js'),
+      import('@mathjax/src/mjs/a11y/assistive-mml.js'),
+      import('@mathjax/mathjax-mhchem-font-extension/mjs/chtml.js')
+    ]);
 
-      mathjax.handlers.register(
-        AssistiveMmlHandler(SafeHandler(new HTMLHandler(browserAdaptor())))
-      );
+    mathjax.handlers.register(
+      AssistiveMmlHandler(SafeHandler(new HTMLHandler(browserAdaptor())))
+    );
 
-      class EmptyFont extends TeXFont {
-        protected static defaultFonts = {} as any;
+    class LocalFont extends MathJaxTexFont {
+      static addFontURLs(): void {
+        // Font faces are bundled through fonts.css.
       }
 
-      const chtml = new CHTML({
-        // Override dynamically generated fonts in favor of our font css
-        font: new EmptyFont()
-      });
+      /**
+       * The TeX font gives 1.198em as the `\big` size of 13 delimiters, such
+       * as `(`, `[` and `{`. That is below the 1.2em that `\big` asks for, so
+       * `\big(` draws the `\Big(` glyph.
+       *
+       * Works around https://github.com/mathjax/MathJax/issues/3622. Drop this
+       * method and its test when migrating to MathJax 4.2.
+       */
+      static fixBigDelimiters(): void {
+        for (const delimiter of Object.values(this.defaultDelimiters)) {
+          const sizes = 'sizes' in delimiter ? delimiter.sizes : undefined;
+          if (sizes?.[1] === 1.198) {
+            sizes[1] = 1.2;
+          }
+        }
+      }
+    }
+    // The mhchem arrows and bonds are in a separate font extension.
+    LocalFont.addExtension(MathJaxMhchemFontExtension);
+    LocalFont.fixBigDelimiters();
 
-      const tex = new TeX({
-        packages: AllPackages.concat('require'),
-        inlineMath: [
-          ['$', '$'],
-          ['\\(', '\\)']
-        ],
-        displayMath: [
-          ['$$', '$$'],
-          ['\\[', '\\]']
-        ],
-        processEscapes: true,
-        processEnvironments: true
-      });
-
-      const mathDocument = mathjax.document(window.document, {
-        InputJax: tex,
-        OutputJax: chtml
-      });
-
-      _loading.resolve(mathDocument);
+    // Share the output jax so delimiter configurations use the same stylesheet.
+    const chtml = new CHTML({ fontData: new LocalFont() });
+    if (_scale !== null) {
+      chtml.options.scale = _scale;
     }
 
-    return _loading.promise;
+    return { mathjax, chtml, TeX, TEX_PACKAGES };
+  }
+
+  let _loading: ReturnType<typeof loadModules> | null = null;
+
+  /**
+   * Ensure the MathJax modules are loaded exactly once per page.
+   */
+  export function ensureMathModules(): ReturnType<typeof loadModules> {
+    if (!_loading) {
+      _loading = loadModules();
+    }
+    return _loading;
+  }
+
+  const _documents = new Map<string, Promise<MathDocument<any, any, any>>>();
+
+  /**
+   * Get (or lazily create) the MathDocument for the given inline delimiters.
+   *
+   * Building a MathDocument costs on the order of ~5 ms and retains memory for
+   * the lifetime of the page. Caching one document per distinct delimiter
+   * configuration keeps that bounded, so constructing many typesetters with
+   * the same configuration (for example one per markdown cell across a large
+   * notebook) reuses a single document instead of multiplying the time and
+   * memory cost.
+   */
+  export function ensureMathDocument(
+    inlineMath: [string, string][]
+  ): Promise<MathDocument<any, any, any>> {
+    const key = JSON.stringify(inlineMath);
+    let document = _documents.get(key);
+    if (!document) {
+      document = createMathDocument(inlineMath);
+      _documents.set(key, document);
+    }
+    return document;
+  }
+
+  /**
+   * Get all MathDocuments created so far, so that document-wide commands
+   * (e.g. scaling) can operate across every delimiter configuration in use.
+   */
+  export function getMathDocuments(): Promise<MathDocument<any, any, any>[]> {
+    return Promise.all(_documents.values());
+  }
+
+  let _scale: number | null = null;
+
+  /**
+   * Remember the requested scale factor, so that MathDocuments created later
+   * (e.g. on first use of a typesetter with a different delimiter
+   * configuration) start at the user's chosen scale rather than the default.
+   */
+  export function setScale(scale: number): void {
+    _scale = scale;
+  }
+
+  const _texSourceByRoot = new WeakMap<Element, string>();
+
+  /**
+   * Record the TeX source of each math expression typeset by `document`,
+   * keyed by its rendered container element.
+   *
+   * A MathDocument only retains the math items from its most recent
+   * `render()` call (each `typeset()` starts with `clear()`), so the source
+   * of earlier expressions must be captured here for the copy command to
+   * find the expression that was actually clicked. Unlike retaining the math
+   * items themselves, this only keeps the source string, and the `WeakMap`
+   * lets it be reclaimed as soon as the rendered node is garbage-collected.
+   */
+  export function recordTexSources(
+    document: MathDocument<any, any, any>
+  ): void {
+    for (const item of document.math) {
+      if (item.typesetRoot) {
+        _texSourceByRoot.set(item.typesetRoot, item.math);
+      }
+    }
+  }
+
+  /**
+   * Get the TeX source of the math expression rendered in `root`
+   * (a `mjx-container` element), if known.
+   */
+  export function getTexSource(root: Element): string | undefined {
+    return _texSourceByRoot.get(root);
+  }
+
+  /**
+   * Build a MathDocument configured with the given inline delimiters.
+   */
+  async function createMathDocument(
+    inlineMath: [string, string][]
+  ): Promise<MathDocument<any, any, any>> {
+    const { mathjax, chtml, TeX, TEX_PACKAGES } = await ensureMathModules();
+
+    const tex = new TeX({
+      packages: TEX_PACKAGES,
+      inlineMath,
+      displayMath: [
+        ['$$', '$$'],
+        ['\\[', '\\]']
+      ],
+      processEscapes: true,
+      processEnvironments: true
+    });
+
+    return mathjax.document(window.document, {
+      InputJax: tex,
+      OutputJax: chtml
+    });
   }
 
   /**

@@ -24,6 +24,7 @@ import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import type { IOutputAreaModel } from './model';
+import type { IPageHandler } from './tokens';
 
 /**
  * The class name added to an output area widget.
@@ -110,6 +111,7 @@ export class OutputArea extends Widget {
     this._translator = options.translator ?? nullTranslator;
     this._inputHistoryScope = options.inputHistoryScope ?? 'global';
     this._showInputPlaceholder = options.showInputPlaceholder ?? true;
+    this._pageHandler = options.pageHandler ?? null;
 
     const model = (this.model = options.model);
     for (
@@ -127,7 +129,8 @@ export class OutputArea extends Widget {
             event: IObservableString.IChangedArgs
           ) => {
             this._setOutput(i, output);
-          }
+          },
+          this
         );
       }
     }
@@ -294,6 +297,13 @@ export class OutputArea extends Widget {
       this._future.dispose();
       this._future = null!;
     }
+    if (this._promptOverlay) {
+      this._promptOverlay.removeEventListener(
+        'click',
+        this._onPromptOverlayClick
+      );
+      this._promptOverlay = null;
+    }
     this._displayIdMap.clear();
     this._outputTracker.dispose();
     super.dispose();
@@ -324,6 +334,16 @@ export class OutputArea extends Widget {
   }
 
   /**
+   * Display id targets for the current outputs, copied on get and set.
+   */
+  get displayIdMap(): ReadonlyMap<string, readonly number[]> {
+    return Private.cloneDisplayIdMap(this._displayIdMap);
+  }
+  set displayIdMap(value: ReadonlyMap<string, readonly number[]>) {
+    this._displayIdMap = Private.cloneDisplayIdMap(value);
+  }
+
+  /**
    * Reattach the kernel future, without clearing the existing output model.
    *
    * This is useful when a cell gets deleted by a user but user later decides
@@ -333,8 +353,12 @@ export class OutputArea extends Widget {
     future: Kernel.IShellFuture<
       KernelMessage.IExecuteRequestMsg,
       KernelMessage.IExecuteReplyMsg
-    >
+    >,
+    displayIdMap?: ReadonlyMap<string, readonly number[]>
   ) {
+    if (displayIdMap) {
+      this.displayIdMap = displayIdMap;
+    }
     this._setFuture(future, false);
   }
 
@@ -358,7 +382,8 @@ export class OutputArea extends Widget {
               event: IObservableString.IChangedArgs
             ) => {
               this._setOutput(args.newIndex, output);
-            }
+            },
+            this
           );
         }
         break;
@@ -440,15 +465,18 @@ export class OutputArea extends Widget {
   private _addPromptOverlay() {
     const overlay = document.createElement('div');
     overlay.className = OUTPUT_PROMPT_OVERLAY;
-    overlay.addEventListener('click', () => {
-      this._toggleScrolling.emit();
-    });
+    overlay.addEventListener('click', this._onPromptOverlayClick);
     this.node.appendChild(overlay);
+    this._promptOverlay = overlay;
 
     requestAnimationFrame(() => {
       this._initialize.emit();
     });
   }
+
+  private _onPromptOverlayClick = (): void => {
+    this._toggleScrolling.emit();
+  };
 
   /**
    * Update indices in _displayIdMap in response to element remove from model items
@@ -484,7 +512,7 @@ export class OutputArea extends Widget {
     change: number | void
   ): void {
     const outputLength = Math.min(this.model.length, this._maxNumberOutputs);
-    if (change) {
+    if (change !== undefined) {
       if (change >= this._maxNumberOutputs) {
         // Bail early
         return;
@@ -530,7 +558,7 @@ export class OutputArea extends Widget {
     // to prevent this jitter.
     const rect = this.node.getBoundingClientRect();
     this.node.style.minHeight = `${rect.height}px`;
-    if (this._minHeightTimeout) {
+    if (this._minHeightTimeout !== null) {
       window.clearTimeout(this._minHeightTimeout);
     }
     this._minHeightTimeout = window.setTimeout(() => {
@@ -804,7 +832,7 @@ export class OutputArea extends Widget {
     const msgType = msg.header.msg_type;
     let output: nbformat.IOutput;
     const transient = ((msg.content as any).transient || {}) as JSONObject;
-    const displayId = transient['display_id'] as string;
+    const displayId = Private.getDisplayId(transient);
     let targets: number[] | undefined;
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (msgType) {
@@ -822,7 +850,7 @@ export class OutputArea extends Widget {
       }
       case 'update_display_data':
         output = { ...msg.content, output_type: 'display_data' };
-        targets = this._displayIdMap.get(displayId);
+        targets = displayId ? this._displayIdMap.get(displayId) : undefined;
         if (targets) {
           for (const index of targets) {
             model.set(index, output);
@@ -868,10 +896,16 @@ export class OutputArea extends Widget {
     if (!pages.length) {
       return;
     }
-    const page = JSON.parse(JSON.stringify(pages[0]));
+
+    const page = pages[0] as ReadonlyJSONObject;
+    if (this._pageHandler?.handlePage(page)) {
+      return;
+    }
+
+    const pageData = JSON.parse(JSON.stringify(page));
     const output: nbformat.IOutput = {
       output_type: 'display_data',
-      data: (page as any).data as nbformat.IMimeBundle,
+      data: (pageData as any).data as nbformat.IMimeBundle,
       metadata: {}
     };
     model.add(output);
@@ -915,6 +949,7 @@ export class OutputArea extends Widget {
   private _inputRequested = new Signal<OutputArea, IStdin>(this);
   private _toggleScrolling = new Signal<OutputArea, void>(this);
   private _initialize = new Signal<OutputArea, void>(this);
+  private _promptOverlay: HTMLDivElement | null = null;
   private _outputTracker = new WidgetTracker<Widget>({
     namespace: UUID.uuid4()
   });
@@ -922,6 +957,7 @@ export class OutputArea extends Widget {
   private _inputHistoryScope: 'global' | 'session' = 'global';
   private _pendingInput: boolean = false;
   private _showInputPlaceholder: boolean = true;
+  private _pageHandler: IPageHandler | null = null;
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -1001,6 +1037,11 @@ export namespace OutputArea {
      * Whether to show placeholder text in standard input
      */
     showInputPlaceholder?: boolean;
+
+    /**
+     * Optional handler for pager payloads (`source: page`).
+     */
+    pageHandler?: IPageHandler;
   }
 
   /**
@@ -1482,6 +1523,29 @@ export namespace Stdin {
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * Clone display id indices.
+   */
+  export function cloneDisplayIdMap(
+    displayIdMap: ReadonlyMap<string, readonly number[]>
+  ): Map<string, number[]> {
+    const clone = new Map<string, number[]>();
+    displayIdMap.forEach((indices, displayId) => {
+      clone.set(displayId, [...indices]);
+    });
+    return clone;
+  }
+
+  /**
+   * Get a display id from transient output data.
+   */
+  export function getDisplayId(
+    transient?: ReadonlyPartialJSONObject
+  ): string | undefined {
+    const displayId = transient?.['display_id'];
+    return typeof displayId === 'string' ? displayId : undefined;
+  }
+
   /**
    * Create the node for an InputWidget.
    */

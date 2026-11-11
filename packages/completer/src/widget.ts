@@ -1253,7 +1253,7 @@ export namespace Completer {
       // Get the label text without HTML markup (`<mark>` is the only markup
       // that is allowed in processed items, everything else gets escaped).
       const labelText = item.label.replace(/<\/?mark>/g, '');
-      return labelText.length + (item.type?.length || 0);
+      return labelText.length + (item.type?.length ?? 0);
     }
 
     /**

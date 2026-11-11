@@ -216,7 +216,7 @@ export class GalataInpage implements IGalataInpage {
       const check = async () => {
         checkTimer = null;
         if (await Promise.resolve(fn())) {
-          if (timeoutTimer) {
+          if (timeoutTimer !== null) {
             clearTimeout(timeoutTimer);
           }
           resolve();
@@ -227,10 +227,10 @@ export class GalataInpage implements IGalataInpage {
 
       void check();
 
-      if (timeout) {
+      if (timeout !== undefined && timeout !== 0) {
         timeoutTimer = window.setTimeout(() => {
           timeoutTimer = null;
-          if (checkTimer) {
+          if (checkTimer !== null) {
             clearTimeout(checkTimer);
           }
           reject(new Error('Timed out waiting for condition to be fulfilled.'));

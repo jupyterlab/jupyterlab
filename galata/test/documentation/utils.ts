@@ -107,15 +107,72 @@ export async function positionMouseOver(
   });
 }
 
+/**
+ * A rectangle usable as the `clip` option of `page.screenshot()`.
+ */
+export interface IClip {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * Compute the smallest rectangle enclosing all the given elements.
+ *
+ * Useful to screenshot a widget together with the element it relates to
+ * (for example a completer and the cell it completes) without hard-coding
+ * pixel coordinates.
+ *
+ * @param page The page the elements belong to
+ * @param elements The elements to enclose
+ * @param padding Margin added on each side (default: 8 pixels)
+ * @returns The enclosing rectangle, clipped to the viewport
+ */
+export async function boundsAround(
+  page: Page,
+  elements: Locator[],
+  padding: number = 8
+): Promise<IClip> {
+  const boxes = await Promise.all(
+    elements.map(element => element.boundingBox())
+  );
+  const found = boxes.filter(box => box !== null);
+  if (found.length === 0) {
+    throw new Error('None of the given elements is visible');
+  }
+
+  const viewport = page.viewportSize()!;
+  const left = Math.max(0, Math.min(...found.map(box => box.x)) - padding);
+  const top = Math.max(0, Math.min(...found.map(box => box.y)) - padding);
+  const right = Math.min(
+    viewport.width,
+    Math.max(...found.map(box => box.x + box.width)) + padding
+  );
+  const bottom = Math.min(
+    viewport.height,
+    Math.max(...found.map(box => box.y + box.height)) + padding
+  );
+
+  return { x: left, y: top, width: right - left, height: bottom - top };
+}
+
+/**
+ * Serve the GitHub avatars of extension authors from local copies, so that
+ * screenshots do not depend on github.com. Other users get the Jupyter logo.
+ */
 export async function stubGitHubUserIcons(page: Page): Promise<void> {
-  // stub out github user icons
-  // only first and last icon for now
-  // logic in @jupyterlab/extensionmanager/src/models::ListEntry#translateSearchResult
   await page.route('https://github.com/*.png*', async (route, request) => {
+    const user = path.basename(new URL(request.url()).pathname, '.png');
+    const avatar = path.resolve(__dirname, `./data/github-avatars/${user}.png`);
     return route.fulfill({
       status: 200,
       contentType: 'image/png',
-      body: fs.readFileSync(path.resolve(__dirname, './data/jupyter.png'))
+      body: fs.readFileSync(
+        fs.existsSync(avatar)
+          ? avatar
+          : path.resolve(__dirname, './data/jupyter.png')
+      )
     });
   });
 }
@@ -192,24 +249,4 @@ export async function ensureMathTypeset(page: Page): Promise<void> {
       }
     }
   });
-}
-
-export async function setTerminalTitle(page: Page, title: string) {
-  const terminal = page.locator('.jp-Terminal-body');
-  await terminal.waitFor();
-  await terminal.focus();
-  if (process.platform === 'win32') {
-    const escapedTitle = title.replace(/"/g, '""').replace(/'/g, "''");
-    // `host.UI.RawUI.WindowTitle` works on PowerShell, `title` works on cmd.exe
-    await page.keyboard.type(
-      `powershell -Command "\"$host.UI.RawUI.WindowTitle='${escapedTitle}'\"" 2>nul || title ${escapedTitle}`
-    );
-  } else {
-    // Linux and Mac
-    const escapedTitle = title.replace(/'/g, `'\\''`);
-    await page.keyboard.type(
-      `PROMPT_COMMAND='printf "\\033]0;${escapedTitle}\\007"'`
-    );
-  }
-  await page.keyboard.press('Enter');
 }

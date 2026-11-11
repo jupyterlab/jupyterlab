@@ -5,27 +5,66 @@ import json
 import os
 import os.path as osp
 from itertools import filterfalse
+from typing import TypedDict, overload
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
-def pjoin(*args):
+def pjoin(*args: str | os.PathLike[str]) -> str:
     """Join paths to create a real path."""
     return osp.abspath(osp.join(*args))
 
 
-def _get_default_core_data():
+class JupyterLabCoreData(TypedDict):
+    name: str
+    version: str
+    extensions: dict[str, str]
+    mimeExtensions: dict[str, str]
+    buildDir: str
+    outputDir: str
+    singletonPackages: list[str]
+    linkedPackages: dict[str, str]
+    staticDir: str
+
+
+class CoreData(TypedDict):
+    name: str
+    version: str
+    private: bool
+    license: str
+    scripts: dict[str, str]
+    resolutions: dict[str, str]
+    dependencies: dict[str, str]
+    devDependencies: dict[str, str]
+    engines: dict[str, str]
+    jupyterlab: JupyterLabCoreData
+
+
+def _get_default_core_data() -> CoreData:
     """Get the data for the app template."""
     with open(pjoin(HERE, "staging", "package.json")) as fid:
-        return json.load(fid)
+        data: CoreData = json.load(fid)
+        return data
 
 
-def _is_lab_package(name):
+def _is_lab_package(name: str) -> bool:
     """Whether a package name is in the lab namespace"""
     return name.startswith("@jupyterlab/")
 
 
-def _only_nonlab(collection):
+@overload
+def _only_nonlab(collection: dict[str, str]) -> dict[str, str]:
+    pass
+
+
+@overload
+def _only_nonlab(collection: list[str] | tuple[str, ...]) -> list[str]:
+    pass
+
+
+def _only_nonlab(
+    collection: dict[str, str] | list[str] | tuple[str, ...],
+) -> dict[str, str] | list[str]:
     """Filter a dict/sequence to remove all lab packages
 
     This is useful to take the default values of e.g. singletons and filter
@@ -50,7 +89,7 @@ class CoreConfig:
     def __init__(self):
         self._data = _get_default_core_data()
 
-    def add(self, name, semver, extension=False, mime_extension=False):
+    def add(self, name: str, semver: str, extension: bool = False, mime_extension: bool = False):
         """Remove an extension/singleton.
 
         If neither extension or mimeExtension is True (the default)
@@ -88,7 +127,7 @@ class CoreConfig:
         else:
             data["jupyterlab"]["singletonPackages"].append(name)
 
-    def remove(self, name):
+    def remove(self, name: str):
         """Remove a package/extension.
 
         name: string
@@ -106,7 +145,7 @@ class CoreConfig:
 
         data["jupyterlab"]["singletonPackages"].remove(name)
 
-    def clear_packages(self, lab_only=True):
+    def clear_packages(self, lab_only: bool = True):
         """Clear the packages/extensions."""
         data = self._data
         # Clear all dependencies
@@ -129,19 +168,19 @@ class CoreConfig:
             data["jupyterlab"]["singletonPackages"] = []
 
     @property
-    def extensions(self):
+    def extensions(self) -> dict[str, str]:
         """A dict mapping all extension names to their semver"""
         data = self._data
         return {k: data["resolutions"][k] for k in data["jupyterlab"]["extensions"]}
 
     @property
-    def mime_extensions(self):
+    def mime_extensions(self) -> dict[str, str]:
         """A dict mapping all MIME extension names to their semver"""
         data = self._data
         return {k: data["resolutions"][k] for k in data["jupyterlab"]["mimeExtensions"]}
 
     @property
-    def singletons(self):
+    def singletons(self) -> dict[str, str | None]:
         """A dict mapping all singleton names to their semver"""
         data = self._data
         return {
@@ -149,9 +188,9 @@ class CoreConfig:
         }
 
     @property
-    def static_dir(self):
+    def static_dir(self) -> str:
         return self._data["jupyterlab"]["staticDir"]
 
     @static_dir.setter
-    def static_dir(self, static_dir):
+    def static_dir(self, static_dir: str):
         self._data["jupyterlab"]["staticDir"] = static_dir

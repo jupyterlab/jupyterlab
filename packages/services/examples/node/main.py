@@ -10,7 +10,7 @@ from jupyterlab_server.process_app import ProcessApp
 HERE = osp.dirname(osp.realpath(__file__))
 
 
-def _jupyter_server_extension_points():
+def _jupyter_server_extension_points() -> list[dict[str, str | type[ProcessApp]]]:
     return [{"module": __name__, "app": NodeApp}]
 
 
@@ -18,7 +18,7 @@ class NodeApp(ProcessApp):
     name = __name__
     serverapp_config = {"allow_origin": "*"}
 
-    def get_command(self):
+    def get_command(self) -> tuple[list[str], dict[str, str]]:
         """Get the command and kwargs to run."""
         # Run the node script with command arguments.
         config = {

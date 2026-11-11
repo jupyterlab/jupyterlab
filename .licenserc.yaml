@@ -35,6 +35,7 @@ header:
     - 'galata/test/*/*/*.txt'
     - 'galata/test/documentation/add.py'
     - 'jupyterlab.desktop'
+    - 'jupyterlab/py.typed'
     - 'jupyterlab/staging'
     - 'packages/codemirror/test/foo.grammar'
     - 'packages/extensionmanager-extension/examples/listings/settings/@jupyterlab/extensionmanager-extension/plugin.jupyterlab-settings'

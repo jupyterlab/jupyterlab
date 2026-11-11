@@ -11,7 +11,7 @@ import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ISanitizer } from '@jupyterlab/apputils';
+import { ISanitizer, showErrorMessage } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import type { IRenderMime } from '@jupyterlab/rendermime';
 import {
@@ -51,7 +51,7 @@ const plugin: JupyterFrontEndPlugin<IRenderMimeRegistry> = {
 export default plugin;
 
 const DEBUGGER_OPEN_SOURCE = 'debugger:open-source';
-
+const FILEBROWSER_GO_TO_PATH = 'filebrowser:go-to-path';
 /**
  * Activate the rendermine plugin.
  */
@@ -71,7 +71,8 @@ function activate(
         const path = args['path'] as string | undefined | null;
         const id = args['id'] as string | undefined | null;
         const scope = (args['scope'] as string | undefined | null) || 'server';
-        if (!path) {
+        // An empty path is the server root directory, but not a kernel file.
+        if (typeof path !== 'string' || (scope === 'kernel' && !path)) {
           return;
         }
         if (scope === 'kernel') {
@@ -88,7 +89,18 @@ function activate(
         // First check if the path exists on the server.
         return docManager.services.contents
           .get(path, { content: false })
-          .then(() => {
+          .then(model => {
+            // Directories have no rendered widget: show them in the file browser.
+            if (model.type === 'directory') {
+              if (!app.commands.hasCommand(FILEBROWSER_GO_TO_PATH)) {
+                console.warn(
+                  'Cannot open directory: file browser not available'
+                );
+                return;
+              }
+              return app.commands.execute(FILEBROWSER_GO_TO_PATH, { path });
+            }
+
             // Open the link with the default rendered widget factory,
             // if applicable.
             const factory =
@@ -99,6 +111,12 @@ function activate(
             if (widget && id) {
               widget.setFragment(id);
             }
+          })
+          .catch(error => {
+            if (error?.response?.status === 404) {
+              error.message = trans.__('Could not find path: %1', path);
+            }
+            void showErrorMessage(trans.__('Cannot open'), error);
           });
       },
       describedBy: {

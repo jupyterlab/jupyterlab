@@ -1025,6 +1025,29 @@ describe('@jupyter/notebook', () => {
         expect(widget.mode).toBe('edit');
       });
 
+      it('should not steal focus from outside the notebook when setting mode', async () => {
+        const widget = createActiveWidget();
+        const input = document.createElement('input');
+        document.body.appendChild(input);
+        Widget.attach(widget, document.body);
+        try {
+          await framePromise();
+
+          input.focus();
+          expect(document.activeElement).toBe(input);
+          expect(widget.node.contains(input)).toBe(false);
+          widget.mode = 'edit';
+          expect(document.activeElement).toBe(input);
+          await framePromise();
+
+          expect(widget.mode).toBe('edit');
+          expect(document.activeElement).toBe(input);
+        } finally {
+          widget.dispose();
+          input.remove();
+        }
+      });
+
       it('should emit the `stateChanged` signal', () => {
         const widget = createActiveWidget();
         let called = false;
@@ -1731,6 +1754,9 @@ describe('@jupyter/notebook', () => {
 
       afterEach(() => {
         widget.dispose();
+        // The selection is shared by the whole document, so it must be reset
+        // even when an assertion above threw.
+        window.getSelection()?.removeAllRanges();
       });
 
       describe('mousedown', () => {
@@ -1823,7 +1849,57 @@ describe('@jupyter/notebook', () => {
           expect(blockedMouseUpEvent.defaultPrevented).toBe(true);
         });
 
-        it('should not extend a selection if there is text selected in the output', () => {
+        it('should allow shift-click selection within a single output', () => {
+          const codeCellIndex = 3;
+          widget.activeCellIndex = codeCellIndex;
+
+          // Set a selection in the active cell outputs.
+          const output = (widget.activeCell as CodeCell).outputArea.node;
+          const selection = window.getSelection()!;
+          selection.selectAllChildren(output);
+          // Guard the fixture: without output text there is nothing to extend.
+          expect(selection.toString()).not.toBe('');
+
+          // Shift click within the same output should preserve browser text
+          // selection, which is what `defaultPrevented` being false means here.
+          const mouseDownEvent = new MouseEvent('mousedown', {
+            bubbles: true,
+            cancelable: true,
+            shiftKey: true
+          });
+          output.dispatchEvent(mouseDownEvent);
+          expect(mouseDownEvent.defaultPrevented).toBe(false);
+          expect(widget.activeCellIndex).toBe(codeCellIndex);
+          expect(selected(widget)).toEqual([]);
+        });
+
+        it('should allow shift-click selection across two outputs', () => {
+          const codeCellIndex = 3;
+          widget.activeCellIndex = codeCellIndex;
+
+          // Set a selection in the active cell outputs.
+          const output = (widget.activeCell as CodeCell).outputArea.node;
+          const selection = window.getSelection()!;
+          selection.selectAllChildren(output);
+          // Guard the fixture: without output text there is nothing to extend.
+          expect(selection.toString()).not.toBe('');
+
+          // Shift click in the output of another cell should preserve browser
+          // text selection, which is what `defaultPrevented` being false means.
+          const otherOutput = (widget.widgets[codeCellIndex + 2] as CodeCell)
+            .outputArea.node;
+          const mouseDownEvent = new MouseEvent('mousedown', {
+            bubbles: true,
+            cancelable: true,
+            shiftKey: true
+          });
+          otherOutput.dispatchEvent(mouseDownEvent);
+          expect(mouseDownEvent.defaultPrevented).toBe(false);
+          expect(widget.activeCellIndex).toBe(codeCellIndex);
+          expect(selected(widget)).toEqual([]);
+        });
+
+        it('should extend cell selection when shift-clicking outside selected output', () => {
           const codeCellIndex = 3;
           widget.activeCellIndex = codeCellIndex;
 
@@ -1833,12 +1909,16 @@ describe('@jupyter/notebook', () => {
             (widget.activeCell as CodeCell).outputArea.node
           );
 
-          // Shift click below, which should not extend cells selection.
+          // Shift click below, which should extend cell selection.
           simulate(widget.widgets[codeCellIndex + 2].node, 'mousedown', {
             shiftKey: true
           });
-          expect(widget.activeCellIndex).toBe(codeCellIndex);
-          expect(selected(widget)).toEqual([]);
+          expect(widget.activeCellIndex).toBe(codeCellIndex + 2);
+          expect(selected(widget)).toEqual([
+            codeCellIndex,
+            codeCellIndex + 1,
+            codeCellIndex + 2
+          ]);
         });
 
         it('should leave a markdown cell rendered', async () => {

@@ -31,7 +31,9 @@ test.describe('Workspaces sidebar', () => {
   });
 
   test('Workspaces context menu', async ({ page }) => {
-    // Load the test workspace
+    // Load the test workspace. `filebrowser.open` cannot be used because a
+    // workspace file does not open a document tab for the helper to wait on.
+    // eslint-disable-next-line jupyter/galata-prefer-filebrowser-helper
     await page.dblclick(
       `.jp-DirListing-item span:has-text("${testWorkspace}")`
     );

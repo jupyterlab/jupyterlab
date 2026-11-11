@@ -6,6 +6,8 @@ This module is meant to run JupyterLab in a headless browser, making sure
 the application launches and starts up without errors.
 """
 
+from __future__ import annotations
+
 import asyncio
 import inspect
 import logging
@@ -14,8 +16,10 @@ import shutil
 import subprocess
 import sys
 import time
+from collections.abc import Awaitable, Callable, Mapping, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from os import path as osp
+from typing import Protocol, cast
 
 from jupyter_server.serverapp import aliases, flags
 from jupyter_server.utils import pathname2url, urljoin
@@ -45,7 +49,7 @@ class LogErrorHandler(logging.StreamHandler):
         self.setLevel(logging.ERROR)
         self.errored = False
 
-    def filter(self, record):
+    def filter(self, record: logging.LogRecord) -> bool:
         # Handle known StreamClosedError from Tornado
         # These occur when we forcibly close Websockets or
         # browser connections during the test.
@@ -58,12 +62,27 @@ class LogErrorHandler(logging.StreamHandler):
             return False
         return super().filter(record)
 
-    def emit(self, record):
+    def emit(self, record: logging.LogRecord):
         self.errored = True
         super().emit(record)
 
 
-def run_test(app, func):
+BrowserTest = Callable[[str], Awaitable[None] | int | None]
+
+
+class _Stoppable(Protocol):
+    def stop(self) -> None:
+        raise NotImplementedError
+
+
+class _BrowserTestApp(Protocol):
+    log: logging.Logger
+    display_url: str
+    http_server: _Stoppable
+    io_loop: IOLoop
+
+
+def run_test(app: _BrowserTestApp, func: BrowserTest):
     """Synchronous entry point to run a test function.
     func is a function that accepts an app url as a parameter and returns a result.
     func can be synchronous or asynchronous.  If it is synchronous, it will be run
@@ -72,7 +91,7 @@ def run_test(app, func):
     IOLoop.current().spawn_callback(run_test_async, app, func)
 
 
-async def run_test_async(app, func):
+async def run_test_async(app: _BrowserTestApp, func: BrowserTest):
     """Run a test against the application.
     func is a function that accepts an app url as a parameter and returns a result.
     func can be synchronous or asynchronous.  If it is synchronous, it will be run
@@ -88,14 +107,16 @@ async def run_test_async(app, func):
 
     # The entry URL for browser tests is different in notebook >= 6.0,
     # since that uses a local HTML file to point the user at the app.
-    if hasattr(app, "browser_open_file"):
-        url = urljoin("file:", pathname2url(app.browser_open_file))
+    browser_open_file = getattr(app, "browser_open_file", None)
+    if browser_open_file is not None:
+        url = urljoin("file:", pathname2url(browser_open_file))
     else:
         url = app.display_url
 
     # Allow a synchronous function to be passed in.
+    test: Awaitable[object]
     if inspect.iscoroutinefunction(func):
-        test = func(url)
+        test = cast("Callable[[str], Awaitable[object]]", func)(url)
     else:
         app.log.info("Using thread pool executor to run test")
         loop = asyncio.get_event_loop()
@@ -131,16 +152,20 @@ async def run_test_async(app, func):
         os._exit(result)
 
 
-async def run_async_process(cmd, **kwargs):
+async def run_async_process(
+    cmd: Sequence[str],
+    cwd: str | None = None,
+    env: Mapping[str, str] | None = None,
+) -> tuple[bytes, bytes]:
     """Run an asynchronous command"""
-    proc = await asyncio.create_subprocess_exec(*cmd, **kwargs)
+    proc = await asyncio.create_subprocess_exec(*cmd, cwd=cwd, env=env)
     stdout, stderr = await proc.communicate()
     if proc.returncode != 0:
         raise RuntimeError(str(cmd) + " exited with " + str(proc.returncode))
     return stdout, stderr
 
 
-async def run_browser(url):
+async def run_browser(url: str):
     """Run the browser test and return an exit code."""
     browser = os.environ.get("JLAB_BROWSER_TYPE", "chromium")
     if browser not in {"chromium", "firefox", "webkit"}:
@@ -157,7 +182,7 @@ async def run_browser(url):
     await run_async_process(["node", "browser-test.js", url], cwd=target)
 
 
-def run_browser_sync(url):
+def run_browser_sync(url: str) -> int:
     """Run the browser test and return an exit code."""
     browser = os.environ.get("JLAB_BROWSER_TYPE", "chromium")
     if browser not in {"chromium", "firefox", "webkit"}:
@@ -195,22 +220,26 @@ class BrowserApp(LabApp):
         self.settings["page_config_data"]["exposeAppInBrowser"] = True
         super().initialize_settings()
 
-    def initialize_handlers(self):
-        def func(*args, **kwargs):
+    def initialize_handlers(self) -> None:
+        def func(url: str) -> int:
             return 0
 
+        test_func: BrowserTest = func
         if self.test_browser:
-            func = run_browser_sync if os.name == "nt" else run_browser
+            test_func = run_browser_sync if os.name == "nt" else run_browser
 
-        run_test(self.serverapp, func)
+        if self.serverapp is None:
+            msg = "BrowserApp requires a linked server application"
+            raise RuntimeError(msg)
+        run_test(cast("_BrowserTestApp", self.serverapp), test_func)
         super().initialize_handlers()
 
 
-def _jupyter_server_extension_points():
+def _jupyter_server_extension_points() -> list[dict[str, str | type[BrowserApp]]]:
     return [{"module": __name__, "app": BrowserApp}]
 
 
-def _jupyter_server_extension_paths():
+def _jupyter_server_extension_paths() -> list[dict[str, str]]:
     return [{"module": "jupyterlab.browser_check"}]
 
 
@@ -218,7 +247,7 @@ if __name__ == "__main__":
     skip_options = ["--no-browser-test", "--no-chrome-test"]
     for option in skip_options:
         if option in sys.argv:
-            BrowserApp.test_browser = False
+            BrowserApp.test_browser = False  # type: ignore[assignment]
             sys.argv.remove(option)
 
     BrowserApp.launch_instance()

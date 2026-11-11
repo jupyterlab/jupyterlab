@@ -2,13 +2,15 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { program as commander } from 'commander';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as utils from './utils';
 import { upgradeLock } from './update-staging-lock';
+
+interface IUpdateCoreModeOptions {
+  skipAssets?: boolean;
+}
 
 commander
   .description('Update the core mode package.json and staging assets')
@@ -16,7 +18,7 @@ commander
     '--skip-assets',
     'Skip the staging build - only update core.package.json metadata'
   )
-  .action((options: any) => {
+  .action((options: IUpdateCoreModeOptions) => {
     updateCoreMode(options.skipAssets);
   });
 
@@ -99,9 +101,11 @@ function updateCoreMode(skipAssets: boolean = false): void {
     lock: path.join(staging, 'yarn.lock'),
     cwd: staging
   });
-  utils.run('jlpm dlx yarn-berry-deduplicate --strategy fewerHighest', {
-    cwd: staging
-  });
+  // Pin @yarnpkg/core: 4.9.2 fails to install (yarnpkg/berry#7249)
+  utils.run(
+    'npx -y -p yarn-berry-deduplicate@6.1.3 -p @yarnpkg/core@4.9.1 yarn-berry-deduplicate --strategy fewerHighest',
+    { cwd: staging }
+  );
   utils.run('jlpm', { cwd: staging });
 
   // Build the core assets.

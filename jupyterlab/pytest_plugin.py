@@ -2,17 +2,43 @@
 # Distributed under the terms of the Modified BSD License.
 
 import urllib.parse
+from collections.abc import Awaitable, Mapping
+from pathlib import Path
+from typing import Any, Protocol
 
 import pytest
+from jupyter_server.serverapp import ServerApp
 from jupyter_server.utils import url_path_join
 from jupyterlab_server import LabConfig
 from tornado.escape import url_escape
+from tornado.httpclient import HTTPResponse
 from traitlets import Unicode
 
 from jupyterlab.labapp import LabApp
 
 
-def mkdir(tmp_path, *parts):
+class LabAppFactory(Protocol):
+    def __call__(self, **kwargs: Any) -> LabApp:
+        pass
+
+
+class FetchClient(Protocol):
+    def fetch(self, request: str, **kwargs: Any) -> Awaitable[HTTPResponse]:
+        pass
+
+
+class FetchFixture(Protocol):
+    def __call__(
+        self,
+        *parts: str,
+        headers: dict[str, str] | None = None,
+        params: dict[str, str] | None = None,
+        **kwargs: Any,
+    ) -> Awaitable[HTTPResponse]:
+        pass
+
+
+def mkdir(tmp_path: Path, *parts: str) -> Path:
     path = tmp_path.joinpath(*parts)
     if not path.exists():
         path.mkdir(parents=True)
@@ -27,9 +53,14 @@ workspaces_dir = pytest.fixture(lambda tmp_path: mkdir(tmp_path, "workspaces"))
 
 @pytest.fixture
 def make_lab_app(
-    jp_root_dir, jp_template_dir, app_settings_dir, user_settings_dir, schemas_dir, workspaces_dir
-):
-    def _make_lab_app(**kwargs):
+    jp_root_dir: Path,
+    jp_template_dir: Path,
+    app_settings_dir: Path,
+    user_settings_dir: Path,
+    schemas_dir: Path,
+    workspaces_dir: Path,
+) -> LabAppFactory:
+    def _make_lab_app(**kwargs: Any) -> LabApp:
         class TestLabApp(LabApp):
             base_url = "/lab"
             extension_url = "/lab"
@@ -88,7 +119,7 @@ def make_lab_app(
 
 
 @pytest.fixture
-def labapp(jp_serverapp, make_lab_app):
+def labapp(jp_serverapp: ServerApp, make_lab_app: LabAppFactory) -> LabApp:
     app = make_lab_app()
     app._link_jupyter_server_extension(jp_serverapp)
     app.initialize()
@@ -96,10 +127,17 @@ def labapp(jp_serverapp, make_lab_app):
 
 
 @pytest.fixture
-def fetch_long(http_server_client, jp_auth_header, jp_base_url):
+def fetch_long(
+    http_server_client: FetchClient, jp_auth_header: Mapping[str, str], jp_base_url: str
+) -> FetchFixture:
     """fetch fixture that handles auth, base_url, and path"""
 
-    def client_fetch(*parts, headers=None, params=None, **kwargs):
+    def client_fetch(
+        *parts: str,
+        headers: dict[str, str] | None = None,
+        params: dict[str, str] | None = None,
+        **kwargs: Any,
+    ) -> Awaitable[HTTPResponse]:
         # Handle URL strings
         path_url = url_escape(url_path_join(*parts), plus=False)
         path_url = url_path_join(jp_base_url, path_url)

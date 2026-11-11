@@ -3,6 +3,8 @@
 
 import { galata } from '@jupyterlab/galata';
 import { expect, test } from '@jupyterlab/galata';
+import type { ILabShell } from '@jupyterlab/application';
+import type { RunningSessions } from '@jupyterlab/running';
 
 import type { Locator } from '@playwright/test';
 
@@ -26,6 +28,15 @@ type ShowSourcesCase = {
   showSourcesInMainArea: boolean;
   expectSourcesPanel: boolean;
 };
+
+interface ISavedWorkspace {
+  data: {
+    'layout-restorer:data'?: {
+      left?: Pick<ILabShell.ISideArea, 'widgetStates'>;
+    };
+    'section-mover:layout'?: Record<string, { index?: number }[]>;
+  };
+}
 const showSourcesCases: ShowSourcesCase[] = [
   {
     name: 'showSourcesInMainArea = false',
@@ -79,6 +90,451 @@ test.describe('Sidebars (except debugger)', () => {
         expect(await sidebar.screenshot()).toMatchSnapshot(imageName);
       });
     });
+});
+
+test.describe('Section reordering', () => {
+  const TOGGLE_REORDERING_SELECTOR =
+    '[data-command="apputils:toggle-section-reordering"]';
+
+  async function toggleReordering(
+    page: galata.IJupyterLabPageFixture,
+    title: Locator
+  ): Promise<void> {
+    await title
+      .locator('.lm-AccordionPanel-titleLabel')
+      .click({ button: 'right' });
+    await page.locator(TOGGLE_REORDERING_SELECTOR).click();
+  }
+
+  async function startDrag(
+    page: galata.IJupyterLabPageFixture,
+    title: Locator,
+    target: Locator
+  ): Promise<number> {
+    const handle = await title
+      .locator('.jp-AccordionPanel-dragHandle')
+      .boundingBox();
+    const destination = await target.boundingBox();
+    if (!handle || !destination) {
+      throw new Error('Section headers are not visible');
+    }
+    await title.evaluate(node => {
+      node.addEventListener(
+        'pointerdown',
+        event => {
+          if (event instanceof PointerEvent) {
+            node.setAttribute('data-pointer-id', String(event.pointerId));
+          }
+        },
+        { once: true }
+      );
+    });
+    await page.mouse.move(
+      handle.x + handle.width / 2,
+      handle.y + handle.height / 2
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      destination.x + destination.width / 2,
+      destination.y + destination.height - 1,
+      { steps: 5 }
+    );
+    const pointerId = await title.getAttribute('data-pointer-id');
+    await title.evaluate(node => node.removeAttribute('data-pointer-id'));
+    if (pointerId === null) {
+      throw new Error('The section did not receive a pointer event');
+    }
+    return Number(pointerId);
+  }
+
+  test('should unlock, reorder and lock sections from the context menu', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('jp-running-sessions');
+    const panel = page.locator('#jp-running-sessions .jp-SidePanel-content');
+    const titles = panel.locator('.lm-AccordionPanel-title');
+    const labels = titles.locator('.lm-AccordionPanel-titleLabel');
+    const initialLabels = await labels.allTextContents();
+    const expanded = await titles.first().getAttribute('aria-expanded');
+    await expect(
+      titles.first().locator('.jp-AccordionPanel-dragHandle')
+    ).toBeHidden();
+
+    await toggleReordering(page, titles.first());
+    await expect(
+      titles.first().locator('.jp-AccordionPanel-dragHandle')
+    ).toBeVisible();
+    await startDrag(page, titles.first(), titles.nth(1));
+    await page.mouse.up();
+    await expect(labels.nth(0)).toHaveText(initialLabels[1]);
+    await expect(labels.nth(1)).toHaveText(initialLabels[0]);
+    await expect
+      .poll(() => titles.nth(1).getAttribute('aria-expanded'))
+      .toBe(expanded);
+
+    await titles.first().focus();
+    await page.keyboard.press('ArrowDown');
+    await expect(titles.nth(1)).toBeFocused();
+    await page.keyboard.press('Tab');
+    const body = page.locator(
+      `#${await titles.nth(1).getAttribute('aria-controls')}`
+    );
+    await expect
+      .poll(() => body.evaluate(node => node.contains(document.activeElement)))
+      .toBe(true);
+
+    await toggleReordering(page, titles.first());
+    await expect(
+      titles.first().locator('.jp-AccordionPanel-dragHandle')
+    ).toBeHidden();
+  });
+
+  test('should share the reordering lock between sidebar panels', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('jp-running-sessions');
+    await page.sidebar.openTab('jp-debugger-sidebar');
+    const runningTitle = page
+      .locator('#jp-running-sessions .lm-AccordionPanel-title')
+      .first();
+    const debuggerTitle = page
+      .locator('#jp-debugger-sidebar .lm-AccordionPanel-title')
+      .first();
+    const runningHandle = runningTitle.locator('.jp-AccordionPanel-dragHandle');
+    const debuggerHandle = debuggerTitle.locator(
+      '.jp-AccordionPanel-dragHandle'
+    );
+    await expect(runningHandle).toBeHidden();
+    await expect(debuggerHandle).toBeHidden();
+
+    await toggleReordering(page, runningTitle);
+    await expect(runningHandle).toBeVisible();
+    await expect(debuggerHandle).toBeVisible();
+    await debuggerTitle
+      .locator('.lm-AccordionPanel-titleLabel')
+      .click({ button: 'right' });
+    const toggle = page.locator(TOGGLE_REORDERING_SELECTOR);
+    await expect(toggle).toHaveAttribute('aria-checked', 'true');
+    await toggle.click();
+    await expect(runningHandle).toBeHidden();
+    await expect(debuggerHandle).toBeHidden();
+
+    for (const unlocked of [false, true]) {
+      if (unlocked) {
+        await toggleReordering(page, debuggerTitle);
+        await expect(runningHandle).toBeVisible();
+      }
+      await runningTitle.locator('.lm-AccordionPanel-titleLabel').click();
+      await expect(runningTitle).toHaveAttribute('aria-expanded', 'false');
+      await runningTitle.locator('.lm-AccordionPanel-titleLabel').click();
+      await expect(runningTitle).toHaveAttribute('aria-expanded', 'true');
+    }
+  });
+
+  test('should restore reordered section states after reload', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('jp-running-sessions');
+    const panel = page.locator('#jp-running-sessions .jp-SidePanel-content');
+    const titles = panel.locator('.lm-AccordionPanel-title');
+    const labels = titles.locator('.lm-AccordionPanel-titleLabel');
+    await expect(labels).toContainText(['Open Tabs', 'Kernels']);
+    const initialLabels = await labels.allTextContents();
+    for (const title of await titles.all()) {
+      if ((await title.getAttribute('aria-expanded')) === 'false') {
+        await title.locator('.lm-AccordionPanel-titleLabel').click();
+      }
+    }
+    await toggleReordering(page, titles.first());
+    await startDrag(page, titles.first(), titles.nth(1));
+    await page.mouse.up();
+    const reordered = [
+      initialLabels[1],
+      initialLabels[0],
+      ...initialLabels.slice(2)
+    ];
+    await expect(labels).toHaveText(reordered);
+
+    await Promise.all([
+      page.waitForResponse(response => {
+        if (
+          response.request().method() !== 'PUT' ||
+          !galata.Routes.workspaces.test(response.url())
+        ) {
+          return false;
+        }
+        const workspace = response.request().postDataJSON() as ISavedWorkspace;
+        return (
+          workspace.data['layout-restorer:data']?.left?.widgetStates[
+            'jp-running-sessions'
+          ]?.expansionStates?.[0] === false
+        );
+      }),
+      titles.first().locator('.lm-AccordionPanel-titleLabel').click()
+    ]);
+    await page.reload();
+    await page.sidebar.openTab('jp-running-sessions');
+    await expect(labels).toHaveText(reordered);
+    await expect(titles.first()).toHaveAttribute('aria-expanded', 'false');
+    await expect(titles.nth(1)).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  test('should cancel dragging with Escape when focus is outside the accordion', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('jp-running-sessions');
+    const panel = page.locator('#jp-running-sessions .jp-SidePanel-content');
+    const titles = panel.locator('.lm-AccordionPanel-title');
+    const labels = titles.locator('.lm-AccordionPanel-titleLabel');
+    const initialLabels = await labels.allTextContents();
+    await toggleReordering(page, titles.first());
+    await page.getByRole('menuitem', { name: 'File', exact: true }).focus();
+    await startDrag(page, titles.first(), titles.nth(1));
+    await expect(panel).toHaveClass(/jp-mod-dragging/);
+    await page.keyboard.press('Escape');
+    await expect(panel).not.toHaveClass(/jp-mod-dragging/);
+    await page.mouse.up();
+    await expect(labels).toHaveText(initialLabels);
+    await expect(
+      panel.locator('.jp-AccordionPanel-dropIndicator')
+    ).toBeHidden();
+  });
+
+  for (const eventType of ['pointercancel', 'lostpointercapture']) {
+    test(`should cancel dragging on ${eventType}`, async ({ page }) => {
+      await page.sidebar.openTab('jp-running-sessions');
+      const panel = page.locator('#jp-running-sessions .jp-SidePanel-content');
+      const titles = panel.locator('.lm-AccordionPanel-title');
+      const labels = titles.locator('.lm-AccordionPanel-titleLabel');
+      const initialLabels = await labels.allTextContents();
+      await toggleReordering(page, titles.first());
+      const pointerId = await startDrag(page, titles.first(), titles.nth(1));
+      if (eventType === 'pointercancel') {
+        await panel.dispatchEvent(eventType, { pointerId });
+      } else {
+        await panel.evaluate(
+          (node, id) => node.releasePointerCapture(id),
+          pointerId
+        );
+        await page.mouse.move(0, 0);
+      }
+      await expect(panel).not.toHaveClass(/jp-mod-dragging/);
+      await page.mouse.up();
+      await expect(labels).toHaveText(initialLabels);
+      await expect(
+        panel.locator('.jp-AccordionPanel-dropIndicator')
+      ).toBeHidden();
+    });
+  }
+
+  test('should ignore another pointer while dragging a section', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('jp-running-sessions');
+    const panel = page.locator('#jp-running-sessions .jp-SidePanel-content');
+    const titles = panel.locator('.lm-AccordionPanel-title');
+    const labels = titles.locator('.lm-AccordionPanel-titleLabel');
+    const initialLabels = await labels.allTextContents();
+    await toggleReordering(page, titles.first());
+    const pointerId = await startDrag(page, titles.first(), titles.nth(1));
+    await titles
+      .nth(1)
+      .locator('.jp-AccordionPanel-dragHandle')
+      .dispatchEvent('pointerdown', {
+        pointerId: pointerId + 1,
+        pointerType: 'touch',
+        button: 0
+      });
+    await page.mouse.up();
+    await expect(labels).toHaveText([
+      initialLabels[1],
+      initialLabels[0],
+      ...initialLabels.slice(2)
+    ]);
+    await expect(panel).not.toHaveClass(/jp-mod-dragging/);
+  });
+
+  test('should show the drop indicator below an expanded last section', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('jp-running-sessions');
+    const panel = page.locator('#jp-running-sessions .jp-SidePanel-content');
+    const titles = panel.locator('.lm-AccordionPanel-title');
+    const last = titles.last();
+    if ((await last.getAttribute('aria-expanded')) === 'false') {
+      await last.locator('.lm-AccordionPanel-titleLabel').click();
+    }
+    const body = page.locator(`#${await last.getAttribute('aria-controls')}`);
+    await toggleReordering(page, titles.first());
+    await startDrag(page, titles.first(), body);
+    const indicator = await panel
+      .locator('.jp-AccordionPanel-dropIndicator')
+      .boundingBox();
+    const bodyBox = await body.boundingBox();
+    await page.mouse.up();
+    expect(indicator!.y + indicator!.height).toBeCloseTo(
+      bodyBox!.y + bodyBox!.height,
+      0
+    );
+  });
+
+  test('should handle sections added to an unlocked file browser and recreated accordions', async ({
+    page
+  }) => {
+    const runningTitles = page.locator(
+      '#jp-running-sessions .lm-AccordionPanel-title'
+    );
+    const accordion = page.locator('.jp-FileBrowser-accordion');
+    const titles = accordion.locator('.lm-AccordionPanel-title');
+
+    const moveToFileBrowser = async (name: string): Promise<void> => {
+      await page.sidebar.openTab('jp-running-sessions');
+      await runningTitles.filter({ hasText: name }).click({ button: 'right' });
+      await page
+        .locator('[data-command="apputils:move-section-to"]')
+        .filter({ hasText: 'File Browser' })
+        .click();
+      await page.sidebar.openTab('filebrowser');
+    };
+    await page.sidebar.openTab('jp-running-sessions');
+    await toggleReordering(page, runningTitles.first());
+    await moveToFileBrowser('Open Tabs');
+    await expect(titles).toHaveCount(2);
+    await expect(
+      titles.first().locator('.jp-AccordionPanel-dragHandle')
+    ).toBeVisible();
+    await moveToFileBrowser('Terminals');
+    await expect(titles).toHaveCount(3);
+    await expect(
+      accordion.locator('.jp-AccordionPanel-dragHandle')
+    ).toHaveCount(3);
+    await expect(
+      accordion.locator('.jp-AccordionPanel-dragHandle:visible')
+    ).toHaveCount(3);
+
+    for (const name of ['Open Tabs', 'Terminals']) {
+      await titles.filter({ hasText: name }).click({ button: 'right' });
+      await page.locator('[data-command="apputils:move-section-back"]').click();
+    }
+    await expect(accordion).toHaveCount(0);
+
+    await moveToFileBrowser('Open Tabs');
+    await expect(titles).toHaveCount(2);
+    await expect(
+      titles.first().locator('.jp-AccordionPanel-dragHandle')
+    ).toBeVisible();
+    const labels = titles.locator('.lm-AccordionPanel-titleLabel');
+    const initialLabels = await labels.allTextContents();
+    await startDrag(page, titles.first(), titles.nth(1));
+    await page.mouse.up();
+    await expect(labels).toHaveText([initialLabels[1], initialLabels[0]]);
+  });
+
+  test('should keep the Tab order of reordered file browser sections after reload', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('jp-running-sessions');
+    await page
+      .locator('#jp-running-sessions .lm-AccordionPanel-title')
+      .filter({ hasText: 'Open Tabs' })
+      .click({ button: 'right' });
+    await page
+      .locator('[data-command="apputils:move-section-to"]')
+      .filter({ hasText: 'File Browser' })
+      .click();
+    await page.sidebar.openTab('filebrowser');
+    const titles = page.locator(
+      '.jp-FileBrowser-accordion .lm-AccordionPanel-title'
+    );
+    const labels = titles.locator('.lm-AccordionPanel-titleLabel');
+    await expect(titles).toHaveCount(2);
+    const initialLabels = await labels.allTextContents();
+    await toggleReordering(page, titles.first());
+    const saved = page.waitForResponse(response => {
+      if (
+        response.request().method() !== 'PUT' ||
+        !galata.Routes.workspaces.test(response.url())
+      ) {
+        return false;
+      }
+      const workspace = response.request().postDataJSON() as ISavedWorkspace;
+      return Object.values(workspace.data['section-mover:layout'] ?? {}).some(
+        sections => sections.some(section => section.index === 0)
+      );
+    });
+    await startDrag(page, titles.first(), titles.nth(1));
+    await page.mouse.up();
+    await saved;
+    await page.reload();
+    await page.sidebar.openTab('filebrowser');
+    await expect(labels).toHaveText([initialLabels[1], initialLabels[0]]);
+
+    await titles.first().focus();
+    await page.keyboard.press('Tab');
+    const body = page.locator(
+      `#${await titles.first().getAttribute('aria-controls')}`
+    );
+    await expect
+      .poll(() => body.evaluate(node => node.contains(document.activeElement)))
+      .toBe(true);
+  });
+
+  test('should retain the search section handle when its title changes', async ({
+    page
+  }) => {
+    await page.route(galata.Routes.extensions, route =>
+      route.fulfill({ json: [] })
+    );
+    await page.sidebar.openTab('extensionmanager.main-view');
+    const panel = page.locator('.jp-extensionmanager-view');
+    await toggleReordering(
+      page,
+      panel.locator('.lm-AccordionPanel-title').first()
+    );
+    await panel.locator('.jp-extensionmanager-disclaimer-enable').click();
+    await panel.getByRole('searchbox').fill('jupyter');
+    const search = panel
+      .locator('.lm-AccordionPanel-title')
+      .filter({ hasText: 'Search Results' });
+    await expect(search.locator('.jp-AccordionPanel-dragHandle')).toHaveCount(
+      1
+    );
+    await expect(search.locator('.jp-AccordionPanel-dragHandle')).toBeVisible();
+    await panel.getByRole('searchbox').clear();
+    const discover = panel
+      .locator('.lm-AccordionPanel-title')
+      .filter({ hasText: 'Discover' });
+    await expect(discover.locator('.jp-AccordionPanel-dragHandle')).toHaveCount(
+      1
+    );
+    await expect(
+      discover.locator('.jp-AccordionPanel-dragHandle')
+    ).toBeVisible();
+  });
+
+  test('should acknowledge the warning after its section is reordered', async ({
+    page
+  }) => {
+    await page.route(galata.Routes.extensions, route =>
+      route.fulfill({ json: [] })
+    );
+    await page.sidebar.openTab('extensionmanager.main-view');
+    const panel = page.locator('.jp-extensionmanager-view');
+    const titles = panel.locator('.lm-AccordionPanel-title');
+    const warning = titles.filter({ hasText: 'Warning' });
+    const installed = titles.filter({ hasText: 'Installed' });
+    await toggleReordering(page, warning);
+    await startDrag(page, warning, installed);
+    await page.mouse.up();
+    await expect(titles.first()).toContainText('Installed');
+    await panel.locator('.jp-extensionmanager-disclaimer-enable').click();
+    await expect(warning).toHaveAttribute('aria-expanded', 'false');
+    await expect(installed).toHaveAttribute('aria-expanded', 'true');
+    await expect(titles.filter({ hasText: 'Discover' })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    );
+  });
 });
 
 test.describe('Debugger sidebar', () => {
@@ -206,12 +662,39 @@ test('Check Running Session button on sidebar has correct aria label and role', 
 }) => {
   await page.sidebar.open('left');
   const runningSessionsWidget = page.locator('#jp-running-sessions');
-  const runningSessionsElementAriaLabel =
-    await runningSessionsWidget.getAttribute('aria-label');
-  const runningSessionsElementRole =
-    await runningSessionsWidget.getAttribute('role');
-  expect(runningSessionsElementAriaLabel).toEqual('Running Sessions section');
-  expect(runningSessionsElementRole).toEqual('region');
+  await expect(runningSessionsWidget).toHaveAttribute(
+    'aria-label',
+    'Running Sessions section'
+  );
+  await expect(runningSessionsWidget).toHaveAttribute('role', 'region');
+});
+
+test('Running sessions includes terminals discovered while detached', async ({
+  page
+}) => {
+  await page.sidebar.openTab('jp-running-sessions');
+  const labels = page
+    .getByRole('region', { name: 'Terminals Section', exact: true })
+    .locator('.jp-RunningSessions-itemLabel');
+  await expect(labels).toHaveCount(0);
+
+  await page.evaluate(async () => {
+    const app = window.jupyterapp;
+    const sidebar = Array.from(app.shell.widgets('left')).find(
+      (widget): widget is RunningSessions => widget.id === 'jp-running-sessions'
+    );
+    const section = sidebar?.removeSectionById('Terminals');
+    if (!sidebar || !section) {
+      throw new Error('Terminals section is missing');
+    }
+    try {
+      await app.serviceManager.terminals.startNew();
+    } finally {
+      sidebar.reinsertSection(section);
+    }
+  });
+
+  await expect(labels).toHaveCount(1);
 });
 
 test('Check Extension Manager button on sidebar has correct aria label and role', async ({
@@ -219,12 +702,11 @@ test('Check Extension Manager button on sidebar has correct aria label and role'
 }) => {
   await page.sidebar.open('left');
   const extensionManagerWidget = page.locator('#extensionmanager\\.main-view');
-  const extensionManagerElementAriaLabel =
-    await extensionManagerWidget.getAttribute('aria-label');
-  const extensionManagerElementRole =
-    await extensionManagerWidget.getAttribute('role');
-  expect(extensionManagerElementAriaLabel).toEqual('Extension Manager section');
-  expect(extensionManagerElementRole).toEqual('region');
+  await expect(extensionManagerWidget).toHaveAttribute(
+    'aria-label',
+    'Extension Manager section'
+  );
+  await expect(extensionManagerWidget).toHaveAttribute('role', 'region');
 });
 
 test('Check File Browser button on sidebar has correct aria label and role', async ({
@@ -232,11 +714,11 @@ test('Check File Browser button on sidebar has correct aria label and role', asy
 }) => {
   await page.sidebar.open('left');
   const fileBrowserWidget = page.locator('#filebrowser');
-  const fileBrowserElementAriaLabel =
-    await fileBrowserWidget.getAttribute('aria-label');
-  const fileBrowserElementRole = await fileBrowserWidget.getAttribute('role');
-  expect(fileBrowserElementAriaLabel).toEqual('File Browser Section');
-  expect(fileBrowserElementRole).toEqual('region');
+  await expect(fileBrowserWidget).toHaveAttribute(
+    'aria-label',
+    'File Browser Section'
+  );
+  await expect(fileBrowserWidget).toHaveAttribute('role', 'region');
 });
 
 test('Check Debugger button on sidebar has correct aria label and role', async ({
@@ -244,11 +726,11 @@ test('Check Debugger button on sidebar has correct aria label and role', async (
 }) => {
   await page.sidebar.open('right');
   const debuggerWidget = page.locator('#jp-debugger-sidebar');
-  const debuggerElementAriaLabel =
-    await debuggerWidget.getAttribute('aria-label');
-  const debuggerElementRole = await debuggerWidget.getAttribute('role');
-  expect(debuggerElementAriaLabel).toEqual('Debugger section');
-  expect(debuggerElementRole).toEqual('region');
+  await expect(debuggerWidget).toHaveAttribute(
+    'aria-label',
+    'Debugger section'
+  );
+  await expect(debuggerWidget).toHaveAttribute('role', 'region');
 });
 
 test('Check Table of Contents button on sidebar has correct aria label and role', async ({
@@ -256,12 +738,11 @@ test('Check Table of Contents button on sidebar has correct aria label and role'
 }) => {
   await page.sidebar.open('left');
   const tableOfContentsWidget = page.locator('#table-of-contents');
-  const tableOfContentsElementAriaLabel =
-    await tableOfContentsWidget.getAttribute('aria-label');
-  const tableOfContentsElementRole =
-    await tableOfContentsWidget.getAttribute('role');
-  expect(tableOfContentsElementAriaLabel).toEqual('Table of Contents section');
-  expect(tableOfContentsElementRole).toEqual('region');
+  await expect(tableOfContentsWidget).toHaveAttribute(
+    'aria-label',
+    'Table of Contents section'
+  );
+  await expect(tableOfContentsWidget).toHaveAttribute('role', 'region');
 });
 
 const elementAriaLabels = {
@@ -333,18 +814,20 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
 
       for (let ariaLabel of keyValueArray) {
         const elementLocator = page.locator(`[aria-label='${ariaLabel}']`);
-        let initialState = await elementLocator.getAttribute('aria-expanded');
+        const initialState = await elementLocator.getAttribute('aria-expanded');
 
         await page.activity.keyToElement(`[aria-label='${ariaLabel}']`, 'Tab');
         await page.keyboard.press('Enter');
-        let stateAfter = await elementLocator.getAttribute('aria-expanded');
-
-        expect(initialState).not.toEqual(stateAfter);
+        // Pressing Enter toggles the panel; wait for aria-expanded to flip.
+        await expect
+          .poll(() => elementLocator.getAttribute('aria-expanded'))
+          .not.toBe(initialState);
 
         await page.keyboard.press('Enter');
-        let finalState = await elementLocator.getAttribute('aria-expanded');
-
-        expect(initialState).toEqual(finalState);
+        // Toggling again returns the panel to its initial state.
+        await expect
+          .poll(() => elementLocator.getAttribute('aria-expanded'))
+          .toBe(initialState);
       }
     });
   });
@@ -412,6 +895,17 @@ test.describe('Running Sessions - Move Sections to File Browser', () => {
       .filter({ hasText: 'Terminals' });
     await expect(openTabsHostedTitle).toBeVisible();
     await expect(terminalsHostedTitle).toBeVisible();
+
+    // Keep this layout snapshot focused on hosted section placement. Terminal
+    // labels are covered in terminal tests and can vary with terminal titles.
+    const hostedTerminalLabels = page
+      .locator('.jp-FileBrowser-accordion .jp-RunningSessions-section')
+      .nth(1)
+      .locator('.jp-RunningSessions-itemLabel');
+    await expect(hostedTerminalLabels.first()).toBeVisible();
+    await hostedTerminalLabels.first().evaluate(node => {
+      node.textContent = 'terminals/1';
+    });
 
     // Screenshot with both sections visible in the file browser accordion
     const leftPanel = page.sidebar.getContentPanelLocator('left');

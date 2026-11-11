@@ -40,7 +40,7 @@ export class WidgetLSPAdapterTracker<
 
       this._current = adapter;
       this._currentChanged.emit(adapter);
-    });
+    }, this);
   }
 
   /**

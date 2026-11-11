@@ -14,6 +14,24 @@ export const FOUND_CLASSES = ['cm-string', 'cm-overlay', 'cm-searching'];
 const SELECTED_CLASSES = ['CodeMirror-selectedtext', 'jp-current-match'];
 
 /**
+ * The element that holds a formula typeset by MathJax.
+ */
+const FORMULA_ELEMENT = 'MJX-CONTAINER';
+
+/**
+ * The element of a line break opportunity in a formula typeset by MathJax,
+ * which holds a space that is not part of the formula.
+ */
+const FORMULA_BREAK_ELEMENT = 'MJX-BREAK';
+
+/**
+ * The element of the extender of a stretchy delimiter in a formula typeset
+ * by MathJax, which repeats one character as many times as the length of the
+ * delimiter needs, such as `–` for the line of `\overline`.
+ */
+const FORMULA_EXTENDER_ELEMENT = 'MJX-EXT';
+
+/**
  * HTML search engine
  */
 export class HTMLSearchEngine {
@@ -84,7 +102,10 @@ export class HTMLSearchEngine {
      * unnecessary overhead.
      */
     svg: true,
-    SVG: true
+    SVG: true,
+    // The visually hidden MathML copy that MathJax adds to each formula for
+    // screen readers would count each match in the formula a second time.
+    'MJX-ASSISTIVE-MML': true
   };
 
   /**
@@ -108,17 +129,29 @@ export class HTMLSearchEngine {
     }
 
     const matches: IHTMLSearchMatch[] = [];
+    // Formulas are searched as a whole when the walker reaches their first
+    // text node; `accepted` holds the formula of the node it last accepted.
+    const accepted = { formula: null as Element | null };
     const walker = document.createTreeWalker(rootNode, NodeFilter.SHOW_TEXT, {
       acceptNode: node => {
         // Filter subtrees of UNSUPPORTED_ELEMENTS and nodes that
         // do not contain our search text
+        let formula: Element | null = null;
         let parentElement = node.parentElement!;
         while (parentElement !== rootNode) {
           if (parentElement.nodeName in HTMLSearchEngine.UNSUPPORTED_ELEMENTS) {
             return NodeFilter.FILTER_REJECT;
           }
+          if (parentElement.nodeName === FORMULA_ELEMENT) {
+            formula = parentElement;
+          }
           parentElement = parentElement.parentElement!;
         }
+        if (formula) {
+          accepted.formula = formula;
+          return NodeFilter.FILTER_ACCEPT;
+        }
+        accepted.formula = null;
         return query.test(node.textContent!)
           ? NodeFilter.FILTER_ACCEPT
           : NodeFilter.FILTER_REJECT;
@@ -127,6 +160,18 @@ export class HTMLSearchEngine {
 
     let node: Node | null = null;
     while ((node = walker.nextNode()) !== null) {
+      const formula = accepted.formula;
+      if (formula) {
+        matches.push(...searchFormula(query, formula));
+        // Continue from the last node of the formula, so that the walker
+        // does not visit the other text nodes of the formula
+        let last: Node = formula;
+        while (last.lastChild) {
+          last = last.lastChild;
+        }
+        walker.currentNode = last;
+        continue;
+      }
       // Reset query index
       query.lastIndex = 0;
       let match: RegExpExecArray | null = null;
@@ -219,8 +264,9 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
    */
   clearHighlight(): Promise<void> {
     if (this._currentMatchIndex >= 0) {
-      const hit = this._markNodes[this._currentMatchIndex];
-      hit.classList.remove(...SELECTED_CLASSES);
+      for (const hit of this._markNodes[this._currentMatchIndex]) {
+        hit.classList.remove(...SELECTED_CLASSES);
+      }
     }
     this._currentMatchIndex = -1;
 
@@ -314,36 +360,39 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
 
     const matches = await HTMLSearchEngine.search(query, this.widget.node);
 
-    // Transform the DOM
-    let nodeIdx = 0;
-    while (nodeIdx < matches.length) {
-      let activeNode = matches[nodeIdx].node;
-      let parent = activeNode.parentNode!;
-
-      let subMatches = [matches[nodeIdx]];
-      while (
-        ++nodeIdx < matches.length &&
-        matches[nodeIdx].node === activeNode
-      ) {
-        subMatches.unshift(matches[nodeIdx]);
+    // Transform the DOM: wrap each part of each match in a mark element. A
+    // match in a formula can have parts in several text nodes.
+    const partsByNode = new Map<
+      Text,
+      { match: number; part: IHTMLSearchMatch }[]
+    >();
+    matches.forEach((match, index) => {
+      for (const part of match.parts ?? [match]) {
+        let parts = partsByNode.get(part.node);
+        if (!parts) {
+          parts = [];
+          partsByNode.set(part.node, parts);
+        }
+        parts.push({ match: index, part });
       }
-
-      const markedNodes = subMatches.map(match => {
+    });
+    this._markNodes = matches.map(() => []);
+    for (const [activeNode, parts] of partsByNode) {
+      const parent = activeNode.parentNode!;
+      // Replace from last to first to maintain the positions of the parts.
+      for (let i = parts.length - 1; i >= 0; i--) {
+        const { match, part } = parts[i];
         // TODO: support tspan for svg when svg support is added
         const markedNode = document.createElement('mark');
         markedNode.classList.add(...FOUND_CLASSES);
-        markedNode.textContent = match.text;
+        markedNode.textContent = part.text;
 
-        const newNode = activeNode.splitText(match.position);
-        newNode.textContent = newNode.textContent!.slice(match.text.length);
+        const newNode = activeNode.splitText(part.position);
+        newNode.textContent = newNode.textContent!.slice(part.text.length);
         parent.insertBefore(markedNode, newNode);
-        return markedNode;
-      });
-
-      // Insert node in reverse order as we replace from last to first
-      // to maintain match position.
-      for (let i = markedNodes.length - 1; i >= 0; i--) {
-        this._markNodes.push(markedNodes[i]);
+        // A match has at most one part per text node, and the text nodes come
+        // in document order, so its marks stay in document order.
+        this._markNodes[match].push(markedNode);
       }
     }
 
@@ -367,11 +416,15 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
    */
   async endQuery(): Promise<void> {
     this._mutationObserver.disconnect();
-    this._markNodes.forEach(el => {
-      const parent = el.parentNode!;
-      parent.replaceChild(document.createTextNode(el.textContent!), el);
-      parent.normalize();
-    });
+    for (const marks of this._markNodes) {
+      for (const el of marks) {
+        const parent = el.parentNode;
+        if (parent) {
+          parent.replaceChild(document.createTextNode(el.textContent!), el);
+          parent.normalize();
+        }
+      }
+    }
     this._markNodes = [];
     this._matches = [];
     this._currentMatchIndex = -1;
@@ -387,8 +440,9 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
     if (this._currentMatchIndex === -1) {
       this._currentMatchIndex = reverse ? this.matches.length - 1 : 0;
     } else {
-      const hit = this._markNodes[this._currentMatchIndex];
-      hit.classList.remove(...SELECTED_CLASSES);
+      for (const hit of this._markNodes[this._currentMatchIndex]) {
+        hit.classList.remove(...SELECTED_CLASSES);
+      }
 
       this._currentMatchIndex = reverse
         ? this._currentMatchIndex - 1
@@ -409,13 +463,15 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
       this._currentMatchIndex >= 0 &&
       this._currentMatchIndex < this._matches.length
     ) {
-      const hit = this._markNodes[this._currentMatchIndex];
-      hit.classList.add(...SELECTED_CLASSES);
-      // If not in view, scroll just enough to see it
-      if (!elementInViewport(hit)) {
-        hit.scrollIntoView(reverse);
+      const hits = this._markNodes[this._currentMatchIndex];
+      for (const hit of hits) {
+        hit.classList.add(...SELECTED_CLASSES);
       }
-      hit.focus();
+      // If not in view, scroll just enough to see it
+      if (!elementInViewport(hits[0])) {
+        hits[0].scrollIntoView(reverse);
+      }
+      hits[0].focus();
 
       return this._matches[this._currentMatchIndex];
     } else {
@@ -440,7 +496,8 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   private _mutationObserver: MutationObserver = new MutationObserver(
     this._onWidgetChanged.bind(this)
   );
-  private _markNodes = new Array<HTMLSpanElement>();
+  // The mark elements of each match, in the order of the matches
+  private _markNodes = new Array<HTMLElement[]>();
 }
 
 function elementInViewport(el: HTMLElement): boolean {
@@ -453,4 +510,160 @@ function elementInViewport(el: HTMLElement): boolean {
     boundingClientRect.right <=
       (window.innerWidth || document.documentElement.clientWidth)
   );
+}
+
+/**
+ * Search the characters of a formula typeset by MathJax as one text.
+ *
+ * MathJax puts each character of a formula in its own text node, so `10`
+ * spans two nodes, and it draws letters as mathematical symbols, such as
+ * 𝑥 for x. The text of the formula joins its characters in the form typed
+ * in a query (see `normalizeFormulaText`), without the hidden MathML copy,
+ * the spaces of line break opportunities and the repeated characters of
+ * stretchy delimiters. A match that spans several text nodes lists them in
+ * `parts`.
+ *
+ * Each character is normalized on its own, so that a match covers whole
+ * characters of the formula: a query for x covers 𝑥, and a query for one
+ * dot covers the whole `…`. Matches that would cover the same character,
+ * such as the three dots of `…`, are joined into one, so that no character
+ * is marked twice.
+ *
+ * @param query - Regular expression to search, with the global flag
+ * @param formula - The `mjx-container` element of the formula
+ * @returns The list of matches
+ */
+function searchFormula(query: RegExp, formula: Element): IHTMLSearchMatch[] {
+  // One unit per character (code point) of the text nodes of the formula,
+  // with its range in its text node (`from`, `to`) and in `text` (`start`,
+  // `end`).
+  const units: {
+    node: Text;
+    from: number;
+    to: number;
+    start: number;
+    end: number;
+  }[] = [];
+  let text = '';
+  const walker = document.createTreeWalker(formula, NodeFilter.SHOW_TEXT, {
+    acceptNode: node => {
+      let parentElement = node.parentElement;
+      while (parentElement && parentElement !== formula) {
+        if (
+          parentElement.nodeName in HTMLSearchEngine.UNSUPPORTED_ELEMENTS ||
+          parentElement.nodeName === FORMULA_BREAK_ELEMENT ||
+          parentElement.nodeName === FORMULA_EXTENDER_ELEMENT
+        ) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        parentElement = parentElement.parentElement;
+      }
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  let node: Node | null;
+  while ((node = walker.nextNode()) !== null) {
+    let from = 0;
+    for (const character of (node as Text).data) {
+      const to = from + character.length;
+      units.push({ node: node as Text, from, to, start: 0, end: 0 });
+      from = to;
+    }
+  }
+  // The normalized form of a function application depends on the character
+  // after it, so pass the next character too
+  const characterOf = (unit: (typeof units)[number] | undefined) =>
+    unit ? unit.node.data.slice(unit.from, unit.to) : '';
+  units.forEach((unit, index) => {
+    unit.start = text.length;
+    text += normalizeFormulaText(
+      characterOf(unit),
+      characterOf(units[index + 1])
+    );
+    unit.end = text.length;
+  });
+
+  // The first and last unit of each match
+  const ranges: { first: number; last: number }[] = [];
+  // Matches come in order, so the units before `cursor` stay behind
+  let cursor = 0;
+  query.lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = query.exec(text)) !== null) {
+    const start = match.index;
+    const end = start + match[0].length;
+    if (start === end) {
+      // Step over an empty match, which would otherwise repeat forever
+      query.lastIndex += 1;
+      continue;
+    }
+    while (cursor < units.length && units[cursor].end <= start) {
+      cursor += 1;
+    }
+    const first = cursor;
+    let last = first;
+    while (last + 1 < units.length && units[last + 1].start < end) {
+      last += 1;
+    }
+    const previous = ranges[ranges.length - 1];
+    if (previous && first <= previous.last) {
+      previous.last = Math.max(previous.last, last);
+    } else {
+      ranges.push({ first, last });
+    }
+  }
+
+  return ranges.map(({ first, last }) => {
+    // One part per text node, from the first unit of the match in that node
+    // to its last
+    const parts: IHTMLSearchMatch[] = [];
+    for (let index = first; index <= last; index++) {
+      const unit = units[index];
+      const part = parts[parts.length - 1];
+      if (part && part.node === unit.node) {
+        parts[parts.length - 1] = {
+          ...part,
+          text: unit.node.data.slice(part.position, unit.to)
+        };
+      } else {
+        parts.push({
+          text: unit.node.data.slice(unit.from, unit.to),
+          position: unit.from,
+          node: unit.node
+        });
+      }
+    }
+    return parts.length === 1
+      ? parts[0]
+      : {
+          text: parts.map(part => part.text).join(''),
+          position: parts[0].position,
+          node: parts[0].node,
+          parts
+        };
+  });
+}
+
+/**
+ * Turn a character of a formula into the characters typed in a query.
+ *
+ * NFKC turns mathematical symbols into letters and digits (𝑥 into x, ℝ into
+ * R). The minus sign, the asterisk operator and the prime become their ASCII
+ * forms. MathJax adds an invisible function application after a function
+ * name, such as `sin`. It becomes a space when a letter or a digit follows,
+ * so that the text of `\sin x` is `sin x`, and is dropped otherwise, so that
+ * the text of `\sin(x)` is `sin(x)`.
+ *
+ * @param character - The character to normalize
+ * @param next - The character that follows it in the formula, if any
+ */
+function normalizeFormulaText(character: string, next = ''): string {
+  if (character === '\u2061') {
+    return /^[\p{L}\p{N}]/u.test(normalizeFormulaText(next)) ? ' ' : '';
+  }
+  return character
+    .normalize('NFKC')
+    .replace(/\u2212/g, '-')
+    .replace(/\u2217/g, '*')
+    .replace(/\u2032/g, "'");
 }

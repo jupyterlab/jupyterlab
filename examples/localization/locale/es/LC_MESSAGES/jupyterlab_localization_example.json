@@ -1,0 +1,17 @@
+{
+  "": {
+    "domain": "jupyterlab_localization_example",
+    "language": "es",
+    "plural_forms": "nplurals=2; plural=(n != 1);"
+  },
+  "Localization example": ["Ejemplo de localización"],
+  "This example uses its own translation catalog.": [
+    "Este ejemplo usa su propio catálogo de traducciones."
+  ],
+  "Language": ["Idioma"],
+  "Hello, %1!": ["¡Hola, %1!"],
+  "There is %1 item": ["Hay %1 elemento", "Hay %1 elementos"],
+  "Remove item": ["Quitar elemento"],
+  "Add item": ["Añadir elemento"],
+  "Unable to load translations.": ["No se pudieron cargar las traducciones."]
+}

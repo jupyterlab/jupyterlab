@@ -3,7 +3,11 @@
 
 import type { SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
-import type { IOutputAreaModel, Stdin } from '@jupyterlab/outputarea';
+import type {
+  IOutputAreaModel,
+  IPageHandler,
+  Stdin
+} from '@jupyterlab/outputarea';
 import {
   OutputArea,
   OutputAreaModel,
@@ -16,6 +20,8 @@ import {
   DEFAULT_OUTPUTS,
   defaultRenderMime
 } from '@jupyterlab/rendermime/lib/testutils';
+import { UUID } from '@lumino/coreutils';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
@@ -26,6 +32,67 @@ import { simulate } from 'simulate-event';
 const rendermime = defaultRenderMime();
 
 const CODE = 'print("hello")';
+
+function createResolvedFuture(): Kernel.IShellFuture<
+  KernelMessage.IExecuteRequestMsg,
+  KernelMessage.IExecuteReplyMsg
+> {
+  const done = Promise.resolve(
+    KernelMessage.createMessage<KernelMessage.IExecuteReplyMsg>({
+      channel: 'shell',
+      msgType: 'execute_reply',
+      session: UUID.uuid4(),
+      content: {
+        status: 'ok',
+        execution_count: 1,
+        user_expressions: {},
+        payload: []
+      }
+    })
+  );
+  return {
+    done,
+    onIOPub: () => undefined,
+    onReply: () => undefined,
+    onStdin: () => undefined,
+    dispose: () => undefined
+  } as unknown as Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  >;
+}
+
+function createUpdateDisplayDataMessage(
+  data: Record<string, string>,
+  displayId: string
+): KernelMessage.IUpdateDisplayDataMsg {
+  return KernelMessage.createMessage<KernelMessage.IUpdateDisplayDataMsg>({
+    channel: 'iopub',
+    msgType: 'update_display_data',
+    session: UUID.uuid4(),
+    content: {
+      data,
+      metadata: {},
+      transient: { display_id: displayId }
+    }
+  });
+}
+
+function createDisplayDataMessage(
+  data: Record<string, string>,
+  displayId: string
+): KernelMessage.IDisplayDataMsg {
+  return KernelMessage.createMessage<KernelMessage.IDisplayDataMsg>({
+    channel: 'iopub',
+    msgType: 'display_data',
+    session: UUID.uuid4(),
+    content: {
+      data,
+      metadata: {},
+      transient: { display_id: displayId }
+    }
+  });
+}
 
 class LogOutputArea extends OutputArea {
   methods: string[] = [];
@@ -412,6 +479,114 @@ describe('outputarea/widget', () => {
       });
     });
 
+    describe('#reattachFuture()', () => {
+      it('should keep display id targets when reattaching to the same output area', () => {
+        const displayId = 'display-id';
+        const initialData = { 'text/plain': 'before' };
+        const updatedData = { 'text/plain': 'after' };
+        const future = createResolvedFuture();
+
+        widget.future = future;
+        void future.onIOPub(createDisplayDataMessage(initialData, displayId));
+        const detachedFuture = widget.detachFuture();
+        expect(detachedFuture).not.toBeNull();
+        if (!detachedFuture) {
+          throw new Error('Expected a detached future.');
+        }
+        expect(detachedFuture).toBe(future);
+        widget.reattachFuture(detachedFuture);
+        void future.onIOPub(
+          createUpdateDisplayDataMessage(updatedData, displayId)
+        );
+
+        expect(model.get(0).data).toEqual(updatedData);
+        expect(model.toJSON()[0]).not.toHaveProperty('transient');
+      });
+
+      it('should use captured display id targets for restored JSON outputs', () => {
+        const displayId = 'display-id';
+        const initialData = { 'text/plain': 'before' };
+        const updatedData = { 'text/plain': 'after' };
+        const future = createResolvedFuture();
+
+        widget.future = future;
+        void future.onIOPub(createDisplayDataMessage(initialData, displayId));
+        const restoredOutputs = model.toJSON();
+        const displayIdMap = widget.displayIdMap;
+        const detachedFuture = widget.detachFuture();
+        expect(detachedFuture).not.toBeNull();
+        if (!detachedFuture) {
+          throw new Error('Expected a detached future.');
+        }
+        expect(detachedFuture).toBe(future);
+
+        widget.dispose();
+        model.dispose();
+        model = new OutputAreaModel({ trusted: true });
+        widget = new LogOutputArea({ rendermime, model });
+        model.fromJSON(restoredOutputs);
+
+        widget.reattachFuture(detachedFuture, displayIdMap);
+        void future.onIOPub(
+          createUpdateDisplayDataMessage(updatedData, displayId)
+        );
+
+        expect(model.get(0).data).toEqual(updatedData);
+      });
+    });
+
+    describe('#displayIdMap', () => {
+      it('should copy display id targets on get and set', () => {
+        const targets = [0];
+        const displayIdMap = new Map([['display-id', targets]]);
+        widget.displayIdMap = displayIdMap;
+        const captured = widget.displayIdMap;
+
+        targets.push(1);
+        displayIdMap.clear();
+        expect(widget.displayIdMap.get('display-id')).toEqual([0]);
+
+        widget.displayIdMap = new Map();
+        expect(captured.get('display-id')).toEqual([0]);
+      });
+    });
+
+    it('should delegate page payloads to an optional page handler', () => {
+      widget.dispose();
+      model.dispose();
+
+      model = new OutputAreaModel({ trusted: true });
+      const receivedPayloads: ReadonlyJSONObject[] = [];
+      const pageHandler: IPageHandler = {
+        handlePage: payload => {
+          receivedPayloads.push(payload);
+          return true;
+        }
+      };
+      widget = new LogOutputArea({ rendermime, model, pageHandler });
+
+      const message = {
+        content: {
+          status: 'ok',
+          payload: [
+            {
+              source: 'page',
+              data: { 'text/plain': 'pager output' }
+            }
+          ]
+        }
+      } as unknown as KernelMessage.IExecuteReplyMsg;
+
+      const testWidget = widget as unknown as {
+        _onExecuteReply: (msg: KernelMessage.IExecuteReplyMsg) => void;
+      };
+      testWidget._onExecuteReply(message);
+
+      expect(receivedPayloads).toHaveLength(1);
+      expect(receivedPayloads[0]['source']).toBe('page');
+      expect(model.length).toBe(0);
+    });
+
     describe('#onModelChanged()', () => {
       it('should handle an added output', () => {
         widget.model.clear();
@@ -433,7 +608,7 @@ describe('outputarea/widget', () => {
         expect(widget.widgets.length).toBe(0);
       });
 
-      it('should follow changes to initial stdout stream', () => {
+      it('should follow changes to initial stdout stream', async () => {
         model = new OutputAreaModel({
           values: [DEFAULT_OUTPUTS[0]],
           trusted: true
@@ -443,6 +618,9 @@ describe('outputarea/widget', () => {
         const streamOutput = 'nctvjd745fdk56';
         expect(widget.node.innerHTML).not.toContain(streamOutput);
         widget.model.appendStreamOutput(streamOutput);
+        // Rendering is asynchronous (the renderer defers work off the initial
+        // task), so wait for it to settle before inspecting the DOM.
+        await new Promise(resolve => setTimeout(resolve, 0));
         expect(widget.node.innerHTML).toContain(streamOutput);
       });
 

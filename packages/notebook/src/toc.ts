@@ -244,8 +244,10 @@ export class NotebookToCModel extends TableOfContentsModel<
    */
   protected async getHeadings(): Promise<INotebookHeading[] | null> {
     const cells = this.widget.content.widgets;
+    const currentCells = new Set(cells);
     const headings: INotebookHeading[] = [];
     const documentLevels = new Array<number>();
+    const cellToHeadingIndex = new WeakMap<Cell, number>();
 
     // Generate headings by iterating through all notebook cells...
     for (let i = 0; i < cells.length; i++) {
@@ -306,12 +308,15 @@ export class NotebookToCModel extends TableOfContentsModel<
       }
 
       if (headings.length > 0) {
-        this._cellToHeadingIndex.set(cell, headings.length - 1);
-      } else {
-        // If no headings were found, remove the cell from the map
-        this._cellToHeadingIndex.delete(cell);
+        cellToHeadingIndex.set(cell, headings.length - 1);
       }
     }
+
+    this._cellToHeadingIndex = cellToHeadingIndex;
+    this._runningCells = this._runningCells.filter(cell =>
+      currentCells.has(cell)
+    );
+    this._errorCells = this._errorCells.filter(cell => currentCells.has(cell));
     this.updateRunningStatus(headings);
     return Promise.resolve(headings);
   }
@@ -329,7 +334,8 @@ export class NotebookToCModel extends TableOfContentsModel<
   ): boolean {
     return (
       super.isHeadingEqual(heading1, heading2) &&
-      heading1.cellRef === heading2.cellRef
+      heading1.cellRef === heading2.cellRef &&
+      heading1.isRunning === heading2.isRunning
     );
   }
 
@@ -463,11 +469,15 @@ export class NotebookToCModel extends TableOfContentsModel<
   }
 
   protected updateRunningStatus(headings: INotebookHeading[]): void {
+    headings.forEach(heading => {
+      heading.isRunning = RunningStatus.Idle;
+    });
+
     // Update isRunning
     this._runningCells.forEach((cell, index) => {
       const headingIndex = this._cellToHeadingIndex.get(cell);
       if (headingIndex !== undefined) {
-        const heading = this.headings[headingIndex];
+        const heading = headings[headingIndex];
         // Running is prioritized over Scheduled, so if a heading is
         // running don't change status
         if (heading.isRunning !== RunningStatus.Running) {
@@ -480,7 +490,7 @@ export class NotebookToCModel extends TableOfContentsModel<
     this._errorCells.forEach((cell, index) => {
       const headingIndex = this._cellToHeadingIndex.get(cell);
       if (headingIndex !== undefined) {
-        const heading = this.headings[headingIndex];
+        const heading = headings[headingIndex];
         // Running and Scheduled are prioritized over Error, so only if
         // a heading is idle will it be set to Error
         if (heading.isRunning === RunningStatus.Idle) {
@@ -630,7 +640,13 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
             return;
           }
 
-          const el = headingToElement.get(heading);
+          let el = headingToElement.get(heading);
+          if (!el || !heading.cellRef.node.contains(el)) {
+            // A rendered Markdown cell can replace its heading elements without
+            // changing the ToC entry. Refresh the mapping before scrolling.
+            await findHeadingElement(cell);
+            el = headingToElement.get(heading);
+          }
           if (el) {
             // We generally want to scroll to particular heading
             // because any cell can have multiple headings...
@@ -699,47 +715,63 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       }
     };
 
-    const findHeadingElement = (cell: Cell): Promise<void> => {
-      return Promise.all(
-        model.getCellHeadings(cell).map(async heading => {
+    // For a cell without headings, `getCellHeadings` returns the headings of
+    // the section the cell is in, which belong to another cell.
+    const getOwnHeadings = (cell: Cell) =>
+      model.getCellHeadings(cell).filter(heading => heading.cellRef === cell);
+
+    const findHeadingElement = async (cell: Cell): Promise<void> => {
+      const headings = getOwnHeadings(cell);
+      const attribute =
+        (this.sanitizer.allowNamedProperties ?? false)
+          ? 'id'
+          : 'data-jupyter-id';
+      const selectors = await Promise.all(
+        headings.map(async heading => {
           const elementId = await getIdForHeading(
             heading,
             this.parser!,
             this.sanitizer
           );
-
-          const attribute =
-            (this.sanitizer.allowNamedProperties ?? false)
-              ? 'id'
-              : 'data-jupyter-id';
-          const selector = elementId
+          return elementId
             ? `h${heading.level}[${attribute}="${CSS.escape(elementId)}"]`
             : `h${heading.level}`;
-
-          if (heading.outputIndex !== undefined) {
-            // Code cell
-            headingToElement.set(
-              heading,
-              TableOfContentsUtils.addPrefix(
-                (heading.cellRef as CodeCell).outputArea.widgets[
-                  heading.outputIndex
-                ].node,
-                selector,
-                heading.prefix ?? ''
-              )
-            );
-          } else {
-            headingToElement.set(
-              heading,
-              TableOfContentsUtils.addPrefix(
-                heading.cellRef.node,
-                selector,
-                heading.prefix ?? ''
-              )
-            );
-          }
         })
-      ).then(() => undefined);
+      );
+
+      const current = getOwnHeadings(cell);
+      if (
+        current.length !== headings.length ||
+        current.some((heading, i) => heading !== headings[i])
+      ) {
+        // The headings changed in the meantime and will be mapped again
+        return;
+      }
+
+      // Update the numbering in one synchronous step, so that calls for the
+      // same cell cannot interleave. `addPrefix` numbers the first matching
+      // element without a number, which keeps identical headings apart
+      // only if the cell's numbering was cleared first.
+      TableOfContentsUtils.clearNumbering(cell.node);
+      headings.forEach((heading, i) => {
+        // Headings in code cell outputs are looked up in their output
+        const container =
+          heading.outputIndex === undefined
+            ? heading.cellRef.node
+            : (heading.cellRef as CodeCell).outputArea.widgets[
+                heading.outputIndex
+              ]?.node;
+        headingToElement.set(
+          heading,
+          container
+            ? TableOfContentsUtils.addPrefix(
+                container,
+                selectors[i],
+                heading.prefix ?? ''
+              )
+            : null
+        );
+      });
     };
 
     const onHeadingsChanged = (model: NotebookToCModel) => {
@@ -751,6 +783,13 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
 
       // Create a new mapping
       headingToElement = new WeakMap<INotebookHeading, Element | null>();
+
+      for (const cell of widget.content.widgets) {
+        if (cell instanceof MarkdownCell) {
+          // No-op if already connected
+          cell.renderedChanged.connect(onMarkdownCellRendered);
+        }
+      }
 
       return Promise.all(
         widget.content.widgets.map(cell => findHeadingElement(cell))
@@ -800,6 +839,14 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       }
     };
 
+    const onMarkdownCellRendered = (cell: MarkdownCell, rendered: boolean) => {
+      if (rendered) {
+        // Rendering replaces the heading elements: map the new ones,
+        // which also restores their numbering.
+        findHeadingElement(cell).catch(console.warn);
+      }
+    };
+
     void widget.context.ready.then(() => {
       onHeadingsChanged(model)?.catch(console.warn);
 
@@ -816,6 +863,11 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
         widget.content.cellInViewportChanged.disconnect(
           onCellInViewportChanged
         );
+        for (const cell of widget.content.widgets) {
+          if (cell instanceof MarkdownCell) {
+            cell.renderedChanged.disconnect(onMarkdownCellRendered);
+          }
+        }
       });
     });
 

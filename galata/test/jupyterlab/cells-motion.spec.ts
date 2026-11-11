@@ -24,35 +24,27 @@ test('Move down a cell', async ({ page }) => {
   const content = await page
     .locator(`${cellSelector} >> nth=2`)
     .allTextContents();
-  await page
-    .locator(`${cellSelector} >> nth=2 >> .jp-InputArea-prompt`)
-    .click();
+  await page.notebook.selectCells(2);
 
   await page.keyboard.press('Control+Shift+ArrowDown');
 
   await expect(page.locator(`${cellSelector} >> nth=3`)).toHaveClass(
     /jp-mod-active/
   );
-  expect(
-    await page.locator(`${cellSelector} >> nth=3`).allTextContents()
-  ).toEqual(content);
+  await expect(page.locator(`${cellSelector} >> nth=3`)).toHaveText(content);
 });
 
 test('Move up a cell', async ({ page }) => {
   const content = await page
     .locator(`${cellSelector} >> nth=2`)
     .allTextContents();
-  await page
-    .locator(`${cellSelector} >> nth=2 >> .jp-InputArea-prompt`)
-    .click();
+  await page.notebook.selectCells(2);
   await page.keyboard.press('Control+Shift+ArrowUp');
 
   await expect(page.locator(`${cellSelector} >> nth=1`)).toHaveClass(
     /jp-mod-active/
   );
-  expect(
-    await page.locator(`${cellSelector} >> nth=1`).allTextContents()
-  ).toEqual(content);
+  await expect(page.locator(`${cellSelector} >> nth=1`)).toHaveText(content);
 });
 
 test('Move down two cells with first active', async ({ page }) => {
@@ -63,9 +55,7 @@ test('Move down two cells with first active', async ({ page }) => {
     .locator(`${cellSelector} >> nth=3`)
     .allTextContents();
 
-  await page
-    .locator(`${cellSelector} >> nth=3 >> .jp-InputArea-prompt`)
-    .click();
+  await page.notebook.selectCells(3);
 
   await page.keyboard.press('Shift+ArrowUp');
   await page.keyboard.press('Control+Shift+ArrowDown');
@@ -76,12 +66,8 @@ test('Move down two cells with first active', async ({ page }) => {
   await expect(page.locator(`${cellSelector} >> nth=4`)).toHaveClass(
     /jp-mod-selected/
   );
-  expect(
-    await page.locator(`${cellSelector} >> nth=3`).allTextContents()
-  ).toEqual(content1);
-  expect(
-    await page.locator(`${cellSelector} >> nth=4`).allTextContents()
-  ).toEqual(content2);
+  await expect(page.locator(`${cellSelector} >> nth=3`)).toHaveText(content1);
+  await expect(page.locator(`${cellSelector} >> nth=4`)).toHaveText(content2);
 });
 
 test('Move up two cells with first active', async ({ page }) => {
@@ -92,9 +78,7 @@ test('Move up two cells with first active', async ({ page }) => {
     .locator(`${cellSelector} >> nth=3`)
     .allTextContents();
 
-  await page
-    .locator(`${cellSelector} >> nth=3 >> .jp-InputArea-prompt`)
-    .click();
+  await page.notebook.selectCells(3);
 
   await page.keyboard.press('Shift+ArrowUp');
   await page.keyboard.press('Control+Shift+ArrowUp');
@@ -105,12 +89,8 @@ test('Move up two cells with first active', async ({ page }) => {
   await expect(page.locator(`${cellSelector} >> nth=2`)).toHaveClass(
     /jp-mod-selected/
   );
-  expect(
-    await page.locator(`${cellSelector} >> nth=1`).allTextContents()
-  ).toEqual(content1);
-  expect(
-    await page.locator(`${cellSelector} >> nth=2`).allTextContents()
-  ).toEqual(content2);
+  await expect(page.locator(`${cellSelector} >> nth=1`)).toHaveText(content1);
+  await expect(page.locator(`${cellSelector} >> nth=2`)).toHaveText(content2);
 });
 
 test('Move down two cells with last active', async ({ page }) => {
@@ -121,9 +101,7 @@ test('Move down two cells with last active', async ({ page }) => {
     .locator(`${cellSelector} >> nth=3`)
     .allTextContents();
 
-  await page
-    .locator(`${cellSelector} >> nth=2 >> .jp-InputArea-prompt`)
-    .click();
+  await page.notebook.selectCells(2);
   await page.keyboard.press('Shift+ArrowDown');
   await page.keyboard.press('Control+Shift+ArrowDown');
 
@@ -133,12 +111,8 @@ test('Move down two cells with last active', async ({ page }) => {
   await expect(page.locator(`${cellSelector} >> nth=4`)).toHaveClass(
     /jp-mod-active/
   );
-  expect(
-    await page.locator(`${cellSelector} >> nth=3`).allTextContents()
-  ).toEqual(content1);
-  expect(
-    await page.locator(`${cellSelector} >> nth=4`).allTextContents()
-  ).toEqual(content2);
+  await expect(page.locator(`${cellSelector} >> nth=3`)).toHaveText(content1);
+  await expect(page.locator(`${cellSelector} >> nth=4`)).toHaveText(content2);
 });
 
 test('Move up two cells with last active', async ({ page }) => {
@@ -148,9 +122,7 @@ test('Move up two cells with last active', async ({ page }) => {
   const content2 = await page
     .locator(`${cellSelector} >> nth=3`)
     .allTextContents();
-  await page
-    .locator(`${cellSelector} >> nth=2 >> .jp-InputArea-prompt`)
-    .click();
+  await page.notebook.selectCells(2);
 
   await page.keyboard.press('Shift+ArrowDown');
   await page.keyboard.press('Control+Shift+ArrowDown');
@@ -161,10 +133,6 @@ test('Move up two cells with last active', async ({ page }) => {
   await expect(page.locator(`${cellSelector} >> nth=4`)).toHaveClass(
     /jp-mod-active/
   );
-  expect(
-    await page.locator(`${cellSelector} >> nth=3`).allTextContents()
-  ).toEqual(content1);
-  expect(
-    await page.locator(`${cellSelector} >> nth=4`).allTextContents()
-  ).toEqual(content2);
+  await expect(page.locator(`${cellSelector} >> nth=3`)).toHaveText(content1);
+  await expect(page.locator(`${cellSelector} >> nth=4`)).toHaveText(content2);
 });
