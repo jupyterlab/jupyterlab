@@ -29,13 +29,15 @@ function key(target: EventTarget, keyName: string): void {
 
 async function setupList(
   registry: TestRegistry,
-  selection?: string
+  selection?: string,
+  query = ''
 ): Promise<PluginList> {
   const model = new PluginList.Model({ registry });
   await model.ready;
-  const list = new PluginList({ registry, model });
+  // The search box sets the filter to its initial query after it renders.
+  const list = new PluginList({ registry, model, query });
   Widget.attach(list, document.body);
-  list.setFilter(updateFilterFunction('', false, false), '');
+  list.setFilter(updateFilterFunction(query, false, false), query);
   if (selection) {
     list.selection = selection;
   }
@@ -399,9 +401,8 @@ describe('@jupyterlab/settingeditor', () => {
           }
         };
         await registry.load(pluginId);
-        list = await setupList(registry);
+        list = await setupList(registry, undefined, 'font');
 
-        list.setFilter(updateFilterFunction('font', false, false), 'font');
         const matches = () =>
           Array.from(
             list.node.querySelectorAll(`[data-id="${pluginId}"] li`),
