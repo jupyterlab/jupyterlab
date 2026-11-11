@@ -58,6 +58,38 @@ test.describe('Console', () => {
 
     await expect(page.activity.getTabLocator(newName)).toBeVisible();
   });
+
+  test('Should keep the prompt position picked for the console when a console setting changes', async ({
+    page
+  }) => {
+    await page.keyboard.type('for i in range(300): print(i)');
+    await page.keyboard.press('Shift+Enter');
+    await expect(page.locator(EXECUTED_CELL)).toContainText('299');
+
+    await page.getByLabel('Change Console Prompt Position').first().click();
+    await page.getByText('Prompt to top').click();
+
+    const input = page.locator('.jp-CodeConsole-input');
+    const content = page.locator('.jp-CodeConsole-content');
+    await content.evaluate(node => {
+      node.scrollTop = node.scrollHeight;
+    });
+
+    await page.menu.clickMenuItem('Settings>Auto Close Brackets');
+
+    // Wait until the new setting reaches the prompt editor.
+    const promptEditor = page.locator(
+      '.jp-CodeConsole-promptCell .jp-InputArea-editor'
+    );
+    await promptEditor.click();
+    await page.keyboard.type('(');
+    await expect(promptEditor).toHaveText('()');
+
+    const inputBox = await input.boundingBox();
+    const contentBox = await content.boundingBox();
+    expect(inputBox!.y).toBeLessThan(contentBox!.y);
+    expect(await content.evaluate(node => node.scrollTop)).toBeGreaterThan(0);
+  });
 });
 
 test.describe('Console (terminal mode)', () => {
