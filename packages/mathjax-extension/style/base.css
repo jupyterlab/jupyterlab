@@ -5,7 +5,53 @@
 
 @import './fonts.css';
 
-/* This can be removed after upgrading to MathJax 4, as the issue will be fixed in the new version */
-mjx-assistive-mml {
-  bottom: 0;
+/* MathJax 4 sets `line-height: 0` on mjx-math only, so without this rule the
+   container applies the paragraph line height to its scaled-up font size and
+   makes every line with inline math taller than the others. */
+mjx-container[jax='CHTML'] {
+  line-height: 0;
+}
+
+/* The text box of each formula character extends below the character, and on
+   the last line of a Markdown cell or an output it adds a vertical scrollbar.
+   Clip it 0.2em outside the character box, so that only the characters
+   themselves count as overflow. Some glyphs extend outside their box, such as
+   the hook of the italic f, and a margin in px would cut them at large font
+   sizes.
+
+   Stretchy characters, such as the line of `\underline` or a `|` made taller
+   by `\left`, hold their text outside mjx-c, so clip their boxes too. Clip
+   the whole box and not each of its parts, because the parts overlap and the
+   glyph of a part, such as the head of a long left arrow, extends outside
+   the box of the part.
+
+   WebKit does not support `overflow-clip-margin` yet: it parses the property
+   only behind the `CSSOverflowClipMarginEnabled` flag, which is off by
+   default, and does not clip with it
+   (https://bugs.webkit.org/show_bug.cgi?id=236153). WebKit also puts the
+   baseline of an inline-block with `overflow: clip` at the bottom of the box,
+   which https://github.com/w3c/csswg-drafts/issues/6212 resolved against.
+   There the rule would raise every character that extends below the
+   baseline, such as g or ∫, so it applies only where the margin is
+   supported. Check it in WebKit again when WebKit turns that flag on. */
+@supports (overflow-clip-margin: 0.2em) {
+  mjx-container[jax='CHTML'] mjx-c,
+  mjx-container[jax='CHTML'] mjx-stretchy-h,
+  mjx-container[jax='CHTML'] mjx-stretchy-v {
+    overflow: clip;
+    overflow-clip-margin: 0.2em;
+  }
+
+  /* U+0338 draws the slash of `\not` before a symbol that has no negated
+     form, such as `\not\perp`. Its box has no width and the slash extends
+     over the symbol before it, so the clip would cut the slash. */
+  mjx-container[jax='CHTML'] mjx-c.mjx-c338 {
+    overflow: visible;
+  }
+}
+
+/* The vertical padding of a breakable formula does not change the layout, but
+   extends below the line in the same way. */
+mjx-container[jax='CHTML'] mjx-math[breakable] {
+  padding-block: 0;
 }
