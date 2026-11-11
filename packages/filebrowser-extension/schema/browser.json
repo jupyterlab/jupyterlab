@@ -308,7 +308,7 @@
         }
       }
     },
-    "showFileFilterByDefault": {
+    "showFileFilter": {
       "type": "boolean",
       "title": "Show Filter Bar by Default",
       "description": "Show the filter bar by default in the file browser.",
