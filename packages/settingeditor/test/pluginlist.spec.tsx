@@ -542,6 +542,28 @@ describe('@jupyterlab/settingeditor', () => {
           ['primaryColor', '24px']
         ]);
       });
+
+      it('should show the key of a setting as code', async () => {
+        const pluginId = 'plugin-viewer';
+        connector.schemas[pluginId] = {
+          type: 'object',
+          title: 'Viewer',
+          properties: { fontSize: { title: 'Font Size', type: 'number' } }
+        };
+        await registry.load(pluginId);
+        list = await setupList(registry, undefined, 'font');
+
+        const codes = () =>
+          Array.from(
+            list.node.querySelectorAll(`[data-id="${pluginId}"] li`),
+            item => item.querySelector('code')?.textContent ?? null
+          );
+        for (let i = 0; i < 10 && codes().length === 0; i++) {
+          await framePromise();
+        }
+
+        expect(codes()).toEqual([null, 'fontSize']);
+      });
     });
 
     describe('#setFilter()', () => {

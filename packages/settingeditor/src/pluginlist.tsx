@@ -747,8 +747,11 @@ export class PluginList extends ReactWidget {
             key={JSON.stringify([...match.path, match.isKey])}
             style={{ paddingLeft: `${12 * (match.path.length - 1)}px` }}
           >
-            {' '}
-            {this._highlight(match.label)}{' '}
+            {match.isKey ? (
+              <code>{this._highlight(match.label)}</code>
+            ) : (
+              this._highlight(match.label)
+            )}
           </li>
         ))
       : undefined;
