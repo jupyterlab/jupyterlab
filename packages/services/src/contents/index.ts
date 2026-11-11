@@ -857,24 +857,28 @@ export class ContentsManager implements Contents.IManager {
     options?: Contents.IFetchOptions
   ): Promise<Contents.IModel> {
     const [drive, localPath] = this._driveForPath(path);
-    return drive.get(localPath, options).then(contentsModel => {
+    return drive.get(localPath, options).then(model => {
+      const deprecated = Private.isContentDeprecated(model);
+      const contentsModel = Private.unwrapModel(model);
       const listing: Contents.IModel[] = [];
       if (contentsModel.type === 'directory' && contentsModel.content) {
         for (const item of contentsModel.content) {
           listing.push({ ...item, path: this._toGlobalPath(drive, item.path) });
         }
-        return {
+        const result = {
           ...contentsModel,
           path: this._toGlobalPath(drive, localPath),
           content: listing,
           serverPath: contentsModel.path
         } as Contents.IModel;
+        return deprecated ? Private.deprecateContent(result) : result;
       } else {
-        return {
+        const result = {
           ...contentsModel,
           path: this._toGlobalPath(drive, localPath),
           serverPath: contentsModel.path
         } as Contents.IModel;
+        return deprecated ? Private.deprecateContent(result) : result;
       }
     });
   }
@@ -1695,6 +1699,47 @@ namespace Private {
     }
     return extension;
   }
+
+  /**
+   * Wrap a model fetched without options, to warn when its content is read.
+   */
+  export function deprecateContent(model: Contents.IModel): Contents.IModel {
+    if (model.content === null || model.content === undefined) {
+      return model;
+    }
+    let warned = false;
+    const proxy = new Proxy(model, {
+      get(target, property, receiver) {
+        if (property === 'content' && !warned) {
+          warned = true;
+          console.warn(
+            `Deprecated: the content of '${target.path}' was fetched without ` +
+              'options. In a future version, the content will only be ' +
+              'returned if requested with `{ content: true }`.'
+          );
+        }
+        return Reflect.get(target, property, receiver);
+      }
+    });
+    deprecatedModels.set(proxy, model);
+    return proxy;
+  }
+
+  /**
+   * Whether the content of a model is deprecated.
+   */
+  export function isContentDeprecated(model: Contents.IModel): boolean {
+    return deprecatedModels.has(model);
+  }
+
+  /**
+   * Get the model wrapped by `deprecateContent()`, or the model itself.
+   */
+  export function unwrapModel(model: Contents.IModel): Contents.IModel {
+    return deprecatedModels.get(model) ?? model;
+  }
+
+  const deprecatedModels = new WeakMap<Contents.IModel, Contents.IModel>();
 }
 
 /**
@@ -1836,7 +1881,9 @@ export class RestContentProvider implements IContentProvider {
     }
     const data = await response.json();
     validate.validateContentsModel(data);
-    return data;
+    // The server returns the content when no option is given, but this
+    // default will change to match the explicit `content: false` default.
+    return options ? data : Private.deprecateContent(data);
   }
 
   /**
