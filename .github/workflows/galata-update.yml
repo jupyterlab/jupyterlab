@@ -35,6 +35,14 @@ jobs:
           # Build dev-mode
           jlpm build
 
+      - name: Disable git hooks for the bot commit
+        # `uv pip install -e .` makes hatch-jupyter-builder write a pre-commit
+        # hook which invokes the Python of uv's temporary build environment; that
+        # interpreter is gone by commit time, so `git commit` inside the
+        # update-snapshots action fails (see #20323). Disable hooks for this job,
+        # matching the `--no-verify` used by galata-update-v2.yml.
+        run: git config core.hooksPath /dev/null
+
       - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -104,6 +112,14 @@ jobs:
 
           # Build dev-mode
           jlpm build
+
+      - name: Disable git hooks for the bot commit
+        # `uv pip install -e .` makes hatch-jupyter-builder write a pre-commit
+        # hook which invokes the Python of uv's temporary build environment; that
+        # interpreter is gone by commit time, so `git commit` inside the
+        # update-snapshots action fails (see #20323). Disable hooks for this job,
+        # matching the `--no-verify` used by galata-update-v2.yml.
+        run: git config core.hooksPath /dev/null
 
       - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
