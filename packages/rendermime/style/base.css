@@ -520,6 +520,17 @@
   height: auto;
 }
 
+/*
+ * Keep `height: auto` on a top-level image with a height in percent, so that it
+ * shows at the size of its data, as on a page whose body has no fixed height.
+ * Some views give the rendered HTML a fixed height, such as the panel height in
+ * the Markdown preview and in a linked output view. Without this rule, the
+ * image would follow that height.
+ */
+.jp-RenderedHTMLCommon > img:where([height*='%']) {
+  height: auto;
+}
+
 /* An svg keeps a lone `height` attribute even with `height: auto`. */
 .jp-RenderedHTMLCommon svg,
 .jp-RenderedSVG svg {

@@ -36,6 +36,26 @@ function imageOutputCell(size: { width?: number; height?: number }) {
   };
 }
 
+function htmlOutputCell(html: string) {
+  return {
+    cell_type: 'code',
+    execution_count: 1,
+    id: 'html-output',
+    metadata: {},
+    outputs: [
+      {
+        data: {
+          'text/html': html,
+          'text/plain': ['<IPython.core.display.HTML object>']
+        },
+        metadata: {},
+        output_type: 'display_data'
+      }
+    ],
+    source: [`HTML('${html}')`]
+  };
+}
+
 function markdownCell(source: string) {
   return { cell_type: 'markdown', id: 'markdown', metadata: {}, source };
 }
@@ -56,7 +76,7 @@ function notebook(cell: Record<string, unknown>): string {
   });
 }
 
-const notebooks: Record<string, string> = {
+const files: Record<string, string> = {
   'output-size.ipynb': notebook(imageOutputCell({ width: 300, height: 30 })),
   'output-wide.ipynb': notebook(imageOutputCell({ width: 1530, height: 2165 })),
   'output-height-wide.ipynb': notebook(imageOutputCell({ height: 2165 })),
@@ -77,7 +97,11 @@ const notebooks: Record<string, string> = {
   ),
   'markdown-style.ipynb': notebook(
     markdownCell(`<div class="gallery"><img src="${IMAGE}"></div>`)
-  )
+  ),
+  'output-height-percent.ipynb': notebook(
+    htmlOutputCell(`<img src="${IMAGE}" height="50%">`)
+  ),
+  'preview-height-percent.md': `<img src="${IMAGE}" height="50%">\n`
 };
 
 /**
@@ -103,7 +127,7 @@ test.describe('Image size', () => {
       path.resolve(__dirname, 'notebooks', IMAGE),
       `${tmpPath}/${IMAGE}`
     );
-    for (const [name, content] of Object.entries(notebooks)) {
+    for (const [name, content] of Object.entries(files)) {
       await contents.uploadContent(content, 'text', `${tmpPath}/${name}`);
     }
   });
@@ -215,6 +239,34 @@ test.describe('Image size', () => {
     await page.notebook.openByPath(`${tmpPath}/markdown-height-percent.ipynb`);
 
     const box = await loadedImageBox(page.locator('.jp-RenderedMarkdown img'));
+
+    expect(box.width).toBeCloseTo(IMAGE_WIDTH, 0);
+  });
+
+  test('Show an image with a height in percent at the size of its data in the Markdown preview', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.filebrowser.open(
+      `${tmpPath}/preview-height-percent.md`,
+      'Markdown Preview'
+    );
+
+    const box = await loadedImageBox(page.locator('.jp-MarkdownViewer img'));
+
+    expect(box.width).toBeCloseTo(IMAGE_WIDTH, 0);
+  });
+
+  test('Show an image with a height in percent at the size of its data in an output view', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.notebook.openByPath(`${tmpPath}/output-height-percent.ipynb`);
+    await page.evaluate(async () => {
+      await window.jupyterapp.commands.execute('notebook:create-output-view');
+    });
+
+    const box = await loadedImageBox(page.locator('.jp-LinkedOutputView img'));
 
     expect(box.width).toBeCloseTo(IMAGE_WIDTH, 0);
   });
