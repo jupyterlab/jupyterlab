@@ -71,9 +71,11 @@ test.describe('Console', () => {
 
     const input = page.locator('.jp-CodeConsole-input');
     const content = page.locator('.jp-CodeConsole-content');
-    await content.evaluate(node => {
-      node.scrollTop = node.scrollHeight;
-    });
+    await content.hover();
+    await page.mouse.wheel(0, 1000);
+    await expect
+      .poll(() => content.evaluate(node => node.scrollTop))
+      .toBeGreaterThan(0);
 
     await page.menu.clickMenuItem(
       'Settings>Console Run Keystroke>Execute with Enter'
