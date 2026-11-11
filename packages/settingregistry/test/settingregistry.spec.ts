@@ -398,6 +398,18 @@ describe('@jupyterlab/settingregistry', () => {
           { ...shortcut, selector: '.jp-LabShell' }
         ]);
       });
+
+      it('should migrate a selector that contains another deprecated selector', () => {
+        // JupyterLab 4.0 shipped this selector, which contains `.jp-Notebook:focus`.
+        const shortcut = {
+          command: 'notebook:move-cursor-heading-above-or-collapse',
+          keys: ['ArrowLeft'],
+          selector: '.jp-Notebook:focus.jp-mod-commandMode'
+        };
+        expect(SettingRegistry.upgradeShortcuts([shortcut])[0].selector).toBe(
+          '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus'
+        );
+      });
     });
 
     const connector = new TestConnector();

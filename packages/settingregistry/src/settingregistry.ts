@@ -1715,11 +1715,11 @@ namespace Private {
       let newSelector = oldSelector;
       for (const change of changes) {
         const matches = change.commands
-          ? oldSelector === change.old &&
+          ? newSelector === change.old &&
             change.commands.includes(shortcut.command)
-          : oldSelector.includes(change.old);
+          : newSelector.includes(change.old);
         if (matches) {
-          newSelector = oldSelector.replace(change.old, change.new);
+          newSelector = newSelector.replace(change.old, change.new);
           if (
             change.versionDeprecated &&
             !selectorsAlreadyWarnedAbout.has(oldSelector)
