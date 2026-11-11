@@ -166,6 +166,23 @@ class TestExtension(AppHandlerTest):
         assert name in extensions
         assert check_extension(name)
 
+    def test_install_extension_without_npm(self):
+        os.rmdir(pjoin(self.mock_extension, "node_modules"))
+        empty_path = self.tempdir()
+        real_which = commands.which
+
+        def which_without_npm(command):
+            return real_which(command, env={"PATH": empty_path} if command == "npm" else None)
+
+        with (
+            patch.object(commands, "which", side_effect=which_without_npm),
+            patch.object(commands._AppHandler, "_run") as run,
+            pytest.raises(ValueError, match=r"Please install Node\.js and npm"),
+        ):
+            install_extension(self.mock_extension)
+
+        run.assert_not_called()
+
     def test_install_twice(self):
         assert install_extension(self.mock_extension) is True
         path = pjoin(self.app_dir, "extensions", "*.tgz")
