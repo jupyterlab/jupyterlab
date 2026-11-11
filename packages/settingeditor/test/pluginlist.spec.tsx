@@ -343,6 +343,26 @@ describe('@jupyterlab/settingeditor', () => {
           'minimumLeftItems'
         ]);
       });
+
+      it('should not match the keywords of an array item schema', () => {
+        const props = {
+          properties: {
+            rulers: {
+              title: 'Rulers',
+              type: 'array',
+              items: { type: 'number', minimum: 0 }
+            }
+          }
+        } as unknown as ISettingRegistry.IProperty;
+        const filter = (item: string) =>
+          item.toLowerCase().includes('min') ? {} : null;
+        const matches = PluginList.prototype.getFilterString.call(
+          PluginList.prototype,
+          filter,
+          props
+        );
+        expect(matches).toEqual([]);
+      });
     });
 
     describe('#setFilter()', () => {

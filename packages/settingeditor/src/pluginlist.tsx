@@ -562,23 +562,19 @@ export class PluginList extends ReactWidget {
     // for that object instead.
     if (props.properties) {
       props = props.properties;
-      // If given properties are an array, advance into the properties
-      // for the items instead.
+      // If given properties are an array, search the schema of its items
+      // instead of the keywords of that schema.
     } else if (props.items) {
-      props = props.items as any;
+      const items = props.items as ISettingRegistry.IProperty;
+      return this.getFilterString(
+        filter,
+        items,
+        definitions,
+        items['$ref'] as string
+      );
       // Otherwise, you've reached the base case and don't need to check for matching properties
     } else {
       return [];
-    }
-
-    // If reference found, recurse
-    if (props['$ref']) {
-      return this.getFilterString(
-        filter,
-        props,
-        definitions,
-        props['$ref'] as string
-      );
     }
 
     // Make sure props is non-empty before calling reduce
