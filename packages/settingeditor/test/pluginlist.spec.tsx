@@ -498,6 +498,50 @@ describe('@jupyterlab/settingeditor', () => {
 
         expect(marks()).toEqual([[], ['Font'], ['font']]);
       });
+
+      it('should indent a setting under the setting it is nested in', async () => {
+        const pluginId = 'plugin-tours';
+        connector.schemas[pluginId] = {
+          type: 'object',
+          title: 'Tours',
+          properties: {
+            floaterProps: {
+              type: 'object',
+              properties: { options: { type: 'object' } }
+            },
+            styles: {
+              type: 'object',
+              properties: {
+                options: {
+                  type: 'object',
+                  properties: { primaryColor: { type: 'string' } }
+                }
+              }
+            }
+          }
+        };
+        await registry.load(pluginId);
+        list = await setupList(registry, undefined, 'p');
+
+        const rows = () =>
+          Array.from(
+            list.node.querySelectorAll<HTMLElement>(
+              `[data-id="${pluginId}"] li`
+            ),
+            item => [item.textContent!.trim(), item.style.paddingLeft]
+          );
+        for (let i = 0; i < 10 && rows().length === 0; i++) {
+          await framePromise();
+        }
+
+        expect(rows()).toEqual([
+          ['floaterProps', '0px'],
+          ['options', '12px'],
+          ['styles', '0px'],
+          ['options', '12px'],
+          ['primaryColor', '24px']
+        ]);
+      });
     });
 
     describe('#setFilter()', () => {
