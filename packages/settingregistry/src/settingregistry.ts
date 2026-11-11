@@ -1672,25 +1672,27 @@ namespace Private {
         old: '[data-jp-kernel-user] :focus:not(:read-write)',
         new: '[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)',
         versionDeprecated: 'JupyterLab 4.1.1'
+      },
+      {
+        old: '.jp-Activity',
+        new: '.jp-LabShell',
+        commands: ['application:close', 'filemenu:close-and-cleanup']
       }
-    ];
-    const commandChanges = [
-      'application:close',
-      'filemenu:close-and-cleanup'
     ];
     const upgraded = shortcuts.map(shortcut => {
       const oldSelector = shortcut.selector;
       let newSelector = oldSelector;
-      if (
-        oldSelector === '.jp-Activity' &&
-        commandChanges.includes(shortcut.command)
-      ) {
-        newSelector = '.jp-LabShell';
-      }
       for (const change of changes) {
-        if (oldSelector.includes(change.old)) {
+        const matches = change.commands
+          ? oldSelector === change.old &&
+            change.commands.includes(shortcut.command)
+          : oldSelector.includes(change.old);
+        if (matches) {
           newSelector = oldSelector.replace(change.old, change.new);
-          if (!selectorsAlreadyWarnedAbout.has(oldSelector)) {
+          if (
+            change.versionDeprecated &&
+            !selectorsAlreadyWarnedAbout.has(oldSelector)
+          ) {
             selectorDeprecationWarnings.add(
               `"${change.old}" was replaced with "${change.new}" in ${change.versionDeprecated} (present in "${oldSelector}")`
             );
