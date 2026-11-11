@@ -11,6 +11,7 @@ import {
   MarkdownCellModel
 } from '@jupyterlab/cells';
 import { NBTestUtils } from '@jupyterlab/cells/lib/testutils';
+import type { IRenderMime } from '@jupyterlab/rendermime';
 import { defaultRenderMime } from '@jupyterlab/rendermime/lib/testutils';
 import { framePromise } from '@jupyterlab/testing';
 import { Widget } from '@lumino/widgets';
@@ -35,6 +36,15 @@ function createPlaceholderCell(editable = true): CodeCell {
 }
 
 /**
+ * A Markdown parser which renders only inline links. Without a parser, the
+ * rendered text of a cell is its source.
+ */
+const LINK_PARSER: IRenderMime.IMarkdownParser = {
+  render: async source =>
+    source.replace(/\[([^\]]*)\]\(([^)]*)\)/g, '<a href="$2">$1</a>')
+};
+
+/**
  * Create a Markdown cell with the given source, which starts rendered.
  */
 function createMarkdownCell(
@@ -54,7 +64,7 @@ function createMarkdownCell(
   });
   return new MarkdownCell({
     model,
-    rendermime: defaultRenderMime(),
+    rendermime: defaultRenderMime().clone({ markdownParser: LINK_PARSER }),
     contentFactory: NBTestUtils.createBaseCellFactory(),
     placeholder: false,
     showEditorForReadOnlyMarkdown
@@ -234,6 +244,19 @@ describe('cells/searchprovider', () => {
 
       match = await provider.highlightNext();
       expect(match).toMatchObject({ text: 'lists', readOnly: true });
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
+    it('should unrender the cell when a match is in an HTML attribute', async () => {
+      cell = createMarkdownCell('<img src="apple.png">\n\nAn apple a day.');
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/apple/, {});
+
+      const match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'apple', position: 10 });
       expect(cell.rendered).toBe(false);
       provider.dispose();
     });

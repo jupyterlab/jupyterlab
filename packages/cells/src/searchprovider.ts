@@ -787,11 +787,13 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * Pair each match in the rendered text with the source match it shows.
    * Returns a map from source match index to rendered match index.
    *
-   * The rendered text does not keep source positions, so the pairing
-   * matches the rendered match text against the source matches in order.
-   * A source match in markdown syntax the rendered text does not show,
-   * such as a link destination, is skipped: it cannot be the visible
-   * counterpart of a rendered match.
+   * The rendered text does not keep source positions, so the matches are
+   * paired in order, after the source matches in Markdown syntax which the
+   * rendered text does not show, such as a link destination, are left out.
+   * The map is empty unless the two lists then hold the same texts: a
+   * difference comes from a source match in syntax which is not listed in
+   * `_hiddenSourceRanges()`, such as an HTML attribute, and pairing around it
+   * would mark another occurrence than the one Replace changes.
    *
    * @returns Map from source match index to rendered match index.
    */
@@ -799,31 +801,20 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     const rendered = this.renderedProvider.matches;
     const source = this.cmHandler.matches;
     const hidden = this._hiddenSourceRanges();
-    const isVisible = (index: number): boolean => {
-      const position = source[index].position;
-      return !hidden.some(
-        range => position >= range.start && position < range.end
-      );
-    };
-    const paired = new Map<number, number>();
-    let sourceIndex = 0;
-    for (
-      let renderedIndex = 0;
-      renderedIndex < rendered.length;
-      renderedIndex++
-    ) {
-      const text = rendered[renderedIndex].text;
-      while (
-        sourceIndex < source.length &&
-        (!isVisible(sourceIndex) || source[sourceIndex].text !== text)
+    const shown: number[] = [];
+    source.forEach(({ position }, index) => {
+      if (
+        !hidden.some(range => position >= range.start && position < range.end)
       ) {
-        sourceIndex++;
+        shown.push(index);
       }
-      if (sourceIndex >= source.length) {
-        break;
-      }
-      paired.set(sourceIndex, renderedIndex);
-      sourceIndex++;
+    });
+    const paired = new Map<number, number>();
+    if (
+      shown.length === rendered.length &&
+      shown.every((index, i) => source[index].text === rendered[i].text)
+    ) {
+      shown.forEach((index, i) => paired.set(index, i));
     }
     return paired;
   }
