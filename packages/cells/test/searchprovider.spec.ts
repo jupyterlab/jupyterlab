@@ -372,6 +372,7 @@ describe('cells/searchprovider', () => {
         'An apple, [more][ref].\n\n[ref]: https://example.com/apple'
       ],
       ['an HTML comment', 'An apple, <!-- an apple --> here.'],
+      ['an HTML attribute', 'An apple, <img src="apple.png"> here.'],
       [
         'a closed details element',
         'An apple, <details><summary>Hint</summary>an apple</details>'
@@ -390,6 +391,21 @@ describe('cells/searchprovider', () => {
 
       const match = await provider.highlightNext();
       expect(match?.position).toBe(source.indexOf('apple', 4));
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
+    it('should not mark the text of a character reference for a match in an HTML tag', async () => {
+      // The rendered `>` comes from `&gt;`, and the source `>` from the tag
+      const source = 'Use the &lt;br&gt; tag.<br>Like this.';
+      cell = createMarkdownCell(source);
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/>/, {});
+
+      const match = await provider.highlightNext();
+      expect(match?.position).toBe(source.indexOf('<br>') + 3);
       expect(cell.rendered).toBe(false);
       provider.dispose();
     });

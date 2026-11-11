@@ -816,8 +816,9 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * rendered text does not show, such as a link destination, are left out.
    * The map is empty unless the two lists then hold the same texts: a
    * difference comes from a source match in syntax which is not listed in
-   * `_hiddenSourceRanges()`, such as an HTML attribute, and pairing around it
-   * would mark another occurrence than the one Replace changes.
+   * `_hiddenSourceRanges()`, such as the language of a code fence, and
+   * pairing around it would mark another occurrence than the one Replace
+   * changes.
    *
    * @returns Map from source match index to rendered match index.
    */
@@ -850,9 +851,9 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
 
   /**
    * Ranges of the cell source that the rendered text does not show: link
-   * and image destinations, reference definitions, reference labels and
-   * HTML comments. A match starting in one of these ranges is not visible
-   * in the rendered text.
+   * and image destinations, reference definitions, reference labels, HTML
+   * tags and HTML comments. A match starting in one of these ranges is not
+   * visible in the rendered text.
    *
    * @returns Source ranges the rendered text does not show.
    */
@@ -891,8 +892,10 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
         end: openBracket + label.length + 2
       });
     }
-    // HTML comments.
-    for (const match of source.matchAll(/<!--[\s\S]*?-->/g)) {
+    // HTML tags with their attributes, and HTML comments.
+    for (const match of source.matchAll(
+      /<\/?[a-z][a-z0-9-]*(?:\s(?:[^>"']|"[^"]*"|'[^']*')*)?\/?>|<!--[\s\S]*?-->/gi
+    )) {
       ranges.push({
         start: match.index ?? 0,
         end: (match.index ?? 0) + match[0].length
