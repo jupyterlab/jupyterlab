@@ -86,9 +86,12 @@ export class SearchDocumentModel
 
   /**
    * Whether the current match can be replaced.
+   *
+   * Without a current match, it has the value of `replaceAllEnabled`.
    */
   get replaceEnabled(): boolean {
-    return !this.searchProvider.getCurrentMatch?.()?.readOnly;
+    const match = this.searchProvider.getCurrentMatch?.();
+    return match ? !match.readOnly : this.replaceAllEnabled;
   }
 
   /**
@@ -382,7 +385,7 @@ export class SearchDocumentModel
       // Emit state change as the index needs to be updated
       this.stateChanged.emit();
     } catch (reason) {
-      this._parsingError = reason.toString();
+      this._parsingError = String(reason);
       this.stateChanged.emit();
       console.error(
         `Failed to parse expression ${this.searchExpression}`,

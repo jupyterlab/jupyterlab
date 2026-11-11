@@ -8,8 +8,14 @@
       {
         "id": "jp-mainmenu-kernel",
         "items": [
-          { "type": "separator", "rank": 1.2 },
-          { "command": "debugger:restart-debug", "rank": 1.2 }
+          {
+            "type": "separator",
+            "rank": 1.2
+          },
+          {
+            "command": "debugger:restart-debug",
+            "rank": 1.2
+          }
         ]
       },
       {
@@ -38,6 +44,14 @@
       {
         "command": "debugger:copy-to-globals",
         "selector": ".jp-DebuggerVariables-body.jp-debuggerVariables-local"
+      },
+      {
+        "command": "debugger:open-kernel-source",
+        "selector": ".jp-DebuggerKernelSource-source"
+      },
+      {
+        "command": "debugger:copy-kernel-source-path",
+        "selector": ".jp-DebuggerKernelSource-source"
       }
     ]
   },
@@ -114,6 +128,12 @@
       "description": "A regular expression filter to apply by default when showing the kernel sources",
       "type": "string",
       "default": ""
+    },
+    "hideNativeSources": {
+      "title": "Hide the kernel's own sources",
+      "description": "Hide the modules that the Python kernel loads for its own use, such as IPython, debugpy and the standard library modules json and asyncio. They stay hidden when your code imports them and when they match the filter.",
+      "type": "boolean",
+      "default": false
     },
     "autoCollapseDebuggerSidebar": {
       "title": "Auto Collapse Debugger Sidebar",

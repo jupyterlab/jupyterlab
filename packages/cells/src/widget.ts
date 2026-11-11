@@ -88,6 +88,8 @@ import { InputPlaceholder, OutputPlaceholder } from './placeholder';
 
 import { ResizeHandle } from './resizeHandle';
 
+import { scrollCellIntoView } from './utils';
+
 /**
  * The CSS class added to cell widgets.
  */
@@ -1148,6 +1150,9 @@ export class CodeCell extends Cell<ICodeCellModel> {
     output.addClass(CELL_OUTPUT_AREA_CLASS);
     output.toggleScrolling.connect(() => {
       this.outputsScrolled = !this.outputsScrolled;
+      if (this.outputsScrolled) {
+        scrollCellIntoView(this);
+      }
     });
     output.initialize.connect(() => {
       this.updatePromptOverlayIcon();
@@ -1375,7 +1380,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
         } else if (mdType) {
           const mdHeading = await TableOfContentsUtils.Markdown.parseHeadings(
             m.data[mdType] as string,
-            this._rendermime.markdownParser
+            this._rendermime.markdownParser,
+            this._rendermime.latexTypesetter?.mathParseOptions
           );
 
           headings.push(
@@ -2270,11 +2276,17 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * This method caches the result after the first call to avoid redundant parsing.
    **/
   async getHeadings(): Promise<Cell.IHeading[]> {
-    if (!this._headingsCache) {
+    while (!this._headingsCache) {
+      const source = this.model.sharedModel.getSource();
       const headings = await TableOfContentsUtils.Markdown.parseHeadings(
-        this.model.sharedModel.getSource(),
-        this._rendermime.markdownParser
+        source,
+        this._rendermime.markdownParser,
+        this._rendermime.latexTypesetter?.mathParseOptions
       );
+      if (!this.isDisposed && source !== this.model.sharedModel.getSource()) {
+        // The source changed while it was parsed: parse it again.
+        continue;
+      }
       this._headingsCache = headings.map(h => {
         return { ...h, type: Cell.HeadingType.Markdown };
       });
@@ -2655,7 +2667,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _rendermime: IRenderMimeRegistry;
   private _rendered = true;
   private _renderedChanged = new Signal<this, boolean>(this);
-  private _showEditorForReadOnlyMarkdown = true;
+  private _showEditorForReadOnlyMarkdown = false;
   private _cachedHeadingText = '';
   private _headingResolved: boolean = false;
   private _emptyPlaceholder: string;
@@ -2689,7 +2701,7 @@ export namespace MarkdownCell {
   /**
    * Default value for showEditorForReadOnlyMarkdown.
    */
-  export const defaultShowEditorForReadOnlyMarkdown = true;
+  export const defaultShowEditorForReadOnlyMarkdown = false;
 }
 
 /** ****************************************************************************

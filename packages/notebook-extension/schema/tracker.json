@@ -380,6 +380,23 @@
   },
   "jupyter.lab.shortcuts": [
     {
+      "command": "notebook:commit-metadata-and-save",
+      "keys": ["Accel S"],
+      "selector": ".jp-MetadataEditorTool"
+    },
+    {
+      "command": "notebook:replace-selection",
+      "keys": ["Alt -"],
+      "selector": ".jp-Notebook.jp-mod-editMode [data-jp-editor-language='r']",
+      "args": { "text": "<- " }
+    },
+    {
+      "command": "notebook:replace-selection",
+      "keys": ["Accel Shift M"],
+      "selector": ".jp-Notebook.jp-mod-editMode [data-jp-editor-language='r']",
+      "args": { "text": "%>% " }
+    },
+    {
       "command": "notebook:change-cell-to-code",
       "keys": ["Y"],
       "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
@@ -809,7 +826,7 @@
       "title": "Show editor for read-only Markdown cells",
       "description": "Should an editor be shown for read-only markdown",
       "type": "boolean",
-      "default": true
+      "default": false
     },
     "kernelStatus": {
       "title": "Kernel status icon configuration",
@@ -903,6 +920,12 @@
     "pasteCodeCellsWithoutOutput": {
       "title": "Paste code cells without output",
       "description": "When enabled, pasting code cells will only paste the cell content, not the outputs.",
+      "type": "boolean",
+      "default": false
+    },
+    "preserveDeletableOnCopy": {
+      "title": "Preserve `deletable` cell metadata of copied cells",
+      "description": "When enabled, the copied and pasted cells will preserve their `deletable` cell metadata.",
       "type": "boolean",
       "default": false
     },

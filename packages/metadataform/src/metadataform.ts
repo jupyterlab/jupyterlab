@@ -225,8 +225,12 @@ export class MetadataFormWidget
       if (!(baseMetadataKey in metadataObject)) {
         metadataObject[baseMetadataKey] = currentMetadata[baseMetadataKey];
       }
-      if (metadataObject[baseMetadataKey] === undefined)
+      // A missing value, or a value that cannot hold the nested key, has no
+      // nested data to remove, and is replaced by an object to write it.
+      if (!Private.canHoldKeys(metadataObject[baseMetadataKey])) {
+        if (!writeFinalData) continue;
         metadataObject[baseMetadataKey] = {};
+      }
 
       // Let's have an object which points to the nested key.
       let workingObject: PartialJSONObject = metadataObject[
@@ -236,9 +240,9 @@ export class MetadataFormWidget
       let finalObjectReached = true;
 
       for (let nested of intermediateMetadataKeys) {
-        // If one of the nested object does not exist, this object is created
-        // only if there is a final data to write.
-        if (!(nested in workingObject)) {
+        // If one of the nested object does not exist, or cannot hold the next
+        // key, an object is created only if there is a final data to write.
+        if (!Private.canHoldKeys(workingObject[nested])) {
           if (!writeFinalData) {
             finalObjectReached = false;
             break;
@@ -292,19 +296,28 @@ export class MetadataFormWidget
   };
 
   /**
-   * Set the content of the widget.
+   * Set the content of the widget, and dispose of the content that it
+   * replaces, unless that is the placeholder.
    */
   protected setContent(content: Widget | null): void {
     const layout = this.layout as SingletonLayout;
-    if (layout.widget) {
-      layout.widget.removeClass('jp-MetadataForm-content');
-      layout.removeWidget(layout.widget);
+    const previous = layout.widget;
+    if (previous) {
+      previous.removeClass('jp-MetadataForm-content');
+      layout.removeWidget(previous);
     }
     if (!content) {
       content = this._placeholder;
     }
     content.addClass('jp-MetadataForm-content');
     layout.widget = content;
+    // A form created before the validator loaded renders when the validator
+    // arrives, unless the form is disposed. A replaced form would then render
+    // into its detached node and move shared field widgets, such as the active
+    // cell tool, out of the form on screen.
+    if (previous && previous !== this._placeholder && previous !== content) {
+      previous.dispose();
+    }
   }
 
   /**
@@ -321,6 +334,20 @@ export class MetadataFormWidget
    */
   protected onAfterShow(msg: Message): void {
     this._update();
+  }
+
+  /**
+   * Update the form when the widget is attached while visible: the active cell
+   * may have changed while the Property Inspector showed another document.
+   * Drop a hidden form instead, so that its outdated data does not mount again.
+   */
+  protected onAfterAttach(msg: Message): void {
+    if (this.isVisible) {
+      this._update();
+    } else if (this._form) {
+      this._form = undefined;
+      this.setContent(null);
+    }
   }
 
   /**
@@ -357,6 +384,7 @@ export class MetadataFormWidget
    * Update the form with current cell metadata, and remove inconsistent fields.
    */
   private _update(): void {
+    if (this.notebookTools == undefined) return;
     const notebook = this.notebookTools.activeNotebookPanel;
 
     const cell = this.notebookTools.activeCell;
@@ -368,9 +396,9 @@ export class MetadataFormWidget
 
     const formData = {} as JSONObject;
 
-    for (let metadataKey of Object.keys(
-      this._metadataSchema.properties || JSONExt.emptyObject
-    )) {
+    // Include the keys of the conditional branches, so that the form shows
+    // their current values instead of their defaults.
+    for (let metadataKey of this.metadataKeys) {
       // Do not display the field if it's Notebook metadata and the notebook model is null.
       if (
         this._metaInformation[metadataKey]?.level === 'notebook' &&
@@ -408,9 +436,9 @@ export class MetadataFormWidget
 
       let hasValue = true;
 
-      // Navigate to the value.
+      // Navigate to the value. A value that cannot hold keys has no nested value.
       for (let nested of nestedKeys) {
-        if (nested in workingObject)
+        if (Private.canHoldKeys(workingObject) && nested in workingObject)
           workingObject = workingObject[nested] as JSONObject;
         else {
           hasValue = false;
@@ -459,6 +487,14 @@ namespace Private {
   }
 
   /**
+   * Whether a metadata value can hold keys: an object or an array, and not a
+   * missing value, null or another primitive value.
+   */
+  export function canHoldKeys(value: unknown): value is PartialJSONObject {
+    return typeof value === 'object' && value !== null;
+  }
+
+  /**
    * Recursive function to clean the empty nested metadata before updating real metadata.
    * this function is called when a nested metadata is undefined (or default), so maybe some
    * object are now empty.
@@ -471,7 +507,11 @@ namespace Private {
     metadataKeysList: Array<string>
   ): PartialJSONObject {
     let metadataKey = metadataKeysList.shift();
-    if (metadataKey !== undefined && metadataKey in metadataObject) {
+    if (
+      metadataKey !== undefined &&
+      metadataKey in metadataObject &&
+      canHoldKeys(metadataObject[metadataKey])
+    ) {
       if (Object.keys(metadataObject[metadataKey] as PartialJSONObject).length)
         metadataObject[metadataKey] = deleteEmptyNested(
           metadataObject[metadataKey] as PartialJSONObject,

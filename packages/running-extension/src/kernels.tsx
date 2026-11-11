@@ -10,7 +10,6 @@ import type {
   IRunningSessions
 } from '@jupyterlab/running';
 import type { Kernel, KernelSpec, Session } from '@jupyterlab/services';
-import { KernelAPI } from '@jupyterlab/services';
 import type { ITranslator } from '@jupyterlab/translation';
 import type {
   IDisposableMenuItem,
@@ -118,7 +117,7 @@ export async function addKernelRunningSessionManager(
 
       if (confirmed.button.accept) {
         await Promise.allSettled(
-          unusedKernels.map(kernel => KernelAPI.shutdownKernel(kernel.id))
+          unusedKernels.map(kernel => kernels.shutdown(kernel.id))
         );
         await Promise.all([
           kernels.refreshRunning(),
@@ -144,6 +143,7 @@ export async function addKernelRunningSessionManager(
   // services are ready, so that the position of the pane does not depend on
   // the server response time.
   managers.add({
+    id: 'jp-running-kernels',
     name: trans.__('Kernels'),
     supportsMultipleViews: true,
     running: (options: { mode: 'tree' | 'list' }) => {

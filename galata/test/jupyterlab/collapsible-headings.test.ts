@@ -4,6 +4,7 @@
 import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
 import { expect, galata, test } from '@jupyterlab/galata';
 import * as path from 'path';
+import { waitForActiveCellToolbar } from './utils';
 
 const fileName = 'notebook.ipynb';
 
@@ -183,6 +184,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('ArrowRight');
     await page.keyboard.press('ArrowRight');
     await page.keyboard.press('ArrowLeft');
+    await waitForActiveCellToolbar(page);
     expect(
       await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('reexpand_headers_01.png');
@@ -210,6 +212,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
+    await waitForActiveCellToolbar(page);
     expect
       .soft(
         await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
@@ -218,6 +221,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('ArrowRight');
     await page.keyboard.press('ArrowRight');
     await page.keyboard.press('ArrowRight');
+    await waitForActiveCellToolbar(page);
     expect(
       await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('reexpand_headers_03b.png');
@@ -259,6 +263,11 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.type('Heading 3');
     await page.keyboard.press('Shift+Enter');
     await page.notebook.selectCells(0);
+    await expect(
+      (await page.notebook.getCellLocator(0))!.locator(
+        '.jp-showHiddenCellsButton'
+      )
+    ).toHaveText(/3 cells hidden/);
     expect(
       await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('add_header_below_02.png');
