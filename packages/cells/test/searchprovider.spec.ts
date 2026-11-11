@@ -53,8 +53,9 @@ const LINK_PARSER: IRenderMime.IMarkdownParser = {
 };
 
 /**
- * A typesetter which draws the formula `$x$` as MathJax does: the letter is
- * the mathematical symbol 𝑥, in a text node of its own.
+ * A typesetter which draws the formulas `$x$` and `$n-1$` as MathJax does:
+ * each character is a mathematical symbol, such as 𝑥, in a text node of its
+ * own.
  */
 const FORMULA_TYPESETTER: IRenderMime.ILatexTypesetter = {
   typeset: host => {
@@ -63,6 +64,14 @@ const FORMULA_TYPESETTER: IRenderMime.ILatexTypesetter = {
         '$x$',
         '<mjx-container class="MathJax" jax="CHTML"><mjx-math>' +
           '<mjx-mi><mjx-c>𝑥</mjx-c></mjx-mi></mjx-math></mjx-container>'
+      );
+    }
+    if (host.innerHTML.includes('$n-1$')) {
+      host.innerHTML = host.innerHTML.replace(
+        '$n-1$',
+        '<mjx-container class="MathJax" jax="CHTML"><mjx-math>' +
+          '<mjx-mi><mjx-c>𝑛</mjx-c></mjx-mi><mjx-mo><mjx-c>−</mjx-c></mjx-mo>' +
+          '<mjx-mn><mjx-c>1</mjx-c></mjx-mn></mjx-math></mjx-container>'
       );
     }
   }
@@ -421,6 +430,19 @@ describe('cells/searchprovider', () => {
       expect(match?.text).toBe('𝑥');
       expect(cell.rendered).toBe(true);
       expect(renderedCurrentMatch(cell)).toBe('𝑥');
+      provider.dispose();
+    });
+
+    it('should mark the current match in a typeset formula with a minus sign', async () => {
+      cell = createMarkdownCell('Divide by $n-1$, as n-1 is the divisor.');
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/n-1/, {});
+
+      const match = await provider.highlightNext();
+      expect(match?.text).toBe('𝑛−1');
+      expect(cell.rendered).toBe(true);
       provider.dispose();
     });
 

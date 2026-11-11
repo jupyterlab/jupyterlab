@@ -837,11 +837,10 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     const paired = new Map<number, number>();
     if (
       shown.length === rendered.length &&
-      // MathJax typesets the letters of a formula as mathematical symbols
       shown.every(
         (index, i) =>
-          source[index].text.normalize('NFKC') ===
-          rendered[i].text.normalize('NFKC')
+          Private.typedText(source[index].text) ===
+          Private.typedText(rendered[i].text)
       )
     ) {
       shown.forEach((index, i) => paired.set(index, i));
@@ -929,5 +928,25 @@ export function createCellSearchProvider(
       return new MarkdownCellSearchProvider(cell);
     default:
       return new CellSearchProvider(cell);
+  }
+}
+
+/**
+ * A namespace for module-private functionality.
+ */
+namespace Private {
+  /**
+   * The text of a match in the form typed in a query. MathJax draws formulas
+   * with mathematical symbols, such as 𝑥 for x and − for -, which the search
+   * in rendered text turns into the typed form in the same way.
+   */
+  export function typedText(text: string): string {
+    return text
+      .normalize('NFKC')
+      .replace(/\u2212/g, '-')
+      .replace(/\u2217/g, '*')
+      .replace(/\u2032/g, "'")
+      .replace(/\u2061(?=[\p{L}\p{N}])/gu, ' ')
+      .replace(/\u2061/g, '');
   }
 }
