@@ -365,6 +365,43 @@ describe('@jupyterlab/settingeditor', () => {
       });
     });
 
+    describe('#mapPlugins()', () => {
+      it('should not list a parent whose matches are listed under an earlier parent', async () => {
+        const pluginId = 'plugin-cells';
+        const cellConfig = (title: string): ISettingRegistry.IProperty => ({
+          title,
+          type: 'object',
+          properties: { fontSize: { title: 'Font Size', type: 'number' } }
+        });
+        connector.schemas[pluginId] = {
+          type: 'object',
+          title: 'Cells',
+          properties: {
+            codeCellConfig: cellConfig('Code Cell Configuration'),
+            rawCellConfig: cellConfig('Raw Cell Configuration')
+          }
+        };
+        await registry.load(pluginId);
+        list = await setupList(registry);
+
+        list.setFilter(updateFilterFunction('font', false, false), 'font');
+        const matches = () =>
+          Array.from(
+            list.node.querySelectorAll(`[data-id="${pluginId}"] li`),
+            item => item.textContent!.trim()
+          );
+        for (let i = 0; i < 10 && matches().length === 0; i++) {
+          await framePromise();
+        }
+
+        expect(matches()).toEqual([
+          'Code Cell Configuration',
+          'Font Size',
+          'fontSize'
+        ]);
+      });
+    });
+
     describe('#setFilter()', () => {
       const pluginId = 'plugin-editor';
 

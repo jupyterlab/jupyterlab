@@ -551,6 +551,20 @@ export class PluginList extends ReactWidget {
     definitions?: any,
     ref?: string
   ): string[] {
+    return this._getFilterString(filter, props, definitions, ref);
+  }
+
+  /**
+   * Same as `getFilterString()`. With `seen`, a match is returned only the
+   * first time, and a parent only together with a new match.
+   */
+  private _getFilterString(
+    filter: (item: string) => Partial<IScore> | null,
+    props: ISettingRegistry.IProperty,
+    definitions?: any,
+    ref?: string,
+    seen?: Set<string>
+  ): string[] {
     // If properties given are references, populate properties
     // with corresponding definition.
     if (ref && definitions) {
@@ -566,11 +580,12 @@ export class PluginList extends ReactWidget {
       // instead of the keywords of that schema.
     } else if (props.items) {
       const items = props.items as ISettingRegistry.IProperty;
-      return this.getFilterString(
+      return this._getFilterString(
         filter,
         items,
         definitions,
-        items['$ref'] as string
+        items['$ref'] as string,
+        seen
       );
       // Otherwise, you've reached the base case and don't need to check for matching properties
     } else {
@@ -597,19 +612,26 @@ export class PluginList extends ReactWidget {
       }
 
       // If there are properties in the object, check for title / description
+      const add = (match: string) => {
+        if (!seen?.has(match)) {
+          seen?.add(match);
+          acc.push(match);
+        }
+      };
       if (filter((subProps.title as string) ?? '')) {
-        acc.push(subProps.title as string);
+        add(subProps.title as string);
       }
       if (filter(value)) {
-        acc.push(value);
+        add(value);
       }
 
       // Finally, recurse on the properties left.
-      const nested = this.getFilterString(
+      const nested = this._getFilterString(
         filter,
         subProps as ISettingRegistry.IProperty,
         definitions,
-        subProps['$ref'] as string
+        subProps['$ref'] as string,
+        seen
       );
       if (nested.length > 0) {
         // The settings form only shows fields whose title or name is listed.
@@ -632,19 +654,33 @@ export class PluginList extends ReactWidget {
     query?: string
   ): void {
     if (filter) {
-      this._filter = (plugin: ISettingRegistry.IPlugin): string[] | null => {
-        if (!filter || filter(plugin.schema.title ?? '')) {
+      const getMatches = (
+        plugin: ISettingRegistry.IPlugin,
+        seen?: Set<string>
+      ): string[] | null => {
+        if (filter(plugin.schema.title ?? '')) {
           return null;
         }
-        const filtered = this.getFilterString(
+        return this._getFilterString(
           filter,
           this._getSearchableSchema(plugin),
-          plugin.schema.definitions
+          plugin.schema.definitions,
+          undefined,
+          seen
         );
-        return [...new Set(filtered)];
       };
+      this._filter = (plugin: ISettingRegistry.IPlugin): string[] | null => {
+        const filtered = getMatches(plugin);
+        return filtered && [...new Set(filtered)];
+      };
+      // The settings form needs every parent of a match, while the list
+      // shows each match once and leaves out a parent whose matches it
+      // already shows.
+      this._listFilter = (plugin: ISettingRegistry.IPlugin) =>
+        getMatches(plugin, new Set());
     } else {
       this._filter = null;
+      this._listFilter = null;
     }
     this._query = query;
     this._updateFilterSignal.emit(this._filter);
@@ -690,8 +726,8 @@ export class PluginList extends ReactWidget {
     const icon = this.getHint(ICON_KEY, this._registry, plugin);
     const iconClass = this.getHint(ICON_CLASS_KEY, this._registry, plugin);
     const iconTitle = this.getHint(ICON_LABEL_KEY, this._registry, plugin);
-    const filteredProperties = this._filter
-      ? this._filter(plugin)?.map(fieldValue => {
+    const filteredProperties = this._listFilter
+      ? this._listFilter(plugin)?.map(fieldValue => {
           const highlightedIndices = StringExt.matchSumOfSquares(
             fieldValue.toLocaleLowerCase(),
             this._query?.toLocaleLowerCase() ?? ''
@@ -827,6 +863,7 @@ export class PluginList extends ReactWidget {
   private _editorRegistry: IFormRendererRegistry | null;
   private _errors: { [id: string]: boolean };
   private _filter: SettingsEditor.PluginSearchFilter;
+  private _listFilter: SettingsEditor.PluginSearchFilter = null;
   private _model: PluginList.Model;
   private _query: string | undefined;
   private _handleSelectSignal = new Signal<this, string>(this);
