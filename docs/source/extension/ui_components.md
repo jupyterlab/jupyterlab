@@ -244,8 +244,8 @@ A copy still differs from the SVG shown inline:
   and `@position-try`, and the original names of `@keyframes`. Give
   these names a prefix that only your icon uses. A layer without a name
   is a new layer in each copy.
-- A `url(#...)` in the initial value of a `@property` rule does not
-  follow the rename.
+- A `url(#...)` in the initial value of a `@property` rule or in a
+  `@font-face` rule does not follow the rename.
 - The rules of a sheet that `@import` loads apply to the whole page, and
   a rule there that names a renamed ID does not match it.
 - Markup that React renders on the server, as with

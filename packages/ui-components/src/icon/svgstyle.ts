@@ -504,9 +504,7 @@ export function rewriteDeclarations(
   keyframes: Map<string, string>
 ): void {
   walkRules(sheet, rule => {
-    // the declarations of style rules, keyframes, CSS functions and the
-    // like; the descriptors of an at-rule such as @font-face cannot hold
-    // var(), but their url() cannot name an element of the svg either
+    // the declarations of style rules, keyframes, CSS functions and the like
     if (hasStyle(rule)) {
       renameAnimations(rule.style, keyframes);
       const text = rewrite(rule.style.cssText);
@@ -604,10 +602,12 @@ function isGroupingRule(rule: CSSRule): rule is CSSGroupingRule {
 
 /**
  * Whether a rule holds declarations, as a style rule, a keyframe, the
- * declarations nested in a rule or the result of a CSS function do.
+ * declarations nested in a rule or the result of a CSS function do. The
+ * descriptors of `@font-face` do not count: they cannot hold `var()`, and
+ * Firefox throws when code sets their text.
  */
 function hasStyle(
   rule: CSSRule
 ): rule is CSSRule & { style: CSSStyleDeclaration } {
-  return 'style' in rule;
+  return 'style' in rule && !(rule instanceof CSSFontFaceRule);
 }

@@ -229,6 +229,23 @@ test.describe('LabIcon copies of an svg with a style element', () => {
     expect(await centerColor(page, 1)).toEqual(BLUE);
   });
 
+  test('should keep the url() of a @font-face rule that names a font of the svg', async ({
+    page
+  }) => {
+    // CorelDRAW writes this rule for a font that it embeds in the svg
+    const svgstr = svg(
+      '<style>@font-face{font-family:"Test LabIcon";src:url("#FontID0")}</style><defs><font id="FontID0"/></defs><rect width="32" height="32"/>'
+    );
+
+    const copies = await renderTwice(
+      page,
+      'test-labicon:font-face-url',
+      svgstr
+    );
+
+    expect(copies[1].styles[0]).toContain('src: url("#FontID0")');
+  });
+
   test('should animate a rule whose animation holds a var() with keyframes of the svg', async ({
     page
   }) => {
