@@ -22,13 +22,13 @@
   gradient, clip path or mask when the first copy on the page is hidden. The rules of a
   `<style>` element in the SVG now style only elements of the copies of that icon. A rule can
   still depend on the page, such as the theme attribute that JupyterLab sets on `<body>`, but a
-  part of its selector that names an ID of the SVG must match inside the copy. The names that
-  the SVG gives to layers get a suffix too. An `animation` in the SVG names a copy of its
-  `@keyframes` rule with such a suffix, so `animationName` gives the new name. A selector
-  outside the SVG that names a renamed ID, in CSS or in code, no longer matches the element:
-  give the element a class, and select it through the `data-icon` attribute of the rendered
-  SVG, for example `svg[data-icon="my-pkg:logo"] .accent`. A React copy now keeps the `style`
-  attribute of the root `<svg>`, as a copy from `element()` does. See {ref}`labicon-svg-ids`.
+  part of its selector that names an ID of the SVG must match inside the copy. An `animation`
+  in the SVG names a copy of its `@keyframes` rule with a suffix, as in `pulse-jp-icon-2`, so
+  `animationName` gives the new name. A selector outside the SVG that names a renamed ID, in
+  CSS or in code, no longer matches the element: give the element a class, and select it
+  through the `data-icon` attribute of the rendered SVG, for example
+  `svg[data-icon="my-pkg:logo"] .accent`. A React copy now keeps the `style` attribute of the
+  root `<svg>`, as a copy from `element()` does. See {ref}`labicon-svg-ids`.
 
 - Users can reorder the sections of a `SidePanel` with the default accordion content, and
   the workspace saves the order, the collapsed state and the size of each section with the

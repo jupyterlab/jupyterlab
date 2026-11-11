@@ -336,65 +336,6 @@ test.describe('LabIcon copies of an svg with a style element', () => {
     expect(await centerColor(page, 1)).toEqual(BLUE);
   });
 
-  test('should render a registered property of a style sheet with a layer statement before its namespace', async ({
-    page
-  }) => {
-    const svgstr = svg(
-      `<style>@layer base; @namespace xlink url(http://www.w3.org/1999/xlink); @property --test-labicon-n{syntax:"&lt;url&gt;";inherits:false;initial-value:url(#g)}.a{fill:var(--test-labicon-n)}</style><defs>${gradient('g', '#00f')}</defs><rect class="a" width="32" height="32"/>`
-    );
-
-    const fill = await page.evaluate(svgstr => {
-      const LabIconClass = window.jupyterapp.docRegistry.getFileType('text')!
-        .icon!.constructor as typeof LabIcon;
-      const icon = new LabIconClass({
-        name: 'test-labicon:layer-namespace',
-        svgstr
-      });
-      const box = document.createElement('div');
-      document.body.appendChild(box);
-      try {
-        icon.element({ container: box });
-      } catch (error) {
-        return String(error);
-      }
-      return getComputedStyle(box.querySelector('rect')!).fill;
-    }, svgstr);
-
-    expect(fill).toMatch(/^url\("#g_[0-9a-z]+"\)$/);
-  });
-
-  test('should let a layer win over the initial value of a registered property after another icon declares a layer of the same name', async ({
-    page
-  }) => {
-    const first = svg(
-      '<style>@layer test-labicon-base{rect{opacity:1}}</style><rect width="32" height="32"/>'
-    );
-    const second = svg(
-      `<style>@layer test-labicon-base{rect{--test-labicon-o:url(#h)}}@property --test-labicon-o{syntax:"&lt;url&gt;";inherits:false;initial-value:url(#g)}rect{fill:var(--test-labicon-o)}</style><defs>${gradient('g', '#f00')}${gradient('h', '#00f')}</defs><rect width="32" height="32"/>`
-    );
-    await renderCopies(
-      page,
-      [
-        { name: 'test-labicon:layer-first', svgstr: first },
-        { name: 'test-labicon:layer-second', svgstr: second }
-      ],
-      { hideFirst: false }
-    );
-
-    expect(await centerColor(page, 1)).toEqual(BLUE);
-  });
-
-  test('should let a registered property that inherits take the value of an ancestor over its initial value', async ({
-    page
-  }) => {
-    const svgstr = svg(
-      `<style>@property --test-labicon-q{syntax:"&lt;url&gt;";inherits:true;initial-value:url(#g)}g{--test-labicon-q:url(#h)}rect{fill:var(--test-labicon-q)}</style><defs>${gradient('g', '#f00')}${gradient('h', '#00f')}</defs><g><rect width="32" height="32"/></g>`
-    );
-    await renderTwice(page, 'test-labicon:property-inherited', svgstr);
-
-    expect(await centerColor(page, 1)).toEqual(BLUE);
-  });
-
   test('should apply a rule to the copy of an element that a use element shows', async ({
     page
   }) => {

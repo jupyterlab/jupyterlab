@@ -5,7 +5,6 @@ import type { ISelectorContext, ISelectorPlace } from '../src/icon/svgstyle';
 import {
   edit,
   renameAnimations,
-  renameDefinitions,
   rewriteSelector,
   setStyleText,
   styleText,
@@ -173,52 +172,6 @@ describe('svgstyle', () => {
 
       expect(style.childNodes.length).toBe(3);
       expect(style.textContent).toBe('.d{}');
-    });
-  });
-
-  describe('renameDefinitions()', () => {
-    it('should add a copy of keyframes with the suffix of the icon', () => {
-      expect(renameDefinitions(['@keyframes a{}'], 's')).toEqual([
-        ['@keyframes a{}@keyframes a-jp-icon-s{}'],
-        new Map([['a', 'a-jp-icon-s']])
-      ]);
-    });
-
-    it('should give each part of the name of a layer the suffix of the icon', () => {
-      const [texts] = renameDefinitions(['@layer a, b.c;'], 's');
-
-      expect(texts).toEqual(['@layer a-jp-icon-s, b-jp-icon-s.c-jp-icon-s;']);
-    });
-
-    it('should give a name to each anonymous layer of the style elements', () => {
-      const [texts] = renameDefinitions(['@layer{}', '@layer {}'], 's');
-
-      expect(texts).toEqual([
-        '@layer jp-layer-0-jp-icon-s{}',
-        '@layer jp-layer-1-jp-icon-s {}'
-      ]);
-    });
-
-    it('should rename the layer of an import', () => {
-      const [texts] = renameDefinitions(
-        ['@import url(a) layer(b); @import url(c) layer;'],
-        's'
-      );
-
-      expect(texts).toEqual([
-        '@import url(a) layer(b-jp-icon-s); @import url(c) layer(jp-layer-0-jp-icon-s);'
-      ]);
-    });
-
-    it('should replace the suffix of a copy that is given again as an svg', () => {
-      const [texts] = renameDefinitions(
-        ['@keyframes a{}@keyframes a-jp-icon-1{}@layer jp-icon-1;'],
-        's'
-      );
-
-      expect(texts).toEqual([
-        '@keyframes a{}@keyframes a-jp-icon-s{}@layer jp-icon-s;'
-      ]);
     });
   });
 

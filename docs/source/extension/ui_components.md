@@ -214,29 +214,27 @@ shown inline on the page, with the same specificity:
   ID in a `data-original-id` attribute, which the selector also checks.
   A selector that reads another attribute that the rename changes, such
   as `use[href="#shine"]`, works in the same way.
-- The names that your SVG gives to layers are local to the icon, as its
-  IDs are: `LabIcon` adds a suffix to them, as in `base-jp-icon-2`.
-  Each `@keyframes` rule gets a copy with such a name, as in
-  `pulse-jp-icon-2`, and the `animation` of a rule or of a `style`
-  attribute of the SVG names the copy. So `animationName` in animation
-  events and in the computed style gives the new name. The original
-  rule keeps its name for page CSS and for a custom property that names
-  it, as in `--spin: pulse`. An `animation` that holds `var()` also uses
-  the original rule when the name is a keyword of `animation` or of
-  `steps()`, such as `linear` or `end`.
-- The initial value of a `@property` that names an ID applies in each
-  copy through a layer of the style sheet, so a value of the property
-  that a page ancestor sets does not reach the copy.
+- Each `@keyframes` rule gets a copy with a name that is local to the
+  icon, as in `pulse-jp-icon-2`, and the `animation` of a rule or of a
+  `style` attribute of the SVG names the copy. So `animationName` in
+  animation events and in the computed style gives the new name. The
+  original rule keeps its name for page CSS and for a custom property
+  that names it, as in `--spin: pulse`. An `animation` that holds
+  `var()` also uses the original rule when the name is a keyword of
+  `animation` or of `steps()`, such as `linear` or `end`.
 
 A copy still differs from the SVG shown inline:
 
 - `:root` selects the root `<svg>` of the copy, and so do `:scope` and
   `&` where they would select `:root`, as at the top level of the sheet.
 - Some names that a style sheet defines are the same for the whole
-  page, as for any style sheet: those of `@property`, `@function`,
-  `@font-face`, `@counter-style`, `@font-palette-values` and
-  `@position-try`, and the original names of `@keyframes`. Give these
-  names a prefix that only your icon uses.
+  page, as for any style sheet: those of `@layer`, `@property`,
+  `@function`, `@font-face`, `@counter-style`, `@font-palette-values`
+  and `@position-try`, and the original names of `@keyframes`. Give
+  these names a prefix that only your icon uses. A layer without a name
+  is a new layer in each copy.
+- A `url(#...)` in the initial value of a `@property` rule does not
+  follow the rename.
 - In a style rule with a list of selectors, the declarations between
   two nested rules take the highest specificity of the list. So do the
   declarations of an at-rule inside the style rule, such as `@media`.

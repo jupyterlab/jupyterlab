@@ -19,11 +19,10 @@ import { LabIconStyle } from '../style';
 import { classes, getReactAttrs } from '../utils';
 import type { ISelectorContext } from './svgstyle';
 import {
-  addInitialValues,
+  copyKeyframes,
   edit,
   parseStyleSheet,
   renameAnimations,
-  renameDefinitions,
   rewriteDeclarations,
   rewriteSelectors,
   serializeStyleSheet,
@@ -1303,38 +1302,35 @@ namespace Private {
 
   /**
    * A style element of the svg that the browser parses, its style sheet, and
-   * the rules that give initial values of registered properties.
+   * the names of the copies of the keyframes of the svg.
    */
   interface IStyle {
     node: Element;
     sheet: CSSStyleSheet;
     keyframes: Map<string, string>;
-    initialValues: string[];
   }
 
   /**
-   * Parse the style elements of the svg, with the names that they define for
-   * keyframes and layers made local to the icon, also in the style attributes
-   * of the svg. jsdom parses none: then a style keeps its text, and an id that
-   * only a style names keeps its value.
+   * Parse the style elements of the svg, with the names of their keyframes
+   * made local to the icon, also in the style attributes of the svg. jsdom
+   * parses none: then a style keeps its text, and an id that only a style
+   * names keeps its value.
    */
   function parseStyles(
     nodes: Element[],
     styleNodes: Element[],
     scope: string
   ): IStyle[] {
-    const [texts, keyframes] = renameDefinitions(
-      styleNodes.map(styleText),
-      scope
-    );
+    const keyframes = new Map<string, string>();
     const styles: IStyle[] = [];
-    styleNodes.forEach((node, index) => {
-      const sheet = parseStyleSheet(texts[index]);
+    for (const node of styleNodes) {
+      const sheet = parseStyleSheet(styleText(node));
       if (sheet) {
-        styles.push({ node, sheet, keyframes, initialValues: [] });
+        copyKeyframes(sheet, scope, keyframes);
+        styles.push({ node, sheet, keyframes });
       }
-    });
-    if (styles.length && keyframes.size) {
+    }
+    if (keyframes.size) {
       for (const node of nodes) {
         if (node instanceof SVGElement || node instanceof HTMLElement) {
           renameAnimations(node.style, keyframes);
@@ -1373,12 +1369,7 @@ namespace Private {
         })
       );
     for (const style of styles) {
-      style.initialValues = rewriteDeclarations(
-        style.sheet,
-        rewriteUrls,
-        scope,
-        style.keyframes
-      );
+      rewriteDeclarations(style.sheet, rewriteUrls, style.keyframes);
     }
     return properties;
   }
@@ -1402,9 +1393,8 @@ namespace Private {
     context: ISelectorContext,
     changed: [number, Attr, string][]
   ): void {
-    for (const { node, sheet, initialValues } of styles) {
+    for (const { node, sheet } of styles) {
       rewriteSelectors(sheet, context);
-      addInitialValues(sheet, context.scope, initialValues);
       setStyleText(node, serializeStyleSheet(sheet));
     }
     for (const node of nodes) {

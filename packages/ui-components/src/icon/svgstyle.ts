@@ -406,27 +406,6 @@ function isSubjectEnd(tokens: IToken[], k: number): boolean {
 }
 
 /**
- * The index of the token that closes the function, parenthesis or block at
- * `tokens[k]`.
- */
-function closeOf(tokens: IToken[], k: number): number {
-  const [open, close] = tokens[k]?.type === '{' ? ['{', '}'] : ['(', ')'];
-  for (let depth = 0; k < tokens.length; k++) {
-    const type = tokens[k].type;
-    depth +=
-      type === open || (open === '(' && type === 'function')
-        ? 1
-        : type === close
-          ? -1
-          : 0;
-    if (depth === 0) {
-      return k;
-    }
-  }
-  return tokens.length - 1;
-}
-
-/**
  * Rewrite the attribute selector that starts at `tokens[k]`, as in
  * `[xlink|href="#a" i]`, if it reads an attribute that copies change. Return
  * the index of its closing bracket, its new text, and whether it names an id.
@@ -590,17 +569,13 @@ function replaceRule(parent: RuleParent, rule: CSSRule, text: string): void {
 
 /**
  * Rewrite the declarations of a style sheet that apply to elements with
- * `rewrite`. Give the rules that set the new initial value of each custom
- * property that the sheet registers with one that `rewrite` changes, as an
- * initial value cannot hold `var()`.
+ * `rewrite`, and give their animations the names of `copyKeyframes`.
  */
 export function rewriteDeclarations(
   sheet: CSSStyleSheet,
   rewrite: (text: string) => string,
-  scope: string,
   keyframes: Map<string, string>
-): string[] {
-  const initialValues: string[] = [];
+): void {
   walkRules(sheet, rule => {
     // the declarations of style rules, keyframes, CSS functions and the
     // like; the descriptors of an at-rule such as @font-face cannot hold
@@ -611,37 +586,8 @@ export function rewriteDeclarations(
       if (text !== rule.style.cssText) {
         rule.style.cssText = text;
       }
-    } else if (isPropertyRule(rule) && rule.initialValue) {
-      const value = rewrite(rule.initialValue);
-      if (value !== rule.initialValue) {
-        // a value that inherits is enough on the root
-        const root = rule.inherits ? ':where([data-icon])' : '';
-        initialValues.push(
-          `${root}${scopeFilter(scope)}{${rule.name}:${value}}`
-        );
-      }
     }
   });
-  return initialValues;
-}
-
-/**
- * Add the rules of `rewriteDeclarations` that set initial values to a style
- * sheet, in a layer that comes before the other layers of the sheet.
- */
-export function addInitialValues(
-  sheet: CSSStyleSheet,
-  scope: string,
-  rules: string[]
-): void {
-  if (rules.length) {
-    // a layer statement may come before @import and @namespace rules
-    sheet.insertRule(`@layer jp-icon-${scope};`, 0);
-    sheet.insertRule(
-      `@layer jp-icon-${scope}{${rules.join('')}}`,
-      sheet.cssRules.length
-    );
-  }
 }
 
 /**
@@ -760,92 +706,33 @@ function selectorPlace(rule: CSSRule, subject: boolean): ISelectorPlace {
 }
 
 /**
- * Give each name that the style texts of an svg define for keyframes and
- * layers a suffix of the icon, as in `pulse-jp-icon-2`, and a name to each
- * anonymous layer. A copy given again as an svg loses the suffixes of its
- * earlier scope. Give the new texts, and the new names of the keyframes.
+ * Give each keyframes rule of a style sheet a copy with a name of the icon,
+ * as in `pulse-jp-icon-2`, and add the new name of each to `keyframes`. The
+ * animations of the svg name the copy, and the original stays for page CSS
+ * and for a name in a custom property.
  */
-export function renameDefinitions(
-  texts: string[],
-  scope: string
-): [string[], Map<string, string>] {
-  const keyframes = new Map<string, string>();
-  const oldSuffix = /-jp-icon-\d+$/;
-  // "jp-icon-2" is the layer of the initial values of registered properties
-  const rename = (name: string) =>
-    /^jp-icon-\d+$/.test(name)
-      ? `jp-icon-${scope}`
-      : `${name.replace(oldSuffix, '')}-jp-icon-${scope}`;
-  let anonymous = 0;
-  const renamed = texts.map(text => {
-    const tokens = tokenize(text);
-    const edits: [number, number, string][] = [];
-    const renameToken = (token: IToken) => {
-      const name = text.slice(token.start, token.end);
-      edits.push([token.start, token.end, rename(name)]);
-      return name;
-    };
-    for (let k = 0; k < tokens.length; k++) {
-      if (tokens[k].type !== '@' || tokens[k + 1]?.type !== 'ident') {
-        continue;
-      }
-      const keyword = tokens[k + 1].value.toLowerCase();
-      // the prelude of the at-rule, to its ";" or "{"
-      let end = k + 2;
-      while (end < tokens.length && !';{'.includes(tokens[end].type)) {
-        end++;
-      }
-      const prelude = tokens
-        .slice(k + 2, end)
-        .filter(token => token.type !== 'ws' && token.type !== 'comment');
-      if (keyword.endsWith('keyframes') && prelude[0]?.type === 'ident') {
-        // the animations of the svg name a copy with a name of the icon, and
-        // the original stays for page CSS and for a name in a custom property
-        const start = tokens[k].start;
-        const name = text.slice(prelude[0].start, prelude[0].end);
-        const close = closeOf(tokens, end);
-        keyframes.set(name, rename(name));
-        if (oldSuffix.test(name)) {
-          // a copy given again as an svg drops its old copy, as the original
-          // makes a new one
-          edits.push([start, tokens[close].end, '']);
-        } else {
-          const copy =
-            text.slice(start, prelude[0].start) +
-            rename(name) +
-            text.slice(prelude[0].end, tokens[close].end);
-          edits.push([tokens[close].end, tokens[close].end, copy]);
-        }
-        k = close;
-        continue;
-      } else if (keyword === 'layer' && prelude.length) {
-        // as in "@layer a, b.c;" or "@layer a {"
-        prelude.filter(token => token.type === 'ident').forEach(renameToken);
-      } else if (keyword === 'layer' && tokens[end]?.type === '{') {
-        const at = tokens[k + 1].end;
-        edits.push([at, at, ` ${rename(`jp-layer-${anonymous++}`)}`]);
-      } else if (keyword === 'import') {
-        // as in "@import url(x) layer(a)" or "@import url(x) layer"
-        const layer = prelude.findIndex(
-          token =>
-            (token.type === 'ident' || token.type === 'function') &&
-            token.value.toLowerCase() === 'layer'
-        );
-        if (prelude[layer]?.type === 'function') {
-          for (let j = layer + 1; prelude[j]?.type === 'ident'; j += 2) {
-            renameToken(prelude[j]);
-          }
-        } else if (layer >= 0) {
-          const { start, end: last } = prelude[layer];
-          const name = rename(`jp-layer-${anonymous++}`);
-          edits.push([start, last, `layer(${name})`]);
-        }
-      }
-      k = end;
+export function copyKeyframes(
+  sheet: CSSStyleSheet,
+  scope: string,
+  keyframes: Map<string, string>
+): void {
+  walkRules(sheet, (rule, parent) => {
+    if (!(rule instanceof CSSKeyframesRule)) {
+      return;
     }
-    return edit(text, edits);
+    const index = indexOf(parent, rule);
+    const original = rule.name.replace(/-jp-icon-\d+$/, '');
+    const name = `${original}-jp-icon-${scope}`;
+    keyframes.set(rule.name, CSS.escape(name));
+    if (original !== rule.name) {
+      // a copy given again as an svg drops the copy of its earlier scope, as
+      // the original makes a new one
+      parent.deleteRule(index);
+    } else {
+      parent.insertRule(rule.cssText, index + 1);
+      (parent.cssRules[index + 1] as CSSKeyframesRule).name = name;
+    }
   });
-  return [renamed, keyframes];
 }
 
 /**
@@ -863,7 +750,7 @@ const ANIMATION_KEYWORDS = new Set(
 
 /**
  * Give the animations of a declaration block the new names of their
- * keyframes from `renameDefinitions`.
+ * keyframes from `copyKeyframes`.
  */
 export function renameAnimations(
   style: CSSStyleDeclaration,
@@ -908,8 +795,4 @@ function hasStyle(
 
 function isScopeRule(rule: CSSRule): rule is CSSScopeRule {
   return 'start' in rule;
-}
-
-function isPropertyRule(rule: CSSRule): rule is CSSPropertyRule {
-  return 'initialValue' in rule;
 }
