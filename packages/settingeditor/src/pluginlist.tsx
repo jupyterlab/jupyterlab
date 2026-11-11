@@ -563,7 +563,8 @@ export class PluginList extends ReactWidget {
    * @param props - Schema properties being filtered
    * @param definitions - Definitions to use for filling in references in properties
    * @param ref - Reference to a definition
-   * @returns - String array of properties that match the search results.
+   * @returns - The titles and keys that match the search, and the title (or
+   * the key, if there is no title) of each setting whose nested settings match.
    */
   getFilterString(
     filter: (item: string) => Partial<IScore> | null,
