@@ -196,6 +196,89 @@ describe('@jupyterlab/settingregistry', () => {
   });
 
   describe('SettingRegistry', () => {
+    describe('#reconcileShortcuts()', () => {
+      it('should migrate only the targeted commands and preserve shortcut options', () => {
+        const user = [
+          {
+            command: 'application:close',
+            keys: ['Alt X'],
+            selector: '.jp-Activity',
+            args: { foo: 'bar' },
+            preventDefault: false
+          },
+          {
+            command: 'filemenu:close-and-cleanup',
+            keys: ['Ctrl Shift Q'],
+            selector: '.jp-Activity'
+          },
+          {
+            command: 'other:command',
+            keys: ['Alt Y'],
+            selector: '.jp-Activity'
+          },
+          {
+            command: 'application:close',
+            keys: ['Alt Z'],
+            selector: '.jp-Activity .custom'
+          }
+        ];
+        const result = SettingRegistry.reconcileShortcuts([], user);
+        expect(result.map(s => s.selector)).toEqual([
+          '.jp-LabShell',
+          '.jp-LabShell',
+          '.jp-Activity',
+          '.jp-Activity .custom'
+        ]);
+        expect(result[0]).toMatchObject({
+          keys: ['Alt X'],
+          args: { foo: 'bar' },
+          preventDefault: false
+        });
+        expect(user[0].selector).toBe('.jp-Activity');
+      });
+
+      it('should reconcile disabled and overridden shortcuts after migration', () => {
+        const defaults = [
+          {
+            command: 'application:close',
+            keys: ['Alt W'],
+            selector: '.jp-LabShell'
+          },
+          {
+            command: 'filemenu:close-and-cleanup',
+            keys: ['Ctrl Shift Q'],
+            selector: '.jp-LabShell'
+          }
+        ];
+        const user = [
+          {
+            command: 'application:close',
+            keys: ['Alt W'],
+            selector: '.jp-Activity',
+            disabled: true
+          },
+          {
+            command: 'filemenu:close-and-cleanup',
+            keys: ['Ctrl Shift Q'],
+            selector: '.jp-Activity'
+          }
+        ];
+        expect(SettingRegistry.reconcileShortcuts(defaults, user)).toEqual([
+          { ...user[1], selector: '.jp-LabShell', args: {} }
+        ]);
+      });
+
+      it('should continue migrating existing selector syntax', () => {
+        const shortcut = {
+          command: 'other:command',
+          keys: ['X'],
+          selector: '.jp-Notebook:focus'
+        };
+        expect(
+          SettingRegistry.reconcileShortcuts([], [shortcut])[0].selector
+        ).toBe('.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus');
+      });
+    });
     const connector = new TestConnector();
     const timeout = 500;
     let registry: SettingRegistry;
