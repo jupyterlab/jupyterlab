@@ -299,24 +299,38 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
    * Move the current match indicator to the next match.
    *
    * @param loop Whether to loop within the matches list.
+   * @param options - With `scroll: false`, a match which is out of view is
+   * not scrolled into view.
    *
    * @returns A promise that resolves once the action has completed.
    */
-  async highlightNext(loop?: boolean): Promise<IHTMLSearchMatch | undefined> {
-    return this._highlightNext(false, loop ?? true) ?? undefined;
+  async highlightNext(
+    loop?: boolean,
+    options?: { scroll?: boolean }
+  ): Promise<IHTMLSearchMatch | undefined> {
+    return (
+      this._highlightNext(false, loop ?? true, options?.scroll ?? true) ??
+      undefined
+    );
   }
 
   /**
    * Move the current match indicator to the previous match.
    *
    * @param loop Whether to loop within the matches list.
+   * @param options - With `scroll: false`, a match which is out of view is
+   * not scrolled into view.
    *
    * @returns A promise that resolves once the action has completed.
    */
   async highlightPrevious(
-    loop?: boolean
+    loop?: boolean,
+    options?: { scroll?: boolean }
   ): Promise<IHTMLSearchMatch | undefined> {
-    return this._highlightNext(true, loop ?? true) ?? undefined;
+    return (
+      this._highlightNext(true, loop ?? true, options?.scroll ?? true) ??
+      undefined
+    );
   }
 
   /**
@@ -432,7 +446,8 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
 
   private _highlightNext(
     reverse: boolean,
-    loop: boolean
+    loop: boolean,
+    scroll: boolean
   ): IHTMLSearchMatch | null {
     if (this._matches.length === 0) {
       return null;
@@ -468,7 +483,7 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
         hit.classList.add(...SELECTED_CLASSES);
       }
       // If not in view, scroll just enough to see it
-      if (!elementInViewport(hits[0])) {
+      if (scroll && !elementInViewport(hits[0])) {
         hits[0].scrollIntoView(reverse);
       }
       hits[0].focus();

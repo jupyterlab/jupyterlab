@@ -531,7 +531,10 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
       return super.highlightNext(loop, options);
     }
 
-    return this._showCurrentMatch(await super.highlightNext(loop, options));
+    return this._showCurrentMatch(
+      await super.highlightNext(loop, options),
+      options
+    );
   }
 
   /**
@@ -553,7 +556,10 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
       return super.highlightPrevious(loop, options);
     }
 
-    return this._showCurrentMatch(await super.highlightPrevious(loop, options));
+    return this._showCurrentMatch(
+      await super.highlightPrevious(loop, options),
+      options
+    );
   }
 
   /**
@@ -677,11 +683,13 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * Report the match the editor just advanced to: mark it in the rendered
    * text when the rendered text shows it, and show the editor otherwise.
    *
-   * @param match Match the editor advanced to, if any.
+   * @param match - Match the editor advanced to, if any.
+   * @param options - Options of the step which advanced the editor.
    * @returns The match to report to the caller.
    */
   private async _showCurrentMatch(
-    match: ISearchMatch | undefined
+    match: ISearchMatch | undefined,
+    options?: IHighlightAdjacentMatchOptions
   ): Promise<ISearchMatch | undefined> {
     const cell = this.cell as MarkdownCell;
     if (!match || this.currentIndex === null) {
@@ -704,7 +712,10 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
       return match;
     }
 
-    const renderedMatch = await this._highlightRenderedMatch(renderedIndex);
+    const renderedMatch = await this._highlightRenderedMatch(
+      renderedIndex,
+      options?.scroll ?? true
+    );
     if (!renderedMatch) {
       this._currentMatchInRendered = false;
       return match;
@@ -717,33 +728,30 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   /**
    * Mark the rendered match at the given index as the current match.
    *
-   * @param index Index of the rendered match to mark.
+   * @param index - Index of the rendered match to mark.
+   * @param scroll - Whether to scroll the match into view.
    * @returns The marked match, if any.
    */
   private async _highlightRenderedMatch(
-    index: number
+    index: number,
+    scroll: boolean
   ): Promise<IHTMLSearchMatch | undefined> {
     const provider = this.renderedProvider;
-    const current = provider.currentMatchIndex;
-    if (current === null) {
-      // No match is marked yet: step forward from the start.
-      for (let i = 0; i <= index; i++) {
-        await provider.highlightNext();
-      }
-    } else if (current > index) {
-      // The marked match is past the target: resync from the start.
-      await provider.clearHighlight();
-      for (let i = 0; i <= index; i++) {
-        await provider.highlightNext();
-      }
-    } else {
-      while (provider.currentMatchIndex !== index) {
-        await provider.highlightNext();
+    // Without a marked match, the first step forward marks the first match
+    let steps = index - (provider.currentMatchIndex ?? -1);
+    while (steps !== 0) {
+      // Scroll only to the match itself, not to the matches on the way
+      const options = { scroll: scroll && Math.abs(steps) === 1 };
+      if (steps > 0) {
+        await provider.highlightNext(false, options);
+        steps--;
+      } else {
+        await provider.highlightPrevious(false, options);
+        steps++;
       }
     }
-    const match = provider.currentMatch;
     return provider.currentMatchIndex === index
-      ? (match ?? undefined)
+      ? (provider.currentMatch ?? undefined)
       : undefined;
   }
 
