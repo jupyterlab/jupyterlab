@@ -22,7 +22,7 @@ class="jp-screenshot">
 
 Read-only cells can now show a lock icon in the cell toolbar, and clicking the icon offers to make the cell editable. To show it, enable "Show lock icon for read-only cells" in Settings → Settings Editor → Notebook.
 
-<img alt="A read-only code cell with a lock icon at the start of its cell toolbar; its delete button is greyed out"
+<img alt="A notebook exercise with an editable cell that defines mean() and a read-only test cell below it, whose cell toolbar starts with a lock icon and has a greyed-out delete button"
 src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.7/docs/source/getting_started/changelog_assets/4.7-cell-lock-icon.png"
 class="jp-screenshot">
 
