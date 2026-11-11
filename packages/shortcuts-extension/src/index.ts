@@ -339,13 +339,18 @@ List of keyboard shortcuts:`,
         }
 
         const defaults = canonical.properties?.shortcuts?.default ?? [];
+        // Migrate before reconciling, so that a stored shortcut that disables
+        // a default still matches it. The shortcuts editor matches the user
+        // shortcuts with the composite ones, so it gets the migrated ones too.
         const user = {
-          shortcuts: plugin.data.user.shortcuts ?? []
+          shortcuts: Private.migrateSelectors(
+            (plugin.data.user.shortcuts ?? []) as ISettingRegistry.IShortcut[]
+          )
         };
         const composite = {
           shortcuts: SettingRegistry.reconcileShortcuts(
-            defaults as ISettingRegistry.IShortcut[],
-            user.shortcuts as ISettingRegistry.IShortcut[]
+            Private.migrateSelectors(defaults as ISettingRegistry.IShortcut[]),
+            user.shortcuts
           )
         };
 
@@ -401,6 +406,32 @@ namespace Private {
    * The internal collection of currently loaded shortcuts.
    */
   let disposables: IDisposable;
+
+  /**
+   * Selectors that changed for the shortcuts of some commands.
+   */
+  const MOVED_SELECTORS = [
+    {
+      old: '.jp-Activity',
+      new: '.jp-LabShell',
+      commands: ['application:close', 'filemenu:close-and-cleanup']
+    }
+  ];
+
+  /**
+   * Migrate the shortcuts stored with a selector that changed for their command.
+   */
+  export function migrateSelectors(
+    shortcuts: ISettingRegistry.IShortcut[]
+  ): ISettingRegistry.IShortcut[] {
+    return shortcuts.map(shortcut => {
+      const change = MOVED_SELECTORS.find(
+        ({ old, commands }) =>
+          shortcut.selector === old && commands.includes(shortcut.command)
+      );
+      return change ? { ...shortcut, selector: change.new } : shortcut;
+    });
+  }
 
   /**
    * Load the keyboard shortcuts from settings.
