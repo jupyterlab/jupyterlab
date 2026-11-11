@@ -339,13 +339,17 @@ List of keyboard shortcuts:`,
         }
 
         const defaults = canonical.properties?.shortcuts?.default ?? [];
+        // The shortcuts editor matches the user shortcuts against the
+        // composite ones, so both need the upgraded selectors.
         const user = {
-          shortcuts: plugin.data.user.shortcuts ?? []
+          shortcuts: SettingRegistry.upgradeShortcuts(
+            (plugin.data.user.shortcuts ?? []) as ISettingRegistry.IShortcut[]
+          )
         };
         const composite = {
           shortcuts: SettingRegistry.reconcileShortcuts(
             defaults as ISettingRegistry.IShortcut[],
-            user.shortcuts as ISettingRegistry.IShortcut[]
+            user.shortcuts
           )
         };
 

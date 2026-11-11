@@ -319,6 +319,21 @@ describe('@jupyterlab/settingregistry', () => {
         ).toBe('.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus');
       });
     });
+
+    describe('#upgradeShortcuts()', () => {
+      it('should migrate the selector of a disabled shortcut', () => {
+        const shortcut = {
+          command: 'application:close',
+          keys: ['Alt W'],
+          selector: '.jp-Activity',
+          disabled: true
+        };
+        expect(SettingRegistry.upgradeShortcuts([shortcut])).toEqual([
+          { ...shortcut, selector: '.jp-LabShell' }
+        ]);
+      });
+    });
+
     const connector = new TestConnector();
     const timeout = 500;
     let registry: SettingRegistry;

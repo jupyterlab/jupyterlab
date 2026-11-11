@@ -1348,6 +1348,17 @@ export namespace SettingRegistry {
   }
 
   /**
+   * Upgrade the selectors of shortcuts written for an earlier version.
+   *
+   * @returns A copy of the shortcuts, with the selectors that `reconcileShortcuts` compares.
+   */
+  export function upgradeShortcuts(
+    shortcuts: ISettingRegistry.IShortcut[]
+  ): ISettingRegistry.IShortcut[] {
+    return Private.upgradeShortcuts(shortcuts);
+  }
+
+  /**
    * Merge two set of toolbar items.
    *
    * @param reference Reference set of toolbar items

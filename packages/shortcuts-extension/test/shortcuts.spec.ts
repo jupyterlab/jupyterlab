@@ -489,6 +489,48 @@ describe('@jupyterlab/shortcut-extension', () => {
 
       expect(shortcuts).toHaveLength(1);
     });
+
+    it('should migrate the selectors of the user shortcuts', async () => {
+      const connector: IDataConnector<ISettingRegistry.IPlugin, string> = {
+        fetch: jest.fn().mockResolvedValue({
+          ...dummySettings,
+          raw: JSON.stringify({
+            shortcuts: [
+              {
+                command: 'application:close',
+                keys: ['Alt W'],
+                selector: '.jp-Activity',
+                disabled: true
+              },
+              {
+                command: 'application:close',
+                keys: ['Ctrl Alt W'],
+                selector: '.jp-Activity'
+              }
+            ]
+          })
+        }),
+        list: jest.fn(),
+        save: jest.fn(),
+        remove: jest.fn()
+      };
+      const settingRegistry = new SettingRegistry({ connector });
+
+      void plugin.default.activate(
+        { commands: new CommandRegistry() } as any,
+        settingRegistry
+      );
+
+      const settings = await settingRegistry.load(plugin.default.id);
+      // The shortcuts editor compares these with the composite shortcuts.
+      const user = settings.get('shortcuts')
+        .user as ISettingRegistry.IShortcut[];
+
+      expect(user.map(shortcut => shortcut.selector)).toEqual([
+        '.jp-LabShell',
+        '.jp-LabShell'
+      ]);
+    });
   });
 
   describe('shortcuts schema', () => {
