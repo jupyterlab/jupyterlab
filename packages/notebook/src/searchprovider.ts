@@ -500,9 +500,14 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       }
     }
 
-    // TODO: markdown unrendering/highlighting sequence is likely incorrect
-    // Force highlighting the first hit in the unrendered cell
-    await unrenderMarkdownCell(true);
+    const current = this.getCurrentMatch();
+    // A match marked in the rendered text is already current, and
+    // highlighting the next match would skip it
+    if (!current || !('node' in current)) {
+      // TODO: markdown unrendering/highlighting sequence is likely incorrect
+      // Force highlighting the first hit in the unrendered cell
+      await unrenderMarkdownCell(true);
+    }
     return replaceOccurred;
   }
 
