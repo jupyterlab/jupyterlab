@@ -1212,24 +1212,24 @@ export namespace SettingRegistry {
     defaults: ISettingRegistry.IShortcut[],
     user: ISettingRegistry.IShortcut[]
   ): ISettingRegistry.IShortcut[] {
-    user = Private.upgradeShortcuts(user);
     const memo: {
       [keys: string]: {
         [selector: string]: {
           shouldDisableDefaultShortcut: boolean;
-          enabledUserShortcut: ISettingRegistry.IShortcut | null;
-          // Enabled default shortcuts, by their selector before the upgrade
+          // Enabled shortcuts, by their selector before the upgrade
+          enabledUserShortcuts: Map<string, ISettingRegistry.IShortcut>;
           enabledDefaultShortcuts: Map<string, ISettingRegistry.IShortcut>;
         };
       };
     } = {};
 
     // If a user shortcut collides with another user shortcut warn and filter.
-    user = [
+    const orderedUser = [
       // Reorder so that disabled are first
       ...user.filter(s => !!s.disabled),
       ...user.filter(s => !s.disabled)
-    ].filter(shortcut => {
+    ];
+    user = Private.upgradeShortcuts(orderedUser).filter((shortcut, index) => {
       const keys =
         CommandRegistry.normalizeKeys(shortcut).join(RECORD_SEPARATOR);
       if (!keys) {
@@ -1244,21 +1244,25 @@ export namespace SettingRegistry {
       }
 
       const { disabled, selector } = shortcut;
+      // As for the defaults, two user shortcuts collide only if they share
+      // the selector as written.
+      const written = orderedUser[index].selector;
       if (!(selector in memo[keys])) {
         memo[keys][selector] = {
-          enabledUserShortcut: disabled ? null : shortcut,
+          enabledUserShortcuts: new Map(disabled ? [] : [[written, shortcut]]),
           enabledDefaultShortcuts: new Map(),
           shouldDisableDefaultShortcut: !!disabled
         };
         return !disabled;
       }
 
-      if (memo[keys][selector].enabledUserShortcut === null) {
+      const collision = memo[keys][selector].enabledUserShortcuts.get(written);
+      if (collision === undefined) {
         if (disabled) {
           memo[keys][selector].shouldDisableDefaultShortcut = true;
           return false;
         } else {
-          memo[keys][selector].enabledUserShortcut = shortcut;
+          memo[keys][selector].enabledUserShortcuts.set(written, shortcut);
           return true;
         }
       } else {
@@ -1266,7 +1270,7 @@ export namespace SettingRegistry {
           'Skipping',
           shortcut,
           'shortcut because it collides with another enabled shortcut:',
-          memo[keys][selector].enabledUserShortcut
+          collision
         );
         return false;
       }
@@ -1300,7 +1304,7 @@ export namespace SettingRegistry {
 
       if (!(selector in memo[keys])) {
         memo[keys][selector] = {
-          enabledUserShortcut: null, // we would have seen it already as we processed user shortcuts earlier
+          enabledUserShortcuts: new Map(), // we would have seen it already as we processed user shortcuts earlier
           enabledDefaultShortcuts: new Map(
             disabled ? [] : [[written, shortcut]]
           ),
@@ -1309,7 +1313,7 @@ export namespace SettingRegistry {
         return !disabled;
       }
 
-      if (memo[keys][selector].enabledUserShortcut !== null) {
+      if (memo[keys][selector].enabledUserShortcuts.size > 0) {
         return false;
       }
 

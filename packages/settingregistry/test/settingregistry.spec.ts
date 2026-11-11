@@ -331,6 +331,29 @@ describe('@jupyterlab/settingregistry', () => {
         ]);
       });
 
+      it('should keep two user shortcuts whose selectors match only after the migration', () => {
+        // The first one was written for JupyterLab 4.0.
+        const user = [
+          {
+            command: 'notebook:run-all-above',
+            keys: ['Shift Y'],
+            selector: '.jp-Notebook:focus'
+          },
+          {
+            command: 'notebook:run-all-below',
+            keys: ['Shift Y'],
+            selector:
+              '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus'
+          }
+        ];
+        const result = SettingRegistry.reconcileShortcuts([], user);
+        // The last one registered runs.
+        expect(result.map(shortcut => shortcut.command)).toEqual([
+          'notebook:run-all-above',
+          'notebook:run-all-below'
+        ]);
+      });
+
       it('should disable a default with a deprecated selector by its migrated selector', () => {
         const defaults = [
           {
