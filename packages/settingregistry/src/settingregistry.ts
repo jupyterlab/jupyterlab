@@ -1212,6 +1212,8 @@ export namespace SettingRegistry {
     defaults: ISettingRegistry.IShortcut[],
     user: ISettingRegistry.IShortcut[]
   ): ISettingRegistry.IShortcut[] {
+    defaults = Private.upgradeShortcuts(defaults);
+    user = Private.upgradeShortcuts(user);
     const memo: {
       [keys: string]: {
         [selector: string]: {
@@ -1330,15 +1332,13 @@ export namespace SettingRegistry {
     });
 
     // Return all the shortcuts that should be registered
-    return Private.upgradeShortcuts(
-      user
-        .concat(defaults)
-        .filter(shortcut => !shortcut.disabled)
-        // Fix shortcuts comparison in rjsf Form to avoid polluting the user settings
-        .map(shortcut => {
-          return { args: {}, ...shortcut };
-        })
-    );
+    return user
+      .concat(defaults)
+      .filter(shortcut => !shortcut.disabled)
+      // Fix shortcuts comparison in rjsf Form to avoid polluting the user settings
+      .map(shortcut => {
+        return { args: {}, ...shortcut };
+      });
   }
 
   /**
@@ -1674,9 +1674,19 @@ namespace Private {
         versionDeprecated: 'JupyterLab 4.1.1'
       }
     ];
+    const commandChanges = [
+      'application:close',
+      'filemenu:close-and-cleanup'
+    ];
     const upgraded = shortcuts.map(shortcut => {
       const oldSelector = shortcut.selector;
       let newSelector = oldSelector;
+      if (
+        oldSelector === '.jp-Activity' &&
+        commandChanges.includes(shortcut.command)
+      ) {
+        newSelector = '.jp-LabShell';
+      }
       for (const change of changes) {
         if (oldSelector.includes(change.old)) {
           newSelector = oldSelector.replace(change.old, change.new);
@@ -1688,8 +1698,7 @@ namespace Private {
           }
         }
       }
-      shortcut.selector = newSelector;
-      return shortcut;
+      return { ...shortcut, selector: newSelector };
     });
     if (selectorDeprecationWarnings.size > 0) {
       console.warn(
