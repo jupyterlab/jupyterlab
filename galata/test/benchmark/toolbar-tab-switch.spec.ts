@@ -105,15 +105,22 @@ test.describe('Benchmark - Toolbar tab switch', () => {
 
       // Shut the kernels down so that kernel status changes do not add noise to
       // the measurement (the command notifications we want to measure are
-      // triggered by the tab switch, not by the kernels).
+      // triggered by the tab switch, not by the kernels). A kernel that starts
+      // after the shutdown would stay alive, so wait for every session first.
       await page.evaluate(async () => {
         const app = (window as any).jupyterapp;
+        const panels = (Array.from(app.shell.widgets('main')) as any[]).filter(
+          widget => widget.node.classList.contains('jp-NotebookPanel')
+        );
+        await Promise.all(panels.map(panel => panel.sessionContext.ready));
         await app.serviceManager.sessions.shutdownAll();
       });
 
-      // Let the UI (and any asynchronous kernel-shutdown work) settle before
-      // measuring, so it does not leak into the measurement window.
-      await page.waitForTimeout(2500);
+      // Wait until every notebook shows that its kernel is gone, so that the
+      // shutdown does not leak into the measurement window.
+      await expect(
+        page.locator('.jp-KernelName', { hasText: 'No Kernel' })
+      ).toHaveCount(N_NOTEBOOKS);
 
       // A tab switch reconciles the button subtrees but usually produces *no*
       // DOM change (the rendered output is identical). The cost is therefore
