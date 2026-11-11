@@ -42,7 +42,7 @@ repos:
       - id: codespell
         args:
           - --ignore-words=.codespellignore
-          - --skip=docs/source/api/**,docs/source/getting_started/changelog.md
+          - --skip=docs/source/api/**
         files: \.(md|rst|txt)$
 
   # Check ruff version is aligned with the one in pyproject.toml
