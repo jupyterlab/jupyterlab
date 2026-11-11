@@ -208,7 +208,6 @@ class="jp-screenshot">
 
 - Julia code is syntax-highlighted with a new grammar, `@plutojl/lang-julia` from the Pluto.jl project.
 - Image outputs now respect the height set in their metadata, as with `Image("plot.png", width=300, height=30)` in IPython. An `<img>` tag with only a `height` attribute is now shown at that height.
-- The Python and R file icons now use the official logos, with their gradients.
 - The Extension Manager lists language packs again, after PyPI retired the listing that it used. For other extensions, it now links to PyPI instead of listing them. Settings → Language → Install more languages… opens it with the language packs.
 - Searching the Settings Editor for an editor option, such as "font" or "rulers", now finds the Notebook, Code Console and CodeMirror settings and shows the matching fields.
 - The file conflict dialog now names its button "Reload from Disk" instead of "Revert".
