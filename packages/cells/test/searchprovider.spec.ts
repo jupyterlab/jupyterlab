@@ -506,6 +506,25 @@ describe('cells/searchprovider', () => {
       provider.dispose();
     });
 
+    it('should mark the current match again after the rendered text changes', async () => {
+      cell = createMarkdownCell('test1 test2');
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+      await provider.highlightNext();
+      await provider.highlightNext();
+      expect(renderedCurrentMatch(cell)).toBe('test2');
+
+      // A diagram or a formula drawn again changes the rendered text
+      cell.renderer.node.appendChild(document.createElement('span'));
+      await framePromise();
+
+      expect(renderedCurrentMatch(cell)).toBe('test2');
+      expect(provider.getCurrentMatch()?.text).toBe('test2');
+      provider.dispose();
+    });
+
     it('should re-highlight the same source match when the cell is un-rendered mid-search', async () => {
       cell = createMarkdownCell('test1 test2');
       Widget.attach(cell, document.body);

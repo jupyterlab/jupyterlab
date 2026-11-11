@@ -464,6 +464,10 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     this.renderedProvider = new GenericSearchProvider(
       (cell as MarkdownCell).renderer
     );
+    this.renderedProvider.stateChanged.connect(
+      this._onRenderedTextSearched,
+      this
+    );
   }
 
   /**
@@ -671,6 +675,23 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
         void this.renderedProvider.endQuery();
       }
     }
+  }
+
+  /**
+   * Mark the current match again after the rendered text changed, as when a
+   * diagram is drawn again: the rendered text was searched again, and the new
+   * search has no current match.
+   */
+  private async _onRenderedTextSearched(): Promise<void> {
+    if (!this._currentMatchInRendered || this.currentIndex === null) {
+      return;
+    }
+    const index = this._pairMatches().get(this.currentIndex);
+    if (index === undefined) {
+      this._currentMatchInRendered = false;
+      return;
+    }
+    await this._highlightRenderedMatch(index, false);
   }
 
   /**
