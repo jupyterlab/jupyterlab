@@ -593,6 +593,11 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
       return Promise.resolve(false);
 
     const result = await super.replaceAllMatches(newText, options);
+    if (result) {
+      // The match marked in the rendered text is replaced too
+      this._currentMatchInRendered = false;
+      await this.renderedProvider.clearHighlight();
+    }
     // if the cell is rendered force update
     if ((this.cell as MarkdownCell).rendered) {
       this.cell.update();

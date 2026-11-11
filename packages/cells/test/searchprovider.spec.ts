@@ -364,6 +364,20 @@ describe('cells/searchprovider', () => {
       provider.dispose();
     });
 
+    it('should have no current match after replacing all matches', async () => {
+      cell = createMarkdownCell('test1 test2');
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+      await provider.highlightNext();
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+
+      expect(await provider.replaceAllMatches('bar')).toBe(true);
+      expect(provider.getCurrentMatch()).toBeUndefined();
+      provider.dispose();
+    });
+
     it('should re-highlight the same source match when the cell is un-rendered mid-search', async () => {
       cell = createMarkdownCell('test1 test2');
       Widget.attach(cell, document.body);
