@@ -183,11 +183,10 @@ reference to it. One rendered copy of the SVG above has:
 ```
 
 An SVG refers to an ID in `url(#...)` in any attribute or rule, in
-`href` and `xlink:href`, in an attribute that lists IDs such as
-`aria-labelledby`, in animation timing such as `begin="dot.click"`,
-and in the values of an animation of `href`. Each of these references
-follows the rename. IDs that the SVG does not refer to keep their
-value.
+`href` and `xlink:href`, in `aria-labelledby` and `aria-describedby`,
+in animation timing such as `begin="dot.click"`, and in the values of
+an animation of `href`. Each of these references follows the rename.
+IDs that the SVG does not refer to keep their value.
 
 `LabIcon` rewrites the rules of a `<style>` element in your SVG once,
 so that every copy has the same rules. A rule styles only elements of

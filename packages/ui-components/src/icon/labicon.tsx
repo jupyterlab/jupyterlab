@@ -824,25 +824,8 @@ export namespace LabIcon {
 namespace Private {
   // XML cannot contain this character, so it cannot clash with svg content
   const SUFFIX_PLACEHOLDER = '\u0000';
-  // the attributes whose value is an id or a list of ids
-  const ID_LIST_ATTRIBUTES = new Set([
-    'aria-activedescendant',
-    'aria-controls',
-    'aria-describedby',
-    'aria-details',
-    'aria-errormessage',
-    'aria-flowto',
-    'aria-labelledby',
-    'aria-owns',
-    'commandfor',
-    'for',
-    'form',
-    'headers',
-    'interestfor',
-    'itemref',
-    'list',
-    'popovertarget'
-  ]);
+  // the attributes that label and describe an svg: their value lists ids
+  const ID_LIST_ATTRIBUTES = new Set(['aria-describedby', 'aria-labelledby']);
   const ANIMATION_VALUES = ['values', 'from', 'to', 'by'];
   // an extension that imports LabIcon through a deep path bundles its own
   // copy of this module, so all copies take suffixes from one counter on the

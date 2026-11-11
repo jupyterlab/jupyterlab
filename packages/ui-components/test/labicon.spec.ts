@@ -296,51 +296,37 @@ describe('@jupyterlab/ui-components', () => {
         );
       });
 
-      it.each([
-        'aria-activedescendant',
-        'aria-controls',
-        'aria-describedby',
-        'aria-details',
-        'aria-errormessage',
-        'aria-flowto',
-        'aria-labelledby',
-        'aria-owns',
-        'commandfor',
-        'for',
-        'form',
-        'headers',
-        'interestfor',
-        'itemref',
-        'list',
-        'popovertarget'
-      ])('should point %s of each copy at its own element', attribute => {
-        const icon = new LabIcon({
-          name: `test-ui-components:id-list-${attribute}`,
-          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+      it.each(['aria-describedby', 'aria-labelledby'])(
+        'should point %s of each copy at its own element',
+        attribute => {
+          const icon = new LabIcon({
+            name: `test-ui-components:id-list-${attribute}`,
+            svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
 <rect id="shape0" width="10" height="10"/><g ${attribute}="shape0 other"/>
 </svg>`
-        });
+          });
 
-        const svg = icon.element({ tag: null });
-        const id = svg.querySelector('rect')!.getAttribute('id');
+          const svg = icon.element({ tag: null });
+          const id = svg.querySelector('rect')!.getAttribute('id');
 
-        expect(id).toMatch(/^shape0_[0-9a-z]+$/);
-        expect(svg.querySelector('g')!.getAttribute(attribute)).toBe(
-          `${id} other`
-        );
-      });
+          expect(id).toMatch(/^shape0_[0-9a-z]+$/);
+          expect(svg.querySelector('g')!.getAttribute(attribute)).toBe(
+            `${id} other`
+          );
+        }
+      );
 
       it('should split a list of ids at any space', () => {
         const icon = new LabIcon({
           name: 'test-ui-components:id-list-tab',
           svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-<rect id="shape0" width="10" height="10"/><g aria-owns="other&#9;shape0"/>
+<rect id="shape0" width="10" height="10"/><g aria-labelledby="other&#9;shape0"/>
 </svg>`
         });
 
         const svg = icon.element({ tag: null });
 
-        expect(svg.querySelector('g')!.getAttribute('aria-owns')).toMatch(
+        expect(svg.querySelector('g')!.getAttribute('aria-labelledby')).toMatch(
           /^other\tshape0_[0-9a-z]+$/
         );
       });
