@@ -278,6 +278,51 @@ describe('@jupyterlab/ui-components', () => {
 
       wrapper.dispose();
     });
+
+    it('should execute the command in the new registry after the registry changes', async () => {
+      const registryId = 'test:rerender-registry';
+      const execute = jest.fn();
+      commands.addCommand(registryId, {
+        execute,
+        label: 'Registry test',
+        icon: blankIcon
+      });
+      const otherExecute = jest.fn();
+      const otherCommands = new CommandRegistry();
+      otherCommands.addCommand(registryId, {
+        execute: otherExecute,
+        label: 'Registry test',
+        icon: blankIcon
+      });
+
+      class Wrapper extends ReactWidget {
+        commands = commands;
+        render(): React.ReactElement {
+          return React.createElement(CommandToolbarButtonComponent, {
+            commands: this.commands,
+            id: registryId
+          });
+        }
+      }
+
+      const wrapper = new Wrapper();
+      Widget.attach(wrapper, document.body);
+      await framePromise();
+      await wrapper.renderPromise;
+
+      // The command renders the same button in both registries, but the
+      // handler must run the command in the new registry.
+      wrapper.commands = otherCommands;
+      wrapper.update();
+      await framePromise();
+      await wrapper.renderPromise;
+
+      simulate(wrapper.node.firstElementChild!, 'click');
+      expect(otherExecute).toHaveBeenCalledTimes(1);
+      expect(execute).not.toHaveBeenCalled();
+
+      wrapper.dispose();
+    });
   });
 
   describe('Toolbar', () => {

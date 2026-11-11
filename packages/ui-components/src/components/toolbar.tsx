@@ -1146,6 +1146,7 @@ export function CommandToolbarButtonComponent(
           // re-render of the button subtree. See `Private.arePropsEqual`.
           <Private.MemoizedToolbarButtonComponent
             {...Private.propsFromCommand(props)}
+            commands={props.commands}
             commandArgs={props.args}
           />
         ) : null
@@ -1493,12 +1494,13 @@ namespace Private {
   /**
    * Props of the memoized toolbar button.
    *
-   * It carries the command `args` (`commandArgs`) in addition to the rendered
-   * button props so that a change of arguments - which only affects the click
-   * handler and not the visual props - still re-renders the button. This field
-   * is not forwarded to the underlying `ToolbarButtonComponent`.
+   * It carries the command registry (`commands`) and the command `args`
+   * (`commandArgs`) in addition to the rendered button props: a change of
+   * either can affect only the click handler, and must still re-render the
+   * button. `ToolbarButtonComponent` ignores these two fields.
    */
   interface IMemoizedButtonProps extends ToolbarButtonComponent.IProps {
+    commands?: CommandRegistry;
     commandArgs?: ReadonlyJSONObject;
   }
 
@@ -1506,8 +1508,9 @@ namespace Private {
    * Props which are recreated on every call to `propsFromCommand` and therefore
    * cannot be compared by identity:
    * - `onClick` is a fresh closure but is semantically stable - what it
-   *   dispatches depends only on the command id and `args` (the latter compared
-   *   through `commandArgs`) - so it is skipped entirely.
+   *   dispatches depends only on the command registry, the command id and
+   *   `args` (compared through `commands`, `dataset` and `commandArgs`) - so
+   *   it is skipped entirely.
    * - `dataset` is a fresh object and is compared by value instead.
    */
   const NON_IDENTITY_PROPS: {
@@ -1586,8 +1589,9 @@ namespace Private {
    */
   export const MemoizedToolbarButtonComponent = React.memo(
     (props: IMemoizedButtonProps): JSX.Element => {
-      // `commandArgs` is only used by `arePropsEqual`; the remaining fields are
-      // the actual button props (the extra field is ignored by the button).
+      // `commands` and `commandArgs` are only used by `arePropsEqual`; the
+      // remaining fields are the actual button props (the button ignores the
+      // extra fields).
       const buttonProps: ToolbarButtonComponent.IProps = props;
       return <ToolbarButtonComponent {...buttonProps} />;
     },
