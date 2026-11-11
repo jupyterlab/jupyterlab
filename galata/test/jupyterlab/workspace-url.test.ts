@@ -106,17 +106,6 @@ for (const factory of ['Editor', 'Notebook']) {
 
     for (const alreadyOpen of factory === 'Editor' ? [false, true] : [true]) {
       test.describe(`Link to a different ${alreadyOpen ? 'open' : 'unopened'} file`, () => {
-        if (factory === 'Notebook') {
-          // Isolate startup routing from the hidden-cell sizing bug (#20430).
-          test.use({
-            mockSettings: {
-              ...galata.DEFAULT_SETTINGS,
-              '@jupyterlab/notebook-extension:tracker': {
-                windowingMode: 'none'
-              }
-            }
-          });
-        }
         test.use({
           mockState: async ({ browserName, tmpPath }, use) => {
             const previous = previousFileName(browserName);
@@ -226,11 +215,6 @@ for (const factory of ['Editor', 'Notebook']) {
             url =>
               url.pathname === `/lab/tree/${target}` && url.hash === fragment
           );
-          if (factory === 'Notebook') {
-            await expect(
-              page.locator('.jp-Cell[data-windowed-list-index="19"]')
-            ).toBeInViewport();
-          }
           expect(await page.evaluate(() => history.length)).toBe(
             historyLength + 1
           );

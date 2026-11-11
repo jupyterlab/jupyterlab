@@ -2275,15 +2275,9 @@ function activateNotebookHandler(
   const { commands, shell } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
 
-  // The file browser applies the startup fragment once the URL tab is ready.
-  let browserRestoring = !!defaultBrowser;
-  void defaultBrowser?.model.restored.then(() => {
-    browserRestoring = false;
-  });
+  // Use the router to deal with hash navigation
   function onRouted(router: IRouter, location: IRouter.ILocation): void {
-    const handledByBrowser =
-      browserRestoring && PageConfig.getOption('treePath');
-    if (!handledByBrowser && location.hash && tracker.currentWidget) {
+    if (location.hash && tracker.currentWidget) {
       tracker.currentWidget.setFragment(location.hash);
     }
   }

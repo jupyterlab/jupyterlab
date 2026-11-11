@@ -30,10 +30,7 @@ import {
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
-import {
-  DocumentWidget,
-  getAvailableKernelFileTypes
-} from '@jupyterlab/docregistry';
+import { getAvailableKernelFileTypes } from '@jupyterlab/docregistry';
 import {
   FileBrowser,
   FileUploadStatus,
@@ -2254,16 +2251,15 @@ namespace Private {
       };
     });
 
-    const location = await new Promise<IRouter.ILocation>(resolve => {
-      const listener = (_: IRouter, location: IRouter.ILocation) => {
+    await new Promise<void>(resolve => {
+      const listener = () => {
         router.routed.disconnect(listener);
-        resolve(location);
+        resolve();
       };
       router.routed.connect(listener);
     });
 
     const paths = await tree?.paths;
-    let target: unknown;
     if (paths?.file || paths?.browser) {
       // Restore the model without populating it.
       await browser.model.restore(browser.id, false);
@@ -2278,13 +2274,12 @@ namespace Private {
           restored.path === manager.services.contents.normalize(paths.file) &&
           (!paths.openWith || (factory && restored.factory === factory));
         if (alreadyRestored) {
-          target = restored.widget;
           await commands.execute(CommandIDs.goToPath, {
             path: paths.file,
             dontShowBrowser: true
           });
         } else {
-          target = await commands.execute(CommandIDs.openPath, {
+          await commands.execute(CommandIDs.openPath, {
             path: paths.file,
             dontShowBrowser: true,
             factory: paths.openWith
@@ -2304,25 +2299,6 @@ namespace Private {
 
     if (labShell?.isEmpty('main')) {
       void commands.execute('launcher:create');
-    }
-    if (location.hash && target instanceof DocumentWidget) {
-      const widget = target;
-      void widget.revealed
-        .then(
-          async () => {
-            // Let the tab's activation and layout finish before scrolling.
-            await new Promise<number>(resolve =>
-              requestAnimationFrame(resolve)
-            );
-            if (widget.isVisible && !widget.isDisposed) {
-              return widget.setFragment(location.hash);
-            }
-          },
-          () => undefined
-        )
-        .catch(error =>
-          console.error('Failed to open the document fragment.', error)
-        );
     }
   }
 
