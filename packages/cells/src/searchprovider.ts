@@ -686,18 +686,21 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   /**
    * Options to step the editor of a rendered cell, which is hidden. The user
    * does not see its cursor, so a search from the selection starts from the
-   * start of the cell instead.
+   * start of the cell instead. A hidden editor keeps a scroll request until
+   * the cell shows it again, and then scrolls the notebook: do not send one.
    *
    * @param options - Options of the step.
    * @returns Options to step the hidden editor.
    */
   private _hiddenEditorOptions(
     options?: IHighlightAdjacentMatchOptions
-  ): IHighlightAdjacentMatchOptions | undefined {
+  ): IHighlightAdjacentMatchOptions {
     const from = options?.from;
-    return from === 'selection' || from === 'selection-start'
-      ? { ...options, from: 'start' }
-      : options;
+    return {
+      ...options,
+      from: from === 'selection' || from === 'selection-start' ? 'start' : from,
+      scroll: false
+    };
   }
 
   /**
@@ -729,6 +732,13 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
         const waitForRendered = signalToPromise(cell.renderedChanged);
         cell.rendered = false;
         await waitForRendered;
+      }
+      // The editor got no scroll request while it was hidden
+      if ((options?.scroll ?? true) && !cell.rendered && cell.editor) {
+        const position = cell.editor.getPositionAt(match.position);
+        if (position) {
+          cell.editor.revealPosition(position);
+        }
       }
       return match;
     }

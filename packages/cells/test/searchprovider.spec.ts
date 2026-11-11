@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { EditorView } from '@codemirror/view';
 import type { YCodeCell, YMarkdownCell } from '@jupyter/ydoc';
 import { createStandaloneCell } from '@jupyter/ydoc';
 import {
@@ -237,6 +238,22 @@ describe('cells/searchprovider', () => {
       });
       expect(match?.text).toBe('test1');
       expect(renderedCurrentMatch(cell)).toBe('test1');
+      provider.dispose();
+    });
+
+    it('should not scroll the hidden editor of a rendered cell', async () => {
+      cell = createMarkdownCell('test1 test2');
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+      // A hidden editor scrolls to the match when the cell shows it again
+      const scrollIntoView = jest.spyOn(EditorView, 'scrollIntoView');
+
+      await provider.highlightNext();
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+      expect(scrollIntoView).not.toHaveBeenCalled();
+      scrollIntoView.mockRestore();
       provider.dispose();
     });
 
