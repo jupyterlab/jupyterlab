@@ -27,7 +27,9 @@ import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import {
   Debugger,
+  DebuggerCompletionProvider,
   DebuggerDisplayRegistry,
+  DebuggerIPythonCompletionProvider,
   IDebugger,
   IDebuggerConfig,
   IDebuggerDisplayRegistry,
@@ -52,11 +54,11 @@ import {
 import type { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ICompletionContext } from '@jupyterlab/completer';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import type { CommandRegistry } from '@lumino/commands';
 import { WidgetTracker } from '@jupyterlab/apputils';
 import { DebugConsoleCellExecutor } from './debug-console-executor';
-import { DebuggerCompletionProvider } from './debugger-completion-provider';
 import { isCodeCellModel } from '@jupyterlab/cells';
 import type { Widget } from '@lumino/widgets';
 
@@ -409,7 +411,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
 
     if (palette) {
       palette.addItem({
-        category: 'Notebook Operations',
+        category: trans.__('Notebook Operations'),
         command: Debugger.CommandIDs.restartDebug
       });
     }
@@ -847,6 +849,11 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
         if (kernel && filters[kernel]) {
           sidebar.variables.filter = new Set<string>(filters[kernel]);
         }
+
+        service.model.kernelSources.hideNativeSources = settings.get(
+          'hideNativeSources'
+        ).composite as boolean;
+
         const kernelSourcesFilter = settings.get('defaultKernelSourcesFilter')
           .composite as string;
         sidebar.kernelSources.filter = kernelSourcesFilter;
@@ -1167,6 +1174,48 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     }
 
+    const getKernelSourcePath = (): string | null => {
+      const node = app.contextMenuHitTest(element =>
+        element.classList.contains('jp-DebuggerKernelSource-source')
+      );
+      return node?.title || null;
+    };
+
+    commands.addCommand(CommandIDs.openKernelSource, {
+      label: trans.__('Open'),
+      caption: trans.__('Open the kernel source'),
+      isEnabled: () => !!sourceViewer,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: async () => {
+        const path = getKernelSourcePath();
+        if (path) {
+          await commands.execute(CommandIDs.openSource, { path });
+        }
+      }
+    });
+
+    commands.addCommand(CommandIDs.copyKernelSourcePath, {
+      label: trans.__('Copy Path'),
+      caption: trans.__('Copy the path of the kernel source to the clipboard'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: () => {
+        const path = getKernelSourcePath();
+        if (path) {
+          Clipboard.copyToSystem(path);
+        }
+      }
+    });
+
     commands.addCommand(CommandIDs.debugContinue, {
       label: () => {
         return service.hasStoppedThreads()
@@ -1266,7 +1315,8 @@ const main: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.pauseOnExceptions, {
-      label: args => (args.filter as string) || 'Breakpoints on exception',
+      label: args =>
+        (args.filter as string) || trans.__('Breakpoints on exception'),
       caption: args => (args.description as string) ?? '',
       isToggled: args =>
         service.session?.isPausingOnException(args.filter as string) || false,
@@ -1424,21 +1474,55 @@ const debuggerCompletions: JupyterFrontEndPlugin<void> = {
   description: 'Provides debugger-based completions.',
   autoStart: true,
   requires: [IDebugger, ICompletionProviderManager],
-  optional: [ITranslator],
+  optional: [ITranslator, ISettingRegistry],
   activate: (
     app: JupyterFrontEnd,
     debuggerService: IDebugger,
     completionManager: ICompletionProviderManager,
-    translator: ITranslator | null
+    translator: ITranslator | null,
+    settingRegistry: ISettingRegistry | null
   ): void => {
-    // Create and register the debugger completion provider
+    const isDebugConsole = (context?: ICompletionContext) =>
+      !!context?.widget.hasClass('jp-DebugConsole');
+
     const provider = new DebuggerCompletionProvider({
       debuggerService: debuggerService,
-      translator: translator || nullTranslator
+      translator: translator || nullTranslator,
+      isDebugConsole
     });
-
-    // Register the provider with the completion manager
     completionManager.registerProvider(provider);
+
+    const ipythonProvider = new DebuggerIPythonCompletionProvider({
+      debuggerService: debuggerService,
+      translator: translator || nullTranslator,
+      isDebugConsole
+    });
+    completionManager.registerProvider(ipythonProvider);
+
+    if (settingRegistry) {
+      void app.restored
+        .then(async () => {
+          const settings = await settingRegistry.load(
+            '@jupyterlab/completer-extension:manager'
+          );
+          const providers = settings.get('availableProviders').user;
+          if (
+            providers &&
+            typeof providers === 'object' &&
+            'DebuggerCompletionProvider' in providers &&
+            !('DebuggerIPythonCompletionProvider' in providers)
+          ) {
+            const rank = providers.DebuggerCompletionProvider;
+            if (typeof rank === 'number') {
+              await settings.set('availableProviders', {
+                ...providers,
+                DebuggerIPythonCompletionProvider: rank < 0 ? rank : rank + 1
+              });
+            }
+          }
+        })
+        .catch(console.error);
+    }
   }
 };
 

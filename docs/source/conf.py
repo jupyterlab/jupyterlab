@@ -234,7 +234,7 @@ def copy_automated_screenshots(temp_folder: Path) -> list[Path]:
     src = root / AUTOMATED_SCREENSHOTS_FOLDER
 
     copied_files = []
-    for img in src.rglob("*.png"):
+    for img in src.rglob("*-documentation-linux.png"):
         target = temp_folder / (img.name.replace("-documentation-linux", ""))
         shutil.copyfile(str(img), str(target))
         copied_files.append(target)
@@ -422,7 +422,9 @@ html_favicon = "_static/logo-icon.png"
 # documentation.
 #
 html_theme_options = {
-    "announcement": '🚀 JupyterLab 4.6.0 is now available · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/installation.html">INSTALL</a> · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/changelog.html#v4-6">RELEASE NOTES</a>',
+    # The announcement will not show if https://jupyter.org/assets/banner.html is empty.
+    # See https://github.com/jupyter/jupyter.github.io#site-wide-announcement-banner
+    "announcement": "https://jupyter.org/assets/banner.html",
     "icon_links": [
         {
             "name": "jupyter.org",

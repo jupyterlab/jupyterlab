@@ -374,6 +374,61 @@ describe('docregistry/registry', () => {
         );
       });
 
+      it('should select factories for file types without extensions', () => {
+        const factory = new WidgetFactory({
+          name: 'Vega-Lite5',
+          fileTypes: ['vega-lite3', 'vega-lite4'],
+          defaultFor: ['vega-lite3', 'vega-lite4']
+        });
+        registry.addWidgetFactory(factory);
+        for (const name of factory.fileTypes) {
+          registry.addFileType({ name, extensions: [] });
+          expect(
+            registry.preferredWidgetFactories(registry.getFileType(name)!)
+          ).toEqual([factory]);
+        }
+      });
+
+      it('should preserve file type associations when extensions overlap', () => {
+        registry.addWidgetFactory(createFactory());
+        const factory = new WidgetFactory({
+          name: 'custom',
+          fileTypes: []
+        });
+        registry.addWidgetFactory(factory);
+        registry.addFileType({ name: 'custom', extensions: ['.foo.bar'] }, [
+          factory.name
+        ]);
+
+        expect(
+          registry.preferredWidgetFactories(registry.getFileType('custom')!)
+        ).toEqual([factory]);
+      });
+
+      it('should respect user overrides for an explicit file type', () => {
+        const factory = createFactory();
+        registry.addWidgetFactory(factory);
+        const globalFactory = new WidgetFactory({
+          name: 'global',
+          fileTypes: ['*'],
+          defaultFor: ['*']
+        });
+        registry.addWidgetFactory(globalFactory);
+        registry.setDefaultWidgetFactory('foobar', globalFactory.name);
+
+        expect(
+          registry.preferredWidgetFactories(registry.getFileType('foobar')!)
+        ).toEqual([globalFactory, factory]);
+      });
+
+      it('should omit unavailable models for an explicit file type', () => {
+        registry.addWidgetFactory(createFactory('missing'));
+
+        expect(
+          registry.preferredWidgetFactories(registry.getFileType('foobar')!)
+        ).toEqual([]);
+      });
+
       it('should select the factory for a given extension', () => {
         const factory = createFactory();
         registry.addWidgetFactory(factory);
@@ -567,6 +622,42 @@ describe('docregistry/registry', () => {
         registry.addWidgetFactory(mdFactory);
         expect(registry.defaultRenderedWidgetFactory('a.baz')).toBe(factory);
         expect(registry.defaultRenderedWidgetFactory('a.md')).toBe(mdFactory);
+      });
+
+      it('should return the default rendered widget factory when a different default widget factory exists', () => {
+        const editorFactory = new WidgetFactory({
+          name: 'editor',
+          fileTypes: ['markdown'],
+          defaultFor: ['markdown']
+        });
+        const mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileTypes: ['markdown'],
+          defaultRendered: ['markdown']
+        });
+        registry.addWidgetFactory(editorFactory);
+        registry.addWidgetFactory(mdFactory);
+        expect(registry.defaultWidgetFactory('a.md')).toBe(editorFactory);
+        expect(registry.defaultRenderedWidgetFactory('a.md')).toBe(mdFactory);
+      });
+
+      it('should prefer a user override to the default rendered widget factory', () => {
+        const editorFactory = new WidgetFactory({
+          name: 'editor',
+          fileTypes: ['markdown'],
+          defaultFor: ['markdown']
+        });
+        const mdFactory = new WidgetFactory({
+          name: 'markdown',
+          fileTypes: ['markdown'],
+          defaultRendered: ['markdown']
+        });
+        registry.addWidgetFactory(editorFactory);
+        registry.addWidgetFactory(mdFactory);
+        registry.setDefaultWidgetFactory('markdown', 'editor');
+        expect(registry.defaultRenderedWidgetFactory('a.md')).toBe(
+          editorFactory
+        );
       });
 
       it('should get the default widget factory if no default rendered factory is registered', () => {

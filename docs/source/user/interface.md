@@ -85,7 +85,9 @@ The left sidebar contains a number of commonly-used tabs including:
 
 The right sidebar contains:
 
-- the property inspector (active in notebooks),
+- the property inspector (active in notebooks), which includes the
+  {ref}`metadata editor <metadata-editor>` for viewing and modifying
+  notebook and cell metadata,
 - the {ref}`debugger <debugger>`.
 
 ```{image} ../images/interface-right.png
@@ -133,6 +135,21 @@ the left, right, top, or bottom of the panel:
 
 The work area has a single current activity. The tab for the current activity is
 marked with a colored top border (blue by default).
+
+### Switching Tabs by Index
+
+You can switch to a specific tab in the current tab bar using {kbd}`Ctrl+Alt`
+({kbd}`Cmd+Option` on macOS) and a number from {kbd}`1` to {kbd}`8`, where
+{kbd}`1` is the first tab. {kbd}`Ctrl+Alt+9` ({kbd}`Cmd+Option+9` on macOS)
+activates the last tab in the current tab bar. When the main area is split into
+multiple panes, these shortcuts only switch tabs within the current pane. If the
+numbered tab does not exist in that pane, the shortcut does nothing.
+
+On Windows, {kbd}`Ctrl+Alt` also acts as {kbd}`AltGr`. If your keyboard layout
+types a character for {kbd}`AltGr` and a number, such as `[` and `]` on a German
+keyboard, the shortcut with that number types the character instead of switching
+tabs. You can assign other keys in the
+{ref}`keyboard shortcuts settings <user-shortcuts>`.
 
 (tabs)=
 
@@ -286,6 +303,61 @@ wish to run are passed in the `args` argument as a list of strings:
 
 In this example `docmanager:save` and `application:close` commands are mapped to `Accel T`.
 The commands are run in succession when you use the shortcut.
+
+### Shortcuts for R operators
+
+JupyterLab provides shortcuts for operators that are common in R when an editor
+using the R language is active. Press {kbd}`Alt+-` ({kbd}`Option+-` on macOS)
+to insert `<-`, or {kbd}`Ctrl+Shift+M` ({kbd}`Cmd+Shift+M` on macOS) to insert
+`%>%`. These shortcuts are scoped to R language editors, so they do not affect
+editors using another language.
+
+To replace `%>%` with R's native pipe `|>`, use the following Keyboard
+Shortcuts settings. First disable the built-in bindings using their exact
+keys and selectors, then add a macro scoped to R editors:
+
+```json
+{
+  "shortcuts": [
+    {
+      "command": "console:replace-selection",
+      "keys": ["Accel Shift M"],
+      "selector": ".jp-CodeConsole-promptCell [data-jp-editor-language='r']",
+      "disabled": true
+    },
+    {
+      "command": "fileeditor:replace-selection",
+      "keys": ["Accel Shift M"],
+      "selector": ".jp-FileEditor [data-jp-editor-language='r']",
+      "disabled": true
+    },
+    {
+      "command": "notebook:replace-selection",
+      "keys": ["Accel Shift M"],
+      "selector": ".jp-Notebook.jp-mod-editMode [data-jp-editor-language='r']",
+      "disabled": true
+    },
+    {
+      "command": "apputils:run-first-enabled",
+      "keys": ["Accel Shift M"],
+      "args": {
+        "commands": [
+          "console:replace-selection",
+          "fileeditor:replace-selection",
+          "notebook:replace-selection"
+        ],
+        "args": { "text": "|> " }
+      },
+      "selector": "[data-jp-editor-language='r']"
+    }
+  ]
+}
+```
+
+`run-first-enabled` sends the replacement to the first command that is
+available in the current context. Use the same pattern to customize `Alt -`.
+In the settings, `Alt` is the {kbd}`Option` key on macOS, and `Accel` maps to
+{kbd}`Cmd` on macOS and {kbd}`Ctrl` on other platforms.
 
 ### Markdown editing shortcuts
 

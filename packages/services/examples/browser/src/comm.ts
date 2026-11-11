@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { KernelManager } from '@jupyterlab/services';
+import { CommsOverSubshells, KernelManager } from '@jupyterlab/services';
 import { PromiseDelegate } from '@lumino/coreutils';
 
 import { log } from './log';
@@ -9,7 +9,10 @@ import { log } from './log';
 export async function main(): Promise<void> {
   // Start a python kernel
   const kernelManager = new KernelManager();
-  const kernel = await kernelManager.startNew({ name: 'python' });
+  const kernel = await kernelManager.startNew(
+    { name: 'python' },
+    { commsOverSubshells: CommsOverSubshells.Disabled }
+  );
 
   log('Register a comm target in the kernel');
   await kernel.requestExecute({

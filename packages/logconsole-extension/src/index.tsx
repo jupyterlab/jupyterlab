@@ -41,6 +41,9 @@ import {
 import { UUID } from '@lumino/coreutils';
 import type { DockLayout } from '@lumino/widgets';
 import * as React from 'react';
+// The plugin activates at startup and creates the status item at once, so
+// the module is needed before the application starts.
+// eslint-disable-next-line jupyter/prefer-lazy-imports
 import { LogConsoleStatus } from './status';
 
 const LOG_CONSOLE_FACTORY = 'LogConsole';

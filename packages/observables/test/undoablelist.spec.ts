@@ -33,6 +33,18 @@ class Serializer implements ISerializer<Test> {
 const serializer = new Serializer();
 const value: JSONObject = { name: 'foo' };
 
+class Item {
+  constructor(readonly value: JSONObject) {}
+}
+
+const ser: ISerializer<Item> = {
+  fromJSON: (v: JSONObject) => new Item({ ...v }),
+  toJSON: (i: Item) => i.value
+};
+
+const ids = (l: ObservableUndoableList<Item>) =>
+  Array.from({ length: l.length }, (_, i) => l.get(i).value['id']).join('');
+
 describe('@jupyterlab/observables', () => {
   describe('ObservableUndoableList', () => {
     describe('#constructor', () => {
@@ -208,7 +220,7 @@ describe('@jupyterlab/observables', () => {
         expect(list.length).toBe(4);
       });
 
-      it('should undo a move', () => {
+      it('should redo a move', () => {
         const items = [
           serializer.fromJSON(value),
           serializer.fromJSON(value),
@@ -220,6 +232,55 @@ describe('@jupyterlab/observables', () => {
         list.undo();
         list.redo();
         expect((list.get(2) as any)['count']).toBe((items[1] as any)['count']);
+      });
+
+      it('should redo a set', () => {
+        const list = new ObservableUndoableList(ser);
+        list.pushAll([new Item({ id: 'a' }), new Item({ id: 'b' })]);
+        list.set(1, new Item({ id: 'c' }));
+        expect(ids(list)).toBe('ac');
+        list.undo();
+        expect(ids(list)).toBe('ab');
+        list.redo();
+        expect(ids(list)).toBe('ac');
+      });
+
+      it('should not mutate change index in undo stack when redoing a set multiple times', () => {
+        const list = new ObservableUndoableList(ser);
+        list.pushAll([new Item({ id: 'a' }), new Item({ id: 'b' })]);
+        list.set(0, new Item({ id: 'c' }));
+        const seen: string[] = [ids(list)];
+        for (let k = 0; k < 2; k++) {
+          list.undo();
+          seen.push(ids(list));
+          list.redo();
+          seen.push(ids(list));
+        }
+        expect(seen.join(' ')).toBe('cb ab cb ab cb');
+      });
+
+      it('should preserve compound operation order across multiple undo/redo cycles', () => {
+        const list = new ObservableUndoableList(ser);
+        list.push(new Item({ id: 'a' }));
+
+        list.beginCompoundOperation();
+        list.push(new Item({ id: 'b' }));
+        list.push(new Item({ id: 'c' }));
+        list.endCompoundOperation();
+
+        expect(ids(list)).toBe('abc');
+
+        // First undo/redo cycle
+        list.undo();
+        expect(ids(list)).toBe('a');
+        list.redo();
+        expect(ids(list)).toBe('abc');
+
+        // Second undo/redo cycle (verifies that undo does not mutate stack in-place)
+        list.undo();
+        expect(ids(list)).toBe('a');
+        list.redo();
+        expect(ids(list)).toBe('abc');
       });
     });
 

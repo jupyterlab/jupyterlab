@@ -14,6 +14,7 @@ import {
   acceptDialog,
   JupyterServer,
   signalToPromise,
+  sleep,
   testEmission
 } from '@jupyterlab/testing';
 
@@ -192,6 +193,25 @@ describe('DebuggerService', () => {
     });
   });
 
+  describe('#displayModules()', () => {
+    it('should do nothing without a debugger session', async () => {
+      await expect(service.displayModules()).resolves.toBeUndefined();
+    });
+
+    it('should not request the modules unless the debugger is started', async () => {
+      service.session = session;
+      const sendRequest = jest.spyOn(service.session, 'sendRequest');
+      await service.displayModules();
+      expect(sendRequest).not.toHaveBeenCalled();
+
+      await service.start();
+      await service.stop();
+      sendRequest.mockClear();
+      await service.displayModules();
+      expect(sendRequest).not.toHaveBeenCalled();
+    });
+  });
+
   describe('#session', () => {
     it('should emit the sessionChanged signal when setting the session', () => {
       const sessionChangedEvents: (IDebugger.ISession | null)[] = [];
@@ -249,6 +269,61 @@ describe('DebuggerService', () => {
         expect(bpList[1].line).toEqual(breakpoints[1].line);
         expect(bpList[0].source).toEqual(breakpoints[0].source);
         expect(bpList[1].source).toEqual(breakpoints[1].source);
+      });
+    });
+
+    describe('#displayModules', () => {
+      it('should display the modules once the debugger is started', async () => {
+        const sendRequest = jest.spyOn(service.session!, 'sendRequest');
+        const kernelSourcesChanged = signalToPromise(
+          service.model.kernelSources.changed
+        );
+        await service.displayModules();
+        expect(sendRequest).toHaveBeenCalledWith('modules', {});
+        const [, kernelSources] = await kernelSourcesChanged;
+        expect(kernelSources?.length).toBeGreaterThan(0);
+      });
+
+      it('should not display the modules once the debugger is stopped', async () => {
+        await service.displayModules();
+        // Answer the disconnect request at once, so the display is still pending
+        // when the debugger stops.
+        jest
+          .spyOn(service.session!, 'sendRequest')
+          .mockImplementation(async () => ({}) as never);
+        await service.stop();
+        // Wait past the debounce of the display.
+        await sleep(1000);
+        expect(service.model.kernelSources.kernelSources).toEqual([]);
+      });
+
+      it('should not display a modules reply received after the debugger stopped', async () => {
+        const displayed = service.displayModules();
+        jest
+          .spyOn(service.session!, 'sendRequest')
+          .mockImplementation(async () => ({}) as never);
+        await service.stop();
+        await displayed;
+        await sleep(1000);
+        expect(service.model.kernelSources.kernelSources).toEqual([]);
+      });
+
+      it('should not display the modules of a stopped session after a restart', async () => {
+        await service.displayModules();
+        // Answer the stop and start requests at once, so the display of the
+        // previous session is still pending when the debugger starts again.
+        jest
+          .spyOn(service.session!, 'sendRequest')
+          .mockImplementation(
+            async command =>
+              (command === 'initialize'
+                ? { success: true, body: {} }
+                : {}) as never
+          );
+        await service.stop();
+        await service.start();
+        await sleep(1000);
+        expect(service.model.kernelSources.kernelSources).toEqual([]);
       });
     });
 
