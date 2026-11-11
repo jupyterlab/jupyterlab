@@ -699,17 +699,6 @@ export class PluginList extends ReactWidget {
           // eslint-disable-next-line jupyter/no-dynamic-translation
           trans._p('schema', schema.title)
         : id;
-    const highlightedTitleIndices = StringExt.matchSumOfSquares(
-      title.toLocaleLowerCase(),
-      this._query?.toLocaleLowerCase() ?? ''
-    );
-    const hightlightedTitle = StringExt.highlight(
-      title,
-      highlightedTitleIndices?.indices ?? [],
-      chunk => {
-        return <mark>{chunk}</mark>;
-      }
-    );
     const description =
       typeof schema.description === 'string'
         ? // Extracted from the settings schema by the `description` selector.
@@ -721,20 +710,9 @@ export class PluginList extends ReactWidget {
     const iconClass = this.getHint(ICON_CLASS_KEY, this._registry, plugin);
     const iconTitle = this.getHint(ICON_LABEL_KEY, this._registry, plugin);
     const filteredProperties = this._listFilter
-      ? this._listFilter(plugin)?.map(fieldValue => {
-          const highlightedIndices = StringExt.matchSumOfSquares(
-            fieldValue.toLocaleLowerCase(),
-            this._query?.toLocaleLowerCase() ?? ''
-          );
-          const highlighted = StringExt.highlight(
-            fieldValue,
-            highlightedIndices?.indices ?? [],
-            chunk => {
-              return <mark>{chunk}</mark>;
-            }
-          );
-          return <li key={`${id}-${fieldValue}`}> {highlighted} </li>;
-        })
+      ? this._listFilter(plugin)?.map(fieldValue => (
+          <li key={`${id}-${fieldValue}`}> {this._highlight(fieldValue)} </li>
+        ))
       : undefined;
     const hasMatchDetails =
       filteredProperties !== undefined && filteredProperties.length > 0;
@@ -770,13 +748,28 @@ export class PluginList extends ReactWidget {
               stylesheet="settingsEditor"
             />
             <span className="jp-PluginList-entry-label-text">
-              {hightlightedTitle}
+              {this._highlight(title)}
             </span>
           </div>
           <ul id={matchesId}>{filteredProperties}</ul>
         </div>
       </li>
     );
+  }
+
+  /**
+   * Mark the first part of the text that matches the search query.
+   */
+  private _highlight(text: string): (string | JSX.Element)[] {
+    const query = this._query?.toLocaleLowerCase() ?? '';
+    const start = query ? text.toLocaleLowerCase().indexOf(query) : -1;
+    const indices =
+      start === -1
+        ? []
+        : Array.from({ length: query.length }, (_, i) => start + i);
+    return StringExt.highlight(text, indices, chunk => (
+      <mark key="match">{chunk}</mark>
+    ));
   }
 
   render(): JSX.Element {

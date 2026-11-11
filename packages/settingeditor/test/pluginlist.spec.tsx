@@ -469,6 +469,35 @@ describe('@jupyterlab/settingeditor', () => {
           'fontSize'
         ]);
       });
+
+      it('should mark only the text that matches the query', async () => {
+        const pluginId = 'plugin-codemirror';
+        connector.schemas[pluginId] = {
+          type: 'object',
+          title: 'Editor',
+          properties: {
+            defaultConfig: {
+              title: 'Default editor configuration',
+              type: 'object',
+              properties: { fontSize: { title: 'Font Size', type: 'number' } }
+            }
+          }
+        };
+        await registry.load(pluginId);
+        list = await setupList(registry, undefined, 'font');
+
+        const marks = () =>
+          Array.from(
+            list.node.querySelectorAll(`[data-id="${pluginId}"] li`),
+            item =>
+              Array.from(item.querySelectorAll('mark'), m => m.textContent)
+          );
+        for (let i = 0; i < 10 && marks().length === 0; i++) {
+          await framePromise();
+        }
+
+        expect(marks()).toEqual([[], ['Font'], ['font']]);
+      });
     });
 
     describe('#setFilter()', () => {
