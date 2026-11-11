@@ -151,7 +151,7 @@
   text-overflow: ellipsis;
 }
 
-.jp-PluginList-entry code {
+.jp-PluginList-settingKey {
   font-family: var(--jp-code-font-family);
   font-size: var(--jp-code-font-size);
 }

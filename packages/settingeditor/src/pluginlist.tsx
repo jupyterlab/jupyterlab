@@ -748,7 +748,9 @@ export class PluginList extends ReactWidget {
             style={{ paddingLeft: `${12 * (match.path.length - 1)}px` }}
           >
             {match.isKey ? (
-              <code>{this._highlight(match.label)}</code>
+              <code className="jp-PluginList-settingKey">
+                {this._highlight(match.label)}
+              </code>
             ) : (
               this._highlight(match.label)
             )}
