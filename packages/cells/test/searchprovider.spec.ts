@@ -41,7 +41,10 @@ function createPlaceholderCell(editable = true): CodeCell {
  */
 const LINK_PARSER: IRenderMime.IMarkdownParser = {
   render: async source =>
-    source.replace(/\[([^\]]*)\]\(([^)]*)\)/g, '<a href="$2">$1</a>')
+    source.replace(
+      /\[([^\]]*)\]\(((?:[^()]|\([^()]*\))*)\)/g,
+      '<a href="$2">$1</a>'
+    )
 };
 
 /**
@@ -257,6 +260,25 @@ describe('cells/searchprovider', () => {
 
       const match = await provider.highlightNext();
       expect(match).toMatchObject({ text: 'apple', position: 10 });
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
+    it('should unrender the cell for a match in a link destination with parentheses', async () => {
+      cell = createMarkdownCell(
+        'The [Python](https://example.com/Python_(language)) page is about Python.'
+      );
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/Python/, {});
+
+      let match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'Python' });
+      expect(cell.rendered).toBe(true);
+
+      match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'Python', position: 33 });
       expect(cell.rendered).toBe(false);
       provider.dispose();
     });

@@ -807,13 +807,17 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     const source = this.model.sharedModel.getSource();
     const ranges: Array<{ start: number; end: number }> = [];
     // Link and image destinations: [text](destination) and ![alt](destination).
-    // For an image the alt text is not rendered either.
-    for (const match of source.matchAll(/(!?)\[[^\]]*\]\(([^)]*)\)/g)) {
+    // For an image the alt text is not rendered either. A destination can
+    // hold pairs of parentheses, as in https://example.com/Python_(language).
+    for (const match of source.matchAll(
+      /(!?)\[[^\]]*\]\(((?:[^()]|\([^()]*\))*)\)/g
+    )) {
       const destination = match[2] ?? '';
-      const openParen = (match.index ?? 0) + match[0].lastIndexOf('(');
+      const end = (match.index ?? 0) + match[0].length;
       ranges.push({
-        start: match[1] === '!' ? (match.index ?? 0) : openParen,
-        end: openParen + destination.length + 2
+        start:
+          match[1] === '!' ? (match.index ?? 0) : end - destination.length - 2,
+        end
       });
     }
     // Reference definitions: the whole [label]: destination line.
