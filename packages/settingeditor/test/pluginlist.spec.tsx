@@ -382,6 +382,57 @@ describe('@jupyterlab/settingeditor', () => {
         );
         expect(matches).toEqual([]);
       });
+
+      it('should match properties of the items of an array setting', () => {
+        const props = {
+          properties: {
+            agents: {
+              title: 'Agents',
+              type: 'array',
+              items: {
+                type: 'object',
+                additionalProperties: false,
+                properties: { label: { title: 'Label', type: 'string' } }
+              }
+            }
+          }
+        } as unknown as ISettingRegistry.IProperty;
+        const filter = (item: string) =>
+          item.toLowerCase().includes('label') ? {} : null;
+        const matches = PluginList.prototype.getFilterString.call(
+          PluginList.prototype,
+          filter,
+          props
+        );
+        expect(matches).toEqual(['Agents', 'Label', 'label']);
+      });
+
+      it('should match properties of array items given by a reference', () => {
+        const props = {
+          properties: {
+            toolbar: {
+              title: 'Toolbar items',
+              type: 'array',
+              items: { $ref: '#/definitions/toolbarItem' }
+            }
+          }
+        } as unknown as ISettingRegistry.IProperty;
+        const definitions = {
+          toolbarItem: {
+            type: 'object',
+            properties: { type: { title: 'Item type', type: 'string' } }
+          }
+        };
+        const filter = (item: string) =>
+          item.toLowerCase().includes('item type') ? {} : null;
+        const matches = PluginList.prototype.getFilterString.call(
+          PluginList.prototype,
+          filter,
+          props,
+          definitions
+        );
+        expect(matches).toEqual(['Toolbar items', 'Item type']);
+      });
     });
 
     describe('#mapPlugins()', () => {
