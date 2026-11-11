@@ -197,6 +197,28 @@ describe('@jupyterlab/settingregistry', () => {
 
   describe('SettingRegistry', () => {
     describe('#reconcileShortcuts()', () => {
+      it('should prefer an enabled user shortcut over a default with the same keys and selector', () => {
+        const defaults = [
+          {
+            command: 'default:command',
+            keys: ['Ctrl D'],
+            selector: '.jp-Activity'
+          }
+        ];
+        const user = [
+          {
+            command: 'user:command',
+            keys: ['Ctrl D'],
+            selector: '.jp-Activity',
+            args: { option: true }
+          }
+        ];
+
+        expect(SettingRegistry.reconcileShortcuts(defaults, user)).toEqual(
+          user
+        );
+      });
+
       it('should migrate only the targeted commands and preserve shortcut options', () => {
         const user = [
           {
