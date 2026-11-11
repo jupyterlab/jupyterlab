@@ -75,15 +75,15 @@ test.describe('Console', () => {
       node.scrollTop = node.scrollHeight;
     });
 
-    await page.menu.clickMenuItem('Settings>Auto Close Brackets');
-
-    // Wait until the new setting reaches the prompt editor.
-    const promptEditor = page.locator(
-      '.jp-CodeConsole-promptCell .jp-InputArea-editor'
+    await page.menu.clickMenuItem(
+      'Settings>Console Run Keystroke>Execute with Enter'
     );
-    await promptEditor.click();
-    await page.keyboard.type('(');
-    await expect(promptEditor).toHaveText('()');
+    // The console gets the new mode in the same settings update that would
+    // move the prompt.
+    await expect(page.locator('.jp-CodeConsole')).toHaveAttribute(
+      'data-jp-interaction-mode',
+      'terminal'
+    );
 
     const inputBox = await input.boundingBox();
     const contentBox = await content.boundingBox();
