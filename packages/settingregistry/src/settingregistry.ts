@@ -1216,20 +1216,18 @@ export namespace SettingRegistry {
       [keys: string]: {
         [selector: string]: {
           shouldDisableDefaultShortcut: boolean;
-          // Enabled shortcuts, by their selector before the upgrade
-          enabledUserShortcuts: Map<string, ISettingRegistry.IShortcut>;
-          enabledDefaultShortcuts: Map<string, ISettingRegistry.IShortcut>;
+          enabledUserShortcut: ISettingRegistry.IShortcut | null;
+          enabledDefaultShortcut: ISettingRegistry.IShortcut | null;
         };
       };
     } = {};
 
     // If a user shortcut collides with another user shortcut warn and filter.
-    const orderedUser = [
+    user = [
       // Reorder so that disabled are first
       ...user.filter(s => !!s.disabled),
       ...user.filter(s => !s.disabled)
-    ];
-    user = Private.upgradeShortcuts(orderedUser).filter((shortcut, index) => {
+    ].filter(shortcut => {
       const keys =
         CommandRegistry.normalizeKeys(shortcut).join(RECORD_SEPARATOR);
       if (!keys) {
@@ -1244,25 +1242,21 @@ export namespace SettingRegistry {
       }
 
       const { disabled, selector } = shortcut;
-      // As for the defaults, two user shortcuts collide only if they share
-      // the selector as written.
-      const written = orderedUser[index].selector;
       if (!(selector in memo[keys])) {
         memo[keys][selector] = {
-          enabledUserShortcuts: new Map(disabled ? [] : [[written, shortcut]]),
-          enabledDefaultShortcuts: new Map(),
+          enabledUserShortcut: disabled ? null : shortcut,
+          enabledDefaultShortcut: null,
           shouldDisableDefaultShortcut: !!disabled
         };
         return !disabled;
       }
 
-      const collision = memo[keys][selector].enabledUserShortcuts.get(written);
-      if (collision === undefined) {
+      if (memo[keys][selector].enabledUserShortcut === null) {
         if (disabled) {
           memo[keys][selector].shouldDisableDefaultShortcut = true;
           return false;
         } else {
-          memo[keys][selector].enabledUserShortcuts.set(written, shortcut);
+          memo[keys][selector].enabledUserShortcut = shortcut;
           return true;
         }
       } else {
@@ -1270,7 +1264,7 @@ export namespace SettingRegistry {
           'Skipping',
           shortcut,
           'shortcut because it collides with another enabled shortcut:',
-          collision
+          memo[keys][selector].enabledUserShortcut
         );
         return false;
       }
@@ -1281,12 +1275,10 @@ export namespace SettingRegistry {
     // disabled shortcuts first). If a shortcut has already been added by the
     // user preferences, filter it out too (this includes shortcuts that are
     // disabled by user preferences).
-    const orderedDefaults = [
+    defaults = [
       ...defaults.filter(s => !!s.disabled),
       ...defaults.filter(s => !s.disabled)
-    ];
-    const upgradedDefaults = Private.upgradeShortcuts(orderedDefaults);
-    defaults = upgradedDefaults.filter((shortcut, index) => {
+    ].filter(shortcut => {
       const keys =
         CommandRegistry.normalizeKeys(shortcut).join(RECORD_SEPARATOR);
 
@@ -1297,29 +1289,17 @@ export namespace SettingRegistry {
         memo[keys] = {};
       }
       const { disabled, selector } = shortcut;
-      // Two enabled defaults collide only if they share the selector as
-      // written: an extension that still ships a deprecated selector keeps
-      // its shortcut next to a default with the same keys.
-      const written = orderedDefaults[index].selector;
 
       if (!(selector in memo[keys])) {
         memo[keys][selector] = {
-          enabledUserShortcuts: new Map(), // we would have seen it already as we processed user shortcuts earlier
-          enabledDefaultShortcuts: new Map(
-            disabled ? [] : [[written, shortcut]]
-          ),
+          enabledUserShortcut: null, // we would have seen it already as we processed user shortcuts earlier
+          enabledDefaultShortcut: disabled ? null : shortcut,
           shouldDisableDefaultShortcut: !!disabled
         };
         return !disabled;
       }
 
-      if (memo[keys][selector].enabledUserShortcuts.size > 0) {
-        return false;
-      }
-
-      const collision =
-        memo[keys][selector].enabledDefaultShortcuts.get(written);
-      if (collision === undefined) {
+      if (memo[keys][selector].enabledDefaultShortcut === null) {
         if (disabled) {
           memo[keys][selector].shouldDisableDefaultShortcut = true;
           return false;
@@ -1328,7 +1308,7 @@ export namespace SettingRegistry {
             // Default shortcut was disabled - no warning
             return false;
           } else {
-            memo[keys][selector].enabledDefaultShortcuts.set(written, shortcut);
+            memo[keys][selector].enabledDefaultShortcut = shortcut;
             return true;
           }
         }
@@ -1342,7 +1322,7 @@ export namespace SettingRegistry {
             'Skipping',
             shortcut,
             'default shortcut because it collides with another enabled default shortcut:',
-            collision
+            memo[keys][selector].enabledDefaultShortcut
           );
           return false;
         }
@@ -1350,7 +1330,7 @@ export namespace SettingRegistry {
     });
 
     // Return all the shortcuts that should be registered
-    return (
+    return Private.upgradeShortcuts(
       user
         .concat(defaults)
         .filter(shortcut => !shortcut.disabled)
@@ -1359,17 +1339,6 @@ export namespace SettingRegistry {
           return { args: {}, ...shortcut };
         })
     );
-  }
-
-  /**
-   * Upgrade the selectors of shortcuts written for an earlier version.
-   *
-   * @returns A copy of the shortcuts, with the selectors that `reconcileShortcuts` compares.
-   */
-  export function upgradeShortcuts(
-    shortcuts: ISettingRegistry.IShortcut[]
-  ): ISettingRegistry.IShortcut[] {
-    return Private.upgradeShortcuts(shortcuts);
   }
 
   /**
@@ -1703,27 +1672,15 @@ namespace Private {
         old: '[data-jp-kernel-user] :focus:not(:read-write)',
         new: '[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)',
         versionDeprecated: 'JupyterLab 4.1.1'
-      },
-      {
-        old: '.jp-Activity',
-        new: '.jp-LabShell',
-        commands: ['application:close', 'filemenu:close-and-cleanup']
       }
     ];
     const upgraded = shortcuts.map(shortcut => {
       const oldSelector = shortcut.selector;
       let newSelector = oldSelector;
       for (const change of changes) {
-        const matches = change.commands
-          ? newSelector === change.old &&
-            change.commands.includes(shortcut.command)
-          : newSelector.includes(change.old);
-        if (matches) {
-          newSelector = newSelector.replace(change.old, change.new);
-          if (
-            change.versionDeprecated &&
-            !selectorsAlreadyWarnedAbout.has(oldSelector)
-          ) {
+        if (oldSelector.includes(change.old)) {
+          newSelector = oldSelector.replace(change.old, change.new);
+          if (!selectorsAlreadyWarnedAbout.has(oldSelector)) {
             selectorDeprecationWarnings.add(
               `"${change.old}" was replaced with "${change.new}" in ${change.versionDeprecated} (present in "${oldSelector}")`
             );
@@ -1731,7 +1688,8 @@ namespace Private {
           }
         }
       }
-      return { ...shortcut, selector: newSelector };
+      shortcut.selector = newSelector;
+      return shortcut;
     });
     if (selectorDeprecationWarnings.size > 0) {
       console.warn(

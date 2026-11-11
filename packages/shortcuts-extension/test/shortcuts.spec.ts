@@ -490,45 +490,123 @@ describe('@jupyterlab/shortcut-extension', () => {
       expect(shortcuts).toHaveLength(1);
     });
 
-    it('should migrate the selectors of the user shortcuts', async () => {
+    /**
+     * Load the shortcuts settings with the given default and user shortcuts.
+     */
+    async function loadShortcuts(
+      defaults: ISettingRegistry.IShortcut[],
+      user: ISettingRegistry.IShortcut[]
+    ): Promise<ISettingRegistry.ISettings> {
+      const extension: ISettingRegistry.IPlugin = {
+        id: 'test-extension:plugin',
+        data: { composite: {}, user: {} },
+        raw: '{}',
+        schema: { type: 'object', 'jupyter.lab.shortcuts': defaults },
+        version: 'test'
+      };
       const connector: IDataConnector<ISettingRegistry.IPlugin, string> = {
         fetch: jest.fn().mockResolvedValue({
           ...dummySettings,
-          raw: JSON.stringify({
-            shortcuts: [
-              {
-                command: 'application:close',
-                keys: ['Alt W'],
-                selector: '.jp-Activity',
-                disabled: true
-              },
-              {
-                command: 'application:close',
-                keys: ['Ctrl Alt W'],
-                selector: '.jp-Activity'
-              }
-            ]
-          })
+          raw: JSON.stringify({ shortcuts: user })
         }),
         list: jest.fn(),
         save: jest.fn(),
         remove: jest.fn()
       };
-      const settingRegistry = new SettingRegistry({ connector });
-
-      void plugin.default.activate(
-        { commands: new CommandRegistry() } as any,
-        settingRegistry
+      const settingRegistry = new SettingRegistry({
+        connector,
+        plugins: [extension]
+      });
+      await plugin.default.activate(
+        { commands: new CommandRegistry() } as JupyterFrontEnd,
+        settingRegistry,
+        null,
+        null,
+        null
       );
+      return settingRegistry.load(plugin.default.id);
+    }
 
-      const settings = await settingRegistry.load(plugin.default.id);
+    const closeTab = {
+      command: 'application:close',
+      keys: ['Alt W'],
+      selector: '.jp-LabShell'
+    };
+
+    it('should migrate the selectors of the user shortcuts', async () => {
+      const settings = await loadShortcuts(
+        [],
+        [
+          { ...closeTab, selector: '.jp-Activity', disabled: true },
+          { ...closeTab, keys: ['Ctrl Alt W'], selector: '.jp-Activity' }
+        ]
+      );
       // The shortcuts editor compares these with the composite shortcuts.
       const user = settings.get('shortcuts')
         .user as ISettingRegistry.IShortcut[];
-
       expect(user.map(shortcut => shortcut.selector)).toEqual([
         '.jp-LabShell',
         '.jp-LabShell'
+      ]);
+    });
+
+    it('should disable a default with a user shortcut stored with the old selector', async () => {
+      const settings = await loadShortcuts(
+        [closeTab],
+        [{ ...closeTab, selector: '.jp-Activity', disabled: true }]
+      );
+      expect(settings.get('shortcuts').composite).toEqual([]);
+    });
+
+    it('should disable a default with a default stored with the old selector', async () => {
+      // The shortcuts of `overrides.json` are part of the defaults.
+      const settings = await loadShortcuts(
+        [closeTab, { ...closeTab, selector: '.jp-Activity', disabled: true }],
+        []
+      );
+      expect(settings.get('shortcuts').composite).toEqual([]);
+    });
+
+    it('should migrate only the selectors of the two close commands', async () => {
+      const settings = await loadShortcuts(
+        [],
+        [
+          {
+            command: 'filemenu:close-and-cleanup',
+            keys: ['Ctrl Shift Q'],
+            selector: '.jp-Activity'
+          },
+          {
+            command: 'other:command',
+            keys: ['Alt Y'],
+            selector: '.jp-Activity'
+          },
+          { ...closeTab, keys: ['Alt Z'], selector: '.jp-Activity .custom' }
+        ]
+      );
+      const composite = settings.get('shortcuts')
+        .composite as ISettingRegistry.IShortcut[];
+      expect(composite.map(shortcut => shortcut.selector)).toEqual([
+        '.jp-LabShell',
+        '.jp-Activity',
+        '.jp-Activity .custom'
+      ]);
+    });
+
+    it('should keep the options of a migrated shortcut', async () => {
+      const settings = await loadShortcuts(
+        [],
+        [
+          {
+            ...closeTab,
+            selector: '.jp-Activity',
+            args: { foo: 'bar' },
+            preventDefault: false
+          }
+        ]
+      );
+      expect(settings.get('shortcuts').composite).toEqual([
+        { ...closeTab, args: { foo: 'bar' }, preventDefault: false }
       ]);
     });
   });
