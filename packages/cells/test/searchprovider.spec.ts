@@ -37,15 +37,35 @@ function createPlaceholderCell(editable = true): CodeCell {
 }
 
 /**
- * A Markdown parser which renders only inline links. Without a parser, the
- * rendered text of a cell is its source.
+ * A Markdown parser which renders only images, links and reference
+ * definitions. Without a parser, the rendered text of a cell is its source.
  */
 const LINK_PARSER: IRenderMime.IMarkdownParser = {
   render: async source =>
-    source.replace(
-      /\[([^\]]*)\]\(((?:[^()]|\([^()]*\))*)\)/g,
-      '<a href="$2">$1</a>'
-    )
+    source
+      .replace(/^\[[^\]]+\]:.*$/gm, '')
+      .replace(/!\[([^\]]*)\]\(([^)]*)\)/g, '<img alt="$1" src="$2">')
+      .replace(
+        /\[([^\]]*)\]\(((?:[^()]|\([^()]*\))*)\)/g,
+        '<a href="$2">$1</a>'
+      )
+      .replace(/\[([^\]]*)\]\[[^\]]*\]/g, '<a href="#">$1</a>')
+};
+
+/**
+ * A typesetter which draws the formula `$x$` as MathJax does: the letter is
+ * the mathematical symbol 𝑥, in a text node of its own.
+ */
+const FORMULA_TYPESETTER: IRenderMime.ILatexTypesetter = {
+  typeset: host => {
+    if (host.innerHTML.includes('$x$')) {
+      host.innerHTML = host.innerHTML.replace(
+        '$x$',
+        '<mjx-container class="MathJax" jax="CHTML"><mjx-math>' +
+          '<mjx-mi><mjx-c>𝑥</mjx-c></mjx-mi></mjx-math></mjx-container>'
+      );
+    }
+  }
 };
 
 /**
@@ -68,7 +88,10 @@ function createMarkdownCell(
   });
   return new MarkdownCell({
     model,
-    rendermime: defaultRenderMime().clone({ markdownParser: LINK_PARSER }),
+    rendermime: defaultRenderMime().clone({
+      markdownParser: LINK_PARSER,
+      latexTypesetter: FORMULA_TYPESETTER
+    }),
     contentFactory: NBTestUtils.createBaseCellFactory(),
     placeholder: false,
     showEditorForReadOnlyMarkdown
@@ -332,6 +355,52 @@ describe('cells/searchprovider', () => {
       expect(match).toMatchObject({ text: 'example', readOnly: true });
       expect(cell.rendered).toBe(true);
       expect(renderedCurrentMatch(cell)).toBe(null);
+      provider.dispose();
+    });
+
+    it.each([
+      [
+        'the alternative text of an image',
+        'An apple, ![apple logo](logo.png).'
+      ],
+      [
+        'the label of a reference link',
+        'An apple, [more][apple].\n\n[apple]: https://example.com'
+      ],
+      [
+        'a reference definition',
+        'An apple, [more][ref].\n\n[ref]: https://example.com/apple'
+      ],
+      ['an HTML comment', 'An apple, <!-- an apple --> here.']
+    ])('should unrender the cell for a match in %s', async (_, source) => {
+      cell = createMarkdownCell(source);
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/apple/, {});
+
+      // The rendered text shows the first match only
+      await provider.highlightNext();
+      expect(cell.rendered).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe('apple');
+
+      const match = await provider.highlightNext();
+      expect(match?.position).toBe(source.indexOf('apple', 4));
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
+    it('should mark the current match in a typeset formula', async () => {
+      cell = createMarkdownCell('Take $x$ from the box.');
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/x/, {});
+
+      const match = await provider.highlightNext();
+      expect(match?.text).toBe('𝑥');
+      expect(cell.rendered).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe('𝑥');
       provider.dispose();
     });
 
