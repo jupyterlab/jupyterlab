@@ -184,9 +184,9 @@ reference to it. One rendered copy of the SVG above has:
 
 An SVG refers to an ID in `url(#...)` in any attribute or rule, in
 `href` and `xlink:href`, in `aria-labelledby` and `aria-describedby`,
-in animation timing such as `begin="dot.click"`, and in the values of
-an animation of `href`. Each of these references follows the rename.
-IDs that the SVG does not refer to keep their value.
+and in animation timing such as `begin="dot.click"`. Each of these
+references follows the rename. IDs that the SVG does not refer to keep
+their value.
 
 `LabIcon` rewrites the rules of a `<style>` element in your SVG once,
 so that every copy has the same rules. A rule styles only elements of
@@ -224,8 +224,20 @@ shown inline on the page, with the same specificity:
 
 A copy still differs from the SVG shown inline:
 
-- `:root` selects the root `<svg>` of the copy, and so do `:scope` and
-  `&` where they would select `:root`, as at the top level of the sheet.
+- `:root` selects the root `<svg>` of the copy.
+- A rule that holds nested rules styles only elements of the copies, as
+  every rule does. So the rules nested in
+  `[data-jp-theme-light='true'] { ... }` match no element: write the
+  theme attribute and the element in one selector instead.
+- In a `@scope` rule, an ID in the start or in the end does not follow
+  the rename, and declarations directly in the rule also style elements
+  of the page that the start selects.
+- The markup of a rendered copy is not an SVG for another icon: if it
+  has a `<style>` element, its rules match no element there. Give
+  `LabIcon` the SVG of the first icon instead.
+- A selector with a namespace prefix, such as `[xlink|href="#shine"]`,
+  and the values of an animation of `href`, such as
+  `values="#shine;#glow"`, do not follow the rename.
 - Some names that a style sheet defines are the same for the whole
   page, as for any style sheet: those of `@layer`, `@property`,
   `@function`, `@font-face`, `@counter-style`, `@font-palette-values`
@@ -234,9 +246,6 @@ A copy still differs from the SVG shown inline:
   is a new layer in each copy.
 - A `url(#...)` in the initial value of a `@property` rule does not
   follow the rename.
-- In a style rule with a list of selectors, the declarations between
-  two nested rules take the highest specificity of the list. So do the
-  declarations of an at-rule inside the style rule, such as `@media`.
 - The rules of a sheet that `@import` loads apply to the whole page, and
   a rule there that names a renamed ID does not match it.
 - Markup that React renders on the server, as with

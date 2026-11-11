@@ -299,32 +299,6 @@ test.describe('LabIcon copies of an svg with a style element', () => {
     expect(copies[0].values).toEqual(['rgb(0, 0, 255)']);
   });
 
-  test('should animate a rule with keyframes that a scope rule holds', async ({
-    page
-  }) => {
-    const svgstr = svg(
-      '<style>@scope (.a) { @keyframes test-labicon-scoped { from, to { fill: #00f } } rect { animation: test-labicon-scoped 1s infinite paused } }</style><g class="a"><rect width="32" height="32"/></g>'
-    );
-
-    const fill = await page.evaluate(svgstr => {
-      const LabIconClass = window.jupyterapp.docRegistry.getFileType('text')!
-        .icon!.constructor as typeof LabIcon;
-      const box = document.createElement('div');
-      document.body.appendChild(box);
-      try {
-        new LabIconClass({
-          name: 'test-labicon:scope-keyframes',
-          svgstr
-        }).element({ container: box });
-      } catch (error) {
-        return String(error);
-      }
-      return getComputedStyle(box.querySelector('rect')!).fill;
-    }, svgstr);
-
-    expect(fill).toEqual('rgb(0, 0, 255)');
-  });
-
   test('should render a gradient that nested declarations name when the first copy is hidden', async ({
     page
   }) => {
@@ -417,25 +391,6 @@ test.describe('LabIcon copies of an svg with a style element', () => {
     expect(copies[1].values).toEqual(['rgb(255, 0, 0)']);
   });
 
-  test('should match an XLink href attribute selector against the href of the svg', async ({
-    page
-  }) => {
-    const svgstr = svg(
-      `<style>@namespace xlink url(http://www.w3.org/1999/xlink); use[xlink|href="#r"]{fill:#f00}</style><rect id="r" width="16" height="32"/><use xlink:href="#r" x="16"/>`
-    );
-
-    const copies = await renderTwice(
-      page,
-      'test-labicon:xlink-attribute',
-      svgstr,
-      {
-        selectors: ['use']
-      }
-    );
-
-    expect(copies[1].values).toEqual(['rgb(255, 0, 0)']);
-  });
-
   test('should not match a style attribute selector against the custom properties of a copy', async ({
     page
   }) => {
@@ -445,70 +400,6 @@ test.describe('LabIcon copies of an svg with a style element', () => {
     await renderTwice(page, 'test-labicon:style-attribute', svgstr);
 
     expect(await centerColor(page, 1)).toEqual(BLUE);
-  });
-
-  test('should match :scope in a nested rule against the root of the svg', async ({
-    page
-  }) => {
-    const svgstr = svg(
-      `<style>.b{:scope > .a > &amp;{fill:#f00}}</style><g class="a"><rect class="b" width="32" height="32" fill="#00f"/></g>`
-    );
-
-    const copies = await renderTwice(
-      page,
-      'test-labicon:nested-scope',
-      svgstr,
-      { selectors: ['rect'] }
-    );
-
-    expect(copies[1].values).toEqual(['rgb(255, 0, 0)']);
-  });
-
-  test('should apply a scope rule whose root is a renamed id', async ({
-    page
-  }) => {
-    const svgstr = svg(
-      `<style>@scope (#g) { rect { fill: #f00 } }</style><g id="g"><rect width="16" height="32" fill="#00f"/></g><use href="#g" x="16"/>`
-    );
-
-    const copies = await renderTwice(page, 'test-labicon:scope-rule', svgstr, {
-      selectors: ['rect']
-    });
-
-    expect(copies[1].values).toEqual(['rgb(255, 0, 0)']);
-  });
-
-  test('should end a scope rule without a start at a renamed id', async ({
-    page
-  }) => {
-    const svgstr = svg(
-      `<style>@scope to (#g){rect{fill:#f00}}</style><g id="g"><rect width="32" height="32" fill="#00f"/></g><use href="#g"/>`
-    );
-
-    const copies = await renderTwice(
-      page,
-      'test-labicon:scope-end-only',
-      svgstr,
-      {
-        selectors: ['g rect']
-      }
-    );
-
-    expect(copies[1].values).toEqual(['rgb(0, 0, 255)']);
-  });
-
-  test('should match :scope in the end of a scope rule against the root of the scope', async ({
-    page
-  }) => {
-    const svgstr = svg(
-      `<style>@scope (.a) to (:scope > .b) { rect { fill: #f00 } }</style><g class="a"><g class="b"><rect width="16" height="32" fill="#00f"/></g><rect class="c" x="16" width="16" height="32" fill="#00f"/></g>`
-    );
-
-    const copies = await renderTwice(page, 'test-labicon:scope-end', svgstr, {
-      selectors: ['.b rect', '.c']
-    });
-
-    expect(copies[1].values).toEqual(['rgb(0, 0, 255)', 'rgb(255, 0, 0)']);
   });
 
   test('should match :scope in a scope rule against the root of the scope', async ({
@@ -523,67 +414,6 @@ test.describe('LabIcon copies of an svg with a style element', () => {
     });
 
     expect(copies[1].values).toEqual(['rgb(255, 0, 0)']);
-  });
-
-  test('should resolve & in the start of a nested scope rule to its parent rule', async ({
-    page
-  }) => {
-    const svgstr = svg(
-      `<style>.a { @scope (&amp; > .b) { rect { fill: #f00 } } }</style><g class="a"><g class="b"><rect width="32" height="32" fill="#00f"/></g></g>`
-    );
-
-    const copies = await renderTwice(
-      page,
-      'test-labicon:nested-scope-start',
-      svgstr,
-      { selectors: ['rect'] }
-    );
-
-    expect(copies[1].values).toEqual(['rgb(255, 0, 0)']);
-  });
-
-  test('should resolve & in a scope rule to the root of its scope', async ({
-    page
-  }) => {
-    const svgstr = svg(
-      '<style>@scope (.a) { &amp; > rect { fill: #f00 } }</style><g class="a"><rect width="32" height="32" fill="#00f"/></g>'
-    );
-
-    const copies = await renderTwice(
-      page,
-      'test-labicon:scope-nesting',
-      svgstr,
-      {
-        selectors: ['rect']
-      }
-    );
-
-    expect(copies[1].values).toEqual(['rgb(255, 0, 0)']);
-  });
-
-  test('should apply the declarations of a scope rule to the copies of its icon only', async ({
-    page
-  }) => {
-    await renderCopies(
-      page,
-      [
-        {
-          name: 'test-labicon:scope-declarations-1',
-          svgstr: svg(
-            '<style>@scope (.cls-1){fill:#00f}</style><rect class="cls-1" width="32" height="32"/>'
-          )
-        },
-        {
-          name: 'test-labicon:scope-declarations-2',
-          svgstr: svg(
-            '<style>@scope (.cls-1){fill:#f00}</style><rect class="cls-1" width="32" height="32"/>'
-          )
-        }
-      ],
-      { hideFirst: false }
-    );
-
-    expect(await centerColor(page, 0)).toEqual(BLUE);
   });
 
   test('should apply a rule that reads the theme attribute of the page', async ({
@@ -605,110 +435,6 @@ test.describe('LabIcon copies of an svg with a style element', () => {
     expect(fills).toEqual(['rgb(0, 0, 255)', 'rgb(255, 0, 0)']);
   });
 
-  test('should apply a nested rule whose parent rule matches an element of the page', async ({
-    page
-  }) => {
-    const svgstr = svg(
-      `<style>[data-jp-theme-light='true'] { .a { fill: #00f } }</style><rect class="a" width="32" height="32"/>`
-    );
-
-    const copies = await renderTwice(
-      page,
-      'test-labicon:theme-parent',
-      svgstr,
-      {
-        selectors: ['rect']
-      }
-    );
-
-    expect(copies[1].values).toEqual(['rgb(0, 0, 255)']);
-  });
-
-  test('should not apply the declarations of a parent rule to an element of the page', async ({
-    page
-  }) => {
-    const svgstr = svg(
-      `<style>[data-jp-theme-light='true'] { --test-labicon-page: 1; .a { fill: #00f } }</style><rect class="a" width="32" height="32"/>`
-    );
-    await renderTwice(page, 'test-labicon:theme-parent-declarations', svgstr);
-
-    const value = await page.evaluate(() =>
-      getComputedStyle(document.body).getPropertyValue('--test-labicon-page')
-    );
-    expect(value).toEqual('');
-  });
-
-  test('should not apply the declarations after the nested rules of a parent rule to an element of the page', async ({
-    page
-  }) => {
-    const svgstr = svg(
-      `<style>[data-jp-theme-light='true'] { .a { fill: #00f } --test-labicon-after: 1 }</style><rect class="a" width="32" height="32"/>`
-    );
-    await renderTwice(page, 'test-labicon:theme-parent-after', svgstr);
-
-    const value = await page.evaluate(() =>
-      getComputedStyle(document.body).getPropertyValue('--test-labicon-after')
-    );
-    expect(value).toEqual('');
-  });
-
-  test('should let a nested rule win over the declarations of its parent rule', async ({
-    page
-  }) => {
-    const svgstr = svg(
-      '<style>.a { fill: #f00; &amp; { fill: #00f } }</style><rect class="a" width="32" height="32"/>'
-    );
-
-    const copies = await renderTwice(
-      page,
-      'test-labicon:nested-order',
-      svgstr,
-      {
-        selectors: ['rect']
-      }
-    );
-
-    expect(copies[1].values).toEqual(['rgb(0, 0, 255)']);
-  });
-
-  test('should let the declarations after a nested rule win over it', async ({
-    page
-  }) => {
-    const svgstr = svg(
-      '<style>.a { &amp; { fill: #f00 } fill: #00f }</style><rect class="a" width="32" height="32"/>'
-    );
-
-    const copies = await renderTwice(
-      page,
-      'test-labicon:nested-declarations-order',
-      svgstr,
-      {
-        selectors: ['rect']
-      }
-    );
-
-    expect(copies[1].values).toEqual(['rgb(0, 0, 255)']);
-  });
-
-  test('should keep the specificity of each selector of a rule for the declarations after its nested rules', async ({
-    page
-  }) => {
-    const svgstr = svg(
-      '<style>.a.b { fill: #00f } #r, .a { .c { opacity: 1 } fill: #f00 }</style><rect class="a b" width="32" height="32"/>'
-    );
-
-    const copies = await renderTwice(
-      page,
-      'test-labicon:nested-declarations-specificity',
-      svgstr,
-      {
-        selectors: ['rect']
-      }
-    );
-
-    expect(copies[1].values).toEqual(['rgb(0, 0, 255)']);
-  });
-
   test('should keep the declarations of an at-rule inside a style rule under its condition', async ({
     page
   }) => {
@@ -719,25 +445,6 @@ test.describe('LabIcon copies of an svg with a style element', () => {
     const copies = await renderTwice(
       page,
       'test-labicon:media-in-rule',
-      svgstr,
-      {
-        selectors: ['rect']
-      }
-    );
-
-    expect(copies[1].values).toEqual(['rgb(0, 0, 255)']);
-  });
-
-  test('should keep the declarations after the nested rules of a rule inside an at-rule under its condition', async ({
-    page
-  }) => {
-    const svgstr = svg(
-      '<style>@media (max-width: 1px) { .a { .x { fill: #0f0 } fill: #f00 } }</style><rect class="a" width="32" height="32" fill="#00f"/>'
-    );
-
-    const copies = await renderTwice(
-      page,
-      'test-labicon:rule-in-media',
       svgstr,
       {
         selectors: ['rect']
@@ -794,118 +501,5 @@ test.describe('LabIcon copies of an svg with a style element', () => {
       return getComputedStyle(badge).fill;
     }, HOST);
     expect(fill).toEqual('rgb(255, 0, 0)');
-  });
-
-  test('should give a new reference in a copy that is given again as an svg its own custom property', async ({
-    page
-  }) => {
-    await renderCopies(
-      page,
-      [
-        {
-          name: 'test-labicon:given-again-url-1',
-          svgstr: svg(
-            `<style>.a{fill:url(#g)}</style><defs>${gradient('g', '#f00')}${gradient('h', '#00f')}</defs><rect class="a" width="32" height="32"/><rect class="b" width="4" height="4" fill="url(#h)"/>`
-          )
-        }
-      ],
-      { hideFirst: false }
-    );
-
-    const fills = await page.evaluate(host => {
-      const LabIconClass = window.jupyterapp.docRegistry.getFileType('text')!
-        .icon!.constructor as typeof LabIcon;
-      const copy = document.querySelector(`#${host}-0 svg`)!;
-      // a rule that names the second gradient of the copy, added by hand
-      const gradient = copy.querySelectorAll('linearGradient')[1].id;
-      const svgstr = copy.outerHTML.replace(
-        '</style>',
-        `.b{fill:url(#${gradient})}</style>`
-      );
-      const icon = new LabIconClass({
-        name: 'test-labicon:given-again-url-2',
-        svgstr
-      });
-      const box = document.createElement('div');
-      document.getElementById(host)!.appendChild(box);
-      icon.element({ container: box });
-      return Array.from(
-        box.querySelectorAll('rect'),
-        rect => getComputedStyle(rect).fill
-      ).join(' ');
-    }, HOST);
-    expect(fills).toMatch(
-      /^url\("#g_[0-9a-z]+_[0-9a-z]+"\) url\("#h_[0-9a-z]+_[0-9a-z]+"\)$/
-    );
-  });
-
-  test('should give a copy that is given again as an svg the style text of the first copy', async ({
-    page
-  }) => {
-    const svgstr = svg(
-      `<style>@keyframes test-labicon-g{from,to{opacity:1}}#g stop{stop-color:#00f}.a{fill:url(#g);animation:test-labicon-g 1s paused}</style><defs>${gradient('g', '#000')}</defs><rect class="a" width="32" height="32"/>`
-    );
-
-    const texts = await page.evaluate(svgstr => {
-      const LabIconClass = window.jupyterapp.docRegistry.getFileType('text')!
-        .icon!.constructor as typeof LabIcon;
-      const result: string[] = [];
-      for (let round = 0; round < 3; round++) {
-        const icon = new LabIconClass({
-          name: `test-labicon:given-again-text-${round}`,
-          svgstr
-        });
-        try {
-          const copy = icon.element({ tag: null });
-          result.push(copy.querySelector('style')!.textContent ?? '');
-          svgstr = copy.outerHTML;
-        } catch (error) {
-          result.push(String(error));
-        }
-      }
-      return result;
-    }, svgstr);
-
-    // the same text but for the value of data-icon-scope
-    const scopes = texts.map(text =>
-      text.replace(/(data-icon-scope="|-jp-icon-)[0-9a-z]+/g, '$1')
-    );
-    expect(scopes[2]).toEqual(scopes[0]);
-  });
-
-  test('should animate the keyframes of a copy that is given again as an svg', async ({
-    page
-  }) => {
-    await renderCopies(
-      page,
-      [
-        {
-          name: 'test-labicon:given-again-keyframes-1',
-          svgstr: svg(
-            '<style>@keyframes test-labicon-again{from{fill:#00f}to{fill:#00f}}.a{animation:test-labicon-again 1s infinite paused}</style><rect class="a" width="32" height="32"/>'
-          )
-        }
-      ],
-      { hideFirst: false }
-    );
-
-    const fill = await page.evaluate(host => {
-      const LabIconClass = window.jupyterapp.docRegistry.getFileType('text')!
-        .icon!.constructor as typeof LabIcon;
-      // the style text of the copy writes from and to as 0% and 100%
-      const svgstr = document.querySelector(`#${host}-0 svg`)!.outerHTML;
-      const box = document.createElement('div');
-      document.getElementById(host)!.appendChild(box);
-      try {
-        new LabIconClass({
-          name: 'test-labicon:given-again-keyframes-2',
-          svgstr
-        }).element({ container: box });
-      } catch (error) {
-        return String(error);
-      }
-      return getComputedStyle(box.querySelector('rect')!).fill;
-    }, HOST);
-    expect(fill).toEqual('rgb(0, 0, 255)');
   });
 });

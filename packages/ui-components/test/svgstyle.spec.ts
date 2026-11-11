@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { ISelectorContext, ISelectorPlace } from '../src/icon/svgstyle';
+import type { ISelectorContext } from '../src/icon/svgstyle';
 import {
   edit,
   renameAnimations,
@@ -12,15 +12,8 @@ import {
   urlReferences
 } from '../src/icon/svgstyle';
 
-const XLINK_NAMESPACE = 'http://www.w3.org/1999/xlink';
 const FILTER = ':where([data-icon-scope="s"], [data-icon-scope="s"] *)';
 const ROOT = '[data-icon]:where([data-icon-scope="s"])';
-// a rule outside other rules, where :scope and & stand for the root
-const TOP: ISelectorPlace = {
-  scopeIsRoot: true,
-  nestingIsRoot: true,
-  subject: true
-};
 
 function selectorContext(
   options: Partial<ISelectorContext> = {}
@@ -32,7 +25,6 @@ function selectorContext(
     changed: new Set(),
     read: new Set(),
     named: new Set(),
-    namespaces: new Map(),
     ...options
   };
 }
@@ -227,7 +219,7 @@ describe('svgstyle', () => {
 
   describe('rewriteSelector()', () => {
     it('should add the filter of the copies to the subject of each selector', () => {
-      expect(rewriteSelector('a > b c, d', selectorContext(), TOP)).toBe(
+      expect(rewriteSelector('a > b c, d', selectorContext())).toBe(
         `a > b c${FILTER}, d${FILTER}`
       );
     });
@@ -235,13 +227,11 @@ describe('svgstyle', () => {
     it('should end a compound selector at a combinator with no space around it', () => {
       const context = selectorContext({ ids: new Set(['a']) });
 
-      expect(rewriteSelector('#a>b', context, TOP)).toBe(
-        `#a${FILTER}>b${FILTER}`
-      );
+      expect(rewriteSelector('#a>b', context)).toBe(`#a${FILTER}>b${FILTER}`);
     });
 
     it('should end a subject before the space that ends its selector', () => {
-      expect(rewriteSelector('a , b', selectorContext(), TOP)).toBe(
+      expect(rewriteSelector('a , b', selectorContext())).toBe(
         `a${FILTER} , b${FILTER}`
       );
     });
@@ -249,13 +239,13 @@ describe('svgstyle', () => {
     it('should add the filter to a compound selector that names an id of the svg', () => {
       const context = selectorContext({ ids: new Set(['main']) });
 
-      expect(rewriteSelector('#main rect', context, TOP)).toBe(
+      expect(rewriteSelector('#main rect', context)).toBe(
         `#main${FILTER} rect${FILTER}`
       );
     });
 
     it('should not add the filter to a compound selector that names an id the svg does not have', () => {
-      expect(rewriteSelector('#main rect', selectorContext(), TOP)).toBe(
+      expect(rewriteSelector('#main rect', selectorContext())).toBe(
         `#main rect${FILTER}`
       );
     });
@@ -263,19 +253,19 @@ describe('svgstyle', () => {
     it('should add the filter to a compound selector that reads an attribute that copies change', () => {
       const context = selectorContext({ changed: new Set(['href']) });
 
-      expect(rewriteSelector('[href] rect', context, TOP)).toBe(
+      expect(rewriteSelector('[href] rect', context)).toBe(
         `:is([data-original-href],[href]:where(:not([data-original-href])))${FILTER} rect${FILTER}`
       );
     });
 
     it('should add the filter to each compound selector of :has()', () => {
-      expect(rewriteSelector('.a:has(.b .c)', selectorContext(), TOP)).toBe(
+      expect(rewriteSelector('.a:has(.b .c)', selectorContext())).toBe(
         `.a:has(.b${FILTER} .c${FILTER})${FILTER}`
       );
     });
 
     it('should add the filter before a pseudo-element', () => {
-      expect(rewriteSelector('a::before', selectorContext(), TOP)).toBe(
+      expect(rewriteSelector('a::before', selectorContext())).toBe(
         `a${FILTER}::before`
       );
     });
@@ -283,7 +273,7 @@ describe('svgstyle', () => {
     it('should add the filter in :not() to a compound selector that names an id of the svg only', () => {
       const context = selectorContext({ ids: new Set(['a']) });
 
-      expect(rewriteSelector(':not(#a .b)', context, TOP)).toBe(
+      expect(rewriteSelector(':not(#a .b)', context)).toBe(
         `:not(#a${FILTER} .b)${FILTER}`
       );
     });
@@ -291,19 +281,19 @@ describe('svgstyle', () => {
     it('should add the filter to a compound selector that names an id after "of" in :nth-child()', () => {
       const context = selectorContext({ ids: new Set(['a']) });
 
-      expect(rewriteSelector(':nth-child(2n+1 of #a)', context, TOP)).toBe(
+      expect(rewriteSelector(':nth-child(2n+1 of #a)', context)).toBe(
         `:nth-child(2n+1 of #a${FILTER})${FILTER}`
       );
     });
 
     it('should leave the argument of another pseudo-class without the filter', () => {
-      expect(rewriteSelector(':lang(en)', selectorContext(), TOP)).toBe(
+      expect(rewriteSelector(':lang(en)', selectorContext())).toBe(
         `:lang(en)${FILTER}`
       );
     });
 
     it('should leave each selector of a list in :is() before the subject without the filter', () => {
-      expect(rewriteSelector(':is(.a, .b) .c', selectorContext(), TOP)).toBe(
+      expect(rewriteSelector(':is(.a, .b) .c', selectorContext())).toBe(
         `:is(.a, .b) .c${FILTER}`
       );
     });
@@ -311,7 +301,7 @@ describe('svgstyle', () => {
     it('should match a renamed id with the specificity of an id', () => {
       const context = selectorContext({ renamed: new Set(['a.b']) });
 
-      expect(rewriteSelector(String.raw`#a\.b`, context, TOP)).toBe(
+      expect(rewriteSelector(String.raw`#a\.b`, context)).toBe(
         String.raw`:is(#a\.b,[data-original-id=a\.b])${FILTER}`
       );
     });
@@ -319,7 +309,7 @@ describe('svgstyle', () => {
     it('should record that a selector reads a renamed id', () => {
       const context = selectorContext({ renamed: new Set(['a']) });
 
-      rewriteSelector('#a', context, TOP);
+      rewriteSelector('#a', context);
 
       expect(context.read).toEqual(new Set(['id']));
     });
@@ -327,7 +317,7 @@ describe('svgstyle', () => {
     it('should record the ids that selectors name', () => {
       const context = selectorContext();
 
-      rewriteSelector('#a, :not(#b)', context, TOP);
+      rewriteSelector('#a, :not(#b)', context);
 
       expect(context.named).toEqual(new Set(['a', 'b']));
     });
@@ -335,7 +325,7 @@ describe('svgstyle', () => {
     it('should read a changed attribute from its original value', () => {
       const context = selectorContext({ changed: new Set(['id']) });
 
-      expect(rewriteSelector('[id$="0" i]', context, TOP)).toBe(
+      expect(rewriteSelector('[id$="0" i]', context)).toBe(
         `:is([data-original-id$="0" i],[id$="0" i]:where(:not([data-original-id])))${FILTER}`
       );
     });
@@ -343,141 +333,46 @@ describe('svgstyle', () => {
     it('should keep a selector of an attribute that copies do not change', () => {
       const context = selectorContext({ changed: new Set(['id']) });
 
-      expect(rewriteSelector('[class="a"]', context, TOP)).toBe(
+      expect(rewriteSelector('[class="a"]', context)).toBe(
         `[class="a"]${FILTER}`
-      );
-    });
-
-    it('should read an XLink attribute through the prefix of its namespace', () => {
-      const context = selectorContext({
-        changed: new Set(['xlink-href']),
-        namespaces: new Map([['x', XLINK_NAMESPACE]])
-      });
-
-      expect(rewriteSelector('[x|href="#a"]', context, TOP)).toBe(
-        `:is([data-original-xlink-href="#a"],[x|href="#a"]:where(:not([data-original-xlink-href])))${FILTER}`
-      );
-    });
-
-    it('should read the attributes of both namespaces for any namespace', () => {
-      const context = selectorContext({
-        changed: new Set(['href', 'xlink-href'])
-      });
-
-      expect(rewriteSelector('[*|href]', context, TOP)).toBe(
-        `:is([data-original-href],[data-original-xlink-href],[*|href]:where(:not([data-original-href],[data-original-xlink-href])))${FILTER}`
       );
     });
 
     it('should not read the style of the root of a copy', () => {
       const context = selectorContext({ changed: new Set(['style']) });
 
-      expect(rewriteSelector('[style]', context, TOP)).toBe(
+      expect(rewriteSelector('[style]', context)).toBe(
         `:is([data-original-style],[style]:where(:not([data-original-style],[data-icon])))${FILTER}`
       );
     });
 
     it('should record that a selector reads a changed attribute', () => {
-      const context = selectorContext({
-        changed: new Set(['href', 'xlink-href'])
-      });
+      const context = selectorContext({ changed: new Set(['href']) });
 
-      rewriteSelector('[*|href]', context, TOP);
+      rewriteSelector('[href]', context);
 
-      expect(context.read).toEqual(new Set(['href', 'xlink-href']));
+      expect(context.read).toEqual(new Set(['href']));
+    });
+
+    it('should keep a selector of a changed attribute with a namespace prefix', () => {
+      const context = selectorContext({ changed: new Set(['href', 'x']) });
+
+      expect(rewriteSelector('[x|href="#a"]', context)).toBe(
+        `[x|href="#a"]${FILTER}`
+      );
+    });
+
+    it('should read a changed attribute that the |= operator follows', () => {
+      const context = selectorContext({ changed: new Set(['id']) });
+
+      expect(rewriteSelector('[id|="a"]', context)).toBe(
+        `:is([data-original-id|="a"],[id|="a"]:where(:not([data-original-id])))${FILTER}`
+      );
     });
 
     it('should select the root of a copy for :root', () => {
-      const place = { scopeIsRoot: false, nestingIsRoot: false, subject: true };
-
-      expect(rewriteSelector(':root .a', selectorContext(), place)).toBe(
+      expect(rewriteSelector(':root .a', selectorContext())).toBe(
         `${ROOT} .a${FILTER}`
-      );
-    });
-
-    it('should select the root of a copy for :scope where it stands for the root', () => {
-      const place = { scopeIsRoot: true, nestingIsRoot: false, subject: true };
-
-      expect(rewriteSelector(':scope', selectorContext(), place)).toBe(
-        `${ROOT}${FILTER}`
-      );
-    });
-
-    it('should keep :scope where it stands for the root of a scope rule', () => {
-      const place = { scopeIsRoot: false, nestingIsRoot: false, subject: true };
-
-      expect(rewriteSelector(':scope', selectorContext(), place)).toBe(
-        `:scope${FILTER}`
-      );
-    });
-
-    it('should select the root of a copy with no specificity for & where it stands for the root', () => {
-      expect(rewriteSelector('& rect', selectorContext(), TOP)).toBe(
-        `:where(${ROOT}) rect${FILTER}`
-      );
-    });
-
-    it('should keep & where it stands for a parent rule', () => {
-      const place = { scopeIsRoot: true, nestingIsRoot: false, subject: true };
-
-      expect(rewriteSelector('& > rect', selectorContext(), place)).toBe(
-        `& > rect${FILTER}`
-      );
-    });
-
-    it('should give the scope of the icon to a selector of data-icon-scope', () => {
-      expect(
-        rewriteSelector('[data-icon-scope="1"]', selectorContext(), TOP)
-      ).toBe(`[data-icon-scope="s"]${FILTER}`);
-    });
-
-    it('should keep a :where() of data-icon-scope that the rewrite did not write', () => {
-      const author = '.a:where([data-icon-scope="x"])';
-
-      expect(rewriteSelector(author, selectorContext(), TOP)).toBe(
-        `${author}${FILTER}`
-      );
-    });
-
-    it('should replace the filter of a copy that is given again as an svg', () => {
-      const copy = '.a:where([data-icon-scope="1"], [data-icon-scope="1"] *)';
-
-      expect(rewriteSelector(copy, selectorContext(), TOP)).toBe(`.a${FILTER}`);
-    });
-
-    it('should replace the root of a copy that is given again as an svg', () => {
-      const copy = '[data-icon]:where([data-icon-scope="1"]) .a';
-
-      expect(rewriteSelector(copy, selectorContext(), TOP)).toBe(
-        `${ROOT} .a${FILTER}`
-      );
-    });
-
-    it('should keep a renamed id of a copy that is given again as an svg', () => {
-      const copy =
-        ':is(#g, [data-original-id="g"]):where([data-icon-scope="1"], [data-icon-scope="1"] *) stop';
-
-      expect(rewriteSelector(copy, selectorContext(), TOP)).toBe(
-        `:is(#g, [data-original-id="g"])${FILTER} stop${FILTER}`
-      );
-    });
-
-    it('should keep a changed attribute of a copy that is given again as an svg', () => {
-      const context = selectorContext({ changed: new Set(['href']) });
-      const copy =
-        ':is([data-original-href], [href]:where(:not([data-original-href]))):where([data-icon-scope="1"], [data-icon-scope="1"] *) rect';
-
-      expect(rewriteSelector(copy, context, TOP)).toBe(
-        `:is([data-original-href], [href]:where(:not([data-original-href])))${FILTER} rect${FILTER}`
-      );
-    });
-
-    it('should not add the filter to the subject of a selector that is the context of other rules', () => {
-      const place = { scopeIsRoot: true, nestingIsRoot: true, subject: false };
-      const context = selectorContext({ ids: new Set(['a']) });
-
-      expect(rewriteSelector('#a .b, .c', context, place)).toBe(
-        `#a${FILTER} .b, .c`
       );
     });
   });

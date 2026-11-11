@@ -433,43 +433,6 @@ describe('@jupyterlab/ui-components', () => {
         );
       });
 
-      it('should point an animated href of each copy at its own element', () => {
-        const icon = new LabIcon({
-          name: 'test-ui-components:animated-href',
-          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-<defs><symbol id="frame1"/><symbol id="frame2"/></defs>
-<use href="#frame1"><animate attributeName="href" values="#frame1;#frame2" dur="1s"/></use>
-</svg>`
-        });
-
-        const svg = icon.element({ tag: null });
-        const [first, second] = Array.from(
-          svg.querySelectorAll('symbol'),
-          symbol => symbol.getAttribute('id')
-        );
-
-        expect(first).not.toBe('frame1');
-        expect(svg.querySelector('animate')!.getAttribute('values')).toBe(
-          `#${first};#${second}`
-        );
-      });
-
-      it('should point an animated XLink href of each copy at its own element', () => {
-        const icon = new LabIcon({
-          name: 'test-ui-components:animated-xlink-href',
-          svgstr: `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 10 10">
-<defs><symbol id="frame1"/></defs>
-<use><set attributeName="xlink:href" to="#frame1"/></use>
-</svg>`
-        });
-
-        const svg = icon.element({ tag: null });
-        const id = svg.querySelector('symbol')!.getAttribute('id');
-
-        expect(id).toMatch(/^frame1_[0-9a-z]+$/);
-        expect(svg.querySelector('set')!.getAttribute('to')).toBe(`#${id}`);
-      });
-
       it('should keep an offset of animation timing that starts with the digit of an id', () => {
         const icon = new LabIcon({
           name: 'test-ui-components:timing-offset',

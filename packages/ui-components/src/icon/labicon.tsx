@@ -826,7 +826,6 @@ namespace Private {
   const SUFFIX_PLACEHOLDER = '\u0000';
   // the attributes that label and describe an svg: their value lists ids
   const ID_LIST_ATTRIBUTES = new Set(['aria-describedby', 'aria-labelledby']);
-  const ANIMATION_VALUES = ['values', 'from', 'to', 'by'];
   // an extension that imports LabIcon through a deep path bundles its own
   // copy of this module, so all copies take suffixes from one counter on the
   // window; keep this key and its meaning the same in later versions
@@ -1177,10 +1176,14 @@ namespace Private {
         renamed: new Set(
           changed.filter(([, a]) => a.name === 'id').map(([, a]) => a.value)
         ),
-        changed: new Set(changed.map(([, a]) => keyOf(a).toLowerCase())),
+        // a selector reads an attribute without a namespace only
+        changed: new Set(
+          changed
+            .filter(([, a]) => a.namespaceURI === null)
+            .map(([, a]) => a.name.toLowerCase())
+        ),
         read: new Set(),
-        named: existing,
-        namespaces: new Map()
+        named: existing
       };
       if (properties.size) {
         // the root of a copy sets its custom properties in its style
@@ -1220,8 +1223,6 @@ namespace Private {
     };
     const changed: [number, Attr, string][] = [];
     nodes.forEach((node, index) => {
-      const animated = node.getAttribute('attributeName');
-      const animatesHref = animated === 'href' || !!animated?.endsWith(':href');
       for (const attribute of Array.from(node.attributes)) {
         const { name, value } = attribute;
         let next = value;
@@ -1240,9 +1241,6 @@ namespace Private {
             .split(';')
             .map(part => renameTiming(part, refer))
             .join(';');
-        } else if (animatesHref && ANIMATION_VALUES.includes(name)) {
-          // an animation of href, as in values="#frame1;#frame2"
-          next = value.split(';').map(renameFragment).join(';');
         } else if (value.includes('(')) {
           next = edit(
             value,
@@ -1358,15 +1356,6 @@ namespace Private {
   }
 
   /**
-   * An attribute is known by its name, or by "xlink-" and its local name.
-   */
-  function keyOf(attribute: Attr): string {
-    return attribute.namespaceURI === XLINK_NAMESPACE
-      ? `xlink-${attribute.localName}`
-      : attribute.name;
-  }
-
-  /**
    * Rewrite the rules so that they style only elements of the copies, as they
    * style the svg shown inline. The rules are the same in every copy.
    */
@@ -1385,10 +1374,9 @@ namespace Private {
     }
     // a selector that reads an attribute that copies change reads its value
     // in the svg from data-original-*
-    for (const [index, attribute] of changed) {
-      const key = keyOf(attribute);
-      if (context.read.has(key.toLowerCase())) {
-        nodes[index].setAttribute(`data-original-${key}`, attribute.value);
+    for (const [index, { name, value }] of changed) {
+      if (context.read.has(name.toLowerCase())) {
+        nodes[index].setAttribute(`data-original-${name}`, value);
       }
     }
     const rootStyle = nodes[0].getAttribute('style');

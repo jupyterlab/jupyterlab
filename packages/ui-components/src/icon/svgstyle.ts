@@ -234,8 +234,7 @@ export function edit(text: string, edits: [number, number, string][]): string {
 /**
  * The selector that a rule of the copies of an icon adds to the compound
  * selectors that must match in a copy: the elements of a copy, and elements
- * added to it. It has the text that browsers serialize it to, so that
- * `rewriteSelector` finds it in a selector of a copy given again as an svg.
+ * added to it.
  */
 function scopeFilter(scope: string): string {
   return `:where([data-icon-scope="${scope}"], [data-icon-scope="${scope}"] *)`;
@@ -260,25 +259,12 @@ export interface ISelectorContext {
   ids: Set<string>;
   /** The ids that copies rename. */
   renamed: Set<string>;
-  /** The keys of the attributes that copies change, in lower case. */
+  /** The names of the attributes that copies change, in lower case. */
   changed: Set<string>;
-  /** The keys of the changed attributes that selectors read, added to. */
+  /** The names of the changed attributes that selectors read, added to. */
   read: Set<string>;
   /** The ids that selectors name, added to. */
   named: Set<string>;
-  /** The namespace prefixes of the style sheet. */
-  namespaces: Map<string, string>;
-}
-
-/**
- * Where a selector stands: whether `:scope` and `&` stand for the root of the
- * svg, as `:root` does, and whether its subject must match in a copy, which
- * it need not for the context of other rules.
- */
-export interface ISelectorPlace {
-  scopeIsRoot: boolean;
-  nestingIsRoot: boolean;
-  subject: boolean;
 }
 
 /**
@@ -289,31 +275,22 @@ export interface ISelectorPlace {
  */
 export function rewriteSelector(
   selector: string,
-  context: ISelectorContext,
-  place: ISelectorPlace
+  context: ISelectorContext
 ): string {
-  // the selectors of a copy that is given again as an svg name the scope of
-  // that copy: they get the scope of this icon
-  const text = selector.replace(
-    /\[data-icon-scope="\d+"\]/g,
-    `[data-icon-scope="${context.scope}"]`
-  );
-  const tokens = tokenize(text);
+  const tokens = tokenize(selector);
   const filter = scopeFilter(context.scope);
   let result = '';
   // a frame for the selector list and for each parenthesis in it, with the
   // compound selectors of it that get the filter, before a pseudo-element
-  const frames = [newFrame(place.subject ? 'subject' : 'ids')];
+  const frames = [newFrame('subject')];
   const endCompound = (k: number) => {
     const frame = frames[frames.length - 1];
     const at = frame.pseudoElement < 0 ? result.length : frame.pseudoElement;
-    // a compound selector of a copy given again as an svg has the filter
     if (
       frame.open &&
       (frame.filter === 'all' ||
         frame.namesId ||
-        (frame.filter === 'subject' && isSubjectEnd(tokens, k))) &&
-      !result.slice(0, at).endsWith(filter)
+        (frame.filter === 'subject' && isSubjectEnd(tokens, k)))
     ) {
       result = result.slice(0, at) + filter + result.slice(at);
     }
@@ -325,7 +302,7 @@ export function rewriteSelector(
     const token = tokens[k];
     const next = tokens[k + 1];
     const frame = frames[frames.length - 1];
-    let part = text.slice(token.start, token.end);
+    let part = selector.slice(token.start, token.end);
     if (token.type === ')' && frames.length > 1) {
       endCompound(k);
       frames.pop();
@@ -355,18 +332,17 @@ export function rewriteSelector(
       }
       part = '::';
       k++;
-    } else if (
-      pseudoClass === 'root' ||
-      (place.scopeIsRoot && pseudoClass === 'scope')
-    ) {
+    } else if (pseudoClass === 'root') {
       part = scopeRoot(context.scope);
       k++;
-    } else if (place.nestingIsRoot && token.type === '&') {
-      // "&" for the root has no specificity
-      part = `:where(${scopeRoot(context.scope)})`;
     } else if (token.type === '[') {
       let namesId: boolean;
-      [k, part, namesId] = rewriteAttributeSelector(text, tokens, k, context);
+      [k, part, namesId] = rewriteAttributeSelector(
+        selector,
+        tokens,
+        k,
+        context
+      );
       frame.namesId ||= namesId;
     }
     result += part;
@@ -407,8 +383,8 @@ function isSubjectEnd(tokens: IToken[], k: number): boolean {
 
 /**
  * Rewrite the attribute selector that starts at `tokens[k]`, as in
- * `[xlink|href="#a" i]`, if it reads an attribute that copies change. Return
- * the index of its closing bracket, its new text, and whether it names an id.
+ * `[href="#a" i]`, if it reads an attribute that copies change. Return the
+ * index of its closing bracket, its new text, and whether it names an id.
  */
 function rewriteAttributeSelector(
   text: string,
@@ -416,65 +392,30 @@ function rewriteAttributeSelector(
   k: number,
   context: ISelectorContext
 ): [number, string, boolean] {
-  let j = k + 1;
-  // a namespace prefix, as in "xlink|", "*|" or "|"
-  let namespace: string | undefined = '';
-  if (tokens[j]?.type === '|') {
-    j++;
-  } else if (tokens[j + 1]?.type === '|' && tokens[j + 2]?.type !== '=') {
-    namespace =
-      tokens[j].type === '*' ? '*' : context.namespaces.get(tokens[j].value);
-    j += 2;
-  }
-  let close = j;
+  let close = k + 1;
   while (close < tokens.length && tokens[close].type !== ']') {
     close++;
   }
   const selector = text.slice(tokens[k].start, tokens[close]?.end);
-  const name = tokens[j];
-  if (name?.type !== 'ident') {
+  const name = tokens[k + 1];
+  // a selector with a namespace prefix, as in [xlink|href], stays as it is
+  const prefixed = tokens[k + 2]?.type === '|' && tokens[k + 3]?.type !== '=';
+  if (name?.type !== 'ident' || prefixed) {
     return [close, selector, false];
   }
-  const nameText = text.slice(name.start, name.end);
   const lowerName = name.value.toLowerCase();
+  if (!context.changed.has(lowerName)) {
+    return [close, selector, false];
+  }
+  context.read.add(lowerName);
+  const original = `data-original-${text.slice(name.start, name.end)}`;
   const rest = text.slice(name.end, tokens[close]?.start);
-  // in a copy that is given again as an svg, this selector stands inside
-  // the one that this function wrote, for the elements without an original
-  // value: it stays as it is
-  const following = tokens
-    .slice(close + 1, close + 7)
-    .map(token => token.value.toLowerCase() || token.type)
-    .join(' ');
-  if (following.startsWith(': where : not [ data-original-')) {
-    return [close, selector, false];
-  }
-  // the keys of an attribute without a namespace, and of an XLink attribute
-  const prefixes: string[] = [];
-  if (namespace === '' || namespace === '*') {
-    prefixes.push('');
-  }
-  if (namespace === XLINK_NAMESPACE || namespace === '*') {
-    prefixes.push('xlink-');
-  }
-  const keys = prefixes.filter(prefix =>
-    context.changed.has(prefix + lowerName)
-  );
-  if (!keys.length) {
-    return [close, selector, false];
-  }
-  const originals = keys.map(prefix => {
-    context.read.add(prefix + lowerName);
-    return `data-original-${prefix}${nameText}`;
-  });
-  const original = originals.map(attribute => `[${attribute}${rest}]`);
-  const unchanged = originals.map(attribute => `[${attribute}]`);
-  if (lowerName === 'style') {
-    // the root of a copy has a style attribute for its custom properties
-    unchanged.push('[data-icon]');
-  }
+  // the root of a copy has a style attribute for its custom properties
+  const unchanged =
+    lowerName === 'style' ? `[${original}],[data-icon]` : `[${original}]`;
   return [
     close,
-    `:is(${original.join(',')},${selector}:where(:not(${unchanged.join(',')})))`,
+    `:is([${original}${rest}],${selector}:where(:not(${unchanged})))`,
     true
   ];
 }
@@ -549,22 +490,8 @@ function walkRules(
   }
 }
 
-function parentOf(rule: CSSRule, sheet: CSSStyleSheet): RuleParent {
-  const parent = rule.parentRule;
-  return parent && isGroupingRule(parent) ? parent : sheet;
-}
-
 function indexOf(parent: RuleParent, rule: CSSRule): number {
   return Array.from(parent.cssRules).indexOf(rule);
-}
-
-/**
- * Put a rule written as `text` in the place of `rule`.
- */
-function replaceRule(parent: RuleParent, rule: CSSRule, text: string): void {
-  const index = indexOf(parent, rule);
-  parent.insertRule(text, index);
-  parent.deleteRule(index + 1);
 }
 
 /**
@@ -592,117 +519,16 @@ export function rewriteDeclarations(
 
 /**
  * Rewrite the selectors of the rules of a style sheet with `rewriteSelector`.
- * The selector of a rule with nested rules is their context, which can match
- * elements of the page, so its declarations move to a rule of their own.
  */
 export function rewriteSelectors(
   sheet: CSSStyleSheet,
   context: ISelectorContext
 ): void {
-  context.namespaces.clear();
-  for (const rule of Array.from(sheet.cssRules)) {
-    if (rule instanceof CSSNamespaceRule) {
-      context.namespaces.set(rule.prefix, rule.namespaceURI);
-    }
-  }
-  walkRules(sheet, (rule, parent) => {
-    // the nearest style rule or scope rule that holds the rule
-    let owner: CSSRule | null = rule.parentRule;
-    while (owner && !(owner instanceof CSSStyleRule || isScopeRule(owner))) {
-      owner = owner.parentRule;
-    }
-    const place = (subject: boolean) => selectorPlace(rule, subject);
+  walkRules(sheet, rule => {
     if (rule instanceof CSSStyleRule) {
-      const nested = rule.cssRules.length > 0;
-      if (nested && rule.style.length) {
-        const selector = rewriteSelector(
-          rule.selectorText,
-          context,
-          place(true)
-        );
-        parent.insertRule(
-          `${selector}{${rule.style.cssText}}`,
-          indexOf(parent, rule)
-        );
-        rule.style.cssText = '';
-      }
-      rule.selectorText = rewriteSelector(
-        rule.selectorText,
-        context,
-        place(!nested)
-      );
-    } else if (owner && hasStyle(rule) && !(rule instanceof CSSKeyframeRule)) {
-      // declarations that follow nested rules apply to the elements of the
-      // rule that holds them, or to the root of a scope with no specificity
-      if (
-        owner === parent &&
-        owner instanceof CSSStyleRule &&
-        rule === parent.cssRules[parent.cssRules.length - 1]
-      ) {
-        // the last ones go after the rule, where each of its selectors keeps
-        // its own specificity
-        const outer = parentOf(owner, sheet);
-        const selector = rewriteSelector(
-          owner.selectorText,
-          context,
-          selectorPlace(owner, true)
-        );
-        outer.insertRule(
-          `${selector}{${rule.style.cssText}}`,
-          indexOf(outer, owner) + 1
-        );
-        parent.deleteRule(indexOf(parent, rule));
-      } else {
-        const selector = owner instanceof CSSStyleRule ? '&' : ':where(:scope)';
-        replaceRule(
-          parent,
-          rule,
-          `${selector}${scopeFilter(context.scope)}{${rule.style.cssText}}`
-        );
-      }
-    } else if (isScopeRule(rule) && (rule.start || rule.end)) {
-      // the selectors of a scope rule cannot change, so replace the rule; in
-      // its start, :scope and & stand for the root outside other rules, and in
-      // its end, for the root of the scope
-      const { nestingIsRoot } = place(false);
-      const startPlace = {
-        scopeIsRoot: nestingIsRoot,
-        nestingIsRoot,
-        subject: false
-      };
-      const start = rule.start
-        ? `(${rewriteSelector(rule.start, context, startPlace)})`
-        : '';
-      const endPlace = {
-        scopeIsRoot: false,
-        nestingIsRoot: false,
-        subject: false
-      };
-      const end = rule.end
-        ? ` to (${rewriteSelector(rule.end, context, endPlace)})`
-        : '';
-      const body = Array.from(rule.cssRules, r => r.cssText).join('\n');
-      replaceRule(parent, rule, `@scope ${start}${end} {${body}}`);
+      rule.selectorText = rewriteSelector(rule.selectorText, context);
     }
   });
-}
-
-/**
- * Where the selector of a rule stands: :scope is the root outside scope
- * rules, and & outside both scope rules and style rules.
- */
-function selectorPlace(rule: CSSRule, subject: boolean): ISelectorPlace {
-  let inStyleRule = false;
-  let inScopeRule = false;
-  for (let p = rule.parentRule; p; p = p.parentRule) {
-    inStyleRule ||= p instanceof CSSStyleRule;
-    inScopeRule ||= isScopeRule(p);
-  }
-  return {
-    scopeIsRoot: !inScopeRule,
-    nestingIsRoot: !inStyleRule && !inScopeRule,
-    subject
-  };
 }
 
 /**
@@ -721,17 +547,10 @@ export function copyKeyframes(
       return;
     }
     const index = indexOf(parent, rule);
-    const original = rule.name.replace(/-jp-icon-\d+$/, '');
-    const name = `${original}-jp-icon-${scope}`;
+    const name = `${rule.name}-jp-icon-${scope}`;
     keyframes.set(rule.name, CSS.escape(name));
-    if (original !== rule.name) {
-      // a copy given again as an svg drops the copy of its earlier scope, as
-      // the original makes a new one
-      parent.deleteRule(index);
-    } else {
-      parent.insertRule(rule.cssText, index + 1);
-      (parent.cssRules[index + 1] as CSSKeyframesRule).name = name;
-    }
+    parent.insertRule(rule.cssText, index + 1);
+    (parent.cssRules[index + 1] as CSSKeyframesRule).name = name;
   });
 }
 
@@ -791,8 +610,4 @@ function hasStyle(
   rule: CSSRule
 ): rule is CSSRule & { style: CSSStyleDeclaration } {
   return 'style' in rule;
-}
-
-function isScopeRule(rule: CSSRule): rule is CSSScopeRule {
-  return 'start' in rule;
 }
