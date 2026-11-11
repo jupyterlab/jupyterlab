@@ -783,7 +783,12 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     const paired = new Map<number, number>();
     if (
       shown.length === rendered.length &&
-      shown.every((index, i) => source[index].text === rendered[i].text)
+      // MathJax typesets the letters of a formula as mathematical symbols
+      shown.every(
+        (index, i) =>
+          source[index].text.normalize('NFKC') ===
+          rendered[i].text.normalize('NFKC')
+      )
     ) {
       shown.forEach((index, i) => paired.set(index, i));
     }
