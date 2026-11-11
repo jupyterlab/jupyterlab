@@ -308,6 +308,49 @@ describe('@jupyterlab/settingregistry', () => {
         expect(SettingRegistry.reconcileShortcuts(defaults, [])).toEqual([]);
       });
 
+      it('should keep two defaults whose selectors match only after the migration', () => {
+        // jupyterlab-rise ships `Shift B` with a selector from JupyterLab 4.0.
+        const defaults = [
+          {
+            command: 'notebook:insert-heading-below',
+            keys: ['Shift B'],
+            selector:
+              '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus'
+          },
+          {
+            command: 'RISE:set-slide-type',
+            keys: ['Shift B'],
+            selector: '.jp-Notebook:focus'
+          }
+        ];
+        const result = SettingRegistry.reconcileShortcuts(defaults, []);
+        // The last one registered runs.
+        expect(result.map(shortcut => shortcut.command)).toEqual([
+          'notebook:insert-heading-below',
+          'RISE:set-slide-type'
+        ]);
+      });
+
+      it('should disable a default with a deprecated selector by its migrated selector', () => {
+        const defaults = [
+          {
+            command: 'RISE:set-slide-type',
+            keys: ['Shift I'],
+            selector: '.jp-Notebook:focus'
+          }
+        ];
+        // The shortcuts editor writes the migrated selector.
+        const user = [
+          {
+            ...defaults[0],
+            selector:
+              '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus',
+            disabled: true
+          }
+        ];
+        expect(SettingRegistry.reconcileShortcuts(defaults, user)).toEqual([]);
+      });
+
       it('should continue migrating existing selector syntax', () => {
         const shortcut = {
           command: 'other:command',
