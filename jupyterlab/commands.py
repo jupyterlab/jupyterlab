@@ -2037,13 +2037,14 @@ class _AppHandler:
         a package name, or run `npm pack` locally if `source` is a
         directory.
         """
+        npm = which("npm")
         is_dir = osp.exists(source) and osp.isdir(source)
         if is_dir and not osp.exists(pjoin(source, "node_modules")):
             self._run(["node", YARN_PATH, "install"], cwd=source)
 
         info: dict[str, Any] = {"source": source, "is_dir": is_dir}
 
-        ret = self._run([which("npm"), "pack", source], cwd=tempdir)
+        ret = self._run([npm, "pack", source], cwd=tempdir)
         if ret != 0:
             msg = f'"{source}" is not a valid npm package'
             raise ValueError(msg)
