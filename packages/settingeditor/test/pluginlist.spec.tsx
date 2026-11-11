@@ -344,6 +344,23 @@ describe('@jupyterlab/settingeditor', () => {
         ]);
       });
 
+      it('should skip a property whose schema is false', () => {
+        const props = {
+          properties: {
+            agents: { title: 'Agents', type: 'object', properties: {} },
+            additionalProperties: false
+          }
+        } as unknown as ISettingRegistry.IProperty;
+        const filter = (item: string) =>
+          item.toLowerCase().includes('add') ? {} : null;
+        const matches = PluginList.prototype.getFilterString.call(
+          PluginList.prototype,
+          filter,
+          props
+        );
+        expect(matches).toEqual([]);
+      });
+
       it('should not match the keywords of an array item schema', () => {
         const props = {
           properties: {

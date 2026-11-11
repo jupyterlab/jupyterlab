@@ -599,16 +599,10 @@ export class PluginList extends ReactWidget {
 
     // Iterate through the properties and check for titles / descriptions that match search.
     return Object.keys(props).reduce((acc: string[], value: any) => {
-      // If this is the base case, check for matching title / description
       const subProps = props[value] as PartialJSONObject;
+      // A property whose schema is `false` is not a setting.
       if (!subProps) {
-        const title = props.title;
-        if (typeof title === 'string' && filter(title)) {
-          return title;
-        }
-        if (filter(value)) {
-          return value;
-        }
+        return acc;
       }
 
       // If there are properties in the object, check for title / description
