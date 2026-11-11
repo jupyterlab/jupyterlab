@@ -638,20 +638,13 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * @param rendered New rendered value
    */
   protected onRenderedChanged(cell: MarkdownCell, rendered: boolean): void {
-    // If the cell was manually un-rendered while a rendered match was
-    // current, keep the search on that source match instead of dropping
-    // it: the editor opens with the same match highlighted. The
-    // highlight is re-applied asynchronously so a replace un-rendering
-    // the cell first can run before the editor is repositioned.
-    const renderedIndex = this._currentMatchInRendered
-      ? this.currentIndex
-      : null;
-    if (!rendered && renderedIndex !== null && this.isActive) {
-      const sourceMatch = this.cmHandler.matches[renderedIndex];
-      if (sourceMatch) {
-        void this._highlightEditorMatch(renderedIndex, sourceMatch);
-      }
-    } else if (!this._unrenderedByHighlight) {
+    // A match marked in the rendered text stays current when the cell shows
+    // its editor: the editor already has it as its current match.
+    const sourceMatch =
+      !rendered && this._currentMatchInRendered && this.isActive
+        ? super.getCurrentMatch()
+        : undefined;
+    if (!sourceMatch && !this._unrenderedByHighlight) {
       this.currentIndex = null;
     }
     this._unrenderedByHighlight = false;
@@ -664,6 +657,12 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
       } else {
         // Force cursor position to ensure reverse search is working as expected
         cell.editor?.setCursorPosition({ column: 0, line: 0 });
+        if (sourceMatch && cell.editor) {
+          const position = cell.editor.getPositionAt(sourceMatch.position);
+          if (position) {
+            cell.editor.revealPosition(position);
+          }
+        }
         void this.renderedProvider.endQuery();
       }
     }
@@ -753,42 +752,6 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     return provider.currentMatchIndex === index
       ? (provider.currentMatch ?? undefined)
       : undefined;
-  }
-
-  /**
-   * Re-highlight in the editor the source match that was current in the
-   * rendered text. The editor highlighter has no direct "highlight match
-   * at index" API, so the steps start from the beginning of the source
-   * and walk forward to the preserved index.
-   *
-   * @param index Index of the preserved source match.
-   * @param match The preserved source match.
-   */
-  private async _highlightEditorMatch(
-    index: number,
-    match: ISearchMatch
-  ): Promise<void> {
-    // Wait a turn so a replace un-rendering the cell first can update
-    // the source: the notebook un-renders the cell before replacing the
-    // current match, and the replace must own the current match then.
-    await Promise.resolve();
-    if (!this.isActive || (this.cell as MarkdownCell).rendered) {
-      return;
-    }
-    // Abort if the source changed under the preserved match (a replace
-    // ran): the match is gone and the replace already positioned the
-    // search on the next match.
-    const source = this.model.sharedModel.getSource();
-    if (
-      source.slice(match.position, match.position + match.text.length) !==
-      match.text
-    ) {
-      return;
-    }
-    await this.highlightNext(false, { from: 'start' });
-    while (this.currentIndex !== null && this.currentIndex < index) {
-      await this.highlightNext(false, { from: 'previous-match' });
-    }
   }
 
   /**
