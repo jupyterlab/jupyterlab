@@ -177,7 +177,7 @@ The terminal now uses xterm.js 6. Without WebGL, it falls back to the DOM render
 
 The Running panel now shows the [titles](https://jupyterlab.readthedocs.io/en/latest/user/terminal.html#terminal-titles) that the shell or a program sets for a terminal, as the tabs do, and keeps them when the tab is closed or the page is reloaded.
 
-<img alt="The Running panel listing a terminal named Model training under Open Tabs and Terminals, next to the terminal tab with the same title"
+<img alt="A terminal running train.py, which shows its progress in the terminal title; the Running panel lists the terminal as Training: epoch 3/10 under Open Tabs and Terminals, as the tab does"
 src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.7/docs/source/getting_started/changelog_assets/4.7-terminal-title-running.png"
 class="jp-screenshot">
 
