@@ -723,7 +723,10 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     }
 
     const renderedIndex = this._pairMatches().get(this.currentIndex);
-    if (renderedIndex === undefined) {
+    if (
+      renderedIndex === undefined ||
+      !this._isRenderedMatchVisible(renderedIndex)
+    ) {
       // The rendered text does not show this match: show the editor.
       this._currentMatchInRendered = false;
       await this.renderedProvider.clearHighlight();
@@ -754,6 +757,24 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     this._currentMatchInRendered = true;
     // A rendered Markdown match is replaceable when the cell is editable.
     return this._applyReadOnlyState(renderedMatch, false);
+  }
+
+  /**
+   * Whether the user can see the rendered match at the given index. A closed
+   * `<details>` element hides its content, and a style can hide rendered text,
+   * as it hides the source of a Mermaid diagram.
+   */
+  private _isRenderedMatchVisible(index: number): boolean {
+    const element = this.renderedProvider.matches[index]?.node.parentElement;
+    if (
+      !element ||
+      element.matches('details:not([open])') ||
+      element.closest('details:not([open]) > :not(summary)')
+    ) {
+      return false;
+    }
+    // The style of a cell outside the document is not known
+    return !element.isConnected || (element.checkVisibility?.() ?? true);
   }
 
   /**

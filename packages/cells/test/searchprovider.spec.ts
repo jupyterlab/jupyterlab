@@ -371,7 +371,11 @@ describe('cells/searchprovider', () => {
         'a reference definition',
         'An apple, [more][ref].\n\n[ref]: https://example.com/apple'
       ],
-      ['an HTML comment', 'An apple, <!-- an apple --> here.']
+      ['an HTML comment', 'An apple, <!-- an apple --> here.'],
+      [
+        'a closed details element',
+        'An apple, <details><summary>Hint</summary>an apple</details>'
+      ]
     ])('should unrender the cell for a match in %s', async (_, source) => {
       cell = createMarkdownCell(source);
       Widget.attach(cell, document.body);
