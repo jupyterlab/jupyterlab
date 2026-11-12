@@ -447,12 +447,10 @@ export class ShortcutUI
   updateSort = (value: IShortcutUI.ColumnId): void => {
     if (value === this.state.currentSort) {
       this.setState(
-        {
+        prevState => ({
           sortDirection:
-            this.state.sortDirection === 'ascending'
-              ? 'descending'
-              : 'ascending'
-        },
+            prevState.sortDirection === 'ascending' ? 'descending' : 'ascending'
+        }),
         this.sortShortcuts
       );
     } else {
