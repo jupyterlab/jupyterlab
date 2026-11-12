@@ -276,14 +276,21 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           allowFileUploads: true
         };
 
-        browser.showFileFilter = settings.get('showFileFilter')
-          .composite as boolean;
+        // The toolbar button also toggles the filter bar, so apply the setting
+        // only when it changes, and not when another setting changes.
+        let showFileFilter: boolean | undefined;
 
         function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
           let key: keyof typeof defaultFileBrowserConfig;
           for (key in defaultFileBrowserConfig) {
             const value = settings.get(key).composite as boolean;
             browser[key] = value;
+          }
+          const showFileFilterSetting = settings.get('showFileFilter')
+            .composite as boolean;
+          if (showFileFilterSetting !== showFileFilter) {
+            showFileFilter = showFileFilterSetting;
+            browser.showFileFilter = showFileFilterSetting;
           }
           const breadcrumbs = settings.get('breadcrumbs')
             .composite as unknown as IBreadcrumbsSettings;
