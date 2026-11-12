@@ -33,15 +33,12 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install system dependencies for enchant
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libenchant-2-2 aspell aspell-en
-
       - name: Install documentation dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install --group docs pyenchant
+          # ensure enchant dictionary is available
+          python -c "import enchant; print(enchant.Dict('en_US').provider.name)"
 
       - name: Run Sphinx spelling builder
         env:
