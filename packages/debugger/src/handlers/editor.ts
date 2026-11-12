@@ -8,10 +8,9 @@ import { ActivityMonitor } from '@jupyterlab/coreutils';
 
 import type { IDisposable } from '@lumino/disposable';
 
-import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
-import type { ISharedText, SourceChange } from '@jupyter/ydoc';
+import type { CellChange, ISharedText } from '@jupyter/ydoc';
 
 import type { Line, Range, StateEffectType } from '@codemirror/state';
 import {
@@ -57,15 +56,10 @@ export class EditorHandler implements IDisposable {
     this._debuggerService = options.debuggerService;
     this._editor = options.getEditor;
 
-    if (options.stateChanged) {
-      options.stateChanged.connect((_: unknown, args: unknown) => {
-        const change = args as { name?: string } | undefined;
-        if (change?.name === 'executionCount') {
-          const code = this._src.getSource();
-          this._executedPath =
-            this._lastCellPath || this._debuggerService.getCodeId(code);
-        }
-      }, this);
+    // The cell may have run before the debugger started.
+    const src = this._src;
+    if ('execution_count' in src && typeof src.execution_count === 'number') {
+      this._ranPaths.add(this._debuggerService.getCodeId(src.getSource()));
     }
 
     this._src.changed.connect(this._onSharedModelChanged, this);
@@ -226,14 +220,16 @@ export class EditorHandler implements IDisposable {
     if (this.isDisposed || this._path) {
       return;
     }
+    const paths = new Set(this._ranPaths);
     if (this._lastCellPath) {
-      void this._debuggerService.updateBreakpoints('', [], this._lastCellPath);
+      paths.add(this._lastCellPath);
     }
-    if (this._executedPath && this._executedPath !== this._lastCellPath) {
-      void this._debuggerService.updateBreakpoints('', [], this._executedPath);
+    for (const path of paths) {
+      if (this._debuggerService.model.breakpoints.getBreakpoints(path).length) {
+        void this._debuggerService.updateBreakpoints('', [], path);
+      }
     }
     this._lastCellPath = null;
-    this._executedPath = null;
   }
 
   /**
@@ -294,13 +290,16 @@ export class EditorHandler implements IDisposable {
   }
 
   /**
-   * Handle a change of the shared model, ignoring changes that leave the
-   * source unchanged, such as outputs or execution count.
+   * Handle a change of the shared model: note the code that starts running,
+   * and ignore other changes that leave the source unchanged, such as
+   * outputs or execution count.
    */
-  private _onSharedModelChanged(
-    sender: ISharedText,
-    change: SourceChange
-  ): void {
+  private _onSharedModelChanged(sender: ISharedText, change: CellChange): void {
+    if (change.executionStateChange?.newValue === 'running') {
+      this._ranPaths.add(
+        this._debuggerService.getCodeId(this._src.getSource())
+      );
+    }
     if (change.sourceChange) {
       this._sourceChanged.emit();
     }
@@ -322,7 +321,7 @@ export class EditorHandler implements IDisposable {
     });
 
     const oldPath = this._path ? undefined : (this._lastCellPath ?? undefined);
-    const clearKernel = Boolean(oldPath && oldPath !== this._executedPath);
+    const clearKernel = Boolean(oldPath && !this._ranPaths.has(oldPath));
 
     void this._debuggerService
       .updateBreakpoints(
@@ -434,7 +433,7 @@ export class EditorHandler implements IDisposable {
     breakpoints.sort((a, b) => a.line! - b.line!);
 
     const oldPath = this._path ? undefined : (this._lastCellPath ?? undefined);
-    const clearKernel = Boolean(oldPath && oldPath !== this._executedPath);
+    const clearKernel = Boolean(oldPath && !this._ranPaths.has(oldPath));
 
     void this._debuggerService
       .updateBreakpoints(
@@ -537,7 +536,7 @@ export class EditorHandler implements IDisposable {
   private _src: ISharedText;
   private _selectedBreakpoint: IDebugger.IBreakpoint | null;
   private _lastCellPath: string | null = null;
-  private _executedPath: string | null = null;
+  private _ranPaths = new Set<string>();
 }
 
 /**
@@ -572,11 +571,6 @@ export namespace EditorHandler {
      * The code source to debug
      */
     src: ISharedText;
-
-    /**
-     * An optional signal emitted when the cell state changes.
-     */
-    stateChanged?: ISignal<unknown, unknown>;
   }
 
   export const _highlightEffect = StateEffect.define<{ pos: number[] }>({

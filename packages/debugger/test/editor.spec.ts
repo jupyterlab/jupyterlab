@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { YCodeCell } from '@jupyter/ydoc';
-import { Signal } from '@lumino/signaling';
 
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -99,44 +98,6 @@ describe('Debugger.EditorHandler', () => {
       'tmp/cell_path_1.py',
       true
     );
-  });
-
-  it('should preserve kernel breakpoints when modifying a cell that already ran', async () => {
-    const cellSrc = YCodeCell.create();
-    const stateChanged = new Signal<unknown, unknown>(cellSrc);
-    const cellHandler = new Debugger.EditorHandler({
-      debuggerService: service,
-      editorReady: () => new Promise<CodeEditor.IEditor>(() => undefined),
-      getEditor: () => null,
-      src: cellSrc,
-      stateChanged
-    });
-
-    updateBreakpoints.mockResolvedValueOnce('tmp/executed_path.py');
-    cellSrc.setSource('def foo(): pass');
-    jest.advanceTimersByTime(1000);
-    await Promise.resolve();
-
-    // Simulate cell execution
-    stateChanged.emit({ name: 'executionCount', oldValue: null, newValue: 1 });
-
-    // Simulate user editing the cell after execution
-    updateBreakpoints.mockResolvedValueOnce('tmp/draft_path.py');
-    cellSrc.setSource('def foo(): pass\nx = 1');
-    jest.advanceTimersByTime(1000);
-    await Promise.resolve();
-
-    // oldPath was the executed path, so clearKernel must be false
-    expect(updateBreakpoints).toHaveBeenLastCalledWith(
-      'def foo(): pass\nx = 1',
-      [],
-      '',
-      'tmp/executed_path.py',
-      false
-    );
-
-    cellHandler.dispose();
-    cellSrc.dispose();
   });
 
   describe('#clearBreakpoints()', () => {

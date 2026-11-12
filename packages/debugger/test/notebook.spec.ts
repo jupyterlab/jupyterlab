@@ -76,4 +76,40 @@ describe('NotebookHandler', () => {
 
     expect(kernel.has(service.getCodeId(CODE))).toBe(false);
   });
+
+  it('should keep the breakpoints of code that ran when the cell is edited', async () => {
+    const cell = firstCell();
+    cell.executionState = 'running';
+    cell.executionCount = 1;
+    cell.executionState = 'idle';
+    cell.sharedModel.setSource('def f():\n    return 2');
+    await sendBreakpoint();
+
+    expect(kernel.get(service.getCodeId(CODE))).toEqual([2]);
+  });
+
+  it('should keep the breakpoints of code that ran right after an edit', async () => {
+    const cell = firstCell();
+    const edited = 'def f():\n    return 2';
+    cell.sharedModel.setSource(edited);
+    cell.executionState = 'running';
+    cell.executionCount = 1;
+    cell.executionState = 'idle';
+    await sendBreakpoint();
+    cell.sharedModel.setSource('def f():\n    return 3');
+    await sendBreakpoint();
+
+    expect(kernel.get(service.getCodeId(edited))).toEqual([2]);
+  });
+
+  it('should keep the breakpoints of code that ran before debugging started', async () => {
+    handler.dispose();
+    firstCell().executionCount = 1;
+    handler = new NotebookHandler({ debuggerService: service, widget: panel });
+    await sendBreakpoint();
+    firstCell().sharedModel.setSource('def f():\n    return 2');
+    await sendBreakpoint();
+
+    expect(kernel.get(service.getCodeId(CODE))).toEqual([2]);
+  });
 });
