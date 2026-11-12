@@ -475,6 +475,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    */
   async clearHighlight(): Promise<void> {
     this._currentMatchInRendered = false;
+    this._hideReadOnlyEditor();
     await super.clearHighlight();
     await this.renderedProvider.clearHighlight();
   }
@@ -532,7 +533,12 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     const cell = this.cell as MarkdownCell;
     if (!cell.rendered) {
       this._currentMatchInRendered = false;
-      return super.highlightNext(loop, options);
+      const match = await super.highlightNext(loop, options);
+      if (!match) {
+        // The current match moves to another cell
+        this._hideReadOnlyEditor();
+      }
+      return match;
     }
 
     return this._showCurrentMatch(
@@ -557,7 +563,12 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     const cell = this.cell as MarkdownCell;
     if (!cell.rendered) {
       this._currentMatchInRendered = false;
-      return super.highlightPrevious(loop, options);
+      const match = await super.highlightPrevious(loop, options);
+      if (!match) {
+        // The current match moves to another cell
+        this._hideReadOnlyEditor();
+      }
+      return match;
     }
 
     return this._showCurrentMatch(
@@ -705,6 +716,18 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   }
 
   /**
+   * Render a read-only cell again after the search showed its editor for a
+   * match which the rendered text does not show.
+   */
+  private _hideReadOnlyEditor(): void {
+    if (this._showsReadOnlyEditor) {
+      this._showsReadOnlyEditor = false;
+      // This renders the cell again
+      (this.cell as MarkdownCell).showEditorForReadOnly = false;
+    }
+  }
+
+  /**
    * Options to step the editor of a rendered cell, which is hidden. The user
    * does not see its cursor, so a search from the selection starts from the
    * start of the cell instead. A hidden editor keeps a scroll request until
@@ -751,7 +774,13 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
       // The rendered text does not show this match: show the editor.
       this._currentMatchInRendered = false;
       await this.renderedProvider.clearHighlight();
-      if (cell.rendered && this._canUnrender()) {
+      if (cell.rendered) {
+        if (!this._canUnrender()) {
+          // A read-only cell shows its editor until the current match moves
+          // to another cell
+          this._showsReadOnlyEditor = true;
+          cell.showEditorForReadOnly = true;
+        }
         this._unrenderedByHighlight = true;
         const waitForRendered = signalToPromise(cell.renderedChanged);
         cell.rendered = false;
@@ -951,6 +980,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   protected renderedProvider: GenericSearchProvider;
   private _unrenderedByHighlight = false;
   private _currentMatchInRendered = false;
+  private _showsReadOnlyEditor = false;
 }
 
 /**

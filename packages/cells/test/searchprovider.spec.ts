@@ -353,7 +353,7 @@ describe('cells/searchprovider', () => {
       provider.dispose();
     });
 
-    it('should not unrender a read-only cell which cannot unrender for a match the rendered text does not show', async () => {
+    it('should show the hidden editor of a read-only cell for a match the rendered text does not show', async () => {
       cell = createMarkdownCell(
         'See the [docs](https://example.com) for details.',
         { editable: false, showEditorForReadOnlyMarkdown: false }
@@ -365,8 +365,42 @@ describe('cells/searchprovider', () => {
 
       const match = await provider.highlightNext();
       expect(match).toMatchObject({ text: 'example', readOnly: true });
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
+    it('should render a read-only cell again when the current match moves to another cell', async () => {
+      cell = createMarkdownCell(
+        'See the [docs](https://example.com) for details.',
+        { editable: false, showEditorForReadOnlyMarkdown: false }
+      );
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/example/, {});
+      await provider.highlightNext();
+      expect(cell.rendered).toBe(false);
+
+      // The notebook moves to the next cell when the cell has no next match
+      expect(await provider.highlightNext(false)).toBeUndefined();
       expect(cell.rendered).toBe(true);
-      expect(renderedCurrentMatch(cell)).toBe(null);
+      provider.dispose();
+    });
+
+    it('should render a read-only cell again when the search ends', async () => {
+      cell = createMarkdownCell(
+        'See the [docs](https://example.com) for details.',
+        { editable: false, showEditorForReadOnlyMarkdown: false }
+      );
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/example/, {});
+      await provider.highlightNext();
+      expect(cell.rendered).toBe(false);
+
+      await provider.endQuery();
+      expect(cell.rendered).toBe(true);
       provider.dispose();
     });
 
