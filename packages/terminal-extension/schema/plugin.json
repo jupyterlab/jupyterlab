@@ -68,36 +68,31 @@
       "title": "Font family",
       "description": "The font family used to render text.",
       "$ref": "#/definitions/fontFamily",
-      "default": "ui-monospace, monospace",
-      "tags": ["%UI%"]
+      "default": "ui-monospace, monospace"
     },
     "fontSize": {
       "title": "Font size",
       "description": "The font size used to render text.",
       "$ref": "#/definitions/fontSize",
-      "default": 13,
-      "tags": ["%UI%"]
+      "default": 13
     },
     "lineHeight": {
       "title": "Line height",
       "description": "The line height used to render text.",
       "$ref": "#/definitions/lineHeight",
-      "default": 1.0,
-      "tags": ["%UI%"]
+      "default": 1.0
     },
     "theme": {
       "title": "Theme",
       "description": "The theme for the terminal.",
       "$ref": "#/definitions/theme",
-      "default": "inherit",
-      "tags": ["%UI%"]
+      "default": "inherit"
     },
     "screenReaderMode": {
       "title": "Screen Reader Mode",
       "description": "Add accessibility elements for use with screen readers.",
       "type": "boolean",
-      "default": false,
-      "tags": ["%UI%"]
+      "default": false
     },
     "scrollback": {
       "title": "Scrollback Buffer",
@@ -115,8 +110,7 @@
       "title": "Close on exit",
       "description": "Close the widget when exiting the terminal.",
       "type": "boolean",
-      "default": true,
-      "tags": ["%UI%"]
+      "default": true
     },
     "pasteWithCtrlV": {
       "title": "Paste with Ctrl+V",
@@ -134,8 +128,7 @@
       "title": "Blinking cursor",
       "description": "Whether to blink the cursor. Changes require reopening the terminal.",
       "type": "boolean",
-      "default": true,
-      "tags": ["%UI%"]
+      "default": true
     },
     "showStatusBarItem": {
       "type": "string",
@@ -155,8 +148,7 @@
           "const": "never",
           "title": "Don't show"
         }
-      ],
-      "tags": ["%UI%"]
+      ]
     }
   },
   "additionalProperties": false,

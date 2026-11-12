@@ -18,8 +18,7 @@
       "type": "boolean",
       "title": "Autolink URL replacement",
       "description": "Whether to replace URLs with links or not.",
-      "default": true,
-      "tags": ["%UI%"]
+      "default": true
     },
     "incrementalAutolink": {
       "type": "boolean",

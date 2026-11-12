@@ -18,8 +18,7 @@
         "$ref": "#/definitions/toolbarItem"
       },
       "type": "array",
-      "default": [],
-      "tags": ["%UI%"]
+      "default": []
     },
     "trustByDefault": {
       "type": "boolean",
