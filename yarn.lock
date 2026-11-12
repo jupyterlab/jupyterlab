@@ -5038,7 +5038,7 @@ __metadata:
     "@lumino/signaling": ^2.1.6
     "@lumino/widgets": ^2.10.0
     "@types/webpack-env": ^1.18.0
-    "@xterm/addon-search": 0.17.0-beta.301
+    "@xterm/addon-search": 0.17.0-beta.331
     color: ^5.0.0
     rimraf: ~5.0.5
     typescript: ~5.9.3
@@ -5059,11 +5059,11 @@ __metadata:
     "@lumino/signaling": ^2.1.6
     "@lumino/widgets": ^2.10.0
     "@types/jest": ^29.2.0
-    "@xterm/addon-fit": 0.12.0-beta.301
-    "@xterm/addon-search": 0.17.0-beta.301
-    "@xterm/addon-web-links": 0.13.0-beta.301
-    "@xterm/addon-webgl": 0.20.0-beta.300
-    "@xterm/xterm": 6.1.0-beta.304
+    "@xterm/addon-fit": 0.12.0-beta.333
+    "@xterm/addon-search": 0.17.0-beta.331
+    "@xterm/addon-web-links": 0.13.0-beta.331
+    "@xterm/addon-webgl": 0.20.0-beta.330
+    "@xterm/xterm": 6.1.0-beta.337
     color: ^5.0.0
     jest: ^29.2.0
     jest-canvas-mock: ^2.5.2
@@ -7957,46 +7957,46 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xterm/addon-fit@npm:0.12.0-beta.301":
-  version: 0.12.0-beta.301
-  resolution: "@xterm/addon-fit@npm:0.12.0-beta.301"
+"@xterm/addon-fit@npm:0.12.0-beta.333":
+  version: 0.12.0-beta.333
+  resolution: "@xterm/addon-fit@npm:0.12.0-beta.333"
   peerDependencies:
-    "@xterm/xterm": ^6.1.0-beta.304
-  checksum: c2db87a6b72b070316e21c00346d79d220bedb1a6a5f28af1a5071e53fed47977e0b9bdbf1ea0ab2a060f1cca75551e91c57e32e4eae791704ac8853c0649aa3
+    "@xterm/xterm": ^6.1.0-beta.337
+  checksum: 7ec9a98ee132f32624149bef35bff0a224ebcea349b47979c99e7ef50c6ab354178a89e1d11dc9e0de2a950ad7e69bb5b84a125f8d9da50381640e9e5602f351
   languageName: node
   linkType: hard
 
-"@xterm/addon-search@npm:0.17.0-beta.301":
-  version: 0.17.0-beta.301
-  resolution: "@xterm/addon-search@npm:0.17.0-beta.301"
+"@xterm/addon-search@npm:0.17.0-beta.331":
+  version: 0.17.0-beta.331
+  resolution: "@xterm/addon-search@npm:0.17.0-beta.331"
   peerDependencies:
-    "@xterm/xterm": ^6.1.0-beta.304
-  checksum: 91eabbbe9374cc63d9d87ce3ecb1c2d054ef6988bcd9658ec188059728c4c05ba5f4c7145dfeb9b4625597a85206d0780672d8ed0975438d24a7cd9cd3380409
+    "@xterm/xterm": ^6.1.0-beta.337
+  checksum: c77c2532f3cc2d32c3e6c74b875c4f0dfbcdc899a27590cd8e27fed9006fa3b3fa814406758049f42ea09bd8dcf1c5085ca69d7fa2e95ecf31565d84adc6e7c3
   languageName: node
   linkType: hard
 
-"@xterm/addon-web-links@npm:0.13.0-beta.301":
-  version: 0.13.0-beta.301
-  resolution: "@xterm/addon-web-links@npm:0.13.0-beta.301"
+"@xterm/addon-web-links@npm:0.13.0-beta.331":
+  version: 0.13.0-beta.331
+  resolution: "@xterm/addon-web-links@npm:0.13.0-beta.331"
   peerDependencies:
-    "@xterm/xterm": ^6.1.0-beta.304
-  checksum: 49e460b11abe574037a1b2149922bd8e963087faaaa3a99ed22d113694647a10160b3b51232b97e3e46d8f84a01dfb778200a1bcdf304f34358381b34a420794
+    "@xterm/xterm": ^6.1.0-beta.337
+  checksum: 62fd3ae6908c29fb452b0285d4889cf446d8098e6ce84ea8a4f29d17eeb00cda9213c18c07d6f6e5bd6cec529e10496ae4720ca04c9269dfef928712d3670abe
   languageName: node
   linkType: hard
 
-"@xterm/addon-webgl@npm:0.20.0-beta.300":
-  version: 0.20.0-beta.300
-  resolution: "@xterm/addon-webgl@npm:0.20.0-beta.300"
+"@xterm/addon-webgl@npm:0.20.0-beta.330":
+  version: 0.20.0-beta.330
+  resolution: "@xterm/addon-webgl@npm:0.20.0-beta.330"
   peerDependencies:
-    "@xterm/xterm": ^6.1.0-beta.304
-  checksum: a8d9bd0eb3471995ab997e47263cad2f4cca786e8965ca8138b05b023fdaf888ee304664991670175d32566d6ed1163441544d19bebf1df1365bedf1c421427c
+    "@xterm/xterm": ^6.1.0-beta.337
+  checksum: 4f2a9b95529381ad74b8c9c0c98eb3b87c61c2124fcec61d9ecc1504e09b3c104deee3ec116a9e2362bcd7ba0d9b48dc5f809cd164983e8930b86c7cc2d93439
   languageName: node
   linkType: hard
 
-"@xterm/xterm@npm:6.1.0-beta.304":
-  version: 6.1.0-beta.304
-  resolution: "@xterm/xterm@npm:6.1.0-beta.304"
-  checksum: 6bbd88d99a306505263bb3769fb1e203532b921a8a1e39e8c1e94e7c7115d90b335fdeecaa189069b8bd33ea36d3752104cc278d95c9d791a1c14d4db622625a
+"@xterm/xterm@npm:6.1.0-beta.337":
+  version: 6.1.0-beta.337
+  resolution: "@xterm/xterm@npm:6.1.0-beta.337"
+  checksum: 0a4332fed03c73da5db4521d2b9208f93a213ac458c949f83f68f8cff32267444a0a567f01668ddb97e9cf275baed889e7cb3fc17423f1d5cc5b717edb8cf877
   languageName: node
   linkType: hard
 
