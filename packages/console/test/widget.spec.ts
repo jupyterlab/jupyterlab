@@ -416,6 +416,47 @@ describe('console/widget', () => {
         );
         expect(hiddenBanner).toBeFalsy();
       });
+
+      it('should not rebuild layout when promptCellPosition is unchanged', async () => {
+        Widget.attach(widget, document.body);
+        await widget.sessionContext.initialize();
+
+        const split = widget.node.querySelector('.jp-CodeConsole-split')!;
+        const mutations: MutationRecord[] = [];
+        const observer = new MutationObserver(records =>
+          mutations.push(...records)
+        );
+        observer.observe(split, { childList: true });
+
+        // showBanner does not affect the layout, and the position is
+        // unchanged, so the panes must not be detached and re-inserted.
+        widget.setConfig({ showBanner: true });
+        // MutationObserver callbacks run as microtasks.
+        await new Promise(resolve => setTimeout(resolve, 0));
+        observer.disconnect();
+
+        expect(mutations).toEqual([]);
+      });
+
+      it('should rebuild layout when promptCellPosition changes', async () => {
+        Widget.attach(widget, document.body);
+        await widget.sessionContext.initialize();
+
+        const split = widget.node.querySelector('.jp-CodeConsole-split')!;
+        // SplitPanel interleaves handle elements between the panes.
+        const order = () =>
+          Array.from(split.children)
+            .filter(child => child.classList.contains('lm-SplitPanel-child'))
+            .map(child =>
+              child.classList.contains('jp-CodeConsole-content')
+                ? 'content'
+                : 'input'
+            );
+        expect(order()).toEqual(['content', 'input']);
+
+        widget.setConfig({ promptCellPosition: 'top' });
+        expect(order()).toEqual(['input', 'content']);
+      });
     });
 
     describe('.ContentFactory', () => {
