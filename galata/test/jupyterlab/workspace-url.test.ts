@@ -87,7 +87,15 @@ for (const factory of ['Editor', 'Notebook']) {
 
       for (let load = 0; load < 3; load++) {
         if (load > 0) {
-          await page.reload();
+          // In the Firefox of Playwright 1.60, `page.reload()` adds a history
+          // entry, while a reload started by the page does not.
+          const reloaded = page.waitForEvent('domcontentloaded');
+          await page.evaluate(() => {
+            setTimeout(() => location.reload());
+          });
+          await reloaded;
+          await page.waitForFunction(() => !!window.jupyterapp);
+          await page.evaluate(() => window.jupyterapp.restored);
         }
         await expect(page.locator('#filebrowser')).not.toHaveClass(
           /jp-mod-restoring/
