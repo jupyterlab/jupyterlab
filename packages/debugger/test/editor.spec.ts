@@ -22,7 +22,7 @@ describe('Debugger.EditorHandler', () => {
     service = new DebuggerService({ config: new Debugger.Config() });
     updateBreakpoints = jest
       .spyOn(service, 'updateBreakpoints')
-      .mockResolvedValue(undefined);
+      .mockResolvedValue();
     src = YCodeCell.create();
     src.setSource('x = 1');
     handler = new Debugger.EditorHandler({
@@ -72,32 +72,24 @@ describe('Debugger.EditorHandler', () => {
     expect(updateBreakpoints).not.toHaveBeenCalled();
   });
 
-  it('should pass oldPath and clearKernel=true when typing in an unexecuted cell', async () => {
-    updateBreakpoints.mockResolvedValueOnce('tmp/cell_path_1.py');
-    src.setSource('x = 2');
-    jest.advanceTimersByTime(1000);
-    await Promise.resolve();
+  it('should clear the breakpoints of the previous code when the source changes', async () => {
+    const kernel = startDebugging([1]);
+    await edit('x = 2');
+    await edit('x = 3');
 
-    expect(updateBreakpoints).toHaveBeenLastCalledWith(
-      'x = 2',
-      [],
-      '',
-      undefined,
-      false
-    );
+    expect([...kernel.keys()]).toEqual([service.getCodeId('x = 3')]);
+  });
 
-    updateBreakpoints.mockResolvedValueOnce('tmp/cell_path_2.py');
-    src.setSource('x = 3');
-    jest.advanceTimersByTime(1000);
-    await Promise.resolve();
+  it('should not clear the previous code of a cell without breakpoints', async () => {
+    startDebugging([]);
+    const sendRequest = jest.spyOn(service.session!, 'sendRequest');
+    await edit('x = 2');
+    await edit('x = 3');
 
-    expect(updateBreakpoints).toHaveBeenLastCalledWith(
-      'x = 3',
-      [],
-      '',
-      'tmp/cell_path_1.py',
-      true
-    );
+    const requests = sendRequest.mock.calls.map(([command]) => command);
+    expect(
+      requests.filter(command => command === 'setBreakpoints')
+    ).toHaveLength(2);
   });
 
   describe('#clearBreakpoints()', () => {

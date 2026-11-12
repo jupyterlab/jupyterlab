@@ -320,22 +320,38 @@ export class EditorHandler implements IDisposable {
       );
     });
 
-    const oldPath = this._path ? undefined : (this._lastCellPath ?? undefined);
-    const clearKernel = Boolean(oldPath && !this._ranPaths.has(oldPath));
+    void this._updateBreakpoints(breakpoints);
+  }
 
-    void this._debuggerService
-      .updateBreakpoints(
-        this._src.getSource(),
-        breakpoints,
-        this._path,
-        oldPath,
-        clearKernel
-      )
-      .then(newPath => {
-        if (!this._path && newPath) {
-          this._lastCellPath = newPath;
-        }
-      });
+  /**
+   * Send the breakpoints of the current code.
+   *
+   * Each version of the code of a cell is a temporary file named after the
+   * code, so an edit gives the breakpoints a new file. The file of the
+   * previous code loses its breakpoints, unless that code has run.
+   */
+  private async _updateBreakpoints(
+    breakpoints: IDebugger.IBreakpoint[]
+  ): Promise<void> {
+    const code = this._src.getSource();
+    let previous: string | null = null;
+    if (!this._path) {
+      const path = this._debuggerService.getCodeId(code);
+      if (this._lastCellPath !== path) {
+        previous = this._lastCellPath;
+      }
+      this._lastCellPath = breakpoints.length ? path : null;
+    }
+    await this._debuggerService.updateBreakpoints(
+      code,
+      breakpoints,
+      this._path
+    );
+    // Clear last: each reply redraws the gutter from the model, which holds
+    // the breakpoints of the new code only once the update is done.
+    if (previous && !this._ranPaths.has(previous)) {
+      await this._debuggerService.updateBreakpoints('', [], previous);
+    }
   }
 
   /**
@@ -432,22 +448,7 @@ export class EditorHandler implements IDisposable {
 
     breakpoints.sort((a, b) => a.line! - b.line!);
 
-    const oldPath = this._path ? undefined : (this._lastCellPath ?? undefined);
-    const clearKernel = Boolean(oldPath && !this._ranPaths.has(oldPath));
-
-    void this._debuggerService
-      .updateBreakpoints(
-        this._src.getSource(),
-        breakpoints,
-        this._path,
-        oldPath,
-        clearKernel
-      )
-      .then(newPath => {
-        if (!this._path && newPath) {
-          this._lastCellPath = newPath;
-        }
-      });
+    void this._updateBreakpoints(breakpoints);
   }
 
   /**

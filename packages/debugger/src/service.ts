@@ -604,29 +604,18 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param code - The code in the cell where the breakpoints are set.
    * @param breakpoints - The list of breakpoints to set.
    * @param path - Optional path to the file where to set the breakpoints.
-   * @param oldPath - Optional previous path to clear breakpoints from.
-   * @param clearKernel - Optional whether to clear breakpoints from the kernel for oldPath.
    */
   async updateBreakpoints(
     code: string,
     breakpoints: IDebugger.IBreakpoint[],
-    path?: string,
-    oldPath?: string,
-    clearKernel = true
-  ): Promise<string | undefined> {
+    path?: string
+  ): Promise<void> {
     if (!this.session?.isStarted) {
       return;
     }
 
     if (!path) {
       path = (await this._dumpCell(code)).body.sourcePath;
-    }
-
-    if (oldPath && oldPath !== path) {
-      if (clearKernel) {
-        await this._setBreakpoints([], oldPath);
-      }
-      this._model.breakpoints.setBreakpoints(oldPath, []);
     }
 
     const state = await this.session.restoreState();
@@ -654,8 +643,6 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     // Update the local model and finish kernel configuration.
     this._model.breakpoints.setBreakpoints(path, updatedBreakpoints);
-
-    return path;
   }
 
   /**
