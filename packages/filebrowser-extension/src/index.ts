@@ -71,7 +71,7 @@ import {
   stopIcon,
   textEditorIcon
 } from '@jupyterlab/ui-components';
-import { map } from '@lumino/algorithm';
+import { find, map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import type { ReadonlyPartialJSONValue } from '@lumino/coreutils';
 import type { AccordionPanel, ContextMenu } from '@lumino/widgets';
@@ -81,6 +81,7 @@ import type { AccordionPanel, ContextMenu } from '@lumino/widgets';
  */
 const FILE_BROWSER_FACTORY = 'FileBrowser';
 const FILE_BROWSER_PLUGIN_ID = '@jupyterlab/filebrowser-extension:browser';
+const RESTORING_CLASS = 'jp-mod-restoring';
 
 /**
  * The command IDs used by the file browser plugin.
@@ -230,13 +231,22 @@ const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
       commandPalette
     );
 
-    void Promise.all([app.restored, browser.model.restored]).then(() => {
-      if (treePathUpdater) {
-        browser.model.pathChanged.connect((sender, args) => {
-          treePathUpdater(args.newValue);
-        });
+    // The default file browser plugin restores the browser and opens the path
+    // from the URL: report the folder once that is done, and follow it after.
+    // A default browser restored by another plugin is followed from `restored`.
+    const restoring = Private.restoring.get(browser);
+    void Promise.all([app.restored, restoring ?? browser.model.restored]).then(
+      () => {
+        if (treePathUpdater) {
+          if (restoring) {
+            treePathUpdater(browser.model.path);
+          }
+          browser.model.pathChanged.connect((sender, args) => {
+            treePathUpdater(args.newValue);
+          });
+        }
       }
-    });
+    );
     return {
       openPath: CommandIDs.openPath
     };
@@ -480,14 +490,19 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
       });
     }
 
-    void Private.restoreBrowser(
+    defaultBrowser.addClass(RESTORING_CLASS);
+    const restored = Private.restoreBrowser(
       defaultBrowser,
       commands,
       router,
       tree,
-      app,
       labShell
-    );
+    )
+      .catch(error => {
+        console.error('Failed to restore the file browser.', error);
+      })
+      .finally(() => defaultBrowser.removeClass(RESTORING_CLASS));
+    Private.restoring.set(defaultBrowser, restored);
     return defaultBrowser;
   }
 };
@@ -2042,6 +2057,10 @@ export default plugins;
  */
 namespace Private {
   /**
+   * Restoration of the default file browser, set by its plugin.
+   */
+  export const restoring = new WeakMap<FileBrowser, Promise<void>>();
+  /**
    * Get browser object given file path.
    */
   export function getBrowserForPath(
@@ -2109,50 +2128,79 @@ namespace Private {
     commands: CommandRegistry,
     router: IRouter | null,
     tree: JupyterFrontEnd.ITreeResolver | null,
-    app: JupyterFrontEnd,
     labShell: ILabShell | null
   ): Promise<void> {
-    const restoring = 'jp-mod-restoring';
-
-    browser.addClass(restoring);
-
     if (!router) {
       await browser.model.restore(browser.id);
       await browser.model.refresh();
-      browser.removeClass(restoring);
       return;
     }
 
-    const listener = async () => {
-      router.routed.disconnect(listener);
+    const { manager } = browser.model;
+    // Capture the restored view before later interactions can dispose it.
+    const restoredDocument = labShell?.restored.then(layout => {
+      const widget = layout.mainArea?.currentWidget;
+      const path = widget ? manager.contextForWidget(widget)?.path : undefined;
+      return {
+        widget,
+        path,
+        factory: path
+          ? find(
+              manager.registry.widgetFactories(),
+              factory => manager.findWidget(path, factory.name) === widget
+            )?.name
+          : undefined
+      };
+    });
 
-      const paths = await tree?.paths;
-      if (paths?.file || paths?.browser) {
-        // Restore the model without populating it.
-        await browser.model.restore(browser.id, false);
-        if (paths.file) {
+    await new Promise<void>(resolve => {
+      const listener = () => {
+        router.routed.disconnect(listener);
+        resolve();
+      };
+      router.routed.connect(listener);
+    });
+
+    const paths = await tree?.paths;
+    if (paths?.file || paths?.browser) {
+      // Restore the model without populating it.
+      await browser.model.restore(browser.id, false);
+      if (paths.file) {
+        const restored = await restoredDocument;
+        const factory = Private.resolveOpenWithFactory(
+          manager.registry,
+          paths.openWith
+        );
+        const alreadyRestored =
+          restored?.widget &&
+          restored.path === manager.services.contents.normalize(paths.file) &&
+          (!paths.openWith || (factory && restored.factory === factory));
+        if (alreadyRestored) {
+          await commands.execute(CommandIDs.goToPath, {
+            path: paths.file,
+            dontShowBrowser: true
+          });
+        } else {
           await commands.execute(CommandIDs.openPath, {
             path: paths.file,
             dontShowBrowser: true
           });
         }
-        if (paths.browser) {
-          await commands.execute(CommandIDs.openPath, {
-            path: paths.browser,
-            dontShowBrowser: true
-          });
-        }
-      } else {
-        await browser.model.restore(browser.id);
-        await browser.model.refresh();
       }
-      browser.removeClass(restoring);
+      if (paths.browser) {
+        await commands.execute(CommandIDs.openPath, {
+          path: paths.browser,
+          dontShowBrowser: true
+        });
+      }
+    } else {
+      await browser.model.restore(browser.id);
+      await browser.model.refresh();
+    }
 
-      if (labShell?.isEmpty('main')) {
-        void commands.execute('launcher:create');
-      }
-    };
-    router.routed.connect(listener);
+    if (labShell?.isEmpty('main')) {
+      void commands.execute('launcher:create');
+    }
   }
 
   export namespace OpenWith {
