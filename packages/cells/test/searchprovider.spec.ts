@@ -376,6 +376,10 @@ describe('cells/searchprovider', () => {
         'An apple, ![apple logo](logo.png).'
       ],
       [
+        'the image of a badge',
+        'An apple, [![apple badge](https://example.com/apple.svg)](https://example.com/apple)'
+      ],
+      [
         'the label of a reference link',
         'An apple, [more][apple].\n\n[apple]: https://example.com'
       ],

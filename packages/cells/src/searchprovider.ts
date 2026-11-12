@@ -897,19 +897,26 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   private _hiddenSourceRanges(): Array<{ start: number; end: number }> {
     const source = this.model.sharedModel.getSource();
     const ranges: Array<{ start: number; end: number }> = [];
-    // Link and image destinations: [text](destination) and ![alt](destination).
-    // For an image the alt text is not rendered either. A destination can
-    // hold pairs of parentheses, as in https://example.com/Python_(language).
-    for (const match of source.matchAll(
-      /(!?)\[[^\]]*\]\(((?:[^()]|\([^()]*\))*)\)/g
+    // Images: ![alt](destination). The alt text is not rendered either. A
+    // destination can hold pairs of parentheses, as in
+    // https://example.com/Python_(language).
+    const images = /!\[[^\]]*\]\((?:[^()]|\([^()]*\))*\)/g;
+    for (const match of source.matchAll(images)) {
+      const start = match.index ?? 0;
+      ranges.push({ start, end: start + match[0].length });
+    }
+    // Link destinations: [text](destination). Blank out the images first, so
+    // that a link whose text is an image is found too, as in a badge:
+    // [![alt](image)](destination).
+    const withoutImages = source.replace(images, image =>
+      ' '.repeat(image.length)
+    );
+    for (const match of withoutImages.matchAll(
+      /\[[^\]]*\]\(((?:[^()]|\([^()]*\))*)\)/g
     )) {
-      const destination = match[2] ?? '';
+      const destination = match[1] ?? '';
       const end = (match.index ?? 0) + match[0].length;
-      ranges.push({
-        start:
-          match[1] === '!' ? (match.index ?? 0) : end - destination.length - 2,
-        end
-      });
+      ranges.push({ start: end - destination.length - 2, end });
     }
     // Reference definitions: the whole [label]: destination line.
     for (const match of source.matchAll(
