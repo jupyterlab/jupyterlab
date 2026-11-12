@@ -661,6 +661,7 @@ describe('docregistry/context', () => {
 
         const oldPath = context.path;
         const spySave = jest.spyOn(manager.contents, 'save');
+        spySave.mockClear();
         const result = await context.saveAs();
         await promise;
 
