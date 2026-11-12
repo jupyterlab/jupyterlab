@@ -8,7 +8,6 @@ on:
       - '**/*.txt'
       - '.codespellignore'
       - '.pre-commit-config.yaml'
-      - 'docs/source/conf.py'
       - 'docs/source/_ext/**'
       - 'docs/source/spelling_wordlist.txt'
       - 'pyproject.toml'

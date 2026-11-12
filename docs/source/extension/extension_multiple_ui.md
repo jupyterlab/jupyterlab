@@ -95,8 +95,9 @@ Notebook 7.
 ### Using Plugin Metadata to Drive Compatibility
 
 JupyterLab's extension system is designed so that plugins can depend on and
-reuse features from one another. A key part of this approach is {ref}`JupyterLab's
-Provider-Consumer pattern <dependency-injection-basic-info>` (a type of [dependency-injection](https://en.wikipedia.org/wiki/Dependency_injection)
+reuse features from one another. A key part of this approach is
+{ref}`JupyterLab's Provider-Consumer pattern <dependency-injection-basic-info>`
+(a type of [dependency-injection](https://en.wikipedia.org/wiki/Dependency_injection)
 pattern), and it is what enables the compatibility solutions discussed here.
 
 Each plugin uses some properties (the `requires` and `optional` properties) to

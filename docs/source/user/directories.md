@@ -179,9 +179,8 @@ JupyterLab Advanced Settings Editor.
 
 ### settings
 
-The `settings` directory inside the {ref}`JupyterLab Application directory
-<application-directory>` may contain `page_config.json`, `overrides.json`,
-and/or `build_config.json` files.
+The `settings` directory inside the {ref}`JupyterLab Application directory <application-directory>`
+may contain `page_config.json`, `overrides.json`, and/or `build_config.json` files.
 
 (page-configjson)=
 

@@ -109,7 +109,7 @@ const plugin: JupyterFrontEndPlugin<MyToken> = {
 };
 ```
 
-The `id` and `activate` fields are required and the other fields may be omitted. For more information about how to use the `requires`, `optional`, or `provides` fields, see {ref}`services`.
+The `id` and `activate` fields are required and the other fields may be omitted. For more information about how to use the `requires`, `optional`, or `provides` fields, see {ref}services.
 
 (plugin-id-convention)=
 
@@ -403,7 +403,7 @@ JupyterLab automatically deduplicates the entire dependency tree between source 
 - `singleton`: if `true`, the extension will always prefer to use the copy of the dependency that other extensions are using, rather than using the highest version available. The default is `false`.
 - `strictVersion`: if `true`, the extension will always make sure the copy of the dependency it is using satisfies the dependency version range it requires.
 
-By default, JupyterLab deduplicates direct dependencies of prebuilt extensions with direct dependencies of other source and prebuilt extensions, choosing the highest version of a dependency available to JupyterLab. JupyterLab chooses reasonable default options when using tokens and services from core JupyterLab packages. We suggest the following `sharedPackages` configurations when using tokens provided by packages other than core JupyterLab packages (see {ref}`services` for more details about using tokens).
+By default, JupyterLab deduplicates direct dependencies of prebuilt extensions with direct dependencies of other source and prebuilt extensions, choosing the highest version of a dependency available to JupyterLab. JupyterLab chooses reasonable default options when using tokens and services from core JupyterLab packages. We suggest the following `sharedPackages` configurations when using tokens provided by packages other than core JupyterLab packages (see {ref}services for more details about using tokens).
 
 (dedup-provide-service)=
 

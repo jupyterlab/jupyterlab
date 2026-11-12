@@ -14,8 +14,8 @@ cells.
 
 (create-console)=
 
-Create a new code console by clicking the `+` button in the {ref}`file
-browser <left-sidebar>` and selecting the kernel:
+Create a new code console by clicking the `+` button in the {ref}`file browser <left-sidebar>`
+and selecting the kernel:
 
 ```{raw} html
 <div class="jp-youtube-video">

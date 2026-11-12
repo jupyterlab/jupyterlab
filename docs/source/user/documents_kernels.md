@@ -12,7 +12,7 @@ environments. JupyterLab enables you to connect any open text file to a
 {ref}`code console and kernel <code-console>`. This means you can easily run code from the
 text file in the kernel interactively.
 
-(create-console)=
+(create-console-kn)=
 
 Right-click on a document and select “Create Console for Editor”:
 

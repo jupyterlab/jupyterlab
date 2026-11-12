@@ -129,7 +129,7 @@ will be automatically triggered. Its steps are:
 
 2. Start a matrix of job (one for each language pack)
    1. Build the source and wheel artifacts
-   2. Create a GitHub release with tag _\<locale>@v\<version>_
+   2. Create a GitHub release with tag `<locale>@v<version>`
    3. Publish the artifacts to PyPI
 
 :::{note}

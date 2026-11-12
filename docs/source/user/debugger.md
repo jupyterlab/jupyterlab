@@ -10,6 +10,8 @@ JupyterLab ships with a Debugger front-end by default.
 
 This means that notebooks, code consoles and files can be debugged from JupyterLab directly!
 
+(debugger)=
+
 ## Requirements
 
 For the debugger to be enabled and visible, a kernel with support for debugging is required.

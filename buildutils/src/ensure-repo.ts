@@ -271,20 +271,6 @@ function ensureBranch(): string[] {
 
   const { source, target, rtdVersion } = URL_CONFIG;
 
-  // Handle the github_version in conf.py
-  const confPath = 'docs/source/conf.py';
-  const oldConfData = fs.readFileSync(confPath, 'utf-8');
-  // eslint-disable-next-line prefer-regex-literals
-  const confTest = new RegExp('"github_version": "(.*)"');
-  const newConfData = oldConfData.replace(
-    confTest,
-    `"github_version": "${target}"`
-  );
-  if (newConfData !== oldConfData) {
-    messages.push(`Overwriting ${confPath}`);
-    fs.writeFileSync(confPath, newConfData, 'utf-8');
-  }
-
   // Handle urls in files
   // Get all files matching the desired file types
   const fileTypes = ['.json', '.md', '.rst', '.yml', '.ts', '.tsx', '.py'];

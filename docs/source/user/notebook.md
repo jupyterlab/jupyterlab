@@ -45,7 +45,7 @@ then selecting a kernel in the new Launcher tab:
 </div>
 ```
 
-(rename-file)=
+(rename-notebook)=
 
 A new file is created with a default name. Rename a file by
 right-clicking on its name in the file browser and selecting “Rename”
@@ -152,7 +152,7 @@ Create a new synchronized view of a cell’s output:
 </div>
 ```
 
-(tab-completion)=
+(tab-completion-nb)=
 
 Tab completion (activated with the `Tab` key) can now include additional
 information about the types of the matched items:
@@ -178,7 +178,7 @@ information about objects:
 </div>
 ```
 
-(create-console)=
+(create-console-nb)=
 
 You can connect a {ref}`code console <code-console>` to a notebook kernel to have a log of
 computations done in the kernel, in the order in which they were done.
