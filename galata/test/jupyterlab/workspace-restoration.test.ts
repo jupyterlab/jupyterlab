@@ -157,49 +157,6 @@ for (const view of [
       }
     });
 
-    test('should keep the selected view after leaving the URL viewer', async ({
-      page
-    }) => {
-      await page.goto(
-        `tree/${filePath}?open-with=${encodeURIComponent(view.factory)}`
-      );
-      await expect(page.locator('#filebrowser')).not.toHaveClass(
-        /jp-mod-restoring/
-      );
-      await expect(page).toHaveURL(
-        url => url.searchParams.get('open-with') === view.factory
-      );
-
-      const defaultContent = page
-        .getByRole('tabpanel', { name: view.file, includeHidden: true })
-        .locator(view.defaultSelector);
-      const id = await defaultContent.evaluate(
-        node => node.closest('.jp-MainAreaWidget')!.id
-      );
-      const saved = page.waitForResponse(
-        response =>
-          new URL(response.url()).pathname.includes('/api/workspaces/') &&
-          response.request().method() === 'PUT' &&
-          !!response
-            .request()
-            .postData()
-            ?.includes(`"current":"${defaultView}"`)
-      );
-      await page.activity
-        .getTabLocator(view.file)
-        .and(page.locator(`[data-id="${id}"]`))
-        .click();
-      await expect(defaultContent).toBeVisible();
-      await saved;
-
-      await page.reload();
-      await expect(page.locator('#filebrowser')).not.toHaveClass(
-        /jp-mod-restoring/
-      );
-      await expect(defaultContent).toBeVisible();
-      await expect(page).toHaveURL(url => !url.searchParams.has('open-with'));
-    });
-
     for (const browserPath of ['', tmpPath]) {
       test(`should preserve a directory URL with browser override ${browserPath || 'unset'}`, async ({
         page
@@ -351,9 +308,7 @@ for (const view of [
 
     for (const selection of [
       'another tab',
-      'another tab with the requested view already selected',
       'another tab after closing the restored view',
-      'another tab after closing the requested view',
       'an extension widget'
     ]) {
       test(`should keep ${selection} activated before routing finishes`, async ({
@@ -372,10 +327,7 @@ for (const view of [
         });
 
         try {
-          const query = selection.includes('requested view')
-            ? `?open-with=${encodeURIComponent(view.factory)}`
-            : '';
-          await page.goto(`tree/${filePath}${query}`);
+          await page.goto(`tree/${filePath}`);
           await expect(page.locator('#filebrowser')).toHaveClass(
             /jp-mod-restoring/
           );
@@ -419,20 +371,6 @@ for (const view of [
         );
       });
     }
-
-    test('should activate a different requested view of the restored file', async ({
-      page
-    }) => {
-      await page.goto(`tree/${filePath}?open-with=${view.defaultFactory}`);
-      await expect(page.locator('#filebrowser')).not.toHaveClass(
-        /jp-mod-restoring/
-      );
-      await expect(
-        page
-          .getByRole('tabpanel', { name: view.file, includeHidden: true })
-          .locator(view.defaultSelector)
-      ).toBeVisible();
-    });
 
     test('should activate a different URL file even if it is already open', async ({
       page

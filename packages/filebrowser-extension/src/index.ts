@@ -71,7 +71,7 @@ import {
   stopIcon,
   textEditorIcon
 } from '@jupyterlab/ui-components';
-import { find, map } from '@lumino/algorithm';
+import { map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import type { ReadonlyPartialJSONValue } from '@lumino/coreutils';
 import type { AccordionPanel, ContextMenu } from '@lumino/widgets';
@@ -2141,16 +2141,7 @@ namespace Private {
     const restoredDocument = labShell?.restored.then(layout => {
       const widget = layout.mainArea?.currentWidget;
       const path = widget ? manager.contextForWidget(widget)?.path : undefined;
-      return {
-        widget,
-        path,
-        factory: path
-          ? find(
-              manager.registry.widgetFactories(),
-              factory => manager.findWidget(path, factory.name) === widget
-            )?.name
-          : undefined
-      };
+      return { widget, path };
     });
 
     await new Promise<void>(resolve => {
@@ -2167,14 +2158,9 @@ namespace Private {
       await browser.model.restore(browser.id, false);
       if (paths.file) {
         const restored = await restoredDocument;
-        const factory = Private.resolveOpenWithFactory(
-          manager.registry,
-          paths.openWith
-        );
         const alreadyRestored =
           restored?.widget &&
-          restored.path === manager.services.contents.normalize(paths.file) &&
-          (!paths.openWith || (factory && restored.factory === factory));
+          restored.path === manager.services.contents.normalize(paths.file);
         if (alreadyRestored) {
           await commands.execute(CommandIDs.goToPath, {
             path: paths.file,
