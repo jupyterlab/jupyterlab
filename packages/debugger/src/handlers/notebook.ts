@@ -128,9 +128,24 @@ export class NotebookHandler implements IDisposable {
     });
     codeCell.disposed.connect(() => {
       this._cellMap.delete(modelId);
+      if (this._isDeleted(modelId)) {
+        editorHandler.clearBreakpoints();
+      }
       editorHandler.dispose();
     });
     this._cellMap.set(cell.model.id, editorHandler);
+  }
+
+  /**
+   * Whether the cell with the given ID left the notebook.
+   *
+   * Moving a cell disposes its widget and inserts a copy with the same ID.
+   */
+  private _isDeleted(id: string): boolean {
+    const model = this._notebookPanel.content.model;
+    return (
+      !!model && !model.sharedModel.cells.some(cell => cell.getId() === id)
+    );
   }
 
   private _debuggerService: IDebugger;

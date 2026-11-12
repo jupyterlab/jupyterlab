@@ -213,28 +213,27 @@ export class EditorHandler implements IDisposable {
     if (this.isDisposed) {
       return;
     }
-    if (!this._path) {
-      if (this._lastCellPath) {
-        void this._debuggerService.updateBreakpoints(
-          '',
-          [],
-          this._lastCellPath
-        );
-      }
-      if (this._executedPath && this._executedPath !== this._lastCellPath) {
-        void this._debuggerService.updateBreakpoints(
-          '',
-          [],
-          this._executedPath
-        );
-      }
-      this._lastCellPath = null;
-      this._executedPath = null;
-    }
     this._editorMonitor.dispose();
     this._clearEditor();
     this.isDisposed = true;
     Signal.clearData(this);
+  }
+
+  /**
+   * Remove the breakpoints of a deleted cell from the kernel.
+   */
+  clearBreakpoints(): void {
+    if (this.isDisposed || this._path) {
+      return;
+    }
+    if (this._lastCellPath) {
+      void this._debuggerService.updateBreakpoints('', [], this._lastCellPath);
+    }
+    if (this._executedPath && this._executedPath !== this._lastCellPath) {
+      void this._debuggerService.updateBreakpoints('', [], this._executedPath);
+    }
+    this._lastCellPath = null;
+    this._executedPath = null;
   }
 
   /**

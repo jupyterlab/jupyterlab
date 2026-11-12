@@ -10,6 +10,8 @@ import { Debugger } from '../src/debugger';
 
 import { DebuggerService } from '../src/service';
 
+import { flushRequests, startTestSession } from './utils';
+
 describe('Debugger.EditorHandler', () => {
   let service: DebuggerService;
   let src: YCodeCell;
@@ -38,6 +40,25 @@ describe('Debugger.EditorHandler', () => {
     service.dispose();
     jest.useRealTimers();
   });
+
+  /**
+   * Debug with a kernel that keeps breakpoints, and with breakpoints on the
+   * given lines of the editor.
+   */
+  function startDebugging(lines: number[]): Map<string, number[]> {
+    updateBreakpoints.mockRestore();
+    handler['_getBreakpointsFromEditor'] = () => lines;
+    return startTestSession(service);
+  }
+
+  /**
+   * Change the source and wait for the breakpoints the editor then sends.
+   */
+  async function edit(source: string): Promise<void> {
+    src.setSource(source);
+    jest.advanceTimersByTime(1000);
+    await flushRequests();
+  }
 
   it('should send the breakpoints after the source changes', () => {
     src.setSource('x = 2');
@@ -118,17 +139,15 @@ describe('Debugger.EditorHandler', () => {
     cellSrc.dispose();
   });
 
-  it('should clear cell breakpoints on dispose', async () => {
-    updateBreakpoints.mockResolvedValueOnce('tmp/cell_path.py');
-    src.setSource('x = 2');
-    jest.advanceTimersByTime(1000);
-    await Promise.resolve();
+  describe('#clearBreakpoints()', () => {
+    it('should clear the breakpoints of the cell', async () => {
+      const kernel = startDebugging([1]);
+      await edit('x = 2');
 
-    handler.dispose();
-    expect(updateBreakpoints).toHaveBeenLastCalledWith(
-      '',
-      [],
-      'tmp/cell_path.py'
-    );
+      handler.clearBreakpoints();
+      await flushRequests();
+
+      expect(kernel.size).toBe(0);
+    });
   });
 });
