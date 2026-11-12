@@ -653,9 +653,17 @@ describe('@jupyterlab/settingeditor', () => {
         }
       };
 
+      const untaggedId = 'plugin-untagged';
+
       beforeEach(async () => {
         connector.schemas[taggedId] = taggedSchema;
+        connector.schemas[untaggedId] = {
+          type: 'object',
+          title: 'Untagged Plugin',
+          properties: {}
+        };
         await registry.load(taggedId);
+        await registry.load(untaggedId);
         model = new PluginList.Model({ registry });
         await model.ready;
         list = new PluginList({ registry, model });
@@ -663,37 +671,36 @@ describe('@jupyterlab/settingeditor', () => {
         MessageLoop.sendMessage(list, Widget.Msg.UpdateRequest);
       });
 
-      it('should return tag when query exactly matches a schema tag', () => {
-        list.setFilter(updateFilterFunction('my-tag', false, false), 'my-tag');
-        const plugin = model.plugins.find(p => p.id === taggedId)!;
-        expect(list.filter!(plugin)).toEqual({ kind: 'tag' });
+      const search = (query: string, id = taggedId) => {
+        list.setFilter(updateFilterFunction(query, false, false), query);
+        return list.filter!(model.plugins.find(p => p.id === id)!);
+      };
+
+      it('should match a schema tag with the tag: prefix', () => {
+        expect(search('tag:my-tag')).toEqual({ kind: 'tag' });
       });
 
-      it('should match tags case-insensitively', () => {
-        list.setFilter(updateFilterFunction('MY-TAG', false, false), 'MY-TAG');
-        const plugin = model.plugins.find(p => p.id === taggedId)!;
-        expect(list.filter!(plugin)).toEqual({ kind: 'tag' });
+      it('should match a part of a schema tag, ignoring the case', () => {
+        expect(search('TAG:Y-T')).toEqual({ kind: 'tag' });
       });
 
-      it('should not match a partial tag', () => {
-        list.setFilter(updateFilterFunction('my', false, false), 'my');
-        const plugin = model.plugins.find(p => p.id === taggedId)!;
-        expect(list.filter!(plugin)).not.toEqual({ kind: 'tag' });
+      it('should not match tags without the tag: prefix', () => {
+        expect(search('my-tag')).toEqual({ kind: 'properties', matches: [] });
+      });
+
+      it('should not match titles and keys with the tag: prefix', () => {
+        expect(search('tag:Tagged')).toEqual({
+          kind: 'properties',
+          matches: []
+        });
       });
 
       it('should return all when query matches title but not tag', () => {
-        list.setFilter(updateFilterFunction('Tagged', false, false), 'Tagged');
-        const plugin = model.plugins.find(p => p.id === taggedId)!;
-        expect(list.filter!(plugin)).toEqual({ kind: 'all' });
+        expect(search('Tagged')).toEqual({ kind: 'all' });
       });
 
-      it('should return matching property names when query matches a property tag', () => {
-        list.setFilter(
-          updateFilterFunction('prop-tag', false, false),
-          'prop-tag'
-        );
-        const plugin = model.plugins.find(p => p.id === taggedId)!;
-        expect(list.filter!(plugin)).toEqual({
+      it('should match a part of a property tag', () => {
+        expect(search('tag:PROP')).toEqual({
           kind: 'properties',
           matches: [
             { matchedBy: 'tag', label: 'Tagged Property', path: ['taggedProp'] }
@@ -701,18 +708,15 @@ describe('@jupyterlab/settingeditor', () => {
         });
       });
 
-      it('should match property tags case-insensitively', () => {
-        list.setFilter(
-          updateFilterFunction('PROP-TAG', false, false),
-          'PROP-TAG'
-        );
+      it('should return all for every plugin when the tag query is empty', () => {
+        expect(search('tag: ')).toEqual({ kind: 'all' });
+        expect(search('tag: ', untaggedId)).toEqual({ kind: 'all' });
+      });
+
+      it('should match tags with an initial tag: query', () => {
+        list = new PluginList({ registry, model, query: 'tag:my' });
         const plugin = model.plugins.find(p => p.id === taggedId)!;
-        expect(list.filter!(plugin)).toEqual({
-          kind: 'properties',
-          matches: [
-            { matchedBy: 'tag', label: 'Tagged Property', path: ['taggedProp'] }
-          ]
-        });
+        expect(list.filter!(plugin)).toEqual({ kind: 'tag' });
       });
     });
   });

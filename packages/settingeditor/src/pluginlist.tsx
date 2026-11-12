@@ -57,6 +57,11 @@ const SETTINGS_HEADER_ID = 'jp-PluginList-settings-header';
  */
 const ENTRY_CLASS = 'jp-PluginList-entry';
 
+/**
+ * A search query that matches the tags of the settings, such as `tag:perf`.
+ */
+const TAG_QUERY = /^tag:(.*)$/i;
+
 type IPropertyMatch = SettingsEditor.IPropertyMatch;
 
 /**
@@ -87,7 +92,8 @@ export class PluginList extends ReactWidget {
     this.mapPlugins = this.mapPlugins.bind(this);
     this.setFilter = this.setFilter.bind(this);
     this.setFilter(
-      options.query ? updateFilterFunction(options.query, false, false) : null
+      options.query ? updateFilterFunction(options.query, false, false) : null,
+      options.query
     );
     this.setError = this.setError.bind(this);
     this._evtClick = this._evtClick.bind(this);
@@ -545,7 +551,6 @@ export class PluginList extends ReactWidget {
    * @param props - Schema properties being filtered
    * @param definitions - Definitions to use for filling in references in properties
    * @param ref - Reference to a definition
-   * @param query - Search query, matched exactly against the setting tags
    * @returns - The titles and keys that match the search, and the title (or
    * the key, if there is no title) of each setting whose nested settings match.
    */
@@ -553,25 +558,25 @@ export class PluginList extends ReactWidget {
     filter: (item: string) => Partial<IScore> | null,
     props: ISettingRegistry.IProperty,
     definitions?: any,
-    ref?: string,
-    query?: string
+    ref?: string
   ): string[] {
-    return this._getMatches(filter, props, definitions, ref, query).map(
+    return this._getMatches(filter, props, definitions, ref).map(
       match => match.label
     );
   }
 
   /**
-   * Same as `getFilterString()`, with the path of each setting. With `seen`,
-   * a match is returned only the first time, and a parent only together
-   * with a new match.
+   * Same as `getFilterString()`, with the path of each setting. With
+   * `matchTags`, the filter is applied to the tags of the settings instead of
+   * their titles and keys. With `seen`, a match is returned only the first
+   * time, and a parent only together with a new match.
    */
   private _getMatches(
     filter: (item: string) => Partial<IScore> | null,
     props: ISettingRegistry.IProperty,
     definitions?: any,
     ref?: string,
-    query?: string,
+    matchTags = false,
     seen?: Set<string>,
     path: string[] = []
   ): IPropertyMatch[] {
@@ -595,7 +600,7 @@ export class PluginList extends ReactWidget {
         items,
         definitions,
         items['$ref'] as string,
-        query,
+        matchTags,
         seen,
         path
       );
@@ -627,23 +632,20 @@ export class PluginList extends ReactWidget {
           own.push({ matchedBy, label, path: settingPath });
         }
       };
-      if (filter((subProps.title as string) ?? '')) {
-        // The title of the property matches.
-        add('title', subProps.title as string);
-      }
-      if (filter(value)) {
-        // The property name matches.
-        add('key', value);
-      }
-      if (
-        query !== undefined &&
-        Array.isArray(subProps.tags) &&
-        (subProps.tags as string[]).some(
-          tag => tag.toLowerCase() === query.toLowerCase()
-        )
-      ) {
-        // one of the tags of the property matches.
-        add('tag', titleOrKey);
+      if (matchTags) {
+        if (Private.hasMatchingTag(filter, subProps.tags)) {
+          // One of the tags of the property matches.
+          add('tag', titleOrKey);
+        }
+      } else {
+        if (filter((subProps.title as string) ?? '')) {
+          // The title of the property matches.
+          add('title', subProps.title as string);
+        }
+        if (filter(value)) {
+          // The property name matches.
+          add('key', value);
+        }
       }
 
       // Finally, recurse on the properties left.
@@ -652,7 +654,7 @@ export class PluginList extends ReactWidget {
         subProps as ISettingRegistry.IProperty,
         definitions,
         subProps['$ref'] as string,
-        query,
+        matchTags,
         seen,
         settingPath
       );
@@ -673,31 +675,34 @@ export class PluginList extends ReactWidget {
     query?: string
   ): void {
     if (filter) {
+      const tagQuery = query?.match(TAG_QUERY)?.[1].trim();
+      const matchTags = tagQuery !== undefined;
+      const searchFilter = matchTags
+        ? updateFilterFunction(tagQuery, false, false)
+        : filter;
       const getMatches = (
         plugin: ISettingRegistry.IPlugin,
         seen?: Set<string>
       ): SettingsEditor.PluginMatch => {
-        const schemaTags = plugin.schema.tags;
-        if (
-          Array.isArray(schemaTags) &&
-          query !== undefined &&
-          (schemaTags as string[]).some(
-            tag => tag.toLowerCase() === query.toLowerCase()
-          )
-        ) {
-          return { kind: 'tag' };
-        }
-        if (!filter || filter(plugin.schema.title ?? '')) {
+        if (matchTags) {
+          if (tagQuery === '') {
+            // empty tag query (`tag:`), return all plugins like an empty search query.
+            return { kind: 'all' };
+          }
+          if (Private.hasMatchingTag(searchFilter, plugin.schema.tags)) {
+            return { kind: 'tag' };
+          }
+        } else if (searchFilter(plugin.schema.title ?? '')) {
           return { kind: 'all' };
         }
         return {
           kind: 'properties',
           matches: this._getMatches(
-            filter,
+            searchFilter,
             this._getSearchableSchema(plugin),
             plugin.schema.definitions,
             undefined,
-            query,
+            matchTags,
             seen
           )
         };
@@ -1136,5 +1141,20 @@ export namespace PluginList {
        */
       toSkip?: string[];
     }
+  }
+}
+
+namespace Private {
+  /**
+   * Whether one of the tags of a schema matches the filter.
+   */
+  export function hasMatchingTag(
+    filter: (item: string) => Partial<IScore> | null,
+    tags: unknown
+  ): boolean {
+    return (
+      Array.isArray(tags) &&
+      tags.some(tag => typeof tag === 'string' && filter(tag) !== null)
+    );
   }
 }
