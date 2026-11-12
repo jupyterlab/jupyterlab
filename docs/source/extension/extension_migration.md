@@ -58,6 +58,8 @@
 
 - `ObservableUndoableList`, `IObservableUndoableList`, and `ObservableUndoableList.IdentitySerializer` from `@jupyterlab/observables` are deprecated since 4.7.0 and will be removed in JupyterLab 5.0. Observable lists with undo/redo are no longer used by JupyterLab core since document models migrated to Yjs in JupyterLab 4.x. Consequently, `IModelDB.createList` and `ModelDB.createList` are also deprecated.
 
+- `get()` of `ContentsManager`, `Drive` and `RestContentProvider` from `@jupyterlab/services` returns the content of the file or directory when it is called without options. This behavior is deprecated and subject to change: a future version will return the content only when it is requested, as `get()` already does when any option is given, for example `{ type: 'file' }`. Reading the `content` of a model fetched without options logs a warning in the browser console. Use `{ content: true }` where the content is read. Calls that do not read the content need no change.
+
 - The JSON Lines renderer plugin was renamed from `@jupyterlab/json-lines-extension:factory`
   to `@jupyterlab/json-extension:json-lines-factory` to match its owning package.
   Update references to the old plugin id in configuration, such as `disabledExtensions`,
