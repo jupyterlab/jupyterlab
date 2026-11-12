@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { Token } from '@lumino/coreutils';
 import type { Field, Widget } from '@rjsf/utils';
 
@@ -17,6 +18,14 @@ export interface IFormRenderer {
    * A React component with properties WidgetProps.
    */
   widgetRenderer?: Widget;
+
+  /**
+   * Returns the schema of the sub-properties displayed by the renderer.
+   *
+   * Use it when the renderer shows properties that are not in the plugin
+   * schema, so that the settings editor search can find them.
+   */
+  getSchemaProperties?: () => ReadonlyPartialJSONObject;
 }
 
 /**

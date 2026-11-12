@@ -132,6 +132,14 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
   white-space: pre-wrap;
 }
 
+/*
+ * A stretched item would count as having a fixed height, and a height in
+ * percent in rendered HTML would then resolve against the height of the row.
+ */
+.jp-OutputArea-output.jp-RenderedHTMLCommon {
+  align-self: flex-start;
+}
+
 /* tables */
 
 .jp-OutputArea-output.jp-RenderedHTMLCommon table {
