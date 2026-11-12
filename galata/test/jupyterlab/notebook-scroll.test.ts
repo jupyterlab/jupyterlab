@@ -170,6 +170,9 @@ test.describe('Notebook scroll on navigation (content visibility)', () => {
     },
     mockSettings: {
       ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/application-extension:shell': {
+        hiddenMode: 'display'
+      },
       '@jupyterlab/notebook-extension:tracker': {
         ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
         windowingMode: 'contentVisibility'
