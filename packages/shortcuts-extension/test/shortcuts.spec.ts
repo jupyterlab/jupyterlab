@@ -609,6 +609,17 @@ describe('@jupyterlab/shortcut-extension', () => {
         { ...closeTab, args: { foo: 'bar' }, preventDefault: false }
       ]);
     });
+
+    it('should keep the selectors of JupyterLab 4.0 in the user shortcuts', async () => {
+      // The shortcuts editor saves these, and JupyterLab 4.6 reads them too.
+      const stored = {
+        command: 'notebook:move-cell-up',
+        keys: ['Ctrl Alt ArrowUp'],
+        selector: '.jp-Notebook:focus'
+      };
+      const settings = await loadShortcuts([], [stored]);
+      expect(settings.get('shortcuts').user).toEqual([stored]);
+    });
   });
 
   describe('shortcuts schema', () => {
