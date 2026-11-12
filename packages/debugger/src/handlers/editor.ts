@@ -10,7 +10,7 @@ import type { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
-import type { ISharedText, SourceChange } from '@jupyter/ydoc';
+import type { CellChange, ISharedText, SourceChange } from '@jupyter/ydoc';
 
 import type { Line, Range, StateEffectType } from '@codemirror/state';
 import {
@@ -272,6 +272,11 @@ export class EditorHandler implements IDisposable {
     sender: ISharedText,
     change: SourceChange
   ): void {
+    // Remember the source that started running. Its temporary file must keep
+    // its breakpoints after a later edit, so that code still stops.
+    if ((change as CellChange).executionStateChange?.newValue === 'running') {
+      this._executedSources.add(this._src.getSource());
+    }
     if (change.sourceChange) {
       this._sourceChanged.emit();
     }
@@ -292,11 +297,52 @@ export class EditorHandler implements IDisposable {
       );
     });
 
-    void this._debuggerService.updateBreakpoints(
-      this._src.getSource(),
+    void this._publishBreakpoints(this._src.getSource(), breakpoints);
+  }
+
+  /**
+   * Send breakpoints for the current source.
+   *
+   * Cells and consoles are stored under a temporary path derived from the
+   * code. An edit is therefore a new file: drop breakpoints on the previous
+   * file unless that code has already run.
+   */
+  private async _publishBreakpoints(
+    code: string,
+    breakpoints: IDebugger.IBreakpoint[]
+  ): Promise<void> {
+    if (!this._path) {
+      const previous = this._breakpointSource;
+      if (
+        previous != null &&
+        previous !== code &&
+        !this._executedSources.has(previous)
+      ) {
+        try {
+          await this._debuggerService.updateBreakpoints(previous, []);
+        } catch (error) {
+          // Still publish the current source if the stale file cannot be cleared.
+          console.error(
+            'Failed to clear breakpoints for the previous cell source.',
+            error
+          );
+        }
+      }
+    }
+
+    if (this.isDisposed || this.editor?.isDisposed) {
+      return;
+    }
+
+    await this._debuggerService.updateBreakpoints(
+      code,
       breakpoints,
       this._path
     );
+
+    if (!this._path && !this.isDisposed) {
+      this._breakpointSource = breakpoints.length > 0 ? code : null;
+    }
   }
 
   /**
@@ -393,11 +439,7 @@ export class EditorHandler implements IDisposable {
 
     breakpoints.sort((a, b) => a.line! - b.line!);
 
-    void this._debuggerService.updateBreakpoints(
-      this._src.getSource(),
-      breakpoints,
-      this._path
-    );
+    void this._publishBreakpoints(this._src.getSource(), breakpoints);
   }
 
   /**
@@ -485,6 +527,8 @@ export class EditorHandler implements IDisposable {
   private _path: string;
   private _src: ISharedText;
   private _selectedBreakpoint: IDebugger.IBreakpoint | null;
+  private _breakpointSource: string | null = null;
+  private _executedSources = new Set<string>();
 }
 
 /**
