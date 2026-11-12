@@ -69,13 +69,21 @@ export class NewShortcutDialog extends Dialog<NewShortcutDialog.IValue> {
   }
 
   /**
-   * Prevent Enter in the JSON editor or keystroke capture from submitting.
+   * Prevent Enter in the command select, JSON editor, or keystroke capture
+   * from submitting the dialog.
    */
   protected _evtKeydown(event: KeyboardEvent): void {
     if (event.key === 'Enter') {
       const activeElement = document.activeElement;
       if (!(activeElement instanceof HTMLElement)) {
         super._evtKeydown(event);
+        return;
+      }
+      // Allow command list to open with Enter (and Space)
+      if (activeElement instanceof HTMLSelectElement) {
+        event.preventDefault();
+        event.stopPropagation();
+        activeElement.showPicker?.();
         return;
       }
       const jsonEditorNode = this.node.querySelector('.jp-JSONEditor');
