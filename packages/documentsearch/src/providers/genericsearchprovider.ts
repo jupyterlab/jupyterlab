@@ -483,8 +483,8 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
         hit.classList.add(...SELECTED_CLASSES);
       }
       // If not in view, scroll just enough to see it
-      if (scroll && !elementInViewport(hits[0])) {
-        hits[0].scrollIntoView(reverse);
+      if (scroll) {
+        hits[0].scrollIntoView({ block: 'nearest' });
       }
       hits[0].focus();
 
@@ -513,18 +513,6 @@ export class GenericSearchProvider extends SearchProvider<Widget> {
   );
   // The mark elements of each match, in the order of the matches
   private _markNodes = new Array<HTMLElement[]>();
-}
-
-function elementInViewport(el: HTMLElement): boolean {
-  const boundingClientRect = el.getBoundingClientRect();
-  return (
-    boundingClientRect.top >= 0 &&
-    boundingClientRect.bottom <=
-      (window.innerHeight || document.documentElement.clientHeight) &&
-    boundingClientRect.left >= 0 &&
-    boundingClientRect.right <=
-      (window.innerWidth || document.documentElement.clientWidth)
-  );
 }
 
 /**

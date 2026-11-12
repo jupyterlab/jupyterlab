@@ -561,6 +561,49 @@ test.describe('Notebook Search', () => {
     );
   });
 
+  test('Scroll to the next match in rendered Markdown above another panel', async ({
+    page,
+    tmpPath
+  }) => {
+    const paragraphs = Array.from(
+      { length: 30 },
+      (_, i) => `Paragraph ${i + 1} mentions an apple.\n\n`
+    );
+    const notebook = galata.Notebook.generateNotebook(
+      1,
+      'markdown',
+      paragraphs
+    );
+    await page.contents.uploadContent(
+      JSON.stringify(notebook),
+      'text',
+      `${tmpPath}/apples.ipynb`
+    );
+    await page.contents.uploadContent('', 'text', `${tmpPath}/notes.txt`);
+    await page.notebook.openByPath(`${tmpPath}/apples.ipynb`);
+    // A console opened for the notebook takes the same place
+    await page.evaluate(async path => {
+      await window.jupyterapp.commands.execute('docmanager:open', {
+        path,
+        options: { mode: 'split-bottom' }
+      });
+    }, `${tmpPath}/notes.txt`);
+    await page.notebook.activate('apples.ipynb');
+
+    await page.keyboard.press('Control+f');
+    await page.fill('[placeholder="Find"]', 'apple');
+    const counter = page.locator('.jp-DocumentSearch-index-counter');
+    await expect(counter).toHaveText('1/30');
+    for (let match = 2; match <= 12; match++) {
+      await page.keyboard.press('Enter');
+      await expect(counter).toHaveText(`${match}/30`);
+    }
+
+    await expect(
+      page.locator('.jp-RenderedMarkdown .jp-current-match')
+    ).toBeInViewport({ ratio: 1 });
+  });
+
   test('Search on typing', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
