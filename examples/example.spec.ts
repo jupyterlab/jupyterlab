@@ -127,6 +127,11 @@ test('should load the example', async ({ page }) => {
   }
 
   if (process.env['TEST_SNAPSHOT'] === '1') {
+    if (EXAMPLE_NAME === 'cell') {
+      // The kernel status icon shows "connecting" until the kernel replies,
+      // and on CI that can take longer than the waits below.
+      await expect(page.getByTitle('Kernel Idle')).toBeVisible();
+    }
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
     expect
