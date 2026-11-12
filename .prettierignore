@@ -8,6 +8,7 @@
 **/coverage
 **/.mypy_cache
 CHANGELOG.md
+docs/source/getting_started/changelog_v*.md
 
 .eggs
 dev_mode/index.js
