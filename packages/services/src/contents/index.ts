@@ -4,7 +4,7 @@
 
 import type { DocumentChange, ISharedDocument, YDocument } from '@jupyter/ydoc';
 
-import { PathExt, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 
 import { type PartialJSONObject, UUID } from '@lumino/coreutils';
 
@@ -858,8 +858,8 @@ export class ContentsManager implements Contents.IManager {
   ): Promise<Contents.IModel> {
     const [drive, localPath] = this._driveForPath(path);
     return drive.get(localPath, options).then(model => {
-      const deprecated = Private.isContentDeprecated(model);
-      const contentsModel = Private.unwrapModel(model);
+      const deprecation = Private.getDeprecation(model);
+      const contentsModel = deprecation?.model ?? model;
       const listing: Contents.IModel[] = [];
       if (contentsModel.type === 'directory' && contentsModel.content) {
         for (const item of contentsModel.content) {
@@ -871,14 +871,26 @@ export class ContentsManager implements Contents.IManager {
           content: listing,
           serverPath: contentsModel.path
         } as Contents.IModel;
-        return deprecated ? Private.deprecateContent(result) : result;
+        return deprecation
+          ? Private.deprecateContent(
+              result,
+              deprecation.provider,
+              deprecation.caller
+            )
+          : result;
       } else {
         const result = {
           ...contentsModel,
           path: this._toGlobalPath(drive, localPath),
           serverPath: contentsModel.path
         } as Contents.IModel;
-        return deprecated ? Private.deprecateContent(result) : result;
+        return deprecation
+          ? Private.deprecateContent(
+              result,
+              deprecation.provider,
+              deprecation.caller
+            )
+          : result;
       }
     });
   }
@@ -1702,44 +1714,104 @@ namespace Private {
 
   /**
    * Wrap a model fetched without options, to warn when its content is read.
+   *
+   * Each provider warns once per extension, so the default drive names each
+   * extension once per page load.
    */
-  export function deprecateContent(model: Contents.IModel): Contents.IModel {
+  export function deprecateContent(
+    model: Contents.IModel,
+    provider: IContentProvider,
+    caller?: Error
+  ): Contents.IModel {
     if (model.content === null || model.content === undefined) {
       return model;
     }
-    let warned = false;
+    let read = false;
     const proxy = new Proxy(model, {
       get(target, property, receiver) {
-        if (property === 'content' && !warned) {
-          warned = true;
-          console.warn(
-            `Deprecated: the content of '${target.path}' was fetched without ` +
-              'options. In a future version, the content will only be ' +
-              'returned if requested with `{ content: true }`.'
-          );
+        if (property === 'content' && !read) {
+          read = true;
+          warnContentDeprecated(target.path, provider, caller);
         }
         return Reflect.get(target, property, receiver);
       }
     });
-    deprecatedModels.set(proxy, model);
+    deprecatedModels.set(proxy, { model, provider, caller });
     return proxy;
   }
 
   /**
-   * Whether the content of a model is deprecated.
+   * Get the model, provider and caller of a model wrapped by
+   * `deprecateContent()`.
    */
-  export function isContentDeprecated(model: Contents.IModel): boolean {
-    return deprecatedModels.has(model);
+  export function getDeprecation(
+    model: Contents.IModel
+  ): IDeprecation | undefined {
+    return deprecatedModels.get(model);
   }
 
   /**
-   * Get the model wrapped by `deprecateContent()`, or the model itself.
+   * The model wrapped by `deprecateContent()`, the provider that fetched it and
+   * an error created by the caller of `get()`.
    */
-  export function unwrapModel(model: Contents.IModel): Contents.IModel {
-    return deprecatedModels.get(model) ?? model;
+  export interface IDeprecation {
+    model: Contents.IModel;
+    provider: IContentProvider;
+    caller?: Error;
   }
 
-  const deprecatedModels = new WeakMap<Contents.IModel, Contents.IModel>();
+  /**
+   * Warn that content was fetched without options, once per provider and
+   * extension.
+   */
+  function warnContentDeprecated(
+    path: string,
+    provider: IContentProvider,
+    caller?: Error
+  ): void {
+    const extension = callerExtension(caller);
+    let warned = warnedExtensions.get(provider);
+    if (!warned) {
+      warned = new Set();
+      warnedExtensions.set(provider, warned);
+    }
+    if (warned.has(extension)) {
+      return;
+    }
+    warned.add(extension);
+    const fetched = extension
+      ? `the ${extension} extension fetched the content of '${path}'`
+      : `the content of '${path}' was fetched`;
+    console.warn(
+      `Deprecated: ${fetched} without options. In a future version, the ` +
+        'content will only be returned if requested with `{ content: true }`.'
+    );
+  }
+
+  /**
+   * Get the package name of the first prebuilt extension in the caller stack.
+   *
+   * Prebuilt extensions are served from `<fullLabextensionsUrl>/<name>/static/`.
+   */
+  function callerExtension(caller?: Error): string | null {
+    const url = PageConfig.getOption('fullLabextensionsUrl');
+    const stack = caller?.stack;
+    if (!url || !stack) {
+      return null;
+    }
+    const prefix = `${url.replace(/\/+$/, '')}/`;
+    const start = stack.indexOf(prefix);
+    if (start === -1) {
+      return null;
+    }
+    const match = /^((?:@[^/]+\/)?[^/]+)\/static\//.exec(
+      stack.slice(start + prefix.length)
+    );
+    return match ? match[1] : null;
+  }
+
+  const deprecatedModels = new WeakMap<Contents.IModel, IDeprecation>();
+  const warnedExtensions = new WeakMap<IContentProvider, Set<string | null>>();
 }
 
 /**
@@ -1861,6 +1933,8 @@ export class RestContentProvider implements IContentProvider {
     localPath: string,
     options?: Contents.IFetchOptions
   ): Promise<Contents.IModel> {
+    // The stack names the extension of the caller only before the first await.
+    const caller = options ? undefined : new Error();
     let url = this._getUrl(localPath);
     if (options) {
       // The notebook type cannot take a format option.
@@ -1883,7 +1957,7 @@ export class RestContentProvider implements IContentProvider {
     validate.validateContentsModel(data);
     // The server returns the content when no option is given, but this
     // default will change to match the explicit `content: false` default.
-    return options ? data : Private.deprecateContent(data);
+    return options ? data : Private.deprecateContent(data, this, caller);
   }
 
   /**

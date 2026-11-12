@@ -20,6 +20,7 @@ test('should load the example', async ({ page }) => {
   console.info('Navigating to page:', PAGE_URL);
 
   let errorLogs = 0;
+  const warnings: string[] = [];
   const pageErrors: string[] = [];
   const routedUrls: string[] = [];
   let testEnded: (value: string | PromiseLike<string>) => void;
@@ -33,6 +34,8 @@ test('should load the example', async ({ page }) => {
 
     if (msg.type() === 'error') {
       errorLogs += 1;
+    } else if (msg.type() === 'warning') {
+      warnings.push(text);
     }
 
     const lower = text.toLowerCase();
@@ -71,6 +74,19 @@ test('should load the example', async ({ page }) => {
   await waitForTestEnd;
 
   expect(pageErrors, 'Uncaught exceptions in the page').toEqual([]);
+
+  if (EXAMPLE_NAME === 'federated') {
+    // Both prebuilt extensions read content fetched without options.
+    for (const name of ['middle', 'md']) {
+      await expect
+        .poll(() => warnings)
+        .toContainEqual(
+          expect.stringContaining(
+            `the @jupyterlab/example-federated-${name} extension fetched`
+          )
+        );
+    }
+  }
 
   if (EXAMPLE_NAME === 'browser-require') {
     expect(
