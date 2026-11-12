@@ -1713,10 +1713,11 @@ namespace Private {
   }
 
   /**
-   * Wrap a model fetched without options, to warn when its content is read.
+   * Copy a model fetched without options, to warn when its content is read.
    *
    * Each provider warns once per extension, so the default drive names each
-   * extension once per page load.
+   * extension once per page load. The copy is a plain object, which
+   * `structuredClone()` accepts.
    */
   export function deprecateContent(
     model: Contents.IModel,
@@ -1726,23 +1727,29 @@ namespace Private {
     if (model.content === null || model.content === undefined) {
       return model;
     }
+    let content = model.content;
     let read = false;
-    const proxy = new Proxy(model, {
-      get(target, property, receiver) {
-        if (property === 'content' && !read) {
+    const copy = { ...model };
+    Object.defineProperty(copy, 'content', {
+      configurable: true,
+      enumerable: true,
+      get() {
+        if (!read) {
           read = true;
-          warnContentDeprecated(target.path, provider, caller);
+          warnContentDeprecated(copy.path, provider, caller);
         }
-        return Reflect.get(target, property, receiver);
+        return content;
+      },
+      set(value) {
+        content = value;
       }
     });
-    deprecatedModels.set(proxy, { model, provider, caller });
-    return proxy;
+    deprecatedModels.set(copy, { model, provider, caller });
+    return copy;
   }
 
   /**
-   * Get the model, provider and caller of a model wrapped by
-   * `deprecateContent()`.
+   * Get the model, provider and caller of a copy made by `deprecateContent()`.
    */
   export function getDeprecation(
     model: Contents.IModel
@@ -1751,7 +1758,7 @@ namespace Private {
   }
 
   /**
-   * The model wrapped by `deprecateContent()`, the provider that fetched it and
+   * The model copied by `deprecateContent()`, the provider that fetched it and
    * an error created by the caller of `get()`.
    */
   export interface IDeprecation {

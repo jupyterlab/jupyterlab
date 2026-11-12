@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { serialize } from 'v8';
 import { Signal } from '@lumino/signaling';
 import {
   expectFailure,
@@ -312,6 +313,19 @@ describe('contents', () => {
         const model = await contents.get('/foo', { content: true });
         expect(model.content).toBe(DEFAULT_FILE.content);
         expect(warn).not.toHaveBeenCalled();
+      } finally {
+        warn.mockRestore();
+      }
+    });
+
+    it('should return a model that can be cloned when fetched without options', async () => {
+      const warn = jest
+        .spyOn(console, 'warn')
+        .mockImplementation(() => undefined);
+      try {
+        handleRequest(contents, 200, DEFAULT_FILE);
+        const model = await contents.get('/foo');
+        expect(() => serialize(model)).not.toThrow();
       } finally {
         warn.mockRestore();
       }
