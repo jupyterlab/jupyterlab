@@ -27,6 +27,17 @@
   overflow-x: auto;
 }
 
+.lm-Menu.jp-ThemedContainer {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.lm-Menu.jp-ThemedContainer::-webkit-scrollbar {
+  display: none;
+}
+
 .lm-MenuBar-menu.jp-ThemedContainer {
   top: calc(-2 * var(--jp-border-width));
   scrollbar-width: none;
