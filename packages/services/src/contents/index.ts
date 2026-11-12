@@ -187,7 +187,9 @@ export namespace Contents {
     /**
      * Whether to include the file content.
      *
-     * The default is `false`.
+     * The default is `false`. A `get()` call without options still returns
+     * the content, but this behavior is deprecated and subject to change.
+     * Use `{ content: true }` to get the content.
      */
     content?: boolean;
 
