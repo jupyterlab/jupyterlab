@@ -161,7 +161,11 @@ const consoles: JupyterFrontEndPlugin<void> = {
           let displayName = source.path ?? '';
 
           consoleTracker.forEach(panel => {
-            for (const cell of panel.console.cells) {
+            const cells = [...panel.console.cells];
+            if (panel.console.promptCell) {
+              cells.push(panel.console.promptCell);
+            }
+            for (const cell of cells) {
               const model = cell.model;
               if (!isCodeCellModel(model)) {
                 continue;
