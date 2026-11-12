@@ -215,12 +215,16 @@ export interface IDebugger {
    * @param code - The code in the cell where the breakpoints are set.
    * @param breakpoints - The list of breakpoints to set.
    * @param path - Optional path to the file where to set the breakpoints.
+   * @param oldPath - Optional previous path to clear breakpoints from.
+   * @param clearKernel - Optional whether to clear breakpoints from the kernel for oldPath.
    */
   updateBreakpoints(
     code: string,
     breakpoints: IDebugger.IBreakpoint[],
-    path?: string
-  ): Promise<void>;
+    path?: string,
+    oldPath?: string,
+    clearKernel?: boolean
+  ): Promise<string | undefined>;
 
   /**
    * Get the debugger state

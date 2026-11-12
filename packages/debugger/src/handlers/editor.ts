@@ -8,6 +8,7 @@ import { ActivityMonitor } from '@jupyterlab/coreutils';
 
 import type { IDisposable } from '@lumino/disposable';
 
+import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
 import type { ISharedText, SourceChange } from '@jupyter/ydoc';
@@ -55,6 +56,17 @@ export class EditorHandler implements IDisposable {
     this._path = options.path ?? '';
     this._debuggerService = options.debuggerService;
     this._editor = options.getEditor;
+
+    if (options.stateChanged) {
+      options.stateChanged.connect((_: unknown, args: unknown) => {
+        const change = args as { name?: string } | undefined;
+        if (change?.name === 'executionCount') {
+          const code = this._src.getSource();
+          this._executedPath =
+            this._lastCellPath || this._debuggerService.getCodeId(code);
+        }
+      }, this);
+    }
 
     this._src.changed.connect(this._onSharedModelChanged, this);
     this._editorMonitor = new ActivityMonitor({
@@ -201,6 +213,24 @@ export class EditorHandler implements IDisposable {
     if (this.isDisposed) {
       return;
     }
+    if (!this._path) {
+      if (this._lastCellPath) {
+        void this._debuggerService.updateBreakpoints(
+          '',
+          [],
+          this._lastCellPath
+        );
+      }
+      if (this._executedPath && this._executedPath !== this._lastCellPath) {
+        void this._debuggerService.updateBreakpoints(
+          '',
+          [],
+          this._executedPath
+        );
+      }
+      this._lastCellPath = null;
+      this._executedPath = null;
+    }
     this._editorMonitor.dispose();
     this._clearEditor();
     this.isDisposed = true;
@@ -292,11 +322,22 @@ export class EditorHandler implements IDisposable {
       );
     });
 
-    void this._debuggerService.updateBreakpoints(
-      this._src.getSource(),
-      breakpoints,
-      this._path
-    );
+    const oldPath = this._path ? undefined : (this._lastCellPath ?? undefined);
+    const clearKernel = Boolean(oldPath && oldPath !== this._executedPath);
+
+    void this._debuggerService
+      .updateBreakpoints(
+        this._src.getSource(),
+        breakpoints,
+        this._path,
+        oldPath,
+        clearKernel
+      )
+      .then(newPath => {
+        if (!this._path && newPath) {
+          this._lastCellPath = newPath;
+        }
+      });
   }
 
   /**
@@ -393,11 +434,22 @@ export class EditorHandler implements IDisposable {
 
     breakpoints.sort((a, b) => a.line! - b.line!);
 
-    void this._debuggerService.updateBreakpoints(
-      this._src.getSource(),
-      breakpoints,
-      this._path
-    );
+    const oldPath = this._path ? undefined : (this._lastCellPath ?? undefined);
+    const clearKernel = Boolean(oldPath && oldPath !== this._executedPath);
+
+    void this._debuggerService
+      .updateBreakpoints(
+        this._src.getSource(),
+        breakpoints,
+        this._path,
+        oldPath,
+        clearKernel
+      )
+      .then(newPath => {
+        if (!this._path && newPath) {
+          this._lastCellPath = newPath;
+        }
+      });
   }
 
   /**
@@ -465,9 +517,9 @@ export class EditorHandler implements IDisposable {
    */
   private _getBreakpoints(): IDebugger.IBreakpoint[] {
     const code = this._src.getSource();
-    return this._debuggerService.model.breakpoints.getBreakpoints(
-      this._path || this._debuggerService.getCodeId(code)
-    );
+    const codeId = this._debuggerService.getCodeId(code);
+    const path = this._path || codeId || this._lastCellPath || '';
+    return this._debuggerService.model.breakpoints.getBreakpoints(path);
   }
 
   private _id: string;
@@ -485,6 +537,8 @@ export class EditorHandler implements IDisposable {
   private _path: string;
   private _src: ISharedText;
   private _selectedBreakpoint: IDebugger.IBreakpoint | null;
+  private _lastCellPath: string | null = null;
+  private _executedPath: string | null = null;
 }
 
 /**
@@ -519,6 +573,11 @@ export namespace EditorHandler {
      * The code source to debug
      */
     src: ISharedText;
+
+    /**
+     * An optional signal emitted when the cell state changes.
+     */
+    stateChanged?: ISignal<unknown, unknown>;
   }
 
   export const _highlightEffect = StateEffect.define<{ pos: number[] }>({
