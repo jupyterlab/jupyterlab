@@ -45,8 +45,7 @@
       "title": "Enabled Status",
       "description": "Enables extension manager.\nWARNING: installing untrusted extensions may be unsafe.",
       "default": true,
-      "type": "boolean",
-      "tags": ["%UI%"]
+      "type": "boolean"
     },
     "disclaimed": {
       "title": "Disclaimed Status",

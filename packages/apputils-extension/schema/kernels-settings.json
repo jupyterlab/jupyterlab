@@ -9,8 +9,7 @@
       "type": "boolean",
       "title": "Show the status bar item",
       "description": "Whether to show the running kernels item in the status bar",
-      "default": true,
-      "tags": ["%UI%"]
+      "default": true
     },
     "commsOverSubshells": {
       "type": "string",

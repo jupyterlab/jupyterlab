@@ -32,8 +32,7 @@
       "title": "Modal Command Palette",
       "description": "Whether the command palette should be modal or in the left panel.",
       "type": "boolean",
-      "default": true,
-      "tags": ["%UI%"]
+      "default": true
     },
     "maxRecentCommands": {
       "title": "Maximum Number of Recently Used Commands",

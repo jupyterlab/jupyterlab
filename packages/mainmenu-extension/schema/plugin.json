@@ -352,8 +352,7 @@
         "$ref": "#/definitions/menu"
       },
       "type": "array",
-      "default": [],
-      "tags": ["%UI%"]
+      "default": []
     }
   },
   "additionalProperties": false,

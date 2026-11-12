@@ -21,8 +21,7 @@
         { "const": "scale", "title": "Scale" },
         { "const": "contentVisibility", "title": "Content visibility" }
       ],
-      "default": "contentVisibility",
-      "tags": ["%UI%"]
+      "default": "contentVisibility"
     },
     "startMode": {
       "type": "string",
@@ -33,8 +32,7 @@
       ],
       "title": "Start mode: ``, `single` or `multiple`",
       "description": "The mode under which JupyterLab should start. If empty, the mode will be imposed by the URL",
-      "default": "",
-      "tags": ["%UI%"]
+      "default": ""
     },
     "layout": {
       "type": "object",
@@ -59,15 +57,13 @@
         },
         "multiple": {}
       },
-      "additionalProperties": false,
-      "tags": ["%UI%"]
+      "additionalProperties": false
     },
     "dockPanelPadding": {
       "type": "boolean",
       "title": "Dock panel padding",
       "description": "Whether to show padding around the main dock panel area. Disable for a more compact layout.",
-      "default": true,
-      "tags": ["%UI%"]
+      "default": true
     },
     "activityBarPosition": {
       "type": "string",
@@ -78,8 +74,7 @@
         { "const": "top", "title": "Top" },
         { "const": "bottom", "title": "Bottom" }
       ],
-      "default": "side",
-      "tags": ["%UI%"]
+      "default": "side"
     },
     "optimizeResize": {
       "type": "boolean",
@@ -91,8 +86,7 @@
       "type": "boolean",
       "title": "Enable Ctrl+ Scroll Zoom",
       "description": "Zoom the widget under the mouse when using Ctrl+ mouse wheel.",
-      "default": false,
-      "tags": ["%UI%"]
+      "default": false
     }
   },
   "additionalProperties": false,
