@@ -992,6 +992,27 @@ describe('@jupyterlab/settingregistry', () => {
     });
   });
 
+  describe('upgradeShortcuts', () => {
+    it('should upgrade the selectors of JupyterLab 4.0', () => {
+      const shortcuts = [
+        { command: 'a', keys: ['A'], selector: '.jp-Notebook:focus' },
+        {
+          command: 'b',
+          keys: ['B'],
+          selector: '.jp-Notebook:focus.jp-mod-commandMode'
+        },
+        { command: 'c', keys: ['C'], selector: 'body' }
+      ];
+      const upgraded = SettingRegistry.upgradeShortcuts(shortcuts);
+      expect(upgraded.map(shortcut => shortcut.selector)).toEqual([
+        '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus',
+        '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus',
+        'body'
+      ]);
+      expect(shortcuts[0].selector).toEqual('.jp-Notebook:focus');
+    });
+  });
+
   describe('filterDisabledItems', () => {
     it('should remove disabled menu item', () => {
       const a: ISettingRegistry.IContextMenuItem[] = [
