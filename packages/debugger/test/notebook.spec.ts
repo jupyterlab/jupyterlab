@@ -77,6 +77,16 @@ describe('NotebookHandler', () => {
     expect(kernel.has(service.getCodeId(CODE))).toBe(false);
   });
 
+  it('should keep the breakpoints of a deleted cell whose code ran', async () => {
+    const cell = firstCell();
+    cell.executionState = 'running';
+    cell.executionState = 'idle';
+    context.model.sharedModel.deleteCell(0);
+    await flushRequests();
+
+    expect(kernel.get(service.getCodeId(CODE))).toEqual([2]);
+  });
+
   it('should keep the breakpoints of code that ran when the cell is edited', async () => {
     const cell = firstCell();
     cell.executionState = 'running';

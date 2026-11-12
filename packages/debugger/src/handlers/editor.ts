@@ -215,21 +215,18 @@ export class EditorHandler implements IDisposable {
 
   /**
    * Remove the breakpoints of a deleted cell from the kernel.
+   *
+   * Code that has run keeps its breakpoints, because it can still run.
    */
   clearBreakpoints(): void {
     if (this.isDisposed || this._path) {
       return;
     }
-    const paths = new Set(this._ranPaths);
-    if (this._lastCellPath) {
-      paths.add(this._lastCellPath);
-    }
-    for (const path of paths) {
-      if (this._debuggerService.model.breakpoints.getBreakpoints(path).length) {
-        void this._debuggerService.updateBreakpoints('', [], path);
-      }
-    }
+    const path = this._lastCellPath;
     this._lastCellPath = null;
+    if (path && !this._ranPaths.has(path)) {
+      void this._debuggerService.updateBreakpoints('', [], path);
+    }
   }
 
   /**
