@@ -92,7 +92,8 @@
       "title": "Screen Reader Mode",
       "description": "Add accessibility elements for use with screen readers.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "tags": ["accessibility"]
     },
     "scrollback": {
       "title": "Scrollback Buffer",
@@ -128,7 +129,8 @@
       "title": "Blinking cursor",
       "description": "Whether to blink the cursor. Changes require reopening the terminal.",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "tags": ["accessibility"]
     },
     "showStatusBarItem": {
       "type": "string",

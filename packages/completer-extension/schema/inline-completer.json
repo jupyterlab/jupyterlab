@@ -71,7 +71,8 @@
         { "const": "none", "title": "None" },
         { "const": "uncover", "title": "Uncover" }
       ],
-      "default": "uncover"
+      "default": "uncover",
+      "tags": ["accessibility"]
     },
     "minLines": {
       "title": "Reserve lines for inline completion",
