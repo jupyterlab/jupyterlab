@@ -155,7 +155,6 @@ class="jp-screenshot">
 
 - "Paste" (<kbd>Ctrl</kbd> + <kbd>V</kbd>) now [pastes into the selected folder](https://jupyterlab.readthedocs.io/en/latest/user/files.html#file-copy-paste), or into the folder that the file browser shows when no folder is selected. Press <kbd>Escape</kbd> or click below the files to clear the selection.
 - <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd> now opens the file browser and moves the focus into it, instead of showing or hiding it.
-- Changing the "Show Filter Bar by Default" setting now takes effect without reloading the page.
 - The breadcrumb of the preferred directory now shows the home icon when the preferred directory is your home directory.
 - Confirmation dialogs opened from a file picker, such as the Import Workspace dialog, now show on top of it.
 
