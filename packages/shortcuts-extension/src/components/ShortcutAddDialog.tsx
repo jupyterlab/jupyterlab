@@ -284,16 +284,18 @@ class NewShortcutDialogBody
   }
 
   private _toSymbols = (value: string): string => {
-    if (!Platform.IS_MAC) {
-      return value
-        .split(' ')
-        .map(key => (key === 'Accel' ? 'Ctrl' : key))
-        .join(' ');
-    }
+    const mapKey = (key: string): string =>
+      Platform.IS_MAC
+        ? (MAC_SYMBOLS[key] ?? key)
+        : key === 'Accel'
+          ? 'Ctrl'
+          : key;
     return value
-      .split(' ')
-      .map(key => MAC_SYMBOLS[key] ?? key)
-      .join(' ');
+      .split(',')
+      .map(chord =>
+        chord.trim().split(/\s+/).filter(Boolean).map(mapKey).join(' + ')
+      )
+      .join(', ');
   };
 
   private _isChordFunctional(keys: string[]): boolean {

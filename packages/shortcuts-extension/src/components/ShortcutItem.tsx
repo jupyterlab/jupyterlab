@@ -135,18 +135,20 @@ export class ShortcutItem extends React.Component<
     });
   };
 
-  /** Transform special key names into unicode characters for Mac */
+  /** Transform keystrokes for display; use + within a chord, comma between chords. */
   toSymbols = (value: string): string => {
-    if (!Platform.IS_MAC) {
-      return value
-        .split(' ')
-        .map(key => (key === 'Accel' ? 'Ctrl' : key))
-        .join(' ');
-    }
+    const mapKey = (key: string): string =>
+      Platform.IS_MAC
+        ? (MAC_SYMBOLS[key] ?? key)
+        : key === 'Accel'
+          ? 'Ctrl'
+          : key;
     return value
-      .split(' ')
-      .map(key => MAC_SYMBOLS[key] ?? key)
-      .join(' ');
+      .split(',')
+      .map(chord =>
+        chord.trim().split(/\s+/).filter(Boolean).map(mapKey).join(' + ')
+      )
+      .join(', ');
   };
 
   getCategoryCell(): JSX.Element {
@@ -323,7 +325,7 @@ export class ShortcutItem extends React.Component<
           <React.Fragment key={index}>
             <div className="jp-Shortcuts-ShortcutKeys">
               {this.toSymbols(keyboardKey)
-                .split(' ')
+                .split(' + ')
                 .map((keyPart, keyPartIndex, keyParts) => (
                   <React.Fragment key={`${index}-${keyPart}-${keyPartIndex}`}>
                     <span className="jp-ContextualShortcut-Key">{keyPart}</span>

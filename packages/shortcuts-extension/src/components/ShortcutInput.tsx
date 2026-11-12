@@ -405,6 +405,14 @@ export class ShortcutInput extends React.Component<
 
           /** if not a modifier key, add it regularly */
         } else {
+          // Shift keydown may have been skipped after idle (for Shift+Tab).
+          if (
+            event.shiftKey &&
+            !currentChain.split(' ').filter(Boolean).includes('Shift')
+          ) {
+            userInput = (userInput + ' Shift').trim();
+            currentChain = (currentChain + ' Shift').trim();
+          }
           userInput = (userInput + ' ' + (key ?? event.key)).trim();
           currentChain = (currentChain + ' ' + (key ?? event.key)).trim();
         }
