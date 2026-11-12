@@ -11,6 +11,7 @@
 ```{toctree}
 :hidden:
 
+JupyterLab 4.x (current) <self>
 JupyterLab 3.x <changelog_v3>
 JupyterLab 2.x <changelog_v2>
 JupyterLab 1.x <changelog_v1>
