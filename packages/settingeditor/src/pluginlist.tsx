@@ -10,7 +10,11 @@ import { ReactWidget } from '@jupyterlab/apputils';
 import type { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
-import type { IFormRendererRegistry, IScore } from '@jupyterlab/ui-components';
+import type {
+  IFilterSuggestion,
+  IFormRendererRegistry,
+  IScore
+} from '@jupyterlab/ui-components';
 import {
   classes,
   FilterBox,
@@ -83,6 +87,7 @@ export class PluginList extends ReactWidget {
       .then(() => {
         this.update();
         this._model.changed.connect(() => {
+          this._tags = null;
           this.update();
         });
       })
@@ -722,6 +727,35 @@ export class PluginList extends ReactWidget {
     this.update();
   }
 
+  /**
+   * Suggest the tags that contain the query, or the text after `tag:`.
+   */
+  private _getTagSuggestions = (query: string): IFilterSuggestion[] => {
+    const tagQuery = query.match(TAG_QUERY)?.[1] ?? query;
+    const search = tagQuery.trim().toLocaleLowerCase();
+    if (!search) {
+      return [];
+    }
+    if (this._tags === null) {
+      const tags = new Set<string>();
+      for (const plugin of this._model.plugins) {
+        Private.collectTags(
+          this._getSearchableSchema(plugin),
+          plugin.schema.definitions,
+          tags
+        );
+      }
+      this._tags = [...tags].sort();
+    }
+    return this._tags
+      .filter(
+        tag =>
+          tag.toLocaleLowerCase().includes(search) &&
+          `tag:${tag}`.toLocaleLowerCase() !== query.trim().toLocaleLowerCase()
+      )
+      .map(tag => ({ label: `tag:${tag}`, value: `tag:${tag}` }));
+  };
+
   setError(id: string, error: boolean): void {
     if (this._errors[id] !== error) {
       this._errors[id] = error;
@@ -867,6 +901,7 @@ export class PluginList extends ReactWidget {
           forceRefresh={false}
           caseSensitive={false}
           initialQuery={this._query}
+          getSuggestions={this._getTagSuggestions}
         />
         {modifiedItems.length > 0 && (
           <div>
@@ -910,6 +945,7 @@ export class PluginList extends ReactWidget {
   private _editorRegistry: IFormRendererRegistry | null;
   private _errors: { [id: string]: boolean };
   private _filter: SettingsEditor.PluginSearchFilter;
+  private _tags: string[] | null = null;
   private _listFilter:
     | ((plugin: ISettingRegistry.IPlugin) => SettingsEditor.PluginMatch)
     | null = null;
@@ -1145,6 +1181,53 @@ export namespace PluginList {
 }
 
 namespace Private {
+  /**
+   * Add the tags of a schema and of its nested properties to a set.
+   */
+  export function collectTags(
+    schema: ISettingRegistry.IProperty,
+    definitions: unknown,
+    tags: Set<string>,
+    seenRefs = new Set<string>()
+  ): void {
+    if (Array.isArray(schema.tags)) {
+      for (const tag of schema.tags) {
+        if (typeof tag === 'string') {
+          tags.add(tag);
+        }
+      }
+    }
+    const ref = schema['$ref'];
+    if (typeof ref === 'string' && !seenRefs.has(ref)) {
+      seenRefs.add(ref);
+      const definition = (definitions as Record<string, unknown> | undefined)?.[
+        ref.replace('#/definitions/', '')
+      ];
+      if (definition && typeof definition === 'object') {
+        collectTags(
+          definition as ISettingRegistry.IProperty,
+          definitions,
+          tags,
+          seenRefs
+        );
+      }
+    }
+    const nested = [
+      ...Object.values(schema.properties ?? {}),
+      ...(schema.items ? [schema.items] : [])
+    ];
+    for (const property of nested) {
+      if (property && typeof property === 'object') {
+        collectTags(
+          property as ISettingRegistry.IProperty,
+          definitions,
+          tags,
+          seenRefs
+        );
+      }
+    }
+  }
+
   /**
    * Whether one of the tags of a schema matches the filter.
    */

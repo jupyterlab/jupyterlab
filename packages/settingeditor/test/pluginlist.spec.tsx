@@ -713,6 +713,34 @@ describe('@jupyterlab/settingeditor', () => {
         expect(search('tag: ', untaggedId)).toEqual({ kind: 'all' });
       });
 
+      describe('tag suggestions', () => {
+        const suggest = async (query: string) => {
+          let search: HTMLInputElement | null = null;
+          for (let i = 0; i < 10 && !search; i++) {
+            await framePromise();
+            search = list.node.querySelector('jp-search');
+          }
+          search!.value = query;
+          search!.dispatchEvent(new Event('input', { bubbles: true }));
+          await framePromise();
+          return Array.from(list.node.querySelectorAll('[role="option"]')).map(
+            option => option.textContent
+          );
+        };
+
+        it('should suggest the tags that contain the query', async () => {
+          expect(await suggest('TAG')).toEqual(['tag:my-tag', 'tag:prop-tag']);
+        });
+
+        it('should suggest the tags that contain the text after tag:', async () => {
+          expect(await suggest('tag:pro')).toEqual(['tag:prop-tag']);
+        });
+
+        it('should not suggest the tag already in the query', async () => {
+          expect(await suggest('tag:prop-tag')).toEqual([]);
+        });
+      });
+
       it('should match tags with an initial tag: query', () => {
         list = new PluginList({ registry, model, query: 'tag:my' });
         const plugin = model.plugins.find(p => p.id === taggedId)!;
