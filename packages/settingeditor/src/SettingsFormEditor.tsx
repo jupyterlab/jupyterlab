@@ -73,9 +73,9 @@ export namespace SettingsFormEditor {
     updateDirtyState: (dirty: boolean) => void;
 
     /**
-     * List of strings that match search value.
+     * The search result for the plugin.
      */
-    filteredValues: SettingsEditor.FilteredValues;
+    filteredValues: SettingsEditor.PluginMatch;
   }
 
   export interface IState {
@@ -333,13 +333,15 @@ export class SettingsFormEditor extends React.Component<
     }
   }
 
-  private _setFilteredSchema(
-    prevFilteredValues?: SettingsEditor.FilteredValues
-  ) {
+  private _setFilteredSchema(prevFilteredValues?: SettingsEditor.PluginMatch) {
+    const fields = Private.getMatchingFields(this.props.filteredValues);
     // Update the filtered value if the filter or the schema has changed.
     if (
       prevFilteredValues === undefined ||
-      !JSONExt.deepEqual(prevFilteredValues, this.props.filteredValues) ||
+      !JSONExt.deepEqual(
+        Private.getMatchingFields(prevFilteredValues),
+        fields
+      ) ||
       !JSONExt.deepEqual(
         this.state.formContext.schema,
         this.props.settings.schema
@@ -349,16 +351,9 @@ export class SettingsFormEditor extends React.Component<
        * Only show fields that match search value.
        */
       const filteredSchema = JSONExt.deepCopy(this.props.settings.schema);
-      if (
-        Array.isArray(this.props.filteredValues) &&
-        this.props.filteredValues.length > 0
-      ) {
+      if (fields !== null) {
         for (const field in filteredSchema.properties) {
-          const title = filteredSchema.properties[field].title;
-          if (
-            !this.props.filteredValues.includes(field) &&
-            !this.props.filteredValues.includes(title ?? field)
-          ) {
+          if (!fields.includes(field)) {
             delete filteredSchema.properties[field];
           }
         }
@@ -395,4 +390,19 @@ export class SettingsFormEditor extends React.Component<
   private _debouncer: Debouncer<void, unknown, [ReadonlyJSONObject, number]>;
   private _formData: ReadonlyJSONObject;
   private _lastSettledChangeId = 0;
+}
+
+namespace Private {
+  /**
+   * Get the top-level fields that match the search, or `null` to show all
+   * the fields.
+   */
+  export function getMatchingFields(
+    match: SettingsEditor.PluginMatch
+  ): string[] | null {
+    if (match.kind !== 'properties' || match.matches.length === 0) {
+      return null;
+    }
+    return [...new Set(match.matches.map(property => property.path[0]))];
+  }
 }

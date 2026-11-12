@@ -606,12 +606,31 @@ describe('@jupyterlab/settingeditor', () => {
 
         list.setFilter(updateFilterFunction('font', false, false), 'font');
 
-        expect(list.filter!(registry.plugins[pluginId]!)).toEqual([
-          'Cell Configuration',
-          'Custom editor styles',
-          'Font Size',
-          'fontSize'
-        ]);
+        expect(list.filter!(registry.plugins[pluginId]!)).toEqual({
+          kind: 'properties',
+          matches: [
+            {
+              matchedBy: 'nested',
+              label: 'Cell Configuration',
+              path: ['cellConfig']
+            },
+            {
+              matchedBy: 'nested',
+              label: 'Custom editor styles',
+              path: ['cellConfig', 'customStyles']
+            },
+            {
+              matchedBy: 'title',
+              label: 'Font Size',
+              path: ['cellConfig', 'customStyles', 'fontSize']
+            },
+            {
+              matchedBy: 'key',
+              label: 'fontSize',
+              path: ['cellConfig', 'customStyles', 'fontSize']
+            }
+          ]
+        });
       });
     });
 
@@ -647,25 +666,25 @@ describe('@jupyterlab/settingeditor', () => {
       it('should return tag when query exactly matches a schema tag', () => {
         list.setFilter(updateFilterFunction('my-tag', false, false), 'my-tag');
         const plugin = model.plugins.find(p => p.id === taggedId)!;
-        expect(list.filter!(plugin)).toBe('tag');
+        expect(list.filter!(plugin)).toEqual({ kind: 'tag' });
       });
 
       it('should match tags case-insensitively', () => {
         list.setFilter(updateFilterFunction('MY-TAG', false, false), 'MY-TAG');
         const plugin = model.plugins.find(p => p.id === taggedId)!;
-        expect(list.filter!(plugin)).toBe('tag');
+        expect(list.filter!(plugin)).toEqual({ kind: 'tag' });
       });
 
       it('should not match a partial tag', () => {
         list.setFilter(updateFilterFunction('my', false, false), 'my');
         const plugin = model.plugins.find(p => p.id === taggedId)!;
-        expect(list.filter!(plugin)).not.toBe('tag');
+        expect(list.filter!(plugin)).not.toEqual({ kind: 'tag' });
       });
 
       it('should return all when query matches title but not tag', () => {
         list.setFilter(updateFilterFunction('Tagged', false, false), 'Tagged');
         const plugin = model.plugins.find(p => p.id === taggedId)!;
-        expect(list.filter!(plugin)).toBe('all');
+        expect(list.filter!(plugin)).toEqual({ kind: 'all' });
       });
 
       it('should return matching property names when query matches a property tag', () => {
@@ -674,7 +693,12 @@ describe('@jupyterlab/settingeditor', () => {
           'prop-tag'
         );
         const plugin = model.plugins.find(p => p.id === taggedId)!;
-        expect(list.filter!(plugin)).toEqual(['Tagged Property']);
+        expect(list.filter!(plugin)).toEqual({
+          kind: 'properties',
+          matches: [
+            { matchedBy: 'tag', label: 'Tagged Property', path: ['taggedProp'] }
+          ]
+        });
       });
 
       it('should match property tags case-insensitively', () => {
@@ -683,7 +707,12 @@ describe('@jupyterlab/settingeditor', () => {
           'PROP-TAG'
         );
         const plugin = model.plugins.find(p => p.id === taggedId)!;
-        expect(list.filter!(plugin)).toEqual(['Tagged Property']);
+        expect(list.filter!(plugin)).toEqual({
+          kind: 'properties',
+          matches: [
+            { matchedBy: 'tag', label: 'Tagged Property', path: ['taggedProp'] }
+          ]
+        });
       });
     });
   });

@@ -57,25 +57,7 @@ const SETTINGS_HEADER_ID = 'jp-PluginList-settings-header';
  */
 const ENTRY_CLASS = 'jp-PluginList-entry';
 
-/**
- * A setting that matches the search, or the parent of one.
- */
-interface ISearchMatch {
-  /**
-   * The title or the key of the setting.
-   */
-  label: string;
-
-  /**
-   * Whether the label is the key of the setting.
-   */
-  isKey: boolean;
-
-  /**
-   * The keys of the setting and of the settings it is nested in.
-   */
-  path: string[];
-}
+type IPropertyMatch = SettingsEditor.IPropertyMatch;
 
 /**
  * A list of plugins with editable settings.
@@ -592,7 +574,7 @@ export class PluginList extends ReactWidget {
     query?: string,
     seen?: Set<string>,
     path: string[] = []
-  ): ISearchMatch[] {
+  ): IPropertyMatch[] {
     // If properties given are references, populate properties
     // with corresponding definition.
     if (ref && definitions) {
@@ -628,7 +610,7 @@ export class PluginList extends ReactWidget {
     }
 
     // Iterate through the properties and check for titles / descriptions that match search.
-    return Object.keys(props).reduce((acc: ISearchMatch[], value: any) => {
+    return Object.keys(props).reduce((acc: IPropertyMatch[], value: any) => {
       const subProps = props[value] as PartialJSONObject;
       // A property whose schema is `false` is not a setting.
       if (!subProps) {
@@ -637,18 +619,21 @@ export class PluginList extends ReactWidget {
 
       // If there are properties in the object, check for title / description
       const settingPath = [...path, value];
-      const own: ISearchMatch[] = [];
-      const add = (label: string, isKey: boolean) => {
+      const titleOrKey = (subProps.title as string) ?? value;
+      const own: IPropertyMatch[] = [];
+      const add = (matchedBy: IPropertyMatch['matchedBy'], label: string) => {
         if (!seen?.has(label)) {
           seen?.add(label);
-          own.push({ label, isKey, path: settingPath });
+          own.push({ matchedBy, label, path: settingPath });
         }
       };
       if (filter((subProps.title as string) ?? '')) {
-        add(subProps.title as string, false);
+        // The title of the property matches.
+        add('title', subProps.title as string);
       }
       if (filter(value)) {
-        add(value, true);
+        // The property name matches.
+        add('key', value);
       }
       if (
         query !== undefined &&
@@ -657,7 +642,8 @@ export class PluginList extends ReactWidget {
           tag => tag.toLowerCase() === query.toLowerCase()
         )
       ) {
-        add((subProps.title as string) ?? value, subProps.title === undefined);
+        // one of the tags of the property matches.
+        add('tag', titleOrKey);
       }
 
       // Finally, recurse on the properties left.
@@ -670,16 +656,8 @@ export class PluginList extends ReactWidget {
         seen,
         settingPath
       );
-      if (nested.length > 0) {
-        // The settings form only shows fields whose title or name is listed.
-        const parent = (subProps.title as string) ?? value;
-        if (!own.some(match => match.label === parent)) {
-          own.push({
-            label: parent,
-            isKey: subProps.title === undefined,
-            path: settingPath
-          });
-        }
+      if (nested.length > 0 && !own.some(match => match.label === titleOrKey)) {
+        own.push({ matchedBy: 'nested', label: titleOrKey, path: settingPath });
       }
       acc.push(...own, ...nested);
       return acc;
@@ -698,7 +676,7 @@ export class PluginList extends ReactWidget {
       const getMatches = (
         plugin: ISettingRegistry.IPlugin,
         seen?: Set<string>
-      ): ISearchMatch[] | 'all' | 'tag' => {
+      ): SettingsEditor.PluginMatch => {
         const schemaTags = plugin.schema.tags;
         if (
           Array.isArray(schemaTags) &&
@@ -707,31 +685,27 @@ export class PluginList extends ReactWidget {
             tag => tag.toLowerCase() === query.toLowerCase()
           )
         ) {
-          return 'tag';
+          return { kind: 'tag' };
         }
         if (!filter || filter(plugin.schema.title ?? '')) {
-          return 'all';
+          return { kind: 'all' };
         }
-        return this._getMatches(
-          filter,
-          this._getSearchableSchema(plugin),
-          plugin.schema.definitions,
-          undefined,
-          query,
-          seen
-        );
+        return {
+          kind: 'properties',
+          matches: this._getMatches(
+            filter,
+            this._getSearchableSchema(plugin),
+            plugin.schema.definitions,
+            undefined,
+            query,
+            seen
+          )
+        };
       };
-      this._filter = (
-        plugin: ISettingRegistry.IPlugin
-      ): SettingsEditor.FilteredValues => {
-        const filtered = getMatches(plugin);
-        return Array.isArray(filtered)
-          ? [...new Set(filtered.map(match => match.label))]
-          : filtered;
-      };
-      // The settings form needs every parent of a match, while the list
-      // shows each match once and leaves out a parent whose matches it
-      // already shows.
+      // The settings form needs the matches of every top-level property,
+      // while the list shows each match once and leaves out a parent whose
+      // matches it already shows.
+      this._filter = (plugin: ISettingRegistry.IPlugin) => getMatches(plugin);
       this._listFilter = (plugin: ISettingRegistry.IPlugin) =>
         getMatches(plugin, new Set());
     } else {
@@ -772,22 +746,29 @@ export class PluginList extends ReactWidget {
     const iconClass = this.getHint(ICON_CLASS_KEY, this._registry, plugin);
     const iconTitle = this.getHint(ICON_LABEL_KEY, this._registry, plugin);
     const listResult = this._listFilter ? this._listFilter(plugin) : undefined;
-    const filteredProperties = Array.isArray(listResult)
-      ? listResult.map(match => (
-          <li
-            key={JSON.stringify([...match.path, match.isKey])}
-            style={{ paddingLeft: `${12 * (match.path.length - 1)}px` }}
-          >
-            {match.isKey ? (
-              <code className="jp-PluginList-settingKey">
-                {this._highlight(match.label)}
-              </code>
-            ) : (
-              this._highlight(match.label)
-            )}
-          </li>
-        ))
-      : undefined;
+    const filteredProperties =
+      listResult?.kind === 'properties'
+        ? listResult.matches.map(match => {
+            const isKey =
+              match.matchedBy === 'key' ||
+              (match.matchedBy !== 'title' &&
+                match.label === match.path[match.path.length - 1]);
+            return (
+              <li
+                key={JSON.stringify([...match.path, isKey])}
+                style={{ paddingLeft: `${12 * (match.path.length - 1)}px` }}
+              >
+                {isKey ? (
+                  <code className="jp-PluginList-settingKey">
+                    {this._highlight(match.label)}
+                  </code>
+                ) : (
+                  this._highlight(match.label)
+                )}
+              </li>
+            );
+          })
+        : undefined;
     const hasMatchDetails =
       filteredProperties !== undefined && filteredProperties.length > 0;
     const matchesId = hasMatchDetails
@@ -854,7 +835,7 @@ export class PluginList extends ReactWidget {
         return false;
       }
       const filtered = this._filter(plugin);
-      return !Array.isArray(filtered) || filtered.length > 0;
+      return filtered.kind !== 'properties' || filtered.matches.length > 0;
     });
 
     const modifiedPlugins = allPlugins.filter(plugin => {
@@ -925,7 +906,7 @@ export class PluginList extends ReactWidget {
   private _errors: { [id: string]: boolean };
   private _filter: SettingsEditor.PluginSearchFilter;
   private _listFilter:
-    | ((plugin: ISettingRegistry.IPlugin) => ISearchMatch[] | 'all' | 'tag')
+    | ((plugin: ISettingRegistry.IPlugin) => SettingsEditor.PluginMatch)
     | null = null;
   private _model: PluginList.Model;
   private _query: string | undefined;

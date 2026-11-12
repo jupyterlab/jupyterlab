@@ -177,15 +177,41 @@ export namespace SettingsEditor {
   export type SaveState = 'started' | 'failed' | 'completed';
 
   /**
-   * The filtered value type.
+   * A property that matches the search, or the parent of one.
    */
-  export type FilteredValues = string[] | 'all' | 'tag';
+  export interface IPropertyMatch {
+    /**
+     * What matches: the title, the key or a tag of the property, or one of
+     * its nested properties.
+     */
+    matchedBy: 'title' | 'key' | 'tag' | 'nested';
+
+    /**
+     * The key of the property if it is matched by key, its title otherwise,
+     * or its key if it has no title.
+     */
+    label: string;
+
+    /**
+     * The keys of the property and of the properties it is nested in.
+     */
+    path: string[];
+  }
+
+  /**
+   * The search result for a plugin: its title matches (`all`), one of its
+   * schema tags matches (`tag`), or only some of its properties match.
+   */
+  export type PluginMatch =
+    | { kind: 'all' }
+    | { kind: 'tag' }
+    | { kind: 'properties'; matches: IPropertyMatch[] };
 
   /**
    * The setting search filter function.
    */
   export type PluginSearchFilter =
-    | ((plugin: ISettingRegistry.IPlugin) => FilteredValues)
+    | ((plugin: ISettingRegistry.IPlugin) => PluginMatch)
     | null;
 
   /**
