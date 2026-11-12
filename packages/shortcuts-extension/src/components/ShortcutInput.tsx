@@ -469,8 +469,8 @@ export class ShortcutInput extends React.Component<
         this._cancel();
         return;
       }
-      if (event.key === 'Tab') {
-        // Allow normal focus movement; blur will dismiss the input.
+      // Allow normal focus movement (Tab | Shift + Tab)
+      if (event.key === 'Tab' || event.key === 'Shift') {
         return;
       }
     }
