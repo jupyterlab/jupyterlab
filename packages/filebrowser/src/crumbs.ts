@@ -546,13 +546,17 @@ export class BreadCrumbs extends Widget {
       }
       if (index !== -1) {
         const hitElement = breadcrumbElements[index];
-        // Don't allow dropping on the current path. The root and preferred
-        // breadcrumbs store their path with a leading slash.
-        const currentPath = this._model.manager.services.contents.localPath(
-          this._model.path
-        );
+        // Refuse the drop when no item would move. The items can come from
+        // another file browser, so compare with their folders instead of the
+        // current folder. The root and preferred breadcrumbs store their path
+        // with a leading slash.
+        const contents = this._model.manager.services.contents;
         const hitPath = PathExt.removeSlash(hitElement.dataset.path ?? '');
-        if (hitPath !== currentPath) {
+        const paths = event.mimeData.getData(CONTENTS_MIME) as string[];
+        const moves = paths.some(
+          path => PathExt.dirname(contents.localPath(path)) !== hitPath
+        );
+        if (moves) {
           hitElement.classList.add(DROP_TARGET_CLASS);
           event.preventDefault();
           event.stopPropagation();

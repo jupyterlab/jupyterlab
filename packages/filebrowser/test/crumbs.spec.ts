@@ -399,6 +399,30 @@ describe('filebrowser/model', () => {
             `${first}/${second}/file.txt`
           );
         });
+
+        it('should move a file from another folder onto the root breadcrumb while browsing the root', async () => {
+          // The file comes from another file browser that shows `path`.
+          await model.cd('/');
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          const root = crumbs.node.querySelector(
+            `.${BREADCRUMB_ROOT_CLASS}`
+          ) as HTMLElement;
+          dropOn(crumbs, root, [`${path}/file.txt`]);
+
+          expect(rename).toHaveBeenCalledWith(`${path}/file.txt`, 'file.txt');
+        });
+
+        it('should move only the files that are not in the folder of the breadcrumb', () => {
+          const items = crumbs.node.querySelectorAll(ITEM_QUERY);
+          dropOn(crumbs, items[2] as HTMLElement, [
+            `${path}/file.txt`,
+            `${first}/${second}/other.txt`
+          ]);
+
+          expect(rename.mock.calls).toEqual([
+            [`${path}/file.txt`, `${first}/${second}/file.txt`]
+          ]);
+        });
       });
     });
 
