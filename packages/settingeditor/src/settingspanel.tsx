@@ -156,13 +156,13 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
     <div className="jp-SettingsPanel" ref={wrapperRef}>
       {settings.map(pluginSettings => {
         // Pass filtered results to SettingsFormEditor to only display filtered fields.
-        const filtered = filterPlugin
+        const filtered: SettingsEditor.PluginMatch = filterPlugin
           ? filterPlugin(pluginSettings.plugin)
-          : 'all';
-        // If filtered results are an array, only show if the array is non-empty.
+          : { kind: 'all' };
+        // If only some properties match, only show if there are any.
         if (
           (activePluginId && activePluginId !== pluginSettings.id) ||
-          (Array.isArray(filtered) && filtered.length === 0)
+          (filtered.kind === 'properties' && filtered.matches.length === 0)
         ) {
           return undefined;
         }

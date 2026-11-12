@@ -67,7 +67,7 @@ describe('@jupyterlab/settingeditor', () => {
 
       const component = renderer.create(
         <SettingsFormEditor
-          filteredValues={'all'}
+          filteredValues={{ kind: 'all' }}
           hasError={() => void 0}
           onSelect={() => void 0}
           renderers={{}}
@@ -98,8 +98,14 @@ describe('@jupyterlab/settingeditor', () => {
       // When
       const component = renderer.create(
         <SettingsFormEditor
-          // Filter by field and by title
-          filteredValues={['keyA', 'Third key', 'keyD']}
+          filteredValues={{
+            kind: 'properties',
+            matches: [
+              { matchedBy: 'key', label: 'keyA', path: ['keyA'] },
+              { matchedBy: 'title', label: 'Third key', path: ['keyC'] },
+              { matchedBy: 'title', label: 'Nested', path: ['keyD', 'nested'] }
+            ]
+          }}
           hasError={() => void 0}
           onSelect={() => void 0}
           renderers={{}}
@@ -133,7 +139,7 @@ describe('@jupyterlab/settingeditor', () => {
 
       const component = renderer.create(
         <SettingsFormEditor
-          filteredValues={'tag'}
+          filteredValues={{ kind: 'tag' }}
           hasError={() => void 0}
           onSelect={() => void 0}
           renderers={{}}
@@ -176,7 +182,7 @@ describe('@jupyterlab/settingeditor', () => {
 
         component = renderer.create(
           <SettingsFormEditor
-            filteredValues={'all'}
+            filteredValues={{ kind: 'all' }}
             hasError={() => void 0}
             onSelect={() => void 0}
             renderers={{}}

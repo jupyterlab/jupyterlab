@@ -73,9 +73,9 @@ export namespace SettingsFormEditor {
     updateDirtyState: (dirty: boolean) => void;
 
     /**
-     * List of strings that match search value.
+     * The search result for the plugin.
      */
-    filteredValues: SettingsEditor.FilteredValues;
+    filteredValues: SettingsEditor.PluginMatch;
   }
 
   export interface IState {
@@ -121,7 +121,7 @@ export class SettingsFormEditor extends React.Component<
     this.state = {
       isModified: settings.isModified,
       uiSchema: this._createUiSchema(),
-      filteredSchema: this._createFilteredSchema(),
+      filteredSchema: this._createFilteredSchema(null),
       formContext: {
         defaultFormData: this.props.settings.default(),
         settings: this.props.settings,
@@ -332,18 +332,21 @@ export class SettingsFormEditor extends React.Component<
     return uiSchema;
   }
 
-  private _setFilteredSchema(
-    prevFilteredValues: SettingsEditor.FilteredValues
-  ) {
+  private _setFilteredSchema(prevFilteredValues?: SettingsEditor.PluginMatch) {
+    const fields = Private.getMatchingFields(this.props.filteredValues);
     // Update the filtered value if the filter or the schema has changed.
     if (
-      !JSONExt.deepEqual(prevFilteredValues, this.props.filteredValues) ||
+      prevFilteredValues === undefined ||
+      !JSONExt.deepEqual(
+        Private.getMatchingFields(prevFilteredValues),
+        fields
+      ) ||
       !JSONExt.deepEqual(
         this.state.formContext.schema,
         this.props.settings.schema
       )
     ) {
-      const filteredSchema = this._createFilteredSchema();
+      const filteredSchema = this._createFilteredSchema(fields);
       this.setState(previousState => ({
         filteredSchema,
         formContext: {
@@ -357,18 +360,13 @@ export class SettingsFormEditor extends React.Component<
   /**
    * Create the schema with only the fields that match the search.
    */
-  private _createFilteredSchema(): ISettingRegistry.ISchema {
+  private _createFilteredSchema(
+    fields: string[] | null
+  ): ISettingRegistry.ISchema {
     const filteredSchema = JSONExt.deepCopy(this.props.settings.schema);
-    if (
-      Array.isArray(this.props.filteredValues) &&
-      this.props.filteredValues.length > 0
-    ) {
+    if (fields !== null) {
       for (const field in filteredSchema.properties) {
-        const title = filteredSchema.properties[field].title;
-        if (
-          !this.props.filteredValues.includes(field) &&
-          !this.props.filteredValues.includes(title ?? field)
-        ) {
+        if (!fields.includes(field)) {
           delete filteredSchema.properties[field];
         }
       }
@@ -398,4 +396,19 @@ export class SettingsFormEditor extends React.Component<
   private _debouncer: Debouncer<void, unknown, [ReadonlyJSONObject, number]>;
   private _formData: ReadonlyJSONObject;
   private _lastSettledChangeId = 0;
+}
+
+namespace Private {
+  /**
+   * Get the top-level fields that match the search, or `null` to show all
+   * the fields.
+   */
+  export function getMatchingFields(
+    match: SettingsEditor.PluginMatch
+  ): string[] | null {
+    if (match.kind !== 'properties' || match.matches.length === 0) {
+      return null;
+    }
+    return [...new Set(match.matches.map(property => property.path[0]))];
+  }
 }
