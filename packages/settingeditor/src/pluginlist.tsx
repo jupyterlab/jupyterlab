@@ -10,7 +10,7 @@ import { ReactWidget } from '@jupyterlab/apputils';
 import type { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
-import type { IScore } from '@jupyterlab/ui-components';
+import type { IFormRendererRegistry, IScore } from '@jupyterlab/ui-components';
 import {
   classes,
   FilterBox,
@@ -58,6 +58,26 @@ const SETTINGS_HEADER_ID = 'jp-PluginList-settings-header';
 const ENTRY_CLASS = 'jp-PluginList-entry';
 
 /**
+ * A setting that matches the search, or the parent of one.
+ */
+interface ISearchMatch {
+  /**
+   * The title or the key of the setting.
+   */
+  label: string;
+
+  /**
+   * Whether the label is the key of the setting.
+   */
+  isKey: boolean;
+
+  /**
+   * The keys of the setting and of the settings it is nested in.
+   */
+  path: string[];
+}
+
+/**
  * A list of plugins with editable settings.
  */
 export class PluginList extends ReactWidget {
@@ -70,6 +90,7 @@ export class PluginList extends ReactWidget {
     this.translator = options.translator || nullTranslator;
     this.addClass('jp-PluginList');
     this._confirm = options.confirm;
+    this._editorRegistry = options.editorRegistry ?? null;
     this._model = options.model ?? new PluginList.Model(options);
     this._model.ready
       .then(() => {
@@ -456,6 +477,36 @@ export class PluginList extends ReactWidget {
   }
 
   /**
+   * Add the properties that form renderers display to the plugin schema.
+   */
+  private _getSearchableSchema(
+    plugin: ISettingRegistry.IPlugin
+  ): ISettingRegistry.ISchema {
+    const schema = plugin.schema ?? {};
+    const renderers = this._editorRegistry?.renderers;
+    if (!renderers || !schema.properties) {
+      return schema;
+    }
+    let properties: ISettingRegistry.ISchema['properties'] | null = null;
+    for (const [name, property] of Object.entries(schema.properties)) {
+      const provided =
+        renderers[`${plugin.id}.${name}`]?.getSchemaProperties?.();
+      if (!provided) {
+        continue;
+      }
+      properties = properties ?? { ...schema.properties };
+      properties[name] = {
+        ...property,
+        properties: {
+          ...(provided as { [name: string]: ISettingRegistry.IProperty }),
+          ...(property.properties ?? {})
+        }
+      };
+    }
+    return properties ? { ...schema, properties } : schema;
+  }
+
+  /**
    * Keep roving tabindex aligned when focus moves between entries via Tab.
    */
   private _evtFocusIn(event: FocusEvent): void {
@@ -512,7 +563,8 @@ export class PluginList extends ReactWidget {
    * @param props - Schema properties being filtered
    * @param definitions - Definitions to use for filling in references in properties
    * @param ref - Reference to a definition
-   * @returns - String array of properties that match the search results.
+   * @returns - The titles and keys that match the search, and the title (or
+   * the key, if there is no title) of each setting whose nested settings match.
    */
   getFilterString(
     filter: (item: string) => Partial<IScore> | null,
@@ -520,6 +572,24 @@ export class PluginList extends ReactWidget {
     definitions?: any,
     ref?: string
   ): string[] {
+    return this._getMatches(filter, props, definitions, ref).map(
+      match => match.label
+    );
+  }
+
+  /**
+   * Same as `getFilterString()`, with the path of each setting. With `seen`,
+   * a match is returned only the first time, and a parent only together
+   * with a new match.
+   */
+  private _getMatches(
+    filter: (item: string) => Partial<IScore> | null,
+    props: ISettingRegistry.IProperty,
+    definitions?: any,
+    ref?: string,
+    seen?: Set<string>,
+    path: string[] = []
+  ): ISearchMatch[] {
     // If properties given are references, populate properties
     // with corresponding definition.
     if (ref && definitions) {
@@ -531,23 +601,21 @@ export class PluginList extends ReactWidget {
     // for that object instead.
     if (props.properties) {
       props = props.properties;
-      // If given properties are an array, advance into the properties
-      // for the items instead.
+      // If given properties are an array, search the schema of its items
+      // instead of the keywords of that schema.
     } else if (props.items) {
-      props = props.items as any;
+      const items = props.items as ISettingRegistry.IProperty;
+      return this._getMatches(
+        filter,
+        items,
+        definitions,
+        items['$ref'] as string,
+        seen,
+        path
+      );
       // Otherwise, you've reached the base case and don't need to check for matching properties
     } else {
       return [];
-    }
-
-    // If reference found, recurse
-    if (props['$ref']) {
-      return this.getFilterString(
-        filter,
-        props,
-        definitions,
-        props['$ref'] as string
-      );
     }
 
     // Make sure props is non-empty before calling reduce
@@ -556,36 +624,50 @@ export class PluginList extends ReactWidget {
     }
 
     // Iterate through the properties and check for titles / descriptions that match search.
-    return Object.keys(props).reduce((acc: string[], value: any) => {
-      // If this is the base case, check for matching title / description
+    return Object.keys(props).reduce((acc: ISearchMatch[], value: any) => {
       const subProps = props[value] as PartialJSONObject;
+      // A property whose schema is `false` is not a setting.
       if (!subProps) {
-        const title = props.title;
-        if (typeof title === 'string' && filter(title)) {
-          return title;
-        }
-        if (filter(value)) {
-          return value;
-        }
+        return acc;
       }
 
       // If there are properties in the object, check for title / description
+      const settingPath = [...path, value];
+      const own: ISearchMatch[] = [];
+      const add = (label: string, isKey: boolean) => {
+        if (!seen?.has(label)) {
+          seen?.add(label);
+          own.push({ label, isKey, path: settingPath });
+        }
+      };
       if (filter((subProps.title as string) ?? '')) {
-        acc.push(subProps.title as string);
+        add(subProps.title as string, false);
       }
       if (filter(value)) {
-        acc.push(value);
+        add(value, true);
       }
 
       // Finally, recurse on the properties left.
-      acc.push(
-        ...this.getFilterString(
-          filter,
-          subProps as ISettingRegistry.IProperty,
-          definitions,
-          subProps['$ref'] as string
-        )
+      const nested = this._getMatches(
+        filter,
+        subProps as ISettingRegistry.IProperty,
+        definitions,
+        subProps['$ref'] as string,
+        seen,
+        settingPath
       );
+      if (nested.length > 0) {
+        // The settings form only shows fields whose title or name is listed.
+        const parent = (subProps.title as string) ?? value;
+        if (!own.some(match => match.label === parent)) {
+          own.push({
+            label: parent,
+            isKey: subProps.title === undefined,
+            path: settingPath
+          });
+        }
+      }
+      acc.push(...own, ...nested);
       return acc;
     }, []);
   }
@@ -599,19 +681,33 @@ export class PluginList extends ReactWidget {
     query?: string
   ): void {
     if (filter) {
-      this._filter = (plugin: ISettingRegistry.IPlugin): string[] | null => {
-        if (!filter || filter(plugin.schema.title ?? '')) {
+      const getMatches = (
+        plugin: ISettingRegistry.IPlugin,
+        seen?: Set<string>
+      ): ISearchMatch[] | null => {
+        if (filter(plugin.schema.title ?? '')) {
           return null;
         }
-        const filtered = this.getFilterString(
+        return this._getMatches(
           filter,
-          plugin.schema ?? {},
-          plugin.schema.definitions
+          this._getSearchableSchema(plugin),
+          plugin.schema.definitions,
+          undefined,
+          seen
         );
-        return filtered;
       };
+      this._filter = (plugin: ISettingRegistry.IPlugin): string[] | null => {
+        const filtered = getMatches(plugin);
+        return filtered && [...new Set(filtered.map(match => match.label))];
+      };
+      // The settings form needs every parent of a match, while the list
+      // shows each match once and leaves out a parent whose matches it
+      // already shows.
+      this._listFilter = (plugin: ISettingRegistry.IPlugin) =>
+        getMatches(plugin, new Set());
     } else {
       this._filter = null;
+      this._listFilter = null;
     }
     this._query = query;
     this._updateFilterSignal.emit(this._filter);
@@ -636,17 +732,6 @@ export class PluginList extends ReactWidget {
           // eslint-disable-next-line jupyter/no-dynamic-translation
           trans._p('schema', schema.title)
         : id;
-    const highlightedTitleIndices = StringExt.matchSumOfSquares(
-      title.toLocaleLowerCase(),
-      this._query?.toLocaleLowerCase() ?? ''
-    );
-    const hightlightedTitle = StringExt.highlight(
-      title,
-      highlightedTitleIndices?.indices ?? [],
-      chunk => {
-        return <mark>{chunk}</mark>;
-      }
-    );
     const description =
       typeof schema.description === 'string'
         ? // Extracted from the settings schema by the `description` selector.
@@ -657,21 +742,21 @@ export class PluginList extends ReactWidget {
     const icon = this.getHint(ICON_KEY, this._registry, plugin);
     const iconClass = this.getHint(ICON_CLASS_KEY, this._registry, plugin);
     const iconTitle = this.getHint(ICON_LABEL_KEY, this._registry, plugin);
-    const filteredProperties = this._filter
-      ? this._filter(plugin)?.map(fieldValue => {
-          const highlightedIndices = StringExt.matchSumOfSquares(
-            fieldValue.toLocaleLowerCase(),
-            this._query?.toLocaleLowerCase() ?? ''
-          );
-          const highlighted = StringExt.highlight(
-            fieldValue,
-            highlightedIndices?.indices ?? [],
-            chunk => {
-              return <mark>{chunk}</mark>;
-            }
-          );
-          return <li key={`${id}-${fieldValue}`}> {highlighted} </li>;
-        })
+    const filteredProperties = this._listFilter
+      ? this._listFilter(plugin)?.map(match => (
+          <li
+            key={JSON.stringify([...match.path, match.isKey])}
+            style={{ paddingLeft: `${12 * (match.path.length - 1)}px` }}
+          >
+            {match.isKey ? (
+              <code className="jp-PluginList-settingKey">
+                {this._highlight(match.label)}
+              </code>
+            ) : (
+              this._highlight(match.label)
+            )}
+          </li>
+        ))
       : undefined;
     const hasMatchDetails =
       filteredProperties !== undefined && filteredProperties.length > 0;
@@ -707,13 +792,28 @@ export class PluginList extends ReactWidget {
               stylesheet="settingsEditor"
             />
             <span className="jp-PluginList-entry-label-text">
-              {hightlightedTitle}
+              {this._highlight(title)}
             </span>
           </div>
           <ul id={matchesId}>{filteredProperties}</ul>
         </div>
       </li>
     );
+  }
+
+  /**
+   * Mark the first part of the text that matches the search query.
+   */
+  private _highlight(text: string): (string | JSX.Element)[] {
+    const query = this._query?.toLocaleLowerCase() ?? '';
+    const start = query ? text.toLocaleLowerCase().indexOf(query) : -1;
+    const indices =
+      start === -1
+        ? []
+        : Array.from({ length: query.length }, (_, i) => start + i);
+    return StringExt.highlight(text, indices, chunk => (
+      <mark key="match">{chunk}</mark>
+    ));
   }
 
   render(): JSX.Element {
@@ -791,8 +891,12 @@ export class PluginList extends ReactWidget {
 
   protected translator: ITranslator;
   private _changed = new Signal<this, void>(this);
+  private _editorRegistry: IFormRendererRegistry | null;
   private _errors: { [id: string]: boolean };
   private _filter: SettingsEditor.PluginSearchFilter;
+  private _listFilter:
+    | ((plugin: ISettingRegistry.IPlugin) => ISearchMatch[] | null)
+    | null = null;
   private _model: PluginList.Model;
   private _query: string | undefined;
   private _handleSelectSignal = new Signal<this, string>(this);
@@ -829,6 +933,11 @@ export namespace PluginList {
      * Model for the plugin list.
      */
     model?: PluginList.Model;
+
+    /**
+     * The form renderers, whose displayed properties are also searched.
+     */
+    editorRegistry?: IFormRendererRegistry;
 
     /**
      * The setting registry for the plugin list.

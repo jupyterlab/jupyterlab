@@ -122,6 +122,8 @@ namespace CommandIDs {
 
   export const switchSidebar = 'sidebar:switch';
 
+  export const activateTabIndex: string = 'application:activate-tab-index';
+
   export const splitTab = 'application:split-tab';
 
   export const zoomInWidget = 'application:zoom-in-widget';
@@ -619,6 +621,35 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         },
         execute: () => {
           labShell.activatePreviousTabBar();
+        }
+      });
+
+      commands.addCommand(CommandIDs.activateTabIndex, {
+        label: args =>
+          args.index === -1
+            ? trans.__('Activate Last Tab')
+            : typeof args.index === 'number' && args.index >= 0
+              ? trans.__('Activate Tab %1', args.index + 1)
+              : trans.__('Activate Tab by Index'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              index: {
+                type: 'number',
+                description: trans.__(
+                  'The zero-based index of the tab to activate in the current tab bar; a negative index counts from the end, so -1 is the last tab'
+                )
+              }
+            },
+            required: ['index']
+          }
+        },
+        execute: args => {
+          const index = args['index'];
+          if (typeof index === 'number') {
+            labShell.activateTab(index);
+          }
         }
       });
 
@@ -1648,14 +1679,19 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
 
           const query = URLExt.queryStringToObject(args.search ?? '');
           const browser = query['file-browser-path'] || '';
-
-          // Remove the file browser path from the query string.
-          delete query['file-browser-path'];
+          // A `+` stands for a space, as in `Markdown+Preview`. Replace it after
+          // decoding, because the redirect of a second tab to an `auto-`
+          // workspace encodes `+` as `%2B`.
+          const openWith = query['open-with']?.replace(/\+/g, ' ') || undefined;
 
           // Clean up artifacts immediately upon routing.
           set.dispose();
 
-          delegate.resolve({ browser, file: PageConfig.getOption('treePath') });
+          delegate.resolve({
+            browser,
+            file: PageConfig.getOption('treePath'),
+            openWith
+          });
         }
       })
     );

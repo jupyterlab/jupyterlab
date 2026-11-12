@@ -35,9 +35,8 @@ volunteered) and open a pull request with proposed implementation.
 If you are not certain about the implementation, using draft pull requests is encouraged.
 
 If you believe you've found a security vulnerability in JupyterLab or
-any Jupyter project, please report it to [security@ipython.org](mailto:security@ipython.org). If you
-prefer to encrypt your security reports, you can use [this PGP public
-key](https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipython_security.asc).
+any Jupyter project, please report it as described in the
+[security policy](https://github.com/jupyterlab/jupyterlab/security/policy).
 
 ```{toctree}
 :hidden: true
@@ -448,7 +447,7 @@ jupyter lab build
 ### Frequent issues
 
 :::{important}
-On Windows, symbolic links need to be activated on Windows 10 or above for Python version 3.8 or higher
+On Windows, symbolic links need to be activated on Windows 10 or above
 by activating the 'Developer Mode'. That may not be allowed by your administrators.
 See [Activate Developer Mode on Windows](https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development)
 for instructions.
@@ -579,6 +578,35 @@ function to get a `Promise` for a `requestAnimationFrame`. We
 sometimes have to set a sentinel value inside a `Promise` and then
 check that the sentinel was set if we need a promise to run without
 blocking.
+
+#### Grouping Tests
+
+Group the tests of a spec file by the code that they test. The outer
+`describe` names the package, the next one names the class, and the
+innermost one names the member under test, as `#property` or
+`#method()`. For example, in `packages/notebook/test/model.spec.ts`:
+
+```typescript
+describe('@jupyterlab/notebook', () => {
+  describe('NotebookModel', () => {
+    describe('#constructor()', () => {
+      it('should create a notebook model', () => {
+        // ...
+      });
+    });
+
+    describe('#metadataChanged', () => {
+      it('should be emitted when a metadata field changes', () => {
+        // ...
+      });
+    });
+  });
+});
+```
+
+Write the behavior in the `it('should ...')` text. Instead of a group
+named after a topic, such as `describe('id references')`, put each test
+under the member that it tests.
 
 ## Internationalization
 
@@ -711,8 +739,10 @@ Here are some good practices to follow when writing integration tests:
 
 - Don't compare multiple screenshots in the same test, unless using `expect.soft`;
   if the first comparison breaks, it will require multiple re-runs of CI workflow to update all snapshots.
-- Don't include more UI elements than necessary, as that increases review burden when elements other than
-  the one tested change - reviewing hundreds of unrelated snapshots is exhausting and error-prone.
+- Crop the screenshot to the smallest area that still shows a reviewer the tested element in context.
+  Each extra UI element makes the test fail when that element changes. Reviewing hundreds of
+  unrelated snapshots is exhausting and error-prone. If the crop is too tight, the reviewer cannot
+  tell what the screenshot shows, or where the tested element is in the interface.
 - When cropping snapshots, prefer retrieving the required dimensions programmatically over hard-coding them.
 - Always use `toMatchSnapshot()` for comparing snapshots; do not implement custom logic reading/writing snapshots.
 - Do not use `waitForTimeout()` as this slows down tests and makes them flaky when CI runs slower than expected.
@@ -861,8 +891,8 @@ provides additional architecture information.
 
 ## The NPM Packages
 
-The repository consists of many npm packages that are managed using the
-lerna build tool. The npm package source files are in the `packages/`
+The repository consists of many npm packages that are managed as Yarn
+workspaces. The npm package source files are in the `packages/`
 subdirectory.
 
 ### Build the NPM Packages from Source
