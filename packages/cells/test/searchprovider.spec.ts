@@ -37,13 +37,16 @@ function createPlaceholderCell(editable = true): CodeCell {
 }
 
 /**
- * A Markdown parser which renders only images, links and reference
- * definitions. Without a parser, the rendered text of a cell is its source.
+ * A Markdown parser which renders only images, links, autolinks, reference
+ * definitions and block quote markers. Without a parser, the rendered text of
+ * a cell is its source.
  */
 const LINK_PARSER: IRenderMime.IMarkdownParser = {
   render: async source =>
     source
       .replace(/^\[[^\]]+\]:.*$/gm, '')
+      .replace(/^>[ \t]?/gm, '')
+      .replace(/<(https?:[^\s<>]*)>/g, '<a href="$1">$1</a>')
       .replace(/!\[([^\]]*)\]\(([^)]*)\)/g, '<img alt="$1" src="$2">')
       .replace(
         /\[([^\]]*)\]\(((?:[^()]|\([^()]*\))*)\)/g,
@@ -418,6 +421,31 @@ describe('cells/searchprovider', () => {
       expect(cell.rendered).toBe(false);
       provider.dispose();
     });
+
+    it.each([
+      ['a block quote marker', '> Use &gt; to redirect the output.', '>'],
+      [
+        'an autolink',
+        'Write &lt;b&gt; for bold, see <https://example.com>.',
+        '<'
+      ]
+    ])(
+      'should not mark the text of a character reference for a match in %s',
+      async (_, source, character) => {
+        // The rendered character comes from the reference, and the source
+        // character from the Markdown syntax
+        cell = createMarkdownCell(source);
+        Widget.attach(cell, document.body);
+        await framePromise();
+        const provider = createCellSearchProvider(cell);
+        await provider.startQuery(new RegExp(character), {});
+
+        const match = await provider.highlightNext();
+        expect(match?.position).toBe(source.indexOf(character));
+        expect(cell.rendered).toBe(false);
+        provider.dispose();
+      }
+    );
 
     it('should mark the current match in a typeset formula', async () => {
       cell = createMarkdownCell('Take $x$ from the box.');

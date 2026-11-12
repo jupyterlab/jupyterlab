@@ -847,11 +847,20 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * difference comes from a source match in syntax which is not listed in
    * `_hiddenSourceRanges()`, such as the language of a code fence, and
    * pairing around it would mark another occurrence than the one Replace
-   * changes.
+   * changes. The map is empty too when a character reference, such as
+   * `&gt;`, adds or removes a match: its rendered text has no source match.
    *
    * @returns Map from source match index to rendered match index.
    */
   private _pairMatches(): Map<number, number> {
+    const text = this.model.sharedModel.getSource();
+    if (
+      this.query &&
+      Private.countMatches(this.query, text) !==
+        Private.countMatches(this.query, Private.decodeReferences(text))
+    ) {
+      return new Map();
+    }
     const rendered = this.renderedProvider.matches;
     const source = this.cmHandler.matches;
     const hidden = this._hiddenSourceRanges();
@@ -977,5 +986,27 @@ namespace Private {
       .replace(/\u2032/g, "'")
       .replace(/\u2061(?=[\p{L}\p{N}])/gu, ' ')
       .replace(/\u2061/g, '');
+  }
+
+  /**
+   * The number of matches of a query in a text.
+   */
+  export function countMatches(query: RegExp, text: string): number {
+    const global = query.global
+      ? query
+      : new RegExp(query.source, query.flags + 'g');
+    return text.match(global)?.length ?? 0;
+  }
+
+  /**
+   * The text with each character reference, such as `&gt;`, replaced by the
+   * character it renders.
+   */
+  export function decodeReferences(text: string): string {
+    const decoder = document.createElement('textarea');
+    return text.replace(/&(?:#\d+|#x[\da-f]+|[a-z][a-z\d]*);/gi, reference => {
+      decoder.innerHTML = reference;
+      return decoder.value;
+    });
   }
 }
