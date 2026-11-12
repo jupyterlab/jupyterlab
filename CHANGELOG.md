@@ -6,6 +6,8 @@
 
 ## v4.7
 
+JupyterLab 4.7 is in beta, so the features described below can still change before the 4.7.0 release.
+
 JupyterLab 4.7 includes a number of new features (described below), bug fixes, and enhancements.
 This release is compatible with extensions supporting JupyterLab 4.0.
 Extension authors are encouraged to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/latest/extension/extension_migration.html#jupyterlab-4-6-to-4-7) which lists deprecations and changes to the public API.
