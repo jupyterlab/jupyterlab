@@ -604,6 +604,44 @@ test.describe('Notebook Search', () => {
     ).toBeInViewport({ ratio: 1 });
   });
 
+  test('Mark the first match of a read-only cell after the query changes', async ({
+    page,
+    tmpPath
+  }) => {
+    const notebook = galata.Notebook.generateNotebook(1, 'markdown', [
+      '## Shopping list\n\n',
+      'See the [list methods](https://docs.python.org/3/tutorial/datastructures.html#more-on-lists).'
+    ]);
+    notebook.cells[0].metadata.editable = false;
+    await page.contents.uploadContent(
+      JSON.stringify(notebook),
+      'text',
+      `${tmpPath}/list.ipynb`
+    );
+    await page.notebook.openByPath(`${tmpPath}/list.ipynb`);
+    await page.notebook.activate('list.ipynb');
+
+    const cell = await page.notebook.getCellLocator(0);
+
+    await page.keyboard.press('Control+f');
+    await page.fill('[placeholder="Find"]', 'list');
+    const counter = page.locator('.jp-DocumentSearch-index-counter');
+    await expect(counter).toHaveText('1/3');
+    await page.keyboard.press('Enter');
+    await expect(counter).toHaveText('2/3');
+    // The third match is in the link URL: the cell shows its editor
+    await page.keyboard.press('Enter');
+    await expect(counter).toHaveText('3/3');
+    await expect(cell!.locator('.jp-InputArea-editor')).toBeVisible();
+
+    // The search starts again and the cell renders again
+    await page.locator('[placeholder="Find"]').press('Backspace');
+    await expect(counter).toHaveText('1/3');
+    await expect(
+      cell!.locator('.jp-RenderedMarkdown .jp-current-match')
+    ).toHaveText('lis');
+  });
+
   test('Search on typing', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');

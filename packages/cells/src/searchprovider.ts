@@ -694,15 +694,25 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * search has no current match.
    */
   private async _onRenderedTextSearched(): Promise<void> {
-    if (!this._currentMatchInRendered || this.currentIndex === null) {
+    // The text can change while the match is being marked, before
+    // `_currentMatchInRendered` is set, as when the table of contents numbers
+    // the heading of a cell which rendered again.
+    if (
+      !this.isActive ||
+      !(this.cell as MarkdownCell).rendered ||
+      this.currentIndex === null
+    ) {
       return;
     }
     const index = this._pairMatches().get(this.currentIndex);
-    if (index === undefined) {
+    if (index === undefined || !this._isRenderedMatchVisible(index)) {
       this._currentMatchInRendered = false;
       return;
     }
-    await this._highlightRenderedMatch(index, false);
+    this._currentMatchInRendered = !!(await this._highlightRenderedMatch(
+      index,
+      false
+    ));
   }
 
   /**
