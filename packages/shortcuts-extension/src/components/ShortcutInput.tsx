@@ -3,9 +3,10 @@
  * Distributed under the terms of the Modified BSD License.
  */
 import * as React from 'react';
-import type { ITranslator } from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONExt } from '@lumino/coreutils';
+import { Platform } from '@lumino/domutils';
 import { EN_US } from '@lumino/keyboard';
 import { checkIcon } from '@jupyterlab/ui-components';
 import type {
@@ -586,17 +587,76 @@ export class ShortcutInput extends React.Component<
     );
   };
 
-  private _statusMessage(trans: ReturnType<ITranslator['load']>): string {
-    if (this.state.phase === 'ready') {
-      return trans.__('Shortcut ready.');
+  /**
+   * Speak a single key token in words (not glyphs) for the live region.
+   */
+  private _spokenKey(token: string, trans: TranslationBundle): string {
+    switch (token) {
+      case 'Ctrl':
+        return trans.__('Control');
+      case 'Accel':
+        return Platform.IS_MAC ? trans.__('Command') : trans.__('Control');
+      case 'Alt':
+        return Platform.IS_MAC ? trans.__('Option') : trans.__('Alt');
+      case 'Shift':
+        return trans.__('Shift');
+      default:
+        return token;
     }
-    if (this.state.announceCaptureStart) {
+  }
+
+  /**
+   * Speak the current captured sequence in words, e.g. "Control Shift E".
+   */
+  private _spokenShortcut(trans: TranslationBundle): string {
+    if (!this.state.userInput.trim()) {
+      return '';
+    }
+    return this.state.userInput
+      .split(',')
+      .map(chord =>
+        chord
+          .trim()
+          .split(/\s+/)
+          .filter(Boolean)
+          .map(token => this._spokenKey(token, trans))
+          .join(' ')
+      )
+      .filter(Boolean)
+      .join(', ');
+  }
+
+  private _statusMessage(trans: TranslationBundle): string {
+    const spoken = this._spokenShortcut(trans);
+
+    if (this.state.phase === 'ready') {
+      return spoken
+        ? trans.__('Shortcut ready: %1.', spoken)
+        : trans.__('Shortcut ready.');
+    }
+
+    // Incomplete is announced via the error channel, not the status region.
+    if (this.state.phase === 'incompleteIdle') {
+      return '';
+    }
+
+    if (this.state.isFunctional && spoken) {
+      return spoken;
+    }
+
+    // Keep "capturing" while empty (after mount announce) or mid-chord.
+    if (
+      this.state.announceCaptureStart ||
+      this.state.userInput !== '' ||
+      this.state.keys.length > 0
+    ) {
       return trans.__('Capturing shortcut keys.');
     }
+
     return '';
   }
 
-  private _errorMessage(trans: ReturnType<ITranslator['load']>): string {
+  private _errorMessage(trans: TranslationBundle): string {
     return this._buildCaptureError(
       !this.state.isAvailable ? this.state.activeConflicts : [],
       this.state.phase
