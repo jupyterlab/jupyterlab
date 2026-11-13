@@ -61,6 +61,7 @@ repos:
         entry: 'npm run eslint:files'
         language: system
         types_or: [ts, tsx, javascript, jsx]
+        require_serial: true
       - id: stylelint
         name: stylelint
         entry: 'npm run stylelint:files'
