@@ -23,8 +23,6 @@ const esModules = [
   'lib0',
   'marked',
   'nanoid',
-  // CommonJS, listed so that its nested ESM-only dependencies are transformed
-  'sanitize-html',
   'vscode-ws-jsonrpc',
   'y-protocols',
   'y-websocket',
@@ -64,6 +62,10 @@ module.exports = function (baseDir: string) {
       '^.+\\.tsx?$': ['ts-jest/legacy', { tsconfig: `./tsconfig.test.json` }],
       '^.+\\.jsx?$': 'babel-jest'
     },
-    transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`]
+    // Check the innermost package of a path, so that a listed package is
+    // transformed also when it is installed inside an unlisted one.
+    transformIgnorePatterns: [
+      `/node_modules/(?!${esModules})(?:@[^/]+/)?[^/]+(?!.*/node_modules/)`
+    ]
   };
 };
