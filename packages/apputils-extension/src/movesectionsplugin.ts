@@ -19,6 +19,7 @@ import type {
   ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 import type { AccordionPanel, Widget } from '@lumino/widgets';
 
 /**
@@ -45,6 +46,8 @@ namespace CommandIDs {
   export const moveSectionTo = 'apputils:move-section-to';
   export const moveSectionBack = 'apputils:move-section-back';
   export const toggleSectionReordering = 'apputils:toggle-section-reordering';
+  export const moveSectionUp = 'apputils:move-section-up';
+  export const moveSectionDown = 'apputils:move-section-down';
 }
 
 /**
@@ -88,6 +91,85 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       selector: '.lm-AccordionPanel-title',
       rank: 20
     });
+
+    /**
+     * The section to move: from a key binding, the one whose header has the
+     * focus; otherwise, the one whose header was right-clicked.
+     */
+    const targetSection = (
+      args: ReadonlyPartialJSONObject
+    ): { reorderer: AccordionPanelReorderer; index: number } | undefined => {
+      const event = args._luminoEvent;
+      const fromKeyBinding =
+        event !== undefined &&
+        JSONExt.isObject(event) &&
+        event.type === 'keybinding';
+      const title = fromKeyBinding
+        ? document.activeElement?.closest<HTMLElement>(
+            '.lm-AccordionPanel-title'
+          )
+        : app.contextMenuHitTest(node =>
+            node.classList.contains('lm-AccordionPanel-title')
+          );
+      const panelNode = title?.parentElement;
+      const reorderer = panelNode
+        ? AccordionPanelReorderer.find(panelNode)
+        : undefined;
+      if (!title || !reorderer) {
+        return undefined;
+      }
+      const index = reorderer.panel.titles.indexOf(title);
+      return index < 0 ? undefined : { reorderer, index };
+    };
+
+    const addMoveCommand = (id: string, label: string, offset: -1 | 1) => {
+      /**
+       * The section index to move from and to, if reordering is unlocked and
+       * the section is not already at that end of the panel.
+       */
+      const resolveMove = (args: ReadonlyPartialJSONObject) => {
+        const section = AccordionPanelReorderer.enabled
+          ? targetSection(args)
+          : undefined;
+        if (!section) {
+          return undefined;
+        }
+        const { reorderer, index: from } = section;
+        const to = from + offset;
+        return to >= 0 && to < reorderer.panel.widgets.length
+          ? { reorderer, from, to }
+          : undefined;
+      };
+      app.commands.addCommand(id, {
+        label,
+        describedBy: { args: { type: 'object', properties: {} } },
+        isVisible: args =>
+          AccordionPanelReorderer.enabled && targetSection(args) !== undefined,
+        isEnabled: args => resolveMove(args) !== undefined,
+        execute: args => {
+          const move = resolveMove(args);
+          if (!move) {
+            return;
+          }
+          const { reorderer, from, to } = move;
+          reorderer.move(reorderer.panel.widgets[from], to);
+          // Moving the header in the DOM, or choosing a menu item, takes the
+          // focus away from it.
+          reorderer.panel.titles[to].focus();
+        }
+      });
+      app.contextMenu.addItem({
+        command: id,
+        selector: '.lm-AccordionPanel-title',
+        rank: 21
+      });
+    };
+    addMoveCommand(CommandIDs.moveSectionUp, trans.__('Move Section Up'), -1);
+    addMoveCommand(
+      CommandIDs.moveSectionDown,
+      trans.__('Move Section Down'),
+      1
+    );
 
     if (!registry) {
       return;

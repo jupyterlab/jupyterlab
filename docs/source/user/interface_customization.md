@@ -148,6 +148,16 @@ resizing sections remain available while reordering is locked.
 Section order, collapsed states, and sizes are restored when reopening the same
 workspace.
 
+To move a section without dragging, right-click its header and select
+**Move Section Up** or **Move Section Down**; these items are shown while
+reordering is enabled. To move the section whose header has the focus with the
+keyboard, bind these commands to keys: in the **Keyboard Shortcuts** settings,
+click **+** to add a shortcut, select **apputils: Move Section Up** or
+**apputils: Move Section Down**, click **+** in the Shortcut column, press the
+keys, and confirm with both check buttons. Arrow keys, Home, End, Enter and
+Space cannot be used, even with a modifier, because they move the focus between
+the headers.
+
 (activity-bar-position-customization)=
 
 ## Activity Bar Position

@@ -717,6 +717,16 @@
     }
   },
   {
+    "id": "apputils:move-section-down",
+    "label": "Move Section Down",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "apputils:move-section-to",
     "label": "Move to ",
     "caption": "",
@@ -731,6 +741,16 @@
           "type": "string"
         }
       }
+    }
+  },
+  {
+    "id": "apputils:move-section-up",
+    "label": "Move Section Up",
+    "caption": "",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
     }
   },
   {
