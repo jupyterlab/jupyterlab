@@ -1,72 +1,22 @@
-name: Fix License Headers
+name: Check License Headers
 
-on: # zizmor: ignore[dangerous-triggers] required to push header fixes back to PR branches
-  pull_request_target:
+on:
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
-  header-license-fix:
+  header-license-check:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
-      pull-requests: write
-
     steps:
       - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           persist-credentials: false
 
-      - name: Configure git to use https
-        run: git config --global hub.protocol https
-
-        #####
-        # This workflow is triggered by pull_request_target event.
-        # The following step will checkout the PR.
-        # DO NOT, UNDER ANY CIRCUMSTANCES, RUN ANY LOCAL CODE ON THE PR.
-        #####
-      - name: Checkout the branch from the PR that triggered the job
-        run: gh pr checkout ${{ github.event.pull_request.number }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Fix License Header
+      - name: Check License Header
         uses: apache/skywalking-eyes/header@a196742f472feaffafea537ce5a2a4c3c53a8de4 # v0.9.0
         with:
-          mode: fix
-
-      - name: List files changed
-        id: files-changed
-        shell: bash -l {0}
-        run: |
-          set -ex
-          export CHANGES=$(git status --porcelain | tee /tmp/modified.log | wc -l)
-          cat /tmp/modified.log
-
-          echo "N_CHANGES=${CHANGES}" >> $GITHUB_OUTPUT
-
-          git diff
-
-      - name: Setup git credentials
-        if: steps.files-changed.outputs.N_CHANGES != '0'
-        run: gh auth setup-git
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Commit any changes
-        if: steps.files-changed.outputs.N_CHANGES != '0'
-        shell: bash -l {0}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git pull --no-tags
-
-          git add *
-          git commit -m "Automatic application of license header"
-
-          git config push.default upstream
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          mode: check
+          token: '' # a read-only token cannot post review comments

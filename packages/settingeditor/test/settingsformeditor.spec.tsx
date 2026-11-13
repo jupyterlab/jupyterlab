@@ -89,7 +89,7 @@ describe('@jupyterlab/settingeditor', () => {
           keyA: { type: 'string', default: 'A' },
           keyB: { type: 'string', default: 'B' },
           keyC: { title: 'Third key', type: 'string', default: 'C' },
-          keyD: { type: 'string', default: 'D' }
+          keyD: { title: 'Fourth key', type: 'string', default: 'D' }
         }
       };
       connector.schemas[id] = schema;
@@ -99,7 +99,7 @@ describe('@jupyterlab/settingeditor', () => {
       const component = renderer.create(
         <SettingsFormEditor
           // Filter by field and by title
-          filteredValues={['keyA', 'Third key']}
+          filteredValues={['keyA', 'Third key', 'keyD']}
           hasError={() => void 0}
           onSelect={() => void 0}
           renderers={{}}
@@ -112,7 +112,7 @@ describe('@jupyterlab/settingeditor', () => {
       // Then
       const instance = component.root;
       const form = instance.findByType(FormComponent);
-      expect(form.props.formData).toEqual({ keyA: 'A', keyC: 'C' });
+      expect(form.props.formData).toEqual({ keyA: 'A', keyC: 'C', keyD: 'D' });
       expect(Object.keys(form.props.schema.properties)).toEqual(
         Object.keys(form.props.formData)
       );
