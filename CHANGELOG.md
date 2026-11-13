@@ -210,6 +210,7 @@ class="jp-screenshot">
 - Image outputs now respect the height set in their metadata, as with `Image("plot.png", width=300, height=30)` in IPython. An `<img>` tag with only a `height` attribute is now shown at that height.
 - The Extension Manager lists language packs again, after PyPI retired the listing that it used. For other extensions, it now links to PyPI instead of listing them. Settings → Language → Install more languages… opens it with the language packs.
 - Searching the Settings Editor for an editor option, such as "font" or "rulers", now finds the Notebook, Code Console and CodeMirror settings and shows the matching fields.
+- The Settings Editor search now finds settings by tag, such as `tag:performance` or `tag:accessibility`, and the search box suggests the tags as you type. Extensions can tag their own settings with the new `tags` field of the settings schema.
 - The file conflict dialog now names its button "Reload from Disk" instead of "Revert".
 - The limit on the number of outputs shown for a cell (`maxNumberOutputs`) now also applies while the cell waits for input.
 - With the history provider of the inline completer enabled, typing no longer sends a request to ipykernel 7 for every key.
