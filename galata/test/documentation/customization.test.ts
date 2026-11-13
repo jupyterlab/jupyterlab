@@ -37,6 +37,8 @@ test.describe('Default', () => {
       '.lm-TabBar-tab:has([data-icon="ui-components:terminal"]) .lm-TabBar-tabLabel'
     );
     await terminalTabLabel.filter({ hasNotText: '...' }).waitFor();
+    // The prompt can appear after the title settles.
+    await expect(page.locator('.jp-Terminal-body')).toContainText('$');
 
     // Normalise the tab title to "Terminal 1" so the snapshot is consistent
     // across environments because locally it would show the user's shell prompt path,
@@ -58,12 +60,7 @@ test.describe('Default', () => {
 
     await page.sidebar.setWidth();
 
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
-    await page.dblclick('text=Lorenz.ipynb');
-
-    await page.locator('div[role="main"] >> text=Lorenz.ipynb').waitFor();
+    await page.notebook.openByPath('notebooks/Lorenz.ipynb');
 
     // Wait for kernel to settle on idle
     await page
@@ -101,7 +98,7 @@ test.describe('Default', () => {
 
     await page.sidebar.setWidth();
 
-    await page.click('text=Tabs');
+    await page.menu.openLocator('Tabs');
 
     await page.locator('#jp-mainmenu-tabs').waitFor();
 
@@ -121,9 +118,7 @@ test.describe('Default', () => {
 
     await page.sidebar.setWidth();
 
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
+    await page.filebrowser.openDirectory('notebooks');
     await page.click('text=Lorenz.ipynb', { button: 'right' });
 
     await page.hover('ul[role="menu"] >> text=New File');
@@ -247,12 +242,7 @@ test.describe('Customized', () => {
 
     await page.sidebar.setWidth();
 
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
-    await page.dblclick('text=Lorenz.ipynb');
-
-    await page.locator('div[role="main"] >> text=Lorenz.ipynb').waitFor();
+    await page.notebook.openByPath('notebooks/Lorenz.ipynb');
 
     await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
     const debuggerActive = page.locator(
@@ -287,7 +277,7 @@ test.describe('Customized', () => {
 
     await page.sidebar.setWidth();
 
-    await page.click('text=Tabs');
+    await page.menu.openLocator('Tabs');
 
     await page.locator('#jp-mainmenu-tabs').waitFor();
 
@@ -307,9 +297,7 @@ test.describe('Customized', () => {
 
     await page.sidebar.setWidth();
 
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
+    await page.filebrowser.openDirectory('notebooks');
     await page.click('text=Lorenz.ipynb', { button: 'right' });
 
     await page.hover('ul[role="menu"] >> text=New File');
@@ -341,8 +329,7 @@ test.describe('Customized', () => {
 
     await page.sidebar.setWidth();
 
-    await page.locator('text=custom-markdown.css').waitFor();
-    await page.dblclick('text=custom-markdown.css');
+    await page.filebrowser.open('custom-markdown.css');
     await expect(
       page
         .locator('#jp-main-dock-panel .lm-TabBar-tab')

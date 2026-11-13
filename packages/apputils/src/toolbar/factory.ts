@@ -2,7 +2,6 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IObservableList } from '@jupyterlab/observables';
 import { ObservableList } from '@jupyterlab/observables';
@@ -110,7 +109,8 @@ async function setToolbarItems(
       schema.properties![propertyId].default =
         SettingRegistry.reconcileToolbarItems(
           pluginDefaults,
-          schema.properties![propertyId].default as any[],
+          schema.properties![propertyId]
+            .default as ISettingRegistry.IToolbarItem[],
           true
         )!.sort(
           (a, b) =>
@@ -170,7 +170,7 @@ async function setToolbarItems(
       }
     });
   } catch (error) {
-    if (error.name === 'TransformError') {
+    if (error instanceof Error && error.name === 'TransformError') {
       // Assume the existing transformer is the toolbar builder transformer
       // from another factory set up.
       listenPlugin = false;
@@ -186,7 +186,7 @@ async function setToolbarItems(
   // React to customization by the user
   settings.changed.connect(() => {
     const newItems: ISettingRegistry.IToolbarItem[] =
-      (settings.composite[propertyId] as any) ?? [];
+      (settings.composite[propertyId] as ISettingRegistry.IToolbarItem[]) ?? [];
 
     transferSettings(newItems);
   });
@@ -195,12 +195,22 @@ async function setToolbarItems(
     // This is not optimal but safer because a toolbar item with the same
     // name cannot be inserted (it will be a no-op). But that could happen
     // if the settings are changing the items order.
+    const filtered = newItems.filter(item => !item.disabled);
+    // settings.changed fires for any change to the plugin's settings, so
+    // skip the rebuild when the toolbar definition itself did not change:
+    // clearing and re-adding identical items rebuilds every toolbar and
+    // can reorder its items.
+    if (JSONExt.deepEqual([...toolbarItems], filtered)) {
+      return;
+    }
     toolbarItems.clear();
-    toolbarItems.pushAll(newItems.filter(item => !item.disabled));
+    toolbarItems.pushAll(filtered);
   };
 
   // Initialize the toolbar
-  transferSettings((settings.composite[propertyId] as any) ?? []);
+  transferSettings(
+    (settings.composite[propertyId] as ISettingRegistry.IToolbarItem[]) ?? []
+  );
 
   // React to plugin changes if no other transformer exists, otherwise bail.
   if (!listenPlugin) {
@@ -247,7 +257,9 @@ async function setToolbarItems(
  * @param pluginId Settings plugin id
  * @param translator Translator
  * @param propertyId Toolbar definition key in the settings plugin
- * @returns List of toolbar widgets factory
+ * @returns List of toolbar widgets factory; its optional `commandArgs`, such
+ *   as the id of the widget the commands act on, are added to the arguments
+ *   of every item without overriding those the item sets
  */
 export function createToolbarFactory(
   toolbarRegistry: IToolbarWidgetRegistry,
@@ -256,9 +268,13 @@ export function createToolbarFactory(
   pluginId: string,
   translator: ITranslator,
   propertyId: string = 'toolbar'
-): (widget: Widget) => IObservableList<ToolbarRegistry.IToolbarItem> {
+): (
+  widget: Widget,
+  commandArgs?: PartialJSONObject
+) => IObservableList<ToolbarRegistry.IToolbarItem> {
   const items = new ObservableList<ISettingRegistry.IToolbarItem>({
-    itemCmp: (a, b) => JSONExt.deepEqual(a as any, b as any)
+    itemCmp: (a, b) =>
+      JSONExt.deepEqual(a as PartialJSONObject, b as PartialJSONObject)
   });
 
   // Get toolbar definition from the settings
@@ -276,7 +292,14 @@ export function createToolbarFactory(
     );
   });
 
-  return (widget: Widget) => {
+  return (widget: Widget, commandArgs?: PartialJSONObject) => {
+    const createWidget = (item: ToolbarRegistry.IWidget) =>
+      toolbarRegistry.createWidget(
+        factoryName,
+        widget,
+        commandArgs ? { ...item, args: { ...commandArgs, ...item.args } } : item
+      );
+
     const updateToolbar = (
       list: IObservableList<ToolbarRegistry.IWidget>,
       change: IObservableList.IChangedArgs<ToolbarRegistry.IWidget>
@@ -289,7 +312,7 @@ export function createToolbarFactory(
           change.newValues.forEach(item =>
             toolbar.push({
               name: item.name,
-              widget: toolbarRegistry.createWidget(factoryName, widget, item)
+              widget: createWidget(item)
             })
           );
           break;
@@ -300,7 +323,7 @@ export function createToolbarFactory(
           change.newValues.forEach(item =>
             toolbar.set(change.newIndex, {
               name: item.name,
-              widget: toolbarRegistry.createWidget(factoryName, widget, item)
+              widget: createWidget(item)
             })
           );
           break;
@@ -320,11 +343,7 @@ export function createToolbarFactory(
       if (itemIndex >= 0) {
         toolbar.set(itemIndex, {
           name: itemName,
-          widget: toolbarRegistry.createWidget(
-            factoryName,
-            widget,
-            items.get(itemIndex)
-          )
+          widget: createWidget(items.get(itemIndex))
         });
       }
     };
@@ -333,7 +352,7 @@ export function createToolbarFactory(
       values: Array.from(items).map(item => {
         return {
           name: item.name,
-          widget: toolbarRegistry.createWidget(factoryName, widget, item)
+          widget: createWidget(item)
         };
       })
     });

@@ -8,6 +8,11 @@ on:
         required: false
         default: 28
         type: number
+      days:
+        description: Number of days in the analysis window
+        required: false
+        default: 7
+        type: number
   schedule:
     - cron: '0 6 * * 1'
 
@@ -27,6 +32,7 @@ jobs:
       contents: read
     outputs:
       runs: ${{ steps.params.outputs.runs }}
+      days: ${{ steps.params.outputs.days }}
       window_start: ${{ steps.report.outputs.window_start }}
       window_end: ${{ steps.report.outputs.window_end }}
     steps:
@@ -34,6 +40,7 @@ jobs:
         id: params
         env:
           INPUT_RUNS: ${{ github.event.inputs.runs || '28' }}
+          INPUT_DAYS: ${{ github.event.inputs.days || '7' }}
         run: |
           set -euo pipefail
 
@@ -42,12 +49,18 @@ jobs:
             exit 1
           fi
 
+          if ! [[ "$INPUT_DAYS" =~ ^[1-9][0-9]*$ ]]; then
+            echo "Invalid days value: $INPUT_DAYS"
+            exit 1
+          fi
+
           {
             echo "runs=$INPUT_RUNS"
+            echo "days=$INPUT_DAYS"
           } >> "$GITHUB_OUTPUT"
 
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
           persist-credentials: false
 
@@ -56,8 +69,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUNS: ${{ steps.params.outputs.runs }}
+          DAYS: ${{ steps.params.outputs.days }}
         run: |
           python scripts/analyze_flaky_tests.py "$RUNS" \
+            --days "$DAYS" \
             --markdown flake-report.md \
             --json flake-report.json \
             --github-output "$GITHUB_OUTPUT"
@@ -67,7 +82,7 @@ jobs:
           cat flake-report.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload report
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: galata-flake-report
           path: |
@@ -89,14 +104,15 @@ jobs:
     steps:
       - name: Download report
         if: ${{ needs.analyze.result == 'success' }}
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: galata-flake-report
 
       - name: Post report comment
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           ANALYZE_RESULT: ${{ needs.analyze.result }}
+          DAYS_REQUESTED: ${{ needs.analyze.outputs.days }}
           RUNS_REQUESTED: ${{ needs.analyze.outputs.runs }}
           TRACKING_ISSUE_NUMBER: ${{ env.TRACKING_ISSUE_NUMBER }}
           TRACKING_REPOSITORY: ${{ env.TRACKING_REPOSITORY }}
@@ -129,6 +145,7 @@ jobs:
               `| Status | ${cell(status)} |`,
               `| Source | ${cell(sourceRepo)} |`,
               `| Branch | ${cell(branch)} |`,
+              `| Days requested | ${cell(process.env.DAYS_REQUESTED)} |`,
               `| Runs requested | ${cell(process.env.RUNS_REQUESTED)} |`,
               `| Window | ${cell(window)} |`,
               `| Workflow run | [Run ${context.runId}](${runUrl}) |`

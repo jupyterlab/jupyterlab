@@ -201,16 +201,19 @@ export namespace Licenses {
   export const REPORT_FORMATS: Record<string, IReportFormat> = {
     markdown: {
       id: 'markdown',
+      // eslint-disable-next-line jupyter/no-untranslated-string -- File format name.
       title: 'Markdown',
       icon: markdownIcon
     },
     csv: {
       id: 'csv',
+      // eslint-disable-next-line jupyter/no-untranslated-string -- File format name.
       title: 'CSV',
       icon: spreadsheetIcon
     },
     json: {
       id: 'json',
+      // eslint-disable-next-line jupyter/no-untranslated-string -- File format name.
       title: 'JSON',
       icon: jsonIcon
     }

@@ -19,6 +19,7 @@ import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ICommandPalette } from '@jupyterlab/apputils';
 import { IWorkspaceCommands, IWorkspacesModel } from '@jupyterlab/workspaces';
+import { WORKSPACE_ITEM_CLASS } from './constants';
 
 namespace CommandIDs {
   /**
@@ -66,8 +67,6 @@ namespace CommandIDs {
 const WORKSPACE_NAME = 'jupyterlab-workspace';
 const WORKSPACE_EXT = '.' + WORKSPACE_NAME;
 const LAST_SAVE_ID = 'workspace-ui:lastSave';
-
-export const WORKSPACE_ITEM_CLASS = 'jp-mod-workspace';
 
 /**
  * The workspace commands

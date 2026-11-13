@@ -8,7 +8,60 @@
 
 ## JupyterLab 4.6 to 4.7 (not released yet)
 
+### Behavior updates
+
+- Listing an extension package name in `disabledExtensions` now disables every plugin that
+  package provides. Before, a plugin whose id did not start with the package name stayed
+  enabled, so a package not following the plugin id convention could not be disabled as a
+  whole. Each such plugin is named in a browser console warning. To keep it enabled, list
+  the plugin ids to disable in `disabledExtensions` instead of the package name.
+
+- Users can reorder the sections of a `SidePanel` with the default accordion content, and
+  the workspace saves the order, the collapsed state and the size of each section with the
+  section ID. Give each section an explicit ID that is unique in the page and the same in
+  every session, for example `section.id = 'my-extension-panel-settings'`. A section
+  without an explicit ID gets a new generated ID in every session, so the workspace saves
+  its title label instead. After the label changes, for example with the display language,
+  the next reload shows the panel in its original order and can apply the saved collapsed
+  states and sizes to the wrong sections. See
+  {ref}`reordering accordion sections <reordering-sections>`.
+
+- Reordering changes the index of each `SidePanel` section. Code that passes a fixed
+  index to the `expand()` or `collapse()` method of the accordion, for example
+  `expand(0)`, then acts on another section. Get the index of the section widget with
+  `panel.widgets.indexOf(widget)` instead.
+
+- `IRunningSessions.IManager` has a new optional `id`. It sets the ID of the manager's
+  section in the Running Sessions panel. Without it, the section ID is built from the
+  translated `name`, so it changes with the display language.
+
+- Notebook panel and cell toolbar items now receive the id of their notebook panel in the `widgetId` command argument. The notebook commands use it to act on that notebook and to compute their state for it, so their buttons show the state of their own notebook while another notebook has the focus. Commands of extensions placed in these toolbars can do the same, as shown in {ref}`toolbar-registry`.
+
+- Semantic commands added with `addSemanticCommand` now pass their arguments to the `isEnabled`, `isToggled` and `isVisible` callbacks of the commands they group, and act on the widget whose id the `widgetId` argument holds. With a `widgetId` argument, a semantic command is visible only when every command it groups is visible.
+
 ### API updates
+
+- `@jupyterlab/mathjax-extension` now uses MathJax 4.1 through `@mathjax/src`
+  and `@mathjax/mathjax-tex-font`. The `mathDocument()` method returns a MathJax 4
+  document. Extensions that use it directly should use the promise-based rendering
+  methods and follow the [MathJax 4 migration guide](https://docs.mathjax.org/en/latest/upgrading/whats-new-4.0.html).
+  JupyterLab continues to bundle the TeX font and the previously enabled TeX packages.
+  Standalone applications that instantiate `MathJaxTypesetter` should import
+  `@jupyterlab/mathjax-extension/style/index.css` to load the bundled fonts.
+  Applications that bundle `@jupyterlab/mathjax-extension` with their own webpack
+  configuration can alias `#default-font` to `@mathjax/mathjax-tex-font/mjs` and
+  `#root/root.js` to `@jupyterlab/mathjax-extension/lib/mathjaxroot.js`, as JupyterLab
+  does, to keep the unused New Computer Modern font data and the build path out of
+  the bundle.
+
+- `HTMLSearchEngine.search` from `@jupyterlab/documentsearch` searches each MathJax formula as one text, because MathJax 4 puts each character of a formula in its own text node. A match in a formula can span several text nodes: its `node` and `position` give its start, its `text` holds the whole match, and the new optional `parts` property of `IHTMLSearchMatch` lists one match per text node. Code that highlights `text.length` characters of `node` should highlight each of the `parts` instead.
+
+- `ObservableUndoableList`, `IObservableUndoableList`, and `ObservableUndoableList.IdentitySerializer` from `@jupyterlab/observables` are deprecated since 4.7.0 and will be removed in JupyterLab 5.0. Observable lists with undo/redo are no longer used by JupyterLab core since document models migrated to Yjs in JupyterLab 4.x. Consequently, `IModelDB.createList` and `ModelDB.createList` are also deprecated.
+
+- The JSON Lines renderer plugin was renamed from `@jupyterlab/json-lines-extension:factory`
+  to `@jupyterlab/json-extension:json-lines-factory` to match its owning package.
+  Update references to the old plugin id in configuration, such as `disabledExtensions`,
+  `deferredExtensions` and `lockedExtensions`. The plugin has no settings to migrate.
 
 - Xterm.js, used by `@jupyterlab/terminal`, was upgraded from 5.x to 6.x, along with the
   `@xterm/addon-fit`, `@xterm/addon-search`, `@xterm/addon-web-links` and `@xterm/addon-webgl`
@@ -24,6 +77,8 @@
   - Extensions depending on `@xterm/*` packages themselves, for example to type against the
     `Terminal.searchAddon` getter of `@jupyterlab/terminal`, should update them to the
     versions used by `@jupyterlab/terminal` (`@xterm/xterm` 6.x and the matching addons).
+
+- `ToolbarRegistry.WIDGET_ID_ARG` in `@jupyterlab/apputils` holds the name of the `widgetId` argument. `CellBarExtension.WIDGET_ID_ARG` in `@jupyterlab/cell-toolbar` is deprecated: use `ToolbarRegistry.WIDGET_ID_ARG` instead. The factory returned by `createToolbarFactory` takes the command arguments to add to every item as an optional second parameter.
 
 ## JupyterLab 4.5 to 4.6
 

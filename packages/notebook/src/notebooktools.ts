@@ -513,14 +513,15 @@ export namespace NotebookTools {
     constructor(options: MetadataEditorTool.IOptions) {
       super();
       const { editorFactory } = options;
+      const trans = (options.translator || nullTranslator).load('jupyterlab');
       this.addClass('jp-MetadataEditorTool');
       const layout = (this.layout = new PanelLayout());
 
       this._editorFactory = editorFactory;
-      this._editorLabel = options.label || 'Edit Metadata';
+      this._editorLabel = options.label || trans.__('Edit Metadata');
       this.createEditor();
       const titleNode = new Widget({ node: document.createElement('label') });
-      titleNode.node.textContent = options.label || 'Edit Metadata';
+      titleNode.node.textContent = this._editorLabel;
       layout.addWidget(titleNode);
       layout.addWidget(this.editor);
     }

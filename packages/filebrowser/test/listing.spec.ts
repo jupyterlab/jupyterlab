@@ -8,7 +8,12 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import type { IFileSystemDirectoryEntryOptions } from '@jupyterlab/testing';
-import { framePromise, signalToPromise } from '@jupyterlab/testing';
+import {
+  acceptDialog,
+  dismissDialog,
+  framePromise,
+  signalToPromise
+} from '@jupyterlab/testing';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import expect from 'expect';
@@ -230,6 +235,377 @@ describe('filebrowser/listing', () => {
         await newNamePromise;
         const itemNode = dirListing['_items'][0];
         expect(itemNode.contains(document.activeElement)).toBe(true);
+      });
+    });
+
+    describe('#copy()', () => {
+      it('should make paste() copy the items after a cut', async () => {
+        dirListing.selectNext();
+        dirListing.cut();
+        dirListing.selectNext();
+        dirListing.copy();
+        const renameSpy = jest.spyOn(dirListing.model.manager, 'rename');
+        const copySpy = jest
+          .spyOn(dirListing.model.manager, 'copy')
+          .mockResolvedValue({} as any);
+
+        await dirListing.paste();
+
+        expect(copySpy).toHaveBeenCalledTimes(1);
+        expect(renameSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('#paste()', () => {
+      // Opens a new folder, so that the cut items move when they are pasted.
+      async function openNewFolder(): Promise<void> {
+        const folder = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+        await dirListing.model.cd(folder.path);
+      }
+
+      it('should paste into the selected destination directory', async () => {
+        const source = [...dirListing.sortedItems()][0];
+
+        const destination = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+
+        await dirListing.selectItemByName(source.name);
+        dirListing.cut();
+
+        await dirListing.selectItemByName(destination.name);
+        await dirListing.paste();
+
+        const moved = await dirListing.model.manager.services.contents.get(
+          `${destination.path}/${source.name}`
+        );
+        expect(moved.name).toBe(source.name);
+      });
+
+      it('should paste into the current directory when no destination directory is selected', async () => {
+        const source = [...dirListing.sortedItems()][0];
+
+        const destination = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+
+        await dirListing.selectItemByName(source.name);
+        dirListing.cut();
+
+        await dirListing.model.cd(destination.path);
+        await dirListing.paste();
+
+        const moved = await dirListing.model.manager.services.contents.get(
+          `${destination.path}/${source.name}`
+        );
+        expect(moved.name).toBe(source.name);
+      });
+
+      it('should paste into the current directory from the menu of the empty area', async () => {
+        const contents = dirListing.model.manager.services.contents;
+        const source = [...dirListing.sortedItems()][0];
+        const destination = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+
+        await dirListing.selectItemByName(source.name);
+        dirListing.cut();
+        await dirListing.selectItemByName(destination.name);
+
+        // Right-click below the last item.
+        simulate(dirListing.contentNode, 'mousedown', { button: 2 });
+        await dirListing.paste();
+
+        await expect(
+          contents.get(`${destination.path}/${source.name}`)
+        ).rejects.toBeTruthy();
+        expect((await contents.get(source.path)).name).toBe(source.name);
+      });
+
+      it('should paste into the current directory after a click on the empty area', async () => {
+        const contents = dirListing.model.manager.services.contents;
+        const source = [...dirListing.sortedItems()][0];
+        const destination = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+
+        await dirListing.selectItemByName(source.name);
+        dirListing.cut();
+        await dirListing.selectItemByName(destination.name);
+
+        // Click below the last item.
+        simulate(dirListing.contentNode, 'mousedown');
+        expect([...dirListing.selectedItems()]).toHaveLength(0);
+        await dirListing.paste();
+
+        await expect(
+          contents.get(`${destination.path}/${source.name}`)
+        ).rejects.toBeTruthy();
+        expect((await contents.get(source.path)).name).toBe(source.name);
+      });
+
+      it('should keep the selection after a modifier click or a scrollbar press on the empty area', async () => {
+        const content = dirListing.contentNode;
+        const source = [...dirListing.sortedItems()][0];
+        await dirListing.selectItemByName(source.name);
+
+        simulate(content, 'mousedown', { ctrlKey: true });
+        simulate(content, 'mousedown', { metaKey: true });
+        simulate(content, 'mousedown', { shiftKey: true });
+
+        // jsdom has no layout, so give the press the sizes of a scrollbar.
+        Object.defineProperty(content, 'clientWidth', { value: 185 });
+        const press = new MouseEvent('mousedown', { bubbles: true });
+        Object.defineProperty(press, 'offsetX', { value: 196 });
+        content.dispatchEvent(press);
+
+        expect([...dirListing.selectedItems()].map(item => item.path)).toEqual([
+          source.path
+        ]);
+      });
+
+      it('should paste into the right-clicked folder of a multi-selection', async () => {
+        const contents = dirListing.model.manager.services.contents;
+        const source = [...dirListing.sortedItems()][0];
+        const first = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+        const second = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+        const nodeFor = (path: string) =>
+          dirListing.contentNode.children[
+            [...dirListing.sortedItems()].findIndex(item => item.path === path)
+          ] as HTMLElement;
+
+        await dirListing.selectItemByName(source.name);
+        dirListing.cut();
+
+        // Select both folders; the second one gets the focus.
+        await dirListing.selectItemByName(first.name, true);
+        simulate(nodeFor(second.path), 'mousedown', { ctrlKey: true });
+        simulate(document.body, 'mouseup', { ctrlKey: true });
+
+        simulate(nodeFor(first.path), 'mousedown', { button: 2 });
+        await dirListing.paste();
+
+        const moved = await contents.get(`${first.path}/${source.name}`);
+        expect(moved.name).toBe(source.name);
+      });
+
+      it('should paste into the current directory when a file is selected', async () => {
+        const [source, other] = [...dirListing.sortedItems()];
+        await dirListing.selectItemByName(source.name);
+        dirListing.copy();
+        await dirListing.selectItemByName(other.name);
+        const copySpy = jest
+          .spyOn(dirListing.model.manager, 'copy')
+          .mockResolvedValue({} as any);
+
+        await dirListing.paste();
+
+        expect(copySpy).toHaveBeenCalledWith(
+          source.path,
+          dirListing.model.path
+        );
+      });
+
+      it('should paste into the current directory when the selected folder is copied', async () => {
+        const folder = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+        await dirListing.selectItemByName(folder.name);
+        dirListing.copy();
+        const copySpy = jest
+          .spyOn(dirListing.model.manager, 'copy')
+          .mockResolvedValue({} as any);
+
+        await dirListing.paste();
+
+        expect(copySpy).toHaveBeenCalledWith(
+          folder.path,
+          dirListing.model.path
+        );
+      });
+
+      it('should paste into the current directory after Escape', async () => {
+        const contents = dirListing.model.manager.services.contents;
+        const source = [...dirListing.sortedItems()][0];
+        const destination = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+        await dirListing.selectItemByName(source.name);
+        dirListing.cut();
+        await dirListing.selectItemByName(destination.name, true);
+
+        simulate(dirListing.node, 'keydown', { key: 'Escape' });
+        expect([...dirListing.selectedItems()]).toHaveLength(0);
+        await dirListing.paste();
+
+        await expect(
+          contents.get(`${destination.path}/${source.name}`)
+        ).rejects.toBeTruthy();
+        expect((await contents.get(source.path)).name).toBe(source.name);
+      });
+
+      it('should prompt to overwrite when pasting cut item over existing file', async () => {
+        jest.spyOn(dirListing.model.manager, 'rename').mockRejectedValueOnce({
+          response: { status: 409 }
+        });
+        const overwriteSpy = jest
+          .spyOn(dirListing.model.manager, 'overwrite')
+          .mockResolvedValue({} as any);
+
+        dirListing.selectNext();
+        dirListing.cut();
+        expect(dirListing['_clipboard'].length).toBeGreaterThan(0);
+        await openNewFolder();
+
+        const pastePromise = dirListing.paste();
+        await acceptDialog();
+        await pastePromise;
+
+        expect(overwriteSpy).toHaveBeenCalled();
+        expect(dirListing['_clipboard'].length).toBe(0);
+        expect(dirListing['_isCut']).toBe(false);
+        overwriteSpy.mockRestore();
+      });
+
+      it('should keep the clipboard when the overwrite is cancelled', async () => {
+        jest.spyOn(dirListing.model.manager, 'rename').mockRejectedValueOnce({
+          response: { status: 409 }
+        });
+
+        dirListing.selectNext();
+        dirListing.cut();
+        const originalClipboard = [...dirListing['_clipboard']];
+        expect(originalClipboard.length).toBeGreaterThan(0);
+        await openNewFolder();
+
+        const pastePromise = dirListing.paste();
+        await dismissDialog();
+        await pastePromise;
+
+        expect(dirListing['_clipboard']).toEqual(originalClipboard);
+        expect(dirListing['_isCut']).toBe(true);
+      });
+
+      it('should keep the clipboard when the paste fails', async () => {
+        jest.spyOn(dirListing.model.manager, 'rename').mockRejectedValueOnce({
+          response: { status: 500 },
+          message: 'Server error'
+        });
+
+        dirListing.selectNext();
+        dirListing.cut();
+        const originalClipboard = [...dirListing['_clipboard']];
+        await openNewFolder();
+
+        const pastePromise = dirListing.paste();
+        await dismissDialog();
+        await pastePromise;
+
+        expect(dirListing['_clipboard']).toEqual(originalClipboard);
+        expect(dirListing['_isCut']).toBe(true);
+      });
+
+      it('should ignore a second paste while the first is pending', async () => {
+        dirListing.selectNext();
+        dirListing.cut();
+        await openNewFolder();
+        let resolveRename: () => void = () => void 0;
+        const renamePromise = new Promise<any>(resolve => {
+          resolveRename = () => resolve({} as any);
+        });
+        const renameSpy = jest
+          .spyOn(dirListing.model.manager, 'rename')
+          .mockImplementation(() => renamePromise);
+
+        const firstPaste = dirListing.paste();
+        const secondPaste = dirListing.paste();
+        resolveRename();
+        await Promise.all([firstPaste, secondPaste]);
+
+        expect(renameSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should clear clipboard after successful cut and paste', async () => {
+        dirListing.selectNext();
+        dirListing.cut();
+        expect(dirListing['_clipboard'].length).toBeGreaterThan(0);
+        await openNewFolder();
+
+        await dirListing.paste();
+
+        expect(dirListing['_clipboard'].length).toBe(0);
+        expect(dirListing['_isCut']).toBe(false);
+      });
+
+      it('should remove successfully moved files from clipboard on partial cut failure', async () => {
+        dirListing.selectNext();
+        dirListing.selectNext(true);
+        dirListing.cut();
+        const clipboard = [...dirListing['_clipboard']];
+        expect(clipboard.length).toBe(2);
+        await openNewFolder();
+
+        jest
+          .spyOn(dirListing.model.manager, 'rename')
+          .mockImplementation(async (oldPath: string) => {
+            if (oldPath === clipboard[1]) {
+              throw { response: { status: 409 } };
+            }
+            return {} as any;
+          });
+
+        const pastePromise = dirListing.paste();
+        await dismissDialog();
+        await pastePromise;
+
+        expect(dirListing['_clipboard']).toEqual([clipboard[1]]);
+        expect(dirListing['_isCut']).toBe(true);
+      });
+
+      it('should not clear newer clipboard if cut or copy occurs while paste is pending', async () => {
+        dirListing.selectNext();
+        dirListing.cut();
+        const firstClipboard = [...dirListing['_clipboard']];
+        expect(firstClipboard.length).toBe(1);
+        await openNewFolder();
+
+        let resolveRename: () => void = () => void 0;
+        const renamePromise = new Promise<any>(resolve => {
+          resolveRename = () => resolve({} as any);
+        });
+        jest
+          .spyOn(dirListing.model.manager, 'rename')
+          .mockImplementation(() => renamePromise);
+
+        const pastePromise = dirListing.paste();
+
+        await dirListing.model.cd('/');
+        dirListing.selectNext();
+        dirListing.cut();
+        const secondClipboard = [...dirListing['_clipboard']];
+        expect(secondClipboard).not.toEqual(firstClipboard);
+
+        resolveRename();
+        await pastePromise;
+
+        expect(dirListing['_clipboard']).toEqual(secondClipboard);
+        expect(dirListing['_isCut']).toBe(true);
+      });
+
+      it('should not move an item pasted into its own folder', async () => {
+        const renameSpy = jest.spyOn(dirListing.model.manager, 'rename');
+        dirListing.selectNext();
+        dirListing.cut();
+
+        await dirListing.paste();
+
+        expect(renameSpy).not.toHaveBeenCalled();
       });
     });
 

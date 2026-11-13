@@ -1,8 +1,20 @@
 import { DockPanelSvg } from '@jupyterlab/ui-components';
-import type { Widget } from '@lumino/widgets';
+import type { Message } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
 
-const DEFAULT_NODE_THRESHOLD = 1000;
-const DEFAULT_TEXT_LENGTH_THRESHOLD = 25000;
+export const DEFAULT_NODE_THRESHOLD = 1000;
+export const DEFAULT_TEXT_LENGTH_THRESHOLD = 25000;
+
+/**
+ * Milliseconds after the last pointer move before the frozen sizes are
+ * re-measured.
+ */
+export const REFRESH_DEBOUNCE = 300;
+
+/**
+ * Milliseconds between re-measures while a drag is held still.
+ */
+export const REFRESH_INTERVAL = 3000;
 
 /**
  * A dock panel that freezes heavy panel dimensions during handle drags to
@@ -20,18 +32,26 @@ export class OptimizedDockPanelSvg extends DockPanelSvg {
    * not be called directly by user code.
    */
   override handleEvent(event: Event): void {
-    if (event.type === 'pointerdown') {
+    // A second pointer going down while a drag is in progress must not be
+    // mistaken for a new drag which never started, or the flag is cleared and
+    // the panels stay frozen for good.
+    if (event.type === 'pointerdown' && !this._isResizeDragActive) {
       this._isResizeDragActive = this._isHandlePointerDown(event);
+      if (this._isResizeDragActive) {
+        this._dragPointerId = (event as PointerEvent).pointerId;
+        // Installed here rather than below, so that the listener and the flag
+        // are always set together, whether or not the freeze is enabled.
+        this._listenForCancel();
+      }
     }
 
     // Unfreeze before super processes the drag-release events so Lumino
     // measures natural sizes when it finalises the split position.
-    if (this._frozenGroups.length > 0 && this._isResizeDragActive) {
-      const t = event.type;
-      if (t === 'pointerup' || t === 'pointercancel' || t === 'keydown') {
-        this._isResizeDragActive = false;
-        this._unfreezeElements();
-      }
+    if (
+      this._isResizeDragActive &&
+      Private.endsDrag(event, this._dragPointerId)
+    ) {
+      this._endDrag();
     }
 
     super.handleEvent(event);
@@ -45,6 +65,105 @@ export class OptimizedDockPanelSvg extends DockPanelSvg {
     } else if (event.type === 'pointermove' && this._isResizeDragActive) {
       this._scheduleRefresh();
     }
+  }
+
+  /**
+   * Dispose of the resources held by the panel.
+   */
+  override dispose(): void {
+    this._endDrag();
+    if (this._layoutCheckId !== 0) {
+      cancelAnimationFrame(this._layoutCheckId);
+      this._layoutCheckId = 0;
+    }
+    this._shownWidgets.clear();
+    super.dispose();
+  }
+
+  /**
+   * Process a message sent to the panel.
+   *
+   * @param msg - The message sent to the panel.
+   */
+  override processMessage(msg: Message): void {
+    super.processMessage(msg);
+    if (
+      msg.type === 'child-shown' &&
+      this.hiddenMode === Widget.HiddenMode.ContentVisibility
+    ) {
+      this._checkLayout((msg as Widget.ChildMessage).child);
+    }
+  }
+
+  /**
+   * Lay out a shown widget again if Firefox left one of its children with an
+   * empty box, see `Private.hasEmptyChild`.
+   *
+   * #### Notes
+   * The check runs in the next animation frame, after Lumino has processed
+   * the messages posted on show and before the browser paints the frame. The
+   * browser has to lay out the shown widget for that frame anyway, so reading
+   * the boxes there only makes that layout happen earlier in the frame.
+   */
+  private _checkLayout(widget: Widget): void {
+    this._shownWidgets.add(widget);
+    if (this._layoutCheckId !== 0) {
+      return;
+    }
+    this._layoutCheckId = requestAnimationFrame(() => {
+      this._layoutCheckId = 0;
+      const widgets = Array.from(this._shownWidgets).filter(
+        shown => !shown.isDisposed && shown.isVisible
+      );
+      this._shownWidgets.clear();
+      // Read all boxes before writing any style, so that the browser does not
+      // lay out the page once per widget.
+      const empty = widgets.filter(shown => Private.hasEmptyChild(shown.node));
+      for (const shown of empty) {
+        Private.requestLayout(shown.node);
+      }
+    });
+  }
+
+  /**
+   * A message handler invoked on an `'after-detach'` message.
+   *
+   * #### Notes
+   * Lumino ends a handle drag on detach without an event reaching
+   * `handleEvent`, so the drag has to be ended here as well.
+   */
+  protected override onAfterDetach(msg: Message): void {
+    this._endDrag();
+    super.onAfterDetach(msg);
+  }
+
+  /**
+   * Stop the drag and put back everything it froze.
+   */
+  private _endDrag(): void {
+    this._isResizeDragActive = false;
+    this._dragPointerId = -1;
+    if (this._cancelListener) {
+      this._cancelListener.removeEventListener('pointercancel', this, true);
+      this._cancelListener = null;
+    }
+    this._unfreezeElements();
+  }
+
+  /**
+   * Listen for the drag being cancelled, which Lumino does not listen for.
+   *
+   * #### Notes
+   * A pen or touch drag taken over by a system gesture ends with
+   * `pointercancel` and no `pointerup`, so without this the panels would stay
+   * frozen.
+   */
+  private _listenForCancel(): void {
+    if (this._cancelListener) {
+      return;
+    }
+    this._cancelListener = this.node.ownerDocument;
+    this._cancelListener.addEventListener('pointercancel', this, true);
   }
 
   private _isHandlePointerDown(event: Event): boolean {
@@ -94,17 +213,23 @@ export class OptimizedDockPanelSvg extends DockPanelSvg {
 
     for (const target of targets) {
       const head = target.node;
-      const elements: HTMLElement[] = [head];
+      const candidates: HTMLElement[] = [head];
       for (let i = 0; i < head.children.length; i++) {
-        elements.push(head.children[i] as HTMLElement);
+        candidates.push(head.children[i] as HTMLElement);
+      }
+
+      // Leave the elements whose geometry Lumino owns untouched; freezing
+      // those corrupts the layout, see `Private.isLayoutManaged`.
+      const elements = candidates.filter(el => !Private.isLayoutManaged(el));
+      if (elements.length === 0) {
+        continue;
       }
 
       // Read all rects before writing to avoid layout thrashing.
       const rects = elements.map(el => el.getBoundingClientRect());
 
-      const frozenGroup: Private.IFrozenElement[] = elements.map((el, i) => ({
+      const frozenGroup: Private.IFrozenElement[] = elements.map(el => ({
         element: el,
-        isHead: i === 0,
         prevWidth: el.style.width,
         prevMaxWidth: el.style.maxWidth,
         prevHeight: el.style.height,
@@ -112,14 +237,7 @@ export class OptimizedDockPanelSvg extends DockPanelSvg {
       }));
 
       for (let i = 0; i < frozenGroup.length; i++) {
-        const el = frozenGroup[i].element;
-        const rect = rects[i];
-        el.style.width = `${rect.width}px`;
-        el.style.maxWidth = `${rect.width}px`;
-        el.style.maxHeight = `${rect.height}px`;
-        if (frozenGroup[i].isHead) {
-          el.style.height = `${rect.height}px`;
-        }
+        Private.pinToRect(frozenGroup[i].element, rects[i]);
       }
       this._frozenGroups.push(frozenGroup);
     }
@@ -127,7 +245,7 @@ export class OptimizedDockPanelSvg extends DockPanelSvg {
     if (this._frozenGroups.length > 0 && this._intervalId === 0) {
       this._intervalId = window.setInterval(() => {
         this._refreshFrozenElements();
-      }, 3000);
+      }, REFRESH_INTERVAL);
     }
   }
 
@@ -141,12 +259,24 @@ export class OptimizedDockPanelSvg extends DockPanelSvg {
     this._refreshTimerId = window.setTimeout(() => {
       this._refreshTimerId = 0;
       this._refreshFrozenElements();
-    }, 300);
+    }, REFRESH_DEBOUNCE);
   }
 
   private _refreshFrozenElements(): void {
+    // A refresh spans several frames, and both the interval and the pointer
+    // move debounce can start one. Stamp each pass so that a pass started
+    // while another is in flight replaces it instead of running alongside it;
+    // two passes sharing `_refreshRAFId` would leave one of them impossible
+    // to cancel, and it would then re-apply sizes to elements that are no
+    // longer frozen.
+    this._cancelRefresh();
+    const generation = this._refreshGeneration;
+
     let g = 0;
     const step = () => {
+      if (generation !== this._refreshGeneration) {
+        return;
+      }
       if (g >= this._frozenGroups.length) {
         this._refreshRAFId = 0;
         return;
@@ -162,17 +292,12 @@ export class OptimizedDockPanelSvg extends DockPanelSvg {
       }
 
       this._refreshRAFId = requestAnimationFrame(() => {
+        if (generation !== this._refreshGeneration) {
+          return;
+        }
         let rects = group.map(entry => entry.element.getBoundingClientRect());
         for (let i = 0; i < group.length; i++) {
-          let entry = group[i];
-          let rect = rects[i];
-          let el = entry.element;
-          el.style.width = `${rect.width}px`;
-          el.style.maxWidth = `${rect.width}px`;
-          el.style.maxHeight = `${rect.height}px`;
-          if (entry.isHead) {
-            el.style.height = `${rect.height}px`;
-          }
+          Private.pinToRect(group[i].element, rects[i]);
         }
         g++;
         this._refreshRAFId = requestAnimationFrame(step);
@@ -182,15 +307,23 @@ export class OptimizedDockPanelSvg extends DockPanelSvg {
     this._refreshRAFId = requestAnimationFrame(step);
   }
 
+  /**
+   * Stop any refresh pass which is in flight.
+   */
+  private _cancelRefresh(): void {
+    this._refreshGeneration++;
+    if (this._refreshRAFId !== 0) {
+      cancelAnimationFrame(this._refreshRAFId);
+      this._refreshRAFId = 0;
+    }
+  }
+
   private _unfreezeElements(): void {
     if (this._refreshTimerId !== 0) {
       clearTimeout(this._refreshTimerId);
       this._refreshTimerId = 0;
     }
-    if (this._refreshRAFId !== 0) {
-      cancelAnimationFrame(this._refreshRAFId);
-      this._refreshRAFId = 0;
-    }
+    this._cancelRefresh();
     if (this._intervalId !== 0) {
       clearInterval(this._intervalId);
       this._intervalId = 0;
@@ -248,17 +381,123 @@ export class OptimizedDockPanelSvg extends DockPanelSvg {
 
   private _optimizeResize = true;
   private _isResizeDragActive = false;
+  private _dragPointerId = -1;
+  private _cancelListener: Document | null = null;
   private _frozenGroups: Private.IFrozenElement[][] = [];
   private _refreshTimerId = 0;
   private _refreshRAFId = 0;
+  private _refreshGeneration = 0;
   private _intervalId = 0;
+  private _layoutCheckId = 0;
+  private _shownWidgets = new Set<Widget>();
 }
 
 /** Namespace for OptimizedDockPanelSvg statics */
 namespace Private {
+  /**
+   * Whether a Lumino layout owns the geometry of the given element.
+   *
+   * #### Notes
+   * Lumino positions widget nodes through `LayoutItem`, which remembers the
+   * geometry it last wrote and skips writing `width` or `height` again when
+   * the value did not change. Anything else writing those properties leaves
+   * the DOM out of step with that record for as long as the layout keeps
+   * computing the same size, which pins the widget at a stale size.
+   * `LayoutItem.fit()` also reads `max-width` and `max-height` back off the
+   * node into the limits it clamps against, so an injected maximum can
+   * survive well past the drag which set it. Split handles are written the
+   * same way, without going through `LayoutItem`.
+   *
+   * Both are set up with an inline `position: absolute`, which is what this
+   * tests for. Testing for the `lm-Widget` class instead would also skip
+   * widget nodes of layouts which never write geometry, such as the outputs
+   * of an output area, and leave nothing to freeze. Should Lumino stop
+   * setting the position inline, this errs towards freezing less rather than
+   * towards corrupting a layout.
+   */
+  export function isLayoutManaged(el: HTMLElement): boolean {
+    return el.style.position === 'absolute';
+  }
+
+  /**
+   * Whether the event ends a handle drag, matching the rules Lumino releases
+   * the drag on, plus the cancellation Lumino does not listen for.
+   */
+  export function endsDrag(event: Event, dragPointerId: number): boolean {
+    switch (event.type) {
+      case 'pointerup':
+        // Deliberately not matched against `dragPointerId`. Lumino releases
+        // on any button 0 release and then drops its document listeners, so
+        // matching here would leave the panels frozen with no drag running
+        // and no further event able to unfreeze them.
+        return (event as PointerEvent).button === 0;
+      case 'pointercancel':
+        // Matched, because Lumino has no cancel case to keep in step with. An
+        // unrelated pointer being cancelled, a palm resting on a touch screen
+        // for instance, must not end a drag it was never part of.
+        return (event as PointerEvent).pointerId === dragPointerId;
+      case 'keydown':
+        return (event as KeyboardEvent).keyCode === 27;
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Whether Firefox left a child of the node with an empty box after the node
+   * was hidden with `content-visibility: hidden` and shown again. See Firefox
+   * bug https://bugzilla.mozilla.org/show_bug.cgi?id=2088371
+   *
+   * #### Notes
+   * Firefox gives an absolutely positioned child an empty box when its content
+   * changes after the hidden parent was laid out, and lays it out again on
+   * show only if the parent's containment changes, which the `contain: strict`
+   * set by Lumino layouts prevents. Lumino sets the size of the children it
+   * lays out inline, so a child that has such a size but an empty box was not
+   * laid out again.
+   */
+  export function hasEmptyChild(node: HTMLElement): boolean {
+    const children = node.children;
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i] as HTMLElement;
+      if (
+        isLayoutManaged(child) &&
+        !child.classList.contains('lm-mod-hidden') &&
+        (parseFloat(child.style.width) > 0 ||
+          parseFloat(child.style.height) > 0) &&
+        child.offsetWidth === 0 &&
+        child.offsetHeight === 0
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Make Firefox lay out the children of a node again.
+   *
+   * #### Notes
+   * A change of `object-fit`, which has no effect on a `div`, makes Firefox
+   * lay out the children that need it.
+   */
+  export function requestLayout(node: HTMLElement): void {
+    node.style.objectFit = node.style.objectFit === 'none' ? '' : 'none';
+  }
+
+  /**
+   * Hold an element at the size it has now, so that resizing an ancestor does
+   * not make the browser lay out its contents again.
+   */
+  export function pinToRect(el: HTMLElement, rect: DOMRect): void {
+    el.style.width = `${rect.width}px`;
+    el.style.maxWidth = `${rect.width}px`;
+    el.style.height = `${rect.height}px`;
+    el.style.maxHeight = `${rect.height}px`;
+  }
+
   export interface IFrozenElement {
     element: HTMLElement;
-    isHead: boolean;
     prevWidth: string;
     prevMaxWidth: string;
     prevHeight: string;

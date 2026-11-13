@@ -18,6 +18,8 @@ import type {
 import { JSONExt } from '@lumino/coreutils';
 import { Debouncer } from '@lumino/polling';
 import type { IChangeEvent } from '@rjsf/core';
+// The settings editor is loaded on demand and needs the validator to render.
+// eslint-disable-next-line jupyter/prefer-lazy-imports
 import validatorAjv8 from '@rjsf/validator-ajv8';
 import type { Field, UiSchema } from '@rjsf/utils';
 import type { JSONSchema7 } from 'json-schema';
@@ -345,10 +347,10 @@ export class SettingsFormEditor extends React.Component<
       const filteredSchema = JSONExt.deepCopy(this.props.settings.schema);
       if (this.props.filteredValues?.length ?? 0 > 0) {
         for (const field in filteredSchema.properties) {
+          const title = filteredSchema.properties[field].title;
           if (
-            !this.props.filteredValues?.includes(
-              filteredSchema.properties[field].title ?? field
-            )
+            !this.props.filteredValues?.includes(field) &&
+            !this.props.filteredValues?.includes(title ?? field)
           ) {
             delete filteredSchema.properties[field];
           }

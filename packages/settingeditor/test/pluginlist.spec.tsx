@@ -4,7 +4,10 @@ import { PluginList } from '../src/pluginlist';
 import { signalToPromise } from '@jupyterlab/coreutils';
 import { framePromise, simulate } from '@jupyterlab/testing';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { updateFilterFunction } from '@jupyterlab/ui-components';
+import {
+  FormRendererRegistry,
+  updateFilterFunction
+} from '@jupyterlab/ui-components';
 import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { TestConnector, TestRegistry } from './utils';
@@ -26,13 +29,15 @@ function key(target: EventTarget, keyName: string): void {
 
 async function setupList(
   registry: TestRegistry,
-  selection?: string
+  selection?: string,
+  query = ''
 ): Promise<PluginList> {
   const model = new PluginList.Model({ registry });
   await model.ready;
-  const list = new PluginList({ registry, model });
+  // The search box sets the filter to its initial query after it renders.
+  const list = new PluginList({ registry, model, query });
   Widget.attach(list, document.body);
-  list.setFilter(updateFilterFunction('', false, false), '');
+  list.setFilter(updateFilterFunction(query, false, false), query);
   if (selection) {
     list.selection = selection;
   }
@@ -309,6 +314,305 @@ describe('@jupyterlab/settingeditor', () => {
       const [, pluginId] = await selected;
       expect(pluginId).toBe(IDS[1]);
       expect(list.selection).toBe(IDS[1]);
+    });
+
+    describe('#getFilterString()', () => {
+      it('should match properties nested inside an object setting', () => {
+        const props = {
+          properties: {
+            breadcrumbs: {
+              title: 'Breadcrumbs',
+              type: 'object',
+              properties: {
+                minimumLeftItems: {
+                  title: 'Minimum breadcrumbs left items',
+                  type: 'number'
+                }
+              }
+            }
+          }
+        } as unknown as ISettingRegistry.IProperty;
+        const filter = (item: string) =>
+          item.toLowerCase().includes('left') ? {} : null;
+        const matches = PluginList.prototype.getFilterString.call(
+          PluginList.prototype,
+          filter,
+          props
+        );
+        expect(matches).toEqual([
+          'Breadcrumbs',
+          'Minimum breadcrumbs left items',
+          'minimumLeftItems'
+        ]);
+      });
+
+      it('should skip a property whose schema is false', () => {
+        const props = {
+          properties: {
+            agents: { title: 'Agents', type: 'object', properties: {} },
+            additionalProperties: false
+          }
+        } as unknown as ISettingRegistry.IProperty;
+        const filter = (item: string) =>
+          item.toLowerCase().includes('add') ? {} : null;
+        const matches = PluginList.prototype.getFilterString.call(
+          PluginList.prototype,
+          filter,
+          props
+        );
+        expect(matches).toEqual([]);
+      });
+
+      it('should not match the keywords of an array item schema', () => {
+        const props = {
+          properties: {
+            rulers: {
+              title: 'Rulers',
+              type: 'array',
+              items: { type: 'number', minimum: 0 }
+            }
+          }
+        } as unknown as ISettingRegistry.IProperty;
+        const filter = (item: string) =>
+          item.toLowerCase().includes('min') ? {} : null;
+        const matches = PluginList.prototype.getFilterString.call(
+          PluginList.prototype,
+          filter,
+          props
+        );
+        expect(matches).toEqual([]);
+      });
+
+      it('should match properties of the items of an array setting', () => {
+        const props = {
+          properties: {
+            agents: {
+              title: 'Agents',
+              type: 'array',
+              items: {
+                type: 'object',
+                additionalProperties: false,
+                properties: { label: { title: 'Label', type: 'string' } }
+              }
+            }
+          }
+        } as unknown as ISettingRegistry.IProperty;
+        const filter = (item: string) =>
+          item.toLowerCase().includes('label') ? {} : null;
+        const matches = PluginList.prototype.getFilterString.call(
+          PluginList.prototype,
+          filter,
+          props
+        );
+        expect(matches).toEqual(['Agents', 'Label', 'label']);
+      });
+
+      it('should match properties of array items given by a reference', () => {
+        const props = {
+          properties: {
+            toolbar: {
+              title: 'Toolbar items',
+              type: 'array',
+              items: { $ref: '#/definitions/toolbarItem' }
+            }
+          }
+        } as unknown as ISettingRegistry.IProperty;
+        const definitions = {
+          toolbarItem: {
+            type: 'object',
+            properties: { type: { title: 'Item type', type: 'string' } }
+          }
+        };
+        const filter = (item: string) =>
+          item.toLowerCase().includes('item type') ? {} : null;
+        const matches = PluginList.prototype.getFilterString.call(
+          PluginList.prototype,
+          filter,
+          props,
+          definitions
+        );
+        expect(matches).toEqual(['Toolbar items', 'Item type']);
+      });
+    });
+
+    describe('#mapPlugins()', () => {
+      it('should not list a parent whose matches are listed under an earlier parent', async () => {
+        const pluginId = 'plugin-cells';
+        const cellConfig = (title: string): ISettingRegistry.IProperty => ({
+          title,
+          type: 'object',
+          properties: { fontSize: { title: 'Font Size', type: 'number' } }
+        });
+        connector.schemas[pluginId] = {
+          type: 'object',
+          title: 'Cells',
+          properties: {
+            codeCellConfig: cellConfig('Code Cell Configuration'),
+            rawCellConfig: cellConfig('Raw Cell Configuration')
+          }
+        };
+        await registry.load(pluginId);
+        list = await setupList(registry, undefined, 'font');
+
+        const matches = () =>
+          Array.from(
+            list.node.querySelectorAll(`[data-id="${pluginId}"] li`),
+            item => item.textContent!.trim()
+          );
+        for (let i = 0; i < 10 && matches().length === 0; i++) {
+          await framePromise();
+        }
+
+        expect(matches()).toEqual([
+          'Code Cell Configuration',
+          'Font Size',
+          'fontSize'
+        ]);
+      });
+
+      it('should mark only the text that matches the query', async () => {
+        const pluginId = 'plugin-codemirror';
+        connector.schemas[pluginId] = {
+          type: 'object',
+          title: 'Editor',
+          properties: {
+            defaultConfig: {
+              title: 'Default editor configuration',
+              type: 'object',
+              properties: { fontSize: { title: 'Font Size', type: 'number' } }
+            }
+          }
+        };
+        await registry.load(pluginId);
+        list = await setupList(registry, undefined, 'font');
+
+        const marks = () =>
+          Array.from(
+            list.node.querySelectorAll(`[data-id="${pluginId}"] li`),
+            item =>
+              Array.from(item.querySelectorAll('mark'), m => m.textContent)
+          );
+        for (let i = 0; i < 10 && marks().length === 0; i++) {
+          await framePromise();
+        }
+
+        expect(marks()).toEqual([[], ['Font'], ['font']]);
+      });
+
+      it('should indent a setting under the setting it is nested in', async () => {
+        const pluginId = 'plugin-tours';
+        connector.schemas[pluginId] = {
+          type: 'object',
+          title: 'Tours',
+          properties: {
+            floaterProps: {
+              type: 'object',
+              properties: { options: { type: 'object' } }
+            },
+            styles: {
+              type: 'object',
+              properties: {
+                options: {
+                  type: 'object',
+                  properties: { primaryColor: { type: 'string' } }
+                }
+              }
+            }
+          }
+        };
+        await registry.load(pluginId);
+        list = await setupList(registry, undefined, 'p');
+
+        const rows = () =>
+          Array.from(
+            list.node.querySelectorAll<HTMLElement>(
+              `[data-id="${pluginId}"] li`
+            ),
+            item => [item.textContent!.trim(), item.style.paddingLeft]
+          );
+        for (let i = 0; i < 10 && rows().length === 0; i++) {
+          await framePromise();
+        }
+
+        expect(rows()).toEqual([
+          ['floaterProps', '0px'],
+          ['options', '12px'],
+          ['styles', '0px'],
+          ['options', '12px'],
+          ['primaryColor', '24px']
+        ]);
+      });
+
+      it('should show the key of a setting as code', async () => {
+        const pluginId = 'plugin-viewer';
+        connector.schemas[pluginId] = {
+          type: 'object',
+          title: 'Viewer',
+          properties: { fontSize: { title: 'Font Size', type: 'number' } }
+        };
+        await registry.load(pluginId);
+        list = await setupList(registry, undefined, 'font');
+
+        const codes = () =>
+          Array.from(
+            list.node.querySelectorAll(`[data-id="${pluginId}"] li`),
+            item => item.querySelector('code')?.textContent ?? null
+          );
+        for (let i = 0; i < 10 && codes().length === 0; i++) {
+          await framePromise();
+        }
+
+        expect(codes()).toEqual([null, 'fontSize']);
+      });
+    });
+
+    describe('#setFilter()', () => {
+      const pluginId = 'plugin-editor';
+
+      beforeEach(async () => {
+        connector.schemas[pluginId] = {
+          type: 'object',
+          title: 'Editor',
+          properties: {
+            cellConfig: {
+              title: 'Cell Configuration',
+              type: 'object',
+              default: {}
+            }
+          }
+        };
+        await registry.load(pluginId);
+      });
+
+      it('should match properties provided by a form renderer', async () => {
+        const editorRegistry = new FormRendererRegistry();
+        const renderer = {
+          fieldRenderer: () => null,
+          getSchemaProperties: () => ({
+            customStyles: {
+              title: 'Custom editor styles',
+              type: 'object',
+              properties: {
+                fontSize: { title: 'Font Size', type: 'number' }
+              }
+            }
+          })
+        };
+        editorRegistry.addRenderer(`${pluginId}.cellConfig`, renderer);
+        const model = new PluginList.Model({ registry });
+        await model.ready;
+        const options = { registry, model, editorRegistry };
+        list = new PluginList(options);
+
+        list.setFilter(updateFilterFunction('font', false, false), 'font');
+
+        expect(list.filter!(registry.plugins[pluginId]!)).toEqual([
+          'Cell Configuration',
+          'Custom editor styles',
+          'Font Size',
+          'fontSize'
+        ]);
+      });
     });
   });
 });
