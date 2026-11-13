@@ -409,7 +409,26 @@ export class DirListing extends Widget {
       return;
     }
 
-    const basePath = this._model.path;
+    let basePath = this._model.path;
+    const selectedPaths = Object.keys(this.selection);
+
+    if (selectedPaths.length > 0) {
+      const items = this._sortedItems;
+      const focusedItem = items[this._focusIndex];
+
+      const target =
+        focusedItem && this.selection[focusedItem.path]
+          ? focusedItem
+          : items.find(item => item.path === selectedPaths.slice(-1)[0]);
+
+      if (
+        target?.type === 'directory' &&
+        !this._clipboard.includes(target.path)
+      ) {
+        basePath = target.path;
+      }
+    }
+
     const isCut = this._isCut;
     const pathsToPaste = [...this._clipboard];
     const pasteRevision = this._clipboardRevision;
@@ -1663,8 +1682,30 @@ export class DirListing extends Widget {
     }
 
     let index = Private.hitTestNodes(this._items, event);
+    const newContext = (IS_MAC && event.ctrlKey) || event.button === 2;
 
     if (index === -1) {
+      // A click or a context menu on the empty area acts on the current
+      // directory, so clear the selection that paste would otherwise use as
+      // destination. A click with a modifier key keeps the selection, and so
+      // does a press on the scrollbar.
+      const content = this.contentNode;
+      const plainClick =
+        event.button === 0 &&
+        !event.shiftKey &&
+        !event.ctrlKey &&
+        !event.metaKey;
+      const onScrollbar =
+        event.target === content && event.offsetX >= content.clientWidth;
+      if (
+        (newContext || plainClick) &&
+        content.contains(event.target as Node) &&
+        !onScrollbar
+      ) {
+        this.clearSelectedItems();
+        this.update();
+        return;
+      }
       // Left mouse press for drag or resize start.
       if (event.button === 0) {
         const resizeHandle = event.target;
@@ -1712,7 +1753,6 @@ export class DirListing extends Widget {
     }
 
     // Check for clearing a context menu.
-    const newContext = (IS_MAC && event.ctrlKey) || event.button === 2;
     if (newContext) {
       return;
     }
@@ -1947,6 +1987,17 @@ export class DirListing extends Widget {
         for (const item of this.selectedItems()) {
           this.handleOpen(item);
         }
+        return;
+      }
+      case 'Escape': {
+        // Clear the selection, so that paste uses the current directory.
+        if (Object.keys(this.selection).length === 0) {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        this.clearSelectedItems();
+        this.update();
         return;
       }
       case 'ArrowUp':
@@ -2323,7 +2374,7 @@ export class DirListing extends Widget {
       this._drag.mimeData.setData(CONTENTS_MIME_RICH, {
         model: item,
         withContent: async () => {
-          return await services.contents.get(item.path);
+          return await services.contents.get(item.path, { content: true });
         }
       } as DirListing.IContentsThunk);
     }
@@ -2419,6 +2470,10 @@ export class DirListing extends Widget {
       // Handle a 'soft' selection
     } else if (path in this.selection && selected.length > 1) {
       this._softSelection = path;
+      // Paste uses the focused item, so focus the item the menu is opened on.
+      if (event.button === 2 || (IS_MAC && event.ctrlKey)) {
+        this._focusItem(index);
+      }
 
       // Default to selecting the only the item.
     } else {
