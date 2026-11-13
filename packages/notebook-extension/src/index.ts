@@ -5687,6 +5687,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
       if (current) {
         current.toolbar.setHidden(!current.toolbar.isHidden);
+        commands.notifyCommandChanged(CommandIDs.toggleToolbar);
       }
     },
     isEnabled,
