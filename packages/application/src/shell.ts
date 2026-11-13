@@ -8,6 +8,7 @@ import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { SidePanel } from '@jupyterlab/ui-components';
 import {
+  AccordionPanelReorderer,
   classes,
   LabIcon,
   TabBarSvg,
@@ -340,6 +341,12 @@ export namespace ILabShell {
          * Expansion states of the widgets.
          */
         readonly expansionStates: Array<boolean> | null;
+
+        /**
+         * Section IDs in display order, when available. A section whose ID
+         * Lumino generated is saved as `label:` followed by its title label.
+         */
+        readonly widgetIds?: string[];
       };
     };
   }
@@ -913,6 +920,26 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         throw new Error(`Invalid area: ${area}`);
     }
   }
+
+  /**
+   * Activate a tab in the active tab bar.
+   *
+   * @param index - The zero-based tab index. A negative index counts from
+   *   the end, so -1 is the last tab.
+   */
+  activateTab(index: number): void {
+    const current = this._currentTabBar();
+    if (!current) {
+      return;
+    }
+
+    const { titles } = current;
+    const title = titles[index < 0 ? titles.length + index : index];
+    if (title) {
+      this._dockPanel.activateWidget(title.owner);
+    }
+  }
+
   /**
    * Activate the next Tab in the active TabBar.
    */
@@ -2428,6 +2455,12 @@ namespace Private {
       widget.content?.expansionToggled?.connect(this._onExpansionToggle, this);
       // @ts-expect-error sometimes widget is a SidePanel
       widget.content?.handleMoved?.connect(this._onHandleMoved, this);
+      if ('content' in widget && widget.content instanceof AccordionPanel) {
+        AccordionPanelReorderer.find(widget.content.node)?.reordered.connect(
+          this._onHandleMoved,
+          this
+        );
+      }
       this._refreshVisibility();
     }
 
@@ -2441,17 +2474,17 @@ namespace Private {
           : this._isCollapsedByUser;
       const widgets = Array.from(this._stackedPanel.widgets);
       const currentWidget = widgets[this._sideBar.currentIndex];
-      const widgetStates: {
-        [id: string]: {
-          sizes: number[] | null;
-          expansionStates: boolean[] | null;
-        };
-      } = {};
+      const widgetStates: ILabShell.ISideArea['widgetStates'] = {};
       this._stackedPanel.widgets.forEach((w: SidePanel) => {
         if (w.id && w.content instanceof SplitPanel) {
+          const widgetIds = w.content.widgets.map(wi => Private.sectionKey(wi));
           widgetStates[w.id] = {
             sizes: w.content.relativeSizes() as number[],
-            expansionStates: w.content.widgets.map(wi => !wi.isHidden)
+            expansionStates: w.content.widgets.map(wi => !wi.isHidden),
+            ...(widgetIds.every(id => id.length > 0) &&
+            new Set(widgetIds).size === widgetIds.length
+              ? { widgetIds }
+              : {})
           };
         }
       });
@@ -2515,8 +2548,49 @@ namespace Private {
         this._stackedPanel.widgets.forEach((w: SidePanel) => {
           if (w.id && w.content instanceof SplitPanel) {
             const state = data.widgetStates[w.id] ?? {};
+            const widgets = new Map(
+              w.content.widgets
+                .filter(wi => wi.id)
+                .map(wi => [Private.sectionKey(wi), wi])
+            );
+            // Older extensions may recreate sections with generated IDs.
+            const widgetIds = state.widgetIds?.some(id => widgets.has(id))
+              ? state.widgetIds
+              : undefined;
+            if (widgetIds && w.content instanceof AccordionPanel) {
+              const ordered = widgetIds
+                .map(id => widgets.get(id))
+                .filter((wi): wi is Widget => wi !== undefined);
+              const savedWidgets = new Set(ordered);
+              let savedIndex = 0;
+              const targetWidgets = w.content.widgets.map(wi =>
+                savedWidgets.has(wi) ? ordered[savedIndex++] : wi
+              );
+              for (const [index, wi] of targetWidgets.entries()) {
+                if (w.content.widgets[index] === wi) {
+                  continue;
+                }
+                w.content.insertWidget(index, wi);
+                // Lumino only repositions the section, so move its title, body
+                // and handle to keep the Tab order the same as the visual order.
+                const next = w.content.titles[index + 1] ?? null;
+                for (const node of [
+                  w.content.titles[index],
+                  wi.node,
+                  w.content.handles[index]
+                ]) {
+                  w.content.node.insertBefore(node, next);
+                }
+              }
+            }
+            const sizes = w.content.relativeSizes();
             w.content.widgets.forEach((wi, widx) => {
-              const expansion = (state.expansionStates ?? [])[widx];
+              const savedIndex = widgetIds
+                ? wi.id
+                  ? widgetIds.indexOf(Private.sectionKey(wi))
+                  : -1
+                : widx;
+              const expansion = state.expansionStates?.[savedIndex];
               if (
                 typeof expansion === 'boolean' &&
                 w.content instanceof AccordionPanel
@@ -2527,9 +2601,13 @@ namespace Private {
                   w.content.collapse(widx);
                 }
               }
+              const size = state.sizes?.[savedIndex];
+              if (typeof size === 'number') {
+                sizes[widx] = size;
+              }
             });
             if (state.sizes) {
-              w.content.setRelativeSizes(state.sizes);
+              w.content.setRelativeSizes(sizes);
             }
           }
         });
@@ -2867,6 +2945,19 @@ namespace Private {
     private _shell: ILabShell;
     private _selected: boolean = false;
   }
+
+  /**
+   * Key of a sidebar section in the saved layout: its ID, or its title label
+   * when Lumino generated the ID, because a generated ID changes in every session.
+   */
+  export function sectionKey(widget: Widget): string {
+    return GENERATED_ID.test(widget.id)
+      ? `label:${widget.title.label}`
+      : widget.id;
+  }
+
+  const GENERATED_ID =
+    /^id-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
   export class RestorableSplitPanel extends SplitPanel {
     /**

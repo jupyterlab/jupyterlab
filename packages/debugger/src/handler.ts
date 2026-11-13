@@ -423,20 +423,63 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       }
     };
 
+    /**
+     * Restore the debugger state, and return whether it worked: a restart, a
+     * kernel change or closing the document drops the requests it sends.
+     */
+    const restoreDebuggerState = async (
+      autoStart: boolean
+    ): Promise<boolean> => {
+      try {
+        await this._service.restoreState(autoStart);
+        return true;
+      } catch (error) {
+        console.error(
+          'Could not restore the debugger state:',
+          error instanceof Error ? error.message : String(error)
+        );
+        return false;
+      }
+    };
+
     const toggleDebugging = async (): Promise<void> => {
       // bail if the widget doesn't have focus
       if (!hasFocus()) {
         return;
       }
       const debugButton = this._iconButtons[widget.id]!;
-      if (isDebuggerOn()) {
-        await stopDebugger();
-        removeHandlers();
-        updateIconButtonState(debugButton, false);
-      } else {
-        await startDebugger();
-        createHandler();
-        updateIconButtonState(debugButton, true);
+      if (this._pendingToggle) {
+        // An earlier click is still starting or stopping the debugger: the
+        // service turns `isStarted` on before it attaches, so acting on this
+        // click would stop it halfway. Undo the toggle the button made itself.
+        debugButton.pressed = !debugButton.pressed;
+        return;
+      }
+      this._pendingToggle = true;
+      try {
+        if (isDebuggerOn()) {
+          await stopDebugger();
+          removeHandlers();
+          updateIconButtonState(debugButton, false);
+        } else {
+          await startDebugger();
+          createHandler();
+          updateIconButtonState(debugButton, true);
+        }
+      } catch (error) {
+        // A restart, a kernel change or closing the document drops the debug
+        // requests of this click.
+        console.error(
+          'Could not toggle the debugger:',
+          error instanceof Error ? error.message : String(error)
+        );
+        // The button toggled itself on this click: show the state of the
+        // debugger instead.
+        if (!debugButton.isDisposed) {
+          debugButton.pressed = isDebuggerOn();
+        }
+      } finally {
+        this._pendingToggle = false;
       }
     };
 
@@ -500,10 +543,8 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       this._service.session.connection = connection;
     }
 
-    if (isDebuggerOn()) {
-      await this._service.restoreState(true);
-    } else {
-      await this._service.restoreState(false);
+    if (!(await restoreDebuggerState(isDebuggerOn()))) {
+      return;
     }
 
     if (this._service.isStarted && !this._service.hasStoppedThreads()) {
@@ -523,7 +564,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     if (!this._service.isStarted) {
       removeHandlers();
       this._service.session.connection = this._previousConnection ?? connection;
-      await this._service.restoreState(false);
+      await restoreDebuggerState(false);
       return;
     }
 
@@ -536,6 +577,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
   private _shell: JupyterFrontEnd.IShell;
   private _service: IDebugger;
   private _previousConnection: Session.ISessionConnection | null;
+  private _pendingToggle = false;
   private _activeWidget:
     | DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
     | null;

@@ -42,6 +42,25 @@ re-open it using the Running tab in the left sidebar:
 </div>
 ```
 
+(terminal-titles)=
+
+## Terminal Titles
+
+Terminal tabs and the Running panel display titles supplied by the shell or
+programs running in the terminal. For example, in Bash you can set a title with:
+
+```bash
+printf '\033]0;My task\007'
+```
+
+Your shell may replace this title when it next displays a prompt.
+
+The last title observed for a terminal is saved in the current workspace. It is
+retained after closing the terminal tab and reloading the page. A terminal whose
+title has not been observed in that workspace displays `terminals/<name>` in the
+Running panel. Title changes made in another client are reflected only when the
+terminal sends a title to an open tab in this client.
+
 (copy-paste)=
 
 ## Copy/Paste

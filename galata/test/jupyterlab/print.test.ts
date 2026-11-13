@@ -69,13 +69,13 @@ test.describe('Print layout', () => {
     ]);
 
     const newPage = await page.context().newPage();
+    // The notebook has no math, so block the scripts that the page loads from
+    // cdnjs: when cdnjs stalls, the page never fires `load`.
+    await newPage.route(/^https:\/\/cdnjs\.cloudflare\.com\//, route =>
+      route.abort()
+    );
 
     await newPage.goto(printedNotebookURL, { waitUntil: 'load' });
-
-    // Wait until MathJax loading message disappears
-    const mathJaxMessage = newPage.locator('#MathJax_Message');
-    await expect(mathJaxMessage).toHaveCount(1);
-    await mathJaxMessage.waitFor({ state: 'hidden' });
 
     await newPage.addStyleTag({ content: pinnedFontsCSS() });
 
