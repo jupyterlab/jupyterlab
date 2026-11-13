@@ -12,7 +12,7 @@ build:
       # asdf's shims predate the pip install above, so the console scripts it
       # creates (jlpm, jupyter, jupyter-book, ...) are not on PATH; add the
       # environment scripts dir so they resolve in the later build steps.
-      - export PATH="$(python -c 'import sysconfig; print(sysconfig.get_path("scripts"))'):$PATH"
+      - export PATH=$(python -c "import sys,os;print(os.path.dirname(sys.executable))"):$PATH
     post_install:
       # this should have already run, but show some errors/warnings more cleanly
       - jlpm
