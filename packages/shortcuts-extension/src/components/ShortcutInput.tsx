@@ -21,9 +21,13 @@ const CAPTURE_IDLE_SECONDS = CAPTURE_IDLE_MS / 1000;
 
 type CapturePhase = 'capturing' | 'ready' | 'incompleteIdle';
 
-export interface IConflicts {
+export interface ICaptureError {
   keys: string[];
+  /** Empty when the error is not a binding clash. */
   conflictsWith: IShortcutTarget[];
+  /** Human-readable message; empty string clears the error UI. */
+  message: string;
+  kind: 'none' | 'conflict' | 'incomplete';
 }
 
 export interface IShortcutInputProps {
@@ -31,8 +35,8 @@ export interface IShortcutInputProps {
   replaceKeybinding: IShortcutUI['replaceKeybinding'];
   deleteKeybinding: IShortcutUI['deleteKeybinding'];
   findConflictsFor: IShortcutRegistry['findConflictsFor'];
-  displayConflicts: (conflicts: IConflicts) => void;
-  clearConflict: () => void;
+  displayCaptureError: (error: ICaptureError) => void;
+  clearCaptureError: () => void;
   toggleInput: () => void;
   onCloseAfterSubmit?: () => void;
   onCloseAfterCancel?: () => void;
@@ -97,7 +101,7 @@ export class ShortcutInput extends React.Component<
     const idSuffix = ShortcutInput._nextHintId++;
     this._inputId = props.id ?? `jp-Shortcuts-CaptureInput-${idSuffix}`;
     this._hintId = `jp-Shortcuts-CaptureHint-${idSuffix}`;
-    this._conflictId = `${this._hintId}-conflict`;
+    this._errorId = `${this._hintId}-error`;
 
     this.state = {
       value: this.props.placeholder,
@@ -144,13 +148,48 @@ export class ShortcutInput extends React.Component<
     return !!this.props.keybinding;
   }
 
-  private _emitConflicts(conflicts: IShortcutTarget[]) {
-    const keys = [...this.state.keys, this.state.currentChain];
+  private _buildCaptureError(
+    conflicts: IShortcutTarget[],
+    phase: CapturePhase = this.state.phase,
+    keys: string[] = this._capturedKeys()
+  ): ICaptureError {
+    const trans = this.props.translator.load('jupyterlab');
+    if (conflicts.length > 0) {
+      return {
+        keys,
+        conflictsWith: conflicts,
+        kind: 'conflict',
+        message: trans.__(
+          'Shortcut already in use by %1.',
+          conflicts.map(target => target.label ?? target.command).join(', ')
+        )
+      };
+    }
+    if (phase === 'incompleteIdle') {
+      return {
+        keys,
+        conflictsWith: [],
+        kind: 'incomplete',
+        message: trans.__('Incomplete shortcut. Continue typing.')
+      };
+    }
+    return {
+      keys,
+      conflictsWith: [],
+      kind: 'none',
+      message: ''
+    };
+  }
+
+  private _emitCaptureError(
+    conflicts: IShortcutTarget[],
+    phase: CapturePhase = this.state.phase,
+    keys?: string[]
+  ): void {
     this.setState({ activeConflicts: conflicts });
-    this.props.displayConflicts({
-      conflictsWith: conflicts,
-      keys
-    });
+    this.props.displayCaptureError(
+      this._buildCaptureError(conflicts, phase, keys)
+    );
   }
 
   private get _deferPersist(): boolean {
@@ -175,7 +214,7 @@ export class ShortcutInput extends React.Component<
     conflicts: IShortcutTarget[],
     keys: string[]
   ): Promise<void> => {
-    this.props.clearConflict();
+    this.props.clearCaptureError();
     this.setState({
       // Since user decided to overwrite, no need to show it as conflicted anymore
       isAvailable: true,
@@ -213,7 +252,7 @@ export class ShortcutInput extends React.Component<
         announceCaptureStart: true
       },
       () => {
-        this.props.clearConflict();
+        this.props.clearCaptureError();
         this._emitKeysChange([], '');
       }
     );
@@ -256,10 +295,15 @@ export class ShortcutInput extends React.Component<
 
   private _onIdleTimerFire = (): void => {
     this._idleTimer = null;
-    this.setState(prev => ({
-      phase: prev.isFunctional ? 'ready' : 'incompleteIdle',
-      timerRunning: false
-    }));
+    this.setState(
+      prev => ({
+        phase: prev.isFunctional ? 'ready' : 'incompleteIdle',
+        timerRunning: false
+      }),
+      () => {
+        this._emitCaptureError(this.state.activeConflicts, this.state.phase);
+      }
+    );
   };
 
   handleSubmit = async () => {
@@ -531,7 +575,11 @@ export class ShortcutInput extends React.Component<
         announceCaptureStart: false
       },
       () => {
-        this._emitConflicts(conflicts);
+        this._emitCaptureError(
+          conflicts,
+          'capturing',
+          this._capturedKeys(keys, currentChain)
+        );
         this._emitKeysChange(keys, currentChain);
         this._resetIdleTimer();
       }
@@ -542,25 +590,17 @@ export class ShortcutInput extends React.Component<
     if (this.state.phase === 'ready') {
       return trans.__('Shortcut ready.');
     }
-    if (this.state.phase === 'incompleteIdle') {
-      return trans.__('Incomplete shortcut. Continue typing.');
-    }
     if (this.state.announceCaptureStart) {
       return trans.__('Capturing shortcut keys.');
     }
     return '';
   }
 
-  private _conflictMessage(trans: ReturnType<ITranslator['load']>): string {
-    if (this.state.isAvailable || this.state.activeConflicts.length === 0) {
-      return '';
-    }
-    return trans.__(
-      'Shortcut already in use by %1.',
-      this.state.activeConflicts
-        .map(target => target.label ?? target.command)
-        .join(', ')
-    );
+  private _errorMessage(trans: ReturnType<ITranslator['load']>): string {
+    return this._buildCaptureError(
+      !this.state.isAvailable ? this.state.activeConflicts : [],
+      this.state.phase
+    ).message;
   }
 
   render() {
@@ -577,9 +617,9 @@ export class ShortcutInput extends React.Component<
       inputClassName += ' jp-mod-unavailable-Input';
     }
     const statusMessage = this._statusMessage(trans);
-    const conflictMessage = this._conflictMessage(trans);
-    const describedBy = conflictMessage
-      ? `${this._hintId} ${this._conflictId}`
+    const errorMessage = this._errorMessage(trans);
+    const describedBy = errorMessage
+      ? `${this._hintId} ${this._errorId}`
       : this._hintId;
     const captureHint = trans._n(
       'Capture pauses %1 second after the last key.',
@@ -651,13 +691,13 @@ export class ShortcutInput extends React.Component<
             {statusMessage}
           </div>
           <div
-            id={this._conflictId}
+            id={this._errorId}
             className="jp-sr-only"
             role="alert"
             aria-live="assertive"
             aria-atomic="true"
           >
-            {conflictMessage}
+            {errorMessage}
           </div>
           {!this._deferPersist &&
             (hasConflict ? (
@@ -725,7 +765,7 @@ export class ShortcutInput extends React.Component<
   private _submitRef = React.createRef<HTMLButtonElement>();
   private _inputId: string;
   private _hintId: string;
-  private _conflictId: string;
+  private _errorId: string;
   private _idleTimer: number | null = null;
   private _announceStartRaf: number | null = null;
   private _blurRaf: number | null = null;

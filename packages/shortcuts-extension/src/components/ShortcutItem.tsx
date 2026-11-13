@@ -14,7 +14,7 @@ import {
 import { Platform } from '@lumino/domutils';
 import * as React from 'react';
 import { CustomOptionsDialog } from './ShortcutCustomOptions';
-import type { IConflicts } from './ShortcutInput';
+import type { ICaptureError } from './ShortcutInput';
 import { ShortcutInput } from './ShortcutInput';
 import type {
   IKeybinding,
@@ -48,7 +48,7 @@ export interface IShortcutItemProps {
 export interface IShortcutItemState {
   displayNewInput: boolean;
   displayReplaceInput: Readonly<Record<number, boolean>>;
-  conflicts: ReadonlyMap<IKeybinding | null, IConflicts>;
+  captureErrors: ReadonlyMap<IKeybinding | null, ICaptureError>;
 }
 
 /** React component for each command shortcut item */
@@ -63,7 +63,7 @@ export class ShortcutItem extends React.Component<
     this.state = {
       displayNewInput: false,
       displayReplaceInput: Object.freeze({}),
-      conflicts: new Map()
+      captureErrors: new Map()
     };
   }
 
@@ -130,8 +130,7 @@ export class ShortcutItem extends React.Component<
   private toggleInputNew = (): void => {
     this.setState({
       displayNewInput: !this.state.displayNewInput,
-      // reset conflicts
-      conflicts: new Map()
+      captureErrors: new Map()
     });
   };
 
@@ -271,8 +270,7 @@ export class ShortcutItem extends React.Component<
         ...this.state.displayReplaceInput,
         [location]: !previous
       },
-      // Clear old conflicts
-      conflicts: new Map()
+      captureErrors: new Map()
     });
   }
 
@@ -300,12 +298,10 @@ export class ShortcutItem extends React.Component<
         toggleInput={() => this.toggleInputReplaceMethod(location)}
         shortcut={this.props.shortcut}
         keybinding={binding}
-        displayConflicts={(data: IConflicts) => {
-          const conflicts = new Map(this.state.conflicts);
-          conflicts.set(binding, data);
-          this.setState({ conflicts });
+        displayCaptureError={(data: ICaptureError) => {
+          this._setCaptureErrorForBinding(binding, data);
         }}
-        clearConflict={() => this._clearConflictForBinding(binding)}
+        clearCaptureError={() => this._clearCaptureErrorForBinding(binding)}
         onCloseAfterSubmit={() =>
           this._scheduleFocusShortcutContainer(location)
         }
@@ -428,12 +424,10 @@ export class ShortcutItem extends React.Component<
         findConflictsFor={this.props.findConflictsFor}
         toggleInput={this.toggleInputNew}
         shortcut={this.props.shortcut}
-        displayConflicts={(data: IConflicts) => {
-          const conflicts = new Map(this.state.conflicts);
-          conflicts.set(null, data);
-          this.setState({ conflicts });
+        displayCaptureError={(data: ICaptureError) => {
+          this._setCaptureErrorForBinding(null, data);
         }}
-        clearConflict={() => this._clearConflictForBinding(null)}
+        clearCaptureError={() => this._clearCaptureErrorForBinding(null)}
         onCloseAfterSubmit={() => this._scheduleFocusNewKeybinding()}
         onCloseAfterCancel={() => this._scheduleFocusAddButton()}
         toSymbols={this.toSymbols}
@@ -470,11 +464,11 @@ export class ShortcutItem extends React.Component<
     );
   }
 
-  getConflicts(): JSX.Element {
-    const conflicts = [...this.state.conflicts.values()].filter(
-      conflict => conflict.conflictsWith.length !== 0
+  getCaptureErrors(): JSX.Element {
+    const errors = [...this.state.captureErrors.values()].filter(
+      error => error.message !== ''
     );
-    if (conflicts.length === 0) {
+    if (errors.length === 0) {
       return <></>;
     }
     const columnCount = this.props.showSelectors ? 5 : 4;
@@ -482,20 +476,17 @@ export class ShortcutItem extends React.Component<
       <tr className="jp-Shortcuts-Row jp-Shortcuts-RowWithConflict">
         <td className="jp-Shortcuts-Cell" colSpan={columnCount}>
           <div className="jp-Shortcuts-ConflictContainer">
-            {conflicts.map(conflict => {
+            {errors.map(error => {
               const key =
-                conflict.keys.join(' ') +
+                error.kind +
                 '_' +
-                conflict.conflictsWith.map(target => target.id).join('');
+                error.keys.join(' ') +
+                '_' +
+                error.conflictsWith.map(target => target.id).join('');
               return (
                 <div className="jp-Shortcuts-Conflict" key={key}>
                   <div className="jp-Shortcuts-ErrorMessage">
-                    {this._trans.__(
-                      'Shortcut already in use by %1.',
-                      conflict.conflictsWith
-                        .map(target => target.label ?? target.command)
-                        .join(', ')
-                    )}
+                    {error.message}
                   </div>
                 </div>
               );
@@ -506,10 +497,23 @@ export class ShortcutItem extends React.Component<
     );
   }
 
-  private _clearConflictForBinding(binding: IKeybinding | null): void {
-    const conflicts = new Map(this.state.conflicts);
-    conflicts.delete(binding);
-    this.setState({ conflicts });
+  private _setCaptureErrorForBinding(
+    binding: IKeybinding | null,
+    data: ICaptureError
+  ): void {
+    const captureErrors = new Map(this.state.captureErrors);
+    if (!data.message) {
+      captureErrors.delete(binding);
+    } else {
+      captureErrors.set(binding, data);
+    }
+    this.setState({ captureErrors });
+  }
+
+  private _clearCaptureErrorForBinding(binding: IKeybinding | null): void {
+    const captureErrors = new Map(this.state.captureErrors);
+    captureErrors.delete(binding);
+    this.setState({ captureErrors });
   }
 
   private get _nonEmptyBindings() {
@@ -553,7 +557,7 @@ export class ShortcutItem extends React.Component<
           {this.getSourceCell()}
           {this.getOptionalSelectorCell()}
         </tr>
-        {this.getConflicts()}
+        {this.getCaptureErrors()}
       </>
     );
   }

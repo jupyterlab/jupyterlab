@@ -25,7 +25,7 @@ import {
   appendCustomOptionFields,
   type ICustomOptionsFields
 } from './ShortcutCustomOptions';
-import type { IConflicts } from './ShortcutInput';
+import type { ICaptureError } from './ShortcutInput';
 import { ShortcutInput } from './ShortcutInput';
 
 const MAC_SYMBOLS: Record<string, string> = {
@@ -216,10 +216,10 @@ class NewShortcutDialogBody
     this._captureHost.className = 'jp-Shortcuts-AddDialog-capture';
     shortcutField.appendChild(this._captureHost);
 
-    this._conflictNode = document.createElement('div');
-    this._conflictNode.className = 'jp-Shortcuts-AddDialog-conflict';
-    this._conflictNode.setAttribute('role', 'status');
-    shortcutField.appendChild(this._conflictNode);
+    this._errorNode = document.createElement('div');
+    this._errorNode.className = 'jp-Shortcuts-AddDialog-error';
+    this._errorNode.setAttribute('role', 'status');
+    shortcutField.appendChild(this._errorNode);
 
     this.node.appendChild(shortcutField);
 
@@ -340,21 +340,12 @@ class NewShortcutDialogBody
     this._updateKeysValidity(keys);
   };
 
-  private _displayConflicts = (data: IConflicts): void => {
-    if (data.conflictsWith.length === 0) {
-      this._conflictNode.textContent = '';
-      return;
-    }
-    this._conflictNode.textContent = this._trans.__(
-      'Shortcut already in use by %1.',
-      data.conflictsWith
-        .map(target => target.label ?? target.command)
-        .join(', ')
-    );
+  private _displayCaptureError = (data: ICaptureError): void => {
+    this._errorNode.textContent = data.message;
   };
 
-  private _clearConflict = (): void => {
-    this._conflictNode.textContent = '';
+  private _clearCaptureError = (): void => {
+    this._errorNode.textContent = '';
   };
 
   private _noopAdd: IShortcutUI['addKeybinding'] = async () => {
@@ -379,8 +370,8 @@ class NewShortcutDialogBody
         replaceKeybinding={this._noopReplace}
         deleteKeybinding={this._noopDelete}
         findConflictsFor={this._findConflictsFor}
-        displayConflicts={this._displayConflicts}
-        clearConflict={this._clearConflict}
+        displayCaptureError={this._displayCaptureError}
+        clearCaptureError={this._clearCaptureError}
         toggleInput={() => undefined}
         shortcut={this._draft}
         toSymbols={this._toSymbols}
@@ -403,7 +394,7 @@ class NewShortcutDialogBody
   private _commandSelect: HTMLSelectElement;
   private _keysValidity: HTMLInputElement;
   private _captureHost: HTMLDivElement;
-  private _conflictNode: HTMLDivElement;
+  private _errorNode: HTMLDivElement;
   private _customOptions: ICustomOptionsFields;
   private _selectorInput: HTMLInputElement;
   private _reactRoot: Root | null = null;
