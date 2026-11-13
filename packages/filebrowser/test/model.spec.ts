@@ -443,6 +443,41 @@ describe('filebrowser/model', () => {
         await expect(promise).rejects.toBe('File not uploaded');
       });
 
+      it('should prompt to overwrite when uploading to a subdirectory with existing file', async () => {
+        const subfolder = 'sub_' + UUID.uuid4();
+        await model.manager.services.contents.save(subfolder, {
+          type: 'directory'
+        });
+
+        const fname = UUID.uuid4() + '.html';
+        const file = new File(['<p>Hello world!</p>'], fname, {
+          type: 'text/html'
+        });
+        await model.upload(file, subfolder);
+
+        const promise = model.upload(file, subfolder);
+        await acceptDialog();
+        const contents = await promise;
+        expect(contents.name).toBe(fname);
+      });
+
+      it('should not prompt to overwrite when uploading to a subdirectory if file only exists in root', async () => {
+        const subfolder = 'sub_' + UUID.uuid4();
+        await model.manager.services.contents.save(subfolder, {
+          type: 'directory'
+        });
+
+        const fname = UUID.uuid4() + '.html';
+        const file = new File(['<p>Hello world!</p>'], fname, {
+          type: 'text/html'
+        });
+        await model.upload(file);
+
+        const contents = await model.upload(file, subfolder);
+        expect(contents.name).toBe(fname);
+        expect(contents.path).toBe(`${subfolder}/${fname}`);
+      });
+
       it('should ask about one large file at a time', async () => {
         const uploads = [1, 2].map(i => {
           const file = new File(

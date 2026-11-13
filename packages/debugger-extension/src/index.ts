@@ -162,7 +162,11 @@ const consoles: JupyterFrontEndPlugin<void> = {
           let displayName = source.path ?? '';
 
           consoleTracker.forEach(panel => {
-            for (const cell of panel.console.cells) {
+            const cells = [...panel.console.cells];
+            if (panel.console.promptCell) {
+              cells.push(panel.console.promptCell);
+            }
+            for (const cell of cells) {
               const model = cell.model;
               if (!isCodeCellModel(model)) {
                 continue;
@@ -849,6 +853,11 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
         if (kernel && filters[kernel]) {
           sidebar.variables.filter = new Set<string>(filters[kernel]);
         }
+
+        service.model.kernelSources.hideNativeSources = settings.get(
+          'hideNativeSources'
+        ).composite as boolean;
+
         const kernelSourcesFilter = settings.get('defaultKernelSourcesFilter')
           .composite as string;
         sidebar.kernelSources.filter = kernelSourcesFilter;

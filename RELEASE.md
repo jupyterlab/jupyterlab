@@ -463,6 +463,7 @@ frozen and non-frozen version of the files.
 - Update branch and RTD config in `ensure_repo.ts` and `jlpm integrity` to update links - source should be the previous branch
 - Update readthedocs branch config as appropriate
 - Automated Release using "major" - edit changelog for new section
+- Move the changelog of the previous major version from `CHANGELOG.md` to a new `docs/source/getting_started/changelog_v<major>.md` page, and add the page to the list at the end of `CHANGELOG.md` and to the toctree in `docs/source/getting_started/changelog.md`
 - Move through alpha and beta phases as appropriate
 
 ### RC Phase
