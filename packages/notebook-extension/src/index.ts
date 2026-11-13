@@ -5697,7 +5697,7 @@ function addCommands(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: { ...widgetIdProperty }
       }
     }
   });
