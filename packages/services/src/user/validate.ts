@@ -13,16 +13,16 @@ export function validateIdentity(
   validateProperty(identity, 'username', 'string');
   validateProperty(identity, 'name', 'string');
   validateProperty(identity, 'display_name', 'string');
-  validateProperty(identity, 'initials', 'string');
-  validateProperty(identity, 'color', 'string');
 
-  if (
-    isRecord(identity) &&
-    Object.prototype.hasOwnProperty.call(identity, 'avatar_url') &&
-    identity.avatar_url !== undefined &&
-    identity.avatar_url !== null
-  ) {
-    validateProperty(identity, 'avatar_url', 'string');
+  for (const prop of ['initials', 'color', 'avatar_url'] as const) {
+    if (
+      isRecord(identity) &&
+      Object.prototype.hasOwnProperty.call(identity, prop) &&
+      identity[prop] !== undefined &&
+      identity[prop] !== null
+    ) {
+      validateProperty(identity, prop, 'string');
+    }
   }
 }
 

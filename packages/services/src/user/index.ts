@@ -5,5 +5,4 @@ import * as User from './user';
 import * as UserAPI from './restapi';
 
 export * from './manager';
-export * from './validate';
 export { User, UserAPI };

@@ -27,9 +27,24 @@ describe('user/validate', () => {
       }).not.toThrow();
     });
 
-    it('should pass a valid identity without optional avatar_url', () => {
-      const identity = { ...validIdentity };
-      delete (identity as any).avatar_url;
+    it('should pass a valid identity without optional fields', () => {
+      const identity = {
+        username: validIdentity.username,
+        name: validIdentity.name,
+        display_name: validIdentity.display_name
+      };
+      expect(() => {
+        validateIdentity(identity);
+      }).not.toThrow();
+    });
+
+    it('should pass a valid identity with null nullable fields', () => {
+      const identity = {
+        ...validIdentity,
+        initials: null,
+        color: null,
+        avatar_url: null
+      };
       expect(() => {
         validateIdentity(identity);
       }).not.toThrow();
@@ -53,21 +68,15 @@ describe('user/validate', () => {
       expect(() => validateIdentity(identity)).toThrow();
     });
 
-    it('should fail on missing initials', () => {
-      const identity: any = { ...validIdentity };
-      delete identity.initials;
-      expect(() => validateIdentity(identity)).toThrow();
-    });
-
-    it('should fail on missing color', () => {
-      const identity: any = { ...validIdentity };
-      delete identity.color;
-      expect(() => validateIdentity(identity)).toThrow();
-    });
-
     it('should fail on invalid property types', () => {
       expect(() =>
         validateIdentity({ ...validIdentity, username: 123 })
+      ).toThrow();
+      expect(() =>
+        validateIdentity({ ...validIdentity, initials: 123 })
+      ).toThrow();
+      expect(() =>
+        validateIdentity({ ...validIdentity, color: 123 })
       ).toThrow();
       expect(() =>
         validateIdentity({ ...validIdentity, avatar_url: 123 })
@@ -112,23 +121,47 @@ describe('user/validate', () => {
   });
 
   describe('UserAPIClient', () => {
-    it('should validate response from get()', async () => {
-      const serverSettings = ServerConnection.makeSettings({
-        fetch: async () =>
-          new Response(JSON.stringify(validUser), { status: 200 })
+    describe('#get()', () => {
+      it('should validate response from get()', async () => {
+        const serverSettings = ServerConnection.makeSettings({
+          fetch: async () =>
+            new Response(JSON.stringify(validUser), { status: 200 })
+        });
+        const client = new UserAPIClient({ serverSettings });
+        const user = await client.get();
+        expect(user.identity.username).toBe('jovyan');
       });
-      const client = new UserAPIClient({ serverSettings });
-      const user = await client.get();
-      expect(user.identity.username).toBe('jovyan');
-    });
 
-    it('should reject with validation error if response is invalid', async () => {
-      const serverSettings = ServerConnection.makeSettings({
-        fetch: async () =>
-          new Response(JSON.stringify({ invalid: 'user' }), { status: 200 })
+      it('should validate response from get() with nullable fields', async () => {
+        const userWithNulls = {
+          identity: {
+            username: 'jovyan',
+            name: 'Jovyan User',
+            display_name: 'Jovyan',
+            initials: null,
+            color: null,
+            avatar_url: null
+          },
+          permissions: {}
+        };
+        const serverSettings = ServerConnection.makeSettings({
+          fetch: async () =>
+            new Response(JSON.stringify(userWithNulls), { status: 200 })
+        });
+        const client = new UserAPIClient({ serverSettings });
+        const user = await client.get();
+        expect(user.identity.username).toBe('jovyan');
+        expect(user.identity.initials).toBeNull();
       });
-      const client = new UserAPIClient({ serverSettings });
-      await expect(client.get()).rejects.toThrow();
+
+      it('should reject with validation error if response is invalid', async () => {
+        const serverSettings = ServerConnection.makeSettings({
+          fetch: async () =>
+            new Response(JSON.stringify({ invalid: 'user' }), { status: 200 })
+        });
+        const client = new UserAPIClient({ serverSettings });
+        await expect(client.get()).rejects.toThrow();
+      });
     });
   });
 });
