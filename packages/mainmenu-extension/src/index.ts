@@ -52,6 +52,8 @@ import { recentsMenuPlugin } from './recents';
 
 const PLUGIN_ID = '@jupyterlab/mainmenu-extension:plugin';
 
+const MENU_BAR_PLUGIN_ID = '@jupyterlab/mainmenu-extension:menu-bar';
+
 /**
  * A namespace for command IDs of semantic extension points.
  */
@@ -132,6 +134,8 @@ export namespace CommandIDs {
   export const getKernel = 'helpmenu:get-kernel';
 
   export const openFirst = 'mainmenu:open-first';
+
+  export const toggleCollapsed = 'mainmenu:toggle-collapsed';
 }
 
 /**
@@ -154,9 +158,10 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     const { commands } = app;
     const trans = translator.load('jupyterlab');
 
-    const menu = new MainMenu(commands);
+    const menu = new MainMenu(commands, { translator });
     menu.id = 'jp-MainMenu';
     menu.addClass('jp-scrollbar-tiny');
+    menu.collapsedMenuBar.id = 'jp-CollapsedMainMenu';
 
     // Built menu from settings
     if (registry) {
@@ -313,8 +318,71 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     }
 
     app.shell.add(menu, 'menu', { rank: 100 });
+    app.shell.add(menu.collapsedMenuBar, 'menu', { rank: 100 });
 
     return menu;
+  }
+};
+
+/**
+ * A plugin to collapse the main menu into a single menu button.
+ */
+const menuBarPlugin: JupyterFrontEndPlugin<void> = {
+  id: MENU_BAR_PLUGIN_ID,
+  description: 'Adds a setting and a command to collapse the main menu.',
+  autoStart: true,
+  requires: [IMainMenu, ITranslator],
+  optional: [ICommandPalette, ISettingRegistry],
+  activate: async (
+    app: JupyterFrontEnd,
+    menu: IMainMenu,
+    translator: ITranslator,
+    palette: ICommandPalette | null,
+    registry: ISettingRegistry | null
+  ): Promise<void> => {
+    if (!(menu instanceof MainMenu)) {
+      return;
+    }
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+    const settings = registry ? await registry.load(MENU_BAR_PLUGIN_ID) : null;
+
+    commands.addCommand(CommandIDs.toggleCollapsed, {
+      label: trans.__('Collapse Main Menu'),
+      caption: trans.__('Collapse the main menu into a single menu button'),
+      isToggled: () => menu.collapsed,
+      execute: () => {
+        // Leave the automatic mode, if enabled, for the opposite of what is shown.
+        const mode = menu.collapsed ? 'never' : 'always';
+        menu.collapseMode = mode;
+        return settings?.set('collapse', mode);
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+    menu.collapsedChanged.connect(() => {
+      commands.notifyCommandChanged(CommandIDs.toggleCollapsed);
+    });
+
+    if (settings) {
+      const onSettingsChanged = (settings: ISettingRegistry.ISettings) => {
+        menu.collapseMode = settings.get('collapse')
+          .composite as MainMenu.CollapseMode;
+      };
+      onSettingsChanged(settings);
+      settings.changed.connect(onSettingsChanged);
+    }
+
+    if (palette) {
+      palette.addItem({
+        command: CommandIDs.toggleCollapsed,
+        category: trans.__('Main Area')
+      });
+    }
   }
 };
 
@@ -1029,7 +1097,7 @@ function createHelpMenu(
   });
 }
 
-export default [plugin, recentsMenuPlugin];
+export default [plugin, menuBarPlugin, recentsMenuPlugin];
 
 /**
  * A namespace for Private data.

@@ -1,0 +1,17 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/* Center the icon over the whole height of the item, as tall as its text line. */
+.jp-CollapsedMainMenu .lm-MenuBar-itemIcon {
+  display: inline-flex;
+  align-items: center;
+  height: calc(var(--jp-private-menubar-height) - var(--jp-border-width) * 2);
+  vertical-align: top;
+}
+
+.jp-CollapsedMainMenu .lm-MenuBar-itemIcon svg {
+  width: 20px;
+  height: 20px;
+}
