@@ -152,6 +152,14 @@ from the context menu:
 </div>
 ```
 
+## Copying and Moving Files
+
+(file-copy-paste)=
+
+To copy or move files and folders, select them in the file browser, then choose "Copy" or "Cut" from the context menu, or press {kbd}`Ctrl` + {kbd}`C` or {kbd}`Ctrl` + {kbd}`X` ({kbd}`Cmd` on macOS). Then choose "Paste" or press {kbd}`Ctrl` + {kbd}`V`. When a folder is selected, the files are pasted into that folder. When no folder is selected, they are pasted into the folder that the file browser shows.
+
+To paste into the folder that the file browser shows while a folder is selected, clear the selection first: press {kbd}`Escape`, or click the empty area below the files. A right-click on the empty area also clears the selection, so "Paste" in that menu uses the folder that the file browser shows.
+
 ## Autosave
 
 JupyterLab automatically saves your files and notebooks every 1 minute (60 seconds) by default.
