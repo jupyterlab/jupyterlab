@@ -89,6 +89,8 @@ export interface IShortcutInputState {
   timerRunning: boolean;
   /** One-shot start announcement for the polite live region. */
   announceCaptureStart: boolean;
+  /** Whether the capture textbox itself has focus. */
+  inputFocused: boolean;
 }
 
 export class ShortcutInput extends React.Component<
@@ -115,7 +117,9 @@ export class ShortcutInput extends React.Component<
       phase: 'capturing',
       timerGeneration: 0,
       timerRunning: false,
-      announceCaptureStart: false
+      announceCaptureStart: false,
+      // Inline edit focuses immediately; the add dialog focuses the command list first.
+      inputFocused: !props.deferPersist
     };
   }
 
@@ -123,12 +127,12 @@ export class ShortcutInput extends React.Component<
     // In dialog mode the parent owns initial focus (e.g. command select).
     if (!this._deferPersist) {
       this._inputRef.current?.focus();
+      // Defer so aria-live announces; initial mount content is often skipped.
+      this._announceStartRaf = requestAnimationFrame(() => {
+        this._announceStartRaf = null;
+        this.setState({ announceCaptureStart: true });
+      });
     }
-    // Defer so aria-live announces; initial mount content is often skipped.
-    this._announceStartRaf = requestAnimationFrame(() => {
-      this._announceStartRaf = null;
-      this.setState({ announceCaptureStart: true });
-    });
   }
 
   componentWillUnmount(): void {
@@ -643,11 +647,13 @@ export class ShortcutInput extends React.Component<
       return spoken;
     }
 
-    // Keep "capturing" while empty (after mount announce) or mid-chord.
+    // Only claim capturing while the textbox is focused (add dialog starts
+    // focused on the command list).
     if (
-      this.state.announceCaptureStart ||
-      this.state.userInput !== '' ||
-      this.state.keys.length > 0
+      this.state.inputFocused &&
+      (this.state.announceCaptureStart ||
+        this.state.userInput !== '' ||
+        this.state.keys.length > 0)
     ) {
       return trans.__('Capturing shortcut keys.');
     }
@@ -680,9 +686,12 @@ export class ShortcutInput extends React.Component<
     const describedBy = errorMessage
       ? `${this._hintId} ${this._errorId}`
       : this._hintId;
-    const captureHint =
-      this.state.phase === 'capturing'
-        ? trans.__('Recording…')
+    const activelyRecording =
+      this.state.phase === 'capturing' && this.state.inputFocused;
+    const captureHint = activelyRecording
+      ? trans.__('Recording…')
+      : this.state.phase === 'capturing'
+        ? trans.__('Focus this field to record a shortcut.')
         : trans.__(
             'Recording paused. Press Tab or Shift+Tab to navigate normally.'
           );
@@ -713,6 +722,8 @@ export class ShortcutInput extends React.Component<
             tabIndex={0}
             className={inputClassName}
             onKeyDown={this.handleInput}
+            onFocus={this._handleInputFocus}
+            onBlur={this._handleInputBlur}
             ref={this._inputRef}
             data-lm-suppress-shortcuts="true"
             aria-invalid={isInvalid || undefined}
@@ -796,6 +807,23 @@ export class ShortcutInput extends React.Component<
       </div>
     );
   }
+
+  private _handleInputFocus = (): void => {
+    this.setState({ inputFocused: true });
+    if (this._deferPersist && !this.state.announceCaptureStart) {
+      if (this._announceStartRaf !== null) {
+        cancelAnimationFrame(this._announceStartRaf);
+      }
+      this._announceStartRaf = requestAnimationFrame(() => {
+        this._announceStartRaf = null;
+        this.setState({ announceCaptureStart: true });
+      });
+    }
+  };
+
+  private _handleInputBlur = (): void => {
+    this.setState({ inputFocused: false });
+  };
 
   private _handleBlur = (): void => {
     if (this._deferPersist) {

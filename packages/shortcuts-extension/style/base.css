@@ -458,6 +458,10 @@ button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
   box-sizing: border-box;
 }
 
+.jp-Shortcuts-AddDialog-capture .jp-Shortcuts-Input {
+  cursor: pointer;
+}
+
 .jp-Shortcuts-AddDialog-error {
   color: var(--jp-error-color1);
   min-height: 1.2em;
