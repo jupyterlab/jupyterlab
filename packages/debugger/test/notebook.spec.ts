@@ -80,6 +80,7 @@ describe('NotebookHandler', () => {
   it('should keep the breakpoints of a deleted cell whose code ran', async () => {
     const cell = firstCell();
     cell.executionState = 'running';
+    cell.executionCount = 1;
     cell.executionState = 'idle';
     context.model.sharedModel.deleteCell(0);
     await flushRequests();
