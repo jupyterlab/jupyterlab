@@ -12,6 +12,7 @@ const esModules = [
   '@jupyter/react-components',
   '@jupyter/web-components',
   '@jupyter/ydoc',
+  '@jupyterlab/',
   'color',
   'dom-serializer',
   'domelementtype',
@@ -23,15 +24,25 @@ const esModules = [
   'lib0',
   'marked',
   'nanoid',
-  // CommonJS, listed so that its nested ESM-only dependencies are transformed
-  'sanitize-html',
   'vscode-ws-jsonrpc',
   'y-protocols',
   'y-websocket',
   'yjs'
-].join('|');
+];
 
-module.exports = function (baseDir: string) {
+/**
+ * Options for the Jest configuration.
+ */
+interface IOptions {
+  /**
+   * More packages that Jest has to transform because they ship ES modules.
+   * An entry also matches the packages whose names start with it.
+   */
+  esModules?: string[];
+}
+
+module.exports = function (baseDir: string, options: IOptions = {}) {
+  const modules = [...esModules, ...(options.esModules ?? [])].join('|');
   return {
     coverageReporters: ['json', 'lcov', 'text', 'html'],
     coverageDirectory: path.join(baseDir, 'coverage'),
@@ -64,6 +75,10 @@ module.exports = function (baseDir: string) {
       '^.+\\.tsx?$': ['ts-jest/legacy', { tsconfig: `./tsconfig.test.json` }],
       '^.+\\.jsx?$': 'babel-jest'
     },
-    transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`]
+    // Check the innermost package of a path, so that a listed package is
+    // transformed also when it is installed inside an unlisted one.
+    transformIgnorePatterns: [
+      `/node_modules/(?!${modules})(?:@[^/]+/)?[^/]+(?!.*/node_modules/)`
+    ]
   };
 };

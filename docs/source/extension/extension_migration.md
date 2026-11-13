@@ -84,22 +84,15 @@
 
 ### Testing with Jest
 
-- `@jupyterlab/apputils` now uses `sanitize-html` 2.18, which depends on `htmlparser2` 12. `htmlparser2` and its dependencies are published as ES modules only. If your `jest.config.js` sets its own `transformIgnorePatterns`, as the extension template does, add these packages to it:
+- The Jest configuration of `@jupyterlab/testutils` now transforms the `@jupyterlab/` packages, and it takes more packages to transform in a new `esModules` option. If your `jest.config.js` sets its own `transformIgnorePatterns`, as the extension template does, remove it and your `esModules` list. Pass in the option only the packages that the base configuration does not list:
 
   ```js
-  const esModules = [
-    // ...the packages already listed
-    'dom-serializer',
-    'domelementtype',
-    'domhandler',
-    'domutils',
-    'entities',
-    'htmlparser2',
-    'sanitize-html'
-  ].join('|');
+  const baseConfig = jestJupyterLab(__dirname, { esModules: ['d3-array'] });
   ```
 
-  `sanitize-html` itself is not an ES module. It is listed because the other packages can be installed in its own `node_modules` folder, and Jest does not transform a file whose path has an unlisted package before it.
+  Your tests then get the packages that JupyterLab adds to the base list. JupyterLab 4.7 adds `htmlparser2` and its dependencies: `@jupyterlab/apputils` now uses them through `sanitize-html` 2.18, and they are published as ES modules only.
+
+- If you keep your own `transformIgnorePatterns`, add `dom-serializer`, `domelementtype`, `domhandler`, `domutils`, `entities`, `htmlparser2` and `sanitize-html` to its list. `sanitize-html` itself is not an ES module, but the other packages can be installed in its own `node_modules` folder, and with the pattern of the extension template Jest transforms them there only when `sanitize-html` is listed too.
 
 ## JupyterLab 4.5 to 4.6
 
