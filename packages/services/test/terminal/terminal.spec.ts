@@ -3,8 +3,8 @@
 
 import { PageConfig } from '@jupyterlab/coreutils';
 import { JupyterServer, testEmission } from '@jupyterlab/testing';
-import { Terminal, TerminalManager } from '../../src';
-import { handleRequest } from '../utils';
+import { Terminal, TerminalAPI, TerminalManager } from '../../src';
+import { getRequestHandler, handleRequest } from '../utils';
 
 const server = new JupyterServer();
 
@@ -36,6 +36,26 @@ describe('terminal', () => {
     describe('.isAvailable()', () => {
       it('should test whether terminal sessions are available', () => {
         expect(Terminal.isAvailable()).toBe(true);
+      });
+    });
+  });
+
+  describe('TerminalAPI', () => {
+    describe('.startNew()', () => {
+      it('should throw an error for an invalid model', async () => {
+        const serverSettings = getRequestHandler(200, { name: 1 });
+        await expect(TerminalAPI.startNew(serverSettings)).rejects.toThrow(
+          /Property 'name' is not of type 'string'/
+        );
+      });
+    });
+
+    describe('.listRunning()', () => {
+      it('should throw an error for an invalid model', async () => {
+        const serverSettings = getRequestHandler(200, [{ name: 1 }]);
+        await expect(TerminalAPI.listRunning(serverSettings)).rejects.toThrow(
+          /Property 'name' is not of type 'string'/
+        );
       });
     });
   });

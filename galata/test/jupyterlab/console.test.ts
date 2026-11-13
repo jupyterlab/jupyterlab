@@ -58,6 +58,40 @@ test.describe('Console', () => {
 
     await expect(page.activity.getTabLocator(newName)).toBeVisible();
   });
+
+  test('Should keep the prompt position picked for the console when a console setting changes', async ({
+    page
+  }) => {
+    await page.keyboard.type('for i in range(300): print(i)');
+    await page.keyboard.press('Shift+Enter');
+    await expect(page.locator(EXECUTED_CELL)).toContainText('299');
+
+    await page.getByLabel('Change Console Prompt Position').first().click();
+    await page.getByText('Prompt to top').click();
+
+    const input = page.locator('.jp-CodeConsole-input');
+    const content = page.locator('.jp-CodeConsole-content');
+    await content.hover();
+    await page.mouse.wheel(0, 1000);
+    await expect
+      .poll(() => content.evaluate(node => node.scrollTop))
+      .toBeGreaterThan(0);
+
+    await page.menu.clickMenuItem(
+      'Settings>Console Run Keystroke>Execute with Enter'
+    );
+    // The console gets the new mode in the same settings update that would
+    // move the prompt.
+    await expect(page.locator('.jp-CodeConsole')).toHaveAttribute(
+      'data-jp-interaction-mode',
+      'terminal'
+    );
+
+    const inputBox = await input.boundingBox();
+    const contentBox = await content.boundingBox();
+    expect(inputBox!.y).toBeLessThan(contentBox!.y);
+    expect(await content.evaluate(node => node.scrollTop)).toBeGreaterThan(0);
+  });
 });
 
 test.describe('Console (terminal mode)', () => {
