@@ -728,14 +728,17 @@ export class PluginList extends ReactWidget {
   }
 
   /**
-   * Suggest the tags that contain the query, or the text after `tag:`.
+   * Suggest the tags that start with the query, or with the text after `tag:`.
+   * Suggest all the tags while the query is a start of `tag:`.
    */
   private _getTagSuggestions = (query: string): IFilterSuggestion[] => {
-    const tagQuery = query.match(TAG_QUERY)?.[1] ?? query;
-    const search = tagQuery.trim().toLocaleLowerCase();
-    if (!search) {
+    const normalized = query.trim().toLocaleLowerCase();
+    if (!normalized) {
       return [];
     }
+    const search =
+      normalized.match(TAG_QUERY)?.[1].trim() ??
+      ('tag:'.startsWith(normalized) ? '' : normalized);
     if (this._tags === null) {
       const tags = new Set<string>();
       for (const plugin of this._model.plugins) {
@@ -750,8 +753,8 @@ export class PluginList extends ReactWidget {
     return this._tags
       .filter(
         tag =>
-          tag.toLocaleLowerCase().includes(search) &&
-          `tag:${tag}`.toLocaleLowerCase() !== query.trim().toLocaleLowerCase()
+          tag.toLocaleLowerCase().startsWith(search) &&
+          `tag:${tag}`.toLocaleLowerCase() !== normalized
       )
       .map(tag => ({ label: `tag:${tag}`, value: `tag:${tag}` }));
   };

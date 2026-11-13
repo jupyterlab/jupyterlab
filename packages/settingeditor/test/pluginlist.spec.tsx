@@ -728,12 +728,25 @@ describe('@jupyterlab/settingeditor', () => {
           );
         };
 
-        it('should suggest the tags that contain the query', async () => {
-          expect(await suggest('TAG')).toEqual(['tag:my-tag', 'tag:prop-tag']);
+        it('should suggest the tags that start with the query', async () => {
+          expect(await suggest('P')).toEqual(['tag:prop-tag']);
         });
 
-        it('should suggest the tags that contain the text after tag:', async () => {
+        it('should suggest the tags that start with the text after tag:', async () => {
           expect(await suggest('tag:pro')).toEqual(['tag:prop-tag']);
+        });
+
+        it('should not suggest the tags that only contain the query', async () => {
+          expect(await suggest('tag:t')).toEqual([]);
+        });
+
+        it('should suggest all the tags while typing tag:', async () => {
+          for (const query of ['t', 'TA', 'tag', 'tag:']) {
+            expect(await suggest(query)).toEqual([
+              'tag:my-tag',
+              'tag:prop-tag'
+            ]);
+          }
         });
 
         it('should not suggest the tag already in the query', async () => {
