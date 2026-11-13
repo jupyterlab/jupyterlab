@@ -110,7 +110,9 @@ export class InputArea extends Widget {
    */
   renderInput(widget: Widget): void {
     const layout = this.layout as PanelLayout;
-    if (this._rendered) {
+    // Keep the widget attached if it is rendered again, as removing it from
+    // the DOM moves any text selection boundary out of it.
+    if (this._rendered && this._rendered !== widget) {
       this._rendered.parent = null;
     }
     this._editor.hide();

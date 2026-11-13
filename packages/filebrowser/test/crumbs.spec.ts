@@ -15,12 +15,52 @@ import expect from 'expect';
 import { simulate } from 'simulate-event';
 import { BreadCrumbs, FileBrowserModel } from '../src';
 import { PageConfig } from '@jupyterlab/coreutils';
+import { MimeData } from '@lumino/coreutils';
+import type { Drag } from '@lumino/dragdrop';
 
 const BREADCRUMB_ROOT_CLASS = 'jp-BreadCrumbs-home';
 const BREADCRUMB_PREFERRED_CLASS = 'jp-BreadCrumbs-preferred';
 const HOME_ITEM_CLASS = 'jp-BreadCrumbs-home';
 const ITEM_CLASS = 'jp-BreadCrumbs-item';
 const ITEM_QUERY = `.${HOME_ITEM_CLASS}, .${ITEM_CLASS}`;
+const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
+
+/**
+ * Create a drag event that carries the given contents paths.
+ */
+function createDragEvent(
+  type: string,
+  target: HTMLElement,
+  paths: string[]
+): Drag.Event {
+  const mimeData = new MimeData();
+  mimeData.setData('application/x-jupyter-icontents', paths);
+  return {
+    type,
+    proposedAction: 'move',
+    dropAction: 'none',
+    mimeData,
+    target,
+    preventDefault: jest.fn(),
+    stopPropagation: jest.fn()
+  } as unknown as Drag.Event;
+}
+
+/**
+ * Drag the given paths onto a breadcrumb and drop them, as Lumino does:
+ * the drop reaches the breadcrumbs only if they accepted the drag enter.
+ */
+function dropOn(
+  crumbs: BreadCrumbs,
+  target: HTMLElement,
+  paths: string[]
+): void {
+  const enter = createDragEvent('lm-dragenter', target, paths);
+  crumbs.handleEvent(enter);
+  if (jest.mocked(enter.preventDefault).mock.calls.length > 0) {
+    crumbs.handleEvent(createDragEvent('lm-drop', target, paths));
+  }
+}
 
 class LogCrumbs extends BreadCrumbs {
   methods: string[] = [];
@@ -243,6 +283,145 @@ describe('filebrowser/model', () => {
           await promise;
           // Should navigate back to the preferred path on preferred breadcrumb click
           expect(model.path).toBe(path);
+        });
+      });
+
+      describe('lm-dragenter', () => {
+        afterEach(() => {
+          Widget.detach(crumbs);
+        });
+
+        it('should refuse the root breadcrumb while browsing the root', async () => {
+          await model.cd('/');
+          expect(model.path).toBe('');
+          Widget.attach(crumbs, document.body);
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          const root = crumbs.node.querySelector(
+            `.${BREADCRUMB_ROOT_CLASS}`
+          ) as HTMLElement;
+          const event = createDragEvent('lm-dragenter', root, ['file.txt']);
+
+          crumbs.handleEvent(event);
+
+          expect(event.preventDefault).not.toHaveBeenCalled();
+          expect(root.classList.contains(DROP_TARGET_CLASS)).toBe(false);
+        });
+
+        it('should refuse the preferred breadcrumb while browsing the preferred path', () => {
+          // The preferred path is the current folder, see `beforeEach`.
+          Widget.attach(crumbs, document.body);
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          const preferred = crumbs.node.querySelector(
+            `.${BREADCRUMB_PREFERRED_CLASS}`
+          ) as HTMLElement;
+          const event = createDragEvent('lm-dragenter', preferred, [
+            `${path}/file.txt`
+          ]);
+
+          crumbs.handleEvent(event);
+
+          expect(event.preventDefault).not.toHaveBeenCalled();
+          expect(preferred.classList.contains(DROP_TARGET_CLASS)).toBe(false);
+        });
+
+        it('should refuse the breadcrumb of the current folder', () => {
+          Widget.attach(crumbs, document.body);
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          const current = crumbs.node.querySelectorAll(ITEM_QUERY)[3];
+          const event = createDragEvent(
+            'lm-dragenter',
+            current as HTMLElement,
+            [`${path}/file.txt`]
+          );
+
+          crumbs.handleEvent(event);
+
+          expect(event.preventDefault).not.toHaveBeenCalled();
+          expect(current.classList.contains(DROP_TARGET_CLASS)).toBe(false);
+        });
+
+        it('should accept the breadcrumb of another folder', () => {
+          Widget.attach(crumbs, document.body);
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          // The crumbs have no width in jsdom, so `items[1]` is the ellipsis.
+          const other = crumbs.node.querySelectorAll(ITEM_QUERY)[2];
+          const event = createDragEvent('lm-dragenter', other as HTMLElement, [
+            `${path}/file.txt`
+          ]);
+
+          crumbs.handleEvent(event);
+
+          expect(event.preventDefault).toHaveBeenCalled();
+          expect(other.classList.contains(DROP_TARGET_CLASS)).toBe(true);
+        });
+      });
+
+      describe('lm-drop', () => {
+        let rename: jest.SpyInstance;
+
+        beforeEach(() => {
+          rename = jest.spyOn(manager, 'rename').mockResolvedValue(null as any);
+          Widget.attach(crumbs, document.body);
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+        });
+
+        afterEach(() => {
+          rename.mockRestore();
+          Widget.detach(crumbs);
+        });
+
+        it('should ignore dropping a file onto the breadcrumb of its folder', () => {
+          // The file comes from another file browser that shows `second`.
+          const items = crumbs.node.querySelectorAll(ITEM_QUERY);
+          dropOn(crumbs, items[2] as HTMLElement, [
+            `${first}/${second}/file.txt`
+          ]);
+
+          expect(rename).not.toHaveBeenCalled();
+        });
+
+        it('should ignore dropping a root file onto the root breadcrumb', () => {
+          // The file comes from another file browser that shows the root.
+          const root = crumbs.node.querySelector(
+            `.${BREADCRUMB_ROOT_CLASS}`
+          ) as HTMLElement;
+          dropOn(crumbs, root, ['file.txt']);
+
+          expect(rename).not.toHaveBeenCalled();
+        });
+
+        it('should move a file when dropped onto a different directory breadcrumb', () => {
+          const items = crumbs.node.querySelectorAll(ITEM_QUERY);
+          dropOn(crumbs, items[2] as HTMLElement, [`${path}/file.txt`]);
+
+          expect(rename).toHaveBeenCalledWith(
+            `${path}/file.txt`,
+            `${first}/${second}/file.txt`
+          );
+        });
+
+        it('should move a file from another folder onto the root breadcrumb while browsing the root', async () => {
+          // The file comes from another file browser that shows `path`.
+          await model.cd('/');
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          const root = crumbs.node.querySelector(
+            `.${BREADCRUMB_ROOT_CLASS}`
+          ) as HTMLElement;
+          dropOn(crumbs, root, [`${path}/file.txt`]);
+
+          expect(rename).toHaveBeenCalledWith(`${path}/file.txt`, 'file.txt');
+        });
+
+        it('should move only the files that are not in the folder of the breadcrumb', () => {
+          const items = crumbs.node.querySelectorAll(ITEM_QUERY);
+          dropOn(crumbs, items[2] as HTMLElement, [
+            `${path}/file.txt`,
+            `${first}/${second}/other.txt`
+          ]);
+
+          expect(rename.mock.calls).toEqual([
+            [`${path}/file.txt`, `${first}/${second}/file.txt`]
+          ]);
         });
       });
     });

@@ -12,7 +12,7 @@ import re
 import sys
 from collections import Counter
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from urllib.error import HTTPError
 from urllib.parse import urlencode
@@ -171,12 +171,12 @@ def parse_args() -> argparse.Namespace:
 
 def parse_github_datetime(value: str) -> datetime:
     """Parse a GitHub ISO timestamp."""
-    return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    return datetime.fromisoformat(value)
 
 
 def format_github_datetime(value: datetime) -> str:
     """Format a timestamp for GitHub API date filters."""
-    return value.astimezone(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return value.astimezone(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def format_created_filter(window_start: datetime, window_end: datetime) -> str:
@@ -560,7 +560,7 @@ def main() -> int:
     args = parse_args()
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     client = GitHubClient(token)
-    window_end = datetime.now(timezone.utc)
+    window_end = datetime.now(UTC)
     window_start = window_end - timedelta(days=args.days)
     created_filter = format_created_filter(window_start, window_end)
 

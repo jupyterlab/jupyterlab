@@ -147,6 +147,7 @@ export interface IDebugger {
 
   /**
    * Requests all the loaded modules and display them.
+   * Does nothing unless the debugger is started.
    */
   displayModules(): Promise<void>;
 
@@ -1065,6 +1066,11 @@ export namespace IDebugger {
        * The filter to apply.
        */
       filter: string;
+
+      /**
+       * Whether to hide native sources.
+       */
+      hideNativeSources?: boolean;
 
       /**
        * Signal emitted when the kernel sources have changed.

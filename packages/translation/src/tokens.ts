@@ -3,6 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import { PageConfig } from '@jupyterlab/coreutils';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import type { ServerConnection } from '@jupyterlab/services';
 import type { IDataConnector } from '@jupyterlab/statedb';
@@ -131,6 +132,10 @@ export class TranslatorConnector
   async fetch(): Promise<ILanguageList>;
   async fetch(opts: { language: string }): Promise<Language>;
   async fetch(opts?: { language: string }): Promise<Language | ILanguageList> {
+    if (opts && Private.isEnglish(opts.language)) {
+      // The source strings are in English, so there is nothing to translate.
+      return { data: {}, message: '' };
+    }
     return requestTranslationsAPI(
       this._translationsUrl,
       opts?.language ?? '',
@@ -160,3 +165,22 @@ export const ITranslator = new Token<ITranslator>(
   '@jupyterlab/translation:ITranslator',
   'A service to translate strings.'
 );
+
+/**
+ * A namespace for module-private functionality.
+ */
+namespace Private {
+  /**
+   * Whether `locale` is English, for which the server has no translations.
+   *
+   * `default` stands for the server locale, such as `en_US`. An explicit
+   * English locale other than `en` is still requested, as a custom language
+   * pack may provide it.
+   */
+  export function isEnglish(locale: string): boolean {
+    if (locale === 'default') {
+      return /^en(?:[-_]|$)/.test(PageConfig.getOption('serverLocale'));
+    }
+    return locale === DEFAULT_LANGUAGE_CODE;
+  }
+}

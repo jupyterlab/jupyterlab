@@ -4,9 +4,15 @@
  */
 
 import { ConsoleMessage, expect, test } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const PAGE_URL = `${process.env['BASE_URL']}`;
 const EXAMPLE_NAME = process.env['EXAMPLE_NAME'];
+const REPO_ROOT = `${process.env['REPO_ROOT']}`;
+
+const UNPKG_SERVICES_URL =
+  'https://unpkg.com/@jupyterlab/services@*/dist/dist/index.js';
 
 test.setTimeout(120000);
 
@@ -14,6 +20,9 @@ test('should load the example', async ({ page }) => {
   console.info('Navigating to page:', PAGE_URL);
 
   let errorLogs = 0;
+  const warnings: string[] = [];
+  const pageErrors: string[] = [];
+  const routedUrls: string[] = [];
   let testEnded: (value: string | PromiseLike<string>) => void;
   const waitForTestEnd = new Promise<string>(resolve => {
     testEnded = resolve;
@@ -25,6 +34,8 @@ test('should load the example', async ({ page }) => {
 
     if (msg.type() === 'error') {
       errorLogs += 1;
+    } else if (msg.type() === 'warning') {
+      warnings.push(text);
     }
 
     const lower = text.toLowerCase();
@@ -35,11 +46,54 @@ test('should load the example', async ({ page }) => {
 
   page.on('console', handleMessage);
 
+  page.on('pageerror', error => {
+    console.log('pageerror >>', error.stack ?? error.message);
+    errorLogs += 1;
+    pageErrors.push(error.message);
+    testEnded(error.message);
+  });
+
+  if (EXAMPLE_NAME === 'browser-require') {
+    // Test the bundle built from this checkout; the next test covers unpkg.
+    const bundle = path.join(REPO_ROOT, 'packages/services/dist/dist/index.js');
+    expect(
+      fs.existsSync(bundle),
+      `${bundle} is missing: run "jlpm build:all" in packages/services`
+    ).toBe(true);
+    await page.route(UNPKG_SERVICES_URL, route => {
+      console.log('route >>', route.request().url(), '->', bundle);
+      routedUrls.push(route.request().url());
+      return route.fulfill({ path: bundle });
+    });
+  }
+
   await page.goto(PAGE_URL);
 
   await expect.soft(page.locator('#jupyter-config-data')).toHaveCount(1);
 
   await waitForTestEnd;
+
+  expect(pageErrors, 'Uncaught exceptions in the page').toEqual([]);
+
+  if (EXAMPLE_NAME === 'federated') {
+    // Both prebuilt extensions read content fetched without options.
+    for (const name of ['middle', 'md']) {
+      await expect
+        .poll(() => warnings)
+        .toContainEqual(
+          expect.stringContaining(
+            `the @jupyterlab/example-federated-${name} extension fetched`
+          )
+        );
+    }
+  }
+
+  if (EXAMPLE_NAME === 'browser-require') {
+    expect(
+      routedUrls,
+      `The page did not request ${UNPKG_SERVICES_URL}`
+    ).toHaveLength(1);
+  }
 
   if (EXAMPLE_NAME === 'localization') {
     const root = page.getByTestId('localization-example');
@@ -89,6 +143,11 @@ test('should load the example', async ({ page }) => {
   }
 
   if (process.env['TEST_SNAPSHOT'] === '1') {
+    if (EXAMPLE_NAME === 'cell') {
+      // The kernel status icon shows "connecting" until the kernel replies,
+      // and on CI that can take longer than the waits below.
+      await expect(page.getByTitle('Kernel Idle')).toBeVisible();
+    }
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
     expect
@@ -111,3 +170,21 @@ test('should load the example', async ({ page }) => {
 
   expect(errorLogs).toEqual(0);
 });
+
+if (EXAMPLE_NAME === 'browser-require') {
+  test('should fetch @jupyterlab/services from unpkg', async ({ request }) => {
+    let body = '';
+    await expect(async () => {
+      const response = await request.get(UNPKG_SERVICES_URL, {
+        timeout: 20000
+      });
+      expect(response.status()).toBe(200);
+      body = await response.text();
+    }, `unpkg did not serve ${UNPKG_SERVICES_URL}`).toPass({
+      intervals: [5000, 15000, 30000],
+      timeout: 100000
+    });
+
+    expect(body).toContain('define("@jupyterlab/services",');
+  });
+}

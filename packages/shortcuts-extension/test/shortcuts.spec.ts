@@ -1,14 +1,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { JupyterFrontEnd } from '@jupyterlab/application';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { SettingRegistry } from '@jupyterlab/settingregistry';
+import { BaseSettings, SettingRegistry } from '@jupyterlab/settingregistry';
 import * as plugin from '@jupyterlab/shortcuts-extension';
 import type { IDataConnector } from '@jupyterlab/statedb';
 import { CommandRegistry } from '@lumino/commands';
 import { Platform } from '@lumino/domutils';
 import { signalToPromise } from '@jupyterlab/testing';
 
+import consoleSchema from '../../console-extension/schema/tracker.json';
+import fileEditorSchema from '../../fileeditor-extension/schema/plugin.json';
+import notebookSchema from '../../notebook-extension/schema/tracker.json';
 import pluginSchema from '../schema/shortcuts.json';
 
 describe('@jupyterlab/shortcut-extension', () => {
@@ -30,6 +34,94 @@ describe('@jupyterlab/shortcut-extension', () => {
   });
 
   describe('shorcuts list', () => {
+    async function registerRShortcuts(): Promise<CommandRegistry> {
+      const schemas = [consoleSchema, fileEditorSchema, notebookSchema];
+      const plugins: ISettingRegistry.IPlugin[] = schemas.map((schema, i) => ({
+        id: `test-plugin-${i}:settings`,
+        data: { composite: {}, user: {} },
+        raw: '{}',
+        schema: {
+          type: 'object',
+          'jupyter.lab.shortcuts': schema['jupyter.lab.shortcuts']
+        },
+        version: 'test'
+      }));
+      const connector: IDataConnector<ISettingRegistry.IPlugin, string> = {
+        fetch: jest.fn().mockResolvedValue(dummySettings),
+        list: jest.fn(),
+        save: jest.fn(),
+        remove: jest.fn()
+      };
+      const settingRegistry = new SettingRegistry({ connector, plugins });
+      const commands = new CommandRegistry();
+
+      await plugin.default.activate(
+        { commands } as JupyterFrontEnd,
+        settingRegistry,
+        null,
+        null,
+        null
+      );
+      return commands;
+    }
+
+    it('should register R operator shortcuts for consoles, file editors and notebooks', async () => {
+      const commands = await registerRShortcuts();
+
+      for (const [widgetClass, command] of [
+        ['jp-CodeConsole-promptCell', 'console:replace-selection'],
+        ['jp-FileEditor', 'fileeditor:replace-selection'],
+        ['jp-Notebook jp-mod-editMode', 'notebook:replace-selection']
+      ]) {
+        const widget = document.createElement('div');
+        widget.className = widgetClass;
+        const editor = document.createElement('div');
+        widget.appendChild(editor);
+        for (const [keys, text] of [
+          ['Alt -', '<- '],
+          ['Accel Shift M', '%>% ']
+        ]) {
+          const bindings = commands.keyBindings.filter(
+            binding =>
+              binding.keys.join(' ') ===
+              CommandRegistry.normalizeKeys({
+                command,
+                keys: [keys],
+                selector: 'body'
+              }).join(' ')
+          );
+          editor.dataset.jpEditorLanguage = 'r';
+          expect(
+            bindings.filter(binding => editor.matches(binding.selector))
+          ).toEqual([expect.objectContaining({ command, args: { text } })]);
+          editor.dataset.jpEditorLanguage = 'python';
+          expect(
+            bindings.filter(binding => editor.matches(binding.selector))
+          ).toEqual([]);
+        }
+      }
+    });
+
+    it('should not register R operator shortcuts for executed console cells', async () => {
+      const commands = await registerRShortcuts();
+      const widget = document.createElement('div');
+      widget.className = 'jp-CodeConsole';
+      const cell = document.createElement('div');
+      cell.className = 'jp-CodeCell';
+      const editor = document.createElement('div');
+      editor.dataset.jpEditorLanguage = 'r';
+      cell.appendChild(editor);
+      widget.appendChild(cell);
+
+      expect(
+        commands.keyBindings.filter(
+          binding =>
+            binding.command === 'console:replace-selection' &&
+            editor.matches(binding.selector)
+        )
+      ).toEqual([]);
+    });
+
     it('should ignored Cmd on non-Mac platform', async () => {
       const bar: ISettingRegistry.IPlugin = {
         data: {
@@ -396,6 +488,155 @@ describe('@jupyterlab/shortcut-extension', () => {
         .composite as ISettingRegistry.IShortcut[];
 
       expect(shortcuts).toHaveLength(1);
+    });
+
+    /**
+     * Load the shortcuts settings with the given default and user shortcuts.
+     */
+    async function loadShortcuts(
+      defaults: ISettingRegistry.IShortcut[],
+      user: ISettingRegistry.IShortcut[]
+    ): Promise<ISettingRegistry.ISettings> {
+      const extension: ISettingRegistry.IPlugin = {
+        id: 'test-extension:plugin',
+        data: { composite: {}, user: {} },
+        raw: '{}',
+        schema: { type: 'object', 'jupyter.lab.shortcuts': defaults },
+        version: 'test'
+      };
+      const connector: IDataConnector<ISettingRegistry.IPlugin, string> = {
+        fetch: jest.fn().mockResolvedValue({
+          ...dummySettings,
+          raw: JSON.stringify({ shortcuts: user })
+        }),
+        list: jest.fn(),
+        save: jest.fn(),
+        remove: jest.fn()
+      };
+      const settingRegistry = new SettingRegistry({
+        connector,
+        plugins: [extension]
+      });
+      await plugin.default.activate(
+        { commands: new CommandRegistry() } as JupyterFrontEnd,
+        settingRegistry,
+        null,
+        null,
+        null
+      );
+      return settingRegistry.load(plugin.default.id);
+    }
+
+    const closeTab = {
+      command: 'application:close',
+      keys: ['Alt W'],
+      selector: '.jp-LabShell'
+    };
+
+    it('should migrate the selectors of the user shortcuts', async () => {
+      const settings = await loadShortcuts(
+        [],
+        [
+          { ...closeTab, selector: '.jp-Activity', disabled: true },
+          { ...closeTab, keys: ['Ctrl Alt W'], selector: '.jp-Activity' }
+        ]
+      );
+      // The shortcuts editor compares these with the composite shortcuts.
+      const user = settings.get('shortcuts')
+        .user as ISettingRegistry.IShortcut[];
+      expect(user.map(shortcut => shortcut.selector)).toEqual([
+        '.jp-LabShell',
+        '.jp-LabShell'
+      ]);
+    });
+
+    it('should disable a default with a user shortcut stored with the old selector', async () => {
+      const settings = await loadShortcuts(
+        [closeTab],
+        [{ ...closeTab, selector: '.jp-Activity', disabled: true }]
+      );
+      expect(settings.get('shortcuts').composite).toEqual([]);
+    });
+
+    it('should disable a default with a default stored with the old selector', async () => {
+      // The shortcuts of `overrides.json` are part of the defaults.
+      const settings = await loadShortcuts(
+        [closeTab, { ...closeTab, selector: '.jp-Activity', disabled: true }],
+        []
+      );
+      expect(settings.get('shortcuts').composite).toEqual([]);
+    });
+
+    it('should migrate only the selectors of the two close commands', async () => {
+      const settings = await loadShortcuts(
+        [],
+        [
+          {
+            command: 'filemenu:close-and-cleanup',
+            keys: ['Ctrl Shift Q'],
+            selector: '.jp-Activity'
+          },
+          {
+            command: 'other:command',
+            keys: ['Alt Y'],
+            selector: '.jp-Activity'
+          },
+          { ...closeTab, keys: ['Alt Z'], selector: '.jp-Activity .custom' }
+        ]
+      );
+      const composite = settings.get('shortcuts')
+        .composite as ISettingRegistry.IShortcut[];
+      expect(composite.map(shortcut => shortcut.selector)).toEqual([
+        '.jp-LabShell',
+        '.jp-Activity',
+        '.jp-Activity .custom'
+      ]);
+    });
+
+    it('should keep the options of a migrated shortcut', async () => {
+      const settings = await loadShortcuts(
+        [],
+        [
+          {
+            ...closeTab,
+            selector: '.jp-Activity',
+            args: { foo: 'bar' },
+            preventDefault: false
+          }
+        ]
+      );
+      expect(settings.get('shortcuts').composite).toEqual([
+        { ...closeTab, args: { foo: 'bar' }, preventDefault: false }
+      ]);
+    });
+  });
+
+  describe('shortcuts schema', () => {
+    it('should preserve `disabled` when reifying default shortcuts', () => {
+      // If `disabled` is dropped, disabled defaults render identically to
+      // the shortcuts they disable in the JSON Settings Editor.
+      const schema = JSON.parse(JSON.stringify(pluginSchema));
+      schema.properties.shortcuts.default = [
+        {
+          command: 'notebook:change-cell-to-code',
+          keys: ['Y'],
+          selector: '.jp-Notebook'
+        },
+        {
+          command: 'notebook:change-cell-to-code',
+          keys: ['Y'],
+          selector: '.jp-Notebook',
+          disabled: true
+        }
+      ];
+
+      const defaults = new BaseSettings({ schema }).default(
+        'shortcuts'
+      ) as ISettingRegistry.IShortcut[];
+
+      expect(defaults).toHaveLength(2);
+      expect(defaults[0].disabled).toBeUndefined();
+      expect(defaults[1].disabled).toBe(true);
     });
   });
 });

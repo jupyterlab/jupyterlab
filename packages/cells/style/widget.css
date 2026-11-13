@@ -132,6 +132,12 @@
 
 .jp-MarkdownOutput {
   flex: 1 1 auto;
+
+  /*
+   * A stretched item would count as having a fixed height, and a height in
+   * percent inside it would then resolve against the height of the row.
+   */
+  align-self: flex-start;
   width: 100%;
   margin-top: 0;
   margin-bottom: 0;

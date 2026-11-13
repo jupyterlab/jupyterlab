@@ -145,6 +145,18 @@ export namespace SystemClipboard {
     getData(mime: string): Promise<unknown | null>;
 
     /**
+     * Whether the given data matches the last value this application wrote to
+     * the clipboard for this mime type.
+     *
+     * Pass the value just returned by `getData`. Returns `false` once the
+     * current clipboard data differs from what this application last wrote.
+     *
+     * @param mime - The mime type that was retrieved.
+     * @param data - The data returned by `getData`.
+     */
+    matchesLastWrite(mime: string, data: unknown): boolean;
+
+    /**
      * Set the data for a given mime type.
      *
      * @param mime - The mime type to set.
@@ -181,6 +193,11 @@ namespace Private {
     fallback: MimeData;
 
     /**
+     * The text last written to the clipboard, per mime type.
+     */
+    private _lastWritten = new Map<string, string>();
+
+    /**
      * Create a new clipboard instance.
      */
     constructor(fallback?: MimeData) {
@@ -198,6 +215,7 @@ namespace Private {
      */
     clear(): void {
       this.fallback.clear();
+      this._lastWritten.clear();
     }
 
     /**
@@ -216,7 +234,10 @@ namespace Private {
         text = await systemClipboard.readText();
       } catch (reason) {
         console.warn('Failed to read data from clipboard:', reason);
-        if (reason.name === 'NotAllowedError') {
+        if (
+          reason instanceof DOMException &&
+          reason.name === 'NotAllowedError'
+        ) {
           // If the clipboard API is not allowed, fall back to the
           // internal clipboard.
           return this.fallback.hasData(mime);
@@ -247,13 +268,33 @@ namespace Private {
         return this.convertStringToData(mime, text);
       } catch (reason) {
         console.warn('Failed to read data from clipboard:', reason);
-        if (reason.name === 'NotAllowedError') {
+        if (
+          reason instanceof DOMException &&
+          reason.name === 'NotAllowedError'
+        ) {
           // If the clipboard API is not allowed, fall back to the
           // internal clipboard.
           return this.fallback.getData(mime);
         }
         return null;
       }
+    }
+
+    /**
+     * Whether the given data matches the last value this application wrote to
+     * the clipboard for a given mime type.
+     *
+     * @param mime - The mime type that was retrieved.
+     * @param data - The data returned by `getData`.
+     */
+    matchesLastWrite(mime: string, data: unknown): boolean {
+      const text = this._lastWritten.get(mime);
+      return (
+        data !== null &&
+        data !== undefined &&
+        text !== undefined &&
+        text === this.convertDataToString(mime, data)
+      );
     }
 
     /**
@@ -264,13 +305,16 @@ namespace Private {
      */
     async setData(mime: string, data: unknown): Promise<void> {
       const { systemClipboard } = this;
+      const text = this.convertDataToString(mime, data);
+      this._lastWritten.clear();
+      this._lastWritten.set(mime, text);
       if (!systemClipboard) {
         this.fallback.clear();
         this.fallback.setData(mime, data);
         return;
       }
       try {
-        await systemClipboard.writeText(this.convertDataToString(mime, data));
+        await systemClipboard.writeText(text);
       } catch (reason) {
         console.warn('Failed to write data to clipboard:', reason);
         // If the clipboard API is not allowed, fall back to the

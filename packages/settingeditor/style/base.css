@@ -151,6 +151,11 @@
   text-overflow: ellipsis;
 }
 
+.jp-PluginList-settingKey {
+  font-family: var(--jp-code-font-family);
+  font-size: var(--jp-code-font-size);
+}
+
 .jp-PluginList-entry-label {
   display: flex;
 }

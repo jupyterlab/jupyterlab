@@ -299,7 +299,7 @@
     {
       "command": "filemenu:close-and-cleanup",
       "keys": ["Ctrl Shift Q"],
-      "selector": ".jp-Activity"
+      "selector": ".jp-LabShell"
     },
     {
       "command": "kernelmenu:interrupt",

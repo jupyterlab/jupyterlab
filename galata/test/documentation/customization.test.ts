@@ -37,6 +37,8 @@ test.describe('Default', () => {
       '.lm-TabBar-tab:has([data-icon="ui-components:terminal"]) .lm-TabBar-tabLabel'
     );
     await terminalTabLabel.filter({ hasNotText: '...' }).waitFor();
+    // The prompt can appear after the title settles.
+    await expect(page.locator('.jp-Terminal-body')).toContainText('$');
 
     // Normalise the tab title to "Terminal 1" so the snapshot is consistent
     // across environments because locally it would show the user's shell prompt path,
@@ -96,7 +98,7 @@ test.describe('Default', () => {
 
     await page.sidebar.setWidth();
 
-    await page.click('text=Tabs');
+    await page.menu.openLocator('Tabs');
 
     await page.locator('#jp-mainmenu-tabs').waitFor();
 
@@ -275,7 +277,7 @@ test.describe('Customized', () => {
 
     await page.sidebar.setWidth();
 
-    await page.click('text=Tabs');
+    await page.menu.openLocator('Tabs');
 
     await page.locator('#jp-mainmenu-tabs').waitFor();
 

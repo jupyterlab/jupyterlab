@@ -95,7 +95,7 @@ export class BreadCrumbs extends Widget {
     this._onPathEdited = options.onPathEdited;
     this._onPathActivated = options.onPathActivated;
     this.addClass(BREADCRUMB_CLASS);
-    this._crumbs = Private.createCrumbs();
+    this._crumbs = Private.createCrumbs(this._trans);
     const hasPreferred = PageConfig.getOption('preferredPath');
     this._hasPreferred = hasPreferred && hasPreferred !== '/' ? true : false;
     this._crumbContainer = document.createElement('span');
@@ -546,11 +546,17 @@ export class BreadCrumbs extends Widget {
       }
       if (index !== -1) {
         const hitElement = breadcrumbElements[index];
-        // Don't allow dropping on the current path
-        const currentPath = this._model.manager.services.contents.localPath(
-          this._model.path
+        // Refuse the drop when no item would move. The items can come from
+        // another file browser, so compare with their folders instead of the
+        // current folder. The root and preferred breadcrumbs store their path
+        // with a leading slash.
+        const contents = this._model.manager.services.contents;
+        const hitPath = PathExt.removeSlash(hitElement.dataset.path ?? '');
+        const paths = event.mimeData.getData(CONTENTS_MIME) as string[];
+        const moves = paths.some(
+          path => PathExt.dirname(contents.localPath(path)) !== hitPath
         );
-        if (hitElement.dataset.path !== currentPath) {
+        if (moves) {
           hitElement.classList.add(DROP_TARGET_CLASS);
           event.preventDefault();
           event.stopPropagation();
@@ -642,8 +648,13 @@ export class BreadCrumbs extends Widget {
     const promises: Promise<Contents.IModel | null>[] = [];
     const oldPaths = event.mimeData.getData(CONTENTS_MIME) as string[];
     for (const oldPath of oldPaths) {
-      const name = PathExt.basename(oldPath);
+      const localPath = manager.services.contents.localPath(oldPath);
+      const name = PathExt.basename(localPath);
       const newPath = PathExt.join(destinationPath, name);
+      // Skip files that are not moving.
+      if (newPath === localPath) {
+        continue;
+      }
       promises.push(renameFile(manager, oldPath, newPath));
     }
     void Promise.all(promises).catch(err => {
@@ -1119,11 +1130,14 @@ namespace Private {
   /**
    * Create the breadcrumb nodes.
    */
-  export function createCrumbs(): ReadonlyArray<HTMLElement> {
+  export function createCrumbs(
+    trans: TranslationBundle
+  ): ReadonlyArray<HTMLElement> {
     const home = rootIcon.element({
       className: BREADCRUMB_ROOT_CLASS,
       tag: 'span',
-      title: PageConfig.getOption('serverRoot') || 'Jupyter Server Root',
+      title:
+        PageConfig.getOption('serverRoot') || trans.__('Jupyter Server Root'),
       stylesheet: 'breadCrumb'
     });
     home.dataset.path = '/';
@@ -1146,7 +1160,7 @@ namespace Private {
     const preferred = (preferredPathIsHome ? homeIcon : preferredIcon).element({
       className: BREADCRUMB_PREFERRED_CLASS,
       tag: 'span',
-      title: path || 'Jupyter Preferred Path',
+      title: path || trans.__('Jupyter Preferred Path'),
       stylesheet: 'breadCrumb'
     });
     preferred.dataset.path = path || '/';
