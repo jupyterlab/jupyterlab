@@ -45,4 +45,20 @@ describe('jest-config', () => {
       )
     ).toBe(false);
   });
+
+  it('should transform the JupyterLab packages', () => {
+    expect(
+      isTransformed(
+        config,
+        '/ext/node_modules/@jupyterlab/apputils/lib/index.js'
+      )
+    ).toBe(true);
+  });
+
+  it('should transform the packages of the esModules option', () => {
+    const extended = jestConfig('/ext', { esModules: ['d3-array'] });
+    expect(
+      isTransformed(extended, '/ext/node_modules/d3-array/src/index.js')
+    ).toBe(true);
+  });
 });
