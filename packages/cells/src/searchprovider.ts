@@ -928,8 +928,9 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   /**
    * Ranges of the cell source that the rendered text does not show: link
    * and image destinations, reference definitions, reference labels, HTML
-   * tags and HTML comments. A match starting in one of these ranges is not
-   * visible in the rendered text.
+   * tags, HTML comments and the content of elements whose text the search in
+   * the rendered text skips, such as the fallback text of a video. A match
+   * starting in one of these ranges is not visible in the rendered text.
    *
    * @returns Source ranges the rendered text does not show.
    */
@@ -973,6 +974,16 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
       ranges.push({
         start: openBracket,
         end: openBracket + label.length + 2
+      });
+    }
+    // The content of elements that `HTMLSearchEngine` does not search, such
+    // as the fallback text of a video.
+    for (const match of source.matchAll(
+      /<(audio|canvas|iframe|map|noscript|object|picture|script|style|svg|video)\b[\s\S]*?<\/\1\s*>/gi
+    )) {
+      ranges.push({
+        start: match.index ?? 0,
+        end: (match.index ?? 0) + match[0].length
       });
     }
     // HTML tags with their attributes, and HTML comments.

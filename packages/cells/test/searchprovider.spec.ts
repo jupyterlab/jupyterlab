@@ -426,6 +426,10 @@ describe('cells/searchprovider', () => {
       [
         'a closed details element',
         'An apple, <details><summary>Hint</summary>an apple</details>'
+      ],
+      [
+        'the fallback text of a video',
+        'An apple, <video src="clip.mp4">an apple</video>'
       ]
     ])('should unrender the cell for a match in %s', async (_, source) => {
       cell = createMarkdownCell(source);
