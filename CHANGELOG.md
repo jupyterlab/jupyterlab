@@ -109,6 +109,8 @@ The sections of sidebar panels, such as the Running panel, the Debugger and the 
 src="https://raw.githubusercontent.com/krassowski/jupyterlab/user-facing-changelog-4.7/docs/source/getting_started/changelog_assets/4.7-reorder-sections.gif"
 class="jp-screenshot">
 
+The toolbar of the current notebook can now be hidden with View → Appearance → Show Toolbar. The choice is not saved, so the toolbar shows again after a reload.
+
 ### Debugger and console improvements
 
 The Kernel Sources panel now shows the modules as a tree grouped by package, with "Open" and "Copy Path" in the context menu. The new "Hide the kernel's own sources" setting of the Debugger, off by default and on in the picture, hides the modules that the kernel loads for itself, such as IPython and debugpy.
