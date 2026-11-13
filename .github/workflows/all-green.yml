@@ -1,0 +1,54 @@
+# Passes once every other workflow run and commit status on the head commit of
+# a pull request has passed, so that branch protection can require this one
+# check.
+name: All Green
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled, ready_for_review]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  all-green:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      actions: read # list the workflow runs of the commit
+      statuses: read # read the statuses that pre-commit.ci and Read the Docs set
+    steps:
+      - name: Wait for the other checks and report their results
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          api="repos/${GITHUB_REPOSITORY}"
+
+          # Sleeping first also lets the runs started by the same event appear
+          while sleep 60; do
+            # The latest run of each other workflow that the pull request started
+            checks=$(gh api --paginate "${api}/actions/runs?head_sha=${HEAD_SHA}&per_page=100" --jq '.workflow_runs[]' |
+              jq --slurp '
+                map(select((.event == "pull_request" or .event == "pull_request_target") and .name != env.GITHUB_WORKFLOW))
+                | group_by(.path)
+                | map(max_by(.id) | {name, result: (.conclusion // "pending")})
+                | if . == [] then [{name: "the first workflow run", result: "pending"}] else . end') || continue
+            # The commit statuses are read once the workflow runs have finished, so
+            # that waiting takes one API request per minute
+            if jq --exit-status 'all(.result != "pending")' <<< "${checks}" > /dev/null; then
+              statuses=$(gh api "${api}/commits/${HEAD_SHA}/status" --jq '[.statuses[] | {name: .context, result: .state}]') || continue
+              checks=$(jq --slurp 'add' <<< "${checks} ${statuses}")
+            fi
+            pending=$(jq --raw-output 'map(select(.result == "pending").name) | join(", ")' <<< "${checks}")
+            [[ -n "${pending}" ]] || break
+            echo "Waiting for: ${pending}"
+          done
+
+          jq --raw-output '.[] | "\(.result): \(.name)"' <<< "${checks}"
+          jq --exit-status 'all(.result | IN("success", "skipped", "neutral"))' <<< "${checks}" > /dev/null
