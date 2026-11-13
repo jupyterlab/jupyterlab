@@ -516,7 +516,7 @@ jupyter lab --dev-mode --extensions-in-dev-mode
 ```
 
 Refer to the {ref}`documentation on extension development <prebuilt-dev-workflow>`
-to know more.
+to learn more.
 :::
 
 When running in dev mode, a red stripe will appear at the top of the
