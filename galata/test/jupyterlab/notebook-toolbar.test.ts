@@ -627,11 +627,17 @@ test('Show Toolbar in the View menu should hide and show the notebook toolbar', 
 }) => {
   await page.notebook.createNew(fileName);
   const toolbar = page.locator('.jp-NotebookPanel-toolbar');
+  const menuItem = page.locator('[data-command="viewmenu:show-toolbar"]');
   await expect(toolbar).toBeVisible();
 
   await page.menu.clickMenuItem('View>Appearance>Show Toolbar');
   await expect(toolbar).toBeHidden();
+  await page.menu.openLocator('View>Appearance');
+  await expect(menuItem).toHaveAttribute('aria-checked', 'false');
+  await page.menu.closeAll();
 
   await page.menu.clickMenuItem('View>Appearance>Show Toolbar');
   await expect(toolbar).toBeVisible();
+  await page.menu.openLocator('View>Appearance');
+  await expect(menuItem).toHaveAttribute('aria-checked', 'true');
 });
