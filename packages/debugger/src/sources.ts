@@ -150,15 +150,19 @@ export class DebuggerSources implements IDebugger.ISources {
         return;
       }
 
-      const cells = consoleWidget.console.cells;
+      const cells = [...consoleWidget.console.cells];
+      const promptCell = consoleWidget.console.promptCell;
+      if (promptCell) {
+        cells.push(promptCell);
+      }
       for (const cell of cells) {
         const code = cell.model.sharedModel.getSource();
         const codeId = this._getCodeId(code, kernel);
         if (!codeId) {
-          break;
+          continue;
         }
         if (source !== codeId) {
-          break;
+          continue;
         }
 
         editors.push(

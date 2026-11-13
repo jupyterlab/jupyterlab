@@ -25,7 +25,6 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 import type { IRunningSessions } from '@jupyterlab/running';
 import { IRunningSessionManagers } from '@jupyterlab/running';
 import type { Terminal } from '@jupyterlab/services';
-import { TerminalAPI } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar, TextItem } from '@jupyterlab/statusbar';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -461,6 +460,7 @@ function addRunningSessionManager(
   }
 
   managers.add({
+    id: 'jp-running-terminals',
     name: trans.__('Terminals'),
     supportsMultipleViews: false,
     running: () =>
@@ -674,10 +674,13 @@ function addCommands(
       let session;
       let initialTitle: string | undefined;
       if (name) {
-        const models = await TerminalAPI.listRunning(
-          serviceManager.serverSettings
+        await serviceManager.terminals.ready;
+        await serviceManager.terminals.refreshRunning();
+        const names = Array.from(
+          serviceManager.terminals.running(),
+          model => model.name
         );
-        if (models.map(d => d.name).includes(name)) {
+        if (names.includes(name)) {
           // we are restoring a terminal widget and the corresponding terminal exists
           // let's connect to it
           initialTitle = await signaler?.title(name);

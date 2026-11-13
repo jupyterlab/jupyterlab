@@ -103,6 +103,38 @@ describe('completer/default/kernelprovider', () => {
         });
       });
 
+      it('should convert cursor offsets between unicode character indices and JS string indices', async () => {
+        let sentCursorPos: number | undefined;
+        kernel.requestComplete = async (
+          contents: KernelMessage.ICompleteRequestMsg['content']
+        ) => {
+          sentCursorPos = contents.cursor_pos;
+          return {
+            channel: 'shell',
+            header: {} as any,
+            parent_header: {} as any,
+            metadata: {},
+            content: {
+              matches: ['waterfall'],
+              cursor_end: 51,
+              cursor_start: 49,
+              metadata: {},
+              status: 'ok'
+            }
+          };
+        };
+
+        const text = 'print("🔬 XRD ANALYSIS PROGRAM 🔬")\n\nwaterfall = 1\nwa';
+        const result = await provider.fetch(
+          { text, offset: text.length },
+          context
+        );
+
+        expect(sentCursorPos).toBe(51);
+        expect(result.start).toBe(51);
+        expect(result.end).toBe(53);
+      });
+
       it('should accept results without `_jupyter_types_experimental` metadata', async () => {
         kernel.requestComplete = async (
           contents: KernelMessage.ICompleteRequestMsg['content']

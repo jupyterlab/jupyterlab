@@ -498,9 +498,25 @@ jupyter lab --dev-mode
 ```
 
 Development mode ensures that you are running the JavaScript assets that
-are built in the dev-installed Python package. Note that when running in
-dev mode, extensions will not be activated by default - refer
-{ref}`documentation on extension development <prebuilt-dev-workflow>` to know more.
+are built in the dev-installed Python package. This includes the core
+packages in `packages/`, so changes there only require rebuilding those
+assets (see `--watch` below); no extra flag is needed for them.
+
+:::{note}
+Dev mode skips the prebuilt extensions found in the `labextensions` search
+paths, that is third-party extensions installed with `pip`/`conda` or with
+`jupyter-builder develop` (`@jupyterlab/galata-extension`, used by the UI
+tests, is the only exception). To load them as well, for example when
+developing a prebuilt extension against the JupyterLab source repository,
+add `--extensions-in-dev-mode`:
+
+```bash
+jupyter lab --dev-mode --extensions-in-dev-mode
+```
+
+Refer to the {ref}`documentation on extension development <prebuilt-dev-workflow>`
+to learn more.
+:::
 
 When running in dev mode, a red stripe will appear at the top of the
 page; this is to indicate running an unreleased version.
@@ -578,6 +594,35 @@ function to get a `Promise` for a `requestAnimationFrame`. We
 sometimes have to set a sentinel value inside a `Promise` and then
 check that the sentinel was set if we need a promise to run without
 blocking.
+
+#### Grouping Tests
+
+Group the tests of a spec file by the code that they test. The outer
+`describe` names the package, the next one names the class, and the
+innermost one names the member under test, as `#property` or
+`#method()`. For example, in `packages/notebook/test/model.spec.ts`:
+
+```typescript
+describe('@jupyterlab/notebook', () => {
+  describe('NotebookModel', () => {
+    describe('#constructor()', () => {
+      it('should create a notebook model', () => {
+        // ...
+      });
+    });
+
+    describe('#metadataChanged', () => {
+      it('should be emitted when a metadata field changes', () => {
+        // ...
+      });
+    });
+  });
+});
+```
+
+Write the behavior in the `it('should ...')` text. Instead of a group
+named after a topic, such as `describe('id references')`, put each test
+under the member that it tests.
 
 ## Internationalization
 
