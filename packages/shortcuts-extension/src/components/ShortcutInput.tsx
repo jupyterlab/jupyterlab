@@ -18,7 +18,6 @@ import type {
 
 /** Idle time after the last keystroke before leaving active capture. */
 const CAPTURE_IDLE_MS = 2000;
-const CAPTURE_IDLE_SECONDS = CAPTURE_IDLE_MS / 1000;
 
 type CapturePhase = 'capturing' | 'ready' | 'incompleteIdle';
 
@@ -681,11 +680,12 @@ export class ShortcutInput extends React.Component<
     const describedBy = errorMessage
       ? `${this._hintId} ${this._errorId}`
       : this._hintId;
-    const captureHint = trans._n(
-      'Capture pauses %1 second after the last key.',
-      'Capture pauses %1 seconds after the last key.',
-      CAPTURE_IDLE_SECONDS
-    );
+    const captureHint =
+      this.state.phase === 'capturing'
+        ? trans.__('Recording…')
+        : trans.__(
+            'Recording paused. Press Tab or Shift+Tab to navigate normally.'
+          );
     const commandName =
       this.props.shortcut.label ?? this.props.shortcut.command;
     const defaultAriaLabel = this._isReplacingExistingKeybinding
