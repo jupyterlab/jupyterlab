@@ -621,3 +621,17 @@ test('Reactive toolbar should move items to the popup when the kernel name gets 
 
   await expect(opener).toBeVisible();
 });
+
+test('Show Toolbar in the View menu should hide and show the notebook toolbar', async ({
+  page
+}) => {
+  await page.notebook.createNew(fileName);
+  const toolbar = page.locator('.jp-NotebookPanel-toolbar');
+  await expect(toolbar).toBeVisible();
+
+  await page.menu.clickMenuItem('View>Appearance>Show Toolbar');
+  await expect(toolbar).toBeHidden();
+
+  await page.menu.clickMenuItem('View>Appearance>Show Toolbar');
+  await expect(toolbar).toBeVisible();
+});
