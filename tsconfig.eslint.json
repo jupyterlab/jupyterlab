@@ -26,5 +26,6 @@
     "scripts/*",
     "jupyterlab/*",
     "jupyterlab/staging/*"
-  ]
+  ],
+  "exclude": ["node_modules", "**/*.js", "**/*.cjs", "**/*.mjs", "**/*.jsx"]
 }
