@@ -30,8 +30,12 @@ jobs:
 
           api="repos/${GITHUB_REPOSITORY}"
 
-          # Sleeping first also lets the runs started by the same event appear
-          while sleep 60; do
+          # Sleeping first also lets the runs started by the same event appear. The
+          # first waits are short because label and description changes start only
+          # runs that take seconds.
+          delay=15
+          while sleep "${delay}"; do
+            delay=$(( delay < 60 ? delay * 2 : 60 ))
             # The latest run of each other workflow that the pull request started
             checks=$(gh api --paginate "${api}/actions/runs?head_sha=${HEAD_SHA}&per_page=100" --jq '.workflow_runs[]' |
               jq --slurp '
@@ -40,7 +44,7 @@ jobs:
                 | map(max_by(.id) | {name, result: (.conclusion // "pending")})
                 | if . == [] then [{name: "the first workflow run", result: "pending"}] else . end') || continue
             # The commit statuses are read once the workflow runs have finished, so
-            # that waiting takes one API request per minute
+            # that each poll takes one API request
             if jq --exit-status 'all(.result != "pending")' <<< "${checks}" > /dev/null; then
               statuses=$(gh api "${api}/commits/${HEAD_SHA}/status" --jq '[.statuses[] | {name: .context, result: .state}]') || continue
               checks=$(jq --slurp 'add' <<< "${checks} ${statuses}")
