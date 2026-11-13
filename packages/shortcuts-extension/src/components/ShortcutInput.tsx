@@ -551,6 +551,11 @@ export class ShortcutInput extends React.Component<
     const trans = this.props.translator.load('jupyterlab');
     const hasConflict =
       !this.state.isAvailable && this.state.activeConflicts.length > 0;
+    const hasCapture =
+      this.state.userInput !== '' ||
+      this.state.keys.length > 0 ||
+      this.state.phase === 'incompleteIdle';
+    const isInvalid = hasConflict || (hasCapture && !this.state.isFunctional);
     let inputClassName = 'jp-Shortcuts-Input';
     if (!this.state.isAvailable) {
       inputClassName += ' jp-mod-unavailable-Input';
@@ -565,18 +570,16 @@ export class ShortcutInput extends React.Component<
       'Capture pauses %1 seconds after the last key.',
       CAPTURE_IDLE_SECONDS
     );
+    const boxClass = [
+      'jp-Shortcuts-InputBox',
+      !this._isReplacingExistingKeybinding ? 'jp-Shortcuts-InputBoxNew' : '',
+      isInvalid ? 'jp-mod-error' : '',
+      this.props.displayInput ? '' : 'jp-mod-hidden'
+    ]
+      .filter(Boolean)
+      .join(' ');
     return (
-      <div
-        className={
-          this.props.displayInput
-            ? !this._isReplacingExistingKeybinding
-              ? 'jp-Shortcuts-InputBox jp-Shortcuts-InputBoxNew'
-              : 'jp-Shortcuts-InputBox'
-            : 'jp-mod-hidden'
-        }
-        ref={this._ref}
-        onBlur={this._handleBlur}
-      >
+      <div className={boxClass} ref={this._ref} onBlur={this._handleBlur}>
         <div className="jp-Shortcuts-InputBox-controls">
           <div
             tabIndex={0}
@@ -584,7 +587,7 @@ export class ShortcutInput extends React.Component<
             onKeyDown={this.handleInput}
             ref={this._inputRef}
             data-lm-suppress-shortcuts="true"
-            aria-invalid={hasConflict || undefined}
+            aria-invalid={isInvalid || undefined}
             aria-describedby={describedBy}
           >
             <p

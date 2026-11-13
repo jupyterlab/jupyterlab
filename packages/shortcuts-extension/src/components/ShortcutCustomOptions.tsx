@@ -78,9 +78,9 @@ export class CustomOptionsDialog extends Dialog<ICustomOptions> {
 }
 
 /**
- * Options for {@link CustomOptionsDialogBody}.
+ * Options for selector and arguments fields.
  */
-export interface ICustomOptionsDialogBodyOptions {
+export interface ICustomOptionsFieldsOptions {
   shortcut: IShortcutTarget;
   translator: ITranslator;
   editorFactory: CodeEditor.Factory;
@@ -89,95 +89,125 @@ export interface ICustomOptionsDialogBodyOptions {
 }
 
 /**
+ * Options for {@link CustomOptionsDialogBody}.
+ */
+export type ICustomOptionsDialogBodyOptions = ICustomOptionsFieldsOptions;
+
+/**
+ * Selector and arguments fields appended to a host (dialog body).
+ */
+export interface ICustomOptionsFields {
+  readonly selectorInput: HTMLInputElement;
+  getValue(): ICustomOptions;
+  dispose(): void;
+}
+
+/**
+ * Append Selector and Arguments fields to `host`.
+ */
+export function appendCustomOptionFields(
+  host: HTMLElement,
+  options: ICustomOptionsFieldsOptions
+): ICustomOptionsFields {
+  const { shortcut, translator, editorFactory, checkValidation, readOnly } =
+    options;
+  const trans = translator.load('jupyterlab');
+
+  const selectorField = document.createElement('div');
+  selectorField.className = 'jp-Shortcuts-Field';
+
+  const selectorLabel = document.createElement('label');
+  selectorLabel.textContent = trans.__('Selector:');
+  selectorLabel.className = 'jp-Dialog-label';
+
+  const selectorInput = document.createElement('input');
+  selectorInput.type = 'text';
+  selectorInput.disabled = readOnly;
+  selectorInput.value = shortcut.selector;
+  selectorInput.className = 'jp-mod-styled';
+
+  selectorField.appendChild(selectorLabel);
+  selectorField.appendChild(selectorInput);
+  host.appendChild(selectorField);
+
+  const argsField = document.createElement('div');
+  argsField.className = 'jp-Shortcuts-Field';
+
+  const argsLabel = document.createElement('label');
+  argsLabel.textContent = trans.__('Arguments:');
+  argsLabel.className = 'jp-Dialog-label';
+  argsField.appendChild(argsLabel);
+
+  let editorWidget: JSONEditorWidget | undefined;
+  if (readOnly) {
+    const argsPre = document.createElement('pre');
+    argsPre.textContent = JSON.stringify(shortcut.args ?? {}, undefined, 2);
+    argsField.appendChild(argsPre);
+  } else {
+    editorWidget = new JSONEditorWidget(
+      shortcut.args ?? {},
+      editorFactory,
+      checkValidation
+    );
+    argsField.appendChild(editorWidget.node);
+  }
+  host.appendChild(argsField);
+
+  return {
+    selectorInput,
+    getValue(): ICustomOptions {
+      const argsText = editorWidget?.getJSON() ?? '{}';
+      let args: JSONObject;
+
+      try {
+        args = JSON.parse(argsText);
+      } catch (error) {
+        console.error(
+          `Invalid JSON in arguments: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        args = {};
+      }
+
+      return {
+        selector: selectorInput.value,
+        args
+      };
+    },
+    dispose(): void {
+      editorWidget?.dispose();
+    }
+  };
+}
+
+/**
  * Body widget for selector and arguments fields.
- *
- * Used by {@link CustomOptionsDialog} and reusable in the add-shortcut dialog.
  */
 export class CustomOptionsDialogBody
   extends Widget
   implements Dialog.IBodyWidget<ICustomOptions>
 {
-  private _selectorInput: HTMLInputElement;
-  private _editorWidget?: JSONEditorWidget;
+  private _fields: ICustomOptionsFields;
 
   constructor(options: ICustomOptionsDialogBodyOptions) {
     super();
-    const { shortcut, translator, editorFactory, checkValidation, readOnly } =
-      options;
-    const trans = translator.load('jupyterlab');
-
     this.addClass('jp-Shortcuts-CustomOptionsDialogBody');
-
-    // Create main container
-    const container = document.createElement('div');
-    container.className = 'jp-Shortcuts-CustomOptionDialog-container';
-
-    // Selector section
-    const selectorLabel = document.createElement('label');
-    selectorLabel.textContent = trans.__('Selector:');
-    selectorLabel.className = 'jp-Dialog-label';
-
-    this._selectorInput = document.createElement('input');
-    this._selectorInput.type = 'text';
-    this._selectorInput.disabled = readOnly;
-    this._selectorInput.value = shortcut.selector;
-    this._selectorInput.className = 'jp-mod-styled';
-
-    container.appendChild(selectorLabel);
-    container.appendChild(this._selectorInput);
-
-    // Args section
-    const argsLabel = document.createElement('label');
-    argsLabel.textContent = trans.__('Arguments:');
-    argsLabel.className = 'jp-Dialog-label';
-    container.appendChild(argsLabel);
-
-    if (readOnly) {
-      const argsPre = document.createElement('pre');
-      argsPre.textContent = JSON.stringify(shortcut.args ?? {}, undefined, 2);
-      container.appendChild(argsPre);
-    } else {
-      // Create dedicated JSON editor widget
-      this._editorWidget = new JSONEditorWidget(
-        shortcut.args ?? {},
-        editorFactory,
-        checkValidation
-      );
-      container.appendChild(this._editorWidget.node);
-    }
-
-    this.node.appendChild(container);
+    this._fields = appendCustomOptionFields(this.node, options);
   }
 
   /**
    * Get the value from the dialog body.
    */
   getValue(): ICustomOptions {
-    const argsText = this._editorWidget?.getJSON() ?? '{}';
-    let args: JSONObject;
-
-    try {
-      args = JSON.parse(argsText);
-    } catch (error) {
-      console.error(
-        `Invalid JSON in arguments: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-      args = {};
-    }
-
-    return {
-      selector: this._selectorInput.value,
-      args
-    };
+    return this._fields.getValue();
   }
 
   /**
    * Dispose resources.
    */
   dispose(): void {
-    this._editorWidget?.dispose();
+    this._fields.dispose();
     super.dispose();
   }
 }

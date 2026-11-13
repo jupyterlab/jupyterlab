@@ -21,7 +21,10 @@ import type {
   IShortcutTarget,
   IShortcutUI
 } from '../types';
-import { CustomOptionsDialogBody } from './ShortcutCustomOptions';
+import {
+  appendCustomOptionFields,
+  type ICustomOptionsFields
+} from './ShortcutCustomOptions';
 import type { IConflicts } from './ShortcutInput';
 import { ShortcutInput } from './ShortcutInput';
 
@@ -155,15 +158,15 @@ class NewShortcutDialogBody
 
     this.addClass('jp-Shortcuts-AddDialogBody');
 
-    const container = document.createElement('div');
-    container.className = 'jp-Shortcuts-AddDialog-container';
-
     // Command
+    const commandField = document.createElement('div');
+    commandField.className = 'jp-Shortcuts-Field';
+
     const commandLabel = document.createElement('label');
     commandLabel.textContent = this._trans.__('Command:');
     commandLabel.htmlFor = 'jp-Shortcuts-AddDialog-command';
     commandLabel.className = 'jp-Dialog-label';
-    container.appendChild(commandLabel);
+    commandField.appendChild(commandLabel);
 
     this._commandSelect = document.createElement('select');
     this._commandSelect.id = 'jp-Shortcuts-AddDialog-command';
@@ -187,13 +190,17 @@ class NewShortcutDialogBody
       this._commandSelect.appendChild(option);
     }
     this._commandSelect.addEventListener('change', this._onCommandChange);
-    container.appendChild(this._commandSelect);
+    commandField.appendChild(this._commandSelect);
+    this.node.appendChild(commandField);
 
-    // Keystroke capture
+    // Keystroke capture (label + control share an error indicator)
+    const shortcutField = document.createElement('div');
+    shortcutField.className = 'jp-Shortcuts-Field';
+
     const shortcutLabel = document.createElement('label');
     shortcutLabel.textContent = this._trans.__('Shortcut:');
     shortcutLabel.className = 'jp-Dialog-label';
-    container.appendChild(shortcutLabel);
+    shortcutField.appendChild(shortcutLabel);
 
     this._keysValidity = document.createElement('input');
     this._keysValidity.type = 'text';
@@ -202,34 +209,29 @@ class NewShortcutDialogBody
     this._keysValidity.className = 'jp-sr-only';
     this._keysValidity.setAttribute('aria-hidden', 'true');
     this._updateKeysValidity([]);
-    container.appendChild(this._keysValidity);
+    shortcutField.appendChild(this._keysValidity);
 
     this._captureHost = document.createElement('div');
     this._captureHost.className = 'jp-Shortcuts-AddDialog-capture';
-    container.appendChild(this._captureHost);
+    shortcutField.appendChild(this._captureHost);
 
     this._conflictNode = document.createElement('div');
     this._conflictNode.className = 'jp-Shortcuts-AddDialog-conflict';
     this._conflictNode.setAttribute('role', 'status');
-    container.appendChild(this._conflictNode);
+    shortcutField.appendChild(this._conflictNode);
 
-    this.node.appendChild(container);
+    this.node.appendChild(shortcutField);
 
-    // Selector + arguments (reused body)
-    this._optionsBody = new CustomOptionsDialogBody({
+    // Selector + arguments (shared with Custom Options dialog)
+    this._customOptions = appendCustomOptionFields(this.node, {
       shortcut: this._draft,
       translator: options.translator,
       editorFactory: options.editorFactory,
       checkValidation: options.checkValidation,
       readOnly: false
     });
-    this.node.appendChild(this._optionsBody.node);
-
-    const selectorInput = this._optionsBody.node.querySelector('input');
-    if (selectorInput instanceof HTMLInputElement) {
-      this._selectorInput = selectorInput;
-      selectorInput.addEventListener('input', this._onSelectorChange);
-    }
+    this._selectorInput = this._customOptions.selectorInput;
+    this._selectorInput.addEventListener('input', this._onSelectorChange);
 
     this._reactRoot = createRoot(this._captureHost);
     this._renderCapture();
@@ -239,7 +241,7 @@ class NewShortcutDialogBody
    * Value for the dialog when accepted.
    */
   getValue(): NewShortcutDialog.IValue {
-    const options = this._optionsBody.getValue();
+    const options = this._customOptions.getValue();
     return {
       command: this._draft.command,
       category: this._draft.category,
@@ -255,10 +257,10 @@ class NewShortcutDialogBody
       return;
     }
     this._commandSelect.removeEventListener('change', this._onCommandChange);
-    this._selectorInput?.removeEventListener('input', this._onSelectorChange);
+    this._selectorInput.removeEventListener('input', this._onSelectorChange);
     this._reactRoot?.unmount();
     this._reactRoot = null;
-    this._optionsBody.dispose();
+    this._customOptions.dispose();
     super.dispose();
   }
 
@@ -329,10 +331,8 @@ class NewShortcutDialogBody
   };
 
   private _onSelectorChange = (): void => {
-    if (this._selectorInput) {
-      this._draft.selector = this._selectorInput.value;
-      this._renderCapture();
-    }
+    this._draft.selector = this._selectorInput.value;
+    this._renderCapture();
   };
 
   private _onKeysChange = (keys: string[]): void => {
@@ -401,8 +401,8 @@ class NewShortcutDialogBody
   private _keysValidity: HTMLInputElement;
   private _captureHost: HTMLDivElement;
   private _conflictNode: HTMLDivElement;
-  private _optionsBody: CustomOptionsDialogBody;
-  private _selectorInput: HTMLInputElement | null = null;
+  private _customOptions: ICustomOptionsFields;
+  private _selectorInput: HTMLInputElement;
   private _reactRoot: Root | null = null;
   private _keys: string[] = [];
   private _draft: IDraftShortcut = {
