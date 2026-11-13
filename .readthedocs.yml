@@ -9,22 +9,19 @@ build:
     install:
       - python -m pip install --upgrade pip
       - python -m pip install --group 'docs'
-      # asdf's shims predate the pip install above, so the console scripts it
-      # creates (jlpm, jupyter, jupyter-book, ...) are not on PATH; add the
-      # environment scripts dir so they resolve in the later build steps.
-      - export PATH=$(python -c "import sys,os;print(os.path.dirname(sys.executable))"):$PATH
     post_install:
-      # this should have already run, but show some errors/warnings more cleanly
-      - jlpm
-      # again ensure all packages are built
-      - jlpm build:packages
-      # avoid the lengthy `typedoc` build inside `sphinx` for cleaner logs
-      - jlpm docs
+      # jlpm/jupyter console scripts live in the python env bin dir, which asdf
+      # does not put on PATH. RTD runs each command in a fresh shell, so the
+      # PATH must be extended in the same command as its use.
+      # this should have already run, but show some errors/warnings more
+      # cleanly; again ensure all packages are built. The `jlpm docs` typedoc
+      # build is not repeated here: `make html` runs it via the `api` target.
+      - export PATH=$(python -c "import sys,os;print(os.path.dirname(sys.executable))"):$PATH && jlpm && jlpm build:packages
     build:
       html:
         # Build the site
-        - cd docs/ && export BASE_URL="/en/$READTHEDOCS_VERSION" && make html
+        - cd docs/ && export PATH=$(python -c "import sys,os;print(os.path.dirname(sys.executable))"):$PATH && export BASE_URL="/en/$READTHEDOCS_VERSION" && make html
     post_build:
         # Copy generated files into Read the Docs directory
         - mkdir --parents $READTHEDOCS_OUTPUT/html/
-        - cp --recursive docs/_build/site/* $READTHEDOCS_OUTPUT/html/
+        - cp --recursive docs/_build/html/* $READTHEDOCS_OUTPUT/html/
