@@ -82,6 +82,25 @@
 
 - `ToolbarRegistry.WIDGET_ID_ARG` in `@jupyterlab/apputils` holds the name of the `widgetId` argument. `CellBarExtension.WIDGET_ID_ARG` in `@jupyterlab/cell-toolbar` is deprecated: use `ToolbarRegistry.WIDGET_ID_ARG` instead. The factory returned by `createToolbarFactory` takes the command arguments to add to every item as an optional second parameter.
 
+### Testing with Jest
+
+- `@jupyterlab/apputils` now uses `sanitize-html` 2.18, which depends on `htmlparser2` 12. `htmlparser2` and its dependencies are published as ES modules only. If your `jest.config.js` sets its own `transformIgnorePatterns`, as the extension template does, add these packages to it:
+
+  ```js
+  const esModules = [
+    // ...the packages already listed
+    'dom-serializer',
+    'domelementtype',
+    'domhandler',
+    'domutils',
+    'entities',
+    'htmlparser2',
+    'sanitize-html'
+  ].join('|');
+  ```
+
+  `sanitize-html` itself is not an ES module. It is listed because the other packages can be installed in its own `node_modules` folder, and Jest does not transform a file whose path has an unlisted package before it.
+
 ## JupyterLab 4.5 to 4.6
 
 ### Migrating to `jupyter-builder`
