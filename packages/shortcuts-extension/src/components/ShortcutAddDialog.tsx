@@ -198,6 +198,7 @@ class NewShortcutDialogBody
     shortcutField.className = 'jp-Shortcuts-Field';
 
     const shortcutLabel = document.createElement('label');
+    shortcutLabel.id = 'jp-Shortcuts-AddDialog-shortcut-label';
     shortcutLabel.textContent = this._trans.__('Shortcut:');
     shortcutLabel.className = 'jp-Dialog-label';
     shortcutField.appendChild(shortcutLabel);
@@ -388,6 +389,8 @@ class NewShortcutDialogBody
         translator={this._translator}
         deferPersist={true}
         onKeysChange={this._onKeysChange}
+        id="jp-Shortcuts-AddDialog-shortcut"
+        labelledBy="jp-Shortcuts-AddDialog-shortcut-label"
       />
     );
   }

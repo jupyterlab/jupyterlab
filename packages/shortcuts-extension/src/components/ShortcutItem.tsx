@@ -289,6 +289,8 @@ export class ShortcutItem extends React.Component<
   }
 
   getShortCutAsInput(binding: IKeybinding, location: number): JSX.Element {
+    const commandName =
+      this.props.shortcut.label ?? this.props.shortcut.command;
     return (
       <ShortcutInput
         addKeybinding={this.props.addKeybinding}
@@ -314,6 +316,7 @@ export class ShortcutItem extends React.Component<
         displayInput={this.getDisplayReplaceInput(location)}
         placeholder={this.toSymbols(binding.keys.join(', '))}
         translator={this.props.external.translator}
+        ariaLabel={this._trans.__('Edit shortcut for %1', commandName)}
       />
     );
   }
@@ -415,6 +418,8 @@ export class ShortcutItem extends React.Component<
   }
 
   getInputBoxWhenToggled(): JSX.Element {
+    const commandName =
+      this.props.shortcut.label ?? this.props.shortcut.command;
     return this.state.displayNewInput ? (
       <ShortcutInput
         addKeybinding={this.props.addKeybinding}
@@ -435,6 +440,7 @@ export class ShortcutItem extends React.Component<
         displayInput={this.state.displayNewInput}
         placeholder={''}
         translator={this.props.external.translator}
+        ariaLabel={this._trans.__('Add shortcut for %1', commandName)}
       />
     ) : (
       <div />

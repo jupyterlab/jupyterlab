@@ -54,6 +54,20 @@ export interface IShortcutInputProps {
    * Keys omit empty segments; may be incomplete while modifiers are held.
    */
   onKeysChange?: (keys: string[]) => void;
+  /**
+   * Id of a visible label element. When set, used as `aria-labelledby`
+   * (preferred over {@link ariaLabel}). Needed because the capture control is
+   * a `div`, which is not associated via a label's `htmlFor`.
+   */
+  labelledBy?: string;
+  /**
+   * Accessible name when {@link labelledBy} is not set.
+   */
+  ariaLabel?: string;
+  /**
+   * Id for the capture textbox. Generated when omitted.
+   */
+  id?: string;
 }
 
 export interface IShortcutInputState {
@@ -80,7 +94,9 @@ export class ShortcutInput extends React.Component<
   constructor(props: IShortcutInputProps) {
     super(props);
     this._ref = React.createRef();
-    this._hintId = `jp-Shortcuts-CaptureHint-${ShortcutInput._nextHintId++}`;
+    const idSuffix = ShortcutInput._nextHintId++;
+    this._inputId = props.id ?? `jp-Shortcuts-CaptureInput-${idSuffix}`;
+    this._hintId = `jp-Shortcuts-CaptureHint-${idSuffix}`;
     this._conflictId = `${this._hintId}-conflict`;
 
     this.state = {
@@ -570,6 +586,15 @@ export class ShortcutInput extends React.Component<
       'Capture pauses %1 seconds after the last key.',
       CAPTURE_IDLE_SECONDS
     );
+    const commandName =
+      this.props.shortcut.label ?? this.props.shortcut.command;
+    const defaultAriaLabel = this._isReplacingExistingKeybinding
+      ? trans.__('Shortcut for %1', commandName)
+      : trans.__('New shortcut for %1', commandName);
+    const labelledBy = this.props.labelledBy;
+    const ariaLabel = labelledBy
+      ? undefined
+      : (this.props.ariaLabel ?? defaultAriaLabel);
     const boxClass = [
       'jp-Shortcuts-InputBox',
       !this._isReplacingExistingKeybinding ? 'jp-Shortcuts-InputBoxNew' : '',
@@ -582,6 +607,9 @@ export class ShortcutInput extends React.Component<
       <div className={boxClass} ref={this._ref} onBlur={this._handleBlur}>
         <div className="jp-Shortcuts-InputBox-controls">
           <div
+            id={this._inputId}
+            role="textbox"
+            aria-readonly="true"
             tabIndex={0}
             className={inputClassName}
             onKeyDown={this.handleInput}
@@ -589,6 +617,8 @@ export class ShortcutInput extends React.Component<
             data-lm-suppress-shortcuts="true"
             aria-invalid={isInvalid || undefined}
             aria-describedby={describedBy}
+            aria-labelledby={labelledBy}
+            aria-label={ariaLabel}
           >
             <p
               className={
@@ -693,6 +723,7 @@ export class ShortcutInput extends React.Component<
   private _ref: React.RefObject<HTMLDivElement>;
   private _inputRef = React.createRef<HTMLDivElement>();
   private _submitRef = React.createRef<HTMLButtonElement>();
+  private _inputId: string;
   private _hintId: string;
   private _conflictId: string;
   private _idleTimer: number | null = null;
