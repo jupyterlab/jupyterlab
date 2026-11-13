@@ -3,6 +3,7 @@
 
 import { ServerConnection } from '../serverconnection';
 import type { IUser, IUserAPIClient } from './user';
+import { validateUser } from './validate';
 
 import { URLExt } from '@jupyterlab/coreutils';
 
@@ -40,7 +41,7 @@ export class UserAPIClient implements IUserAPIClient {
    * @returns A promise that resolves with the user data.
    *
    * #### Notes
-   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#/identity).
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#/identity) and validates the response model.
    */
   async get(): Promise<IUser> {
     const { baseUrl } = this.serverSettings;
@@ -52,7 +53,8 @@ export class UserAPIClient implements IUserAPIClient {
       const err = await ResponseError.create(response);
       throw err;
     }
-    // TODO: add validation
-    return await response.json();
+    const data = await response.json();
+    validateUser(data);
+    return data;
   }
 }

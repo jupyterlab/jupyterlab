@@ -11,6 +11,9 @@ module.exports = [
     activate: function (app) {
       console.log('JupyterLab extension middle is activated!');
       console.log(app.commands);
+      // Read content fetched without options, so that the example test can
+      // check that the deprecation warning names each prebuilt extension.
+      void app.serviceManager.contents.get('').then(model => model.content);
       return 'hello';
     }
   }
