@@ -71,14 +71,13 @@ async function injectTag(
   );
 }
 
-test('Tag search finds a plugin by exact tag match', async ({ page }) => {
+test('Tag search finds a plugin by a part of its tag', async ({ page }) => {
   const pluginId = '@jupyterlab/settingeditor-extension:form-ui';
-  await injectTag(page, pluginId, 'zz-galata-tag-test-zz');
+  await injectTag(page, pluginId, 'galata-tag-test');
 
-  // Search by exact tag — 'zz' cannot fuzzy-match any real plugin title
   await page.evaluate(async () => {
     await window.jupyterapp.commands.execute('settingeditor:open', {
-      query: 'zz-galata-tag-test-zz'
+      query: 'tag:GALATA-TAG'
     });
   });
 
@@ -86,29 +85,29 @@ test('Tag search finds a plugin by exact tag match', async ({ page }) => {
   await expect(
     page.locator('.jp-PluginList-entry-label-text').first()
   ).toHaveText('Settings Editor Form UI');
-  // Tag match means the full settings form is visible (not filtered to a subset)
+  // A plugin tag match shows the whole settings form.
   await expect(page.locator('.jp-SettingsForm')).toHaveCount(1);
 });
 
-test('Partial tag does not match via tag search', async ({ page }) => {
+test('Tag search requires the tag: prefix', async ({ page }) => {
   const pluginId = '@jupyterlab/settingeditor-extension:form-ui';
-  await injectTag(page, pluginId, 'zz-galata-partial-zz');
+  await injectTag(page, pluginId, 'galata-tag-test');
 
-  // 'zz-galata-partial' is not an exact match of 'zz-galata-partial-zz'
-  // and cannot fuzzy-match any real plugin title
   await page.evaluate(async () => {
     await window.jupyterapp.commands.execute('settingeditor:open', {
-      query: 'zz-galata-partial'
+      query: 'galata-tag-test'
     });
   });
 
-  await page.locator('.jp-PluginList').waitFor();
-
-  // The form-ui plugin must not appear: no tag match and no title/property match
-  const titles = await page
-    .locator('.jp-PluginList-entry-label-text')
-    .allTextContents();
-  expect(titles).not.toContain('Settings Editor Form UI');
+  await expect
+    .poll(() =>
+      page
+        .locator('.jp-PluginList jp-search')
+        .evaluate(elem => (elem as HTMLInputElement).value)
+    )
+    .toEqual('galata-tag-test');
+  // No plugin title or setting matches the query, and tags are ignored.
+  await expect(page.locator('.jp-PluginList-entry')).toHaveCount(0);
 });
 
 test.describe('change font-size', () => {
