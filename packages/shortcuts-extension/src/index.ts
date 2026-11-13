@@ -28,12 +28,24 @@ import { DisposableSet } from '@lumino/disposable';
 import { Platform } from '@lumino/domutils';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
+import React from 'react';
 
-import { renderShortCut } from './renderer';
 import type { IShortcutsSettingsLayout, IShortcutUI } from './types';
 import { CommandIDs } from './types';
 
 const SHORTCUT_PLUGIN_ID = '@jupyterlab/shortcuts-extension:shortcuts';
+
+type ShortcutRendererProps = {
+  external: IShortcutUI.IExternalBundle;
+};
+
+const ShortcutRenderer = React.lazy(async () => {
+  const { renderShortCut } = await import('./renderer');
+  return {
+    default: (props: ShortcutRendererProps): React.ReactElement =>
+      renderShortCut(props)
+  };
+});
 
 function getExternalForJupyterLab(
   settingRegistry: ISettingRegistry,
@@ -219,16 +231,19 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
 
       const component: IFormRenderer = {
         fieldRenderer: (props: any) => {
-          return renderShortCut({
-            external: getExternalForJupyterLab(
-              registry,
-              app,
-              translator_,
-              actionRequested,
-              editorFactory
-            ),
-            ...props
-          });
+          return React.createElement(
+            React.Suspense,
+            { fallback: null },
+            React.createElement(ShortcutRenderer, {
+              external: getExternalForJupyterLab(
+                registry,
+                app,
+                translator_,
+                actionRequested,
+                editorFactory
+              )
+            })
+          );
         }
       };
       editorRegistry.addRenderer(`${shortcuts.id}.shortcuts`, component);
@@ -324,13 +339,18 @@ List of keyboard shortcuts:`,
         }
 
         const defaults = canonical.properties?.shortcuts?.default ?? [];
+        // Migrate before reconciling, so that a stored shortcut that disables
+        // a default still matches it. The shortcuts editor matches the user
+        // shortcuts with the composite ones, so it gets the migrated ones too.
         const user = {
-          shortcuts: plugin.data.user.shortcuts ?? []
+          shortcuts: Private.migrateSelectors(
+            (plugin.data.user.shortcuts ?? []) as ISettingRegistry.IShortcut[]
+          )
         };
         const composite = {
           shortcuts: SettingRegistry.reconcileShortcuts(
-            defaults as ISettingRegistry.IShortcut[],
-            user.shortcuts as ISettingRegistry.IShortcut[]
+            Private.migrateSelectors(defaults as ISettingRegistry.IShortcut[]),
+            user.shortcuts
           )
         };
 
@@ -386,6 +406,32 @@ namespace Private {
    * The internal collection of currently loaded shortcuts.
    */
   let disposables: IDisposable;
+
+  /**
+   * Selectors that changed for the shortcuts of some commands.
+   */
+  const MOVED_SELECTORS = [
+    {
+      old: '.jp-Activity',
+      new: '.jp-LabShell',
+      commands: ['application:close', 'filemenu:close-and-cleanup']
+    }
+  ];
+
+  /**
+   * Migrate the shortcuts stored with a selector that changed for their command.
+   */
+  export function migrateSelectors(
+    shortcuts: ISettingRegistry.IShortcut[]
+  ): ISettingRegistry.IShortcut[] {
+    return shortcuts.map(shortcut => {
+      const change = MOVED_SELECTORS.find(
+        ({ old, commands }) =>
+          shortcut.selector === old && commands.includes(shortcut.command)
+      );
+      return change ? { ...shortcut, selector: change.new } : shortcut;
+    });
+  }
 
   /**
    * Load the keyboard shortcuts from settings.

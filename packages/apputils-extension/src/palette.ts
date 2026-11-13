@@ -5,25 +5,38 @@
 
 import type { ILayoutRestorer, JupyterFrontEnd } from '@jupyterlab/application';
 import type { ICommandPalette, IPaletteItem } from '@jupyterlab/apputils';
-import { ModalCommandPalette } from '@jupyterlab/apputils';
+import {
+  ModalCommandPalette,
+  RecentsCommandPalette
+} from '@jupyterlab/apputils';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import type { ITranslator } from '@jupyterlab/translation';
+import type { IStateDB } from '@jupyterlab/statedb';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import type { IDisposable } from '@lumino/disposable';
 import { DisposableDelegate } from '@lumino/disposable';
-import { CommandPalette } from '@lumino/widgets';
+import type { VirtualElement } from '@lumino/virtualdom';
+import { h } from '@lumino/virtualdom';
+import type { CommandPalette } from '@lumino/widgets';
 
 /**
  * The command IDs used by the apputils extension.
  */
 namespace CommandIDs {
   export const activate = 'apputils:activate-command-palette';
+
+  export const clearRecents = 'apputils:clear-recent-commands';
 }
 
 const PALETTE_PLUGIN_ID = '@jupyterlab/apputils-extension:palette';
+
+/**
+ * The state database key of the recent commands.
+ */
+const RECENTS_STATE_KEY = 'command-palette:recents';
 
 /**
  * A thin wrapper around the `CommandPalette` class to conform with the
@@ -94,7 +107,7 @@ export namespace Palette {
   ): ICommandPalette {
     const { commands, shell } = app;
     const trans = translator.load('jupyterlab');
-    const palette = Private.createPalette(app);
+    const palette = Private.createPalette(app, translator);
     const modalPalette = new ModalCommandPalette({
       commandPalette: palette,
       restore: () => {
@@ -128,6 +141,8 @@ export namespace Palette {
           modalPalette.attach();
         }
         modal = newModal;
+        palette.maxRecentCommands = settings.get('maxRecentCommands')
+          .composite as number;
       };
 
       Promise.all([loadSettings, app.restored])
@@ -177,6 +192,30 @@ export namespace Palette {
       label: trans.__('Activate Command Palette')
     });
 
+    commands.addCommand(CommandIDs.clearRecents, {
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: () => {
+        palette.recentCommands = [];
+      },
+      isEnabled: () => palette.recentCommands.length > 0,
+      label: trans.__('Clear Recently Used Commands'),
+      caption: trans.__('Clear the list of recently used commands.')
+    });
+    palette.addItem({
+      command: CommandIDs.clearRecents,
+      category: trans.__('Command Palette')
+    });
+
+    // Keep the enabled state of the clear command up to date.
+    palette.recentsChanged.connect(() => {
+      commands.notifyCommandChanged(CommandIDs.clearRecents);
+    });
+
     palette.inputNode.placeholder = trans.__('SEARCH');
 
     return new Palette(palette, translator);
@@ -187,13 +226,57 @@ export namespace Palette {
    */
   export function restore(
     app: JupyterFrontEnd,
-    restorer: ILayoutRestorer
+    restorer: ILayoutRestorer,
+    translator: ITranslator,
+    state: IStateDB,
+    settingRegistry: ISettingRegistry | null
   ): void {
-    const palette = Private.createPalette(app);
+    const palette = Private.createPalette(app, translator);
     // Let the application restorer track the command palette for restoration of
     // application state (e.g. setting the command palette as the current side bar
     // widget).
     restorer.add(palette, 'command-palette');
+
+    // Apply the limit first, so that the default limit does not truncate the
+    // restored history.
+    const limitApplied = settingRegistry
+      ? settingRegistry.load(PALETTE_PLUGIN_ID).then(settings => {
+          palette.maxRecentCommands = settings.get('maxRecentCommands')
+            .composite as number;
+        })
+      : Promise.resolve();
+    const restored = limitApplied
+      .then(() => state.fetch(RECENTS_STATE_KEY))
+      .then(async value => {
+        const saved = (
+          value as
+            | { commands?: RecentsCommandPalette.IRecentCommand[] }
+            | undefined
+        )?.commands;
+        if (!Array.isArray(saved)) {
+          return;
+        }
+        if (palette.maxRecentCommands === 0) {
+          await state.remove(RECENTS_STATE_KEY);
+        } else {
+          palette.recentCommands = [...palette.recentCommands, ...saved];
+        }
+      })
+      .catch((reason: Error) => {
+        console.error('Failed to restore the recently used commands.', reason);
+      });
+
+    // Wait for the restoration, so that an early save does not overwrite
+    // the stored history.
+    palette.recentsChanged.connect(() => {
+      void restored
+        .then(() =>
+          state.save(RECENTS_STATE_KEY, { commands: palette.recentCommands })
+        )
+        .catch((reason: Error) => {
+          console.warn('Failed to save the recently used commands.', reason);
+        });
+    });
   }
 }
 
@@ -204,17 +287,59 @@ namespace Private {
   /**
    * The private command palette instance.
    */
-  let palette: CommandPalette;
+  let palette: RecentsCommandPalette;
+
+  /**
+   * A command palette renderer which adds a badge to the recent commands.
+   */
+  class Renderer extends CommandPaletteSvg.Renderer {
+    /**
+     * Construct a new renderer.
+     */
+    constructor(
+      translator: ITranslator,
+      isRecent: (item: CommandPalette.IItem) => boolean
+    ) {
+      super();
+      this._isRecent = isRecent;
+      this._trans = translator.load('jupyterlab');
+    }
+
+    /**
+     * Render the content for a command palette item.
+     */
+    renderItemContent(data: CommandPalette.IItemRenderData): VirtualElement {
+      if (!this._isRecent(data.item)) {
+        return super.renderItemContent(data);
+      }
+      return h.div(
+        { className: 'lm-CommandPalette-itemContent jp-mod-recent' },
+        this.renderItemLabel(data),
+        this.renderItemCaption(data),
+        h.div(
+          { className: 'jp-CommandPalette-recentBadge' },
+          this._trans.__('recently used')
+        )
+      );
+    }
+
+    private _isRecent: (item: CommandPalette.IItem) => boolean;
+    private _trans: TranslationBundle;
+  }
 
   /**
    * Create the application-wide command palette.
    */
-  export function createPalette(app: JupyterFrontEnd): CommandPalette {
+  export function createPalette(
+    app: JupyterFrontEnd,
+    translator: ITranslator
+  ): RecentsCommandPalette {
     if (!palette) {
-      // use a renderer tweaked to use inline svg icons
-      palette = new CommandPalette({
+      // use a renderer tweaked to use inline svg icons and to display a
+      // badge for the recent commands
+      palette = new RecentsCommandPalette({
         commands: app.commands,
-        renderer: CommandPaletteSvg.defaultRenderer
+        renderer: new Renderer(translator, item => palette.isRecent(item))
       });
       palette.id = 'command-palette';
       palette.title.icon = paletteIcon;

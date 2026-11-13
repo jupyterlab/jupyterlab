@@ -72,10 +72,10 @@ export class NotebookHistory implements INotebookHistory {
   constructor(options: NotebookHistory.IOptions) {
     this._sessionContext = options.sessionContext;
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
+    this._toRequest = this._requestBatchSize;
     void this._handleKernel().then(() => {
       this._sessionContext.kernelChanged.connect(this._handleKernel, this);
     });
-    this._toRequest = this._requestBatchSize;
   }
 
   /**

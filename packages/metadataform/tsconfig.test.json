@@ -1,5 +1,8 @@
 {
   "extends": "../../tsconfigbase.test",
+  "compilerOptions": {
+    "lib": ["DOM", "DOM.iterable", "ES2021.WeakRef"]
+  },
   "include": ["src/*", "test/*"],
   "references": [
     {
