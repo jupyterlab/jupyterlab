@@ -2462,7 +2462,58 @@ export class Notebook extends StaticNotebook {
       return;
     }
 
-    let result;
+    let result = await this._findFragmentTarget(parsedFragment, fragment);
+    if (result == null) {
+      return;
+    }
+
+    // Cells above the target that are still placeholders push it down when
+    // they render, so wait for them and for the layout before scrolling.
+    const index = this.widgets.indexOf(result.cell);
+    await Promise.all(this.widgets.slice(0, index + 1).map(c => c.ready));
+    await Private.nextFrames(2);
+    if (this.isDisposed) {
+      return;
+    }
+    if (result.element == null || !result.element.isConnected) {
+      result =
+        (await this._findFragmentTarget(parsedFragment, fragment)) ?? result;
+    }
+    let { cell, element } = result;
+
+    if (!cell.inViewport) {
+      await this.scrollToCell(cell, 'center');
+    }
+
+    if (element == null || !element.isConnected) {
+      element = cell.node;
+    }
+
+    // Scroll notebook to set the target on top. Cells that come into view
+    // may change size once laid out (for example with content-visibility),
+    // so scroll again until the target stays in place.
+    for (let attempt = 0; attempt < 5; attempt++) {
+      element.scrollIntoView();
+      const top = element.getBoundingClientRect().top;
+      await Private.nextFrames(2);
+      if (
+        this.isDisposed ||
+        !element.isConnected ||
+        Math.abs(element.getBoundingClientRect().top - top) < 1
+      ) {
+        break;
+      }
+    }
+  }
+
+  /**
+   * Find the cell and element targeted by a URI fragment.
+   */
+  private async _findFragmentTarget(
+    parsedFragment: Private.IFragmentData,
+    fragment: string
+  ): Promise<Private.IScrollTarget | null> {
+    let result: Private.IScrollTarget | null;
 
     switch (parsedFragment.kind) {
       case 'heading':
@@ -2472,7 +2523,10 @@ export class Notebook extends StaticNotebook {
         result = this._findCellById(parsedFragment.value);
         break;
       case 'legacy':
-        result = await this._findLegacy(parsedFragment.value);
+        result =
+          (await this._findLegacy(parsedFragment.value)) ??
+          // Cells may not be rendered yet; match headings from their source.
+          (await this._findHeading(parsedFragment.value));
         break;
       default:
         console.warn(
@@ -2483,22 +2537,7 @@ export class Notebook extends StaticNotebook {
         );
         break;
     }
-
-    if (result == null) {
-      return;
-    }
-    let { cell, element } = result;
-
-    if (!cell.inViewport) {
-      await this.scrollToCell(cell, 'center');
-    }
-
-    if (element == null) {
-      element = cell.node;
-    }
-
-    // Scroll notebook to set the target on top.
-    element.scrollIntoView();
+    return result;
   }
 
   /**
@@ -3098,7 +3137,11 @@ export class Notebook extends StaticNotebook {
         // Bail early
         continue;
       }
-      for (const heading of cell.headings) {
+      const headings =
+        cell.model.type === 'markdown'
+          ? await (cell as MarkdownCell).getHeadings()
+          : cell.headings;
+      for (const heading of headings) {
         let id: string | undefined | null = '';
         switch (heading.type) {
           case Cell.HeadingType.HTML:
@@ -3922,6 +3965,15 @@ export namespace Notebook {
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * Resolve after the given number of animation frames.
+   */
+  export async function nextFrames(count: number): Promise<void> {
+    for (let i = 0; i < count; i++) {
+      await new Promise(resolve => requestAnimationFrame(resolve));
+    }
+  }
+
   /**
    * An attached property for the selected state of a cell.
    */
