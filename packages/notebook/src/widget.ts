@@ -1064,15 +1064,14 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
               this.layout.removeWidget(cell);
             });
           } else if (
-            this.notebookConfig.windowingMode === 'contentVisibility'
+            this.notebookConfig.windowingMode === 'contentVisibility' &&
+            // Cells in hidden notebooks do not have a measurable height.
+            this.isVisible
           ) {
             // Update height estimate in the view model
             const height = cell.node.getBoundingClientRect().height;
-            // Cells in hidden notebooks do not have a measurable height.
-            if (height > 0) {
-              this.viewModel.setEstimatedWidgetSize(cell.model.id, height);
-              cell.node.style.containIntrinsicSize = `auto ${height}px`;
-            }
+            this.viewModel.setEstimatedWidgetSize(cell.model.id, height);
+            cell.node.style.containIntrinsicSize = `auto ${height}px`;
           }
         }
       }
