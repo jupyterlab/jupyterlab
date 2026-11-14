@@ -2,7 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
-import type { CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import {
+  CodeMirrorEditor,
+  EditorLanguageRegistry,
+  ybinding
+} from '@jupyterlab/codemirror';
 import type { Signal } from '@lumino/signaling';
 import type {
   ICompletionContext,
@@ -13,11 +18,20 @@ import {
   CompleterModel,
   CompletionHandler,
   CompletionTriggerKind,
+  ContextCompleterProvider,
+  KernelCompleterProvider,
   ProviderReconciliator
 } from '@jupyterlab/completer';
 import { isHintableMimeType } from '@jupyterlab/completer/lib/utils';
 import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
+import { KernelMessage } from '@jupyterlab/services';
+import {
+  KernelMock,
+  SessionConnectionMock
+} from '@jupyterlab/services/lib/testutils';
+import { sleep } from '@jupyterlab/testing';
 import { Widget } from '@lumino/widgets';
+import { YFile } from '@jupyter/ydoc';
 import type { ISharedFile, ISharedText, SourceChange } from '@jupyter/ydoc';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 
@@ -342,6 +356,98 @@ describe('@jupyterlab/completer', () => {
           line,
           column: column + 6
         });
+      });
+    });
+
+    describe('#invoke()', () => {
+      const kernel = new KernelMock({});
+      let anchor: CodeEditorWrapper;
+      let handler: CompletionHandler;
+
+      beforeAll(async () => {
+        const languages = new EditorLanguageRegistry();
+        for (const spec of EditorLanguageRegistry.getDefaultLanguages().filter(
+          language => language.name === 'Python'
+        )) {
+          languages.addLanguage(spec);
+          await languages.getLanguage(spec.name);
+        }
+        const sharedModel = new YFile();
+        anchor = new CodeEditorWrapper({
+          model: new CodeEditor.Model({ sharedModel }),
+          factory: options =>
+            new CodeMirrorEditor({
+              ...options,
+              languages,
+              extensions: [
+                ...(options.extensions ?? []),
+                ybinding({
+                  ytext: sharedModel.ysource,
+                  undoManager: sharedModel.undoManager ?? undefined
+                })
+              ]
+            })
+        });
+        anchor.model.mimeType = 'text/x-python';
+        Widget.attach(anchor, document.body);
+
+        handler = new CompletionHandler({
+          reconciliator: new ProviderReconciliator({
+            context: {
+              widget: anchor,
+              editor: anchor.editor,
+              session: new SessionConnectionMock({}, kernel)
+            },
+            providers: [
+              new ContextCompleterProvider(),
+              new KernelCompleterProvider()
+            ],
+            timeout: 1000
+          }),
+          completer: new Completer({
+            editor: null,
+            model: new CompleterModel()
+          })
+        });
+        handler.editor = anchor.editor;
+      });
+
+      afterAll(() => {
+        anchor.dispose();
+        handler.completer.dispose();
+        handler.dispose();
+      });
+
+      it('should replace the typed prefix after characters outside the BMP', async () => {
+        // Kernels count code points, so in this text `wa` starts at 49.
+        kernel.requestComplete = async () =>
+          KernelMessage.createMessage<KernelMessage.ICompleteReplyMsg>({
+            session: '',
+            channel: 'shell',
+            msgType: 'complete_reply',
+            content: {
+              status: 'ok',
+              matches: ['waterfall'],
+              cursor_start: 49,
+              cursor_end: 51,
+              metadata: {}
+            }
+          });
+        anchor.model.sharedModel.setSource(
+          'print("🔬 XRD ANALYSIS PROGRAM 🔬")\n\nwaterfall = 1\nwa'
+        );
+        await sleep(10);
+        anchor.editor.setCursorPosition({ line: 3, column: 2 });
+
+        handler.invoke();
+        await sleep(10);
+        (handler.completer.selected as Signal<Completer, string>).emit(
+          'waterfall'
+        );
+
+        expect(anchor.model.sharedModel.getSource()).toBe(
+          'print("🔬 XRD ANALYSIS PROGRAM 🔬")\n\nwaterfall = 1\nwaterfall'
+        );
       });
     });
 

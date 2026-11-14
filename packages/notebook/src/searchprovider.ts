@@ -64,6 +64,19 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     );
     this._observeActiveCell();
     this._filtersChanged.connect(this._setEnginesSelectionSearchMode, this);
+
+    // Synchronously initialize _selectedCells from the widget's current
+    // selection state. The reactive path (_onCellSelectionChanged →
+    // _updateCellSelection) only fires on future changes, so without this
+    // initialization a provider created while multiple cells are already
+    // selected would always report "Search in 1 Selected Cell".
+    let initialSelectedCells = 0;
+    for (const cell of this.widget.content.widgets) {
+      if (this.widget.content.isSelectedOrActive(cell)) {
+        initialSelectedCells += 1;
+      }
+    }
+    this._selectedCells = initialSelectedCells;
   }
 
   private _onNotebookStateChanged(_: Notebook, args: IChangedArgs<unknown>) {
@@ -820,6 +833,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     }
 
     await this._ensureCurrentMatch();
+    this._filtersChanged.emit();
   }
 
   /**
@@ -932,6 +946,14 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       clearTimeout(this._delayedActiveCellChangeHandler);
       this._delayedActiveCellChangeHandler = null;
     }
+    if (this._cellSelectionChangePending) {
+      return;
+    }
+    // Selection can change before the active cell changes in the same event,
+    // and entering edit mode deselects the cells one by one: handle it once.
+    this._cellSelectionChangePending = true;
+    await Promise.resolve();
+    this._cellSelectionChangePending = false;
     await this._updateCellSelection();
     if (this._currentProviderIndex === null) {
       // For consistency we set the first cell in selection as current provider.
@@ -940,7 +962,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       );
       this._currentProviderIndex = firstSelectedCellIndex;
     }
+    // Search the new selection before choosing a current match in it.
+    await this._setEnginesSelectionSearchMode();
     await this._ensureCurrentMatch();
+    this._filtersChanged.emit();
   }
 
   private async _updateCellSelection() {
@@ -963,8 +988,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this._selectedCells = selectedCells;
       this._updateSelectionMode();
     }
-
-    this._filtersChanged.emit();
   }
 
   // used for testing only
@@ -996,4 +1019,5 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   private _selectionSearchMode: 'cells' | 'text' = 'cells';
   private _selectionLock: boolean = false;
   private _searchActive: boolean = false;
+  private _cellSelectionChangePending = false;
 }

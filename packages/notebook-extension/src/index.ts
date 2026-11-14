@@ -368,6 +368,8 @@ namespace CommandIDs {
 
   export const virtualScrollbar = 'notebook:toggle-virtual-scrollbar';
 
+  export const toggleToolbar = 'notebook:toggle-toolbar';
+
   export const copySelectedtext = 'notebook:copy-selected-text';
 
   export const pasteText = 'notebook:paste-text';
@@ -3777,10 +3779,14 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
+        const preserveMetadata = settings?.get('preserveDeletableOnCopy')
+          .composite as boolean;
         if (settings?.get('useSystemClipboardForCells').composite as boolean) {
-          return await NotebookActions.cutToSystemClipboard(current.content);
+          return await NotebookActions.cutToSystemClipboard(current.content, {
+            preserveMetadata
+          });
         }
-        return NotebookActions.cut(current.content);
+        return NotebookActions.cut(current.content, { preserveMetadata });
       }
     },
     icon: args => (args.toolbar ? cutIcon : undefined),
@@ -3828,10 +3834,14 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
+        const preserveMetadata = settings?.get('preserveDeletableOnCopy')
+          .composite as boolean;
         if (settings?.get('useSystemClipboardForCells').composite as boolean) {
-          return await NotebookActions.copyToSystemClipboard(current.content);
+          return await NotebookActions.copyToSystemClipboard(current.content, {
+            preserveMetadata
+          });
         }
-        return NotebookActions.copy(current.content);
+        return NotebookActions.copy(current.content, { preserveMetadata });
       }
     },
     icon: args => (args.toolbar ? copyIcon : undefined),
@@ -3964,7 +3974,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        NotebookActions.duplicate(current.content, 'belowSelected');
+        const preserveMetadata = settings?.get('preserveDeletableOnCopy')
+          .composite as boolean;
+        NotebookActions.duplicate(current.content, 'belowSelected', {
+          preserveMetadata
+        });
       }
     },
     icon: args => (args.toolbar ? duplicateIcon : undefined),
@@ -5666,6 +5680,29 @@ function addCommands(
     }
   });
 
+  commands.addCommand(CommandIDs.toggleToolbar, {
+    label: trans.__('Show Toolbar'),
+    caption: trans.__('Show or hide the notebook toolbar'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+      if (current) {
+        current.toolbar.setHidden(!current.toolbar.isHidden);
+        commands.notifyCommandChanged(CommandIDs.toggleToolbar);
+      }
+    },
+    isEnabled,
+    isToggled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return current ? !current.toolbar.isHidden : false;
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: { ...widgetIdProperty }
+      }
+    }
+  });
+
   // All commands with isEnabled defined directly or in a semantic commands
   // To simplify here we added all commands as most of them have isEnabled
   const skip = [CommandIDs.createNew, CommandIDs.createOutputView];
@@ -5715,7 +5752,8 @@ function populatePalette(
     CommandIDs.expandAllCmd,
     CommandIDs.accessPreviousHistory,
     CommandIDs.accessNextHistory,
-    CommandIDs.virtualScrollbar
+    CommandIDs.virtualScrollbar,
+    CommandIDs.toggleToolbar
   ].forEach(command => {
     palette.addItem({ command, category });
   });
@@ -5862,6 +5900,11 @@ function populateMenus(mainMenu: IMainMenu, isEnabled: () => boolean): void {
   mainMenu.viewMenu.editorViewers.toggleMinimap.add({
     id: CommandIDs.virtualScrollbar,
     isEnabled: () => true
+  });
+
+  mainMenu.viewMenu.editorViewers.toggleToolbar.add({
+    id: CommandIDs.toggleToolbar,
+    isEnabled
   });
 
   // Add an ICodeRunner to the application run menu

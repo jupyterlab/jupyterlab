@@ -135,6 +135,135 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#filtersChanged', () => {
+      beforeEach(() => {
+        panel.model!.sharedModel.deleteCellRange(0, 2);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test' },
+          { cell_type: 'code', source: 'test' },
+          { cell_type: 'code', source: 'test' }
+        ]);
+        panel.content.activeCellIndex = 0;
+        panel.content.mode = 'command';
+        // The handlers run on 0 ms timers and the tests wait for frames
+        jest.useRealTimers();
+      });
+
+      afterEach(() => {
+        jest.useFakeTimers();
+      });
+
+      it.each([0, 1, 2])(
+        'should notify with the current match after collapsing selection to cell %i',
+        async cellIndex => {
+          await provider.startQuery(/test/, { selection: true });
+          const selected = signalToPromise(provider.filtersChanged);
+          panel.content.extendContiguousSelectionTo(2);
+          await selected;
+          await framePromise();
+          expect(provider.matchesCount).toBe(3);
+
+          const observed: { current: number | null; count: number | null }[] =
+            [];
+          provider.filtersChanged.connect(() => {
+            observed.push({
+              current: provider.currentMatchIndex,
+              count: provider.matchesCount
+            });
+          });
+
+          // Prompt clicks collapse the selection before changing the active cell.
+          const collapsed = signalToPromise(provider.filtersChanged);
+          panel.content.deselectAll();
+          panel.content.activeCellIndex = cellIndex;
+          await collapsed;
+          await framePromise();
+
+          expect(provider.currentMatchIndex).toBe(0);
+          expect(observed.at(-1)).toEqual({ current: 0, count: 1 });
+          expect(await provider.replaceCurrentMatch('replaced')).toBe(true);
+          expect(
+            panel.model!.cells.get(cellIndex).sharedModel.getSource()
+          ).toBe('replaced');
+          await provider.endQuery();
+        }
+      );
+
+      it.each([0, 1, 2])(
+        'should notify with the current match after the editor of cell %i takes focus',
+        async cellIndex => {
+          await provider.startQuery(/test/, { selection: true });
+          const selected = signalToPromise(provider.filtersChanged);
+          panel.content.extendContiguousSelectionTo(2);
+          await selected;
+          await framePromise();
+
+          const observed: { current: number | null; count: number | null }[] =
+            [];
+          provider.filtersChanged.connect(() => {
+            observed.push({
+              current: provider.currentMatchIndex,
+              count: provider.matchesCount
+            });
+          });
+
+          // Focus in an editor activates its cell, then edit mode deselects
+          // the selected cells one by one.
+          const collapsed = signalToPromise(provider.filtersChanged);
+          panel.content.activeCellIndex = cellIndex;
+          panel.content.mode = 'edit';
+          await collapsed;
+          await framePromise();
+
+          expect(provider.currentMatchIndex).toBe(0);
+          expect(observed.at(-1)).toEqual({ current: 0, count: 1 });
+          expect(await provider.replaceCurrentMatch('replaced')).toBe(true);
+          expect(
+            panel.model!.cells.get(cellIndex).sharedModel.getSource()
+          ).toBe('replaced');
+          await provider.endQuery();
+        }
+      );
+
+      it('should notify with the current match after extending a line selection to cells', async () => {
+        panel.model!.cells.get(0).sharedModel.setSource('abc\ntest');
+        panel.model!.cells.get(1).sharedModel.setSource('');
+        panel.content.mode = 'edit';
+        await setSelections(panel.content.activeCell!.editor!, [
+          {
+            uuid: 'main-selection',
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 3 }
+          }
+        ]);
+        await provider.startQuery(/test/, { selection: true });
+        expect(provider.matchesCount).toBe(0);
+
+        const observed: { current: number | null; count: number | null }[] = [];
+        provider.filtersChanged.connect(() => {
+          observed.push({
+            current: provider.currentMatchIndex,
+            count: provider.matchesCount
+          });
+        });
+
+        // Shift-click on the prompt of the empty cell below
+        const extended = signalToPromise(provider.filtersChanged);
+        panel.content.mode = 'command';
+        panel.content.extendContiguousSelectionTo(1);
+        await extended;
+        await framePromise();
+
+        expect(provider.currentMatchIndex).toBe(0);
+        expect(observed.at(-1)).toEqual({ current: 0, count: 1 });
+        expect(await provider.replaceCurrentMatch('replaced')).toBe(true);
+        expect(panel.model!.cells.get(0).sharedModel.getSource()).toBe(
+          'abc\nreplaced'
+        );
+        await provider.endQuery();
+      });
+    });
+
     describe('#replaceableMatchesCount', () => {
       it('should count only matches which can be replaced', async () => {
         panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
@@ -1116,6 +1245,25 @@ describe('@jupyterlab/notebook', () => {
 
         expect(provider.getFilters().selection.title).toContain('Cell');
         await provider.endQuery();
+      });
+
+      it('should report the correct selected-cell count when provider is created with two cells already selected', () => {
+        // Arrange: put the notebook in command mode and select both cells
+        // before the search provider is instantiated, mimicking the
+        // user workflow: Shift+Up selects cells → Ctrl+F opens search.
+        panel.content.mode = 'command';
+        panel.content.activeCellIndex = 1;
+        panel.content.select(panel.content.widgets[0]);
+        panel.content.select(panel.content.widgets[1]);
+
+        // Act: create a fresh provider now that the selection is in place.
+        const freshProvider = new NotebookSearchProvider(panel);
+        const filters = freshProvider.getFilters();
+
+        // Assert: both cells must be counted immediately, with no signal needed.
+        expect(filters['selection'].title).toBe('Search in 2 Selected Cells');
+
+        freshProvider.dispose();
       });
     });
 

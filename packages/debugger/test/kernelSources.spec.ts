@@ -164,3 +164,44 @@ describe('KernelSourcesBody', () => {
     expect(getSourceItem('/src/module.cpp')?.textContent).toBe('module.cpp');
   });
 });
+
+describe('KernelSourcesModel', () => {
+  let model: KernelSourcesModel;
+
+  const sources = [
+    { name: 'IPython.lib.pretty', path: '/lib/IPython/lib/pretty.py' },
+    { name: 'mypackage', path: '/home/user/mypackage/__init__.py' }
+  ];
+
+  beforeEach(() => {
+    model = new KernelSourcesModel();
+  });
+
+  afterEach(() => {
+    model.dispose();
+  });
+
+  describe('#hideNativeSources', () => {
+    it('should hide the sources that the kernel loads for its own use', async () => {
+      model.hideNativeSources = true;
+      const changed = signalToPromise(model.changed);
+      model.kernelSources = sources;
+
+      const [, shown] = await changed;
+      expect(shown?.map(source => source.name)).toEqual(['mypackage']);
+    });
+
+    it('should show the hidden sources again when set to false', async () => {
+      model.hideNativeSources = true;
+      model.kernelSources = sources;
+      const changed = signalToPromise(model.changed);
+      model.hideNativeSources = false;
+
+      const [, shown] = await changed;
+      expect(shown?.map(source => source.name)).toEqual([
+        'IPython.lib.pretty',
+        'mypackage'
+      ]);
+    });
+  });
+});

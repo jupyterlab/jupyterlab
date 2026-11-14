@@ -259,7 +259,8 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
                 translator={translator}
               />
             );
-          }
+          },
+          getSchemaProperties: () => registry.settingsSchema
         });
       }
 

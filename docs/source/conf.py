@@ -145,7 +145,7 @@ if "sphinxcontrib.spelling" in extensions:
             "spelling_word_list_filename": ["spelling_wordlist.txt"],
             "spelling_exclude_patterns": [
                 "api/**",
-                "getting_started/changelog.md",
+                "getting_started/changelog*.md",
             ],
             "spelling_filters": [
                 "spelling_filters.CodeIdentifierFilter",
@@ -590,8 +590,6 @@ def setup(app: "Sphinx"):
         body="window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init({hashBasedRouting:true})",
     )
 
-    dest = HERE / "getting_started/changelog.md"
-    shutil.copy(str(HERE.parent.parent / "CHANGELOG.md"), str(dest))
     app.add_css_file("css/custom.css")  # may also be an URL
     app.add_js_file("js/plugin_playground_embed.js")
     # Skip expensive API docs build for i18n and spelling-only builders.
