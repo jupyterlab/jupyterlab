@@ -39,7 +39,10 @@ export class DebugConsoleCellExecutor implements IConsoleCellExecutor {
 
     try {
       // Check if debugger has stopped threads (required for evaluation)
-      if (!this._debuggerService.hasStoppedThreads()) {
+      if (
+        !this._debuggerService.hasStoppedThreads() ||
+        !this._debuggerService.model.callstack.frame
+      ) {
         return this.createDisplayData(
           this._trans.__(
             'Debugger does not have stopped threads - cannot evaluate'

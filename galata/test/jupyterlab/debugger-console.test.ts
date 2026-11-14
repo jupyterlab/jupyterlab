@@ -335,6 +335,16 @@ test.describe('Debugger Console', () => {
     await expect(continueButton).toBeVisible();
     await continueButton.click();
 
+    // Wait for the debugger to resume execution and clear stopped threads
+    await page.waitForCondition(async () => {
+      return await page.evaluate(async () => {
+        const debuggerService = await window.galata.getPlugin(
+          '@jupyterlab/debugger-extension:service'
+        );
+        return !debuggerService?.hasStoppedThreads();
+      });
+    });
+
     // Focus on the debug console input
     const debugConsoleWidget = page.locator(DEBUG_CONSOLE_WIDGET_SELECTOR);
     const promptCell = debugConsoleWidget.locator('.jp-CodeConsole-promptCell');

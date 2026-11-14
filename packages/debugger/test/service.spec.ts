@@ -397,6 +397,23 @@ describe('DebuggerService', () => {
       });
     });
 
+    describe('#continue', () => {
+      it('should send continue request with the stopped thread id', async () => {
+        service.session = session;
+        const sendRequest = jest
+          .spyOn(service.session, 'sendRequest')
+          .mockResolvedValue({} as never);
+        service.model.stoppedThreads = new Set([42]);
+
+        await service.continue();
+
+        expect(sendRequest).toHaveBeenCalledWith('continue', {
+          threadId: 42
+        });
+        expect(service.hasStoppedThreads()).toBe(false);
+      });
+    });
+
     describe('#hasStoppedThreads', () => {
       it('should return false if the model is null', () => {
         const hasStoppedThreads = service.hasStoppedThreads();
