@@ -932,6 +932,14 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       _: IDebugger.Model.ICallstack,
       frame: IDebugger.IStackFrame
     ): Promise<void> => {
+      if (
+        service.isStarted &&
+        frame?.source?.path &&
+        revealInOpenEditors(frame.source.path, frame)
+      ) {
+        return;
+      }
+
       if (!showSourcesInMainArea) {
         /* display sources in the sources panel*/
         return;
@@ -964,6 +972,43 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
     };
     model.callstack.currentFrameChanged.connect(onCurrentFrameChanged);
 
+    /**
+     * Focus the open editors of a source on the line of a breakpoint or frame.
+     *
+     * Returns whether any open editor shows the source.
+     */
+    const revealInOpenEditors = (
+      sourcePath: string,
+      breakpointOrFrame?: IDebugger.IBreakpoint | IDebugger.IStackFrame
+    ): boolean => {
+      const results = debuggerSources.find({
+        focus: true,
+        kernel: service.session?.connection?.kernel?.name ?? '',
+        path: service.session?.connection?.path ?? '',
+        source: sourcePath
+      });
+      results.forEach(editor => {
+        void editor.reveal().then(() => {
+          const edit = editor.get();
+          if (
+            edit &&
+            breakpointOrFrame &&
+            typeof breakpointOrFrame.line !== 'undefined'
+          ) {
+            edit.revealPosition({
+              line: breakpointOrFrame.line - 1,
+              column: breakpointOrFrame.column ?? 0
+            });
+            Debugger.EditorHandler.showCurrentLine(
+              edit,
+              breakpointOrFrame.line
+            );
+          }
+        });
+      });
+      return results.length > 0;
+    };
+
     const openSource = (
       /* Method to open sources in the main area */
       source: IDebugger.Source,
@@ -973,32 +1018,12 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
         return;
       }
       const { content, mimeType, path } = source;
-      const results = debuggerSources.find({
-        focus: true,
-        kernel: service.session?.connection?.kernel?.name ?? '',
-        path: service.session?.connection?.path ?? '',
-        source: breakpointOrFrame?.source?.path ?? path
-      });
-      if (results.length > 0) {
-        results.forEach(editor => {
-          void editor.reveal().then(() => {
-            const edit = editor.get();
-            if (
-              edit &&
-              breakpointOrFrame &&
-              typeof breakpointOrFrame.line !== 'undefined'
-            ) {
-              edit.revealPosition({
-                line: breakpointOrFrame.line - 1,
-                column: breakpointOrFrame.column ?? 0
-              });
-              Debugger.EditorHandler.showCurrentLine(
-                edit,
-                breakpointOrFrame.line
-              );
-            }
-          });
-        });
+      if (
+        revealInOpenEditors(
+          breakpointOrFrame?.source?.path ?? path,
+          breakpointOrFrame
+        )
+      ) {
         return;
       }
       // Auto-close previously auto-opened read-only editor
