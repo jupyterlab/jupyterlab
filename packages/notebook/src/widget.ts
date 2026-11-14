@@ -2492,6 +2492,8 @@ export class Notebook extends StaticNotebook {
     }
     let { cell, element } = result;
 
+    // Activating a markdown cell in edit mode would unrender the target.
+    this.setMode('command', { focus: false });
     // Scroll anchoring is enabled only for the active cell.
     this.activeCellIndex = this.widgets.indexOf(cell);
 
