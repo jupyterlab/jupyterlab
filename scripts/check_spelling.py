@@ -375,10 +375,13 @@ def parse_spelling_line(source_dir: Path, line: str) -> tuple[str, list[int], st
     return path, line_numbers, match.group("rest")
 
 
-def spelling_errors_on_changed_lines(
-    build_dir: Path, source_dir: Path, changed_lines: dict[str, set[int]]
+def spelling_errors(
+    build_dir: Path, source_dir: Path, changed_lines: dict[str, set[int]] | None
 ) -> tuple[list[str], int]:
-    """Return spelling errors on changed lines and the ignored error count."""
+    """Return spelling errors and the count ignored outside changed lines.
+
+    With ``changed_lines`` set to None, every error is returned.
+    """
     errors: list[str] = []
     ignored = 0
 
@@ -393,81 +396,16 @@ def spelling_errors_on_changed_lines(
                 continue
 
             path, line_numbers, rest = spelling_error
-            changed = [
-                number for number in line_numbers if number in changed_lines.get(path, set())
-            ]
-            if changed:
-                errors.append(f"{path}:{changed[0]}:{rest}")
+            if changed_lines is not None:
+                line_numbers = [
+                    number for number in line_numbers if number in changed_lines.get(path, set())
+                ]
+            if line_numbers:
+                errors.append(f"{path}:{line_numbers[0]}:{rest}")
             else:
                 ignored += 1
 
     return errors, ignored
-
-
-def spelling_errors(build_dir: Path, source_dir: Path) -> list[str]:
-    """Return every spelling error reported by Sphinx."""
-    errors: list[str] = []
-
-    for report in sorted(build_dir.rglob("*.spelling")):
-        if report.stat().st_size == 0:
-            continue
-
-        for line in report.read_text(encoding="utf-8").splitlines():
-            spelling_error = parse_spelling_line(source_dir, line)
-            if spelling_error is None:
-                errors.append(line)
-                continue
-
-            path, line_numbers, rest = spelling_error
-            errors.append(f"{path}:{line_numbers[0]}:{rest}")
-
-    return errors
-
-
-def spelling_paths_for_run(changed_paths: list[str], support_paths: list[str]) -> list[str]:
-    """Return the document paths that Sphinx should check."""
-    if support_paths:
-        return tracked_text_documents()
-
-    return changed_paths
-
-
-def report_spelling_scope(changed_paths: list[str], support_paths: list[str]) -> None:
-    """Print which files caused the spelling run."""
-    if support_paths:
-        sys.stdout.write("Spelling support files changed; checking all text documents:\n")
-        for path in support_paths:
-            sys.stdout.write(f"  {path}\n")
-        return
-
-    sys.stdout.write("Running Sphinx spelling for changed text documents:\n")
-    for path in changed_paths:
-        sys.stdout.write(f"  {path}\n")
-
-
-def collect_spelling_errors(
-    build_dir: Path,
-    source_dir: Path,
-    changed_lines: dict[str, set[int]],
-    *,
-    check_all_documents: bool,
-) -> tuple[list[str], int]:
-    """Return spelling errors and ignored-error count for the selected scope."""
-    if check_all_documents:
-        return spelling_errors(build_dir, source_dir), 0
-
-    return spelling_errors_on_changed_lines(build_dir, source_dir, changed_lines)
-
-
-def report_spelling_errors(errors: list[str], *, check_all_documents: bool) -> None:
-    """Print spelling errors using wording that matches the selected scope."""
-    if check_all_documents:
-        sys.stdout.write("Spelling errors found in text documents:\n")
-    else:
-        sys.stdout.write("Spelling errors found in changed text-document lines:\n")
-
-    for error in errors:
-        sys.stdout.write(f"{error}\n")
 
 
 def main() -> int:
@@ -488,7 +426,6 @@ def main() -> int:
     changed_lines = changed_text_document_lines(git_diff_args)
     changed_paths = sorted(path for path, lines in changed_lines.items() if lines)
     support_paths = changed_support_files(git_diff_args)
-    check_all_documents = bool(support_paths)
 
     if not changed_paths and not support_paths:
         sys.stdout.write("No changed text-document lines; skipping Sphinx spelling builder.\n")
@@ -497,8 +434,15 @@ def main() -> int:
     if not check_spelling_backend():
         return 1
 
-    spelling_paths = spelling_paths_for_run(changed_paths, support_paths)
-    report_spelling_scope(changed_paths, support_paths)
+    if support_paths:
+        sys.stdout.write("Spelling support files changed; checking all text documents:\n")
+        scope_paths = support_paths
+        spelling_paths = tracked_text_documents()
+    else:
+        sys.stdout.write("Running Sphinx spelling for changed text documents:\n")
+        scope_paths = spelling_paths = changed_paths
+    for path in scope_paths:
+        sys.stdout.write(f"  {path}\n")
 
     with TemporaryDirectory() as source, TemporaryDirectory() as build:
         source_dir = Path(source).resolve()
@@ -509,15 +453,15 @@ def main() -> int:
             staged=args.staged,
         )
         sphinx_returncode = run_sphinx(source_dir, build_dir, spelling_docs)
-        errors, ignored = collect_spelling_errors(
-            build_dir,
-            source_dir,
-            changed_lines,
-            check_all_documents=check_all_documents,
+        errors, ignored = spelling_errors(
+            build_dir, source_dir, None if support_paths else changed_lines
         )
 
     if errors:
-        report_spelling_errors(errors, check_all_documents=check_all_documents)
+        scope = "text documents" if support_paths else "changed text-document lines"
+        sys.stdout.write(f"Spelling errors found in {scope}:\n")
+        for error in errors:
+            sys.stdout.write(f"{error}\n")
         return 1
 
     if ignored:

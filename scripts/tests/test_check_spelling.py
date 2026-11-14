@@ -103,7 +103,7 @@ def test_report_locations(spelling, tmp_path, location, suggestions):
         encoding="utf-8",
     )
 
-    errors, ignored = spelling.spelling_errors_on_changed_lines(build, source, {"example.md": {3}})
+    errors, ignored = spelling.spelling_errors(build, source, {"example.md": {3}})
     assert len(errors) == 1
     assert errors[0].startswith("example.md:3:")
     assert "qzxnewword" in errors[0]
@@ -128,9 +128,7 @@ def test_misreported_location(spelling, tmp_path, location, changed, expected):
     (tmp_path / "example.spelling").write_text(
         f"example.md:{location}: (qzxnewword)  {sentence}\n", encoding="utf-8"
     )
-    errors, ignored = spelling.spelling_errors_on_changed_lines(
-        tmp_path, tmp_path, {"example.md": changed}
-    )
+    errors, ignored = spelling.spelling_errors(tmp_path, tmp_path, {"example.md": changed})
     assert [error[: len("example.md:4:")] for error in errors] == expected
     assert ignored == 1 - len(expected)
 
@@ -148,9 +146,7 @@ def test_misreported_location(spelling, tmp_path, location, changed, expected):
 def test_unmapped_reports_fail(spelling, tmp_path, content, report):
     (tmp_path / "example.md").write_text(content, encoding="utf-8")
     (tmp_path / "example.spelling").write_text(report + "\n", encoding="utf-8")
-    errors, ignored = spelling.spelling_errors_on_changed_lines(
-        tmp_path, tmp_path, {"example.md": {2}}
-    )
+    errors, ignored = spelling.spelling_errors(tmp_path, tmp_path, {"example.md": {2}})
     assert errors == [report]
     assert ignored == 0
 
