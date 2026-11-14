@@ -50,9 +50,11 @@ def repo(tmp_path, monkeypatch, spelling):
     docs = root / "docs/source"
     docs.mkdir(parents=True)
     (docs / "conf.py").write_text(
+        "import os\n"
         "extensions = ['myst_parser', 'sphinxcontrib.spelling']\n"
         "source_suffix = {'.md': 'markdown', '.txt': 'restructuredtext'}\n"
-        "spelling_word_list_filename = ['spelling_wordlist.txt']\n"
+        "spelling_word_list_filename = "
+        "[os.path.join(os.path.dirname(__file__), 'spelling_wordlist.txt')]\n"
         "spelling_show_suggestions = True\n"
         "exclude_patterns = ['spelling_wordlist.txt', 'docs/source/spelling_wordlist.txt']\n",
         encoding="utf-8",
@@ -65,7 +67,6 @@ def repo(tmp_path, monkeypatch, spelling):
     git("commit", "-m", "Initial documents")
     monkeypatch.setattr(spelling, "ROOT", root)
     monkeypatch.setattr(spelling, "DOCS_SOURCE", docs)
-    monkeypatch.setattr(spelling, "SPELLING_WORDLIST", docs / "spelling_wordlist.txt")
     monkeypatch.setattr(sys, "argv", ["check_spelling.py", "--staged"])
     return root, git
 
@@ -228,7 +229,7 @@ def test_staged_snapshot(spelling, repo, tmp_path):
     source = tmp_path / "snapshot"
     source.mkdir()
     spelling.write_spelling_source(source, ["example.md"], staged=True)
-    for path in [*paths, "spelling_wordlist.txt"]:
+    for path in paths:
         assert (source / path).read_text(encoding="utf-8") == "Staged content\n"
 
 

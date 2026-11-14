@@ -36,7 +36,6 @@ SUPPORT_FILE_PATHS = {
 }
 SUPPORT_FILE_PREFIXES = ("docs/source/_ext/",)
 SPELLING_INDEX = "__spelling_index"
-SPELLING_WORDLIST = DOCS_SOURCE / "spelling_wordlist.txt"
 
 HUNK_RE = re.compile(r"^@@ -\d+(?:,\d+)? \+(?P<start>\d+)(?:,(?P<count>\d+))? @@")
 SPELLING_RE = re.compile(r"^(?P<source>.*):(?P<line>\d+|None):(?P<rest>.*)$")
@@ -216,22 +215,6 @@ def copy_tracked_files(source_dir: Path, *, staged: bool) -> None:
         shutil.copy2(source, target)
 
 
-def read_git_index_file(path: str) -> bytes:
-    """Read a file from the git index."""
-    result = subprocess.run(  # noqa: S603
-        ["git", "show", f":{path}"],  # noqa: S607
-        cwd=ROOT,
-        capture_output=True,
-        check=False,
-    )
-    if result.returncode != 0:
-        stderr = result.stderr.decode()
-        message = f"git show :{path} failed:\n{stderr}"
-        raise SystemExit(message)
-
-    return result.stdout
-
-
 def write_spelling_source(
     source_dir: Path,
     spelling_paths: list[str],
@@ -240,12 +223,6 @@ def write_spelling_source(
 ) -> list[Path]:
     """Copy docs into a temporary Sphinx source tree."""
     copy_tracked_files(source_dir, staged=staged)
-
-    wordlist = source_dir / SPELLING_WORDLIST.name
-    if staged:
-        wordlist.write_bytes(read_git_index_file(SPELLING_WORDLIST.relative_to(ROOT).as_posix()))
-    else:
-        shutil.copy2(SPELLING_WORDLIST, wordlist)
 
     spelling_docs = []
     for path in spelling_paths:

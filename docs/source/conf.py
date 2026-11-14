@@ -150,7 +150,7 @@ if "sphinxcontrib.spelling" in extensions:
     # Sphinx consumes these values dynamically by their module-global names.
     globals().update(
         {
-            "spelling_word_list_filename": ["spelling_wordlist.txt"],
+            "spelling_word_list_filename": [str(HERE / "spelling_wordlist.txt")],
             "spelling_exclude_patterns": [
                 "api/**",
                 "docs/source/api/**",
