@@ -23,7 +23,8 @@ import {
   acceptDialog,
   dismissDialog,
   JupyterServer,
-  testEmission
+  testEmission,
+  waitForDialog
 } from '@jupyterlab/testing';
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
 import * as fs from 'fs-extra';
@@ -411,6 +412,20 @@ describe('@jupyterlab/apputils', () => {
         expect(result).toBe(true);
       });
 
+      it('should not start a kernel of the same language when the locked one is unavailable', async () => {
+        const installed = specsManager.specs!.default;
+        sessionContext.kernelPreference = {
+          name: 'not-a-real-kernel',
+          language: specsManager.specs!.kernelspecs[installed]!.language,
+          autoStartDefault: false,
+          locked: true
+        };
+
+        const result = await sessionContext.initialize();
+        expect(result).toBe(true);
+        expect(sessionContext.session?.kernel).toBeFalsy();
+      });
+
       it('should be a no-op if the shouldStart kernelPreference is false', async () => {
         sessionContext.kernelPreference = { shouldStart: false };
         const result = await sessionContext.initialize();
@@ -730,6 +745,27 @@ describe('@jupyterlab/apputils', () => {
         ).toBe(spec.name);
       });
 
+      it('should not pick another kernel when the locked one is unavailablee', () => {
+        const spec =
+          specsManager.specs!.kernelspecs[specsManager.specs!.default]!;
+        const kernelspecs: any = {};
+
+        kernelspecs[spec.name] = spec;
+        expect(
+          SessionContext.getDefaultKernel({
+            specs: {
+              default: spec.name,
+              kernelspecs
+            },
+            preference: {
+              name: 'foo',
+              language: spec.language,
+              locked: true
+            }
+          })
+        ).toBeNull();
+      });
+
       it('should return null if a language matches twice', () => {
         const spec =
           specsManager.specs!.kernelspecs[specsManager.specs!.default]!;
@@ -835,6 +871,127 @@ describe('@jupyterlab/apputils', () => {
         const session = sessionContext.session;
         expect(session!.kernel!.id).toBe(id);
         expect(session!.kernel!.name).toBe(name);
+      });
+
+      it('should persist the lock choice into the kernel preference', async () => {
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          locked: false
+        };
+        await sessionContext.initialize();
+
+        const select = sessionContextDialogs.selectKernel(sessionContext);
+        await waitForDialog();
+        const checkbox = document.querySelector<HTMLInputElement>(
+          '.jp-Dialog-body input[data-role="kernelLock"]'
+        )!;
+        checkbox.checked = true;
+        await acceptDialog();
+        await select;
+
+        expect(sessionContext.kernelPreference.locked).toBe(true);
+      });
+
+      it('should start the selected kernel when locking a new notebook', async () => {
+        // A new notebook with no kernel.
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          locked: false,
+          shouldStart: false
+        };
+        await sessionContext.initialize();
+        expect(sessionContext.hasNoKernel).toBe(true);
+
+        const select = sessionContextDialogs.selectKernel(sessionContext);
+        await waitForDialog();
+        const dropdown = document.querySelector<HTMLSelectElement>(
+          '.jp-Dialog-body select'
+        )!;
+        const lockCheckbox = document.querySelector<HTMLInputElement>(
+          '.jp-Dialog-body input[data-role="kernelLock"]'
+        )!;
+        // Select a kernel and lock it in the same dialog.
+        const defaultName = specsManager.specs!.default;
+        dropdown.value = JSON.stringify({ name: defaultName });
+        lockCheckbox.checked = true;
+        await acceptDialog();
+        await select;
+
+        // The selected kernel must be applied, and the lock set.
+        expect(sessionContext.session?.kernel?.name).toBe(defaultName);
+        expect(sessionContext.kernelPreference.locked).toBe(true);
+      });
+
+      it('should start the locked kernel when no kernel is running', async () => {
+        // A locked kernel choice with no kernel running.
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          locked: true,
+          shouldStart: false
+        };
+        await sessionContext.initialize();
+        expect(sessionContext.hasNoKernel).toBe(true);
+
+        const select = sessionContextDialogs.selectKernel(sessionContext);
+        await waitForDialog();
+        const dropdown = document.querySelector<HTMLSelectElement>(
+          '.jp-Dialog-body select'
+        )!;
+
+        // Select the locked kernel and keep the lock.
+        const lockedName = specsManager.specs!.default;
+        dropdown.value = JSON.stringify({ name: lockedName });
+        await acceptDialog();
+        await select;
+
+        expect(sessionContext.session?.kernel?.name).toBe(lockedName);
+        expect(sessionContext.kernelPreference.locked).toBe(true);
+      });
+
+      it('should not start another kernel when the kernel is locked', async () => {
+        // A locked kernel choice with no kernel running.
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          locked: true,
+          shouldStart: false
+        };
+        await sessionContext.initialize();
+        expect(sessionContext.hasNoKernel).toBe(true);
+
+        const select = sessionContextDialogs.selectKernel(sessionContext);
+        await waitForDialog();
+        const dropdown = document.querySelector<HTMLSelectElement>(
+          '.jp-Dialog-body select'
+        )!;
+
+        // Select a kernel other than the locked one and keep the lock.
+        const otherName = Object.keys(specsManager.specs!.kernelspecs).find(
+          name => name !== specsManager.specs!.default
+        )!;
+        dropdown.value = JSON.stringify({ name: otherName });
+        await acceptDialog();
+        await select;
+
+        expect(sessionContext.session?.kernel).toBeFalsy();
+      });
+
+      it('should show warning when a locked kernel is unavailable', async () => {
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          locked: true,
+          name: 'not-a-real-kernel'
+        };
+
+        const select = sessionContextDialogs.selectKernel(sessionContext);
+        await waitForDialog();
+        // The warning dialog has no kernel selector.
+        const selector = document.querySelector('.jp-Dialog-body select');
+        expect(selector).toBeNull();
+        await acceptDialog();
+        await select;
+
+        // The kernel was not changed.
+        expect(sessionContext.session?.kernel).toBeFalsy();
       });
     });
 
