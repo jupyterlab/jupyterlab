@@ -29,7 +29,9 @@ test.describe('Extension Manager', () => {
             query === null
               ? extensionsList
               : languagePacks.filter(pack =>
-                  pack.name.toLowerCase().includes(query.toLowerCase())
+                  [pack.name, pack.description].some(value =>
+                    value.toLowerCase().includes(query.toLowerCase())
+                  )
                 );
           return route.fulfill({
             status: 200,
@@ -46,6 +48,15 @@ test.describe('Extension Manager', () => {
   test('Sidebar', async ({ page }) => {
     await page.goto();
     await openExtensionSidebar(page);
+
+    const discover = page.locator('#jp-extensionmanager-search');
+    const browse = discover.getByRole('link', {
+      name: 'Browse extensions on PyPI'
+    });
+    await expect(browse).toBeVisible();
+    await expect(discover.getByRole('link').first()).toHaveText(
+      'Browse extensions on PyPI'
+    );
 
     expect(
       await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 600 } })
@@ -78,9 +89,6 @@ test.describe('Extension Manager', () => {
     const sidebar = page.locator('.jp-extensionmanager-view');
     const filter = sidebar.getByRole('searchbox');
     await expect(filter).toHaveValue('jupyterlab-language-pack');
-    await expect(
-      sidebar.getByRole('link', { name: 'Browse extensions on PyPI' })
-    ).toBeVisible();
     await sidebar.getByRole('button', { name: 'Yes', exact: true }).click();
     await expect(
       sidebar.getByText('Search Results', { exact: true })
@@ -93,16 +101,60 @@ test.describe('Extension Manager', () => {
     });
     await expect(french).toBeVisible();
     await expect(german).toBeVisible();
+    await expect(
+      sidebar.getByRole('link', { name: 'Browse extensions on PyPI' })
+    ).toHaveCount(0);
 
-    await filter.fill('fr-fr');
+    await filter.fill('French');
     await expect(german).toHaveCount(0);
     await expect(french).toBeVisible();
+    await expect(
+      sidebar
+        .getByRole('listitem')
+        .filter({ hasText: 'jupyterlab-language-pack-fr-FR' })
+        .locator('svg[data-icon="ui-components:jupyter"]')
+    ).toBeVisible();
     await page.sidebar.setWidth();
-    await waitForExtensionAvatars(page);
 
     expect(
       await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 600 } })
     ).toMatchSnapshot('extensions_search.png');
+  });
+
+  test('List an installed language pack under Installed', async ({ page }) => {
+    const french = {
+      ...languagePacks[1],
+      installed: true,
+      installed_version: '4.6.post0',
+      latest_version: null
+    };
+    await page.route(galata.Routes.extensions, route => {
+      const { searchParams } = new URL(route.request().url());
+      return route.fulfill({
+        json: searchParams.has('query') ? languagePacks : [french]
+      });
+    });
+
+    await page.goto();
+    await page.sidebar.openTab('extensionmanager.main-view');
+    const sidebar = page.locator('.jp-extensionmanager-view');
+    await sidebar.getByRole('button', { name: 'Yes', exact: true }).click();
+    const installed = page
+      .locator('#jp-extensionmanager-installed .jp-extensionmanager-entry')
+      .filter({ hasText: french.name });
+    await expect(installed).toBeVisible();
+    await expect(
+      installed.getByRole('button', { name: 'Uninstall' })
+    ).toBeVisible();
+    await expect(installed.getByRole('button')).toHaveCount(1);
+    await expect(
+      sidebar.getByRole('link', { name: 'jupyterlab-language-pack-de-DE' })
+    ).toBeVisible();
+    await expect(
+      page.locator('#jp-extensionmanager-search').getByText(french.name)
+    ).toHaveCount(0);
+    await sidebar.getByRole('searchbox').fill('French');
+    await expect(installed).toBeVisible();
   });
 
   test('Retry language pack search after PyPI is unavailable', async ({

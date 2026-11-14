@@ -40,16 +40,6 @@
   font-weight: normal;
 }
 
-.jp-extensionmanager-browse {
-  margin: 4px 10px;
-}
-
-.jp-extensionmanager-browse > a {
-  color: var(--jp-content-link-color);
-  text-decoration: underline;
-  text-transform: none;
-}
-
 .jp-extensionmanager-disclaimer {
   padding: 0 8px;
   min-height: 160px;
@@ -88,6 +78,26 @@
   min-height: 0;
   flex: 1 1 auto;
   overflow: auto;
+}
+
+.jp-extensionmanager-searchresults {
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-extensionmanager-searchresults > .jp-extensionmanager-listview-wrapper {
+  flex: 1;
+  min-height: 0;
+}
+
+.jp-extensionmanager-browse {
+  padding: 8px;
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
+}
+
+.jp-extensionmanager-browse > a {
+  color: var(--jp-content-link-color);
+  text-decoration: underline;
 }
 
 /*

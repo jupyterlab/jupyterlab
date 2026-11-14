@@ -70,9 +70,9 @@ export interface IEntry {
   status: 'ok' | 'warning' | 'error' | 'deprecated' | null;
 
   /**
-   * The package type (prebuilt or source).
+   * The package type.
    */
-  pkg_type: 'prebuilt' | 'source';
+  pkg_type: 'prebuilt' | 'source' | 'language-pack';
 
   /**
    * The information about extension installation.
@@ -476,11 +476,11 @@ export class ListModel extends VDomModel {
   }
 
   /**
-   * Refresh the installed list and, for PyPI, the available language packs.
+   * Refresh the installed list and any available search results.
    */
   async refresh(): Promise<void> {
     await this.refreshInstalled(true);
-    if (this.name === 'PyPI' && this.isDisclaimed) {
+    if (this.canInstall && this.isDisclaimed) {
       await this._debouncedSearch.invoke(true);
     }
   }

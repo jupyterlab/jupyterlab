@@ -130,8 +130,9 @@ your screen.
 
 ### Finding Extensions
 
-The "Discover" section lists the available JupyterLab language packs. The search
-field filters both the available packs and the "Installed" section by name.
+The "Discover" section lists the available JupyterLab language packs and pins
+the "Browse extensions on PyPI" link above the list. The search field matches
+package names and language pack descriptions.
 **Settings → Language → Install more languages…** opens the Extension Manager
 with the language pack search filled in.
 
@@ -157,9 +158,9 @@ The newly installed extension may require JupyterLab to be restarted.
 
 ### Managing Installed Extensions
 
-When there are some installed extensions, they will be shown in the "Installed"
-section. These can then be uninstalled or disabled. Disabling an extension will
-prevent it from being activated, but without rebuilding the application.
+Installed extensions and language packs appear in the "Installed" section,
+where you can uninstall them. You can also disable extensions to prevent them
+from being activated without rebuilding the application.
 
 ### Configuring the Extension Manager
 

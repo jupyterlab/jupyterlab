@@ -6,6 +6,7 @@
 
 import { PageConfig } from '@jupyterlab/coreutils';
 import type { ServiceManager } from '@jupyterlab/services';
+import { ServerConnection } from '@jupyterlab/services';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { ListModel } from '@jupyterlab/extensionmanager';
 import type { IEntry } from '@jupyterlab/extensionmanager';
@@ -190,6 +191,38 @@ describe('@jupyterlab/extensionmanager', () => {
         expect(model.searchError).toBeNull();
         expect(model.query).toBe('jupyterlab-language-pack');
       });
+    });
+
+    describe('#refresh()', () => {
+      afterEach(() => {
+        jest.restoreAllMocks();
+      });
+
+      it.each([
+        [true, true, 1],
+        [true, false, 0],
+        [false, true, 0]
+      ])(
+        'should refresh search according to canInstall=%s and isDisclaimed=%s',
+        async (canInstall, isDisclaimed, expectedSearches) => {
+          const model = createModel({
+            name: 'Custom registry',
+            can_install: canInstall
+          });
+          const request = jest
+            .spyOn(ServerConnection, 'makeRequest')
+            .mockImplementation(async () => new Response('[]'));
+          model.isDisclaimed = isDisclaimed;
+
+          await model.refresh();
+
+          expect(model.fetchInstalledCount).toBe(1);
+          expect(request).toHaveBeenCalledTimes(expectedSearches);
+          expect(
+            request.mock.calls.filter(([url]) => url.includes('refresh=1'))
+          ).toHaveLength(expectedSearches);
+        }
+      );
     });
 
     describe('#fetchInstalled()', () => {

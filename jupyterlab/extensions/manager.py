@@ -63,7 +63,7 @@ class ExtensionPackage:
         name: Package name
         description: Package description
         homepage_url: Package home page
-        pkg_type: Type of package - ["prebuilt", "source"]
+        pkg_type: Type of package - ["prebuilt", "source", "language-pack"]
         allowed: [optional] Whether this extension is allowed or not - default True
         approved: [optional] Whether the package is approved by your administrators - default False
         companion: [optional] Type of companion for the frontend extension - [None, "kernel", "server"]; default None

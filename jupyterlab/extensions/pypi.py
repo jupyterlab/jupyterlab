@@ -14,6 +14,7 @@ import tempfile
 from collections.abc import Awaitable, Callable
 from functools import partial
 from http import HTTPStatus
+from importlib.metadata import Distribution, entry_points
 from os import environ
 from pathlib import Path
 from subprocess import CalledProcessError, run
@@ -25,6 +26,7 @@ from zipfile import ZipFile
 import httpx2
 import tornado
 from async_lru import alru_cache
+from jupyterlab_server.translation_utils import JUPYTERLAB_LANGUAGEPACK_ENTRY
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
 from packaging.utils import InvalidName, canonicalize_name
 from packaging.version import InvalidVersion, Version
@@ -199,6 +201,14 @@ LANGUAGE_PACKS = (
 )
 
 
+def _installed_language_packs() -> dict[str, Distribution]:
+    packs: dict[str, Distribution] = {}
+    for entry in entry_points(group=JUPYTERLAB_LANGUAGEPACK_ENTRY):
+        if entry.dist is not None and entry.dist.name:
+            packs[canonicalize_name(entry.dist.name)] = entry.dist
+    return packs
+
+
 class PyPIExtensionManager(ExtensionManager):
     """Extension manager using pip as package manager and PyPi.org as packages source."""
 
@@ -336,6 +346,33 @@ class PyPIExtensionManager(ExtensionManager):
         else:
             self._configure_package_metadata_cache()
 
+    @override
+    async def _get_installed_extensions(
+        self, get_latest_version: bool = True
+    ) -> dict[str, ExtensionPackage]:
+        extensions = await super()._get_installed_extensions(get_latest_version)
+        for name, dist in _installed_language_packs().items():
+            metadata = dist.metadata.json
+            summary = metadata.get("summary")
+            homepage = metadata.get("home_page")
+            project_urls = metadata.get("project_url")
+            if not homepage and isinstance(project_urls, list):
+                for project_url in project_urls:
+                    label, _, url = project_url.partition(",")
+                    if label.strip().casefold() == "homepage":
+                        homepage = url.strip()
+                        break
+            extensions[name] = ExtensionPackage(
+                name=name,
+                description=summary if isinstance(summary, str) else "",
+                homepage_url=homepage if isinstance(homepage, str) else "",
+                pkg_type="language-pack",
+                installed=True,
+                installed_version=dist.version,
+                latest_version=None,
+            )
+        return extensions
+
     async def list_packages(
         self, query: str, page: int, per_page: int
     ) -> tuple[dict[str, ExtensionPackage], int | None]:
@@ -344,7 +381,8 @@ class PyPIExtensionManager(ExtensionManager):
             self._configure_package_metadata_cache()
 
         query = query.casefold()
-        names = sorted(name for name in LANGUAGE_PACKS if query in name.casefold())
+        installed = _installed_language_packs()
+        names = sorted(name for name in LANGUAGE_PACKS if canonicalize_name(name) not in installed)
         packages = await asyncio.gather(
             *(self._fetch_package_metadata(name, self.base_url) for name in names),
             return_exceptions=True,
@@ -361,6 +399,9 @@ class PyPIExtensionManager(ExtensionManager):
                 continue
             latest_version = _metadata_string(data, "version")
             if not latest_version:
+                continue
+            description = _metadata_string(data, "summary") or ""
+            if query not in name.casefold() and query not in description.casefold():
                 continue
 
             package_urls = _metadata_string_map(data, "project_urls")
@@ -389,7 +430,6 @@ class PyPIExtensionManager(ExtensionManager):
                 requires_python
             )
 
-            description = _metadata_string(data, "summary") or ""
             if version_explanation:
                 if description:
                     description += f" ({version_explanation})"
@@ -403,7 +443,7 @@ class PyPIExtensionManager(ExtensionManager):
                 author=_metadata_string(data, "author"),
                 license=_metadata_string(data, "license"),
                 latest_version=ExtensionManager.get_semver_version(latest_version),
-                pkg_type="prebuilt",
+                pkg_type="language-pack",
                 allowed=python_compatible,
                 bug_tracker_url=bug_tracker_url,
                 documentation_url=documentation_url,

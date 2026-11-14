@@ -56,22 +56,63 @@ async def test_pypi_search_only_lists_language_packs(monkeypatch):
     browse = Mock(return_value=[("jupyterlab-git", "1.0.0")])
     monkeypatch.setattr("xmlrpc.client.ServerProxy", Mock(return_value=Mock(browse=browse)))
     manager = PyPIExtensionManager()
-    get = AsyncMock(return_value=httpx2.Response(200, json={"info": {"version": "1.0.0"}}))
+    get = AsyncMock(
+        return_value=httpx2.Response(
+            200, json={"info": {"version": "1.0.0", "summary": "French language pack"}}
+        )
+    )
     monkeypatch.setattr(manager._httpx_client, "get", get)
 
     extensions, _ = await manager.list_extensions("jupyterlab-git")
     assert extensions == []
-    get.assert_not_called()
 
-    packs, _ = await manager.list_extensions("FR-fr")
-    assert [(pack.name, pack.latest_version) for pack in packs] == [
-        ("jupyterlab-language-pack-fr-FR", "1.0.0")
-    ]
+    for query in ("FR-fr", "FRENCH"):
+        packs, _ = await manager.list_extensions(query)
+        assert [(pack.name, pack.latest_version) for pack in packs] == [
+            ("jupyterlab-language-pack-fr-FR", "1.0.0")
+        ]
     get.assert_awaited_once_with(
         f"{manager.base_url}/jupyterlab-language-pack-fr-FR/json",
         headers={"Content-Type": "application/json"},
     )
     browse.assert_not_called()
+
+
+@patch(
+    "jupyterlab.extensions.pypi.LANGUAGE_PACKS",
+    ("jupyterlab-language-pack-de-DE", "jupyterlab-language-pack-fr-FR"),
+)
+async def test_pypi_lists_installed_language_packs_separately(monkeypatch, tmp_path):
+    dist_info = tmp_path / "jupyterlab_language_pack_de_de-4.5.post3.dist-info"
+    dist_info.mkdir()
+    (dist_info / "METADATA").write_text(
+        "Name: jupyterlab_language_pack_de_de\n"
+        "Version: 4.5.post3\n"
+        "Summary: German language pack\n"
+        "Project-URL: homepage, https://github.com/jupyterlab/language-packs\n",
+        encoding="utf-8",
+    )
+    (dist_info / "entry_points.txt").write_text(
+        "[jupyterlab.languagepack]\nde_DE = jupyterlab_language_pack_de_DE\n",
+        encoding="utf-8",
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+    monkeypatch.setattr(ExtensionManager, "_get_installed_extensions", AsyncMock(return_value={}))
+    manager = PyPIExtensionManager()
+    get = AsyncMock(return_value=httpx2.Response(200, json={"info": {"version": "4.5.post3"}}))
+    monkeypatch.setattr(manager._httpx_client, "get", get)
+
+    packs, _ = await manager.list_extensions()
+    assert [
+        (pack.name, pack.installed_version, pack.installed, pack.pkg_type) for pack in packs
+    ] == [("jupyterlab-language-pack-de-de", "4.5.post3", True, "language-pack")]
+    assert packs[0].description == "German language pack"
+    assert packs[0].homepage_url == "https://github.com/jupyterlab/language-packs"
+    get.assert_not_called()
+
+    packs, last_page = await manager.list_extensions("", per_page=1)
+    assert [pack.name for pack in packs] == ["jupyterlab-language-pack-fr-FR"]
+    assert last_page == 1
 
 
 @pytest.mark.parametrize(
@@ -439,7 +480,7 @@ async def test_pypi_language_pack_pagination_skips_unavailable_packs(monkeypatch
             name="jupyterlab-language-pack-de-DE",
             description="A JupyterLab language pack",
             homepage_url="https://github.com/jupyterlab/language-packs",
-            pkg_type="prebuilt",
+            pkg_type="language-pack",
             latest_version="1.2.3-rc.1",
         )
     ]
