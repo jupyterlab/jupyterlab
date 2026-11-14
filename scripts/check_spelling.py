@@ -112,6 +112,8 @@ def changed_text_document_lines(git_diff_args: list[str]) -> dict[str, set[int]]
             "--unified=0",
             "--no-color",
             "--no-ext-diff",
+            "--src-prefix=a/",
+            "--dst-prefix=b/",
             "--diff-filter=ACMR",
             *git_diff_args,
             "--",
