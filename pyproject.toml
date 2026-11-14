@@ -78,8 +78,7 @@ docs-screenshots = [
     # IPython is frozen because its version is displayed in
     # the console header
     "altair==6.3.0",
-    # Held at 9.16.1: from 9.17 the debugger also pauses inside pygments on
-    # raised exceptions, so the "Breakpoints on exception" test times out
+    # Held at 9.16.1: https://github.com/ipython/ipykernel/issues/1596
     "ipython==9.16.1",
     "ipywidgets==8.1.9",
     "jupyterlab-geojson==3.4.0",
