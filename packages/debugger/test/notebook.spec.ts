@@ -33,11 +33,12 @@ describe('NotebookHandler', () => {
   }
 
   /**
-   * Send a breakpoint on line 2 of the first cell, as its editor does a
-   * second after an edit.
+   * Send a breakpoint on line 2 of a cell, as its editor does a second
+   * after an edit.
    */
-  async function sendBreakpoint(): Promise<void> {
-    const cellHandler = handler['_cellMap'].get(firstCell().id)!;
+  async function sendBreakpoint(index = 0): Promise<void> {
+    const id = context.model.cells.get(index).id;
+    const cellHandler = handler['_cellMap'].get(id)!;
     cellHandler['_getBreakpointsFromEditor'] = () => [2];
     cellHandler['_sendEditorBreakpoints']();
     await flushRequests();
@@ -122,5 +123,23 @@ describe('NotebookHandler', () => {
     await sendBreakpoint();
 
     expect(kernel.get(service.getCodeId(CODE))).toEqual([2]);
+  });
+
+  it('should clear the breakpoints of a moved cell when it is edited', async () => {
+    context.model.sharedModel.moveCell(0, 1);
+    await flushRequests();
+    context.model.cells.get(1).sharedModel.setSource('def f():\n    return 2');
+    await sendBreakpoint(1);
+
+    expect(kernel.has(service.getCodeId(CODE))).toBe(false);
+  });
+
+  it('should clear the breakpoints of a cell deleted after debugging restarts', async () => {
+    handler.dispose();
+    handler = new NotebookHandler({ debuggerService: service, widget: panel });
+    context.model.sharedModel.deleteCell(0);
+    await flushRequests();
+
+    expect(kernel.has(service.getCodeId(CODE))).toBe(false);
   });
 });

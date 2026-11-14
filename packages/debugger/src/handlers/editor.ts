@@ -61,6 +61,15 @@ export class EditorHandler implements IDisposable {
     if ('execution_count' in src && typeof src.execution_count === 'number') {
       this._ranPaths.add(this._debuggerService.getCodeId(src.getSource()));
     }
+    // After a reload or a move, the cell already shows the breakpoints of
+    // its code, and the next edit or a deletion has to clear them.
+    if (!this._path) {
+      const path = this._debuggerService.getCodeId(src.getSource());
+      const model = this._debuggerService.model.breakpoints;
+      if (path && model.getBreakpoints(path).length) {
+        this._lastCellPath = path;
+      }
+    }
 
     this._src.changed.connect(this._onSharedModelChanged, this);
     this._editorMonitor = new ActivityMonitor({
