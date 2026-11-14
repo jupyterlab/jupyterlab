@@ -321,8 +321,8 @@ def path_from_source(source: str, source_dir: Path) -> str | None:
     return relative.as_posix()
 
 
-def spelling_line_from_context(source_dir: Path, path: str, report: str) -> int | None:
-    """Recover a missing location only when its context matches one source line."""
+def spelling_context(source_dir: Path, path: str, report: str) -> tuple[str, list[str]] | None:
+    """Return the context text of a spelling report and the lines of its source."""
     match = SPELLING_CONTEXT_RE.match(report)
     if match is None:
         return None
@@ -344,11 +344,38 @@ def spelling_line_from_context(source_dir: Path, path: str, report: str) -> int 
     except (OSError, UnicodeError):
         return None
 
+    return context, lines
+
+
+def spelling_lines(source_dir: Path, path: str, line_number: int, report: str) -> list[int]:
+    """Return the source lines that a spelling report can refer to.
+
+    Sphinx may report a word at the first line of its block (for example a
+    multi-line MyST paragraph), at an unrelated line, or at line 0, so the
+    context is searched up to the block end, then in the whole file.
+    """
+    found = spelling_context(source_dir, path, report)
+    fallback = [line_number] if line_number else []
+    if found is None:
+        return fallback
+
+    context, lines = found
+    if line_number:
+        matches = []
+        for number in range(line_number, len(lines) + 1):
+            text = lines[number - 1]
+            if not text.strip():
+                break
+            if context in text:
+                matches.append(number)
+        if matches:
+            return matches
+
     matches = [number for number, text in enumerate(lines, 1) if context in text]
-    return matches[0] if len(matches) == 1 else None
+    return matches if len(matches) == 1 else fallback
 
 
-def parse_spelling_line(source_dir: Path, line: str) -> tuple[str, int, str] | None:
+def parse_spelling_line(source_dir: Path, line: str) -> tuple[str, list[int], str] | None:
     """Parse one line from a Sphinx spelling report."""
     match = SPELLING_RE.match(line)
     if not match:
@@ -359,11 +386,10 @@ def parse_spelling_line(source_dir: Path, line: str) -> tuple[str, int, str] | N
         return None
 
     line_number = int(match.group("line")) if match.group("line") != "None" else 0
-    if line_number == 0:
-        line_number = spelling_line_from_context(source_dir, path, match.group("rest"))
-        if line_number is None:
-            return None
-    return path, line_number, f"{path}:{line_number}:{match.group('rest')}"
+    line_numbers = spelling_lines(source_dir, path, line_number, match.group("rest"))
+    if not line_numbers:
+        return None
+    return path, line_numbers, match.group("rest")
 
 
 def spelling_errors_on_changed_lines(
@@ -383,9 +409,12 @@ def spelling_errors_on_changed_lines(
                 errors.append(line)
                 continue
 
-            path, line_number, text = spelling_error
-            if line_number in changed_lines.get(path, set()):
-                errors.append(text)
+            path, line_numbers, rest = spelling_error
+            changed = [
+                number for number in line_numbers if number in changed_lines.get(path, set())
+            ]
+            if changed:
+                errors.append(f"{path}:{changed[0]}:{rest}")
             else:
                 ignored += 1
 
@@ -406,8 +435,8 @@ def spelling_errors(build_dir: Path, source_dir: Path) -> list[str]:
                 errors.append(line)
                 continue
 
-            _, _, text = spelling_error
-            errors.append(text)
+            path, line_numbers, rest = spelling_error
+            errors.append(f"{path}:{line_numbers[0]}:{rest}")
 
     return errors
 
