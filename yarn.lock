@@ -14320,14 +14320,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lib0@npm:^0.2.42, lib0@npm:^0.2.49":
-  version: 0.2.65
-  resolution: "lib0@npm:0.2.65"
+"lib0@npm:^0.2.42, lib0@npm:^0.2.99":
+  version: 0.2.120
+  resolution: "lib0@npm:0.2.120"
   dependencies:
     isomorphic.js: ^0.2.4
   bin:
+    0ecdsa-generate-keypair: bin/0ecdsa-generate-keypair.js
     0gentesthtml: bin/gentesthtml.js
-  checksum: c511810d209d8b616005ff9a93966d11c15b0a092953c1fb01f48dd53fb9830d19cbfe7dfffaa3f5913fba5801761fba76e3ca4dae8c2164cb606428a5f6a838
+    0serve: bin/0serve.js
+  checksum: 7c0c2f964f147804c9a18c96c7e74722e79cfc77b773708474f507422e543a79c927497ceab3d96227727d90e38f8b5b72916db1f6bbf25ad4d10bcd3ceecd57
   languageName: node
   linkType: hard
 
@@ -19674,12 +19676,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yjs@npm:^13.5.40":
-  version: 13.5.49
-  resolution: "yjs@npm:13.5.49"
+"yjs@npm:^13.6.33":
+  version: 13.6.33
+  resolution: "yjs@npm:13.6.33"
   dependencies:
-    lib0: ^0.2.49
-  checksum: d5e0ec9ce055cff0abf6335106ee6b946948995cf29ae2a1702070e1d4418e62bdf1a73348a6f552c467181a8a5bb4c7d72f1acaaacd27eac5977014ffd2a210
+    lib0: ^0.2.99
+  checksum: 02e20ef79a687dd05b6d70ad309a261c79f9c4a6bcff4cbaafd3d57b4b6967b260cac8c6f11cd420ccadc03c2a8d2f87f76dc55c1999a3a77e0643ceb6775ae0
   languageName: node
   linkType: hard
 
