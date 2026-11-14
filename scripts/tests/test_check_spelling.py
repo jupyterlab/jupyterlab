@@ -183,6 +183,17 @@ def test_diff_ranges(spelling, repo, content, expected):
     assert changes == ({"example.md": expected} if expected else {})
 
 
+@pytest.mark.parametrize("config", ["diff.mnemonicPrefix", "diff.noprefix"])
+def test_diff_prefix_config(spelling, repo, config):
+    root, git = repo
+    git("config", config, "true")
+    (root / "example.md").write_text(
+        "# Title\n\nAn existing qzxoldword.\n\nA changed sentence.\n", encoding="utf-8"
+    )
+    git("add", "example.md")
+    assert spelling.changed_text_document_lines(["--cached"]) == {"example.md": {5}}
+
+
 @pytest.mark.parametrize("staged", [False, True])
 def test_dirty_checkout_rejected(spelling, repo, staged):
     root, git = repo
