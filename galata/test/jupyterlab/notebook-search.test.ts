@@ -721,6 +721,55 @@ test.describe('Notebook Search', () => {
     });
   }
 
+  test('Keep the scroll position when the search restarts after a cell is added, with a match in an output', async ({
+    page,
+    tmpPath
+  }) => {
+    const notebook = galata.Notebook.generateNotebook(
+      40,
+      'code',
+      ['print("hay")'],
+      [{ output_type: 'stream', name: 'stdout', text: ['Only hay here.\n'] }]
+    );
+    notebook.cells[30].outputs = [
+      { output_type: 'stream', name: 'stdout', text: ['The needle is here.\n'] }
+    ];
+    await page.contents.uploadContent(
+      JSON.stringify(notebook),
+      'text',
+      `${tmpPath}/haystack.ipynb`
+    );
+    await page.notebook.openByPath(`${tmpPath}/haystack.ipynb`);
+    await page.notebook.activate('haystack.ipynb');
+
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+    await page.click('text=Search Cell Outputs');
+    // If the notebook is not fully loaded yet a confirmation dialog will show up
+    if (await page.locator('.jp-Dialog').isVisible()) {
+      await page.click('.jp-Dialog .jp-mod-accept');
+    }
+    await page.fill('[placeholder="Find"]', 'needle');
+    await expect(page.locator('.jp-DocumentSearch-index-counter')).toHaveText(
+      '1/1'
+    );
+
+    const firstCell = (await page.notebook.getCellLocator(0))!;
+    await (await page.notebook.getNotebookInPanelLocator())!.hover();
+    await page.mouse.wheel(0, -10000);
+    await expect(firstCell).toBeInViewport();
+
+    const mark = page.locator('.jp-OutputArea .jp-current-match');
+    const previousMark = await mark.elementHandle();
+    await firstCell.locator('.jp-InputPrompt').click();
+    await page.keyboard.press('b');
+    // The search starts again and marks the match anew
+    await page.waitForFunction(element => !element?.isConnected, previousMark);
+    await expect(mark).toHaveCount(1);
+
+    await expect(firstCell).toBeInViewport();
+  });
+
   test('Search on typing', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');

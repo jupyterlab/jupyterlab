@@ -280,7 +280,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
 
       while (this.currentProviderIndex < this.outputsProvider.length) {
         const provider = this.outputsProvider[this.currentProviderIndex];
-        const match = await provider.highlightNext(false);
+        const match = await provider.highlightNext(false, options);
         if (match) {
           this.currentIndex =
             super.matchesCount +
@@ -329,7 +329,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
       while (this.currentProviderIndex >= 0) {
         const provider = this.outputsProvider[this.currentProviderIndex];
 
-        const match = await provider.highlightPrevious(false);
+        const match = await provider.highlightPrevious(false, options);
         if (match) {
           this.currentIndex =
             super.matchesCount +
