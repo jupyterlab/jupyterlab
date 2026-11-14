@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import json
 import os
 import re
@@ -25,6 +26,7 @@ EXCLUDED_TEXT_DOCUMENTS = {
     "docs/source/spelling_wordlist.txt",
     "scripts/release_template.txt",
 }
+EXCLUDED_TEXT_DOCUMENT_PATTERNS = ("docs/source/getting_started/changelog*.md",)
 SUPPORT_FILE_PATHS = {
     ".github/workflows/spell-check.yml",
     "docs/source/conf.py",
@@ -75,7 +77,9 @@ def diff_args(args: argparse.Namespace) -> list[str]:
 
 def is_text_document(path: str) -> bool:
     """Return whether a path is a text document checked for spelling."""
-    if path in EXCLUDED_TEXT_DOCUMENTS:
+    if path in EXCLUDED_TEXT_DOCUMENTS or any(
+        fnmatch.fnmatchcase(path, pattern) for pattern in EXCLUDED_TEXT_DOCUMENT_PATTERNS
+    ):
         return False
 
     suffix = Path(path).suffix.lower()
