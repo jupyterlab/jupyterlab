@@ -16,6 +16,20 @@
   whole. Each such plugin is named in a browser console warning. To keep it enabled, list
   the plugin ids to disable in `disabledExtensions` instead of the package name.
 
+- In each copy of an icon that `LabIcon` renders, the IDs that the SVG refers to now get a
+  suffix: `id="shine"` and `fill="url(#shine)"` become `id="shine_3"` and
+  `fill="url(#shine_3)"`. Without this suffix, the other copies could render without their
+  gradient, clip path or mask when the first copy on the page is hidden. The rules of a
+  `<style>` element in the SVG now style only elements of the copies of that icon. A rule can
+  still depend on the page, such as the theme attribute that JupyterLab sets on `<body>`, but a
+  part of its selector that names an ID of the SVG must match inside the copy. An `animation`
+  in the SVG names a copy of its `@keyframes` rule with a suffix, as in `pulse-jp-icon-2`, so
+  `animationName` gives the new name. A selector outside the SVG that names a renamed ID, in
+  CSS or in code, no longer matches the element: give the element a class, and select it
+  through the `data-icon` attribute of the rendered SVG, for example
+  `svg[data-icon="my-pkg:logo"] .accent`. A React copy now keeps the `style` attribute of the
+  root `<svg>`, as a copy from `element()` does. See {ref}`labicon-svg-ids`.
+
 - Users can reorder the sections of a `SidePanel` with the default accordion content, and
   the workspace saves the order, the collapsed state and the size of each section with the
   section ID. Give each section an explicit ID that is unique in the page and the same in
