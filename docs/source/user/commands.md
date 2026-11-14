@@ -78,7 +78,6 @@ unique identifier is useful if you want to customize the menus, the toolbars or 
 On Mac OS, the `Ctrl` key should be replaced by `Cmd`.
 :::
 
-```{eval-rst}
-.. include:: commands_list.md
-   :parser: myst_parser.sphinx_
+```{include} commands_list.md
+
 ```

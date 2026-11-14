@@ -15,8 +15,8 @@ for other extensions to use and can depend on other extensions. In fact, the
 whole of JupyterLab itself is simply a collection of extensions that are no
 more powerful or privileged than any custom extension.
 
-For information about developing extensions, see the {ref}`developer
-documentation <developer-extensions>`.
+For information about developing extensions, see the
+{ref}`developer documentation <developer-extensions>`.
 
 ```{contents} Table of contents
 :depth: 1
@@ -582,8 +582,8 @@ You can also install a source extension that is not uploaded to npm, i.e.,
 gzipped tarball, or a URL to a gzipped tarball.
 
 :::{note}
-Installing a source extension will require {ref}`installing
-Node.js <installing-nodejs>` and require a rebuild of JupyterLab.
+Installing a source extension will require
+{ref}`installing Node.js <installing-nodejs>` and require a rebuild of JupyterLab.
 :::
 
 Uninstall source extensions using the command:

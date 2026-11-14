@@ -127,17 +127,12 @@ builder = [
 ]
 docs = [
     { include-group = "builder" },
+    "jupyter-book>=2.1.4",
     "jsx-lexer",
-    "myst-parser",
-    "pydata-sphinx-theme>=0.13.0",
     "pytest",
     "pytest-check-links",
     "pytest-jupyter",
     "shellcheck-py",
-    "sphinx>=1.8,<8.2.0",
-    "sphinx-copybutton",
-    "sphinxcontrib-mermaid",
-    "sphinxcontrib-spelling",
 ]
 
 [tool.check-wheel-contents]

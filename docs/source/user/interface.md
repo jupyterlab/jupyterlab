@@ -12,11 +12,11 @@ traditional integrated development environments (IDEs), it remains
 focused on interactive, exploratory computing.
 
 The JupyterLab interface consists of a {ref}`main work area <main-area>`
-containing tabs of documents and activities, a collapsible {ref}`left sidebar
-<left-sidebar>`, and a {ref}`menu bar <menu-bar>`. The left sidebar contains a
-{ref}`file browser <working-with-files>`, the {ref}`list of running kernels and
-terminals <running>`, the {ref}`command palette <commands>`, the {ref}`notebook
-cell tools inspector <notebook>`, and the {ref}`tabs list <tabs>`.
+containing tabs of documents and activities, a collapsible
+{ref}`left sidebar <left-sidebar>`, and a {ref}`menu bar <menu-bar>`. The left sidebar contains a
+{ref}`file browser <working-with-files>`, the {ref}`list of running kernels and terminals <running>`,
+the {ref}`command palette <commands>`, the {ref}`notebook cell tools inspector <notebook>`,
+and the {ref}`tabs list <tabs>`.
 
 ```{image} ../images/interface-jupyterlab.png
 :align: center
