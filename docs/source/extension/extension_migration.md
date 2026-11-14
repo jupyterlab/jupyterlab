@@ -58,6 +58,8 @@
 
 - `ObservableUndoableList`, `IObservableUndoableList`, and `ObservableUndoableList.IdentitySerializer` from `@jupyterlab/observables` are deprecated since 4.7.0 and will be removed in JupyterLab 5.0. Observable lists with undo/redo are no longer used by JupyterLab core since document models migrated to Yjs in JupyterLab 4.x. Consequently, `IModelDB.createList` and `ModelDB.createList` are also deprecated.
 
+- `get()` of `ContentsManager`, `Drive` and `RestContentProvider` from `@jupyterlab/services` returns the content of the file or directory when it is called without options. This behavior is deprecated and subject to change: a future version will return the content only when it is requested, as `get()` already does when any option is given, for example `{ type: 'file' }`. Reading the `content` of a model fetched without options logs a warning in the browser console. Use `{ content: true }` where the content is read. Calls that do not read the content need no change.
+
 - The JSON Lines renderer plugin was renamed from `@jupyterlab/json-lines-extension:factory`
   to `@jupyterlab/json-extension:json-lines-factory` to match its owning package.
   Update references to the old plugin id in configuration, such as `disabledExtensions`,
@@ -79,6 +81,18 @@
     versions used by `@jupyterlab/terminal` (`@xterm/xterm` 6.x and the matching addons).
 
 - `ToolbarRegistry.WIDGET_ID_ARG` in `@jupyterlab/apputils` holds the name of the `widgetId` argument. `CellBarExtension.WIDGET_ID_ARG` in `@jupyterlab/cell-toolbar` is deprecated: use `ToolbarRegistry.WIDGET_ID_ARG` instead. The factory returned by `createToolbarFactory` takes the command arguments to add to every item as an optional second parameter.
+
+### Testing with Jest
+
+- The Jest configuration of `@jupyterlab/testutils` now transforms the `@jupyterlab/` packages, and it takes more packages to transform in a new `esModules` option. If your `jest.config.js` sets its own `transformIgnorePatterns`, as the extension template does, remove it and your `esModules` list. Pass in the option only the packages that the base configuration does not list:
+
+  ```js
+  const baseConfig = jestJupyterLab(__dirname, { esModules: ['d3-array'] });
+  ```
+
+  Your tests then get the packages that JupyterLab adds to the base list. JupyterLab 4.7 adds `htmlparser2` and its dependencies: `@jupyterlab/apputils` now uses them through `sanitize-html` 2.18, and they are published as ES modules only.
+
+- If you keep your own `transformIgnorePatterns`, add `dom-serializer`, `domelementtype`, `domhandler`, `domutils`, `entities`, `htmlparser2` and `sanitize-html` to its list. `sanitize-html` itself is not an ES module, but the other packages can be installed in its own `node_modules` folder, and with the pattern of the extension template Jest transforms them there only when `sanitize-html` is listed too.
 
 ## JupyterLab 4.5 to 4.6
 
