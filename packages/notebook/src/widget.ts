@@ -1068,8 +1068,11 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           ) {
             // Update height estimate in the view model
             const height = cell.node.getBoundingClientRect().height;
-            this.viewModel.setEstimatedWidgetSize(cell.model.id, height);
-            cell.node.style.containIntrinsicSize = `auto ${height}px`;
+            // Cells in hidden notebooks do not have a measurable height.
+            if (height > 0) {
+              this.viewModel.setEstimatedWidgetSize(cell.model.id, height);
+              cell.node.style.containIntrinsicSize = `auto ${height}px`;
+            }
           }
         }
       }
@@ -2488,6 +2491,9 @@ export class Notebook extends StaticNotebook {
       return;
     }
     let { cell, element } = result;
+
+    // Scroll anchoring is enabled only for the active cell.
+    this.activeCellIndex = this.widgets.indexOf(cell);
 
     if (!cell.inViewport) {
       await this.scrollToCell(cell, 'center');
