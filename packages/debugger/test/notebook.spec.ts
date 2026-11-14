@@ -142,4 +142,28 @@ describe('NotebookHandler', () => {
 
     expect(kernel.has(service.getCodeId(CODE))).toBe(false);
   });
+
+  it('should keep the breakpoints of a cell when a cell with the same code is edited', async () => {
+    context.model.sharedModel.insertCell(1, {
+      cell_type: 'code',
+      source: CODE
+    });
+    await sendBreakpoint(1);
+    context.model.cells.get(1).sharedModel.setSource('def f():\n    return 2');
+    await sendBreakpoint(1);
+
+    expect(kernel.get(service.getCodeId(CODE))).toEqual([2]);
+  });
+
+  it('should keep the breakpoints of a cell when a cell with the same code is deleted', async () => {
+    context.model.sharedModel.insertCell(1, {
+      cell_type: 'code',
+      source: CODE
+    });
+    await flushRequests();
+    context.model.sharedModel.deleteCell(1);
+    await flushRequests();
+
+    expect(kernel.get(service.getCodeId(CODE))).toEqual([2]);
+  });
 });

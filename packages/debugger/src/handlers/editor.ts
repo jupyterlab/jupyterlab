@@ -10,7 +10,7 @@ import type { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
-import type { CellChange, ISharedText } from '@jupyter/ydoc';
+import type { CellChange, ISharedCell, ISharedText } from '@jupyter/ydoc';
 
 import type { Line, Range, StateEffectType } from '@codemirror/state';
 import {
@@ -233,7 +233,7 @@ export class EditorHandler implements IDisposable {
     }
     const path = this._lastCellPath;
     this._lastCellPath = null;
-    if (path && !this._ranPaths.has(path)) {
+    if (path && this._canClear(path)) {
       void this._debuggerService.updateBreakpoints('', [], path);
     }
   }
@@ -355,9 +355,27 @@ export class EditorHandler implements IDisposable {
     );
     // Clear last: each reply redraws the gutter from the model, which holds
     // the breakpoints of the new code only once the update is done.
-    if (previous && !this._ranPaths.has(previous)) {
+    if (previous && this._canClear(previous)) {
       await this._debuggerService.updateBreakpoints('', [], previous);
     }
+  }
+
+  /**
+   * Whether the file of an earlier version of the code can lose its
+   * breakpoints: code that ran can still run, and the cells of a notebook
+   * that have the same code share one file.
+   */
+  private _canClear(path: string): boolean {
+    if (this._ranPaths.has(path)) {
+      return false;
+    }
+    const src = this._src;
+    const cells = Private.isCell(src) ? (src.notebook?.cells ?? []) : [];
+    return !cells.some(
+      cell =>
+        cell !== src &&
+        this._debuggerService.getCodeId(cell.getSource()) === path
+    );
   }
 
   /**
@@ -683,6 +701,13 @@ namespace Private {
       return marker;
     }
   })();
+
+  /**
+   * Whether the shared model is a cell, which may belong to a notebook.
+   */
+  export function isCell(src: ISharedText): src is ISharedCell {
+    return 'notebook' in src;
+  }
 
   /**
    * Create a new breakpoint.
