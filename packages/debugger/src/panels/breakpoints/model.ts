@@ -72,7 +72,11 @@ export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
    * @param breakpoints The list of breakpoints.
    */
   setBreakpoints(id: string, breakpoints: IDebugger.IBreakpoint[]): void {
-    this._breakpoints.set(id, breakpoints);
+    if (breakpoints.length === 0) {
+      this._breakpoints.delete(id);
+    } else {
+      this._breakpoints.set(id, breakpoints);
+    }
     this._changed.emit(breakpoints);
   }
 
