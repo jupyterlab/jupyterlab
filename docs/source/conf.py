@@ -604,6 +604,10 @@ def setup(app: "Sphinx"):
             HERE.parent.parent / AUTOMATED_SCREENSHOTS_FOLDER / TOKENS_LIST_PATH,
             src_dir / TOKENS_LIST_DOC,
         )
+        app.connect(
+            "build-finished",
+            lambda app, exception: shutil.rmtree(src_dir / SNIPPETS_FOLDER, ignore_errors=True),
+        )
         return
 
     # Enable Plausible.io stats
