@@ -23,6 +23,8 @@ import React from 'react';
 import pluginSchema from '../../schema/shortcuts.json';
 
 const SHORTCUT_PLUGIN_ID = '@jupyterlab/shortcuts-extension:shortcuts';
+const COMMAND_MODE =
+  '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus';
 
 class DummySettings extends Settings {
   constructor(protected options: Settings.IOptions) {
@@ -521,6 +523,98 @@ describe('@jupyterlab/shortcut-extension', () => {
         await shortcutUI.deleteKeybinding(target, keybinding);
         // The user shortcut should be removed, not left behind.
         expect(data.user.shortcuts).toHaveLength(0);
+      });
+
+      it('should remove a user keybinding stored with a selector of JupyterLab 4.0', async () => {
+        data.user.shortcuts.push({
+          command: 'test:command',
+          keys: ['Ctrl Alt ArrowUp'],
+          selector: '.jp-Notebook:focus'
+        });
+        const keybinding = { keys: ['Ctrl Alt ArrowUp'], isDefault: false };
+        const target = {
+          id: 'test-id',
+          command: 'test:command',
+          keybindings: [keybinding],
+          args: {},
+          selector: COMMAND_MODE,
+          category: 'test'
+        };
+        await shortcutUI.deleteKeybinding(target, keybinding);
+        expect(data.user.shortcuts).toHaveLength(0);
+      });
+
+      it('should disable a default keybinding with the selector that it is stored with', async () => {
+        jest.spyOn(settings, 'default').mockReturnValue([
+          {
+            command: 'test:command',
+            keys: ['Shift B'],
+            selector: '.jp-Notebook:focus'
+          }
+        ]);
+        const keybinding = { keys: ['Shift B'], isDefault: true };
+        const target = {
+          id: 'test-id',
+          command: 'test:command',
+          keybindings: [keybinding],
+          args: {},
+          selector: COMMAND_MODE,
+          category: 'test'
+        };
+        await shortcutUI.deleteKeybinding(target, keybinding);
+        expect(data.user.shortcuts).toEqual([
+          {
+            command: 'test:command',
+            keys: ['Shift B'],
+            selector: '.jp-Notebook:focus',
+            disabled: true
+          }
+        ]);
+      });
+
+      it('should keep the selectors of the other user keybindings as stored', async () => {
+        const stored = {
+          command: 'other:command',
+          keys: ['Ctrl B'],
+          selector: '.jp-Notebook:focus'
+        };
+        data.user.shortcuts.push({ ...stored });
+        const keybinding = { keys: ['Ctrl A'], isDefault: false };
+        const target = {
+          id: 'test-id',
+          command: 'test:command',
+          keybindings: [keybinding],
+          args: {},
+          selector: 'body',
+          category: 'test'
+        };
+        registerKeybinding(target, keybinding);
+        await shortcutUI.deleteKeybinding(target, keybinding);
+        expect(data.user.shortcuts).toEqual([stored]);
+      });
+    });
+
+    describe('#setCustomOptions()', () => {
+      it('should update a user shortcut stored with a selector of JupyterLab 4.0', async () => {
+        data.user.shortcuts.push({
+          command: 'test:command',
+          keys: ['Ctrl A'],
+          selector: '.jp-Notebook:focus'
+        });
+        const target = {
+          id: 'test-id',
+          command: 'test:command',
+          keybindings: [{ keys: ['Ctrl A'], isDefault: false }],
+          args: {},
+          selector: COMMAND_MODE,
+          category: 'test'
+        };
+        const updated = await shortcutUI.setCustomOptions(target, {
+          selector: 'body',
+          args: {}
+        });
+        expect(updated).toBe(true);
+        expect(data.user.shortcuts[0].selector).toEqual('body');
       });
     });
 
