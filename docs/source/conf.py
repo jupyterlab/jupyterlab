@@ -591,23 +591,6 @@ intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 def setup(app: "Sphinx"):
     if SPELLING_BUILD_ENABLED:
-        src_dir = Path(app.srcdir)
-        if (src_dir / "docs/source").exists():
-            src_dir = src_dir / "docs/source"
-        copy_code_files(src_dir / SNIPPETS_FOLDER)
-        document_commands_list(src_dir)
-        document_plugins_tokens_list(
-            HERE.parent.parent / AUTOMATED_SCREENSHOTS_FOLDER / PLUGINS_LIST_PATH,
-            src_dir / PLUGINS_LIST_DOC,
-        )
-        document_plugins_tokens_list(
-            HERE.parent.parent / AUTOMATED_SCREENSHOTS_FOLDER / TOKENS_LIST_PATH,
-            src_dir / TOKENS_LIST_DOC,
-        )
-        app.connect(
-            "build-finished",
-            lambda app, exception: shutil.rmtree(src_dir / SNIPPETS_FOLDER, ignore_errors=True),
-        )
         return
 
     # Enable Plausible.io stats
