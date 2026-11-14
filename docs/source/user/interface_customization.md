@@ -150,13 +150,12 @@ workspace.
 
 To move a section without dragging, right-click its header and select
 **Move Section Up** or **Move Section Down**; these items are shown while
-reordering is enabled. To move the section whose header has the focus with the
-keyboard, bind these commands to keys: in the **Keyboard Shortcuts** settings,
-click **+** to add a shortcut, select **apputils: Move Section Up** or
-**apputils: Move Section Down**, click **+** in the Shortcut column, press the
-keys, and confirm with both check buttons. Arrow keys, Home, End, Enter and
-Space cannot be used, even with a modifier, because they move the focus between
-the headers.
+reordering is enabled. With the keyboard, press the context menu key on a
+focused header to open the same menu. Both commands can also be bound to keys in
+the {ref}`keyboard shortcuts settings <user-shortcuts>`, with the selector
+`.lm-AccordionPanel-title`. The up and down arrow keys, Home, End, Enter and
+Space cannot be bound, even with a modifier, because a focused header already
+uses them.
 
 (activity-bar-position-customization)=
 
