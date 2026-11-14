@@ -6,6 +6,8 @@ set -ex
 set -o pipefail
 
 # use a single global cache dir
+# Workflows must also set this in the job env: base-setup resolves the yarn
+# cache folder to restore and save before this script runs.
 export YARN_ENABLE_GLOBAL_CACHE=1
 
 # display verbose output for pkg builds run during `jlpm`

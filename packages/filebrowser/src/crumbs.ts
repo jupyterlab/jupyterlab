@@ -546,11 +546,17 @@ export class BreadCrumbs extends Widget {
       }
       if (index !== -1) {
         const hitElement = breadcrumbElements[index];
-        // Don't allow dropping on the current path
-        const currentPath = this._model.manager.services.contents.localPath(
-          this._model.path
+        // Refuse the drop when no item would move. The items can come from
+        // another file browser, so compare with their folders instead of the
+        // current folder. The root and preferred breadcrumbs store their path
+        // with a leading slash.
+        const contents = this._model.manager.services.contents;
+        const hitPath = PathExt.removeSlash(hitElement.dataset.path ?? '');
+        const paths = event.mimeData.getData(CONTENTS_MIME) as string[];
+        const moves = paths.some(
+          path => PathExt.dirname(contents.localPath(path)) !== hitPath
         );
-        if (hitElement.dataset.path !== currentPath) {
+        if (moves) {
           hitElement.classList.add(DROP_TARGET_CLASS);
           event.preventDefault();
           event.stopPropagation();
@@ -642,8 +648,13 @@ export class BreadCrumbs extends Widget {
     const promises: Promise<Contents.IModel | null>[] = [];
     const oldPaths = event.mimeData.getData(CONTENTS_MIME) as string[];
     for (const oldPath of oldPaths) {
-      const name = PathExt.basename(oldPath);
+      const localPath = manager.services.contents.localPath(oldPath);
+      const name = PathExt.basename(localPath);
       const newPath = PathExt.join(destinationPath, name);
+      // Skip files that are not moving.
+      if (newPath === localPath) {
+        continue;
+      }
       promises.push(renameFile(manager, oldPath, newPath));
     }
     void Promise.all(promises).catch(err => {

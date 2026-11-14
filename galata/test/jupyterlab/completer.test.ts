@@ -156,11 +156,15 @@ test.describe('Completer', () => {
       await page.locator('text=| Idle').waitFor();
 
       await page.keyboard.type('import getopt\ngetopt.');
+
+      // Warm up Jedi: the first completion in a new kernel can exceed IPython's
+      // 400 ms limit for inferring types, which then show as `<unknown>`.
       await page.keyboard.press('Tab');
-      // We need to wait until the completer gets bound to the cell after
-      // entering it.
-      // eslint-disable-next-line playwright/no-wait-for-timeout
-      await page.waitForTimeout(50);
+      const completer = page.locator(COMPLETER_SELECTOR);
+      await completer.waitFor({ timeout: COMPLETER_TIMEOUT });
+      await page.keyboard.press('Escape');
+      await expect(completer).toBeHidden();
+      await page.keyboard.press('Tab');
     });
 
     test('Open completer on console', async ({ page }) => {

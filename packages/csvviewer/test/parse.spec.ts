@@ -202,6 +202,21 @@ describe('csvviewer/parse', () => {
       expect(results.offsets).toEqual([0, 2, 4, 6, 7, 7, 7]);
     });
 
+    it.each(['\n', '\r\n', '\r'])(
+      'pads missing final columns at EOF with row delimiter %j',
+      rowDelimiter => {
+        for (const data of ['1,2', '1,23', '1,"2"', '1,']) {
+          const results = parser({
+            data,
+            rowDelimiter,
+            ncols: 4,
+            columnOffsets: true
+          });
+          expect(results.offsets).toEqual([0, 2, data.length, data.length]);
+        }
+      }
+    );
+
     it('adjusts columns to match ncols with one row and trailing delimiter', () => {
       const data = `a,b,c,d\n`;
       const options = { data, rowDelimiter: '\n', ncols: 7 };

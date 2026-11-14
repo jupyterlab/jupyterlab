@@ -121,6 +121,8 @@ The `id` and `activate` fields are required and the other fields may be omitted.
   in that extension. Disabling by package name is the exception: it disables
   every plugin the package provides, including a plugin whose id does not
   follow the convention.
+  The `jupyter/plugin-id-convention` rule enforces the package prefix for
+  plugin IDs in this repository, excluding mock plugins in tests.
   The `jupyter/token-format` rule from
   [`@jupyter/eslint-plugin`](https://eslint-plugin.readthedocs.io/en/latest/rules/token-format/)
   can enforce the related `<package>:<TokenSymbol>` convention for token IDs
@@ -836,13 +838,10 @@ To transpile jupyterlab packages, you need to install the following package:
 jlpm add --dev jest @types/jest ts-jest @babel/core@^7 @babel/preset-env@^7
 ```
 
-Then in `jest.config.js`, you will specify to use babel for js files and ignore
-all node modules except the ES6 modules:
+Then in `jest.config.js`, extend the configuration from `@jupyterlab/testutils`. It uses babel for JavaScript files, and it transforms the JupyterLab packages and their dependencies that ship ES modules:
 
 ```javascript
 const jestJupyterLab = require('@jupyterlab/testutils/lib/jest-config');
-
-const esModules = ['@jupyterlab/'].join('|');
 
 const baseConfig = jestJupyterLab(__dirname);
 
@@ -855,13 +854,11 @@ module.exports = {
     '!src/**/.ipynb_checkpoints/*'
   ],
   coverageReporters: ['lcov', 'text'],
-  testRegex: 'src/.*/.*.spec.ts[x]?$',
-  transformIgnorePatterns: [
-    ...baseConfig.transformIgnorePatterns,
-    `/node_modules/(?!${esModules}).+`
-  ]
+  testRegex: 'src/.*/.*.spec.ts[x]?$'
 };
 ```
+
+If your extension depends on other packages that ship ES modules, give their names in the `esModules` option, for example `jestJupyterLab(__dirname, { esModules: ['d3-array'] })`. Do not set `transformIgnorePatterns` yourself. Jest skips a file when any of the patterns matches it, so an added pattern cannot make Jest transform more files, and a pattern that replaces the base one misses the packages that later versions of JupyterLab add to it.
 
 Finally, you will need to configure babel with a `babel.config.js` file containing:
 

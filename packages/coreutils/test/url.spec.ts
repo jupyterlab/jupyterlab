@@ -92,6 +92,42 @@ describe('@jupyterlab/coreutils', () => {
       });
     });
 
+    describe('queryStringToObject()', () => {
+      it('should return an object from a query string', () => {
+        expect(URLExt.queryStringToObject('?name=foo&id=baz')).toEqual({
+          name: 'foo',
+          id: 'baz'
+        });
+      });
+
+      it('should keep an equals sign inside a value', () => {
+        expect(URLExt.queryStringToObject('?token=YWJjZA==')).toEqual({
+          token: 'YWJjZA=='
+        });
+        expect(URLExt.queryStringToObject('?a=1&b=x=y')).toEqual({
+          a: '1',
+          b: 'x=y'
+        });
+      });
+
+      it('should handle a parameter with no value', () => {
+        expect(URLExt.queryStringToObject('?a&b=1')).toEqual({
+          a: '',
+          b: '1'
+        });
+        expect(URLExt.queryStringToObject('?a=&b=1')).toEqual({
+          a: '',
+          b: '1'
+        });
+      });
+
+      it('should keep a malformed escape as written', () => {
+        const parse = () => URLExt.queryStringToObject('?q=100%&a=b=%');
+        expect(parse).not.toThrow();
+        expect(parse()).toEqual({ q: '100%', a: 'b=%' });
+      });
+    });
+
     describe('.isLocal()', () => {
       it('should test whether the url is a local url', () => {
         expect(URLExt.isLocal('https://foo/bar.txt')).toBe(false);

@@ -62,7 +62,6 @@ lib
 node_modules
 
 *.tsbuildinfo
-lerna-debug.log
 yarn-error.log
 
 # python
@@ -111,7 +110,6 @@ examples/app/themes
 examples/app/schemas
 iframe_figures/
 
-lerna-debug.log
 yarn-error.log
 
 # yarn >=2.x local files
@@ -124,9 +122,6 @@ jupyterlab/tests/mock_packages/test-hyphens-underscore/.pnp/*
 jupyterlab/tests/mock_packages/test_no_hyphens/.yarn/*
 jupyterlab/tests/mock_packages/test_no_hyphens/.pnp/*
 jupyterlab/tests/mock_packages/test-hyphens/.yarn/*
-
-# copied changelog file
-docs/source/getting_started/changelog.md
 
 junit.xml
 

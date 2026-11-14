@@ -108,6 +108,75 @@ _Examples_
 
 File Types (see {ts:class}`docregistry.DocumentRegistry` `addFileType` method) add a new file type to be understood through a mimetype and file extensions within JupyterLab.
 
+### Associate a file extension with a CodeMirror language
+
+Registering a file type with the document registry does not select the syntax
+highlighting used by the text editor. JupyterLab uses the CodeMirror language
+registry ({ts:interface}`codemirror.IEditorLanguageRegistry`) to match a file
+name to a language. Register the language for the syntax highlighting, and the
+file type for the icon in the file browser.
+
+For example, Snakemake workflows are written in a Python-based language, in
+files named `Snakefile` or ending with `.smk`. JupyterLab opens these files as
+plain text. The following example highlights them as Python and gives them the
+Python icon:
+
+```typescript
+import type {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
+import { pythonIcon } from '@jupyterlab/ui-components';
+
+const plugin: JupyterFrontEndPlugin<void> = {
+  id: 'my-extension:snakemake-file-type',
+  autoStart: true,
+  requires: [IEditorLanguageRegistry],
+  activate: (app: JupyterFrontEnd, languages: IEditorLanguageRegistry) => {
+    const pythonLanguage = languages.findByName('python');
+    if (!pythonLanguage) {
+      throw new Error('The Python language is not available.');
+    }
+
+    languages.addLanguage({
+      name: 'Snakemake',
+      mime: 'text/x-snakemake',
+      extensions: ['smk'],
+      filename: /^Snakefile$/,
+      load: async () => {
+        const language = await languages.getLanguage(pythonLanguage);
+        if (!language?.support) {
+          throw new Error('The Python language support could not be loaded.');
+        }
+        return language.support;
+      }
+    });
+
+    app.docRegistry.addFileType({
+      name: 'snakemake',
+      displayName: 'Snakemake',
+      extensions: ['.smk'],
+      pattern: '^Snakefile$',
+      mimeTypes: ['text/x-snakemake'],
+      icon: pythonIcon
+    });
+  }
+};
+
+export default plugin;
+```
+
+The two registries take file names in different formats.
+{ts:interface}`codemirror.IEditorLanguage` takes `smk` without a leading dot,
+and a regular expression for `filename`. `DocumentRegistry.addFileType()` takes
+`.smk` with the dot, and a string for `pattern`. The language registry compares
+`extensions` only with the text after the last dot, so a compound extension such
+as `.cmake.in` needs a `filename` expression, like `Snakefile` does. Use the
+MIME type registered for the language in the file type as well. To use a custom
+syntax highlighter, make the language's `load` callback return the
+`LanguageSupport` provided by its CodeMirror 6 language package.
+
 ### Document Models
 
 {ts:interface}`docregistry.DocumentRegistry.IModel` instances are created by the model factories and passed to widget factories and widget
