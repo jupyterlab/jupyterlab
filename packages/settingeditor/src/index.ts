@@ -7,4 +7,5 @@
 
 export * from './settingseditor';
 export * from './jsonsettingeditor';
+export * from './searchprovider';
 export * from './tokens';

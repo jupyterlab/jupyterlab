@@ -38,6 +38,8 @@ import type {
   JsonSettingEditor,
   SettingsEditor
 } from '@jupyterlab/settingeditor';
+import { SettingEditorSearchProvider } from '@jupyterlab/settingeditor';
+import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IPluginManager } from '@jupyterlab/pluginmanager';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
@@ -288,6 +290,19 @@ function activate(
 
   return tracker;
 }
+
+/**
+ * A plugin to search the Advanced Settings editor
+ */
+const searchPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/settingeditor-extension:search',
+  description: 'Adds search capability to the Advanced Settings editor.',
+  requires: [ISearchProviderRegistry],
+  autoStart: true,
+  activate: (app: JupyterFrontEnd, registry: ISearchProviderRegistry) => {
+    registry.add('jp-settingeditorSearchProvider', SettingEditorSearchProvider);
+  }
+};
 
 /**
  * The default setting editor extension.
@@ -648,4 +663,4 @@ function activateJSON(
   return tracker;
 }
 
-export default [plugin, jsonPlugin];
+export default [plugin, jsonPlugin, searchPlugin];
