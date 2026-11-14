@@ -15,6 +15,7 @@ export * from './history';
 export * from './model';
 export * from './modelfactory';
 export * from './modestatus';
+export * from './navigationrail';
 export * from './notebooklspadapter';
 export * from './notebooktools';
 export * from './panel';

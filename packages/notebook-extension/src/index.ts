@@ -2515,6 +2515,8 @@ function activateNotebookHandler(
     widget.title.iconClass = ft?.iconClass ?? '';
     widget.title.iconLabel = ft?.iconLabel ?? '';
     widget.content.scrollbar = factory.notebookConfig.showMinimap ?? false;
+    widget.content.navigationRail =
+      factory.notebookConfig.showCellNavigationRail ?? true;
 
     // Notify the widget tracker if restore data needs to update. The context
     // outlives this panel when other views of the document stay open, so the
@@ -2561,6 +2563,8 @@ function activateNotebookHandler(
     tracker.forEach(widget => {
       widget.setConfig(options);
       widget.content.scrollbar = options.notebookConfig.showMinimap ?? false;
+      widget.content.navigationRail =
+        options.notebookConfig.showCellNavigationRail ?? true;
     });
   }
 
@@ -2623,7 +2627,9 @@ function activateNotebookHandler(
         | 'contentVisibility',
       accessKernelHistory: settings.get('accessKernelHistory')
         .composite as boolean,
-      showMinimap: settings.get('showMinimap').composite as boolean
+      showMinimap: settings.get('showMinimap').composite as boolean,
+      showCellNavigationRail: settings.get('showCellNavigationRail')
+        .composite as boolean
     };
     setSideBySideOutputRatio(factory.notebookConfig.sideBySideOutputRatio);
     const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {

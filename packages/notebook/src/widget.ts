@@ -39,6 +39,7 @@ import type { INotebookHistory } from './history';
 import type { INotebookModel } from './model';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
 import { NotebookFooter } from './notebookfooter';
+import { NotebookNavigationRail } from './navigationrail';
 import type { CodeCellModel } from '../../cells/src/model';
 
 /**
@@ -1109,7 +1110,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   /**
    * Apply updated notebook settings.
    */
-  private _updateNotebookConfig() {
+  protected _updateNotebookConfig() {
     // Apply scrollPastEnd setting.
     this.toggleClass(
       'jp-mod-scrollPastEnd',
@@ -1480,6 +1481,12 @@ export namespace StaticNotebook {
      * notebook’s content to help with navigation.
      */
     showMinimap?: boolean;
+
+    /**
+     * Whether to show the cell navigation rail (vertical dot indicators for
+     * prompts and error statuses) along the left margin of the notebook.
+     */
+    showCellNavigationRail?: boolean;
   }
 
   /**
@@ -1504,7 +1511,8 @@ export namespace StaticNotebook {
     windowingMode: 'contentVisibility',
     accessKernelHistory: false,
     showInputPlaceholder: true,
-    showMinimap: false
+    showMinimap: false,
+    showCellNavigationRail: true
   };
 
   /**
@@ -1810,6 +1818,7 @@ export class Notebook extends StaticNotebook {
     this.selectionChanged.connect(this._updateSelectedCells, this);
 
     this.addFooter();
+    this.addNavigationRail();
   }
 
   /**
@@ -1850,6 +1859,48 @@ export class Notebook extends StaticNotebook {
   protected addFooter(): void {
     const info = new NotebookFooter(this);
     (this.layout as NotebookWindowedLayout).footer = info;
+  }
+
+  /**
+   * Adds a cell navigation rail to the notebook.
+   */
+  protected addNavigationRail(): void {
+    this._navigationRail = new NotebookNavigationRail({
+      notebook: this,
+      translator: this.translator
+    });
+    (this.layout as NotebookWindowedLayout).navigationRail =
+      this._navigationRail;
+    if (this.notebookConfig.showCellNavigationRail === false) {
+      this._navigationRail.setHidden(true);
+    }
+  }
+
+  /**
+   * Whether the cell navigation rail is visible.
+   */
+  get navigationRail(): boolean {
+    return this._navigationRail ? !this._navigationRail.isHidden : false;
+  }
+  set navigationRail(value: boolean) {
+    if (this._navigationRail) {
+      this._navigationRail.setHidden(!value);
+    }
+  }
+
+  /**
+   * The navigation rail widget instance.
+   */
+  get navigationRailWidget(): NotebookNavigationRail | null {
+    return this._navigationRail;
+  }
+
+  protected override _updateNotebookConfig(): void {
+    super._updateNotebookConfig();
+    if (this._navigationRail) {
+      const show = this.notebookConfig.showCellNavigationRail ?? true;
+      this._navigationRail.setHidden(!show);
+    }
   }
 
   /**
@@ -2108,6 +2159,8 @@ export class Notebook extends StaticNotebook {
       return;
     }
     this._activeCell = null;
+    this._navigationRail?.dispose();
+    this._navigationRail = null;
     super.dispose();
   }
 
@@ -3824,6 +3877,7 @@ export class Notebook extends StaticNotebook {
   private _lastModifiedCellBackStack: string[] = [];
   private _lastModifiedCellForwardStack: string[] = [];
   private static readonly MAX_MODIFIED_STACK = 50;
+  private _navigationRail: NotebookNavigationRail | null = null;
   private _activeCellIndex = -1;
   private _activeCell: Cell | null = null;
   private _mode: NotebookMode = 'command';

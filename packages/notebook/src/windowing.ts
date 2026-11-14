@@ -270,6 +270,23 @@ export class NotebookViewModel extends WindowedListModel {
 export class NotebookWindowedLayout extends WindowedLayout {
   private _header: Widget | null = null;
   private _footer: Widget | null = null;
+  private _navigationRail: Widget | null = null;
+
+  /**
+   * Notebook navigation rail
+   */
+  get navigationRail(): Widget | null {
+    return this._navigationRail;
+  }
+  set navigationRail(rail: Widget | null) {
+    if (this._navigationRail && this._navigationRail.isAttached) {
+      Widget.detach(this._navigationRail);
+    }
+    this._navigationRail = rail;
+    if (this._navigationRail && this.parent?.isAttached) {
+      Widget.attach(this._navigationRail, this.parent!.node);
+    }
+  }
 
   /**
    * Notebook's header
@@ -323,6 +340,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
     }
     this._header?.dispose();
     this._footer?.dispose();
+    this._navigationRail?.dispose();
     super.dispose();
   }
 
@@ -571,6 +589,9 @@ export class NotebookWindowedLayout extends WindowedLayout {
     if (this._footer && !this._footer.isAttached) {
       Widget.attach(this._footer, this.parent!.outerNode);
     }
+    if (this._navigationRail && !this._navigationRail.isAttached) {
+      Widget.attach(this._navigationRail, this.parent!.node);
+    }
   }
 
   protected onBeforeDetach(msg: Message): void {
@@ -579,6 +600,9 @@ export class NotebookWindowedLayout extends WindowedLayout {
     }
     if (this._footer?.isAttached) {
       Widget.detach(this._footer);
+    }
+    if (this._navigationRail?.isAttached) {
+      Widget.detach(this._navigationRail);
     }
     super.onBeforeDetach(msg);
   }
