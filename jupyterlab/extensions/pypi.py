@@ -394,7 +394,7 @@ class PyPIExtensionManager(ExtensionManager):
             if isinstance(data, BaseException):
                 if not isinstance(data, Exception):
                     raise data
-                self.log.debug("Failed to fetch language pack metadata for %s: %s", name, data)
+                self.log.warning("Failed to fetch language pack metadata for %s: %s", name, data)
                 failed = True
                 continue
             latest_version = _metadata_string(data, "version")

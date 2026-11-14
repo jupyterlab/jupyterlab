@@ -3,8 +3,10 @@
 
 import io
 import json
+import logging
 import sys
 import tarfile
+from importlib.metadata import distributions
 from subprocess import CompletedProcess
 from types import MethodType, SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
@@ -25,6 +27,12 @@ from jupyterlab.extensions.pypi import _check_python_version_compatible
 from jupyterlab.handlers.extension_manager_handler import ExtensionHandler
 
 from . import fake_client_factory
+
+
+@pytest.fixture(autouse=True)
+def no_installed_language_packs(monkeypatch):
+    """Hide the language packs installed in the test environment."""
+    monkeypatch.setattr("jupyterlab.extensions.pypi.entry_points", lambda **_: [])
 
 
 @pytest.mark.parametrize(
@@ -53,8 +61,6 @@ def test_check_python_version_compatible_current_version():
 
 @patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ("jupyterlab-language-pack-fr-FR",))
 async def test_pypi_search_only_lists_language_packs(monkeypatch):
-    browse = Mock(return_value=[("jupyterlab-git", "1.0.0")])
-    monkeypatch.setattr("xmlrpc.client.ServerProxy", Mock(return_value=Mock(browse=browse)))
     manager = PyPIExtensionManager()
     get = AsyncMock(
         return_value=httpx2.Response(
@@ -75,7 +81,6 @@ async def test_pypi_search_only_lists_language_packs(monkeypatch):
         f"{manager.base_url}/jupyterlab-language-pack-fr-FR/json",
         headers={"Content-Type": "application/json"},
     )
-    browse.assert_not_called()
 
 
 @patch(
@@ -96,7 +101,14 @@ async def test_pypi_lists_installed_language_packs_separately(monkeypatch, tmp_p
         "[jupyterlab.languagepack]\nde_DE = jupyterlab_language_pack_de_DE\n",
         encoding="utf-8",
     )
-    monkeypatch.syspath_prepend(str(tmp_path))
+    monkeypatch.setattr(
+        "jupyterlab.extensions.pypi.entry_points",
+        lambda *, group: [
+            entry
+            for dist in distributions(path=[str(tmp_path)])
+            for entry in dist.entry_points.select(group=group)
+        ],
+    )
     monkeypatch.setattr(ExtensionManager, "_get_installed_extensions", AsyncMock(return_value={}))
     manager = PyPIExtensionManager()
     get = AsyncMock(return_value=httpx2.Response(200, json={"info": {"version": "4.5.post3"}}))
@@ -452,7 +464,7 @@ async def test_ExtensionManager_uninstall():
         "jupyterlab-language-pack-ja-JP",
     ),
 )
-async def test_pypi_language_pack_pagination_skips_unavailable_packs(monkeypatch):
+async def test_pypi_language_pack_pagination_skips_unavailable_packs(monkeypatch, caplog):
     manager = PyPIExtensionManager()
     unavailable = True
 
@@ -485,6 +497,12 @@ async def test_pypi_language_pack_pagination_skips_unavailable_packs(monkeypatch
         )
     ]
     assert pages_count == 2
+    assert [
+        record.getMessage() for record in caplog.records if record.levelno == logging.WARNING
+    ] == [
+        "Failed to fetch language pack metadata for jupyterlab-language-pack-ja-JP: "
+        "Connection refused"
+    ]
 
     second_page, pages_count = await manager.list_extensions("", page=2, per_page=1)
     assert [pack.name for pack in second_page] == ["jupyterlab-language-pack-fr-FR"]
