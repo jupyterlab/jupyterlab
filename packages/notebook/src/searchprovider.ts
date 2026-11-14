@@ -413,13 +413,12 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     // - the next match when starting search using ctrl + f
     // `scroll` and `select` are disabled because `startQuery` is also used as
     // "restartQuery" after each text change and if those were enabled, we would
-    // steal the cursor. Only a new query scrolls, and only to a match in a
-    // Markdown cell.
+    // steal the cursor. Only a new query scrolls.
     await this._stepNext(false, true, {
       from: 'selection-start',
       scroll: false,
       select: false,
-      scrollMarkdown: isNewQuery
+      scrollInCell: isNewQuery
     });
 
     return Promise.resolve();
@@ -710,11 +709,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         // Treat it as a cell without matches, so the loop below still ends
         return undefined;
       }
-      const cellOptions =
-        options?.scrollMarkdown &&
-        this.widget.content.widgets[index]?.model.type === 'markdown'
-          ? { ...options, scroll: true }
-          : options;
+      const cellOptions = options?.scrollInCell
+        ? { ...options, scroll: true }
+        : options;
       return reverse
         ? searchEngine.highlightPrevious(false, cellOptions)
         : searchEngine.highlightNext(false, cellOptions);
@@ -1047,8 +1044,9 @@ namespace Private {
    */
   export interface IStepOptions extends IHighlightAdjacentMatchOptions {
     /**
-     * Whether to scroll to a match in a Markdown cell when `scroll` is false.
+     * Whether the cell scrolls to its match when `scroll` is false, which
+     * leaves the active cell as it is.
      */
-    scrollMarkdown?: boolean;
+    scrollInCell?: boolean;
   }
 }

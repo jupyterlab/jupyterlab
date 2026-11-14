@@ -642,70 +642,84 @@ test.describe('Notebook Search', () => {
     ).toHaveText('lis');
   });
 
-  test('Scroll to the first match in rendered Markdown when typing a query', async ({
-    page,
-    tmpPath
-  }) => {
-    const notebook = galata.Notebook.generateNotebook(40, 'markdown', [
-      'Only hay here.'
-    ]);
-    notebook.cells[30].source = ['The needle is here.'];
-    await page.contents.uploadContent(
-      JSON.stringify(notebook),
-      'text',
-      `${tmpPath}/haystack.ipynb`
-    );
-    await page.notebook.openByPath(`${tmpPath}/haystack.ipynb`);
-    await page.notebook.activate('haystack.ipynb');
+  for (const { cellType, where, currentMatch } of [
+    {
+      cellType: 'markdown',
+      where: 'rendered Markdown',
+      currentMatch: '.jp-RenderedMarkdown .jp-current-match'
+    },
+    {
+      cellType: 'code',
+      where: 'a code cell',
+      currentMatch: '.jp-CodeCell .jp-current-match'
+    }
+  ] as const) {
+    test(`Scroll to the first match in ${where} when typing a query`, async ({
+      page,
+      tmpPath
+    }) => {
+      const notebook = galata.Notebook.generateNotebook(40, cellType, [
+        'Only hay here.'
+      ]);
+      notebook.cells[30].source = ['The needle is here.'];
+      await page.contents.uploadContent(
+        JSON.stringify(notebook),
+        'text',
+        `${tmpPath}/haystack.ipynb`
+      );
+      await page.notebook.openByPath(`${tmpPath}/haystack.ipynb`);
+      await page.notebook.activate('haystack.ipynb');
 
-    await page.keyboard.press('Control+f');
-    await page.fill('[placeholder="Find"]', 'needle');
+      await page.keyboard.press('Control+f');
+      await page.fill('[placeholder="Find"]', 'needle');
 
-    await expect(page.locator('.jp-DocumentSearch-index-counter')).toHaveText(
-      '1/1'
-    );
-    await expect(
-      page.locator('.jp-RenderedMarkdown .jp-current-match')
-    ).toBeInViewport({ ratio: 1 });
-  });
+      await expect(page.locator('.jp-DocumentSearch-index-counter')).toHaveText(
+        '1/1'
+      );
+      await expect(page.locator(currentMatch)).toBeInViewport({ ratio: 1 });
+    });
 
-  test('Keep the scroll position when the search restarts after a cell is added', async ({
-    page,
-    tmpPath
-  }) => {
-    const notebook = galata.Notebook.generateNotebook(40, 'markdown', [
-      'Only hay here.'
-    ]);
-    notebook.cells[30].source = ['The needle is here.'];
-    await page.contents.uploadContent(
-      JSON.stringify(notebook),
-      'text',
-      `${tmpPath}/haystack.ipynb`
-    );
-    await page.notebook.openByPath(`${tmpPath}/haystack.ipynb`);
-    await page.notebook.activate('haystack.ipynb');
+    test(`Keep the scroll position when the search restarts after a cell is added, with a match in ${where}`, async ({
+      page,
+      tmpPath
+    }) => {
+      const notebook = galata.Notebook.generateNotebook(40, cellType, [
+        'Only hay here.'
+      ]);
+      notebook.cells[30].source = ['The needle is here.'];
+      await page.contents.uploadContent(
+        JSON.stringify(notebook),
+        'text',
+        `${tmpPath}/haystack.ipynb`
+      );
+      await page.notebook.openByPath(`${tmpPath}/haystack.ipynb`);
+      await page.notebook.activate('haystack.ipynb');
 
-    await page.keyboard.press('Control+f');
-    await page.fill('[placeholder="Find"]', 'needle');
-    await expect(page.locator('.jp-DocumentSearch-index-counter')).toHaveText(
-      '1/1'
-    );
+      await page.keyboard.press('Control+f');
+      await page.fill('[placeholder="Find"]', 'needle');
+      await expect(page.locator('.jp-DocumentSearch-index-counter')).toHaveText(
+        '1/1'
+      );
 
-    const firstCell = (await page.notebook.getCellLocator(0))!;
-    await (await page.notebook.getNotebookInPanelLocator())!.hover();
-    await page.mouse.wheel(0, -10000);
-    await expect(firstCell).toBeInViewport();
+      const firstCell = (await page.notebook.getCellLocator(0))!;
+      await (await page.notebook.getNotebookInPanelLocator())!.hover();
+      await page.mouse.wheel(0, -10000);
+      await expect(firstCell).toBeInViewport();
 
-    const mark = page.locator('.jp-RenderedMarkdown .jp-current-match');
-    const previousMark = await mark.elementHandle();
-    await firstCell.locator('.jp-InputPrompt').click();
-    await page.keyboard.press('b');
-    // The search starts again and marks the match anew
-    await page.waitForFunction(element => !element?.isConnected, previousMark);
-    await expect(mark).toHaveCount(1);
+      const mark = page.locator(currentMatch);
+      const previousMark = await mark.elementHandle();
+      await firstCell.locator('.jp-InputPrompt').click();
+      await page.keyboard.press('b');
+      // The search starts again and marks the match anew
+      await page.waitForFunction(
+        element => !element?.isConnected,
+        previousMark
+      );
+      await expect(mark).toHaveCount(1);
 
-    await expect(firstCell).toBeInViewport();
-  });
+      await expect(firstCell).toBeInViewport();
+    });
+  }
 
   test('Search on typing', async ({ page }) => {
     // Open search box
