@@ -317,3 +317,8 @@ button:not(:disabled) > .jp-DocumentSearch-up-down-button:active {
   border: none;
   overflow: hidden;
 }
+
+/* Keep the current match off the edge of a scrolled area, as in code cells */
+mark.jp-current-match {
+  scroll-margin: 5px;
+}

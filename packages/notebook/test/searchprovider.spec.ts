@@ -13,7 +13,7 @@ import {
   SearchDocumentModel,
   SearchDocumentView
 } from '@jupyterlab/documentsearch';
-import type { CodeCell, CodeCellModel } from '@jupyterlab/cells';
+import type { CodeCell, CodeCellModel, MarkdownCell } from '@jupyterlab/cells';
 import { CellSearchProvider } from '@jupyterlab/cells';
 import { Widget } from '@lumino/widgets';
 
@@ -764,6 +764,10 @@ describe('@jupyterlab/notebook', () => {
 
       afterEach(() => {
         readOnlyChecks.mockRestore();
+        if (panel.isAttached) {
+          Widget.detach(panel);
+        }
+        jest.useFakeTimers();
       });
 
       it('should replace with a shorter text and highlight next', async () => {
@@ -947,6 +951,27 @@ describe('@jupyterlab/notebook', () => {
           },
           { cell_type: 'code', source: 'test1 test2 test3' }
         ]);
+        panel.content.activeCellIndex = 0;
+        await provider.startQuery(/test\d/, undefined);
+        expect(provider.getCurrentMatch()?.text).toBe('test1');
+
+        await provider.replaceCurrentMatch('bar');
+        expect(provider.getCurrentMatch()?.text).toBe('test2');
+      });
+
+      it('should move to the first match of the next Markdown cell', async () => {
+        // A Markdown cell renders only in the document, on a real timer
+        jest.useRealTimers();
+        Widget.attach(panel, document.body);
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1' },
+          { cell_type: 'markdown', source: 'test2 test3' }
+        ]);
+        const markdownCell = panel.content.widgets[1] as MarkdownCell;
+        while (!markdownCell.renderer.node.textContent) {
+          await framePromise();
+        }
         panel.content.activeCellIndex = 0;
         await provider.startQuery(/test\d/, undefined);
         expect(provider.getCurrentMatch()?.text).toBe('test1');

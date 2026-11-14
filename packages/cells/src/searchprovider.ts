@@ -11,6 +11,7 @@ import { signalToPromise } from '@jupyterlab/coreutils';
 import type {
   IBaseSearchProvider,
   IFilters,
+  IHTMLSearchMatch,
   IReplaceOptions,
   ISearchMatch
 } from '@jupyterlab/documentsearch';
@@ -279,7 +280,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
 
       while (this.currentProviderIndex < this.outputsProvider.length) {
         const provider = this.outputsProvider[this.currentProviderIndex];
-        const match = await provider.highlightNext(false);
+        const match = await provider.highlightNext(false, options);
         if (match) {
           this.currentIndex =
             super.matchesCount +
@@ -328,7 +329,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
       while (this.currentProviderIndex >= 0) {
         const provider = this.outputsProvider[this.currentProviderIndex];
 
-        const match = await provider.highlightPrevious(false);
+        const match = await provider.highlightPrevious(false, options);
         if (match) {
           this.currentIndex =
             super.matchesCount +
@@ -463,12 +464,18 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     this.renderedProvider = new GenericSearchProvider(
       (cell as MarkdownCell).renderer
     );
+    this.renderedProvider.stateChanged.connect(
+      this._onRenderedTextSearched,
+      this
+    );
   }
 
   /**
    * Clear currently highlighted match
    */
   async clearHighlight(): Promise<void> {
+    this._currentMatchInRendered = false;
+    this._hideReadOnlyEditor();
     await super.clearHighlight();
     await this.renderedProvider.clearHighlight();
   }
@@ -488,8 +495,26 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * Stop the search and clean any UI elements.
    */
   async endQuery(): Promise<void> {
+    this._currentMatchInRendered = false;
     await super.endQuery();
     await this.renderedProvider.endQuery();
+  }
+
+  /**
+   * Get the currently selected match.
+   *
+   * @returns The currently selected match, if any.
+   */
+  getCurrentMatch(): ISearchMatch | undefined {
+    if (this._currentMatchInRendered) {
+      // A rendered Markdown match is replaceable when the cell is
+      // editable: the notebook un-renders the cell before replacing.
+      return this._applyReadOnlyState(
+        this.renderedProvider.currentMatch ?? undefined,
+        false
+      );
+    }
+    return super.getCurrentMatch();
   }
 
   /**
@@ -501,23 +526,25 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     loop = true,
     options?: IHighlightAdjacentMatchOptions
   ): Promise<ISearchMatch | undefined> {
-    let match: ISearchMatch | undefined = undefined;
     if (!this.isActive) {
-      return match;
+      return undefined;
     }
 
     const cell = this.cell as MarkdownCell;
-    if (cell.rendered && this.matchesCount > 0 && this._canUnrender()) {
-      // Unrender the cell
-      this._unrenderedByHighlight = true;
-      const waitForRendered = signalToPromise(cell.renderedChanged);
-      cell.rendered = false;
-      await waitForRendered;
+    if (!cell.rendered) {
+      this._currentMatchInRendered = false;
+      const match = await super.highlightNext(loop, options);
+      if (!match) {
+        // The current match moves to another cell
+        this._hideReadOnlyEditor();
+      }
+      return match;
     }
 
-    match = await super.highlightNext(loop, options);
-
-    return match;
+    return this._showCurrentMatch(
+      await super.highlightNext(loop, this._hiddenEditorOptions(options)),
+      options
+    );
   }
 
   /**
@@ -525,20 +552,29 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    *
    * @returns The previous match if there is one.
    */
-  async highlightPrevious(): Promise<ISearchMatch | undefined> {
-    let match: ISearchMatch | undefined = undefined;
-    const cell = this.cell as MarkdownCell;
-    if (cell.rendered && this.matchesCount > 0 && this._canUnrender()) {
-      // Unrender the cell if there are matches within the cell
-      this._unrenderedByHighlight = true;
-      const waitForRendered = signalToPromise(cell.renderedChanged);
-      cell.rendered = false;
-      await waitForRendered;
+  async highlightPrevious(
+    loop = true,
+    options?: IHighlightAdjacentMatchOptions
+  ): Promise<ISearchMatch | undefined> {
+    if (!this.isActive) {
+      return undefined;
     }
 
-    match = await super.highlightPrevious();
+    const cell = this.cell as MarkdownCell;
+    if (!cell.rendered) {
+      this._currentMatchInRendered = false;
+      const match = await super.highlightPrevious(loop, options);
+      if (!match) {
+        // The current match moves to another cell
+        this._hideReadOnlyEditor();
+      }
+      return match;
+    }
 
-    return match;
+    return this._showCurrentMatch(
+      await super.highlightPrevious(loop, this._hiddenEditorOptions(options)),
+      options
+    );
   }
 
   /**
@@ -549,6 +585,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * @param filters Filter parameters to pass to provider
    */
   async startQuery(query: RegExp | null, filters?: IFilters): Promise<void> {
+    this._currentMatchInRendered = false;
     await super.startQuery(query, filters);
     const cell = this.cell as MarkdownCell;
     if (cell.rendered) {
@@ -571,6 +608,11 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
       return Promise.resolve(false);
 
     const result = await super.replaceAllMatches(newText, options);
+    if (result) {
+      // The match marked in the rendered text is replaced too
+      this._currentMatchInRendered = false;
+      await this.renderedProvider.clearHighlight();
+    }
     // if the cell is rendered force update
     if ((this.cell as MarkdownCell).rendered) {
       this.cell.update();
@@ -593,6 +635,18 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     if (this.model.getMetadata('editable') === false)
       return Promise.resolve(false);
 
+    if (this._currentMatchInRendered) {
+      // The position of a rendered match counts from the start of its text
+      // node: replace the source match, in the editor if the cell shows it.
+      if (this._canUnrender()) {
+        const cell = this.cell as MarkdownCell;
+        const waitForRendered = signalToPromise(cell.renderedChanged);
+        cell.rendered = false;
+        await waitForRendered;
+      }
+      this._currentMatchInRendered = false;
+    }
+
     const result = await super.replaceCurrentMatch(newText, loop, options);
     return result;
   }
@@ -604,19 +658,61 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * @param rendered New rendered value
    */
   protected onRenderedChanged(cell: MarkdownCell, rendered: boolean): void {
-    if (!this._unrenderedByHighlight) {
+    // A match marked in the rendered text stays current when the cell shows
+    // its editor: the editor already has it as its current match.
+    const sourceMatch =
+      !rendered && this._currentMatchInRendered && this.isActive
+        ? super.getCurrentMatch()
+        : undefined;
+    if (!sourceMatch && !this._unrenderedByHighlight) {
       this.currentIndex = null;
     }
     this._unrenderedByHighlight = false;
+    // The rendered matches are rebuilt when the cell renders again, so a
+    // match marked in the rendered text is no longer current.
+    this._currentMatchInRendered = false;
     if (this.isActive) {
       if (rendered) {
         void this.renderedProvider.startQuery(this.query);
       } else {
         // Force cursor position to ensure reverse search is working as expected
         cell.editor?.setCursorPosition({ column: 0, line: 0 });
+        if (sourceMatch && cell.editor) {
+          const position = cell.editor.getPositionAt(sourceMatch.position);
+          if (position) {
+            cell.editor.revealPosition(position);
+          }
+        }
         void this.renderedProvider.endQuery();
       }
     }
+  }
+
+  /**
+   * Mark the current match again after the rendered text changed, as when a
+   * diagram is drawn again: the rendered text was searched again, and the new
+   * search has no current match.
+   */
+  private async _onRenderedTextSearched(): Promise<void> {
+    // The text can change while the match is being marked, before
+    // `_currentMatchInRendered` is set, as when the table of contents numbers
+    // the heading of a cell which rendered again.
+    if (
+      !this.isActive ||
+      !(this.cell as MarkdownCell).rendered ||
+      this.currentIndex === null
+    ) {
+      return;
+    }
+    const index = this._pairMatches().get(this.currentIndex);
+    if (index === undefined || !this._isRenderedMatchVisible(index)) {
+      this._currentMatchInRendered = false;
+      return;
+    }
+    this._currentMatchInRendered = !!(await this._highlightRenderedMatch(
+      index,
+      false
+    ));
   }
 
   /**
@@ -629,8 +725,283 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     return !cell.readOnly || cell.showEditorForReadOnly;
   }
 
+  /**
+   * Render a read-only cell again after the search showed its editor for a
+   * match which the rendered text does not show.
+   */
+  private _hideReadOnlyEditor(): void {
+    if (this._showsReadOnlyEditor) {
+      this._showsReadOnlyEditor = false;
+      // This renders the cell again
+      (this.cell as MarkdownCell).showEditorForReadOnly = false;
+    }
+  }
+
+  /**
+   * Options to step the editor of a rendered cell, which is hidden. The user
+   * does not see its cursor, so a search from the selection starts from the
+   * start of the cell instead. A hidden editor keeps a scroll request until
+   * the cell shows it again, and then scrolls the notebook: do not send one.
+   *
+   * @param options - Options of the step.
+   * @returns Options to step the hidden editor.
+   */
+  private _hiddenEditorOptions(
+    options?: IHighlightAdjacentMatchOptions
+  ): IHighlightAdjacentMatchOptions {
+    const from = options?.from;
+    return {
+      ...options,
+      from: from === 'selection' || from === 'selection-start' ? 'start' : from,
+      scroll: false
+    };
+  }
+
+  /**
+   * Report the match the editor just advanced to: mark it in the rendered
+   * text when the rendered text shows it, and show the editor otherwise.
+   *
+   * @param match - Match the editor advanced to, if any.
+   * @param options - Options of the step which advanced the editor.
+   * @returns The match to report to the caller.
+   */
+  private async _showCurrentMatch(
+    match: ISearchMatch | undefined,
+    options?: IHighlightAdjacentMatchOptions
+  ): Promise<ISearchMatch | undefined> {
+    const cell = this.cell as MarkdownCell;
+    if (!match || this.currentIndex === null) {
+      this._currentMatchInRendered = false;
+      await this.renderedProvider.clearHighlight();
+      return undefined;
+    }
+
+    const renderedIndex = this._pairMatches().get(this.currentIndex);
+    if (
+      renderedIndex === undefined ||
+      !this._isRenderedMatchVisible(renderedIndex)
+    ) {
+      // The rendered text does not show this match: show the editor.
+      this._currentMatchInRendered = false;
+      await this.renderedProvider.clearHighlight();
+      if (cell.rendered) {
+        if (!this._canUnrender()) {
+          // A read-only cell shows its editor until the current match moves
+          // to another cell
+          this._showsReadOnlyEditor = true;
+          cell.showEditorForReadOnly = true;
+        }
+        this._unrenderedByHighlight = true;
+        const waitForRendered = signalToPromise(cell.renderedChanged);
+        cell.rendered = false;
+        await waitForRendered;
+      }
+      // The editor got no scroll request while it was hidden
+      if ((options?.scroll ?? true) && !cell.rendered && cell.editor) {
+        const position = cell.editor.getPositionAt(match.position);
+        if (position) {
+          cell.editor.revealPosition(position);
+        }
+      }
+      return match;
+    }
+
+    const renderedMatch = await this._highlightRenderedMatch(
+      renderedIndex,
+      options?.scroll ?? true
+    );
+    if (!renderedMatch) {
+      this._currentMatchInRendered = false;
+      return match;
+    }
+    this._currentMatchInRendered = true;
+    // A rendered Markdown match is replaceable when the cell is editable.
+    return this._applyReadOnlyState(renderedMatch, false);
+  }
+
+  /**
+   * Whether the user can see the rendered match at the given index. A closed
+   * `<details>` element hides its content, and a style can hide rendered text,
+   * as it hides the source of a Mermaid diagram.
+   */
+  private _isRenderedMatchVisible(index: number): boolean {
+    const element = this.renderedProvider.matches[index]?.node.parentElement;
+    if (
+      !element ||
+      element.matches('details:not([open])') ||
+      element.closest('details:not([open]) > :not(summary)')
+    ) {
+      return false;
+    }
+    // The style of a cell outside the document is not known
+    return !element.isConnected || (element.checkVisibility?.() ?? true);
+  }
+
+  /**
+   * Mark the rendered match at the given index as the current match.
+   *
+   * @param index - Index of the rendered match to mark.
+   * @param scroll - Whether to scroll the match into view.
+   * @returns The marked match, if any.
+   */
+  private async _highlightRenderedMatch(
+    index: number,
+    scroll: boolean
+  ): Promise<IHTMLSearchMatch | undefined> {
+    const provider = this.renderedProvider;
+    const current = provider.currentMatchIndex;
+    const count = provider.matchesCount ?? 0;
+    // Without a marked match, the first step forward marks the first match
+    // and the first step back marks the last one: take the shorter way
+    let steps =
+      current !== null
+        ? index - current
+        : index < count - index
+          ? index + 1
+          : index - count;
+    while (steps !== 0) {
+      // Scroll only to the match itself, not to the matches on the way
+      const options = { scroll: scroll && Math.abs(steps) === 1 };
+      if (steps > 0) {
+        await provider.highlightNext(false, options);
+        steps--;
+      } else {
+        await provider.highlightPrevious(false, options);
+        steps++;
+      }
+    }
+    return provider.currentMatchIndex === index
+      ? (provider.currentMatch ?? undefined)
+      : undefined;
+  }
+
+  /**
+   * Pair each match in the rendered text with the source match it shows.
+   * Returns a map from source match index to rendered match index.
+   *
+   * The rendered text does not keep source positions, so the matches are
+   * paired in order, after the source matches in Markdown syntax which the
+   * rendered text does not show, such as a link destination, are left out.
+   * The map is empty unless the two lists then hold the same texts: a
+   * difference comes from a source match in syntax which is not listed in
+   * `_hiddenSourceRanges()`, such as the language of a code fence, and
+   * pairing around it would mark another occurrence than the one Replace
+   * changes. The map is empty too when a character reference, such as
+   * `&gt;`, adds or removes a match: its rendered text has no source match.
+   *
+   * @returns Map from source match index to rendered match index.
+   */
+  private _pairMatches(): Map<number, number> {
+    const text = this.model.sharedModel.getSource();
+    if (
+      this.query &&
+      Private.countMatches(this.query, text) !==
+        Private.countMatches(this.query, Private.decodeReferences(text))
+    ) {
+      return new Map();
+    }
+    const rendered = this.renderedProvider.matches;
+    const source = this.cmHandler.matches;
+    const hidden = this._hiddenSourceRanges();
+    const shown: number[] = [];
+    source.forEach(({ position }, index) => {
+      if (
+        !hidden.some(range => position >= range.start && position < range.end)
+      ) {
+        shown.push(index);
+      }
+    });
+    const paired = new Map<number, number>();
+    if (
+      shown.length === rendered.length &&
+      shown.every(
+        (index, i) =>
+          Private.typedText(source[index].text) ===
+          Private.typedText(rendered[i].text)
+      )
+    ) {
+      shown.forEach((index, i) => paired.set(index, i));
+    }
+    return paired;
+  }
+
+  /**
+   * Ranges of the cell source that the rendered text does not show: link
+   * and image destinations, reference definitions, reference labels, HTML
+   * tags, HTML comments and the content of elements whose text the search in
+   * the rendered text skips, such as the fallback text of a video. A match
+   * starting in one of these ranges is not visible in the rendered text.
+   *
+   * @returns Source ranges the rendered text does not show.
+   */
+  private _hiddenSourceRanges(): Array<{ start: number; end: number }> {
+    const source = this.model.sharedModel.getSource();
+    const ranges: Array<{ start: number; end: number }> = [];
+    // Images: ![alt](destination). The alt text is not rendered either. A
+    // destination can hold pairs of parentheses, as in
+    // https://example.com/Python_(language).
+    const images = /!\[[^\]]*\]\((?:[^()]|\([^()]*\))*\)/g;
+    for (const match of source.matchAll(images)) {
+      const start = match.index ?? 0;
+      ranges.push({ start, end: start + match[0].length });
+    }
+    // Link destinations: [text](destination). Blank out the images first, so
+    // that a link whose text is an image is found too, as in a badge:
+    // [![alt](image)](destination).
+    const withoutImages = source.replace(images, image =>
+      ' '.repeat(image.length)
+    );
+    for (const match of withoutImages.matchAll(
+      /\[[^\]]*\]\(((?:[^()]|\([^()]*\))*)\)/g
+    )) {
+      const destination = match[1] ?? '';
+      const end = (match.index ?? 0) + match[0].length;
+      ranges.push({ start: end - destination.length - 2, end });
+    }
+    // Reference definitions: the whole [label]: destination line.
+    for (const match of source.matchAll(
+      /^[ \t]{0,3}\[[^\]]+\]:[ \t]*\S.*$/gm
+    )) {
+      ranges.push({
+        start: match.index ?? 0,
+        end: (match.index ?? 0) + match[0].length
+      });
+    }
+    // Reference labels: the second [...] in [text][label] and [text][].
+    for (const match of source.matchAll(/\[[^\]]*\]\[([^\]]*)\]/g)) {
+      const label = match[1] ?? '';
+      const openBracket = (match.index ?? 0) + match[0].lastIndexOf('[');
+      ranges.push({
+        start: openBracket,
+        end: openBracket + label.length + 2
+      });
+    }
+    // The content of elements that `HTMLSearchEngine` does not search, such
+    // as the fallback text of a video.
+    for (const match of source.matchAll(
+      /<(audio|canvas|iframe|map|noscript|object|picture|script|style|svg|video)\b[\s\S]*?<\/\1\s*>/gi
+    )) {
+      ranges.push({
+        start: match.index ?? 0,
+        end: (match.index ?? 0) + match[0].length
+      });
+    }
+    // HTML tags with their attributes, and HTML comments.
+    for (const match of source.matchAll(
+      /<\/?[a-z][a-z0-9-]*(?:\s(?:[^>"']|"[^"]*"|'[^']*')*)?\/?>|<!--[\s\S]*?-->/gi
+    )) {
+      ranges.push({
+        start: match.index ?? 0,
+        end: (match.index ?? 0) + match[0].length
+      });
+    }
+    return ranges;
+  }
+
   protected renderedProvider: GenericSearchProvider;
   private _unrenderedByHighlight = false;
+  private _currentMatchInRendered = false;
+  private _showsReadOnlyEditor = false;
 }
 
 /**
@@ -653,5 +1024,47 @@ export function createCellSearchProvider(
       return new MarkdownCellSearchProvider(cell);
     default:
       return new CellSearchProvider(cell);
+  }
+}
+
+/**
+ * A namespace for module-private functionality.
+ */
+namespace Private {
+  /**
+   * The text of a match in the form typed in a query. MathJax draws formulas
+   * with mathematical symbols, such as 𝑥 for x and − for -, which the search
+   * in rendered text turns into the typed form in the same way.
+   */
+  export function typedText(text: string): string {
+    return text
+      .normalize('NFKC')
+      .replace(/\u2212/g, '-')
+      .replace(/\u2217/g, '*')
+      .replace(/\u2032/g, "'")
+      .replace(/\u2061(?=[\p{L}\p{N}])/gu, ' ')
+      .replace(/\u2061/g, '');
+  }
+
+  /**
+   * The number of matches of a query in a text.
+   */
+  export function countMatches(query: RegExp, text: string): number {
+    const global = query.global
+      ? query
+      : new RegExp(query.source, query.flags + 'g');
+    return text.match(global)?.length ?? 0;
+  }
+
+  /**
+   * The text with each character reference, such as `&gt;`, replaced by the
+   * character it renders.
+   */
+  export function decodeReferences(text: string): string {
+    const decoder = document.createElement('textarea');
+    return text.replace(/&(?:#\d+|#x[\da-f]+|[a-z][a-z\d]*);/gi, reference => {
+      decoder.innerHTML = reference;
+      return decoder.value;
+    });
   }
 }

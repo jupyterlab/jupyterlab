@@ -808,6 +808,10 @@ export class CodeMirrorSearchHighlighter {
             effects: EditorView.scrollIntoView(match.position)
           });
         }
+      } else if (options?.scroll === true) {
+        this._cm.editor.dispatch({
+          effects: EditorView.scrollIntoView(match.position)
+        });
       }
     } else {
       this._current = null;
