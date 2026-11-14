@@ -11,7 +11,7 @@ import * as React from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 
-type ReactRenderElement = Array<React.ReactElement> | React.ReactElement;
+export type ReactRenderElement = Array<React.ReactElement> | React.ReactElement;
 
 /**
  * An abstract class for a Lumino widget which renders a React component.

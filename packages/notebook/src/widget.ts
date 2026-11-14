@@ -103,7 +103,7 @@ const UNCONFINED_CLASS = 'jp-mod-unconfined';
 
 /**
  * The class name added to the notebook when an element within it is focused
- * and takes keyboard input, such as focused <input> or <div contenteditable>.
+ * and takes keyboard input, such as focused `<input>` or `<div contenteditable>`.
  *
  * This class is also effective when the focused element is in shadow DOM.
  */
@@ -154,7 +154,7 @@ const MAXIMUM_TIME_REMAINING = 50;
 /*
  * The rendering mode for the notebook.
  */
-type RenderingLayout = 'default' | 'side-by-side';
+export type RenderingLayout = 'default' | 'side-by-side';
 
 /**
  * The class attached to the heading collapser button
@@ -1940,7 +1940,7 @@ export class Notebook extends StaticNotebook {
    *
    * @param newValue Notebook mode
    * @param options Control mode side-effect
-   * @param options.focus Whether to ensure focus (default) or not when setting the mode.
+   * - `focus`: Whether to ensure focus (default) or not when setting the mode.
    */
   protected setMode(
     newValue: NotebookMode,

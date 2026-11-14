@@ -797,7 +797,7 @@ export interface IReplyAbortContent {
  * This automatically unions the necessary error and abort replies required in
  * the [message spec](https://jupyter-client.readthedocs.io/en/latest/messaging.html#request-reply).
  */
-type ReplyContent<T> = T | IReplyErrorContent | IReplyAbortContent;
+export type ReplyContent<T> = T | IReplyErrorContent | IReplyAbortContent;
 
 /**
  * A `'kernel_info_request'` message on the `'shell'` channel.
@@ -871,7 +871,7 @@ export interface ICompleteRequestMsg extends IShellMessage<'complete_request'> {
  * @see {@link KernelMessage.ICompleteRequestMsg}
  * @see {@link Kernel.IKernelConnection.requestComplete}
  */
-interface ICompleteReply extends IReplyOkContent {
+export interface ICompleteReply extends IReplyOkContent {
   matches: string[];
   cursor_start: number;
   cursor_end: number;

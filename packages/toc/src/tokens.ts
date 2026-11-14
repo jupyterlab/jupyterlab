@@ -279,8 +279,9 @@ export namespace TableOfContents {
     /**
      * Callback on heading collapse.
      *
-     * @param options.heading The heading to change state (all headings if not provided)
-     * @param options.collapsed The new collapsed status (toggle existing status if not provided)
+     * @param options - The options.
+     * - `heading`: The heading to change state (all headings if not provided)
+     * - `collapsed`: The new collapsed status (toggle existing status if not provided)
      */
     toggleCollapse: (options: { heading?: H; collapsed?: boolean }) => void;
   }

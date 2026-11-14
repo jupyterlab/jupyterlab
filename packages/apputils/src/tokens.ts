@@ -198,9 +198,6 @@ export interface IThemeManager {
   getDisplayName(name: string): string;
 }
 
-/**
- * A namespace for the `IThemeManager` sub-types.
- */
 export namespace IThemeManager {
   /**
    * An interface for a theme.
@@ -254,18 +251,15 @@ export const ISanitizer = new Token<IRenderMime.ISanitizer>(
 );
 
 /**
- * @deprecated since v4 use {@link IRenderMime.ISanitizer}
+ * @deprecated since v4 use {@link "rendermime-interfaces".IRenderMime.ISanitizer}
  */
 export type ISanitizer = IRenderMime.ISanitizer;
 
-/**
- * The namespace for `ISanitizer` related interfaces.
- */
 export namespace ISanitizer {
   /**
    * The options used to sanitize.
    *
-   * @deprecated in v4 use {@link IRenderMime.ISanitizerOptions}
+   * @deprecated in v4 use {@link "rendermime-interfaces".IRenderMime.ISanitizerOptions}
    */
   export type IOptions = IRenderMime.ISanitizerOptions;
 }

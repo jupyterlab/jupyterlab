@@ -186,7 +186,7 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
    * @deprecated This is error-prone and will be removed in JupyterLab 5.0, use `getEditorIndex()` with `virtualDocument.getEditorAtVirtualLine(position)` instead.
    *
    * @param position - the position of cursor in the virtual document.
-   * @return  {number} - index of the virtual editor
+   * @return The index of the virtual editor
    */
   getEditorIndexAt(position: IVirtualPosition): number {
     return 0;
@@ -205,7 +205,7 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
    * Get the wrapper of input editor.
    *
    * @param ceEditor
-   * @return  {HTMLElement}
+   * @return The wrapper element.
    */
   getEditorWrapper(ceEditor: Document.IEditor): HTMLElement {
     return this.wrapperElement;

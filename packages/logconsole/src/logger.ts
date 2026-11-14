@@ -20,12 +20,12 @@ import type {
 /**
  * All severity levels, including an internal one for metadata.
  */
-type FullLogLevel = LogLevel | 'metadata';
+export type FullLogLevel = LogLevel | 'metadata';
 
 /**
  * Custom Notebook Output with log info.
  */
-type ILogOutput = nbformat.IOutput & {
+export type ILogOutput = nbformat.IOutput & {
   /**
    * Date & time when output is logged in integer representation.
    */
@@ -80,7 +80,7 @@ export class LogOutputModel extends OutputModel implements ILogOutputModel {
 /**
  * Log Output Model namespace that defines initialization options.
  */
-namespace LogOutputModel {
+export namespace LogOutputModel {
   export interface IOptions extends IOutputModel.IOptions {
     value: ILogOutput;
   }

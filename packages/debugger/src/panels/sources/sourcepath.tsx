@@ -9,8 +9,8 @@ import type { IDebugger } from '../../tokens';
 /**
  * A React component to display the path to a source.
  *
- * @param {object} props The component props.
- * @param props.model The model for the sources.
+ * @param props The component props.
+ * - `model`: The model for the sources.
  */
 export const SourcePathComponent = ({
   model,
