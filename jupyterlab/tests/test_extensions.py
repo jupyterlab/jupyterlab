@@ -3,12 +3,15 @@
 
 import io
 import json
+import logging
 import sys
 import tarfile
+from importlib.metadata import distributions
 from subprocess import CompletedProcess
 from types import MethodType, SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
 
+import httpx2
 import pytest
 from tornado import web
 from traitlets.config import Config, Configurable
@@ -24,6 +27,12 @@ from jupyterlab.extensions.pypi import _check_python_version_compatible
 from jupyterlab.handlers.extension_manager_handler import ExtensionHandler
 
 from . import fake_client_factory
+
+
+@pytest.fixture(autouse=True)
+def no_installed_language_packs(monkeypatch):
+    """Hide the language packs installed in the test environment."""
+    monkeypatch.setattr("jupyterlab.extensions.pypi.entry_points", lambda **_: [])
 
 
 @pytest.mark.parametrize(
@@ -50,6 +59,74 @@ def test_check_python_version_compatible_current_version():
     assert _check_python_version_compatible(current)[0] is True
 
 
+@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ("jupyterlab-language-pack-fr-FR",))
+async def test_pypi_search_only_lists_language_packs(monkeypatch):
+    manager = PyPIExtensionManager()
+    get = AsyncMock(
+        return_value=httpx2.Response(
+            200, json={"info": {"version": "1.0.0", "summary": "French language pack"}}
+        )
+    )
+    monkeypatch.setattr(manager._httpx_client, "get", get)
+
+    extensions, _ = await manager.list_extensions("jupyterlab-git")
+    assert extensions == []
+
+    for query in ("FR-fr", "FRENCH"):
+        packs, _ = await manager.list_extensions(query)
+        assert [(pack.name, pack.latest_version) for pack in packs] == [
+            ("jupyterlab-language-pack-fr-FR", "1.0.0")
+        ]
+    get.assert_awaited_once_with(
+        f"{manager.base_url}/jupyterlab-language-pack-fr-FR/json",
+        headers={"Content-Type": "application/json"},
+    )
+
+
+@patch(
+    "jupyterlab.extensions.pypi.LANGUAGE_PACKS",
+    ("jupyterlab-language-pack-de-DE", "jupyterlab-language-pack-fr-FR"),
+)
+async def test_pypi_lists_installed_language_packs_separately(monkeypatch, tmp_path):
+    dist_info = tmp_path / "jupyterlab_language_pack_de_de-4.5.post3.dist-info"
+    dist_info.mkdir()
+    (dist_info / "METADATA").write_text(
+        "Name: jupyterlab-language-pack-de-DE\n"
+        "Version: 4.5.post3\n"
+        "Summary: German language pack\n"
+        "Project-URL: homepage, https://github.com/jupyterlab/language-packs\n",
+        encoding="utf-8",
+    )
+    (dist_info / "entry_points.txt").write_text(
+        "[jupyterlab.languagepack]\nde_DE = jupyterlab_language_pack_de_DE\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        "jupyterlab.extensions.pypi.entry_points",
+        lambda *, group: [
+            entry
+            for dist in distributions(path=[str(tmp_path)])
+            for entry in dist.entry_points.select(group=group)
+        ],
+    )
+    monkeypatch.setattr(ExtensionManager, "_get_installed_extensions", AsyncMock(return_value={}))
+    manager = PyPIExtensionManager()
+    get = AsyncMock(return_value=httpx2.Response(200, json={"info": {"version": "4.5.post3"}}))
+    monkeypatch.setattr(manager._httpx_client, "get", get)
+
+    packs, _ = await manager.list_extensions()
+    assert [
+        (pack.name, pack.installed_version, pack.installed, pack.pkg_type) for pack in packs
+    ] == [("jupyterlab-language-pack-de-DE", "4.5.post3", True, "language-pack")]
+    assert packs[0].description == "German language pack"
+    assert packs[0].homepage_url == "https://github.com/jupyterlab/language-packs"
+    get.assert_not_called()
+
+    packs, last_page = await manager.list_extensions("", per_page=1)
+    assert [pack.name for pack in packs] == ["jupyterlab-language-pack-fr-FR"]
+    assert last_page == 1
+
+
 @pytest.mark.parametrize(
     "requires_python, expected_allowed",
     (
@@ -58,36 +135,35 @@ def test_check_python_version_compatible_current_version():
         (None, True),  # No requirement - should be allowed
     ),
 )
-@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ())
-@patch("jupyterlab.extensions.pypi.xmlrpc.client")
+@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ("jupyterlab-language-pack-fr-FR",))
 async def test_extension_package_allowed_set_from_python_compatibility(
-    mocked_rpcclient, requires_python, expected_allowed
+    monkeypatch, requires_python, expected_allowed
 ):
-    """Test that allowed attribute is correctly set based on Python version compatibility."""
-    proxy = Mock(browse=Mock(return_value=[["test-extension", "1.0.0"]]))
-    mocked_rpcclient.ServerProxy = Mock(return_value=proxy)
-
     manager = PyPIExtensionManager()
+    get = AsyncMock(
+        return_value=httpx2.Response(
+            200,
+            json={
+                "info": {
+                    "version": "1.0.0",
+                    "summary": "French language pack",
+                    "requires_python": requires_python,
+                }
+            },
+        )
+    )
+    monkeypatch.setattr(manager._httpx_client, "get", get)
 
-    async def mock_pkg_metadata(name, version, base_url):
-        return {
-            "name": "test-extension",
-            "summary": "A test extension",
-            "requires_python": requires_python,
-        }
-
-    manager._fetch_package_metadata = mock_pkg_metadata
-
-    extensions, _ = await manager.list_extensions("test")
+    extensions, _ = await manager.list_extensions("fr-FR")
 
     assert len(extensions) == 1
     ext = extensions[0]
-    assert ext.name == "test-extension"
+    assert ext.name == "jupyterlab-language-pack-fr-FR"
     assert ext.allowed == expected_allowed
     if not expected_allowed:
         assert "Requires Python" in ext.description
     else:
-        assert ext.description == "A test extension"
+        assert ext.description == "French language pack"
 
 
 @pytest.mark.parametrize(
@@ -379,253 +455,87 @@ async def test_ExtensionManager_uninstall():
     assert result.message == "Extension removal not supported."
 
 
-@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ())
-@patch("jupyterlab.extensions.pypi.xmlrpc.client")
-async def test_ExtensionManager_list_extensions_query_sort(mocked_rpcclient):
-    extension_data = [
-        {
-            "name": "jupyterlab-apod",
-            "project_urls": {
-                "Homepage": "https://github.com/jupyterlab/jupyterlab_apod",
-            },
-        },
-        {
-            "name": "jupyterlab-gitlab",
-            "project_urls": {
-                "Homepage": "https://github.com/jupyterlab-contrib/jupyterlab-gitlab/issues",
-            },
-        },
-        {
-            "name": "jupyterlab-git",
-            "project_url": "https://github.com/jupyterlab/jupyterlab-git",
-        },
-        {
-            "name": "jupyterlab-rainbow-brackets",
-            "project_url": "https://github.com/krassowski/jupyterlab-rainbow-brackets",
-        },
-        {"name": "nbdime", "home_page": "https://github.com/jupyter/nbdime"},
-        {
-            "name": "rise",
-            "project_urls": {
-                "Source Code": "https://github.com/jupyterlab-contrib/rise",
-            },
-        },
-    ]
-
-    proxy = Mock(
-        browse=Mock(return_value=[[extension["name"], "1.0.0"] for extension in extension_data]),
-    )
-    mocked_rpcclient.ServerProxy = Mock(return_value=proxy)
-
+@patch(
+    "jupyterlab.extensions.pypi.LANGUAGE_PACKS",
+    (
+        "jupyterlab-language-pack-fr-FR",
+        "jupyterlab-language-pack-de-DE",
+        "jupyterlab-language-pack-et-EE",
+        "jupyterlab-language-pack-ja-JP",
+    ),
+)
+async def test_pypi_language_pack_pagination_skips_unavailable_packs(monkeypatch, caplog):
     manager = PyPIExtensionManager()
+    unavailable = True
 
-    extensions = {
-        extension["name"]: {"version": "1.0.0", **extension} for extension in extension_data
-    }
-
-    async def mock_pkg_metadata(name, l, b):  # noqa
-        return extensions[name]
-
-    manager._fetch_package_metadata = mock_pkg_metadata
-
-    first_page, pages_count = await manager.list_extensions("", per_page=3)
-    assert [extension.name for extension in first_page] == [
-        # jupyter/jupyterlab
-        "jupyterlab-git",
-        "nbdime",
-        # jupyterlab-contrib
-        "jupyterlab-gitlab",
-    ]
-    assert pages_count == 2
-    second_page, pages_count = await manager.list_extensions("", page=2, per_page=3)
-    assert [extension.name for extension in second_page] == [
-        # jupyterlab-contrib
-        "rise",
-        # other third-party
-        "jupyterlab-rainbow-brackets",
-        # example extensions
-        "jupyterlab-apod",
-    ]
-
-
-@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ())
-@patch("jupyterlab.extensions.pypi.xmlrpc.client")
-async def test_PyPiExtensionManager_list_extensions_query(mocked_rpcclient):
-    extension1 = ExtensionPackage(
-        name="jupyterlab-git",
-        description="A JupyterLab extension for version control using git",
-        homepage_url="https://github.com/jupyterlab/jupyterlab-git",
-        pkg_type="prebuilt",
-        latest_version="0.37.1",
-        author="Jupyter Development Team",
-        license="BSD-3-Clause",
-        package_manager_url="https://pypi.org/project/jupyterlab-git/",
-    )
-    extension2 = ExtensionPackage(
-        name="jupyterlab-github",
-        description="JupyterLab viewer for GitHub repositories",
-        homepage_url="https://github.com/jupyterlab/jupyterlab-github/blob/main/README.md",
-        pkg_type="prebuilt",
-        latest_version="3.0.1",
-        author="Ian Rose",
-        license="BSD-3-Clause",
-        bug_tracker_url="https://github.com/jupyterlab/jupyterlab-github/issues",
-        package_manager_url="https://pypi.org/project/jupyterlab-github/",
-        repository_url="https://github.com/jupyterlab/jupyterlab-github",
-    )
-
-    proxy = Mock(
-        browse=Mock(
-            return_value=[
-                ["jupyterlab-git", "0.33.0"],
-                ["jupyterlab-git", "0.34.0"],
-                ["jupyterlab-git", "0.34.1"],
-                ["jupyterlab-git", "0.37.0"],
-                ["jupyterlab-git", "0.37.1"],
-                ["jupyterlab-github", "3.0.0"],
-                ["jupyterlab-github", "3.0.1"],
-            ]
-        ),
-    )
-    mocked_rpcclient.ServerProxy = Mock(return_value=proxy)
-
-    manager = PyPIExtensionManager()
-
-    async def mock_pkg_metadata(n, l, b):  # noqa
-        return (
-            {
-                "name": "jupyterlab-git",
-                "version": "0.37.1",
-                "stable_version": None,
-                "bugtrack_url": None,
-                "package_url": "https://pypi.org/project/jupyterlab-git/",
-                "release_url": "https://pypi.org/project/jupyterlab-git/0.37.1/",
-                "docs_url": None,
-                "home_page": "https://github.com/jupyterlab/jupyterlab-git",
-                "download_url": "",
-                "project_url": "",
-                "project_urls": {},
-                "author": "Jupyter Development Team",
-                "author_email": "",
-                "maintainer": "",
-                "maintainer_email": "",
-                "summary": "A JupyterLab extension for version control using git",
-                "license": "BSD-3-Clause",
-                "keywords": "Jupyter,JupyterLab,JupyterLab3,jupyterlab-extension,Git",
-                "platform": "Linux",
-                "classifiers": [
-                    "Framework :: Jupyter",
-                    "Framework :: Jupyter :: JupyterLab",
-                    "Framework :: Jupyter :: JupyterLab :: 3",
-                    "Framework :: Jupyter :: JupyterLab :: Extensions",
-                    "Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt",
-                    "Intended Audience :: Developers",
-                    "Intended Audience :: Science/Research",
-                    "License :: OSI Approved :: BSD License",
-                    "Programming Language :: Python",
-                    "Programming Language :: Python :: 3",
-                    "Programming Language :: Python :: 3.10",
-                    "Programming Language :: Python :: 3.6",
-                    "Programming Language :: Python :: 3.7",
-                    "Programming Language :: Python :: 3.8",
-                    "Programming Language :: Python :: 3.9",
-                ],
-                "requires": [],
-                "requires_dist": [
-                    "jupyter-server",
-                    "nbdime (~=3.1)",
-                    "nbformat",
-                    "packaging",
-                    "pexpect",
-                    "coverage ; extra == 'dev'",
-                    "jupyterlab (~=3.0) ; extra == 'dev'",
-                    "pre-commit ; extra == 'dev'",
-                    "pytest ; extra == 'dev'",
-                    "pytest-asyncio ; extra == 'dev'",
-                    "pytest-cov ; extra == 'dev'",
-                    "pytest-tornasync ; extra == 'dev'",
-                    "coverage ; extra == 'tests'",
-                    "jupyterlab (~=3.0) ; extra == 'tests'",
-                    "pre-commit ; extra == 'tests'",
-                    "pytest ; extra == 'tests'",
-                    "pytest-asyncio ; extra == 'tests'",
-                    "pytest-cov ; extra == 'tests'",
-                    "pytest-tornasync ; extra == 'tests'",
-                    "hybridcontents ; extra == 'tests'",
-                    "jupytext ; extra == 'tests'",
-                ],
-                "provides": [],
-                "provides_dist": [],
-                "obsoletes": [],
-                "obsoletes_dist": [],
-                "requires_python": "<4,>=3.6",
-                "requires_external": [],
-                "_pypi_ordering": 55,
-                "downloads": {"last_day": -1, "last_week": -1, "last_month": -1},
-                "cheesecake_code_kwalitee_id": None,
-                "cheesecake_documentation_id": None,
-                "cheesecake_installability_id": None,
-            }
-            if n == "jupyterlab-git"
-            else {
-                "name": "jupyterlab-github",
-                "version": "3.0.1",
-                "stable_version": None,
-                "bugtrack_url": None,
-                "package_url": "https://pypi.org/project/jupyterlab-github/",
-                "release_url": "https://pypi.org/project/jupyterlab-github/3.0.1/",
-                "docs_url": None,
-                "home_page": "",
-                "download_url": "",
-                "project_url": "",
-                "project_urls": {
-                    "Homepage": "https://github.com/jupyterlab/jupyterlab-github/blob/main/README.md",
-                    "Bug Tracker": "https://github.com/jupyterlab/jupyterlab-github/issues",
-                    "Source Code": "https://github.com/jupyterlab/jupyterlab-github",
-                },
-                "author": "Ian Rose",
-                "author_email": "jupyter@googlegroups.com",
-                "maintainer": "",
-                "maintainer_email": "",
-                "summary": "JupyterLab viewer for GitHub repositories",
-                "license": "BSD-3-Clause",
-                "keywords": "Jupyter,JupyterLab,JupyterLab3",
-                "platform": "Linux",
-                "classifiers": [
-                    "Framework :: Jupyter",
-                    "Framework :: Jupyter :: JupyterLab",
-                    "Framework :: Jupyter :: JupyterLab :: 3",
-                    "Framework :: Jupyter :: JupyterLab :: Extensions",
-                    "Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt",
-                    "License :: OSI Approved :: BSD License",
-                    "Programming Language :: Python",
-                    "Programming Language :: Python :: 3",
-                    "Programming Language :: Python :: 3.6",
-                    "Programming Language :: Python :: 3.7",
-                    "Programming Language :: Python :: 3.8",
-                    "Programming Language :: Python :: 3.9",
-                ],
-                "requires": [],
-                "requires_dist": ["jupyterlab (~=3.0)"],
-                "provides": [],
-                "provides_dist": [],
-                "obsoletes": [],
-                "obsoletes_dist": [],
-                "requires_python": ">=3.6",
-                "requires_external": [],
-                "_pypi_ordering": 12,
-                "downloads": {"last_day": -1, "last_week": -1, "last_month": -1},
-                "cheesecake_code_kwalitee_id": None,
-                "cheesecake_documentation_id": None,
-                "cheesecake_installability_id": None,
-            }
+    async def get(url, *, headers):
+        if url.endswith("/jupyterlab-language-pack-et-EE/json"):
+            return httpx2.Response(404)
+        if unavailable and url.endswith("/jupyterlab-language-pack-ja-JP/json"):
+            raise httpx2.ConnectError("Connection refused")
+        return httpx2.Response(
+            200,
+            json={
+                "info": {
+                    "version": "1.2.3rc1",
+                    "summary": "A JupyterLab language pack",
+                    "project_urls": {"Homepage": "https://github.com/jupyterlab/language-packs"},
+                }
+            },
         )
 
-    manager._fetch_package_metadata = mock_pkg_metadata
+    monkeypatch.setattr(manager._httpx_client, "get", get)
 
-    extensions = await manager.list_extensions("git")
+    first_page, pages_count = await manager.list_extensions("", per_page=1)
+    assert first_page == [
+        ExtensionPackage(
+            name="jupyterlab-language-pack-de-DE",
+            description="A JupyterLab language pack",
+            homepage_url="https://github.com/jupyterlab/language-packs",
+            pkg_type="language-pack",
+            latest_version="1.2.3-rc.1",
+        )
+    ]
+    assert pages_count == 2
+    assert [
+        record.getMessage() for record in caplog.records if record.levelno == logging.WARNING
+    ] == [
+        "Failed to fetch language pack metadata for jupyterlab-language-pack-ja-JP: "
+        "Connection refused"
+    ]
 
-    assert extensions == ([extension1, extension2], 1)
+    second_page, pages_count = await manager.list_extensions("", page=2, per_page=1)
+    assert [pack.name for pack in second_page] == ["jupyterlab-language-pack-fr-FR"]
+    assert pages_count == 2
+
+    unavailable = False
+    _, pages_count = await manager.list_extensions("", per_page=1)
+    assert pages_count == 3
+
+
+@pytest.mark.parametrize(
+    "failure",
+    (
+        httpx2.ConnectError("Connection refused"),
+        httpx2.Response(503, request=httpx2.Request("GET", "https://pypi.org/pypi")),
+    ),
+)
+@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ("jupyterlab-language-pack-fr-FR",))
+async def test_pypi_language_pack_search_recovers(monkeypatch, failure):
+    manager = PyPIExtensionManager()
+    get = AsyncMock(
+        side_effect=[failure, httpx2.Response(200, json={"info": {"version": "1.0.0"}})]
+    )
+    monkeypatch.setattr(manager._httpx_client, "get", get)
+
+    with pytest.raises(web.HTTPError) as error:
+        await manager.list_extensions("fr-FR")
+    assert error.value.status_code == 503
+
+    packs, _ = await manager.list_extensions("fr-FR")
+    assert [pack.name for pack in packs] == ["jupyterlab-language-pack-fr-FR"]
+    await manager.list_extensions("fr-FR")
+    assert get.await_count == 2
 
 
 async def test_PyPiExtensionManager_custom_server_url():
@@ -636,6 +546,18 @@ async def test_PyPiExtensionManager_custom_server_url():
     manager = PyPIExtensionManager(parent=parent)
 
     assert manager.base_url == BASE_URL
+
+
+async def test_PyPiExtensionManager_rpc_request_throttling_is_deprecated(caplog):
+    parent = Configurable(config=Config({"PyPIExtensionManager": {"rpc_request_throttling": 2}}))
+
+    PyPIExtensionManager(parent=parent)
+
+    assert any(
+        "rpc_request_throttling is deprecated" in record.getMessage()
+        for record in caplog.records
+        if record.levelno == logging.WARNING
+    )
 
 
 LEVELS = ["user", "sys_prefix", "system"]

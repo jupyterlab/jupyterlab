@@ -70,9 +70,9 @@ export interface IEntry {
   status: 'ok' | 'warning' | 'error' | 'deprecated' | null;
 
   /**
-   * The package type (prebuilt or source).
+   * The package type.
    */
-  pkg_type: 'prebuilt' | 'source';
+  pkg_type: 'prebuilt' | 'source' | 'language-pack';
 
   /**
    * The information about extension installation.
@@ -476,6 +476,16 @@ export class ListModel extends VDomModel {
   }
 
   /**
+   * Refresh the installed list and any available search results.
+   */
+  async refresh(): Promise<void> {
+    await this.refreshInstalled(true);
+    if (this.canInstall && this.isDisclaimed) {
+      await this._debouncedSearch.invoke(true);
+    }
+  }
+
+  /**
    * Fetch the list of installed extensions.
    *
    * @param force Force refreshing the list of installed packages
@@ -499,13 +509,9 @@ export class ListModel extends VDomModel {
    * @returns The extensions matching the current query.
    */
   protected async search(force = false): Promise<void> {
-    if (!this.canInstall) {
-      // No registry to search; re-render so the query filters the list locally.
+    if (!this.canInstall || !this.isDisclaimed) {
       this.stateChanged.emit();
       return;
-    }
-    if (!this.isDisclaimed) {
-      return Promise.reject('Installation warning is not disclaimed.');
     }
 
     this.searchError = null;
@@ -689,7 +695,7 @@ export class ListModel extends VDomModel {
   private _installed: IEntry[];
   private _lastSearchResult: IEntry[];
   private _pendingActions: Promise<any>[] = [];
-  private _debouncedSearch: Debouncer<void, void>;
+  private _debouncedSearch: Debouncer<void, void, [force?: boolean]>;
 }
 
 /**

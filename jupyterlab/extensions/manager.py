@@ -63,7 +63,7 @@ class ExtensionPackage:
         name: Package name
         description: Package description
         homepage_url: Package home page
-        pkg_type: Type of package - ["prebuilt", "source"]
+        pkg_type: Type of package - ["prebuilt", "source", "language-pack"]
         allowed: [optional] Whether this extension is allowed or not - default True
         approved: [optional] Whether the package is approved by your administrators - default False
         companion: [optional] Type of companion for the frontend extension - [None, "kernel", "server"]; default None
@@ -474,16 +474,12 @@ class ExtensionManager(PluginManager):
             The extensions
             Last page of results
         """
-        if query not in self._extensions_cache or page not in self._extensions_cache[query].cache:
-            await self.refresh(query, page, per_page)
+        cache, last_page = await self._get_extensions_page(query, page, per_page)
 
         # filter using listings settings
         if self._listings_cache is None and self._listing_fetch is not None:
             await self._fetch_listings()
 
-        cache = self._extensions_cache[query].cache[page]
-        if cache is None:
-            cache = {}
         extensions = list(cache.values())
         if query is not None and self._listings_cache is not None:
             listing = list(self._listings_cache)
@@ -503,7 +499,16 @@ class ExtensionManager(PluginManager):
                         self.log.warning(f"Not allowed extension '{name}' is installed.")
                         extensions.append(replace(ext, allowed=False))
 
-        return extensions, self._extensions_cache[query].last_page
+        return extensions, last_page
+
+    async def _get_extensions_page(
+        self, query: str | None, page: int, per_page: int
+    ) -> tuple[dict[str, ExtensionPackage], int]:
+        if query not in self._extensions_cache or page not in self._extensions_cache[query].cache:
+            await self.refresh(query, page, per_page)
+
+        cache = self._extensions_cache[query]
+        return cache.cache[page] or {}, cache.last_page
 
     async def refresh(self, query: str | None, page: int, per_page: int) -> None:
         """Refresh the list of extensions."""

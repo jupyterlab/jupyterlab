@@ -6,33 +6,32 @@
 from __future__ import annotations
 
 import asyncio
-import http.client
 import io
 import json
 import math
-import re
 import sys
 import tempfile
-import xmlrpc.client
 from collections.abc import Awaitable, Callable
-from datetime import UTC, datetime, timedelta
 from functools import partial
-from itertools import groupby
+from http import HTTPStatus
+from importlib.metadata import Distribution, entry_points
 from os import environ
 from pathlib import Path
 from subprocess import CalledProcessError, run
 from tarfile import TarFile
-from typing import TypeVar, cast
-from urllib.parse import urlparse
+from time import monotonic
+from typing import cast
 from zipfile import ZipFile
 
 import httpx2
 import tornado
 from async_lru import alru_cache
+from jupyterlab_server.translation_utils import JUPYTERLAB_LANGUAGEPACK_ENTRY
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
 from packaging.utils import InvalidName, canonicalize_name
 from packaging.version import InvalidVersion, Version
 from packaging.version import parse as parse_version
+from tornado.web import HTTPError
 from traitlets import CFloat, CInt, Unicode, config, observe
 
 if sys.version_info >= (3, 12):
@@ -50,9 +49,7 @@ from jupyterlab.extensions.manager import (
 
 JSONValue = str | int | float | bool | None | list["JSONValue"] | dict[str, "JSONValue"]
 PackageMetadata = dict[str, JSONValue]
-FetchPackageMetadata = Callable[[str, str, str], Awaitable[PackageMetadata]]
-_Arg = TypeVar("_Arg")
-_R = TypeVar("_R")
+FetchPackageMetadata = Callable[[str, str], Awaitable[PackageMetadata]]
 
 
 def _json_object_or_none(value: object) -> dict[str, JSONValue] | None:
@@ -83,26 +80,6 @@ def _metadata_string_map(data: PackageMetadata, key: str) -> dict[str, str]:
     return {k: v for k, v in value.items() if isinstance(v, str)}
 
 
-class ProxiedTransport(xmlrpc.client.Transport):
-    proxy: tuple[str, str | int | None]
-    proxy_headers: dict[str, str] | None
-
-    def set_proxy(
-        self,
-        host: str,
-        port: str | int | None = None,
-        headers: dict[str, str] | None = None,
-    ) -> None:
-        self.proxy = host, port
-        self.proxy_headers = headers
-
-    def make_connection(self, host: tuple[str, dict[str, str]] | str) -> http.client.HTTPConnection:
-        connection = http.client.HTTPConnection(*self.proxy)  # type: ignore[arg-type]
-        connection.set_tunnel(host, headers=self.proxy_headers)  # type: ignore[arg-type]
-        self._connection = host, connection
-        return connection
-
-
 all_proxy_url = environ.get("ALL_PROXY")
 # For historical reasons, we also support the lowercase environment variables.
 # Info: https://about.gitlab.com/blog/2021/01/27/we-need-to-talk-no-proxy/
@@ -113,19 +90,11 @@ https_proxy_url = (
 
 _httpx_mounts: dict[str, httpx2.AsyncBaseTransport] | None = None
 
-xmlrpc_transport_override = None
-
 if http_proxy_url:
-    http_proxy = urlparse(http_proxy_url)
-    proxy_host, _, proxy_port = http_proxy.netloc.partition(":")
-
     _httpx_mounts = {
         "http://": httpx2.AsyncHTTPTransport(proxy=http_proxy_url),
         "https://": httpx2.AsyncHTTPTransport(proxy=https_proxy_url),
     }
-
-    xmlrpc_transport_override = ProxiedTransport()
-    xmlrpc_transport_override.set_proxy(proxy_host, proxy_port)
 
 
 def _check_python_version_compatible(requires_python: str | None) -> tuple[bool, str | None]:
@@ -165,40 +134,40 @@ def _process_output(output: bytes | str | None) -> str:
 async def _fetch_package_metadata(
     client: httpx2.AsyncClient,
     name: str,
-    latest_version: str,
     base_url: str,
 ) -> PackageMetadata:
     response = await client.get(
-        base_url + f"/{name}/{latest_version}/json",
+        base_url + f"/{name}/json",
         headers={"Content-Type": "application/json"},
     )
-    if response.status_code < 400:  # noqa PLR2004
-        response_data: object = json.loads(response.text)
-        data = _json_object(_json_object(response_data).get("info"))
-
-        # Keep minimal information to limit cache size
-        return {
-            k: data.get(k)
-            for k in [
-                "author",
-                "bugtrack_url",
-                "docs_url",
-                "home_page",
-                "license",
-                "package_url",
-                "project_url",
-                "project_urls",
-                "requires_python",
-                "summary",
-            ]
-        }
-    else:
+    if response.status_code == HTTPStatus.NOT_FOUND:
         return {}
+    if not response.is_success:
+        response.raise_for_status()
+
+    response_data: object = json.loads(response.text)
+    data = _json_object(_json_object(response_data).get("info"))
+
+    # Keep minimal information to limit cache size
+    return {
+        k: data.get(k)
+        for k in [
+            "author",
+            "bugtrack_url",
+            "docs_url",
+            "home_page",
+            "license",
+            "package_url",
+            "project_url",
+            "project_urls",
+            "requires_python",
+            "summary",
+            "version",
+        ]
+    }
 
 
 # Known language packs from https://github.com/jupyterlab/language-packs
-# These are not tagged with the prebuilt extension classifier on PyPI,
-# so they are listed explicitly.
 LANGUAGE_PACKS = (
     "jupyterlab-language-pack-ar-SA",
     "jupyterlab-language-pack-ca-ES",
@@ -232,13 +201,21 @@ LANGUAGE_PACKS = (
 )
 
 
+def _installed_language_packs() -> dict[str, Distribution]:
+    packs: dict[str, Distribution] = {}
+    for entry in entry_points(group=JUPYTERLAB_LANGUAGEPACK_ENTRY):
+        if entry.dist is not None and entry.dist.name:
+            packs[canonicalize_name(entry.dist.name)] = entry.dist
+    return packs
+
+
 class PyPIExtensionManager(ExtensionManager):
     """Extension manager using pip as package manager and PyPi.org as packages source."""
 
     base_url = Unicode("https://pypi.org/pypi", config=True, help="The base URL of PyPI index.")
 
     cache_timeout = CFloat(
-        5 * 60.0, config=True, help="PyPI extensions list cache timeout in seconds."
+        5 * 60.0, config=True, help="PyPI language pack metadata cache timeout in seconds."
     )
 
     package_metadata_cache_size = CInt(
@@ -248,7 +225,7 @@ class PyPIExtensionManager(ExtensionManager):
     rpc_request_throttling = CFloat(
         1.0,
         config=True,
-        help="Throttling time in seconds between PyPI requests using the XML-RPC API.",
+        help="Deprecated: has no effect since PyPI retired its XML-RPC API.",
     )
 
     def __init__(
@@ -259,25 +236,10 @@ class PyPIExtensionManager(ExtensionManager):
     ) -> None:
         super().__init__(app_options, ext_options, parent)
         self._httpx_client = httpx2.AsyncClient(mounts=_httpx_mounts)
-        # Set configurable cache size to fetch function
-        self._fetch_package_metadata: FetchPackageMetadata = partial(
-            _fetch_package_metadata, self._httpx_client
+        self._configure_package_metadata_cache()
+        self.observe(
+            self._configure_package_metadata_cache, ["cache_timeout", "package_metadata_cache_size"]
         )
-        self._observe_package_metadata_cache_size({"new": self.package_metadata_cache_size})
-        # Combine XML RPC API and JSON API to reduce throttling by PyPI.org
-        self._rpc_client = xmlrpc.client.ServerProxy(
-            self.base_url, transport=xmlrpc_transport_override
-        )
-        self.__last_all_packages_request_time = datetime.now(tz=UTC) - timedelta(
-            seconds=self.cache_timeout * 1.01
-        )
-        self.__all_packages_cache: list[tuple[str, str]] | None = None
-
-        self.log.debug(f"Extensions list will be fetched from {self.base_url}.")
-        if xmlrpc_transport_override:
-            self.log.info(
-                f"Extensions will be fetched using proxy, proxy host and port: {xmlrpc_transport_override.proxy}"
-            )
 
     @property
     def metadata(self) -> ExtensionManagerMetadata:
@@ -363,87 +325,99 @@ class PyPIExtensionManager(ExtensionManager):
                 return self._normalize_name(install_metadata["packageName"])
         return self._normalize_name(extension.name)
 
-    async def __throttleRequest(  # noqa: N802
-        self,
-        recursive: bool,
-        fn: Callable[[_Arg], _R],
-        arg: _Arg,
-    ) -> _R:
-        """Throttle XMLRPC API request
+    @observe("rpc_request_throttling")
+    def _warn_rpc_request_throttling(self, _change: object) -> None:
+        self.log.warning(
+            "PyPIExtensionManager.rpc_request_throttling is deprecated and has no effect "
+            "since PyPI retired its XML-RPC API. It will be removed in JupyterLab 5."
+        )
 
-        Args:
-            recursive: Whether to call the throttling recursively once or not.
-            fn: API method to call
-            arg: API method argument
-        Returns:
-            Result of the method
-        Raises:
-            xmlrpc.client.Fault
-        """
-        current_loop = tornado.ioloop.IOLoop.current()
-        try:
-            data: _R = await current_loop.run_in_executor(None, fn, arg)
-        except xmlrpc.client.Fault as err:
-            if not (
-                err.faultCode == -32500  # noqa PLR2004
-                and err.faultString.startswith("HTTPTooManyRequests:")
-            ):
-                raise
-            delay = 1.01
-            match = re.search(r"Limit may reset in (\d+) seconds.", err.faultString)
-            if match is not None:
-                delay = int(match.group(1) or "1")
-            self.log.info(
-                f"HTTPTooManyRequests - Perform next call to PyPI XMLRPC API in {delay}s."
-            )
-            await asyncio.sleep(delay * self.rpc_request_throttling + 0.01)
-            if recursive:
-                data = await self.__throttleRequest(False, fn, arg)
-            else:
-                data = await current_loop.run_in_executor(None, fn, arg)
-
-        return data
-
-    @observe("package_metadata_cache_size")
-    def _observe_package_metadata_cache_size(self, change: dict[str, object]) -> None:
-        new_size = cast("int | str", change["new"])
+    def _configure_package_metadata_cache(self, _change: object = None) -> None:
         self._fetch_package_metadata = cast(
             "FetchPackageMetadata",
-            alru_cache(maxsize=int(new_size))(partial(_fetch_package_metadata, self._httpx_client)),
+            alru_cache(maxsize=self.package_metadata_cache_size)(
+                partial(_fetch_package_metadata, self._httpx_client)
+            ),
         )
+        self._package_metadata_cache_expires = monotonic() + self.cache_timeout
+
+    @override
+    async def _get_extensions_page(
+        self, query: str | None, page: int, per_page: int
+    ) -> tuple[dict[str, ExtensionPackage], int]:
+        if query is None:
+            return await super()._get_extensions_page(query, page, per_page)
+        # Cache metadata per pack so a partial search can recover on the next request.
+        extensions, last_page = await self.list_packages(query, page, per_page)
+        return extensions, last_page or 1
+
+    @override
+    async def refresh(self, query: str | None, page: int, per_page: int) -> None:
+        """Refresh installed extensions or invalidate cached language pack metadata."""
+        if query is None:
+            await super().refresh(query, page, per_page)
+        else:
+            self._configure_package_metadata_cache()
+
+    @override
+    async def _get_installed_extensions(
+        self, get_latest_version: bool = True
+    ) -> dict[str, ExtensionPackage]:
+        extensions = await super()._get_installed_extensions(get_latest_version)
+        for dist in _installed_language_packs().values():
+            name = self._normalize_name(dist.name)
+            metadata = dist.metadata.json
+            summary = metadata.get("summary")
+            homepage = metadata.get("home_page")
+            project_urls = metadata.get("project_url")
+            if not homepage and isinstance(project_urls, list):
+                for project_url in project_urls:
+                    label, _, url = project_url.partition(",")
+                    if label.strip().casefold() == "homepage":
+                        homepage = url.strip()
+                        break
+            extensions[name] = ExtensionPackage(
+                name=name,
+                description=summary if isinstance(summary, str) else "",
+                homepage_url=homepage if isinstance(homepage, str) else "",
+                pkg_type="language-pack",
+                installed=True,
+                installed_version=dist.version,
+                latest_version=None,
+            )
+        return extensions
 
     async def list_packages(
         self, query: str, page: int, per_page: int
     ) -> tuple[dict[str, ExtensionPackage], int | None]:
-        """List the available extensions.
+        """List known language packs matching the query."""
+        if monotonic() >= self._package_metadata_cache_expires:
+            self._configure_package_metadata_cache()
 
-        Note:
-            This will list the packages based on the classifier
-                Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt
+        query = query.casefold()
+        installed = _installed_language_packs()
+        names = sorted(name for name in LANGUAGE_PACKS if canonicalize_name(name) not in installed)
+        packages = await asyncio.gather(
+            *(self._fetch_package_metadata(name, self.base_url) for name in names),
+            return_exceptions=True,
+        )
 
-            Then it filters it with the query and sorts by organization priority:
-            1. Project Jupyter (@jupyter)
-            2. JupyterLab Community (@jupyterlab-contrib)
-            3. Others
+        matches = []
+        failed = False
+        for name, data in zip(names, packages, strict=True):
+            if isinstance(data, BaseException):
+                if not isinstance(data, Exception):
+                    raise data
+                self.log.warning("Failed to fetch language pack metadata for %s: %s", name, data)
+                failed = True
+                continue
+            latest_version = _metadata_string(data, "version")
+            if not latest_version:
+                continue
+            description = _metadata_string(data, "summary") or ""
+            if query not in name.casefold() and query not in description.casefold():
+                continue
 
-        Args:
-            query: The search extension query
-            page: The result page
-            per_page: The number of results per page
-        Returns:
-            The available extensions in a mapping {name: metadata}
-            The results last page; None if the manager does not support pagination
-        """
-        matches = await self.__get_all_extensions()
-
-        extensions: dict[str, ExtensionPackage] = {}
-        all_matches: list[tuple[int, ExtensionPackage]] = []
-
-        for name, group in groupby(filter(lambda m: query in m[0], matches), lambda e: e[0]):
-            _, latest_version = list(group)[-1]
-            data = await self._fetch_package_metadata(name, latest_version, self.base_url)
-
-            normalized_name = self._normalize_name(name)
             package_urls = _metadata_string_map(data, "project_urls")
 
             source_url = package_urls.get("Source Code")
@@ -470,7 +444,6 @@ class PyPIExtensionManager(ExtensionManager):
                 requires_python
             )
 
-            description = _metadata_string(data, "summary") or ""
             if version_explanation:
                 if description:
                     description += f" ({version_explanation})"
@@ -478,13 +451,13 @@ class PyPIExtensionManager(ExtensionManager):
                     description = version_explanation
 
             extension = ExtensionPackage(
-                name=normalized_name,
+                name=self._normalize_name(name),
                 description=description,
                 homepage_url=best_guess_home_url or "",
                 author=_metadata_string(data, "author"),
                 license=_metadata_string(data, "license"),
                 latest_version=ExtensionManager.get_semver_version(latest_version),
-                pkg_type="prebuilt",
+                pkg_type="language-pack",
                 allowed=python_compatible,
                 bug_tracker_url=bug_tracker_url,
                 documentation_url=documentation_url,
@@ -492,86 +465,17 @@ class PyPIExtensionManager(ExtensionManager):
                 repository_url=source_url,
             )
 
-            # Determine organization priority
-            priority = 3  # Default priority for other packages
-            urls_to_check = [
-                str(url).lower() for url in [source_url, homepage_url, best_guess_home_url] if url
-            ]
-            exclude = [
-                "https://github.com/jupyterlab/jupyterlab_apod",
-                "https://github.com/jupyterlab/extension-examples",
-            ]
+            matches.append(extension)
 
-            for url in urls_to_check:
-                if url in exclude:
-                    priority = 4
-                    break
-                if any(
-                    org in url
-                    for org in ["github.com/jupyter/", "jupyter.org", "github.com/jupyterlab/"]
-                ):
-                    priority = 1
-                    break
-                elif "github.com/jupyterlab-contrib/" in url:
-                    priority = 2
-                    break
-
-            all_matches.append((priority, extension))
-
-        sorted_matches = sorted(all_matches, key=lambda x: (x[0], x[1].name))
-
-        # Apply pagination
-        start_idx = (page - 1) * per_page
-        end_idx = start_idx + per_page
-        page_matches = sorted_matches[start_idx:end_idx]
-
-        for _, extension in page_matches:
-            extensions[extension.name] = extension
-
-        total_pages = math.ceil(len(sorted_matches) / per_page)
-
-        return extensions, total_pages
-
-    async def __get_all_extensions(self) -> list[tuple[str, str]]:
-        all_packages_cache = self.__all_packages_cache
-        if all_packages_cache is None or datetime.now(
-            tz=UTC
-        ) > self.__last_all_packages_request_time + timedelta(seconds=self.cache_timeout):
-            self.log.debug("Requesting PyPI.org RPC API for prebuilt JupyterLab extensions.")
-            browse = cast(
-                "Callable[[list[str]], list[tuple[str, str]]]",
-                self._rpc_client.browse,
+        if failed and not matches:
+            raise HTTPError(
+                HTTPStatus.SERVICE_UNAVAILABLE,
+                "Could not load language packs from PyPI. Try refreshing the extensions list.",
             )
-            raw_packages = await self.__throttleRequest(
-                True,
-                browse,
-                ["Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt"],
-            )
-            all_packages_cache = list(raw_packages)
 
-            # Also include known language packs.  They are not tagged with the
-            # prebuilt extension classifier so we fetch their latest versions
-            # from the JSON API instead.
-            extension_names = {p[0] for p in all_packages_cache}
-            packs_to_fetch = [name for name in LANGUAGE_PACKS if name not in extension_names]
-            language_pack_results = await asyncio.gather(
-                *(self.get_latest_version(name) for name in packs_to_fetch),
-                return_exceptions=True,
-            )
-            for name, result in zip(packs_to_fetch, language_pack_results, strict=True):
-                if isinstance(result, BaseException):
-                    self.log.info(
-                        "Failed to fetch latest version for language pack %s: %s",
-                        name,
-                        result,
-                    )
-                elif result is not None:
-                    all_packages_cache.append((name, result))
-
-            self.__all_packages_cache = all_packages_cache
-            self.__last_all_packages_request_time = datetime.now(tz=UTC)
-
-        return all_packages_cache
+        start = (page - 1) * per_page
+        extensions = {pack.name: pack for pack in matches[start : start + per_page]}
+        return extensions, math.ceil(len(matches) / per_page)
 
     async def install(self, name: str, version: str | None = None) -> ActionResult:  # noqa
         """Install the required extension.
