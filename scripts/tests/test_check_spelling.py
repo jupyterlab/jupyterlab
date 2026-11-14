@@ -110,6 +110,31 @@ def test_report_locations(spelling, tmp_path, location, suggestions):
 
 
 @pytest.mark.parametrize(
+    ("location", "changed", "expected"),
+    [
+        (3, {4}, ["example.md:4:"]),
+        (3, {3}, []),
+        (1, {6}, ["example.md:6:"]),
+        (1, {1}, []),
+    ],
+)
+def test_misreported_location(spelling, tmp_path, location, changed, expected):
+    (tmp_path / "example.md").write_text(
+        "# Title\n\nUnchanged `code` line.\nA qzxnewword sentence.\n\nAnother qzxnewword.\n",
+        encoding="utf-8",
+    )
+    sentence = "A qzxnewword sentence." if location == 3 else "Another qzxnewword."
+    (tmp_path / "example.spelling").write_text(
+        f"example.md:{location}: (qzxnewword)  {sentence}\n", encoding="utf-8"
+    )
+    errors, ignored = spelling.spelling_errors_on_changed_lines(
+        tmp_path, tmp_path, {"example.md": changed}
+    )
+    assert [error[: len("example.md:4:")] for error in errors] == expected
+    assert ignored == 1 - len(expected)
+
+
+@pytest.mark.parametrize(
     ("content", "report"),
     [
         ("qzxword\nqzxword\n", "example.md:0: (qzxword) [] qzxword"),
