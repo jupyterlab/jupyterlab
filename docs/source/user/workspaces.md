@@ -61,11 +61,11 @@ The `export` command will generate a URL for any workspace you provide as an arg
 even if the workspace does not yet exist. Visiting a URL for a nonexistent workspace will create
 a new workspace with that name.
 
-The `import` functionality validates the structure of the workspace file and
-validates the `id` field in the workspace `metadata` to make sure its URL is
-compatible with either the `workspaces_url` configuration or the `page_url`
-configuration to verify that it is a correctly named workspace or it is the
-default workspace.
+The `import` functionality validates the structure of the workspace file.
+It also checks the `id` field in the workspace `metadata` to ensure the
+workspace URL is compatible with either the `workspaces_url` or the
+`page_url` configuration. This verification ensures that the workspace
+is either correctly named or refers to the default workspace.
 
 ## Workspace File Format
 
@@ -77,7 +77,10 @@ like `/lab/workspaces/foo`. Additionally, `metadata` may contain `created` and `
 The date and time are encoded using ISO 8601 format, for example `2022-06-15T23:41:15.818986+00:00`.
 
 The `data` key maps to the initial state of the `IStateDB`. Many plugins look in the State DB for the configuration.
-Also any plugins that register with the `ILayoutRestorer` will look up all keys in the State DB
+Plugins that register with the `ILayoutRestorer` query the State DB for entries
+whose keys begin with the tracker’s `namespace` (that is, the portion of the key
+before the first `:`). This allows the restorer to identify and restore the
+workspace state associated with that plugin.
 that start with the `namespace` of their tracker before the first `:`. The values of these keys should have a `data`
 attribute that maps.
 
@@ -109,4 +112,7 @@ void restorer.restore(tracker, {
 });
 ```
 
-Note the part of the data key after the first `:` (`package.json:JSON`) is dropped and is irrelevant.
+Note that only the portion of the key before the first `:` (the tracker namespace)
+is used to associate the workspace entry with a plugin. Any additional segments
+after the first `:` (such as `package.json:JSON`) are not used during restoration
+and do not affect how the workspace is loaded.
