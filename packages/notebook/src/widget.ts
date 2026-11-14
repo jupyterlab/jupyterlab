@@ -1132,6 +1132,16 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       }
     }
 
+    // Apply maxNumberOutputs to Code cells
+    const maxNumberOutputs = this._notebookConfig.maxNumberOutputs;
+    if (maxNumberOutputs !== undefined) {
+      for (const cell of this.cellsArray) {
+        if (cell.model.type === 'code') {
+          (cell as CodeCell).outputArea.maxNumberOutputs = maxNumberOutputs;
+        }
+      }
+    }
+
     this.viewModel.windowingActive =
       this._notebookConfig.windowingMode === 'full';
 

@@ -808,7 +808,8 @@
       "title": "The maximum number of output cells to be rendered in the output area.",
       "description": "Defines the maximum number of output cells to be rendered in the output area for cells with many outputs. The output area will have a head and the remaining outputs will be trimmed and not displayed unless the user clicks on the information message. Set to 0 to have the complete display.",
       "type": "number",
-      "default": 50
+      "default": 50,
+      "minimum": 0
     },
     "scrollHeadingToTop": {
       "title": "Scroll heading to top",
