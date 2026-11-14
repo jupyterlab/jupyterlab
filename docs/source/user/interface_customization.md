@@ -148,6 +148,15 @@ resizing sections remain available while reordering is locked.
 Section order, collapsed states, and sizes are restored when reopening the same
 workspace.
 
+To move a section without dragging, right-click its header and select
+**Move Section Up** or **Move Section Down**; these items are shown while
+reordering is enabled. With the keyboard, press the context menu key on a
+focused header to open the same menu. Both commands can also be bound to keys in
+the {ref}`keyboard shortcuts settings <user-shortcuts>`, with the selector
+`.lm-AccordionPanel-title`. The up and down arrow keys, Home, End, Enter and
+Space cannot be bound, even with a modifier, because a focused header already
+uses them.
+
 (activity-bar-position-customization)=
 
 ## Activity Bar Position
