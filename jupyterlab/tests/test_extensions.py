@@ -91,7 +91,7 @@ async def test_pypi_lists_installed_language_packs_separately(monkeypatch, tmp_p
     dist_info = tmp_path / "jupyterlab_language_pack_de_de-4.5.post3.dist-info"
     dist_info.mkdir()
     (dist_info / "METADATA").write_text(
-        "Name: jupyterlab_language_pack_de_de\n"
+        "Name: jupyterlab-language-pack-de-DE\n"
         "Version: 4.5.post3\n"
         "Summary: German language pack\n"
         "Project-URL: homepage, https://github.com/jupyterlab/language-packs\n",
@@ -117,7 +117,7 @@ async def test_pypi_lists_installed_language_packs_separately(monkeypatch, tmp_p
     packs, _ = await manager.list_extensions()
     assert [
         (pack.name, pack.installed_version, pack.installed, pack.pkg_type) for pack in packs
-    ] == [("jupyterlab-language-pack-de-de", "4.5.post3", True, "language-pack")]
+    ] == [("jupyterlab-language-pack-de-DE", "4.5.post3", True, "language-pack")]
     assert packs[0].description == "German language pack"
     assert packs[0].homepage_url == "https://github.com/jupyterlab/language-packs"
     get.assert_not_called()
@@ -546,6 +546,18 @@ async def test_PyPiExtensionManager_custom_server_url():
     manager = PyPIExtensionManager(parent=parent)
 
     assert manager.base_url == BASE_URL
+
+
+async def test_PyPiExtensionManager_rpc_request_throttling_is_deprecated(caplog):
+    parent = Configurable(config=Config({"PyPIExtensionManager": {"rpc_request_throttling": 2}}))
+
+    PyPIExtensionManager(parent=parent)
+
+    assert any(
+        "rpc_request_throttling is deprecated" in record.getMessage()
+        for record in caplog.records
+        if record.levelno == logging.WARNING
+    )
 
 
 LEVELS = ["user", "sys_prefix", "system"]
