@@ -606,12 +606,158 @@ describe('@jupyterlab/settingeditor', () => {
 
         list.setFilter(updateFilterFunction('font', false, false), 'font');
 
-        expect(list.filter!(registry.plugins[pluginId]!)).toEqual([
-          'Cell Configuration',
-          'Custom editor styles',
-          'Font Size',
-          'fontSize'
-        ]);
+        expect(list.filter!(registry.plugins[pluginId]!)).toEqual({
+          kind: 'properties',
+          matches: [
+            {
+              matchedBy: 'nested',
+              label: 'Cell Configuration',
+              path: ['cellConfig']
+            },
+            {
+              matchedBy: 'nested',
+              label: 'Custom editor styles',
+              path: ['cellConfig', 'customStyles']
+            },
+            {
+              matchedBy: 'title',
+              label: 'Font Size',
+              path: ['cellConfig', 'customStyles', 'fontSize']
+            },
+            {
+              matchedBy: 'key',
+              label: 'fontSize',
+              path: ['cellConfig', 'customStyles', 'fontSize']
+            }
+          ]
+        });
+      });
+    });
+
+    describe('setFilter', () => {
+      let model: PluginList.Model;
+
+      const taggedId = 'plugin-tagged';
+      const taggedSchema: ISettingRegistry.ISchema = {
+        type: 'object',
+        title: 'Tagged Plugin',
+        tags: ['my-tag'],
+        properties: {
+          value: { title: 'Value', type: 'string', default: 'x' },
+          taggedProp: {
+            title: 'Tagged Property',
+            type: 'string',
+            default: 'y',
+            tags: ['prop-tag']
+          }
+        }
+      };
+
+      const untaggedId = 'plugin-untagged';
+
+      beforeEach(async () => {
+        connector.schemas[taggedId] = taggedSchema;
+        connector.schemas[untaggedId] = {
+          type: 'object',
+          title: 'Untagged Plugin',
+          properties: {}
+        };
+        await registry.load(taggedId);
+        await registry.load(untaggedId);
+        model = new PluginList.Model({ registry });
+        await model.ready;
+        list = new PluginList({ registry, model });
+        Widget.attach(list, document.body);
+        MessageLoop.sendMessage(list, Widget.Msg.UpdateRequest);
+      });
+
+      const search = (query: string, id = taggedId) => {
+        list.setFilter(updateFilterFunction(query, false, false), query);
+        return list.filter!(model.plugins.find(p => p.id === id)!);
+      };
+
+      it('should match a schema tag with the tag: prefix', () => {
+        expect(search('tag:my-tag')).toEqual({ kind: 'tag' });
+      });
+
+      it('should match a part of a schema tag, ignoring the case', () => {
+        expect(search('TAG:Y-T')).toEqual({ kind: 'tag' });
+      });
+
+      it('should not match tags without the tag: prefix', () => {
+        expect(search('my-tag')).toEqual({ kind: 'properties', matches: [] });
+      });
+
+      it('should not match titles and keys with the tag: prefix', () => {
+        expect(search('tag:Tagged')).toEqual({
+          kind: 'properties',
+          matches: []
+        });
+      });
+
+      it('should return all when query matches title but not tag', () => {
+        expect(search('Tagged')).toEqual({ kind: 'all' });
+      });
+
+      it('should match a part of a property tag', () => {
+        expect(search('tag:PROP')).toEqual({
+          kind: 'properties',
+          matches: [
+            { matchedBy: 'tag', label: 'Tagged Property', path: ['taggedProp'] }
+          ]
+        });
+      });
+
+      it('should return all for every plugin when the tag query is empty', () => {
+        expect(search('tag: ')).toEqual({ kind: 'all' });
+        expect(search('tag: ', untaggedId)).toEqual({ kind: 'all' });
+      });
+
+      describe('tag suggestions', () => {
+        const suggest = async (query: string) => {
+          let search: HTMLInputElement | null = null;
+          for (let i = 0; i < 10 && !search; i++) {
+            await framePromise();
+            search = list.node.querySelector('jp-search');
+          }
+          search!.value = query;
+          search!.dispatchEvent(new Event('input', { bubbles: true }));
+          await framePromise();
+          return Array.from(list.node.querySelectorAll('[role="option"]')).map(
+            option => option.textContent
+          );
+        };
+
+        it('should suggest the tags that start with the query', async () => {
+          expect(await suggest('P')).toEqual(['tag:prop-tag']);
+        });
+
+        it('should suggest the tags that start with the text after tag:', async () => {
+          expect(await suggest('tag:pro')).toEqual(['tag:prop-tag']);
+        });
+
+        it('should not suggest the tags that only contain the query', async () => {
+          expect(await suggest('tag:t')).toEqual([]);
+        });
+
+        it('should suggest all the tags while typing tag:', async () => {
+          for (const query of ['t', 'TA', 'tag', 'tag:']) {
+            expect(await suggest(query)).toEqual([
+              'tag:my-tag',
+              'tag:prop-tag'
+            ]);
+          }
+        });
+
+        it('should not suggest the tag already in the query', async () => {
+          expect(await suggest('tag:prop-tag')).toEqual([]);
+        });
+      });
+
+      it('should match tags with an initial tag: query', () => {
+        list = new PluginList({ registry, model, query: 'tag:my' });
+        const plugin = model.plugins.find(p => p.id === taggedId)!;
+        expect(list.filter!(plugin)).toEqual({ kind: 'tag' });
       });
     });
   });

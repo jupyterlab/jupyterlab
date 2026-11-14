@@ -125,7 +125,8 @@
       "type": "string",
       "title": "Selected Theme",
       "description": "Application-level visual styling theme. Ignored when Adaptive Theme is enabled.",
-      "default": "JupyterLab Light"
+      "default": "JupyterLab Light",
+      "tags": ["accessibility"]
     },
     "adaptive-theme": {
       "type": "boolean",
@@ -168,7 +169,8 @@
           "light": null,
           "dark": null
         }
-      }
+      },
+      "tags": ["accessibility"]
     }
   }
 }
