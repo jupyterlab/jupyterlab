@@ -155,6 +155,19 @@ def test_unmapped_reports_fail(spelling, tmp_path, content, report):
 
 
 @pytest.mark.parametrize(
+    ("path", "expected"),
+    [
+        ("docs/source/index.md", True),
+        ("docs/source/getting_started/changelog.md", False),
+        ("docs/source/getting_started/changelog_v3.md", False),
+        ("CHANGELOG.md", False),
+    ],
+)
+def test_is_text_document(spelling, path, expected):
+    assert spelling.is_text_document(path) is expected
+
+
+@pytest.mark.parametrize(
     ("content", "expected"),
     [
         ("# Title\n\n++ b/other.md\n+++ b/fake.md\nFinal typo", {3, 4, 5}),
