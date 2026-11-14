@@ -213,6 +213,7 @@ jupyter lab --LabApp.extension_manager=readonly
 The `pypi` manager has specific options that can be set using command line options:
 
 - `--PyPIExtensionManager.base_url`: PyPI warehouse base URL - default to <https://pypi.org/pypi>.
+- `--PyPIExtensionManager.rpc_request_throttling`: Deprecated, has no effect since PyPI retired its XML-RPC API.
 - `--PyPIExtensionManager.cache_timeout`: PyPI language pack metadata cache timeout in seconds - default 300.
 - `--PyPIExtensionManager.package_metadata_cache_size`: The cache size for package metadata - default 1500.
 

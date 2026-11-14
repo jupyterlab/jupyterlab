@@ -32,7 +32,7 @@ from packaging.utils import InvalidName, canonicalize_name
 from packaging.version import InvalidVersion, Version
 from packaging.version import parse as parse_version
 from tornado.web import HTTPError
-from traitlets import CFloat, CInt, Unicode, config
+from traitlets import CFloat, CInt, Unicode, config, observe
 
 if sys.version_info >= (3, 12):
     from typing import override
@@ -222,6 +222,12 @@ class PyPIExtensionManager(ExtensionManager):
         1500, config=True, help="The cache size for package metadata."
     )
 
+    rpc_request_throttling = CFloat(
+        1.0,
+        config=True,
+        help="Deprecated: has no effect since PyPI retired its XML-RPC API.",
+    )
+
     def __init__(
         self,
         app_options: dict | None = None,
@@ -319,6 +325,13 @@ class PyPIExtensionManager(ExtensionManager):
                 return self._normalize_name(install_metadata["packageName"])
         return self._normalize_name(extension.name)
 
+    @observe("rpc_request_throttling")
+    def _warn_rpc_request_throttling(self, _change: object) -> None:
+        self.log.warning(
+            "PyPIExtensionManager.rpc_request_throttling is deprecated and has no effect "
+            "since PyPI retired its XML-RPC API. It will be removed in JupyterLab 5."
+        )
+
     def _configure_package_metadata_cache(self, _change: object = None) -> None:
         self._fetch_package_metadata = cast(
             "FetchPackageMetadata",
@@ -351,7 +364,8 @@ class PyPIExtensionManager(ExtensionManager):
         self, get_latest_version: bool = True
     ) -> dict[str, ExtensionPackage]:
         extensions = await super()._get_installed_extensions(get_latest_version)
-        for name, dist in _installed_language_packs().items():
+        for dist in _installed_language_packs().values():
+            name = self._normalize_name(dist.name)
             metadata = dist.metadata.json
             summary = metadata.get("summary")
             homepage = metadata.get("home_page")
