@@ -49,6 +49,7 @@ classnames
 closable
 codebase
 codebases
+codespace
 collapser
 completers
 conda
@@ -168,6 +169,7 @@ scrollable
 scrollbar
 Scrollbars
 semver
+setuptools
 SHA
 signalled
 sourcemaps
@@ -195,6 +197,7 @@ teardown
 templated
 themeable
 theming
+toctree
 tooltip
 tooltips
 topbar
