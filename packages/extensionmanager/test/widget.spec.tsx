@@ -47,6 +47,12 @@ class TestModel extends ListModel {
   }
 }
 
+class NoResultsModel extends TestModel {
+  protected async search(): Promise<void> {
+    this.stateChanged.emit();
+  }
+}
+
 describe('@jupyterlab/extensionmanager', () => {
   describe('ExtensionsPanel', () => {
     let model: TestModel;
@@ -93,6 +99,34 @@ describe('@jupyterlab/extensionmanager', () => {
       const content = await installedFor('french');
       expect(content).toContain('jupyterlab-language-pack-fr-FR');
       expect(content).not.toContain('jupyterlab-git');
+    });
+
+    it('should link to a PyPI search when a search finds nothing', async () => {
+      PageConfig.setOption(
+        'extensionManager',
+        JSON.stringify({ name: 'PyPI', can_install: true })
+      );
+      const pypiModel = new NoResultsModel(new ServiceManagerMock());
+      pypiModel.isDisclaimed = true;
+      const pypiPanel = new ExtensionsPanel({
+        model: pypiModel,
+        translator: nullTranslator
+      });
+      Widget.attach(pypiPanel, document.body);
+      pypiModel.query = 'jupyterlab-git';
+      pypiModel.stateChanged.emit();
+      let link: HTMLAnchorElement | null = null;
+      for (let i = 0; i < 10 && !link; i++) {
+        await framePromise();
+        link = pypiPanel.node.querySelector(
+          '#jp-extensionmanager-search .jp-extensionmanager-browse a'
+        );
+      }
+      const href = link?.getAttribute('href');
+      pypiPanel.dispose();
+      pypiModel.dispose();
+
+      expect(href).toContain('q=jupyterlab-git');
     });
   });
 });

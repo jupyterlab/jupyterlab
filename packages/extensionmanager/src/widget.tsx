@@ -23,6 +23,8 @@ import { ListModel } from './model';
 
 const BADGE_SIZE = 32;
 const BADGE_QUERY_SIZE = Math.floor(devicePixelRatio * BADGE_SIZE);
+const PYPI_BROWSE_URL =
+  'https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Prebuilt';
 
 function getExtensionGitHubUser(entry: IEntry) {
   if (
@@ -610,12 +612,25 @@ class SearchResult extends ReactWidget {
   }
 
   render(): JSX.Element {
+    const query = this.model.query;
+    // The PyPI manager lists only language packs, so a search that finds
+    // nothing points to the same search on PyPI.
+    const showBrowse =
+      this.model.name === 'PyPI' &&
+      (!query ||
+        (!this.model.isSearching &&
+          this.model.searchError === null &&
+          this.model.searchResult.length === 0));
     return (
       <>
-        {this.model.name === 'PyPI' && !this.model.query && (
+        {showBrowse && (
           <div className="jp-extensionmanager-browse">
             <a
-              href="https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Prebuilt"
+              href={
+                query
+                  ? `${PYPI_BROWSE_URL}&q=${encodeURIComponent(query)}`
+                  : PYPI_BROWSE_URL
+              }
               target="_blank"
               rel="noopener noreferrer"
             >
