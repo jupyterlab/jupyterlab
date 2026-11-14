@@ -335,6 +335,17 @@ test.describe('Debugger Console', () => {
     await expect(continueButton).toBeVisible();
     await continueButton.click();
 
+    await expect(continueButton).toBeHidden();
+    await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
+    await page.waitForCondition(async () => {
+      return await page.evaluate(async () => {
+        const debuggerService = await window.galata.getPlugin(
+          '@jupyterlab/debugger-extension:service'
+        );
+        return !debuggerService?.hasStoppedThreads();
+      });
+    });
+
     // Focus on the debug console input
     const debugConsoleWidget = page.locator(DEBUG_CONSOLE_WIDGET_SELECTOR);
     const promptCell = debugConsoleWidget.locator('.jp-CodeConsole-promptCell');

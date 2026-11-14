@@ -228,11 +228,12 @@ export class DebuggerService implements IDebugger, IDisposable {
       if (!this.session) {
         throw new Error('No active debugger session');
       }
-      this._model.stoppedThreads.delete(this._currentThread());
+      const currentThread = this._currentThread();
+      this._model.stoppedThreads.delete(currentThread);
       this._clearModel();
       this._clearSignals();
       await this.session.sendRequest('continue', {
-        threadId: this._currentThread()
+        threadId: currentThread
       });
     } catch (err) {
       console.error('Error:', err instanceof Error ? err.message : String(err));
