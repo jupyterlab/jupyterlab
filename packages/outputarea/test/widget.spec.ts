@@ -245,6 +245,37 @@ describe('outputarea/widget', () => {
         expect(widget.widgets.length).toEqual(model.length);
       });
 
+      test('should display all widgets when set to 0 in constructor', () => {
+        const widget = new OutputArea({
+          rendermime,
+          model,
+          maxNumberOutputs: 0
+        });
+
+        expect(widget.maxNumberOutputs).toBe(Infinity);
+        expect(widget.widgets.length).toEqual(model.length);
+        expect(
+          widget.widgets[widget.widgets.length - 1].node.textContent
+        ).not.toContain('Show more outputs');
+      });
+
+      test('should display all widgets when set to 0 via setter', () => {
+        const widget = new OutputArea({
+          rendermime,
+          model,
+          maxNumberOutputs: 2
+        });
+        expect(widget.widgets.length).toBeLessThan(model.length);
+
+        widget.maxNumberOutputs = 0;
+
+        expect(widget.maxNumberOutputs).toBe(Infinity);
+        expect(widget.widgets.length).toEqual(model.length);
+        expect(
+          widget.widgets[widget.widgets.length - 1].node.textContent
+        ).not.toContain('Show more outputs');
+      });
+
       test('should display new widgets if increased', () => {
         const widget = new OutputArea({
           rendermime,
