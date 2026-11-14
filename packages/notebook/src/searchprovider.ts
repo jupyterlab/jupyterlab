@@ -464,21 +464,24 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   ): Promise<boolean> {
     let replaceOccurred = false;
 
+    // A Markdown cell is unrendered only when it holds the match being
+    // replaced: the active cell can be another, rendered cell.
     const unrenderMarkdownCell = async (
       highlightNext = false
     ): Promise<void> => {
-      // Unrendered markdown cell
-      const activeCell = this.widget?.content.activeCell;
-      if (
-        activeCell?.model.type === 'markdown' &&
-        (activeCell as MarkdownCell).rendered
-      ) {
-        (activeCell as MarkdownCell).rendered = false;
-        // A read-only cell stays rendered when its editor is hidden, and
-        // highlighting the next match would then skip the current one
-        if (highlightNext && !(activeCell as MarkdownCell).rendered) {
-          await this.highlightNext(loop);
-        }
+      const index = this._currentProviderIndex;
+      if (index === null) {
+        return;
+      }
+      const cell = this.widget?.content.widgets[index];
+      if (cell?.model.type !== 'markdown' || !(cell as MarkdownCell).rendered) {
+        return;
+      }
+      (cell as MarkdownCell).rendered = false;
+      // A read-only cell stays rendered when its editor is hidden, and
+      // highlighting the next match would then skip the current one
+      if (highlightNext && !(cell as MarkdownCell).rendered) {
+        await this.highlightNext(loop);
       }
     };
 
