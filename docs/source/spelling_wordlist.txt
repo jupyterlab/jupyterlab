@@ -49,6 +49,7 @@ classnames
 closable
 codebase
 codebases
+codespace
 collapser
 completers
 conda
@@ -71,6 +72,7 @@ dialogs
 discoverability
 discoverable
 divs
+docstrings
 dropdown
 eg
 emacs
@@ -167,6 +169,7 @@ scrollable
 scrollbar
 Scrollbars
 semver
+setuptools
 SHA
 signalled
 sourcemaps
@@ -194,6 +197,7 @@ teardown
 templated
 themeable
 theming
+toctree
 tooltip
 tooltips
 topbar
