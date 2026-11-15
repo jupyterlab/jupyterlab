@@ -1512,7 +1512,7 @@ export namespace StaticNotebook {
     accessKernelHistory: false,
     showInputPlaceholder: true,
     showMinimap: false,
-    showCellNavigationRail: true
+    showCellNavigationRail: false
   };
 
   /**
@@ -1871,7 +1871,7 @@ export class Notebook extends StaticNotebook {
     });
     (this.layout as NotebookWindowedLayout).navigationRail =
       this._navigationRail;
-    if (this.notebookConfig.showCellNavigationRail === false) {
+    if (!this.notebookConfig.showCellNavigationRail) {
       this._navigationRail.setHidden(true);
     }
   }
@@ -1879,13 +1879,23 @@ export class Notebook extends StaticNotebook {
   /**
    * Whether the cell navigation rail is visible.
    */
-  get navigationRail(): boolean {
+  get showCellNavigationRail(): boolean {
     return this._navigationRail ? !this._navigationRail.isHidden : false;
   }
-  set navigationRail(value: boolean) {
+  set showCellNavigationRail(value: boolean) {
     if (this._navigationRail) {
       this._navigationRail.setHidden(!value);
     }
+  }
+
+  /**
+   * Whether the cell navigation rail is visible (alias for backwards compatibility).
+   */
+  get navigationRail(): boolean {
+    return this.showCellNavigationRail;
+  }
+  set navigationRail(value: boolean) {
+    this.showCellNavigationRail = value;
   }
 
   /**
@@ -1898,7 +1908,7 @@ export class Notebook extends StaticNotebook {
   protected override _updateNotebookConfig(): void {
     super._updateNotebookConfig();
     if (this._navigationRail) {
-      const show = this.notebookConfig.showCellNavigationRail ?? true;
+      const show = this.notebookConfig.showCellNavigationRail ?? false;
       this._navigationRail.setHidden(!show);
     }
   }

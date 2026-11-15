@@ -368,6 +368,9 @@ namespace CommandIDs {
 
   export const virtualScrollbar = 'notebook:toggle-virtual-scrollbar';
 
+  export const toggleCellNavigationRail =
+    'notebook:toggle-cell-navigation-rail';
+
   export const toggleToolbar = 'notebook:toggle-toolbar';
 
   export const copySelectedtext = 'notebook:copy-selected-text';
@@ -5686,6 +5689,36 @@ function addCommands(
     }
   });
 
+  commands.addCommand(CommandIDs.toggleCellNavigationRail, {
+    label: trans.__('Show Cell Navigation Rail'),
+    caption: trans.__(
+      'Show or hide the cell prompt and error navigation rail'
+    ),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        current.content.showCellNavigationRail =
+          !current.content.showCellNavigationRail;
+        commands.notifyCommandChanged(CommandIDs.toggleCellNavigationRail);
+      }
+    },
+    isEnabled: () => {
+      const current = tracker.currentWidget;
+      return !!current;
+    },
+    isToggled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return current?.content.showCellNavigationRail ?? false;
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: { ...widgetIdProperty }
+      }
+    }
+  });
+
   commands.addCommand(CommandIDs.toggleToolbar, {
     label: trans.__('Show Toolbar'),
     caption: trans.__('Show or hide the notebook toolbar'),
@@ -5759,6 +5792,7 @@ function populatePalette(
     CommandIDs.accessPreviousHistory,
     CommandIDs.accessNextHistory,
     CommandIDs.virtualScrollbar,
+    CommandIDs.toggleCellNavigationRail,
     CommandIDs.toggleToolbar
   ].forEach(command => {
     palette.addItem({ command, category });
@@ -5906,6 +5940,11 @@ function populateMenus(mainMenu: IMainMenu, isEnabled: () => boolean): void {
   mainMenu.viewMenu.editorViewers.toggleMinimap.add({
     id: CommandIDs.virtualScrollbar,
     isEnabled: () => true
+  });
+
+  mainMenu.viewMenu.addItem({
+    command: CommandIDs.toggleCellNavigationRail,
+    rank: 10.6
   });
 
   mainMenu.viewMenu.editorViewers.toggleToolbar.add({

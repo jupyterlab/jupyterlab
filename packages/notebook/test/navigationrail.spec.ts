@@ -160,12 +160,6 @@ describe('@jupyterlab/notebook', () => {
     });
 
     it('should toggle visibility when notebookConfig.showCellNavigationRail changes', () => {
-      expect(notebook.navigationRail).toBe(true);
-
-      notebook.notebookConfig = {
-        ...notebook.notebookConfig,
-        showCellNavigationRail: false
-      };
       expect(notebook.navigationRail).toBe(false);
 
       notebook.notebookConfig = {
@@ -173,6 +167,12 @@ describe('@jupyterlab/notebook', () => {
         showCellNavigationRail: true
       };
       expect(notebook.navigationRail).toBe(true);
+
+      notebook.notebookConfig = {
+        ...notebook.notebookConfig,
+        showCellNavigationRail: false
+      };
+      expect(notebook.navigationRail).toBe(false);
     });
   });
 });

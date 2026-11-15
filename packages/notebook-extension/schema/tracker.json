@@ -915,7 +915,7 @@
       "title": "Show cell navigation rail",
       "description": "Whether to show the cell navigation rail (vertical dot indicators for prompts and error statuses) on the left side of the notebook.",
       "type": "boolean",
-      "default": true
+      "default": false
     },
     "useSystemClipboardForCells": {
       "title": "Use system clipboard for copy/cut/paste of cells",
