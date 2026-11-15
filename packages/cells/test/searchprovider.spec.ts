@@ -258,6 +258,22 @@ describe('cells/searchprovider', () => {
       provider.dispose();
     });
 
+    it('should mark the current match in the rendered text of a cell in a hidden tab', async () => {
+      cell = createReadOnlyMarkdownCell(false);
+      Widget.attach(cell, document.body);
+      await framePromise();
+      // A hidden tab hides each of its elements with `content-visibility`
+      cell.node.checkVisibility = () => false;
+      cell.renderer.node.checkVisibility = () => false;
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+
+      await provider.highlightNext();
+      expect(cell.rendered).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+      provider.dispose();
+    });
+
     it('should not skip the matches before the cursor of the hidden editor', async () => {
       cell = createMarkdownCell('test1 test2');
       Widget.attach(cell, document.body);

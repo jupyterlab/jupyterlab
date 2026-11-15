@@ -838,8 +838,12 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     ) {
       return false;
     }
-    // The style of a cell outside the document is not known
-    return !element.isConnected || (element.checkVisibility?.() ?? true);
+    // The style of the match is not known for a cell outside the document,
+    // nor for a hidden cell, as in a background tab
+    if (!element.isConnected || !(this.cell.node.checkVisibility?.() ?? true)) {
+      return true;
+    }
+    return element.checkVisibility?.() ?? true;
   }
 
   /**
