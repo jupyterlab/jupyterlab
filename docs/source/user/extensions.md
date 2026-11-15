@@ -77,8 +77,12 @@ You can use the Extension Manager in JupyterLab to manage extensions. That featu
 may have been disabled by your system administrator for security reasons.
 
 :::{note}
-The default manager lists known JupyterLab language packs from PyPI and uses `pip`
-to install them. For other extensions, use [Browse extensions on PyPI](https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Prebuilt)
+The default manager lists the prebuilt extensions maintained in the `jupyter`,
+`jupyter-book`, `jupyter-lsp`, `jupyter-server`, `jupyter-widgets`, `jupyterhub`,
+`jupyterlab`, `jupyterlab-contrib` and `voila-dashboards` GitHub organizations
+and the known JupyterLab language packs from PyPI, and uses `pip` to install
+them. For other extensions,
+use [Browse extensions on PyPI](https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Prebuilt)
 to find prebuilt extensions and follow the package's installation instructions.
 :::
 
@@ -114,7 +118,8 @@ By default, the disclaimer is not acknowledged.
 **Figure:** User has not acknowledged the disclaimer
 :::
 
-To list available language packs or install one, first acknowledge the disclaimer.
+To list available extensions and language packs or install one, first
+acknowledge the disclaimer.
 Once done, this will remain across sessions and the user does not have to
 check it again.
 
@@ -130,9 +135,9 @@ your screen.
 
 ### Finding Extensions
 
-The "Discover" section lists the available JupyterLab language packs and pins
-the "Browse extensions on PyPI" link above the list. The search field matches
-package names and language pack descriptions.
+The "Discover" section lists the known extensions, then the JupyterLab language
+packs, and pins the "Browse extensions on PyPI" link above the list. The search
+field matches package names and descriptions.
 **Settings → Language → Install more languages…** opens the Extension Manager
 with the language pack search filled in.
 
@@ -144,8 +149,9 @@ with the language pack search filled in.
 
 ### Installing an Extension
 
-Click "Install" next to a language pack to install it from the Extension Manager.
-For other extensions, follow the installation instructions on the package's PyPI page.
+Click "Install" next to a listed extension or language pack to install it from
+the Extension Manager. For other extensions, follow the installation instructions
+on the package's PyPI page.
 
 :::{danger}
 Installing an extension allows it to execute arbitrary code on the

@@ -14,7 +14,7 @@ import tempfile
 from collections.abc import Awaitable, Callable
 from functools import partial
 from http import HTTPStatus
-from importlib.metadata import Distribution, entry_points
+from importlib.metadata import Distribution, distributions, entry_points
 from os import environ
 from pathlib import Path
 from subprocess import CalledProcessError, run
@@ -199,6 +199,92 @@ LANGUAGE_PACKS = (
     "jupyterlab-language-pack-zh-CN",
     "jupyterlab-language-pack-zh-TW",
 )
+
+# Prebuilt JupyterLab 4 extensions, grouped by the GitHub organization that
+# maintains them. PyPI no longer lists packages by classifier, so search is
+# limited to known packages (#19932).
+JUPYTER_ORG_EXTENSIONS = (
+    "nbdime",
+    "nbgrader",
+)
+JUPYTER_BOOK_ORG_EXTENSIONS = ("jupyterlab-myst",)
+JUPYTER_LSP_ORG_EXTENSIONS = ("jupyterlab-lsp",)
+JUPYTER_SERVER_ORG_EXTENSIONS = (
+    "jupyter-resource-usage",
+    "jupyter-scheduler",
+)
+JUPYTER_WIDGETS_ORG_EXTENSIONS = (
+    "jupyterlab-widgets",
+    "sidecar",
+)
+JUPYTERHUB_ORG_EXTENSIONS = ("jupyter-server-proxy",)
+JUPYTERLAB_ORG_EXTENSIONS = (
+    "jupyter-ai",
+    "jupyter-collaboration",
+    "jupyterlab-chat",
+    "jupyterlab-fasta",
+    "jupyterlab-geojson",
+    "jupyterlab-git",
+    "jupyterlab-github",
+    "jupyterlab-katex",
+    "jupyterlab-latex",
+    "jupyterlab-mathjax2",
+    "jupyterlab-plugin-playground",
+    "jupyterlab-ui-profiler",
+    "jupyterlab-vega3",
+    "jupyterlite-ai",
+)
+JUPYTERLAB_CONTRIB_ORG_EXTENSIONS = (
+    "jlab-enhanced-launcher",
+    "jupyter-archive",
+    "jupyter-secrets-manager",
+    "jupyter-suggestions",
+    "jupyter-theme-editor",
+    "jupyterlab-browser-storage",
+    "jupyterlab-cell-flash",
+    "jupyterlab-citation-manager",
+    "jupyterlab-code-formatter",
+    "jupyterlab-day",
+    "jupyterlab-favorites",
+    "jupyterlab-filesystem-access",
+    "jupyterlab-gitlab",
+    "jupyterlab-hybrid-kernels",
+    "jupyterlab-in-context-translation",
+    "jupyterlab-js-logs",
+    "jupyterlab-kernelspy",
+    "jupyterlab-logout",
+    "jupyterlab-night",
+    "jupyterlab-open-url-parameter",
+    "jupyterlab-pytutor",
+    "jupyterlab-quickopen",
+    "jupyterlab-rise",
+    "jupyterlab-search-replace",
+    "jupyterlab-slideshow",
+    "jupyterlab-spellchecker",
+    "jupyterlab-spreadsheet-editor",
+    "jupyterlab-theme-toggler",
+    "jupyterlab-topbar-text",
+    "jupyterlab-tour",
+    "jupyterlab-unfold",
+    "jupyterlab-vim",
+    "lckr-jupyterlab-variableinspector",
+)
+VOILA_DASHBOARDS_ORG_EXTENSIONS = ("voila",)
+KNOWN_EXTENSIONS = (
+    *JUPYTER_ORG_EXTENSIONS,
+    *JUPYTER_BOOK_ORG_EXTENSIONS,
+    *JUPYTER_LSP_ORG_EXTENSIONS,
+    *JUPYTER_SERVER_ORG_EXTENSIONS,
+    *JUPYTER_WIDGETS_ORG_EXTENSIONS,
+    *JUPYTERHUB_ORG_EXTENSIONS,
+    *JUPYTERLAB_ORG_EXTENSIONS,
+    *JUPYTERLAB_CONTRIB_ORG_EXTENSIONS,
+    *VOILA_DASHBOARDS_ORG_EXTENSIONS,
+)
+
+
+def _installed_distribution_names() -> set[str]:
+    return {canonicalize_name(dist.name) for dist in distributions() if dist.name}
 
 
 def _installed_language_packs() -> dict[str, Distribution]:
@@ -390,13 +476,17 @@ class PyPIExtensionManager(ExtensionManager):
     async def list_packages(
         self, query: str, page: int, per_page: int
     ) -> tuple[dict[str, ExtensionPackage], int | None]:
-        """List known language packs matching the query."""
+        """List known extensions and language packs matching the query."""
         if monotonic() >= self._package_metadata_cache_expires:
             self._configure_package_metadata_cache()
 
         query = query.casefold()
-        installed = _installed_language_packs()
-        names = sorted(name for name in LANGUAGE_PACKS if canonicalize_name(name) not in installed)
+        installed = _installed_distribution_names()
+        names = [
+            name
+            for name in (*sorted(KNOWN_EXTENSIONS), *sorted(LANGUAGE_PACKS))
+            if canonicalize_name(name) not in installed
+        ]
         packages = await asyncio.gather(
             *(self._fetch_package_metadata(name, self.base_url) for name in names),
             return_exceptions=True,
@@ -408,7 +498,7 @@ class PyPIExtensionManager(ExtensionManager):
             if isinstance(data, BaseException):
                 if not isinstance(data, Exception):
                     raise data
-                self.log.warning("Failed to fetch language pack metadata for %s: %s", name, data)
+                self.log.warning("Failed to fetch package metadata for %s: %s", name, data)
                 failed = True
                 continue
             latest_version = _metadata_string(data, "version")
@@ -457,7 +547,7 @@ class PyPIExtensionManager(ExtensionManager):
                 author=_metadata_string(data, "author"),
                 license=_metadata_string(data, "license"),
                 latest_version=ExtensionManager.get_semver_version(latest_version),
-                pkg_type="language-pack",
+                pkg_type="language-pack" if name in LANGUAGE_PACKS else "prebuilt",
                 allowed=python_compatible,
                 bug_tracker_url=bug_tracker_url,
                 documentation_url=documentation_url,
@@ -470,7 +560,7 @@ class PyPIExtensionManager(ExtensionManager):
         if failed and not matches:
             raise HTTPError(
                 HTTPStatus.SERVICE_UNAVAILABLE,
-                "Could not load language packs from PyPI. Try refreshing the extensions list.",
+                "Could not load extensions from PyPI. Try refreshing the extensions list.",
             )
 
         start = (page - 1) * per_page
