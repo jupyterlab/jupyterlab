@@ -77,11 +77,11 @@ You can use the Extension Manager in JupyterLab to manage extensions. That featu
 may have been disabled by your system administrator for security reasons.
 
 :::{note}
-The default manager lists the prebuilt extensions maintained in the `jupyter`,
-`jupyter-book`, `jupyter-lsp`, `jupyter-server`, `jupyter-widgets`, `jupyterhub`,
-`jupyterlab`, `jupyterlab-contrib` and `voila-dashboards` GitHub organizations
-and the known JupyterLab language packs from PyPI, and uses `pip` to install
-them. For other extensions,
+The default manager lists the prebuilt extensions maintained in the `ipython`,
+`jupyter`, `jupyter-book`, `jupyter-lsp`, `jupyter-server`, `jupyter-widgets`,
+`jupyterhub`, `jupyterlab`, `jupyterlab-contrib` and `voila-dashboards` GitHub
+organizations and the known JupyterLab language packs from PyPI, and uses `pip`
+to install them. For other extensions,
 use [Browse extensions on PyPI](https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Prebuilt)
 to find prebuilt extensions and follow the package's installation instructions.
 :::

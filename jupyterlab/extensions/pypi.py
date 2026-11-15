@@ -219,6 +219,7 @@ LANGUAGE_PACKS = (
 # Prebuilt JupyterLab 4 extensions, grouped by the GitHub organization that
 # maintains them. PyPI no longer lists packages by classifier, so search is
 # limited to known packages (#19932).
+IPYTHON_ORG_EXTENSIONS = ("ipyparallel",)
 JUPYTER_ORG_EXTENSIONS = (
     "nbdime",
     "nbgrader",
@@ -287,6 +288,7 @@ JUPYTERLAB_CONTRIB_ORG_EXTENSIONS = (
 )
 VOILA_DASHBOARDS_ORG_EXTENSIONS = ("voila",)
 KNOWN_EXTENSIONS = (
+    *IPYTHON_ORG_EXTENSIONS,
     *JUPYTER_ORG_EXTENSIONS,
     *JUPYTER_BOOK_ORG_EXTENSIONS,
     *JUPYTER_LSP_ORG_EXTENSIONS,
