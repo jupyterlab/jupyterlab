@@ -642,16 +642,27 @@ test.describe('Notebook Search', () => {
     ).toHaveText('lis');
   });
 
-  for (const { cellType, where, currentMatch } of [
+  for (const { cellType, where, needle, metadata, currentMatch } of [
     {
       cellType: 'markdown',
       where: 'rendered Markdown',
+      needle: 'The needle is here.',
+      metadata: {},
       currentMatch: '.jp-RenderedMarkdown .jp-current-match'
     },
     {
       cellType: 'code',
       where: 'a code cell',
+      needle: 'The needle is here.',
+      metadata: {},
       currentMatch: '.jp-CodeCell .jp-current-match'
+    },
+    {
+      cellType: 'markdown',
+      where: 'a link of a read-only Markdown cell',
+      needle: 'See the [docs](https://example.com/needle).',
+      metadata: { editable: false },
+      currentMatch: '.jp-MarkdownCell .cm-content .jp-current-match'
     }
   ] as const) {
     test(`Scroll to the first match in ${where} when typing a query`, async ({
@@ -661,7 +672,8 @@ test.describe('Notebook Search', () => {
       const notebook = galata.Notebook.generateNotebook(40, cellType, [
         'Only hay here.'
       ]);
-      notebook.cells[30].source = ['The needle is here.'];
+      notebook.cells[30].source = [needle];
+      notebook.cells[30].metadata = { ...metadata };
       await page.contents.uploadContent(
         JSON.stringify(notebook),
         'text',
@@ -686,7 +698,8 @@ test.describe('Notebook Search', () => {
       const notebook = galata.Notebook.generateNotebook(40, cellType, [
         'Only hay here.'
       ]);
-      notebook.cells[30].source = ['The needle is here.'];
+      notebook.cells[30].source = [needle];
+      notebook.cells[30].metadata = { ...metadata };
       await page.contents.uploadContent(
         JSON.stringify(notebook),
         'text',

@@ -675,8 +675,13 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
       if (rendered) {
         void this.renderedProvider.startQuery(this.query);
       } else {
-        // Force cursor position to ensure reverse search is working as expected
-        cell.editor?.setCursorPosition({ column: 0, line: 0 });
+        // Force cursor position to ensure reverse search is working as
+        // expected, without a scroll: a restarted search keeps the scroll
+        // position, and a new query scrolls to the match itself
+        cell.editor?.setCursorPosition(
+          { column: 0, line: 0 },
+          { scroll: false }
+        );
         if (sourceMatch && cell.editor) {
           const position = cell.editor.getPositionAt(sourceMatch.position);
           if (position) {
