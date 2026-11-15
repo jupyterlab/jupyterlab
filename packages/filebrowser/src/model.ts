@@ -470,13 +470,26 @@ export class FileBrowserModel implements IDisposable {
     ) {
       throw 'Cancelled large file upload';
     }
-    await this._uploadCheckDisposed();
-    await this.refresh();
-    await this._uploadCheckDisposed();
-    if (
-      this._items.find(i => i.name === file.name) &&
-      !(await this._prompt(() => shouldOverwrite(file.name)))
-    ) {
+    let fileExists = false;
+    if (typeof path === 'undefined' || path === this._model.path) {
+      await this._uploadCheckDisposed();
+      await this.refresh();
+      await this._uploadCheckDisposed();
+      fileExists = !!this._items.find(i => i.name === file.name);
+    } else {
+      await this._uploadCheckDisposed();
+      const targetPath = path ? path + '/' + file.name : file.name;
+      try {
+        await this.manager.services.contents.get(targetPath, {
+          content: false
+        });
+        fileExists = true;
+      } catch {
+        fileExists = false;
+      }
+      await this._uploadCheckDisposed();
+    }
+    if (fileExists && !(await this._prompt(() => shouldOverwrite(file.name)))) {
       throw err;
     }
     await this._uploadCheckDisposed();
@@ -554,14 +567,7 @@ export class FileBrowserModel implements IDisposable {
     };
 
     if (!chunked) {
-      try {
-        return await uploadInner(file);
-      } catch (err) {
-        ArrayExt.removeFirstWhere(this._uploads, uploadIndex => {
-          return file.name === uploadIndex.path;
-        });
-        throw err;
-      }
+      return await uploadInner(file);
     }
 
     let finalModel: Contents.IModel | undefined;
@@ -579,7 +585,7 @@ export class FileBrowserModel implements IDisposable {
       const chunk = lastChunk ? -1 : end / CHUNK_SIZE;
 
       const newUpload = { path, progress: start / file.size };
-      this._uploads.splice(this._uploads.indexOf(upload));
+      ArrayExt.removeFirstOf(this._uploads, upload);
       this._uploads.push(newUpload);
       this._uploadChanged.emit({
         name: 'update',
@@ -592,9 +598,7 @@ export class FileBrowserModel implements IDisposable {
       try {
         currentModel = await uploadInner(file.slice(start, end), chunk);
       } catch (err) {
-        ArrayExt.removeFirstWhere(this._uploads, uploadIndex => {
-          return file.name === uploadIndex.path;
-        });
+        ArrayExt.removeFirstOf(this._uploads, upload);
 
         this._uploadChanged.emit({
           name: 'failure',
@@ -610,7 +614,7 @@ export class FileBrowserModel implements IDisposable {
       }
     }
 
-    this._uploads.splice(this._uploads.indexOf(upload));
+    ArrayExt.removeFirstOf(this._uploads, upload);
     this._uploadChanged.emit({
       name: 'finish',
       newValue: null,

@@ -5,7 +5,10 @@
  * @module metadataform
  */
 
+/* global WeakRef */
+
 import { ReactWidget } from '@jupyterlab/apputils';
+import type { NotebookTools } from '@jupyterlab/notebook';
 import { FormComponent } from '@jupyterlab/ui-components';
 import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { PromiseDelegate } from '@lumino/coreutils';
@@ -34,6 +37,11 @@ export class FormWidget extends ReactWidget {
     const rootId =
       (props.uiSchema['ui:rootFieldId'] as unknown as string) || this._idPrefix;
     this._fields = Private.createFields(rootId);
+    // The model of the cell this form is built for, held weakly so that the
+    // form does not keep a closed notebook in memory. Captured at
+    // construction time so a stale form can be recognized later.
+    const cell = props.metadataFormWidget.notebookTools?.activeCell;
+    this._sourceModel = cell ? new WeakRef(cell.model) : null;
     if (Private.getValidator() === null) {
       void Private.ensureValidator().then(() => {
         if (!this.isDisposed) {
@@ -52,9 +60,27 @@ export class FormWidget extends ReactWidget {
     if (validator === null) {
       return null;
     }
+    const updateMetadata = (
+      formData: ReadonlyPartialJSONObject,
+      reload?: boolean
+    ): void => {
+      const owner = this._props.metadataFormWidget;
+      // A replaced form must not write, nor a form that stayed hidden while the
+      // active cell changed: its fields can still write later, for example when
+      // a request finishes.
+      if (owner.isDisposed || owner.form !== this) return;
+      const activeCell = owner.notebookTools?.activeCell;
+      if (
+        this._sourceModel &&
+        activeCell?.model !== this._sourceModel.deref()
+      ) {
+        return;
+      }
+      owner.updateMetadata(formData, reload);
+    };
     const formContext = {
       defaultFormData: this._props.settings.default(),
-      updateMetadata: this._props.metadataFormWidget.updateMetadata
+      updateMetadata
     };
     return (
       <FormComponent
@@ -71,7 +97,7 @@ export class FormWidget extends ReactWidget {
           // The values that the form fills in itself come without an id.
           if (id === undefined) return;
           const formData = e.formData || {};
-          this._props.metadataFormWidget.updateMetadata({ [id]: formData[id] });
+          updateMetadata({ [id]: formData[id] });
         }}
         compact={true}
         showModifiedFromDefault={this._props.showModified}
@@ -84,6 +110,9 @@ export class FormWidget extends ReactWidget {
   private _props: MetadataForm.IProps;
   private _idPrefix: string;
   private _fields: { SchemaField: Field; NullField: Field };
+  private _sourceModel: WeakRef<
+    NonNullable<NotebookTools['activeCell']>['model']
+  > | null = null;
 }
 
 /**

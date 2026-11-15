@@ -6,7 +6,9 @@ import {
   bugDotIcon,
   bugIcon,
   CommandToolbarButton,
+  CommandToolbarButtonComponent,
   jupyterIcon,
+  LabIcon,
   ReactiveToolbar,
   ReactWidget,
   Toolbar,
@@ -15,7 +17,10 @@ import {
 } from '@jupyterlab/ui-components';
 import { framePromise, JupyterServer } from '@jupyterlab/testing';
 import { CommandRegistry } from '@lumino/commands';
-import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import type {
+  ReadonlyJSONObject,
+  ReadonlyPartialJSONObject
+} from '@lumino/coreutils';
 import { MessageLoop } from '@lumino/messaging';
 import type { PanelLayout } from '@lumino/widgets';
 import { Panel, Widget } from '@lumino/widgets';
@@ -156,6 +161,168 @@ describe('@jupyterlab/ui-components', () => {
       expect(iconSVG.dataset.icon).toMatch(buttonIcon.name);
       expect(iconSVG.dataset.icon).not.toMatch(icon.name);
     });
+
+    describe('#render()', () => {
+      let enabled = true;
+      let iconClassValue = 'initial-icon-class';
+
+      async function render(button: CommandToolbarButton) {
+        button.update();
+        await framePromise();
+        await button.renderPromise;
+      }
+
+      beforeEach(() => {
+        enabled = true;
+        iconClassValue = 'initial-icon-class';
+        commands.addCommand(id, {
+          execute: () => undefined,
+          label: 'Re-render test',
+          icon: blankIcon,
+          iconClass: () => iconClassValue,
+          isEnabled: () => enabled
+        });
+      });
+
+      it('should not re-render the button when an unrelated command change is notified', async () => {
+        const button = new CommandToolbarButton({ commands, id });
+        await render(button);
+
+        // Spy is installed after the initial render so its call count starts
+        // at zero; `resolveReact` is only invoked while rendering the button
+        // subtree, so it is a proxy for "the button re-rendered".
+        const resolveReact = jest.spyOn(LabIcon, 'resolveReact');
+        try {
+          // A `changed` notification with no underlying state change (the
+          // common case when switching tabs) must not re-render the button.
+          commands.notifyCommandChanged(id);
+          await framePromise();
+          expect(resolveReact).not.toHaveBeenCalled();
+
+          // A `many-changed` notification (also emitted on tab switch) must
+          // likewise be a no-op when nothing relevant changed.
+          commands.notifyCommandChanged();
+          await framePromise();
+          expect(resolveReact).not.toHaveBeenCalled();
+        } finally {
+          resolveReact.mockRestore();
+        }
+        button.dispose();
+      });
+
+      it('should re-render the button when the command state changes', async () => {
+        const button = new CommandToolbarButton({ commands, id });
+        await render(button);
+
+        const resolveReact = jest.spyOn(LabIcon, 'resolveReact');
+        try {
+          enabled = false;
+          commands.notifyCommandChanged(id);
+          await framePromise();
+          expect(resolveReact).toHaveBeenCalled();
+        } finally {
+          resolveReact.mockRestore();
+        }
+        button.dispose();
+      });
+    });
+  });
+
+  describe('CommandToolbarButtonComponent', () => {
+    let commands: CommandRegistry;
+
+    beforeEach(() => {
+      commands = new CommandRegistry();
+    });
+
+    it('should not execute the command with stale arguments after args change', async () => {
+      // Regression test: when only the command arguments change (the visual
+      // props stay identical), the memoized button must still re-render so
+      // that its click handler dispatches the command with the new args.
+      const execute = jest.fn();
+      const argsId = 'test:rerender-args';
+      commands.addCommand(argsId, {
+        execute,
+        label: 'Args test',
+        icon: blankIcon
+      });
+
+      class Wrapper extends ReactWidget {
+        args: ReadonlyJSONObject = { value: 1 };
+        render(): React.ReactElement {
+          return React.createElement(CommandToolbarButtonComponent, {
+            commands,
+            id: argsId,
+            args: this.args
+          });
+        }
+      }
+
+      const wrapper = new Wrapper();
+      Widget.attach(wrapper, document.body);
+      await framePromise();
+      await wrapper.renderPromise;
+
+      simulate(wrapper.node.firstElementChild!, 'click');
+      expect(execute).toHaveBeenLastCalledWith({ value: 1 });
+
+      // Change the args (new reference and content); the rendered output of
+      // the button is unchanged, but the handler must pick up the new args.
+      wrapper.args = { value: 2 };
+      wrapper.update();
+      await framePromise();
+      await wrapper.renderPromise;
+
+      simulate(wrapper.node.firstElementChild!, 'click');
+      expect(execute).toHaveBeenLastCalledWith({ value: 2 });
+
+      wrapper.dispose();
+    });
+
+    it('should execute the command in the new registry after the registry changes', async () => {
+      const registryId = 'test:rerender-registry';
+      const execute = jest.fn();
+      commands.addCommand(registryId, {
+        execute,
+        label: 'Registry test',
+        icon: blankIcon
+      });
+      const otherExecute = jest.fn();
+      const otherCommands = new CommandRegistry();
+      otherCommands.addCommand(registryId, {
+        execute: otherExecute,
+        label: 'Registry test',
+        icon: blankIcon
+      });
+
+      class Wrapper extends ReactWidget {
+        commands = commands;
+        render(): React.ReactElement {
+          return React.createElement(CommandToolbarButtonComponent, {
+            commands: this.commands,
+            id: registryId
+          });
+        }
+      }
+
+      const wrapper = new Wrapper();
+      Widget.attach(wrapper, document.body);
+      await framePromise();
+      await wrapper.renderPromise;
+
+      // The command renders the same button in both registries, but the
+      // handler must run the command in the new registry.
+      wrapper.commands = otherCommands;
+      wrapper.update();
+      await framePromise();
+      await wrapper.renderPromise;
+
+      simulate(wrapper.node.firstElementChild!, 'click');
+      expect(otherExecute).toHaveBeenCalledTimes(1);
+      expect(execute).not.toHaveBeenCalled();
+
+      wrapper.dispose();
+    });
   });
 
   describe('Toolbar', () => {
@@ -256,6 +423,55 @@ describe('@jupyterlab/ui-components', () => {
         widget.addItem('b', new Widget());
         const value = widget.insertBefore('c', 'd', new Widget());
         expect(value).toBe(false);
+      });
+    });
+
+    describe('#handleEvent()', () => {
+      let parent: Panel;
+      let button: Widget;
+
+      beforeEach(() => {
+        parent = new Panel();
+        parent.addWidget(widget);
+        button = new Widget({ node: document.createElement('button') });
+        widget.addItem('button', button);
+        Widget.attach(parent, document.body);
+      });
+
+      afterEach(() => {
+        parent.dispose();
+      });
+
+      it.each(['pointerdown', 'keydown'])(
+        'should not activate the parent when a click after %s moves the focus to a menu',
+        eventType => {
+          const menu = document.createElement('div');
+          menu.tabIndex = -1;
+          document.body.appendChild(menu);
+          button.node.addEventListener('click', () => menu.focus());
+          const activate = jest.spyOn(parent, 'activate');
+
+          button.node.focus();
+          button.node.dispatchEvent(new Event(eventType, { bubbles: true }));
+          simulate(button.node, 'click');
+
+          expect(activate).not.toHaveBeenCalled();
+          menu.remove();
+        }
+      );
+
+      it('should activate the parent when a click on empty space leaves the focus on the body', () => {
+        const input = new Widget({ node: document.createElement('input') });
+        parent.addWidget(input);
+        const activate = jest.spyOn(parent, 'activate');
+
+        input.node.focus();
+        widget.node.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+        // A press on an element that cannot take focus moves the focus to the body.
+        input.node.blur();
+        simulate(widget.node, 'click');
+
+        expect(activate).toHaveBeenCalled();
       });
     });
 

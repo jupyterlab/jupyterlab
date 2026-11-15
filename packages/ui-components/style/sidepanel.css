@@ -112,3 +112,46 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.jp-AccordionPanel-dragHandle {
+  display: none;
+  touch-action: none;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0 4px;
+  opacity: 0.5;
+  cursor: grab;
+}
+
+.jp-AccordionPanel-dragHandle::before {
+  content: '⠿';
+  font-size: var(--jp-ui-font-size1);
+  line-height: 1;
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-mod-dragging .jp-AccordionPanel-dragHandle {
+  cursor: grabbing;
+}
+
+.jp-AccordionPanel-dropIndicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--jp-brand-color1);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.jp-mod-reorderable > .lm-AccordionPanel-title > .jp-AccordionPanel-dragHandle {
+  display: inline-flex;
+}
+
+.lm-AccordionPanel[data-orientation='horizontal']
+  > .jp-AccordionPanel-dropIndicator {
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  height: auto;
+}

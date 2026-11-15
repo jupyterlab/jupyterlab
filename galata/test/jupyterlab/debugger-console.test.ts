@@ -289,6 +289,44 @@ test.describe('Debugger Console', () => {
     await expect(inputArea).toContainText('user_count');
   });
 
+  test.describe('Saved completion provider settings', () => {
+    test.use({
+      mockSettings: {
+        ...galata.DEFAULT_SETTINGS,
+        '@jupyterlab/completer-extension:manager': {
+          providerTimeout: 60000,
+          availableProviders: {
+            DebuggerCompletionProvider: 1000,
+            'CompletionProvider:kernel': 550,
+            'CompletionProvider:context': 500
+          }
+        }
+      }
+    });
+
+    test('preserves dictionary key completions after upgrading', async ({
+      page
+    }) => {
+      await page.evaluate(async () => {
+        const service = await window.galata.getPlugin(
+          '@jupyterlab/debugger-extension:service'
+        );
+        await service.evaluate("data = {'alpha': 1}");
+      });
+      const inputArea = page
+        .locator(DEBUG_CONSOLE_WIDGET_SELECTOR)
+        .locator('.jp-CodeConsole-promptCell')
+        .locator(CELL_EDITOR_SELECTOR);
+      await inputArea.fill("data['al");
+      await inputArea.press('Tab');
+      await expect(
+        page.locator('.jp-Completer:not(.lm-mod-hidden) .jp-Completer-item', {
+          hasText: 'alpha'
+        })
+      ).toBeVisible();
+    });
+  });
+
   test('Debug evaluation shows error when debugger has no stopped threads', async ({
     page
   }) => {

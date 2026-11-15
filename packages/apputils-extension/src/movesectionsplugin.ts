@@ -14,11 +14,13 @@ import {
 } from '@jupyterlab/apputils';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
+import { AccordionPanelReorderer } from '@jupyterlab/ui-components';
 import type {
   ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-import type { AccordionLayout, AccordionPanel, Widget } from '@lumino/widgets';
+import { JSONExt } from '@lumino/coreutils';
+import type { AccordionPanel, Widget } from '@lumino/widgets';
 
 /**
  * State DB key for persisting moved sections.
@@ -43,6 +45,9 @@ interface IMoveSectionsState {
 namespace CommandIDs {
   export const moveSectionTo = 'apputils:move-section-to';
   export const moveSectionBack = 'apputils:move-section-back';
+  export const toggleSectionReordering = 'apputils:toggle-section-reordering';
+  export const moveSectionUp = 'apputils:move-section-up';
+  export const moveSectionDown = 'apputils:move-section-down';
 }
 
 /**
@@ -63,11 +68,112 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
     registry: IMovableSectionRegistry | null,
     stateDB: IStateDB | null
   ): void => {
+    const trans = translator.load('jupyterlab');
+
+    const contextReorderer = (): AccordionPanelReorderer | undefined => {
+      const node = app.contextMenuHitTest(node =>
+        node.classList.contains('lm-AccordionPanel')
+      );
+      return node ? AccordionPanelReorderer.find(node) : undefined;
+    };
+
+    app.commands.addCommand(CommandIDs.toggleSectionReordering, {
+      label: trans.__('Enable Section Reordering'),
+      describedBy: { args: { type: 'object', properties: {} } },
+      isVisible: () => contextReorderer() !== undefined,
+      isToggled: () => AccordionPanelReorderer.enabled,
+      execute: () => {
+        AccordionPanelReorderer.enabled = !AccordionPanelReorderer.enabled;
+      }
+    });
+    app.contextMenu.addItem({
+      command: CommandIDs.toggleSectionReordering,
+      selector: '.lm-AccordionPanel-title',
+      rank: 20
+    });
+
+    /**
+     * The section to move: from a key binding, the one whose header has the
+     * focus; otherwise, the one whose header was right-clicked.
+     */
+    const targetSection = (
+      args: ReadonlyPartialJSONObject
+    ): { reorderer: AccordionPanelReorderer; index: number } | undefined => {
+      const event = args._luminoEvent;
+      const fromKeyBinding =
+        event !== undefined &&
+        JSONExt.isObject(event) &&
+        event.type === 'keybinding';
+      const title = fromKeyBinding
+        ? document.activeElement?.closest<HTMLElement>(
+            '.lm-AccordionPanel-title'
+          )
+        : app.contextMenuHitTest(node =>
+            node.classList.contains('lm-AccordionPanel-title')
+          );
+      const panelNode = title?.parentElement;
+      const reorderer = panelNode
+        ? AccordionPanelReorderer.find(panelNode)
+        : undefined;
+      if (!title || !reorderer) {
+        return undefined;
+      }
+      const index = reorderer.panel.titles.indexOf(title);
+      return index < 0 ? undefined : { reorderer, index };
+    };
+
+    const addMoveCommand = (id: string, label: string, offset: -1 | 1) => {
+      /**
+       * The section index to move from and to, if reordering is unlocked and
+       * the section is not already at that end of the panel.
+       */
+      const resolveMove = (args: ReadonlyPartialJSONObject) => {
+        const section = AccordionPanelReorderer.enabled
+          ? targetSection(args)
+          : undefined;
+        if (!section) {
+          return undefined;
+        }
+        const { reorderer, index: from } = section;
+        const to = from + offset;
+        return to >= 0 && to < reorderer.panel.widgets.length
+          ? { reorderer, from, to }
+          : undefined;
+      };
+      app.commands.addCommand(id, {
+        label,
+        describedBy: { args: { type: 'object', properties: {} } },
+        isVisible: args =>
+          AccordionPanelReorderer.enabled && targetSection(args) !== undefined,
+        isEnabled: args => resolveMove(args) !== undefined,
+        execute: args => {
+          const move = resolveMove(args);
+          if (!move) {
+            return;
+          }
+          const { reorderer, from, to } = move;
+          reorderer.move(reorderer.panel.widgets[from], to);
+          // Moving the header in the DOM, or choosing a menu item, takes the
+          // focus away from it.
+          reorderer.panel.titles[to].focus();
+        }
+      });
+      app.contextMenu.addItem({
+        command: id,
+        selector: '.lm-AccordionPanel-title',
+        rank: 21
+      });
+    };
+    addMoveCommand(CommandIDs.moveSectionUp, trans.__('Move Section Up'), -1);
+    addMoveCommand(
+      CommandIDs.moveSectionDown,
+      trans.__('Move Section Down'),
+      1
+    );
+
     if (!registry) {
       return;
     }
-
-    const trans = translator.load('jupyterlab');
 
     // section title element (in source sidebar) → section identity
     const titleToSection = new WeakMap<
@@ -149,130 +255,15 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
       );
     };
 
-    // Re-appending all titles in logical to fix keyboard Tab navigation.
-    const syncTitleDOMOrder = (accordion: AccordionPanel): void => {
-      const layout = accordion.layout as AccordionLayout;
-      for (const title of layout.titles) {
-        accordion.node.appendChild(title);
-      }
-    };
-
-    const addDragHandle = (widget: Widget, accordion: AccordionPanel): void => {
-      const idx = Array.from(accordion.widgets).indexOf(widget);
-      if (idx < 0) {
-        return;
-      }
-      const titleEl = accordion.titles[idx];
-      if (!titleEl.querySelector('.jp-movable-section-dragHandle')) {
-        const handle = document.createElement('span');
-        handle.className = 'jp-movable-section-dragHandle';
-        titleEl.prepend(handle);
-      }
-    };
-
     const setupAccordionDrag = (accordion: AccordionPanel): void => {
       if (dragSetupDone.has(accordion)) {
         return;
       }
       dragSetupDone.add(accordion);
-
-      // Persist collapse/expand state whenever the user toggles a section.
       accordion.expansionToggled.connect(() => void saveState());
-
-      let draggedWidget: Widget | null = null;
-      let startY = 0;
-      let isDragging = false;
-
-      const indicator = document.createElement('div');
-      indicator.className = 'jp-movable-section-dropIndicator';
-      indicator.style.display = 'none';
-      accordion.node.appendChild(indicator);
-
-      const getTargetSlot = (clientY: number): number => {
-        const layout = accordion.layout as AccordionLayout;
-        const titles = Array.from(layout.titles);
-        for (let i = 0; i < titles.length; i++) {
-          const rect = titles[i].getBoundingClientRect();
-          if (clientY < rect.top + rect.height / 2) {
-            return i;
-          }
-        }
-        return titles.length;
-      };
-
-      const showIndicator = (targetSlot: number): void => {
-        const layout = accordion.layout as AccordionLayout;
-        const titles = Array.from(layout.titles);
-        const panelRect = accordion.node.getBoundingClientRect();
-        let top: number;
-        if (targetSlot < titles.length) {
-          top = titles[targetSlot].getBoundingClientRect().top - panelRect.top;
-        } else {
-          const last = titles[titles.length - 1].getBoundingClientRect();
-          top = last.bottom - panelRect.top;
-        }
-        indicator.style.top = `${top}px`;
-        indicator.style.display = 'block';
-      };
-
-      const endDrag = (clientY?: number): void => {
-        indicator.style.display = 'none';
-        accordion.node.classList.remove('jp-mod-dragging');
-        if (isDragging && draggedWidget && clientY !== undefined) {
-          const currentIdx = Array.from(accordion.widgets).indexOf(
-            draggedWidget
-          );
-          const targetSlot = getTargetSlot(clientY);
-          const insertIdx =
-            targetSlot > currentIdx ? targetSlot - 1 : targetSlot;
-          if (insertIdx !== currentIdx) {
-            accordion.insertWidget(insertIdx, draggedWidget);
-            syncTitleDOMOrder(accordion);
-            void saveState();
-          }
-        }
-        draggedWidget = null;
-        isDragging = false;
-      };
-
-      accordion.node.addEventListener('pointerdown', (event: PointerEvent) => {
-        const target = event.target as HTMLElement;
-        const titleEl = target.closest(
-          '.jp-AccordionPanel-title'
-        ) as HTMLElement | null;
-        if (!titleEl || !target.closest('.jp-movable-section-dragHandle')) {
-          return;
-        }
-        const layout = accordion.layout as AccordionLayout;
-        const idx = Array.from(layout.titles).indexOf(titleEl);
-        if (idx < 0) {
-          return;
-        }
-        draggedWidget = accordion.widgets[idx];
-        startY = event.clientY;
-        accordion.node.setPointerCapture(event.pointerId);
-      });
-
-      accordion.node.addEventListener('pointermove', (event: PointerEvent) => {
-        if (!draggedWidget) {
-          return;
-        }
-        if (!isDragging && Math.abs(event.clientY - startY) > 5) {
-          isDragging = true;
-          accordion.node.classList.add('jp-mod-dragging');
-        }
-        if (isDragging) {
-          showIndicator(getTargetSlot(event.clientY));
-        }
-      });
-
-      accordion.node.addEventListener('pointerup', (event: PointerEvent) => {
-        endDrag(event.clientY);
-      });
-
-      accordion.node.addEventListener('pointercancel', () => {
-        endDrag();
-      });
+      AccordionPanelReorderer.get(accordion, translator).reordered.connect(
+        () => void saveState()
+      );
     };
 
     // Core move operations
@@ -300,12 +291,20 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
           const target = Math.max(0, Math.min(index, total - 1));
           if (accordion.widgets[target] !== widget) {
             accordion.insertWidget(target, widget);
-            syncTitleDOMOrder(accordion);
+            // Lumino only repositions the section, so move its title, body
+            // and handle to keep the Tab order the same as the visual order.
+            const next = accordion.titles[target + 1] ?? null;
+            for (const node of [
+              accordion.titles[target],
+              widget.node,
+              accordion.handles[target]
+            ]) {
+              accordion.node.insertBefore(node, next);
+            }
           }
         }
 
         setupAccordionDrag(accordion);
-        addDragHandle(widget, accordion);
 
         const idx = Array.from(accordion.widgets).indexOf(widget);
         if (idx >= 0) {
@@ -440,7 +439,7 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
         rank: 10
       });
 
-      if (panel.accordionPanel && panel.sections.length > 0) {
+      if (panel.accordionPanel) {
         setupAccordionDrag(panel.accordionPanel);
       }
     };

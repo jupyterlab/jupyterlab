@@ -29,6 +29,23 @@ export async function waitForLauncherIcons(
 }
 
 /**
+ * Wait for the toolbar of the active cell before taking screenshots: the
+ * cell toolbar tracker shows or hides it in an idle callback.
+ */
+export async function waitForActiveCellToolbar(
+  page: IJupyterLabPageFixture
+): Promise<void> {
+  await page
+    .locator('.jp-Notebook-cell.jp-mod-active .jp-cell-toolbar')
+    .waitFor({ state: 'attached' });
+  // Idle callbacks run in the order they were requested, so this one runs
+  // after the one that shows or hides the toolbar.
+  await page.evaluate(
+    () => new Promise<void>(resolve => requestIdleCallback(() => resolve()))
+  );
+}
+
+/**
  * Measure how much of the **notebook** viewport does a cell take up.
  */
 export async function notebookViewportRatio(

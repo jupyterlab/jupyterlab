@@ -103,7 +103,7 @@
     "@rspack/cli": "2.0.2",
     "@rspack/core": "2.0.2",
     "@types/react": "^18.0.26",
-    "lodash": "^4.17.23",
+    "lodash": "^4.18.1",
     "lodash-es": "^4.18.1",
     "marked": "^17.0.6",
     "prettier": "^3.8.1",
