@@ -94,10 +94,7 @@ describe('docregistry/dialog', () => {
       it('should throw error on no response', async () => {
         delete alreadyExistsError.response;
         await expect(
-          Promise.all([
-            dismissDialog(),
-            renameFile(manager, 'foo.ipynb', 'bar.ipynb')
-          ])
+          renameFile(manager, 'foo.ipynb', 'bar.ipynb')
         ).rejects.toBe(alreadyExistsError);
       });
       it('should throw error on not 409 status', async () => {
@@ -111,10 +108,7 @@ describe('docregistry/dialog', () => {
           type: 'directory'
         });
         await expect(
-          Promise.all([
-            dismissDialog(),
-            renameFile(manager, 'foo.ipynb', directory.path)
-          ])
+          renameFile(manager, 'foo.ipynb', directory.path)
         ).rejects.toBe(alreadyExistsError);
       });
     });
