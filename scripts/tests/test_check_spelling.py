@@ -237,6 +237,8 @@ def test_staged_snapshot(spelling, repo, tmp_path):
         "- **Do**: Fix qzxnewword.",
         "Correct `code` on this line.\nA qzxnewword sentence.",
         "Correct **bold** on this line.\nA qzxnewword sentence.",
+        "A correct sentence.\nA qzxnewword \\* sentence.",
+        "A correct sentence.\nA qzxnewword &amp; sentence.",
     ],
 )
 def test_changed_markdown_fails(spelling, repo, capfd, replacement):
