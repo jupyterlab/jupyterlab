@@ -192,13 +192,14 @@ export class NotebookViewModel extends WindowedListModel {
         'text'
       ];
       for (let outputIdx = 0; outputIdx < model.outputs.length; outputIdx++) {
-        const output = model.outputs.get(outputIdx);
+        // `data` copies the output on every read
+        const data = model.outputs.get(outputIdx).data;
         const preferredType = supportedOutputTypes.find(
-          mimeType => output.data[mimeType] !== undefined
+          mimeType => data[mimeType] !== undefined
         );
         if (preferredType) {
-          const data = output.data[preferredType];
-          const text = Array.isArray(data) ? data.join('') : data;
+          const value = data[preferredType];
+          const text = Array.isArray(value) ? value.join('') : value;
           if (typeof text === 'string') {
             // A trailing newline ends the last line
             outputsLines +=
