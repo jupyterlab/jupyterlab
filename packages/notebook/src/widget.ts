@@ -4099,8 +4099,6 @@ namespace Private {
     kind: 'legacy' | 'heading' | 'cell-id';
     /*
      * The value of the fragment query.
-
-    con
      */
 
     value: string;
