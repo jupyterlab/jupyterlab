@@ -237,6 +237,7 @@ JUPYTER_WIDGETS_ORG_EXTENSIONS = (
 JUPYTERHUB_ORG_EXTENSIONS = ("jupyter-server-proxy",)
 JUPYTERLAB_ORG_EXTENSIONS = (
     "jupyter-ai",
+    "jupyter-ai-lite",
     "jupyter-collaboration",
     "jupyterlab-chat",
     "jupyterlab-fasta",
@@ -249,7 +250,6 @@ JUPYTERLAB_ORG_EXTENSIONS = (
     "jupyterlab-plugin-playground",
     "jupyterlab-ui-profiler",
     "jupyterlab-vega3",
-    "jupyterlite-ai",
 )
 JUPYTERLAB_CONTRIB_ORG_EXTENSIONS = (
     "jlab-enhanced-launcher",
