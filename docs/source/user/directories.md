@@ -300,3 +300,11 @@ environments. The location can be modified using the
 
 These files can be imported and exported to create default "profiles", using
 the {ref}`workspace command line tool <workspaces-cli>`.
+
+(notebook-directory)=
+
+## Notebook Directory
+
+The notebook directory (root directory) is the base directory served by the contents manager, where notebooks and files are accessed and saved.
+
+By default, the notebook directory is the current working directory where JupyterLab was launched. The directory can be overridden using the `--notebook-dir` command-line option or by setting the `JUPYTER_NOTEBOOK_DIR` environment variable. Command-line flags take precedence over the environment variable, which in turn takes precedence over configuration file settings.

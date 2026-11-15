@@ -67,7 +67,9 @@ from .handlers.extension_manager_handler import ExtensionHandler, extensions_han
 from .handlers.plugin_manager_handler import PluginHandler, plugins_handler_path
 
 if TYPE_CHECKING:
+    import logging
     from collections.abc import Sequence
+    from typing import Any
 
     from jupyter_server.serverapp import ServerApp
 
@@ -424,6 +426,61 @@ aliases.update(
 )
 
 
+def _parse_bool_env(env_var_name: str, log: logging.Logger | None = None) -> bool | None:
+    """Parse a boolean environment variable.
+
+    Returns True for truthy values ('1', 'true', 'yes', 't', 'y', 'on'),
+    False for falsy values ('0', 'false', 'no', 'f', 'n', 'off'),
+    and None if unset, empty, or invalid (with a warning logged if invalid).
+    """
+    val = os.environ.get(env_var_name)
+    if val is None or val.strip() == "":
+        return None
+    val_clean = val.strip().lower()
+    if val_clean in ("1", "true", "yes", "t", "y", "on"):
+        return True
+    if val_clean in ("0", "false", "no", "f", "n", "off"):
+        return False
+    if log is not None:
+        log.warning(f"Unrecognized value for {env_var_name}: {val!r}. Ignoring.")
+    return None
+
+
+def _apply_env_overrides(serverapp: ServerApp, log: logging.Logger | None = None) -> None:
+    """Apply JUPYTER_NOTEBOOK_DIR and JUPYTER_NO_BROWSER environment variable overrides.
+
+    Preserves standard precedence: CLI flags > Environment Variables > Config files > Defaults.
+    """
+    cli_config = getattr(serverapp, "cli_config", {})
+
+    # JUPYTER_NO_BROWSER
+    no_browser_bool = _parse_bool_env("JUPYTER_NO_BROWSER", log=log)
+    if no_browser_bool is not None:
+        has_cli_browser = any(
+            "open_browser" in cli_config.get(s, {}) for s in ("ServerApp", "ExtensionApp", "LabApp")
+        )
+        if not has_cli_browser:
+            open_browser_val = not no_browser_bool
+            serverapp.open_browser = open_browser_val
+            serverapp.config.ServerApp.open_browser = open_browser_val
+            serverapp.config.ExtensionApp.open_browser = open_browser_val
+            serverapp.config.LabApp.open_browser = open_browser_val
+
+    # JUPYTER_NOTEBOOK_DIR
+    notebook_dir_env = os.environ.get("JUPYTER_NOTEBOOK_DIR")
+    if notebook_dir_env and notebook_dir_env.strip() != "":
+        has_cli_root = "root_dir" in cli_config.get("ServerApp", {})
+        if not has_cli_root:
+            notebook_dir = os.path.expanduser(notebook_dir_env.strip())
+            serverapp.root_dir = notebook_dir
+            serverapp.config.ServerApp.root_dir = notebook_dir
+            if "preferred_dir" not in cli_config.get("ServerApp", {}):
+                serverapp.preferred_dir = notebook_dir
+                serverapp.config.ServerApp.preferred_dir = notebook_dir
+            if hasattr(serverapp, "contents_manager") and serverapp.contents_manager is not None:
+                serverapp.contents_manager.root_dir = notebook_dir
+
+
 class LabApp(NotebookConfigShimMixin, LabServerApp):
     version = version
 
@@ -711,6 +768,8 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             # Otherwise notebook_shim warns that ServerApp has an option of the same name
             serverapp.config["LabApp"].pop("raise_config_file_errors", None)
         super()._link_jupyter_server_extension(serverapp)
+        _apply_env_overrides(serverapp, log=self.log)
+        self.open_browser = serverapp.open_browser
 
     def load_config_file(self, suppress_errors: bool = True) -> None:  # type: ignore[override]
         """Load the config files, and exit when one of them has an error.
@@ -992,6 +1051,19 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         # Extend Server handlers with jupyterlab handlers.
         self.handlers.extend(handlers)
         super().initialize_handlers()
+
+    @classmethod
+    def initialize_server(
+        cls,
+        argv: Sequence[str] | None = None,
+        load_other_extensions: bool = True,
+        **kwargs: Any,
+    ) -> ServerApp:
+        serverapp = super().initialize_server(
+            argv=argv, load_other_extensions=load_other_extensions, **kwargs
+        )
+        _apply_env_overrides(serverapp)
+        return serverapp
 
     def initialize(self, argv: Sequence[str] | None = None):
         """Subclass because the ExtensionApp.initialize() method does not take arguments"""

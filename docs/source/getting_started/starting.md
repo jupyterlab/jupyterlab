@@ -12,9 +12,9 @@ Start JupyterLab using:
 jupyter lab
 ```
 
-JupyterLab will open automatically in your browser.
+JupyterLab will open automatically in your browser. To prevent launching the browser automatically, pass the `--no-browser` command-line flag or set the `JUPYTER_NO_BROWSER=1` (or `true`) environment variable.
 
-If your notebook files are not in the current directory, you can pass your working directory path as argument when starting JupyterLab. Avoid running it from your root volume (e.g. `C:\` on Windows or `/` on Linux) to limit the risk of modifying system files.
+If your notebook files are not in the current directory, you can pass your working directory path as argument when starting JupyterLab or set the `JUPYTER_NOTEBOOK_DIR` environment variable. Avoid running it from your root volume (e.g. `C:\` on Windows or `/` on Linux) to limit the risk of modifying system files.
 
 Example:
 
@@ -23,6 +23,10 @@ Example:
 jupyter lab --notebook-dir=E:/ --preferred-dir E:/Documents/Somewhere/Else
 #Linux Example
 jupyter lab --notebook-dir=/var/ --preferred-dir /var/www/html/example-app/
+#Environment Variable Example
+export JUPYTER_NOTEBOOK_DIR=/var/www/html/example-app/
+export JUPYTER_NO_BROWSER=1
+jupyter lab
 ```
 
 You may access JupyterLab by entering the notebook server's {ref}`URL <urls>`
