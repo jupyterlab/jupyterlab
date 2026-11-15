@@ -289,7 +289,7 @@ export class Context<
    * Save the document to a different path chosen by the user.
    *
    * @returns A promise that resolves to `true` if the save operation was initiated.
-   * Returns `false` if the user cancelled the operation.
+   * Returns `false` if the user cancelled the operation or chose an existing folder.
    *
    * Note:
    * - If the save operation proceeds but fails due to an error in the content manager,
