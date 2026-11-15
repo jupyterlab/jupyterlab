@@ -265,7 +265,6 @@ JUPYTERLAB_CONTRIB_ORG_EXTENSIONS = (
     "jupyterlab-filesystem-access",
     "jupyterlab-gitlab",
     "jupyterlab-hybrid-kernels",
-    "jupyterlab-in-context-translation",
     "jupyterlab-js-logs",
     "jupyterlab-kernelspy",
     "jupyterlab-logout",
