@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as http from 'http';
 import { expect, galata, JupyterLabPage, test } from '@jupyterlab/galata';
 
 test.describe('page', () => {
@@ -226,5 +227,97 @@ test.describe('tmpPath', () => {
     expect(tmpPath).toMatch(
       /test-galata-fixture-tmpPat-\w{5}-eturn-an-unique-test-folder-galata/
     );
+  });
+});
+
+test.describe('mockPageConfig', () => {
+  let server: http.Server;
+  let port: number;
+
+  test.beforeAll(async () => {
+    server = http.createServer((req, res) => {
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(
+        '<!DOCTYPE html><html><head><script id="jupyter-config-data" type="application/json">{"serverLocale": "en_US", "original": true}</script><script>window.jupyterapp = { started: Promise.resolve() }; window.galata = { app: {} };</script></head><body></body></html>'
+      );
+    });
+    await new Promise<void>(resolve => server.listen(0, resolve));
+    port = (server.address() as any).port;
+  });
+
+  test.afterAll(async () => {
+    await new Promise<void>(resolve => server.close(() => resolve()));
+  });
+
+  test.describe('fixture option', () => {
+    test.use({
+      autoGoto: false,
+      tmpPath: '',
+      // eslint-disable-next-line no-empty-pattern
+      waitForApplication: async ({}, use) => {
+        await use(async () => {});
+      },
+      mockPageConfig: {
+        customOption: 'customValue',
+        serverLocale: 'zh_CN'
+      }
+    });
+
+    test('should return mocked PageConfig', async ({ page }) => {
+      await page.goto(`http://localhost:${port}/`);
+      const config = await page.evaluate(() => {
+        const el = document.getElementById('jupyter-config-data');
+        return el ? JSON.parse(el.textContent || '{}') : {};
+      });
+
+      expect(config.customOption).toEqual('customValue');
+      expect(config.serverLocale).toEqual('zh_CN');
+      expect(config.original).toEqual(true);
+    });
+
+    test('should retain mocked PageConfig across reload', async ({ page }) => {
+      await page.goto(`http://localhost:${port}/`);
+      await page.reload();
+      const config = await page.evaluate(() => {
+        const el = document.getElementById('jupyter-config-data');
+        return el ? JSON.parse(el.textContent || '{}') : {};
+      });
+
+      expect(config.customOption).toEqual('customValue');
+      expect(config.serverLocale).toEqual('zh_CN');
+      expect(config.original).toEqual(true);
+    });
+  });
+
+  test('should allow mocking PageConfig programmatically', async ({
+    context
+  }) => {
+    const page = await context.newPage();
+    await galata.Mock.mockPageConfig(page, {
+      initialKey: 'overriddenVal',
+      newKey: 'newVal',
+      serverLocale: undefined
+    });
+    await page.goto(`http://localhost:${port}/`);
+    const config = await page.evaluate(() => {
+      const el = document.getElementById('jupyter-config-data');
+      return el ? JSON.parse(el.textContent || '{}') : {};
+    });
+    expect(config).toEqual({
+      original: true,
+      initialKey: 'overriddenVal',
+      newKey: 'newVal'
+    });
+    await page.reload();
+    const reloadedConfig = await page.evaluate(() => {
+      const el = document.getElementById('jupyter-config-data');
+      return el ? JSON.parse(el.textContent || '{}') : {};
+    });
+    expect(reloadedConfig).toEqual({
+      original: true,
+      initialKey: 'overriddenVal',
+      newKey: 'newVal'
+    });
+    await page.close();
   });
 });
