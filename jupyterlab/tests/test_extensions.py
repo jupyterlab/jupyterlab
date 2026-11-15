@@ -116,6 +116,28 @@ async def test_pypi_search_leaves_out_installed_known_extensions(monkeypatch):
     assert [ext.name for ext in extensions] == ["nbdime"]
 
 
+@patch("jupyterlab.extensions.pypi.KNOWN_EXTENSIONS", ("jupyter-ai",))
+@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ())
+async def test_pypi_search_reads_project_urls_by_label(monkeypatch):
+    manager = PyPIExtensionManager()
+    project_urls = {
+        "Documentation": "https://jupyter-ai.readthedocs.io",
+        "Source": "https://github.com/jupyterlab/jupyter-ai",
+        "Tracker": "https://github.com/jupyterlab/jupyter-ai/issues",
+    }
+    get = AsyncMock(
+        return_value=httpx2.Response(
+            200, json={"info": {"version": "1.0.0", "project_urls": project_urls}}
+        )
+    )
+    monkeypatch.setattr(manager._httpx_client, "get", get)
+
+    [extension], _ = await manager.list_extensions("")
+
+    assert extension.repository_url == "https://github.com/jupyterlab/jupyter-ai"
+    assert extension.bug_tracker_url == "https://github.com/jupyterlab/jupyter-ai/issues"
+
+
 @patch(
     "jupyterlab.extensions.pypi.LANGUAGE_PACKS",
     ("jupyterlab-language-pack-de-DE", "jupyterlab-language-pack-fr-FR"),

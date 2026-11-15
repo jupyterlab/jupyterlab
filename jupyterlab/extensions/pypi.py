@@ -80,6 +80,22 @@ def _metadata_string_map(data: PackageMetadata, key: str) -> dict[str, str]:
     return {k: v for k, v in value.items() if isinstance(v, str)}
 
 
+# Labels of well-known project URLs, normalized as in PEP 753.
+_PROJECT_URL_LABELS = {
+    "homepage": ("homepage",),
+    "source": ("source", "repository", "sourcecode", "github"),
+    "documentation": ("documentation", "docs"),
+    "issues": ("issues", "bugs", "issue", "tracker", "issuetracker", "bugtracker"),
+}
+
+
+def _project_url(urls: dict[str, str], kind: str) -> str | None:
+    by_label = {
+        "".join(c for c in label.lower() if c.isalnum()): url for label, url in urls.items()
+    }
+    return next((by_label[label] for label in _PROJECT_URL_LABELS[kind] if label in by_label), None)
+
+
 all_proxy_url = environ.get("ALL_PROXY")
 # For historical reasons, we also support the lowercase environment variables.
 # Info: https://about.gitlab.com/blog/2021/01/27/we-need-to-talk-no-proxy/
@@ -510,13 +526,15 @@ class PyPIExtensionManager(ExtensionManager):
 
             package_urls = _metadata_string_map(data, "project_urls")
 
-            source_url = package_urls.get("Source Code")
-            homepage_url = _metadata_string(data, "home_page") or package_urls.get("Homepage")
-            documentation_url = _metadata_string(data, "docs_url") or package_urls.get(
-                "Documentation"
+            source_url = _project_url(package_urls, "source")
+            homepage_url = _metadata_string(data, "home_page") or _project_url(
+                package_urls, "homepage"
             )
-            bug_tracker_url = _metadata_string(data, "bugtrack_url") or package_urls.get(
-                "Bug Tracker"
+            documentation_url = _metadata_string(data, "docs_url") or _project_url(
+                package_urls, "documentation"
+            )
+            bug_tracker_url = _metadata_string(data, "bugtrack_url") or _project_url(
+                package_urls, "issues"
             )
 
             best_guess_home_url = (
