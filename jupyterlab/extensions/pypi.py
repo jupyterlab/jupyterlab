@@ -253,7 +253,6 @@ JUPYTERLAB_ORG_EXTENSIONS = (
 JUPYTERLAB_CONTRIB_ORG_EXTENSIONS = (
     "jlab-enhanced-launcher",
     "jupyter-archive",
-    "jupyter-secrets-manager",
     "jupyter-suggestions",
     "jupyter-theme-editor",
     "jupyterlab-browser-storage",
