@@ -39,7 +39,7 @@ SPELLING_INDEX = "__spelling_index"
 
 HUNK_RE = re.compile(r"^@@ -\d+(?:,\d+)? \+(?P<start>\d+)(?:,(?P<count>\d+))? @@")
 SPELLING_RE = re.compile(r"^(?P<source>.*):(?P<line>\d+|None):(?P<rest>.*)$")
-SPELLING_CONTEXT_RE = re.compile(r"^\s*\([^)]+\) (?P<context>.*)$")
+SPELLING_CONTEXT_RE = re.compile(r"^\s*\((?P<word>[^)]+)\) (?P<context>.*)$")
 
 
 def git_output(args: list[str]) -> str:
@@ -304,8 +304,8 @@ def path_from_source(source: str, source_dir: Path) -> str | None:
     return relative.as_posix()
 
 
-def spelling_context(source_dir: Path, path: str, report: str) -> tuple[str, list[str]] | None:
-    """Return the context text of a spelling report and the lines of its source."""
+def spelling_context(source_dir: Path, path: str, report: str) -> tuple[str, str, list[str]] | None:
+    """Return the word and context text of a spelling report and the lines of its source."""
     match = SPELLING_CONTEXT_RE.match(report)
     if match is None:
         return None
@@ -327,7 +327,7 @@ def spelling_context(source_dir: Path, path: str, report: str) -> tuple[str, lis
     except (OSError, UnicodeError):
         return None
 
-    return context, lines
+    return match.group("word"), context, lines
 
 
 def spelling_lines(source_dir: Path, path: str, line_number: int, report: str) -> list[int]:
@@ -335,22 +335,26 @@ def spelling_lines(source_dir: Path, path: str, line_number: int, report: str) -
 
     Sphinx may report a word at the first line of its block (for example a
     multi-line MyST paragraph), at an unrelated line, or at line 0, so the
-    context is searched up to the block end, then in the whole file.
+    context is searched up to the block end, then in the whole file. The
+    context is rendered text, so the word alone is also searched in the block
+    in case Markdown escapes or entities prevent a context match.
     """
     found = spelling_context(source_dir, path, report)
     fallback = [line_number] if line_number else []
     if found is None:
         return fallback
 
-    context, lines = found
+    word, context, lines = found
     if line_number:
-        matches = []
+        block = []
         for number in range(line_number, len(lines) + 1):
-            text = lines[number - 1]
-            if not text.strip():
+            if not lines[number - 1].strip():
                 break
-            if context in text:
-                matches.append(number)
+            block.append(number)
+        matches = [number for number in block if context in lines[number - 1]]
+        if not matches:
+            word_re = re.compile(rf"(?<!\w){re.escape(word)}(?!\w)")
+            matches = [number for number in block if word_re.search(lines[number - 1])]
         if matches:
             return matches
 
