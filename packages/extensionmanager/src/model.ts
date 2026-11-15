@@ -509,9 +509,13 @@ export class ListModel extends VDomModel {
    * @returns The extensions matching the current query.
    */
   protected async search(force = false): Promise<void> {
-    if (!this.canInstall || !this.isDisclaimed) {
+    if (!this.canInstall) {
+      // No registry to search; re-render so the query filters the list locally.
       this.stateChanged.emit();
       return;
+    }
+    if (!this.isDisclaimed) {
+      return Promise.reject('Installation warning is not disclaimed.');
     }
 
     this.searchError = null;

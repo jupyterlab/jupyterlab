@@ -184,12 +184,12 @@ describe('@jupyterlab/extensionmanager', () => {
         expect(changed).toBe(1);
       });
 
-      it('should skip a prefilled search until the disclaimer is accepted', async () => {
+      it('should reject when installable but not disclaimed', async () => {
         const model = createModel({ can_install: true });
-        model.query = 'jupyterlab-language-pack';
-        await expect(model.search()).resolves.toBeUndefined();
-        expect(model.searchError).toBeNull();
-        expect(model.query).toBe('jupyterlab-language-pack');
+        expect(model.isDisclaimed).toBe(false);
+        await expect(model.search()).rejects.toBe(
+          'Installation warning is not disclaimed.'
+        );
       });
     });
 
