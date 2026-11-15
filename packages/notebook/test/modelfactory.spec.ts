@@ -162,10 +162,7 @@ describe('@jupyterlab/notebook', () => {
         {
           output_type: 'stream',
           name: 'stdout',
-          text: 'line 1\nline 2\nline 3\n',
-          data: {
-            'application/vnd.jupyter.stdout': 'line 1\nline 2\nline 3\n'
-          }
+          text: 'line 1\nline 2\nline 3\n'
         }
       ];
       const sharedModel = createStandaloneCell({
@@ -189,11 +186,7 @@ describe('@jupyterlab/notebook', () => {
         {
           output_type: 'stream',
           name: 'stderr',
-          text: 'Warning: something\nTraceback:\n  File "test.py"\n',
-          data: {
-            'application/vnd.jupyter.stderr':
-              'Warning: something\nTraceback:\n  File "test.py"\n'
-          }
+          text: 'Warning: something\nTraceback:\n  File "test.py"\n'
         }
       ];
       const sharedModel = createStandaloneCell({
@@ -212,14 +205,12 @@ describe('@jupyterlab/notebook', () => {
       expect(height).toBe(107); // (2 + 3) * 17 + 22
     });
 
-    test('should handle multiple outputs from different cells', () => {
+    test('should add up the lines of all outputs', () => {
       const outputObj = [
         {
           output_type: 'stream',
           name: 'stdout',
-          data: {
-            'application/vnd.jupyter.stdout': 'hello\nworld'
-          }
+          text: 'hello\nworld\n'
         },
         {
           output_type: 'execute_result',
