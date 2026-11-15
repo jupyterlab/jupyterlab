@@ -152,9 +152,8 @@ describe('@jupyterlab/notebook', () => {
       notebook.cells.push({ model } as Cell<ICodeCellModel>);
 
       const height = notebook.estimateWidgetSize(0);
-      // markdown has 3 non-empty lines: "# Header", "Some paragraph", "Another paragraph"
-      // source has 1 line
-      expect(height).toBe(90); // (1 + 3) * 17 + 22
+      // 1 source line, 5 markdown lines
+      expect(height).toBe(124); // (1 + 5) * 17 + 22
     });
 
     test('should count lines from stdout stream output', () => {
@@ -177,7 +176,7 @@ describe('@jupyterlab/notebook', () => {
       notebook.cells.push({ model } as Cell<ICodeCellModel>);
 
       const height = notebook.estimateWidgetSize(0);
-      // 3 source lines, 3 non-empty output lines
+      // 3 source lines, 3 output lines
       expect(height).toBe(124); // (3 + 3) * 17 + 22
     });
 
@@ -201,7 +200,7 @@ describe('@jupyterlab/notebook', () => {
       notebook.cells.push({ model } as Cell<ICodeCellModel>);
 
       const height = notebook.estimateWidgetSize(0);
-      // 2 source lines, 3 non-empty stderr lines
+      // 2 source lines, 3 stderr lines
       expect(height).toBe(107); // (2 + 3) * 17 + 22
     });
 
@@ -237,12 +236,13 @@ describe('@jupyterlab/notebook', () => {
       expect(height).toBe(124); // (3 + 3) * 17 + 22
     });
 
-    test('should skip empty lines in output for height estimation', () => {
+    test('should count blank lines in the output', () => {
       const outputObj = [
         {
           output_type: 'execute_result',
           data: {
-            'text/plain': 'line1\n\n\nline2\n\n'
+            'text/plain':
+              'array([[[0., 0.],\n        [0., 0.]],\n\n       [[0., 0.],\n        [0., 0.]]])'
           },
           execution_count: 1,
           metadata: {}
@@ -252,7 +252,7 @@ describe('@jupyterlab/notebook', () => {
         cell_type: 'code',
         execution_count: 1,
         outputs: outputObj,
-        source: ['x'],
+        source: ['np.zeros((2, 2, 2))'],
         metadata: {}
       }) as YCodeCell;
 
@@ -260,8 +260,8 @@ describe('@jupyterlab/notebook', () => {
       notebook.cells.push({ model } as Cell<ICodeCellModel>);
 
       const height = notebook.estimateWidgetSize(0);
-      // 1 source line, 2 non-empty output lines ("line1", "line2")
-      expect(height).toBe(73); // (1 + 2) * 17 + 22
+      // 1 source line, 5 output lines
+      expect(height).toBe(124); // (1 + 5) * 17 + 22
     });
 
     test('should calculate height based on number of lines in source and output (string[] output)', () => {
@@ -293,7 +293,7 @@ describe('@jupyterlab/notebook', () => {
       notebook.cells.push({ model } as Cell<ICodeCellModel>);
 
       const height = notebook.estimateWidgetSize(0);
-      expect(height).toBe(107); // (2 source_lines + 3 non-empty output_lines) * 17 (line_height) + 22 (cell_margin)
+      expect(height).toBe(107); // (2 source_lines + 3 output_lines) * 17 (line_height) + 22 (cell_margin)
     });
   });
 });

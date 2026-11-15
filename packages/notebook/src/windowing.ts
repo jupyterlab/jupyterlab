@@ -198,10 +198,11 @@ export class NotebookViewModel extends WindowedListModel {
         );
         if (preferredType) {
           const data = output.data[preferredType];
-          if (typeof data === 'string') {
-            outputsLines += data.split('\n').filter(l => l.trim() !== '').length;
-          } else if (Array.isArray(data)) {
-            outputsLines += data.join('').split('\n').filter(l => l.trim() !== '').length;
+          const text = Array.isArray(data) ? data.join('') : data;
+          if (typeof text === 'string') {
+            // A trailing newline ends the last line
+            outputsLines +=
+              text.split('\n').length - (text.endsWith('\n') ? 1 : 0);
           }
         }
       }
