@@ -249,7 +249,6 @@ JUPYTERLAB_ORG_EXTENSIONS = (
     "jupyterlab-mathjax2",
     "jupyterlab-plugin-playground",
     "jupyterlab-ui-profiler",
-    "jupyterlab-vega3",
 )
 JUPYTERLAB_CONTRIB_ORG_EXTENSIONS = (
     "jlab-enhanced-launcher",
