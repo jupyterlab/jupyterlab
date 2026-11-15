@@ -110,22 +110,22 @@
   box-shadow: 0 0 0 2px var(--jp-brand-color1), 0 0 0 4px var(--jp-error-color3);
 }
 
-/* Tooltip */
+/* Tooltip - Minimalist, no unnecessary symbols */
 .jp-Notebook-navigationRail-tooltip {
   position: fixed;
   z-index: 10000;
   pointer-events: none;
-  max-width: 380px;
-  padding: 10px 14px;
+  max-width: 320px;
+  padding: 10px 12px;
   border-radius: 8px;
   background: var(--jp-layout-color1);
   color: var(--jp-ui-font-color0);
   font-family: var(--jp-ui-font-family);
   font-size: var(--jp-ui-font-size1);
-  line-height: 1.45;
-  box-shadow: var(--jp-elevation-z8);
+  line-height: 1.4;
+  box-shadow: var(--jp-elevation-z6);
   border: 1px solid var(--jp-border-color1);
-  animation: jp-navigationRail-fadeIn 0.15s ease-out;
+  animation: jp-navigationRail-fadeIn 0.12s ease-out;
 }
 
 @keyframes jp-navigationRail-fadeIn {
@@ -139,67 +139,46 @@
   }
 }
 
-.jp-Notebook-navigationRail-tooltip-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-  font-size: 11px;
+.jp-Notebook-navigationRail-tooltip-title {
+  font-size: 12px;
   font-weight: 600;
-  color: var(--jp-ui-font-color2);
+  color: var(--jp-ui-font-color0);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.jp-Notebook-navigationRail-tooltip-header.jp-mod-error {
+.jp-Notebook-navigationRail-tooltip-title.jp-mod-error {
   color: var(--jp-error-color1);
-}
-
-.jp-Notebook-navigationRail-tooltip-badge {
-  background: var(--jp-error-color3);
-  color: var(--jp-error-color0);
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-family: var(--jp-code-font-family);
-  font-size: 10px;
-  font-weight: 600;
-}
-
-.jp-Notebook-navigationRail-tooltip-ename {
-  font-weight: 700;
-  color: var(--jp-error-color1);
-}
-
-.jp-Notebook-navigationRail-tooltip-prompt {
-  font-family: var(--jp-code-font-family);
-  color: var(--jp-brand-color1);
-}
-
-.jp-Notebook-navigationRail-tooltip-type {
-  color: var(--jp-ui-font-color2);
 }
 
 .jp-Notebook-navigationRail-tooltip-message {
-  color: var(--jp-error-color0);
-  background: var(--jp-error-color3);
-  border: 1px solid var(--jp-error-color2);
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-weight: 500;
-  margin-bottom: 6px;
-  font-family: var(--jp-code-font-family);
   font-size: 11px;
+  color: var(--jp-ui-font-color1);
+  margin-bottom: 6px;
   word-break: break-word;
+  line-height: 1.35;
 }
 
 .jp-Notebook-navigationRail-tooltip-code {
-  margin: 0;
+  margin: 0 0 6px 0;
   padding: 6px 8px;
   border-radius: 4px;
-  background: var(--jp-cell-editor-background, var(--jp-layout-color2));
+  background: var(--jp-layout-color2);
   border: 1px solid var(--jp-border-color2);
-  color: var(--jp-ui-font-color0);
+  color: var(--jp-ui-font-color1);
   font-family: var(--jp-code-font-family);
   font-size: 11px;
+  line-height: 1.35;
   white-space: pre;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-height: 70px;
+}
+
+.jp-Notebook-navigationRail-tooltip-footer {
+  font-size: 10px;
+  color: var(--jp-ui-font-color2);
+  font-weight: 500;
 }

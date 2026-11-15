@@ -401,52 +401,49 @@ export class NotebookNavigationRail extends Widget {
    */
   private _renderTooltipContent(cell: ICellModel, index: number): void {
     const errorInfo = this._getCellError(cell);
-    const source = cell.sharedModel.getSource() || '';
-    const truncatedSource = this._truncateSource(source, 4);
+    const source = (cell.sharedModel.getSource() || '').trim();
+    const lines = source ? source.split('\n') : [];
+    const totalCells = this.notebook.model?.cells.length ?? 1;
 
     if (errorInfo.hasError) {
-      const execCount =
-        cell.type === 'code' ? (cell as ICodeCellModel).executionCount : null;
-      const countLabel =
-        execCount !== null ? `[${execCount}]` : `[${index + 1}]`;
-
+      const preview = lines.slice(0, 3).join('\n') + (lines.length > 3 ? '\n...' : '');
       this._tooltip.innerHTML = `
-        <div class="jp-Notebook-navigationRail-tooltip-header jp-mod-error">
-          <span class="jp-Notebook-navigationRail-tooltip-badge">${this._escape(
-            countLabel
-          )}</span>
-          <span class="jp-Notebook-navigationRail-tooltip-ename">${this._escape(
-            errorInfo.ename ?? 'Error'
-          )}</span>
-        </div>
+        <div class="jp-Notebook-navigationRail-tooltip-title jp-mod-error">${this._escape(
+          errorInfo.ename ?? 'Error'
+        )}</div>
         <div class="jp-Notebook-navigationRail-tooltip-message">${this._escape(
-          this._stripAnsi(errorInfo.evalue ?? '')
+          this._stripAnsi(errorInfo.evalue ?? 'Execution failed')
         )}</div>
         ${
-          truncatedSource
+          preview
             ? `<pre class="jp-Notebook-navigationRail-tooltip-code">${this._escape(
-                truncatedSource
+                preview
               )}</pre>`
             : ''
         }
+        <div class="jp-Notebook-navigationRail-tooltip-footer">Cell ${
+          index + 1
+        } of ${totalCells}</div>
       `;
     } else {
-      const typeLabel = cell.type.charAt(0).toUpperCase() + cell.type.slice(1);
-      const promptLabel =
-        cell.type === 'code'
-          ? `In [${(cell as ICodeCellModel).executionCount ?? ' '}]:`
-          : `${typeLabel}`;
+      const isMarkdown = cell.type === 'markdown';
+      const firstLine = lines[0] || (isMarkdown ? 'Markdown Cell' : 'Empty Cell');
+      const restLines = lines.slice(1, 4).join('\n') + (lines.length > 4 ? '\n...' : '');
 
       this._tooltip.innerHTML = `
-        <div class="jp-Notebook-navigationRail-tooltip-header">
-          <span class="jp-Notebook-navigationRail-tooltip-prompt">${this._escape(
-            promptLabel
-          )}</span>
-          <span class="jp-Notebook-navigationRail-tooltip-type">Cell ${index + 1}</span>
-        </div>
-        <pre class="jp-Notebook-navigationRail-tooltip-code">${this._escape(
-          truncatedSource || '(empty cell)'
-        )}</pre>
+        <div class="jp-Notebook-navigationRail-tooltip-title">${this._escape(
+          firstLine
+        )}</div>
+        ${
+          restLines
+            ? `<pre class="jp-Notebook-navigationRail-tooltip-code">${this._escape(
+                restLines
+              )}</pre>`
+            : ''
+        }
+        <div class="jp-Notebook-navigationRail-tooltip-footer">Cell ${
+          index + 1
+        } of ${totalCells}</div>
       `;
     }
   }
