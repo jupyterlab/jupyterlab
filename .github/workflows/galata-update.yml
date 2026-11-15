@@ -35,6 +35,9 @@ jobs:
           # Build dev-mode
           jlpm build
 
+      - name: Disable git hooks for the bot commit
+        run: git config core.hooksPath /dev/null
+
       - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -104,6 +107,9 @@ jobs:
 
           # Build dev-mode
           jlpm build
+
+      - name: Disable git hooks for the bot commit
+        run: git config core.hooksPath /dev/null
 
       - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
