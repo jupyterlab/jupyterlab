@@ -78,6 +78,23 @@ describe('@jupyterlab/fileeditor', () => {
       widget.dispose();
     });
 
+    /**
+     * Text of the editor line which holds the current match, if any.
+     */
+    const markedLine = () =>
+      widget.node.querySelector('.jp-current-match')?.closest('.cm-line')
+        ?.textContent ?? null;
+
+    describe('#startQuery()', () => {
+      it('should mark the first match when every match is before the cursor', async () => {
+        widget.editor.setCursorPosition({ line: 1, column: 4 });
+        await provider.startQuery(/test/, undefined);
+        expect(provider.currentMatchIndex).toBe(0);
+        expect(markedLine()).toBe('test test');
+        await provider.endQuery();
+      });
+    });
+
     describe('#matchesCount', () => {
       it('should return number of matches', async () => {
         await provider.startQuery(/test/, undefined);
@@ -117,6 +134,7 @@ describe('@jupyterlab/fileeditor', () => {
         expect(provider.currentMatchIndex).toBe(2);
         await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(0);
+        expect(markedLine()).toBe('test test');
         await provider.endQuery();
       });
 
@@ -147,6 +165,7 @@ describe('@jupyterlab/fileeditor', () => {
         expect(provider.currentMatchIndex).toBe(0);
         await provider.highlightPrevious();
         expect(provider.currentMatchIndex).toBe(2);
+        expect(markedLine()).toBe('test');
         await provider.endQuery();
       });
     });
