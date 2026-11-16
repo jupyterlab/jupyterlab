@@ -584,6 +584,20 @@ describe('@jupyterlab/settingeditor', () => {
         await registry.load(pluginId);
       });
 
+      it('should emit the filter once the query stops changing', async () => {
+        list = await setupList(registry);
+        const emitted: unknown[] = [];
+        list.updateFilterSignal.connect((_, filter) => emitted.push(filter));
+
+        for (const query of ['e', 'ed', 'edi']) {
+          list.setFilter(updateFilterFunction(query, false, false), query);
+        }
+        expect(emitted).toEqual([]);
+
+        await signalToPromise(list.updateFilterSignal);
+        expect(emitted).toEqual([list.filter]);
+      });
+
       it('should match properties provided by a form renderer', async () => {
         const editorRegistry = new FormRendererRegistry();
         const renderer = {

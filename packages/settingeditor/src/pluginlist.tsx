@@ -23,6 +23,7 @@ import type { PartialJSONObject } from '@lumino/coreutils';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
 import type { Message } from '@lumino/messaging';
+import { Debouncer } from '@lumino/polling';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 
@@ -33,6 +34,12 @@ import type { SettingsEditor } from './settingseditor';
  * icon class of a plugin.
  */
 const ICON_KEY = 'jupyter.lab.setting-icon';
+
+/**
+ * The delay in milliseconds before the settings forms follow a new search
+ * query, so that they render once the user stops typing.
+ */
+const FILTER_EMIT_DELAY = 200;
 
 /**
  * The JupyterLab plugin schema key for the setting editor
@@ -164,6 +171,7 @@ export class PluginList extends ReactWidget {
 
   /**
    * Signal that fires when search filter is updated so that settings panel can filter results.
+   * It fires once the filter stops changing for a short delay.
    */
   get updateFilterSignal(): ISignal<this, SettingsEditor.PluginSearchFilter> {
     return this._updateFilterSignal;
@@ -171,6 +179,17 @@ export class PluginList extends ReactWidget {
 
   get handleSelectSignal(): ISignal<this, string> {
     return this._handleSelectSignal;
+  }
+
+  /**
+   * Dispose of the resources held by the plugin list.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._filterEmitter.dispose();
+    super.dispose();
   }
 
   /**
@@ -710,7 +729,10 @@ export class PluginList extends ReactWidget {
       this._listFilter = null;
     }
     this._query = query;
-    this._updateFilterSignal.emit(this._filter);
+    // The search box can still apply its initial query after disposal.
+    if (!this._filterEmitter.isDisposed) {
+      void this._filterEmitter.invoke();
+    }
     this.update();
   }
 
@@ -904,6 +926,9 @@ export class PluginList extends ReactWidget {
     this,
     SettingsEditor.PluginSearchFilter
   >(this);
+  private _filterEmitter = new Debouncer(() => {
+    this._updateFilterSignal.emit(this._filter);
+  }, FILTER_EMIT_DELAY);
   private _confirm?: (id: string) => Promise<void>;
   private _scrollTop: number | undefined = 0;
   private _selection = '';

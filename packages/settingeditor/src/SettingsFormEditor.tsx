@@ -118,8 +118,8 @@ export class SettingsFormEditor extends React.Component<
 
     this.state = {
       isModified: settings.isModified,
-      uiSchema: {},
-      filteredSchema: this.props.settings.schema,
+      uiSchema: this._createUiSchema(),
+      filteredSchema: this._createFilteredSchema(),
       formContext: {
         defaultFormData: this.props.settings.default(),
         settings: this.props.settings,
@@ -128,11 +128,6 @@ export class SettingsFormEditor extends React.Component<
     };
     this.handleChange = this.handleChange.bind(this);
     this._debouncer = new Debouncer(this._handleChange);
-  }
-
-  componentDidMount(): void {
-    this._setUiSchema();
-    this._setFilteredSchema();
   }
 
   componentDidUpdate(prevProps: SettingsFormEditor.IProps): void {
@@ -314,48 +309,37 @@ export class SettingsFormEditor extends React.Component<
         Object.keys(renderers ?? {}).sort()
       )
     ) {
-      /**
-       * Construct uiSchema to pass any custom renderers to the form editor.
-       */
-      const uiSchema: UiSchema = {};
-      for (const id in this.props.renderers[this.props.settings.id]) {
-        if (
-          Object.keys(this.props.settings.schema.properties ?? {}).includes(id)
-        ) {
-          uiSchema[id] = {
-            'ui:field': id
-          };
-        }
-      }
-      this.setState({ uiSchema });
+      this.setState({ uiSchema: this._createUiSchema() });
     }
   }
 
-  private _setFilteredSchema(prevFilteredValues?: string[] | null) {
+  /**
+   * Create the UI schema that passes the custom renderers to the form.
+   */
+  private _createUiSchema(): UiSchema {
+    const uiSchema: UiSchema = {};
+    for (const id in this.props.renderers[this.props.settings.id]) {
+      if (
+        Object.keys(this.props.settings.schema.properties ?? {}).includes(id)
+      ) {
+        uiSchema[id] = {
+          'ui:field': id
+        };
+      }
+    }
+    return uiSchema;
+  }
+
+  private _setFilteredSchema(prevFilteredValues: string[] | null) {
     // Update the filtered value if the filter or the schema has changed.
     if (
-      prevFilteredValues === undefined ||
       !JSONExt.deepEqual(prevFilteredValues, this.props.filteredValues) ||
       !JSONExt.deepEqual(
         this.state.formContext.schema,
         this.props.settings.schema
       )
     ) {
-      /**
-       * Only show fields that match search value.
-       */
-      const filteredSchema = JSONExt.deepCopy(this.props.settings.schema);
-      if (this.props.filteredValues?.length ?? 0 > 0) {
-        for (const field in filteredSchema.properties) {
-          const title = filteredSchema.properties[field].title;
-          if (
-            !this.props.filteredValues?.includes(field) &&
-            !this.props.filteredValues?.includes(title ?? field)
-          ) {
-            delete filteredSchema.properties[field];
-          }
-        }
-      }
+      const filteredSchema = this._createFilteredSchema();
       this.setState(previousState => ({
         filteredSchema,
         formContext: {
@@ -364,6 +348,25 @@ export class SettingsFormEditor extends React.Component<
         }
       }));
     }
+  }
+
+  /**
+   * Create the schema with only the fields that match the search.
+   */
+  private _createFilteredSchema(): ISettingRegistry.ISchema {
+    const filteredSchema = JSONExt.deepCopy(this.props.settings.schema);
+    if (this.props.filteredValues?.length ?? 0 > 0) {
+      for (const field in filteredSchema.properties) {
+        const title = filteredSchema.properties[field].title;
+        if (
+          !this.props.filteredValues?.includes(field) &&
+          !this.props.filteredValues?.includes(title ?? field)
+        ) {
+          delete filteredSchema.properties[field];
+        }
+      }
+    }
+    return filteredSchema;
   }
 
   private _getFilteredFormData(
