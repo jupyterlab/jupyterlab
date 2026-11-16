@@ -207,6 +207,10 @@ export class NotebookViewModel extends WindowedListModel {
           }
         }
       }
+      if (model.getMetadata('collapsed') === true) {
+        // Collapsed outputs show a one-line placeholder
+        outputsLines = Math.min(outputsLines, 1);
+      }
     }
     return (
       NotebookViewModel.DEFAULT_EDITOR_LINE_HEIGHT * (nLines + outputsLines) +

@@ -264,6 +264,30 @@ describe('@jupyterlab/notebook', () => {
       expect(height).toBe(124); // (1 + 5) * 17 + 22
     });
 
+    test('should count collapsed outputs as one line', () => {
+      const outputObj = [
+        {
+          output_type: 'stream',
+          name: 'stdout',
+          text: 'line 1\nline 2\nline 3\n'
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['print("line 1\\nline 2\\nline 3")'],
+        metadata: { collapsed: true }
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      // 1 source line, 1 placeholder line
+      expect(height).toBe(56); // (1 + 1) * 17 + 22
+    });
+
     test('should calculate height based on number of lines in source and output (string[] output)', () => {
       const outputObj = [
         {
