@@ -730,7 +730,10 @@ export class CodeMirrorSearchHighlighter {
     } else {
       this._cm = editor;
       if (this._currentIndex !== null) {
-        this._highlightCurrentMatch();
+        // A hidden editor keeps a scroll request until it is shown again
+        this._highlightCurrentMatch({
+          scroll: editor.host.checkVisibility?.() ?? true
+        });
       }
       this._cm.editor.dispatch({
         effects: StateEffect.appendConfig.of(this._domEventHandlers)

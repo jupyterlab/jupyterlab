@@ -87,10 +87,15 @@ function createMarkdownCell(
   source: string,
   options: {
     editable?: boolean;
+    placeholder?: boolean;
     showEditorForReadOnlyMarkdown?: boolean;
   } = {}
 ): MarkdownCell {
-  const { editable = true, showEditorForReadOnlyMarkdown = true } = options;
+  const {
+    editable = true,
+    placeholder = false,
+    showEditorForReadOnlyMarkdown = true
+  } = options;
   const model = new MarkdownCellModel({
     sharedModel: createStandaloneCell({
       cell_type: 'markdown',
@@ -105,7 +110,7 @@ function createMarkdownCell(
       latexTypesetter: FORMULA_TYPESETTER
     }),
     contentFactory: NBTestUtils.createBaseCellFactory(),
-    placeholder: false,
+    placeholder,
     showEditorForReadOnlyMarkdown
   }).initializeState();
 }
@@ -303,6 +308,25 @@ describe('cells/searchprovider', () => {
 
       await provider.highlightNext();
       expect(renderedCurrentMatch(cell)).toBe('test1');
+      expect(scrollIntoView).not.toHaveBeenCalled();
+      scrollIntoView.mockRestore();
+      provider.dispose();
+    });
+
+    it('should not scroll the hidden editor of a cell which renders after the search starts', async () => {
+      // A notebook renders the cells out of view when the browser is idle
+      cell = createMarkdownCell('test1 test2', { placeholder: true });
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+      await provider.highlightNext();
+      const scrollIntoView = jest.spyOn(EditorView, 'scrollIntoView');
+
+      Widget.attach(cell, document.body);
+      // jsdom has no layout: hide the editor as the rendered cell does
+      cell.editor!.host.checkVisibility = () => false;
+      cell.inViewport = true;
+      await framePromise();
+
       expect(scrollIntoView).not.toHaveBeenCalled();
       scrollIntoView.mockRestore();
       provider.dispose();
