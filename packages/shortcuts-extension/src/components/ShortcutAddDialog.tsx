@@ -217,7 +217,7 @@ class NewShortcutDialogBody
     shortcutField.appendChild(this._captureHost);
 
     this._errorNode = document.createElement('div');
-    this._errorNode.className = 'jp-Shortcuts-AddDialog-error';
+    this._errorNode.className = 'jp-Shortcuts-Field-error';
     this._errorNode.setAttribute('role', 'status');
     shortcutField.appendChild(this._errorNode);
 

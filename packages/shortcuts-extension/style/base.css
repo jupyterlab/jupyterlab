@@ -444,9 +444,20 @@ button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
   flex-direction: column;
   gap: 12px;
   width: 500px;
-  height: 400px;
+  max-width: 500px;
+  min-height: 400px;
+  height: auto;
   padding: 12px 0;
   box-sizing: border-box;
+}
+
+.jp-Dialog-content:has(.jp-Shortcuts-AddDialogBody),
+.jp-Dialog-content:has(.jp-Shortcuts-CustomOptionsDialogBody) {
+  /* Body is 500px; content padding is 24px on each side. */
+  width: max-content;
+  max-width: calc(500px + 48px);
+  max-height: 90vh;
+  resize: vertical;
 }
 
 .jp-Shortcuts-AddDialog-capture .jp-Shortcuts-InputBox,
@@ -462,7 +473,7 @@ button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
   cursor: pointer;
 }
 
-.jp-Shortcuts-AddDialog-error {
+.jp-Shortcuts-Field-error {
   color: var(--jp-error-color1);
   min-height: 1.2em;
   font-size: var(--jp-ui-font-size1);
@@ -490,8 +501,8 @@ button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
 }
 
 .jp-Shortcuts-Field:has(.jp-JSONEditor) {
-  flex: 1;
-  min-height: 0;
+  flex: 1 1 auto;
+  min-height: 8rem;
 }
 
 .jp-Shortcuts-Field .jp-select-wrapper {
@@ -554,8 +565,15 @@ button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
 }
 
 .jp-Shortcuts-AddDialogBody .jp-JSONEditor-host .cm-editor,
+.jp-Shortcuts-CustomOptionsDialogBody .jp-JSONEditor-host .cm-editor {
+  height: 100%;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+}
+
 .jp-Shortcuts-AddDialogBody .jp-JSONEditor-host .cm-content,
-.jp-Shortcuts-CustomOptionsDialogBody .jp-JSONEditor-host .cm-editor,
 .jp-Shortcuts-CustomOptionsDialogBody .jp-JSONEditor-host .cm-content {
   background: transparent;
   color: inherit;
@@ -570,5 +588,16 @@ button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
 }
 
 .jp-JSONEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.jp-JSONEditor .jp-JSONEditor-host {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
 }

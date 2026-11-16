@@ -5,7 +5,7 @@
 
 import { Dialog } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import type { ITranslator } from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import type { JSONObject } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
@@ -147,7 +147,8 @@ export function appendCustomOptionFields(
     editorWidget = new JSONEditorWidget(
       shortcut.args ?? {},
       editorFactory,
-      checkValidation
+      checkValidation,
+      trans
     );
     argsField.appendChild(editorWidget.node);
   }
@@ -219,15 +220,19 @@ class JSONEditorWidget extends Widget {
   private _editor: CodeEditor.IEditor;
   private _checkValidation: () => void;
   private _editorHostNode: HTMLDivElement;
+  private _errorNode: HTMLDivElement;
+  private _trans: TranslationBundle;
 
   constructor(
     initialArgs: Record<string, unknown>,
     editorFactory: CodeEditor.Factory,
-    checkValidation: () => void
+    checkValidation: () => void,
+    trans: TranslationBundle
   ) {
     super();
     this.addClass('jp-JSONEditor');
     this._checkValidation = checkValidation;
+    this._trans = trans;
     this._editorHostNode = document.createElement('div');
     this._editorHostNode.className = 'jp-JSONEditor-host';
 
@@ -243,7 +248,12 @@ class JSONEditorWidget extends Widget {
       }
     });
 
+    this._errorNode = document.createElement('div');
+    this._errorNode.className = 'jp-Shortcuts-Field-error';
+    this._errorNode.setAttribute('role', 'status');
+
     this.node.appendChild(this._editorHostNode);
+    this.node.appendChild(this._errorNode);
 
     // CodeMirror binds Tab to indent; in dialogs Tab should move focus instead.
     this._editorHostNode.addEventListener(
@@ -270,8 +280,11 @@ class JSONEditorWidget extends Widget {
       const text = this._editor.model.sharedModel.getSource();
       JSON.parse(text);
       this.node.classList.remove('jp-mod-error');
+      this._errorNode.textContent = '';
     } catch (error) {
       this.node.classList.add('jp-mod-error');
+      const detail = error instanceof Error ? error.message : String(error);
+      this._errorNode.textContent = this._trans.__('Invalid JSON: %1', detail);
     }
     this._checkValidation();
   };
