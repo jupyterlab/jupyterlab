@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { galata, test } from '@jupyterlab/galata';
+import type { NotebookPanel } from '@jupyterlab/notebook';
 import { expect } from '@playwright/test';
 import * as path from 'path';
 
@@ -681,6 +682,11 @@ test.describe('Notebook Search', () => {
       );
       await page.notebook.openByPath(`${tmpPath}/haystack.ipynb`);
       await page.notebook.activate('haystack.ipynb');
+      // Off-screen cells are rendered when the browser is idle
+      await page.waitForFunction(() => {
+        const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+        return panel.content.widgets.every(cell => !cell.isPlaceholder());
+      });
 
       await page.keyboard.press('Control+f');
       await page.fill('[placeholder="Find"]', 'needle');
@@ -707,6 +713,11 @@ test.describe('Notebook Search', () => {
       );
       await page.notebook.openByPath(`${tmpPath}/haystack.ipynb`);
       await page.notebook.activate('haystack.ipynb');
+      // Off-screen cells are rendered when the browser is idle
+      await page.waitForFunction(() => {
+        const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+        return panel.content.widgets.every(cell => !cell.isPlaceholder());
+      });
 
       await page.keyboard.press('Control+f');
       await page.fill('[placeholder="Find"]', 'needle');
@@ -754,6 +765,11 @@ test.describe('Notebook Search', () => {
     );
     await page.notebook.openByPath(`${tmpPath}/haystack.ipynb`);
     await page.notebook.activate('haystack.ipynb');
+    // Off-screen cells are rendered when the browser is idle
+    await page.waitForFunction(() => {
+      const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+      return panel.content.widgets.every(cell => !cell.isPlaceholder());
+    });
 
     await page.keyboard.press('Control+f');
     await page.click('button[title="Show Search Filters"]');
