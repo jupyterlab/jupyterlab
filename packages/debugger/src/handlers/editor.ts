@@ -545,10 +545,19 @@ export class EditorHandler implements IDisposable {
    * or its path (if it exists).
    */
   private _getBreakpoints(): IDebugger.IBreakpoint[] {
+    const model = this._debuggerService.model.breakpoints;
+    if (this._path) {
+      return model.getBreakpoints(this._path);
+    }
     const code = this._src.getSource();
-    const codeId = this._debuggerService.getCodeId(code);
-    const path = this._path || codeId || this._lastCellPath || '';
-    return this._debuggerService.model.breakpoints.getBreakpoints(path);
+    const breakpoints = model.getBreakpoints(
+      this._debuggerService.getCodeId(code)
+    );
+    // The model has no breakpoints for an edit that is not sent yet.
+    if (breakpoints.length || !this._lastCellPath) {
+      return breakpoints;
+    }
+    return model.getBreakpoints(this._lastCellPath);
   }
 
   private _id: string;

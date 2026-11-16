@@ -3,7 +3,9 @@
 
 import { YCodeCell } from '@jupyter/ydoc';
 
-import type { CodeEditor } from '@jupyterlab/codeeditor';
+import { CodeEditor } from '@jupyterlab/codeeditor';
+
+import { CodeMirrorEditor, ybinding } from '@jupyterlab/codemirror';
 
 import { Debugger } from '../src/debugger';
 
@@ -112,6 +114,35 @@ describe('Debugger.EditorHandler', () => {
     expect(kernel.get(service.getCodeId('x = 2'))).toEqual([1]);
     promptHandler.dispose();
     prompt.dispose();
+  });
+
+  it('should keep the breakpoints when the source changes while they are sent', async () => {
+    updateBreakpoints.mockRestore();
+    const kernel = startTestSession(service);
+    const editor = new CodeMirrorEditor({
+      model: new CodeEditor.Model({ sharedModel: src }),
+      host: document.createElement('div'),
+      extensions: [ybinding({ ytext: src.ysource })]
+    });
+    handler.dispose();
+    handler = new Debugger.EditorHandler({
+      debuggerService: service,
+      editorReady: async () => editor,
+      getEditor: () => editor,
+      src
+    });
+    await flushRequests();
+    handler['_onGutterClick'](editor.editor, 0);
+    await flushRequests();
+    src.updateSource(5, 5, '0');
+    jest.advanceTimersByTime(1000);
+    src.updateSource(6, 6, '0');
+    await flushRequests();
+    jest.advanceTimersByTime(1000);
+    await flushRequests();
+
+    expect(kernel.get(service.getCodeId('x = 100'))).toEqual([1]);
+    editor.dispose();
   });
 
   describe('#clearBreakpoints()', () => {
