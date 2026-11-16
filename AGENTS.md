@@ -32,7 +32,7 @@ We welcome contributions made with AI and expect them to be of the highest quali
 - **Do**: Define explicit TypeScript interfaces
 - **Don't**: Use the `any` type; prefer `unknown` with type guards
 - **Do**: Prefer type guards over type casts
-- **Don't**: Use non-null assertions (`!`) where optional chaining (`?.`), nullish coalescing (`??`), or type guards can be used; avoid `!` on DOM queries, `Map.get()`, array index lookups, and regex matches
+- **Don't**: Use non-null assertions (`!`) where optional chaining (`?.`), nullish coalescing (`??`), or type guards can be used; avoid `!` on DOM queries, `Map.get()`, array index access, and regex matches (non-null assertions are fine in test files)
 
 ### Code Comments
 
