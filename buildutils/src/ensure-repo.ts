@@ -355,18 +355,18 @@ function ensureBranch(): string[] {
   });
 
   // Handle workflow file target branches
-  if (source !== target) {
-    const workflows = glob.sync(path.join('.github', 'workflows', '*.yml'));
-    workflows.forEach(filePath => {
-      let workflowData = fs.readFileSync(filePath, 'utf-8');
-      const test = new RegExp(`\\[${source}\\]`, 'g');
-      if (test.test(workflowData)) {
+  const workflows = glob.sync(path.join('.github', 'workflows', '*.yml'));
+  workflows.forEach(filePath => {
+    let workflowData = fs.readFileSync(filePath, 'utf-8');
+    const test = new RegExp(`\\[${source}\\]`, 'g');
+    if (workflowData.match(test)) {
+      if (workflowData.match(test)![1] !== `[${target}]`) {
         messages.push(`Overwriting ${filePath}`);
         workflowData = workflowData.replace(test, `[${target}]`);
         fs.writeFileSync(filePath, workflowData, 'utf-8');
       }
-    });
-  }
+    }
+  });
 
   return messages;
 }
