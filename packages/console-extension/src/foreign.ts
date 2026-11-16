@@ -103,7 +103,9 @@ function activateForeign(
           ],
           defaultButton: 0,
           checkbox: {
-            label: trans.__('Do not ask me again for any kernel until reload')
+            label: trans.__(
+              'Do not ask me again for other kernels (until reload)'
+            )
           }
         });
         if (!result.button.accept) {
