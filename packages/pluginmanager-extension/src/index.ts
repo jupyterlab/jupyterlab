@@ -78,7 +78,8 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
       const model = new PluginListModel({
         ...args,
         pluginData: {
-          availablePlugins: appInfo.availablePlugins
+          availablePlugins: appInfo.availablePlugins,
+          availablePluginsChanged: appInfo.availablePluginsChanged
         },
         serverSettings: app.serviceManager.serverSettings,
         extraLockedPlugins: [
@@ -102,6 +103,11 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
       content.title.icon = extensionIcon;
       content.title.caption = trans.__('Plugin Manager');
       const main = new MainAreaWidget({ content, reveal: model.ready });
+      // The model listens to the application info, which outlives the widget,
+      // so it has to be disposed together with the widget which owns it.
+      main.disposed.connect(() => {
+        model.dispose();
+      });
 
       main.toolbar.addItem(
         'refresh-plugins',

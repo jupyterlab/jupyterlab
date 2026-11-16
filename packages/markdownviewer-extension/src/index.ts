@@ -10,8 +10,14 @@ import type {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ILayoutRestorer } from '@jupyterlab/application';
-import { Clipboard, ISanitizer, WidgetTracker } from '@jupyterlab/apputils';
+import {
+  Clipboard,
+  CommandLinker,
+  ISanitizer,
+  WidgetTracker
+} from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
+import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import type { MarkdownDocument } from '@jupyterlab/markdownviewer';
 import {
   IMarkdownViewerTracker,
@@ -27,6 +33,8 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 import { ITranslator } from '@jupyterlab/translation';
+
+import { markdownViewerSearchProviderFactory } from './searchprovider';
 
 /**
  * The command IDs used by the markdownviewer plugin.
@@ -56,6 +64,7 @@ const plugin: JupyterFrontEndPlugin<IMarkdownViewerTracker> = {
     ILayoutRestorer,
     ISettingRegistry,
     ITableOfContentsRegistry,
+    ISearchProviderRegistry,
     ISanitizer
   ],
   autoStart: true
@@ -71,6 +80,7 @@ function activate(
   restorer: ILayoutRestorer | null,
   settingRegistry: ISettingRegistry | null,
   tocRegistry: ITableOfContentsRegistry | null,
+  searchRegistry: ISearchProviderRegistry | null,
   sanitizer: IRenderMime.ISanitizer | null
 ): IMarkdownViewerTracker {
   const trans = translator.load('jupyterlab');
@@ -83,6 +93,14 @@ function activate(
   const tracker = new WidgetTracker<MarkdownDocument>({
     namespace
   });
+
+  // Register the search provider for the rendered markdown.
+  if (searchRegistry) {
+    searchRegistry.add(
+      'jp-markdownViewerSearchProvider',
+      markdownViewerSearchProviderFactory
+    );
+  }
 
   let config: Partial<MarkdownViewer.IConfig> = {
     ...MarkdownViewer.defaultConfig
@@ -213,9 +231,15 @@ function activate(
 
   commands.addCommand(CommandIDs.trust, {
     label: trans.__('Trust Markdown Preview'),
-    execute: () => {
-      const widget = tracker.currentWidget;
-      if (widget) {
+    execute: args => {
+      const trustBoundaryId = args[CommandLinker.TRUST_BOUNDARY_ID_ARG];
+      const widget =
+        typeof trustBoundaryId === 'string'
+          ? (tracker.find(
+              widget => widget.content.node.id === trustBoundaryId
+            ) ?? null)
+          : tracker.currentWidget;
+      if (widget && !widget.isDisposed) {
         widget.content.node.classList.add('jp-mod-trusted');
         app.commandLinker.markTrusted(widget.content.node);
         return { trusted: true };
@@ -225,7 +249,12 @@ function activate(
     describedBy: {
       args: {
         type: 'object',
-        properties: {}
+        properties: {
+          [CommandLinker.TRUST_BOUNDARY_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The Markdown preview trust boundary ID')
+          }
+        }
       }
     }
   });

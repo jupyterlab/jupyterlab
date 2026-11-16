@@ -15,6 +15,16 @@ it provides features from the most recent EMCAScript 6 standards, while
 providing type safety. The TypeScript compiler eliminates an entire
 class of bugs, while making it much easier to refactor code.
 
+### Avoiding Non-Null Assertions
+
+The TypeScript non-null assertion operator (`!`) bypasses compiler null checks and can introduce runtime errors. Avoid using `!` when safer alternatives are available:
+
+- Prefer **optional chaining** (`?.`) and **nullish coalescing** (`??`) when accessing properties on objects that may be `null` or `undefined`.
+- Prefer **type guards** (such as `if (value != null)` or custom predicate functions) to narrow types before method calls or property access.
+- Avoid using `!` on the results of DOM queries (`document.querySelector()`), `Map.get()`, array index access, or regular expression matching (`RegExp.exec()`, `String.match()`), as these operations can legitimately produce `null` or `undefined` at runtime.
+- Non-null assertions should be reserved for framework lifecycle invariants where a value is always set before use and TypeScript cannot infer the initialization flow.
+- Non-null assertions are fine in test files where an unexpected `null` or `undefined` value will fail the test immediately rather than cause unexpected runtime issues in production.
+
 ## Initialization Options
 
 Objects will typically have an `IOptions` interface for initializing
@@ -88,6 +98,12 @@ If an object instance should respond to DOM events, create a `handleEvent` metho
 ## Promises
 
 We use Promises for asynchronous function calls, and a shim for browsers that do not support them. When handling a resolved or rejected Promise, make sure to check for the current state (typically by checking an `.isDisposed` property) before proceeding.
+
+## Lazy Imports
+
+Extension modules should keep startup imports light. Load a heavy dependency with `await import(...)` in the command, renderer, or user-interaction callback that first uses it, and keep the plugin `activate()` method synchronous: the application attaches its shell only after every plugin with `autoStart: true` has activated, so an `await` in `activate()` delays the whole start. If activation registers callbacks, renderers, or other extension points that must be available immediately, register them synchronously and lazy-load the heavy implementation inside the callback instead. A package that another core package already loads at startup gains nothing from being deferred. The [`jupyter/prefer-lazy-imports`](https://eslint-plugin.readthedocs.io/en/latest/rules/prefer-lazy-imports/) rule reports imports that could be deferred and skips the packages the application shares with extensions.
+
+The rule's `deferredPackages` list in `eslint.config.mjs` protects dependencies that JupyterLab loads on demand. It rejects static imports and re-exports of these packages in every source module, even when `allowedPackages` would otherwise permit them. Use `import type` for types. If a module is itself loaded on demand and needs a static import, add a local rule suppression explaining why it is safe.
 
 ## Server Requests
 

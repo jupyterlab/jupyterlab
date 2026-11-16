@@ -3,6 +3,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { CommandRegistry } from '@lumino/commands';
+// This module is loaded on demand by the variables grid.
+// eslint-disable-next-line jupyter/prefer-lazy-imports
 import {
   BasicKeyHandler,
   BasicMouseHandler,

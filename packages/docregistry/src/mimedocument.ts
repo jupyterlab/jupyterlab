@@ -65,7 +65,7 @@ export class MimeContent extends Widget {
         });
         void showErrorMessage(
           this._trans.__('Renderer Failure: %1', this._context.path),
-          reason
+          reason instanceof Error ? reason : String(reason)
         );
       });
   }
@@ -181,7 +181,7 @@ export class MimeContent extends Widget {
       });
       void showErrorMessage(
         this._trans.__('Renderer Failure: %1', context.path),
-        reason
+        reason instanceof Error ? reason : String(reason)
       );
     }
   }

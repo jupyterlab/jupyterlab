@@ -5,13 +5,23 @@
 
 import React from 'react';
 import type { FieldProps } from '@rjsf/utils';
+import { SystemClipboard } from '@jupyterlab/apputils';
 import type { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
+import { PageConfig } from '@jupyterlab/coreutils';
 import type { INotebookTracker } from '@jupyterlab/notebook';
 import { NotebookTools } from '@jupyterlab/notebook';
 import type { ISharedText } from '@jupyter/ydoc';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import type { ICellModel } from '@jupyterlab/cells';
 import { InputPrompt, isCodeCellModel } from '@jupyterlab/cells';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import {
+  checkIcon,
+  copyIcon,
+  linkIcon,
+  ToolbarButtonComponent
+} from '@jupyterlab/ui-components';
 import { Debouncer } from '@lumino/polling';
 
 /**
@@ -26,6 +36,25 @@ const ACTIVE_CELL_TOOL_CONTENT_CLASS = 'jp-ActiveCellTool-Content';
  * The class name added to the ActiveCellTool cell content.
  */
 const ACTIVE_CELL_TOOL_CELL_CONTENT_CLASS = 'jp-ActiveCellTool-CellContent';
+
+/**
+ * The class name added to the cell ID field.
+ */
+const CELL_ID_FIELD_CLASS = 'jp-CellIdField';
+
+type CopiedAction = 'id' | 'link';
+
+interface ICellIdFieldProps extends FieldProps {
+  /**
+   * The tracker to the notebook panel.
+   */
+  tracker: INotebookTracker;
+
+  /**
+   * Language translator.
+   */
+  translator?: ITranslator;
+}
 
 namespace Private {
   /**
@@ -42,6 +71,118 @@ namespace Private {
      */
     languages: IEditorLanguageRegistry;
   }
+}
+
+/**
+ * The cell ID field, displaying the ID of the active cell.
+ *
+ * ## Note
+ * This field does not work as other metadata form fields, as it does not update metadata.
+ */
+export function CellIdField(props: ICellIdFieldProps): JSX.Element {
+  const translator = props.translator ?? nullTranslator;
+  const trans = translator.load('jupyterlab');
+  const title = props.schema.title ?? trans.__('Cell ID');
+  const activeCellId = props.tracker.activeCell?.model.id ?? '';
+  const [copiedAction, setCopiedAction] = React.useState<CopiedAction | null>(
+    null
+  );
+  const copiedTimeout = React.useRef<number | null>(null);
+
+  React.useEffect(() => {
+    setCopiedAction(null);
+  }, [activeCellId]);
+
+  React.useEffect(() => {
+    return () => {
+      if (copiedTimeout.current !== null) {
+        window.clearTimeout(copiedTimeout.current);
+      }
+    };
+  }, []);
+
+  const showCopied = (action: CopiedAction) => {
+    setCopiedAction(action);
+    if (copiedTimeout.current !== null) {
+      window.clearTimeout(copiedTimeout.current);
+    }
+    copiedTimeout.current = window.setTimeout(() => {
+      setCopiedAction(null);
+      copiedTimeout.current = null;
+    }, 1400);
+  };
+
+  const onCopyId = () => {
+    if (!activeCellId) {
+      return;
+    }
+    void SystemClipboard.getInstance()
+      .setData('text/plain', activeCellId)
+      .then(() => showCopied('id'));
+  };
+
+  const onCopyLink = () => {
+    const notebookPanel = props.tracker.currentWidget;
+    const activeCell = props.tracker.activeCell;
+    if (!notebookPanel || !activeCell) {
+      return;
+    }
+
+    const url = PageConfig.getUrl({
+      workspace: PageConfig.defaultWorkspace,
+      treePath: notebookPanel.context.path,
+      toShare: true
+    });
+    void SystemClipboard.getInstance()
+      .setData(
+        'text/plain',
+        `${url}#cell-id=${encodeURIComponent(activeCell.model.id)}`
+      )
+      .then(() => showCopied('link'));
+  };
+
+  return (
+    <div className={CELL_ID_FIELD_CLASS}>
+      <label htmlFor={props.idSchema.$id}>{title}</label>
+      <div className="jp-CellIdField-row">
+        <input
+          className="jp-mod-styled jp-CellIdField-input"
+          id={props.idSchema.$id}
+          readOnly
+          type="text"
+          value={activeCellId}
+        />
+        <ToolbarButtonComponent
+          className={`jp-CellIdField-button ${
+            copiedAction === 'id' ? 'jp-mod-copied' : ''
+          }`}
+          enabled={!!activeCellId}
+          icon={copiedAction === 'id' ? checkIcon : copyIcon}
+          iconLabel={trans.__('Copy cell ID')}
+          onClick={onCopyId}
+          tooltip={
+            copiedAction === 'id'
+              ? trans.__('Copied')
+              : trans.__('Copy cell ID')
+          }
+        />
+        <ToolbarButtonComponent
+          className={`jp-CellIdField-button ${
+            copiedAction === 'link' ? 'jp-mod-copied' : ''
+          }`}
+          enabled={!!activeCellId}
+          icon={copiedAction === 'link' ? checkIcon : linkIcon}
+          iconLabel={trans.__('Copy link to cell')}
+          onClick={onCopyLink}
+          tooltip={
+            copiedAction === 'link'
+              ? trans.__('Copied')
+              : trans.__('Copy link to cell')
+          }
+        />
+      </div>
+    </div>
+  );
 }
 
 /**
