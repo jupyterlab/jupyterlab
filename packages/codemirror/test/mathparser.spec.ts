@@ -7,9 +7,9 @@
 // Copyright (C) 2020 by Marijn Haverbeke <marijnh@gmail.com> and others
 
 import { parseMathIPython } from '@jupyterlab/codemirror';
-import { Tree } from '@lezer/common';
+import { Tree, TreeFragment } from '@lezer/common';
 import type { MarkdownParser } from '@lezer/markdown';
-import { parser } from '@lezer/markdown';
+import { GFM, parser } from '@lezer/markdown';
 import { StreamLanguage } from '@codemirror/language';
 import { stexMath } from '@codemirror/legacy-modes/mode/stex';
 
@@ -269,13 +269,202 @@ test(
 test(
   'Block math $$ on multilines',
   `
-{P:{MaBD:{maBD:$$}
+{MaBD:{maBD:$$}
 \\begin{aligned}
-\\dot{x} & = \\sigma(y-x) {Esc:\\\\}
-\\dot{y} & = \\rho x - y - xz {Esc:\\\\}
+\\dot{x} & = \\sigma(y-x) \\\\
+\\dot{y} & = \\rho x - y - xz \\\\
 \\dot{z} & = -\\beta z + xy
 \\end{aligned}
+{maBD:$$}}
+`
+);
+
+test(
+  'Block math $$ containing a setext = underline',
+  `
+{MaBD:{maBD:$$}
+\\text{This}
+=
+\\text{broken.}
+{maBD:$$}}
+`
+);
+
+test(
+  'Block math $$ containing a setext - underline',
+  `
+{MaBD:{maBD:$$}
+Title
+---
+{maBD:$$}}
+`
+);
+
+test(
+  'Block math $$ containing a line starting with a list marker',
+  `
+{MaBD:{maBD:$$}
+L = \\sum_i y_i
+- \\lambda w^2
+{maBD:$$}}
+`
+);
+
+test(
+  'Block math $$ containing a line starting with a quote marker',
+  `
+{MaBD:{maBD:$$}
+f(x)
+> 0
+{maBD:$$}}
+`
+);
+
+test(
+  'Block math $$ interrupting a paragraph',
+  `
+{P:Some text}
+{MaBD:{maBD:$$}
+a
+=
+{maBD:$$}}
+`
+);
+
+test(
+  'Block math $$ after a paragraph with $$ in a code span',
+  '\n{P:Wrap display math in {C:{c:`}$${c:`}}:}\n{MaBD:{maBD:$$}\nx^2\n{maBD:$$}}\n{P:where {Em:{e:*}x{e:*}} is a variable.}\n'
+);
+
+test(
+  'Block math $$ followed by Markdown on the closing line',
+  `
+{MaBD:{maBD:$$}
+E = mc^2
+{maBD:$$}} {P:where {MaID:{maID:$}m{maID:$}} is the {Em:{e:*}mass{e:*}}.}
+`
+);
+
+test(
+  'Unclosed block math $$ is a paragraph up to a blank line',
+  `
+{P:$$
+a}
+
+{SH1:b
+{h:=}}
+`
+);
+
+test(
+  'Closing $$ of math interrupted by a list item is a paragraph',
+  `
+{P:The loss is $$
+L = \\sum_i y_i}
+{BL:{LI:{l:+} {P:\\lambda w^2}}}
+{P:$$
+where {Em:{e:*}w{e:*}} is the weight.}
+`
+);
+
+test(
+  'Block math $$ closing inline math opened in a paragraph',
+  `
+{P:The energy is {MaBD:{maBD:$$}
+E = mc^2
+{maBD:$$}}
+where {Em:{e:*}m{e:*}} is the mass.}
+`
+);
+
+test(
+  'Math $$ opened mid-line containing a setext = underline',
+  `
+{P:Some text {MaBD:{maBD:$$}
+a
+=
+{maBD:$$}}
+where {Em:{e:*}m{e:*}} is the mass.}
+`
+);
+
+test(
+  'Math $$ opened mid-line with a setext = underline on its first line',
+  `
+{P:Some text {MaBD:{maBD:$$}
+=
+b
+{maBD:$$}}
+where {Em:{e:*}m{e:*}} is the mass.}
+`
+);
+
+test(
+  'Math $$ opened mid-line containing a setext - underline',
+  `
+{P:Some text {MaBD:{maBD:$$}
+a
+---
+{maBD:$$}}
+where {Em:{e:*}m{e:*}} is the mass.}
+`
+);
+
+test(
+  'Block math $$ opened on a line with an escaped \\$$',
+  `
+{MaBD:{maBD:$$} x \\$$
+a
+{maBD:$$}}
+`
+);
+
+test(
+  'Block math $$ containing an escaped \\$$',
+  `
+{MaBD:{maBD:$$}
+a \\$$
+b
+{maBD:$$}}
+`
+);
+
+test(
+  'Math $$ opened mid-line containing two setext = underlines',
+  `
+{P:Some text {MaBD:{maBD:$$}
+=
+a
+=
 {maBD:$$}}}
+`
+);
+
+test(
+  'Setext = underline after $$ math opened and closed mid-paragraph',
+  `
+{SH1:Some text {MaBD:{maBD:$$}
+=
+{maBD:$$}} and more
+{h:=}}
+`
+);
+
+test(
+  'Block math $$ opened on a line with $$ in a code span',
+  '\n{MaBD:{maBD:$$} `$$`\na\n{maBD:$$}}\n'
+);
+
+test(
+  'Block math $$ containing $$ in a code span',
+  '\n{MaBD:{maBD:$$}\na `$$` b\n{maBD:$$}}\n'
+);
+
+test(
+  'Setext heading text with an unpaired $$ is a paragraph',
+  `
+{P:Making $$ with Python
+===}
 `
 );
 
@@ -305,5 +494,48 @@ describe('markdown parser', () => {
   it('should parse empty math block $$$$ without error', () => {
     const inputText = '$$$$';
     expect(() => mixedParser.parse(inputText)).not.toThrow();
+  });
+
+  it('should keep a table with $$ in a cell', () => {
+    const gfmParser = parser.configure([GFM, parseMathIPython()]);
+    const tree = gfmParser.parse('| Level | $$ |\n|---|---|\n| a | b |');
+    expect(tree.topNode.firstChild?.name).toBe('Table');
+  });
+
+  it('should keep a table with $$ in a cell when GFM is configured last', () => {
+    const gfmParser = parser.configure([parseMathIPython(), GFM]);
+    const tree = gfmParser.parse('Level | $$\n--- | ---\na | b');
+    expect(tree.topNode.firstChild?.name).toBe('Table');
+  });
+
+  it('should reparse a list item ending with $$ math as from scratch', () => {
+    // TreeFragment.applyChanges drops unchanged ranges under 128 characters.
+    const doc = [
+      'The energy of a body at rest follows from its mass, as the list below',
+      'shows for a few cases.',
+      '',
+      '- Energy:',
+      '  $$',
+      '  E = mc^2',
+      '  $$ where $m$ is the *mass*.',
+      '1. Next step',
+      '',
+      'Text'
+    ].join('\n');
+    const edited = `${doc}x`;
+    const fragments = TreeFragment.applyChanges(
+      TreeFragment.addTree(ipythonParser.parse(doc)),
+      [
+        {
+          fromA: doc.length,
+          toA: doc.length,
+          fromB: doc.length,
+          toB: edited.length
+        }
+      ]
+    );
+    expect(ipythonParser.parse(edited, fragments).toString()).toBe(
+      ipythonParser.parse(edited).toString()
+    );
   });
 });

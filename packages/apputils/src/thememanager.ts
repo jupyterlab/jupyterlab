@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { URLExt } from '@jupyterlab/coreutils';
@@ -27,6 +26,9 @@ const REQUEST_THRESHOLD = 20;
 
 type Dict<T> = { [key: string]: T };
 type ThemedProp<T> = { light: T; dark: T };
+type ThemeManagerSchemaDefinitions = {
+  cssOverrides: { properties: Record<string, unknown> };
+};
 
 /**
  * A class that provides theme management.
@@ -392,7 +394,8 @@ export class ThemeManager implements IThemeManager {
    * Initialize the key -> property dict for the overrides
    */
   private _initOverrideProps(): void {
-    const definitions = this._settings.schema.definitions as any;
+    const definitions = this._settings.schema
+      .definitions as ThemeManagerSchemaDefinitions;
     const overidesSchema = definitions.cssOverrides.properties;
 
     Object.keys(overidesSchema).forEach(key => {
@@ -560,8 +563,13 @@ export class ThemeManager implements IThemeManager {
         });
 
         // Need to force a redraw of the app here to avoid a Chrome rendering
-        // bug that can leave the scrollbars in an invalid state
-        this._host.hide();
+        // bug that can leave the scrollbars in an invalid state. Skip it before
+        // the host is attached: nothing is drawn yet, and a host attached while
+        // hidden gets its first layout from `show()`, which sizes children
+        // before their parents and loses the relative sizes of split panels.
+        if (this._host.isAttached) {
+          this._host.hide();
+        }
 
         // If we hide/show the widget too quickly, no redraw will happen.
         // requestAnimationFrame delays until after the next frame render.
@@ -580,7 +588,7 @@ export class ThemeManager implements IThemeManager {
   /**
    * Handle a theme error.
    */
-  private _onError(reason: any): void {
+  private _onError(reason: unknown): void {
     void showDialog({
       title: this._trans.__('Error Loading Theme'),
       body: String(reason),

@@ -145,7 +145,7 @@ if "sphinxcontrib.spelling" in extensions:
             "spelling_word_list_filename": ["spelling_wordlist.txt"],
             "spelling_exclude_patterns": [
                 "api/**",
-                "getting_started/changelog.md",
+                "getting_started/changelog*.md",
             ],
             "spelling_filters": [
                 "spelling_filters.CodeIdentifierFilter",
@@ -234,7 +234,7 @@ def copy_automated_screenshots(temp_folder: Path) -> list[Path]:
     src = root / AUTOMATED_SCREENSHOTS_FOLDER
 
     copied_files = []
-    for img in src.rglob("*.png"):
+    for img in src.rglob("*-documentation-linux.png"):
         target = temp_folder / (img.name.replace("-documentation-linux", ""))
         shutil.copyfile(str(img), str(target))
         copied_files.append(target)
@@ -422,7 +422,9 @@ html_favicon = "_static/logo-icon.png"
 # documentation.
 #
 html_theme_options = {
-    "announcement": '🚀 JupyterLab 4.6.0 is now available · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/installation.html">INSTALL</a> · <a href="https://jupyterlab.rtfd.io/en/latest/getting_started/changelog.html#v4-6">RELEASE NOTES</a>',
+    # The announcement will not show if https://jupyter.org/assets/banner.html is empty.
+    # See https://github.com/jupyter/jupyter.github.io#site-wide-announcement-banner
+    "announcement": "https://jupyter.org/assets/banner.html",
     "icon_links": [
         {
             "name": "jupyter.org",
@@ -588,8 +590,6 @@ def setup(app: "Sphinx"):
         body="window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init({hashBasedRouting:true})",
     )
 
-    dest = HERE / "getting_started/changelog.md"
-    shutil.copy(str(HERE.parent.parent / "CHANGELOG.md"), str(dest))
     app.add_css_file("css/custom.css")  # may also be an URL
     app.add_js_file("js/plugin_playground_embed.js")
     # Skip expensive API docs build for i18n and spelling-only builders.

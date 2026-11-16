@@ -38,7 +38,10 @@ import {
   IConsoleCellExecutor,
   IConsoleTracker
 } from '@jupyterlab/console';
-import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
+import {
+  IDefaultFileBrowser,
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IPageHandler } from '@jupyterlab/outputarea';
@@ -138,6 +141,7 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
   optional: [
     ILayoutRestorer,
     IDefaultFileBrowser,
+    IFileBrowserFactory,
     IMainMenu,
     ICommandPalette,
     ILauncher,
@@ -280,6 +284,7 @@ async function activateConsole(
   settingRegistry: ISettingRegistry,
   restorer: ILayoutRestorer | null,
   filebrowser: IDefaultFileBrowser | null,
+  filebrowserFactory: IFileBrowserFactory | null,
   mainMenu: IMainMenu | null,
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
@@ -546,6 +551,7 @@ async function activateConsole(
   let interactionMode: string;
   let promptCellConfig: JSONObject = {};
   let promptCellPosition: CodeConsole.PromptCellPosition;
+  let appliedPromptCellPosition: CodeConsole.PromptCellPosition | undefined;
   let showBanner: boolean;
 
   /**
@@ -572,7 +578,7 @@ async function activateConsole(
     showBanner = (await settingRegistry.get(pluginId, 'showBanner'))
       .composite as boolean;
 
-    const setWidgetOptions = (widget: ConsolePanel) => {
+    const setWidgetOptions = (widget: ConsolePanel, setPosition: boolean) => {
       widget.console.node.dataset.jpInteractionMode = interactionMode;
       // Update future promptCells - merge with defaults to preserve tabFocusable: false for output cells
       // But prompt cells will have tabFocusable: true set explicitly in newPromptCell()
@@ -591,15 +597,19 @@ async function activateConsole(
         clearCellsOnExecute,
         clearCodeContentOnExecute,
         hideCodeInput,
-        promptCellPosition,
+        promptCellPosition: setPosition ? promptCellPosition : undefined,
         showBanner
       });
     };
 
     if (panel) {
-      setWidgetOptions(panel);
+      setWidgetOptions(panel, true);
     } else {
-      tracker.forEach(setWidgetOptions);
+      // Keep the position picked for a console with the "Prompt to ..."
+      // commands until the Prompt Cell Position setting itself changes.
+      const positionChanged = promptCellPosition !== appliedPromptCellPosition;
+      appliedPromptCellPosition = promptCellPosition;
+      tracker.forEach(widget => setWidgetOptions(widget, positionChanged));
     }
   }
 
@@ -821,10 +831,12 @@ async function activateConsole(
       }
     },
     execute: args => {
+      const currentBrowser =
+        filebrowserFactory?.tracker.currentWidget ?? filebrowser;
       const basePath =
         ((args['basePath'] as string) ||
           (args['cwd'] as string) ||
-          filebrowser?.model.path) ??
+          currentBrowser?.model.path) ??
         '';
       return createConsole({ basePath, ...args });
     }
@@ -862,6 +874,14 @@ async function activateConsole(
     right: dockRightIcon,
     left: dockLeftIcon
   };
+  // Spelled out rather than built from `position` so that the labels are
+  // picked up by the translation string extractor.
+  const labelMap = {
+    top: trans.__('Prompt to top'),
+    bottom: trans.__('Prompt to bottom'),
+    right: trans.__('Prompt to right'),
+    left: trans.__('Prompt to left')
+  };
   promptCellPositions.forEach((position: CodeConsole.PromptCellPosition) => {
     const command = `console:prompt-to-${position}`;
     commands.addCommand(command, {
@@ -874,7 +894,7 @@ async function activateConsole(
       },
       isEnabled: () =>
         !!tracker.currentWidget && tracker.currentWidget.isVisible,
-      label: trans.__(`Prompt to ${position}`),
+      label: labelMap[position],
       icon: args => (args['isPalette'] ? undefined : iconMap[position]),
       describedBy: {
         args: {
@@ -1102,7 +1122,12 @@ async function activateConsole(
   });
 
   commands.addCommand(CommandIDs.replaceSelection, {
-    label: trans.__('Replace Selection in Console'),
+    label: args => {
+      const text = args['text'];
+      return typeof text === 'string' && text
+        ? trans.__('Replace Selection in Console with "%1"', text)
+        : trans.__('Replace Selection in Console');
+    },
     describedBy: {
       args: {
         type: 'object',
@@ -1274,7 +1299,10 @@ async function activateConsole(
       try {
         await session.setName(result.value);
       } catch (error) {
-        void showErrorMessage(trans.__('Rename Error'), error);
+        void showErrorMessage(
+          trans.__('Rename Error'),
+          error instanceof Error ? error : String(error)
+        );
       }
     },
     isEnabled: () => contextMenuConsole() !== null || isEnabled(),
@@ -1482,7 +1510,7 @@ async function activateConsole(
   commands.addCommand(CommandIDs.interactionMode, {
     label: args =>
       runShortcutTitles[args['interactionMode'] as string] ??
-      'Set the console interaction mode.',
+      trans.__('Set the console interaction mode.'),
     execute: async args => {
       const key = 'keyMap';
       try {
@@ -1492,7 +1520,11 @@ async function activateConsole(
           args['interactionMode'] as string
         );
       } catch (reason) {
-        console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
+        console.error(
+          `Failed to set ${pluginId}:${key} - ${
+            reason instanceof Error ? reason.message : String(reason)
+          }`
+        );
       }
     },
     isToggled: args => args['interactionMode'] === interactionMode,

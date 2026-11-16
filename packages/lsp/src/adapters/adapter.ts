@@ -467,13 +467,15 @@ export abstract class WidgetLSPAdapter<
           virtualDocument.uri,
           message
         );
-      }
+      },
+      this
     );
 
     data.connection.serverNotifications['window/logMessage'].connect(
       (connection, message) => {
         console.log(connection.serverIdentifier + ': ' + message.message);
-      }
+      },
+      this
     );
 
     data.connection.serverNotifications['window/showMessage'].connect(
@@ -482,7 +484,8 @@ export abstract class WidgetLSPAdapter<
           title: this.trans.__('Message from ') + connection.serverIdentifier,
           body: message.message
         });
-      }
+      },
+      this
     );
 
     data.connection.serverRequests['window/showMessageRequest'].setHandler(

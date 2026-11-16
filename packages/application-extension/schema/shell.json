@@ -21,7 +21,8 @@
         { "const": "scale", "title": "Scale" },
         { "const": "contentVisibility", "title": "Content visibility" }
       ],
-      "default": "contentVisibility"
+      "default": "contentVisibility",
+      "tags": ["performance"]
     },
     "startMode": {
       "type": "string",
@@ -80,13 +81,15 @@
       "type": "boolean",
       "title": "Optimize panel resize",
       "description": "Freeze panel dimensions during handle drag to improve resize performance when panels contain heavy DOM content.",
-      "default": true
+      "default": true,
+      "tags": ["performance"]
     },
     "zoomOnWheel": {
       "type": "boolean",
       "title": "Enable Ctrl+ Scroll Zoom",
       "description": "Zoom the widget under the mouse when using Ctrl+ mouse wheel.",
-      "default": false
+      "default": false,
+      "tags": ["accessibility"]
     }
   },
   "additionalProperties": false,

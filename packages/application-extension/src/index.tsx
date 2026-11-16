@@ -27,10 +27,11 @@ import {
   ICommandPalette,
   IWindowResolver,
   MenuFactory,
+  Notification,
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import {
   IPropertyInspectorProvider,
   SideBarPropertyInspectorProvider
@@ -79,6 +80,8 @@ namespace CommandIDs {
 
   export const closeRightTabs = 'application:close-right-tabs';
 
+  export const copyImage = 'application:copy-image';
+
   export const closeAll: string = 'application:close-all';
 
   export const setActivityBarPosition: string =
@@ -119,6 +122,8 @@ namespace CommandIDs {
 
   export const switchSidebar = 'sidebar:switch';
 
+  export const activateTabIndex: string = 'application:activate-tab-index';
+
   export const splitTab = 'application:split-tab';
 
   export const zoomInWidget = 'application:zoom-in-widget';
@@ -130,6 +135,7 @@ namespace CommandIDs {
 
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 3;
+const COPY_IMAGE_NOTIFICATION_AUTO_CLOSE = 5000;
 
 /**
  * A plugin to register the commands for the main application.
@@ -191,6 +197,65 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       const id = node.dataset.id;
       return id ? findWidgetById(id) : null;
+    };
+
+    const contextMenuImage = (): HTMLImageElement | undefined => {
+      const node = app.contextMenuHitTest(
+        node => node instanceof HTMLImageElement
+      );
+      return node instanceof HTMLImageElement ? node : undefined;
+    };
+
+    const imageToPngBlob = async (
+      image: HTMLImageElement,
+      errorMessage: string
+    ): Promise<Blob> => {
+      const canvasBlob = (): Promise<Blob> => {
+        const canvas = document.createElement('canvas');
+        canvas.width = image.naturalWidth || image.width;
+        canvas.height = image.naturalHeight || image.height;
+
+        const context = canvas.getContext('2d');
+        if (!context || !canvas.width || !canvas.height) {
+          return Promise.reject(new Error(errorMessage));
+        }
+
+        try {
+          context.drawImage(image, 0, 0);
+        } catch {
+          return Promise.reject(new Error(errorMessage));
+        }
+
+        return new Promise<Blob>((resolve, reject) => {
+          try {
+            canvas.toBlob(blob => {
+              if (blob) {
+                resolve(blob);
+              } else {
+                reject(new Error(errorMessage));
+              }
+            }, 'image/png');
+          } catch {
+            reject(new Error(errorMessage));
+          }
+        });
+      };
+
+      const src = image.currentSrc || image.src;
+      if (!src) {
+        return canvasBlob();
+      }
+
+      try {
+        const response = await fetch(src);
+        if (!response.ok) {
+          throw new Error(errorMessage);
+        }
+        const blob = await response.blob();
+        return blob.type === 'image/png' ? blob : canvasBlob();
+      } catch {
+        return canvasBlob();
+      }
     };
 
     // Closes an array of widgets.
@@ -372,6 +437,59 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    commands.addCommand(CommandIDs.copyImage, {
+      label: trans.__('Copy Image'),
+      caption: trans.__('Copy image to clipboard'),
+      execute: async () => {
+        const image = contextMenuImage();
+        if (!image) {
+          return;
+        }
+
+        try {
+          if (
+            !navigator.clipboard?.write ||
+            typeof ClipboardItem === 'undefined'
+          ) {
+            throw new Error(
+              trans.__('Image copying is not supported in this browser.')
+            );
+          }
+
+          if (!image.complete) {
+            throw new Error(trans.__('Could not copy image.'));
+          }
+
+          const errorMessage = trans.__(
+            'Could not copy image. Browser security restrictions may prevent copying images loaded from another origin.'
+          );
+          const blob = await imageToPngBlob(image, errorMessage);
+
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': blob })
+          ]);
+        } catch (reason) {
+          const error =
+            reason instanceof Error
+              ? reason
+              : new Error(trans.__('Could not copy image.'));
+          Notification.error(error.message, {
+            autoClose: COPY_IMAGE_NOTIFICATION_AUTO_CLOSE
+          });
+        }
+      },
+      isEnabled: () =>
+        !!contextMenuImage() &&
+        !!navigator.clipboard?.write &&
+        typeof ClipboardItem !== 'undefined',
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
     commands.addCommand(CommandIDs.zoomInWidget, {
       label: trans.__('Zoom In Active Widget'),
       describedBy: {
@@ -418,6 +536,31 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           resetWidgetZoom(widget);
         }
       }
+    });
+
+    commands.addCommand(CommandIDs.toggleFullscreenMode, {
+      label: trans.__('Fullscreen Mode'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: () => {
+        if (
+          document.fullscreenElement === null ||
+          document.fullscreenElement === undefined
+        ) {
+          document.documentElement.requestFullscreen().catch(reason => {
+            console.error('Failed to enter fullscreen mode.', reason);
+          });
+        } else if (document.fullscreenElement !== null) {
+          document.exitFullscreen().catch(reason => {
+            console.error('Failed to exit fullscreen mode.', reason);
+          });
+        }
+      },
+      isToggled: () => document.fullscreenElement !== null
     });
 
     shell.currentChanged?.connect(() => {
@@ -478,6 +621,35 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         },
         execute: () => {
           labShell.activatePreviousTabBar();
+        }
+      });
+
+      commands.addCommand(CommandIDs.activateTabIndex, {
+        label: args =>
+          args.index === -1
+            ? trans.__('Activate Last Tab')
+            : typeof args.index === 'number' && args.index >= 0
+              ? trans.__('Activate Tab %1', args.index + 1)
+              : trans.__('Activate Tab by Index'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {
+              index: {
+                type: 'number',
+                description: trans.__(
+                  'The zero-based index of the tab to activate in the current tab bar; a negative index counts from the end, so -1 is the last tab'
+                )
+              }
+            },
+            required: ['index']
+          }
+        },
+        execute: args => {
+          const index = args['index'];
+          if (typeof index === 'number') {
+            labShell.activateTab(index);
+          }
         }
       });
 
@@ -686,31 +858,6 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         },
         isToggled: () => labShell.presentationMode,
         isVisible: () => true
-      });
-
-      commands.addCommand(CommandIDs.toggleFullscreenMode, {
-        label: trans.__('Fullscreen Mode'),
-        describedBy: {
-          args: {
-            type: 'object',
-            properties: {}
-          }
-        },
-        execute: () => {
-          if (
-            document.fullscreenElement === null ||
-            document.fullscreenElement === undefined
-          ) {
-            document.documentElement.requestFullscreen().catch(reason => {
-              console.error('Failed to enter fullscreen mode.', reason);
-            });
-          } else if (document.fullscreenElement !== null) {
-            document.exitFullscreen().catch(reason => {
-              console.error('Failed to exit fullscreen mode.', reason);
-            });
-          }
-        },
-        isToggled: () => document.fullscreenElement !== null
       });
 
       commands.addCommand(CommandIDs.setMode, {
@@ -1131,16 +1278,65 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     let _docTreePath = '';
     let _defaultBrowserTreePath = '';
 
+    /**
+     * Set or delete a query parameter that the page URL already has.
+     */
+    function updateQuery(name: string, value?: string) {
+      const { pathname, search, hash } = window.location;
+      // Edit the `key=value` pairs as written, so that the other parameters
+      // keep their exact text. `URLSearchParams` would write a space as `+`,
+      // which the tree resolver reads as a plus sign. A parse into an object
+      // would use names from the URL as property names.
+      const pairs: string[] = [];
+      let found = false;
+      for (const pair of search.slice(1).split('&')) {
+        if (pair.split('=', 1)[0] !== name) {
+          if (pair) {
+            pairs.push(pair);
+          }
+        } else if (!found) {
+          found = true;
+          if (value !== undefined) {
+            pairs.push(`${name}=${encodeURIComponent(value)}`);
+          }
+        }
+      }
+      if (!found) {
+        return;
+      }
+      const query = pairs.length ? `?${pairs.join('&')}` : '';
+      router.navigate(pathname + query + hash, { skipRouting: true });
+    }
+
+    function updateUrl(
+      treePath: string,
+      parameterToClear?: 'file-browser-path' | 'open-with'
+    ) {
+      const url = PageConfig.getUrl({ treePath });
+      const path = URLExt.parse(url).pathname;
+      if (path !== window.location.pathname) {
+        router.navigate(path, { skipRouting: true });
+      } else if (parameterToClear) {
+        updateQuery(parameterToClear);
+      }
+      PageConfig.setOption('treePath', treePath);
+    }
+
     function updateTreePath(treePath: string) {
-      // Wait for tree resolver to finish before updating the path because it use the PageConfig['treePath']
-      void treeResolver.paths.then(() => {
+      void ready.then(() => {
+        if (treePath === _defaultBrowserTreePath) {
+          return;
+        }
         _defaultBrowserTreePath = treePath;
         if (!_docTreePath) {
-          const url = PageConfig.getUrl({ treePath });
-          const path = URLExt.parse(url).pathname;
-          router.navigate(path, { skipRouting: true });
-          // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
-          PageConfig.setOption('treePath', treePath);
+          updateUrl(treePath, 'file-browser-path');
+        } else {
+          updateQuery(
+            'file-browser-path',
+            treePath === PathExt.dirname(_docTreePath)
+              ? undefined
+              : treePath || '/'
+          );
         }
       });
     }
@@ -1166,6 +1362,9 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     // Watch the mode and update the page URL to /lab or /doc to reflect the
     // change.
     app.shell.modeChanged.connect((_, args: DockPanel.Mode) => {
+      if (args === PageConfig.getOption('mode')) {
+        return;
+      }
       const url = PageConfig.getUrl({ mode: args as string });
       const path = URLExt.parse(url).pathname;
       router.navigate(path, { skipRouting: true });
@@ -1173,21 +1372,35 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
       PageConfig.setOption('mode', args as string);
     });
 
-    // Wait for tree resolver to finish before updating the path because it use the PageConfig['treePath']
-    void treeResolver.paths.then(() => {
-      // Watch the path of the current widget in the main area and update the page
-      // URL to reflect the change.
-      app.shell.currentPathChanged.connect((_, args) => {
-        const maybeTreePath = args.newValue as string;
-        const treePath = maybeTreePath || _defaultBrowserTreePath;
-        const url = PageConfig.getUrl({ treePath: treePath });
-        const path = URLExt.parse(url).pathname;
-        router.navigate(path, { skipRouting: true });
-        // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
-        PageConfig.setOption('treePath', treePath);
-        _docTreePath = maybeTreePath;
-      });
+    let mainAreaChanged = false;
+    const onStartupCurrentChanged = () => {
+      mainAreaChanged = true;
+    };
+    const shellRestored = app.shell.restored.then(() => {
+      app.shell.currentChanged.connect(onStartupCurrentChanged);
     });
+    const ready = Promise.all([treeResolver.paths, shellRestored]).then(
+      ([paths]) => {
+        app.shell.currentChanged.disconnect(onStartupCurrentChanged);
+        const { contents } = app.serviceManager;
+        const current = app.shell.currentPath ?? '';
+        const file = paths?.file ? contents.normalize(paths.file) : '';
+        // A tree URL that does not name the current document is a folder, or a
+        // file that routing opens next: until then the URL follows the browser.
+        _docTreePath =
+          file && file !== current && !mainAreaChanged ? '' : current;
+        if (paths?.browser && !contents.driveName(paths.browser)) {
+          _defaultBrowserTreePath = contents.normalize(paths.browser);
+        }
+        if (mainAreaChanged) {
+          updateUrl(_docTreePath || _defaultBrowserTreePath, 'open-with');
+        }
+        app.shell.currentPathChanged.connect((_, args) => {
+          _docTreePath = args.newValue;
+          updateUrl(_docTreePath || _defaultBrowserTreePath, 'open-with');
+        });
+      }
+    );
 
     // If the connection to the server is lost, handle it with the
     // connection lost handler.
@@ -1296,6 +1509,9 @@ const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
     function createMenu(options: ISettingRegistry.IMenu): RankedMenu {
       const menu = new RankedMenu({ ...options, commands: app.commands });
       if (options.label) {
+        // The label comes from the `jupyter.lab.menus` key of a settings
+        // schema, from which it is extracted by the schema selectors.
+        // eslint-disable-next-line jupyter/no-dynamic-translation
         menu.title.label = trans.__(options.label);
       }
       return menu;
@@ -1529,14 +1745,19 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
 
           const query = URLExt.queryStringToObject(args.search ?? '');
           const browser = query['file-browser-path'] || '';
-
-          // Remove the file browser path from the query string.
-          delete query['file-browser-path'];
+          // A `+` stands for a space, as in `Markdown+Preview`. Replace it after
+          // decoding, because the redirect of a second tab to an `auto-`
+          // workspace encodes `+` as `%2B`.
+          const openWith = query['open-with']?.replace(/\+/g, ' ') || undefined;
 
           // Clean up artifacts immediately upon routing.
           set.dispose();
 
-          delegate.resolve({ browser, file: PageConfig.getOption('treePath') });
+          delegate.resolve({
+            browser,
+            file: PageConfig.getOption('treePath'),
+            openWith
+          });
         }
       })
     );

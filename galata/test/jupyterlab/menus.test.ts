@@ -94,6 +94,34 @@ test.describe('General Tests', () => {
     ).toHaveCount(1);
     await expect(exportMenu!.getByRole('menuitem')).toHaveCount(1);
   });
+
+  test('Scroll overflowing submenu with mousewheel', async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 600 });
+    await page.goto();
+
+    const submenu = await page.menu.openLocator(
+      'View>Text Editor Syntax Highlighting'
+    );
+    expect(submenu).not.toBeNull();
+    await expect(submenu!).toBeVisible();
+
+    const metrics = await submenu!.evaluate(el => ({
+      scrollTop: el.scrollTop,
+      overflowY: getComputedStyle(el).overflowY,
+      canScroll: el.scrollHeight > el.clientHeight
+    }));
+    expect(metrics.overflowY).toBe('auto');
+    expect(metrics.canScroll).toBe(true);
+
+    const box = await submenu!.boundingBox();
+    expect(box).not.toBeNull();
+    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+    await page.mouse.wheel(0, 200);
+
+    await expect
+      .poll(async () => submenu!.evaluate(el => el.scrollTop))
+      .toBeGreaterThan(metrics.scrollTop);
+  });
 });
 
 const EXPECTED_MISSING_COMMANDS_MAINMENU = ['hub:control-panel', 'hub:logout'];

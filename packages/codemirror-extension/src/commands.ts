@@ -22,7 +22,6 @@ import {
 } from '@codemirror/language';
 import { EditorSelection } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
-import { selectNextOccurrence } from '@codemirror/search';
 import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -289,11 +288,12 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
           properties: {}
         }
       },
-      execute: () => {
+      execute: async () => {
         const view = findEditorView();
         if (!view) {
           return;
         }
+        const { selectNextOccurrence } = await import('@codemirror/search');
         selectNextOccurrence(view);
       },
       isEnabled

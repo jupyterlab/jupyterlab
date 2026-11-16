@@ -22,6 +22,9 @@
       "path": "../codemirror"
     },
     {
+      "path": "../completer"
+    },
+    {
       "path": "../console"
     },
     {

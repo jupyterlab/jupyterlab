@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IDisposable } from '@lumino/disposable';
 import type { Message } from '@lumino/messaging';
@@ -12,9 +11,7 @@ import * as React from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 
-type ReactRenderElement =
-  | Array<React.ReactElement<any>>
-  | React.ReactElement<any>;
+type ReactRenderElement = Array<React.ReactElement> | React.ReactElement;
 
 /**
  * An abstract class for a Lumino widget which renders a React component.
@@ -64,13 +61,68 @@ export abstract class ReactWidget extends Widget {
   }
 
   /**
+   * The parent of the widget.
+   */
+  get parent(): Widget | null {
+    return super.parent;
+  }
+  set parent(value: Widget | null) {
+    // A move to a detached parent, or to one without a layout to attach the
+    // widget, unmounts at once, while the node is still in the document.
+    this._moving = value !== null && value.isAttached && value.layout !== null;
+    try {
+      super.parent = value;
+    } finally {
+      this._moving = false;
+    }
+  }
+
+  /**
    * Called before the widget is detached from the DOM.
    */
   protected onBeforeDetach(msg: Message): void {
-    // Unmount the component so it can tear down.
-    if (this._rootDOM !== null) {
-      this._rootDOM.unmount();
+    if (this._moving) {
+      // A widget moved to an attached parent is attached again synchronously
+      // and keeps its component state; unmount if the layout did not attach it.
+      queueMicrotask(() => {
+        if (!this.isAttached) {
+          this._unmount();
+        }
+      });
+      return;
+    }
+    // Unmount while the node is in the document, so that cleanups can still
+    // detach or measure what they rendered.
+    this._unmount();
+  }
+
+  /**
+   * Dispose the widget.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    // A widget disposed while already detached receives no `before-detach`
+    // message, and without this call its React root would stay mounted with
+    // every subscription of its components.
+    try {
+      this._unmount();
+    } finally {
+      super.dispose();
+    }
+  }
+
+  /**
+   * Unmount the React tree, if one is mounted.
+   */
+  private _unmount(): void {
+    const root = this._rootDOM;
+    if (root !== null) {
+      // Forget the root first: a cleanup that throws would otherwise leave a
+      // root that cannot render again.
       this._rootDOM = null;
+      root.unmount();
     }
   }
 
@@ -99,8 +151,7 @@ export abstract class ReactWidget extends Widget {
         requestIdleCallback(() => resolve());
       } else {
         // If the virtual node is null, unmount the node content
-        this._rootDOM.unmount();
-        this._rootDOM = null;
+        this._unmount();
         requestIdleCallback(() => resolve());
       }
     });
@@ -109,6 +160,7 @@ export abstract class ReactWidget extends Widget {
   // Set whenever a new render is triggered and resolved when it is finished.
   renderPromise?: Promise<void>;
   private _rootDOM: Root | null = null;
+  private _moving = false;
 }
 
 /**

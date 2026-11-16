@@ -13,6 +13,7 @@
  * - added TypeScript types
  * - simplified `YUndoManagerConfig` by removing public methods
  * - moved `_onStackItemAdded`, `_onStackItemPopped` and `_storeSelection` definitions out of constructor
+ * - `destroy()` deletes this plugin's metadata from the undo manager stacks
  */
 import type { PluginValue, ViewUpdate } from '@codemirror/view';
 import { EditorView, ViewPlugin } from '@codemirror/view';
@@ -67,6 +68,7 @@ class YUndoManagerPluginValue implements PluginValue {
     ) {
       // do not overwrite previous stored selection
       stackItem.meta.set(this, this._beforeChangeSelection);
+      this._storedSelection = true;
     }
   };
   _onStackItemPopped = ({ stackItem }: { stackItem: IStackItem }) => {
@@ -102,10 +104,28 @@ class YUndoManagerPluginValue implements PluginValue {
     this._undoManager.off('stack-item-added', this._onStackItemAdded);
     this._undoManager.off('stack-item-popped', this._onStackItemPopped);
     this._undoManager.removeTrackedOrigin(this._syncConf);
+    // The stack items live as long as the undo manager, which belongs to the
+    // document. The metadata stored on them would keep this plugin, its
+    // editor view and everything the view references (for a notebook, the
+    // whole deleted cell) reachable after the editor is destroyed, while its
+    // only purpose is to restore the selection, which has no meaning once
+    // the view is gone. Skipped when this editor never stored any, so that
+    // destroying many editors does not rescan the shared stacks needlessly.
+    if (this._storedSelection) {
+      for (const stack of [
+        this._undoManager.undoStack,
+        this._undoManager.redoStack
+      ]) {
+        for (const item of stack) {
+          (item as IStackItem).meta.delete(this);
+        }
+      }
+    }
   }
   private _undoManager: UndoManager;
   private _view: EditorView;
   private _beforeChangeSelection: null | YRange;
+  private _storedSelection = false;
   private _conf: YUndoManagerConfig;
   private _syncConf: YSyncConfig;
 }

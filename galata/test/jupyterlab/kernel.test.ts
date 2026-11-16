@@ -239,11 +239,18 @@ test.describe('Kernel', () => {
       .locator('.jp-Dialog-button.jp-mod-accept:has-text("select")')
       .click();
 
-    // Add long running script to first cell
+    // Add long running script to first cell. The loop has to outlast the
+    // creation of the second notebook below, including the start of its
+    // kernel, otherwise the first kernel goes idle before we switch back
+    // and the final assertion sees "Idle". The cell is never awaited, so a
+    // long loop does not slow the test down. The loop body stays on one
+    // line: the editor indents Python blocks only once the kernel reports
+    // its language, which can happen while the cell is typed, and a block
+    // typed across that change gets mixed indentation.
     await page.notebook.setCell(
       0,
       'code',
-      'import time\nfor i in range(5):\n    print(f"Step {i}")\n    time.sleep(1)'
+      'import time\nfor i in range(120): time.sleep(1)'
     );
     await statusBar.getByText('Idle').waitFor();
 

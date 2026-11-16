@@ -6,7 +6,6 @@
 import contextlib
 import logging
 import os
-import sys
 import tempfile
 import traceback
 import warnings
@@ -58,8 +57,7 @@ class DebugLogFileMixin(Configurable):
         try:
             yield
         except Exception as ex:
-            _, _, exc_traceback = sys.exc_info()
-            msg = traceback.format_exception(ex.__class__, ex, exc_traceback)
+            msg = traceback.format_exception(ex)
             for line in msg:
                 app.log.debug(line)
             if isinstance(ex, SystemExit):

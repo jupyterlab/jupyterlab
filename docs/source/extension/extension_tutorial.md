@@ -223,7 +223,7 @@ jupyter-builder develop --overwrite .
 ### Important for Windows users
 
 :::{important}
-On Windows, symbolic links need to be activated on Windows 10 or above for Python version 3.8 or higher
+On Windows, symbolic links need to be activated on Windows 10 or above
 by activating the 'Developer Mode'. That may not be allowed by your administrators.
 See [Activate Developer Mode on Windows](https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development)
 for instructions.
@@ -347,7 +347,7 @@ ICommandPalette: Palette {_palette: CommandPalette}
 ```
 
 Note that we had to run `jlpm build` in order for the bundle to
-update. This command does two things: compiles the TypeScript files in `` src/` ``
+update. This command does two things: compiles the TypeScript files in `src/`
 into JavaScript files in `lib/` (`jlpm build`), then bundles the
 JavaScript files in `lib/` into a JupyterLab extension in
 `jupyterlab_apod/static` (`jlpm build:extension`). If you wish to avoid

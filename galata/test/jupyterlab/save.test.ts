@@ -25,6 +25,11 @@ for (const type of ['Text', 'Notebook', 'Markdown']) {
       await page.click('.jp-Dialog >> button >> text=Select');
     }
 
+    // Save is enabled once the document has loaded, and an open menu does
+    // not update its items.
+    await page.waitForFunction(() =>
+      window.jupyterapp.commands.isEnabled('docmanager:save')
+    );
     await page.menu.clickMenuItem(
       type === 'Markdown' ? `File>Save ${type} File` : `File>Save ${type}`
     );
@@ -67,6 +72,11 @@ for (const type of ['Text', 'Notebook', 'Markdown']) {
     await page.fill('.jp-Dialog >> input', `dummy${EXTENSION[type]}`);
 
     await page.click('.jp-Dialog >> button >> text=Rename');
+
+    // The file stays untitled until the server confirms the rename.
+    await page
+      .locator(`[role="main"] >> text=dummy${EXTENSION[type]}`)
+      .waitFor();
 
     await page.menu.clickMenuItem(
       type === 'Markdown' ? `File>Save ${type} File` : `File>Save ${type}`
