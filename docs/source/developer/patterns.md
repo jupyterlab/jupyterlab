@@ -15,6 +15,15 @@ it provides features from the most recent EMCAScript 6 standards, while
 providing type safety. The TypeScript compiler eliminates an entire
 class of bugs, while making it much easier to refactor code.
 
+### Avoiding Non-Null Assertions
+
+The TypeScript non-null assertion operator (`!`) bypasses compiler null checks and can introduce runtime errors. Avoid using `!` when safer alternatives are available:
+
+- Prefer **optional chaining** (`?.`) and **nullish coalescing** (`??`) when accessing properties on potentially nullable or undefined objects.
+- Prefer **type guards** (such as `if (value != null)` or custom predicate functions) to narrow types before method calls or property access.
+- Avoid using `!` on the results of DOM queries (`document.querySelector()`), `Map.get()`, array index lookups, or regular expression matching (`RegExp.exec()`, `String.match()`), as these operations can legitimately produce `null` or `undefined` at runtime.
+- Non-null assertions should be reserved for framework lifecycle invariants where an object is guaranteed to be initialized by the container and TypeScript cannot infer the initialization flow.
+
 ## Initialization Options
 
 Objects will typically have an `IOptions` interface for initializing
