@@ -14,7 +14,7 @@ import tempfile
 from collections.abc import Awaitable, Callable
 from functools import partial
 from http import HTTPStatus
-from importlib.metadata import Distribution, entry_points
+from importlib.metadata import Distribution, PackageNotFoundError, distribution, entry_points
 from os import environ
 from pathlib import Path
 from subprocess import CalledProcessError, run
@@ -201,6 +201,19 @@ LANGUAGE_PACKS = (
 )
 
 
+def _python_distribution(install: dict | None) -> Distribution | None:
+    """Get the installed Python package that an extension's install.json names."""
+    if not install or install.get("packageManager") != "python":
+        return None
+    name = install.get("packageName")
+    if not isinstance(name, str) or not name:
+        return None
+    try:
+        return distribution(name)
+    except PackageNotFoundError:
+        return None
+
+
 def _installed_language_packs() -> dict[str, Distribution]:
     packs: dict[str, Distribution] = {}
     for entry in entry_points(group=JUPYTERLAB_LANGUAGEPACK_ENTRY):
@@ -307,23 +320,24 @@ class PyPIExtensionManager(ExtensionManager):
             )
 
     def get_normalized_name(self, extension: ExtensionPackage) -> str:
-        """Normalize extension name.
-
-        Extension have multiple parts, npm package, Python package,...
-        Sub-classes may override this method to ensure the name of
-        an extension from the service provider and the local installed
-        listing is matching.
+        """Get the name of the Python package that installed an extension.
 
         Args:
             extension: The extension metadata
         Returns:
-            The normalized name
+            The package name from install.json if that package is installed,
+            the normalized extension name otherwise
         """
-        if extension.install is not None:
-            install_metadata = extension.install
-            if install_metadata["packageManager"] == "python":
-                return self._normalize_name(install_metadata["packageName"])
-        return self._normalize_name(extension.name)
+        installed = _python_distribution(extension.install)
+        return self._normalize_name(installed.name if installed else extension.name)
+
+    @override
+    def _get_installed_version(self, data: dict) -> str:
+        # The labextension version can differ from the Python package version that PyPI reports.
+        installed = _python_distribution(data.get("install"))
+        if installed is None:
+            return super()._get_installed_version(data)
+        return self.get_semver_version(installed.version)
 
     @observe("rpc_request_throttling")
     def _warn_rpc_request_throttling(self, _change: object) -> None:
