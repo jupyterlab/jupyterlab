@@ -112,16 +112,21 @@ export function appendCustomOptionFields(
   const { shortcut, translator, editorFactory, checkValidation, readOnly } =
     options;
   const trans = translator.load('jupyterlab');
+  const idPrefix = `jp-Shortcuts-CustomOptions-${Private.nextId++}`;
 
   const selectorField = document.createElement('div');
   selectorField.className = 'jp-Shortcuts-Field';
 
+  const selectorId = `${idPrefix}-selector`;
   const selectorLabel = document.createElement('label');
   selectorLabel.textContent = trans.__('Selector:');
   selectorLabel.className = 'jp-Dialog-label';
+  selectorLabel.htmlFor = selectorId;
 
   const selectorInput = document.createElement('input');
   selectorInput.type = 'text';
+  selectorInput.id = selectorId;
+  selectorInput.name = 'shortcut-selector';
   selectorInput.disabled = readOnly;
   selectorInput.value = shortcut.selector;
   selectorInput.className = 'jp-mod-styled';
@@ -133,7 +138,11 @@ export function appendCustomOptionFields(
   const argsField = document.createElement('div');
   argsField.className = 'jp-Shortcuts-Field';
 
-  const argsLabel = document.createElement('label');
+  // Not a <label>: the JSON editor is not a labelable form control; use
+  // aria-labelledby on the editor host instead.
+  const argsLabelId = `${idPrefix}-args-label`;
+  const argsLabel = document.createElement('div');
+  argsLabel.id = argsLabelId;
   argsLabel.textContent = trans.__('Arguments:');
   argsLabel.className = 'jp-Dialog-label';
   argsField.appendChild(argsLabel);
@@ -142,13 +151,15 @@ export function appendCustomOptionFields(
   if (readOnly) {
     const argsPre = document.createElement('pre');
     argsPre.textContent = JSON.stringify(shortcut.args ?? {}, undefined, 2);
+    argsPre.setAttribute('aria-labelledby', argsLabelId);
     argsField.appendChild(argsPre);
   } else {
     editorWidget = new JSONEditorWidget(
       shortcut.args ?? {},
       editorFactory,
       checkValidation,
-      trans
+      trans,
+      argsLabelId
     );
     argsField.appendChild(editorWidget.node);
   }
@@ -227,7 +238,8 @@ class JSONEditorWidget extends Widget {
     initialArgs: Record<string, unknown>,
     editorFactory: CodeEditor.Factory,
     checkValidation: () => void,
-    trans: TranslationBundle
+    trans: TranslationBundle,
+    labelledBy?: string
   ) {
     super();
     this.addClass('jp-JSONEditor');
@@ -235,6 +247,9 @@ class JSONEditorWidget extends Widget {
     this._trans = trans;
     this._editorHostNode = document.createElement('div');
     this._editorHostNode.className = 'jp-JSONEditor-host';
+    if (labelledBy) {
+      this._editorHostNode.setAttribute('aria-labelledby', labelledBy);
+    }
 
     const model = new CodeEditor.Model({ mimeType: 'application/json' });
     const content = JSON.stringify(initialArgs, null, 2);
@@ -309,4 +324,11 @@ class JSONEditorWidget extends Widget {
     this._editor.dispose();
     super.dispose();
   }
+}
+
+/**
+ * Shared helpers for custom-option fields.
+ */
+namespace Private {
+  export let nextId = 0;
 }

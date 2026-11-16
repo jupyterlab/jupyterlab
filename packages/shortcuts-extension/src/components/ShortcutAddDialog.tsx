@@ -207,7 +207,9 @@ class NewShortcutDialogBody
     const shortcutField = document.createElement('div');
     shortcutField.className = 'jp-Shortcuts-Field';
 
-    const shortcutLabel = document.createElement('label');
+    // Not a <label>: the capture control is not a labelable form control; use
+    // aria-labelledby on ShortcutInput instead.
+    const shortcutLabel = document.createElement('div');
     shortcutLabel.id = 'jp-Shortcuts-AddDialog-shortcut-label';
     shortcutLabel.textContent = this._trans.__('Shortcut (required):');
     shortcutLabel.className = 'jp-Dialog-label';
@@ -215,6 +217,8 @@ class NewShortcutDialogBody
 
     this._keysValidity = document.createElement('input');
     this._keysValidity.type = 'text';
+    this._keysValidity.id = 'jp-Shortcuts-AddDialog-keys-validity';
+    this._keysValidity.name = 'shortcut-keys';
     this._keysValidity.required = true;
     this._keysValidity.tabIndex = -1;
     this._keysValidity.className = 'jp-sr-only';

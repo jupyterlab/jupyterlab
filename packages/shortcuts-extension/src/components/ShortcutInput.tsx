@@ -741,10 +741,10 @@ export class ShortcutInput extends React.Component<
       ? trans.__('Shortcut for %1', commandName)
       : trans.__('New shortcut for %1', commandName);
     const labelledBy = this.props.labelledBy;
-    const ariaLabel = isIdle
-      ? trans.__('Start recording shortcut')
-      : labelledBy
-        ? undefined
+    const ariaLabel = labelledBy
+      ? undefined
+      : isIdle
+        ? trans.__('Start recording shortcut')
         : (this.props.ariaLabel ?? defaultAriaLabel);
     const placeholderText = isIdle
       ? trans.__('Start recording')
@@ -776,7 +776,7 @@ export class ShortcutInput extends React.Component<
             data-lm-suppress-shortcuts="true"
             aria-invalid={isInvalid || undefined}
             aria-describedby={describedBy}
-            aria-labelledby={isIdle ? undefined : labelledBy}
+            aria-labelledby={labelledBy}
             aria-label={ariaLabel}
           >
             <p
