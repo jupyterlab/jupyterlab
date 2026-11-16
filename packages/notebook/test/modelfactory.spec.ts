@@ -204,6 +204,35 @@ describe('@jupyterlab/notebook', () => {
       expect(height).toBe(107); // (2 + 3) * 17 + 22
     });
 
+    test('should count lines from the traceback of an error output', () => {
+      const outputObj = [
+        {
+          output_type: 'error',
+          ename: 'ZeroDivisionError',
+          evalue: 'division by zero',
+          traceback: [
+            'ZeroDivisionError                         Traceback (most recent call last)',
+            'Cell In[1], line 1\n----> 1 1 / 0',
+            'ZeroDivisionError: division by zero'
+          ]
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['1 / 0'],
+        metadata: {}
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      // 1 source line, 4 traceback lines
+      expect(height).toBe(107); // (1 + 4) * 17 + 22
+    });
+
     test('should add up the lines of all outputs', () => {
       const outputObj = [
         {
