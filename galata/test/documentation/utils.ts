@@ -157,15 +157,22 @@ export async function boundsAround(
   return { x: left, y: top, width: right - left, height: bottom - top };
 }
 
+/**
+ * Serve the GitHub avatars of extension authors from local copies, so that
+ * screenshots do not depend on github.com. Other users get the Jupyter logo.
+ */
 export async function stubGitHubUserIcons(page: Page): Promise<void> {
-  // stub out github user icons
-  // only first and last icon for now
-  // logic in @jupyterlab/extensionmanager/src/models::ListEntry#translateSearchResult
   await page.route('https://github.com/*.png*', async (route, request) => {
+    const user = path.basename(new URL(request.url()).pathname, '.png');
+    const avatar = path.resolve(__dirname, `./data/github-avatars/${user}.png`);
     return route.fulfill({
       status: 200,
       contentType: 'image/png',
-      body: fs.readFileSync(path.resolve(__dirname, './data/jupyter.png'))
+      body: fs.readFileSync(
+        fs.existsSync(avatar)
+          ? avatar
+          : path.resolve(__dirname, './data/jupyter.png')
+      )
     });
   });
 }
@@ -242,24 +249,4 @@ export async function ensureMathTypeset(page: Page): Promise<void> {
       }
     }
   });
-}
-
-export async function setTerminalTitle(page: Page, title: string) {
-  const terminal = page.locator('.jp-Terminal-body');
-  await terminal.waitFor();
-  await terminal.focus();
-  if (process.platform === 'win32') {
-    const escapedTitle = title.replace(/"/g, '""').replace(/'/g, "''");
-    // `host.UI.RawUI.WindowTitle` works on PowerShell, `title` works on cmd.exe
-    await page.keyboard.type(
-      `powershell -Command "\"$host.UI.RawUI.WindowTitle='${escapedTitle}'\"" 2>nul || title ${escapedTitle}`
-    );
-  } else {
-    // Linux and Mac
-    const escapedTitle = title.replace(/'/g, `'\\''`);
-    await page.keyboard.type(
-      `PROMPT_COMMAND='printf "\\033]0;${escapedTitle}\\007"'`
-    );
-  }
-  await page.keyboard.press('Enter');
 }

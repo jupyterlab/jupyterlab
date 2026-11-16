@@ -3,7 +3,9 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import type { Cell } from '@jupyterlab/cells';
+import type { Cell, ICellModel } from '@jupyterlab/cells';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type { IObservableList } from '@jupyterlab/observables';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import {
@@ -175,51 +177,75 @@ export namespace NotebookTrustStatus {
           this
         );
 
-        oldNotebook.modelContentChanged.disconnect(this._onModelChanged, this);
+        oldNotebook.modelChanged.disconnect(this._onModelChanged, this);
       }
 
-      const oldState = this._getAllState();
       this._notebook = model;
-      if (this._notebook === null) {
-        this._trustedCells = 0;
-        this._totalCells = 0;
-        this._activeCellTrusted = false;
-      } else {
+      if (this._notebook !== null) {
         // Add listeners
         this._notebook.activeCellChanged.connect(
           this._onActiveCellChanged,
           this
         );
-        this._notebook.modelContentChanged.connect(this._onModelChanged, this);
-
-        // Derive values
-        if (this._notebook.activeCell) {
-          this._activeCellTrusted = this._notebook.activeCell.model.trusted;
-        } else {
-          this._activeCellTrusted = false;
-        }
-
-        const { total, trusted } = this._deriveCellTrustState(
-          this._notebook.model
-        );
-
-        this._totalCells = total;
-        this._trustedCells = trusted;
+        this._notebook.modelChanged.connect(this._onModelChanged, this);
       }
 
-      this._triggerChange(oldState, this._getAllState());
+      this._onModelChanged();
     }
 
     /**
-     * When the notebook model changes, update the trust state.
+     * When the notebook model changes, follow the cells of the new model.
+     *
+     * Only cell additions, removals and trust changes are followed, so that
+     * editing a cell does not count the cells again.
      */
-    private _onModelChanged(notebook: Notebook): void {
-      const oldState = this._getAllState();
-      const { total, trusted } = this._deriveCellTrustState(notebook.model);
+    private _onModelChanged(): void {
+      const oldModel = this._model;
+      // Disposing a model disconnects its cells.
+      if (oldModel !== null && !oldModel.isDisposed) {
+        oldModel.cells.changed.disconnect(this._onCellsChanged, this);
+        for (const cell of oldModel.cells) {
+          cell.stateChanged.disconnect(this._onCellStateChanged, this);
+        }
+      }
 
-      this._totalCells = total;
-      this._trustedCells = trusted;
-      this._triggerChange(oldState, this._getAllState());
+      this._model = this._notebook?.model ?? null;
+      if (this._model !== null) {
+        this._model.cells.changed.connect(this._onCellsChanged, this);
+        for (const cell of this._model.cells) {
+          cell.stateChanged.connect(this._onCellStateChanged, this);
+        }
+      }
+
+      this._update();
+    }
+
+    /**
+     * When cells are added or removed, update the trust state.
+     */
+    private _onCellsChanged(
+      _cells: INotebookModel['cells'],
+      change: IObservableList.IChangedArgs<ICellModel>
+    ): void {
+      // Removed cells are disposed, which disconnects them.
+      if (change.type === 'add') {
+        for (const cell of change.newValues) {
+          cell.stateChanged.connect(this._onCellStateChanged, this);
+        }
+      }
+      this._update();
+    }
+
+    /**
+     * When the trust of a cell changes, update the trust state.
+     */
+    private _onCellStateChanged(
+      _cell: ICellModel,
+      change: IChangedArgs<unknown>
+    ): void {
+      if (change.name === 'trusted') {
+        this._update();
+      }
     }
 
     /**
@@ -260,6 +286,20 @@ export namespace NotebookTrustStatus {
     }
 
     /**
+     * Count the trusted code cells and read the trust of the active cell.
+     */
+    private _update(): void {
+      const oldState = this._getAllState();
+      const { total, trusted } = this._deriveCellTrustState(this._model);
+
+      this._totalCells = total;
+      this._trustedCells = trusted;
+      this._activeCellTrusted =
+        this._notebook?.activeCell?.model.trusted ?? false;
+      this._triggerChange(oldState, this._getAllState());
+    }
+
+    /**
      * Get the current state of the model.
      */
     private _getAllState(): [number, number, boolean] {
@@ -286,5 +326,6 @@ export namespace NotebookTrustStatus {
     private _totalCells: number = 0;
     private _activeCellTrusted: boolean = false;
     private _notebook: Notebook | null = null;
+    private _model: INotebookModel | null = null;
   }
 }

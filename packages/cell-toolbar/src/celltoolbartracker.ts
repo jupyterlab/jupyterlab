@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { ToolbarRegistry } from '@jupyterlab/apputils';
+import { ToolbarRegistry } from '@jupyterlab/apputils';
 import { createDefaultFactory } from '@jupyterlab/apputils';
 import type {
   Cell,
@@ -372,7 +372,7 @@ export class CellToolbarTracker implements IDisposable {
   /**
    * Check for overlap between rendered Markdown and the cell toolbar
    *
-   * @param activeCell A rendered MarkdownCell
+   * @param activeCell - A rendered MarkdownCell
    * @returns `true` if the first line of the output overlaps with the cell toolbar, `false` otherwise
    */
   private _markdownOverlapsToolbar(activeCell: MarkdownCell): boolean {
@@ -525,7 +525,10 @@ const defaultToolbarItems: ToolbarRegistry.IWidget[] = [
  */
 export class CellBarExtension implements DocumentRegistry.WidgetExtension {
   static readonly FACTORY_NAME = 'Cell';
-  static readonly WIDGET_ID_ARG = 'widgetId';
+  /**
+   * @deprecated use `ToolbarRegistry.WIDGET_ID_ARG`
+   */
+  static readonly WIDGET_ID_ARG = ToolbarRegistry.WIDGET_ID_ARG;
 
   constructor(
     commands: CommandRegistry,
@@ -573,7 +576,7 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
     // Create a factory that passes the widget ID to the toolbar factory
     const factoryWithWidgetId = (widget: Widget) => {
       return this._toolbarFactory(widget, {
-        [CellBarExtension.WIDGET_ID_ARG]: panel.id
+        [ToolbarRegistry.WIDGET_ID_ARG]: panel.id
       });
     };
 

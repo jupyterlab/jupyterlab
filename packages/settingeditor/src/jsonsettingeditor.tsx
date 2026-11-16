@@ -10,6 +10,7 @@ import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { IStateDB } from '@jupyterlab/statedb';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
+import type { IFormRendererRegistry } from '@jupyterlab/ui-components';
 import { ReactWidget } from '@jupyterlab/ui-components';
 import type { CommandRegistry } from '@lumino/commands';
 import type { JSONObject, JSONValue } from '@lumino/coreutils';
@@ -69,6 +70,7 @@ export class JsonSettingEditor extends SplitPanel {
     const confirm = () => editor.confirm();
     const list = (this._list = new PluginList({
       confirm,
+      editorRegistry: options.editorRegistry,
       registry,
       translator: this.translator
     }));
@@ -357,6 +359,11 @@ export namespace JsonSettingEditor {
      * The editor factory used by the setting editor.
      */
     editorFactory: CodeEditor.Factory;
+
+    /**
+     * The form renderers, whose displayed properties are also searched.
+     */
+    editorRegistry?: IFormRendererRegistry;
 
     /**
      * The state database key for the editor's state management.

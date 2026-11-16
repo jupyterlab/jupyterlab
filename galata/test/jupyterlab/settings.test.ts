@@ -51,6 +51,65 @@ test('Open the settings editor with a specific search query', async ({
   await expect(fistListEntry).toHaveText('CodeMirror');
 });
 
+async function injectTag(
+  page: IJupyterLabPageFixture,
+  pluginId: string,
+  tag: string
+): Promise<void> {
+  await page.evaluate(
+    async ({ id, t }) => {
+      const registry = await window.galata.getPlugin(
+        '@jupyterlab/apputils-extension:settings'
+      );
+      if (!registry) {
+        throw new Error('Settings registry plugin is unavailable');
+      }
+      const settings = await registry.load(id);
+      settings.plugin.schema.tags = [t];
+    },
+    { id: pluginId, t: tag }
+  );
+}
+
+test('Tag search finds a plugin by a part of its tag', async ({ page }) => {
+  const pluginId = '@jupyterlab/settingeditor-extension:form-ui';
+  await injectTag(page, pluginId, 'galata-tag-test');
+
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'tag:GALATA-TAG'
+    });
+  });
+
+  await expect(page.locator('.jp-PluginList-entry')).toHaveCount(1);
+  await expect(
+    page.locator('.jp-PluginList-entry-label-text').first()
+  ).toHaveText('Settings Editor Form UI');
+  // A plugin tag match shows the whole settings form.
+  await expect(page.locator('.jp-SettingsForm')).toHaveCount(1);
+});
+
+test('Tag search requires the tag: prefix', async ({ page }) => {
+  const pluginId = '@jupyterlab/settingeditor-extension:form-ui';
+  await injectTag(page, pluginId, 'galata-tag-test');
+
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'galata-tag-test'
+    });
+  });
+
+  await expect
+    .poll(() =>
+      page
+        .locator('.jp-PluginList jp-search')
+        .evaluate(elem => (elem as HTMLInputElement).value)
+    )
+    .toEqual('galata-tag-test');
+  // No plugin title or setting matches the query, and tags are ignored.
+  await expect(page.locator('.jp-PluginList-entry')).toHaveCount(0);
+});
+
 test.describe('change font-size', () => {
   // We wrap the font size comparisons in `expect().toPass()`
   // because clicking on the menu only triggers the asynchronous
@@ -407,6 +466,28 @@ test('Keyboard Shortcuts: should filter commands in add shortcut row', async ({
   await expect(commandOptions).toHaveCount(1);
 });
 
+test('Keyboard Shortcuts: should find a shortcut by the text it inserts', async ({
+  page
+}) => {
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Keyboard Shortcuts'
+    });
+  });
+
+  const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
+  const filterInput = shortcutsForm.locator('jp-search.jp-FilterBox');
+  await filterInput.locator('input').fill('%>%');
+
+  await expect(shortcutsForm.locator('.jp-Shortcuts-Row .jp-label')).toHaveText(
+    [
+      'Replace Selection in Console with "%>% "',
+      'Replace Selection in Editor with "%>% "',
+      'Replace Selection in Notebook Cell with "%>% "'
+    ]
+  );
+});
+
 test('Keyboard Shortcuts: should add a new shortcut', async ({ page }) => {
   // Function that get the shortcuts related to a command.
   const getShortcut = async (command: string) => {
@@ -664,6 +745,9 @@ test('Setting for "Show Filter Bar by Default" should work on reload', async ({
 
   await page.reload({ waitForIsReady: false });
   await expect(filterBox).toBeVisible();
+  // Wait for the restored settings editor. Running the command earlier opens
+  // a second editor, or the restored one later resets the query.
+  await page.locator('.jp-SettingsPanel').waitFor();
   await page.evaluate(() =>
     window.jupyterapp.commands.execute('settingeditor:open', {
       query: 'Show Filter Bar by Default'

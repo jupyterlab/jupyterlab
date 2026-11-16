@@ -172,6 +172,26 @@ describe('@jupyterlab/settingregistry', () => {
         expect(plugin.data.user.bar).toBeUndefined();
         expect(plugin.data.composite.bar).toBe(schema.properties!.bar.default);
       });
+
+      it('should accept a plugin ID that is not a valid schema URI', () => {
+        const id = 'my_extension:plugin';
+        const validator = new DefaultSchemaValidator();
+        const schema: ISettingRegistry.ISchema = {
+          additionalProperties: false,
+          properties: {
+            bar: { type: 'string' }
+          },
+          type: 'object'
+        };
+        const composite = {} as JSONObject;
+        const user = {} as JSONObject;
+        const raw = '{ "bar": "baz" }';
+        const version = 'test';
+        const plugin = { id, data: { composite, user }, raw, schema, version };
+
+        expect(() => validator.validateData(plugin)).not.toThrow();
+        expect(plugin.data.composite.bar).toBe('baz');
+      });
     });
   });
 
@@ -450,6 +470,32 @@ describe('@jupyterlab/settingregistry', () => {
           failed = true;
         }
         expect(failed).toBe(true);
+      });
+
+      it('should load a plugin whose ID is not a valid schema URI', async () => {
+        const id = 'my_extension:plugin';
+
+        connector.schemas[id] = { type: 'object' };
+        await expect(
+          registry.load(id).then(settings => settings.id)
+        ).resolves.toBe(id);
+      });
+
+      it('should reject with the validator error if a schema fails to register', async () => {
+        const id = 'foo';
+        const failure = new Error('schema registration failed');
+        const failing = new SettingRegistry({
+          connector,
+          timeout,
+          validator: {
+            validateData: () => {
+              throw failure;
+            }
+          }
+        });
+
+        connector.schemas[id] = { type: 'object' };
+        await expect(failing.load(id)).rejects.toBe(failure);
       });
     });
 
@@ -1157,6 +1203,80 @@ describe('@jupyterlab/settingregistry', () => {
         };
         settings = (await registry.load(id)) as Settings;
         expect(settings.default()).toStrictEqual(defaults);
+      });
+
+      it('should keep `disabled` and `preventDefault: false` on default shortcuts', async () => {
+        const id = 'omicron';
+        const shortcuts = [
+          // A shortcut disabled in `overrides.json`. The shortcut schema
+          // does not declare `disabled`.
+          {
+            command: 'notebook:change-cell-to-code',
+            keys: ['Y'],
+            selector: '.jp-Notebook',
+            disabled: true
+          },
+          {
+            command: 'inline-completer:next',
+            keys: ['Alt ]'],
+            selector: '.jp-mod-completer-enabled',
+            preventDefault: false
+          }
+        ];
+
+        connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            shortcuts: {
+              type: 'array',
+              items: { $ref: '#/definitions/shortcut' },
+              default: shortcuts
+            }
+          },
+          definitions: {
+            shortcut: {
+              type: 'object',
+              properties: {
+                command: { type: 'string' },
+                keys: { type: 'array', items: { type: 'string' } },
+                selector: { type: 'string' },
+                preventDefault: { type: 'boolean' }
+              }
+            }
+          }
+        };
+        settings = (await registry.load(id)) as Settings;
+        expect(settings.default('shortcuts')).toEqual(shortcuts);
+      });
+
+      it('should keep a toolbar item `rank` of 0 over the schema default', async () => {
+        const id = 'omicron';
+        const toolbar = [
+          { name: 'run', command: 'console:run-forced', rank: 0 }
+        ];
+
+        connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            toolbar: {
+              type: 'array',
+              items: { $ref: '#/definitions/toolbarItem' },
+              default: toolbar
+            }
+          },
+          definitions: {
+            toolbarItem: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                command: { type: 'string' },
+                rank: { type: 'number', default: 50 }
+              }
+            }
+          }
+        };
+        settings = (await registry.load(id)) as Settings;
+        expect(settings.default('toolbar')).toEqual(toolbar);
       });
     });
 

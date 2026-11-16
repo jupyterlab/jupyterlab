@@ -150,6 +150,12 @@ export namespace MetadataForm {
      * The plugin ID.
      */
     pluginId?: string;
+
+    /**
+     * Whether the form fields should be rendered as disabled, e.g. because
+     * the owning notebook is view-only.
+     */
+    disabled?: boolean;
   }
 
   /**

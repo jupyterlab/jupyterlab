@@ -90,6 +90,23 @@ describe('@jupyterlab/cells', () => {
         expect(rendered.isAttached).toBe(true);
         widget.dispose();
       });
+
+      it('should keep a text selection in the widget when rendering it again', () => {
+        const widget = new InputArea({
+          contentFactory,
+          model
+        });
+        const rendered = new Widget();
+        rendered.node.textContent = 'alpha beta';
+        Widget.attach(widget, document.body);
+        widget.renderInput(rendered);
+        const selection = window.getSelection()!;
+        selection.selectAllChildren(rendered.node);
+        widget.renderInput(rendered);
+        expect(selection.toString()).toBe('alpha beta');
+        selection.removeAllRanges();
+        widget.dispose();
+      });
     });
 
     describe('#showEditor()', () => {

@@ -121,6 +121,8 @@ The `id` and `activate` fields are required and the other fields may be omitted.
   in that extension. Disabling by package name is the exception: it disables
   every plugin the package provides, including a plugin whose id does not
   follow the convention.
+  The `jupyter/plugin-id-convention` rule enforces the package prefix for
+  plugin IDs in this repository, excluding mock plugins in tests.
   The `jupyter/token-format` rule from
   [`@jupyter/eslint-plugin`](https://eslint-plugin.readthedocs.io/en/latest/rules/token-format/)
   can enforce the related `<package>:<TokenSymbol>` convention for token IDs
@@ -129,7 +131,7 @@ The `id` and `activate` fields are required and the other fields may be omitted.
 - `autostart` indicates whether your plugin should be activated at application startup. Typically this should be `true`. If it is `false` or omitted, your plugin will be activated when any other plugin requests the token your plugin is providing.
 - `requires` and `optional` are lists of {ref}`tokens <tokens>` corresponding to services other plugins provide. These services will be given as arguments to the `activate` function when the plugin is activated. If a `requires` service is not registered with JupyterLab, an error will be thrown and the plugin will not be activated.
 - `provides` is the {ref}`token <tokens>` associated with the service your plugin is providing to the system. If your plugin does not provide a service to the system, omit this field and do not return a value from your `activate` function.
-- `activate` is the function called when your plugin is activated. The arguments are, in order, the {ref}`application object <application-object>`, the services corresponding to the `requires` tokens, then the services corresponding to the `optional` tokens (or `null` if that particular `optional` token is not registered in the system). If a `provides` token is given, the return value of the `activate` function (or resolved return value if a promise is returned) will be registered as the service associated with the token.
+- `activate` is the function called when your plugin is activated. The arguments are, in order, the {ref}`application object <application-object>`, the services corresponding to the `requires` tokens, then the services corresponding to the `optional` tokens (or `null` if that particular `optional` token is not registered in the system). If a `provides` token is given, the return value of the `activate` function (or resolved return value if a promise is returned) will be registered as the service associated with the token. Heavy dependencies that are not needed to register the plugin should be loaded with `await import(...)` in the command, renderer, or callback that first uses them; `activate` should stay synchronous in an `autoStart` plugin, because the application attaches its shell only after every auto-start plugin has activated. The [`jupyter/prefer-lazy-imports`](https://eslint-plugin.readthedocs.io/en/latest/rules/prefer-lazy-imports/) rule reports imports that could be deferred.
 - `deactivate` is the optional deactivation method
 
 For more information, see the API reference for {ts:type}`application.JupyterFrontEndPlugin`.
@@ -366,6 +368,18 @@ The file browser setting schema file (which specifies some default keyboard shor
 See the
 [fileeditor-extension](https://github.com/jupyterlab/jupyterlab/tree/main/packages/fileeditor-extension)
 for another example of an extension that uses settings.
+
+A schema, or any of its properties, can list `tags`. Users find the tagged settings by typing `tag:<tag>` in the Settings Editor search:
+
+```json
+"maxNumberOutputs": {
+  "type": "number",
+  "default": 50,
+  "tags": ["performance"]
+}
+```
+
+Some tags are already exposed by JupyterLab: `accessibility` and `performance`.
 
 Please ensure that the schema files are included in the `files` metadata in `package.json`.
 
@@ -694,8 +708,8 @@ Framework :: Jupyter :: JupyterLab :: Extensions :: Themes
 
 Include each relevant classifier (and its parents) to help describe what your package
 provides to prospective users in your `setup.py`, `setup.cfg`, or `pyproject.toml`.
-In particular `Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt` is used by
-the extension manager to get the available extensions from PyPI.org.
+In particular, the "Browse extensions on PyPI" link of the extension manager lists the
+packages with `Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt` on PyPI.org.
 
 :::{hint}
 For example, a theme, only compatible with JupyterLab 3, and distributed as
@@ -836,13 +850,10 @@ To transpile jupyterlab packages, you need to install the following package:
 jlpm add --dev jest @types/jest ts-jest @babel/core@^7 @babel/preset-env@^7
 ```
 
-Then in `jest.config.js`, you will specify to use babel for js files and ignore
-all node modules except the ES6 modules:
+Then in `jest.config.js`, extend the configuration from `@jupyterlab/testutils`. It uses babel for JavaScript files, and it transforms the JupyterLab packages and their dependencies that ship ES modules:
 
 ```javascript
 const jestJupyterLab = require('@jupyterlab/testutils/lib/jest-config');
-
-const esModules = ['@jupyterlab/'].join('|');
 
 const baseConfig = jestJupyterLab(__dirname);
 
@@ -855,13 +866,11 @@ module.exports = {
     '!src/**/.ipynb_checkpoints/*'
   ],
   coverageReporters: ['lcov', 'text'],
-  testRegex: 'src/.*/.*.spec.ts[x]?$',
-  transformIgnorePatterns: [
-    ...baseConfig.transformIgnorePatterns,
-    `/node_modules/(?!${esModules}).+`
-  ]
+  testRegex: 'src/.*/.*.spec.ts[x]?$'
 };
 ```
+
+If your extension depends on other packages that ship ES modules, give their names in the `esModules` option, for example `jestJupyterLab(__dirname, { esModules: ['d3-array'] })`. Do not set `transformIgnorePatterns` yourself. Jest skips a file when any of the patterns matches it, so an added pattern cannot make Jest transform more files, and a pattern that replaces the base one misses the packages that later versions of JupyterLab add to it.
 
 Finally, you will need to configure babel with a `babel.config.js` file containing:
 
