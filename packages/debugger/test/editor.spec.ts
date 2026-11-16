@@ -92,6 +92,28 @@ describe('Debugger.EditorHandler', () => {
     ).toHaveLength(2);
   });
 
+  it('should keep the breakpoints of code that another cell ran', async () => {
+    const kernel = startDebugging([1]);
+    await edit('x = 2');
+    src.executionState = 'running';
+    const prompt = YCodeCell.create();
+    prompt.setSource('x = 2');
+    const promptHandler = new Debugger.EditorHandler({
+      debuggerService: service,
+      editorReady: () => new Promise<CodeEditor.IEditor>(() => undefined),
+      getEditor: () => null,
+      src: prompt
+    });
+    promptHandler['_getBreakpointsFromEditor'] = () => [1];
+    prompt.setSource('x = 3');
+    jest.advanceTimersByTime(1000);
+    await flushRequests();
+
+    expect(kernel.get(service.getCodeId('x = 2'))).toEqual([1]);
+    promptHandler.dispose();
+    prompt.dispose();
+  });
+
   describe('#clearBreakpoints()', () => {
     it('should clear the breakpoints of the cell', async () => {
       const kernel = startDebugging([1]);

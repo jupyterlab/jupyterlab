@@ -55,6 +55,8 @@ export class EditorHandler implements IDisposable {
     this._path = options.path ?? '';
     this._debuggerService = options.debuggerService;
     this._editor = options.getEditor;
+    // A console prompt can keep the code of the cell that just ran.
+    this._ranPaths = Private.getRanPaths(this._debuggerService);
 
     // The cell may have run before the debugger started.
     const src = this._src;
@@ -565,7 +567,7 @@ export class EditorHandler implements IDisposable {
   private _src: ISharedText;
   private _selectedBreakpoint: IDebugger.IBreakpoint | null;
   private _lastCellPath: string | null = null;
-  private _ranPaths = new Set<string>();
+  private _ranPaths: Set<string>;
 }
 
 /**
@@ -705,6 +707,20 @@ namespace Private {
       return marker;
     }
   })();
+
+  const ranPaths = new WeakMap<IDebugger, Set<string>>();
+
+  /**
+   * Get the files of the code that ran in any cell of a debugger service.
+   */
+  export function getRanPaths(service: IDebugger): Set<string> {
+    let paths = ranPaths.get(service);
+    if (!paths) {
+      paths = new Set<string>();
+      ranPaths.set(service, paths);
+    }
+    return paths;
+  }
 
   /**
    * Whether the shared model is a cell, which may belong to a notebook.
