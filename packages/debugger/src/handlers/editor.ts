@@ -61,14 +61,11 @@ export class EditorHandler implements IDisposable {
     if ('execution_count' in src && typeof src.execution_count === 'number') {
       this._ranPaths.add(this._debuggerService.getCodeId(src.getSource()));
     }
-    // After a reload or a move, the cell already shows the breakpoints of
-    // its code, and the next edit or a deletion has to clear them.
+    // After a reload, a move or an undone deletion, the kernel may already
+    // hold breakpoints of this code, and an edit or a deletion clears them.
     if (!this._path) {
-      const path = this._debuggerService.getCodeId(src.getSource());
-      const model = this._debuggerService.model.breakpoints;
-      if (path && model.getBreakpoints(path).length) {
-        this._lastCellPath = path;
-      }
+      this._lastCellPath =
+        this._debuggerService.getCodeId(src.getSource()) || null;
     }
 
     this._src.changed.connect(this._onSharedModelChanged, this);
@@ -223,19 +220,25 @@ export class EditorHandler implements IDisposable {
   }
 
   /**
-   * Remove the breakpoints of a deleted cell from the kernel.
+   * Remove the breakpoints of a deleted cell from the kernel, and return them
+   * with their file, so that undo or paste can restore them.
    *
    * Code that has run keeps its breakpoints, because it can still run.
    */
-  clearBreakpoints(): void {
+  clearBreakpoints(): IDebugger.IBreakpoint[] {
     if (this.isDisposed || this._path) {
-      return;
+      return [];
     }
     const path = this._lastCellPath;
     this._lastCellPath = null;
-    if (path && this._canClear(path)) {
-      void this._debuggerService.updateBreakpoints('', [], path);
+    if (!path || !this._canClear(path)) {
+      return [];
     }
+    const breakpoints = this._debuggerService.model.breakpoints
+      .getBreakpoints(path)
+      .map(breakpoint => ({ ...breakpoint, source: { path } }));
+    void this._debuggerService.updateBreakpoints('', [], path);
+    return breakpoints;
   }
 
   /**
@@ -346,7 +349,7 @@ export class EditorHandler implements IDisposable {
       if (this._lastCellPath !== path) {
         previous = this._lastCellPath;
       }
-      this._lastCellPath = breakpoints.length ? path : null;
+      this._lastCellPath = path || null;
     }
     await this._debuggerService.updateBreakpoints(
       code,
@@ -361,12 +364,13 @@ export class EditorHandler implements IDisposable {
   }
 
   /**
-   * Whether the file of an earlier version of the code can lose its
-   * breakpoints: code that ran can still run, and the cells of a notebook
-   * that have the same code share one file.
+   * Whether the file of an earlier version of the code has breakpoints to
+   * clear: code that ran can still run, and the cells of a notebook that
+   * have the same code share one file.
    */
   private _canClear(path: string): boolean {
-    if (this._ranPaths.has(path)) {
+    const breakpoints = this._debuggerService.model.breakpoints;
+    if (this._ranPaths.has(path) || !breakpoints.getBreakpoints(path).length) {
       return false;
     }
     const src = this._src;

@@ -44,6 +44,22 @@ describe('NotebookHandler', () => {
     await flushRequests();
   }
 
+  /**
+   * Cut the first cell and paste it back: the pasted cell keeps the ID of
+   * the cut one.
+   */
+  async function cutAndPaste(): Promise<void> {
+    const id = firstCell().id;
+    context.model.sharedModel.deleteCell(0);
+    await flushRequests();
+    context.model.sharedModel.insertCell(0, {
+      id,
+      cell_type: 'code',
+      source: CODE
+    });
+    await flushRequests();
+  }
+
   beforeEach(async () => {
     context = await NBTestUtils.createMockContext();
     panel = NBTestUtils.createNotebookPanel(context);
@@ -165,5 +181,19 @@ describe('NotebookHandler', () => {
     await flushRequests();
 
     expect(kernel.get(service.getCodeId(CODE))).toEqual([2]);
+  });
+
+  it('should restore the breakpoints of a cut cell when it is pasted', async () => {
+    await cutAndPaste();
+
+    expect(kernel.get(service.getCodeId(CODE))).toEqual([2]);
+  });
+
+  it('should clear the restored breakpoints of a pasted cell when it is edited', async () => {
+    await cutAndPaste();
+    firstCell().sharedModel.setSource('def f():\n    return 2');
+    await sendBreakpoint();
+
+    expect(kernel.has(service.getCodeId(CODE))).toBe(false);
   });
 });
