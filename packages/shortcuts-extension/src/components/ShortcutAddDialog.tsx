@@ -173,7 +173,7 @@ class NewShortcutDialogBody
     commandField.className = 'jp-Shortcuts-Field';
 
     const commandLabel = document.createElement('label');
-    commandLabel.textContent = this._trans.__('Command:');
+    commandLabel.textContent = this._trans.__('Command (required):');
     commandLabel.htmlFor = 'jp-Shortcuts-AddDialog-command';
     commandLabel.className = 'jp-Dialog-label';
     commandField.appendChild(commandLabel);
@@ -209,7 +209,7 @@ class NewShortcutDialogBody
 
     const shortcutLabel = document.createElement('label');
     shortcutLabel.id = 'jp-Shortcuts-AddDialog-shortcut-label';
-    shortcutLabel.textContent = this._trans.__('Shortcut:');
+    shortcutLabel.textContent = this._trans.__('Shortcut (required):');
     shortcutLabel.className = 'jp-Dialog-label';
     shortcutField.appendChild(shortcutLabel);
 
