@@ -3,7 +3,11 @@
 
 import { Sanitizer } from '@jupyterlab/apputils';
 import type { IMarkdownParser } from '@jupyterlab/rendermime';
-import { renderMarkdown } from '@jupyterlab/rendermime';
+import {
+  removeMath,
+  renderMarkdown,
+  replaceMath
+} from '@jupyterlab/rendermime';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import type { TableOfContents } from '../tokens';
 
@@ -69,6 +73,8 @@ export async function getHeadingId(
  *
  * @param text - Markdown text
  * @param parser - A Markdown parser instance used to render the content to HTML.
+ * @param mathParseOptions - How math is found in the text, as for the
+ *   typesetter that renders it; the default delimiters when omitted.
  * @returns List of headings
  *
  * @remarks
@@ -77,7 +83,8 @@ export async function getHeadingId(
  */
 export async function parseHeadings(
   markdownText: string,
-  parser: IMarkdownParser | null
+  parser: IMarkdownParser | null,
+  mathParseOptions?: IRenderMime.ILatexTypesetter.IMathParseOptions
 ): Promise<IMarkdownHeading[]> {
   if (!parser || !parser.getHeadingTokens) {
     console.warn(
@@ -87,13 +94,18 @@ export async function parseHeadings(
   }
 
   // Get the heading tokens from the parser, including the source line metadata
-  const headingTokens = await parser.getHeadingTokens(markdownText);
+  const headingTokens = await parser.getHeadingTokens(
+    markdownText,
+    mathParseOptions
+  );
 
   // Convert each heading token into HTML and extract the heading elements,
   // as this provides a clean and reliable way to retrieve the headings.
   const parseHeadings = await Promise.all(
     headingTokens.map(async token => {
-      const renderedHtml = await parser.render(token.raw);
+      // Hide math from the parser, as `renderMarkdown` does.
+      const { text, math } = removeMath(token.raw, mathParseOptions);
+      const renderedHtml = replaceMath(await parser.render(text), math);
       const dom = new DOMParser().parseFromString(renderedHtml, 'text/html');
       const htmlHeadings = Array.from(
         dom.querySelectorAll('h1, h2, h3, h4, h5, h6')

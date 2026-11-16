@@ -84,7 +84,11 @@ async function getSavedNotebook(
     .toBe(false);
   return await page.evaluate(
     async filePath =>
-      (await window.jupyterapp.serviceManager.contents.get(filePath)).content,
+      (
+        await window.jupyterapp.serviceManager.contents.get(filePath, {
+          content: true
+        })
+      ).content,
     filePath
   );
 }
@@ -419,9 +423,9 @@ test.describe('Default metadata without "showModified" flag', () => {
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
 
-    // Metadata should contains written default value.
+    // Opening the form should not write the default value.
     let cellMetadata = await getCellMetadata(page, 0);
-    expect(cellMetadata['default-written']).toBe(1);
+    expect(cellMetadata['default-written']).toBeUndefined();
 
     // Empty value should remove the metadata.
     await formGroup.locator('input').first().fill('');
@@ -457,9 +461,9 @@ test.describe('Default metadata without "showModified" flag', () => {
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
 
-    // Metadata should contains written default value.
+    // Opening the form should not write the default value.
     let cellMetadata = await getCellMetadata(page, 0);
-    expect(cellMetadata['default-written']).toBe(1);
+    expect(cellMetadata['default-written']).toBeUndefined();
 
     // Fill the first one with default should be written in metadata.
     await formGroup.locator('input').first().fill('2');
@@ -508,9 +512,9 @@ test.describe('Default metadata with "showModified" flag', () => {
     // Open and get the form DOM.
     const { formGroup } = await getFormGroup(page);
 
-    // Metadata should contains the default value.
+    // Opening the form should not write the default value.
     let cellMetadata = await getCellMetadata(page, 0);
-    expect(cellMetadata['value-with-default']).toBe(1);
+    expect(cellMetadata['value-with-default']).toBeUndefined();
 
     // Fill the field with non default value should display that value is different from default.
     await formGroup.locator('input').first().fill('2');

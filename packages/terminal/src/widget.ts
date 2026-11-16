@@ -59,7 +59,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    */
   constructor(
     session: TerminalNS.ITerminalConnection,
-    options: Partial<ITerminal.IOptions> = {},
+    options: Terminal.IOptions = {},
     translator?: ITranslator
   ) {
     super();
@@ -68,7 +68,9 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     this.session = session;
 
     // Initialize settings.
-    this._options = { ...ITerminal.defaultOptions, ...options };
+    const { initialTitle, ...terminalOptions } = options;
+    this._initialTitle = initialTitle;
+    this._options = { ...ITerminal.defaultOptions, ...terminalOptions };
 
     // Track the link under the pointer so that it can be exposed when the
     // context menu is opened (see `contextMenuLink`).
@@ -141,7 +143,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
         this._searchAddon = searchAddon;
         this._initializeTerm();
 
-        this.title.label = this._trans.__('Terminal');
+        this.title.label = this._initialTitle ?? this._trans.__('Terminal');
         this._isReady = true;
         this._ready.resolve();
 
@@ -452,7 +454,8 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       return;
     }
 
-    this.title.label = this._trans.__('Terminal %1', this.session.name);
+    this.title.label =
+      this._initialTitle ?? this._trans.__('Terminal %1', this.session.name);
     this._setSessionSize();
     if (this._options.initialCommand) {
       this.session.send({
@@ -712,6 +715,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   private _offsetWidth = -1;
   private _offsetHeight = -1;
   private _options: ITerminal.IOptions;
+  private _initialTitle: string | undefined;
   private _isReady = false;
   private _ready = new PromiseDelegate<void>();
   private _term: Xterm;
@@ -747,6 +751,18 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       default:
         break;
     }
+  }
+}
+
+/**
+ * A namespace for terminal widget options.
+ */
+export namespace Terminal {
+  export interface IOptions extends Partial<ITerminal.IOptions> {
+    /**
+     * The restored title to use until the terminal sends a new title.
+     */
+    initialTitle?: string;
   }
 }
 

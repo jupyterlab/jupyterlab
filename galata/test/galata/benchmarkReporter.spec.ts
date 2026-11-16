@@ -79,6 +79,9 @@ function createReporter(options?: {
 }
 
 test.describe('BenchmarkReporter', () => {
+  // The tests share their report files, so they must not run in parallel.
+  test.describe.configure({ mode: 'default' });
+
   test('should generate report with default builders', async () => {
     const reporter = createReporter({
       outputFile: 'test.json',

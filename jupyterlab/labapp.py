@@ -27,6 +27,8 @@ from jupyterlab_server.config import get_static_page_config
 from jupyterlab_server.translation_utils import DEFAULT_LOCALE, SYS_LOCALE, is_valid_locale
 from notebook_shim.shim import NotebookConfigShimMixin
 from traitlets import Bool, Instance, Type, Unicode, default
+from traitlets.config import Config
+from traitlets.config.application import catch_config_error
 
 from ._version import __version__
 from .commands import (
@@ -66,6 +68,8 @@ from .handlers.plugin_manager_handler import PluginHandler, plugins_handler_path
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
+
+    from jupyter_server.serverapp import ServerApp
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -535,6 +539,16 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
     workspaces_dir = Unicode(get_workspaces_dir(), config=True, help="The directory for workspaces")
 
+    raise_config_file_errors = Bool(
+        True,
+        config=True,
+        help=(
+            "Whether to stop when a config file has an error. Set it on the command line "
+            "or in jupyter_server_config.py: a value in jupyter_lab_config.py has no effect, "
+            "because that file is loaded after this option is read."
+        ),
+    )
+
     core_mode = Bool(
         False,
         config=True,
@@ -685,6 +699,34 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         if self.override_theme_url:
             return self.override_theme_url
         return ""
+
+    @catch_config_error
+    def _link_jupyter_server_extension(self, serverapp: ServerApp) -> None:
+        # The base class loads the config files before it applies the server config
+        # and the command line, so read raise_config_file_errors from them first.
+        own_config = self._find_my_config(serverapp.config)
+        if "raise_config_file_errors" in own_config:
+            value = own_config["raise_config_file_errors"]
+            self._load_config(Config({"LabApp": {"raise_config_file_errors": value}}))
+            # Otherwise notebook_shim warns that ServerApp has an option of the same name
+            serverapp.config["LabApp"].pop("raise_config_file_errors", None)
+        super()._link_jupyter_server_extension(serverapp)
+
+    def load_config_file(self, suppress_errors: bool = True) -> None:  # type: ignore[override]
+        """Load the config files, and exit when one of them has an error.
+
+        The server only logs exceptions raised while it links an extension,
+        so exit to stop it, as traitlets does for invalid config values.
+        """
+        try:
+            super().load_config_file(suppress_errors)
+        except Exception:
+            self.log.critical(
+                "Stopping because a config file has an error. Fix the file, or pass "
+                "--LabApp.raise_config_file_errors=False to skip it.",
+                exc_info=True,
+            )
+            self.exit(1)
 
     def initialize_templates(self):
         # Determine which model to run JupyterLab

@@ -237,6 +237,19 @@ describe('documentsearch/searchmodel', () => {
         await replaceModel.replaceCurrentMatch();
         expect(matchList.replaced).toEqual([0]);
       });
+
+      it('should be false without a current match when no match can be replaced', async () => {
+        const readOnly = new MatchListProvider([
+          { text: 'query', position: 10, readOnly: true }
+        ]);
+        const readOnlyModel = new SearchDocumentModel(readOnly, 0);
+        readOnlyModel.searchExpression = 'query';
+        await signalToPromise(readOnlyModel.stateChanged);
+        await readOnly.clearHighlight();
+        expect(readOnlyModel.replaceEnabled).toEqual(false);
+        readOnlyModel.dispose();
+        readOnly.dispose();
+      });
     });
 
     describe('#replaceAllEnabled', () => {

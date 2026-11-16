@@ -196,6 +196,15 @@ export interface IHTMLSearchMatch extends ISearchMatch {
    * Node containing the match
    */
   readonly node: Text;
+
+  /**
+   * The parts of a match that spans several text nodes, such as the
+   * characters of a formula, one per node in document order.
+   *
+   * The first part has the same `node` and `position` as the match, and
+   * `text` joins the text of all parts.
+   */
+  readonly parts?: ReadonlyArray<IHTMLSearchMatch>;
 }
 
 /**
@@ -416,8 +425,8 @@ export interface ISearchProvider extends IBaseSearchProvider {
   /**
    * The number of matches which can be replaced, if known.
    *
-   * The search box disables Replace All when there are matches but none of
-   * them can be replaced.
+   * The search box disables Replace All, and Replace while no match is
+   * current, when there are matches but none of them can be replaced.
    */
   readonly replaceableMatchesCount?: number | null;
 }

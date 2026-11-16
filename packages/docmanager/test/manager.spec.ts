@@ -487,5 +487,22 @@ describe('@jupyterlab/docmanager', () => {
         await expect(manager.closeAll()).resolves.not.toThrow();
       });
     });
+
+    describe('#overwrite()', () => {
+      it('should move the file back when the target cannot be deleted', async () => {
+        const source = await services.contents.newUntitled({ type: 'file' });
+        const target = await services.contents.newUntitled({ type: 'file' });
+        const error = new Error('Permission denied');
+        jest.spyOn(manager, 'deleteFile').mockRejectedValue(error);
+
+        await expect(manager.overwrite(source.path, target.path)).rejects.toBe(
+          error
+        );
+
+        await expect(services.contents.get(source.path)).resolves.toMatchObject(
+          { path: source.path }
+        );
+      });
+    });
   });
 });

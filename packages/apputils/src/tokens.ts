@@ -346,6 +346,12 @@ export namespace ToolbarRegistry {
       toolbarItem: IWidget
     ) => Widget;
   }
+
+  /**
+   * The default arg property referring to the ID of the widget, that is the
+   * parent of the toolbar.
+   */
+  export const WIDGET_ID_ARG = 'widgetId';
 }
 
 /**

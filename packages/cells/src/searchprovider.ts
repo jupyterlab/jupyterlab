@@ -507,7 +507,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     }
 
     const cell = this.cell as MarkdownCell;
-    if (cell.rendered && this.matchesCount > 0) {
+    if (cell.rendered && this.matchesCount > 0 && this._canUnrender()) {
       // Unrender the cell
       this._unrenderedByHighlight = true;
       const waitForRendered = signalToPromise(cell.renderedChanged);
@@ -528,7 +528,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   async highlightPrevious(): Promise<ISearchMatch | undefined> {
     let match: ISearchMatch | undefined = undefined;
     const cell = this.cell as MarkdownCell;
-    if (cell.rendered && this.matchesCount > 0) {
+    if (cell.rendered && this.matchesCount > 0 && this._canUnrender()) {
       // Unrender the cell if there are matches within the cell
       this._unrenderedByHighlight = true;
       const waitForRendered = signalToPromise(cell.renderedChanged);
@@ -617,6 +617,16 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
         void this.renderedProvider.endQuery();
       }
     }
+  }
+
+  /**
+   * Whether setting `rendered` to `false` shows the cell editor. A read-only
+   * cell stays rendered when its editor is hidden, and does not emit
+   * `renderedChanged`.
+   */
+  private _canUnrender(): boolean {
+    const cell = this.cell as MarkdownCell;
+    return !cell.readOnly || cell.showEditorForReadOnly;
   }
 
   protected renderedProvider: GenericSearchProvider;

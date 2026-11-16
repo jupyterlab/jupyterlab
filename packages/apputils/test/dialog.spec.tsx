@@ -228,6 +228,163 @@ describe('@jupyterlab/apputils', () => {
           await promptPromise.catch(() => {});
         });
 
+        describe('with focus in the body', () => {
+          let bodyDialog: Dialog<unknown>;
+          let prompt: Promise<Dialog.IResult<unknown>>;
+
+          afterEach(async () => {
+            bodyDialog.dispose();
+            await prompt.catch(() => {});
+          });
+
+          const launchWithBody = async (
+            body: React.ReactElement
+          ): Promise<HTMLElement> => {
+            bodyDialog = new Dialog({ body });
+            prompt = bodyDialog.launch();
+            await waitForDialog();
+            const target = bodyDialog.node.querySelector<HTMLElement>(
+              '[data-testid="target"]'
+            )!;
+            target.focus();
+            return target;
+          };
+
+          // Returns whether the dialog canceled the event.
+          const press = (target: HTMLElement, key: string): boolean =>
+            !target.dispatchEvent(generate('keydown', { key }));
+
+          it('should leave the enter key to a link', async () => {
+            const target = await launchWithBody(
+              <a href="#target" data-testid="target">
+                link
+              </a>
+            );
+
+            expect(press(target, 'Enter')).toBe(false);
+            expect(bodyDialog.isVisible).toBe(true);
+          });
+
+          it('should leave the enter key to a button', async () => {
+            const target = await launchWithBody(
+              <button data-testid="target">button</button>
+            );
+
+            expect(press(target, 'Enter')).toBe(false);
+            expect(bodyDialog.isVisible).toBe(true);
+          });
+
+          it('should leave the enter key to a textarea', async () => {
+            const target = await launchWithBody(
+              <textarea data-testid="target" />
+            );
+
+            expect(press(target, 'Enter')).toBe(false);
+            expect(bodyDialog.isVisible).toBe(true);
+          });
+
+          it('should leave the enter key to a code editor', async () => {
+            const target = await launchWithBody(
+              <div contentEditable tabIndex={0} data-testid="target" />
+            );
+
+            expect(press(target, 'Enter')).toBe(false);
+            expect(bodyDialog.isVisible).toBe(true);
+          });
+
+          it('should accept on enter key within a text input', async () => {
+            const target = await launchWithBody(
+              <input type="text" data-testid="target" />
+            );
+
+            expect(press(target, 'Enter')).toBe(true);
+            expect((await prompt).button.accept).toBe(true);
+          });
+
+          it('should not move focus to the footer on arrow keys', async () => {
+            const target = await launchWithBody(
+              <button data-testid="target">button</button>
+            );
+
+            expect(press(target, 'ArrowRight')).toBe(false);
+            expect(document.activeElement).toBe(target);
+            expect(press(target, 'ArrowLeft')).toBe(false);
+            expect(document.activeElement).toBe(target);
+          });
+
+          it('should accept on enter key sent to the dialog node', async () => {
+            // As `acceptDialog()` from `@jupyterlab/testing` does.
+            await launchWithBody(<div tabIndex={0} data-testid="target" />);
+
+            simulate(bodyDialog.node, 'keydown', { key: 'Enter' });
+
+            expect(bodyDialog.isDisposed).toBe(true);
+            expect((await prompt).button.accept).toBe(true);
+          });
+
+          it('should accept on enter key sent to the dialog node with a body button focused', async () => {
+            await launchWithBody(<button data-testid="target">button</button>);
+
+            simulate(bodyDialog.node, 'keydown', { key: 'Enter' });
+
+            expect(bodyDialog.isDisposed).toBe(true);
+            expect((await prompt).button.accept).toBe(true);
+          });
+
+          it('should accept on enter key within the input of a web component', async () => {
+            // Such as the <jp-search> of a FilterBox, whose <input> sits in a
+            // shadow root, so that `document.activeElement` is the host.
+            if (!customElements.get('test-shadow-field')) {
+              customElements.define(
+                'test-shadow-field',
+                class extends HTMLElement {
+                  constructor() {
+                    super();
+                    this.attachShadow({ mode: 'open' }).appendChild(
+                      document.createElement('input')
+                    );
+                  }
+                }
+              );
+            }
+            const host = await launchWithBody(
+              React.createElement('test-shadow-field', {
+                'data-testid': 'target'
+              })
+            );
+            const input = host.shadowRoot!.querySelector('input')!;
+            input.focus();
+
+            expect(
+              !input.dispatchEvent(
+                generate('keydown', { key: 'Enter', composed: true })
+              )
+            ).toBe(true);
+            expect((await prompt).button.accept).toBe(true);
+          });
+        });
+
+        it('should cancel the enter key on the close button', async () => {
+          const closable = new Dialog({ title: 'foo', hasClose: true });
+          const prompt = closable.launch();
+          await waitForDialog();
+          await closable.ready;
+          const closeButton = closable.node.querySelector<HTMLElement>(
+            '.jp-Dialog-close-button'
+          )!;
+          closeButton.focus();
+
+          // Otherwise the browser passes the key on to the element that gets
+          // the focus back when the dialog closes, such as the button that
+          // opened it, or an editor that then gets a new line.
+          const event = generate('keydown', { key: 'Enter' });
+          closeButton.dispatchEvent(event);
+
+          expect(event.defaultPrevented).toBe(true);
+          closable.dispose();
+          await prompt.catch(() => {});
+        });
+
         it('should resolve with currently focused button', async () => {
           const dialog = new TestDialog({
             buttons: [

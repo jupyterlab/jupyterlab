@@ -573,6 +573,37 @@ The recommended ranges for this rank are:
 - 900: The default rank if none is specified.
 - 1000: The JupyterLab extension manager.
 
+(reordering-sections)=
+
+#### Reordering accordion sections
+
+Users can reorder the sections of a {ts:class}`ui-components.SidePanel` after
+they select **Enable Section Reordering** in the context menu of a section
+header. The workspace saves the order, the collapsed state and the size of each
+section with the section ID. The shell applies them to the sections that the
+panel has when the layout is restored, so add the sections when your plugin
+activates. Give each section an explicit ID that is unique in the page and the
+same in every session:
+
+```typescript
+const panel = new SidePanel();
+panel.id = 'my-extension-panel';
+
+const settings = new Widget();
+settings.id = 'my-extension-panel-settings';
+settings.title.label = 'Settings';
+panel.addWidget(settings);
+
+app.shell.add(panel, 'left');
+```
+
+A section without an explicit ID gets a new generated ID in every session, so
+the workspace saves its title label instead. The section then keeps its place
+and state only while its label is unique in the panel and the same in every
+session. A translated label changes with the display language, so the first
+reload after a language change shows the panel in its original order and can
+apply the saved collapsed states and sizes to the wrong sections.
+
 #### Movable accordion sections
 
 Sidebar panels can participate in the movable-sections system so users can
@@ -863,7 +894,7 @@ function activatePlugin(
 
     if (settingRegistry) {
       // Create the factory
-      toolbarFactory = createToolbarFactory(
+      const panelToolbarFactory = createToolbarFactory(
         toolbarRegistry,
         settingRegistry,
         // Factory name
@@ -872,6 +903,11 @@ function activatePlugin(
         '@jupyterlab/notebook-extension:panel',
         translator
       );
+      // Pass the panel id so that the buttons act on their own notebook
+      toolbarFactory = (panel: NotebookPanel) =>
+        panelToolbarFactory(panel, {
+          [ToolbarRegistry.WIDGET_ID_ARG]: panel.id
+        });
     }
   }
 
@@ -890,6 +926,34 @@ function activatePlugin(
 The registry `addFactory` method allows an extension to provide special widget for a unique pair
 (factory name, toolbar item name). Then the helper `createToolbarFactory` can be used to extract the
 toolbar definition from the settings and build the factory to pass to the widget factory.
+
+The factory returned by {ts:function}`apputils.createToolbarFactory` takes optional command arguments as its second parameter. It adds them to the arguments of every command item, and the `args` set by an item take precedence over them. The notebook panel toolbar and the cell toolbar pass the id of the notebook panel this way, under the {ts:variable}`apputils.ToolbarRegistry.WIDGET_ID_ARG` key. In a split view, a button can belong to a notebook that does not have the focus. A command placed in these toolbars should therefore find its notebook from that argument, both to act on it and to compute its state. In this example, `tracker` is the {ts:interface}`notebook.INotebookTracker`:
+
+```typescript
+// The notebook of the toolbar button, or the current notebook when the
+// command runs from a menu, the command palette or a keyboard shortcut
+function getNotebook(args: ReadonlyPartialJSONObject): NotebookPanel | null {
+  const widgetId = args[ToolbarRegistry.WIDGET_ID_ARG];
+  if (widgetId) {
+    return tracker.find(panel => panel.id === widgetId) ?? null;
+  }
+  return tracker.currentWidget;
+}
+
+app.commands.addCommand('my-extension:clear-outputs', {
+  label: 'Clear All Outputs',
+  isEnabled: args => {
+    const notebook = getNotebook(args);
+    return notebook !== null && !notebook.viewOnly;
+  },
+  execute: args => {
+    const notebook = getNotebook(args);
+    if (notebook) {
+      NotebookActions.clearAllOutputs(notebook.content);
+    }
+  }
+});
+```
 
 The default toolbar items can be defined across multiple extensions by providing an entry in the `"jupyter.lab.toolbars"`
 mapping. For example for the notebook panel:

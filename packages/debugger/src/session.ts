@@ -89,6 +89,13 @@ export class DebuggerSession implements IDebugger.ISession {
         ready.resolve();
         future.dispose();
       };
+      // A restart, a kernel change or a closed connection disposes the future
+      // before the reply: fail the requests waiting for it instead of leaving
+      // them pending forever.
+      future.done.catch(error => {
+        ready.promise.catch(() => undefined);
+        ready.reject(error);
+      });
     }
   }
 

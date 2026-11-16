@@ -327,6 +327,10 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
+      case 'pointerdown':
+      case 'keydown':
+        this._focusBeforeClick = document.activeElement;
+        break;
       case 'click':
         this.handleClick(event);
         break;
@@ -342,6 +346,9 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     // Stop propagating the click outside the toolbar
     event.stopPropagation();
 
+    const focusBeforeClick = this._focusBeforeClick;
+    this._focusBeforeClick = null;
+
     // Clicking a label focuses the corresponding control
     // that is linked with `for` attribute, so let it be.
     if (event.target instanceof HTMLLabelElement) {
@@ -356,6 +363,16 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
       return;
     }
 
+    // If this click moved the focus out of the toolbar, for example to a menu,
+    // let it be. The focus is on the body when the click did not focus anything.
+    if (
+      focusBeforeClick !== null &&
+      document.activeElement !== focusBeforeClick &&
+      document.activeElement !== document.body
+    ) {
+      return;
+    }
+
     // Otherwise, activate the parent widget, which may take focus if desired.
     if (this.parent) {
       this.parent.activate();
@@ -367,6 +384,8 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('click', this);
+    this.node.addEventListener('pointerdown', this);
+    this.node.addEventListener('keydown', this);
   }
 
   /**
@@ -374,9 +393,12 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    */
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
+    this.node.removeEventListener('pointerdown', this);
+    this.node.removeEventListener('keydown', this);
   }
 
   noFocusOnClick: boolean;
+  private _focusBeforeClick: Element | null = null;
 }
 
 /**
@@ -1118,7 +1140,15 @@ export function CommandToolbarButtonComponent(
     >
       {() =>
         props.commands.listCommands().includes(props.id) ? (
-          <ToolbarButtonComponent {...Private.propsFromCommand(props)} />
+          // Use a memoized component so that signal emissions which do not
+          // actually change the rendered output (e.g. the bulk command
+          // notifications fired when switching tabs) do not trigger a costly
+          // re-render of the button subtree. See `Private.arePropsEqual`.
+          <Private.MemoizedToolbarButtonComponent
+            {...Private.propsFromCommand(props)}
+            commands={props.commands}
+            commandArgs={props.args}
+          />
         ) : null
       }
     </UseSignal>
@@ -1460,6 +1490,113 @@ namespace Private {
       'aria-controls': ariaControls
     };
   }
+
+  /**
+   * Props of the memoized toolbar button.
+   *
+   * It carries the command registry (`commands`) and the command `args`
+   * (`commandArgs`) in addition to the rendered button props: a change of
+   * either can affect only the click handler, and must still re-render the
+   * button. `ToolbarButtonComponent` ignores these two fields.
+   */
+  interface IMemoizedButtonProps extends ToolbarButtonComponent.IProps {
+    commands?: CommandRegistry;
+    commandArgs?: ReadonlyJSONObject;
+  }
+
+  /**
+   * Props which are recreated on every call to `propsFromCommand` and therefore
+   * cannot be compared by identity:
+   * - `onClick` is a fresh closure but is semantically stable - what it
+   *   dispatches depends only on the command registry, the command id and
+   *   `args` (compared through `commands`, `dataset` and `commandArgs`) - so
+   *   it is skipped entirely.
+   * - `dataset` is a fresh object and is compared by value instead.
+   */
+  const NON_IDENTITY_PROPS: {
+    [key in keyof IMemoizedButtonProps]?: 'skip' | 'dataset';
+  } = {
+    onClick: 'skip',
+    dataset: 'dataset'
+  };
+
+  /**
+   * Compare two sets of toolbar button props for rendering equality.
+   *
+   * Used as the equality function of a `React.memo` wrapper so that command
+   * change notifications which do not affect the button (the common case when
+   * switching tabs, where every notebook command is notified but most buttons
+   * are unaffected) do not re-render the button.
+   *
+   * #### Notes
+   * This compares *every* prop generically (rather than an explicit allow-list)
+   * so that the optimization stays correct when a new prop is added to
+   * `ToolbarButtonComponent.IProps`: an unhandled prop is compared by identity,
+   * which at worst forces a re-render but can never leave the button stale.
+   * Only the props that are recreated on every render
+   * (see {@link NON_IDENTITY_PROPS}) need explicit handling here.
+   *
+   * `propsFromCommand` always returns the same set of keys, so iterating the
+   * keys of `a` is sufficient. We use `for...in` rather than `Object.keys`/a
+   * `Set` to avoid allocating on every call: this runs for every toolbar button
+   * on every command notification, so the per-call cost must stay minimal.
+   */
+  export function arePropsEqual(
+    a: IMemoizedButtonProps,
+    b: IMemoizedButtonProps
+  ): boolean {
+    const aRecord = a as Record<string, unknown>;
+    const bRecord = b as Record<string, unknown>;
+    for (const key in aRecord) {
+      const handling = NON_IDENTITY_PROPS[key as keyof IMemoizedButtonProps];
+      if (handling === 'skip') {
+        continue;
+      }
+      if (handling === 'dataset') {
+        if (!shallowEqualDataset(a.dataset, b.dataset)) {
+          return false;
+        }
+        continue;
+      }
+      if (aRecord[key] !== bRecord[key]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Shallow comparison of two `dataset` objects (key/value equality).
+   */
+  function shallowEqualDataset(a?: DOMStringMap, b?: DOMStringMap): boolean {
+    if (a === b) {
+      return true;
+    }
+    if (!a || !b) {
+      return false;
+    }
+    const aKeys = Object.keys(a);
+    const bKeys = Object.keys(b);
+    if (aKeys.length !== bKeys.length) {
+      return false;
+    }
+    return aKeys.every(key => a[key] === b[key]);
+  }
+
+  /**
+   * A memoized version of `ToolbarButtonComponent` which skips re-rendering
+   * when the derived props are unchanged (see `arePropsEqual`).
+   */
+  export const MemoizedToolbarButtonComponent = React.memo(
+    (props: IMemoizedButtonProps): JSX.Element => {
+      // `commands` and `commandArgs` are only used by `arePropsEqual`; the
+      // remaining fields are the actual button props (the button ignores the
+      // extra fields).
+      const buttonProps: ToolbarButtonComponent.IProps = props;
+      return <ToolbarButtonComponent {...buttonProps} />;
+    },
+    arePropsEqual
+  );
 
   /**
    * An attached property for the name of a toolbar item.

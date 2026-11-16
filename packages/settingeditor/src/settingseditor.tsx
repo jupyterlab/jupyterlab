@@ -46,7 +46,8 @@ export class SettingsEditor extends SplitPanel {
       registry: options.registry,
       translator: this.translator,
       query: options.query,
-      model: this._listModel
+      model: this._listModel,
+      editorRegistry: options.editorRegistry
     });
     this._listModel.changed.connect(() => {
       this.update();

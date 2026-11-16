@@ -7,18 +7,25 @@ import dataclasses
 import json
 from urllib.parse import urlencode, urlunparse
 
+from jupyter_core.utils import ensure_async
+from jupyter_server.auth.decorator import authorized
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
 from jupyterlab.extensions.manager import ExtensionManager
 
+AUTH_RESOURCE = "jupyterlab:extensions"
+
 
 class ExtensionHandler(APIHandler):
+    auth_resource = AUTH_RESOURCE
+
     def initialize(self, manager: ExtensionManager):
         super().initialize()
         self.manager = manager
 
     @web.authenticated
+    @authorized
     async def get(self):
         """GET query returns info on extensions
 
@@ -95,7 +102,24 @@ class ExtensionHandler(APIHandler):
 
         self.finish(json.dumps(list(map(dataclasses.asdict, extensions))))
 
+    async def _check_install(self, name: str, version: str | None) -> None:
+        """Raise unless the user may install the package and it is allowed."""
+        # Installing a package runs its code on the server.
+        if not await ensure_async(
+            self.authorizer.is_authorized(self, self.current_user, "execute", self.auth_resource)
+        ):
+            raise web.HTTPError(
+                403,
+                f"User is not authorized to execute on resource: {self.auth_resource}.",
+            )
+        if not await self.manager.is_install_allowed(name, version):
+            raise web.HTTPError(
+                422,
+                f"Install of {name!r} was blocked, check the logs.",
+            )
+
     @web.authenticated
+    @authorized
     async def post(self):
         """POST query performs an action on a specific extension
 
@@ -116,11 +140,8 @@ class ExtensionHandler(APIHandler):
                 f"Could not process instruction {cmd!r} with extension name {name!r}",
             )
 
-        if cmd == "install" and not await self.manager.is_install_allowed(name, version):
-            raise web.HTTPError(
-                422,
-                f"Install of {name!r} was blocked, check the logs.",
-            )
+        if cmd == "install":
+            await self._check_install(name, version)
         if cmd == "uninstall" and not await self.manager.is_uninstall_allowed(name):
             raise web.HTTPError(
                 422,
