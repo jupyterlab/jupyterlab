@@ -22,7 +22,7 @@ The TypeScript non-null assertion operator (`!`) bypasses compiler null checks a
 - Prefer **optional chaining** (`?.`) and **nullish coalescing** (`??`) when accessing properties on objects that may be `null` or `undefined`.
 - Prefer **type guards** (such as `if (value != null)` or custom predicate functions) to narrow types before method calls or property access.
 - Avoid using `!` on the results of DOM queries (`document.querySelector()`), `Map.get()`, array index access, or regular expression matching (`RegExp.exec()`, `String.match()`), as these operations can legitimately produce `null` or `undefined` at runtime.
-- Non-null assertions should be reserved for framework lifecycle invariants where an object is guaranteed to be initialized by the container and TypeScript cannot infer the initialization flow.
+- Non-null assertions should be reserved for framework lifecycle invariants where a value is always set before use and TypeScript cannot infer the initialization flow.
 - Non-null assertions are fine in test files where an unexpected `null` or `undefined` value will fail the test immediately rather than cause unexpected runtime issues in production.
 
 ## Initialization Options
