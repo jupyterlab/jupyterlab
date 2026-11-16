@@ -17,7 +17,6 @@ import {
   CommandToolbarButtonComponent,
   Dialog,
   ICommandPalette,
-  InputDialog,
   ISessionContextDialogs,
   Notification,
   ReactWidget,
@@ -27,7 +26,7 @@ import {
   UseSignal
 } from '@jupyterlab/apputils';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
-import { PathExt, Time } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
 import {
   DocumentManager,
   DocumentManagerDialogs,
@@ -46,7 +45,6 @@ import { IUrlResolverFactory } from '@jupyterlab/rendermime';
 import type { Contents, Kernel } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
-import type { TranslationBundle } from '@jupyterlab/translation';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { saveIcon } from '@jupyterlab/ui-components';
 import { some } from '@lumino/algorithm';
@@ -56,7 +54,7 @@ import { JSONExt } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import type { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { recentsManagerPlugin } from './recents';
 
@@ -260,7 +258,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
       translator,
       labShell,
       palette,
-      dialogs
+      Private.withDefaultDialogs(dialogs, translator)
     );
 
     // Keep up to date with the settings registry.
@@ -604,8 +602,8 @@ export const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * A plugin that provides the default dialogs for three document management operations:
- * Rename, Confirm Close, and Save Before Close.
+ * A plugin that provides the default dialogs for document management operations,
+ * such as Rename, Confirm Close, Save Before Close, Reload and Revert to Checkpoint.
  *
  * To customize these dialogs, implement a custom plugin that provides the `IDocumentManagerDialogs` token.
  */
@@ -666,22 +664,6 @@ export namespace ToolbarItems {
   }
 }
 
-/* Widget to display the revert to checkpoint confirmation. */
-class RevertConfirmWidget extends Widget {
-  /**
-   * Construct a new revert confirmation widget.
-   */
-  constructor(
-    checkpoint: Contents.ICheckpointModel,
-    trans: TranslationBundle,
-    fileType: string = 'notebook'
-  ) {
-    super({
-      node: Private.createRevertConfirmNode(checkpoint, fileType, trans)
-    });
-  }
-}
-
 // Returns the file type for a widget.
 function fileType(widget: Widget | null, docManager: IDocumentManager): string {
   if (!widget) {
@@ -706,7 +688,7 @@ function addCommands(
   translator: ITranslator,
   labShell: ILabShell | null,
   palette: ICommandPalette | null,
-  dialogs: IDocumentManagerDialogs | null
+  dialogs: Required<IDocumentManagerDialogs>
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
@@ -733,9 +715,6 @@ function addCommands(
   };
   // If inside a rich application like JupyterLab, add additional functionality.
   if (labShell) {
-    if (!dialogs) {
-      dialogs = new DocumentManagerDialogs({ translator: translator });
-    }
     addLabCommands(
       app,
       docManager,
@@ -979,7 +958,7 @@ function addCommands(
         properties: {}
       }
     },
-    execute: () => {
+    execute: async () => {
       // Checks that shell.currentWidget is valid:
       if (!isEnabled()) {
         return;
@@ -994,21 +973,10 @@ function addCommands(
         });
       }
       if (context.model.dirty) {
-        return showDialog({
-          title: trans.__('Reload %1 from Disk', type),
-          body: trans.__(
-            'Are you sure you want to reload the %1 from the disk?',
-            type
-          ),
-          buttons: [
-            Dialog.cancelButton(),
-            Dialog.warnButton({ label: trans.__('Reload') })
-          ]
-        }).then(result => {
-          if (result.button.accept && !context.isDisposed) {
-            return context.revert();
-          }
-        });
+        const res = await dialogs.reload({ type });
+        if (res.shouldReload && !context.isDisposed) {
+          return context.revert();
+        }
       } else {
         if (!context.isDisposed) {
           return context.revert();
@@ -1053,37 +1021,31 @@ function addCommands(
           );
           return;
         }
-        const targetCheckpoint =
+        const chosen =
           checkpoints.length === 1
             ? checkpoints[0]
-            : await Private.getTargetCheckpoint(checkpoints.reverse(), trans);
-
-        if (!targetCheckpoint) {
+            : (
+                await dialogs.chooseCheckpoint({
+                  checkpoints: checkpoints.slice().reverse(),
+                  fileType: type
+                })
+              ).checkpoint;
+        if (!chosen) {
           return;
         }
-        return showDialog({
-          title: trans.__('Revert %1 to checkpoint', type),
-          body: new RevertConfirmWidget(targetCheckpoint, trans, type),
-          buttons: [
-            Dialog.cancelButton(),
-            Dialog.warnButton({
-              label: trans.__('Revert'),
-              ariaLabel: trans.__('Revert to Checkpoint')
-            })
-          ]
-        }).then(result => {
-          if (context.isDisposed) {
-            return;
-          }
-          if (result.button.accept) {
-            if (context.model.readOnly) {
-              return context.revert();
-            }
-            return context
-              .restoreCheckpoint(targetCheckpoint.id)
-              .then(() => context.revert());
-          }
+        const confirm = await dialogs.revert({
+          checkpoint: chosen,
+          fileType: type
         });
+        if (!confirm.shouldRevert || context.isDisposed) {
+          return;
+        }
+        if (context.model.readOnly) {
+          return context.revert();
+        }
+        return context
+          .restoreCheckpoint(chosen.id)
+          .then(() => context.revert());
       });
     }
   });
@@ -1169,36 +1131,27 @@ function addCommands(
             docManager.renameUntitledFileOnSave &&
             (widget as IDocumentWidget).isUntitled === true
           ) {
-            const result = await InputDialog.getText({
-              title: trans.__('Rename file'),
-              okLabel: trans.__('Rename and Save'),
-              placeholder: trans.__('File name'),
-              text: oldName,
-              selectionRange: oldName.length - PathExt.extname(oldName).length,
-              checkbox: {
-                label: trans.__('Do not ask for rename on first save.'),
-                caption: trans.__(
-                  'If checked, you will not be asked to rename future untitled files when saving them.'
-                )
-              }
+            const result = await dialogs.renameOnSave({
+              name: oldName
             });
+            const { accepted, doNotAskAgain, newName: value } = result;
 
-            if (result.button.accept) {
-              newName = result.value ?? oldName;
+            if (accepted) {
+              newName = value ?? oldName;
               (widget as IDocumentWidget).isUntitled = false;
-              if (typeof result.isChecked === 'boolean') {
+              if (typeof doNotAskAgain === 'boolean') {
                 const currentSetting = (
                   await settingRegistry.get(
                     docManagerPluginId,
                     'renameUntitledFileOnSave'
                   )
                 ).composite as boolean;
-                if (result.isChecked === currentSetting) {
+                if (doNotAskAgain === currentSetting) {
                   settingRegistry
                     .set(
                       docManagerPluginId,
                       'renameUntitledFileOnSave',
-                      !result.isChecked
+                      !doNotAskAgain
                     )
                     .catch(reason => {
                       console.error(
@@ -1369,7 +1322,7 @@ function addLabCommands(
   labShell: ILabShell,
   widgetOpener: IDocumentWidgetOpener,
   translator: ITranslator,
-  dialogs: IDocumentManagerDialogs
+  dialogs: Required<IDocumentManagerDialogs>
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands } = app;
@@ -1481,16 +1434,9 @@ function addLabCommands(
         if (!context) {
           return;
         }
-        const result = await showDialog({
-          title: trans.__('Delete'),
-          body: trans.__('Are you sure you want to delete %1', context.path),
-          buttons: [
-            Dialog.cancelButton(),
-            Dialog.warnButton({ label: trans.__('Delete') })
-          ]
-        });
+        const result = await dialogs.delete({ path: context.path });
 
-        if (result.button.accept) {
+        if (result.shouldDelete) {
           await app.commands.execute('docmanager:delete-file', {
             path: context.path
           });
@@ -1584,69 +1530,29 @@ namespace Private {
    */
   export let id = 0;
 
-  export function createRevertConfirmNode(
-    checkpoint: Contents.ICheckpointModel,
-    fileType: string,
-    trans: TranslationBundle
-  ): HTMLElement {
-    const body = document.createElement('div');
-    const confirmMessage = document.createElement('p');
-    const confirmText = document.createTextNode(
-      trans.__(
-        'Are you sure you want to revert the %1 to checkpoint? ',
-        fileType
-      )
-    );
-    const cannotUndoText = document.createElement('strong');
-    cannotUndoText.textContent = trans.__('This cannot be undone.');
-
-    confirmMessage.appendChild(confirmText);
-    confirmMessage.appendChild(cannotUndoText);
-
-    const lastCheckpointMessage = document.createElement('p');
-    const lastCheckpointText = document.createTextNode(
-      trans.__('The checkpoint was last updated at: ')
-    );
-    const lastCheckpointDate = document.createElement('p');
-    const date = new Date(checkpoint.last_modified);
-    lastCheckpointDate.style.textAlign = 'center';
-    lastCheckpointDate.textContent =
-      Time.format(date) + ' (' + Time.formatHuman(date) + ')';
-
-    lastCheckpointMessage.appendChild(lastCheckpointText);
-    lastCheckpointMessage.appendChild(lastCheckpointDate);
-
-    body.appendChild(confirmMessage);
-    body.appendChild(lastCheckpointMessage);
-    return body;
-  }
-
   /**
-   * Ask user for a checkpoint to revert to.
+   * Use the default dialogs for the optional methods `dialogs` does not implement.
    */
-  export async function getTargetCheckpoint(
-    checkpoints: Contents.ICheckpointModel[],
-    trans: TranslationBundle
-  ): Promise<Contents.ICheckpointModel | undefined> {
-    // the id could be too long to show so use the index instead
-    const indexSeparator = '.';
-    const items = checkpoints.map((checkpoint, index) => {
-      const isoDate = Time.format(checkpoint.last_modified);
-      const humanDate = Time.formatHuman(checkpoint.last_modified);
-      return `${index}${indexSeparator} ${isoDate} (${humanDate})`;
-    });
-
-    const selectedItem = (
-      await InputDialog.getItem({
-        items: items,
-        title: trans.__('Choose a checkpoint')
-      })
-    ).value;
-
-    if (!selectedItem) {
-      return;
+  export function withDefaultDialogs(
+    dialogs: IDocumentManagerDialogs | null,
+    translator: ITranslator
+  ): Required<IDocumentManagerDialogs> {
+    const defaults = new DocumentManagerDialogs({ translator });
+    if (!dialogs) {
+      return defaults;
     }
-    const selectedIndex = selectedItem.split(indexSeparator, 1)[0];
-    return checkpoints[parseInt(selectedIndex, 10)];
+    return {
+      rename: context => dialogs.rename(context),
+      confirmClose: options => dialogs.confirmClose(options),
+      saveBeforeClose: options => dialogs.saveBeforeClose(options),
+      reload: options => dialogs.reload?.(options) ?? defaults.reload(options),
+      delete: options => dialogs.delete?.(options) ?? defaults.delete(options),
+      chooseCheckpoint: options =>
+        dialogs.chooseCheckpoint?.(options) ??
+        defaults.chooseCheckpoint(options),
+      revert: options => dialogs.revert?.(options) ?? defaults.revert(options),
+      renameOnSave: options =>
+        dialogs.renameOnSave?.(options) ?? defaults.renameOnSave(options)
+    };
   }
 }
