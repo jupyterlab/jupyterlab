@@ -209,7 +209,7 @@
     "@jupyter/builder": "^1.0.0-beta.1",
     "@jupyterlab/buildutils": "^4.7.0-beta.1",
     "@module-federation/runtime-tools": "^2.0.0",
-    "@rsdoctor/rspack-plugin": "^1.3.12",
+    "@rsdoctor/rspack-plugin": "^1.5.16",
     "@rspack/cli": "^2.0.2",
     "@rspack/core": "^2.0.2",
     "css-loader": "^7.1.4",
