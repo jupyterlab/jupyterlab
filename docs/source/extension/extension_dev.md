@@ -369,6 +369,18 @@ See the
 [fileeditor-extension](https://github.com/jupyterlab/jupyterlab/tree/main/packages/fileeditor-extension)
 for another example of an extension that uses settings.
 
+A schema, or any of its properties, can list `tags`. Users find the tagged settings by typing `tag:<tag>` in the Settings Editor search:
+
+```json
+"maxNumberOutputs": {
+  "type": "number",
+  "default": 50,
+  "tags": ["performance"]
+}
+```
+
+Some tags are already exposed by JupyterLab: `accessibility` and `performance`.
+
 Please ensure that the schema files are included in the `files` metadata in `package.json`.
 
 When declaring dependencies on JupyterLab packages, use the `^` operator before a package version so that the build system installs the newest patch or minor version for a given major version. For example, `^4.0.0` will install version 4.0.0, 4.0.1, 4.1.0, etc.
