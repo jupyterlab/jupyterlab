@@ -121,7 +121,9 @@ export class SettingsFormEditor extends React.Component<
     this.state = {
       isModified: settings.isModified,
       uiSchema: this._createUiSchema(),
-      filteredSchema: this._createFilteredSchema(null),
+      filteredSchema: this._createFilteredSchema(
+        Private.getMatchingFields(props.filteredValues)
+      ),
       formContext: {
         defaultFormData: this.props.settings.default(),
         settings: this.props.settings,

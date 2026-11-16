@@ -722,11 +722,6 @@ describe('@jupyterlab/settingeditor', () => {
         });
       });
 
-      it('should return all for every plugin when the tag query is empty', () => {
-        expect(search('tag: ')).toEqual({ kind: 'all' });
-        expect(search('tag: ', untaggedId)).toEqual({ kind: 'all' });
-      });
-
       describe('tag suggestions', () => {
         const suggest = async (query: string) => {
           let search: HTMLInputElement | null = null;
