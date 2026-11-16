@@ -41,7 +41,6 @@ const FILTER_BUTTON_CLASS = 'jp-DocumentSearch-filter-button';
 const FILTER_BUTTON_ENABLED_CLASS = 'jp-DocumentSearch-filter-button-enabled';
 const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
 const SEARCH_OPTIONS_CLASS = 'jp-DocumentSearch-search-options';
-const SEARCH_FILTER_DISABLED_CLASS = 'jp-DocumentSearch-search-filter-disabled';
 const SEARCH_FILTER_CLASS = 'jp-DocumentSearch-search-filter';
 const REPLACE_BUTTON_CLASS = 'jp-DocumentSearch-replace-button';
 const REPLACE_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-replace-button-wrapper';
@@ -220,6 +219,8 @@ interface IReplaceEntryProps {
   replaceOptionsSupport: IReplaceOptionsSupport | undefined;
   replaceText: string;
   translator?: ITranslator;
+  replaceEnabled?: boolean;
+  replaceAllEnabled?: boolean;
 }
 
 function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
@@ -257,7 +258,14 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       </div>
       <button
         className={REPLACE_BUTTON_WRAPPER_CLASS}
+        disabled={props.replaceEnabled === false}
         onClick={() => props.onReplaceCurrent()}
+        title={
+          props.replaceEnabled === false
+            ? trans.__('Cannot replace: match is in output or read-only cell')
+            : trans.__('Replace')
+        }
+        tabIndex={0}
       >
         <span className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}>
           {trans.__('Replace')}
@@ -265,7 +273,15 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       </button>
       <button
         className={REPLACE_BUTTON_WRAPPER_CLASS}
+        disabled={props.replaceAllEnabled === false}
         onClick={() => props.onReplaceAll()}
+        title={
+          props.replaceAllEnabled === false
+            ? trans.__(
+                'Cannot replace: all matches are in outputs or read-only cells'
+              )
+            : trans.__('Replace All')
+        }
       >
         <span className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}>
           {trans.__('Replace All')}
@@ -387,24 +403,15 @@ interface IFilterSelectionProps {
   title: string;
   description: string;
   value: boolean;
-  isEnabled: boolean;
   onToggle: () => void;
 }
 
 function FilterSelection(props: IFilterSelectionProps): JSX.Element {
   return (
-    <label
-      className={
-        props.isEnabled
-          ? SEARCH_FILTER_CLASS
-          : `${SEARCH_FILTER_CLASS} ${SEARCH_FILTER_DISABLED_CLASS}`
-      }
-      title={props.description}
-    >
+    <label className={SEARCH_FILTER_CLASS} title={props.description}>
       <input
         type="checkbox"
         className="jp-mod-styled"
-        disabled={!props.isEnabled}
         checked={props.value}
         onChange={props.onToggle}
       />
@@ -486,6 +493,14 @@ interface ISearchOverlayProps {
    * Whether the search matches entire words or any substring.
    */
   wholeWords: boolean;
+  /**
+   * Whether the replace button is enabled.
+   */
+  replaceEnabled?: boolean;
+  /**
+   * Whether the replace all button is enabled.
+   */
+  replaceAllEnabled?: boolean;
   /**
    * Callback on case sensitive toggled.
    */
@@ -600,20 +615,6 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
   }
 
   private _onReplaceToggled() {
-    // Deactivate invalid replace filters
-    if (!this.props.replaceEntryVisible) {
-      for (const key in this.props.filtersDefinition) {
-        const filter = this.props.filtersDefinition[key];
-        if (!filter.supportReplace) {
-          this.props.onFilterChanged(key, false).catch(reason => {
-            console.error(
-              `Fail to update filter value for ${filter.title}:\n${reason}`
-            );
-          });
-        }
-      }
-    }
-
     this.props.onReplaceEntryShown(!this.props.replaceEntryVisible);
   }
 
@@ -651,20 +652,14 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
       <div className={SEARCH_OPTIONS_CLASS}>
         {Object.keys(filters).map(name => {
           const filter = filters[name];
-
-          const isEnabled = !showReplace || filter.supportReplace;
-          // Show an alternate description, if one exists, when a filter is disabled in replace mode.
-          const description = isEnabled
-            ? filter.description
-            : (filter.disabledDescription ?? filter.description);
           return (
             <FilterSelection
               key={name}
               title={filter.title}
               description={
-                description + (name == 'selection' ? selectionKeyHint : '')
+                filter.description +
+                (name == 'selection' ? selectionKeyHint : '')
               }
-              isEnabled={isEnabled}
               onToggle={async () => {
                 await this.props.onFilterChanged(
                   name,
@@ -774,6 +769,8 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
                 replaceText={this.props.replaceText}
                 preserveCase={this.props.preserveCase}
                 translator={this.translator}
+                replaceEnabled={this.props.replaceEnabled}
+                replaceAllEnabled={this.props.replaceAllEnabled}
               />
               <div className={SPACER_CLASS}></div>
             </>
@@ -910,6 +907,8 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         replaceText={this.model.replaceText}
         initialSearchText={this.model.initialQuery}
         lastSearchText={this.model.searchExpression}
+        replaceEnabled={this.model.replaceEnabled}
+        replaceAllEnabled={this.model.replaceAllEnabled}
         searchInputRef={
           this._searchInput as React.RefObject<HTMLTextAreaElement>
         }

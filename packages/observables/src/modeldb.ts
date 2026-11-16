@@ -184,6 +184,8 @@ export interface IModelDB extends IDisposable {
    *
    * @returns the list that was created.
    *
+   * @deprecated since 4.7.0, will be removed in 5.0. Returns an `IObservableUndoableList` which is deprecated.
+   *
    * #### Notes
    * The list can only store objects that are simple
    * JSON Objects and primitives.
@@ -432,6 +434,8 @@ export class ModelDB implements IModelDB {
    * @param path the path for the list.
    *
    * @returns the list that was created.
+   *
+   * @deprecated since 4.7.0, will be removed in 5.0. Returns an `IObservableUndoableList` which is deprecated.
    *
    * #### Notes
    * The list can only store objects that are simple

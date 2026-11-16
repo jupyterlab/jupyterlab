@@ -15,12 +15,7 @@ test.describe('Notebook No Kernel', () => {
 
     // Open notebook with "Open With > Notebook (no kernel)" from the context menu
     await page.sidebar.openTab('filebrowser');
-    await page.click(`.jp-DirListing-item span:has-text("${NOTEBOOK_NAME}")`, {
-      button: 'right'
-    });
-    expect(await page.menu.isAnyOpen()).toBe(true);
-    await page.hover('text=Open With');
-    await page.click('text=Notebook (no kernel)');
+    await page.notebook.open(NOTEBOOK_NAME, { noKernel: true });
     await page.waitForSelector('.jp-NotebookPanel');
   });
 

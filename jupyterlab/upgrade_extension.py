@@ -7,12 +7,7 @@ import re
 import shutil
 import subprocess
 import sys
-
-try:
-    import tomllib
-except ImportError:
-    import tomli as tomllib
-
+import tomllib
 from importlib.resources import files
 from pathlib import Path
 

@@ -334,6 +334,16 @@ export class OutputArea extends Widget {
   }
 
   /**
+   * Display id targets for the current outputs, copied on get and set.
+   */
+  get displayIdMap(): ReadonlyMap<string, readonly number[]> {
+    return Private.cloneDisplayIdMap(this._displayIdMap);
+  }
+  set displayIdMap(value: ReadonlyMap<string, readonly number[]>) {
+    this._displayIdMap = Private.cloneDisplayIdMap(value);
+  }
+
+  /**
    * Reattach the kernel future, without clearing the existing output model.
    *
    * This is useful when a cell gets deleted by a user but user later decides
@@ -343,8 +353,12 @@ export class OutputArea extends Widget {
     future: Kernel.IShellFuture<
       KernelMessage.IExecuteRequestMsg,
       KernelMessage.IExecuteReplyMsg
-    >
+    >,
+    displayIdMap?: ReadonlyMap<string, readonly number[]>
   ) {
+    if (displayIdMap) {
+      this.displayIdMap = displayIdMap;
+    }
     this._setFuture(future, false);
   }
 
@@ -818,7 +832,7 @@ export class OutputArea extends Widget {
     const msgType = msg.header.msg_type;
     let output: nbformat.IOutput;
     const transient = ((msg.content as any).transient || {}) as JSONObject;
-    const displayId = transient['display_id'] as string;
+    const displayId = Private.getDisplayId(transient);
     let targets: number[] | undefined;
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (msgType) {
@@ -836,7 +850,7 @@ export class OutputArea extends Widget {
       }
       case 'update_display_data':
         output = { ...msg.content, output_type: 'display_data' };
-        targets = this._displayIdMap.get(displayId);
+        targets = displayId ? this._displayIdMap.get(displayId) : undefined;
         if (targets) {
           for (const index of targets) {
             model.set(index, output);
@@ -1509,6 +1523,29 @@ export namespace Stdin {
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * Clone display id indices.
+   */
+  export function cloneDisplayIdMap(
+    displayIdMap: ReadonlyMap<string, readonly number[]>
+  ): Map<string, number[]> {
+    const clone = new Map<string, number[]>();
+    displayIdMap.forEach((indices, displayId) => {
+      clone.set(displayId, [...indices]);
+    });
+    return clone;
+  }
+
+  /**
+   * Get a display id from transient output data.
+   */
+  export function getDisplayId(
+    transient?: ReadonlyPartialJSONObject
+  ): string | undefined {
+    const displayId = transient?.['display_id'];
+    return typeof displayId === 'string' ? displayId : undefined;
+  }
+
   /**
    * Create the node for an InputWidget.
    */

@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { AttachmentsModel, AttachmentsResolver } from '@jupyterlab/attachments';
 import { MathJaxTypesetter } from '@jupyterlab/mathjax-extension';
 import type { IRenderMime } from '@jupyterlab/rendermime';
 import {
@@ -201,6 +202,89 @@ describe('rendermime/registry', () => {
         const w = r.createRenderer('text/html');
         await w.renderModel(model);
         expect(called).toBe(true);
+      });
+
+      it('should send paths without the query to link handler', async () => {
+        const model = createModel({
+          'text/html': '<a href="./foo/bar.md?foo=bar#baz">foo</a>'
+        });
+        let path = '';
+        r = r.clone({
+          resolver: RESOLVER,
+          linkHandler: {
+            handleLink: (node: HTMLElement, linkPath: string) => {
+              path = linkPath;
+            }
+          }
+        });
+        const w = r.createRenderer('text/html');
+        await w.renderModel(model);
+        expect(path).toMatch(/foo\/bar\.md$/);
+        expect(w.node.querySelector('a')!.getAttribute('href')).toMatch(
+          /\/foo\/bar\.md\?foo=bar#baz$/
+        );
+      });
+
+      it('should keep the query of a local source out of its path', async () => {
+        const model = createModel({
+          'text/html': '<img src="./images/example.png?foo=bar">'
+        });
+        r = r.clone({ resolver: RESOLVER });
+        const w = r.createRenderer('text/html');
+        await w.renderModel(model);
+        expect(w.node.querySelector('img')!.getAttribute('src')).toMatch(
+          /\/images\/example\.png\?foo=bar&\d+$/
+        );
+      });
+
+      it('should keep the fragment at the end of a local source', async () => {
+        const model = createModel({
+          'text/html': '<img src="./images/example.svg#view">'
+        });
+        r = r.clone({ resolver: RESOLVER });
+        const w = r.createRenderer('text/html');
+        await w.renderModel(model);
+        expect(w.node.querySelector('img')!.getAttribute('src')).toMatch(
+          /\/images\/example\.svg\?\d+#view$/
+        );
+      });
+
+      it('should add the query of a local source after the xsrf token', async () => {
+        const cookie = jest
+          .spyOn(Document.prototype, 'cookie', 'get')
+          .mockReturnValue('_xsrf=token');
+        try {
+          const model = createModel({
+            'text/html': '<img src="./images/example.png?foo=bar">'
+          });
+          r = r.clone({ resolver: RESOLVER });
+          const w = r.createRenderer('text/html');
+          await w.renderModel(model);
+          expect(w.node.querySelector('img')!.getAttribute('src')).toMatch(
+            /\/images\/example\.png\?_xsrf=token&foo=bar&\d+$/
+          );
+        } finally {
+          cookie.mockRestore();
+        }
+      });
+
+      it('should keep a question mark in the name of an attachment', async () => {
+        const model = createModel({
+          'text/html': '<img src="attachment:a?b.png">'
+        });
+        r = r.clone({
+          resolver: new AttachmentsResolver({
+            model: new AttachmentsModel({
+              values: { 'a?b.png': { 'image/png': 'iVBORw0KGgo=' } }
+            }),
+            parent: RESOLVER
+          })
+        });
+        const w = r.createRenderer('text/html');
+        await w.renderModel(model);
+        expect(w.node.querySelector('img')!.getAttribute('src')).toBe(
+          'data:image/png;base64,iVBORw0KGgo='
+        );
       });
     });
 
