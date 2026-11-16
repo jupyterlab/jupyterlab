@@ -134,7 +134,10 @@ export class ShortcutItem extends React.Component<
     });
   };
 
-  /** Transform keystrokes for display; use + within a chord, comma between chords. */
+  /**
+   * Transform keystrokes for display; use + within a chord, comma-space between
+   * chords. Split on ', ' (not ',') so a comma key (e.g. "Ctrl Shift ,") is kept.
+   */
   toSymbols = (value: string): string => {
     const mapKey = (key: string): string =>
       Platform.IS_MAC
@@ -143,7 +146,7 @@ export class ShortcutItem extends React.Component<
           ? 'Ctrl'
           : key;
     return value
-      .split(',')
+      .split(', ')
       .map(chord =>
         chord.trim().split(/\s+/).filter(Boolean).map(mapKey).join(' + ')
       )

@@ -303,8 +303,9 @@ class NewShortcutDialogBody
         : key === 'Accel'
           ? 'Ctrl'
           : key;
+    // Split on ', ' so a comma key (e.g. "Ctrl Shift ,") is not a chord break.
     return value
-      .split(',')
+      .split(', ')
       .map(chord =>
         chord.trim().split(/\s+/).filter(Boolean).map(mapKey).join(' + ')
       )

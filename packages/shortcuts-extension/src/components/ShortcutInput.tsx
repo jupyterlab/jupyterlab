@@ -645,8 +645,9 @@ export class ShortcutInput extends React.Component<
     if (!this.state.userInput.trim()) {
       return '';
     }
+    // Split on ', ' so a comma key is not treated as a chord separator.
     return this.state.userInput
-      .split(',')
+      .split(', ')
       .map(chord =>
         chord
           .trim()
