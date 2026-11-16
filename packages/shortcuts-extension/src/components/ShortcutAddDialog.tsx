@@ -74,6 +74,10 @@ export class NewShortcutDialog extends Dialog<NewShortcutDialog.IValue> {
   /**
    * Prevent Enter in the command select, JSON editor, or keystroke capture
    * from submitting the dialog.
+   *
+   * The dialog listens in the capture phase. For the capture field we must not
+   * stopPropagation, or Enter never reaches ShortcutInput (so it cannot start
+   * recording or be recorded). Skip super() so Accept is not triggered.
    */
   protected _evtKeydown(event: KeyboardEvent): void {
     if (event.key === 'Enter') {
@@ -92,12 +96,18 @@ export class NewShortcutDialog extends Dialog<NewShortcutDialog.IValue> {
       const jsonEditorNode = this.node.querySelector('.jp-JSONEditor');
       const captureNode = this.node.querySelector('.jp-Shortcuts-Input');
       if (
-        (jsonEditorNode instanceof HTMLElement &&
-          jsonEditorNode.contains(activeElement)) ||
-        (captureNode instanceof HTMLElement &&
-          captureNode.contains(activeElement))
+        jsonEditorNode instanceof HTMLElement &&
+        jsonEditorNode.contains(activeElement)
       ) {
-        event.stopPropagation();
+        // Keep Enter in the editor; do not accept the dialog.
+        event.preventDefault();
+        return;
+      }
+      if (
+        captureNode instanceof HTMLElement &&
+        captureNode.contains(activeElement)
+      ) {
+        // Let ShortcutInput handle Enter (start capture / record the key).
         return;
       }
     }

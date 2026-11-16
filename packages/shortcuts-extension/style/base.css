@@ -471,6 +471,41 @@ button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
 
 .jp-Shortcuts-AddDialog-capture .jp-Shortcuts-Input {
   cursor: pointer;
+  /* Inline table uses slide-animation (0→120px); full-width dialog must not. */
+  animation: none;
+}
+
+/* Idle capture control: look like a start button until recording begins. */
+.jp-Shortcuts-AddDialog-capture .jp-Shortcuts-Input.jp-mod-idle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--jp-layout-color2);
+  border-color: var(--jp-border-color1);
+  min-height: 32px;
+  height: auto;
+  line-height: normal;
+  padding: 4px 8px;
+  box-sizing: border-box;
+}
+
+.jp-Shortcuts-AddDialog-capture .jp-Shortcuts-Input.jp-mod-idle:hover {
+  background: var(--jp-layout-color3);
+  border-color: var(--jp-border-color0);
+}
+
+.jp-Shortcuts-AddDialog-capture .jp-Shortcuts-Input.jp-mod-idle:focus-visible {
+  outline: var(--jp-focus-outline-width) solid var(--jp-focus-outline-color);
+  outline-offset: 1px;
+}
+
+.jp-Shortcuts-AddDialog-capture
+  .jp-Shortcuts-Input.jp-mod-idle
+  .jp-Shortcuts-InputText {
+  width: auto;
+  margin: 0;
+  padding: 0;
+  font-weight: 500;
 }
 
 .jp-Shortcuts-Field-error {

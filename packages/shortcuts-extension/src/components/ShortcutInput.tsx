@@ -19,7 +19,7 @@ import type {
 /** Idle time after the last keystroke before leaving active capture. */
 const CAPTURE_IDLE_MS = 2000;
 
-type CapturePhase = 'capturing' | 'ready' | 'incompleteIdle';
+type CapturePhase = 'idle' | 'capturing' | 'ready' | 'incompleteIdle';
 
 export interface ICaptureError {
   keys: string[];
@@ -114,7 +114,8 @@ export class ShortcutInput extends React.Component<
       currentChain: '',
       selected: true,
       activeConflicts: [],
-      phase: 'capturing',
+      // Dialog waits for an explicit start; inline edit records immediately.
+      phase: props.deferPersist ? 'idle' : 'capturing',
       timerGeneration: 0,
       timerRunning: false,
       announceCaptureStart: false,
@@ -251,15 +252,31 @@ export class ShortcutInput extends React.Component<
         isAvailable: true,
         isFunctional: false,
         activeConflicts: [],
-        phase: 'capturing',
+        phase: this._deferPersist ? 'idle' : 'capturing',
         timerRunning: false,
-        announceCaptureStart: true
+        announceCaptureStart: !this._deferPersist
       },
       () => {
         this.props.clearCaptureError();
         this._emitKeysChange([], '');
       }
     );
+  };
+
+  private _startRecording = (): void => {
+    if (this.state.phase !== 'idle') {
+      return;
+    }
+    this.setState({ phase: 'capturing', announceCaptureStart: false }, () => {
+      this._inputRef.current?.focus();
+      if (this._announceStartRaf !== null) {
+        cancelAnimationFrame(this._announceStartRaf);
+      }
+      this._announceStartRaf = requestAnimationFrame(() => {
+        this._announceStartRaf = null;
+        this.setState({ announceCaptureStart: true });
+      });
+    });
   };
 
   private _cancel = (): void => {
@@ -534,6 +551,19 @@ export class ShortcutInput extends React.Component<
 
   /** Parse and normalize user input */
   handleInput = (event: React.KeyboardEvent): void => {
+    if (this.state.phase === 'idle') {
+      // Allow Tab navigation until the user explicitly starts capture.
+      if (event.key === 'Tab' || event.key === 'Shift') {
+        return;
+      }
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        event.stopPropagation();
+        this._startRecording();
+      }
+      return;
+    }
+
     if (this.state.phase === 'incompleteIdle' || this.state.phase === 'ready') {
       if (event.key === 'Escape') {
         event.preventDefault();
@@ -630,6 +660,10 @@ export class ShortcutInput extends React.Component<
   }
 
   private _statusMessage(trans: TranslationBundle): string {
+    if (this.state.phase === 'idle') {
+      return '';
+    }
+
     const spoken = this._spokenShortcut(trans);
 
     if (this.state.phase === 'ready') {
@@ -647,8 +681,7 @@ export class ShortcutInput extends React.Component<
       return spoken;
     }
 
-    // Only claim capturing while the textbox is focused (add dialog starts
-    // focused on the command list).
+    // Only claim capturing while the textbox is focused.
     if (
       this.state.inputFocused &&
       (this.state.announceCaptureStart ||
@@ -677,9 +710,13 @@ export class ShortcutInput extends React.Component<
       this.state.keys.length > 0 ||
       this.state.phase === 'incompleteIdle';
     const isInvalid = hasConflict || (hasCapture && !this.state.isFunctional);
+    const isIdle = this.state.phase === 'idle';
     let inputClassName = 'jp-Shortcuts-Input';
     if (!this.state.isAvailable) {
       inputClassName += ' jp-mod-unavailable-Input';
+    }
+    if (isIdle) {
+      inputClassName += ' jp-mod-idle';
     }
     const statusMessage = this._statusMessage(trans);
     const errorMessage = this._errorMessage(trans);
@@ -688,22 +725,31 @@ export class ShortcutInput extends React.Component<
       : this._hintId;
     const activelyRecording =
       this.state.phase === 'capturing' && this.state.inputFocused;
-    const captureHint = activelyRecording
-      ? trans.__('Recording…')
-      : this.state.phase === 'capturing'
-        ? trans.__('Focus this field to record a shortcut.')
-        : trans.__(
-            'Recording paused. Press Tab or Shift+Tab to navigate normally.'
-          );
+    const captureHint = isIdle
+      ? trans.__('Press to start keystroke capture.')
+      : activelyRecording
+        ? trans.__('Recording…')
+        : this.state.phase === 'capturing'
+          ? trans.__('Focus this field to record a shortcut.')
+          : trans.__(
+              'Recording paused. Press Tab or Shift+Tab to navigate normally.'
+            );
     const commandName =
       this.props.shortcut.label ?? this.props.shortcut.command;
     const defaultAriaLabel = this._isReplacingExistingKeybinding
       ? trans.__('Shortcut for %1', commandName)
       : trans.__('New shortcut for %1', commandName);
     const labelledBy = this.props.labelledBy;
-    const ariaLabel = labelledBy
-      ? undefined
-      : (this.props.ariaLabel ?? defaultAriaLabel);
+    const ariaLabel = isIdle
+      ? trans.__('Start recording shortcut')
+      : labelledBy
+        ? undefined
+        : (this.props.ariaLabel ?? defaultAriaLabel);
+    const placeholderText = isIdle
+      ? trans.__('Start recording')
+      : this.state.value === ''
+        ? trans.__('press keys')
+        : this.state.value;
     const boxClass = [
       'jp-Shortcuts-InputBox',
       !this._isReplacingExistingKeybinding ? 'jp-Shortcuts-InputBoxNew' : '',
@@ -717,32 +763,31 @@ export class ShortcutInput extends React.Component<
         <div className="jp-Shortcuts-InputBox-controls">
           <div
             id={this._inputId}
-            role="textbox"
-            aria-readonly="true"
+            role={isIdle ? 'button' : 'textbox'}
+            aria-readonly={isIdle ? undefined : 'true'}
             tabIndex={0}
             className={inputClassName}
             onKeyDown={this.handleInput}
+            onClick={this._handleInputClick}
             onFocus={this._handleInputFocus}
             onBlur={this._handleInputBlur}
             ref={this._inputRef}
             data-lm-suppress-shortcuts="true"
             aria-invalid={isInvalid || undefined}
             aria-describedby={describedBy}
-            aria-labelledby={labelledBy}
+            aria-labelledby={isIdle ? undefined : labelledBy}
             aria-label={ariaLabel}
           >
             <p
               className={
                 this.state.selected && this._isReplacingExistingKeybinding
                   ? 'jp-Shortcuts-InputText jp-mod-selected-InputText'
-                  : this.state.value === ''
+                  : this.state.value === '' || isIdle
                     ? 'jp-Shortcuts-InputText jp-mod-waiting-InputText'
                     : 'jp-Shortcuts-InputText'
               }
             >
-              {this.state.value === ''
-                ? trans.__('press keys')
-                : this.state.value}
+              {placeholderText}
             </p>
             {this.state.timerRunning ? (
               <div
@@ -808,17 +853,14 @@ export class ShortcutInput extends React.Component<
     );
   }
 
+  private _handleInputClick = (): void => {
+    if (this.state.phase === 'idle') {
+      this._startRecording();
+    }
+  };
+
   private _handleInputFocus = (): void => {
     this.setState({ inputFocused: true });
-    if (this._deferPersist && !this.state.announceCaptureStart) {
-      if (this._announceStartRaf !== null) {
-        cancelAnimationFrame(this._announceStartRaf);
-      }
-      this._announceStartRaf = requestAnimationFrame(() => {
-        this._announceStartRaf = null;
-        this.setState({ announceCaptureStart: true });
-      });
-    }
   };
 
   private _handleInputBlur = (): void => {
