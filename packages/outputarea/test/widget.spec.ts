@@ -276,6 +276,20 @@ describe('outputarea/widget', () => {
         ).not.toContain('Show more outputs');
       });
 
+      test('should not throw when set to 0 on an outputarea with fewer outputs than previous limit', () => {
+        const emptyModel = new OutputAreaModel();
+        const widget = new OutputArea({
+          rendermime,
+          model: emptyModel,
+          maxNumberOutputs: 50
+        });
+
+        expect(() => {
+          widget.maxNumberOutputs = 0;
+        }).not.toThrow();
+        expect(widget.maxNumberOutputs).toBe(Infinity);
+      });
+
       test('should display new widgets if increased', () => {
         const widget = new OutputArea({
           rendermime,

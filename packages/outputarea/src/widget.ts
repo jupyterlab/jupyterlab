@@ -284,6 +284,9 @@ export class OutputArea extends Widget {
     if (limit <= 0) {
       limit = Infinity;
     }
+    if (this._maxNumberOutputs === limit) {
+      return;
+    }
     const lastShown = this._maxNumberOutputs;
     this._maxNumberOutputs = limit;
     if (lastShown < limit) {
@@ -741,10 +744,17 @@ export class OutputArea extends Widget {
    * @param lastShown Starting model index to insert.
    */
   private _showTrimmedOutputs(lastShown: number) {
-    // Dispose information widget
-    this.widgets[lastShown].dispose();
+    const trimmedIndex = this.widgets.findIndex(widget =>
+      this._isTrimmedOutputsWidget(widget)
+    );
+    if (trimmedIndex === -1) {
+      return;
+    }
 
-    for (let idx = lastShown; idx < this.model.length; idx++) {
+    // Dispose information widget
+    this.widgets[trimmedIndex].dispose();
+
+    for (let idx = trimmedIndex; idx < this.model.length; idx++) {
       this._insertOutput(idx, this.model.get(idx));
     }
 
