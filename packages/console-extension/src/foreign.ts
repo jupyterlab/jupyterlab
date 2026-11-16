@@ -89,11 +89,15 @@ function activateForeign(
         handler.enabled = false;
         return;
       }
-      const { composite: snoozedUntil } = await settingRegistry.get(
+      const kernelId = current.console.sessionContext.session?.kernel?.id;
+      const { composite: warn } = await settingRegistry.get(
         Private.TRACKER_PLUGIN_ID,
-        Private.SNOOZE_SETTING
+        Private.WARNING_SETTING
       );
-      if (!Private.isSnoozed(snoozedUntil)) {
+      if (
+        warn !== false &&
+        !(kernelId && Private.trustedKernels.has(kernelId))
+      ) {
         const result = await showDialog({
           title: trans.__('Show activity from other kernel clients?'),
           body: new Private.ShowAllActivityBody(trans),
@@ -103,7 +107,7 @@ function activateForeign(
           ],
           defaultButton: 0,
           checkbox: {
-            label: trans.__('Do not ask me again today'),
+            label: trans.__('Do not ask me again for any kernel'),
             caption: trans.__(
               'You can change this in the Settings Editor under Code Console.'
             )
@@ -112,11 +116,14 @@ function activateForeign(
         if (!result.button.accept) {
           return;
         }
+        if (kernelId) {
+          Private.trustedKernels.add(kernelId);
+        }
         if (result.isChecked) {
           await settingRegistry.set(
             Private.TRACKER_PLUGIN_ID,
-            Private.SNOOZE_SETTING,
-            Private.tomorrow()
+            Private.WARNING_SETTING,
+            false
           );
         }
       }
@@ -169,36 +176,14 @@ namespace Private {
   export const TRACKER_PLUGIN_ID = '@jupyterlab/console-extension:tracker';
 
   /**
-   * The setting holding the date until which the warning is skipped.
+   * The setting controlling whether the confirmation dialog is shown.
    */
-  export const SNOOZE_SETTING = 'showAllKernelActivityWarningSnoozedUntil';
+  export const WARNING_SETTING = 'showAllKernelActivityWarning';
 
   /**
-   * Whether a `YYYY-MM-DD` snooze date is still in the future, in local time.
+   * Ids of kernels the user agreed to show all activity for, until reload.
    */
-  export function isSnoozed(value: unknown): boolean {
-    if (typeof value !== 'string') {
-      return false;
-    }
-    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-    if (!match) {
-      return false;
-    }
-    const [, year, month, day] = match.map(Number);
-    return Date.now() < new Date(year, month - 1, day).getTime();
-  }
-
-  /**
-   * Tomorrow's date as `YYYY-MM-DD` in local time.
-   */
-  export function tomorrow(): string {
-    const date = new Date();
-    date.setDate(date.getDate() + 1);
-    const pad = (n: number) => String(n).padStart(2, '0');
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
-      date.getDate()
-    )}`;
-  }
+  export const trustedKernels = new Set<string>();
 
   /**
    * The body of the dialog shown before showing all kernel activity.

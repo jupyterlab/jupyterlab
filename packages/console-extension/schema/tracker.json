@@ -171,12 +171,11 @@
       "type": "boolean",
       "default": false
     },
-    "showAllKernelActivityWarningSnoozedUntil": {
-      "title": "Skip Show All Kernel Activity Warning Until",
-      "description": "Date (YYYY-MM-DD) until which turning on Show All Kernel Activity does not ask for confirmation. Leave empty to always ask.",
-      "type": "string",
-      "pattern": "^(\\d{4}-\\d{2}-\\d{2})?$",
-      "default": ""
+    "showAllKernelActivityWarning": {
+      "title": "Warn Before Showing All Kernel Activity",
+      "description": "Whether turning on Show All Kernel Activity asks for confirmation. Once confirmed, the console does not ask again for that kernel until the page is reloaded.",
+      "type": "boolean",
+      "default": true
     },
     "promptCellConfig": {
       "title": "Prompt Cell Configuration",

@@ -85,9 +85,14 @@ test.describe('Console', () => {
     await page.evaluate(id => window.jupyterapp.commands.execute(id), command);
     await expect(dialog).toHaveCount(0);
     expect(await isToggled()).toBe(false);
+
+    // The kernel is trusted for the rest of the session.
+    await page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    await expect(dialog).toHaveCount(0);
+    expect(await isToggled()).toBe(true);
   });
 
-  test('Should not ask again today about showing all kernel activity when checked', async ({
+  test('Should not ask again about showing all kernel activity when checked', async ({
     page
   }) => {
     const command = 'console:toggle-show-all-kernel-activity';
