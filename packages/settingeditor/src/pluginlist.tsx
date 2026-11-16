@@ -709,10 +709,6 @@ export class PluginList extends ReactWidget {
         seen?: Set<string>
       ): SettingsEditor.PluginMatch => {
         if (matchTags) {
-          if (tagQuery === '') {
-            // empty tag query (`tag:`), return all plugins like an empty search query.
-            return { kind: 'all' };
-          }
           if (Private.hasMatchingTag(searchFilter, plugin.schema.tags)) {
             return { kind: 'tag' };
           }

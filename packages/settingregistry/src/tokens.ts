@@ -399,7 +399,7 @@ export namespace ISettingRegistry {
     type?: Primitive | Primitive[];
 
     /**
-     * Tags of the settings that can be filtered out
+     * Tags that the Settings Editor search finds with `tag:<tag>`.
      */
     tags?: string[];
   }
