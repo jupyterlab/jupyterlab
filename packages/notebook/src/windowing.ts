@@ -131,6 +131,11 @@ window.ResizeObserver = class extends window.ResizeObserver {
 };
 
 /**
+ * Output lines that fit in a scrolled output area, which has a `max-height` of 24em
+ */
+const SCROLLED_OUTPUT_LINES = 18;
+
+/**
  * Notebook view model for the windowed list.
  */
 export class NotebookViewModel extends WindowedListModel {
@@ -210,6 +215,8 @@ export class NotebookViewModel extends WindowedListModel {
       if (model.getMetadata('collapsed') === true) {
         // Collapsed outputs show a one-line placeholder
         outputsLines = Math.min(outputsLines, 1);
+      } else if (model.getMetadata('scrolled') === true) {
+        outputsLines = Math.min(outputsLines, SCROLLED_OUTPUT_LINES);
       }
     }
     return (

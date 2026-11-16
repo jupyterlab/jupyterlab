@@ -288,6 +288,30 @@ describe('@jupyterlab/notebook', () => {
       expect(height).toBe(56); // (1 + 1) * 17 + 22
     });
 
+    test('should count at most 18 lines of scrolled outputs', () => {
+      const outputObj = [
+        {
+          output_type: 'stream',
+          name: 'stdout',
+          text: 'epoch\n'.repeat(400)
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['for i in range(400):\n    print("epoch")'],
+        metadata: { scrolled: true }
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      // 2 source lines, 18 lines in the scrolled output area
+      expect(height).toBe(362); // (2 + 18) * 17 + 22
+    });
+
     test('should calculate height based on number of lines in source and output (string[] output)', () => {
       const outputObj = [
         {
