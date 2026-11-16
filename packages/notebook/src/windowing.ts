@@ -196,7 +196,14 @@ export class NotebookViewModel extends WindowedListModel {
         'application/vnd.jupyter.stdout',
         'text'
       ];
-      for (let outputIdx = 0; outputIdx < model.outputs.length; outputIdx++) {
+      // The output area shows a button in place of the outputs past its limit
+      const shownOutputs = Math.min(
+        model.outputs.length,
+        cell instanceof CodeCell && !cell.isDisposed
+          ? cell.outputArea.maxNumberOutputs
+          : Infinity
+      );
+      for (let outputIdx = 0; outputIdx < shownOutputs; outputIdx++) {
         // `data` copies the output on every read
         const data = model.outputs.get(outputIdx).data;
         const preferredType = supportedOutputTypes.find(
@@ -211,6 +218,9 @@ export class NotebookViewModel extends WindowedListModel {
               text.split('\n').length - (text.endsWith('\n') ? 1 : 0);
           }
         }
+      }
+      if (shownOutputs < model.outputs.length) {
+        outputsLines += 1;
       }
       if (model.getMetadata('collapsed') === true) {
         // Collapsed outputs show a one-line placeholder

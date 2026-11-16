@@ -4,12 +4,13 @@
 import type { YCodeCell } from '@jupyter/ydoc';
 import { createStandaloneCell } from '@jupyter/ydoc';
 import type { Cell, ICodeCellModel } from '@jupyterlab/cells';
-import { CodeCellModel } from '@jupyterlab/cells';
+import { CodeCell, CodeCellModel } from '@jupyterlab/cells';
 import {
   NotebookModel,
   NotebookModelFactory,
   NotebookViewModel
 } from '@jupyterlab/notebook';
+import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 
 describe('@jupyterlab/notebook', () => {
   describe('NotebookModelFactory', () => {
@@ -339,6 +340,35 @@ describe('@jupyterlab/notebook', () => {
       const height = notebook.estimateWidgetSize(0);
       // 2 source lines, 18 lines in the scrolled output area
       expect(height).toBe(362); // (2 + 18) * 17 + 22
+    });
+
+    test('should count the outputs past the limit of the output area as one line', () => {
+      const outputObj = Array.from({ length: 10 }, (_, i) => ({
+        output_type: 'stream',
+        name: i % 2 ? 'stderr' : 'stdout',
+        text: `step ${i}\n`
+      }));
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['for i in range(5):\n    print(i)\n    log.warning(i)'],
+        metadata: {}
+      }) as YCodeCell;
+
+      const model = new CodeCellModel({ sharedModel });
+      const cell = new CodeCell({
+        model,
+        rendermime: NBTestUtils.defaultRenderMime(),
+        contentFactory: NBTestUtils.createCodeCellFactory(),
+        maxNumberOutputs: 4
+      });
+      notebook.cells.push(cell);
+
+      const height = notebook.estimateWidgetSize(0);
+      // 3 source lines, 4 output lines and the button that shows the rest
+      expect(height).toBe(158); // (3 + 4 + 1) * 17 + 22
+      cell.dispose();
     });
 
     test('should calculate height based on number of lines in source and output (string[] output)', () => {
