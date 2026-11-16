@@ -92,7 +92,7 @@ test.describe('Console', () => {
     expect(await isToggled()).toBe(true);
   });
 
-  test('Should not ask again about showing all kernel activity when checked', async ({
+  test('Should not ask again about showing all kernel activity for any kernel when checked', async ({
     page
   }) => {
     const command = 'console:toggle-show-all-kernel-activity';
@@ -110,8 +110,10 @@ test.describe('Console', () => {
     await toggle();
     expect(await isToggled()).toBe(false);
 
+    // A console with another kernel is not asked either.
+    await setupConsole(page);
     await toggle();
-    expect(await isToggled()).toBe(true);
+    await expect.poll(isToggled).toBe(true);
     await expect(dialog).toHaveCount(0);
   });
 

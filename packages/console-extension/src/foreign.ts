@@ -90,12 +90,8 @@ function activateForeign(
         return;
       }
       const kernelId = current.console.sessionContext.session?.kernel?.id;
-      const { composite: warn } = await settingRegistry.get(
-        Private.TRACKER_PLUGIN_ID,
-        Private.WARNING_SETTING
-      );
       if (
-        warn !== false &&
+        !Private.warningDisabled &&
         !(kernelId && Private.trustedKernels.has(kernelId))
       ) {
         const result = await showDialog({
@@ -107,10 +103,7 @@ function activateForeign(
           ],
           defaultButton: 0,
           checkbox: {
-            label: trans.__('Do not ask me again for any kernel'),
-            caption: trans.__(
-              'You can change this in the Settings Editor under Code Console.'
-            )
+            label: trans.__('Do not ask me again for any kernel until reload')
           }
         });
         if (!result.button.accept) {
@@ -120,11 +113,7 @@ function activateForeign(
           Private.trustedKernels.add(kernelId);
         }
         if (result.isChecked) {
-          await settingRegistry.set(
-            Private.TRACKER_PLUGIN_ID,
-            Private.WARNING_SETTING,
-            false
-          );
+          Private.warningDisabled = true;
         }
       }
       if (!handler.isDisposed) {
@@ -176,9 +165,9 @@ namespace Private {
   export const TRACKER_PLUGIN_ID = '@jupyterlab/console-extension:tracker';
 
   /**
-   * The setting controlling whether the confirmation dialog is shown.
+   * Whether the user opted out of the confirmation dialog, until reload.
    */
-  export const WARNING_SETTING = 'showAllKernelActivityWarning';
+  export let warningDisabled = false;
 
   /**
    * Ids of kernels the user agreed to show all activity for, until reload.

@@ -171,12 +171,6 @@
       "type": "boolean",
       "default": false
     },
-    "showAllKernelActivityWarning": {
-      "title": "Warn Before Showing All Kernel Activity",
-      "description": "Whether turning on Show All Kernel Activity asks for confirmation. Once confirmed, the console does not ask again for that kernel until the page is reloaded.",
-      "type": "boolean",
-      "default": true
-    },
     "promptCellConfig": {
       "title": "Prompt Cell Configuration",
       "description": "The configuration for all prompt cells; it will override the CodeMirror default configuration.",
