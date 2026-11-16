@@ -458,6 +458,20 @@ button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
   max-width: calc(500px + 48px);
   max-height: 90vh;
   resize: vertical;
+  /* Keep overflow hidden for resize/radius; scrolling belongs on .jp-Dialog-body. */
+  overflow: hidden;
+}
+
+/*
+ * When shrinking the card, the body must be allowed to shrink (min-height: 0)
+ * and scroll so that the scrollbar is not clipped by .jp-Dialog-content's
+ * overflow: hidden.
+ */
+.jp-Dialog-content:has(.jp-Shortcuts-AddDialogBody) > .jp-Dialog-body,
+.jp-Dialog-content:has(.jp-Shortcuts-CustomOptionsDialogBody) > .jp-Dialog-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
 }
 
 .jp-Shortcuts-AddDialog-capture .jp-Shortcuts-InputBox,
