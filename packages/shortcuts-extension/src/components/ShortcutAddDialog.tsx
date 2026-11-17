@@ -380,7 +380,12 @@ class NewShortcutDialogBody
 
   private _displayCaptureError = (data: ICaptureError): void => {
     this._conflicts = data.kind === 'conflict' ? [...data.conflictsWith] : [];
-    this._errorNode.textContent = data.message;
+    // Assertive error region also announces that the footer is now Overwrite
+    // (label swap alone is easy to miss while focus stays in the capture field).
+    this._errorNode.textContent =
+      data.kind === 'conflict'
+        ? this._trans.__('%1 Press Overwrite to replace it.', data.message)
+        : data.message;
     this._checkValidation();
   };
 
