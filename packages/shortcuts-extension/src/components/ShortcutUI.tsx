@@ -496,6 +496,21 @@ export class ShortcutUI
    * Persist a new shortcut from the add dialog.
    */
   saveNewShortcut = async (value: NewShortcutDialog.IValue): Promise<void> => {
+    const normalizedKeys = value.keys.map(CommandRegistry.normalizeKeystroke);
+    for (const target of value.overwriteTargets) {
+      const conflictingBinding = target.keybindings.find(
+        binding =>
+          JSONExt.deepEqual(binding.keys, normalizedKeys) ||
+          normalizedKeys.some(key => JSONExt.deepEqual(binding.keys, [key]))
+      );
+      if (!conflictingBinding) {
+        console.error(
+          `Conflicting binding could not be found for ${target.id} using keys ${value.keys}`
+        );
+        continue;
+      }
+      await this.deleteKeybinding(target, conflictingBinding);
+    }
     const shortcut: IShortcutTarget = {
       id: `${value.command}-${value.selector}`,
       command: value.command,

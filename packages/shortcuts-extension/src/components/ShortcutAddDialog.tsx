@@ -59,9 +59,44 @@ export class NewShortcutDialog extends Dialog<NewShortcutDialog.IValue> {
       focusNodeSelector: '#jp-Shortcuts-AddDialog-command'
     });
 
+    this._formBody = body;
+    this._trans = trans;
     checkValidation = () => this._checkValidation();
     this._checkValidation();
   }
+
+  /**
+   * Keep accept enabled for key conflicts (footer becomes Overwrite); still
+   * disable for incomplete keys, missing command, or invalid JSON.
+   */
+  protected _checkValidation(): void {
+    super._checkValidation();
+    this._syncAcceptButton();
+  }
+
+  private _syncAcceptButton(): void {
+    const accept = this.node.querySelector(
+      '.jp-Dialog-footer button.jp-mod-accept'
+    );
+    if (!(accept instanceof HTMLButtonElement)) {
+      return;
+    }
+    const overwrite = this._formBody.hasConflicts();
+    const label = overwrite
+      ? this._trans.__('Overwrite')
+      : this._trans.__('Save');
+    const labelNode = accept.querySelector('.jp-Dialog-buttonLabel');
+    if (labelNode) {
+      labelNode.textContent = label;
+      labelNode.setAttribute('aria-label', label);
+    } else {
+      accept.textContent = label;
+    }
+    accept.classList.toggle('jp-mod-warn', overwrite);
+  }
+
+  private _formBody: NewShortcutDialogBody;
+  private _trans: TranslationBundle;
 
   /**
    * Prevent Enter in the command select, JSON editor, or keystroke capture
@@ -121,6 +156,8 @@ export namespace NewShortcutDialog {
     category: string;
     label?: string;
     keys: string[];
+    /** Conflicting targets to remove when accepting Overwrite. */
+    overwriteTargets: IShortcutTarget[];
   }
 
   /**
@@ -249,6 +286,13 @@ class NewShortcutDialogBody
   /**
    * Value for the dialog when accepted.
    */
+  /**
+   * Whether the current capture conflicts with existing shortcuts.
+   */
+  hasConflicts(): boolean {
+    return this._conflicts.length > 0;
+  }
+
   getValue(): NewShortcutDialog.IValue {
     const options = this._customOptions.getValue();
     return {
@@ -256,6 +300,7 @@ class NewShortcutDialogBody
       category: this._draft.category,
       label: this._draft.label,
       keys: [...this._keys],
+      overwriteTargets: [...this._conflicts],
       selector: options.selector,
       args: options.args
     };
@@ -334,11 +379,15 @@ class NewShortcutDialogBody
   };
 
   private _displayCaptureError = (data: ICaptureError): void => {
+    this._conflicts = data.kind === 'conflict' ? [...data.conflictsWith] : [];
     this._errorNode.textContent = data.message;
+    this._checkValidation();
   };
 
   private _clearCaptureError = (): void => {
+    this._conflicts = [];
     this._errorNode.textContent = '';
+    this._checkValidation();
   };
 
   private _noopAdd: IShortcutUI['addKeybinding'] = async () => {
@@ -392,6 +441,7 @@ class NewShortcutDialogBody
   private _selectorInput: HTMLInputElement;
   private _reactRoot: Root | null = null;
   private _keys: string[] = [];
+  private _conflicts: IShortcutTarget[] = [];
   private _draft: IDraftShortcut = {
     id: 'new-shortcut',
     command: '',

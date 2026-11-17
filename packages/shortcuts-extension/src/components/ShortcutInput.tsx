@@ -223,11 +223,6 @@ export class ShortcutInput extends React.Component<
       isAvailable: true,
       activeConflicts: []
     });
-    if (this._deferPersist) {
-      // Defer deleting conflicting bindings until the parent dialog saves.
-      this._emitKeysChange(keys, '');
-      return;
-    }
     await this._handleOverwrite(conflicts, keys);
     this._closeAfterSubmit();
   };
@@ -697,7 +692,11 @@ export class ShortcutInput extends React.Component<
       this.state.userInput !== '' ||
       this.state.keys.length > 0 ||
       this.state.phase === 'incompleteIdle';
-    const isInvalid = hasConflict || (hasCapture && !this.state.isFunctional);
+    const isIncomplete = hasCapture && !this.state.isFunctional;
+    const isInvalid = hasConflict || isIncomplete;
+    // In the add dialog, conflicts must not use jp-mod-error or Dialog disables
+    // the accept button; the footer becomes Overwrite instead.
+    const showErrorClass = this._deferPersist ? isIncomplete : isInvalid;
     const isIdle = this.state.phase === 'idle';
     let inputClassName = 'jp-Shortcuts-Input';
     if (!this.state.isAvailable) {
@@ -733,7 +732,7 @@ export class ShortcutInput extends React.Component<
     const boxClass = [
       'jp-Shortcuts-InputBox',
       !this._isReplacingExistingKeybinding ? 'jp-Shortcuts-InputBoxNew' : '',
-      isInvalid ? 'jp-mod-error' : '',
+      showErrorClass ? 'jp-mod-error' : '',
       this.props.displayInput ? '' : 'jp-mod-hidden'
     ]
       .filter(Boolean)
