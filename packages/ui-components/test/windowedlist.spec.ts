@@ -243,6 +243,91 @@ describe('@jupyterlab/ui-components', () => {
         ]);
         expect(getOffset(2)).toBe(30);
       });
+      it('should ignore entries with zero or non-positive sizes', () => {
+        const model = new TestModel({
+          itemsList: new ObservableList({
+            values: [1, 2]
+          })
+        });
+        model.windowingActive = true;
+        expect(model.getEstimatedTotalSize()).toBe(2 * FIXED_ESTIMATED_SIZE);
+        model.setWidgetSize([
+          {
+            index: 0,
+            size: 0
+          }
+        ]);
+        expect(model.getEstimatedTotalSize()).toBe(2 * FIXED_ESTIMATED_SIZE);
+      });
+    });
+    describe('#getSpan()', () => {
+      it('should fall back to estimated size for connected widgets with zero height', () => {
+        const widget0 = new Widget();
+        const widget1 = new Widget();
+        Widget.attach(widget0, document.body);
+        Widget.attach(widget1, document.body);
+        widget1.node.style.display = 'none';
+
+        jest
+          .spyOn(widget0.node, 'getBoundingClientRect')
+          .mockReturnValue({ height: 80 } as DOMRect);
+        jest
+          .spyOn(widget1.node, 'getBoundingClientRect')
+          .mockReturnValue({ height: 0 } as DOMRect);
+
+        class SpanTestModel extends WindowedListModel {
+          estimateWidgetSize = (_index: number): number => FIXED_ESTIMATED_SIZE;
+          widgetRenderer = (index: number): Widget =>
+            index === 0 ? widget0 : widget1;
+        }
+
+        const model = new SpanTestModel({
+          itemsList: new ObservableList({ values: ['a', 'b'] })
+        });
+        model.windowingActive = true;
+
+        const [top, height] = model.getSpan(0, 1);
+        expect(top).toBe(0);
+        // Widget 0 has measured height 80, widget 1 has estimated height FIXED_ESTIMATED_SIZE (100)
+        expect(height).toBe(80 + FIXED_ESTIMATED_SIZE);
+        expect(model.getEstimatedTotalSize()).toBe(80 + FIXED_ESTIMATED_SIZE);
+
+        Widget.detach(widget0);
+        Widget.detach(widget1);
+      });
+
+      it('should use measured height for connected widgets with positive height', () => {
+        const widget0 = new Widget();
+        const widget1 = new Widget();
+        Widget.attach(widget0, document.body);
+        Widget.attach(widget1, document.body);
+
+        jest
+          .spyOn(widget0.node, 'getBoundingClientRect')
+          .mockReturnValue({ height: 80 } as DOMRect);
+        jest
+          .spyOn(widget1.node, 'getBoundingClientRect')
+          .mockReturnValue({ height: 120 } as DOMRect);
+
+        class SpanTestModel extends WindowedListModel {
+          estimateWidgetSize = (_index: number): number => FIXED_ESTIMATED_SIZE;
+          widgetRenderer = (index: number): Widget =>
+            index === 0 ? widget0 : widget1;
+        }
+
+        const model = new SpanTestModel({
+          itemsList: new ObservableList({ values: ['a', 'b'] })
+        });
+        model.windowingActive = true;
+
+        const [top, height] = model.getSpan(0, 1);
+        expect(top).toBe(0);
+        expect(height).toBe(80 + 120);
+        expect(model.getEstimatedTotalSize()).toBe(80 + 120);
+
+        Widget.detach(widget0);
+        Widget.detach(widget1);
+      });
     });
   });
 });
