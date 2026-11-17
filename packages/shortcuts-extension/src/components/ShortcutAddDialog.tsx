@@ -230,10 +230,6 @@ class NewShortcutDialogBody
     this._commandSelect.name = 'shortcut-command';
     this._commandSelect.className = 'jp-mod-styled';
     this._commandSelect.required = true;
-    this._commandSelect.setAttribute(
-      'aria-label',
-      this._trans.__('Select a command')
-    );
 
     const placeholder = document.createElement('option');
     placeholder.value = '';

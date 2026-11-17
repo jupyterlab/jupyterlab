@@ -45,6 +45,7 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
           active={this.props.currentSort}
           sortDirection={this.props.sortDirection}
           columnId={columnId}
+          translator={this.props.translator}
         />
       </th>
     );
