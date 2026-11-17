@@ -1355,6 +1355,9 @@ async function activateConsole(
         shell.activateById(widget.id);
       }
       const sessionContext = widget.console.sessionContext;
+      if (sessionContext.hasNoKernel) {
+        return;
+      }
       await sessionContext.ready;
       if (widget.isDisposed || widget.console.isDisposed) {
         return;

@@ -922,7 +922,9 @@ export namespace Commands {
           return Promise.resolve(void 0);
         }
       },
-      isEnabled,
+      isEnabled: () =>
+        isEnabled() &&
+        getConsoleForEditor()?.sessionContext.hasNoKernel === false,
       label: trans.__('Run Selected Code'),
       describedBy: {
         args: {
