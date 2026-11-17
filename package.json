@@ -131,7 +131,7 @@
     "typescript-eslint": "^8.0.0"
   },
   "devDependencies": {
-    "@jupyter/eslint-plugin": "^1.4.0",
+    "@jupyter/eslint-plugin": "^1.5.0",
     "typedoc": "~0.27.4",
     "typedoc-plugin-mdn-links": "^4.0.4"
   },
