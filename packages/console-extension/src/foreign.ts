@@ -49,7 +49,7 @@ function activateForeign(
 
     // Property showAllKernelActivity configures foreign handler enabled on start.
     void settingRegistry
-      .get(Private.TRACKER_PLUGIN_ID, 'showAllKernelActivity')
+      .get('@jupyterlab/console-extension:tracker', 'showAllKernelActivity')
       .then(({ composite }) => {
         const showAllKernelActivity = composite as boolean;
         handler.enabled = showAllKernelActivity;
@@ -161,11 +161,6 @@ function activateForeign(
  * A namespace for private data.
  */
 namespace Private {
-  /**
-   * The plugin holding the console tracker settings.
-   */
-  export const TRACKER_PLUGIN_ID = '@jupyterlab/console-extension:tracker';
-
   /**
    * Whether the user opted out of the confirmation dialog, until reload.
    */
