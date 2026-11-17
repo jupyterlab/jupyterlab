@@ -7,7 +7,6 @@ import { Dialog } from '@jupyterlab/apputils';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import type { JSONObject } from '@lumino/coreutils';
-import { Platform } from '@lumino/domutils';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';
@@ -27,14 +26,7 @@ import {
 } from './ShortcutCustomOptions';
 import type { ICaptureError } from './ShortcutInput';
 import { ShortcutInput } from './ShortcutInput';
-
-const MAC_SYMBOLS: Record<string, string> = {
-  Ctrl: '⌃',
-  Alt: '⌥',
-  Shift: '⇧',
-  Accel: '⌘',
-  Cmd: '⌘'
-};
+import { toSymbols } from '../keystrokeDisplay';
 
 const MODIFIER_KEYS = new Set(['Ctrl', 'Alt', 'Accel', 'Shift']);
 
@@ -300,22 +292,6 @@ class NewShortcutDialogBody
     return commands;
   }
 
-  private _toSymbols = (value: string): string => {
-    const mapKey = (key: string): string =>
-      Platform.IS_MAC
-        ? (MAC_SYMBOLS[key] ?? key)
-        : key === 'Accel'
-          ? 'Ctrl'
-          : key;
-    // Split on ', ' so a comma key (e.g. "Ctrl Shift ,") is not a chord break.
-    return value
-      .split(', ')
-      .map(chord =>
-        chord.trim().split(/\s+/).filter(Boolean).map(mapKey).join(' + ')
-      )
-      .join(', ');
-  };
-
   private _isChordFunctional(keys: string[]): boolean {
     if (keys.length === 0) {
       return false;
@@ -389,7 +365,7 @@ class NewShortcutDialogBody
         clearCaptureError={this._clearCaptureError}
         toggleInput={() => undefined}
         shortcut={this._draft}
-        toSymbols={this._toSymbols}
+        toSymbols={toSymbols}
         displayInput={true}
         placeholder=""
         translator={this._translator}

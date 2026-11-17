@@ -11,25 +11,17 @@ import {
   infoIcon,
   restoreIcon
 } from '@jupyterlab/ui-components';
-import { Platform } from '@lumino/domutils';
 import * as React from 'react';
 import { CustomOptionsDialog } from './ShortcutCustomOptions';
 import type { ICaptureError } from './ShortcutInput';
 import { ShortcutInput } from './ShortcutInput';
+import { toSymbols } from '../keystrokeDisplay';
 import type {
   IKeybinding,
   IShortcutRegistry,
   IShortcutTarget,
   IShortcutUI
 } from '../types';
-
-const MAC_SYMBOLS: Record<string, string> = {
-  Ctrl: '⌃',
-  Alt: '⌥',
-  Shift: '⇧',
-  Accel: '⌘',
-  Cmd: '⌘'
-};
 
 /** Props for ShortcutItem component */
 export interface IShortcutItemProps {
@@ -132,25 +124,6 @@ export class ShortcutItem extends React.Component<
       displayNewInput: !this.state.displayNewInput,
       captureErrors: new Map()
     });
-  };
-
-  /**
-   * Transform keystrokes for display; use + within a chord, comma-space between
-   * chords. Split on ', ' (not ',') so a comma key (e.g. "Ctrl Shift ,") is kept.
-   */
-  toSymbols = (value: string): string => {
-    const mapKey = (key: string): string =>
-      Platform.IS_MAC
-        ? (MAC_SYMBOLS[key] ?? key)
-        : key === 'Accel'
-          ? 'Ctrl'
-          : key;
-    return value
-      .split(', ')
-      .map(chord =>
-        chord.trim().split(/\s+/).filter(Boolean).map(mapKey).join(' + ')
-      )
-      .join(', ');
   };
 
   getCategoryCell(): JSX.Element {
@@ -311,9 +284,9 @@ export class ShortcutItem extends React.Component<
         onCloseAfterCancel={() =>
           this._scheduleFocusShortcutContainer(location)
         }
-        toSymbols={this.toSymbols}
+        toSymbols={toSymbols}
         displayInput={this.getDisplayReplaceInput(location)}
-        placeholder={this.toSymbols(binding.keys.join(', '))}
+        placeholder={toSymbols(binding.keys.join(', '))}
         translator={this.props.external.translator}
         ariaLabel={this._trans.__('Edit shortcut for %1', commandName)}
       />
@@ -326,7 +299,7 @@ export class ShortcutItem extends React.Component<
         {binding.keys.map((keyboardKey: string, index: number) => (
           <React.Fragment key={index}>
             <div className="jp-Shortcuts-ShortcutKeys">
-              {this.toSymbols(keyboardKey)
+              {toSymbols(keyboardKey)
                 .split(' + ')
                 .map((keyPart, keyPartIndex, keyParts) => (
                   <React.Fragment key={`${index}-${keyPart}-${keyPartIndex}`}>
@@ -367,7 +340,7 @@ export class ShortcutItem extends React.Component<
           role="button"
           aria-label={this._trans.__(
             'Edit keybinding %1 for %2',
-            this.toSymbols(binding.keys.join(', ')),
+            toSymbols(binding.keys.join(', ')),
             this.props.shortcut.label ?? this.props.shortcut.command
           )}
           data-keybinding={index}
@@ -433,7 +406,7 @@ export class ShortcutItem extends React.Component<
         clearCaptureError={() => this._clearCaptureErrorForBinding(null)}
         onCloseAfterSubmit={() => this._scheduleFocusNewKeybinding()}
         onCloseAfterCancel={() => this._scheduleFocusAddButton()}
-        toSymbols={this.toSymbols}
+        toSymbols={toSymbols}
         displayInput={this.state.displayNewInput}
         placeholder={''}
         translator={this.props.external.translator}
