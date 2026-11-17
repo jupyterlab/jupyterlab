@@ -23,9 +23,9 @@ import {
   KernelCompleterProvider,
   ProviderReconciliator
 } from '@jupyterlab/completer';
-import { nullTranslator } from '@jupyterlab/translation';
 import { isHintableMimeType } from '@jupyterlab/completer/lib/utils';
 import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
+import { nullTranslator } from '@jupyterlab/translation';
 import { KernelMessage } from '@jupyterlab/services';
 import {
   KernelMock,
@@ -603,6 +603,9 @@ describe('@jupyterlab/completer', () => {
       });
 
       it('should trigger on local text change after remote change', async () => {
+        // this test depends on the previous one ('should not trigger auto-completion on remote collaborator changes')
+        // to have left editor.lastChangeIsRemote as true.
+        expect(handler.editor!.lastChangeIsRemote).toBe(true);
         provider.triggers.length = 0;
         const srcLength = handler.editor!.model.sharedModel.getSource().length;
         handler.editor!.model.sharedModel.updateSource(
@@ -618,22 +621,16 @@ describe('@jupyterlab/completer', () => {
         );
         expect(handler.editor!.lastChangeIsRemote).toBe(false);
       });
-    });
 
-    describe('inline auto-completion with remote changes', () => {
-      let inlineEditorWidget: CodeEditorWrapper;
-      let inlineHandler: CompletionHandler;
-      let fetchInlineSpy: jest.SpyInstance;
-
-      beforeEach(() => {
-        inlineEditorWidget = createEditorWidget();
+      it('should not trigger inline auto-completion on remote collaborator changes', async () => {
+        const inlineEditorWidget = createEditorWidget();
         Widget.attach(inlineEditorWidget, document.body);
         const reconciliator = new ProviderReconciliator({
           context: Symbol() as any,
           providers: [],
           timeout: 0
         });
-        fetchInlineSpy = jest
+        const fetchInlineSpy = jest
           .spyOn(reconciliator, 'fetchInline')
           .mockReturnValue([]);
         const inlineModel = new InlineCompleter.Model();
@@ -642,7 +639,7 @@ describe('@jupyterlab/completer', () => {
           model: inlineModel,
           trans: nullTranslator.load('test')
         });
-        inlineHandler = new CompletionHandler({
+        const inlineHandler = new CompletionHandler({
           reconciliator,
           completer: new Completer({
             editor: null,
@@ -651,55 +648,91 @@ describe('@jupyterlab/completer', () => {
           inlineCompleter
         });
         inlineHandler.editor = inlineEditorWidget.editor;
-      });
 
-      afterEach(() => {
-        inlineEditorWidget.dispose();
-        inlineHandler.completer.dispose();
-        inlineHandler.inlineCompleter?.dispose();
-        inlineHandler.dispose();
-        fetchInlineSpy.mockRestore();
-      });
+        try {
+          inlineEditorWidget.editor.model.sharedModel.setSource('foo');
+          await new Promise(process.nextTick);
+          inlineEditorWidget.editor.setCursorPosition({
+            line: 0,
+            column: 3
+          });
+          fetchInlineSpy.mockClear();
 
-      it('should not trigger inline auto-completion on remote collaborator changes', async () => {
-        inlineEditorWidget.editor.model.sharedModel.setSource('foo');
-        await new Promise(process.nextTick);
-        fetchInlineSpy.mockClear();
+          const currentDoc = (
+            inlineEditorWidget.editor.model.sharedModel as YFile
+          ).ysource.doc!;
+          const remoteDoc = new Doc();
+          const remoteText = remoteDoc.getText('source');
+          applyUpdate(remoteDoc, encodeStateAsUpdate(currentDoc));
 
-        const currentDoc = (
-          inlineEditorWidget.editor.model.sharedModel as YFile
-        ).ysource.doc!;
-        const remoteDoc = new Doc();
-        const remoteText = remoteDoc.getText('source');
-        applyUpdate(remoteDoc, encodeStateAsUpdate(currentDoc));
+          remoteText.insert(remoteText.length, 'bar');
+          const update = encodeStateAsUpdate(remoteDoc);
+          applyUpdate(currentDoc, update, 'remote-collaborator');
+          await new Promise(process.nextTick);
 
-        remoteText.insert(remoteText.length, 'bar');
-        const update = encodeStateAsUpdate(remoteDoc);
-        applyUpdate(currentDoc, update, 'remote-collaborator');
-        await new Promise(process.nextTick);
-
-        expect(fetchInlineSpy).not.toHaveBeenCalled();
+          expect(fetchInlineSpy).not.toHaveBeenCalled();
+        } finally {
+          inlineEditorWidget.dispose();
+          inlineHandler.completer.dispose();
+          inlineHandler.inlineCompleter?.dispose();
+          inlineHandler.dispose();
+          fetchInlineSpy.mockRestore();
+        }
       });
 
       it('should trigger inline auto-completion on local text changes', async () => {
-        inlineEditorWidget.editor.model.sharedModel.setSource('foo');
-        await new Promise(process.nextTick);
-        fetchInlineSpy.mockClear();
-
-        const srcLength =
-          inlineEditorWidget.editor.model.sharedModel.getSource().length;
-        inlineEditorWidget.editor.setCursorPosition({
-          line: 0,
-          column: srcLength
+        const inlineEditorWidget = createEditorWidget();
+        Widget.attach(inlineEditorWidget, document.body);
+        const reconciliator = new ProviderReconciliator({
+          context: Symbol() as any,
+          providers: [],
+          timeout: 0
         });
-        inlineEditorWidget.editor.model.sharedModel.updateSource(
-          srcLength,
-          srcLength,
-          'z'
-        );
-        await new Promise(process.nextTick);
+        const fetchInlineSpy = jest
+          .spyOn(reconciliator, 'fetchInline')
+          .mockReturnValue([]);
+        const inlineModel = new InlineCompleter.Model();
+        const inlineCompleter = new InlineCompleter({
+          editor: inlineEditorWidget.editor,
+          model: inlineModel,
+          trans: nullTranslator.load('test')
+        });
+        const inlineHandler = new CompletionHandler({
+          reconciliator,
+          completer: new Completer({
+            editor: null,
+            model: new CompleterModel()
+          }),
+          inlineCompleter
+        });
+        inlineHandler.editor = inlineEditorWidget.editor;
 
-        expect(fetchInlineSpy).toHaveBeenCalled();
+        try {
+          inlineEditorWidget.editor.model.sharedModel.setSource('foo');
+          await new Promise(process.nextTick);
+          const srcLength =
+            inlineEditorWidget.editor.model.sharedModel.getSource().length;
+          inlineEditorWidget.editor.setCursorPosition({
+            line: 0,
+            column: srcLength
+          });
+          fetchInlineSpy.mockClear();
+
+          inlineEditorWidget.editor.model.sharedModel.updateSource(
+            srcLength,
+            srcLength,
+            'z'
+          );
+          await new Promise(process.nextTick);
+
+          expect(fetchInlineSpy).toHaveBeenCalled();
+        } finally {
+          inlineEditorWidget.dispose();
+          inlineHandler.completer.dispose();
+          inlineHandler.inlineCompleter?.dispose();
+          inlineHandler.dispose();
+          fetchInlineSpy.mockRestore();
+        }
       });
     });
 

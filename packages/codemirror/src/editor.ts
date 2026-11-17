@@ -9,7 +9,8 @@ import {
   Compartment,
   EditorSelection,
   EditorState,
-  Prec
+  Prec,
+  Transaction
 } from '@codemirror/state';
 import type { Command, ViewUpdate } from '@codemirror/view';
 import { EditorView } from '@codemirror/view';
@@ -18,7 +19,6 @@ import type { SyntaxNodeRef } from '@lezer/common';
 import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 import { ExtensionsHandler } from './extension';
-import { yRemoteAnnotation } from './extensions/ybinding';
 import { EditorLanguageRegistry } from './language';
 import type {
   IEditorExtensionRegistry,
@@ -752,8 +752,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   private _onDocChanged(update: ViewUpdate) {
     if (update.docChanged) {
-      this._lastChangeIsRemote = update.transactions.some(
-        tr => tr.annotation(yRemoteAnnotation) === true
+      this._lastChangeIsRemote = update.transactions.some(tr =>
+        Boolean(tr.annotation(Transaction.remote))
       );
     }
     if (update.transactions.length && update.transactions[0].selection) {

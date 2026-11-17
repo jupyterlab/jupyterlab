@@ -8,7 +8,12 @@
  * licensed under MIT License by Kevin Jahns
  */
 import type { Extension, SelectionRange } from '@codemirror/state';
-import { Annotation, EditorSelection, Facet } from '@codemirror/state';
+import {
+  Annotation,
+  EditorSelection,
+  Facet,
+  Transaction
+} from '@codemirror/state';
 import type { EditorView, ViewUpdate } from '@codemirror/view';
 import { ViewPlugin } from '@codemirror/view';
 import {
@@ -19,9 +24,9 @@ import {
 import type {
   RelativePosition,
   Text,
-  Transaction,
   UndoManager,
-  YTextEvent
+  YTextEvent,
+  Transaction as YTransaction
 } from 'yjs';
 import {
   createAbsolutePositionFromRelativePosition,
@@ -186,11 +191,6 @@ export const ySyncFacet = Facet.define<YSyncConfig, YSyncConfig>({
 export const ySyncAnnotation = Annotation.define<YSyncConfig>();
 
 /**
- * Annotation indicating whether a change originated from a remote collaborator.
- */
-export const yRemoteAnnotation = Annotation.define<boolean>();
-
-/**
  * Yjs binding view plugin to synchronize the
  * editor state with the Yjs document.
  */
@@ -198,7 +198,7 @@ export const ySync = ViewPlugin.fromClass(
   class {
     constructor(view: EditorView) {
       this.conf = view.state.facet(ySyncFacet);
-      this._observer = (event: YTextEvent, tr: Transaction) => {
+      this._observer = (event: YTextEvent, tr: YTransaction) => {
         if (tr.origin !== this.conf) {
           const delta = event.delta;
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -219,7 +219,7 @@ export const ySync = ViewPlugin.fromClass(
             ySyncAnnotation.of(this.conf)
           ];
           if (!tr.local) {
-            annotations.push(yRemoteAnnotation.of(true));
+            annotations.push(Transaction.remote.of(true));
           }
           view.dispatch({
             changes,
@@ -268,7 +268,7 @@ export const ySync = ViewPlugin.fromClass(
     }
 
     conf: YSyncConfig;
-    _observer: (event: YTextEvent, tr: Transaction) => void;
+    _observer: (event: YTextEvent, tr: YTransaction) => void;
     _ytext: Text;
   }
 );

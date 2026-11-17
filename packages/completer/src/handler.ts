@@ -347,11 +347,12 @@ export class CompletionHandler implements IDisposable {
     if (model) {
       // If there is a text selection, no completion is allowed.
       const { start, end } = editor.getSelection();
-      if (start.column !== end.column || start.line !== end.line) {
-        return;
+      if (start.column === end.column && start.line === end.line) {
+        // Dispatch the text change synchronously so active completion filtering is immediate.
+        model.handleTextChange(
+          this.getState(editor, editor.getCursorPosition())
+        );
       }
-      // Dispatch the text change synchronously so active completion filtering is immediate.
-      model.handleTextChange(this.getState(editor, editor.getCursorPosition()));
     }
 
     const position = editor.getCursorPosition();
@@ -437,14 +438,6 @@ export class CompletionHandler implements IDisposable {
           return;
         }
 
-        if (
-          trigger === CompletionTriggerKind.TriggerCharacter &&
-          editor.lastChangeIsRemote
-        ) {
-          // A collaborator changed the text while the request was pending
-          return;
-        }
-
         if (!this._isCurrentState(editor, state)) {
           return;
         }
@@ -488,6 +481,10 @@ export class CompletionHandler implements IDisposable {
     trigger: InlineCompletionTriggerKind
   ) {
     if (trigger === InlineCompletionTriggerKind.Automatic) {
+      // For file editors (YFile), the observer registration order means
+      // CodeMirror has not yet processed the transaction when sharedModel.changed
+      // fires. Awaiting a microtask ensures CodeMirror is updated and lastChangeIsRemote
+      // is correctly set before checking it.
       await Promise.resolve();
     }
     const editor = this.editor;
@@ -502,7 +499,8 @@ export class CompletionHandler implements IDisposable {
       trigger === InlineCompletionTriggerKind.Automatic &&
       editor.lastChangeIsRemote
     ) {
-      return Promise.resolve();
+      this._fetchingInline += 1;
+      return;
     }
 
     const line = editor.getLine(position.line);
@@ -553,9 +551,9 @@ export class CompletionHandler implements IDisposable {
           }
           if (
             trigger === InlineCompletionTriggerKind.Automatic &&
-            (!editor.hasFocus() || editor.lastChangeIsRemote)
+            !editor.hasFocus()
           ) {
-            // The user left the editor or a collaborator changed the text while the request was pending
+            // The user left the editor while the request was pending
             return;
           }
           completed.add(promise);
