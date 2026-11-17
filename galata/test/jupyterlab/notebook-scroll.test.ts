@@ -391,6 +391,19 @@ test.describe('Notebook scroll on execution (with windowing)', () => {
     await page.waitForTimeout(500);
     const referenceBox = (await thirdCell!.boundingBox())!;
 
+    // Record the top of the third cell each time the second cell grows. This
+    // observer runs after the observer of the list, just before the paint.
+    await thirdCell!.evaluate(cell => {
+      const tops: number[] = [];
+      (window as any).thirdCellTops = tops;
+      const secondCell = cell.parentElement!.querySelector(
+        '[data-windowed-list-index="1"]'
+      )!;
+      new ResizeObserver(() => {
+        tops.push(cell.getBoundingClientRect().top);
+      }).observe(secondCell);
+    });
+
     await execution;
     // Allow the layout to settle after the last output arrived
     // eslint-disable-next-line playwright/no-wait-for-timeout
@@ -400,6 +413,14 @@ test.describe('Notebook scroll on execution (with windowing)', () => {
     // output of the cell above was growing
     const finalBox = (await thirdCell!.boundingBox())!;
     expect(Math.abs(finalBox.y - referenceBox.y)).toBeLessThan(150);
+
+    // The cells in view should not move for a single frame either
+    const tops: number[] = await page.evaluate(
+      () => (window as any).thirdCellTops
+    );
+    for (const top of tops) {
+      expect(Math.abs(top - referenceBox.y)).toBeLessThan(5);
+    }
   });
 
   test('should not scroll when advancing if top is non-marginally visible', async ({
