@@ -37,7 +37,7 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
       <th
         scope="col"
         className="jp-Shortcuts-Cell"
-        aria-sort={isActive ? this.props.sortDirection : undefined}
+        aria-sort={isActive ? this.props.sortDirection : 'none'}
       >
         <ShortcutTitleItem
           title={title}
