@@ -190,7 +190,7 @@ namespace Private {
           'Output of code run by other clients is treated as trusted. If it contains JavaScript or HTML, it will run in your browser with the same access as your own code, without asking you first.'
         ),
         trans.__(
-          'Only continue if you trust everyone who can run code on this kernel.'
+          'Only continue if you trust everyone who can run code on this kernel. JupyterLab will not ask again for this console until you reload the page.'
         )
       ];
       for (const text of paragraphs) {
