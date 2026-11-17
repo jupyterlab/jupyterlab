@@ -65,7 +65,7 @@ test.describe('File Edit Operations', () => {
 
 test.describe('Console Interactions', () => {
   for (const shutdown of [false, true]) {
-    test(`Should disable Run All and Restart with ${shutdown ? 'a shut down' : 'no selected'} kernel`, async ({
+    test(`Should disable running code with ${shutdown ? 'a shut down' : 'no selected'} kernel`, async ({
       page
     }) => {
       await page.locator('.jp-FileEditor').click({ button: 'right' });
@@ -89,6 +89,9 @@ test.describe('Console Interactions', () => {
       await page.locator('.jp-FileEditor .cm-content').click();
       const menu = await page.menu.openLocator('Run');
       await expect(
+        menu!.getByRole('menuitemcheckbox', { name: /^Run Selected Code/ })
+      ).toBeDisabled();
+      await expect(
         menu!.getByRole('menuitemcheckbox', {
           name: 'Run All Code',
           exact: true
@@ -103,10 +106,10 @@ test.describe('Console Interactions', () => {
     });
   }
 
-  test('Should queue code without changing the editor when no kernel is selected', async ({
+  test('Should not run code sent with no kernel once a kernel is selected', async ({
     page
   }) => {
-    await page.locator('.jp-FileEditor .cm-content').fill('123');
+    await page.locator('.jp-FileEditor .cm-content').fill('123\n456');
     await page.locator('.jp-FileEditor').click({ button: 'right' });
     await page
       .getByRole('menuitem', { name: 'Create Console for Editor' })
@@ -115,21 +118,31 @@ test.describe('Console Interactions', () => {
     await expect(
       page.locator('.jp-ConsolePanel .jp-Toolbar-kernelName')
     ).toHaveText('No Kernel');
-    await page.locator('.jp-FileEditor .cm-content').click();
+    await page
+      .locator('.jp-FileEditor')
+      .getByText('123', { exact: true })
+      .click();
     const before = await getEditorState(page);
 
     await page.keyboard.press('Shift+Enter');
 
     expect(await getEditorState(page)).toEqual(before);
-    await expect(
-      page.locator('.jp-CodeConsole .jp-OutputArea-output')
-    ).toHaveCount(0);
 
     await page.locator('.jp-ConsolePanel .jp-Toolbar-kernelName').click();
     await page.getByRole('button', { name: 'Select Kernel' }).click();
     await expect(
-      page.getByLabel('Code Cell Content with Output').locator('span')
-    ).toContainText('123');
+      page.locator('.jp-ConsolePanel [title="Kernel Idle"]')
+    ).toBeVisible();
+    await page
+      .locator('.jp-FileEditor')
+      .getByText('123', { exact: true })
+      .click();
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Shift+Enter');
+
+    const cells = page.locator('.jp-CodeConsole-content .jp-CodeCell');
+    await expect(cells.filter({ hasText: '456' })).toHaveCount(1);
+    await expect(cells.filter({ hasText: '123' })).toHaveCount(0);
     await page.locator('.jp-FileEditor .cm-content').click();
     await expect
       .poll(() =>
