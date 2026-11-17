@@ -23,6 +23,8 @@ import { ListModel } from './model';
 
 const BADGE_SIZE = 32;
 const BADGE_QUERY_SIZE = Math.floor(devicePixelRatio * BADGE_SIZE);
+const PYPI_BROWSE_URL =
+  'https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Prebuilt';
 
 function getExtensionGitHubUser(entry: IEntry) {
   if (
@@ -54,11 +56,13 @@ function isProtocolAllowed(url: string): boolean {
  */
 function ListEntry(props: ListEntry.IProperties): React.ReactElement {
   const { canFetch, entry, supportInstallation, trans } = props;
+  const isLanguagePack = entry.pkg_type === 'language-pack';
   const flagClasses = [];
   if (entry.status && ['ok', 'warning', 'error'].indexOf(entry.status) !== -1) {
     flagClasses.push(`jp-extensionmanager-entry-${entry.status}`);
   }
-  const githubUser = canFetch ? getExtensionGitHubUser(entry) : null;
+  const githubUser =
+    canFetch && !isLanguagePack ? getExtensionGitHubUser(entry) : null;
 
   if (!entry.allowed) {
     flagClasses.push(`jp-extensionmanager-entry-should-be-uninstalled`);
@@ -70,7 +74,12 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement {
       style={{ display: 'flex' }}
     >
       <div style={{ marginRight: '8px' }}>
-        {githubUser ? (
+        {isLanguagePack ? (
+          <jupyterIcon.react
+            height={`${BADGE_SIZE}px`}
+            width={`${BADGE_SIZE}px`}
+          />
+        ) : githubUser ? (
           <img
             src={`https://github.com/${githubUser}.png?size=${BADGE_QUERY_SIZE}`}
             style={{ width: '32px', height: '32px' }}
@@ -166,25 +175,26 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement {
                       </Button>
                     </>
                   )}
-                  {entry.enabled ? (
-                    <Button
-                      onClick={() => props.performAction!('disable', entry)}
-                      title={trans.__('Disable "%1"', entry.name)}
-                      minimal
-                      small
-                    >
-                      {trans.__('Disable')}
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={() => props.performAction!('enable', entry)}
-                      title={trans.__('Enable "%1"', entry.name)}
-                      minimal
-                      small
-                    >
-                      {trans.__('Enable')}
-                    </Button>
-                  )}
+                  {!isLanguagePack &&
+                    (entry.enabled ? (
+                      <Button
+                        onClick={() => props.performAction!('disable', entry)}
+                        title={trans.__('Disable "%1"', entry.name)}
+                        minimal
+                        small
+                      >
+                        {trans.__('Disable')}
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => props.performAction!('enable', entry)}
+                        title={trans.__('Enable "%1"', entry.name)}
+                        minimal
+                        small
+                      >
+                        {trans.__('Enable')}
+                      </Button>
+                    ))}
                 </>
               ) : (
                 supportInstallation && (
@@ -387,7 +397,6 @@ class Header extends ReactWidget {
           useFuzzyFilter={false}
           inputRef={this.searchInputRef}
         />
-
         <div
           className={`jp-extensionmanager-pending ${
             this.model.hasPendingActions() ? 'jp-mod-hasPending' : ''
@@ -490,6 +499,7 @@ class InstalledList extends ReactWidget {
   }
 
   render(): JSX.Element {
+    const query = this.model.query.toLowerCase();
     return (
       <>
         {this.model.installedError !== null ? (
@@ -505,8 +515,11 @@ class InstalledList extends ReactWidget {
         ) : (
           <ListView
             canFetch={this.model.canFetch}
-            entries={this.model.installed.filter(pkg =>
-              new RegExp(this.model.query.toLowerCase()).test(pkg.name)
+            entries={this.model.installed.filter(
+              pkg =>
+                pkg.name.toLowerCase().includes(query) ||
+                (pkg.pkg_type === 'language-pack' &&
+                  pkg.description.toLowerCase().includes(query))
             )}
             numPages={1}
             trans={this.trans}
@@ -599,8 +612,32 @@ class SearchResult extends ReactWidget {
   }
 
   render(): JSX.Element {
+    const query = this.model.query;
+    // The PyPI manager lists only language packs, so a search that finds
+    // nothing points to the same search on PyPI.
+    const showBrowse =
+      this.model.name === 'PyPI' &&
+      (!query ||
+        (!this.model.isSearching &&
+          this.model.searchError === null &&
+          this.model.searchResult.length === 0));
     return (
       <>
+        {showBrowse && (
+          <div className="jp-extensionmanager-browse">
+            <a
+              href={
+                query
+                  ? `${PYPI_BROWSE_URL}&q=${encodeURIComponent(query)}`
+                  : PYPI_BROWSE_URL
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {this.trans.__('Browse extensions on PyPI')}
+            </a>
+          </div>
+        )}
         {this.model.searchError !== null ? (
           <ErrorMessage>
             {`Error searching for extensions${
@@ -683,10 +720,8 @@ export class ExtensionsPanel extends SidePanel {
       new ToolbarButton({
         icon: refreshIcon,
         onClick: () => {
-          model.refreshInstalled(true).catch(reason => {
-            console.error(
-              `Failed to refresh the installed extensions list:\n${reason}`
-            );
+          model.refresh().catch(reason => {
+            console.error(`Failed to refresh the extensions list:\n${reason}`);
           });
         },
         tooltip: this.trans.__('Refresh extensions list')
