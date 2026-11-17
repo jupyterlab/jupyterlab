@@ -83,6 +83,26 @@ describe('jupyter.services - Comm', () => {
         comm.dispose();
       });
 
+      it('should not spawn a subshell when disabled in the connection options', async () => {
+        const noSubshellKernel = await kernelManager.startNew(
+          {},
+          { commsOverSubshells: CommsOverSubshells.Disabled }
+        );
+        await noSubshellKernel.info;
+        expect(noSubshellKernel.supportsSubshells).toBeTruthy();
+        await noSubshellKernel.requestExecute({ code: TARGET }, true).done;
+
+        const comm = noSubshellKernel.createComm('test') as CommHandler;
+        await comm.open({ foo: 'bar' }).done;
+
+        // Check before closing, because closing a comm deletes its subshell.
+        expect(comm.subshellId).toBeNull();
+        await expect(getSubshellIds(noSubshellKernel)).resolves.toEqual([]);
+
+        await comm.close().done;
+        await noSubshellKernel.shutdown();
+      });
+
       it('should spawn a subshell per-comm', async () => {
         await echoKernel.info;
 

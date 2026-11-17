@@ -6,9 +6,14 @@
 import type {
   CompletionHandler,
   ICompletionContext,
-  ICompletionProvider
+  ICompletionProvider,
+  IInlineCompleterSettings,
+  IInlineCompletionProvider
 } from '@jupyterlab/completer';
-import { ProviderReconciliator } from '@jupyterlab/completer';
+import {
+  InlineCompletionTriggerKind,
+  ProviderReconciliator
+} from '@jupyterlab/completer';
 import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
 import { Context } from '@jupyterlab/docregistry';
 import type { INotebookModel } from '@jupyterlab/notebook';
@@ -285,6 +290,79 @@ describe('completer/reconciliator', () => {
         });
         const res = await reconciliator.fetch({ offset: 0, text: '' });
         expect(res).toEqual(null);
+      });
+    });
+    describe('#fetchInline()', () => {
+      const INLINE_PROVIDER_ID = 'InlineCompletionProvider:sample';
+
+      function inlineSetup(debouncerDelay: number) {
+        const fetch = jest.fn(async (request: CompletionHandler.IRequest) => ({
+          items: []
+        }));
+        const provider: IInlineCompletionProvider = {
+          identifier: INLINE_PROVIDER_ID,
+          name: 'a sample inline provider',
+          fetch
+        };
+        const reconciliator = new ProviderReconciliator({
+          context: { widget },
+          providers: [],
+          inlineProviders: [provider],
+          inlineProvidersSettings: {
+            [INLINE_PROVIDER_ID]: {
+              enabled: true,
+              autoFillInMiddle: false,
+              debouncerDelay,
+              timeout: 1000
+            }
+          } as IInlineCompleterSettings['providers'],
+          timeout: 1000
+        });
+        return { fetch, reconciliator };
+      }
+
+      it('should only fetch once when typing faster than the debouncer delay', async () => {
+        const { fetch, reconciliator } = inlineSetup(100);
+        const request = { offset: 1, text: 'a' };
+        const superseded = reconciliator.fetchInline(
+          request,
+          InlineCompletionTriggerKind.Automatic
+        );
+        const latest = reconciliator.fetchInline(
+          { offset: 2, text: 'ab' },
+          InlineCompletionTriggerKind.Automatic
+        );
+        await Promise.all([...superseded, ...latest]);
+        expect(fetch).toHaveBeenCalledTimes(1);
+        expect(fetch.mock.calls[0][0]).toEqual({ offset: 2, text: 'ab' });
+      });
+
+      it('should fetch for every request slower than the debouncer delay', async () => {
+        const { fetch, reconciliator } = inlineSetup(20);
+        await Promise.all(
+          reconciliator.fetchInline(
+            { offset: 1, text: 'a' },
+            InlineCompletionTriggerKind.Automatic
+          )
+        );
+        await Promise.all(
+          reconciliator.fetchInline(
+            { offset: 2, text: 'ab' },
+            InlineCompletionTriggerKind.Automatic
+          )
+        );
+        expect(fetch).toHaveBeenCalledTimes(2);
+      });
+
+      it('should not debounce requests invoked by the user', async () => {
+        const { fetch, reconciliator } = inlineSetup(5000);
+        await Promise.all(
+          reconciliator.fetchInline(
+            { offset: 1, text: 'a' },
+            InlineCompletionTriggerKind.Invoke
+          )
+        );
+        expect(fetch).toHaveBeenCalledTimes(1);
       });
     });
     describe('#shouldShowContinuousHint()', () => {

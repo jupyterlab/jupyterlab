@@ -4,6 +4,7 @@
 import {
   CellCounterStatus,
   Notebook,
+  NotebookActions,
   NotebookModel,
   StaticNotebook
 } from '@jupyterlab/notebook';
@@ -88,6 +89,27 @@ describe('@jupyterlab/notebook', () => {
         expect(status.model.selectionStart).toBe(2);
         expect(status.model.selectionEnd).toBe(4);
         expect(status.model.totalCells).toBe(5);
+      });
+
+      it('updates the total cell count when a deletion is undone', () => {
+        status.model.notebook = widget;
+        widget.model!.sharedModel.clearUndoHistory();
+        widget.activeCellIndex = 3;
+        NotebookActions.deleteCells(widget);
+        widget.activeCellIndex = 0;
+
+        NotebookActions.undo(widget);
+
+        expect(status.model.totalCells).toBe(5);
+      });
+
+      it('does not check the selection when a cell source changes', () => {
+        status.model.notebook = widget;
+        const check = jest.spyOn(widget, 'isSelectedOrActive');
+
+        widget.model!.cells.get(0).sharedModel.setSource('x = 1');
+
+        expect(check).not.toHaveBeenCalled();
       });
     });
 

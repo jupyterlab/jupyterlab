@@ -5,6 +5,7 @@ import { JupyterServer, testEmission } from '@jupyterlab/testing';
 import { UUID } from '@lumino/coreutils';
 import type { Session } from '../../src';
 import {
+  CommsOverSubshells,
   KernelManager,
   ServerConnection,
   SessionAPI,
@@ -167,6 +168,22 @@ describe('session/manager', () => {
         });
         await startNew(manager);
         expect(called).toBe(true);
+      });
+
+      it('should keep the comms over subshells mode given in the kernel connection options', async () => {
+        kernelManager.commsOverSubshells = CommsOverSubshells.PerComm;
+        const session = await manager.startNew(
+          { path: UUID.uuid4(), name: UUID.uuid4(), type: 'MYTEST' },
+          {
+            kernelConnectionOptions: {
+              commsOverSubshells: CommsOverSubshells.Disabled
+            }
+          }
+        );
+        expect(session.kernel!.commsOverSubshells).toBe(
+          CommsOverSubshells.Disabled
+        );
+        return session.shutdown();
       });
     });
 

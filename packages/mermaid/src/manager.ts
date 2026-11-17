@@ -1,11 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import type MermaidType from 'mermaid';
+import type { MermaidConfig } from 'mermaid/dist/config.type';
 import type MermaidElkType from '@mermaid-js/layout-elk';
 
 import { PromiseDelegate } from '@lumino/coreutils';
+import { type ISignal, Signal } from '@lumino/signaling';
 
-import { LruCache } from '@jupyterlab/coreutils';
+import { type IChangedArgs, LruCache } from '@jupyterlab/coreutils';
 
 import type { IThemeManager } from '@jupyterlab/apputils';
 
@@ -22,6 +24,18 @@ import {
 } from './tokens';
 
 /**
+ * The class of Markdown rendered by `@jupyterlab/rendermime`.
+ */
+const RENDERED_MARKDOWN_CLASS = 'jp-RenderedMarkdown';
+
+/**
+ * The prefix of the class that records the mermaid theme of a drawn diagram.
+ *
+ * A class, unlike a data attribute, is kept when Markdown is sanitized.
+ */
+const THEME_CLASS_PREFIX = 'jp-mod-mermaidTheme-';
+
+/**
  * A mermaid diagram manager with cache.
  */
 export class MermaidManager implements IMermaidManager {
@@ -30,6 +44,8 @@ export class MermaidManager implements IMermaidManager {
 
   constructor(options: MermaidManager.IOptions = {}) {
     this._diagrams = new LruCache({ maxSize: options.maxCacheSize ?? null });
+    this._svgs = new LruCache({ maxSize: options.maxCacheSize ?? null });
+    this._themes = options.themes ?? null;
 
     // handle reacting to themes
     if (options.themes) {
@@ -47,11 +63,113 @@ export class MermaidManager implements IMermaidManager {
   }
 
   /**
+   * A signal emitted when the theme changes or mermaid is re-initialized.
+   */
+  get themeChanged(): ISignal<this, void> {
+    return this._themeChanged;
+  }
+
+  /**
+   * Whether the manager is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources held by the manager.
+   */
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    this._observer?.disconnect();
+    this._observer = null;
+    Signal.clearData(this);
+    this._diagrams.clear();
+    this._svgs.clear();
+  }
+
+  /**
+   * Refresh the mermaid diagrams in rendered Markdown in the document (or within the specified root element).
+   *
+   * `RenderedMermaid` widgets redraw themselves when `themeChanged` is emitted.
+   */
+  async refreshDiagrams(root?: ParentNode): Promise<void> {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    const currentRefreshId = this._refreshId;
+    const parent = root ?? document;
+    const nodes: HTMLElement[] = [];
+    if (
+      parent instanceof HTMLElement &&
+      parent.classList.contains(MERMAID_CLASS)
+    ) {
+      nodes.push(parent);
+    }
+    nodes.push(
+      ...Array.from(
+        parent.querySelectorAll<HTMLElement>(
+          `.${RENDERED_MARKDOWN_CLASS} .${MERMAID_CLASS}`
+        )
+      )
+    );
+
+    for (const node of nodes) {
+      if (this._isDisposed || this._refreshId !== currentRefreshId) {
+        return;
+      }
+      const code = node.querySelector(`.${MERMAID_CODE_CLASS}`);
+      if (!code || !code.textContent) {
+        continue;
+      }
+      try {
+        const figure = await this.renderFigure(code.textContent);
+        if (this._isDisposed || this._refreshId !== currentRefreshId) {
+          return;
+        }
+        const children = Array.from(figure.childNodes).map(child =>
+          child.cloneNode(true)
+        );
+        node.replaceChildren(...children);
+        Private.setDrawnTheme(node, Private.uiTheme());
+        if (figure.classList.contains(WARNING_CLASS)) {
+          node.classList.add(WARNING_CLASS);
+        } else {
+          node.classList.remove(WARNING_CLASS);
+        }
+      } catch {
+        // Continue refreshing other diagrams if one fails
+      }
+    }
+  }
+
+  /**
    * Handle (re)-initializing mermaid based on external values.
    */
-  initialize() {
+  initialize(
+    sender?: IThemeManager,
+    args?: IChangedArgs<string, string | null>
+  ): void {
     this._diagrams.clear();
+    this._svgs.clear();
+    this._generation++;
     Private.initMermaid();
+    // The theme manager also reloads the current theme on every change of its
+    // settings, such as a font size change, which does not affect the diagrams.
+    if (args && args.oldValue === args.newValue) {
+      return;
+    }
+    this._refreshId++;
+    this._themeChanged.emit();
+    void this.refreshDiagrams();
+    // Diagrams that are not in the document now, such as in a Markdown cell
+    // in edit mode, are redrawn when they are added to it again.
+    if (this._hasDrawn) {
+      this._observeDocument();
+    }
   }
 
   /**
@@ -81,18 +199,37 @@ export class MermaidManager implements IMermaidManager {
   /**
    * Attempt a raw rendering of mermaid to an SVG string, extracting some metadata.
    */
-  async renderSvg(text: string): Promise<IMermaidManager.IRenderInfo> {
+  async renderSvg(
+    text: string,
+    options: IMermaidManager.IRenderOptions = {}
+  ): Promise<IMermaidManager.IRenderInfo> {
     const _mermaid = await this.getMermaid();
     await Private.ensureRenderers(text);
 
-    const id = `jp-mermaid-${Private.nextMermaidId()}`;
+    const cached = this._svgs.get(
+      `${options.theme ?? Private.uiTheme()}\n${text}`
+    );
+    if (cached) {
+      return cached;
+    }
+
+    // An id that depends only on the source keeps a stored SVG the same in
+    // every session, whatever the order of renders.
+    const id = `jp-mermaid-${Private.hash(text)}`;
+    const generation = this._generation;
 
     // create temporary element into which to render
     const el = document.createElement('div');
     document.body.appendChild(el);
     try {
-      let { svg } = await _mermaid.render(id, text, el);
-      svg = MermaidManager.cleanMermaidSvg(svg);
+      const rendered = await Private.render(
+        _mermaid,
+        id,
+        text,
+        el,
+        options.theme
+      );
+      const svg = MermaidManager.cleanMermaidSvg(rendered.svg);
 
       const parser = new DOMParser();
       const doc = parser.parseFromString(svg, 'image/svg+xml');
@@ -108,6 +245,11 @@ export class MermaidManager implements IMermaidManager {
       }
       if (firstDesc) {
         info.accessibleDescription = firstDesc.textContent;
+      }
+      // `initialize()` cleared the cache during the render, which may have
+      // used the configuration from before it.
+      if (generation === this._generation) {
+        this._svgs.set(`${rendered.theme}\n${text}`, info);
       }
       return info;
     } finally {
@@ -126,9 +268,11 @@ export class MermaidManager implements IMermaidManager {
       return output;
     }
 
+    const generation = this._generation;
+
     let className = MERMAID_CLASS;
 
-    let result: HTMLElement | null = null;
+    let result: HTMLElement;
 
     // the element that will be returned
     output = document.createElement('div');
@@ -137,7 +281,7 @@ export class MermaidManager implements IMermaidManager {
     try {
       const response = await this.renderSvg(text);
       result = this.makeMermaidFigure(response);
-    } catch (err) {
+    } catch {
       output.classList.add(WARNING_CLASS);
       result = await this.makeMermaidError(text);
     }
@@ -149,6 +293,14 @@ export class MermaidManager implements IMermaidManager {
     }
 
     output.appendChild(result);
+
+    // The theme changed during the render: draw the diagram again in it.
+    if (generation !== this._generation) {
+      return this.renderFigure(text);
+    }
+
+    Private.setDrawnTheme(output, Private.uiTheme());
+    this._hasDrawn = true;
 
     // update the cache for use when rendering synchronously
     this._diagrams.set(text, output);
@@ -233,6 +385,64 @@ export class MermaidManager implements IMermaidManager {
 
     return figure;
   }
+
+  /**
+   * Redraw diagrams drawn in another theme when their Markdown is added to
+   * the document again.
+   */
+  private async _onDomChanged(records: MutationRecord[]): Promise<void> {
+    if (this._isDisposed) {
+      return;
+    }
+    const selector = Private.staleDiagramSelector(Private.uiTheme());
+    const stale = new Set<HTMLElement>();
+    for (const record of records) {
+      for (const node of Array.from(record.addedNodes)) {
+        if (!(node instanceof HTMLElement)) {
+          continue;
+        }
+        if (node.matches(selector)) {
+          stale.add(node);
+        }
+        for (const diagram of Array.from(
+          node.querySelectorAll<HTMLElement>(selector)
+        )) {
+          stale.add(diagram);
+        }
+      }
+    }
+    for (const diagram of stale) {
+      if (this._isDisposed) {
+        return;
+      }
+      // The diagram may have been removed again since it was added.
+      if (diagram.isConnected) {
+        await this.refreshDiagrams(diagram);
+      }
+    }
+  }
+
+  /**
+   * Start redrawing diagrams drawn in another theme when their Markdown is
+   * added to the document again.
+   */
+  private _observeDocument(): void {
+    if (this._isDisposed || this._observer || typeof document === 'undefined') {
+      return;
+    }
+    this._observer = new MutationObserver(records => {
+      void this._onDomChanged(records);
+    });
+    this._observer.observe(document.body, { childList: true, subtree: true });
+  }
+
+  private _themeChanged = new Signal<this, void>(this);
+  private _isDisposed = false;
+  private _generation = 0;
+  private _refreshId = 0;
+  private _hasDrawn = false;
+  private _observer: MutationObserver | null = null;
+  private _svgs: LruCache<string, IMermaidManager.IRenderInfo>;
 }
 
 /**
@@ -257,7 +467,7 @@ namespace Private {
   let _mermaidElk: typeof MermaidElkType | null = null;
   let _loading: PromiseDelegate<typeof MermaidType> | null = null;
   let _loadingElk: PromiseDelegate<typeof MermaidElkType> | null = null;
-  let _nextMermaidId = 0;
+  let _rendering: Promise<unknown> = Promise.resolve();
   let _version: string | null = null;
 
   /**
@@ -268,6 +478,31 @@ namespace Private {
   }
 
   /**
+   * Record the mermaid theme a diagram was drawn in.
+   */
+  export function setDrawnTheme(
+    node: HTMLElement,
+    theme: MermaidConfig['theme']
+  ): void {
+    for (const name of Array.from(node.classList)) {
+      if (name.startsWith(THEME_CLASS_PREFIX)) {
+        node.classList.remove(name);
+      }
+    }
+    node.classList.add(`${THEME_CLASS_PREFIX}${theme}`);
+  }
+
+  /**
+   * Get a selector of diagrams in rendered Markdown drawn in another theme.
+   */
+  export function staleDiagramSelector(theme: MermaidConfig['theme']): string {
+    return (
+      `.${RENDERED_MARKDOWN_CLASS} .${MERMAID_CLASS}` +
+      `[class*="${THEME_CLASS_PREFIX}"]:not(.${THEME_CLASS_PREFIX}${theme})`
+    );
+  }
+
+  /**
    * Get the version of mermaid used for rendering.
    */
   export function version(): string | null {
@@ -275,25 +510,27 @@ namespace Private {
   }
 
   /**
+   * Get the mermaid theme that follows the JupyterLab theme.
+   */
+  export function uiTheme(): MermaidConfig['theme'] {
+    if (!_themes) {
+      return MERMAID_DEFAULT_THEME;
+    }
+    const jpTheme = _themes.theme;
+    return jpTheme && _themes.isLight(jpTheme)
+      ? MERMAID_DEFAULT_THEME
+      : MERMAID_DARK_THEME;
+  }
+
+  /**
    * (Re-)initialize mermaid with lab-specific theme information
    */
   export function initMermaid(
-    mermaid: typeof MermaidType | null = null
+    mermaid: typeof MermaidType | null = _mermaid,
+    theme: MermaidConfig['theme'] = uiTheme()
   ): boolean {
-    mermaid = _mermaid;
-
     if (!mermaid) {
       return false;
-    }
-
-    let theme = MERMAID_DEFAULT_THEME;
-
-    if (_themes) {
-      const jpTheme = _themes.theme;
-      theme =
-        jpTheme && _themes.isLight(jpTheme)
-          ? MERMAID_DEFAULT_THEME
-          : MERMAID_DARK_THEME;
     }
 
     const fontFamily = window
@@ -319,10 +556,47 @@ namespace Private {
   }
 
   /**
-   * Provide a globally-unique, but unstable, ID for disambiguation.
+   * Get a 32-bit FNV-1a hash of the text, in hexadecimal.
    */
-  export function nextMermaidId() {
-    return _nextMermaidId++;
+  export function hash(text: string): string {
+    let value = 0x811c9dc5;
+    for (let i = 0; i < text.length; i++) {
+      value ^= text.charCodeAt(i);
+      value = Math.imul(value, 0x01000193);
+    }
+    return (value >>> 0).toString(16).padStart(8, '0');
+  }
+
+  /**
+   * Render a diagram, in `theme` if given, and report the theme used.
+   *
+   * Renders run one at a time, so that a render in another theme does not
+   * change the theme of a render in progress.
+   */
+  export function render(
+    mermaid: typeof MermaidType,
+    id: string,
+    text: string,
+    container: HTMLElement,
+    theme?: MermaidConfig['theme']
+  ): Promise<{ svg: string; theme: MermaidConfig['theme'] }> {
+    const result = _rendering.then(async () => {
+      const current = uiTheme();
+      const switchTheme = theme !== undefined && theme !== current;
+      if (switchTheme) {
+        initMermaid(mermaid, theme);
+      }
+      try {
+        const { svg } = await mermaid.render(id, text, container);
+        return { svg, theme: theme ?? current };
+      } finally {
+        if (switchTheme) {
+          initMermaid(mermaid);
+        }
+      }
+    });
+    _rendering = result.catch(() => undefined);
+    return result;
   }
 
   /**
