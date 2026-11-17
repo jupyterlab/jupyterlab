@@ -1694,8 +1694,9 @@ export class WindowedList<
       if (scrollCompensation !== 0) {
         this.viewModel.scrollOffset = scrollOffset + scrollCompensation;
         // Scroll before the paint, as `update()` waits for the next frame, and
-        // grow the list first, or the browser clamps the offset at the end.
-        this._updateTotalSize();
+        // grow the list first, also during a scroll, or the browser clamps the
+        // offset at the end.
+        this._updateTotalSize(true);
         this._outerElement.scrollTop = this.viewModel.scrollOffset;
       }
       this._scrollBackToItemOnResize();
@@ -1902,10 +1903,12 @@ export class WindowedList<
 
   /**
    * Update the total size
+   *
+   * @param force - Update also while the user scrolls.
    */
-  private _updateTotalSize(): void {
+  private _updateTotalSize(force = false): void {
     if (this.viewModel.windowingActive) {
-      if (this._viewport.dataset.isScrolling == 'true') {
+      if (!force && this._viewport.dataset.isScrolling == 'true') {
         // Do not update while scrolling, delay until later
         this._requiresTotalSizeUpdate = true;
         return;
