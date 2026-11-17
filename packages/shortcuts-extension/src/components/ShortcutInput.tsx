@@ -25,9 +25,9 @@ export interface ICaptureError {
   keys: string[];
   /** Empty when the error is not a binding clash. */
   conflictsWith: IShortcutTarget[];
-  /** Human-readable message; empty string clears the error UI. */
+  /** Human-readable message for the error UI. */
   message: string;
-  kind: 'none' | 'conflict' | 'incomplete';
+  kind: 'conflict' | 'incomplete';
 }
 
 export interface IShortcutInputProps {
@@ -157,7 +157,7 @@ export class ShortcutInput extends React.Component<
     conflicts: IShortcutTarget[],
     phase: CapturePhase = this.state.phase,
     keys: string[] = this._capturedKeys()
-  ): ICaptureError {
+  ): ICaptureError | null {
     const trans = this.props.translator.load('jupyterlab');
     if (conflicts.length > 0) {
       return {
@@ -178,12 +178,7 @@ export class ShortcutInput extends React.Component<
         message: trans.__('Incomplete shortcut. Continue typing.')
       };
     }
-    return {
-      keys,
-      conflictsWith: [],
-      kind: 'none',
-      message: ''
-    };
+    return null;
   }
 
   private _emitCaptureError(
@@ -192,9 +187,12 @@ export class ShortcutInput extends React.Component<
     keys?: string[]
   ): void {
     this.setState({ activeConflicts: conflicts });
-    this.props.displayCaptureError(
-      this._buildCaptureError(conflicts, phase, keys)
-    );
+    const error = this._buildCaptureError(conflicts, phase, keys);
+    if (error) {
+      this.props.displayCaptureError(error);
+    } else {
+      this.props.clearCaptureError();
+    }
   }
 
   private get _deferPersist(): boolean {
@@ -696,10 +694,12 @@ export class ShortcutInput extends React.Component<
   }
 
   private _errorMessage(trans: TranslationBundle): string {
-    return this._buildCaptureError(
-      !this.state.isAvailable ? this.state.activeConflicts : [],
-      this.state.phase
-    ).message;
+    return (
+      this._buildCaptureError(
+        !this.state.isAvailable ? this.state.activeConflicts : [],
+        this.state.phase
+      )?.message ?? ''
+    );
   }
 
   render() {

@@ -478,11 +478,7 @@ export class ShortcutItem extends React.Component<
     data: ICaptureError
   ): void {
     const captureErrors = new Map(this.state.captureErrors);
-    if (!data.message) {
-      captureErrors.delete(binding);
-    } else {
-      captureErrors.set(binding, data);
-    }
+    captureErrors.set(binding, data);
     this.setState({ captureErrors });
   }
 
