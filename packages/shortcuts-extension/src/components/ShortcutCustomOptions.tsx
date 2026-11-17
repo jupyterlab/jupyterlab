@@ -68,7 +68,8 @@ export class CustomOptionsDialog extends Dialog<ICustomOptions> {
         activeElement instanceof HTMLElement &&
         jsonEditorNode.contains(activeElement)
       ) {
-        event.stopPropagation();
+        // Skip dialog Accept. Do not stopPropagation/preventDefault or the
+        // editor never receives Enter (no newline) in the capture phase.
         return;
       }
     }

@@ -144,8 +144,8 @@ export class NewShortcutDialog extends Dialog<NewShortcutDialog.IValue> {
         jsonEditorNode instanceof HTMLElement &&
         jsonEditorNode.contains(activeElement)
       ) {
-        // Keep Enter in the editor; do not accept the dialog.
-        event.preventDefault();
+        // Do not accept the dialog; do not preventDefault or the editor
+        // cannot insert a newline.
         return;
       }
       if (
