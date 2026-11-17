@@ -6324,7 +6324,7 @@
         },
         "cwd": {
           "type": "string",
-          "description": "Current working directory for the terminal"
+          "description": "Current working directory for the terminal; defaults to the directory open in the file browser"
         },
         "isPalette": {
           "type": "boolean",

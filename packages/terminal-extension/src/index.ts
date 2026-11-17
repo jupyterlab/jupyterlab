@@ -18,7 +18,10 @@ import {
   showErrorMessage,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import {
+  IDefaultFileBrowser,
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
@@ -109,7 +112,8 @@ const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
     IThemeManager,
     IRunningSessionManagers,
     ISearchProviderRegistry,
-    IStatusBar
+    IStatusBar,
+    IDefaultFileBrowser
   ],
   autoStart: true
 };
@@ -197,7 +201,8 @@ function activate(
   themeManager: IThemeManager | null,
   runningSessionManagers: IRunningSessionManagers | null,
   searchRegistry: ISearchProviderRegistry | null,
-  statusBar: IStatusBar | null
+  statusBar: IStatusBar | null,
+  defaultBrowser: IDefaultFileBrowser | null
 ): ITerminalTracker {
   const trans = translator.load('jupyterlab');
   const { serviceManager, commands } = app;
@@ -308,7 +313,15 @@ function activate(
   const signaler = runningSessionManagers
     ? new RunningTerminalSignaler(serviceManager.terminals, tracker, stateDB)
     : null;
-  addCommands(app, tracker, settingRegistry, translator, options, signaler);
+  addCommands(
+    app,
+    tracker,
+    settingRegistry,
+    translator,
+    options,
+    signaler,
+    defaultBrowser
+  );
 
   tracker.widgetAdded.connect((_, widget) => {
     widget.content.escapeHintRequested.connect(() => {
@@ -649,7 +662,8 @@ function addCommands(
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
   options: Partial<ITerminal.IOptions>,
-  signaler: RunningTerminalSignaler | null
+  signaler: RunningTerminalSignaler | null,
+  defaultBrowser: IDefaultFileBrowser | null
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands, serviceManager } = app;
@@ -666,7 +680,9 @@ function addCommands(
     icon: args => (args['isPalette'] ? undefined : terminalIcon),
     execute: async args => {
       const name = args['name'] as string;
-      const cwd = args['cwd'] as string;
+      // Restored terminals do not follow the file browser location.
+      const cwd =
+        (args['cwd'] as string) || (name ? '' : defaultBrowser?.model.path);
       const localPath = cwd
         ? serviceManager.contents.localPath(cwd)
         : undefined;
@@ -721,7 +737,9 @@ function addCommands(
           },
           cwd: {
             type: 'string',
-            description: trans.__('Current working directory for the terminal')
+            description: trans.__(
+              'Current working directory for the terminal; defaults to the directory open in the file browser'
+            )
           },
           isPalette: {
             type: 'boolean',
