@@ -113,7 +113,8 @@ const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
     IRunningSessionManagers,
     ISearchProviderRegistry,
     IStatusBar,
-    IDefaultFileBrowser
+    IDefaultFileBrowser,
+    IFileBrowserFactory
   ],
   autoStart: true
 };
@@ -202,7 +203,8 @@ function activate(
   runningSessionManagers: IRunningSessionManagers | null,
   searchRegistry: ISearchProviderRegistry | null,
   statusBar: IStatusBar | null,
-  defaultBrowser: IDefaultFileBrowser | null
+  defaultBrowser: IDefaultFileBrowser | null,
+  filebrowserFactory: IFileBrowserFactory | null
 ): ITerminalTracker {
   const trans = translator.load('jupyterlab');
   const { serviceManager, commands } = app;
@@ -320,7 +322,8 @@ function activate(
     translator,
     options,
     signaler,
-    defaultBrowser
+    defaultBrowser,
+    filebrowserFactory
   );
 
   tracker.widgetAdded.connect((_, widget) => {
@@ -663,7 +666,8 @@ function addCommands(
   translator: ITranslator,
   options: Partial<ITerminal.IOptions>,
   signaler: RunningTerminalSignaler | null,
-  defaultBrowser: IDefaultFileBrowser | null
+  defaultBrowser: IDefaultFileBrowser | null,
+  filebrowserFactory: IFileBrowserFactory | null
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands, serviceManager } = app;
@@ -680,9 +684,13 @@ function addCommands(
     icon: args => (args['isPalette'] ? undefined : terminalIcon),
     execute: async args => {
       const name = args['name'] as string;
-      // Restored terminals do not follow the file browser location.
+      // Terminals opened by name (restored or via `terminal:open`) keep the
+      // server default directory; new ones follow the current file browser.
+      const currentBrowser =
+        filebrowserFactory?.tracker.currentWidget ?? defaultBrowser;
       const cwd =
-        (args['cwd'] as string) || (name ? '' : defaultBrowser?.model.path);
+        (args['cwd'] as string | undefined) ??
+        (name ? undefined : currentBrowser?.model.path);
       const localPath = cwd
         ? serviceManager.contents.localPath(cwd)
         : undefined;
