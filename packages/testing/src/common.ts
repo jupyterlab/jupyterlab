@@ -50,11 +50,7 @@ export function simulate(element: EventTarget, type: string, options?: any) {
  * Test a single emission from a signal.
  *
  * @param signal - The signal we are listening to.
- * @param find - An optional function to determine which emission to test,
- * defaulting to the first emission.
- * @param test - An optional function which contains the tests for the emission, and should throw an error if the tests fail.
- * @param value - An optional value that the promise resolves to if the test is
- * successful.
+ * @param options - The emission filter, test, and promise resolution value.
  *
  * @returns a promise that rejects if the function throws an error (e.g., if an
  * expect test doesn't pass), and resolves otherwise.
@@ -75,8 +71,17 @@ export function simulate(element: EventTarget, type: string, options?: any) {
 export async function testEmission<T, U, V>(
   signal: ISignal<T, U>,
   options: {
+    /**
+     * Select the emission to test. Defaults to the first emission.
+     */
     find?: (a: T, b: U) => boolean;
+    /**
+     * Test the emission, throwing an error if the test fails.
+     */
     test?: (a: T, b: U) => void;
+    /**
+     * The value that the promise resolves to if the test succeeds.
+     */
     value?: V;
   } = {}
 ): Promise<V | undefined> {

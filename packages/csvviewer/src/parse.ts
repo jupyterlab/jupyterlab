@@ -60,7 +60,7 @@ export namespace IParser {
     comment?: string;
 
     /**
-     * The row delimiter to use. Defaults to '\r\n'.
+     * The row delimiter to use. Defaults to `'\r\n'`.
      */
     rowDelimiter?: string;
 

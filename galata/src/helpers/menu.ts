@@ -80,7 +80,7 @@ export class MenuHelper {
   /**
    * Get the handle on a menu item from its path.
    *
-   * The separator used is '>'; e.g. to look for the new Notebook item 'File>New>Notebook'.
+   * The separator used is `>`; e.g. to look for the new Notebook item `File>New>Notebook`.
    *
    * @param path Menu item path
    * @returns Handle to the menu item or null
@@ -94,7 +94,7 @@ export class MenuHelper {
   /**
    * Get the locator on a menu item from its path.
    *
-   * The separator used is '>'; e.g. to look for the new Notebook item 'File>New>Notebook'.
+   * The separator used is `>`; e.g. to look for the new Notebook item `File>New>Notebook`.
    *
    * @param path Menu item path
    * @returns Locator to the menu item or null

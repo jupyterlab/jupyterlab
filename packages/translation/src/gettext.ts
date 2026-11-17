@@ -268,8 +268,8 @@ class Gettext {
    * @param args - The variables to use in interpolation.
    *
    * ### Examples
-   * strfmt("%1 dogs are in %2", 7, "the kitchen"); => "7 dogs are in the kitchen"
-   * strfmt("I like %1, bananas and %1", "apples"); => "I like apples, bananas and apples"
+   * `strfmt("%1 dogs are in %2", 7, "the kitchen");` → "7 dogs are in the kitchen"
+   * `strfmt("I like %1, bananas and %1", "apples");` → "I like apples, bananas and apples"
    */
   static strfmt(fmt: string, ...args: unknown[]): string {
     return (
@@ -538,7 +538,7 @@ class Gettext {
   }
 
   /**
-   * Split a locale into parent locales. "es-CO" -> ["es-CO", "es"]
+   * Split a locale into parent locales. `"es-CO"` → `["es-CO", "es"]`
    *
    * @param locale - The locale string.
    *
@@ -556,7 +556,7 @@ class Gettext {
   }
 
   /**
-   * Split a locale into parent locales. "es-CO" -> ["es-CO", "es"]
+   * Compile a plural-form expression into a function.
    *
    * @param pluralForm - Plural form string..
    * @returns An function to compute plural forms.

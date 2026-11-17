@@ -10,7 +10,7 @@ import { Toolbar as ApputilsToolbar } from './toolbar';
 
 /**
  * @deprecated since v4
- * These widgets are now in @jupyterlab/ui-components
+ * These widgets are now in `@jupyterlab/ui-components`
  */
 export {
   addCommandToolbarButtonClass,
@@ -65,7 +65,7 @@ export * from './windowresolver';
 // Merge Toolbar namespace to preserve API
 /**
  * @deprecated since v4
- * This class is in @jupyterlab/ui-components
+ * This class is in `@jupyterlab/ui-components`
  */
 export class Toolbar<T extends Widget = Widget> extends UIToolbar<T> {}
 
@@ -76,7 +76,7 @@ export namespace Toolbar {
   export const createRestartButton = ApputilsToolbar.createRestartButton;
   /**
    * @deprecated since v4
-   * This helper function is in @jupyterlab/ui-components
+   * This helper function is in `@jupyterlab/ui-components`
    */
   export const createSpacerItem = UIToolbar.createSpacerItem;
 }

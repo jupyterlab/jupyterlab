@@ -693,7 +693,7 @@ export interface IShell {
 /**
  * A tracker that tracks WidgetLSPAdapters.
  *
- * @typeparam T - The type of widget being tracked. Defaults to `WidgetLSPAdapter`.
+ * @typeParam T - The type of widget being tracked. Defaults to `WidgetLSPAdapter`.
  */
 export interface IWidgetLSPAdapterTracker<
   T extends WidgetLSPAdapter = WidgetLSPAdapter

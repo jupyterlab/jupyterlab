@@ -46,9 +46,6 @@ export const IDocumentManagerDialogs = new Token<IDocumentManagerDialogs>(
   'A service for displaying dialogs related to document management.'
 );
 
-/**
- * Namespace for dialog-related interfaces (argument/result) used by IDocumentManagerDialogs.
- */
 export namespace IDocumentManagerDialogs {
   /**
    * Options and result types for the {@link IDocumentManagerDialogs.confirmClose} dialog.

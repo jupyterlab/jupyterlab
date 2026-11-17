@@ -67,7 +67,8 @@ export class NotebookHelper {
    * The notebook needs to exist in the current folder.
    *
    * @param name Notebook name
-   * @param options.noKernel If true, the notebook will be opened without a kernel
+   * @param options - The options.
+   * - `noKernel`: If true, the notebook will be opened without a kernel
    * @returns Action success status
    */
   async open(name: string, options?: { noKernel?: boolean }): Promise<boolean> {
@@ -1485,8 +1486,8 @@ export class NotebookHelper {
    *
    * @param cellIndex Cell index
    * @param options Options for running cell; for compatibility a boolean can be passed as shorthand for `inplace`
-   * @param options.inplace Whether to stay on the cell or select the next one (default `false`)
-   * @param options.wait Whether to wait for the completion (default `true`)
+   * - `inplace`: Whether to stay on the cell or select the next one (default `false`)
+   * - `wait`: Whether to wait for the completion (default `true`)
    * @returns Action success status
    */
   async runCell(
@@ -1536,7 +1537,7 @@ export class NotebookHelper {
    *
    * @param name - The name of the notebook. If provided, the notebook will be renamed to this name.
    * @param options - Parameters for creating the notebook.
-   * @param options.kernel - The kernel to use for the notebook.
+   * - `kernel`: The kernel to use for the notebook.
    * @returns A Promise that resolves to the name of the created notebook, or `null` if the notebook creation failed.
    */
   async createNew(

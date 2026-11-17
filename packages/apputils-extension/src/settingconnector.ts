@@ -5,8 +5,8 @@
 
 export {
   /**
-   * @deprecated The setting connector is now in the settingregistry package. Import from '@jupyterlab/settingregistry' instead.
-   * Use: import { SettingConnector } from '@jupyterlab/settingregistry';
+   * @deprecated The setting connector is now in the settingregistry package. Import from `@jupyterlab/settingregistry` instead.
+   * Use: `import { SettingConnector } from '@jupyterlab/settingregistry';`
    */
   SettingConnector
 } from '@jupyterlab/settingregistry';

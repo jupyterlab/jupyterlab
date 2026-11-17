@@ -14,11 +14,11 @@ import type { VariablesBodyTree } from './tree';
 /**
  * A React component to handle scope changes.
  *
- * @param {object} props The component props.
- * @param props.model The variables model.
- * @param props.tree The variables tree widget.
- * @param props.grid The variables grid widget.
- * @param props.trans The translation bundle.
+ * @param props The component props.
+ * - `model`: The variables model.
+ * - `tree`: The variables tree widget.
+ * - `grid`: The variables grid widget.
+ * - `trans`: The translation bundle.
  */
 const ScopeSwitcherComponent = ({
   model,

@@ -149,7 +149,7 @@ type AnyMethodType =
   | typeof Method.ClientNotification
   | typeof Method.ClientRequest
   | typeof Method.ServerRequest;
-type AnyMethod =
+export type AnyMethod =
   | Method.ServerNotification
   | Method.ClientNotification
   | Method.ClientRequest
@@ -169,7 +169,7 @@ function createMethodMap<T, H, U extends keyof T = keyof T>(
   return result as T;
 }
 
-enum MessageKind {
+export enum MessageKind {
   clientNotifiedServer,
   serverNotifiedClient,
   serverRequested,
@@ -178,7 +178,7 @@ enum MessageKind {
   responseForServer
 }
 
-interface IMessageLog<T extends AnyMethod = AnyMethod> {
+export interface IMessageLog<T extends AnyMethod = AnyMethod> {
   method: T;
   message: any;
 }

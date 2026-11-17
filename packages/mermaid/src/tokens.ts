@@ -71,9 +71,6 @@ export interface IMermaidManager {
   getCachedFigure(text: string): HTMLElement | null;
 }
 
-/**
- * A namespace for the mermaid manager.
- */
 export namespace IMermaidManager {
   /**
    * Options for rendering a mermaid text-based diagram.

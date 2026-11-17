@@ -189,7 +189,7 @@ export const ySyncAnnotation = Annotation.define<YSyncConfig>();
  * Yjs binding view plugin to synchronize the
  * editor state with the Yjs document.
  */
-export const ySync = ViewPlugin.fromClass(
+export const ySync: ViewPlugin<IYSyncPlugin> = ViewPlugin.fromClass(
   class {
     constructor(view: EditorView) {
       this.conf = view.state.facet(ySyncFacet);
@@ -263,11 +263,23 @@ export const ySync = ViewPlugin.fromClass(
 );
 
 /**
+ * The plugin instance that synchronizes the editor with a Yjs document.
+ */
+export interface IYSyncPlugin {
+  conf: YSyncConfig;
+  _observer: (event: YTextEvent, tr: Transaction) => void;
+  _ytext: Text;
+  update(update: ViewUpdate): void;
+  destroy(): void;
+}
+
+/**
  * Extension for CodeMirror 6 binding the Yjs text (source of truth)
  * and the editor state.
  *
- * @param options.ytext Yjs text to bind
- * @param options.undoManager Yjs text undo manager
+ * @param options - The options.
+ * - `ytext`: Yjs text to bind
+ * - `undoManager`: Yjs text undo manager
  * @returns CodeMirror 6 extension
  */
 export function ybinding(options: {

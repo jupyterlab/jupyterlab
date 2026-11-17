@@ -83,9 +83,6 @@ export const ILabShell = new Token<ILabShell>(
  */
 export interface ILabShell extends LabShell {}
 
-/**
- * The namespace for `ILabShell` type information.
- */
 export namespace ILabShell {
   /**
    * The areas of the application shell where widgets can reside.

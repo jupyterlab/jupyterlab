@@ -215,7 +215,7 @@ export interface IModelDB extends IDisposable {
   createValue(path: string): IObservableValue;
 
   /**
-   * Get a value at a path, or `undefined if it has not been set
+   * Get a value at a path, or `undefined` if it has not been set
    * That value must already have been created using `createValue`.
    *
    * @param path the path for the value.
@@ -483,7 +483,7 @@ export class ModelDB implements IModelDB {
   }
 
   /**
-   * Get a value at a path, or `undefined if it has not been set
+   * Get a value at a path, or `undefined` if it has not been set
    * That value must already have been created using `createValue`.
    *
    * @param path the path for the value.

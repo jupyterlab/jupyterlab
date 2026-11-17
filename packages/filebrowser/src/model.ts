@@ -27,7 +27,7 @@ import { isPathWithinRoot } from './utils';
 const DEFAULT_REFRESH_INTERVAL = 10000;
 
 /**
- * The maximum upload size (in bytes) for notebook version < 5.1.0
+ * The maximum upload size (in bytes) for notebook version earlier than 5.1.0
  */
 export const LARGE_FILE_SIZE = 15 * 1024 * 1024;
 
@@ -431,7 +431,7 @@ export class FileBrowserModel implements IDisposable {
    * @returns A promise containing the new file contents model.
    *
    * #### Notes
-   * On Notebook version < 5.1.0, this will fail to upload files that are too
+   * On Notebook version earlier than 5.1.0, this will fail to upload files that are too
    * big to be sent in one request to the server. On newer versions, or on
    * Jupyter Server, it will ask for confirmation then upload the file in 1 MB
    * chunks.

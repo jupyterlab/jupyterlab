@@ -72,11 +72,11 @@ export namespace benchmark {
      */
     contentType: 'application/json' | 'image/png' | string;
     /**
-     * path <void|string> Optional path on the filesystem to the attached file.
+     * path `void | string` Optional path on the filesystem to the attached file.
      */
     path?: string;
     /**
-     * body <void|Buffer> Optional attachment body used instead of a file.
+     * body `void | Buffer` Optional attachment body used instead of a file.
      */
     body?: Buffer;
   }

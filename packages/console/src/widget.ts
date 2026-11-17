@@ -84,7 +84,7 @@ const INPUT_CLASS = 'jp-CodeConsole-input';
 
 /**
  * The class name added to the console when an element within it is focused
- * and takes keyboard input, such as <input> and <div contenteditable>
+ * and takes keyboard input, such as `<input>` and `<div contenteditable>`
  *
  * This class is also effective when the focused element is in shadow DOM.
  */

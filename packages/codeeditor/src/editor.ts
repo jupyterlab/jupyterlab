@@ -385,7 +385,6 @@ export namespace CodeEditor {
      * Inject an extension into the editor
      *
      * @alpha
-     * @experimental
      * @param ext Editor extension
      */
     injectExtension(ext: Extension): void;

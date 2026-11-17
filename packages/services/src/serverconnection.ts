@@ -15,7 +15,7 @@ if (typeof window === 'undefined') {
   WEBSOCKET = WebSocket;
 }
 
-interface ISerializer {
+export interface ISerializer {
   /**
    * Serialize a kernel message for transport.
    */

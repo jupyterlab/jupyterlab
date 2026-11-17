@@ -553,9 +553,9 @@ export namespace IRenderMime {
     resolvePath?: (path: string) => Promise<IResolvedLocation | null>;
   }
 
-  type UrlAttributes = 'href' | 'src';
+  export type UrlAttributes = 'href' | 'src';
 
-  type TagsAcceptingUrls = {
+  export type TagsAcceptingUrls = {
     [K in keyof HTMLElementTagNameMap]: Extract<
       keyof HTMLElementTagNameMap[K],
       UrlAttributes
