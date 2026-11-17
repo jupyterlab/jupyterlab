@@ -109,6 +109,7 @@ export class ShortcutInput extends React.Component<
     this._inputId = props.id ?? `jp-Shortcuts-CaptureInput-${idSuffix}`;
     this._hintId = `jp-Shortcuts-CaptureHint-${idSuffix}`;
     this._errorId = `${this._hintId}-error`;
+    this._startLabelId = `${this._hintId}-start`;
 
     this.state = {
       value: this.props.placeholder,
@@ -752,9 +753,12 @@ export class ShortcutInput extends React.Component<
               type="button"
               className="jp-Button jp-mod-styled jp-Shortcuts-StartRecording"
               onClick={this._startRecording}
+              aria-labelledby={
+                labelledBy ? `${labelledBy} ${this._startLabelId}` : undefined
+              }
               aria-describedby={this._hintId}
             >
-              {trans.__('Start recording')}
+              <span id={this._startLabelId}>{trans.__('Start recording')}</span>
             </button>
           ) : (
             <div
@@ -888,6 +892,7 @@ export class ShortcutInput extends React.Component<
   private _inputId: string;
   private _hintId: string;
   private _errorId: string;
+  private _startLabelId: string;
   private _idleTimer: number | null = null;
   private _announceStartRaf: number | null = null;
   private _blurRaf: number | null = null;
