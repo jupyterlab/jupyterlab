@@ -549,19 +549,6 @@ export class ShortcutInput extends React.Component<
 
   /** Parse and normalize user input */
   handleInput = (event: React.KeyboardEvent): void => {
-    if (this.state.phase === 'idle') {
-      // Allow Tab navigation until the user explicitly starts capture.
-      if (event.key === 'Tab' || event.key === 'Shift') {
-        return;
-      }
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        event.stopPropagation();
-        this._startRecording();
-      }
-      return;
-    }
-
     if (this.state.phase === 'incompleteIdle' || this.state.phase === 'ready') {
       if (event.key === 'Escape') {
         event.preventDefault();
@@ -716,9 +703,6 @@ export class ShortcutInput extends React.Component<
     if (!this.state.isAvailable) {
       inputClassName += ' jp-mod-unavailable-Input';
     }
-    if (isIdle) {
-      inputClassName += ' jp-mod-idle';
-    }
     const statusMessage = this._statusMessage(trans);
     const errorMessage = this._errorMessage(trans);
     const describedBy = errorMessage
@@ -727,7 +711,7 @@ export class ShortcutInput extends React.Component<
     const activelyRecording =
       this.state.phase === 'capturing' && this.state.inputFocused;
     const captureHint = isIdle
-      ? trans.__('Press to start keystroke capture.')
+      ? trans.__('Press Start recording to capture a shortcut.')
       : activelyRecording
         ? trans.__('Recording…')
         : this.state.phase === 'capturing'
@@ -743,14 +727,9 @@ export class ShortcutInput extends React.Component<
     const labelledBy = this.props.labelledBy;
     const ariaLabel = labelledBy
       ? undefined
-      : isIdle
-        ? trans.__('Start recording shortcut')
-        : (this.props.ariaLabel ?? defaultAriaLabel);
-    const placeholderText = isIdle
-      ? trans.__('Start recording')
-      : this.state.value === ''
-        ? trans.__('press keys')
-        : this.state.value;
+      : (this.props.ariaLabel ?? defaultAriaLabel);
+    const placeholderText =
+      this.state.value === '' ? trans.__('press keys') : this.state.value;
     const boxClass = [
       'jp-Shortcuts-InputBox',
       !this._isReplacingExistingKeybinding ? 'jp-Shortcuts-InputBoxNew' : '',
@@ -762,43 +741,53 @@ export class ShortcutInput extends React.Component<
     return (
       <div className={boxClass} ref={this._ref} onBlur={this._handleBlur}>
         <div className="jp-Shortcuts-InputBox-controls">
-          <div
-            id={this._inputId}
-            role={isIdle ? 'button' : 'textbox'}
-            aria-readonly={isIdle ? undefined : 'true'}
-            tabIndex={0}
-            className={inputClassName}
-            onKeyDown={this.handleInput}
-            onClick={this._handleInputClick}
-            onFocus={this._handleInputFocus}
-            onBlur={this._handleInputBlur}
-            ref={this._inputRef}
-            data-lm-suppress-shortcuts="true"
-            aria-invalid={isInvalid || undefined}
-            aria-describedby={describedBy}
-            aria-labelledby={labelledBy}
-            aria-label={ariaLabel}
-          >
-            <p
-              className={
-                this.state.selected && this._isReplacingExistingKeybinding
-                  ? 'jp-Shortcuts-InputText jp-mod-selected-InputText'
-                  : this.state.value === '' || isIdle
-                    ? 'jp-Shortcuts-InputText jp-mod-waiting-InputText'
-                    : 'jp-Shortcuts-InputText'
-              }
+          {isIdle ? (
+            <button
+              type="button"
+              className="jp-Button jp-mod-styled jp-Shortcuts-StartRecording"
+              onClick={this._startRecording}
+              aria-describedby={this._hintId}
             >
-              {placeholderText}
-            </p>
-            {this.state.timerRunning ? (
-              <div
-                key={this.state.timerGeneration}
-                className="jp-Shortcuts-CaptureTimer jp-mod-running"
-                style={{ animationDuration: `${CAPTURE_IDLE_MS}ms` }}
-                aria-hidden="true"
-              />
-            ) : null}
-          </div>
+              {trans.__('Start recording')}
+            </button>
+          ) : (
+            <div
+              id={this._inputId}
+              role="textbox"
+              aria-readonly="true"
+              tabIndex={0}
+              className={inputClassName}
+              onKeyDown={this.handleInput}
+              onFocus={this._handleInputFocus}
+              onBlur={this._handleInputBlur}
+              ref={this._inputRef}
+              data-lm-suppress-shortcuts="true"
+              aria-invalid={isInvalid || undefined}
+              aria-describedby={describedBy}
+              aria-labelledby={labelledBy}
+              aria-label={ariaLabel}
+            >
+              <p
+                className={
+                  this.state.selected && this._isReplacingExistingKeybinding
+                    ? 'jp-Shortcuts-InputText jp-mod-selected-InputText'
+                    : this.state.value === ''
+                      ? 'jp-Shortcuts-InputText jp-mod-waiting-InputText'
+                      : 'jp-Shortcuts-InputText'
+                }
+              >
+                {placeholderText}
+              </p>
+              {this.state.timerRunning ? (
+                <div
+                  key={this.state.timerGeneration}
+                  className="jp-Shortcuts-CaptureTimer jp-mod-running"
+                  style={{ animationDuration: `${CAPTURE_IDLE_MS}ms` }}
+                  aria-hidden="true"
+                />
+              ) : null}
+            </div>
+          )}
           <div
             className="jp-sr-only"
             role="status"
@@ -853,12 +842,6 @@ export class ShortcutInput extends React.Component<
       </div>
     );
   }
-
-  private _handleInputClick = (): void => {
-    if (this.state.phase === 'idle') {
-      this._startRecording();
-    }
-  };
 
   private _handleInputFocus = (): void => {
     this.setState({ inputFocused: true });

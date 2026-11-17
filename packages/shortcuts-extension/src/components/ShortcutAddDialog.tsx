@@ -86,7 +86,9 @@ export class NewShortcutDialog extends Dialog<NewShortcutDialog.IValue> {
         return;
       }
       const jsonEditorNode = this.node.querySelector('.jp-JSONEditor');
-      const captureNode = this.node.querySelector('.jp-Shortcuts-Input');
+      const captureHost = this.node.querySelector(
+        '.jp-Shortcuts-AddDialog-capture'
+      );
       if (
         jsonEditorNode instanceof HTMLElement &&
         jsonEditorNode.contains(activeElement)
@@ -96,10 +98,10 @@ export class NewShortcutDialog extends Dialog<NewShortcutDialog.IValue> {
         return;
       }
       if (
-        captureNode instanceof HTMLElement &&
-        captureNode.contains(activeElement)
+        captureHost instanceof HTMLElement &&
+        captureHost.contains(activeElement)
       ) {
-        // Let ShortcutInput handle Enter (start capture / record the key).
+        // Let Start recording / ShortcutInput handle Enter; do not accept.
         return;
       }
     }
