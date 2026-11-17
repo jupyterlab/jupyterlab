@@ -66,11 +66,27 @@ export class NewShortcutDialog extends Dialog<NewShortcutDialog.IValue> {
   }
 
   /**
-   * Keep accept enabled for key conflicts (footer becomes Overwrite); still
-   * disable for incomplete keys, missing command, or invalid JSON.
+   * Disable accept for missing command, incomplete keys, or invalid JSON.
+   * Key conflicts stay allowed so the footer can show Overwrite.
    */
   protected _checkValidation(): void {
-    super._checkValidation();
+    const hasErrors =
+      !this._formBody.hasCommand() ||
+      !this._formBody.hasKeysReady() ||
+      !!this.node.querySelector('.jp-JSONEditor.jp-mod-error');
+
+    // Dialog keeps _hasValidationErrors private; mirror its accept-button logic.
+    const dialog = this as unknown as {
+      _hasValidationErrors: boolean;
+      _buttons: ReadonlyArray<{ accept: boolean }>;
+      _buttonNodes: ReadonlyArray<HTMLButtonElement>;
+    };
+    dialog._hasValidationErrors = hasErrors;
+    for (let i = 0; i < dialog._buttons.length; i++) {
+      if (dialog._buttons[i].accept) {
+        dialog._buttonNodes[i].disabled = hasErrors;
+      }
+    }
     this._syncAcceptButton();
   }
 
@@ -246,17 +262,6 @@ class NewShortcutDialogBody
     shortcutLabel.className = 'jp-Dialog-label';
     shortcutField.appendChild(shortcutLabel);
 
-    this._keysValidity = document.createElement('input');
-    this._keysValidity.type = 'text';
-    this._keysValidity.id = 'jp-Shortcuts-AddDialog-keys-validity';
-    this._keysValidity.name = 'shortcut-keys';
-    this._keysValidity.required = true;
-    this._keysValidity.tabIndex = -1;
-    this._keysValidity.className = 'jp-sr-only';
-    this._keysValidity.setAttribute('aria-hidden', 'true');
-    this._updateKeysValidity([]);
-    shortcutField.appendChild(this._keysValidity);
-
     this._captureHost = document.createElement('div');
     this._captureHost.className = 'jp-Shortcuts-AddDialog-capture';
     shortcutField.appendChild(this._captureHost);
@@ -286,12 +291,17 @@ class NewShortcutDialogBody
     this._renderCapture();
   }
 
-  /**
-   * Value for the dialog when accepted.
-   */
-  /**
-   * Whether the current capture conflicts with existing shortcuts.
-   */
+  /** Whether a command is selected. */
+  hasCommand(): boolean {
+    return this._commandSelect.value !== '';
+  }
+
+  /** Whether the captured chord is complete enough to save. */
+  hasKeysReady(): boolean {
+    return this._isChordFunctional(this._keys);
+  }
+
+  /** Whether the current capture conflicts with existing shortcuts. */
   hasConflicts(): boolean {
     return this._conflicts.length > 0;
   }
@@ -351,16 +361,6 @@ class NewShortcutDialogBody
     return !MODIFIER_KEYS.has(lastKey);
   }
 
-  private _updateKeysValidity(keys: string[]): void {
-    this._keys = keys;
-    const functional = this._isChordFunctional(keys);
-    this._keysValidity.value = functional ? keys.join(' ') : '';
-    this._keysValidity.setCustomValidity(
-      functional ? '' : this._trans.__('Capture a complete shortcut.')
-    );
-    this._checkValidation();
-  }
-
   private _onCommandChange = (): void => {
     const selected = this._commands.find(
       command => command.command === this._commandSelect.value
@@ -378,7 +378,8 @@ class NewShortcutDialogBody
   };
 
   private _onKeysChange = (keys: string[]): void => {
-    this._updateKeysValidity(keys);
+    this._keys = keys;
+    this._checkValidation();
   };
 
   private _displayCaptureError = (data: ICaptureError): void => {
@@ -438,7 +439,6 @@ class NewShortcutDialogBody
   private _checkValidation: () => void;
   private _commands: IShortcutTarget[];
   private _commandSelect: HTMLSelectElement;
-  private _keysValidity: HTMLInputElement;
   private _captureHost: HTMLDivElement;
   private _errorNode: HTMLDivElement;
   private _customOptions: ICustomOptionsFields;
