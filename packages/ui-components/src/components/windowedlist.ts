@@ -1693,7 +1693,10 @@ export class WindowedList<
     if (this.viewModel.setWidgetSize(newSizes)) {
       if (scrollCompensation !== 0) {
         this.viewModel.scrollOffset = scrollOffset + scrollCompensation;
-        this._scrollUpdateWasRequested = true;
+        // Scroll before the paint, as `update()` waits for the next frame, and
+        // grow the list first, or the browser clamps the offset at the end.
+        this._updateTotalSize();
+        this._outerElement.scrollTop = this.viewModel.scrollOffset;
       }
       this._scrollBackToItemOnResize();
       // Update the list
