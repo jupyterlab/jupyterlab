@@ -187,6 +187,13 @@ export async function renderImage(
   if (typeof width === 'number') {
     img.width = width;
   }
+  if (typeof width === 'number' && typeof height === 'number') {
+    // `height: auto` from the style sheet then keeps this ratio, not the
+    // ratio of the image data.
+    img.style.aspectRatio = `${width} / ${height}`;
+  } else if (typeof height === 'number') {
+    Private.fitHeightOnlyImage(img, height);
+  }
 
   if (needsBackground === 'light') {
     img.classList.add('jp-needs-light-background');
@@ -2096,7 +2103,44 @@ namespace Private {
       if (!imgs[i].alt) {
         imgs[i].alt = trans.__('Image');
       }
+      const value = imgs[i].getAttribute('height') ?? '';
+      // Browsers read `300px` as 300, and `50%` as a share of the parent.
+      const height = value.includes('%') ? 0 : parseFloat(value);
+      if (height > 0 && !imgs[i].hasAttribute('width')) {
+        fitHeightOnlyImage(imgs[i], height);
+      }
     }
+  }
+
+  /**
+   * Give an image with a height and no width the width that keeps the ratio
+   * of its data, once it loads.
+   *
+   * #### Notes
+   * With a height alone, `max-width` narrows a wide image but keeps its
+   * height, while with both sizes `height: auto` follows the narrowed width.
+   */
+  export function fitHeightOnlyImage(
+    img: HTMLImageElement,
+    height: number
+  ): void {
+    img.addEventListener(
+      'load',
+      () => {
+        if (img.naturalHeight > 0) {
+          // A style sheet can also set the height, or a maximum height, so
+          // use the height the image is shown at when it is in the document.
+          const shown = parseFloat(getComputedStyle(img).height) || height;
+          const derived = Math.max(
+            1,
+            Math.round((shown * img.naturalWidth) / img.naturalHeight)
+          );
+          img.width = derived;
+          img.style.aspectRatio = `${derived} / ${shown}`;
+        }
+      },
+      { once: true }
+    );
   }
 
   /**

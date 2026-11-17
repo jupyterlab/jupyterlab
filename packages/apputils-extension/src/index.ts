@@ -271,8 +271,13 @@ Would you like to clear the workspace or keep waiting?`),
 
     // Return ISplashScreen.
     let splashCount = 0;
+    let splashTimeout = 0;
     return {
       show: (light = true) => {
+        if (splashTimeout) {
+          window.clearTimeout(splashTimeout);
+          splashTimeout = 0;
+        }
         splash.classList.remove('splash-fade');
         splash.classList.toggle('light', light);
         splash.classList.toggle('dark', !light);
@@ -284,7 +289,8 @@ Would you like to clear the workspace or keep waiting?`),
 
         return new DisposableDelegate(async () => {
           await restored;
-          if (--splashCount === 0) {
+          if (--splashCount <= 0) {
+            splashCount = 0;
             void recovery.stop();
 
             if (dialog) {
@@ -293,8 +299,14 @@ Would you like to clear the workspace or keep waiting?`),
             }
 
             splash.classList.add('splash-fade');
-            window.setTimeout(() => {
-              document.body.removeChild(splash);
+            if (splashTimeout) {
+              window.clearTimeout(splashTimeout);
+            }
+            splashTimeout = window.setTimeout(() => {
+              if (splash.parentElement) {
+                splash.parentElement.removeChild(splash);
+              }
+              splashTimeout = 0;
             }, 200);
           }
         });

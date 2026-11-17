@@ -279,6 +279,98 @@ test.describe('Section reordering', () => {
     await expect(titles.nth(1)).toHaveAttribute('aria-expanded', 'true');
   });
 
+  test('should move a section with single clicks and keep the focus on its header', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('jp-running-sessions');
+    const panel = page.locator('#jp-running-sessions .jp-SidePanel-content');
+    const titles = panel.locator('.lm-AccordionPanel-title');
+    const labels = titles.locator('.lm-AccordionPanel-titleLabel');
+    await expect(labels).toContainText(['Open Tabs', 'Kernels']);
+    const initialLabels = await labels.allTextContents();
+    const moveUp = page.locator(
+      '.lm-Menu [data-command="apputils:move-section-up"]'
+    );
+    const moveDown = page.locator(
+      '.lm-Menu [data-command="apputils:move-section-down"]'
+    );
+
+    // The items follow the same lock as dragging.
+    await titles
+      .first()
+      .locator('.lm-AccordionPanel-titleLabel')
+      .click({ button: 'right' });
+    await expect(page.locator(TOGGLE_REORDERING_SELECTOR)).toBeVisible();
+    await expect(moveDown).toBeHidden();
+    await page.keyboard.press('Escape');
+
+    await toggleReordering(page, titles.first());
+    await titles
+      .first()
+      .locator('.lm-AccordionPanel-titleLabel')
+      .click({ button: 'right' });
+    await expect(moveUp).toHaveClass(/lm-mod-disabled/);
+    await moveDown.click();
+    await expect(labels).toHaveText([
+      initialLabels[1],
+      initialLabels[0],
+      ...initialLabels.slice(2)
+    ]);
+    await expect(titles.nth(1)).toBeFocused();
+  });
+
+  test('should move the focused section with key bindings', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('jp-running-sessions');
+    const panel = page.locator('#jp-running-sessions .jp-SidePanel-content');
+    const titles = panel.locator('.lm-AccordionPanel-title');
+    const labels = titles.locator('.lm-AccordionPanel-titleLabel');
+    await expect(labels).toContainText(['Open Tabs', 'Kernels']);
+    const initialLabels = await labels.allTextContents();
+    const reordered = [
+      initialLabels[1],
+      initialLabels[0],
+      ...initialLabels.slice(2)
+    ];
+    await page.evaluate(() => {
+      const { commands } = window.jupyterapp;
+      commands.addKeyBinding({
+        command: 'apputils:move-section-down',
+        keys: ['Alt J'],
+        selector: 'body'
+      });
+      commands.addKeyBinding({
+        command: 'apputils:move-section-up',
+        keys: ['Alt K'],
+        selector: 'body'
+      });
+    });
+    await toggleReordering(page, titles.first());
+
+    await titles.first().focus();
+    await page.keyboard.press('Alt+KeyJ');
+    await expect(labels).toHaveText(reordered);
+    await expect(titles.nth(1)).toBeFocused();
+
+    await page.keyboard.press('Alt+KeyK');
+    await expect(labels).toHaveText(initialLabels);
+    await expect(titles.first()).toBeFocused();
+    // Arrow keys still move the focus between the headers in the new order.
+    await page.keyboard.press('ArrowDown');
+    await expect(titles.nth(1)).toBeFocused();
+
+    // Without a focused header, the key binding moves nothing, even though a
+    // header was right-clicked before.
+    await page.evaluate(() => {
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+    });
+    await page.keyboard.press('Alt+KeyJ');
+    await expect(labels).toHaveText(initialLabels);
+  });
+
   test('should cancel dragging with Escape when focus is outside the accordion', async ({
     page
   }) => {

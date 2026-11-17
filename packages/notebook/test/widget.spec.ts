@@ -1302,6 +1302,118 @@ describe('@jupyter/notebook', () => {
       });
     });
 
+    describe('#setFragment()', () => {
+      it('should keep a markdown target rendered when in edit mode', async () => {
+        const widget = createActiveWidget();
+        Widget.attach(widget, document.body);
+        widget.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'a = 1' },
+          { cell_type: 'markdown', source: '# Target' }
+        ]);
+        const target = widget.widgets[1] as MarkdownCell;
+        target.inViewport = true;
+        target.node.scrollIntoView = jest.fn();
+        widget.activeCellIndex = 0;
+        widget.mode = 'edit';
+        expect(target.rendered).toBe(true);
+
+        await widget.setFragment(`#cell-id=${target.model.id}`);
+
+        expect(widget.activeCell).toBe(target);
+        expect(target.rendered).toBe(true);
+        widget.dispose();
+      });
+
+      const markdown = (source: string) => ({
+        cell_type: 'markdown',
+        metadata: {},
+        source
+      });
+      const content = {
+        ...utils.DEFAULT_CONTENT,
+        cells: [
+          markdown('# Top'),
+          ...Array.from({ length: 12 }, (_, i) => markdown(`Filler ${i}`)),
+          markdown('## Target section\n\nThe requested section.')
+        ]
+      };
+
+      it.each(['defer', 'none'])(
+        'should scroll to a heading of a notebook that was just loaded (%s windowing)',
+        async mode => {
+          const widget = new LogNotebook({
+            ...options,
+            rendermime: rendermime.clone({ markdownParser: headingParser }),
+            notebookConfig: {
+              ...notebookConfig,
+              windowingMode: mode as 'defer' | 'none'
+            }
+          });
+          widget.model = new NotebookModel();
+          Widget.attach(widget, document.body);
+          widget.model!.fromJSON(content);
+          jest.spyOn(widget, 'scrollToCell').mockResolvedValue();
+          let placeholdersAtScroll = -1;
+          const scrollIntoView = jest.fn(() => {
+            placeholdersAtScroll = widget.widgets.filter(c =>
+              c.isPlaceholder()
+            ).length;
+          });
+          const original = HTMLElement.prototype.scrollIntoView;
+          HTMLElement.prototype.scrollIntoView = scrollIntoView;
+          try {
+            await widget.setFragment('#Target-section');
+          } finally {
+            HTMLElement.prototype.scrollIntoView = original;
+          }
+          const target = widget.widgets[widget.widgets.length - 1];
+          expect(scrollIntoView).toHaveBeenCalledTimes(1);
+          expect(target.node.contains(scrollIntoView.mock.contexts[0])).toBe(
+            true
+          );
+          // Cells rendering after the scroll would push the target away.
+          expect(placeholdersAtScroll).toBe(0);
+          widget.dispose();
+        }
+      );
+
+      it('should scroll again if the target moves after scrolling', async () => {
+        const widget = new LogNotebook({
+          ...options,
+          rendermime: rendermime.clone({ markdownParser: headingParser }),
+          notebookConfig: { ...notebookConfig, windowingMode: 'none' }
+        });
+        widget.model = new NotebookModel();
+        Widget.attach(widget, document.body);
+        widget.model!.fromJSON(content);
+        jest.spyOn(widget, 'scrollToCell').mockResolvedValue();
+        // Cells above the target change size once they come into view, so
+        // the target moves after the first scroll and then stays put.
+        const tops = [0, -60, -60, -60];
+        const scrollIntoView = jest.fn();
+        const getRect = HTMLElement.prototype.getBoundingClientRect;
+        const rectSpy = jest
+          .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+          .mockImplementation(function (this: HTMLElement) {
+            if (!scrollIntoView.mock.contexts.includes(this)) {
+              return getRect.call(this);
+            }
+            const top = tops.length > 1 ? tops.shift()! : tops[0];
+            return { top } as DOMRect;
+          });
+        const original = HTMLElement.prototype.scrollIntoView;
+        HTMLElement.prototype.scrollIntoView = scrollIntoView;
+        try {
+          await widget.setFragment('#Target-section');
+        } finally {
+          HTMLElement.prototype.scrollIntoView = original;
+          rectSpy.mockRestore();
+        }
+        expect(scrollIntoView).toHaveBeenCalledTimes(2);
+        widget.dispose();
+      });
+    });
+
     describe('#isSelected()', () => {
       it('should get whether the cell is selected', () => {
         const widget = createActiveWidget();
@@ -2064,97 +2176,6 @@ describe('@jupyter/notebook', () => {
           widget.node.dispatchEvent(evt);
           expect(widget.mode).toBe('command');
         });
-      });
-    });
-
-    describe('#setFragment()', () => {
-      const markdown = (source: string) => ({
-        cell_type: 'markdown',
-        metadata: {},
-        source
-      });
-      const content = {
-        ...utils.DEFAULT_CONTENT,
-        cells: [
-          markdown('# Top'),
-          ...Array.from({ length: 12 }, (_, i) => markdown(`Filler ${i}`)),
-          markdown('## Target section\n\nThe requested section.')
-        ]
-      };
-
-      it.each(['defer', 'none'])(
-        'should scroll to a heading of a notebook that was just loaded (%s windowing)',
-        async mode => {
-          const widget = new LogNotebook({
-            ...options,
-            rendermime: rendermime.clone({ markdownParser: headingParser }),
-            notebookConfig: {
-              ...notebookConfig,
-              windowingMode: mode as 'defer' | 'none'
-            }
-          });
-          widget.model = new NotebookModel();
-          Widget.attach(widget, document.body);
-          widget.model!.fromJSON(content);
-          jest.spyOn(widget, 'scrollToCell').mockResolvedValue();
-          let placeholdersAtScroll = -1;
-          const scrollIntoView = jest.fn(() => {
-            placeholdersAtScroll = widget.widgets.filter(c =>
-              c.isPlaceholder()
-            ).length;
-          });
-          const original = HTMLElement.prototype.scrollIntoView;
-          HTMLElement.prototype.scrollIntoView = scrollIntoView;
-          try {
-            await widget.setFragment('#Target-section');
-          } finally {
-            HTMLElement.prototype.scrollIntoView = original;
-          }
-          const target = widget.widgets[widget.widgets.length - 1];
-          expect(scrollIntoView).toHaveBeenCalledTimes(1);
-          expect(target.node.contains(scrollIntoView.mock.contexts[0])).toBe(
-            true
-          );
-          // Cells rendering after the scroll would push the target away.
-          expect(placeholdersAtScroll).toBe(0);
-          widget.dispose();
-        }
-      );
-
-      it('should scroll again if the target moves after scrolling', async () => {
-        const widget = new LogNotebook({
-          ...options,
-          rendermime: rendermime.clone({ markdownParser: headingParser }),
-          notebookConfig: { ...notebookConfig, windowingMode: 'none' }
-        });
-        widget.model = new NotebookModel();
-        Widget.attach(widget, document.body);
-        widget.model!.fromJSON(content);
-        jest.spyOn(widget, 'scrollToCell').mockResolvedValue();
-        // Cells above the target change size once they come into view, so
-        // the target moves after the first scroll and then stays put.
-        const tops = [0, -60, -60, -60];
-        const scrollIntoView = jest.fn();
-        const getRect = HTMLElement.prototype.getBoundingClientRect;
-        const rectSpy = jest
-          .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-          .mockImplementation(function (this: HTMLElement) {
-            if (!scrollIntoView.mock.contexts.includes(this)) {
-              return getRect.call(this);
-            }
-            const top = tops.length > 1 ? tops.shift()! : tops[0];
-            return { top } as DOMRect;
-          });
-        const original = HTMLElement.prototype.scrollIntoView;
-        HTMLElement.prototype.scrollIntoView = scrollIntoView;
-        try {
-          await widget.setFragment('#Target-section');
-        } finally {
-          HTMLElement.prototype.scrollIntoView = original;
-          rectSpy.mockRestore();
-        }
-        expect(scrollIntoView).toHaveBeenCalledTimes(2);
-        widget.dispose();
       });
     });
 

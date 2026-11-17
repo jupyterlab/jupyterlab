@@ -195,8 +195,16 @@ async function setToolbarItems(
     // This is not optimal but safer because a toolbar item with the same
     // name cannot be inserted (it will be a no-op). But that could happen
     // if the settings are changing the items order.
+    const filtered = newItems.filter(item => !item.disabled);
+    // settings.changed fires for any change to the plugin's settings, so
+    // skip the rebuild when the toolbar definition itself did not change:
+    // clearing and re-adding identical items rebuilds every toolbar and
+    // can reorder its items.
+    if (JSONExt.deepEqual([...toolbarItems], filtered)) {
+      return;
+    }
     toolbarItems.clear();
-    toolbarItems.pushAll(newItems.filter(item => !item.disabled));
+    toolbarItems.pushAll(filtered);
   };
 
   // Initialize the toolbar

@@ -470,13 +470,26 @@ export class FileBrowserModel implements IDisposable {
     ) {
       throw 'Cancelled large file upload';
     }
-    await this._uploadCheckDisposed();
-    await this.refresh();
-    await this._uploadCheckDisposed();
-    if (
-      this._items.find(i => i.name === file.name) &&
-      !(await this._prompt(() => shouldOverwrite(file.name)))
-    ) {
+    let fileExists = false;
+    if (typeof path === 'undefined' || path === this._model.path) {
+      await this._uploadCheckDisposed();
+      await this.refresh();
+      await this._uploadCheckDisposed();
+      fileExists = !!this._items.find(i => i.name === file.name);
+    } else {
+      await this._uploadCheckDisposed();
+      const targetPath = path ? path + '/' + file.name : file.name;
+      try {
+        await this.manager.services.contents.get(targetPath, {
+          content: false
+        });
+        fileExists = true;
+      } catch {
+        fileExists = false;
+      }
+      await this._uploadCheckDisposed();
+    }
+    if (fileExists && !(await this._prompt(() => shouldOverwrite(file.name)))) {
       throw err;
     }
     await this._uploadCheckDisposed();

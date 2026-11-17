@@ -1064,7 +1064,9 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
               this.layout.removeWidget(cell);
             });
           } else if (
-            this.notebookConfig.windowingMode === 'contentVisibility'
+            this.notebookConfig.windowingMode === 'contentVisibility' &&
+            // Cells in hidden notebooks do not have a measurable height.
+            this.isVisible
           ) {
             // Update height estimate in the view model
             const height = cell.node.getBoundingClientRect().height;
@@ -2480,6 +2482,11 @@ export class Notebook extends StaticNotebook {
         (await this._findFragmentTarget(parsedFragment, fragment)) ?? result;
     }
     let { cell, element } = result;
+
+    // Activating a markdown cell in edit mode would unrender the target.
+    this.setMode('command', { focus: false });
+    // Scroll anchoring is enabled only for the active cell.
+    this.activeCellIndex = this.widgets.indexOf(cell);
 
     if (!cell.inViewport) {
       await this.scrollToCell(cell, 'center');

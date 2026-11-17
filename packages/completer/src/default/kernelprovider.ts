@@ -48,7 +48,7 @@ export class KernelCompleterProvider implements ICompletionProvider {
 
     const contents: KernelMessage.ICompleteRequestMsg['content'] = {
       code: request.text,
-      cursor_pos: request.offset
+      cursor_pos: Text.jsIndexToCharIndex(request.offset, request.text)
     };
 
     const msg = await kernel.requestComplete(contents);
@@ -74,8 +74,8 @@ export class KernelCompleterProvider implements ICompletionProvider {
       }
     });
     return {
-      start: response.cursor_start,
-      end: response.cursor_end,
+      start: Text.charIndexToJsIndex(response.cursor_start, request.text),
+      end: Text.charIndexToJsIndex(response.cursor_end, request.text),
       items
     };
   }
@@ -94,7 +94,7 @@ export class KernelCompleterProvider implements ICompletionProvider {
       let code = editor.model.sharedModel.getSource();
 
       const position = editor.getCursorPosition();
-      let offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), code);
+      let offset = editor.getOffsetAt(position);
       const kernel = session.kernel;
       if (!code || !kernel) {
         return Promise.resolve(item);
@@ -107,7 +107,7 @@ export class KernelCompleterProvider implements ICompletionProvider {
 
       const contents: KernelMessage.IInspectRequestMsg['content'] = {
         code,
-        cursor_pos: offset,
+        cursor_pos: Text.jsIndexToCharIndex(offset, code),
         detail_level: 0
       };
       const msg = await kernel.requestInspect(contents);

@@ -77,6 +77,12 @@ codebase defines a set of [color variables](https://github.com/jupyterlab/jupyte
 that can be used for borders, icons, and such. If you're adding any CSS that
 needs a color value, please use one of the variables defined.
 
+### Tag accessibility settings
+
+If you add a setting related to accessibility, add `"tags": ["accessibility"]`
+to it in the schema, so that users can find it with `tag:accessibility` in the
+Settings Editor (see {ref}`settings-editor-tags`).
+
 ### Upstream fixes in Lumino
 
 JupyterLab uses a front-end framework that was built specifically for it called
