@@ -186,6 +186,11 @@ export const ySyncFacet = Facet.define<YSyncConfig, YSyncConfig>({
 export const ySyncAnnotation = Annotation.define<YSyncConfig>();
 
 /**
+ * Annotation indicating whether a change originated from a remote collaborator.
+ */
+export const yRemoteAnnotation = Annotation.define<boolean>();
+
+/**
  * Yjs binding view plugin to synchronize the
  * editor state with the Yjs document.
  */
@@ -210,10 +215,16 @@ export const ySync = ViewPlugin.fromClass(
               pos += d.retain ?? 0;
             }
           }
+          const annotations: Annotation<unknown>[] = [
+            ySyncAnnotation.of(this.conf)
+          ];
+          if (!tr.local) {
+            annotations.push(yRemoteAnnotation.of(true));
+          }
           view.dispatch({
             changes,
             // Specified the changes origin to not loop when synchronizing
-            annotations: [ySyncAnnotation.of(this.conf)]
+            annotations
           });
         }
       };

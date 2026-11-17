@@ -332,6 +332,11 @@ export namespace CodeEditor {
    */
   export interface IEditor extends ISelectionOwner, IDisposable {
     /**
+     * Whether the last document change was applied from a remote collaborator.
+     */
+    readonly lastChangeIsRemote?: boolean;
+
+    /**
      * A signal emitted when either the top or bottom edge is requested.
      */
     readonly edgeRequested: ISignal<IEditor, EdgeLocation>;

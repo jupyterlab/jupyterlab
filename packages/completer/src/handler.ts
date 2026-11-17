@@ -353,6 +353,7 @@ export class CompletionHandler implements IDisposable {
         this.completer.isVisible,
         changed
       )) &&
+      !editor.lastChangeIsRemote &&
       this._isCurrentState(editor, state)
     ) {
       void this._makeRequest(position, CompletionTriggerKind.TriggerCharacter);
@@ -364,10 +365,13 @@ export class CompletionHandler implements IDisposable {
       // (this happens before request is sent)
       inlineModel.handleTextChange(changed);
       if (this._continuousInline) {
-        void this._makeInlineRequest(
-          editor.getCursorPosition(),
-          InlineCompletionTriggerKind.Automatic
-        );
+        await Promise.resolve();
+        if (!editor.lastChangeIsRemote) {
+          void this._makeInlineRequest(
+            editor.getCursorPosition(),
+            InlineCompletionTriggerKind.Automatic
+          );
+        }
       }
     }
 
@@ -435,6 +439,14 @@ export class CompletionHandler implements IDisposable {
           return;
         }
 
+        if (
+          trigger === CompletionTriggerKind.TriggerCharacter &&
+          editor.lastChangeIsRemote
+        ) {
+          // A collaborator changed the text while the request was pending
+          return;
+        }
+
         if (!this._isCurrentState(editor, state)) {
           return;
         }
@@ -485,6 +497,12 @@ export class CompletionHandler implements IDisposable {
     if (!this.inlineCompleter) {
       return Promise.reject(new Error('No inline completer'));
     }
+    if (
+      trigger === InlineCompletionTriggerKind.Automatic &&
+      editor.lastChangeIsRemote
+    ) {
+      return Promise.resolve();
+    }
 
     const line = editor.getLine(position.line);
     if (
@@ -534,9 +552,9 @@ export class CompletionHandler implements IDisposable {
           }
           if (
             trigger === InlineCompletionTriggerKind.Automatic &&
-            !editor.hasFocus()
+            (!editor.hasFocus() || editor.lastChangeIsRemote)
           ) {
-            // The user left the editor while the request was pending
+            // The user left the editor or a collaborator changed the text while the request was pending
             return;
           }
           completed.add(promise);
