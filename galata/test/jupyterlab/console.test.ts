@@ -14,7 +14,8 @@ async function setupConsole(page: IJupyterLabPageFixture) {
 
   await page.click('button:has-text("Select")');
 
-  await page.locator('[aria-label="Code Cell Content"]').waitFor();
+  // A previously opened console may still be in the DOM, so only match the visible one.
+  await page.locator('[aria-label="Code Cell Content"]:visible').waitFor();
   await page.locator('text=| Idle').waitFor();
 }
 
