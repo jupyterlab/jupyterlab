@@ -117,6 +117,132 @@ test.describe('Notebook scroll on navigation (with windowing), named properties 
   }
 });
 
+test.describe('Notebook scroll on navigation (content visibility)', () => {
+  test.use({
+    autoGoto: false,
+    mockState: async ({ tmpPath }, use) => {
+      const target = `notebook:${tmpPath}/target.ipynb`;
+      const source = `notebook:${tmpPath}/links.ipynb`;
+      await use({
+        'layout-restorer:data': {
+          main: {
+            current: source,
+            dock: {
+              type: 'tab-area',
+              currentIndex: 1,
+              widgets: [target, source]
+            }
+          }
+        },
+        ...Object.fromEntries(
+          [target, source].map(name => [
+            name,
+            {
+              data: {
+                path: name.slice('notebook:'.length),
+                factory: 'Notebook',
+                kernelPreference: { shouldStart: false }
+              }
+            }
+          ])
+        )
+      });
+    },
+    waitForApplication: async ({ baseURL }, use) => {
+      await use(async page => {
+        await page.evaluate(async () => {
+          await window.jupyterapp.restored;
+        });
+      });
+    },
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:tracker': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
+        windowingMode: 'contentVisibility'
+      }
+    }
+  });
+
+  for (const cellType of ['code', 'markdown'] as const) {
+    test(`should follow a cell-id link to a ${cellType} cell in a restored background notebook on the first click`, async ({
+      page,
+      tmpPath
+    }) => {
+      const targetName = 'target.ipynb';
+      const sourceName = 'links.ipynb';
+      const cellCount = 50;
+      const targetIndex = 40;
+      const notebook = {
+        nbformat: 4,
+        nbformat_minor: 5,
+        metadata: {}
+      };
+      await page.contents.uploadContent(
+        JSON.stringify({
+          ...notebook,
+          cells: Array.from({ length: cellCount }, (_, index) => ({
+            cell_type: cellType,
+            id: `cell-${index}`,
+            metadata: {},
+            source:
+              cellType === 'code'
+                ? `# Cell ${index}\nvalue = ${index}\nprint(value)`
+                : `## Cell ${index}\n\nContent of cell ${index}.`,
+            ...(cellType === 'code'
+              ? { execution_count: null, outputs: [] }
+              : {})
+          }))
+        }),
+        'text',
+        `${tmpPath}/${targetName}`
+      );
+      await page.contents.uploadContent(
+        JSON.stringify({
+          ...notebook,
+          cells: [
+            {
+              cell_type: 'markdown',
+              id: 'link',
+              metadata: {},
+              source: `[Go to cell](${targetName}#cell-id=cell-${targetIndex})`
+            }
+          ]
+        }),
+        'text',
+        `${tmpPath}/${sourceName}`
+      );
+
+      await page.goto();
+
+      const targetNotebook = page.locator('.jp-NotebookPanel').filter({
+        has: page.locator(`[data-windowed-list-index="${cellCount - 1}"]`)
+      });
+      await expect(
+        targetNotebook.locator(
+          cellType === 'code' ? '.cm-editor' : '.jp-MarkdownOutput'
+        )
+      ).toHaveCount(cellCount);
+      expect(await page.activity.isTabActive(targetName)).toBe(false);
+
+      await page.getByRole('link', { name: 'Go to cell' }).click();
+
+      await expect.poll(() => page.activity.isTabActive(targetName)).toBe(true);
+      await expect(
+        targetNotebook.locator(`[data-windowed-list-index="${targetIndex}"]`)
+      ).toBeInViewport({ ratio: 0.99 });
+      // Cells measured while the notebook was hidden would keep a zero size.
+      expect(
+        await targetNotebook
+          .locator('.jp-Cell')
+          .evaluateAll(cells =>
+            cells.map(cell => getComputedStyle(cell).containIntrinsicSize)
+          )
+      ).not.toContain('auto 0px');
+    });
+  }
+});
+
 test.describe('Notebook scroll on dragging cells (with windowing)', () => {
   test.beforeEach(async ({ page, tmpPath }) => {
     await page.contents.uploadFile(
