@@ -191,22 +191,18 @@ test.describe('Extension Manager', () => {
     await page.goto();
     await openExtensionSidebar(page);
 
-    const waitRequest = page.waitForRequest(request => {
-      if (
-        request.method() !== 'POST' ||
-        !galata.Routes.extensions.test(request.url())
-      ) {
-        return false;
-      }
-      const data = request.postDataJSON();
-      return (
-        data.cmd === 'install' &&
-        data.extension_name === '@jupyterlab/geojson-extension' &&
-        data.extension_version === '3.2.1'
-      );
-    });
+    const waitRequest = page.waitForRequest(
+      request =>
+        request.method() === 'POST' &&
+        galata.Routes.extensions.test(request.url())
+    );
     await page.getByRole('button', { name: 'Update to 3.2.1' }).click();
-    await waitRequest;
+    const updateRequest = await waitRequest;
+    expect(updateRequest.postDataJSON()).toEqual({
+      cmd: 'install',
+      extension_name: 'jupyterlab-geojson',
+      extension_version: '3.2.1'
+    });
   });
 
   test('Has no unused style rules', async ({ page }) => {
