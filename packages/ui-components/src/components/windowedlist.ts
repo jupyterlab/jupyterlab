@@ -586,18 +586,19 @@ export abstract class WindowedListModel implements WindowedList.IModel {
         if (!sizer) {
           const previous: WindowedList.ItemMetadata | undefined =
             this._widgetSizers[index - 1];
+          const hasValidMeasuredSize =
+            measuredSize !== undefined && measuredSize > 0;
           const newSizer = {
             offset: previous ? previous.offset + previous.size : 0,
-            size:
-              measuredSize !== undefined
-                ? measuredSize
-                : this.estimateWidgetSize(index),
-            measured: measuredSize !== undefined
+            size: hasValidMeasuredSize
+              ? measuredSize
+              : this.estimateWidgetSize(index),
+            measured: hasValidMeasuredSize
           };
           this._widgetSizers[index] = newSizer;
           sizer = newSizer;
         }
-        if (measuredSize !== undefined) {
+        if (measuredSize !== undefined && measuredSize > 0) {
           // If the we learned about the size, update it and compute atomic offset for following item (`itemDelta`)
           if (sizer.size != measuredSize) {
             itemDelta = measuredSize - sizer.size;
@@ -694,8 +695,12 @@ export abstract class WindowedListModel implements WindowedList.IModel {
           measured = true;
         } else {
           const widget = this.widgetRenderer(i);
-          if (widget?.node && widget.node.isConnected) {
-            size = widget.node.getBoundingClientRect().height;
+          const height =
+            widget?.node && widget.node.isConnected
+              ? widget.node.getBoundingClientRect().height
+              : 0;
+          if (height > 0) {
+            size = height;
             measured = true;
           } else {
             size = this.estimateWidgetSize(i);
@@ -1654,8 +1659,9 @@ export class WindowedList<
 
     const newSizes: { index: number; size: number }[] = [];
     for (let entry of entries) {
-      // Update size only if item is attached to the DOM
-      if (entry.target.isConnected) {
+      const size = entry.borderBoxSize[0].blockSize;
+      // Update size only if item is attached to the DOM and has a positive height
+      if (entry.target.isConnected && size > 0) {
         // Rely on the data attribute as some nodes may be hidden instead of detach
         // to preserve state.
         newSizes.push({
@@ -1663,7 +1669,7 @@ export class WindowedList<
             (entry.target as HTMLElement).dataset.windowedListIndex!,
             10
           ),
-          size: entry.borderBoxSize[0].blockSize
+          size
         });
       }
     }
