@@ -72,6 +72,11 @@ export interface IShortcutInputProps {
    * Id for the capture textbox. Generated when omitted.
    */
   id?: string;
+  /**
+   * Id of an external error element that owns assertive announcements.
+   * When set, used in `aria-describedby` and the internal alert is omitted.
+   */
+  externalErrorId?: string;
 }
 
 export interface IShortcutInputState {
@@ -704,8 +709,10 @@ export class ShortcutInput extends React.Component<
     }
     const statusMessage = this._statusMessage(trans);
     const errorMessage = this._errorMessage(trans);
+    const externalErrorId = this.props.externalErrorId;
+    const errorDescribedBy = externalErrorId ?? this._errorId;
     const describedBy = errorMessage
-      ? `${this._hintId} ${this._errorId}`
+      ? `${this._hintId} ${errorDescribedBy}`
       : this._hintId;
     const activelyRecording =
       this.state.phase === 'capturing' && this.state.inputFocused;
@@ -795,15 +802,17 @@ export class ShortcutInput extends React.Component<
           >
             {statusMessage}
           </div>
-          <div
-            id={this._errorId}
-            className="jp-sr-only"
-            role="alert"
-            aria-live="assertive"
-            aria-atomic="true"
-          >
-            {errorMessage}
-          </div>
+          {!externalErrorId && (
+            <div
+              id={this._errorId}
+              className="jp-sr-only"
+              role="alert"
+              aria-live="assertive"
+              aria-atomic="true"
+            >
+              {errorMessage}
+            </div>
+          )}
           {!this._deferPersist &&
             (hasConflict ? (
               <button

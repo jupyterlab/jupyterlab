@@ -262,8 +262,11 @@ class NewShortcutDialogBody
     shortcutField.appendChild(this._captureHost);
 
     this._errorNode = document.createElement('div');
+    this._errorNode.id = 'jp-Shortcuts-AddDialog-shortcut-error';
     this._errorNode.className = 'jp-Shortcuts-Field-error';
-    this._errorNode.setAttribute('role', 'status');
+    this._errorNode.setAttribute('role', 'alert');
+    this._errorNode.setAttribute('aria-live', 'assertive');
+    this._errorNode.setAttribute('aria-atomic', 'true');
     shortcutField.appendChild(this._errorNode);
 
     this.node.appendChild(shortcutField);
@@ -424,6 +427,7 @@ class NewShortcutDialogBody
         onKeysChange={this._onKeysChange}
         id="jp-Shortcuts-AddDialog-shortcut"
         labelledBy="jp-Shortcuts-AddDialog-shortcut-label"
+        externalErrorId="jp-Shortcuts-AddDialog-shortcut-error"
       />
     );
   }
