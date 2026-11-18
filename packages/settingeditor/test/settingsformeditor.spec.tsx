@@ -224,5 +224,115 @@ describe('@jupyterlab/settingeditor', () => {
         jest.useRealTimers();
       }
     });
+
+    it('should not reorder array items while editing until blur', async () => {
+      jest.useFakeTimers();
+
+      const id = 'alpha';
+      const testConnector = new RecordingConnector();
+      const testRegistry = new SettingRegistry({ connector: testConnector });
+      let component: renderer.ReactTestRenderer | null = null;
+
+      try {
+        testConnector.schemas[id] = {
+          type: 'object',
+          'jupyter.lab.transform': true,
+          properties: {
+            toolbar: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  rank: { type: 'number' }
+                }
+              },
+              default: [
+                { name: 'itemA', rank: 10 },
+                { name: 'itemB', rank: 20 }
+              ]
+            }
+          }
+        };
+
+        // Transform plugin data to sort toolbar items by rank in composite,
+        // matching the behavior of registry.transform in packages/apputils/src/toolbar/factory.ts
+        testRegistry.transform(id, {
+          compose: plugin => {
+            const composite = { ...plugin.data.composite };
+            const user = (plugin.data.user.toolbar as any[]) ?? [];
+            const items =
+              user.length > 0 ? user : ((composite.toolbar as any[]) ?? []);
+            composite.toolbar = [...items].sort(
+              (a, b) => (a.rank ?? 50) - (b.rank ?? 50)
+            );
+            plugin.data = { composite, user: plugin.data.user };
+            return plugin;
+          }
+        });
+
+        settings = (await testRegistry.load(id)) as Settings;
+
+        component = renderer.create(
+          <SettingsFormEditor
+            filteredValues={{ kind: 'all' }}
+            hasError={() => void 0}
+            onSelect={() => void 0}
+            renderers={{}}
+            settings={settings}
+            translator={nullTranslator}
+            updateDirtyState={() => void 0}
+          />
+        );
+
+        let form = component.root.findByType(FormComponent);
+        expect((form.props.formData.toolbar as any[])[0].name).toBe('itemA');
+        expect((form.props.formData.toolbar as any[])[1].name).toBe('itemB');
+
+        // Focus the rank input of itemB
+        await act(async () => {
+          form.props.onFocus?.(`jp-SettingsEditor-${id}_toolbar_1_rank`, 20);
+        });
+
+        // Change rank of itemB from 20 to 5 (which would sort before itemA)
+        await act(async () => {
+          form.props.onChange(
+            createChangeEvent({
+              toolbar: [
+                { name: 'itemA', rank: 10 },
+                { name: 'itemB', rank: 5 }
+              ]
+            })
+          );
+        });
+
+        // Advance timers by 500ms so debouncer triggers save
+        await act(async () => {
+          jest.advanceTimersByTime(500);
+          await flushPromises();
+        });
+
+        // While still focused, toolbar items must NOT have reordered in form formData
+        form = component.root.findByType(FormComponent);
+        expect((form.props.formData.toolbar as any[])[0].name).toBe('itemA');
+        expect((form.props.formData.toolbar as any[])[1].name).toBe('itemB');
+
+        // Blur the input (user finishes editing)
+        await act(async () => {
+          form.props.onBlur?.(`jp-SettingsEditor-${id}_toolbar_1_rank`, 5);
+          jest.advanceTimersByTime(0);
+          await flushPromises();
+        });
+
+        // After blur, toolbar items should now be reordered according to rank
+        form = component.root.findByType(FormComponent);
+        expect((form.props.formData.toolbar as any[])[0].name).toBe('itemB');
+        expect((form.props.formData.toolbar as any[])[1].name).toBe('itemA');
+      } finally {
+        component?.unmount();
+        await testConnector.clear();
+        jest.useRealTimers();
+      }
+    });
   });
 });
