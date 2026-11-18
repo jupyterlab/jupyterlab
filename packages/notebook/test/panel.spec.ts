@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { SessionContextDialogs } from '@jupyterlab/apputils';
 import type { Context } from '@jupyterlab/docregistry';
 import { initNotebookContext } from '@jupyterlab/notebook/lib/testutils';
 import { JupyterServer, testEmission } from '@jupyterlab/testing';

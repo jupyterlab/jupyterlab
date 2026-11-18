@@ -305,6 +305,49 @@ describe('@jupyterlab/apputils', () => {
         other.dispose();
       });
 
+      it('should switch an existing path session to the locked kernel', async () => {
+        const lockedName = specsManager.specs!.default;
+        const otherName = Object.keys(specsManager.specs!.kernelspecs).find(
+          name => name !== lockedName
+        )!;
+        const other = await sessionManager.startNew({
+          name: '',
+          path,
+          type: 'test',
+          kernel: { name: otherName }
+        });
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          name: lockedName,
+          locked: true
+        };
+
+        await sessionContext.initialize();
+        expect(sessionContext.session?.id).toBe(other.id);
+        expect(sessionContext.session?.kernel?.name).toBe(lockedName);
+        await other.shutdown();
+        other.dispose();
+      });
+
+      it('should not attach to a path session when the locked kernel is unavailable', async () => {
+        const other = await sessionManager.startNew({
+          name: '',
+          path,
+          type: 'test'
+        });
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          name: 'not-a-real-kernel',
+          locked: true
+        };
+
+        expect(await sessionContext.initialize()).toBe(true);
+        expect(sessionContext.session).toBeFalsy();
+        expect(sessionContext.hasNoKernel).toBe(true);
+        await other.shutdown();
+        other.dispose();
+      });
+
       it('should keep no kernel when shouldReuse is false even if a path session exists', async () => {
         const refreshRunning = jest
           .spyOn(sessionManager, 'refreshRunning')

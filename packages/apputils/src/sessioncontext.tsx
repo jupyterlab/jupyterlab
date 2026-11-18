@@ -863,12 +863,28 @@ export class SessionContext implements ISessionContext {
         return item.path === this._path;
       });
       if (model) {
+        // Ensure a locked notebook always runs on the locked kernel.
+        const lockedName = preference.locked === true ? preference.name : '';
+        const mismatch = !!lockedName && model.kernel?.name !== lockedName;
+        if (mismatch) {
+          await this.specsManager.ready;
+          if (!this.specsManager.specs?.kernelspecs[lockedName!]) {
+            return true;
+          }
+        }
         try {
           const session = manager.connectTo({ model });
           this._handleNewSession(session);
         } catch (err) {
           void this._handleSessionError(err as ServerConnection.ResponseError);
           return Promise.reject(err);
+        }
+        if (mismatch) {
+          try {
+            await this._changeKernel({ name: lockedName });
+          } catch (err) {
+            /* no-op */
+          }
         }
       }
     }
