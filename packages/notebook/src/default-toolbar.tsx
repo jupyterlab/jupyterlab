@@ -137,10 +137,14 @@ export namespace ToolbarItems {
     return new ToolbarButton({
       icon: cutIcon,
       onClick: async () => {
+        const preserveMetadata = settings?.get('preserveDeletableOnCopy')
+          .composite as boolean;
         if (settings?.get('useSystemClipboardForCells').composite as boolean) {
-          await NotebookActions.cutToSystemClipboard(panel.content);
+          await NotebookActions.cutToSystemClipboard(panel.content, {
+            preserveMetadata
+          });
         } else {
-          NotebookActions.cut(panel.content);
+          NotebookActions.cut(panel.content, { preserveMetadata });
         }
       },
       tooltip: trans.__('Cut the selected cells')
@@ -162,10 +166,14 @@ export namespace ToolbarItems {
     return new ToolbarButton({
       icon: copyIcon,
       onClick: async () => {
+        const preserveMetadata = settings?.get('preserveDeletableOnCopy')
+          .composite as boolean;
         if (settings?.get('useSystemClipboardForCells').composite as boolean) {
-          await NotebookActions.copyToSystemClipboard(panel.content);
+          await NotebookActions.copyToSystemClipboard(panel.content, {
+            preserveMetadata
+          });
         } else {
-          NotebookActions.copy(panel.content);
+          NotebookActions.copy(panel.content, { preserveMetadata });
         }
       },
       tooltip: trans.__('Copy the selected cells')
@@ -344,6 +352,8 @@ export class CellTypeSwitcher extends ReactWidget {
     widget.activeCellChanged.connect(this.update, this);
     // Follow a change in the selection.
     widget.selectionChanged.connect(this.update, this);
+    // Keep the disabled state in sync with view-only mode.
+    widget.viewOnlyChanged.connect(this.update, this);
   }
 
   /**
@@ -387,6 +397,7 @@ export class CellTypeSwitcher extends ReactWidget {
         onChange={this.handleChange}
         onKeyDown={this.handleKeyDown}
         value={value}
+        disabled={this._notebook.viewOnly}
         aria-label={this._trans.__('Cell type')}
         title={this._trans.__('Select the cell type')}
       >

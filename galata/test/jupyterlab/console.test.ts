@@ -14,7 +14,8 @@ async function setupConsole(page: IJupyterLabPageFixture) {
 
   await page.click('button:has-text("Select")');
 
-  await page.locator('[aria-label="Code Cell Content"]').waitFor();
+  // A previously opened console may still be in the DOM, so only match the visible one.
+  await page.locator('[aria-label="Code Cell Content"]:visible').waitFor();
   await page.locator('text=| Idle').waitFor();
 }
 
@@ -57,6 +58,98 @@ test.describe('Console', () => {
     await page.click('.jp-Dialog >> button >> text=Rename');
 
     await expect(page.activity.getTabLocator(newName)).toBeVisible();
+  });
+
+  test('Should ask for confirmation before showing all kernel activity', async ({
+    page
+  }) => {
+    const command = 'console:toggle-show-all-kernel-activity';
+    const isToggled = () =>
+      page.evaluate(id => window.jupyterapp.commands.isToggled(id), command);
+
+    void page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    const dialog = page.locator('.jp-Dialog');
+    await expect(dialog).toContainText('treated as trusted');
+    await dialog.getByRole('button', { name: 'Cancel' }).click();
+    expect(await isToggled()).toBe(false);
+
+    void page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    await expect(dialog).toBeVisible();
+    await page.keyboard.press('Enter');
+    await expect(dialog).toHaveCount(0);
+    expect(await isToggled()).toBe(false);
+
+    void page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    await dialog.getByRole('button', { name: 'Show All Activity' }).click();
+    await expect.poll(isToggled).toBe(true);
+
+    await page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    await expect(dialog).toHaveCount(0);
+    expect(await isToggled()).toBe(false);
+
+    // The kernel is trusted for the rest of the session.
+    await page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    await expect(dialog).toHaveCount(0);
+    expect(await isToggled()).toBe(true);
+  });
+
+  test('Should not ask again about showing all kernel activity for any kernel when checked', async ({
+    page
+  }) => {
+    const command = 'console:toggle-show-all-kernel-activity';
+    const toggle = () =>
+      page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    const isToggled = () =>
+      page.evaluate(id => window.jupyterapp.commands.isToggled(id), command);
+
+    void toggle();
+    const dialog = page.locator('.jp-Dialog');
+    await dialog.getByRole('checkbox').check();
+    await dialog.getByRole('button', { name: 'Show All Activity' }).click();
+    await expect.poll(isToggled).toBe(true);
+
+    await toggle();
+    expect(await isToggled()).toBe(false);
+
+    // A console with another kernel is not asked either.
+    await setupConsole(page);
+    await toggle();
+    await expect.poll(isToggled).toBe(true);
+    await expect(dialog).toHaveCount(0);
+  });
+
+  test('Should keep the prompt position picked for the console when a console setting changes', async ({
+    page
+  }) => {
+    await page.keyboard.type('for i in range(300): print(i)');
+    await page.keyboard.press('Shift+Enter');
+    await expect(page.locator(EXECUTED_CELL)).toContainText('299');
+
+    await page.getByLabel('Change Console Prompt Position').first().click();
+    await page.getByText('Prompt to top').click();
+
+    const input = page.locator('.jp-CodeConsole-input');
+    const content = page.locator('.jp-CodeConsole-content');
+    await content.hover();
+    await page.mouse.wheel(0, 1000);
+    await expect
+      .poll(() => content.evaluate(node => node.scrollTop))
+      .toBeGreaterThan(0);
+
+    await page.menu.clickMenuItem(
+      'Settings>Console Run Keystroke>Execute with Enter'
+    );
+    // The console gets the new mode in the same settings update that would
+    // move the prompt.
+    await expect(page.locator('.jp-CodeConsole')).toHaveAttribute(
+      'data-jp-interaction-mode',
+      'terminal'
+    );
+
+    const inputBox = await input.boundingBox();
+    const contentBox = await content.boundingBox();
+    expect(inputBox!.y).toBeLessThan(contentBox!.y);
+    expect(await content.evaluate(node => node.scrollTop)).toBeGreaterThan(0);
   });
 });
 

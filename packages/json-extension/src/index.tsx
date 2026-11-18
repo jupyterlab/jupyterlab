@@ -130,7 +130,7 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     }
   },
   {
-    id: '@jupyterlab/json-lines-extension:factory',
+    id: '@jupyterlab/json-extension:json-lines-factory',
     description: 'Adds renderer for JSONLines content.',
     rendererFactory,
     rank: 0,

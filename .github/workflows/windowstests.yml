@@ -16,7 +16,7 @@ jobs:
     name: Windows
     strategy:
       matrix:
-        python-version: ["3.14"]
+        python-version: ["3.15"]
         group: [integrity, python]
         include:
           - group: integrity
@@ -28,12 +28,26 @@ jobs:
     timeout-minutes: 40
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
           persist-credentials: false
 
+      # File operations on C: are several times slower than on D:
+      - name: Move temporary files and package caches to the D drive
+        shell: pwsh
+        run: |
+          $tmp = Join-Path $Env:RUNNER_TEMP "tmp"
+          New-Item -ItemType Directory -Force -Path $tmp | Out-Null
+          "TEMP=$tmp" >> $Env:GITHUB_ENV
+          "TMP=$tmp" >> $Env:GITHUB_ENV
+          "YARN_GLOBAL_FOLDER=$(Join-Path $Env:RUNNER_TEMP yarn-berry)" >> $Env:GITHUB_ENV
+          # base-setup caches the folder that `yarn config get cacheFolder` reports,
+          # which is the global cache only when this is set before base-setup runs
+          "YARN_ENABLE_GLOBAL_CACHE=1" >> $Env:GITHUB_ENV
+          "UV_CACHE_DIR=$(Join-Path $Env:RUNNER_TEMP uv-cache)" >> $Env:GITHUB_ENV
+
       - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@95d85449e4f3f352e261221f6529f8ed307f5728 # v1
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
           python_package_manager: "uv pip"
           python_cache_key_suffix: ${{ matrix.optional_dependencies }}

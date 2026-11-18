@@ -1,6 +1,6 @@
 import { DockPanelSvg } from '@jupyterlab/ui-components';
 import type { Message } from '@lumino/messaging';
-import type { Widget } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 
 export const DEFAULT_NODE_THRESHOLD = 1000;
 export const DEFAULT_TEXT_LENGTH_THRESHOLD = 25000;
@@ -72,7 +72,57 @@ export class OptimizedDockPanelSvg extends DockPanelSvg {
    */
   override dispose(): void {
     this._endDrag();
+    if (this._layoutCheckId !== 0) {
+      cancelAnimationFrame(this._layoutCheckId);
+      this._layoutCheckId = 0;
+    }
+    this._shownWidgets.clear();
     super.dispose();
+  }
+
+  /**
+   * Process a message sent to the panel.
+   *
+   * @param msg - The message sent to the panel.
+   */
+  override processMessage(msg: Message): void {
+    super.processMessage(msg);
+    if (
+      msg.type === 'child-shown' &&
+      this.hiddenMode === Widget.HiddenMode.ContentVisibility
+    ) {
+      this._checkLayout((msg as Widget.ChildMessage).child);
+    }
+  }
+
+  /**
+   * Lay out a shown widget again if Firefox left one of its children with an
+   * empty box, see `Private.hasEmptyChild`.
+   *
+   * #### Notes
+   * The check runs in the next animation frame, after Lumino has processed
+   * the messages posted on show and before the browser paints the frame. The
+   * browser has to lay out the shown widget for that frame anyway, so reading
+   * the boxes there only makes that layout happen earlier in the frame.
+   */
+  private _checkLayout(widget: Widget): void {
+    this._shownWidgets.add(widget);
+    if (this._layoutCheckId !== 0) {
+      return;
+    }
+    this._layoutCheckId = requestAnimationFrame(() => {
+      this._layoutCheckId = 0;
+      const widgets = Array.from(this._shownWidgets).filter(
+        shown => !shown.isDisposed && shown.isVisible
+      );
+      this._shownWidgets.clear();
+      // Read all boxes before writing any style, so that the browser does not
+      // lay out the page once per widget.
+      const empty = widgets.filter(shown => Private.hasEmptyChild(shown.node));
+      for (const shown of empty) {
+        Private.requestLayout(shown.node);
+      }
+    });
   }
 
   /**
@@ -338,6 +388,8 @@ export class OptimizedDockPanelSvg extends DockPanelSvg {
   private _refreshRAFId = 0;
   private _refreshGeneration = 0;
   private _intervalId = 0;
+  private _layoutCheckId = 0;
+  private _shownWidgets = new Set<Widget>();
 }
 
 /** Namespace for OptimizedDockPanelSvg statics */
@@ -389,6 +441,48 @@ namespace Private {
       default:
         return false;
     }
+  }
+
+  /**
+   * Whether Firefox left a child of the node with an empty box after the node
+   * was hidden with `content-visibility: hidden` and shown again. See Firefox
+   * bug https://bugzilla.mozilla.org/show_bug.cgi?id=2088371
+   *
+   * #### Notes
+   * Firefox gives an absolutely positioned child an empty box when its content
+   * changes after the hidden parent was laid out, and lays it out again on
+   * show only if the parent's containment changes, which the `contain: strict`
+   * set by Lumino layouts prevents. Lumino sets the size of the children it
+   * lays out inline, so a child that has such a size but an empty box was not
+   * laid out again.
+   */
+  export function hasEmptyChild(node: HTMLElement): boolean {
+    const children = node.children;
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i] as HTMLElement;
+      if (
+        isLayoutManaged(child) &&
+        !child.classList.contains('lm-mod-hidden') &&
+        (parseFloat(child.style.width) > 0 ||
+          parseFloat(child.style.height) > 0) &&
+        child.offsetWidth === 0 &&
+        child.offsetHeight === 0
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Make Firefox lay out the children of a node again.
+   *
+   * #### Notes
+   * A change of `object-fit`, which has no effect on a `div`, makes Firefox
+   * lay out the children that need it.
+   */
+  export function requestLayout(node: HTMLElement): void {
+    node.style.objectFit = node.style.objectFit === 'none' ? '' : 'none';
   }
 
   /**

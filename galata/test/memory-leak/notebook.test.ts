@@ -174,7 +174,8 @@ test.describe('Notebook memory lifecycle', () => {
         'OutputArea',
         'CodeMirrorEditor'
       ]);
-      expect(await page.notebook.close()).toBe(true);
+      expect(await page.notebook.save()).toBe(true);
+      expect(await page.notebook.close(false)).toBe(true);
       await expect(page.locator('.jp-NotebookPanel')).toHaveCount(0);
       const baseline = await probe.countObjects();
 
@@ -184,7 +185,8 @@ test.describe('Notebook memory lifecycle', () => {
         ).toBe(true);
         await waitForNotebookCellCount(page, NOTEBOOK_CELL_COUNT);
         await waitForCurrentNotebookReady(page);
-        expect(await page.notebook.close()).toBe(true);
+        expect(await page.notebook.save()).toBe(true);
+        expect(await page.notebook.close(false)).toBe(true);
         await expect(page.locator('.jp-NotebookPanel')).toHaveCount(0);
       }
 

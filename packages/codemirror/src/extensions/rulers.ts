@@ -57,7 +57,6 @@ const plugin = ViewPlugin.fromClass(
                 overflow: hidden;
             `;
 
-      const defaultCharacterWidth = view.defaultCharacterWidth;
       const widths = view.state.facet(rulerConfig);
       const guttersWidths =
         view.scrollDOM.querySelector('.cm-gutters')?.clientWidth ?? 0;
@@ -66,9 +65,11 @@ const plugin = ViewPlugin.fromClass(
           document.createElement('div')
         );
         ruler.classList.add(RULERS_CLASSNAME);
+        // Use `ch` rather than `defaultCharacterWidth`: CodeMirror does not
+        // measure it again when the code font loads after the first measure.
         ruler.style.cssText = `
                 position: absolute;
-                left: ${guttersWidths + width * defaultCharacterWidth}px;
+                left: calc(${guttersWidths}px + ${width}ch);
                 height: 100%;
             `;
         // FIXME: This should be equal to the amount of padding on a line.
@@ -89,11 +90,8 @@ const plugin = ViewPlugin.fromClass(
       ) {
         const guttersWidth =
           update.view.scrollDOM.querySelector('.cm-gutters')?.clientWidth ?? 0;
-        const defaultCharacterWidth = update.view.defaultCharacterWidth;
         this.rulers.forEach((ruler, rulerIdx) => {
-          ruler.style.left = `${
-            guttersWidth + widths[rulerIdx] * defaultCharacterWidth
-          }px`;
+          ruler.style.left = `calc(${guttersWidth}px + ${widths[rulerIdx]}ch)`;
         });
       }
     }

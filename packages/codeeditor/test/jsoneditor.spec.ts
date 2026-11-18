@@ -149,6 +149,61 @@ describe('codeeditor', () => {
       });
     });
 
+    describe('#isValid', () => {
+      it('should be true for valid JSON content', () => {
+        editor.source = new ObservableJSON();
+        Widget.attach(editor, document.body);
+        editor.model.sharedModel.setSource('{"foo": 1}');
+        expect(editor.isValid).toBe(true);
+      });
+
+      it('should be false for invalid JSON content', () => {
+        editor.source = new ObservableJSON();
+        Widget.attach(editor, document.body);
+        editor.model.sharedModel.setSource('{"foo":');
+        expect(editor.isValid).toBe(false);
+      });
+    });
+
+    describe('#commit()', () => {
+      it('should commit a valid pending change to the source', () => {
+        const source = new ObservableJSON();
+        editor.source = source;
+        Widget.attach(editor, document.body);
+        editor.model.sharedModel.setSource('{"foo": 1}');
+        expect(editor.isDirty).toBe(true);
+        expect(editor.commit()).toBe(true);
+        expect(source.get('foo')).toBe(1);
+        expect(editor.isDirty).toBe(false);
+      });
+
+      it('should be a no-op returning true if there is nothing to commit', () => {
+        const source = new ObservableJSON();
+        editor.source = source;
+        Widget.attach(editor, document.body);
+        expect(editor.isDirty).toBe(false);
+        expect(editor.commit()).toBe(true);
+        expect(editor.isDirty).toBe(false);
+      });
+
+      it.each(['{"foo":', 'null', 'true', '42', '"text"', '[]', '[{}]'])(
+        'should reject %s and preserve the source and draft',
+        draft => {
+          const source = new ObservableJSON();
+          source.set('foo', 1);
+          editor.source = source;
+          Widget.attach(editor, document.body);
+          editor.model.sharedModel.setSource(draft);
+          expect(editor.isValid).toBe(false);
+          expect(editor.commitButtonNode.hidden).toBe(true);
+          expect(editor.commit()).toBe(false);
+          expect(source.toJSON()).toEqual({ foo: 1 });
+          expect(editor.model.sharedModel.getSource()).toBe(draft);
+          expect(editor.isDirty).toBe(true);
+        }
+      );
+    });
+
     describe('model.value.changed', () => {
       it('should add the error flag if invalid JSON', () => {
         editor.model.sharedModel.setSource('foo');

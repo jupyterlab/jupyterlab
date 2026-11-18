@@ -110,8 +110,9 @@ export async function expectFailure(
     await promise;
     called = true;
   } catch (err) {
-    if (message && err.message.indexOf(message) === -1) {
-      throw Error(`Error "${message}" not in: "${err.message}"`);
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    if (message && errorMessage.indexOf(message) === -1) {
+      throw Error(`Error "${message}" not in: "${errorMessage}"`);
     }
   }
   if (called) {

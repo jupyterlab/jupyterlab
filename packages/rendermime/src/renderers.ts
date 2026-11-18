@@ -5,7 +5,7 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import type { ITranslator } from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import escape from 'lodash.escape';
 import { LiveText, mergeNodes } from './livetext';
@@ -80,7 +80,7 @@ export async function renderHTML(options: renderHTML.IOptions): Promise<void> {
   }
 
   // Handle default behavior of nodes.
-  Private.handleDefaults(host);
+  Private.handleDefaults(host, trans);
 
   if (shouldTypeset && latexTypesetter) {
     const maybePromise = latexTypesetter.typeset(host);
@@ -186,6 +186,13 @@ export async function renderImage(
   }
   if (typeof width === 'number') {
     img.width = width;
+  }
+  if (typeof width === 'number' && typeof height === 'number') {
+    // `height: auto` from the style sheet then keeps this ratio, not the
+    // ratio of the image data.
+    img.style.aspectRatio = `${width} / ${height}`;
+  } else if (typeof height === 'number') {
+    Private.fitHeightOnlyImage(img, height);
   }
 
   if (needsBackground === 'light') {
@@ -450,8 +457,10 @@ export async function renderSVG(
 
   // Display a message if the source is not trusted.
   if (!trusted) {
-    host.textContent =
-      'Cannot display an untrusted SVG. Maybe you need to run the cell?';
+    const trans = (options.translator || nullTranslator).load('jupyterlab');
+    host.textContent = trans.__(
+      'Cannot display an untrusted SVG. Maybe you need to run the cell?'
+    );
     return;
   }
 
@@ -2084,14 +2093,54 @@ namespace Private {
   /**
    * Handle the default behavior of nodes.
    */
-  export function handleDefaults(node: HTMLElement): void {
+  export function handleDefaults(
+    node: HTMLElement,
+    trans: TranslationBundle
+  ): void {
     // Handle image elements.
     const imgs = node.getElementsByTagName('img');
     for (let i = 0; i < imgs.length; i++) {
       if (!imgs[i].alt) {
-        imgs[i].alt = 'Image';
+        imgs[i].alt = trans.__('Image');
+      }
+      const value = imgs[i].getAttribute('height') ?? '';
+      // Browsers read `300px` as 300, and `50%` as a share of the parent.
+      const height = value.includes('%') ? 0 : parseFloat(value);
+      if (height > 0 && !imgs[i].hasAttribute('width')) {
+        fitHeightOnlyImage(imgs[i], height);
       }
     }
+  }
+
+  /**
+   * Give an image with a height and no width the width that keeps the ratio
+   * of its data, once it loads.
+   *
+   * #### Notes
+   * With a height alone, `max-width` narrows a wide image but keeps its
+   * height, while with both sizes `height: auto` follows the narrowed width.
+   */
+  export function fitHeightOnlyImage(
+    img: HTMLImageElement,
+    height: number
+  ): void {
+    img.addEventListener(
+      'load',
+      () => {
+        if (img.naturalHeight > 0) {
+          // A style sheet can also set the height, or a maximum height, so
+          // use the height the image is shown at when it is in the document.
+          const shown = parseFloat(getComputedStyle(img).height) || height;
+          const derived = Math.max(
+            1,
+            Math.round((shown * img.naturalWidth) / img.naturalHeight)
+          );
+          img.width = derived;
+          img.style.aspectRatio = `${derived} / ${shown}`;
+        }
+      },
+      { once: true }
+    );
   }
 
   /**
@@ -2200,16 +2249,18 @@ namespace Private {
     if (!source || !isLocal) {
       return;
     }
+    const [path, query, fragment] = splitLocalUrl(source);
     try {
-      const urlPath = await resolver.resolveUrl(source, {
+      const urlPath = await resolver.resolveUrl(path, {
         attribute: name,
         tag: node.localName as IRenderMime.IResolveUrlContext['tag']
       });
       let url = await resolver.getDownloadUrl(urlPath);
       if (URLExt.parse(url).protocol !== 'data:') {
+        url = appendQuery(url, query);
         // Bust caching for local src attrs.
         // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest#Bypassing_the_cache
-        url += (/\?/.test(url) ? '&' : '?') + new Date().getTime();
+        url += (/\?/.test(url) ? '&' : '?') + new Date().getTime() + fragment;
       }
       node.setAttribute(name, url);
     } catch (err) {
@@ -2263,9 +2314,10 @@ namespace Private {
       // For external links, remove the hash until we have hash handling.
       href = href.replace(hash, '');
     }
+    const [hrefPath, query] = splitLocalUrl(href);
     // Get the appropriate file path.
     return resolver
-      .resolveUrl(href, { attribute: 'href', tag: 'a' })
+      .resolveUrl(hrefPath, { attribute: 'href', tag: 'a' })
       .then(urlPath => {
         // decode encoded url from url to api path
         const path = decodeURIComponent(urlPath);
@@ -2278,13 +2330,35 @@ namespace Private {
       })
       .then(url => {
         // Set the visible anchor.
-        anchor.href = url + hash;
+        anchor.href = appendQuery(url, query) + hash;
       })
       .catch(err => {
         // If there was an error getting the url,
         // just make it an empty link.
         anchor.href = '';
       });
+  }
+
+  /**
+   * Split a local url into its path, its query and its fragment.
+   *
+   * A url with a scheme, such as `attachment:image.png`, or with no path is
+   * returned whole as the path, for the resolver to read.
+   */
+  function splitLocalUrl(url: string): [string, string, string] {
+    const [, path, query = '', fragment = ''] =
+      /^([^?#]*)(\?[^#]*)?(#.*)?$/s.exec(url)!;
+    if (!path || /^[a-z][a-z\d+.-]*:/i.test(path)) {
+      return [url, '', ''];
+    }
+    return [path, query, fragment];
+  }
+
+  /**
+   * Append the query of a local url to the download url of its file.
+   */
+  function appendQuery(url: string, query: string): string {
+    return query ? url + (/\?/.test(url) ? '&' : '?') + query.slice(1) : url;
   }
 
   /**

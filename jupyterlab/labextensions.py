@@ -153,7 +153,7 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
 
     @default("labextensions_path")
     def _default_labextensions_path(self) -> list[str]:
-        lab = LabApp()
+        lab = LabApp(raise_config_file_errors=False)
         lab.load_config_file()
         return lab.labextensions_path + lab.extra_labextensions_path
 
