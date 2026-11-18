@@ -354,7 +354,11 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     sender: ISessionContext,
     args: IChangedArgs<ISessionContext.IKernelPreference>
   ): void {
-    const locked = args.newValue.locked === true;
+    const { locked } = args.newValue;
+    // A loading context and some extensions write a preference without `locked`.
+    if (typeof locked !== 'boolean') {
+      return;
+    }
     if (this.model && locked !== this.model.kernelLocked) {
       this.model.setKernelLocked(locked);
     }

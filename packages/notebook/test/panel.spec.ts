@@ -2,12 +2,18 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { SessionContextDialogs } from '@jupyterlab/apputils';
-import type { Context } from '@jupyterlab/docregistry';
+import { Context } from '@jupyterlab/docregistry';
 import { initNotebookContext } from '@jupyterlab/notebook/lib/testutils';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { JupyterServer, testEmission } from '@jupyterlab/testing';
 import { Toolbar } from '@jupyterlab/ui-components';
 import type { INotebookModel } from '@jupyterlab/notebook';
-import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
+import {
+  Notebook,
+  NotebookModel,
+  NotebookModelFactory,
+  NotebookPanel
+} from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 /**
@@ -190,6 +196,40 @@ describe('@jupyterlab/notebook', () => {
           locked: false
         };
         expect(panel.model!.kernelLocked).toBe(false);
+      });
+
+      it('should keep the `kernel_lock` metadata of a notebook that the context cannot save', async () => {
+        const manager = new ServiceManagerMock();
+        const saved = new NotebookModel();
+        saved.setKernelLocked(true);
+        await manager.contents.save('locked.ipynb', {
+          type: 'notebook',
+          format: 'json',
+          content: saved.toJSON()
+        });
+        saved.dispose();
+        const lockedContext = new Context<INotebookModel>({
+          manager,
+          factory: new NotebookModelFactory(),
+          path: 'locked.ipynb'
+        });
+        // As for a read-only file or a collaborative document.
+        jest.spyOn(lockedContext, 'canSave', 'get').mockReturnValue(false);
+        const panel = utils.createNotebookPanel(lockedContext);
+        await lockedContext.initialize(false);
+        await lockedContext.ready;
+
+        expect(panel.model!.kernelLocked).toBe(true);
+        lockedContext.dispose();
+      });
+
+      it('should keep the `kernel_lock` metadata when a preference without `locked` is set', async () => {
+        const panel = utils.createNotebookPanel(context);
+        await context.ready;
+        panel.model!.setKernelLocked(true);
+
+        context.sessionContext.kernelPreference = { autoStartDefault: true };
+        expect(panel.model!.kernelLocked).toBe(true);
       });
 
       it('should restart the locked kernel after switching, locking and shutting down', async () => {
