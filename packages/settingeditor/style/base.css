@@ -111,7 +111,7 @@
   position: relative;
 }
 
-.jp-PluginList-wrapper > .jp-FilterBox {
+.jp-PluginList-wrapper > .jp-FilterBox-wrapper {
   margin: 8px 12px 0;
 }
 
@@ -136,12 +136,24 @@
   background: var(--jp-layout-color2);
 }
 
+.jp-PluginList-entry:focus-visible {
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
+  outline-offset: calc(var(--jp-focus-outline-width) * -1);
+}
+
 .jp-PluginList-entry li {
   margin-left: 27px;
   margin-top: 5px;
   color: var(--jp-ui-font-color1);
   overflow-x: hidden;
   text-overflow: ellipsis;
+}
+
+.jp-PluginList-settingKey {
+  font-family: var(--jp-code-font-family);
+  font-size: var(--jp-code-font-size);
 }
 
 .jp-PluginList-entry-label {
@@ -264,7 +276,14 @@
 .jp-SettingsHeader-buttonbar > .jp-RestoreButton {
   background-color: var(--jp-warn-color-normal);
   border: 0;
-  color: var(--jp-ui-inverse-font-color0);
+  color: var(--jp-warn-color-foreground, var(--jp-ui-inverse-font-color0));
+}
+
+.jp-SettingsHeader-buttonbar > .jp-RestoreButton:focus-visible {
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-warn-outline-color, var(--jp-warn-color-normal));
+  outline-style: solid;
+  outline-offset: 2px;
 }
 
 .jp-PluginEditor {
@@ -284,4 +303,46 @@
 
 .jp-SettingsEditor-placeholderContent > h3 {
   margin-bottom: var(--jp-content-heading-margin-bottom);
+}
+
+/** Import Settings Widget **/
+.jp-SettingsImport-container {
+  padding: 20px;
+}
+
+.jp-SettingsImport-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.jp-SettingsImport-title {
+  /* stylelint-disable-next-line declaration-property-value-allowed-list */
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 10px 15px;
+}
+
+.jp-SettingsImport-list {
+  margin-top: 30px;
+  max-height: 400px; /* Limit height for scrollable list */
+  overflow-y: auto;
+}
+
+.jp-SettingsImport-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--jp-border-color2);
+  padding: 10px 15px;
+  cursor: pointer;
+}
+
+.jp-SettingsImport-itemKey {
+  flex: 1;
+}
+
+.jp-SettingsImport-checkbox {
+  flex-shrink: 0;
 }

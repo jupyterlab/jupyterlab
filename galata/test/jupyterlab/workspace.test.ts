@@ -2,11 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
-import { Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import * as path from 'path';
 
 const nbFile = 'simple_notebook.ipynb';
 const mdFile = 'simple.md';
+const vegaFile = 'plot.json';
 
 test.use({
   autoGoto: false,
@@ -30,11 +31,15 @@ test.describe('Workspace', () => {
       path.resolve(__dirname, `./notebooks/${mdFile}`),
       `${tmpPath}/${mdFile}`
     );
-  });
-
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
+    await contents.uploadContent(
+      JSON.stringify({
+        data: { values: [{ x: 1 }] },
+        mark: 'point',
+        encoding: { x: { field: 'x', type: 'quantitative' } }
+      }),
+      'text',
+      `${tmpPath}/${vegaFile}`
+    );
   });
 
   test('should reset the workspace', async ({ page, tmpPath }) => {
@@ -57,6 +62,125 @@ test.describe('Workspace', () => {
     await expect(
       page.locator('[role="main"] >> text=Title').first()
     ).toBeVisible();
+  });
+
+  test('should open a file from `tree` url with `open-with` query', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.goto(`tree/${tmpPath}/${nbFile}?open-with=txt`);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-FileEditor')
+    ).toHaveCount(1);
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-Notebook')
+    ).toHaveCount(0);
+  });
+
+  test('should open a file from `tree` url with JSON viewer query', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.goto(`tree/${tmpPath}/${nbFile}?open-with=json`);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-RenderedJSON')
+    ).toHaveCount(1);
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-FileEditor')
+    ).toHaveCount(0);
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-Notebook')
+    ).toHaveCount(0);
+  });
+
+  for (const fileType of ['vega-lite3', 'vega-lite4']) {
+    test(`should open a file from \`tree\` url with ${fileType} query`, async ({
+      page,
+      tmpPath
+    }) => {
+      await page.goto(`tree/${tmpPath}/${vegaFile}?open-with=${fileType}`);
+
+      await expect(
+        page.locator('#jp-main-dock-panel .jp-RenderedVegaLite .vega-embed')
+      ).toBeVisible();
+    });
+  }
+
+  test('should preserve a file type alias sharing another type extension', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.goto();
+
+    await page.evaluate(async path => {
+      const { commands, docRegistry } = window.jupyterapp;
+      const registration = docRegistry.addFileType(
+        { name: 'notebook-json', extensions: ['.ipynb'] },
+        ['JSON']
+      );
+      try {
+        await commands.execute('filebrowser:open-path', {
+          path,
+          factory: 'notebook-json'
+        });
+      } finally {
+        registration.dispose();
+      }
+    }, `${tmpPath}/${nbFile}`);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-RenderedJSON')
+    ).toBeVisible();
+  });
+
+  test('should open the default viewer for an unknown `open-with` value', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.goto(`tree/${tmpPath}/${nbFile}?open-with=unknown-viewer`);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-Notebook')
+    ).toHaveCount(1);
+  });
+
+  test('should decode `+` as a space in the `open-with` value', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.goto(`tree/${tmpPath}/${mdFile}?open-with=Markdown+Preview`);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MarkdownViewer')
+    ).toHaveCount(1);
+  });
+
+  test('should decode `+` in the `open-with` value in a second tab', async ({
+    baseURL,
+    page,
+    tmpPath
+  }) => {
+    // The first tab holds the default workspace, so the second tab is
+    // redirected to an `auto-` workspace. That redirect rewrites the query.
+    await page.goto();
+    const second = await page.context().newPage();
+    await second.goto(
+      `${baseURL}/lab/tree/${tmpPath}/${mdFile}?open-with=Markdown+Preview`
+    );
+    await second.waitForURL(/\/lab\/workspaces\/auto-/);
+    // The URL changes before the page reloads, so wait for the reloaded page
+    // to open the file rather than for the splash screen of the first one.
+    await second
+      .locator('#jp-main-dock-panel .jp-MainAreaWidget')
+      .first()
+      .waitFor();
+
+    await expect(
+      second.locator('#jp-main-dock-panel .jp-MarkdownViewer')
+    ).toHaveCount(1);
+    await second.close();
   });
 
   test('should open a file from `tree` url if workspace is not empty', async ({
@@ -228,6 +352,26 @@ test.describe('Workspace', () => {
     await expect(page.locator(`[role="main"] >> text=${mdFile}`)).toBeVisible();
     await expect(page.locator(`[role="main"] >> text=${nbFile}`)).toBeVisible();
   });
+
+  test('should display workspace indicator and switch workspaces', async ({
+    page
+  }) => {
+    await page.goto();
+    const workspaceSelector = page.locator('.jp-WorkspaceSelector-header');
+    // Not visible by default
+    await expect(workspaceSelector).toBeHidden();
+
+    // Open custom workspace
+    await page.goto('workspaces/foo');
+    await page.menu.clickMenuItem('View>Appearance>Show Workspace Indicator');
+    await expect(workspaceSelector).toBeVisible();
+    await workspaceSelector.click();
+    await page
+      .locator('.jp-WorkspaceSelector-item:has-text("default")')
+      .click();
+
+    await expect(page).toHaveURL(/\/workspaces\/default/);
+  });
 });
 
 test.describe('Workspace in doc mode', () => {
@@ -241,11 +385,6 @@ test.describe('Workspace in doc mode', () => {
       path.resolve(__dirname, `./notebooks/${mdFile}`),
       `${tmpPath}/${mdFile}`
     );
-  });
-
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
   });
 
   // Use non-default state to have the running session panel displayed
@@ -317,8 +456,11 @@ test.describe('Workspace in doc mode', () => {
   test('should restore workspace when switching back to lab mode', async ({
     baseURL,
     page,
-    tmpPath
+    tmpPath,
+    browserName
   }) => {
+    test.skip(browserName === 'firefox', 'Flaky on Firefox');
+
     // Open the browser in doc mode.
     // This should not change the saved workspace's main area information,
     // the document opened from URL should not be saved in workspace.
@@ -376,7 +518,7 @@ test.describe('Workspace in doc mode', () => {
         );
       }),
       page.url() === `${baseURL}/lab`,
-      page.click('button.jp-switch[role="switch"]')
+      page.menu.clickMenuItem('View>Appearance>Simple Interface')
     ]);
 
     // Ensure that the document opened by URL is closed, and that the one from workspace file is restored.
@@ -387,5 +529,231 @@ test.describe('Workspace in doc mode', () => {
     await expect(
       page.locator('#jp-main-dock-panel .jp-MainAreaWidget')
     ).toHaveCount(1);
+  });
+});
+
+test.describe('Restore non-default-type editor', () => {
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${nbFile}`),
+      `${tmpPath}/${nbFile}`
+    );
+  });
+
+  // Use non-default state to have the running session panel displayed
+  test.use({
+    mockState: {
+      'layout-restorer:data': {
+        main: {
+          current: 'editor:workspace-test/simple_notebook.ipynb',
+          dock: {
+            type: 'tab-area',
+            currentIndex: 0,
+            widgets: ['editor:workspace-test/simple_notebook.ipynb'] // notebook open with file editor, not NotebookPanel
+          }
+        },
+        down: {
+          size: 0,
+          widgets: []
+        },
+        left: {
+          collapsed: false,
+          visible: true,
+          current: 'filebrowser',
+          widgets: [
+            'filebrowser',
+            'running-sessions',
+            '@jupyterlab/toc:plugin',
+            'extensionmanager.main-view'
+          ],
+          widgetStates: {
+            ['jp-running-sessions']: {
+              sizes: [0.25, 0.25, 0.25, 0.25],
+              expansionStates: [false, false, false, false]
+            },
+            ['extensionmanager.main-view']: {
+              sizes: [
+                0.3333333333333333, 0.3333333333333333, 0.3333333333333333
+              ],
+              expansionStates: [false, false, false]
+            }
+          }
+        },
+        right: {
+          collapsed: true,
+          visible: true,
+          widgets: ['jp-property-inspector', 'debugger-sidebar'],
+          widgetStates: {
+            ['jp-debugger-sidebar']: {
+              sizes: [0.2, 0.2, 0.2, 0.2, 0.2],
+              expansionStates: [false, false, false, false, false]
+            }
+          }
+        },
+        relativeSizes: [0.4, 0.6, 0],
+        top: {
+          simpleVisibility: true
+        }
+      },
+      'file-browser-filebrowser:cwd': {
+        path: 'workspace-test'
+      },
+      'editor:workspace-test/simple_notebook.ipynb': {
+        // File Editor, not Notebook
+        data: {
+          path: 'workspace-test/simple_notebook.ipynb',
+          factory: 'Editor'
+        }
+      }
+    } as any
+  });
+
+  test('should restore file editor of `.ipynb` file when reloading, and not open a Notebook', async ({
+    baseURL,
+    page,
+    tmpPath
+  }) => {
+    // load page and wait for workspace to be saved
+    await Promise.all([
+      page.waitForResponse(
+        response =>
+          response.request().method() === 'PUT' &&
+          /api\/workspaces/.test(response.request().url()) &&
+          response.request().postDataJSON().data[
+            `editor:workspace-test/simple_notebook.ipynb`
+          ]
+      ),
+      page.goto(`${baseURL}/lab/workspaces/default?path=${tmpPath}/${nbFile}`)
+    ]);
+
+    // Ensure that there is only the document opened, no matter the workspace content.
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-FileEditor')
+    ).toHaveCount(1);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-Notebook')
+    ).toHaveCount(0); // opened as a File, not a Notebook
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget')
+    ).toHaveCount(1);
+
+    // Reload, which should restore the loaded workspace, which means a file editor and not opening a new Notebook.
+    await Promise.all([page.reload()]);
+    // Requires manual wait due to firefox resolving page.reload() before restore completes.
+    await new Promise(r => setTimeout(r, 2000));
+    await page.evaluate(async () => {
+      await window.jupyterapp.restored;
+    });
+
+    // Ensure that there is STILL only the file editor document opened, and no new Notebook
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-FileEditor')
+    ).toHaveCount(1);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-Notebook')
+    ).toHaveCount(0); // opened as a File, not a Notebook
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget')
+    ).toHaveCount(1);
+
+    // try to open the already open file from the filebrowser, and confirm it doesn't open a new Notebook editor.
+    await Promise.all([page.filebrowser.open('simple_notebook.ipynb')]);
+
+    // Ensure that there is STILL only the file editor document opened, and no new Notebook
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-FileEditor')
+    ).toHaveCount(1);
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget .jp-Notebook')
+    ).toHaveCount(0); // opened as a File, not a Notebook
+
+    await expect(
+      page.locator('#jp-main-dock-panel .jp-MainAreaWidget')
+    ).toHaveCount(1);
+  });
+});
+
+test.describe('Restore with a slow nbconvert endpoint', () => {
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${nbFile}`),
+      `${tmpPath}/${nbFile}`
+    );
+  });
+
+  test.use({
+    mockState: {
+      'layout-restorer:data': {
+        main: {
+          dock: {
+            type: 'tab-area',
+            currentIndex: 0,
+            widgets: ['notebook:workspace-test/simple_notebook.ipynb']
+          }
+        },
+        down: { size: 0, widgets: [] },
+        left: { collapsed: true, visible: true, widgets: ['filebrowser'] },
+        right: { collapsed: true, visible: true, widgets: [] },
+        relativeSizes: [0, 1, 0],
+        top: { simpleVisibility: true }
+      },
+      'notebook:workspace-test/simple_notebook.ipynb': {
+        data: {
+          path: 'workspace-test/simple_notebook.ipynb',
+          factory: 'Notebook'
+        }
+      }
+    } as any
+  });
+
+  test('should show the notebook content while export formats are pending', async ({
+    page
+  }) => {
+    // On a fresh server the first `/api/nbconvert` request imports nbconvert
+    // on the event loop, which takes seconds on a slow file system, and every
+    // request that arrives meanwhile waits. Hold API requests accordingly.
+    let release = () => {};
+    const released = new Promise<void>(resolve => {
+      release = resolve;
+    });
+    let nbconvertRequested = false;
+    await page.route(/\/api\//, async route => {
+      if (nbconvertRequested) {
+        await released;
+      }
+      await route.fallback();
+    });
+    await page.route(/\/api\/nbconvert(\?.*)?$/, async route => {
+      nbconvertRequested = true;
+      await released;
+      await route.continue();
+    });
+
+    await page.goto();
+
+    await expect(
+      page.locator('[role="main"] >> text=Test Notebook¶').first()
+    ).toBeVisible();
+
+    await expect.poll(() => nbconvertRequested).toBe(true);
+    const formats = page.waitForResponse(/\/api\/nbconvert(\?.*)?$/);
+    release();
+    await formats;
+    // The export submenu does not open until the formats are processed.
+    await expect(async () => {
+      const exportMenu = await page.menu.openLocator(
+        'File>Save and Export Notebook As'
+      );
+      await expect(
+        exportMenu!.getByRole('menuitem', { name: 'HTML', exact: true })
+      ).toHaveCount(1, { timeout: 500 });
+    }).toPass();
   });
 });

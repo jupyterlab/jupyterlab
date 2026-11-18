@@ -2,9 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Sanitizer } from '@jupyterlab/apputils';
-import { IMarkdownParser, renderMarkdown } from '@jupyterlab/rendermime';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { TableOfContents } from '../tokens';
+import type { IMarkdownParser } from '@jupyterlab/rendermime';
+import {
+  removeMath,
+  renderMarkdown,
+  replaceMath
+} from '@jupyterlab/rendermime';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { TableOfContents } from '../tokens';
 
 /**
  * Markdown heading
@@ -53,8 +58,9 @@ export async function getHeadingId(
     if (!header) {
       return null;
     }
-
-    return header.id;
+    return sanitizer?.allowNamedProperties
+      ? header.id
+      : header.getAttribute('data-jupyter-id');
   } catch (reason) {
     console.error('Failed to parse a heading.', reason);
   }
@@ -65,8 +71,70 @@ export async function getHeadingId(
 /**
  * Parses the provided string and returns a list of headings.
  *
+ * @param text - Markdown text
+ * @param parser - A Markdown parser instance used to render the content to HTML.
+ * @param mathParseOptions - How math is found in the text, as for the
+ *   typesetter that renders it; the default delimiters when omitted.
+ * @returns List of headings
+ *
+ * @remarks
+ * Renders Markdown to HTML and extracts `<h1>`–`<h6>` elements.
+ * Returns an empty list if the parser is `null`.
+ */
+export async function parseHeadings(
+  markdownText: string,
+  parser: IMarkdownParser | null,
+  mathParseOptions?: IRenderMime.ILatexTypesetter.IMathParseOptions
+): Promise<IMarkdownHeading[]> {
+  if (!parser || !parser.getHeadingTokens) {
+    console.warn(
+      'Unable to parse headings; Markdown parser is missing or does not implement getHeadingTokens().'
+    );
+    return [];
+  }
+
+  // Get the heading tokens from the parser, including the source line metadata
+  const headingTokens = await parser.getHeadingTokens(
+    markdownText,
+    mathParseOptions
+  );
+
+  // Convert each heading token into HTML and extract the heading elements,
+  // as this provides a clean and reliable way to retrieve the headings.
+  const parseHeadings = await Promise.all(
+    headingTokens.map(async token => {
+      // Hide math from the parser, as `renderMarkdown` does.
+      const { text, math } = removeMath(token.raw, mathParseOptions);
+      const renderedHtml = replaceMath(await parser.render(text), math);
+      const dom = new DOMParser().parseFromString(renderedHtml, 'text/html');
+      const htmlHeadings = Array.from(
+        dom.querySelectorAll('h1, h2, h3, h4, h5, h6')
+      );
+
+      return htmlHeadings.map(e => ({
+        text: e.textContent?.trim() || '',
+        line: token.line,
+        level: parseInt(e.tagName[1], 10),
+        raw: token.raw.replace(/\n+$/, ''),
+        skip: skipHeading.test(token.raw)
+      }));
+    })
+  );
+
+  return parseHeadings.reduce(
+    (acc, curr) => acc.concat(curr),
+    [] as IMarkdownHeading[]
+  );
+}
+
+/**
+ * @deprecated in favour of async parseHeadings()
+ *
+ * Parses the provided string and returns a list of headings.
+ *
  * @param text - Input text
  * @returns List of headings
+ *
  */
 export function getHeadings(text: string): IMarkdownHeading[] {
   // Split the text into lines:
@@ -139,8 +207,8 @@ export function getHeadings(text: string): IMarkdownHeading[] {
 // Returns the length of ``` or ~~~ fences.
 function extractLeadingFences(line: string) {
   let match;
-  if (line.startsWith('`')) match = line.match(/^(`{3,})/);
-  else match = line.match(/^(~{3,})/);
+  if (line.startsWith('`')) match = line.match(/^`{3,}/);
+  else match = line.match(/^~{3,}/);
   return match ? match[0].length : 0;
 }
 
@@ -171,7 +239,6 @@ export function isMarkdown(mime: string): boolean {
 
 /**
  * Interface describing a parsed heading result.
- *
  * @private
  */
 interface IHeader {
@@ -250,7 +317,7 @@ interface IHeader {
  */
 function parseHeading(line: string, nextLine?: string): IHeader | null {
   // Case: Markdown heading
-  let match = line.match(/^([#]{1,6}) (.*)/);
+  let match = line.match(/^(#{1,6}) (.*)/);
   if (match) {
     return {
       text: cleanTitle(match[2]),
@@ -261,7 +328,7 @@ function parseHeading(line: string, nextLine?: string): IHeader | null {
   }
   // Case: Markdown heading (alternative style)
   if (nextLine) {
-    match = nextLine.match(/^ {0,3}([=]{2,}|[-]{2,})\s*$/);
+    match = nextLine.match(/^ {0,3}([=]{2,}|-{2,})\s*$/);
     if (match) {
       return {
         text: cleanTitle(line),
@@ -272,7 +339,7 @@ function parseHeading(line: string, nextLine?: string): IHeader | null {
     }
   }
   // Case: HTML heading (WARNING: this is not particularly robust, as HTML headings can span multiple lines)
-  match = line.match(/<h([1-6]).*>(.*)<\/h\1>/i);
+  match = line.match(/<h([1-6]).*>(.*)<\/h\1>/i); // eslint-disable-line regexp/no-super-linear-backtracking
   if (match) {
     return {
       text: match[2],
@@ -294,4 +361,4 @@ function cleanTitle(heading: string): string {
  * Ignore title with html tag with a class name equal to `jp-toc-ignore` or `tocSkip`
  */
 const skipHeading =
-  /<\w+\s(.*?\s)?class="(.*?\s)?(jp-toc-ignore|tocSkip)(\s.*?)?"(\s.*?)?>/;
+  /<\w+\s(?:.*?\s)?class="(?:.*?\s)?(?:jp-toc-ignore|tocSkip)(?:\s.*?)?"(?:\s.*?)?>/;

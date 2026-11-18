@@ -3,6 +3,8 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import React from 'react';
 export namespace ProgressCircle {
   /**
@@ -18,6 +20,10 @@ export namespace ProgressCircle {
      */
     label?: string;
     /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
+    /**
      * Element width
      */
     width?: number;
@@ -25,10 +31,15 @@ export namespace ProgressCircle {
      * Element height
      */
     height?: number;
+    /**
+     * Click handler
+     */
+    onClick?: () => void;
   }
 }
 
 export function ProgressCircle(props: ProgressCircle.IProps): JSX.Element {
+  const trans = (props.translator || nullTranslator).load('jupyterlab');
   const radius = 104;
   const d = (progress: number): string => {
     const angle = Math.max(progress * 3.6, 0.1);
@@ -50,10 +61,11 @@ export function ProgressCircle(props: ProgressCircle.IProps): JSX.Element {
     <div
       className={'jp-Statusbar-ProgressCircle'}
       role="progressbar"
-      aria-label={props.label || 'Unlabelled progress circle'}
+      aria-label={props.label || trans.__('Unlabelled progress circle')}
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={props.progress}
+      onClick={props.onClick}
     >
       <svg viewBox="0 0 250 250">
         <circle

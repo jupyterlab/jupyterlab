@@ -5,11 +5,11 @@
  * @module csvviewer-extension
  */
 
-import {
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer } from '@jupyterlab/application';
 import {
   createToolbarFactory,
   InputDialog,
@@ -17,17 +17,22 @@ import {
   IToolbarWidgetRegistry,
   WidgetTracker
 } from '@jupyterlab/apputils';
+// The package root also loads the model and its datagrid dependency.
+import { CSVComment, CSVDelimiter } from '@jupyterlab/csvviewer/lib/toolbar';
 import {
+  CSVDocumentWidget,
   CSVViewerFactory,
   TSVViewerFactory
 } from '@jupyterlab/csvviewer/lib/widget';
-import { CSVDelimiter } from '@jupyterlab/csvviewer/lib/toolbar';
 import type { CSVViewer } from '@jupyterlab/csvviewer';
 import type { TextRenderConfig } from '@jupyterlab/csvviewer';
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { IObservableList } from '@jupyterlab/observables';
+import type { IObservableList } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import type { DataGrid } from '@lumino/datagrid';
@@ -116,6 +121,16 @@ function activateCsv(
         })
     );
 
+    toolbarRegistry.addFactory<IDocumentWidget<CSVViewer>>(
+      FACTORY_CSV,
+      'comment',
+      widget =>
+        new CSVComment({
+          widget: widget.content,
+          translator
+        })
+    );
+
     if (settingRegistry) {
       toolbarFactory = createToolbarFactory(
         toolbarRegistry,
@@ -129,7 +144,40 @@ function activateCsv(
 
   const trans = translator.load('jupyterlab');
 
-  const factory = new CSVViewerFactory({
+  let defaultDelimiter = ',';
+
+  // Opens new files with the delimiter from the settings.
+  class CustomCSVViewerFactory extends CSVViewerFactory {
+    protected createNewWidget(
+      context: DocumentRegistry.Context
+    ): IDocumentWidget<CSVViewer> {
+      const translator = this.translator;
+      return new CSVDocumentWidget({
+        context,
+        delimiter: defaultDelimiter,
+        translator
+      });
+    }
+  }
+
+  if (settingRegistry) {
+    void settingRegistry
+      .load(csv.id)
+      .then(settings => {
+        // Open files keep their delimiter, which the toolbar may have changed.
+        const updateSettings = () => {
+          defaultDelimiter =
+            (settings.get('delimiter').composite as string) || ',';
+        };
+        updateSettings();
+        settings.changed.connect(updateSettings);
+      })
+      .catch(reason => {
+        console.error(`Failed to load settings for ${csv.id}.`, reason);
+      });
+  }
+
+  const factory = new CustomCSVViewerFactory({
     name: FACTORY_CSV,
     label: trans.__('CSV Viewer'),
     fileTypes: ['csv'],
@@ -144,7 +192,7 @@ function activateCsv(
 
   // The current styles for the data grids.
   let style: DataGrid.Style = Private.LIGHT_STYLE;
-  let rendererConfig: TextRenderConfig = Private.LIGHT_TEXT_CONFIG;
+  let rendererConfig: TextRenderConfig = Private.getTextRendererConfig();
 
   if (restorer) {
     // Handle state restoration.
@@ -185,6 +233,9 @@ function activateCsv(
     await widget.content.ready;
     widget.content.style = style;
     widget.content.rendererConfig = rendererConfig;
+
+    // Make sure the theme is correctly set when new widgets are created.
+    updateThemes();
   });
 
   // Keep the themes up-to-date.
@@ -194,9 +245,7 @@ function activateCsv(
         ? themeManager.isLight(themeManager.theme)
         : true;
     style = isLight ? Private.LIGHT_STYLE : Private.DARK_STYLE;
-    rendererConfig = isLight
-      ? Private.LIGHT_TEXT_CONFIG
-      : Private.DARK_TEXT_CONFIG;
+    rendererConfig = Private.getTextRendererConfig(isLight);
     tracker.forEach(async grid => {
       await grid.content.ready;
       grid.content.style = style;
@@ -227,7 +276,13 @@ function activateCsv(
         widget.content.goToLine(result.value);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   if (mainMenu) {
@@ -276,6 +331,16 @@ function activateTsv(
         })
     );
 
+    toolbarRegistry.addFactory<IDocumentWidget<CSVViewer>>(
+      FACTORY_TSV,
+      'comment',
+      widget =>
+        new CSVComment({
+          widget: widget.content,
+          translator
+        })
+    );
+
     if (settingRegistry) {
       toolbarFactory = createToolbarFactory(
         toolbarRegistry,
@@ -304,7 +369,7 @@ function activateTsv(
 
   // The current styles for the data grids.
   let style: DataGrid.Style = Private.LIGHT_STYLE;
-  let rendererConfig: TextRenderConfig = Private.LIGHT_TEXT_CONFIG;
+  let rendererConfig: TextRenderConfig = Private.getTextRendererConfig();
 
   if (restorer) {
     // Handle state restoration.
@@ -354,9 +419,7 @@ function activateTsv(
         ? themeManager.isLight(themeManager.theme)
         : true;
     style = isLight ? Private.LIGHT_STYLE : Private.DARK_STYLE;
-    rendererConfig = isLight
-      ? Private.LIGHT_TEXT_CONFIG
-      : Private.DARK_TEXT_CONFIG;
+    rendererConfig = Private.getTextRendererConfig(isLight);
     tracker.forEach(async grid => {
       await grid.content.ready;
       grid.content.style = style;
@@ -387,7 +450,13 @@ function activateTsv(
         widget.content.goToLine(result.value);
       }
     },
-    isEnabled
+    isEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   if (mainMenu) {
@@ -406,7 +475,7 @@ function activateTsv(
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [csv, tsv];
+const plugins: JupyterFrontEndPlugin<unknown>[] = [csv, tsv];
 export default plugins;
 
 /**
@@ -438,9 +507,32 @@ namespace Private {
   };
 
   /**
+   * Utility to get the text renderer config for light/dark theme.
+   */
+  export const getTextRendererConfig = (
+    isLight: boolean = true
+  ): TextRenderConfig => {
+    const style = window.getComputedStyle(document.body);
+    const fontFamily = style.getPropertyValue('--jp-datagrid-font-family');
+    const fallbackFontFamily = style.getPropertyValue(
+      '--jp-content-font-family'
+    );
+    const fontSize = style.getPropertyValue('--jp-datagrid-font-size');
+    const commentColor = style
+      .getPropertyValue('--jp-mirror-editor-comment-color')
+      .trim();
+    return {
+      ...(isLight ? LIGHT_TEXT_CONFIG : DARK_TEXT_CONFIG),
+      fontSize: fontSize || undefined,
+      fontFamily: fontFamily || fallbackFontFamily || undefined,
+      commentColor: commentColor || undefined
+    };
+  };
+
+  /**
    * The light config for the data grid renderer.
    */
-  export const LIGHT_TEXT_CONFIG: TextRenderConfig = {
+  const LIGHT_TEXT_CONFIG: Omit<TextRenderConfig, 'fontSize' | 'fontFamily'> = {
     textColor: '#111111',
     matchBackgroundColor: '#FFFFE0',
     currentMatchBackgroundColor: '#FFFF00',
@@ -450,7 +542,7 @@ namespace Private {
   /**
    * The dark config for the data grid renderer.
    */
-  export const DARK_TEXT_CONFIG: TextRenderConfig = {
+  const DARK_TEXT_CONFIG: Omit<TextRenderConfig, 'fontSize' | 'fontFamily'> = {
     textColor: '#F5F5F5',
     matchBackgroundColor: '#838423',
     currentMatchBackgroundColor: '#A3807A',

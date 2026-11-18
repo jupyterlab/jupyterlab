@@ -3,20 +3,18 @@
 
 import { YFile } from '@jupyter/ydoc';
 import { CodeEditor } from '@jupyterlab/codeeditor';
+import type {
+  IEditorExtensionRegistry,
+  IEditorLanguageRegistry
+} from '@jupyterlab/codemirror';
 import {
   CodeMirrorEditor,
   EditorExtensionRegistry,
   EditorLanguageRegistry,
-  IEditorExtensionRegistry,
-  IEditorLanguageRegistry,
   ybinding
 } from '@jupyterlab/codemirror';
 import { sleep } from '@jupyterlab/testutils';
 import { generate, simulate } from 'simulate-event';
-
-const UP_ARROW = 38;
-
-const DOWN_ARROW = 40;
 
 class LogFileEditor extends CodeMirrorEditor {
   methods: string[] = [];
@@ -52,7 +50,7 @@ describe('CodeMirrorEditor', () => {
         extensionsRegistry.addExtension(ext);
       });
     for (const language of EditorLanguageRegistry.getDefaultLanguages().filter(
-      spec => spec.name === 'Python'
+      spec => ['Python', 'R'].includes(spec.name)
     )) {
       languages.addLanguage(language);
       await languages.getLanguage(language.name);
@@ -70,7 +68,12 @@ describe('CodeMirrorEditor', () => {
       model,
       languages,
       // Binding between the editor and the Yjs model
-      extensions: [ybinding({ ytext: sharedModel.ysource })]
+      extensions: [
+        ybinding({
+          ytext: sharedModel.ysource,
+          undoManager: sharedModel.undoManager ?? undefined
+        })
+      ]
     });
   });
 
@@ -83,12 +86,32 @@ describe('CodeMirrorEditor', () => {
     it('should create a CodeMirrorEditor', () => {
       expect(editor).toBeInstanceOf(CodeMirrorEditor);
     });
+
+    it('should set the editor language data attribute for Python', async () => {
+      model.mimeType = 'text/x-python';
+      await sleep(0);
+      expect(editor.host.dataset.jpEditorLanguage).toBe('python');
+    });
+
+    it('should set the editor language data attribute for R', async () => {
+      model.mimeType = 'text/x-rsrc';
+      await sleep(0);
+      expect(editor.host.dataset.jpEditorLanguage).toBe('r');
+    });
+
+    it('should update the editor language data attribute', async () => {
+      model.mimeType = 'text/x-python';
+      await sleep(0);
+      model.mimeType = 'text/plain';
+      await sleep(0);
+      expect(editor.host.dataset.jpEditorLanguage).toBe('none');
+    });
   });
 
   describe('#edgeRequested', () => {
     it('should emit a signal when the top edge is requested', () => {
       let edge: CodeEditor.EdgeLocation | null = null;
-      const event = generate('keydown', { keyCode: UP_ARROW });
+      const event = generate('keydown', { key: 'ArrowUp' });
       const listener = (sender: any, args: CodeEditor.EdgeLocation) => {
         edge = args;
       };
@@ -100,7 +123,7 @@ describe('CodeMirrorEditor', () => {
 
     it('should emit a signal when the bottom edge is requested', () => {
       let edge: CodeEditor.EdgeLocation | null = null;
-      const event = generate('keydown', { keyCode: DOWN_ARROW });
+      const event = generate('keydown', { key: 'ArrowDown' });
       const listener = (sender: any, args: CodeEditor.EdgeLocation) => {
         edge = args;
       };
@@ -130,6 +153,21 @@ describe('CodeMirrorEditor', () => {
     it('should be the codemirror editor wrapped by the editor', () => {
       const cm = editor.editor;
       expect(cm.state.doc).toBe(editor.doc);
+    });
+
+    it('should warn when accessing the legacy cmView shim', () => {
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const content = editor.editor.contentDOM as HTMLElement & {
+        cmView?: { view: typeof editor.editor; dom: HTMLElement };
+      };
+
+      expect(content.cmView?.view).toBe(editor.editor);
+      expect(content.cmView?.dom).toBe(content);
+      expect(warn).toHaveBeenCalledWith(
+        'Accessing cmView is deprecated. Use the public API EditorView.findFromDOM() instead.'
+      );
+
+      warn.mockRestore();
     });
   });
 
@@ -439,7 +477,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#onKeydown()', () => {
     it('should run when there is a keydown event on the editor', () => {
-      const event = generate('keydown', { keyCode: UP_ARROW });
+      const event = generate('keydown', { key: 'ArrowUp' });
       expect(editor.methods).toEqual(expect.not.arrayContaining(['onKeydown']));
       editor.editor.contentDOM.dispatchEvent(event);
       expect(editor.methods).toEqual(expect.arrayContaining(['onKeydown']));
@@ -473,6 +511,17 @@ describe('CodeMirrorEditor', () => {
         type: 'import',
         offset: 0,
         value: 'import'
+      });
+    });
+    it('should return token of parent when erroneous leaf is found', async () => {
+      model.mimeType = 'text/x-python';
+      model.sharedModel.setSource('a = "/home');
+      // Needed to have the sharedModel content transferred to the editor document
+      await sleep(0.01);
+      expect(editor.getTokenAt(10)).toStrictEqual({
+        offset: 4,
+        type: 'String',
+        value: '"/home'
       });
     });
   });

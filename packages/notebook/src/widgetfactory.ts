@@ -1,11 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
-import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-import { ABCWidgetFactory, DocumentRegistry } from '@jupyterlab/docregistry';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ITranslator } from '@jupyterlab/translation';
-import { INotebookModel } from './model';
+import type { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import { ABCWidgetFactory } from '@jupyterlab/docregistry';
+import type { IPageHandler } from '@jupyterlab/outputarea';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { INotebookModel } from './model';
 import { NotebookPanel } from './panel';
 import { StaticNotebook } from './widget';
 import { NotebookHistory } from './history';
@@ -31,6 +32,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
       options.editorConfig || StaticNotebook.defaultEditorConfig;
     this._notebookConfig =
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
+    this._pageHandler = options.pageHandler;
   }
 
   /*
@@ -78,7 +80,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     context: DocumentRegistry.IContext<INotebookModel>,
     source?: NotebookPanel
   ): NotebookPanel {
-    const translator = (context as any).translator;
+    const translator = this.translator;
     const kernelHistory = new NotebookHistory({
       sessionContext: context.sessionContext,
       translator: translator
@@ -93,6 +95,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
       notebookConfig: source
         ? source.content.notebookConfig
         : this._notebookConfig,
+      pageHandler: this._pageHandler,
       translator,
       kernelHistory
     };
@@ -103,6 +106,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
 
   private _editorConfig: StaticNotebook.IEditorConfig;
   private _notebookConfig: StaticNotebook.INotebookConfig;
+  private _pageHandler: IPageHandler | undefined;
 }
 
 /**
@@ -112,8 +116,9 @@ export namespace NotebookWidgetFactory {
   /**
    * The options used to construct a `NotebookWidgetFactory`.
    */
-  export interface IOptions<T extends NotebookPanel>
-    extends DocumentRegistry.IWidgetFactoryOptions<T> {
+  export interface IOptions<
+    T extends NotebookPanel
+  > extends DocumentRegistry.IWidgetFactoryOptions<T> {
     /*
      * A rendermime instance.
      */
@@ -140,6 +145,11 @@ export namespace NotebookWidgetFactory {
     notebookConfig?: StaticNotebook.INotebookConfig;
 
     /**
+     * Optional handler for pager payloads (`source: page`).
+     */
+    pageHandler?: IPageHandler;
+
+    /**
      * The application language translator.
      */
     translator?: ITranslator;
@@ -148,8 +158,10 @@ export namespace NotebookWidgetFactory {
   /**
    * The interface for a notebook widget factory.
    */
-  export interface IFactory
-    extends DocumentRegistry.IWidgetFactory<NotebookPanel, INotebookModel> {
+  export interface IFactory extends DocumentRegistry.IWidgetFactory<
+    NotebookPanel,
+    INotebookModel
+  > {
     /**
      * Whether to automatically start the preferred kernel.
      */

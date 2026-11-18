@@ -2,9 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, test } from '@jupyterlab/galata';
+import { waitForLauncherIcons } from './utils';
 
 test.describe('General Tests', () => {
   test('Launch Screen', async ({ page }) => {
+    await waitForLauncherIcons(page);
     const imageName = 'launch.png';
     expect(await page.screenshot()).toMatchSnapshot(imageName.toLowerCase());
   });
@@ -50,7 +52,28 @@ test.describe('General Tests', () => {
     await page.menu.clickMenuItem(
       'Settings>Theme>Synchronize with System Settings'
     );
+    // Wait for a short time to increase the chance that
+    // the setting was already saved on the backend.
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await page.waitForTimeout(100);
     await page.reload();
     expect(await page.theme.getTheme()).toEqual('JupyterLab Dark');
+  });
+
+  test('Browser tab name updates to file name in /doc mode', async ({
+    page
+  }) => {
+    // Switch to single-document mode
+    const currentUrl = page.url();
+    const docUrl = currentUrl.replace('/lab/', '/doc/');
+    await page.goto(docUrl);
+
+    // Create a new text file and wait for it to load
+    await page.menu.clickMenuItem('File>New>Text File');
+    await page.locator('.cm-editor:not(.jp-mod-readOnly)').first().waitFor();
+
+    // Verify the browser's tab name matches the new file name
+    const title = await page.title();
+    expect(title).toBe('untitled.txt - JupyterLab');
   });
 });

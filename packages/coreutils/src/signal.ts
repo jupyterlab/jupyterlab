@@ -4,7 +4,7 @@
  */
 
 import { PromiseDelegate } from '@lumino/coreutils';
-import { ISignal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 
 /**
  * Convert a signal into a promise for the first emitted value.

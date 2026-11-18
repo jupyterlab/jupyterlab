@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { LanguageIdentifier } from '../lsp';
+import type { LanguageIdentifier } from '../lsp';
 
 export interface IExtractedCode {
   /**

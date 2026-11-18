@@ -1,14 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   CommandToolbarButton,
   PanelWithToolbar
 } from '@jupyterlab/ui-components';
-import { CommandRegistry } from '@lumino/commands';
-import { Panel } from '@lumino/widgets';
-import { IDebugger } from '../../tokens';
+import type { CommandRegistry } from '@lumino/commands';
+import type { Panel } from '@lumino/widgets';
+import type { IDebugger } from '../../tokens';
 import { CallstackBody } from './body';
 
 /**
@@ -27,6 +28,10 @@ export class Callstack extends PanelWithToolbar {
     this.title.label = trans.__('Callstack');
     const body = new CallstackBody(model);
 
+    this.toolbar.node.setAttribute(
+      'aria-label',
+      trans.__('Callstack panel toolbar')
+    );
     this.toolbar.addItem(
       'continue',
       new CommandToolbarButton({

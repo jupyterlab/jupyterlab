@@ -3,37 +3,35 @@
 import { nullTranslator } from '@jupyterlab/translation';
 import { SettingsFormEditor } from '../src/SettingsFormEditor';
 import React from 'react';
-import renderer from 'react-test-renderer';
-import { StateDB } from '@jupyterlab/statedb';
-import {
-  ISettingRegistry,
-  SettingRegistry,
-  Settings
-} from '@jupyterlab/settingregistry';
+import renderer, { act } from 'react-test-renderer';
+import type { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
+import { SettingRegistry } from '@jupyterlab/settingregistry';
 import { FormComponent } from '@jupyterlab/ui-components';
+import { TestConnector } from './utils';
+import type { IChangeEvent } from '@rjsf/core';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
-class TestConnector extends StateDB {
-  schemas: { [key: string]: ISettingRegistry.ISchema } = {};
+class RecordingConnector extends TestConnector {
+  readonly saveRequests: string[] = [];
 
-  async fetch(id: string): Promise<ISettingRegistry.IPlugin | undefined> {
-    const fetched = await super.fetch(id);
-    if (!fetched && !this.schemas[id]) {
-      return undefined;
-    }
-
-    const schema: ISettingRegistry.ISchema = this.schemas[id] || {
-      type: 'object'
-    };
-    const composite = {};
-    const user = {};
-    const raw = (fetched as string) || '{ }';
-    const version = 'test';
-    return { id, data: { composite, user }, raw, schema, version };
+  async save(id: string, raw: string): Promise<void> {
+    this.saveRequests.push(raw);
+    return super.save(id, raw);
   }
+}
 
-  async list(): Promise<any> {
-    return Promise.reject('list method not implemented');
-  }
+function createChangeEvent(
+  formData: ReadonlyPartialJSONObject
+): IChangeEvent<ReadonlyPartialJSONObject> {
+  return {
+    errors: [],
+    formData
+  } as unknown as IChangeEvent<ReadonlyPartialJSONObject>;
+}
+
+async function flushPromises(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
 }
 
 describe('@jupyterlab/settingeditor', () => {
@@ -69,7 +67,7 @@ describe('@jupyterlab/settingeditor', () => {
 
       const component = renderer.create(
         <SettingsFormEditor
-          filteredValues={null}
+          filteredValues={{ kind: 'all' }}
           hasError={() => void 0}
           onSelect={() => void 0}
           renderers={{}}
@@ -91,7 +89,7 @@ describe('@jupyterlab/settingeditor', () => {
           keyA: { type: 'string', default: 'A' },
           keyB: { type: 'string', default: 'B' },
           keyC: { title: 'Third key', type: 'string', default: 'C' },
-          keyD: { type: 'string', default: 'D' }
+          keyD: { title: 'Fourth key', type: 'string', default: 'D' }
         }
       };
       connector.schemas[id] = schema;
@@ -100,8 +98,14 @@ describe('@jupyterlab/settingeditor', () => {
       // When
       const component = renderer.create(
         <SettingsFormEditor
-          // Filter by field and by title
-          filteredValues={['keyA', 'Third key']}
+          filteredValues={{
+            kind: 'properties',
+            matches: [
+              { matchedBy: 'key', label: 'keyA', path: ['keyA'] },
+              { matchedBy: 'title', label: 'Third key', path: ['keyC'] },
+              { matchedBy: 'title', label: 'Nested', path: ['keyD', 'nested'] }
+            ]
+          }}
           hasError={() => void 0}
           onSelect={() => void 0}
           renderers={{}}
@@ -114,10 +118,111 @@ describe('@jupyterlab/settingeditor', () => {
       // Then
       const instance = component.root;
       const form = instance.findByType(FormComponent);
-      expect(form.props.formData).toEqual({ keyA: 'A', keyC: 'C' });
+      expect(form.props.formData).toEqual({ keyA: 'A', keyC: 'C', keyD: 'D' });
       expect(Object.keys(form.props.schema.properties)).toEqual(
         Object.keys(form.props.formData)
       );
+    });
+
+    it('should render all properties when filteredValues is tag', async () => {
+      const id = 'alpha';
+      const schema: ISettingRegistry.ISchema = {
+        type: 'object',
+        tags: ['my-tag'],
+        properties: {
+          keyA: { type: 'string', default: 'A' },
+          keyB: { type: 'string', default: 'B' }
+        }
+      };
+      connector.schemas[id] = schema;
+      settings = (await registry.load(id)) as Settings;
+
+      const component = renderer.create(
+        <SettingsFormEditor
+          filteredValues={{ kind: 'tag' }}
+          hasError={() => void 0}
+          onSelect={() => void 0}
+          renderers={{}}
+          settings={settings}
+          translator={nullTranslator}
+          updateDirtyState={() => void 0}
+        />
+      );
+
+      const form = component.root.findByType(FormComponent);
+      expect(Object.keys(form.props.schema.properties ?? {})).toEqual([
+        'keyA',
+        'keyB'
+      ]);
+    });
+
+    it('should preserve pending form data when settings change before save', async () => {
+      jest.useFakeTimers();
+
+      const id = 'alpha';
+      const field = 'settings';
+      const raceConnector = new RecordingConnector();
+      const raceRegistry = new SettingRegistry({ connector: raceConnector });
+      let component: renderer.ReactTestRenderer | null = null;
+
+      try {
+        raceConnector.schemas[id] = {
+          type: 'object',
+          properties: {
+            [field]: {
+              type: 'object',
+              properties: {
+                first: { type: 'boolean', default: false },
+                second: { type: 'boolean', default: false }
+              }
+            }
+          }
+        };
+        settings = (await raceRegistry.load(id)) as Settings;
+
+        component = renderer.create(
+          <SettingsFormEditor
+            filteredValues={{ kind: 'all' }}
+            hasError={() => void 0}
+            onSelect={() => void 0}
+            renderers={{}}
+            settings={settings}
+            translator={nullTranslator}
+            updateDirtyState={() => void 0}
+          ></SettingsFormEditor>
+        );
+
+        const form = component.root.findByType(FormComponent);
+
+        await act(async () => {
+          form.props.onChange(
+            createChangeEvent({
+              [field]: { first: true, second: true }
+            })
+          );
+        });
+
+        await act(async () => {
+          await raceRegistry.upload(
+            id,
+            JSON.stringify({ [field]: { first: true } }, undefined, 4)
+          );
+        });
+
+        await act(async () => {
+          jest.advanceTimersByTime(500);
+          await flushPromises();
+        });
+
+        expect(raceConnector.saveRequests).toHaveLength(2);
+        expect(JSON.parse(raceConnector.saveRequests[1])).toEqual({
+          [field]: { first: true, second: true }
+        });
+      } finally {
+        component?.unmount();
+        await raceConnector.clear();
+        jest.useRealTimers();
+      }
     });
   });
 });

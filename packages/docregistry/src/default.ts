@@ -1,17 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { MainAreaWidget, setToolbar } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
-import { IObservableList } from '@jupyterlab/observables';
-import { Contents } from '@jupyterlab/services';
-import { DocumentChange, FileChange, ISharedFile } from '@jupyter/ydoc';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { PartialJSONValue } from '@lumino/coreutils';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Title, Widget } from '@lumino/widgets';
-import { DocumentRegistry, IDocumentWidget } from './index';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
+import type { IObservableList } from '@jupyterlab/observables';
+import type { Contents } from '@jupyterlab/services';
+import type { DocumentChange, FileChange, ISharedFile } from '@jupyter/ydoc';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { PartialJSONValue } from '@lumino/coreutils';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Title, Widget } from '@lumino/widgets';
+import type { DocumentRegistry, IDocumentWidget } from './index';
 import { createReadonlyLabel } from './components';
 
 /**
@@ -50,19 +54,13 @@ export class DocumentModel
    * The dirty state of the document.
    */
   get dirty(): boolean {
-    return this._dirty;
+    return this.sharedModel.dirty;
   }
   set dirty(newValue: boolean) {
-    const oldValue = this._dirty;
-    if (newValue === oldValue) {
+    if (newValue === this.dirty) {
       return;
     }
-    this._dirty = newValue;
-    this.triggerStateChange({
-      name: 'dirty',
-      oldValue,
-      newValue
-    });
+    this.sharedModel.dirty = newValue;
   }
 
   /**
@@ -160,7 +158,6 @@ export class DocumentModel
    */
   protected triggerContentChange(): void {
     this._contentChanged.emit(void 0);
-    this.dirty = true;
   }
 
   private _onStateChanged(sender: ISharedFile, changes: DocumentChange): void {
@@ -169,12 +166,7 @@ export class DocumentModel
     }
     if (changes.stateChange) {
       changes.stateChange.forEach(value => {
-        if (value.name === 'dirty') {
-          // Setting `dirty` will trigger the state change.
-          // We always set `dirty` because the shared model state
-          // and the local attribute are synchronized one way shared model -> _dirty
-          this.dirty = value.newValue;
-        } else if (value.oldValue !== value.newValue) {
+        if (value.oldValue !== value.newValue) {
           this.triggerStateChange({
             newValue: undefined,
             oldValue: undefined,
@@ -190,7 +182,6 @@ export class DocumentModel
    */
   readonly sharedModel: ISharedFile;
   private _defaultLang = '';
-  private _dirty = false;
   private _readOnly = false;
   private _contentChanged = new Signal<this, void>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
@@ -326,8 +317,7 @@ export class Base64ModelFactory extends TextModelFactory {
 export abstract class ABCWidgetFactory<
   T extends IDocumentWidget,
   U extends DocumentRegistry.IModel = DocumentRegistry.IModel
-> implements DocumentRegistry.IWidgetFactory<T, U>
-{
+> implements DocumentRegistry.IWidgetFactory<T, U> {
   /**
    * Construct a new `ABCWidgetFactory`.
    */
@@ -345,6 +335,7 @@ export abstract class ABCWidgetFactory<
     this._shutdownOnClose = !!options.shutdownOnClose;
     this._autoStartDefault = !!options.autoStartDefault;
     this._toolbarFactory = options.toolbarFactory;
+    this._contentProviderId = options.contentProviderId;
   }
 
   /**
@@ -488,6 +479,25 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
+   * Identifier of the content provider required for the widget (if any).
+   *
+   * Throws Error if the content provider was already set.
+   *
+   * @experimental
+   */
+  get contentProviderId(): string | undefined {
+    return this._contentProviderId;
+  }
+  set contentProviderId(value: string | undefined) {
+    if (this._contentProviderId && value !== this._contentProviderId) {
+      throw Error(
+        `Cannot change content provider on factory with an existing provider: ${this._contentProviderId}`
+      );
+    }
+    this._contentProviderId = value;
+  }
+
+  /**
    * Create a widget for a context.
    */
   protected abstract createNewWidget(
@@ -502,6 +512,7 @@ export abstract class ABCWidgetFactory<
     return [];
   }
 
+  private _contentProviderId?: string;
   private _toolbarFactory:
     | ((
         widget: T
@@ -536,9 +547,9 @@ const DIRTY_CLASS = 'jp-mod-dirty';
  * A document widget implementation.
  */
 export class DocumentWidget<
-    T extends Widget = Widget,
-    U extends DocumentRegistry.IModel = DocumentRegistry.IModel
-  >
+  T extends Widget = Widget,
+  U extends DocumentRegistry.IModel = DocumentRegistry.IModel
+>
   extends MainAreaWidget<T>
   implements IDocumentWidget<T, U>
 {
@@ -557,6 +568,7 @@ export class DocumentWidget<
     this.context.model.stateChanged.connect(this._onModelStateChanged, this);
     void this.context.ready.then(() => {
       this._handleDirtyState();
+      this._handleReadOnlyState();
     });
 
     // listen for changes to the title object
@@ -574,7 +586,7 @@ export class DocumentWidget<
    * Handle a title change.
    */
   private async _onTitleChanged(_sender: Title<this>) {
-    const validNameExp = /[\/\\:]/;
+    const validNameExp = /[/\\:]/;
     const name = this.title.label;
     // Use localPath to avoid the drive name
     const filename =
@@ -602,9 +614,11 @@ export class DocumentWidget<
     sender: DocumentRegistry.IContext<U>,
     path: string
   ): void {
-    this.title.label = PathExt.basename(sender.localPath);
-    // The document is not untitled any more.
-    this.isUntitled = false;
+    const newName = PathExt.basename(sender.localPath);
+    if (newName !== this.title.label) {
+      this.isUntitled = false;
+    }
+    this.title.label = newName;
   }
 
   /**
@@ -617,34 +631,35 @@ export class DocumentWidget<
     if (args.name === 'dirty') {
       this._handleDirtyState();
     }
-    if (!this.context.model.dirty) {
-      if (!this.context.model.collaborative) {
-        if (!this.context.contentsModel?.writable) {
-          const readOnlyIndicator = createReadonlyLabel(this);
-          let roi = this.toolbar.insertBefore(
-            'kernelName',
-            'read-only-indicator',
-            readOnlyIndicator
-          );
-          if (!roi) {
-            this.toolbar.addItem('read-only-indicator', readOnlyIndicator);
-          }
-        }
-      }
-    }
   }
 
   /**
    * Handle the dirty state of the context model.
    */
   private _handleDirtyState(): void {
-    if (
-      this.context.model.dirty &&
-      !this.title.className.includes(DIRTY_CLASS)
-    ) {
-      this.title.className += ` ${DIRTY_CLASS}`;
+    if (this.context.model.dirty) {
+      if (!this.title.className.includes(DIRTY_CLASS)) {
+        this.title.className += ` ${DIRTY_CLASS}`;
+      }
     } else {
       this.title.className = this.title.className.replace(DIRTY_CLASS, '');
+    }
+  }
+
+  /**
+   * Handle the read-only state of the context model.
+   */
+  private _handleReadOnlyState(): void {
+    if (this.context.contentsModel?.writable === false) {
+      const readOnlyIndicator = createReadonlyLabel(this);
+      let roi = this.toolbar.insertBefore(
+        'kernelName',
+        'read-only-indicator',
+        readOnlyIndicator
+      );
+      if (!roi) {
+        this.toolbar.addItem('read-only-indicator', readOnlyIndicator);
+      }
     }
   }
 

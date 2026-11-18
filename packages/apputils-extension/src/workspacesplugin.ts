@@ -1,21 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  IRouter,
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
-} from '@jupyterlab/application';
+import type { JupyterFrontEndPlugin } from '@jupyterlab/application';
+import { IRouter, JupyterFrontEnd } from '@jupyterlab/application';
 import { URLExt } from '@jupyterlab/coreutils';
-import {
-  ABCWidgetFactory,
+import type {
   DocumentRegistry,
-  DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-import { Workspace, WorkspaceManager } from '@jupyterlab/services';
+import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
+import type { Workspace, WorkspaceManager } from '@jupyterlab/services';
 import { IStateDB } from '@jupyterlab/statedb';
-import { IWorkspaceCommands } from '@jupyterlab/workspaces';
+import { IWorkspaceCommands, IWorkspacesModel } from '@jupyterlab/workspaces';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 
@@ -32,18 +28,20 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
   description: 'Add workspace file type.',
   autoStart: true,
   requires: [IStateDB, ITranslator, JupyterFrontEnd.IPaths],
-  optional: [IRouter, IWorkspaceCommands],
+  optional: [IRouter, IWorkspaceCommands, IWorkspacesModel],
   activate: (
     app: JupyterFrontEnd,
     state: IStateDB,
     translator: ITranslator,
     paths: JupyterFrontEnd.IPaths,
     router: IRouter | null,
-    workspaceCommands: IWorkspaceCommands | null
+    workspaceCommands: IWorkspaceCommands | null,
+    workspacesModel: IWorkspacesModel | null
   ): void => {
     // The workspace factory creates dummy widgets to load a new workspace.
     const factory = new Private.WorkspaceFactory({
       workspaces: app.serviceManager.workspaces,
+      workspacesModel,
       state,
       translator,
       open: async (id: string) => {
@@ -99,6 +97,7 @@ namespace Private {
       });
       this._state = options.state;
       this._workspaces = options.workspaces;
+      this._workspacesModel = options.workspacesModel ?? null;
       this._open = options.open;
     }
 
@@ -120,6 +119,9 @@ namespace Private {
         // Save the file contents as a workspace.
         await this._workspaces.save(id, workspace);
 
+        // Refresh the model so workspace-ui:open finds the new workspace ID.
+        await this._workspacesModel?.refresh();
+
         // Save last save location for the save command.
         await this._state.save(LAST_SAVE_ID, path);
 
@@ -132,6 +134,7 @@ namespace Private {
     private _open: (id: string) => Promise<void>;
     private _state: IStateDB;
     private _workspaces: WorkspaceManager;
+    private _workspacesModel: IWorkspacesModel | null;
   }
 
   /**
@@ -145,6 +148,7 @@ namespace Private {
       state: IStateDB;
       translator: ITranslator;
       workspaces: WorkspaceManager;
+      workspacesModel?: IWorkspacesModel | null;
       open: (id: string) => Promise<void>;
     }
   }

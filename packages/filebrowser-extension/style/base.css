@@ -11,3 +11,21 @@
   padding: 0;
   flex: 0 0 auto;
 }
+
+.jp-mod-refreshing
+  .jp-ToolbarButtonComponent[data-command='filebrowser:refresh']
+  > svg {
+  animation: jp-refresh-spin 1s linear infinite;
+  transform-origin: 50% 50%;
+  display: block;
+}
+
+@keyframes jp-refresh-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -6,7 +6,7 @@
 import { PromiseDelegate } from '@lumino/coreutils';
 import { StateDB } from '@jupyterlab/statedb';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
-import { ServiceManager } from '@jupyterlab/services';
+import type { ServiceManager } from '@jupyterlab/services';
 import { RecentsManager } from '../src';
 import { PageConfig } from '@jupyterlab/coreutils';
 

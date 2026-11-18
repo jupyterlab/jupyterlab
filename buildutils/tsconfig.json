@@ -3,8 +3,9 @@
   "compilerOptions": {
     "outDir": "lib",
     "rootDir": "src",
-    "module": "commonjs",
-    "moduleResolution": "node16"
+    "module": "Node16",
+    "moduleResolution": "node16",
+    "verbatimModuleSyntax": false
   },
   "include": ["src/*"],
   "references": []

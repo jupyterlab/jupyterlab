@@ -7,12 +7,20 @@ import glob
 import json
 import os
 import subprocess
+from collections.abc import Sequence
 
 from hatch_jupyter_builder import npm_builder
 from packaging.version import Version
 
+NpmBuilderValue = str | bool | Sequence[str] | None
 
-def builder(target_name, version, *args, **kwargs):
+
+def builder(
+    target_name: str,
+    version: str,
+    *args: NpmBuilderValue,
+    **kwargs: NpmBuilderValue,
+):
     # Allow building from sdist without node.
     if target_name == "wheel" and not os.path.exists("dev_mode"):
         return

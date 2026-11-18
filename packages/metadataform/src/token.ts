@@ -5,16 +5,20 @@
  * @module metadataform
  */
 
-import { CellType } from '@jupyterlab/nbformat';
-import { NotebookTools } from '@jupyterlab/notebook';
-import { BaseSettings, ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator } from '@jupyterlab/translation';
-import {
+import type { CellType } from '@jupyterlab/nbformat';
+import type { NotebookTools } from '@jupyterlab/notebook';
+import type {
+  BaseSettings,
+  ISettingRegistry
+} from '@jupyterlab/settingregistry';
+import type { ITranslator } from '@jupyterlab/translation';
+import type {
   PartialJSONObject,
-  ReadonlyJSONObject,
-  Token
+  PartialJSONValue,
+  ReadonlyJSONObject
 } from '@lumino/coreutils';
-import { MetadataFormWidget } from './metadataform';
+import { Token } from '@lumino/coreutils';
+import type { MetadataFormWidget } from './metadataform';
 
 export namespace MetadataForm {
   /**
@@ -46,7 +50,7 @@ export namespace MetadataForm {
     /**
      * The default value for this metadata.
      */
-    default?: any;
+    default?: PartialJSONValue;
 
     /**
      * Whether to avoid writing default value in metadata.
@@ -65,7 +69,7 @@ export namespace MetadataForm {
    * RJSF ui:schema options.
    */
   export interface IUiSchemaOption {
-    [option: string]: any;
+    [option: string]: unknown;
   }
 
   /**
@@ -146,6 +150,12 @@ export namespace MetadataForm {
      * The plugin ID.
      */
     pluginId?: string;
+
+    /**
+     * Whether the form fields should be rendered as disabled, e.g. because
+     * the owning notebook is view-only.
+     */
+    disabled?: boolean;
   }
 
   /**

@@ -8,14 +8,29 @@ $ErrorActionPreference = "stop"
 New-Item -Path $Env:USERPROFILE\.jupyter -ItemType "directory" -Force
 
 # Install and enable the server extension
-pip install -q --upgrade pip --user
+pip install -q --upgrade pip uv
 if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
 
 pip --version
 if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
 
+uv --version
+if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
+
+if (-not (Test-Path Env:OPTIONAL_DEPENDENCIES)) {
+	# undefined - use default dev,test
+	$spec = ".[dev,test]"
+} elseif ([string]::IsNullOrEmpty($Env:OPTIONAL_DEPENDENCIES)) {
+	# defined but empty
+	$spec = "."
+} else {
+	# defined and non-empty
+	$spec = ".[${Env:OPTIONAL_DEPENDENCIES}]"
+}
+# Keep OPTIONAL_DEPENDENCIES handling in sync with scripts/ci_install.sh.
+
 # Show a verbose install if the install fails, for debugging
-pip install -e ".[dev,test]" || pip install -v -e ".[dev,test]"
+uv pip install --system -e "${spec}" || uv pip install --verbose --system -e "${spec}"
 if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
 
 # next two lines equivalent to deprecated `yarn versions` cmd from yarn@1.x

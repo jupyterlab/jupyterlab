@@ -1,14 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
 import { UseSignal } from '@jupyterlab/ui-components';
 
 import React from 'react';
 
-import { IDebugger } from '../../tokens';
+import type { IDebugger } from '../../tokens';
 
 import { Search } from '@jupyter/react-components';
-import { TranslationBundle } from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
 
 /**
  * The class name added to the filebrowser crumbs node.
@@ -23,18 +22,33 @@ export interface IFilterBoxProps {
 }
 
 const FilterBox = (props: IFilterBoxProps) => {
-  const onFilterChange = (e: any) => {
-    const filter = (e.target as HTMLInputElement).value;
-    props.model.filter = filter;
+  const onFilterChange = (event: CustomEvent<unknown>) => {
+    const target = event.target;
+    if (!hasStringValue(target)) {
+      console.error(
+        'Search input event target does not provide a string value.'
+      );
+      return;
+    }
+    props.model.filter = target.value;
   };
   return (
     <Search
-      onChange={onFilterChange}
-      placeholder={props.trans.__('Filter the kernel sources')}
+      onInput={onFilterChange}
+      placeholder={props.trans.__('Filter sources')}
       value={props.model.filter}
+      className="jp-Debugger-KernelSources-Filter"
     />
   );
 };
+
+function hasStringValue(
+  target: EventTarget | null
+): target is EventTarget & { value: string } {
+  return (
+    target !== null && 'value' in target && typeof target.value === 'string'
+  );
+}
 
 /**
  * A widget which hosts a input textbox to filter on file names.

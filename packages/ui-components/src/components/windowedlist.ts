@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /*
  * This code is inspired by
@@ -10,14 +11,16 @@
  * - https://github.com/WICG/virtual-scroller/
  * Licensed by Contributors under the [W3C Software and Document License](http://www.w3.org/Consortium/Legal/2015/copyright-software-and-document)
  */
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import { IObservableList } from '@jupyterlab/observables';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type { IObservableList } from '@jupyterlab/observables';
 import { ArrayExt } from '@lumino/algorithm';
 import { PromiseDelegate } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { IDisposable } from '@lumino/disposable';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Throttler } from '@lumino/polling';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 
 /**
@@ -26,7 +29,26 @@ import { PanelLayout, Widget } from '@lumino/widgets';
  *
  * The time is given in milliseconds.
  */
-const MAXIMUM_TIME_REMAINING = 100;
+const MAXIMUM_TIME_FOR_SCROLLBACK = 3000;
+
+/**
+ * How long should we wait for programmatic scroll resolution?
+ * When scrolling to a not-yet-rendered item in defer/content-visibility mode,
+ * MAXIMUM_TIME_WAITING_FOR_ITEM will take precedence over this value.
+ *
+ * The time is given in milliseconds.
+ */
+const PROGRAMMATIC_SCROLL_TIMEOUT = 3000;
+
+/**
+ * For how long after a scroll request should we wait for the item to show up
+ * in modes which implement deferred rendering?
+ * When scrolling to a not-yet-rendered item in defer/content-visibility mode,
+ * this takes precedence over the PROGRAMMATIC_SCROLL_TIMEOUT value.
+ *
+ * The time is given in milliseconds.
+ */
+const MAXIMUM_TIME_WAITING_FOR_ITEM = 10000;
 
 /*
  * Feature detection
@@ -449,9 +471,18 @@ export abstract class WindowedListModel implements WindowedList.IModel {
    *
    * It returns ``null`` if the range does not need to be updated.
    *
+   * @param options - Control how the range is computed.
+   *   - `virtual`: If `true`, return a virtual range without updating
+   *     the current window.
+   *     If `false` or omitted, update and return the actual window range.
    * @returns The current items range to display
    */
-  getRangeToRender(): WindowedList.WindowIndex | null {
+  getRangeToRender(options?: {
+    virtual?: boolean;
+  }): WindowedList.WindowIndex | null {
+    if (options?.virtual) {
+      return this._computeVirtualRange();
+    }
     let newWindowIndex: [number, number, number, number] = [
       0,
       Math.max(this.widgetCount - 1, -1),
@@ -461,7 +492,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
 
     const previousLastMeasuredIndex = this._measuredAllUntilIndex;
     if (this.windowingActive) {
-      newWindowIndex = this._getRangeToRender();
+      newWindowIndex = this._computeVirtualRange();
     }
     const [startIndex, stopIndex] = newWindowIndex;
 
@@ -474,7 +505,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       return newWindowIndex;
     }
 
-    return null;
+    return newWindowIndex ?? null;
   }
 
   /**
@@ -639,6 +670,10 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       case 'set':
         this.resetAfterIndex(changes.newIndex - 1);
         break;
+      case 'clear':
+        this._widgetSizers.length = 0;
+        this.resetAfterIndex(-1);
+        break;
     }
   }
 
@@ -651,20 +686,33 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       }
 
       for (let i = this._measuredAllUntilIndex + 1; i <= index; i++) {
-        let size = this._widgetSizers[i]?.measured
-          ? this._widgetSizers[i].size
-          : this.estimateWidgetSize(i);
+        let size: number;
+        let measured: boolean;
 
-        this._widgetSizers[i] = {
-          offset,
-          size,
-          measured: this._widgetSizers[i]?.measured
-        };
+        if (this._widgetSizers[i]?.measured) {
+          size = this._widgetSizers[i].size;
+          measured = true;
+        } else {
+          const widget = this.widgetRenderer(i);
+          if (widget?.node && widget.node.isConnected) {
+            size = widget.node.getBoundingClientRect().height;
+            measured = true;
+          } else {
+            size = this.estimateWidgetSize(i);
+            measured = false;
+          }
+        }
 
+        this._widgetSizers[i] = { offset, size, measured };
         offset += size;
       }
-
-      this._measuredAllUntilIndex = index;
+      // Because the loop above updates estimated sizes,
+      // we need to fix (heal) offsets of the remaining items.
+      for (let i = index + 1; i < this._widgetSizers.length; i++) {
+        const sizer = this._widgetSizers[i];
+        const previous = this._widgetSizers[i - 1];
+        sizer.offset = previous.offset + previous.size;
+      }
     }
 
     for (let i = 0; i <= this._measuredAllUntilIndex; i++) {
@@ -754,7 +802,10 @@ export abstract class WindowedListModel implements WindowedList.IModel {
     );
   }
 
-  private _getRangeToRender(): WindowedList.WindowIndex {
+  /**
+   * Compute the virtual range of items to render.
+   */
+  private _computeVirtualRange(): WindowedList.WindowIndex {
     const widgetCount = this.widgetCount;
 
     if (widgetCount === 0) {
@@ -777,7 +828,6 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       stopIndex
     ];
   }
-
   private _getStartIndexForOffset(offset: number): number {
     return this._findNearestItem(offset);
   }
@@ -788,6 +838,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   ): number {
     const size = this._height;
     const itemMetadata = this._getItemMetadata(startIndex);
+
     const maxOffset = scrollOffset + size;
 
     let offset = itemMetadata.offset + itemMetadata.size;
@@ -880,6 +931,7 @@ export class WindowedList<
 
     const viewport = innerElement.appendChild(renderer.createViewport());
     viewport.classList.add('jp-WindowedPanel-viewport');
+    viewport.classList.add('jp-zoom-target');
 
     super({ node });
     super.layout = options.layout ?? new WindowedLayout();
@@ -984,9 +1036,14 @@ export class WindowedList<
   handleEvent(event: Event): void {
     switch (event.type) {
       case 'pointerdown':
-        event.preventDefault();
-        event.stopPropagation();
         this._evtPointerDown(event as PointerEvent);
+        // Stop propagation of this event; a `mousedown` event will still
+        // be automatically dispatched and handled by the parent notebook
+        // (which will close any open context menu, etc.)
+        event.stopPropagation();
+        break;
+      case 'scrollend':
+        this._onScrollEnd();
         break;
       case 'scroll':
         this.onScroll(event);
@@ -1002,8 +1059,12 @@ export class WindowedList<
    * @deprecated since v4 This is an internal helper. Prefer calling `scrollToItem`.
    */
   scrollTo(scrollOffset: number): void {
+    this._renderScrollbar();
+
     if (!this.viewModel.windowingActive) {
       this._outerElement.scrollTo({ top: scrollOffset });
+      // Scrolling done with browser-native code above
+      this._markProgrammaticScrollingDone();
       return;
     }
 
@@ -1013,7 +1074,11 @@ export class WindowedList<
       this.viewModel.scrollOffset = scrollOffset;
       this._scrollUpdateWasRequested = true;
 
+      // Scroll will happen in udpate() routine
       this.update();
+    } else {
+      // No further scrolling will happen
+      this._markProgrammaticScrollingDone();
     }
   }
 
@@ -1046,6 +1111,7 @@ export class WindowedList<
     margin: number = 0.25,
     alignPreference?: WindowedList.BaseScrollToAlignment
   ): Promise<void> {
+    let delegate: PromiseDelegate<void>;
     if (
       !this._isScrolling ||
       this._scrollToItem === null ||
@@ -1056,46 +1122,145 @@ export class WindowedList<
         this._isScrolling.reject('Scrolling to a new item is requested.');
       }
 
-      this._isScrolling = new PromiseDelegate<void>();
+      delegate = new PromiseDelegate<void>();
+      this._isScrolling = delegate;
       // Catch the internal reject, as otherwise this will
       // result in an unhandled promise rejection in test.
-      this._isScrolling.promise.catch(console.debug);
+      delegate.promise.catch(console.debug);
+    } else {
+      delegate = this._isScrolling;
     }
 
     this._scrollToItem = [index, align, margin, alignPreference];
 
     this._resetScrollToItem();
 
-    let precomputed = undefined;
     if (!this.viewModel.windowingActive) {
-      const item = this._innerElement.querySelector(
-        `[data-windowed-list-index="${index}"]`
-      );
-      if (!item || !(item instanceof HTMLElement)) {
-        // Note: this can happen when scroll is requested when a cell is getting added
-        console.debug(`Element with index ${index} not found`);
-        return Promise.resolve();
+      // The requested item may not be attached to the DOM yet.
+      // Wait for it to be inserted before computing its position.
+      // While we wait, the scroll has not happened yet, so the
+      // `_resetScrollToItem` safety timer must not resolve `delegate` (it
+      // would mark the programmatic scroll done before it actually occurred).
+      // We track the number of outstanding waits rather than a boolean so this
+      // stays correct when several scroll requests overlap: each request that
+      // starts waiting is balanced by exactly one decrement in `finally`, and
+      // the timer only resolves once no wait is left.
+      const count = this.viewModel.widgetCount;
+      if (count <= 0) {
+        this._markProgrammaticScrollingDone();
+        return delegate.promise;
       }
-      precomputed = {
-        totalSize: this._outerElement.scrollHeight,
-        itemMetadata: {
-          offset: item.offsetTop,
-          size: item.clientHeight
-        },
-        currentOffset: this._outerElement.scrollTop
-      };
+      const clampedIndex = Math.max(0, Math.min(index, count - 1));
+      this._pendingItemWaits++;
+      void this._waitForItem(clampedIndex)
+        .then(item => {
+          // Bail if a newer scroll request superseded this one while waiting;
+          // the surviving request owns the scroll. (`_pendingItemWaits` keeps
+          // the safety timer from resolving `delegate` until every wait -
+          // including this superseded one - has settled).
+          if (this._isScrolling !== delegate) {
+            return;
+          }
+          if (!item) {
+            // Note: this can happen if the item never gets rendered.
+            console.debug(`Element with index ${clampedIndex} not found`);
+            this._markProgrammaticScrollingDone();
+            return;
+          }
+          this.scrollTo(
+            this.viewModel.getOffsetForIndexAndAlignment(
+              clampedIndex,
+              align,
+              margin,
+              {
+                totalSize: this._outerElement.scrollHeight,
+                itemMetadata: {
+                  offset: item.offsetTop,
+                  size: item.clientHeight
+                },
+                currentOffset: this._outerElement.scrollTop
+              },
+              alignPreference
+            )
+          );
+        })
+        .catch(error => {
+          // If computing the offset or scrolling threw, resolve the delegate
+          // so callers awaiting `scrollToItem` are not left hung (the safety
+          // timer is no longer guaranteed to be pending), and surface the
+          // error for debugging.
+          console.warn(error);
+          this._markProgrammaticScrollingDone();
+        })
+        .finally(() => {
+          // Balances the increment above. Runs exactly once regardless of
+          // whether the wait scrolled, bailed, or threw.
+          this._pendingItemWaits--;
+        });
+
+      return delegate.promise;
     }
     this.scrollTo(
       this.viewModel.getOffsetForIndexAndAlignment(
         Math.max(0, Math.min(index, this.viewModel.widgetCount - 1)),
         align,
         margin,
-        precomputed,
+        undefined,
         alignPreference
       )
     );
 
-    return this._isScrolling.promise;
+    return delegate.promise;
+  }
+
+  /**
+   * Wait for the item with the given index to be attached to the DOM.
+   * This resolves with the matching element once it
+   * is inserted, or with `null` if it does not appear
+   * within the timeout.
+   *
+   * @param index Item index to wait for
+   */
+  private _waitForItem(
+    index: number,
+    timeout = MAXIMUM_TIME_WAITING_FOR_ITEM
+  ): Promise<HTMLElement | null> {
+    const selector = `[data-windowed-list-index="${index}"]`;
+    const existing = this._innerElement.querySelector(selector);
+    if (existing instanceof HTMLElement) {
+      return Promise.resolve(existing);
+    }
+    return new Promise<HTMLElement | null>(resolve => {
+      let timer: number | null = null;
+      const observer = new MutationObserver(() => {
+        const item = this._innerElement.querySelector(selector);
+        if (item instanceof HTMLElement) {
+          observer.disconnect();
+          if (timer !== null) {
+            window.clearTimeout(timer);
+          }
+          resolve(item);
+        }
+      });
+      observer.observe(this._innerElement, {
+        childList: true,
+        subtree: true
+      });
+      // Safety net to avoid leaking the observer if the item never gets
+      // rendered
+      timer = window.setTimeout(() => {
+        observer.disconnect();
+        if (this.isDisposed || !this.isAttached) {
+          resolve(null);
+          return;
+        }
+        const item = this._innerElement.querySelector(selector);
+        console.warn(
+          `Item with index ${index} did not appear within ${timeout} ms`
+        );
+        resolve(item instanceof HTMLElement ? item : null);
+      }, timeout);
+    });
   }
 
   /**
@@ -1115,6 +1280,7 @@ export class WindowedList<
     this._viewportPaddingTop = this.viewModel.paddingTop;
     this._viewportPaddingBottom = parseFloat(viewportStyle.paddingBottom);
     this._scrollbarElement.addEventListener('pointerdown', this);
+    this._outerElement.addEventListener('scrollend', this);
   }
 
   /**
@@ -1123,6 +1289,7 @@ export class WindowedList<
   protected onBeforeDetach(msg: Message): void {
     this._removeListeners();
     this._scrollbarElement.removeEventListener('pointerdown', this);
+    this._outerElement.removeEventListener('scrollend', this);
     super.onBeforeDetach(msg);
   }
 
@@ -1134,6 +1301,24 @@ export class WindowedList<
   protected onScroll(event: Event): void {
     const { clientHeight, scrollHeight, scrollTop } =
       event.currentTarget as HTMLDivElement;
+
+    // A scroll that the list did not request, such as one with the mouse
+    // wheel, stops the list from scrolling back to the last requested
+    // item. The type check excludes the synthetic onScroll call made
+    // when windowing is toggled, which carries no event type.
+    // When the list requests an offset past the end (such as the last
+    // item plus a margin), the browser scrolls only to the end, so the
+    // comparison limits the offset to the end.
+    if (
+      event.type === 'scroll' &&
+      !this._scrollUpdateWasRequested &&
+      Math.abs(
+        Math.min(this.viewModel.scrollOffset, scrollHeight - clientHeight) -
+          scrollTop
+      ) > 1
+    ) {
+      this._scrollToItem = null;
+    }
 
     // TBC Firefox is emitting two events one with 1px diff then the _real_ scroll
     if (
@@ -1152,9 +1337,26 @@ export class WindowedList<
         Math.min(scrollTop, scrollHeight - clientHeight)
       );
       this.viewModel.scrollOffset = scrollOffset;
-      this._scrollUpdateWasRequested = false;
+      this._renderScrollbar();
 
-      this.update();
+      if (this.viewModel.windowingActive) {
+        this._scrollUpdateWasRequested = false;
+
+        if (this._viewport.dataset.isScrolling != 'true') {
+          this._viewport.dataset.isScrolling = 'true';
+        }
+
+        if (this._timerToClearScrollStatus !== null) {
+          window.clearTimeout(this._timerToClearScrollStatus);
+        }
+        // TODO: remove once `scrollend` event is supported by Safari
+        this._timerToClearScrollStatus = window.setTimeout(() => {
+          this._onScrollEnd();
+        }, 750);
+        this.update();
+        // }
+      }
+
       // }
     }
   }
@@ -1280,48 +1482,55 @@ export class WindowedList<
    * Add listeners for viewport, contents and the virtual scrollbar.
    */
   private _addListeners() {
-    if (this.viewModel.windowingActive) {
-      if (!this._itemsResizeObserver) {
-        this._itemsResizeObserver = new ResizeObserver(
-          this._onItemResize.bind(this)
-        );
-      }
-      for (const widget of this.layout.widgets) {
-        this._itemsResizeObserver.observe(widget.node);
-        widget.disposed.connect(
-          () => this._itemsResizeObserver?.unobserve(widget.node)
-        );
-      }
-      this._outerElement.addEventListener('scroll', this, passiveIfSupported);
-
+    // Scrollbar resize
+    if (!this._scrollbarResizeObserver) {
       this._scrollbarResizeObserver = new ResizeObserver(
         this._adjustDimensionsForScrollbar.bind(this)
       );
       this._scrollbarResizeObserver.observe(this._outerElement);
       this._scrollbarResizeObserver.observe(this._scrollbarElement);
-    } else {
-      if (!this._areaResizeObserver) {
-        this._areaResizeObserver = new ResizeObserver(
-          this._onAreaResize.bind(this)
-        );
-        this._areaResizeObserver.observe(this._innerElement);
-      }
     }
+
+    // Observe all items for size changes, regardless of windowing mode
+    if (!this._itemsResizeObserver) {
+      this._itemsResizeObserver = new ResizeObserver(
+        this._onItemResize.bind(this)
+      );
+    }
+    for (const widget of this.layout.widgets) {
+      this._itemsResizeObserver.observe(widget.node);
+      widget.disposed.connect(() =>
+        this._itemsResizeObserver?.unobserve(widget.node)
+      );
+    }
+    if (!this._areaResizeObserver && this.viewModel.windowingActive) {
+      // This is taken care by browser scroll anchoring outside of full windowing mode.
+      this._areaResizeObserver = new ResizeObserver(
+        this._onAreaResize.bind(this)
+      );
+      this._areaResizeObserver.observe(this._innerElement);
+    }
+    this._outerElement.addEventListener('scroll', this, passiveIfSupported);
   }
 
   /**
    * Turn off windowing related styles in the viewport.
    */
   private _applyNoWindowingStyles() {
+    this._outerElement.style.removeProperty('overflow-anchor');
     this._viewport.style.position = 'relative';
+    this._viewport.style.contain = '';
     this._viewport.style.top = '0px';
+    this._viewport.style.minHeight = '';
     this._innerElement.style.height = '';
   }
   /**
    * Turn on windowing related styles in the viewport.
    */
   private _applyWindowingStyles() {
+    this._outerElement.style.setProperty('overflow-anchor', 'none');
     this._viewport.style.position = 'absolute';
+    this._viewport.style.contain = 'layout';
   }
 
   /**
@@ -1348,17 +1557,9 @@ export class WindowedList<
     const newWindowIndex = this.viewModel.getRangeToRender();
 
     if (newWindowIndex !== null) {
-      const [startIndex, stopIndex, firstVisibleIndex, lastVisibleIndex] =
-        newWindowIndex;
+      const [startIndex, stopIndex] = newWindowIndex;
 
-      if (this.scrollbar) {
-        const scrollbarItems = this._renderScrollbar();
-        const first = scrollbarItems[firstVisibleIndex];
-        const last = scrollbarItems[lastVisibleIndex];
-        this._viewportIndicator.style.top = first.offsetTop - 1 + 'px';
-        this._viewportIndicator.style.height =
-          last.offsetTop - first.offsetTop + last.offsetHeight + 'px';
-      }
+      this._renderScrollbar();
 
       const toAdd: Widget[] = [];
       if (stopIndex >= 0) {
@@ -1383,8 +1584,8 @@ export class WindowedList<
         const item = toAdd[index];
         if (this._itemsResizeObserver && !this.layout.widgets.includes(item)) {
           this._itemsResizeObserver.observe(item.node);
-          item.disposed.connect(
-            () => this._itemsResizeObserver?.unobserve(item.node)
+          item.disposed.connect(() =>
+            this._itemsResizeObserver?.unobserve(item.node)
           );
         }
 
@@ -1399,12 +1600,9 @@ export class WindowedList<
           this._updateTotalSize();
 
           // Update position of window container
-          const [top, minHeight] = this.viewModel.getSpan(
-            startIndex,
-            stopIndex
-          );
-          this._viewport.style.top = `${top}px`;
-          this._viewport.style.minHeight = `${minHeight}px`;
+          let [top, _minHeight] = this.viewModel.getSpan(startIndex, stopIndex);
+
+          this._viewport.style.transform = `translateY(${top}px)`;
         } else {
           // Update inner container height
           this._innerElement.style.height = `0px`;
@@ -1418,6 +1616,7 @@ export class WindowedList<
         if (this._scrollUpdateWasRequested) {
           this._outerElement.scrollTop = this.viewModel.scrollOffset;
           this._scrollUpdateWasRequested = false;
+          this._markProgrammaticScrollingDone();
         }
       }
     }
@@ -1494,8 +1693,13 @@ export class WindowedList<
    * On implementation level, this is ensured by scrolling to `this._scrollToItem`
    * which is cleared after a short timeout once the scrolling settles
    * (see `this._resetScrollToItem()`).
+   *
+   * This is taken care by browser scroll anchoring outside of full windowing mode.
    */
   private _scrollBackToItemOnResize() {
+    if (!this.viewModel.windowingActive) {
+      return;
+    }
     if (!this._scrollToItem) {
       return;
     }
@@ -1508,18 +1712,40 @@ export class WindowedList<
    * Clear any outstanding timeout and enqueue scrolling to a new item.
    */
   private _resetScrollToItem(): void {
-    if (this._resetScrollToItemTimeout) {
+    if (this._resetScrollToItemTimeout !== null) {
       clearTimeout(this._resetScrollToItemTimeout);
+    }
+
+    if (this._programmaticScrollTimeout !== null) {
+      clearTimeout(this._programmaticScrollTimeout);
     }
 
     if (this._scrollToItem) {
       this._resetScrollToItemTimeout = window.setTimeout(() => {
         this._scrollToItem = null;
-        if (this._isScrolling) {
-          this._isScrolling.resolve();
-          this._isScrolling = null;
+      }, MAXIMUM_TIME_FOR_SCROLLBACK);
+    }
+
+    if (this._isScrolling) {
+      this._programmaticScrollTimeout = window.setTimeout(() => {
+        // Do not resolve the programmatic scroll delegate while any scroll is
+        // still waiting for a not-yet-rendered item (non-windowing path): the
+        // scroll has not happened yet and will resolve the delegate itself
+        // once `_waitForItem` settles (see `scrollToItem`).
+        if (this._pendingItemWaits === 0) {
+          this._markProgrammaticScrollingDone();
         }
-      }, MAXIMUM_TIME_REMAINING);
+      }, PROGRAMMATIC_SCROLL_TIMEOUT);
+    }
+  }
+
+  /**
+   * Mark the current promise for programmatic scrolling as completed.
+   */
+  private _markProgrammaticScrollingDone() {
+    if (this._isScrolling) {
+      this._isScrolling.resolve();
+      this._isScrolling = null;
     }
   }
 
@@ -1527,10 +1753,15 @@ export class WindowedList<
    * Render virtual scrollbar.
    */
   private _renderScrollbar(): HTMLElement[] {
+    if (!this.scrollbar) {
+      return [];
+    }
+
     const { node, renderer, viewModel } = this;
     const content = node.querySelector('.jp-WindowedPanel-scrollbar-content')!;
 
     const elements: HTMLElement[] = [];
+    const visitedKeys = new Set<string>();
 
     const getElement = (
       item: ReturnType<WindowedList.IRenderer['createScrollbarItem']>,
@@ -1538,24 +1769,31 @@ export class WindowedList<
     ) => {
       if (item instanceof HTMLElement) {
         return item;
-      } else {
-        visitedKeys.add(item.key);
-        const props = { index };
-        const cachedItem = this._scrollbarItems[item.key];
-        if (cachedItem && !cachedItem.isDisposed) {
+      }
+      visitedKeys.add(item.key);
+      const props = { index };
+      const cachedItem = this._scrollbarItems[item.key];
+
+      if (cachedItem && !cachedItem.isDisposed) {
+        try {
           return cachedItem.render(props);
-        } else {
-          this._scrollbarItems[item.key] = item;
-          const element = item.render(props);
-          return element;
+        } catch {
+          return document.createElement('div'); // fallback for tests
+        }
+      } else {
+        this._scrollbarItems[item.key] = item;
+        try {
+          return item.render(props);
+        } catch {
+          return document.createElement('div'); // fallback for tests
         }
       }
     };
 
     const list = viewModel.itemsList;
     const count = list?.length ?? viewModel.widgetCount;
-    const visitedKeys = new Set<string>();
-    for (let index = 0; index < count; index += 1) {
+
+    for (let index = 0; index < count; index++) {
       const model = list?.get?.(index);
       const item = renderer.createScrollbarItem(this, index, model);
       const element: HTMLElement = getElement(item, index);
@@ -1581,6 +1819,18 @@ export class WindowedList<
       content.replaceChildren(...elements);
     }
 
+    if (this.scrollbar) {
+      const newWindowIndex = this.viewModel.getRangeToRender({ virtual: true });
+      if (newWindowIndex !== null) {
+        const [firstVisibleIndex, lastVisibleIndex] = newWindowIndex;
+
+        const first = elements[firstVisibleIndex];
+        const last = elements[lastVisibleIndex];
+        this._viewportIndicator.style.top = first.offsetTop - 1 + 'px';
+        this._viewportIndicator.style.height =
+          last.offsetTop - first.offsetTop + last.offsetHeight + 'px';
+      }
+    }
     return elements;
   }
   private _scrollbarItems: Record<
@@ -1606,10 +1856,32 @@ export class WindowedList<
   }
 
   /**
+   * Handle `scrollend` events on the scroller.
+   */
+  private _onScrollEnd() {
+    if (this._timerToClearScrollStatus !== null) {
+      window.clearTimeout(this._timerToClearScrollStatus);
+    }
+    this._viewport.dataset.isScrolling = 'false';
+    if (this._requiresTotalSizeUpdate) {
+      this._updateTotalSize();
+      // The scroll height changes only after deferred size updates are applied.
+      // Re-run scrollback using the final post-scroll geometry.
+      this._scrollBackToItemOnResize();
+    }
+    this._requiresTotalSizeUpdate = false;
+  }
+
+  /**
    * Update the total size
    */
   private _updateTotalSize(): void {
     if (this.viewModel.windowingActive) {
+      if (this._viewport.dataset.isScrolling == 'true') {
+        // Do not update while scrolling, delay until later
+        this._requiresTotalSizeUpdate = true;
+        return;
+      }
       const estimatedTotalHeight = this.viewModel.getEstimatedTotalSize();
       const heightWithPadding =
         estimatedTotalHeight +
@@ -1626,11 +1898,15 @@ export class WindowedList<
   private _innerElement: HTMLElement;
   private _isParentHidden: boolean;
   private _isScrolling: PromiseDelegate<void> | null;
+  private _pendingItemWaits = 0;
   private _needsUpdate = false;
   private _outerElement: HTMLElement;
   private _resetScrollToItemTimeout: number | null;
+  private _programmaticScrollTimeout: number | null;
+  private _requiresTotalSizeUpdate: boolean = false;
   private _areaResizeObserver: ResizeObserver | null;
   private _itemsResizeObserver: ResizeObserver | null;
+  private _timerToClearScrollStatus: number | null = null;
   private _scrollbarElement: HTMLElement;
   private _scrollbarResizeObserver: ResizeObserver | null;
   private _scrollRepaint: number | null;
@@ -1915,9 +2191,15 @@ export namespace WindowedList {
      *
      * It returns ``null`` if the range does not need to be updated.
      *
+     * @param options - Control how the range is computed.
+     *   - `virtual`: If `true`, return a virtual range without updating
+     *     the current window.
+     *     If `false` or omitted, update and return the actual window range.
      * @returns The current items range to display
      */
-    getRangeToRender(): WindowIndex | null;
+    getRangeToRender(options?: {
+      virtual?: boolean;
+    }): WindowedList.WindowIndex | null;
 
     /**
      * Return the viewport top position and height for range spanning from

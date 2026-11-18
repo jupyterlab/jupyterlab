@@ -1,14 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { CommandLinker } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { ServiceManager } from '@jupyterlab/services';
 import { ContextMenuSvg } from '@jupyterlab/ui-components';
-import { Application, IPlugin } from '@lumino/application';
+import type { IPlugin } from '@lumino/application';
+import { Application } from '@lumino/application';
 import { Token } from '@lumino/coreutils';
-import { ISignal, Signal } from '@lumino/signaling';
-import { FocusTracker, Widget } from '@lumino/widgets';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { FocusTracker, Widget } from '@lumino/widgets';
 
 /**
  * The type for all JupyterFrontEnd application plugins.
@@ -218,8 +221,10 @@ export namespace JupyterFrontEnd {
   /**
    * The options used to initialize a JupyterFrontEnd.
    */
-  export interface IOptions<T extends IShell = IShell, U = any>
-    extends Application.IOptions<T> {
+  export interface IOptions<
+    T extends IShell = IShell,
+    U = any
+  > extends Application.IOptions<T> {
     /**
      * The document registry instance used by the application.
      */
@@ -410,8 +415,15 @@ export namespace JupyterFrontEnd {
     /**
      * The browser and file paths if the tree resolver encountered and handled
      * a tree URL or `null` if not. Empty string paths should be ignored.
+     * `openWith` holds the value of the `open-with` query parameter: a widget
+     * factory name, a file type name or a file extension. Pass it as the
+     * `factory` argument of `filebrowser:open-path`, which resolves it.
      */
-    export type Paths = { browser: string; file: string } | null;
+    export type Paths = {
+      browser: string;
+      file: string;
+      openWith?: string;
+    } | null;
   }
 }
 

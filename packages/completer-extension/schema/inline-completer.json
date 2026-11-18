@@ -71,7 +71,8 @@
         { "const": "none", "title": "None" },
         { "const": "uncover", "title": "Uncover" }
       ],
-      "default": "uncover"
+      "default": "uncover",
+      "tags": ["accessibility"]
     },
     "minLines": {
       "title": "Reserve lines for inline completion",
@@ -99,6 +100,12 @@
       "type": "number",
       "default": 1000,
       "minimum": 0
+    },
+    "ghostSyntaxHighlighting": {
+      "title": "Syntax Highlighting for Ghost Text",
+      "description": "If enabled, ghost text suggestions will use the language's syntax highlighting instead of being a low-opacity gray.",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false,

@@ -23,7 +23,7 @@ export namespace Text {
    * @returns The unicode character offset
    */
   export function jsIndexToCharIndex(jsIdx: number, text: string): number {
-    if (HAS_SURROGATES) {
+    if (!HAS_SURROGATES) {
       // not using surrogates, nothing to do
       return jsIdx;
     }
@@ -52,7 +52,7 @@ export namespace Text {
    * @returns The js-native index
    */
   export function charIndexToJsIndex(charIdx: number, text: string): number {
-    if (HAS_SURROGATES) {
+    if (!HAS_SURROGATES) {
       // not using surrogates, nothing to do
       return charIdx;
     }
@@ -83,6 +83,7 @@ export namespace Text {
    * @returns the camel case version of the input string.
    */
   export function camelCase(str: string, upper: boolean = false): string {
+    // eslint-disable-next-line regexp/strict
     return str.replace(/^(\w)|[\s-_:]+(\w)/g, function (match, p1, p2) {
       if (p2) {
         return p2.toUpperCase();

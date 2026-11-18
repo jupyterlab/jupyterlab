@@ -1,29 +1,35 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterFrontEnd } from '@jupyterlab/application';
+import type { JupyterFrontEnd } from '@jupyterlab/application';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
-import { Kernel, KernelAPI, KernelSpec, Session } from '@jupyterlab/services';
-import { ITranslator } from '@jupyterlab/translation';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type {
+  IRunningSessionManagers,
+  IRunningSessions
+} from '@jupyterlab/running';
+import type { Kernel, KernelSpec, Session } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
+import type {
+  IDisposableMenuItem,
+  LabIcon,
+  RankedMenu
+} from '@jupyterlab/ui-components';
 import {
   cleaningIcon,
   closeIcon,
   CommandToolbarButton,
   consoleIcon,
-  IDisposableMenuItem,
   jupyterIcon,
   kernelIcon,
-  LabIcon,
-  notebookIcon,
-  RankedMenu
+  notebookIcon
 } from '@jupyterlab/ui-components';
-import { CommandRegistry } from '@lumino/commands';
+import type { CommandRegistry } from '@lumino/commands';
 import { Throttler } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { CommandIDs } from '.';
 
 const KERNEL_ITEM_CLASS = 'jp-mod-kernel';
@@ -42,10 +48,14 @@ export async function addKernelRunningSessionManager(
   const { commands, contextMenu, serviceManager } = app;
   const { kernels, kernelspecs, sessions } = serviceManager;
   const { runningChanged, RunningKernel } = Private;
+  // This function is called from a plugin `activate`, so both throttlers live
+  // for the application session; there is no owner to hand them to.
+  // eslint-disable-next-line jupyter/require-disposable-ownership
   const throttler = new Throttler(() => runningChanged.emit(undefined), 100);
   const trans = translator.load('jupyterlab');
   const shutdownUnusedLabel = trans.__('Shut Down Unused');
   let shutdownUnusedEnabled = false;
+  // eslint-disable-next-line jupyter/require-disposable-ownership
   const shutdownUnusedThrottler = new Throttler(
     checkShutdownUnusedEnabled,
     10000
@@ -57,9 +67,6 @@ export async function addKernelRunningSessionManager(
     void shutdownUnusedThrottler.invoke();
   });
   sessions.runningChanged.connect(() => void throttler.invoke());
-
-  // Wait until the relevant services are ready.
-  await Promise.all([kernels.ready, kernelspecs.ready, sessions.ready]);
 
   function getUnusedKernels() {
     // Identifies unused kernels
@@ -110,7 +117,7 @@ export async function addKernelRunningSessionManager(
 
       if (confirmed.button.accept) {
         await Promise.allSettled(
-          unusedKernels.map(kernel => KernelAPI.shutdownKernel(kernel.id))
+          unusedKernels.map(kernel => kernels.shutdown(kernel.id))
         );
         await Promise.all([
           kernels.refreshRunning(),
@@ -118,11 +125,25 @@ export async function addKernelRunningSessionManager(
         ]);
       }
     },
-    isEnabled: () => shutdownUnusedEnabled
+    isEnabled: () => shutdownUnusedEnabled,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: trans.__('Whether executed from toolbar')
+          }
+        }
+      }
+    }
   });
 
-  // Add the kernels pane to the running sidebar.
+  // Add the kernels pane to the running sidebar. It is added before the
+  // services are ready, so that the position of the pane does not depend on
+  // the server response time.
   managers.add({
+    id: 'jp-running-kernels',
     name: trans.__('Kernels'),
     supportsMultipleViews: true,
     running: (options: { mode: 'tree' | 'list' }) => {
@@ -192,6 +213,17 @@ export async function addKernelRunningSessionManager(
       if (id) {
         return commands.execute('console:create', { kernelPreference: { id } });
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: trans.__('Kernel ID to create console for')
+          }
+        }
+      }
     }
   });
   commands.addCommand(CommandIDs.kernelNewNotebook, {
@@ -203,6 +235,17 @@ export async function addKernelRunningSessionManager(
       if (id) {
         return commands.execute('notebook:create-new', { kernelId: id });
       }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: trans.__('Kernel ID to create notebook for')
+          }
+        }
+      }
     }
   });
   commands.addCommand(CommandIDs.kernelOpenSession, {
@@ -210,8 +253,8 @@ export async function addKernelRunningSessionManager(
       args.type === 'console'
         ? consoleIcon
         : args.type === 'notebook'
-        ? notebookIcon
-        : undefined,
+          ? notebookIcon
+          : undefined,
     isEnabled: ({ path, type }) => !!type || path !== undefined,
     label: ({ name, path }) =>
       (name as string) ||
@@ -222,6 +265,25 @@ export async function addKernelRunningSessionManager(
       }
       const command = type === 'console' ? 'console:open' : 'docmanager:open';
       return commands.execute(command, { path });
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description: trans.__('Path to the session to open')
+          },
+          type: {
+            type: 'string',
+            description: trans.__('Type of session (console or notebook)')
+          },
+          name: {
+            type: 'string',
+            description: trans.__('Name of the session')
+          }
+        }
+      }
     }
   });
   commands.addCommand(CommandIDs.kernelShutDown, {
@@ -232,6 +294,17 @@ export async function addKernelRunningSessionManager(
       const id = (args.id as string) ?? node?.dataset['context'];
       if (id) {
         return kernels.shutdown(id);
+      }
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: trans.__('Kernel ID to shut down')
+          }
+        }
       }
     }
   });
@@ -274,6 +347,10 @@ export async function addKernelRunningSessionManager(
       }
     }
   });
+
+  // Render the kernels with their specs and sessions once all are loaded.
+  await Promise.all([kernels.ready, kernelspecs.ready, sessions.ready]);
+  runningChanged.emit(undefined);
 }
 
 namespace Private {
@@ -328,7 +405,10 @@ namespace Private {
   type DocumentWidgetWithKernelItem = Omit<
     IRunningSessions.IRunningItem,
     'label'
-  > & { label(): ReactNode; name(): string };
+  > & {
+    label(): ReactNode;
+    name(): string;
+  };
 
   export class RunningKernel implements IRunningSessions.IRunningItem {
     constructor(options: RunningKernel.IOptions) {
@@ -371,8 +451,8 @@ namespace Private {
               type === 'console'
                 ? consoleIcon
                 : type === 'notebook'
-                ? notebookIcon
-                : jupyterIcon,
+                  ? notebookIcon
+                  : jupyterIcon,
             label: () => {
               if (this._mode === 'tree') {
                 return name;

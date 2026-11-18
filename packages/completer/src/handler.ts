@@ -1,14 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  CodeEditor,
-  COMPLETER_ACTIVE_CLASS,
-  COMPLETER_ENABLED_CLASS,
-  COMPLETER_LINE_BEGINNING_CLASS
-} from '@jupyterlab/codeeditor';
-import { Text } from '@jupyterlab/coreutils';
-import {
+import type {
   CellChange,
   FileChange,
   ISharedBaseCell,
@@ -16,22 +9,30 @@ import {
   ISharedText,
   SourceChange
 } from '@jupyter/ydoc';
-import { IDataConnector } from '@jupyterlab/statedb';
-import { LabIcon } from '@jupyterlab/ui-components';
-import { IDisposable } from '@lumino/disposable';
-import { Message, MessageLoop } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
-
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 import {
-  CompletionTriggerKind,
+  COMPLETER_ACTIVE_CLASS,
+  COMPLETER_ENABLED_CLASS,
+  COMPLETER_LINE_BEGINNING_CLASS
+} from '@jupyterlab/codeeditor';
+import type { IDataConnector } from '@jupyterlab/statedb';
+import type { LabIcon } from '@jupyterlab/ui-components';
+import type { IDisposable } from '@lumino/disposable';
+import { Message, MessageLoop } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+
+import type { TransactionSpec } from '@codemirror/state';
+import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import type { InlineCompleter } from './inline';
+import type {
   IInlineCompletionItem,
   IInlineCompletionList,
   IInlineCompletionProviderInfo,
-  InlineCompletionTriggerKind,
   IProviderReconciliator
 } from './tokens';
-import { Completer } from './widget';
-import { InlineCompleter } from './inline';
+import { CompletionTriggerKind, InlineCompletionTriggerKind } from './tokens';
+import type { Completer } from './widget';
 
 /**
  * A completion handler for editors.
@@ -204,11 +205,16 @@ export class CompletionHandler implements IDisposable {
 
     const { start, end, value } = patch;
     const cursorBeforeChange = editor.getOffsetAt(editor.getCursorPosition());
-    // we need to update the shared model in a single transaction so that the undo manager works as expected
-    editor.model.sharedModel.updateSource(start, end, value);
+    // Update the document and the cursor position in the same transaction
+    // to ensure consistency in listeners to document changes.
+    // Note: it also ensures a single change is stored by the undo manager.
+    const transactions: TransactionSpec = {
+      changes: { from: start, to: end, insert: value }
+    };
     if (cursorBeforeChange <= end && cursorBeforeChange >= start) {
-      editor.setCursorPosition(editor.getPositionAt(start + value.length)!);
+      transactions.selection = { anchor: start + value.length };
     }
+    (editor as CodeMirrorEditor).editor.dispatch(transactions);
   }
 
   /**
@@ -337,6 +343,8 @@ export class CompletionHandler implements IDisposable {
     if (!editor) {
       return;
     }
+    const position = editor.getCursorPosition();
+    const state = this.getState(editor, position);
     if (
       model &&
       this._autoCompletion &&
@@ -344,12 +352,10 @@ export class CompletionHandler implements IDisposable {
       (await this._reconciliator.shouldShowContinuousHint(
         this.completer.isVisible,
         changed
-      ))
+      )) &&
+      this._isCurrentState(editor, state)
     ) {
-      void this._makeRequest(
-        editor.getCursorPosition(),
-        CompletionTriggerKind.TriggerCharacter
-      );
+      void this._makeRequest(position, CompletionTriggerKind.TriggerCharacter);
     }
 
     const inlineModel = this.inlineCompleter?.model;
@@ -429,6 +435,10 @@ export class CompletionHandler implements IDisposable {
           return;
         }
 
+        if (!this._isCurrentState(editor, state)) {
+          return;
+        }
+
         const model = this._updateModel(state, reply.start, reply.end);
         if (!model) {
           return;
@@ -450,6 +460,19 @@ export class CompletionHandler implements IDisposable {
       });
   }
 
+  private _isCurrentState(
+    editor: CodeEditor.IEditor,
+    state: Completer.ITextState
+  ): boolean {
+    const position = editor.getCursorPosition();
+    return (
+      editor === this.editor &&
+      state.text === editor.model.sharedModel.getSource() &&
+      state.line === position.line &&
+      state.column === position.column
+    );
+  }
+
   private async _makeInlineRequest(
     position: CodeEditor.IPosition,
     trigger: InlineCompletionTriggerKind
@@ -467,13 +490,18 @@ export class CompletionHandler implements IDisposable {
     if (
       trigger === InlineCompletionTriggerKind.Automatic &&
       (typeof line === 'undefined' ||
-        position.column < line.length ||
         line.slice(0, position.column).match(/^\s*$/))
     ) {
       // In Automatic mode we only auto-trigger on the end of line (and not on the beginning).
       // Increase the counter to avoid out-of date replies when pressing Backspace quickly.
       this._fetchingInline += 1;
       return;
+    }
+
+    let isMiddleOfLine = false;
+
+    if (typeof line !== 'undefined' && position.column < line.length) {
+      isMiddleOfLine = true;
     }
 
     const request = this._composeRequest(editor, position);
@@ -485,7 +513,11 @@ export class CompletionHandler implements IDisposable {
     model.cursor = position;
 
     const current = ++this._fetchingInline;
-    const promises = this._reconciliator.fetchInline(request, trigger);
+    const promises = this._reconciliator.fetchInline(
+      request,
+      trigger,
+      isMiddleOfLine
+    );
     let cancelled = false;
 
     const completed = new Set<
@@ -498,6 +530,13 @@ export class CompletionHandler implements IDisposable {
             return;
           }
           if (current !== this._fetchingInline) {
+            return;
+          }
+          if (
+            trigger === InlineCompletionTriggerKind.Automatic &&
+            !editor.hasFocus()
+          ) {
+            // The user left the editor while the request was pending
             return;
           }
           completed.add(promise);
@@ -538,7 +577,7 @@ export class CompletionHandler implements IDisposable {
   ): CompletionHandler.IRequest {
     const text = editor.model.sharedModel.getSource();
     const mimeType = editor.model.mimeType;
-    const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
+    const offset = editor.getOffsetAt(position);
     return { text, offset, mimeType };
   }
 
@@ -551,7 +590,6 @@ export class CompletionHandler implements IDisposable {
     end: number
   ): Completer.IModel | null {
     const model = this.completer.model;
-    const text = state.text;
 
     if (!model) {
       return null;
@@ -561,8 +599,8 @@ export class CompletionHandler implements IDisposable {
     model.original = state;
     // Update the cursor.
     model.cursor = {
-      start: Text.charIndexToJsIndex(start, text),
-      end: Text.charIndexToJsIndex(end, text)
+      start,
+      end
     };
     return model;
   }
@@ -673,15 +711,17 @@ export namespace CompletionHandler {
    * A reply to a completion items fetch request.
    */
   export interface ICompletionItemsReply<
-    T extends
-      CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
+    T extends CompletionHandler.ICompletionItem =
+      CompletionHandler.ICompletionItem
   > {
     /**
-     * The starting index for the substring being replaced by completion.
+     * The starting index for the substring being replaced by completion,
+     * as a JavaScript string index (UTF-16 code units).
      */
     start: number;
     /**
-     * The end index for the substring being replaced by completion.
+     * The end index for the substring being replaced by completion,
+     * as a JavaScript string index (UTF-16 code units).
      */
     end: number;
     /**
@@ -723,7 +763,9 @@ export namespace CompletionHandler {
    */
   export interface IRequest {
     /**
-     * The cursor offset position within the text being completed.
+     * The cursor offset position within the text being completed, as a
+     * JavaScript string index (UTF-16 code units) like CodeMirror positions.
+     * Kernel messages count code points: use `Text.jsIndexToCharIndex`.
      */
     offset: number;
 

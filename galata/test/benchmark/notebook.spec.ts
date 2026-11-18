@@ -136,9 +136,9 @@ test.describe('Benchmark', () => {
         ).toBeVisible();
       }
 
-      expect(await document.screenshot()).toMatchSnapshot(
-        `${file.replace('.', '-')}.png`
-      );
+      expect
+        .soft(await document.screenshot())
+        .toMatchSnapshot(`${file.replace('.', '-')}.png`);
 
       testInfo.attachments.push(
         benchmark.addAttachment({

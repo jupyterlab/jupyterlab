@@ -18,6 +18,7 @@ import {
   SidebarHelper,
   StatusBarHelper,
   StyleHelper,
+  TerminalHelper,
   ThemeHelper
 } from './helpers';
 import * as Utils from './utils';
@@ -26,13 +27,17 @@ import * as Utils from './utils';
  * JupyterLab page interface
  */
 export interface IJupyterLabPageFixture
-  extends Omit<Page, 'goto'>,
-    IJupyterLabPage {}
+  extends Omit<Page, 'goto' | 'reload'>, IJupyterLabPage {}
 
 /**
  * JupyterLab specific helpers interface
  */
 export interface IJupyterLabPage {
+  /**
+   * Reload the application, optionally skipping the default readiness check.
+   */
+  reload: JupyterLabPage['reload'];
+
   /**
    * Application URL path fragment
    */
@@ -87,6 +92,10 @@ export interface IJupyterLabPage {
    * JupyterLab style helpers
    */
   readonly style: StyleHelper;
+  /**
+   * JupyterLab terminal helpers
+   */
+  readonly terminal: TerminalHelper;
   /**
    * JupyterLab theme helpers
    */
@@ -307,6 +316,7 @@ export class JupyterLabPage implements IJupyterLabPage {
     this.statusbar = new StatusBarHelper(page, this.menu);
     this.sidebar = new SidebarHelper(page, this.menu);
     this.style = new StyleHelper(page);
+    this.terminal = new TerminalHelper(page);
     this.theme = new ThemeHelper(page);
     this.debugger = new DebuggerHelper(page, this.sidebar, this.notebook);
   }
@@ -372,6 +382,11 @@ export class JupyterLabPage implements IJupyterLabPage {
    * JupyterLab style helpers
    */
   readonly style: StyleHelper;
+
+  /**
+   * JupyterLab terminal helpers
+   */
+  readonly terminal: TerminalHelper;
 
   /**
    * JupyterLab theme helpers
@@ -601,26 +616,14 @@ export class JupyterLabPage implements IJupyterLabPage {
    * @returns Whether this operation succeeds or not
    */
   async setSimpleMode(simple: boolean): Promise<boolean> {
-    const toggle = this.page.locator(
-      '#jp-single-document-mode button.jp-switch'
-    );
-    if (toggle) {
-      const checked = (await toggle.getAttribute('aria-checked')) === 'true';
-
-      if ((checked && !simple) || (!checked && simple)) {
-        await Promise.all([
-          Utils.waitForTransition(this.page, toggle),
-          toggle.click()
-        ]);
-      }
-
+    const current = await this.isInSimpleMode();
+    if (current !== simple) {
+      await this.menu.clickMenuItem('View>Appearance>Simple Interface');
       await Utils.waitForCondition(async () => {
         return (await this.isInSimpleMode()) === simple;
       });
-
-      return true;
     }
-    return false;
+    return true;
   }
 
   /**

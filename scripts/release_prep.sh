@@ -9,18 +9,18 @@ if [[ $# -ne 1 ]]; then
 else
     set -v
     JLAB_REL_BRANCH=$1
-    JLAB_REL_ENV=jlabrelease_$JLAB_REL_BRANCH
+    JLAB_REL_ENV=jlabrelease_"$JLAB_REL_BRANCH"
 
-    WORK_DIR=$(mktemp -d -t ${JLAB_REL_ENV}XXXXX)
-    cd $WORK_DIR
+    WORK_DIR=$(mktemp -d -t "${JLAB_REL_ENV}"XXXXX)
+    cd "${WORK_DIR}" || exit
 
-    conda create --override-channels --strict-channel-priority -c conda-forge -c nodefaults -y -n $JLAB_REL_ENV jupyter-packaging nodejs twine
-    conda activate $JLAB_REL_ENV
+    conda create --override-channels --strict-channel-priority -c conda-forge -c nodefaults -y -n "${JLAB_REL_ENV}" nodejs twine
+    conda activate "${JLAB_REL_ENV}"
 
     git clone git@github.com:jupyterlab/jupyterlab.git
-    cd jupyterlab
+    cd jupyterlab || exit
 
-    git checkout $JLAB_REL_BRANCH
+    git checkout "${JLAB_REL_BRANCH}"
 
     pip install -ve .
 

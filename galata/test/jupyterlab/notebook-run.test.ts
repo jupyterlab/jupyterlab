@@ -3,6 +3,7 @@
 
 import { expect, galata, test } from '@jupyterlab/galata';
 import * as path from 'path';
+import { waitForActiveCellToolbar } from './utils';
 
 const fileName = 'simple_notebook.ipynb';
 
@@ -25,11 +26,6 @@ test.describe.serial('Notebook Run', () => {
     await page.filebrowser.openDirectory(tmpPath);
   });
 
-  test.afterAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
-  });
-
   test('Run Notebook and capture cell outputs', async ({ page, tmpPath }) => {
     await page.notebook.openByPath(`${tmpPath}/${fileName}`);
     await page.notebook.activate(fileName);
@@ -45,6 +41,7 @@ test.describe.serial('Notebook Run', () => {
       onBeforeScroll: async () => {
         const nbPanel = await page.notebook.getNotebookInPanelLocator();
         if (nbPanel) {
+          await waitForActiveCellToolbar(page);
           captures.push(await nbPanel.screenshot());
           numNBImages++;
         }
@@ -55,6 +52,7 @@ test.describe.serial('Notebook Run', () => {
     await page.notebook.save();
 
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
+    await waitForActiveCellToolbar(page);
     captures.push(await nbPanel!.screenshot());
     numNBImages++;
 

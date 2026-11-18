@@ -1,40 +1,58 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module shortcuts-extension
  */
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import { IEditorServices } from '@jupyterlab/codeeditor';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import {
-  IFormRenderer,
-  IFormRendererRegistry
-} from '@jupyterlab/ui-components';
+import type { IFormRenderer } from '@jupyterlab/ui-components';
+import { IFormRendererRegistry } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
-import {
-  JSONExt,
+import type {
   PartialJSONValue,
   ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-import { DisposableSet, IDisposable } from '@lumino/disposable';
+import { JSONExt } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableSet } from '@lumino/disposable';
 import { Platform } from '@lumino/domutils';
-import { CommandIDs, IShortcutsSettingsLayout, IShortcutUI } from './types';
-import { renderShortCut } from './renderer';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import React from 'react';
+
+import type { IShortcutsSettingsLayout, IShortcutUI } from './types';
+import { CommandIDs } from './types';
 
 const SHORTCUT_PLUGIN_ID = '@jupyterlab/shortcuts-extension:shortcuts';
+
+type ShortcutRendererProps = {
+  external: IShortcutUI.IExternalBundle;
+};
+
+const ShortcutRenderer = React.lazy(async () => {
+  const { renderShortCut } = await import('./renderer');
+  return {
+    default: (props: ShortcutRendererProps): React.ReactElement =>
+      renderShortCut(props)
+  };
+});
 
 function getExternalForJupyterLab(
   settingRegistry: ISettingRegistry,
   app: JupyterFrontEnd,
   translator: ITranslator,
-  actionRequested: ISignal<unknown, IShortcutUI.ActionRequest>
+  actionRequested: ISignal<unknown, IShortcutUI.ActionRequest>,
+  editorFactory?: CodeEditor.Factory
 ): IShortcutUI.IExternalBundle {
   return {
     translator,
@@ -43,7 +61,8 @@ function getExternalForJupyterLab(
         ISettingRegistry.ISettings<IShortcutsSettingsLayout>
       >,
     commandRegistry: app.commands,
-    actionRequested
+    actionRequested,
+    editorFactory
   };
 }
 
@@ -80,12 +99,13 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
   id: SHORTCUT_PLUGIN_ID,
   description: 'Adds the keyboard shortcuts editor.',
   requires: [ISettingRegistry],
-  optional: [ITranslator, IFormRendererRegistry],
+  optional: [ITranslator, IFormRendererRegistry, IEditorServices],
   activate: async (
     app: JupyterFrontEnd,
     registry: ISettingRegistry,
     translator: ITranslator | null,
-    editorRegistry: IFormRendererRegistry | null
+    editorRegistry: IFormRendererRegistry | null,
+    editorServices: IEditorServices | null
   ) => {
     const translator_ = translator ?? nullTranslator;
     const trans = translator_.load('jupyterlab');
@@ -106,6 +126,12 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
       app.commands.addCommand(CommandIDs.editBinding, {
         label: trans.__('Edit Keybinding'),
         caption: trans.__('Edit existing keybinding'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           const node = app.contextMenuHitTest(isKeybindingNode);
           const keybinding = node?.dataset['keybinding'];
@@ -124,6 +150,12 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
       app.commands.addCommand(CommandIDs.deleteBinding, {
         label: trans.__('Delete Keybinding'),
         caption: trans.__('Delete chosen keybinding'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           const node = app.contextMenuHitTest(isKeybindingNode);
           const keybinding = node?.dataset['keybinding'];
@@ -142,6 +174,12 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
       app.commands.addCommand(CommandIDs.addBinding, {
         label: trans.__('Add Keybinding'),
         caption: trans.__('Add new keybinding for existing shortcut target'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           const node = app.contextMenuHitTest(isKeybindingNode);
           const shortcutId = node?.dataset['shortcut'];
@@ -158,6 +196,12 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.toggleSelectors, {
         label: trans.__('Toggle Selectors'),
         caption: trans.__('Toggle command selectors'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           actionRequested.emit({
             request: 'toggle-selectors'
@@ -168,6 +212,12 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.resetAll, {
         label: trans.__('Reset All'),
         caption: trans.__('Reset all shortcuts'),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
         execute: () => {
           actionRequested.emit({
             request: 'reset-all'
@@ -175,17 +225,25 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
         }
       });
 
+      const editorFactory: CodeEditor.Factory | undefined = editorServices
+        ? options => editorServices.factoryService.newInlineEditor(options)
+        : undefined;
+
       const component: IFormRenderer = {
         fieldRenderer: (props: any) => {
-          return renderShortCut({
-            external: getExternalForJupyterLab(
-              registry,
-              app,
-              translator_,
-              actionRequested
-            ),
-            ...props
-          });
+          return React.createElement(
+            React.Suspense,
+            { fallback: null },
+            React.createElement(ShortcutRenderer, {
+              external: getExternalForJupyterLab(
+                registry,
+                app,
+                translator_,
+                actionRequested,
+                editorFactory
+              )
+            })
+          );
         }
       };
       editorRegistry.addRenderer(`${shortcuts.id}.shortcuts`, component);
@@ -281,13 +339,18 @@ List of keyboard shortcuts:`,
         }
 
         const defaults = canonical.properties?.shortcuts?.default ?? [];
+        // Migrate before reconciling, so that a stored shortcut that disables
+        // a default still matches it. The shortcuts editor matches the user
+        // shortcuts with the composite ones, so it gets the migrated ones too.
         const user = {
-          shortcuts: plugin.data.user.shortcuts ?? []
+          shortcuts: Private.migrateSelectors(
+            (plugin.data.user.shortcuts ?? []) as ISettingRegistry.IShortcut[]
+          )
         };
         const composite = {
           shortcuts: SettingRegistry.reconcileShortcuts(
-            defaults as ISettingRegistry.IShortcut[],
-            user.shortcuts as ISettingRegistry.IShortcut[]
+            Private.migrateSelectors(defaults as ISettingRegistry.IShortcut[]),
+            user.shortcuts
           )
         };
 
@@ -343,6 +406,32 @@ namespace Private {
    * The internal collection of currently loaded shortcuts.
    */
   let disposables: IDisposable;
+
+  /**
+   * Selectors that changed for the shortcuts of some commands.
+   */
+  const MOVED_SELECTORS = [
+    {
+      old: '.jp-Activity',
+      new: '.jp-LabShell',
+      commands: ['application:close', 'filemenu:close-and-cleanup']
+    }
+  ];
+
+  /**
+   * Migrate the shortcuts stored with a selector that changed for their command.
+   */
+  export function migrateSelectors(
+    shortcuts: ISettingRegistry.IShortcut[]
+  ): ISettingRegistry.IShortcut[] {
+    return shortcuts.map(shortcut => {
+      const change = MOVED_SELECTORS.find(
+        ({ old, commands }) =>
+          shortcut.selector === old && commands.includes(shortcut.command)
+      );
+      return change ? { ...shortcut, selector: change.new } : shortcut;
+    });
+  }
 
   /**
    * Load the keyboard shortcuts from settings.

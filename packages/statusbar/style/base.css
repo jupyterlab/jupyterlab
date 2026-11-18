@@ -72,10 +72,23 @@
   color: var(--jp-ui-font-color1);
 }
 
+.jp-StatusBar-TextItem:focus-visible {
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
+}
+
 .jp-StatusBar-GroupItem {
   display: flex;
   align-items: center;
   flex-direction: row;
+}
+
+.jp-StatusBar-GroupItem:focus-visible {
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
+  outline-offset: -1px;
 }
 
 .jp-Statusbar-ProgressCircle > svg {
@@ -114,9 +127,9 @@
   float: left;
   width: 0%;
   height: 100%;
-  font-size: 12px;
+  font-size: calc(var(--jp-ui-font-size1) * 12 / 13);
   line-height: 14px;
-  color: #fff;
+  color: var(--jp-ui-inverse-font-color0);
   text-align: center;
   animation: jp-Statusbar-ExecutionTime-progress-bar 2s linear infinite;
 }

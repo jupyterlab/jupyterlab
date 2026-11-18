@@ -18,9 +18,9 @@
 
 /* fix illegible yellow background in exception stacktrace */
 :where(
-    .jp-RenderedText[data-mime-type='application/vnd.jupyter.stderr']
-      pre
-      .ansi-yellow-bg
-  ) {
+  .jp-RenderedText[data-mime-type='application/vnd.jupyter.stderr']
+    pre
+    .ansi-yellow-bg
+) {
   color: black;
 }

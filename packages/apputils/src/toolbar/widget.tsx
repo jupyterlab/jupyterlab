@@ -1,11 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   circleEmptyIcon,
   circleIcon,
@@ -20,7 +17,8 @@ import {
 } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { ISessionContext, SessionContextDialogs } from '../sessioncontext';
+import type { ISessionContext } from '../sessioncontext';
+import { SessionContextDialogs } from '../sessioncontext';
 import { translateKernelStatuses } from '../kernelstatuses';
 /**
  * The class name added to toolbar kernel name text.

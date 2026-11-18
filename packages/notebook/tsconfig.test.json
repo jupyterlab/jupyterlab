@@ -27,10 +27,16 @@
       "path": "../lsp"
     },
     {
+      "path": "../markedparser-extension"
+    },
+    {
       "path": "../nbformat"
     },
     {
       "path": "../observables"
+    },
+    {
+      "path": "../outputarea"
     },
     {
       "path": "../rendermime"

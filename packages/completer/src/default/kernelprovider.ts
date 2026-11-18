@@ -2,12 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Text } from '@jupyterlab/coreutils';
-import { KernelMessage } from '@jupyterlab/services';
-import { SourceChange } from '@jupyter/ydoc';
-import { JSONObject } from '@lumino/coreutils';
-import { CompletionHandler } from '../handler';
-import { ICompletionContext, ICompletionProvider } from '../tokens';
-import { Completer } from '../widget';
+import type { KernelMessage } from '@jupyterlab/services';
+import type { SourceChange } from '@jupyter/ydoc';
+import type { JSONObject } from '@lumino/coreutils';
+import type { CompletionHandler } from '../handler';
+import type { ICompletionContext, ICompletionProvider } from '../tokens';
+import type { Completer } from '../widget';
+import { isContinuousHintingChange, isHintableMimeType } from '../utils';
 
 export const KERNEL_PROVIDER_ID = 'CompletionProvider:kernel';
 /**
@@ -47,7 +48,7 @@ export class KernelCompleterProvider implements ICompletionProvider {
 
     const contents: KernelMessage.ICompleteRequestMsg['content'] = {
       code: request.text,
-      cursor_pos: request.offset
+      cursor_pos: Text.jsIndexToCharIndex(request.offset, request.text)
     };
 
     const msg = await kernel.requestComplete(contents);
@@ -73,8 +74,8 @@ export class KernelCompleterProvider implements ICompletionProvider {
       }
     });
     return {
-      start: response.cursor_start,
-      end: response.cursor_end,
+      start: Text.charIndexToJsIndex(response.cursor_start, request.text),
+      end: Text.charIndexToJsIndex(response.cursor_end, request.text),
       items
     };
   }
@@ -93,7 +94,7 @@ export class KernelCompleterProvider implements ICompletionProvider {
       let code = editor.model.sharedModel.getSource();
 
       const position = editor.getCursorPosition();
-      let offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), code);
+      let offset = editor.getOffsetAt(position);
       const kernel = session.kernel;
       if (!code || !kernel) {
         return Promise.resolve(item);
@@ -106,7 +107,7 @@ export class KernelCompleterProvider implements ICompletionProvider {
 
       const contents: KernelMessage.IInspectRequestMsg['content'] = {
         code,
-        cursor_pos: offset,
+        cursor_pos: Text.jsIndexToCharIndex(offset, code),
         detail_level: 0
       };
       const msg = await kernel.requestInspect(contents);
@@ -121,23 +122,19 @@ export class KernelCompleterProvider implements ICompletionProvider {
   }
 
   /**
-   * Kernel provider will activate the completer in continuous mode after
-   * the `.` character.
+   * Kernel provider will activate the completer in continuous mode after an
+   * identifier character.
    */
-  shouldShowContinuousHint(visible: boolean, changed: SourceChange): boolean {
-    const sourceChange = changed.sourceChange;
-    if (sourceChange == null) {
-      return true;
-    }
-
-    if (sourceChange.some(delta => delta.delete != null)) {
+  shouldShowContinuousHint(
+    visible: boolean,
+    changed: SourceChange,
+    context?: ICompletionContext
+  ): boolean {
+    const mimeType = context?.editor?.model.mimeType ?? '';
+    if (!isHintableMimeType(mimeType)) {
       return false;
     }
 
-    return sourceChange.some(
-      delta =>
-        delta.insert != null &&
-        (delta.insert === '.' || (!visible && delta.insert.trim().length > 0))
-    );
+    return !visible && isContinuousHintingChange(changed);
   }
 }

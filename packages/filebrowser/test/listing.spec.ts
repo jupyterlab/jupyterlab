@@ -3,13 +3,16 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+import { Time } from '@jupyterlab/coreutils';
 import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
+import type { IFileSystemDirectoryEntryOptions } from '@jupyterlab/testing';
 import {
+  acceptDialog,
+  dismissDialog,
   framePromise,
-  IFileSystemDirectoryEntryOptions,
   signalToPromise
 } from '@jupyterlab/testing';
 import { Signal } from '@lumino/signaling';
@@ -192,14 +195,12 @@ describe('filebrowser/listing', () => {
         const goUpSpy = jest.spyOn(dirListing as any, 'goUp');
         const editNode = dirListing['_editNode'];
         simulate(editNode, 'keydown', {
-          key: 'Backspace',
-          keyCode: 8
+          key: 'Backspace'
         });
         // Can input node's value be changed with simulated key events?
         editNode.value = 'new_name.txt';
         simulate(editNode, 'keydown', {
-          key: 'Enter',
-          keyCode: 13
+          key: 'Enter'
         });
         const newName = await newNamePromise;
         expect(newName).toBe('new_name.txt');
@@ -214,8 +215,7 @@ describe('filebrowser/listing', () => {
         // Give it a name that should put it at the bottom
         editNode.value = 'z.txt';
         simulate(editNode, 'keydown', {
-          key: 'Enter',
-          keyCode: 13
+          key: 'Enter'
         });
         await newNamePromise;
         const sortedItems = [...dirListing.sortedItems()];
@@ -231,12 +231,382 @@ describe('filebrowser/listing', () => {
         const newNamePromise = dirListing.rename();
         const editNode = dirListing['_editNode'];
         simulate(editNode, 'keydown', {
-          key: 'Escape',
-          keyCode: 27
+          key: 'Escape'
         });
         await newNamePromise;
         const itemNode = dirListing['_items'][0];
         expect(itemNode.contains(document.activeElement)).toBe(true);
+      });
+    });
+
+    describe('#copy()', () => {
+      it('should make paste() copy the items after a cut', async () => {
+        dirListing.selectNext();
+        dirListing.cut();
+        dirListing.selectNext();
+        dirListing.copy();
+        const renameSpy = jest.spyOn(dirListing.model.manager, 'rename');
+        const copySpy = jest
+          .spyOn(dirListing.model.manager, 'copy')
+          .mockResolvedValue({} as any);
+
+        await dirListing.paste();
+
+        expect(copySpy).toHaveBeenCalledTimes(1);
+        expect(renameSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('#paste()', () => {
+      // Opens a new folder, so that the cut items move when they are pasted.
+      async function openNewFolder(): Promise<void> {
+        const folder = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+        await dirListing.model.cd(folder.path);
+      }
+
+      it('should paste into the selected destination directory', async () => {
+        const source = [...dirListing.sortedItems()][0];
+
+        const destination = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+
+        await dirListing.selectItemByName(source.name);
+        dirListing.cut();
+
+        await dirListing.selectItemByName(destination.name);
+        await dirListing.paste();
+
+        const moved = await dirListing.model.manager.services.contents.get(
+          `${destination.path}/${source.name}`
+        );
+        expect(moved.name).toBe(source.name);
+      });
+
+      it('should paste into the current directory when no destination directory is selected', async () => {
+        const source = [...dirListing.sortedItems()][0];
+
+        const destination = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+
+        await dirListing.selectItemByName(source.name);
+        dirListing.cut();
+
+        await dirListing.model.cd(destination.path);
+        await dirListing.paste();
+
+        const moved = await dirListing.model.manager.services.contents.get(
+          `${destination.path}/${source.name}`
+        );
+        expect(moved.name).toBe(source.name);
+      });
+
+      it('should paste into the current directory from the menu of the empty area', async () => {
+        const contents = dirListing.model.manager.services.contents;
+        const source = [...dirListing.sortedItems()][0];
+        const destination = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+
+        await dirListing.selectItemByName(source.name);
+        dirListing.cut();
+        await dirListing.selectItemByName(destination.name);
+
+        // Right-click below the last item.
+        simulate(dirListing.contentNode, 'mousedown', { button: 2 });
+        await dirListing.paste();
+
+        await expect(
+          contents.get(`${destination.path}/${source.name}`)
+        ).rejects.toBeTruthy();
+        expect((await contents.get(source.path)).name).toBe(source.name);
+      });
+
+      it('should paste into the current directory after a click on the empty area', async () => {
+        const contents = dirListing.model.manager.services.contents;
+        const source = [...dirListing.sortedItems()][0];
+        const destination = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+
+        await dirListing.selectItemByName(source.name);
+        dirListing.cut();
+        await dirListing.selectItemByName(destination.name);
+
+        // Click below the last item.
+        simulate(dirListing.contentNode, 'mousedown');
+        expect([...dirListing.selectedItems()]).toHaveLength(0);
+        await dirListing.paste();
+
+        await expect(
+          contents.get(`${destination.path}/${source.name}`)
+        ).rejects.toBeTruthy();
+        expect((await contents.get(source.path)).name).toBe(source.name);
+      });
+
+      it('should keep the selection after a modifier click or a scrollbar press on the empty area', async () => {
+        const content = dirListing.contentNode;
+        const source = [...dirListing.sortedItems()][0];
+        await dirListing.selectItemByName(source.name);
+
+        simulate(content, 'mousedown', { ctrlKey: true });
+        simulate(content, 'mousedown', { metaKey: true });
+        simulate(content, 'mousedown', { shiftKey: true });
+
+        // jsdom has no layout, so give the press the sizes of a scrollbar.
+        Object.defineProperty(content, 'clientWidth', { value: 185 });
+        const press = new MouseEvent('mousedown', { bubbles: true });
+        Object.defineProperty(press, 'offsetX', { value: 196 });
+        content.dispatchEvent(press);
+
+        expect([...dirListing.selectedItems()].map(item => item.path)).toEqual([
+          source.path
+        ]);
+      });
+
+      it('should paste into the right-clicked folder of a multi-selection', async () => {
+        const contents = dirListing.model.manager.services.contents;
+        const source = [...dirListing.sortedItems()][0];
+        const first = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+        const second = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+        const nodeFor = (path: string) =>
+          dirListing.contentNode.children[
+            [...dirListing.sortedItems()].findIndex(item => item.path === path)
+          ] as HTMLElement;
+
+        await dirListing.selectItemByName(source.name);
+        dirListing.cut();
+
+        // Select both folders; the second one gets the focus.
+        await dirListing.selectItemByName(first.name, true);
+        simulate(nodeFor(second.path), 'mousedown', { ctrlKey: true });
+        simulate(document.body, 'mouseup', { ctrlKey: true });
+
+        simulate(nodeFor(first.path), 'mousedown', { button: 2 });
+        await dirListing.paste();
+
+        const moved = await contents.get(`${first.path}/${source.name}`);
+        expect(moved.name).toBe(source.name);
+      });
+
+      it('should paste into the current directory when a file is selected', async () => {
+        const [source, other] = [...dirListing.sortedItems()];
+        await dirListing.selectItemByName(source.name);
+        dirListing.copy();
+        await dirListing.selectItemByName(other.name);
+        const copySpy = jest
+          .spyOn(dirListing.model.manager, 'copy')
+          .mockResolvedValue({} as any);
+
+        await dirListing.paste();
+
+        expect(copySpy).toHaveBeenCalledWith(
+          source.path,
+          dirListing.model.path
+        );
+      });
+
+      it('should paste into the current directory when the selected folder is copied', async () => {
+        const folder = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+        await dirListing.selectItemByName(folder.name);
+        dirListing.copy();
+        const copySpy = jest
+          .spyOn(dirListing.model.manager, 'copy')
+          .mockResolvedValue({} as any);
+
+        await dirListing.paste();
+
+        expect(copySpy).toHaveBeenCalledWith(
+          folder.path,
+          dirListing.model.path
+        );
+      });
+
+      it('should paste into the current directory after Escape', async () => {
+        const contents = dirListing.model.manager.services.contents;
+        const source = [...dirListing.sortedItems()][0];
+        const destination = await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+        await dirListing.selectItemByName(source.name);
+        dirListing.cut();
+        await dirListing.selectItemByName(destination.name, true);
+
+        simulate(dirListing.node, 'keydown', { key: 'Escape' });
+        expect([...dirListing.selectedItems()]).toHaveLength(0);
+        await dirListing.paste();
+
+        await expect(
+          contents.get(`${destination.path}/${source.name}`)
+        ).rejects.toBeTruthy();
+        expect((await contents.get(source.path)).name).toBe(source.name);
+      });
+
+      it('should prompt to overwrite when pasting cut item over existing file', async () => {
+        jest.spyOn(dirListing.model.manager, 'rename').mockRejectedValueOnce({
+          response: { status: 409 }
+        });
+        const overwriteSpy = jest
+          .spyOn(dirListing.model.manager, 'overwrite')
+          .mockResolvedValue({} as any);
+
+        dirListing.selectNext();
+        dirListing.cut();
+        expect(dirListing['_clipboard'].length).toBeGreaterThan(0);
+        await openNewFolder();
+
+        const pastePromise = dirListing.paste();
+        await acceptDialog();
+        await pastePromise;
+
+        expect(overwriteSpy).toHaveBeenCalled();
+        expect(dirListing['_clipboard'].length).toBe(0);
+        expect(dirListing['_isCut']).toBe(false);
+        overwriteSpy.mockRestore();
+      });
+
+      it('should keep the clipboard when the overwrite is cancelled', async () => {
+        jest.spyOn(dirListing.model.manager, 'rename').mockRejectedValueOnce({
+          response: { status: 409 }
+        });
+
+        dirListing.selectNext();
+        dirListing.cut();
+        const originalClipboard = [...dirListing['_clipboard']];
+        expect(originalClipboard.length).toBeGreaterThan(0);
+        await openNewFolder();
+
+        const pastePromise = dirListing.paste();
+        await dismissDialog();
+        await pastePromise;
+
+        expect(dirListing['_clipboard']).toEqual(originalClipboard);
+        expect(dirListing['_isCut']).toBe(true);
+      });
+
+      it('should keep the clipboard when the paste fails', async () => {
+        jest.spyOn(dirListing.model.manager, 'rename').mockRejectedValueOnce({
+          response: { status: 500 },
+          message: 'Server error'
+        });
+
+        dirListing.selectNext();
+        dirListing.cut();
+        const originalClipboard = [...dirListing['_clipboard']];
+        await openNewFolder();
+
+        const pastePromise = dirListing.paste();
+        await dismissDialog();
+        await pastePromise;
+
+        expect(dirListing['_clipboard']).toEqual(originalClipboard);
+        expect(dirListing['_isCut']).toBe(true);
+      });
+
+      it('should ignore a second paste while the first is pending', async () => {
+        dirListing.selectNext();
+        dirListing.cut();
+        await openNewFolder();
+        let resolveRename: () => void = () => void 0;
+        const renamePromise = new Promise<any>(resolve => {
+          resolveRename = () => resolve({} as any);
+        });
+        const renameSpy = jest
+          .spyOn(dirListing.model.manager, 'rename')
+          .mockImplementation(() => renamePromise);
+
+        const firstPaste = dirListing.paste();
+        const secondPaste = dirListing.paste();
+        resolveRename();
+        await Promise.all([firstPaste, secondPaste]);
+
+        expect(renameSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should clear clipboard after successful cut and paste', async () => {
+        dirListing.selectNext();
+        dirListing.cut();
+        expect(dirListing['_clipboard'].length).toBeGreaterThan(0);
+        await openNewFolder();
+
+        await dirListing.paste();
+
+        expect(dirListing['_clipboard'].length).toBe(0);
+        expect(dirListing['_isCut']).toBe(false);
+      });
+
+      it('should remove successfully moved files from clipboard on partial cut failure', async () => {
+        dirListing.selectNext();
+        dirListing.selectNext(true);
+        dirListing.cut();
+        const clipboard = [...dirListing['_clipboard']];
+        expect(clipboard.length).toBe(2);
+        await openNewFolder();
+
+        jest
+          .spyOn(dirListing.model.manager, 'rename')
+          .mockImplementation(async (oldPath: string) => {
+            if (oldPath === clipboard[1]) {
+              throw { response: { status: 409 } };
+            }
+            return {} as any;
+          });
+
+        const pastePromise = dirListing.paste();
+        await dismissDialog();
+        await pastePromise;
+
+        expect(dirListing['_clipboard']).toEqual([clipboard[1]]);
+        expect(dirListing['_isCut']).toBe(true);
+      });
+
+      it('should not clear newer clipboard if cut or copy occurs while paste is pending', async () => {
+        dirListing.selectNext();
+        dirListing.cut();
+        const firstClipboard = [...dirListing['_clipboard']];
+        expect(firstClipboard.length).toBe(1);
+        await openNewFolder();
+
+        let resolveRename: () => void = () => void 0;
+        const renamePromise = new Promise<any>(resolve => {
+          resolveRename = () => resolve({} as any);
+        });
+        jest
+          .spyOn(dirListing.model.manager, 'rename')
+          .mockImplementation(() => renamePromise);
+
+        const pastePromise = dirListing.paste();
+
+        await dirListing.model.cd('/');
+        dirListing.selectNext();
+        dirListing.cut();
+        const secondClipboard = [...dirListing['_clipboard']];
+        expect(secondClipboard).not.toEqual(firstClipboard);
+
+        resolveRename();
+        await pastePromise;
+
+        expect(dirListing['_clipboard']).toEqual(secondClipboard);
+        expect(dirListing['_isCut']).toBe(true);
+      });
+
+      it('should not move an item pasted into its own folder', async () => {
+        const renameSpy = jest.spyOn(dirListing.model.manager, 'rename');
+        dirListing.selectNext();
+        dirListing.cut();
+
+        await dirListing.paste();
+
+        expect(renameSpy).not.toHaveBeenCalled();
       });
     });
 
@@ -438,8 +808,7 @@ describe('filebrowser/listing', () => {
         const itemNode = dirListing['_items'][2];
         const nameNode = dirListing['_renderer'].getNameNode(itemNode);
         simulate(nameNode, 'keydown', {
-          key: 'Enter',
-          keyCode: 13
+          key: 'Enter'
         });
         expect(handleOpenSpy).toHaveBeenCalledTimes(2);
         const sortedItems = [...dirListing.sortedItems()];
@@ -476,8 +845,7 @@ describe('filebrowser/listing', () => {
           dirListing.node.querySelector(`.${ITEM_TEXT_CLASS}`)!,
           'keydown',
           {
-            key: 'ArrowDown',
-            keyCode: 40
+            key: 'ArrowDown'
           }
         );
         await signalToPromise(dirListing.updated);
@@ -493,8 +861,7 @@ describe('filebrowser/listing', () => {
           dirListing.node.querySelector(`.${ITEM_TEXT_CLASS}`)!,
           'keydown',
           {
-            key: 'ArrowDown',
-            keyCode: 40
+            key: 'ArrowDown'
           }
         );
         await signalToPromise(dirListing.updated);
@@ -518,7 +885,6 @@ describe('filebrowser/listing', () => {
             'keydown',
             {
               key: 'ArrowDown',
-              keyCode: 40,
               shiftKey: true
             }
           );
@@ -544,7 +910,6 @@ describe('filebrowser/listing', () => {
           await signalToPromise(dirListing.updated);
           simulate(dirListing.node, 'keydown', {
             key: 'ArrowDown',
-            keyCode: 40,
             shiftKey: true
           });
           await signalToPromise(dirListing.updated);
@@ -847,6 +1212,228 @@ describe('filebrowser/listing', () => {
       });
     });
 
+    describe('last modified column', () => {
+      const ITEM_MODIFIED_CLASS = 'jp-DirListing-itemModified';
+
+      it('should pick the modified date style from the listing width', () => {
+        // jsdom does not load the stylesheet, and without this variable the
+        // listing does not fit its columns to its width.
+        dirListing.node.style.setProperty(
+          '--jp-dirlisting-padding-width',
+          '12px'
+        );
+        // The contents manager mock stamps `last_modified` with the current
+        // time, which reads "now" in every style.
+        const lastModified = new Date(2020, 0, 1).toISOString();
+        Object.assign([...dirListing.sortedItems()][0], {
+          last_modified: lastModified
+        });
+        const modifiedCell = dirListing.contentNode.children[0].querySelector(
+          `.${ITEM_MODIFIED_CLASS}`
+        )!;
+
+        const rendered: (string | null)[] = [];
+        // The modified column is then about 70, 110, 145 and 90 px wide.
+        for (const width of [200, 360, 500, 200]) {
+          dirListing.onResize(new Widget.ResizeMessage(width, -1));
+          rendered.push(modifiedCell.textContent);
+        }
+
+        expect(rendered).toEqual([
+          Time.formatHuman(lastModified, 'narrow'),
+          Time.formatHuman(lastModified, 'short'),
+          Time.formatHuman(lastModified, 'long'),
+          Time.formatHuman(lastModified, 'narrow')
+        ]);
+      });
+    });
+
+    describe('date created column', () => {
+      const ITEM_CREATED_CLASS = 'jp-DirListing-itemCreated';
+      const CREATED_ID_CLASS = 'jp-id-created';
+
+      beforeEach(async () => {
+        // Assign each file a distinct `created` timestamp so sort tests have
+        // deterministic, unambiguous data to work with.
+        const items = [...dirListing.sortedItems()].filter(
+          i => i.type !== 'directory'
+        );
+        const contents = dirListing.model.manager.services.contents;
+        for (let i = 0; i < items.length; i++) {
+          const created = new Date(2020 + i, 0, 1).toISOString();
+          await contents.save(items[i].path, { created } as any);
+        }
+        await signalToPromise(dirListing.updated);
+      });
+
+      it('should be hidden by default', () => {
+        const headerNode = dirListing.headerNode;
+        const createdHeader = headerNode.querySelector(`.${CREATED_ID_CLASS}`);
+        expect(createdHeader).toBeNull();
+      });
+
+      it('should show column when visibility is toggled on', async () => {
+        dirListing.setColumnVisibility('date_created', true);
+        // Trigger update to render the column cells
+        dirListing.update();
+        await signalToPromise(dirListing.updated);
+
+        const headerNode = dirListing.headerNode;
+        const createdHeader = headerNode.querySelector(`.${CREATED_ID_CLASS}`);
+        expect(createdHeader).not.toBeNull();
+
+        // Check that items have the created cell
+        const itemNode = dirListing.contentNode.children[0] as HTMLElement;
+        const createdCell = itemNode.querySelector(`.${ITEM_CREATED_CLASS}`);
+        expect(createdCell).not.toBeNull();
+      });
+
+      it('should hide column when visibility is toggled off', async () => {
+        // First show the column
+        dirListing.setColumnVisibility('date_created', true);
+        dirListing.update();
+        await signalToPromise(dirListing.updated);
+
+        // Verify it's visible
+        let headerNode = dirListing.headerNode;
+        let createdHeader = headerNode.querySelector(`.${CREATED_ID_CLASS}`);
+        expect(createdHeader).not.toBeNull();
+
+        // Now hide it
+        dirListing.setColumnVisibility('date_created', false);
+        dirListing.update();
+        await signalToPromise(dirListing.updated);
+
+        // Verify it's hidden
+        headerNode = dirListing.headerNode;
+        createdHeader = headerNode.querySelector(`.${CREATED_ID_CLASS}`);
+        expect(createdHeader).toBeNull();
+      });
+
+      it('should display created date in item cells', async () => {
+        dirListing.setColumnVisibility('date_created', true);
+        dirListing.update();
+        await signalToPromise(dirListing.updated);
+
+        const itemNode = dirListing.contentNode.children[0] as HTMLElement;
+        const createdCell = itemNode.querySelector(
+          `.${ITEM_CREATED_CLASS}`
+        ) as HTMLElement;
+        expect(createdCell).not.toBeNull();
+        // The cell should have text content (formatted date) and a title (full date)
+        expect(createdCell.textContent).not.toBe('');
+        expect(createdCell.title).not.toBe('');
+      });
+
+      it('should sort by date created ascending', async () => {
+        dirListing.sort({
+          direction: 'ascending',
+          key: 'date_created'
+        });
+        await signalToPromise(dirListing.updated);
+
+        const itemsAsc = [...dirListing.sortedItems()];
+        expect(itemsAsc.length).toBeGreaterThan(0);
+
+        // NOTE: JupyterLab's direction semantics are inverted from typical conventions:
+        // 'ascending' displays larger/newer values first (see GitHub issue #16779).
+        // Verify items are sorted with larger dates first
+        for (let i = 1; i < itemsAsc.length; i++) {
+          const prevCreated = Date.parse(itemsAsc[i - 1].created ?? '');
+          const currCreated = Date.parse(itemsAsc[i].created ?? '');
+          expect(prevCreated).toBeGreaterThanOrEqual(currCreated);
+        }
+      });
+
+      it('should sort by date created descending', async () => {
+        dirListing.sort({
+          direction: 'descending',
+          key: 'date_created'
+        });
+        await signalToPromise(dirListing.updated);
+
+        const itemsDesc = [...dirListing.sortedItems()];
+        expect(itemsDesc.length).toBeGreaterThan(0);
+
+        // NOTE: JupyterLab's direction semantics are inverted from typical conventions:
+        // 'descending' displays smaller/older values first (see GitHub issue #16779).
+        // Verify items are sorted with smaller dates first
+        for (let i = 1; i < itemsDesc.length; i++) {
+          const prevCreated = Date.parse(itemsDesc[i - 1].created ?? '');
+          const currCreated = Date.parse(itemsDesc[i].created ?? '');
+          expect(prevCreated).toBeLessThanOrEqual(currCreated);
+        }
+      });
+
+      it('should produce opposite order for ascending vs descending', async () => {
+        dirListing.sort({
+          direction: 'ascending',
+          key: 'date_created'
+        });
+        await signalToPromise(dirListing.updated);
+        const itemsAsc = [...dirListing.sortedItems()];
+
+        dirListing.sort({
+          direction: 'descending',
+          key: 'date_created'
+        });
+        await signalToPromise(dirListing.updated);
+        const itemsDesc = [...dirListing.sortedItems()];
+
+        // Directories are always pinned first; compare only non-directory items.
+        const dirCount = itemsAsc.filter(i => i.type === 'directory').length;
+        const ascNonDirNames = itemsAsc.slice(dirCount).map(i => i.name);
+        const descNonDirNames = itemsDesc.slice(dirCount).map(i => i.name);
+
+        // The beforeEach guarantees distinct created dates, so ascending and
+        // descending must produce strictly reversed orderings.
+        expect(ascNonDirNames.length).toBeGreaterThan(1);
+        expect(ascNonDirNames).toEqual([...descNonDirNames].reverse());
+      });
+
+      it('should produce stable sort order when sorted multiple times', async () => {
+        // This test verifies that sorting is stable and doesn't produce NaN
+        // comparisons which would cause inconsistent ordering
+        dirListing.sort({
+          direction: 'ascending',
+          key: 'date_created'
+        });
+        await signalToPromise(dirListing.updated);
+        const firstSort = [...dirListing.sortedItems()].map(i => i.name);
+
+        // Sort again with the same parameters
+        dirListing.sort({
+          direction: 'ascending',
+          key: 'date_created'
+        });
+        await signalToPromise(dirListing.updated);
+        const secondSort = [...dirListing.sortedItems()].map(i => i.name);
+
+        // The order should be identical - if NaN comparisons occurred,
+        // the sort would be unstable and produce different results
+        expect(firstSort).toEqual(secondSort);
+      });
+
+      it('should produce stable sort order for last_modified when sorted multiple times', async () => {
+        // Verify last_modified sorting is also stable (no NaN issues)
+        dirListing.sort({
+          direction: 'ascending',
+          key: 'last_modified'
+        });
+        await signalToPromise(dirListing.updated);
+        const firstSort = [...dirListing.sortedItems()].map(i => i.name);
+
+        dirListing.sort({
+          direction: 'ascending',
+          key: 'last_modified'
+        });
+        await signalToPromise(dirListing.updated);
+        const secondSort = [...dirListing.sortedItems()].map(i => i.name);
+
+        expect(firstSort).toEqual(secondSort);
+      });
+    });
+
     describe('should sort correctly', () => {
       beforeEach(async () => {
         const options = createOptionsForConstructor();
@@ -887,7 +1474,6 @@ describe('filebrowser/listing', () => {
             key: 'name'
           });
           await signalToPromise(dirListing.updated);
-
           expect(getItemTitles(dirListing)).toEqual([
             '2',
             '5',
@@ -903,7 +1489,6 @@ describe('filebrowser/listing', () => {
             key: 'name'
           });
           await signalToPromise(dirListing.updated);
-
           expect(getItemTitles(dirListing)).toEqual([
             '5',
             '2',
@@ -924,7 +1509,6 @@ describe('filebrowser/listing', () => {
           await signalToPromise(dirListing.updated);
           dirListing.setNotebooksFirstSorting(true);
           await signalToPromise(dirListing.updated);
-
           expect(getItemTitles(dirListing)).toEqual([
             '2',
             '5',
@@ -942,7 +1526,6 @@ describe('filebrowser/listing', () => {
             key: 'name'
           });
           await signalToPromise(dirListing.updated);
-
           expect(getItemTitles(dirListing)).toEqual([
             '5',
             '2',
@@ -992,6 +1575,180 @@ describe('filebrowser/listing', () => {
             '6.ipynb'
           ]);
         });
+      });
+
+      describe('with sortFileNamesNaturally', () => {
+        beforeEach(async () => {
+          const options = createOptionsForConstructor();
+          const naturalTestFiles = ['file10.txt', 'file2.txt', 'file1.txt'];
+          for (const name of naturalTestFiles) {
+            const model = await options.model.manager.newUntitled({
+              type: 'file'
+            });
+            await options.model.manager.rename(model.path, name);
+          }
+          dirListing = new TestDirListing(options);
+          Widget.attach(dirListing, document.body);
+          await signalToPromise(dirListing.updated);
+        });
+
+        it('should sort naturally when enabled by default', async () => {
+          dirListing.sort({
+            direction: 'ascending',
+            key: 'name'
+          });
+          await signalToPromise(dirListing.updated);
+          expect(getItemTitles(dirListing)).toEqual([
+            'file1.txt',
+            'file2.txt',
+            'file10.txt'
+          ]);
+        });
+
+        it('should sort lexicographically when disabled', async () => {
+          dirListing.setSortFileNamesNaturally(false);
+          await signalToPromise(dirListing.updated);
+          dirListing.sort({
+            direction: 'ascending',
+            key: 'name'
+          });
+          await signalToPromise(dirListing.updated);
+          expect(getItemTitles(dirListing)).toEqual([
+            'file1.txt',
+            'file10.txt',
+            'file2.txt'
+          ]);
+        });
+
+        it('should re-sort when toggling sortFileNamesNaturally', async () => {
+          dirListing.sort({
+            direction: 'ascending',
+            key: 'name'
+          });
+          await signalToPromise(dirListing.updated);
+          expect(getItemTitles(dirListing)).toEqual([
+            'file1.txt',
+            'file2.txt',
+            'file10.txt'
+          ]);
+
+          dirListing.setSortFileNamesNaturally(false);
+          await signalToPromise(dirListing.updated);
+          expect(getItemTitles(dirListing)).toEqual([
+            'file1.txt',
+            'file10.txt',
+            'file2.txt'
+          ]);
+
+          dirListing.setSortFileNamesNaturally(true);
+          await signalToPromise(dirListing.updated);
+          expect(getItemTitles(dirListing)).toEqual([
+            'file1.txt',
+            'file2.txt',
+            'file10.txt'
+          ]);
+        });
+      });
+    });
+
+    describe('singleClickNavigation', () => {
+      let directoryNode: HTMLElement;
+      let fileNode: HTMLElement;
+
+      beforeEach(async () => {
+        await dirListing.model.manager.newUntitled({
+          type: 'directory'
+        });
+        await dirListing.model.cd('.');
+        await signalToPromise(dirListing.updated);
+
+        directoryNode = dirListing.contentNode.children[0] as HTMLElement;
+        fileNode = dirListing.contentNode.children[1] as HTMLElement;
+      });
+
+      it('should open a file on single click', async () => {
+        dirListing.setAllowSingleClickNavigation(true);
+
+        const fileOpened = jest.fn();
+        dirListing.onItemOpened.connect(fileOpened);
+
+        simulate(fileNode!, 'click');
+
+        expect(fileOpened).toHaveBeenCalledTimes(1);
+        const openedFile = fileOpened.mock.calls[0][1];
+        expect(openedFile.type).toBe('file');
+
+        dirListing.onItemOpened.disconnect(fileOpened);
+      });
+
+      it('should navigate to directory on single click', async () => {
+        dirListing.setAllowSingleClickNavigation(true);
+
+        const directoryOpened = jest.fn();
+        dirListing.onItemOpened.connect(directoryOpened);
+
+        simulate(directoryNode, 'click');
+        await signalToPromise(dirListing.updated);
+        expect(directoryOpened).toHaveBeenCalled();
+        expect(getItemTitles(dirListing)).toHaveLength(0);
+      });
+
+      it('should not open file or navigate to directory when single click navigation is disabled', async () => {
+        dirListing.setAllowSingleClickNavigation(false);
+
+        const fileOpened = jest.fn();
+        dirListing.onItemOpened.connect(fileOpened);
+
+        simulate(fileNode!, 'click');
+        expect(fileOpened).not.toHaveBeenCalled();
+
+        const directoryOpened = jest.fn();
+        dirListing.onItemOpened.connect(directoryOpened);
+
+        simulate(directoryNode!, 'click');
+        expect(directoryOpened).not.toHaveBeenCalled();
+        expect(getItemTitles(dirListing)).toHaveLength(5);
+
+        dirListing.onItemOpened.disconnect(fileOpened);
+      });
+
+      it('should still open directory on double click when single click navigation is disabled', async () => {
+        dirListing.setAllowSingleClickNavigation(false);
+
+        const fileOpened = jest.fn();
+        dirListing.onItemOpened.connect(fileOpened);
+
+        simulate(fileNode!, 'dblclick');
+        expect(fileOpened).toHaveBeenCalledTimes(1);
+        const openedFile = fileOpened.mock.calls[0][1];
+        expect(openedFile.type).toBe('file');
+
+        const directoryOpened = jest.fn();
+        dirListing.onItemOpened.connect(directoryOpened);
+
+        simulate(directoryNode!, 'dblclick');
+        await signalToPromise(dirListing.updated);
+        expect(directoryOpened).toHaveBeenCalled();
+        expect(getItemTitles(dirListing)).toHaveLength(0);
+
+        dirListing.onItemOpened.disconnect(fileOpened);
+      });
+
+      it('should check boxes when clicking with single click navigation enabled', async () => {
+        dirListing.setAllowSingleClickNavigation(true);
+
+        const fileOpened = jest.fn();
+        dirListing.onItemOpened.connect(fileOpened);
+
+        const checkbox = dirListing.renderer.getCheckboxNode!(
+          directoryNode
+        ) as HTMLInputElement;
+        simulate(checkbox, 'click');
+
+        expect(fileOpened).not.toHaveBeenCalled();
+        expect(checkbox.checked).toBe(true);
+
+        dirListing.onItemOpened.disconnect(fileOpened);
       });
     });
   });

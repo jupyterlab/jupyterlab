@@ -4,7 +4,7 @@
   "jupyter.lab.menus": {
     "context": [
       {
-        "command": "inspector:open",
+        "command": "inspector:toggle",
         "selector": ".jp-Notebook",
         "rank": 50
       }

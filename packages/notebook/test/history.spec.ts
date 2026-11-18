@@ -1,9 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
-import { Notebook, NotebookActions, NotebookModel } from '@jupyterlab/notebook';
+import type { Notebook } from '@jupyterlab/notebook';
+import {
+  NotebookActions,
+  NotebookHistory,
+  NotebookModel
+} from '@jupyterlab/notebook';
 import { JupyterServer } from '@jupyterlab/testing';
 import * as utils from './utils';
 
@@ -52,6 +57,24 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#history', () => {
+      it('should request a batch of history from an existing kernel', async () => {
+        const requestHistory = jest.fn().mockResolvedValue({
+          content: { status: 'ok', history: [] }
+        });
+        const context = {
+          session: { kernel: { requestHistory } },
+          kernelChanged: { connect: jest.fn() }
+        } as unknown as ISessionContext;
+
+        new NotebookHistory({ sessionContext: context });
+
+        expect(requestHistory).toHaveBeenCalledWith({
+          output: false,
+          raw: true,
+          hist_access_type: 'tail',
+          n: 10
+        });
+      });
       it('shouldnt break if there is no history', async () => {
         let activeCell = widget.widgets[0];
         widget.select(activeCell);

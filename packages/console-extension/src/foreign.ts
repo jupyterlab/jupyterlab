@@ -1,21 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ICommandPalette } from '@jupyterlab/apputils';
-import {
-  CodeConsole,
-  ConsolePanel,
-  ForeignHandler,
-  IConsoleTracker
-} from '@jupyterlab/console';
+import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
+import type { CodeConsole, ConsolePanel } from '@jupyterlab/console';
+import { ForeignHandler, IConsoleTracker } from '@jupyterlab/console';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { TranslationBundle } from '@jupyterlab/translation';
 import { ITranslator } from '@jupyterlab/translation';
-import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { AttachedProperty } from '@lumino/properties';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The console foreign handler.
@@ -78,14 +76,50 @@ function activateForeign(
 
   commands.addCommand(toggleShowAllActivity, {
     label: args => trans.__('Show All Kernel Activity'),
-    execute: args => {
+    execute: async args => {
       const current = getCurrent(args);
       if (!current) {
         return;
       }
       const handler = Private.foreignHandlerProperty.get(current.console);
-      if (handler) {
-        handler.enabled = !handler.enabled;
+      if (!handler) {
+        return;
+      }
+      if (handler.enabled) {
+        handler.enabled = false;
+        return;
+      }
+      const kernelId = current.console.sessionContext.session?.kernel?.id;
+      if (
+        !Private.warningDisabled &&
+        !(kernelId && Private.trustedKernels.has(kernelId))
+      ) {
+        const result = await showDialog({
+          title: trans.__('Show activity from other kernel clients?'),
+          body: new Private.ShowAllActivityBody(trans),
+          buttons: [
+            Dialog.cancelButton(),
+            Dialog.warnButton({ label: trans.__('Show All Activity') })
+          ],
+          defaultButton: 0,
+          checkbox: {
+            label: trans.__(
+              'Do not ask me again for other kernels (until reload)'
+            )
+          }
+        });
+        if (!result.button.accept) {
+          return;
+        }
+        if (kernelId) {
+          Private.trustedKernels.add(kernelId);
+        }
+        if (result.isChecked) {
+          Private.warningDisabled = true;
+        }
+      }
+      if (!handler.isDisposed) {
+        handler.enabled = true;
       }
     },
     isToggled: () =>
@@ -94,7 +128,18 @@ function activateForeign(
         ?.enabled,
     isEnabled: () =>
       tracker.currentWidget !== null &&
-      tracker.currentWidget === shell.currentWidget
+      tracker.currentWidget === shell.currentWidget,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          activate: {
+            type: 'boolean',
+            description: trans.__('Whether to activate the widget')
+          }
+        }
+      }
+    }
   });
 
   const notify = () => {
@@ -116,6 +161,41 @@ function activateForeign(
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * Whether the user opted out of the confirmation dialog, until reload.
+   */
+  export let warningDisabled = false;
+
+  /**
+   * Ids of kernels the user agreed to show all activity for, until reload.
+   */
+  export const trustedKernels = new Set<string>();
+
+  /**
+   * The body of the dialog shown before showing all kernel activity.
+   */
+  export class ShowAllActivityBody extends Widget {
+    constructor(trans: TranslationBundle) {
+      super();
+      const paragraphs = [
+        trans.__(
+          'This console will also show code that other clients run on the same kernel, such as collaborators or other notebooks and consoles, together with its output.'
+        ),
+        trans.__(
+          'Output of code run by other clients is treated as trusted. If it contains JavaScript or HTML, it will run in your browser with the same access as your own code, without asking you first.'
+        ),
+        trans.__(
+          'Only continue if you trust everyone who can run code on this kernel. JupyterLab will not ask again for this console until you reload the page.'
+        )
+      ];
+      for (const text of paragraphs) {
+        const p = document.createElement('p');
+        p.textContent = text;
+        this.node.appendChild(p);
+      }
+    }
+  }
+
   /**
    * An attached property for a console's foreign handler.
    */

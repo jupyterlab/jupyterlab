@@ -9,21 +9,32 @@
 
 import { PromiseDelegate } from '@lumino/coreutils';
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { LruCache } from '@jupyterlab/coreutils';
 import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
-import { IMarkdownParser } from '@jupyterlab/rendermime';
+import { IMarkdownParser, removeMath } from '@jupyterlab/rendermime';
+import type {
+  IMarkdownHeadingToken,
+  IRenderMime
+} from '@jupyterlab/rendermime';
 import { IMermaidMarkdown } from '@jupyterlab/mermaid';
 
-import type { marked, Renderer } from 'marked';
-import type { MarkedExtension, MarkedOptions } from 'MarkedOptions';
-import type { Token, Tokens } from 'Tokens';
+import type {
+  marked,
+  MarkedExtension,
+  MarkedOptions,
+  Renderer,
+  Token,
+  Tokens
+} from 'marked';
 
 // highlight cache key separator
 const FENCE = '```~~~';
+
+const HEADING_TAG_REGEX = /^<h[1-6]\b[^>]*>/i;
 
 /**
  * An interface for fenced code block renderers.
@@ -56,6 +67,12 @@ export function createMarkdownParser(
   return {
     render: (content: string): Promise<string> => {
       return Private.render(content, languages, options);
+    },
+    getHeadingTokens: (
+      content: string,
+      mathParseOptions?: IRenderMime.ILatexTypesetter.IMathParseOptions
+    ): Promise<IMarkdownHeadingToken[]> => {
+      return Private.getHeadingTokens(content, options, mathParseOptions);
     }
   };
 }
@@ -181,11 +198,12 @@ namespace Private {
     const renderer = new Renderer_();
     const originalCode = renderer.code;
 
-    renderer.code = (code: string, language: string) => {
+    renderer.code = token => {
+      const { text, lang } = token;
       // handle block renderers
       for (const block of _blocks) {
-        if (block.languages.includes(language)) {
-          const rendered = block.render(code);
+        if (lang && block.languages.includes(lang)) {
+          const rendered = block.render(text);
           if (rendered != null) {
             return rendered;
           }
@@ -193,14 +211,14 @@ namespace Private {
       }
 
       // handle known highlighting
-      const key = `${language}${FENCE}${code}${FENCE}`;
+      const key = `${lang}${FENCE}${text}${FENCE}`;
       const highlight = _highlights.get(key);
       if (highlight != null) {
         return highlight;
       }
 
       // fall back to calling with the renderer as `this`
-      return originalCode.call(renderer, code, language);
+      return originalCode.call(renderer, token);
     };
 
     return renderer;
@@ -248,5 +266,99 @@ namespace Private {
         }
         await highlight(token as Tokens.Code);
     }
+  }
+
+  /**
+   * Extract heading metadata from markdown source.
+   */
+  export async function getHeadingTokens(
+    content: string,
+    options?: IRenderOptions,
+    mathParseOptions?: IRenderMime.ILatexTypesetter.IMathParseOptions
+  ): Promise<IMarkdownHeadingToken[]> {
+    if (!_marked) {
+      _marked = await initializeMarked(options);
+    }
+    const headings = new Array<IMarkdownHeadingToken>();
+    // Hide math from the lexer, as `renderMarkdown` does, but not single `$`
+    // math that spans lines: those `$` are often dollar amounts, and the
+    // editor shows any heading on those lines.
+    const { text, math } = removeMath(content, mathParseOptions);
+    const tokens = _marked.lexer(restoreMath(text, math, spansLines));
+
+    // Extract heading tokens and compute line numbers
+    // Include three token types that may contain headings:
+    // - heading: Standard markdown headings (# Title)
+    // - html: Standalone HTML heading blocks (<h1>Title</h1>)
+    // - paragraph: Only paragraphs with nested HTML tokens (inline html tags) that might contain embedded headings (<span><h1>Title</h1></span>)
+    let currentLine = 0;
+    for (const token of tokens) {
+      const raw = restoreMath(token.raw, math);
+      if (
+        token.type === 'heading' ||
+        (token.type === 'html' && containsHeadingTag(token.raw)) ||
+        (token.type === 'paragraph' && containsInlineHeading(token))
+      ) {
+        headings.push({
+          raw,
+          line: currentLine
+        });
+      }
+      currentLine += raw.split('\n').length - 1;
+    }
+
+    return headings;
+  }
+
+  function containsHeadingTag(raw: string) {
+    return HEADING_TAG_REGEX.test(raw);
+  }
+
+  function containsInlineHeading(token: Tokens.Generic): boolean {
+    if (!token.tokens) return false;
+
+    return token.tokens.some(
+      (t: Tokens.Generic) => t.type === 'html' && containsHeadingTag(t.raw)
+    );
+  }
+
+  /**
+   * Whether math in single `$` spans more than one line.
+   */
+  function spansLines(math: string): boolean {
+    return /^\$[^$]/.test(math) && math.includes('\n');
+  }
+
+  /**
+   * Put back the math source hidden by `removeMath` that `filter` accepts,
+   * undoing the HTML escaping it applies, so that the result matches the
+   * Markdown source.
+   */
+  function restoreMath(
+    text: string,
+    math: string[],
+    filter: (source: string) => boolean = () => true
+  ): string {
+    const placeholder = /@@(\d+)@@/g;
+    let restored = '';
+    let end = 0;
+    let match: RegExpExecArray | null;
+    while ((match = placeholder.exec(text)) !== null) {
+      const source: string | undefined = math[Number(match[1])];
+      if (source === undefined) {
+        // Text such as `@@1` right before a placeholder forms a `@@n@@` that
+        // has no math: look for the placeholder from the next character.
+        placeholder.lastIndex = match.index + 1;
+      } else if (filter(source)) {
+        restored +=
+          text.slice(end, match.index) +
+          source
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;/g, '&');
+        end = placeholder.lastIndex;
+      }
+    }
+    return restored + text.slice(end);
   }
 }

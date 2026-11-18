@@ -1,18 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type {
+  ISessionContext,
+  ISessionContextDialogs
+} from '@jupyterlab/apputils';
 import {
   Clipboard,
   Dialog,
-  ISessionContext,
-  ISessionContextDialogs,
-  showDialog
+  showDialog,
+  SystemClipboard
 } from '@jupyterlab/apputils';
+import type { Cell, ICodeCellModel } from '@jupyterlab/cells';
 import {
-  Cell,
   CodeCell,
-  ICellModel,
-  ICodeCellModel,
+  CodeCellModel,
   isMarkdownCellModel,
   isRawCellModel,
   MarkdownCell
@@ -20,17 +23,21 @@ import {
 import { Notification } from '@jupyterlab/apputils';
 import { signalToPromise } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
-import { KernelMessage } from '@jupyterlab/services';
-import { ISharedAttachmentsCell } from '@jupyter/ydoc';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { Kernel, KernelMessage } from '@jupyterlab/services';
+import type { ISharedAttachmentsCell } from '@jupyter/ydoc';
+import type { YNotebook } from '@jupyter/ydoc';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { every, findIndex } from '@lumino/algorithm';
-import { JSONExt, JSONObject } from '@lumino/coreutils';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { JSONObject } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import * as React from 'react';
 import { runCell as defaultRunCell } from './cellexecutor';
-import { Notebook, StaticNotebook } from './widget';
-import { NotebookWindowedLayout } from './windowing';
-import { INotebookCellExecutor } from './tokens';
+import type { Notebook, StaticNotebook } from './widget';
+import type { NotebookWindowedLayout } from './windowing';
+import type { INotebookCellExecutor } from './tokens';
 
 /**
  * The mimetype used for Jupyter cell data.
@@ -137,10 +144,31 @@ export class NotebookActions {
  * A namespace for `NotebookActions` static methods.
  */
 export namespace NotebookActions {
+  const READ_ONLY_ACTION_AUTO_CLOSE = 5000;
+
+  function notifySplitReadOnlyAction(translator?: ITranslator): void {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+    Notification.error(trans.__('The cell is read-only and cannot be split.'), {
+      autoClose: READ_ONLY_ACTION_AUTO_CLOSE
+    });
+  }
+
+  function notifyMergeReadOnlyAction(translator?: ITranslator): void {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+    Notification.error(
+      trans.__('The cell is read-only and cannot be merged.'),
+      {
+        autoClose: READ_ONLY_ACTION_AUTO_CLOSE
+      }
+    );
+  }
+
   /**
    * Split the active cell into two or more cells.
    *
    * @param notebook The target notebook widget.
+   *
+   * @param translator - Application translator.
    *
    * #### Notes
    * It will preserve the existing mode.
@@ -154,9 +182,17 @@ export namespace NotebookActions {
    * If there is no content, two empty cells will be created.
    * Both cells will have the same type as the original cell.
    * This action can be undone.
+   * The original cell is preserved to maintain kernel connections.
    */
-  export function splitCell(notebook: Notebook): void {
+  export function splitCell(
+    notebook: Notebook,
+    translator?: ITranslator
+  ): void {
     if (!notebook.model || !notebook.activeCell) {
+      return;
+    }
+    if (notebook.activeCell.model.getMetadata('editable') === false) {
+      notifySplitReadOnlyAction(translator);
       return;
     }
 
@@ -202,32 +238,76 @@ export namespace NotebookActions {
 
     offsets.push(orig.length);
 
-    const cellCountAfterSplit = offsets.length - 1;
-    const clones = offsets.slice(0, -1).map((offset, offsetIdx) => {
-      const { cell_type, metadata, outputs } = child.model.sharedModel.toJSON();
+    const { cell_type, metadata } = child.model.sharedModel.toJSON();
+    const baseMetadata = JSON.parse(JSON.stringify(metadata ?? {}));
 
-      return {
-        cell_type,
-        metadata,
-        source: orig
-          .slice(offset, offsets[offsetIdx + 1])
-          .replace(/^\n+/, '')
-          .replace(/\n+$/, ''),
-        outputs:
-          offsetIdx === cellCountAfterSplit - 1 && cell_type === 'code'
-            ? outputs
-            : undefined
-      };
-    });
+    // If execution metadata is present but missing execute_reply (i.e., it is in running state),
+    // remove execution metadata entirely for new cells
+    if (
+      cell_type === 'code' &&
+      baseMetadata.execution &&
+      baseMetadata.execution['iopub.execute_input'] &&
+      !baseMetadata.execution['shell.execute_reply']
+    ) {
+      delete baseMetadata.execution;
+    }
+
+    // Create new cells for all content pieces EXCEPT the last one
+    // The last piece will remain in the original cell to preserve kernel connection
+    const newCells = offsets.slice(0, -2).map((offset, offsetIdx) => ({
+      cell_type,
+      metadata: JSON.parse(JSON.stringify(baseMetadata)),
+      source: orig
+        .slice(offset, offsets[offsetIdx + 1])
+        .replace(/^\n+/, '')
+        .replace(/\n+$/, ''),
+      outputs: undefined
+    }));
+
+    // Prepare the content for the original cell (last piece)
+    const lastPieceStart = offsets[offsets.length - 2];
+    const lastPieceEnd = offsets[offsets.length - 1];
+    const lastPieceContent = orig
+      .slice(lastPieceStart, lastPieceEnd)
+      .replace(/^\n+/, '')
+      .replace(/\n+$/, '');
 
     nbModel.sharedModel.transact(() => {
-      nbModel.sharedModel.deleteCell(index);
-      nbModel.sharedModel.insertCells(index, clones);
+      // Insert new cells above the current cell (if any)
+      if (newCells.length > 0) {
+        nbModel.sharedModel.insertCells(index, newCells);
+      }
+
+      // Update the original cell with the last piece of content
+      child.model.sharedModel.setSource(lastPieceContent);
+      // Mark cell as dirty if it is running
+      if (child.model instanceof CodeCellModel) {
+        const codeCellModel = child.model as CodeCellModel;
+        if (codeCellModel.executionState === 'running') {
+          codeCellModel.isDirty = true;
+        }
+      }
     });
 
-    // If there is a selection the selected cell will be activated
-    const activeCellDelta = start !== end ? 2 : 1;
-    notebook.activeCellIndex = index + clones.length - activeCellDelta;
+    // If there was a selection, activate the cell containing the selection
+    let targetCellIndex: number;
+
+    if (start !== end) {
+      // Find which piece contains the selection
+      let selectionPieceIndex = 0;
+      for (let i = 0; i < offsets.length - 1; i++) {
+        if (start >= offsets[i] && start < offsets[i + 1]) {
+          selectionPieceIndex = i;
+          break;
+        }
+      }
+      targetCellIndex = index + selectionPieceIndex;
+    } else {
+      // No selection, activate the original cell (now at the end)
+      targetCellIndex = index + newCells.length;
+    }
+
+    notebook.activeCellIndex = targetCellIndex;
     notebook
       .scrollToItem(notebook.activeCellIndex)
       .then(() => {
@@ -248,6 +328,11 @@ export namespace NotebookActions {
    * @param mergeAbove - If only one cell is selected, indicates whether to merge it
    *    with the cell above (true) or below (false, default).
    *
+   * @param addExtraLine - Whether to add an extra newline between merged cell contents
+   *    (true, default) or use only a single newline (false).
+   *
+   * @param translator - Application translator.
+   *
    * #### Notes
    * The widget mode will be preserved.
    * If only one cell is selected and `mergeAbove` is true, the above cell will be selected.
@@ -259,7 +344,9 @@ export namespace NotebookActions {
    */
   export function mergeCells(
     notebook: Notebook,
-    mergeAbove: boolean = false
+    mergeAbove: boolean = false,
+    addExtraLine: boolean = true,
+    translator?: ITranslator
   ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
@@ -273,10 +360,15 @@ export namespace NotebookActions {
     const primary = notebook.activeCell;
     const active = notebook.activeCellIndex;
     const attachments: nbformat.IAttachments = {};
+    let hasReadOnlyCell = false;
 
     // Get the cells to merge.
     notebook.widgets.forEach((child, index) => {
       if (notebook.isSelectedOrActive(child)) {
+        if (child.model.getMetadata('editable') === false) {
+          hasReadOnlyCell = true;
+          return;
+        }
         toMerge.push(child.model.sharedModel.getSource());
         if (index !== active) {
           toDelete.push(index);
@@ -291,12 +383,23 @@ export namespace NotebookActions {
       }
     });
 
+    if (hasReadOnlyCell) {
+      notifyMergeReadOnlyAction(translator);
+      return;
+    }
+
     // Check for only a single cell selected.
     if (toMerge.length === 1) {
       // Merge with the cell above when mergeAbove is true
       if (mergeAbove === true) {
         // Bail if it is the first cell.
         if (active === 0) {
+          return;
+        }
+        if (
+          notebook.widgets[active - 1].model.getMetadata('editable') === false
+        ) {
+          notifyMergeReadOnlyAction(translator);
           return;
         }
         // Otherwise merge with the previous cell.
@@ -307,6 +410,12 @@ export namespace NotebookActions {
       } else if (mergeAbove === false) {
         // Bail if it is the last cell.
         if (active === cells.length - 1) {
+          return;
+        }
+        if (
+          notebook.widgets[active + 1].model.getMetadata('editable') === false
+        ) {
+          notifyMergeReadOnlyAction(translator);
           return;
         }
         // Otherwise merge with the next cell.
@@ -328,13 +437,29 @@ export namespace NotebookActions {
     const newModel = {
       cell_type,
       metadata,
-      source: toMerge.join('\n\n'),
+      source: toMerge.join(addExtraLine ? '\n\n' : '\n'),
       attachments:
         primaryModel.cell_type === 'markdown' ||
         primaryModel.cell_type === 'raw'
           ? attachments
           : undefined
     };
+
+    // Detach kernel futures from cells about to be deleted so OutputArea.dispose()
+    // does not terminate them - they stay live in kernel._futures for reconnection
+    // after undo. Handlers are cleared by detachFuture() so the future no
+    // longer holds references to the (soon-to-be-disposed) output area.
+    const storedExecutions: Private.IStoredCellExecution[] = [];
+    [active, ...toDelete].forEach(index => {
+      const cell = notebook.widgets[index];
+      if (!(cell instanceof CodeCell)) {
+        return;
+      }
+      const stored = Private.captureExecution(cell);
+      if (stored) {
+        storedExecutions.push(stored);
+      }
+    });
 
     // Make the changes while preserving history.
     model.sharedModel.transact(() => {
@@ -346,6 +471,15 @@ export namespace NotebookActions {
           model.sharedModel.deleteCell(index);
         });
     });
+
+    // Store execution context in the undo stack item so undo() can restore state.
+    if (storedExecutions.length > 0) {
+      const undoManager = (model.sharedModel as YNotebook).undoManager;
+      const lastItem = undoManager.undoStack[undoManager.undoStack.length - 1];
+      lastItem?.meta.set(Private.CELL_EXECUTION_META_KEY, storedExecutions);
+      lastItem?.meta.set(Private.CELL_EXECUTION_SOURCE_META_KEY, 'merge');
+    }
+
     // If the original cell is a markdown cell, make sure
     // the new cell is unrendered.
     if (primary instanceof MarkdownCell) {
@@ -470,13 +604,76 @@ export namespace NotebookActions {
       lastIndex = notebook.model.cells.length;
     }
 
-    if (shift > 0) {
-      notebook.moveCell(firstIndex, lastIndex, lastIndex - firstIndex);
-    } else {
-      notebook.moveCell(firstIndex, firstIndex + shift, lastIndex - firstIndex);
-    }
+    const toIndex = shift > 0 ? lastIndex : firstIndex + shift;
+    moveCells(notebook, firstIndex, toIndex, lastIndex - firstIndex);
 
     void Private.handleState(notebook, state, true);
+  }
+
+  /**
+   * Move cells while preserving in-flight kernel futures.
+   *
+   * The underlying `jupyter-ydoc` `moveCells` implementation currently
+   * serializes cells to JSON and recreates them via a delete + insert
+   * transaction, which disposes any active kernel futures attached to the
+   * old widgets. This wrapper detaches futures before the move and
+   * reattaches them to the new widgets afterwards, and stores them in the
+   * undo stack so that undoing the move also restores execution state.
+   *
+   * @param notebook - The target notebook.
+   * @param from - Index of the first cell to move.
+   * @param to - Target index (as passed to `notebook.moveCell`).
+   * @param n - Number of cells to move.
+   */
+  export function moveCells(
+    notebook: Notebook,
+    from: number,
+    to: number,
+    n = 1
+  ): void {
+    if (!notebook.model) {
+      return;
+    }
+
+    // Mirror `Notebook.moveCell`'s bounding/no-op logic so that we do not
+    // capture futures or touch the undo stack when the move won't happen.
+    // Otherwise we could attach execution metadata to an unrelated previous
+    // undo item, corrupting subsequent undo behavior.
+    const boundedTo = Math.min(
+      notebook.model.cells.length - 1,
+      Math.max(0, to)
+    );
+    if (boundedTo === from) {
+      return;
+    }
+
+    // moveCells serializes cells to JSON and recreates widgets (delete+insert),
+    // which would dispose any in-flight futures. Capture them first.
+    const storedExecutions: Private.IStoredCellExecution[] = [];
+    notebook.widgets.slice(from, from + n).forEach(child => {
+      if (!(child instanceof CodeCell)) {
+        return;
+      }
+      const stored = Private.captureExecution(child);
+      if (stored) {
+        storedExecutions.push(stored);
+      }
+    });
+
+    notebook.moveCell(from, to, n);
+
+    // Immediately reconnect futures to the newly created widgets.
+    for (const stored of storedExecutions) {
+      Private.restoreExecution(notebook, stored);
+    }
+
+    // Store in the undo stack so that undoing the move can also restore state.
+    if (storedExecutions.length > 0) {
+      const undoManager = (notebook.model.sharedModel as YNotebook).undoManager;
+      const lastItem = undoManager.undoStack[undoManager.undoStack.length - 1];
+      lastItem?.meta.set(Private.CELL_EXECUTION_META_KEY, storedExecutions);
+      lastItem?.meta.set(Private.CELL_EXECUTION_SOURCE_META_KEY, 'move');
+    }
   }
 
   /**
@@ -521,7 +718,7 @@ export namespace NotebookActions {
 
     const state = Private.getState(notebook);
 
-    Private.changeCellType(notebook, value, translator);
+    Private.changeCellType(notebook, value, { translator });
     void Private.handleState(notebook, state);
   }
 
@@ -884,10 +1081,11 @@ export namespace NotebookActions {
    * @param text - The text to replace the selection.
    */
   export function replaceSelection(notebook: Notebook, text: string): void {
-    if (!notebook.model || !notebook.activeCell?.editor) {
+    const cell = notebook.activeCell;
+    if (!notebook.model || !cell?.editor || cell.readOnly) {
       return;
     }
-    notebook.activeCell.editor.replaceSelection?.(text);
+    cell.editor.replaceSelection?.(text);
   }
 
   /**
@@ -1203,22 +1401,68 @@ export namespace NotebookActions {
    * Copy the selected cell(s) data to a clipboard.
    *
    * @param notebook - The target notebook widget.
+   * @param options - Optional. Set `preserveMetadata: true` to keep the metadata of copied cells.
    */
-  export function copy(notebook: Notebook): void {
-    Private.copyOrCut(notebook, false);
+  export function copy(
+    notebook: Notebook,
+    options?: { preserveMetadata?: boolean }
+  ): void {
+    Private.copyOrCut(notebook, false, options?.preserveMetadata);
+  }
+
+  /**
+   * Copy the selected cell(s) data to the system clipboard.
+   *
+   * @param notebook - The target notebook widget.
+   * @param options - Optional. Set `preserveMetadata: true` to keep the metadata of copied cells.
+   */
+  export async function copyToSystemClipboard(
+    notebook: Notebook,
+    options?: { preserveMetadata?: boolean }
+  ): Promise<void> {
+    await Private.copyOrCutToSystemClipboard(
+      notebook,
+      false,
+      options?.preserveMetadata
+    );
   }
 
   /**
    * Cut the selected cell data to a clipboard.
    *
    * @param notebook - The target notebook widget.
+   * @param options - Optional. Set `preserveMetadata: true` to keep the metadata of copied cells.
    *
    * #### Notes
    * This action can be undone.
    * A new code cell is added if all cells are cut.
    */
-  export function cut(notebook: Notebook): void {
-    Private.copyOrCut(notebook, true);
+  export function cut(
+    notebook: Notebook,
+    options?: { preserveMetadata?: boolean }
+  ): void {
+    Private.copyOrCut(notebook, true, options?.preserveMetadata);
+  }
+
+  /**
+   * Cut the selected cell data to the system clipboard.
+   *
+   * @param notebook - The target notebook widget.
+   * @param options - Optional. Set `preserveMetadata: true` to keep the metadata of copied cells.
+   *
+   * #### Notes
+   * This action can be undone.
+   * A new code cell is added if all cells are cut.
+   */
+  export async function cutToSystemClipboard(
+    notebook: Notebook,
+    options?: { preserveMetadata?: boolean }
+  ): Promise<void> {
+    await Private.copyOrCutToSystemClipboard(
+      notebook,
+      true,
+      options?.preserveMetadata
+    );
   }
 
   /**
@@ -1232,6 +1476,8 @@ export namespace NotebookActions {
    *   'above' adds cells above the active cell, and
    *   'replace' removes the currently selected cells and adds cells in their place.
    *
+   * @param options - Optional. Set `stripOutputs: true` to paste code cells without their outputs.
+   *
    * #### Notes
    * The last pasted cell becomes the active cell.
    * This is a no-op if there is no cell data on the clipboard.
@@ -1239,7 +1485,8 @@ export namespace NotebookActions {
    */
   export function paste(
     notebook: Notebook,
-    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below'
+    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below',
+    options?: { stripOutputs?: boolean }
   ): void {
     const clipboard = Clipboard.getInstance();
 
@@ -1247,9 +1494,57 @@ export namespace NotebookActions {
       return;
     }
 
-    const values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
+    let values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
+    if (options?.stripOutputs) {
+      values = Private.stripCodeCellOutputs(values);
+    }
 
     addCells(notebook, mode, values, true);
+    void focusActiveCell(notebook);
+  }
+
+  /**
+   * Paste cells from the system clipboard.
+   *
+   * @param notebook - The target notebook widget.
+   *
+   * @param mode - the mode of adding cells:
+   *   'below' (default) adds cells below the active cell,
+   *   'belowSelected' adds cells below all selected cells,
+   *   'above' adds cells above the active cell, and
+   *   'replace' removes the currently selected cells and adds cells in their place.
+   *
+   * @param options - Optional. Set `stripOutputs: true` to paste code cells without their outputs.
+   *
+   * #### Notes
+   * The last pasted cell becomes the active cell.
+   * This is a no-op if there is no cell data on the clipboard.
+   * This action can be undone.
+   */
+  export async function pasteFromSystemClipboard(
+    notebook: Notebook,
+    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below',
+    options?: { stripOutputs?: boolean }
+  ): Promise<void> {
+    const clipboard = SystemClipboard.getInstance();
+
+    const stored = await clipboard.getData(JUPYTER_CELL_MIME);
+    if (stored === null || stored === undefined) {
+      return;
+    }
+
+    const storedCells = stored as nbformat.IBaseCell[];
+    const isLocal = clipboard.matchesLastWrite(JUPYTER_CELL_MIME, stored);
+    let values = isLocal
+      ? (JSONExt.deepCopy(storedCells) as nbformat.IBaseCell[])
+      : Private.untrustSystemClipboardCells(storedCells);
+    let interactionValues = storedCells;
+    if (options?.stripOutputs) {
+      values = Private.stripCodeCellOutputs(values);
+      interactionValues = Private.stripCodeCellOutputs(storedCells);
+    }
+
+    addCells(notebook, mode, values, true, interactionValues);
     void focusActiveCell(notebook);
   }
 
@@ -1264,6 +1559,8 @@ export namespace NotebookActions {
    *   'above' adds cells above the active cell, and
    *   'replace' removes the currently selected cells and adds cells in their place.
    *
+   * @param options - Optional. Set `preserveMetadata: true` to keep the metadata of duplicated cells.
+   *
    * #### Notes
    * The last pasted cell becomes the active cell.
    * This is a no-op if there is no cell data on the clipboard.
@@ -1271,9 +1568,10 @@ export namespace NotebookActions {
    */
   export function duplicate(
     notebook: Notebook,
-    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below'
+    mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below',
+    options?: { preserveMetadata?: boolean }
   ): void {
-    const values = Private.selectedCells(notebook);
+    const values = Private.selectedCells(notebook, options?.preserveMetadata);
 
     if (!values || values.length === 0) {
       return;
@@ -1297,6 +1595,8 @@ export namespace NotebookActions {
    *
    * @param cellsFromClipboard — True if the cells were sourced from the clipboard.
    *
+   * @param clipboardInteractionValues — The cells to use for clipboard signal comparison.
+   *
    * #### Notes
    * The last added cell becomes the active cell.
    * This is a no-op if values is an empty array.
@@ -1307,7 +1607,8 @@ export namespace NotebookActions {
     notebook: Notebook,
     mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below',
     values: nbformat.IBaseCell[],
-    cellsFromClipboard: boolean = false
+    cellsFromClipboard: boolean = false,
+    clipboardInteractionValues: nbformat.IBaseCell[] = values
   ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
@@ -1326,6 +1627,19 @@ export namespace NotebookActions {
       switch (mode) {
         case 'below':
           index = notebook.activeCellIndex + 1;
+          // If the active cell is a collapsed markdown heading with children,
+          // insert after all the children, not just after the heading.
+          {
+            const activeCell = notebook.activeCell;
+            if (
+              activeCell instanceof MarkdownCell &&
+              activeCell.headingCollapsed &&
+              activeCell.numberChildNodes > 0
+            ) {
+              index =
+                notebook.activeCellIndex + activeCell.numberChildNodes + 1;
+            }
+          }
           break;
         case 'belowSelected':
           notebook.widgets.forEach((child, childIndex) => {
@@ -1333,7 +1647,24 @@ export namespace NotebookActions {
               index = childIndex + 1;
             }
           });
-
+          // If the last selected cell is a collapsed markdown heading with children,
+          // insert after all the children, not just after the heading.
+          {
+            const lastSelectedIndex = index - 1;
+            if (
+              lastSelectedIndex >= 0 &&
+              lastSelectedIndex < notebook.widgets.length
+            ) {
+              const widget = notebook.widgets[lastSelectedIndex];
+              if (
+                widget instanceof MarkdownCell &&
+                widget.headingCollapsed &&
+                widget.numberChildNodes > 0
+              ) {
+                index = lastSelectedIndex + widget.numberChildNodes + 1;
+              }
+            }
+          }
           break;
         case 'above':
           index = notebook.activeCellIndex;
@@ -1384,7 +1715,10 @@ export namespace NotebookActions {
     notebook.activeCellIndex = prevActiveCellIndex + values.length;
     notebook.deselectAll();
     if (cellsFromClipboard) {
-      notebook.lastClipboardInteraction = 'paste';
+      notebook.recordCellClipboardInteraction(
+        'paste',
+        clipboardInteractionValues
+      );
     }
     void Private.handleState(notebook, state, true);
   }
@@ -1403,9 +1737,79 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
-
+    const trans = notebook.translator.load('jupyterlab');
     notebook.mode = 'command';
+
+    const undoManager = (notebook.model.sharedModel as YNotebook).undoManager;
+
+    // For cells that will be MOVED by the undo (i.e. they still exist in the
+    // notebook at their current position), pre-capture their futures now before
+    // sharedModel.undo() destroys those widgets. This prevents OutputArea.dispose()
+    // from cancelling the future during the Y.js delete+insert that implements the move.
+    const topItem = undoManager.undoStack[undoManager.undoStack.length - 1];
+    const pendingExecutions = topItem?.meta.get(
+      Private.CELL_EXECUTION_META_KEY
+    ) as Private.IStoredCellExecution[] | undefined;
+    const preCaptured = new Map<string, Private.IStoredCellExecution>();
+    pendingExecutions?.forEach(stored => {
+      const cell = notebook.widgets.find(w => w.model.id === stored.cellId);
+      if (!(cell instanceof CodeCell)) {
+        return; // cell was deleted (not moved) — handled via stored future below
+      }
+      // Cell still present → move undo. Fresh capture protects the future.
+      const fresh = Private.captureExecution(cell) ?? {
+        ...stored,
+        isDone: () => true,
+        buffered: []
+      };
+      // The undo will roll the outputs back to their state at the time of
+      // the move; snapshot the current outputs so anything received since
+      // then can be re-applied after the undo.
+      fresh.outputs = cell.model.outputs.toJSON();
+      preCaptured.set(stored.cellId, fresh);
+    });
+
+    // Capture execution context from the stack item being popped.
+    let storedExecutions: Private.IStoredCellExecution[] | undefined;
+    let executionCaptureSource: Private.IExecutionCaptureSource | undefined;
+    const onStackItemPopped = ({
+      stackItem
+    }: {
+      stackItem: { meta: Map<unknown, unknown> };
+    }) => {
+      storedExecutions = stackItem.meta.get(Private.CELL_EXECUTION_META_KEY) as
+        | Private.IStoredCellExecution[]
+        | undefined;
+      executionCaptureSource = stackItem.meta.get(
+        Private.CELL_EXECUTION_SOURCE_META_KEY
+      ) as Private.IExecutionCaptureSource | undefined;
+    };
+    undoManager.on('stack-item-popped', onStackItemPopped);
     notebook.model.sharedModel.undo();
+    undoManager.off('stack-item-popped', onStackItemPopped);
+    if (storedExecutions) {
+      const redoItem = undoManager.redoStack[undoManager.redoStack.length - 1];
+      redoItem?.meta.set(Private.CELL_EXECUTION_META_KEY, storedExecutions);
+      if (executionCaptureSource) {
+        redoItem?.meta.set(
+          Private.CELL_EXECUTION_SOURCE_META_KEY,
+          executionCaptureSource
+        );
+      }
+    }
+
+    // Restore execution state on resurrected/moved cell widgets.
+    // For move-undo: use freshly pre-captured data (stored data is stale).
+    // For delete-undo: stored data has the futures captured at deletion time.
+    storedExecutions?.forEach(stored => {
+      const execution = preCaptured.get(stored.cellId) ?? stored;
+      if (execution.isDone() && executionCaptureSource === 'delete') {
+        Private.restoreFinishedDeleteExecution(notebook, execution, trans);
+      } else {
+        Private.restoreExecution(notebook, execution);
+      }
+    });
+
     notebook.deselectAll();
     void Private.handleState(notebook, state);
   }
@@ -1424,9 +1828,28 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
+    const redoExecutions = Private.captureRedoExecutions(notebook);
+    const undoManager = (notebook.model.sharedModel as YNotebook).undoManager;
+    const redoItem = undoManager.redoStack[undoManager.redoStack.length - 1];
+    const executionCaptureSource = redoItem?.meta.get(
+      Private.CELL_EXECUTION_SOURCE_META_KEY
+    );
 
     notebook.mode = 'command';
     notebook.model.sharedModel.redo();
+    if (redoExecutions) {
+      if (executionCaptureSource === 'move') {
+        redoExecutions.forEach(execution => {
+          Private.restoreExecution(notebook, execution);
+        });
+      }
+      const undoItem = undoManager.undoStack[undoManager.undoStack.length - 1];
+      undoItem?.meta.set(Private.CELL_EXECUTION_META_KEY, redoExecutions);
+      undoItem?.meta.set(
+        Private.CELL_EXECUTION_SOURCE_META_KEY,
+        executionCaptureSource
+      );
+    }
     notebook.deselectAll();
     void Private.handleState(notebook, state);
   }
@@ -1802,6 +2225,36 @@ export namespace NotebookActions {
   }
 
   /**
+   * Select the last modified cell and pop it from the back stack
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export async function selectLastModifiedCell(
+    notebook: Notebook
+  ): Promise<void> {
+    const cell = notebook.popLastModifiedCell();
+    if (cell && cell !== notebook.activeCell && !cell.isDisposed) {
+      notebook.activeCellIndex = notebook.widgets.indexOf(cell);
+      await notebook.scrollToCell(cell);
+    }
+  }
+
+  /**
+   * Select the next modified cell and pop it from the forward stack
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export async function selectNextModifiedCell(
+    notebook: Notebook
+  ): Promise<void> {
+    const cell = notebook.popNextModifiedCell();
+    if (cell && cell !== notebook.activeCell && !cell.isDisposed) {
+      notebook.activeCellIndex = notebook.widgets.indexOf(cell);
+      await notebook.scrollToCell(cell);
+    }
+  }
+
+  /**
    * Set the markdown header level.
    *
    * @param notebook - The target notebook widget.
@@ -1825,15 +2278,12 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
-    const cells = notebook.model.cells;
 
     level = Math.min(Math.max(level, 1), 6);
-    notebook.widgets.forEach((child, index) => {
-      if (notebook.isSelectedOrActive(child)) {
-        Private.setMarkdownHeader(cells.get(index), level);
-      }
+    Private.changeCellType(notebook, 'markdown', {
+      translator,
+      headingLevel: level
     });
-    Private.changeCellType(notebook, 'markdown', translator);
     void Private.handleState(notebook, state);
   }
 
@@ -2003,6 +2453,17 @@ export namespace NotebookActions {
     for (cellNum = which + 1; cellNum < notebook.widgets.length; cellNum++) {
       let subCell = notebook.widgets[cellNum];
       let subCellHeadingInfo = NotebookActions.getHeadingInfo(subCell);
+      const isHeadingResolved = (subCell as unknown as MarkdownCell)
+        .headingsResolved;
+
+      // Defer until subCell's asynchronous heading parsing is complete
+      if (subCellHeadingInfo.headingLevel === -1 && !isHeadingResolved) {
+        requestAnimationFrame(() => {
+          setHeadingCollapse(cell, collapsing, notebook);
+        });
+        break;
+      }
+
       if (
         subCellHeadingInfo.isHeading &&
         subCellHeadingInfo.headingLevel <= selectedHeadingInfo.headingLevel
@@ -2117,12 +2578,12 @@ export namespace NotebookActions {
   export function trust(
     notebook: Notebook,
     translator?: ITranslator
-  ): Promise<void> {
+  ): Promise<{ trusted: boolean }> {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
 
     if (!notebook.model) {
-      return Promise.resolve();
+      return Promise.resolve({ trusted: false });
     }
     // Do nothing if already trusted.
 
@@ -2154,7 +2615,7 @@ export namespace NotebookActions {
       return showDialog({
         body: trans.__('Notebook is already trusted'),
         buttons: [Dialog.okButton()]
-      }).then(() => undefined);
+      }).then(() => ({ trusted: true }));
     }
 
     return showDialog({
@@ -2174,7 +2635,9 @@ export namespace NotebookActions {
             cell.trusted = true;
           }
         }
+        return { trusted: true };
       }
+      return { trusted: false };
     });
   }
 
@@ -2269,9 +2732,356 @@ export function setCellExecutor(executor: INotebookCellExecutor): void {
  * A namespace for private data.
  */
 namespace Private {
+  /** Key used to store cell execution state in Y.js undo stack item metadata. */
+  export const CELL_EXECUTION_META_KEY = Symbol('cellExecutionState');
+  /** Key used to store the action kind that captured execution context. */
+  export const CELL_EXECUTION_SOURCE_META_KEY = Symbol('cellExecutionSource');
+  export const NEW_OUTPUTS_NOTIFICATION_AUTO_CLOSE = 10000;
+
+  export type IExecutionCaptureSource =
+    | 'delete'
+    | 'merge'
+    | 'change-cell-type'
+    | 'move';
+
+  /**
+   * A kernel message that arrived while the future was detached, tagged with
+   * its channel so it can be dispatched to the right handler on replay.
+   */
+  export type IBufferedMessage =
+    | { channel: 'iopub'; msg: KernelMessage.IIOPubMessage }
+    | { channel: 'stdin'; msg: KernelMessage.IStdinMessage }
+    | { channel: 'reply'; msg: KernelMessage.IExecuteReplyMsg };
+
+  export interface IStoredCellExecution {
+    cellId: string;
+    future: Kernel.IShellFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >;
+    isDone: () => boolean;
+    /**
+     * Kernel messages (IOPub, stdin and reply) that arrived while the future
+     * was detached, in arrival order, so they can be replayed on reattach.
+     */
+    buffered: IBufferedMessage[];
+    /**
+     * Snapshot of the cell outputs to restore after an undo.
+     *
+     * The Y.js undo of a move (a delete + insert transaction) resurrects the
+     * cell as it was when the move happened, rolling back any output received
+     * since. Re-applying this snapshot after the undo prevents that loss.
+     */
+    outputs: nbformat.IOutput[];
+    /** Display id targets from the output area when execution was detached. */
+    displayIdMap: ReadonlyMap<string, readonly number[]>;
+    /** Whether newer outputs are waiting for the user to accept them. */
+    pendingOutputs?: boolean;
+  }
+
+  const pendingOutputExecutions = new WeakMap<CodeCell, IStoredCellExecution>();
+
+  function isOutputChangingIOPubMessage(
+    msg: KernelMessage.IIOPubMessage
+  ): boolean {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+    switch (msg.header.msg_type) {
+      case 'execute_result':
+      case 'display_data':
+      case 'stream':
+      case 'error':
+      case 'clear_output':
+      case 'update_display_data':
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * The original execute() call targeted a previous cell widget instance, so it
+   * may not update executionCount/executionState on the resurrected one.
+   */
+  export function syncExecutionStateWithFuture(
+    cell: CodeCell,
+    future: Kernel.IShellFuture<
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
+    >
+  ): void {
+    void future.done.then(
+      reply => {
+        if (!cell.isDisposed) {
+          // The future is authoritative for the prompt number; a snapshot
+          // taken before completion would be stale (still null). Setting a
+          // non-null execution count also flips the state back to 'idle'.
+          cell.model.executionCount = reply.content.execution_count;
+          cell.model.executionState = 'idle';
+        }
+      },
+      () => {
+        if (!cell.isDisposed) {
+          cell.model.executionState = 'idle';
+        }
+      }
+    );
+  }
+
+  /**
+   * Detach the kernel future from a code cell, buffering any messages that
+   * arrive while it is detached so they can be replayed on reattach.
+   *
+   * `detachFuture` clears the IOPub, stdin and reply handlers, so all three
+   * channels are buffered here; otherwise a message arriving during the
+   * detached window (e.g. an `input()` request on stdin) would be dropped.
+   *
+   * Returns null if the cell has no active future.
+   */
+  export function captureExecution(
+    cell: CodeCell
+  ): IStoredCellExecution | null {
+    const pending = pendingOutputExecutions.get(cell);
+    if (pending && !cell.outputArea.future) {
+      pending.outputs = cell.model.outputs.toJSON();
+      pending.displayIdMap = cell.outputArea.displayIdMap;
+      return pending;
+    }
+    const future = cell.outputArea.detachFuture();
+    if (!future) {
+      return null;
+    }
+    const displayIdMap = cell.outputArea.displayIdMap;
+    const outputs = cell.model.outputs.toJSON();
+    let done = false;
+    void future.done.then(
+      () => {
+        done = true;
+      },
+      () => {
+        done = true;
+      }
+    );
+    const buffered: IBufferedMessage[] = [];
+    future.onIOPub = msg => {
+      buffered.push({ channel: 'iopub', msg });
+    };
+    future.onStdin = msg => {
+      buffered.push({ channel: 'stdin', msg });
+    };
+    future.onReply = msg => {
+      buffered.push({ channel: 'reply', msg });
+    };
+    return {
+      cellId: cell.model.id,
+      outputs,
+      future,
+      isDone: () => done,
+      buffered,
+      displayIdMap
+    };
+  }
+
+  /**
+   * Recapture cell execution before redoing a deletion or move.
+   */
+  export function captureRedoExecutions(
+    notebook: Notebook
+  ): IStoredCellExecution[] | null {
+    if (!notebook.model) {
+      return null;
+    }
+    const undoManager = (notebook.model.sharedModel as YNotebook).undoManager;
+    const stackItem = undoManager.redoStack[undoManager.redoStack.length - 1];
+    const source = stackItem?.meta.get(CELL_EXECUTION_SOURCE_META_KEY);
+    if (source !== 'delete' && source !== 'move') {
+      return null;
+    }
+    const storedExecutions = stackItem.meta.get(CELL_EXECUTION_META_KEY) as
+      | IStoredCellExecution[]
+      | undefined;
+    const recapturedExecutions: IStoredCellExecution[] = [];
+    storedExecutions?.forEach(({ cellId }) => {
+      const cell = notebook.widgets.find(w => w.model.id === cellId);
+      if (!(cell instanceof CodeCell)) {
+        return;
+      }
+      const recaptured = captureExecution(cell);
+      if (recaptured) {
+        recapturedExecutions.push(recaptured);
+      }
+    });
+    return recapturedExecutions.length === 0 ? null : recapturedExecutions;
+  }
+
+  /**
+   * Reconnect a captured execution to the cell widget that now holds the model.
+   *
+   * Handles both the "still running" and "already finished" cases.
+   */
+  export function restoreExecution(
+    notebook: Notebook,
+    storedExecution: IStoredCellExecution
+  ): void {
+    if (storedExecution.pendingOutputs) {
+      restoreFinishedDeleteExecution(
+        notebook,
+        storedExecution,
+        notebook.translator.load('jupyterlab')
+      );
+      return;
+    }
+    const { cellId, future, isDone, buffered, outputs, displayIdMap } =
+      storedExecution;
+    const cell = notebook.widgets.find(w => w.model.id === cellId);
+    if (!(cell instanceof CodeCell)) {
+      return;
+    }
+    if (outputs && !JSONExt.deepEqual(outputs, cell.model.outputs.toJSON())) {
+      // Re-apply the output snapshot taken just before the undo: the Y.js
+      // undo rolled the outputs back to their state at the time of the
+      // undone action. Going through the output area model keeps the
+      // in-memory model and the shared model in sync (output changes are
+      // not tracked by the undo manager, so this does not pollute history).
+      cell.model.outputs.fromJSON(outputs);
+    }
+    // Reattach the future (without clearing existing outputs) and replay any
+    // messages buffered while it was detached, in arrival order. This is done
+    // whether or not the execution has already finished, so that final outputs
+    // (or a pending stdin request) that arrived while detached are not lost
+    // (e.g. if the kernel completed in the brief window during the undo).
+    cell.outputArea.reattachFuture(future, displayIdMap);
+    for (const buf of buffered) {
+      switch (buf.channel) {
+        case 'iopub':
+          void future.onIOPub(buf.msg);
+          break;
+        case 'stdin':
+          void future.onStdin(buf.msg);
+          break;
+        case 'reply':
+          void future.onReply(buf.msg);
+          break;
+      }
+    }
+    buffered.length = 0;
+    if (isDone()) {
+      // The execution already finished (e.g. it completed or was interrupted
+      // during the undo). The resurrected cell may carry a stale 'running'
+      // state from its restored snapshot, so reset it synchronously rather
+      // than relying solely on the asynchronous `future.done` handler below.
+      cell.model.executionState = 'idle';
+    } else {
+      // Restore the running state on the recreated cell widget.
+      cell.model.executionState = 'running';
+    }
+    syncExecutionStateWithFuture(cell, future);
+  }
+
+  /**
+   * Restore a finished deleted cell without applying newer output by default.
+   */
+  export function restoreFinishedDeleteExecution(
+    notebook: Notebook,
+    storedExecution: IStoredCellExecution,
+    trans: TranslationBundle
+  ): void {
+    const { cellId, future } = storedExecution;
+    const cell = notebook.widgets.find(w => w.model.id === cellId);
+    if (!(cell instanceof CodeCell)) {
+      return;
+    }
+    if (
+      !JSONExt.deepEqual(storedExecution.outputs, cell.model.outputs.toJSON())
+    ) {
+      cell.model.outputs.fromJSON(storedExecution.outputs);
+    }
+    cell.outputArea.displayIdMap = storedExecution.displayIdMap;
+    cell.model.executionState = 'idle';
+    syncExecutionStateWithFuture(cell, future);
+    const hasOutputChanges = storedExecution.buffered.some(
+      buffered =>
+        buffered.channel === 'iopub' &&
+        isOutputChangingIOPubMessage(buffered.msg)
+    );
+    storedExecution.pendingOutputs = hasOutputChanges;
+    if (!hasOutputChanges) {
+      restoreExecution(notebook, storedExecution);
+      return;
+    }
+
+    pendingOutputExecutions.set(cell, storedExecution);
+    const model = cell.model;
+    let notificationId = '';
+    const dismiss = () => {
+      cell.disposed.disconnect(dismiss);
+      model.stateChanged.disconnect(onStateChanged);
+      Notification.manager.changed.disconnect(onNotificationChanged);
+      pendingOutputExecutions.delete(cell);
+      if (notificationId) {
+        Notification.dismiss(notificationId);
+      }
+    };
+    const onStateChanged = () => {
+      if (model.executionState === 'running') {
+        dismiss();
+        storedExecution.pendingOutputs = false;
+        storedExecution.buffered.length = 0;
+        future.dispose();
+      }
+    };
+    // A toast that times out stays in the notification center, so only closing
+    // the notification keeps the restored output and reconnects the future.
+    const onNotificationChanged = (
+      _: unknown,
+      change: Notification.IChange
+    ) => {
+      if (
+        change.type !== 'removed' ||
+        change.notification.id !== notificationId
+      ) {
+        return;
+      }
+      const restore = canRestore();
+      dismiss();
+      if (restore) {
+        storedExecution.pendingOutputs = false;
+        storedExecution.buffered.length = 0;
+        cell.outputArea.reattachFuture(future);
+      }
+    };
+    const canRestore = () =>
+      !cell.isDisposed &&
+      pendingOutputExecutions.get(cell) === storedExecution &&
+      (!cell.outputArea.future || cell.outputArea.future === future);
+    cell.disposed.connect(dismiss);
+    model.stateChanged.connect(onStateChanged);
+    notificationId = Notification.info(
+      trans.__('A restored cell has newer outputs available.'),
+      {
+        autoClose: NEW_OUTPUTS_NOTIFICATION_AUTO_CLOSE,
+        actions: [
+          {
+            label: trans.__('Show new outputs'),
+            displayType: 'accent',
+            callback: () => {
+              const restore = canRestore();
+              dismiss();
+              if (restore) {
+                storedExecution.pendingOutputs = false;
+                restoreExecution(notebook, storedExecution);
+              }
+            }
+          }
+        ]
+      }
+    );
+    Notification.manager.changed.connect(onNotificationChanged);
+  }
+
   /**
    * Notebook cell executor
    */
+  // eslint-disable-next-line no-unassigned-vars
   export let executor: INotebookCellExecutor;
 
   /**
@@ -2349,13 +3159,38 @@ namespace Private {
   ): Promise<void> {
     const { activeCell, activeCellIndex } = notebook;
     if (scrollIfNeeded && activeCell) {
-      await notebook.scrollToItem(activeCellIndex, 'auto', 0).catch(reason => {
-        // no-op
-      });
+      await notebook
+        .scrollToItem(
+          activeCellIndex,
+          'auto',
+          0,
+          getActiveCellAlignmentPreference(notebook)
+        )
+        .catch(reason => {
+          // no-op
+        });
     }
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();
     }
+  }
+
+  /**
+   * Get the alignment preference used when scrolling to the active cell.
+   *
+   * Cells taller than the viewport are aligned to their start so that
+   * navigation does not land at the end of long outputs; other cells
+   * keep the default `auto` heuristic which minimizes viewport shift.
+   */
+  function getActiveCellAlignmentPreference(
+    notebook: Notebook
+  ): 'start' | undefined {
+    const viewportHeight = notebook.outerNode.clientHeight;
+    const activeCellHeight =
+      notebook.activeCell?.node.getBoundingClientRect().height ?? 0;
+    return viewportHeight > 0 && activeCellHeight > viewportHeight
+      ? 'start'
+      : undefined;
   }
 
   /**
@@ -2396,7 +3231,7 @@ namespace Private {
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
-    const lastCell = cells[-1];
+    const lastCell = cells[cells.length - 1];
     notebook.mode = 'command';
 
     let initializingDialogShown = false;
@@ -2414,12 +3249,12 @@ namespace Private {
           const trans = translator.load('jupyterlab');
           Notification.emit(
             trans.__(
-              `Kernel '${sessionContext.kernelDisplayName}' for '${sessionContext.path}' is still initializing. You can run code cells when the kernel has initialized.`
+              "Kernel '%1' for '%2' is still initializing. You can run code cells when the kernel has initialized.",
+              sessionContext.kernelDisplayName,
+              sessionContext.path
             ),
             'warning',
-            {
-              autoClose: false
-            }
+            { autoClose: false }
           );
           return Promise.resolve(false);
         }
@@ -2550,18 +3385,92 @@ namespace Private {
   }
 
   /**
+   * Return a deep copy of cells with code cell outputs and execution_count cleared.
+   *
+   * @param cells - The cells to process.
+   * @returns New cell objects.
+   */
+  export function stripCodeCellOutputs(
+    cells: nbformat.IBaseCell[]
+  ): nbformat.IBaseCell[] {
+    return cells.map(cell => {
+      const copy = JSONExt.deepCopy(cell) as nbformat.ICell;
+      if (copy && nbformat.isCode(copy)) {
+        copy.outputs = [];
+        copy.execution_count = null;
+      }
+      return copy;
+    });
+  }
+
+  /**
+   * Return a deep copy of cells with trust removed for system clipboard paste.
+   *
+   * System clipboard data is plain text and has no authenticated JupyterLab
+   * provenance, so it must not confer trusted-output authority.
+   *
+   * @param cells - The cells to process.
+   * @returns New cell objects.
+   */
+  export function untrustSystemClipboardCells(
+    cells: nbformat.IBaseCell[]
+  ): nbformat.IBaseCell[] {
+    return cells.map(cell => {
+      const copy = JSONExt.deepCopy(cell) as nbformat.ICell;
+      copy.metadata =
+        copy.metadata && JSONExt.isObject(copy.metadata) ? copy.metadata : {};
+
+      if (nbformat.isCode(copy)) {
+        copy.metadata.trusted = false;
+      } else {
+        delete copy.metadata.trusted;
+      }
+      return copy;
+    });
+  }
+
+  /**
    * Get the selected cell(s) without affecting the clipboard.
    *
    * @param notebook - The target notebook widget.
+   * @param preserveMetadata - Whether to preserve cell metadata in the returned cells.
    *
    * @returns A list of 0 or more selected cells
    */
-  export function selectedCells(notebook: Notebook): nbformat.ICell[] {
-    return notebook.widgets
-      .filter(cell => notebook.isSelectedOrActive(cell))
+  export function selectedCells(
+    notebook: Notebook,
+    preserveMetadata: boolean = false
+  ): nbformat.ICell[] {
+    const cellsToInclude = new Set<Cell>();
+
+    // Collect all selected/active cells and expand collapsed sections
+    for (let i = 0; i < notebook.widgets.length; i++) {
+      const cell = notebook.widgets[i];
+      if (notebook.isSelectedOrActive(cell)) {
+        cellsToInclude.add(cell);
+
+        // If this is a collapsed markdown cell, add all its children
+        if (
+          cell instanceof MarkdownCell &&
+          cell.headingCollapsed &&
+          cell.numberChildNodes > 0
+        ) {
+          for (let j = i + 1; j <= i + cell.numberChildNodes; j++) {
+            if (notebook.widgets[j]) {
+              cellsToInclude.add(notebook.widgets[j]);
+            }
+          }
+        }
+      }
+    }
+
+    return Array.from(cellsToInclude)
       .map(cell => cell.model.toJSON())
       .map(cellJSON => {
-        if ((cellJSON.metadata as JSONObject).deletable !== undefined) {
+        if (
+          !preserveMetadata &&
+          (cellJSON.metadata as JSONObject).deletable !== undefined
+        ) {
           delete (cellJSON.metadata as JSONObject).deletable;
         }
         return cellJSON;
@@ -2574,8 +3483,14 @@ namespace Private {
    * @param notebook - The target notebook widget.
    *
    * @param cut - True if the cells should be cut, false if they should be copied.
+   *
+   * @param preserveMetadata - Whether to preserve cell metadata in the copied cells.
    */
-  export function copyOrCut(notebook: Notebook, cut: boolean): void {
+  export function copyOrCut(
+    notebook: Notebook,
+    cut: boolean,
+    preserveMetadata: boolean = false
+  ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
@@ -2586,7 +3501,7 @@ namespace Private {
     notebook.mode = 'command';
     clipboard.clear();
 
-    const data = Private.selectedCells(notebook);
+    const data = Private.selectedCells(notebook, preserveMetadata);
 
     clipboard.setData(JUPYTER_CELL_MIME, data);
     if (cut) {
@@ -2595,9 +3510,49 @@ namespace Private {
       notebook.deselectAll();
     }
     if (cut) {
-      notebook.lastClipboardInteraction = 'cut';
+      notebook.recordCellClipboardInteraction('cut', data);
     } else {
-      notebook.lastClipboardInteraction = 'copy';
+      notebook.recordCellClipboardInteraction('copy', data);
+    }
+    void handleState(notebook, state);
+  }
+
+  /**
+   * Copy or cut the selected cell data to the system clipboard.
+   *
+   * @param notebook - The target notebook widget.
+   *
+   * @param cut - True if the cells should be cut, false if they should be copied.
+   *
+   * @param preserveMetadata - Whether to preserve cell metadata in the copied cells.
+   */
+  export async function copyOrCutToSystemClipboard(
+    notebook: Notebook,
+    cut: boolean,
+    preserveMetadata: boolean = false
+  ): Promise<void> {
+    if (!notebook.model || !notebook.activeCell) {
+      return;
+    }
+
+    const state = getState(notebook);
+    const clipboard = SystemClipboard.getInstance();
+
+    notebook.mode = 'command';
+    clipboard.clear();
+
+    const data = Private.selectedCells(notebook, preserveMetadata);
+
+    await clipboard.setData(JUPYTER_CELL_MIME, data);
+    if (cut) {
+      deleteCells(notebook);
+    } else {
+      notebook.deselectAll();
+    }
+    if (cut) {
+      notebook.recordCellClipboardInteraction('cut', data);
+    } else {
+      notebook.recordCellClipboardInteraction('copy', data);
     }
     void handleState(notebook, state);
   }
@@ -2618,8 +3573,12 @@ namespace Private {
   export function changeCellType(
     notebook: Notebook,
     value: nbformat.CellType,
-    translator?: ITranslator
+    options?: {
+      translator?: ITranslator;
+      headingLevel?: number;
+    }
   ): void {
+    const { translator, headingLevel } = options ?? {};
     const notebookSharedModel = notebook.model!.sharedModel;
     notebook.widgets.forEach((child, index) => {
       if (!notebook.isSelectedOrActive(child)) {
@@ -2629,8 +3588,7 @@ namespace Private {
         child.model.type === 'code' &&
         (child as CodeCell).outputArea.pendingInput
       ) {
-        translator = translator || nullTranslator;
-        const trans = translator.load('jupyterlab');
+        const trans = (translator ?? nullTranslator).load('jupyterlab');
         // Do not permit changing cell type when input is pending
         void showDialog({
           title: trans.__('Cell type not changed due to pending input'),
@@ -2642,8 +3600,7 @@ namespace Private {
         return;
       }
       if (child.model.getMetadata('editable') == false) {
-        translator = translator || nullTranslator;
-        const trans = translator.load('jupyterlab');
+        const trans = (translator ?? nullTranslator).load('jupyterlab');
         // Do not permit changing cell type when the cell is readonly
         void showDialog({
           title: trans.__('Cell is read-only'),
@@ -2654,6 +3611,15 @@ namespace Private {
       }
       if (child.model.type !== value) {
         const raw = child.model.toJSON();
+        let newSource = raw.source as string;
+        if (headingLevel !== undefined) {
+          newSource = Private.setMarkdownHeader(newSource, headingLevel);
+        }
+        // Detach future before the transaction so dispose() does not cancel it.
+        const storedExecution =
+          child instanceof CodeCell
+            ? Private.captureExecution(child)
+            : undefined;
         notebookSharedModel.transact(() => {
           notebookSharedModel.deleteCell(index);
           if (value === 'code') {
@@ -2665,14 +3631,36 @@ namespace Private {
             raw.metadata.trusted = undefined;
           }
           const newCell = notebookSharedModel.insertCell(index, {
+            id: raw.id,
             cell_type: value,
-            source: raw.source,
+            source: newSource,
             metadata: raw.metadata
           });
           if (raw.attachments && ['markdown', 'raw'].includes(value)) {
             (newCell as ISharedAttachmentsCell).attachments =
               raw.attachments as nbformat.IAttachments;
           }
+        });
+        if (storedExecution) {
+          const undoManager = (notebookSharedModel as YNotebook).undoManager;
+          const lastItem =
+            undoManager.undoStack[undoManager.undoStack.length - 1];
+          lastItem?.meta.set(Private.CELL_EXECUTION_META_KEY, [
+            storedExecution
+          ]);
+          lastItem?.meta.set(
+            Private.CELL_EXECUTION_SOURCE_META_KEY,
+            'change-cell-type'
+          );
+        }
+      } else if (value === 'markdown' && headingLevel !== undefined) {
+        notebookSharedModel.transact(() => {
+          child.model.sharedModel.setSource(
+            Private.setMarkdownHeader(
+              child.model.sharedModel.getSource(),
+              headingLevel
+            )
+          );
         });
       }
       if (value === 'markdown') {
@@ -2699,21 +3687,55 @@ namespace Private {
     const model = notebook.model!;
     const sharedModel = model.sharedModel;
     const toDelete: number[] = [];
+    const cellsToDeleteSet = new Set<number>();
 
     notebook.mode = 'command';
 
-    // Find the cells to delete.
+    // Find the cells to delete, expanding collapsed sections.
     notebook.widgets.forEach((child, index) => {
       const deletable = child.model.getMetadata('deletable') !== false;
 
       if (notebook.isSelectedOrActive(child) && deletable) {
-        toDelete.push(index);
+        cellsToDeleteSet.add(index);
         notebook.model?.deletedCells.push(child.model.id);
+
+        // If this is a collapsed markdown cell, mark all its children for deletion
+        if (
+          child instanceof MarkdownCell &&
+          child.headingCollapsed &&
+          child.numberChildNodes > 0
+        ) {
+          for (let j = index + 1; j <= index + child.numberChildNodes; j++) {
+            if (notebook.widgets[j]) {
+              const childDeletable =
+                notebook.widgets[j].model.getMetadata('deletable') !== false;
+              if (childDeletable) {
+                cellsToDeleteSet.add(j);
+                notebook.model?.deletedCells.push(notebook.widgets[j].model.id);
+              }
+            }
+          }
+        }
       }
     });
 
+    toDelete.push(...Array.from(cellsToDeleteSet).sort((a, b) => a - b));
+
     // If cells are not deletable, we may not have anything to delete.
     if (toDelete.length > 0) {
+      // Detach futures before the transaction so dispose() does not cancel them.
+      const storedExecutions: Private.IStoredCellExecution[] = [];
+      toDelete.forEach(index => {
+        const cell = notebook.widgets[index];
+        if (!(cell instanceof CodeCell)) {
+          return;
+        }
+        const stored = Private.captureExecution(cell);
+        if (stored) {
+          storedExecutions.push(stored);
+        }
+      });
+
       // Delete the cells as one undo event.
       sharedModel.transact(() => {
         // Delete cells in reverse order to maintain the correct indices.
@@ -2737,6 +3759,13 @@ namespace Private {
           });
         }
       });
+      if (storedExecutions.length > 0) {
+        const undoManager = (sharedModel as YNotebook).undoManager;
+        const lastItem =
+          undoManager.undoStack[undoManager.undoStack.length - 1];
+        lastItem?.meta.set(Private.CELL_EXECUTION_META_KEY, storedExecutions);
+        lastItem?.meta.set(Private.CELL_EXECUTION_SOURCE_META_KEY, 'delete');
+      }
       // Select the *first* interior cell not deleted or the cell
       // *after* the last selected cell.
       // Note: The activeCellIndex is clamped to the available cells,
@@ -2752,19 +3781,18 @@ namespace Private {
   }
 
   /**
-   * Set the markdown header level of a cell.
+   * Set the markdown header level of a cell source.
    */
-  export function setMarkdownHeader(cell: ICellModel, level: number): void {
+  export function setMarkdownHeader(source: string, level: number): string {
     // Remove existing header or leading white space.
-    let source = cell.sharedModel.getSource();
-    const regex = /^(#+\s*)|^(\s*)/;
+    const regex = /^#+\s*|^\s*/;
     const newHeader = Array(level + 1).join('#') + ' ';
     const matches = regex.exec(source);
 
     if (matches) {
       source = source.slice(matches[0].length);
     }
-    cell.sharedModel.setSource(newHeader + source);
+    return newHeader + source;
   }
 
   /** Functionality related to collapsible headings */

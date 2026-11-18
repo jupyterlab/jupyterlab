@@ -1,11 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-(window as any).__webpack_public_path__ = URLExt.join(
-  PageConfig.getBaseUrl(),
-  'example/'
-);
+(
+  window as unknown as Window & { __webpack_public_path__: string }
+).__webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'example/');
 
 // Import style through JS file to deduplicate them.
 import './style';
@@ -52,7 +50,7 @@ import {
   SessionManager
 } from '@jupyterlab/services';
 
-import { IYText } from '@jupyter/ydoc';
+import type { IYText } from '@jupyter/ydoc';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -127,7 +125,7 @@ function main(): void {
 
   const cellWidget = new CodeCell({
     contentFactory: new Cell.ContentFactory({
-      editorFactory: factoryService.newInlineEditor.bind(factoryService)
+      editorFactory: factoryService.newInlineEditor
     }),
     rendermime,
     model: new CodeCellModel()

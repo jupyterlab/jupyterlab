@@ -4,7 +4,7 @@
  */
 
 import { RenderedVega, VEGALITE5_MIME_TYPE } from '@jupyterlab/vega5-extension';
-import { JSONObject } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
 
 interface ISize {
   width: number;

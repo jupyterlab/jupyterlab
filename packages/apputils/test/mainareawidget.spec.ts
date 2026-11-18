@@ -24,26 +24,24 @@ describe('@jupyterlab/apputils', () => {
         expect(widget.toolbar).toBe(toolbar);
       });
 
-      it('toolbar should have an aria label of notebook actions and a role of toolbar', () => {
+      it('toolbar should have an aria label of main area toolbar and a role of toolbar', () => {
         const content = new Widget();
         const toolbar = new Toolbar();
         const widget = new MainAreaWidget({ content, toolbar });
         expect(widget.toolbar.node.getAttribute('aria-label')).toEqual(
-          'notebook actions'
+          'main area toolbar'
         );
         expect(widget.toolbar.node.getAttribute('role')).toEqual('toolbar');
       });
 
-      // This test covers incorrect behaviour documented in issue #13045
-      it.failing(
-        'content should have an aria-label of notebook content and a role of region',
-        () => {
-          const content = new Widget();
-          const widget = new MainAreaWidget({ content });
-          expect(widget.content.node.getAttribute('aria-label')).toEqual('');
-          expect(widget.content.node.getAttribute('role')).toEqual('region');
-        }
-      );
+      it('content should have an aria-label of main area content and a role of region', () => {
+        const content = new Widget();
+        const widget = new MainAreaWidget({ content });
+        expect(widget.content.node.getAttribute('aria-label')).toEqual(
+          'main area content'
+        );
+        expect(widget.content.node.getAttribute('role')).toEqual('region');
+      });
     });
 
     describe('contentHeader', () => {

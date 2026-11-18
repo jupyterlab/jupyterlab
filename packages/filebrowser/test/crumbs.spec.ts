@@ -1,21 +1,66 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
+import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
-import { ServiceManager } from '@jupyterlab/services';
+import type { ServiceManager } from '@jupyterlab/services';
 import { framePromise, signalToPromise } from '@jupyterlab/testing';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import expect from 'expect';
 import { simulate } from 'simulate-event';
 import { BreadCrumbs, FileBrowserModel } from '../src';
+import { PageConfig } from '@jupyterlab/coreutils';
+import { MimeData } from '@lumino/coreutils';
+import type { Drag } from '@lumino/dragdrop';
 
+const BREADCRUMB_ROOT_CLASS = 'jp-BreadCrumbs-home';
+const BREADCRUMB_PREFERRED_CLASS = 'jp-BreadCrumbs-preferred';
 const HOME_ITEM_CLASS = 'jp-BreadCrumbs-home';
 const ITEM_CLASS = 'jp-BreadCrumbs-item';
 const ITEM_QUERY = `.${HOME_ITEM_CLASS}, .${ITEM_CLASS}`;
+const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
+
+/**
+ * Create a drag event that carries the given contents paths.
+ */
+function createDragEvent(
+  type: string,
+  target: HTMLElement,
+  paths: string[]
+): Drag.Event {
+  const mimeData = new MimeData();
+  mimeData.setData('application/x-jupyter-icontents', paths);
+  return {
+    type,
+    proposedAction: 'move',
+    dropAction: 'none',
+    mimeData,
+    target,
+    preventDefault: jest.fn(),
+    stopPropagation: jest.fn()
+  } as unknown as Drag.Event;
+}
+
+/**
+ * Drag the given paths onto a breadcrumb and drop them, as Lumino does:
+ * the drop reaches the breadcrumbs only if they accepted the drag enter.
+ */
+function dropOn(
+  crumbs: BreadCrumbs,
+  target: HTMLElement,
+  paths: string[]
+): void {
+  const enter = createDragEvent('lm-dragenter', target, paths);
+  crumbs.handleEvent(enter);
+  if (jest.mocked(enter.preventDefault).mock.calls.length > 0) {
+    crumbs.handleEvent(createDragEvent('lm-drop', target, paths));
+  }
+}
 
 class LogCrumbs extends BreadCrumbs {
   methods: string[] = [];
@@ -85,6 +130,10 @@ describe('filebrowser/model', () => {
   beforeEach(async () => {
     model = new FileBrowserModel({ manager });
     await model.cd(path);
+    // Remove leading '/' from preferredPath (as done by jupyter server)
+    const preferredPath = path.startsWith('/') ? path.slice(1) : path;
+    PageConfig.setOption('preferredPath', preferredPath);
+    PageConfig.setOption('preferredPathIsHome', 'false');
     crumbs = new LogCrumbs({ model });
   });
 
@@ -97,12 +146,58 @@ describe('filebrowser/model', () => {
       it('should create a new BreadCrumbs instance', () => {
         const bread = new BreadCrumbs({ model });
         expect(bread).toBeInstanceOf(BreadCrumbs);
+        // Before attachment, the breadcrumb container is empty (items are
+        // populated during onUpdateRequest which runs after attach).
         const items = crumbs.node.querySelectorAll(ITEM_QUERY);
-        expect(items.length).toBe(1);
+        expect(items.length).toBe(0);
+        // After attachment, the root node should have two child elements:
+        // the breadcrumb container and the path navigator.
+        Widget.attach(bread, document.body);
+        expect(bread.node.children.length).toBe(2);
+        Widget.detach(bread);
+        bread.dispose();
       });
 
       it('should add the jp-BreadCrumbs class', () => {
         expect(crumbs.hasClass('jp-BreadCrumbs')).toBe(true);
+      });
+
+      it('should use the home icon only when the preferred path is home', () => {
+        PageConfig.setOption('preferredPathIsHome', 'true');
+        const bread = new BreadCrumbs({ model });
+        Widget.attach(bread, document.body);
+        MessageLoop.sendMessage(bread, Widget.Msg.UpdateRequest);
+
+        const rootIcon = bread.node.querySelector(
+          `.${BREADCRUMB_ROOT_CLASS} svg`
+        );
+        const preferredHomeIcon = bread.node.querySelector(
+          `.${BREADCRUMB_PREFERRED_CLASS} svg`
+        );
+        expect(rootIcon?.getAttribute('data-icon')).toBe(
+          'ui-components:folder'
+        );
+        expect(preferredHomeIcon?.getAttribute('data-icon')).toBe(
+          'ui-components:home'
+        );
+
+        Widget.detach(bread);
+        bread.dispose();
+
+        PageConfig.setOption('preferredPathIsHome', 'false');
+        const nonHomeBread = new BreadCrumbs({ model });
+        Widget.attach(nonHomeBread, document.body);
+        MessageLoop.sendMessage(nonHomeBread, Widget.Msg.UpdateRequest);
+
+        const preferredIcon = nonHomeBread.node.querySelector(
+          `.${BREADCRUMB_PREFERRED_CLASS} svg`
+        );
+        expect(preferredIcon?.getAttribute('data-icon')).toBe(
+          'ui-components:folder-favorite'
+        );
+
+        Widget.detach(nonHomeBread);
+        nonHomeBread.dispose();
       });
     });
 
@@ -160,6 +255,173 @@ describe('filebrowser/model', () => {
           items = crumbs.node.querySelectorAll(ITEM_QUERY);
           expect(items.length).toBe(4);
           expect(model.path).toBe(path);
+        });
+
+        it('should handle preferred and root breadcrumb clicks', async () => {
+          Widget.attach(crumbs, document.body);
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          // Should start at the preferred path
+          expect(model.path).toBe(path);
+
+          const rootElement = crumbs.node.querySelector(
+            `.${BREADCRUMB_ROOT_CLASS}`
+          ) as HTMLElement;
+          expect(rootElement).not.toBeNull();
+          let promise = signalToPromise(model.pathChanged);
+          simulate(rootElement, 'click');
+          await promise;
+          // Should navigate to the root directory on root breadcrumb click
+          expect(model.path).toBe('');
+
+          // Should find the preferred breadcrumb element as preferred path is set
+          const preferredElement = crumbs.node.querySelector(
+            `.${BREADCRUMB_PREFERRED_CLASS}`
+          ) as HTMLElement;
+          expect(preferredElement).not.toBeNull();
+          promise = signalToPromise(model.pathChanged);
+          simulate(preferredElement, 'click');
+          await promise;
+          // Should navigate back to the preferred path on preferred breadcrumb click
+          expect(model.path).toBe(path);
+        });
+      });
+
+      describe('lm-dragenter', () => {
+        afterEach(() => {
+          Widget.detach(crumbs);
+        });
+
+        it('should refuse the root breadcrumb while browsing the root', async () => {
+          await model.cd('/');
+          expect(model.path).toBe('');
+          Widget.attach(crumbs, document.body);
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          const root = crumbs.node.querySelector(
+            `.${BREADCRUMB_ROOT_CLASS}`
+          ) as HTMLElement;
+          const event = createDragEvent('lm-dragenter', root, ['file.txt']);
+
+          crumbs.handleEvent(event);
+
+          expect(event.preventDefault).not.toHaveBeenCalled();
+          expect(root.classList.contains(DROP_TARGET_CLASS)).toBe(false);
+        });
+
+        it('should refuse the preferred breadcrumb while browsing the preferred path', () => {
+          // The preferred path is the current folder, see `beforeEach`.
+          Widget.attach(crumbs, document.body);
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          const preferred = crumbs.node.querySelector(
+            `.${BREADCRUMB_PREFERRED_CLASS}`
+          ) as HTMLElement;
+          const event = createDragEvent('lm-dragenter', preferred, [
+            `${path}/file.txt`
+          ]);
+
+          crumbs.handleEvent(event);
+
+          expect(event.preventDefault).not.toHaveBeenCalled();
+          expect(preferred.classList.contains(DROP_TARGET_CLASS)).toBe(false);
+        });
+
+        it('should refuse the breadcrumb of the current folder', () => {
+          Widget.attach(crumbs, document.body);
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          const current = crumbs.node.querySelectorAll(ITEM_QUERY)[3];
+          const event = createDragEvent(
+            'lm-dragenter',
+            current as HTMLElement,
+            [`${path}/file.txt`]
+          );
+
+          crumbs.handleEvent(event);
+
+          expect(event.preventDefault).not.toHaveBeenCalled();
+          expect(current.classList.contains(DROP_TARGET_CLASS)).toBe(false);
+        });
+
+        it('should accept the breadcrumb of another folder', () => {
+          Widget.attach(crumbs, document.body);
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          // The crumbs have no width in jsdom, so `items[1]` is the ellipsis.
+          const other = crumbs.node.querySelectorAll(ITEM_QUERY)[2];
+          const event = createDragEvent('lm-dragenter', other as HTMLElement, [
+            `${path}/file.txt`
+          ]);
+
+          crumbs.handleEvent(event);
+
+          expect(event.preventDefault).toHaveBeenCalled();
+          expect(other.classList.contains(DROP_TARGET_CLASS)).toBe(true);
+        });
+      });
+
+      describe('lm-drop', () => {
+        let rename: jest.SpyInstance;
+
+        beforeEach(() => {
+          rename = jest.spyOn(manager, 'rename').mockResolvedValue(null as any);
+          Widget.attach(crumbs, document.body);
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+        });
+
+        afterEach(() => {
+          rename.mockRestore();
+          Widget.detach(crumbs);
+        });
+
+        it('should ignore dropping a file onto the breadcrumb of its folder', () => {
+          // The file comes from another file browser that shows `second`.
+          const items = crumbs.node.querySelectorAll(ITEM_QUERY);
+          dropOn(crumbs, items[2] as HTMLElement, [
+            `${first}/${second}/file.txt`
+          ]);
+
+          expect(rename).not.toHaveBeenCalled();
+        });
+
+        it('should ignore dropping a root file onto the root breadcrumb', () => {
+          // The file comes from another file browser that shows the root.
+          const root = crumbs.node.querySelector(
+            `.${BREADCRUMB_ROOT_CLASS}`
+          ) as HTMLElement;
+          dropOn(crumbs, root, ['file.txt']);
+
+          expect(rename).not.toHaveBeenCalled();
+        });
+
+        it('should move a file when dropped onto a different directory breadcrumb', () => {
+          const items = crumbs.node.querySelectorAll(ITEM_QUERY);
+          dropOn(crumbs, items[2] as HTMLElement, [`${path}/file.txt`]);
+
+          expect(rename).toHaveBeenCalledWith(
+            `${path}/file.txt`,
+            `${first}/${second}/file.txt`
+          );
+        });
+
+        it('should move a file from another folder onto the root breadcrumb while browsing the root', async () => {
+          // The file comes from another file browser that shows `path`.
+          await model.cd('/');
+          MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+          const root = crumbs.node.querySelector(
+            `.${BREADCRUMB_ROOT_CLASS}`
+          ) as HTMLElement;
+          dropOn(crumbs, root, [`${path}/file.txt`]);
+
+          expect(rename).toHaveBeenCalledWith(`${path}/file.txt`, 'file.txt');
+        });
+
+        it('should move only the files that are not in the folder of the breadcrumb', () => {
+          const items = crumbs.node.querySelectorAll(ITEM_QUERY);
+          dropOn(crumbs, items[2] as HTMLElement, [
+            `${path}/file.txt`,
+            `${first}/${second}/other.txt`
+          ]);
+
+          expect(rename.mock.calls).toEqual([
+            [`${path}/file.txt`, `${first}/${second}/file.txt`]
+          ]);
         });
       });
     });
@@ -275,6 +537,131 @@ describe('filebrowser/model', () => {
 
         observer.disconnect();
         model.dispose();
+      });
+    });
+    describe('#breadcrumbitems', () => {
+      it('should show correct number of left and right directories with ellipsis', async () => {
+        const customCrumbs = new LogCrumbs({
+          model,
+          minimumLeftItems: 1,
+          minimumRightItems: 1
+        });
+        Widget.attach(customCrumbs, document.body);
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+
+        let items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        expect(items.length).toBe(4);
+        expect(items[1].textContent).toBe(first);
+        expect((items[1] as HTMLElement).title).toBe(`${first}`);
+        // Ellipsis
+        expect(items[2].querySelector('svg')).not.toBeNull();
+        expect(items[3].textContent).toBe(third);
+        expect((items[3] as HTMLElement).title).toBe(
+          `${first}/${second}/${third}`
+        );
+
+        customCrumbs.minimumLeftItems = 0;
+        customCrumbs.minimumRightItems = 0;
+        customCrumbs.update();
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+        items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        // Should show: preferred, ellipsis
+        expect(items.length).toBe(2);
+        expect(items[1].querySelector('svg')).not.toBeNull();
+
+        customCrumbs.minimumLeftItems = 0;
+        customCrumbs.minimumRightItems = 2;
+        customCrumbs.update();
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+        items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        // Should show: preferred, ellipsis, second, third
+        expect(items.length).toBe(4);
+        expect(items[1].querySelector('svg')).not.toBeNull();
+        expect(items[2].textContent).toBe(second);
+        expect(items[3].textContent).toBe(third);
+
+        // Set minimumLeftItems = 2, minimumRightItems = 0,
+        customCrumbs.minimumLeftItems = 2;
+        customCrumbs.minimumRightItems = 0;
+        customCrumbs.update();
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+        items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        // Should show: preferred, first, second, ellipsis
+        expect(items.length).toBe(4);
+        expect(items[1].textContent).toBe(first);
+        expect(items[2].textContent).toBe(second);
+        expect(items[3].querySelector('svg')).not.toBeNull();
+
+        Widget.detach(customCrumbs);
+        customCrumbs.dispose();
+      });
+
+      it('should show more items when container width increases', async () => {
+        const customCrumbs = new LogCrumbs({
+          model,
+          minimumLeftItems: 0,
+          minimumRightItems: 1
+        });
+
+        // Create a container with controlled width
+        const container = document.createElement('div');
+        container.style.width = '200px';
+        document.body.appendChild(container);
+
+        Widget.attach(customCrumbs, container);
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+
+        // Stub clientWidth to return controlled values
+        const originalClientWidth = Object.getOwnPropertyDescriptor(
+          HTMLElement.prototype,
+          'clientWidth'
+        );
+
+        // First, test with narrow width
+        Object.defineProperty(customCrumbs.node, 'clientWidth', {
+          configurable: true,
+          get: () => 150
+        });
+
+        // Force cache invalidation and recalculation
+        (customCrumbs as any)._cachedWidths = null;
+        (customCrumbs as any)._previousState = null;
+        customCrumbs.update();
+        await framePromise();
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+
+        let items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        const narrowItemCount = items.length;
+
+        // Force truncation in narrow mode by ensuring it's very small if needed
+        // But with 150px and the setup, it should be small.
+
+        Object.defineProperty(customCrumbs.node, 'clientWidth', {
+          configurable: true,
+          get: () => 1000
+        });
+
+        // Force cache invalidation and recalculation
+        (customCrumbs as any)._cachedWidths = null;
+        (customCrumbs as any)._previousState = null;
+        customCrumbs.update();
+        await framePromise();
+        MessageLoop.sendMessage(customCrumbs, Widget.Msg.UpdateRequest);
+
+        items = customCrumbs.node.querySelectorAll(ITEM_QUERY);
+        const wideItemCount = items.length;
+
+        // With sufficient width (1000px), it should show MORE items than the constricted 150px case
+        expect(wideItemCount).toBeGreaterThan(narrowItemCount);
+
+        // Restore original clientWidth descriptor if it existed
+        if (originalClientWidth) {
+          delete (customCrumbs.node as any).clientWidth;
+        }
+
+        Widget.detach(customCrumbs);
+        customCrumbs.dispose();
+        document.body.removeChild(container);
       });
     });
   });

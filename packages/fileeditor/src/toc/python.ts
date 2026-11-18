@@ -3,11 +3,20 @@
 
 /*eslint no-invalid-regexp: ["error", { "allowConstructorFlags": ["d"] }]*/
 
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import { TableOfContents, TableOfContentsModel } from '@jupyterlab/toc';
-import { Widget } from '@lumino/widgets';
-import { FileEditor } from '../widget';
-import { EditorTableOfContentsFactory, IEditorHeading } from './factory';
+import type {
+  DocumentRegistry,
+  IDocumentWidget
+} from '@jupyterlab/docregistry';
+import type { TableOfContents } from '@jupyterlab/toc';
+import { TableOfContentsModel } from '@jupyterlab/toc';
+import type { Widget } from '@lumino/widgets';
+import type { FileEditor } from '../widget';
+import type { IEditorHeading } from './factory';
+import { EditorTableOfContentsFactory } from './factory';
+
+type RegExpExecArrayWithIndices = RegExpExecArray & {
+  indices: [number, number][];
+};
 
 /**
  * Regular expression to create the outline
@@ -17,8 +26,10 @@ try {
   // https://github.com/tc39/proposal-regexp-match-indices was accepted
   // in May 2021 (https://github.com/tc39/proposals/blob/main/finished-proposals.md)
   // So we will fallback to the polyfill regexp-match-indices if not available
+  // eslint-disable-next-line prefer-regex-literals
   KEYWORDS = new RegExp('^\\s*(class |def |async def |from |import )', 'd');
 } catch {
+  // eslint-disable-next-line prefer-regex-literals
   KEYWORDS = new RegExp('^\\s*(class |def |async def |from |import )');
 }
 
@@ -68,14 +79,13 @@ export class PythonTableOfContentsModel extends TableOfContentsModel<
       if (KEYWORDS.flags.includes('d')) {
         hasKeyword = KEYWORDS.exec(line);
       } else {
-        const { default: execWithIndices } = await import(
-          'regexp-match-indices'
-        );
+        const { default: execWithIndices } =
+          await import('regexp-match-indices');
         hasKeyword = execWithIndices(KEYWORDS, line);
       }
       if (hasKeyword) {
         // Index 0 contains the spaces, index 1 is the keyword group
-        const [start] = (hasKeyword as any).indices[1];
+        const [start] = (hasKeyword as RegExpExecArrayWithIndices).indices[1];
         if (indent === 1 && start > 0) {
           indent = start;
         }
@@ -117,9 +127,9 @@ export class PythonTableOfContentsFactory extends EditorTableOfContentsFactory {
   isApplicable(widget: Widget): boolean {
     const isApplicable = super.isApplicable(widget);
 
-    if (isApplicable) {
-      let mime = (widget as any).content?.model?.mimeType;
-      return (
+    if (isApplicable && Private.isFileEditorWidget(widget)) {
+      let mime = widget.content.model.mimeType;
+      return Boolean(
         mime &&
         (mime === 'application/x-python-code' || mime === 'text/x-python')
       );
@@ -139,5 +149,13 @@ export class PythonTableOfContentsFactory extends EditorTableOfContentsFactory {
     configuration?: TableOfContents.IConfig
   ): PythonTableOfContentsModel {
     return new PythonTableOfContentsModel(widget, configuration);
+  }
+}
+
+namespace Private {
+  export function isFileEditorWidget(
+    widget: Widget
+  ): widget is IDocumentWidget<FileEditor, DocumentRegistry.IModel> {
+    return 'content' in widget;
   }
 }

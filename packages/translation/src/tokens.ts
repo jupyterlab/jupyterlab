@@ -3,22 +3,110 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import { PageConfig } from '@jupyterlab/coreutils';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { ServerConnection } from '@jupyterlab/services';
-import { DataConnector, IDataConnector } from '@jupyterlab/statedb';
+import type { ServerConnection } from '@jupyterlab/services';
+import type { IDataConnector } from '@jupyterlab/statedb';
+import { DataConnector } from '@jupyterlab/statedb';
 import { Token } from '@lumino/coreutils';
 import { requestTranslationsAPI } from './server';
 
-/*
- * Translation
+/**
+ * Application default locale.
  */
-export type Language = { [key: string]: string };
+export const DEFAULT_LANGUAGE_CODE = 'en';
+
+/**
+ * Metadata describing translation domain.
+ */
+interface IDomainMetadata {
+  /**
+   * Domain name, e.g. jupyterlab-git.
+   */
+  domain: string;
+  /**
+   * Language.
+   */
+  language: string;
+  /**
+   * Plural forms string in gettext format, e.g. `nplurals=2; plural=(n > 1);`.
+   */
+  plural_forms: string;
+  /**
+   * Version.
+   */
+  version?: string;
+}
+
+/**
+ * Domain data is a key-value map of translations.
+ *
+ * Empty string key is a special value with the domain metadata.
+ */
+export type DomainData = Record<string, string[]> & {
+  '': IDomainMetadata;
+};
+
+/*
+ * Translation data.
+ */
+export type Language = {
+  /**
+   * Warning message, empty string if absent.
+   *
+   * Present if requested language pack is invalid or missing.
+   */
+  message: string;
+  /**
+   * Domain data, keyed by domain name.
+   */
+  data: Record<string, DomainData>;
+};
+
+/**
+ * Description of language.
+ */
+export interface ILanguageData {
+  /**
+   * Display name of the language in the current language.
+   */
+  displayName: string;
+  /**
+   * Display name of the language in the language itself.
+   */
+  nativeName: string;
+}
+
+/*
+ * List of available languages.
+ */
+export interface ILanguageList {
+  /**
+   * Warning message, empty string if absent.
+   *
+   * Present if one or more language packs is invalid.
+   */
+  message: string;
+  /**
+   * List of available languages, keyed by language identifier.
+   */
+  data: Record<string, ILanguageData>;
+}
 
 /**
  * Translation connection interface.
  */
-export interface ITranslatorConnector
-  extends IDataConnector<Language, Language, { language: string }> {}
+export interface ITranslatorConnector extends IDataConnector<
+  Language,
+  Language | ILanguageList,
+  { language: string } | undefined
+> {
+  /**
+   * Fetch language list or given language.
+   */
+  fetch(): Promise<ILanguageList>;
+  fetch(opts: { language: string }): Promise<Language>;
+}
 
 /**
  * A service to connect to the server translation endpoint
@@ -29,7 +117,7 @@ export const ITranslatorConnector = new Token<ITranslatorConnector>(
 );
 
 export class TranslatorConnector
-  extends DataConnector<Language, Language, { language: string }>
+  extends DataConnector<Language, Language, { language: string } | undefined>
   implements ITranslatorConnector
 {
   constructor(
@@ -41,10 +129,16 @@ export class TranslatorConnector
     this._serverSettings = serverSettings;
   }
 
-  async fetch(opts: { language: string }): Promise<Language> {
+  async fetch(): Promise<ILanguageList>;
+  async fetch(opts: { language: string }): Promise<Language>;
+  async fetch(opts?: { language: string }): Promise<Language | ILanguageList> {
+    if (opts && Private.isEnglish(opts.language)) {
+      // The source strings are in English, so there is nothing to translate.
+      return { data: {}, message: '' };
+    }
     return requestTranslationsAPI(
       this._translationsUrl,
-      opts.language,
+      opts?.language ?? '',
       {},
       this._serverSettings
     );
@@ -71,3 +165,22 @@ export const ITranslator = new Token<ITranslator>(
   '@jupyterlab/translation:ITranslator',
   'A service to translate strings.'
 );
+
+/**
+ * A namespace for module-private functionality.
+ */
+namespace Private {
+  /**
+   * Whether `locale` is English, for which the server has no translations.
+   *
+   * `default` stands for the server locale, such as `en_US`. An explicit
+   * English locale other than `en` is still requested, as a custom language
+   * pack may provide it.
+   */
+  export function isEnglish(locale: string): boolean {
+    if (locale === 'default') {
+      return /^en(?:[-_]|$)/.test(PageConfig.getOption('serverLocale'));
+    }
+    return locale === DEFAULT_LANGUAGE_CODE;
+  }
+}

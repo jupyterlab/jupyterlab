@@ -2,15 +2,21 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Token } from '@lumino/coreutils';
+import type { ISignal } from '@lumino/signaling';
 import type MermaidType from 'mermaid';
+import type { MermaidConfig } from 'mermaid/dist/config.type';
 
 // documented upstream constants
 export const MERMAID_MIME_TYPE = 'text/vnd.mermaid';
 export const MERMAID_FILE_EXTENSIONS = ['.mmd', '.mermaid'];
 
+// layout sniffing
+export const RE_DEFAULT_RENDERER =
+  /\bdefaultRenderer["']?\s*:\s*(["']?)(\b[^"'\s]+\b)(\1)/g;
+
 // mermaid themes
-export const MERMAID_DEFAULT_THEME = 'default';
-export const MERMAID_DARK_THEME = 'dark';
+export const MERMAID_DEFAULT_THEME: MermaidConfig['theme'] = 'default';
+export const MERMAID_DARK_THEME: MermaidConfig['theme'] = 'dark';
 
 // DOM
 export const MERMAID_CLASS = 'jp-RenderedMermaid';
@@ -32,6 +38,11 @@ export const IMermaidManager = new Token<IMermaidManager>(
  */
 export interface IMermaidManager {
   /**
+   * A signal emitted when the theme changes and rendered diagrams should be redrawn.
+   */
+  readonly themeChanged?: ISignal<this, void>;
+
+  /**
    * Get the (potentially uninitialized) mermaid module.
    */
   getMermaid(): Promise<typeof MermaidType>;
@@ -44,7 +55,10 @@ export interface IMermaidManager {
   /**
    * Render mermaid source to an SVG string with extracted metadata.
    */
-  renderSvg(text: string): Promise<IMermaidManager.IRenderInfo>;
+  renderSvg(
+    text: string,
+    options?: IMermaidManager.IRenderOptions
+  ): Promise<IMermaidManager.IRenderInfo>;
 
   /**
    * Render and cache mermaid source as a figure of an image, or a unsuccessful parser message.
@@ -61,6 +75,17 @@ export interface IMermaidManager {
  * A namespace for the mermaid manager.
  */
 export namespace IMermaidManager {
+  /**
+   * Options for rendering a mermaid text-based diagram.
+   */
+  export interface IRenderOptions {
+    /**
+     * The mermaid theme to use instead of the one that follows the JupyterLab
+     * theme. A theme set in the diagram source still takes precedence.
+     */
+    theme?: MermaidConfig['theme'];
+  }
+
   /**
    * The results of a successful rendering of a mermaid text-based diagram.
    */

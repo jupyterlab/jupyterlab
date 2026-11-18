@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/markdownviewer",
-  "version": "4.3.0",
+  "version": "4.7.0-beta.2",
   "description": "JupyterLab - Markdown viewer Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -32,24 +32,32 @@
   ],
   "scripts": {
     "build": "tsc -b",
+    "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "test": "jest",
+    "test:cov": "jest --collect-coverage",
+    "test:debug": "node --inspect-brk ../../node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk ../../node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.4.0",
-    "@jupyterlab/coreutils": "^6.3.0",
-    "@jupyterlab/docregistry": "^4.3.0",
-    "@jupyterlab/rendermime": "^4.3.0",
-    "@jupyterlab/toc": "^6.3.0",
-    "@jupyterlab/translation": "^4.3.0",
-    "@lumino/coreutils": "^2.2.0",
-    "@lumino/messaging": "^2.0.2",
-    "@lumino/signaling": "^2.1.3",
-    "@lumino/widgets": "^2.5.0"
+    "@jupyterlab/apputils": "^4.8.0-beta.2",
+    "@jupyterlab/coreutils": "^6.7.0-beta.2",
+    "@jupyterlab/docregistry": "^4.7.0-beta.2",
+    "@jupyterlab/rendermime": "^4.7.0-beta.2",
+    "@jupyterlab/toc": "^6.7.0-beta.2",
+    "@jupyterlab/translation": "^4.7.0-beta.2",
+    "@lumino/coreutils": "^2.2.3",
+    "@lumino/messaging": "^2.0.5",
+    "@lumino/signaling": "^2.1.6",
+    "@lumino/widgets": "^2.10.0"
   },
   "devDependencies": {
+    "@jupyterlab/testing": "^4.7.0-beta.2",
+    "@types/jest": "^29.2.0",
+    "jest": "^29.2.0",
     "rimraf": "~5.0.5",
-    "typescript": "~5.1.6"
+    "typescript": "~5.9.3"
   },
   "publishConfig": {
     "access": "public"

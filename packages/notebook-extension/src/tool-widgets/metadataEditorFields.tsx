@@ -4,12 +4,13 @@
  */
 
 import React from 'react';
-import { FieldProps } from '@rjsf/utils';
-import { INotebookTracker, NotebookTools } from '@jupyterlab/notebook';
-import { ITranslator } from '@jupyterlab/translation';
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import type { FieldProps } from '@rjsf/utils';
+import type { INotebookTracker } from '@jupyterlab/notebook';
+import { NotebookTools } from '@jupyterlab/notebook';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { ObservableJSON } from '@jupyterlab/observables';
-import { JSONObject } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
 
 const CELL_METADATA_EDITOR_CLASS = 'jp-CellMetadataEditor';
 const NOTEBOOK_METADATA_EDITOR_CLASS = 'jp-NotebookMetadataEditor';
@@ -60,19 +61,39 @@ export class CellMetadataField extends NotebookTools.MetadataEditorTool {
   }
 
   private _onSourceChanged() {
-    if (this.editor.source) {
-      this._tracker.activeCell?.model.sharedModel.setMetadata(
-        this.editor.source.toJSON()
-      );
+    if (this._tracker.currentWidget?.viewOnly === true) {
+      return;
+    }
+    const activeCell = this._tracker.activeCell?.model.sharedModel;
+    if (activeCell && this.editor.source) {
+      const metadataKeys = Object.keys(activeCell.metadata ?? {});
+      const source = this.editor.source.toJSON() ?? {};
+
+      activeCell.transact(() => {
+        // Iterate over all existing metadata keys and delete each one.
+        // This ensures that any keys not present in the new metadata are removed.
+        metadataKeys.forEach(key => activeCell.deleteMetadata(key));
+        activeCell.setMetadata(source);
+      });
     }
   }
 
   render(props: FieldProps): JSX.Element {
     const cell = this._tracker.activeCell;
+    // Replace and dispose the source created for the previous render.
+    const previousSource = this.editor.source;
     this.editor.source = cell
       ? new ObservableJSON({ values: cell.model.metadata as JSONObject })
       : null;
+    previousSource?.dispose();
     this.editor.source?.changed.connect(this._onSourceChanged, this);
+    // The `source` setter above resets `readOnly` based only on whether a
+    // cell is selected, so it must be re-applied here to also account for
+    // view-only notebooks.
+    this.editor.editor.setOption(
+      'readOnly',
+      this._tracker.currentWidget?.viewOnly === true
+    );
 
     return (
       <div className={CELL_METADATA_EDITOR_CLASS}>
@@ -103,6 +124,9 @@ export class NotebookMetadataField extends NotebookTools.MetadataEditorTool {
   }
 
   private _onSourceChanged() {
+    if (this._tracker.currentWidget?.viewOnly === true) {
+      return;
+    }
     if (this.editor.source) {
       this._tracker.currentWidget?.model?.sharedModel.setMetadata(
         this.editor.source.toJSON()
@@ -112,10 +136,17 @@ export class NotebookMetadataField extends NotebookTools.MetadataEditorTool {
 
   render(props: FieldProps): JSX.Element {
     const notebook = this._tracker.currentWidget;
+    // Replace and dispose the source created for the previous render.
+    const previousSource = this.editor.source;
     this.editor.source = notebook
       ? new ObservableJSON({ values: notebook.model?.metadata as JSONObject })
       : null;
+    previousSource?.dispose();
     this.editor.source?.changed.connect(this._onSourceChanged, this);
+    // The `source` setter above resets `readOnly` based only on whether a
+    // notebook is active, so it must be re-applied here to also account for
+    // view-only notebooks.
+    this.editor.editor.setOption('readOnly', notebook?.viewOnly === true);
 
     return (
       <div className={NOTEBOOK_METADATA_EDITOR_CLASS}>

@@ -12,7 +12,7 @@ import { Toolbar } from './toolbar';
 export class PanelWithToolbar extends Panel implements Toolbar.IWidgetToolbar {
   constructor(options: PanelWithToolbar.IOptions = {}) {
     super(options);
-    this._toolbar = new Toolbar();
+    this._toolbar = options.toolbar ?? new Toolbar();
   }
 
   /**

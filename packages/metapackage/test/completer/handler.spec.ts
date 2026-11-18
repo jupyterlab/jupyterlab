@@ -1,21 +1,38 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
-import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
-import { Signal } from '@lumino/signaling';
+import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import {
+  CodeMirrorEditor,
+  EditorLanguageRegistry,
+  ybinding
+} from '@jupyterlab/codemirror';
+import type { Signal } from '@lumino/signaling';
+import type {
+  ICompletionContext,
+  ICompletionProvider
+} from '@jupyterlab/completer';
 import {
   Completer,
   CompleterModel,
   CompletionHandler,
   CompletionTriggerKind,
-  ICompletionContext,
-  ICompletionProvider,
+  ContextCompleterProvider,
+  KernelCompleterProvider,
   ProviderReconciliator
 } from '@jupyterlab/completer';
+import { isHintableMimeType } from '@jupyterlab/completer/lib/utils';
 import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
+import { KernelMessage } from '@jupyterlab/services';
+import {
+  KernelMock,
+  SessionConnectionMock
+} from '@jupyterlab/services/lib/testutils';
+import { sleep } from '@jupyterlab/testing';
 import { Widget } from '@lumino/widgets';
-import { ISharedFile, ISharedText, SourceChange } from '@jupyter/ydoc';
+import { YFile } from '@jupyter/ydoc';
+import type { ISharedFile, ISharedText, SourceChange } from '@jupyter/ydoc';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 
 class TestCompleterModel extends CompleterModel {
@@ -72,6 +89,10 @@ class FooCompletionProvider implements ICompletionProvider {
     changed: SourceChange,
     context?: ICompletionContext
   ) {
+    const mimeType = context?.editor?.model.mimeType ?? '';
+    if (!isHintableMimeType(mimeType)) {
+      return false;
+    }
     return this._continuousHint;
   }
 }
@@ -338,6 +359,98 @@ describe('@jupyterlab/completer', () => {
       });
     });
 
+    describe('#invoke()', () => {
+      const kernel = new KernelMock({});
+      let anchor: CodeEditorWrapper;
+      let handler: CompletionHandler;
+
+      beforeAll(async () => {
+        const languages = new EditorLanguageRegistry();
+        for (const spec of EditorLanguageRegistry.getDefaultLanguages().filter(
+          language => language.name === 'Python'
+        )) {
+          languages.addLanguage(spec);
+          await languages.getLanguage(spec.name);
+        }
+        const sharedModel = new YFile();
+        anchor = new CodeEditorWrapper({
+          model: new CodeEditor.Model({ sharedModel }),
+          factory: options =>
+            new CodeMirrorEditor({
+              ...options,
+              languages,
+              extensions: [
+                ...(options.extensions ?? []),
+                ybinding({
+                  ytext: sharedModel.ysource,
+                  undoManager: sharedModel.undoManager ?? undefined
+                })
+              ]
+            })
+        });
+        anchor.model.mimeType = 'text/x-python';
+        Widget.attach(anchor, document.body);
+
+        handler = new CompletionHandler({
+          reconciliator: new ProviderReconciliator({
+            context: {
+              widget: anchor,
+              editor: anchor.editor,
+              session: new SessionConnectionMock({}, kernel)
+            },
+            providers: [
+              new ContextCompleterProvider(),
+              new KernelCompleterProvider()
+            ],
+            timeout: 1000
+          }),
+          completer: new Completer({
+            editor: null,
+            model: new CompleterModel()
+          })
+        });
+        handler.editor = anchor.editor;
+      });
+
+      afterAll(() => {
+        anchor.dispose();
+        handler.completer.dispose();
+        handler.dispose();
+      });
+
+      it('should replace the typed prefix after characters outside the BMP', async () => {
+        // Kernels count code points, so in this text `wa` starts at 49.
+        kernel.requestComplete = async () =>
+          KernelMessage.createMessage<KernelMessage.ICompleteReplyMsg>({
+            session: '',
+            channel: 'shell',
+            msgType: 'complete_reply',
+            content: {
+              status: 'ok',
+              matches: ['waterfall'],
+              cursor_start: 49,
+              cursor_end: 51,
+              metadata: {}
+            }
+          });
+        anchor.model.sharedModel.setSource(
+          'print("🔬 XRD ANALYSIS PROGRAM 🔬")\n\nwaterfall = 1\nwa'
+        );
+        await sleep(10);
+        anchor.editor.setCursorPosition({ line: 3, column: 2 });
+
+        handler.invoke();
+        await sleep(10);
+        (handler.completer.selected as Signal<Completer, string>).emit(
+          'waterfall'
+        );
+
+        expect(anchor.model.sharedModel.getSource()).toBe(
+          'print("🔬 XRD ANALYSIS PROGRAM 🔬")\n\nwaterfall = 1\nwaterfall'
+        );
+      });
+    });
+
     describe('#autoCompletion', () => {
       let anchor: CodeEditorWrapper;
       let provider: FooCompletionProvider;
@@ -374,7 +487,6 @@ describe('@jupyterlab/completer', () => {
 
       it('should use Invoked for invoke()', async () => {
         expect(provider.triggers.length).toEqual(0);
-
         handler.editor!.model.sharedModel.setSource('foo.');
         anchor.node.focus();
         await new Promise(process.nextTick);
@@ -424,12 +536,50 @@ describe('@jupyterlab/completer', () => {
         expect(spy).toHaveBeenCalledTimes(1);
         expect(spy).toHaveBeenLastCalledWith(
           false,
-          {
-            sourceChange: [{ retain: 4 }, { insert: 'a' }]
-          } as SourceChange,
+          { sourceChange: [{ retain: 4 }, { insert: 'a' }] } as SourceChange,
           context
         );
         spy.mockRestore();
+      });
+
+      it('should ignore stale completion replies', async () => {
+        handler.editor!.model.sharedModel.setSource('foo.');
+        await new Promise(process.nextTick);
+        anchor.editor.setCursorPosition({ line: 0, column: 4 });
+        handler.completer.reset();
+
+        let resolvePending!: (
+          reply: CompletionHandler.ICompletionItemsReply
+        ) => void;
+        const pending = new Promise<CompletionHandler.ICompletionItemsReply>(
+          resolve => {
+            resolvePending = resolve;
+          }
+        );
+        const fetch = jest.spyOn(provider, 'fetch').mockReturnValue(pending);
+        const shouldShow = jest
+          .spyOn(provider, 'shouldShowContinuousHint')
+          .mockReturnValueOnce(true)
+          .mockReturnValue(false);
+        const model = handler.completer.model!;
+
+        handler.editor!.model.sharedModel.updateSource(4, 4, 'a');
+        await new Promise(process.nextTick);
+        expect(fetch).toHaveBeenCalledTimes(1);
+
+        handler.editor!.model.sharedModel.updateSource(5, 5, ':');
+        await new Promise(process.nextTick);
+        resolvePending({
+          start: 0,
+          end: 1,
+          items: [{ label: 'alpha' }]
+        });
+        await new Promise(process.nextTick);
+
+        expect(model.original).toBeNull();
+        expect(model.completionItems()).toHaveLength(0);
+        fetch.mockRestore();
+        shouldShow.mockRestore();
       });
     });
 
@@ -465,6 +615,67 @@ describe('@jupyterlab/completer', () => {
       expect(editor.getCursorPosition()).toEqual({
         line,
         column: column + 6
+      });
+    });
+
+    describe('#autoCompletion (non-code cells)', () => {
+      let anchor: CodeEditorWrapper;
+      let provider: FooCompletionProvider;
+      let handler: CompletionHandler;
+      let context: symbol;
+
+      beforeEach(() => {
+        anchor = createEditorWidget();
+        Widget.attach(anchor, document.body);
+
+        context = { editor: anchor.editor } as any;
+        provider = new FooCompletionProvider(true);
+        handler = new CompletionHandler({
+          reconciliator: new ProviderReconciliator({
+            context: context as any,
+            providers: [provider],
+            timeout: 0
+          }),
+          completer: new Completer({
+            editor: null,
+            model: new CompleterModel()
+          })
+        });
+
+        handler.editor = anchor.editor;
+        handler.autoCompletion = true;
+      });
+
+      afterEach(() => {
+        handler.completer.dispose();
+        handler.dispose();
+        anchor.dispose();
+      });
+
+      it('should NOT trigger automcompletion for markdown mimeType', async () => {
+        handler.editor!.model.mimeType = 'text/x-ipythongfm';
+
+        anchor.node.focus();
+        handler.editor!.model.sharedModel.setSource('foo.');
+        await new Promise(process.nextTick);
+
+        handler.editor!.model.sharedModel.updateSource(4, 4, 'a');
+        await new Promise(process.nextTick);
+
+        expect(provider.triggers).toHaveLength(0);
+      });
+
+      it('should NOT trigger automcompletion for text mimeType', async () => {
+        handler.editor!.model.mimeType = 'text/plain';
+
+        anchor.node.focus();
+        handler.editor!.model.sharedModel.setSource('foo.');
+        await new Promise(process.nextTick);
+
+        handler.editor!.model.sharedModel.updateSource(4, 4, 'a');
+        await new Promise(process.nextTick);
+
+        expect(provider.triggers).toHaveLength(0);
       });
     });
   });

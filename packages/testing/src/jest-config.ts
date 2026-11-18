@@ -7,20 +7,42 @@ import path from 'path';
 
 const esModules = [
   '@codemirror',
+  '@marijn',
   '@microsoft',
   '@jupyter/react-components',
   '@jupyter/web-components',
   '@jupyter/ydoc',
+  '@jupyterlab/',
+  'color',
+  'dom-serializer',
+  'domelementtype',
+  'domhandler',
+  'domutils',
+  'entities',
   'exenv-es6',
+  'htmlparser2',
   'lib0',
+  'marked',
   'nanoid',
   'vscode-ws-jsonrpc',
   'y-protocols',
   'y-websocket',
   'yjs'
-].join('|');
+];
 
-module.exports = function (baseDir: string) {
+/**
+ * Options for the Jest configuration.
+ */
+interface IOptions {
+  /**
+   * More packages that Jest has to transform because they ship ES modules.
+   * An entry also matches the packages whose names start with it.
+   */
+  esModules?: string[];
+}
+
+module.exports = function (baseDir: string, options: IOptions = {}) {
+  const modules = [...esModules, ...(options.esModules ?? [])].join('|');
   return {
     coverageReporters: ['json', 'lcov', 'text', 'html'],
     coverageDirectory: path.join(baseDir, 'coverage'),
@@ -35,6 +57,8 @@ module.exports = function (baseDir: string) {
       'cjs'
     ],
     moduleNameMapper: {
+      // MathJax's ESM loader uses import.meta; use its CommonJS build in Jest.
+      '^@mathjax/(.*)/mjs/(.*)$': '@mathjax/$1/cjs/$2',
       '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
       '\\.(gif|ttf|eot)$': '@jupyterlab/testing/lib/jest-file-mock.js'
     },
@@ -48,14 +72,13 @@ module.exports = function (baseDir: string) {
     transform: {
       '\\.svg$': '@jupyterlab/testing/lib/jest-raw-loader.js',
       // Extracted from https://github.com/kulshekhar/ts-jest/blob/v29.0.3/presets/index.js
-      '^.+\\.tsx?$': [
-        'ts-jest/legacy',
-        {
-          tsconfig: `./tsconfig.test.json`
-        }
-      ],
+      '^.+\\.tsx?$': ['ts-jest/legacy', { tsconfig: `./tsconfig.test.json` }],
       '^.+\\.jsx?$': 'babel-jest'
     },
-    transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`]
+    // Check the innermost package of a path, so that a listed package is
+    // transformed also when it is installed inside an unlisted one.
+    transformIgnorePatterns: [
+      `/node_modules/(?!${modules})(?:@[^/]+/)?[^/]+(?!.*/node_modules/)`
+    ]
   };
 };

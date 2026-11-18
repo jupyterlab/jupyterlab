@@ -1,10 +1,49 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import { IJupyterLabPageFixture } from '@jupyterlab/galata';
-import { Locator } from '@playwright/test';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { expect } from '@jupyterlab/galata';
+import type { Locator } from '@playwright/test';
 
 const OUTER_SELECTOR = '.jp-WindowedPanel-outer';
 const DRAGGABLE_AREA = '.jp-InputArea-prompt';
+
+/**
+ * Wait for visible launcher card images to load before taking screenshots.
+ */
+export async function waitForLauncherIcons(
+  page: IJupyterLabPageFixture
+): Promise<void> {
+  const launcher = page.locator('.jp-Launcher:visible');
+  await launcher.locator('.jp-LauncherCard').first().waitFor();
+  await page.waitForCondition(() =>
+    launcher.locator('.jp-Launcher-kernelIcon').evaluateAll(images =>
+      images.every(image => {
+        return (
+          image instanceof HTMLImageElement &&
+          image.complete &&
+          image.naturalWidth > 0
+        );
+      })
+    )
+  );
+}
+
+/**
+ * Wait for the toolbar of the active cell before taking screenshots: the
+ * cell toolbar tracker shows or hides it in an idle callback.
+ */
+export async function waitForActiveCellToolbar(
+  page: IJupyterLabPageFixture
+): Promise<void> {
+  await page
+    .locator('.jp-Notebook-cell.jp-mod-active .jp-cell-toolbar')
+    .waitFor({ state: 'attached' });
+  // Idle callbacks run in the order they were requested, so this one runs
+  // after the one that shows or hides the toolbar.
+  await page.evaluate(
+    () => new Promise<void>(resolve => requestIdleCallback(() => resolve()))
+  );
+}
 
 /**
  * Measure how much of the **notebook** viewport does a cell take up.
@@ -39,12 +78,67 @@ export async function positionCellPartiallyBelowViewport(
   ratio: number
 ): Promise<void> {
   const scroller = notebook.locator(OUTER_SELECTOR).first();
-  const notebookBbox = await scroller.boundingBox();
+
+  // `page.mouse.wheel` returns before the browser applies the scroll, so wait
+  // for `scrollTop` to change; a wheel of less than one pixel may not scroll
+  const wheel = async (deltaY: number) => {
+    const delta = Math.round(deltaY);
+    if (delta === 0) {
+      return;
+    }
+    const before = await scroller.evaluate(node => node.scrollTop);
+    await page.mouse.wheel(0, delta);
+    await expect
+      .poll(() => scroller.evaluate(node => node.scrollTop))
+      .not.toBe(before);
+  };
+
+  // Helper to measure actual visible pixels of the cell
+  const measureVisiblePixels = async (): Promise<number> => {
+    const notebookBbox = await scroller.boundingBox();
+    const cellBbox = await cell.boundingBox();
+    const cellTop = cellBbox.y;
+    const cellBottom = cellBbox.y + cellBbox.height;
+    const viewportTop = notebookBbox.y;
+    const viewportBottom = notebookBbox.y + notebookBbox.height;
+
+    if (cellBottom <= viewportTop || cellTop >= viewportBottom) {
+      return 0; // Cell not in viewport
+    }
+
+    const visibleTop = Math.max(cellTop, viewportTop);
+    const visibleBottom = Math.min(cellBottom, viewportBottom);
+    return visibleBottom - visibleTop;
+  };
+
+  // Calculate target visible pixels
   const cellBbox = await cell.boundingBox();
+  const targetPixels = cellBbox.height * ratio;
+
+  // Initial scroll estimate
+  const notebookBbox = await scroller.boundingBox();
   await page.mouse.move(notebookBbox.x, notebookBbox.y);
-  const scrollOffset =
-    cellBbox.y - notebookBbox.y - notebookBbox.height + cellBbox.height * ratio;
-  await page.mouse.wheel(0, scrollOffset);
+
+  const initialScrollOffset =
+    cellBbox.y - notebookBbox.y - notebookBbox.height + targetPixels;
+  await wheel(initialScrollOffset);
+
+  // Optimization loop to refine positioning
+  const MAX_ITERATIONS = 10;
+  const TOLERANCE = 1; // 1 pixel tolerance
+
+  for (let i = 0; i < MAX_ITERATIONS; i++) {
+    const actualPixels = await measureVisiblePixels();
+    const error = actualPixels - targetPixels;
+
+    if (Math.abs(error) <= TOLERANCE) {
+      break; // Achieved target within tolerance
+    }
+
+    // Correct by half the error amount
+    const correction = -error / 2;
+    await wheel(correction);
+  }
 }
 
 /**
@@ -91,4 +185,30 @@ export function isValidJSON(value: string): boolean {
  */
 export function isBlank(value: string): boolean {
   return value.trim().length === 0;
+}
+
+/**
+ * Get the font size of items in the file browser listing.
+ */
+export async function getFileListFontSize(
+  page: IJupyterLabPageFixture
+): Promise<number> {
+  const itemElement = page.locator(
+    '.jp-DirListing-content .jp-DirListing-itemText'
+  );
+  await itemElement.waitFor();
+  const fontSize = await itemElement.evaluate(
+    el => getComputedStyle(el).fontSize
+  );
+  return parseInt(fontSize);
+}
+
+/**
+ * Change font size using Settings > Theme menu.
+ */
+export async function changeCodeFontSize(
+  page: IJupyterLabPageFixture,
+  menuOption: string
+): Promise<void> {
+  await page.menu.clickMenuItem(`Settings>Theme>${menuOption}`);
 }

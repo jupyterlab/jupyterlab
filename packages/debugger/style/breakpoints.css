@@ -18,6 +18,7 @@
 .jp-DebuggerBreakpoint {
   display: flex;
   align-items: center;
+  height: 24px;
 }
 
 .jp-DebuggerBreakpoint:hover {
@@ -25,11 +26,12 @@
   cursor: pointer;
 }
 
-.jp-DebuggerBreakpoint-marker {
-  font-size: 20px;
-  padding-right: 5px;
-  content: '●';
-  color: var(--jp-error-color1);
+.jp-DebuggerBreakpoint-container {
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
 }
 
 .jp-DebuggerBreakpoint-source {
@@ -56,7 +58,6 @@
 }
 
 [data-jp-debugger='true'] .cm-breakpoint-gutter .cm-gutterElement:empty::after {
-  content: '●';
   color: var(--jp-error-color1);
   opacity: 0;
 }
@@ -66,11 +67,8 @@
 }
 
 .cm-breakpoint-gutter .cm-gutterElement {
-  color: var(--jp-error-color1);
-  padding-left: 5px;
-  font-size: 20px;
-  position: relative;
-  top: -5px;
+  padding-top: 1.1px;
+  height: 18.2px;
 }
 
 [data-jp-debugger='true'].jp-Editor

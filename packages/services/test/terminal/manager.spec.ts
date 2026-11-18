@@ -8,6 +8,7 @@ import {
   TerminalAPI,
   TerminalManager
 } from '../../src';
+import { TerminalAPIClient } from '../../src/terminal/restapi';
 
 const server = new JupyterServer();
 
@@ -18,6 +19,12 @@ beforeAll(async () => {
 afterAll(async () => {
   await server.shutdown();
 });
+
+class UnavailableTerminalAPIClient extends TerminalAPIClient {
+  override get isAvailable() {
+    return false;
+  }
+}
 
 describe('terminal', () => {
   afterAll(async () => {
@@ -85,8 +92,25 @@ describe('terminal', () => {
     });
 
     describe('#isAvailable()', () => {
-      it('should test whether terminal sessions are available', () => {
+      it('should return true from exposed function if available', async () => {
         expect(Terminal.isAvailable()).toBe(true);
+      });
+      it('should return true from method if available', async () => {
+        expect(manager.isAvailable()).toBe(true);
+      });
+      it('should return false if unavailable', async () => {
+        const terminalAPIClient = new UnavailableTerminalAPIClient();
+        const manager = new TerminalManager({ terminalAPIClient });
+        expect(manager.isAvailable()).toBe(false);
+        manager.dispose();
+      });
+    });
+
+    describe('#dispose()', () => {
+      it('should dispose without errors when terminals are not available', async () => {
+        const terminalAPIClient = new UnavailableTerminalAPIClient();
+        const manager = new TerminalManager({ terminalAPIClient });
+        expect(manager.dispose.bind(manager)).not.toThrow();
       });
     });
 

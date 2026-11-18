@@ -1,14 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { PageConfig } from '@jupyterlab/coreutils';
 import { Base64ModelFactory } from '@jupyterlab/docregistry';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { ServiceManager } from '@jupyterlab/services';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { IConnectionStatus } from '@jupyterlab/services';
+import { ConnectionStatus, ServiceManager } from '@jupyterlab/services';
 import { PromiseDelegate, Token } from '@lumino/coreutils';
-import { JupyterFrontEnd, JupyterFrontEndPlugin } from './frontend';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { JupyterFrontEndPlugin } from './frontend';
+import { JupyterFrontEnd } from './frontend';
 import { createRendermimePlugins } from './mimerenderers';
-import { ILabShell, LabShell } from './shell';
+import type { ILabShell } from './shell';
+import { LabShell } from './shell';
 import { LabStatus } from './status';
 
 /**
@@ -31,16 +37,8 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
         })
     });
 
-    // Create an IInfo dictionary from the options to override the defaults.
-    const info = Object.keys(JupyterLab.defaultInfo).reduce((acc, val) => {
-      if (val in options) {
-        (acc as any)[val] = JSON.parse(JSON.stringify((options as any)[val]));
-      }
-      return acc;
-    }, {} as Partial<JupyterLab.IInfo>);
-
     // Populate application info.
-    this._info = { ...JupyterLab.defaultInfo, ...info };
+    this._info = new JupyterLab.Info(options);
 
     this.restored = this.shell.restored
       .then(async () => {
@@ -126,6 +124,8 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
 
   /**
    * A list of all errors encountered when registering plugins.
+   *
+   * @deprecated This is unused and may be removed in a future version.
    */
   readonly registerPluginErrors: Array<Error> = [];
 
@@ -169,6 +169,8 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
    * Register plugins from a plugin module.
    *
    * @param mod - The plugin module to register.
+   *
+   * @deprecated This is unused and may be removed in a future version.
    */
   registerPluginModule(mod: JupyterLab.IPluginModule): void {
     let data = mod.default;
@@ -183,7 +185,9 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
       try {
         this.registerPlugin(item);
       } catch (error) {
-        this.registerPluginErrors.push(error);
+        this.registerPluginErrors.push(
+          error instanceof Error ? error : new Error(String(error))
+        );
       }
     });
   }
@@ -192,6 +196,8 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
    * Register the plugins from multiple plugin modules.
    *
    * @param mods - The plugin modules to register.
+   *
+   * @deprecated This is unused and may be removed in a future version.
    */
   registerPluginModules(mods: JupyterLab.IPluginModule[]): void {
     mods.forEach(mod => {
@@ -296,7 +302,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
       .catch(console.warn);
   }
 
-  private _info: JupyterLab.IInfo = JupyterLab.defaultInfo;
+  private _info: JupyterLab.IInfo;
   private _paths: JupyterFrontEnd.IPaths;
   private _allPluginsActivated = new PromiseDelegate<void>();
 }
@@ -309,13 +315,32 @@ export namespace JupyterLab {
    * The options used to initialize a JupyterLab object.
    */
   export interface IOptions
-    extends Partial<JupyterFrontEnd.IOptions<ILabShell>>,
-      Partial<IInfo> {
+    extends Partial<JupyterFrontEnd.IOptions<ILabShell>>, Partial<IInfo> {
+    /**
+     * URL and directory paths used by a Jupyter front-end.
+     */
     paths?: Partial<JupyterFrontEnd.IPaths>;
+
+    /**
+     * Application connection status.
+     */
+    connectionStatus?: IConnectionStatus;
+
+    /**
+     * A signal announcing plugins which become known only after the
+     * application started, for example the plugins of disabled federated
+     * extensions, whose modules are loaded once the application is idle.
+     *
+     * On each emission, the plugins are appended to `info.availablePlugins`,
+     * the ids of the disabled ones are added to `info.disabled.matches`, and
+     * `info.availablePluginsChanged` is emitted. An emission before the
+     * application is constructed is not seen.
+     */
+    availablePluginsAdded?: ISignal<unknown, IPluginInfo[]>;
   }
 
   /**
-   * The layout restorer token.
+   * The application info token.
    */
   export const IInfo = new Token<IInfo>(
     '@jupyterlab/application:IInfo',
@@ -352,6 +377,13 @@ export namespace JupyterLab {
     readonly availablePlugins: IPluginInfo[];
 
     /**
+     * A signal emitted when `availablePlugins` changes, for example once the
+     * plugins of disabled federated extensions, which are loaded after
+     * startup, are known.
+     */
+    readonly availablePluginsChanged?: ISignal<IInfo, void>;
+
+    /**
      * Whether files are cached on the server.
      */
     readonly filesCached: boolean;
@@ -369,11 +401,143 @@ export namespace JupyterLab {
     isConnected: boolean;
   }
 
+  /**
+   * The information about a JupyterLab application.
+   */
+  export class Info implements IInfo {
+    constructor({
+      connectionStatus,
+      availablePluginsAdded,
+      ...options
+    }: Partial<IInfo> & {
+      connectionStatus?: IConnectionStatus;
+      availablePluginsAdded?: ISignal<unknown, IPluginInfo[]>;
+    } = {}) {
+      this._connectionStatus = connectionStatus ?? new ConnectionStatus();
+
+      this._availablePlugins = options.availablePlugins ?? [
+        ...JupyterLab.defaultInfo.availablePlugins
+      ];
+      this._devMode = options.devMode ?? JupyterLab.defaultInfo.devMode;
+      this._deferred = JSON.parse(
+        JSON.stringify(options.deferred ?? JupyterLab.defaultInfo.deferred)
+      );
+      this._disabled = JSON.parse(
+        JSON.stringify(options.disabled ?? JupyterLab.defaultInfo.disabled)
+      );
+      this._filesCached =
+        options.filesCached ?? JupyterLab.defaultInfo.filesCached;
+      this._mimeExtensions = JSON.parse(
+        JSON.stringify(
+          options.mimeExtensions ?? JupyterLab.defaultInfo.mimeExtensions
+        )
+      );
+      this.isConnected =
+        options.isConnected ?? JupyterLab.defaultInfo.isConnected;
+
+      availablePluginsAdded?.connect(this._onAvailablePluginsAdded, this);
+    }
+
+    /**
+     * The information about available plugins.
+     */
+    get availablePlugins(): IPluginInfo[] {
+      return this._availablePlugins;
+    }
+
+    /**
+     * A signal emitted when `availablePlugins` changes.
+     */
+    get availablePluginsChanged(): ISignal<IInfo, void> {
+      return this._availablePluginsChanged;
+    }
+
+    /**
+     * Whether the application is in dev mode.
+     */
+    get devMode(): boolean {
+      return this._devMode;
+    }
+
+    /**
+     * The collection of deferred extension patterns and matched extensions.
+     */
+    get deferred(): { patterns: string[]; matches: string[] } {
+      return this._deferred;
+    }
+
+    /**
+     * The collection of disabled extension patterns and matched extensions.
+     */
+    get disabled(): { patterns: string[]; matches: string[] } {
+      return this._disabled;
+    }
+
+    /**
+     * Whether files are cached on the server.
+     */
+    get filesCached(): boolean {
+      return this._filesCached;
+    }
+
+    /**
+     * Every periodic network polling should be paused while this is set
+     * to `false`. Extensions should use this value to decide whether to proceed
+     * with the polling.
+     * The extensions may also set this value to `false` if there is no need to
+     * fetch anything from the server backend basing on some conditions
+     * (e.g. when an error message dialog is displayed).
+     * At the same time, the extensions are responsible for setting this value
+     * back to `true`.
+     */
+    get isConnected(): boolean {
+      return this._connectionStatus.isConnected;
+    }
+    set isConnected(v: boolean) {
+      this._connectionStatus.isConnected = v;
+    }
+
+    /**
+     * The mime renderer extensions.
+     */
+    get mimeExtensions(): IRenderMime.IExtensionModule[] {
+      return this._mimeExtensions;
+    }
+
+    /**
+     * Add the announced plugins to the available plugins.
+     */
+    private _onAvailablePluginsAdded(_: unknown, plugins: IPluginInfo[]): void {
+      if (plugins.length === 0) {
+        return;
+      }
+      const disabled = new Set(this._disabled.matches);
+      for (const plugin of plugins) {
+        this._availablePlugins.push(plugin);
+        if (!plugin.enabled && !disabled.has(plugin.id)) {
+          this._disabled.matches.push(plugin.id);
+          disabled.add(plugin.id);
+        }
+      }
+      this._availablePluginsChanged.emit();
+    }
+
+    private _devMode: boolean;
+    private _deferred: { patterns: string[]; matches: string[] };
+    private _disabled: { patterns: string[]; matches: string[] };
+    private _mimeExtensions: IRenderMime.IExtensionModule[];
+    private _availablePlugins: IPluginInfo[];
+    private _availablePluginsChanged = new Signal<IInfo, void>(this);
+    private _filesCached: boolean;
+    private _connectionStatus: IConnectionStatus;
+  }
+
   /*
    * A read-only subset of the `Token`.
    */
-  export interface IToken
-    extends Readonly<Pick<Token<any>, 'name' | 'description'>> {
+  export interface IToken extends Readonly<
+    Pick<Token<any>, 'name' | 'description'>
+  > {
     // no-op
   }
 
@@ -381,10 +545,9 @@ export namespace JupyterLab {
    * A readonly subset of lumino plugin bundle (excluding activation function,
    * service, and state information, and runtime token details).
    */
-  interface ILuminoPluginData
-    extends Readonly<
-      Pick<JupyterFrontEndPlugin<void>, 'id' | 'description' | 'autoStart'>
-    > {
+  interface ILuminoPluginData extends Readonly<
+    Pick<JupyterFrontEndPlugin<void>, 'id' | 'description' | 'autoStart'>
+  > {
     /**
      * The types of required services for the plugin, or `[]`.
      */

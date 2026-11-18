@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { h, VirtualElement } from '@lumino/virtualdom';
+import type { VirtualElement } from '@lumino/virtualdom';
+import { h } from '@lumino/virtualdom';
 import { CommandPalette } from '@lumino/widgets';
 import { LabIconStyle } from '../../style';
 import { classes } from '../../utils';
@@ -27,9 +28,7 @@ export namespace CommandPaletteSvg {
     renderHeader(data: CommandPalette.IHeaderRenderData): VirtualElement {
       const content = this.formatHeader(data);
       return h.li(
-        {
-          className: classes('lm-CommandPalette-header', 'jp-icon-hoverShow')
-        },
+        { className: classes('lm-CommandPalette-header', 'jp-icon-hoverShow') },
         content,
         h.span(searchHeaderIcon)
       );

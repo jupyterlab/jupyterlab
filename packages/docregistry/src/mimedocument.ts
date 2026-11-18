@@ -4,21 +4,17 @@
 import { Printing, showErrorMessage } from '@jupyterlab/apputils';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { ActivityMonitor } from '@jupyterlab/coreutils';
-import {
-  IRenderMime,
-  IRenderMimeRegistry,
-  MimeModel
-} from '@jupyterlab/rendermime';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { JSONExt, PartialJSONObject, PromiseDelegate } from '@lumino/coreutils';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { MimeModel } from '@jupyterlab/rendermime';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { PartialJSONObject } from '@lumino/coreutils';
+import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { StackedLayout, Widget } from '@lumino/widgets';
 import { ABCWidgetFactory, DocumentWidget } from './default';
-import { DocumentRegistry } from './registry';
+import type { DocumentRegistry } from './registry';
 
 /**
  * A content widget for a rendered mimetype document.
@@ -69,7 +65,7 @@ export class MimeContent extends Widget {
         });
         void showErrorMessage(
           this._trans.__('Renderer Failure: %1', this._context.path),
-          reason
+          reason instanceof Error ? reason : String(reason)
         );
       });
   }
@@ -173,7 +169,7 @@ export class MimeContent extends Widget {
       });
       void showErrorMessage(
         this._trans.__('Renderer Failure: %1', context.path),
-        reason
+        reason instanceof Error ? reason : String(reason)
       );
     }
   }
@@ -273,7 +269,10 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
   constructor(options: MimeDocumentFactory.IOptions<MimeDocument>) {
     super(Private.createRegistryOptions(options));
     this._rendermime = options.rendermime;
-    this._renderTimeout = options.renderTimeout || 1000;
+    this._renderTimeout =
+      options.renderTimeout === undefined || options.renderTimeout === 0
+        ? 1000
+        : options.renderTimeout;
     this._dataType = options.dataType || 'string';
     this._fileType = options.primaryFileType;
     this._factory = options.factory;
@@ -284,9 +283,11 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
    */
   protected createNewWidget(context: DocumentRegistry.Context): MimeDocument {
     const ft = this._fileType;
-    const mimeType = ft?.mimeTypes.length
-      ? ft.mimeTypes[0]
-      : IEditorMimeTypeService.defaultMimeType;
+    const mimeTypes = ft?.mimeTypes ?? [];
+    const mimeType =
+      mimeTypes.length > 0
+        ? mimeTypes[0]
+        : IEditorMimeTypeService.defaultMimeType;
 
     const rendermime = this._rendermime.clone({
       resolver: context.urlResolver
@@ -337,8 +338,9 @@ export namespace MimeDocumentFactory {
   /**
    * The options used to initialize a MimeDocumentFactory.
    */
-  export interface IOptions<T extends MimeDocument>
-    extends DocumentRegistry.IWidgetFactoryOptions<T> {
+  export interface IOptions<
+    T extends MimeDocument
+  > extends DocumentRegistry.IWidgetFactoryOptions<T> {
     /**
      * The primary file type associated with the document.
      */

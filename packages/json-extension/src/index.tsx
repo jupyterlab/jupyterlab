@@ -6,13 +6,15 @@
  */
 
 import { Printing } from '@jupyterlab/apputils';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { JSONObject, JSONValue } from '@lumino/coreutils';
-import { Message } from '@lumino/messaging';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { JSONObject, JSONValue } from '@lumino/coreutils';
+import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 
 /**
  * The CSS class to add to the JSON Widget.
@@ -128,7 +130,7 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     }
   },
   {
-    id: '@jupyterlab/json-lines-extension:factory',
+    id: '@jupyterlab/json-extension:json-lines-factory',
     description: 'Adds renderer for JSONLines content.',
     rendererFactory,
     rank: 0,

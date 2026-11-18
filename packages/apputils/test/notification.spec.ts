@@ -2,7 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Notification } from '@jupyterlab/apputils';
-import { PromiseDelegate, ReadonlyJSONValue } from '@lumino/coreutils';
+import type { ReadonlyJSONValue } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
 describe('@jupyterlab/apputils', () => {
   describe('Notification', () => {

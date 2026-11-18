@@ -18,6 +18,9 @@
       "path": "../attachments"
     },
     {
+      "path": "../audio-extension"
+    },
+    {
       "path": "../cell-toolbar"
     },
     {
@@ -222,6 +225,9 @@
       "path": "../services"
     },
     {
+      "path": "../services-extension"
+    },
+    {
       "path": "../settingeditor"
     },
     {
@@ -283,6 +289,9 @@
     },
     {
       "path": "../vega5-extension"
+    },
+    {
+      "path": "../video-extension"
     },
     {
       "path": "../workspaces"

@@ -46,6 +46,8 @@
   color: var(--jp-content-link-visited-color, var(--jp-content-link-color));
 }
 
+/* stylelint-disable declaration-property-value-allowed-list */
+
 /* console foregrounds and backgrounds */
 .jp-RenderedText pre .ansi-black-fg {
   color: #3e424d;
@@ -191,6 +193,8 @@
   padding: var(--jp-private-code-span-padding) 0;
 }
 
+/* stylelint-enable declaration-property-value-allowed-list */
+
 .jp-RenderedText pre .ansi-default-inverse-fg {
   color: var(--jp-ui-inverse-font-color0);
 }
@@ -211,6 +215,11 @@
 .jp-RenderedText[data-mime-type='application/vnd.jupyter.stderr'] {
   background: var(--jp-rendermime-error-background);
   padding-top: var(--jp-code-padding);
+}
+
+/* fix illegible yellow text with yellow background in exception stacktrace */
+.jp-RenderedText pre .ansi-yellow-bg.ansi-yellow-fg {
+  color: black;
 }
 
 /*-----------------------------------------------------------------------------
@@ -495,7 +504,32 @@
 }
 
 .jp-RenderedHTMLCommon img,
-.jp-RenderedImage img,
+.jp-RenderedImage img {
+  max-width: 100%;
+}
+
+/*
+ * Keep `height: auto`, which keeps the aspect ratio when `max-width` shrinks an
+ * image, unless only a height is given. `:where()` adds no specificity, so the
+ * style sheet of an output can still set the height.
+ */
+.jp-RenderedHTMLCommon img:where(:not([height]), [width]),
+.jp-RenderedImage img:where(:not([height]), [width]) {
+  height: auto;
+}
+
+/*
+ * Keep `height: auto` on a top-level image with a height in percent, so that it
+ * shows at the size of its data, as on a page whose body has no fixed height.
+ * Some views give the rendered HTML a fixed height, such as the panel height in
+ * the Markdown preview and in a linked output view. Without this rule, the
+ * image would follow that height.
+ */
+.jp-RenderedHTMLCommon > img:where([height*='%']) {
+  height: auto;
+}
+
+/* An svg keeps a lone `height` attribute even with `height: auto`. */
 .jp-RenderedHTMLCommon svg,
 .jp-RenderedSVG svg {
   max-width: 100%;

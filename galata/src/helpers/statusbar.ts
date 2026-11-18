@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Page } from '@playwright/test';
-import { MenuHelper } from './menu';
+import type { Page } from '@playwright/test';
+import type { MenuHelper } from './menu';
 
 /**
  * Status Bar helpers
@@ -20,9 +20,8 @@ export class StatusBarHelper {
    */
   async isVisible(): Promise<boolean> {
     return await this.page.evaluate(() => {
-      const statusBar = document.querySelector(
-        '#jp-main-statusbar'
-      ) as HTMLElement;
+      const statusBar =
+        document.querySelector<HTMLElement>('#jp-main-statusbar')!;
       return window.galata.isElementVisible(statusBar);
     });
   }

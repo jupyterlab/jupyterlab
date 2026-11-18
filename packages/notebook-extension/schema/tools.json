@@ -28,6 +28,25 @@
               }
             ]
           },
+          "/deletable": {
+            "title": "Deletable",
+            "type": "boolean",
+            "default": true,
+            "oneOf": [
+              {
+                "const": true,
+                "title": "Deletable"
+              },
+              {
+                "const": false,
+                "title": "Not deletable"
+              }
+            ]
+          },
+          "_CELL-ID": {
+            "title": "Cell ID",
+            "type": "null"
+          },
           "/slideshow/slide_type": {
             "title": "Slide Type",
             "type": "string",
@@ -97,13 +116,20 @@
         }
       },
       "uiSchema": {
+        "ui:order": ["_CELL-TOOL", "/editable", "/deletable", "_CELL-ID", "*"],
         "/editable": {
+          "ui:widget": "select"
+        },
+        "/deletable": {
           "ui:widget": "select"
         }
       },
       "metadataOptions": {
         "_CELL-TOOL": {
           "customRenderer": "@jupyterlab/notebook-extension:active-cell-tool.renderer"
+        },
+        "_CELL-ID": {
+          "customRenderer": "@jupyterlab/notebook-extension:active-cell-tool.cell-id"
         },
         "/raw_mimetype": {
           "cellTypes": ["raw"]

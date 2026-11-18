@@ -1,0 +1,620 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+import type {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import {
+  type IMovableSectionDestination,
+  IMovableSectionRegistry,
+  type IMovableSectionSource
+} from '@jupyterlab/apputils';
+import { IStateDB } from '@jupyterlab/statedb';
+import { ITranslator } from '@jupyterlab/translation';
+import { AccordionPanelReorderer } from '@jupyterlab/ui-components';
+import type {
+  ReadonlyPartialJSONObject,
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
+import type { AccordionPanel, Widget } from '@lumino/widgets';
+
+/**
+ * State DB key for persisting moved sections.
+ */
+const MOVE_STATE_KEY = 'section-mover:layout';
+
+/**
+ * Shape of the persisted state.
+ * Keyed by target panel ID; each entry records ordered sections, their
+ * absolute index in the destination accordion, and whether each was
+ * collapsed when the state was saved.
+ */
+interface IMoveSectionsState {
+  [targetId: string]: Array<{
+    sourceId: string;
+    sectionId: string;
+    index?: number;
+    collapsed?: true;
+  }>;
+}
+
+namespace CommandIDs {
+  export const moveSectionTo = 'apputils:move-section-to';
+  export const moveSectionBack = 'apputils:move-section-back';
+  export const toggleSectionReordering = 'apputils:toggle-section-reordering';
+  export const moveSectionUp = 'apputils:move-section-up';
+  export const moveSectionDown = 'apputils:move-section-down';
+}
+
+/**
+ * Plugin that moves sections between any registered source sidebar
+ * and target panel. Sources and targets announce themselves via
+ * IMovableSectionRegistry.
+ */
+export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/apputils-extension:move-sections',
+  description:
+    'Enables moving sections between any registered source and target sidebars.',
+  requires: [ITranslator],
+  optional: [IMovableSectionRegistry, IStateDB],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    registry: IMovableSectionRegistry | null,
+    stateDB: IStateDB | null
+  ): void => {
+    const trans = translator.load('jupyterlab');
+
+    const contextReorderer = (): AccordionPanelReorderer | undefined => {
+      const node = app.contextMenuHitTest(node =>
+        node.classList.contains('lm-AccordionPanel')
+      );
+      return node ? AccordionPanelReorderer.find(node) : undefined;
+    };
+
+    app.commands.addCommand(CommandIDs.toggleSectionReordering, {
+      label: trans.__('Enable Section Reordering'),
+      describedBy: { args: { type: 'object', properties: {} } },
+      isVisible: () => contextReorderer() !== undefined,
+      isToggled: () => AccordionPanelReorderer.enabled,
+      execute: () => {
+        AccordionPanelReorderer.enabled = !AccordionPanelReorderer.enabled;
+      }
+    });
+    app.contextMenu.addItem({
+      command: CommandIDs.toggleSectionReordering,
+      selector: '.lm-AccordionPanel-title',
+      rank: 20
+    });
+
+    /**
+     * The section to move: from a key binding, the one whose header has the
+     * focus; otherwise, the one whose header was right-clicked.
+     */
+    const targetSection = (
+      args: ReadonlyPartialJSONObject
+    ): { reorderer: AccordionPanelReorderer; index: number } | undefined => {
+      const event = args._luminoEvent;
+      const fromKeyBinding =
+        event !== undefined &&
+        JSONExt.isObject(event) &&
+        event.type === 'keybinding';
+      const title = fromKeyBinding
+        ? document.activeElement?.closest<HTMLElement>(
+            '.lm-AccordionPanel-title'
+          )
+        : app.contextMenuHitTest(node =>
+            node.classList.contains('lm-AccordionPanel-title')
+          );
+      const panelNode = title?.parentElement;
+      const reorderer = panelNode
+        ? AccordionPanelReorderer.find(panelNode)
+        : undefined;
+      if (!title || !reorderer) {
+        return undefined;
+      }
+      const index = reorderer.panel.titles.indexOf(title);
+      return index < 0 ? undefined : { reorderer, index };
+    };
+
+    const addMoveCommand = (id: string, label: string, offset: -1 | 1) => {
+      /**
+       * The section index to move from and to, if reordering is unlocked and
+       * the section is not already at that end of the panel.
+       */
+      const resolveMove = (args: ReadonlyPartialJSONObject) => {
+        const section = AccordionPanelReorderer.enabled
+          ? targetSection(args)
+          : undefined;
+        if (!section) {
+          return undefined;
+        }
+        const { reorderer, index: from } = section;
+        const to = from + offset;
+        return to >= 0 && to < reorderer.panel.widgets.length
+          ? { reorderer, from, to }
+          : undefined;
+      };
+      app.commands.addCommand(id, {
+        label,
+        describedBy: { args: { type: 'object', properties: {} } },
+        isVisible: args =>
+          AccordionPanelReorderer.enabled && targetSection(args) !== undefined,
+        isEnabled: args => resolveMove(args) !== undefined,
+        execute: args => {
+          const move = resolveMove(args);
+          if (!move) {
+            return;
+          }
+          const { reorderer, from, to } = move;
+          reorderer.move(reorderer.panel.widgets[from], to);
+          // Moving the header in the DOM, or choosing a menu item, takes the
+          // focus away from it.
+          reorderer.panel.titles[to].focus();
+        }
+      });
+      app.contextMenu.addItem({
+        command: id,
+        selector: '.lm-AccordionPanel-title',
+        rank: 21
+      });
+    };
+    addMoveCommand(CommandIDs.moveSectionUp, trans.__('Move Section Up'), -1);
+    addMoveCommand(
+      CommandIDs.moveSectionDown,
+      trans.__('Move Section Down'),
+      1
+    );
+
+    if (!registry) {
+      return;
+    }
+
+    // section title element (in source sidebar) → section identity
+    const titleToSection = new WeakMap<
+      HTMLElement,
+      { sourceId: string; sectionId: string }
+    >();
+
+    const widgetToInfo = new Map<
+      Widget,
+      {
+        sourceId: string;
+        sectionId: string;
+        sourceLabel: string;
+        targetId: string;
+      }
+    >();
+
+    // For context-menu lookup
+    const hostedTitleToWidget = new WeakMap<HTMLElement, Widget>();
+
+    // Keyed by accordion instance so a recreated accordion (after the last
+    // hosted section leaves and the FileBrowser disposes it) gets fresh
+    // listeners on the next move-in.
+    const dragSetupDone = new WeakSet<AccordionPanel>();
+    const pendingSections = new Map<
+      string,
+      Map<string, { targetId: string; collapsed: boolean; index?: number }>
+    >();
+
+    // Capture last right-clicked element before the context menu opens
+    let lastContextEl: HTMLElement | null = null;
+    document.addEventListener(
+      'contextmenu',
+      (ev: MouseEvent) => {
+        lastContextEl = ev.target as HTMLElement;
+      },
+      true
+    );
+
+    const saveState = async (): Promise<void> => {
+      if (!stateDB) {
+        return;
+      }
+      const state: IMoveSectionsState = {};
+      for (const [targetId, { panel }] of registry.getTargets()) {
+        const accordion = panel.accordionPanel;
+        const allWidgets = accordion ? Array.from(accordion.widgets) : [];
+        const sections = panel.sections
+          .map(w => {
+            const info = widgetToInfo.get(w);
+            if (!info || info.targetId !== targetId) {
+              return null;
+            }
+            // Detect collapsed state: widget content is hidden when collapsed
+            const isCollapsed = w.isHidden;
+            const index = allWidgets.indexOf(w);
+            return {
+              sourceId: info.sourceId,
+              sectionId: info.sectionId,
+              ...(index >= 0 ? { index } : {}),
+              ...(isCollapsed ? { collapsed: true as const } : {})
+            };
+          })
+          .filter((e): e is NonNullable<typeof e> => e !== null);
+        // Apply in saved accordion order so insertWidget on restore lands in
+        // the right spot relative to non-moved widgets.
+        sections.sort(
+          (a, b) =>
+            (a.index ?? Number.MAX_SAFE_INTEGER) -
+            (b.index ?? Number.MAX_SAFE_INTEGER)
+        );
+        if (sections.length > 0) {
+          state[targetId] = sections;
+        }
+      }
+      await stateDB.save(
+        MOVE_STATE_KEY,
+        state as unknown as ReadonlyPartialJSONValue
+      );
+    };
+
+    const setupAccordionDrag = (accordion: AccordionPanel): void => {
+      if (dragSetupDone.has(accordion)) {
+        return;
+      }
+      dragSetupDone.add(accordion);
+      accordion.expansionToggled.connect(() => void saveState());
+      AccordionPanelReorderer.get(accordion, translator).reordered.connect(
+        () => void saveState()
+      );
+    };
+
+    // Core move operations
+
+    const applyMoveToTarget = (
+      widget: Widget,
+      sourceId: string,
+      sectionId: string,
+      sourceLabel: string,
+      targetId: string,
+      targetPanel: IMovableSectionDestination,
+      collapsed = false,
+      index?: number
+    ): void => {
+      // Capture hidden state before reparenting
+      const wasHidden = widget.isHidden;
+      targetPanel.addSection(widget);
+
+      widgetToInfo.set(widget, { sourceId, sectionId, sourceLabel, targetId });
+
+      const accordion = targetPanel.accordionPanel;
+      if (accordion) {
+        if (typeof index === 'number') {
+          const total = accordion.widgets.length;
+          const target = Math.max(0, Math.min(index, total - 1));
+          if (accordion.widgets[target] !== widget) {
+            accordion.insertWidget(target, widget);
+            // Lumino only repositions the section, so move its title, body
+            // and handle to keep the Tab order the same as the visual order.
+            const next = accordion.titles[target + 1] ?? null;
+            for (const node of [
+              accordion.titles[target],
+              widget.node,
+              accordion.handles[target]
+            ]) {
+              accordion.node.insertBefore(node, next);
+            }
+          }
+        }
+
+        setupAccordionDrag(accordion);
+
+        const idx = Array.from(accordion.widgets).indexOf(widget);
+        if (idx >= 0) {
+          const hostedTitle = accordion.titles[idx];
+          hostedTitle.classList.add('jp-hosted-section');
+          hostedTitleToWidget.set(hostedTitle, widget);
+
+          if (wasHidden || collapsed) {
+            // Ensure the content widget is actually hidden (needed when
+            // restoring state where the widget was expanded in the source).
+            widget.hide();
+            hostedTitle.classList.remove('lm-mod-expanded');
+            hostedTitle.setAttribute('aria-expanded', 'false');
+          }
+        }
+      }
+    };
+
+    /**
+     * Move a section from its source sidebar to a target panel.
+     * Returns true on success, false if the section is not yet available.
+     */
+    const moveSection = (
+      sourceId: string,
+      sectionId: string,
+      targetId: string,
+      collapsed = false,
+      index?: number
+    ): boolean => {
+      const sourceEntry = registry.getSources().get(sourceId);
+      const targetEntry = registry.getTargets().get(targetId);
+      if (!sourceEntry || !targetEntry) {
+        return false;
+      }
+      const widget = sourceEntry.sidebar.removeSectionById(sectionId);
+      if (!widget) {
+        return false;
+      }
+      applyMoveToTarget(
+        widget,
+        sourceId,
+        sectionId,
+        sourceEntry.label,
+        targetId,
+        targetEntry.panel,
+        collapsed,
+        index
+      );
+      void saveState();
+      return true;
+    };
+
+    const moveSectionBack = (widget: Widget): void => {
+      const info = widgetToInfo.get(widget);
+      if (!info) {
+        return;
+      }
+      const sourceEntry = registry.getSources().get(info.sourceId);
+      const targetEntry = registry.getTargets().get(info.targetId);
+      if (!sourceEntry || !targetEntry) {
+        return;
+      }
+      const isHidden = widget.isHidden;
+      targetEntry.panel.removeSectionWidget(widget);
+      sourceEntry.sidebar.reinsertSection(widget);
+      widgetToInfo.delete(widget);
+
+      // After reinsertion the accordion assigns a fresh title element.
+      // Re-register it so the context menu works on this section again.
+      const restored = sourceEntry.sidebar
+        .getSections()
+        .find(s => s.id === info.sectionId);
+      if (restored) {
+        restored.titleNode.classList.add('jp-movable-section');
+        titleToSection.set(restored.titleNode, {
+          sourceId: info.sourceId,
+          sectionId: info.sectionId
+        });
+        if (isHidden) {
+          restored.widget.hide();
+          restored.titleNode.classList.remove('lm-mod-expanded');
+          restored.titleNode.setAttribute('aria-expanded', 'false');
+        }
+      }
+
+      void saveState();
+    };
+
+    // Source / target wiring
+
+    const setupSource = (
+      sourceId: string,
+      source: IMovableSectionSource
+    ): void => {
+      for (const section of source.getSections()) {
+        section.titleNode.classList.add('jp-movable-section');
+        titleToSection.set(section.titleNode, {
+          sourceId,
+          sectionId: section.id
+        });
+      }
+
+      source.sectionAdded.connect((_sender, section) => {
+        section.titleNode.classList.add('jp-movable-section');
+        titleToSection.set(section.titleNode, {
+          sourceId,
+          sectionId: section.id
+        });
+
+        // Fulfill any pending state restoration for this section
+        const pending = pendingSections.get(sourceId);
+        if (pending?.has(section.id)) {
+          const { targetId, collapsed, index } = pending.get(section.id)!;
+          pending.delete(section.id);
+          if (pending.size === 0) {
+            pendingSections.delete(sourceId);
+          }
+          moveSection(sourceId, section.id, targetId, collapsed, index);
+        }
+      });
+    };
+
+    const setupTarget = (
+      targetId: string,
+      targetLabel: string,
+      panel: IMovableSectionDestination
+    ): void => {
+      app.contextMenu.addItem({
+        command: CommandIDs.moveSectionTo,
+        args: { targetId, targetLabel },
+        selector: '.jp-movable-section',
+        rank: 10
+      });
+
+      if (panel.accordionPanel) {
+        setupAccordionDrag(panel.accordionPanel);
+      }
+    };
+
+    app.commands.addCommand(CommandIDs.moveSectionTo, {
+      label: (args: ReadonlyPartialJSONObject) =>
+        trans.__('Move to %1', (args.targetLabel as string) ?? ''),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            targetId: { type: 'string' },
+            targetLabel: { type: 'string' }
+          }
+        }
+      },
+      isVisible: (args: ReadonlyPartialJSONObject) => {
+        if (!lastContextEl) {
+          return false;
+        }
+        const titleEl = lastContextEl.closest(
+          '.jp-movable-section'
+        ) as HTMLElement | null;
+        if (!titleEl) {
+          return false;
+        }
+        // A title currently hosting a moved-in section is not a valid source —
+        // it should only offer "Move back".
+        if (titleEl.classList.contains('jp-hosted-section')) {
+          return false;
+        }
+        const sectionInfo = titleToSection.get(titleEl);
+        if (!sectionInfo) {
+          return false;
+        }
+        const targetId = args.targetId as string;
+        if (!targetId) {
+          return false;
+        }
+        // Don't offer to move a section to the same panel it originates from
+        const sourceEntry = registry.getSources().get(sectionInfo.sourceId);
+        const targetEntry = registry.getTargets().get(targetId);
+        if (!sourceEntry || !targetEntry) {
+          return false;
+        }
+        return (
+          (sourceEntry.sidebar as unknown) !== (targetEntry.panel as unknown)
+        );
+      },
+      execute: (args: ReadonlyPartialJSONObject) => {
+        const targetId = args.targetId as string;
+        if (!targetId || !lastContextEl) {
+          return;
+        }
+        const titleEl = lastContextEl.closest(
+          '.jp-movable-section'
+        ) as HTMLElement | null;
+        if (!titleEl || titleEl.classList.contains('jp-hosted-section')) {
+          return;
+        }
+        const sectionInfo = titleToSection.get(titleEl);
+        if (!sectionInfo) {
+          return;
+        }
+        moveSection(sectionInfo.sourceId, sectionInfo.sectionId, targetId);
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.moveSectionBack, {
+      label: () => {
+        if (!lastContextEl) {
+          return trans.__('Move back');
+        }
+        const titleEl = lastContextEl.closest(
+          '.jp-hosted-section'
+        ) as HTMLElement | null;
+        if (!titleEl) {
+          return trans.__('Move back');
+        }
+        const widget = hostedTitleToWidget.get(titleEl);
+        if (!widget) {
+          return trans.__('Move back');
+        }
+        const info = widgetToInfo.get(widget);
+        return info
+          ? trans.__('Move back to %1', info.sourceLabel)
+          : trans.__('Move back');
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      isVisible: () => {
+        if (!lastContextEl) {
+          return false;
+        }
+        const titleEl = lastContextEl.closest(
+          '.jp-hosted-section'
+        ) as HTMLElement | null;
+        return titleEl ? hostedTitleToWidget.has(titleEl) : false;
+      },
+      execute: () => {
+        if (!lastContextEl) {
+          return;
+        }
+        const titleEl = lastContextEl.closest(
+          '.jp-hosted-section'
+        ) as HTMLElement | null;
+        if (!titleEl) {
+          return;
+        }
+        const widget = hostedTitleToWidget.get(titleEl);
+        if (widget) {
+          moveSectionBack(widget);
+        }
+      }
+    });
+
+    app.contextMenu.addItem({
+      command: CommandIDs.moveSectionBack,
+      selector: '.jp-hosted-section',
+      rank: 10
+    });
+
+    // Bootstrap from registry
+
+    for (const [id, { sidebar }] of registry.getSources()) {
+      setupSource(id, sidebar);
+    }
+    for (const [id, { label, panel }] of registry.getTargets()) {
+      setupTarget(id, label, panel);
+    }
+
+    registry.sourcePanelRegistered.connect((_sender, { id, sidebar }) => {
+      setupSource(id, sidebar);
+    });
+    registry.targetPanelRegistered.connect((_sender, { id, label, panel }) => {
+      setupTarget(id, label, panel);
+    });
+
+    // State restoration
+
+    if (stateDB) {
+      void stateDB.fetch(MOVE_STATE_KEY).then(value => {
+        if (!value) {
+          return;
+        }
+        const state = value as IMoveSectionsState;
+
+        for (const [targetId, sections] of Object.entries(state)) {
+          for (const { sourceId, sectionId, collapsed, index } of sections) {
+            if (
+              !moveSection(
+                sourceId,
+                sectionId,
+                targetId,
+                collapsed ?? false,
+                index
+              )
+            ) {
+              // Section not yet available — wait for sectionAdded signal
+              if (!pendingSections.has(sourceId)) {
+                pendingSections.set(sourceId, new Map());
+              }
+              pendingSections.get(sourceId)!.set(sectionId, {
+                targetId,
+                collapsed: collapsed ?? false,
+                index
+              });
+            }
+          }
+        }
+      });
+    }
+  }
+};

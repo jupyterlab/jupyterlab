@@ -32,7 +32,7 @@
 }
 
 #jp-main-dock-panel {
-  padding: 5px;
+  padding: var(--jp-private-dock-panel-padding, 5px);
 }
 
 #jp-main-dock-panel[data-mode='single-document'] {
@@ -83,10 +83,4 @@
 #jp-bottom-panel {
   background: var(--jp-layout-color1);
   display: flex;
-}
-
-#jp-single-document-mode {
-  margin: 0 8px;
-  display: flex;
-  align-items: center;
 }

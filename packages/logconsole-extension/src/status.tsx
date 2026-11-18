@@ -1,13 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   IContentChange,
   ILogger,
   ILoggerRegistry
 } from '@jupyterlab/logconsole';
 import { GroupItem, TextItem } from '@jupyterlab/statusbar';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { listIcon, VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { Signal } from '@lumino/signaling';
 import React from 'react';
@@ -36,7 +37,18 @@ function LogConsoleStatusComponent(
     title += trans.__('%1 log entries for %2', props.logEntries, props.source);
   }
   return (
-    <GroupItem spacing={0} onClick={props.handleClick} title={title}>
+    <GroupItem
+      role="button"
+      tabIndex={0}
+      spacing={0}
+      onClick={props.handleClick}
+      onKeyDown={(event: React.KeyboardEvent): void => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          props.handleClick();
+        }
+      }}
+      title={title}
+    >
       <listIcon.react top={'2px'} stylesheet={'statusBar'} />
       {props.newMessages > 0 ? <TextItem source={props.newMessages} /> : <></>}
     </GroupItem>

@@ -1,12 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import mergeWith from 'lodash.mergewith';
 
-import { ClientCapabilities } from './lsp';
-import { IFeature, ILSPFeatureManager } from './tokens';
-import { EditorAdapter } from './adapters/editorAdapter';
+import type { ClientCapabilities } from './lsp';
+import type { IFeature, ILSPFeatureManager } from './tokens';
+import type { EditorAdapter } from './adapters/editorAdapter';
 
 /**
  * Class to manager the registered features of the language servers.

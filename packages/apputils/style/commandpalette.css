@@ -92,7 +92,6 @@
 
 .jp-SearchIconGroup {
   color: white;
-  background-color: var(--jp-brand-color1);
   position: absolute;
   top: 4px;
   right: 4px;
@@ -105,7 +104,7 @@
 }
 
 .jp-SearchIconGroup .jp-icon3[fill] {
-  fill: var(--jp-layout-color0);
+  fill: var(--jp-inverse-layout-color3);
 }
 
 .lm-CommandPalette-input {
@@ -219,6 +218,37 @@
 
 .lm-CommandPalette-item .lm-CommandPalette-itemShortcut {
   flex: 0 0 auto;
+}
+
+.lm-CommandPalette-itemContent.jp-mod-recent {
+  display: flex;
+}
+
+.lm-CommandPalette-itemContent.jp-mod-recent .lm-CommandPalette-itemLabel {
+  flex: 1 1 auto;
+}
+
+.jp-CommandPalette-recentBadge {
+  flex: 0 0 auto;
+  align-self: center;
+  padding: 0 4px;
+  color: var(--jp-brand-color1);
+  font-size: var(--jp-ui-font-size0);
+}
+
+/*
+ * The brand color lacks contrast on the hover background.
+ */
+.lm-CommandPalette-item:hover .jp-CommandPalette-recentBadge {
+  color: var(--jp-ui-font-color1);
+}
+
+.lm-CommandPalette-item.lm-mod-disabled .jp-CommandPalette-recentBadge {
+  color: var(--jp-ui-font-color2);
+}
+
+.lm-CommandPalette-item.lm-mod-active .jp-CommandPalette-recentBadge {
+  color: var(--jp-ui-inverse-font-color1);
 }
 
 .lm-CommandPalette-itemCaption {

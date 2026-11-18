@@ -3,9 +3,8 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-const TerserPlugin = require('terser-webpack-plugin');
 const merge = require('webpack-merge').default;
-const WPPlugin = require('@jupyterlab/builder').WPPlugin;
+const WPPlugin = require('@jupyter/builder').WPPlugin;
 const config = require('./webpack.config');
 
 config[0] = merge(config[0], {
@@ -17,22 +16,7 @@ config[0] = merge(config[0], {
     filename: '[name].[contenthash].js?v=[contenthash]'
   },
   optimization: {
-    minimize: true,
-    minimizer: [
-      new TerserPlugin({
-        parallel: true,
-        terserOptions: {
-          compress: false,
-          ecma: 6,
-          mangle: true,
-          output: {
-            beautify: false,
-            comments: false
-          },
-          safari10: true
-        }
-      })
-    ]
+    minimize: true
   },
   plugins: [
     new WPPlugin.JSONLicenseWebpackPlugin({

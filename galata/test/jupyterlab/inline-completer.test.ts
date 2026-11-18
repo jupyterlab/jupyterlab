@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import * as path from 'path';
 
-const fileName = 'notebook.ipynb';
 const COMPLETER_SELECTOR = '.jp-InlineCompleter';
 const GHOST_SELECTOR = '.jp-GhostText';
 const GHOST_LINE_SPACER_CLASS = '.jp-GhostText-lineSpacer';
@@ -13,25 +13,30 @@ const SHORTCUTS_ID = '@jupyterlab/shortcuts-extension:shortcuts';
 const SHARED_SETTINGS = {
   providers: {
     '@jupyterlab/inline-completer:history': {
-      enabled: true
+      enabled: true,
+      autoFillInMiddle: true
     }
   }
 };
 
 test.describe('Inline Completer', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.notebook.createNew(fileName);
-    await page.notebook.setCell(0, 'code', 'suggestion_1 = 1');
-    await page.notebook.addCell(
-      'code',
-      'suggestion_2 = 2\n# second line\n# third line'
+  test.beforeEach(async ({ page, tmpPath }) => {
+    const fileName = 'inline_completer.ipynb';
+    await page.contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${fileName}`),
+      `${tmpPath}/${fileName}`
     );
-    await page.notebook.addCell('code', 's');
+    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+    await page.notebook.activate(fileName);
+
     await page.notebook.runCell(0, true);
     await page.notebook.runCell(1, true);
     await page.notebook.enterCellEditingMode(2);
     // we need to wait until the completer gets bound to the cell after entering it
-    await page.waitForTimeout(50);
+    const boundEditor = page.locator(
+      '.lm-Widget.jp-mod-active .jp-CodeMirrorEditor.jp-InputArea-editor'
+    );
+    await expect(boundEditor).toHaveClass(/jp-mod-completer-enabled/);
   });
 
   test.describe('Widget "onHover", shortcuts on', () => {
@@ -59,7 +64,7 @@ test.describe('Inline Completer', () => {
       await completer.waitFor();
 
       // Wait for full opacity
-      await page.waitForTimeout(100);
+      await expect(completer).toHaveCSS('opacity', '1');
 
       const imageName = 'inline-completer-shortcuts-on.png';
       expect(await completer.screenshot()).toMatchSnapshot(imageName);
@@ -95,7 +100,6 @@ test.describe('Inline Completer', () => {
 
       // Should hide on blur
       await page.keyboard.press('Escape');
-      await page.waitForTimeout(50);
       await expect(completer).toBeHidden();
     });
 
@@ -107,6 +111,7 @@ test.describe('Inline Completer', () => {
       // Focusing or clicking should not hide
       await completer.focus();
       await completer.click();
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(100);
       await expect(completer).toBeVisible();
     });
@@ -231,7 +236,7 @@ test.describe('Inline Completer', () => {
     });
 
     test('Ghost text updates on typing', async ({ page }) => {
-      const cellEditor = await page.notebook.getCellInputLocator(2);
+      const cellEditor = (await page.notebook.getCellInputLocator(2))!;
       await page.keyboard.press('u');
 
       // Ghost text shows up
@@ -247,8 +252,30 @@ test.describe('Inline Completer', () => {
 
       // Ghost text should hide
       await page.keyboard.press('Escape');
-      await page.waitForTimeout(50);
       await expect(ghostText).toBeHidden();
+    });
+
+    test('Ghost text shows on middle of line when FIM is enabled', async ({
+      page
+    }) => {
+      const cellEditor = (await page.notebook.getCellInputLocator(2))!;
+      await page.keyboard.press('u');
+
+      // Ghost text shows up
+      const ghostText = cellEditor.locator(GHOST_SELECTOR);
+      await ghostText.waitFor();
+
+      await page.keyboard.type('n'); //sun|
+      await page.keyboard.press('ArrowLeft'); //su|n
+      await page.keyboard.type('g'); //sug|n
+      await expect(ghostText).toHaveText('gestio'); //sug|(gestio)n
+      await page.keyboard.press('ArrowRight'); //sugn|
+      await page.keyboard.press('Backspace'); //sug|
+      await page.keyboard.type('q'); //sugq|
+      await page.keyboard.press('ArrowLeft'); //sug|q
+      await page.keyboard.press('Backspace'); //su|q
+      await page.keyboard.type('g'); //sug|q
+      await expect(ghostText).toBeHidden(); //Hidden on sug|q
     });
 
     test('Empty space is retained to avoid jitter', async ({ page }) => {
@@ -285,14 +312,48 @@ test.describe('Inline Completer', () => {
       // By default the hiding animation starts after 700ms and lasts for 300ms
 
       // When animation starts the editor height should reduce
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(750);
       const spacerAnimatingHeight = await measureEditorHeight();
       expect(spacerAnimatingHeight).toBeLessThan(ghostTextShownHeight);
 
       // After animation is done the height should be back to the initial height
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(300);
       const finalHeight = await measureEditorHeight();
       expect(noGhostTextHeight).toEqual(finalHeight);
+    });
+  });
+  test.describe('Ghost text with Syntax Highlighting', () => {
+    test.use({
+      mockSettings: {
+        ...galata.DEFAULT_SETTINGS,
+        [PLUGIN_ID]: {
+          ...SHARED_SETTINGS,
+          showWidget: 'never',
+          ghostSyntaxHighlighting: true
+        }
+      }
+    });
+
+    test('should apply syntax highlighting', async ({ page }) => {
+      const cellEditor = (await page.notebook.getCellInputLocator(2))!;
+      // Type 'ug' (the cell already has 's') which matches 'suggestion_1 = 1' from the setup notebook.
+      await page.keyboard.type('ug');
+
+      // Wait for the ghost text to appear.
+      const ghostText = cellEditor.locator(GHOST_SELECTOR);
+      await ghostText.waitFor();
+
+      // The ghost text should contain the rest of the suggestion.
+      await expect(ghostText).toHaveText('gestion_1 = 1');
+
+      // Wait for the syntax-highlighting spans to be rendered into the ghost text.
+      await expect(ghostText.locator('span').first()).toBeAttached();
+
+      // Take a screenshot of the entire cell.
+      const imageName = 'ghost-text-with-syntax-highlighting.png';
+      expect(await cellEditor!.screenshot()).toMatchSnapshot(imageName);
     });
   });
 });

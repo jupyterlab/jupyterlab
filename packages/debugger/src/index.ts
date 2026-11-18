@@ -7,11 +7,18 @@
 
 export { Debugger } from './debugger';
 
+export { DebuggerCompletionProvider } from './completionprovider';
+
+export { DebuggerIPythonCompletionProvider } from './ipythoncompletionprovider';
+
+export { DebuggerDisplayRegistry } from './displayregistry';
+
 export {
   IDebugger,
   IDebuggerConfig,
   IDebuggerSources,
   IDebuggerSidebar,
   IDebuggerHandler,
-  IDebuggerSourceViewer
+  IDebuggerSourceViewer,
+  IDebuggerDisplayRegistry
 } from './tokens';

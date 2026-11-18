@@ -1,20 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { SourceChange } from '@jupyter/ydoc';
+import type { SourceChange } from '@jupyter/ydoc';
 import { CompletionHandler } from './handler';
-import {
+import type {
   CompletionTriggerKind,
   ICompletionContext,
   ICompletionProvider,
   IInlineCompleterSettings,
   IInlineCompletionList,
   IInlineCompletionProvider,
-  InlineCompletionTriggerKind,
   IProviderReconciliator
 } from './tokens';
-import { Completer } from './widget';
+import { InlineCompletionTriggerKind } from './tokens';
+import type { Completer } from './widget';
 import { Signal } from '@lumino/signaling';
+import { isContinuousHintingChange, isHintableMimeType } from './utils';
 
 // Shorthand for readability.
 export type InlineResult =
@@ -50,7 +51,8 @@ export class ProviderReconciliator implements IProviderReconciliator {
 
   fetchInline(
     request: CompletionHandler.IRequest,
-    trigger: InlineCompletionTriggerKind
+    trigger: InlineCompletionTriggerKind,
+    isMiddleOfLine?: boolean
   ): Promise<InlineResult>[] {
     let promises: Promise<
       IInlineCompletionList<CompletionHandler.IInlineItem>
@@ -58,7 +60,14 @@ export class ProviderReconciliator implements IProviderReconciliator {
     const current = ++this._inlineFetching;
     for (const provider of this._inlineProviders) {
       const settings = this._inlineProvidersSettings[provider.identifier];
-
+      if (
+        trigger !== InlineCompletionTriggerKind.Invoke &&
+        isMiddleOfLine &&
+        !settings.autoFillInMiddle
+      ) {
+        // Skip if FIM is disabled
+        continue;
+      }
       let delay = 0;
       if (trigger === InlineCompletionTriggerKind.Automatic) {
         delay = settings.debouncerDelay;
@@ -306,13 +315,12 @@ export class ProviderReconciliator implements IProviderReconciliator {
     completerIsVisible: boolean,
     changed: SourceChange
   ): boolean {
-    return (
-      !completerIsVisible &&
-      (changed.sourceChange == null ||
-        changed.sourceChange.some(
-          delta => delta.insert != null && delta.insert.length > 0
-        ))
-    );
+    const mimeType = this._context?.editor?.model.mimeType ?? '';
+    if (!isHintableMimeType(mimeType)) {
+      return false;
+    }
+
+    return !completerIsVisible && isContinuousHintingChange(changed);
   }
 
   private _resolveFactory = (

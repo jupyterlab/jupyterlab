@@ -3,16 +3,13 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { HTMLSelect, ReactWidget, UseSignal } from '@jupyterlab/ui-components';
 import React, { useState } from 'react';
-import { IDebugger } from '../../tokens';
-import { VariablesBodyGrid } from './grid';
-import { VariablesBodyTree } from './tree';
+import type { IDebugger } from '../../tokens';
+import type { VariablesBodyGrid } from './grid';
+import type { VariablesBodyTree } from './tree';
 
 /**
  * A React component to handle scope changes.
@@ -52,7 +49,12 @@ const ScopeSwitcherComponent = ({
     >
       {scopes.map(scope => (
         <option key={scope.name} value={scope.name}>
-          {trans.__(scope.name)}
+          {
+            // Scope names are chosen by the debug adapter, so there is no
+            // literal to extract here.
+            // eslint-disable-next-line jupyter/no-dynamic-translation
+            trans.__(scope.name)
+          }
         </option>
       ))}
     </HTMLSelect>

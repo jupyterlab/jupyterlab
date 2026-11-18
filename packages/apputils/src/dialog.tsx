@@ -1,7 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   Button,
   closeIcon,
@@ -11,7 +13,8 @@ import {
 } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { PromiseDelegate } from '@lumino/coreutils';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { WidgetTracker } from './widgettracker';
@@ -95,6 +98,7 @@ export class Dialog<T> extends Widget {
     this._host = normalized.host;
     this._defaultButton = normalized.defaultButton;
     this._buttons = normalized.buttons;
+    this._skipQueue = normalized.skipQueue;
     this._hasClose = normalized.hasClose;
     this._buttonNodes = this._buttons.map(b => renderer.createButtonNode(b));
     this._checkboxNode = null;
@@ -176,16 +180,33 @@ export class Dialog<T> extends Widget {
       return this._promise.promise;
     }
     const promise = (this._promise = new PromiseDelegate<Dialog.IResult<T>>());
+
+    if (this._skipQueue) {
+      Private.launchQueue.push(this._promise.promise);
+      Widget.attach(this, this._host);
+      return promise.promise;
+    }
+
     const promises = Promise.all(Private.launchQueue);
     Private.launchQueue.push(this._promise.promise);
-    return promises.then(() => {
+    return promises.then(async () => {
+      // A dialog that skipped the queue may have attached while this launch was
+      // pending; it must stay on top, so wait for it to close. Collecting the
+      // promises synchronously keeps this free of an `await` when none is open,
+      // so a dialog launched a microtask later still attaches on top.
+      let pending = this._skipQueuePromises();
+      while (pending.length > 0) {
+        await Promise.all(pending);
+        // Another one may have opened while we were waiting.
+        pending = this._skipQueuePromises();
+      }
       // Do not show Dialog if it was disposed of before it was at the front of the launch queue
       if (!this._promise) {
-        return Promise.resolve({
+        return {
           button: Dialog.cancelButton(),
           isChecked: null,
           value: null
-        });
+        };
       }
       Widget.attach(this, this._host);
       return promise.promise;
@@ -266,6 +287,7 @@ export class Dialog<T> extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     const node = this.node;
+    Private.openDialogs.push(this);
     node.addEventListener('keydown', this, true);
     node.addEventListener('contextmenu', this, true);
     node.addEventListener('click', this, true);
@@ -309,6 +331,7 @@ export class Dialog<T> extends Widget {
    */
   protected onAfterDetach(msg: Message): void {
     const node = this.node;
+    ArrayExt.removeFirstOf(Private.openDialogs, this);
     node.removeEventListener('keydown', this, true);
     node.removeEventListener('contextmenu', this, true);
     node.removeEventListener('click', this, true);
@@ -327,13 +350,24 @@ export class Dialog<T> extends Widget {
     }
     super.onCloseRequest(msg);
   }
+
   /**
    * Handle the `'input'` event for dialog's children.
    *
    * @param event - The DOM event sent to the widget
    */
   protected _evtInput(_event: InputEvent): void {
-    this._hasValidationErrors = !!this.node.querySelector(':invalid');
+    this._checkValidation();
+  }
+
+  /**
+   * Check that every input in the dialog is valid.
+   * It looks for :invalid pseudo class of inputs, or .jp-mod-error class.
+   */
+  protected _checkValidation(): void {
+    this._hasValidationErrors =
+      !!this.node.querySelector(':invalid') ||
+      !!this.node.querySelector('.jp-mod-error');
     for (let i = 0; i < this._buttons.length; i++) {
       if (this._buttons[i].accept) {
         this._buttonNodes[i].disabled = this._hasValidationErrors;
@@ -373,19 +407,21 @@ export class Dialog<T> extends Widget {
    */
   protected _evtKeydown(event: KeyboardEvent): void {
     // Check for escape key
-    switch (event.keyCode) {
-      case 27: // Escape.
+    switch (event.key) {
+      case 'Escape':
         event.stopPropagation();
         event.preventDefault();
         if (this._hasClose) {
           this.reject();
         }
         break;
-      case 37: {
-        // Left arrow
+      case 'ArrowLeft': {
         const activeEl = document.activeElement;
 
-        if (activeEl instanceof HTMLButtonElement) {
+        if (
+          activeEl instanceof HTMLButtonElement &&
+          this._buttonNodes.includes(activeEl)
+        ) {
           let idx = this._buttonNodes.indexOf(activeEl) - 1;
 
           // Handle a left arrows on the first button
@@ -400,11 +436,13 @@ export class Dialog<T> extends Widget {
         }
         break;
       }
-      case 39: {
-        // Right arrow
+      case 'ArrowRight': {
         const activeEl = document.activeElement;
 
-        if (activeEl instanceof HTMLButtonElement) {
+        if (
+          activeEl instanceof HTMLButtonElement &&
+          this._buttonNodes.includes(activeEl)
+        ) {
           let idx = this._buttonNodes.indexOf(activeEl) + 1;
 
           // Handle a right arrows on the last button
@@ -419,8 +457,7 @@ export class Dialog<T> extends Widget {
         }
         break;
       }
-      case 9: {
-        // Tab.
+      case 'Tab': {
         // Handle a tab on the last button.
         const node = this._buttonNodes[this._buttons.length - 1];
         if (document.activeElement === node && !event.shiftKey) {
@@ -430,18 +467,28 @@ export class Dialog<T> extends Widget {
         }
         break;
       }
-      case 13: {
-        // Enter.
-        event.stopPropagation();
-        event.preventDefault();
+      case 'Enter': {
+        const activeEl = Private.deepActiveElement();
+        let index = -1;
 
-        const activeEl = document.activeElement;
-        let index: number | undefined;
-
-        if (activeEl instanceof HTMLButtonElement) {
+        if (
+          activeEl instanceof HTMLButtonElement &&
+          this._buttonNodes.includes(activeEl)
+        ) {
           index = this._buttonNodes.indexOf(activeEl);
+        } else if (
+          // Enter sent to the dialog node itself, as `acceptDialog()` does.
+          event.target === this.node ||
+          Private.submitsOnEnter(activeEl)
+        ) {
+          index = this._defaultButton;
         }
-        this.resolve(index);
+        // Other elements, such as links and editors, handle Enter themselves.
+        if (index !== -1) {
+          event.stopPropagation();
+          event.preventDefault();
+          this.resolve(index);
+        }
         break;
       }
       default:
@@ -455,10 +502,14 @@ export class Dialog<T> extends Widget {
    * @param event - The DOM event sent to the widget
    */
   protected _evtFocus(event: FocusEvent): void {
+    // Only the most recently attached dialog traps the focus.
+    if (Private.openDialogs[Private.openDialogs.length - 1] !== this) {
+      return;
+    }
     const target = event.target as HTMLElement;
     if (!this.node.contains(target as HTMLElement)) {
       event.stopPropagation();
-      this._buttonNodes[this._defaultButton]?.focus();
+      (this._primary ?? this._buttonNodes[this._defaultButton])?.focus();
     }
   }
 
@@ -473,6 +524,20 @@ export class Dialog<T> extends Widget {
     )[0] as HTMLElement;
     const target = event.target as HTMLElement;
     this._lastMouseDownInDialog = content.contains(target as HTMLElement);
+  }
+
+  /**
+   * The promises of the attached dialogs which skipped the launch queue.
+   */
+  private _skipQueuePromises(): Promise<unknown>[] {
+    const pending: Promise<unknown>[] = [];
+    for (const dialog of Private.openDialogs) {
+      if (dialog._skipQueue && dialog._promise) {
+        // Disposal rejects the promise; only its settling matters here.
+        pending.push(dialog._promise.promise.catch(() => undefined));
+      }
+    }
+    return pending;
   }
 
   /**
@@ -498,7 +563,13 @@ export class Dialog<T> extends Widget {
       body instanceof Widget &&
       typeof body.getValue === 'function'
     ) {
-      value = body.getValue();
+      try {
+        value = body.getValue();
+      } catch (err) {
+        this.dispose();
+        promise.reject(err);
+        return;
+      }
     }
     this.dispose();
     promise.resolve({
@@ -521,6 +592,7 @@ export class Dialog<T> extends Widget {
   private _promise: PromiseDelegate<Dialog.IResult<T>> | null;
   private _defaultButton: number;
   private _host: HTMLElement;
+  private _skipQueue: boolean;
   private _hasClose: boolean;
   private _body: Dialog.Body<T>;
   private _lastMouseDownInDialog: boolean;
@@ -690,6 +762,14 @@ export namespace Dialog {
      * focus.
      */
     focusNodeSelector: string;
+
+    /**
+     * Whether the dialog should bypass the launch queue and attach immediately.
+     * Useful for nested dialogs (such as confirmation prompts) that must appear
+     * on top of an already open dialog. Such dialogs do not wait for each
+     * other, so a caller that opens several at once should show one at a time.
+     */
+    skipQueue: boolean;
 
     /**
      * When "false", disallows user from dismissing the dialog by clicking outside it
@@ -877,6 +957,9 @@ export namespace Dialog {
       const handleKeyDown = (event: React.KeyboardEvent) => {
         const { key } = event;
         if (key === 'Enter' || key === ' ') {
+          // Keep the browser from passing the key on to the element that
+          // gets the focus back when the dialog closes.
+          event.preventDefault();
           reject();
         }
       };
@@ -973,9 +1056,12 @@ export namespace Dialog {
           '<div class="jp-Dialog-spacer"></div>'
         );
       }
+      const footerButton = document.createElement('div');
+      footerButton.classList.add('jp-Dialog-footerButtons');
       for (const button of buttons) {
-        footer.node.appendChild(button);
+        footerButton.appendChild(button);
       }
+      footer.node.appendChild(footerButton);
       Styling.styleNode(footer.node);
 
       return footer;
@@ -1115,6 +1201,11 @@ namespace Private {
    */
   export const launchQueue: Promise<Dialog.IResult<any>>[] = [];
 
+  /**
+   * The attached dialogs, in the order they were attached.
+   */
+  export const openDialogs: Dialog<any>[] = [];
+
   export const errorMessagePromiseCache: Map<string, Promise<void>> = new Map();
 
   /**
@@ -1140,6 +1231,7 @@ namespace Private {
       defaultButton: options.defaultButton ?? buttons.length - 1,
       renderer: options.renderer ?? Dialog.defaultRenderer,
       focusNodeSelector: options.focusNodeSelector ?? '',
+      skipQueue: options.skipQueue ?? false,
       hasClose: options.hasClose ?? true
     };
   }
@@ -1157,5 +1249,32 @@ namespace Private {
       '[tabindex]'
     ].join(',');
     return node.querySelectorAll(candidateSelectors)[0] as HTMLElement;
+  }
+
+  /**
+   * The focused element, looked up through open shadow roots.
+   *
+   * For a web component such as `<jp-search>`, `document.activeElement` is
+   * the host, and the focused `<input>` is in its shadow root.
+   */
+  export function deepActiveElement(): Element | null {
+    let el = document.activeElement;
+    while (el?.shadowRoot?.activeElement) {
+      el = el.shadowRoot.activeElement;
+    }
+    return el;
+  }
+
+  /**
+   * Whether Enter in the element submits the dialog, as it submits a form.
+   *
+   * Button-like inputs are excluded because the browser activates them on Enter.
+   */
+  export function submitsOnEnter(el: Element | null): boolean {
+    return (
+      el instanceof HTMLSelectElement ||
+      (el instanceof HTMLInputElement &&
+        !['button', 'submit', 'reset', 'image'].includes(el.type))
+    );
   }
 }

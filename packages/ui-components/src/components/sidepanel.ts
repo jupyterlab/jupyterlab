@@ -1,12 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { AccordionPanel, Panel, PanelLayout, Widget } from '@lumino/widgets';
+import { AccordionPanelReorderer } from './accordionpanelreorderer';
 import { AccordionToolbar } from './accordiontoolbar';
 import { Toolbar } from './toolbar';
 
@@ -16,6 +14,7 @@ import { Toolbar } from './toolbar';
  * #### Note
  * By default the content widget is an accordion panel that supports widget with
  * associated toolbar to be displayed in the widget title.
+ * Give content widgets stable, unique IDs to persist their order and state.
  */
 export class SidePanel extends Widget {
   constructor(options: SidePanel.IOptions = {}) {
@@ -41,6 +40,10 @@ export class SidePanel extends Widget {
     content.node.setAttribute('aria-label', trans.__('side panel content'));
     content.addClass('jp-SidePanel-content');
     layout.addWidget(content);
+
+    if (content instanceof AccordionPanel) {
+      AccordionPanelReorderer.get(content, options.translator);
+    }
 
     if (options.toolbar) {
       this.addToolbar(options.toolbar);
@@ -112,10 +115,6 @@ export class SidePanel extends Widget {
   private addToolbar(toolbar?: Toolbar) {
     const theToolbar = (this._toolbar = toolbar ?? new Toolbar());
     theToolbar.addClass('jp-SidePanel-toolbar');
-    theToolbar.node.setAttribute(
-      'aria-label',
-      this._trans.__('side panel actions')
-    );
     (this.layout as PanelLayout).insertWidget(
       (this.layout as PanelLayout).widgets.length - 1,
       theToolbar

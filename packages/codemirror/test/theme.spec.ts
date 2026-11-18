@@ -3,10 +3,8 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import {
-  EditorThemeRegistry,
-  IEditorThemeRegistry
-} from '@jupyterlab/codemirror';
+import type { IEditorThemeRegistry } from '@jupyterlab/codemirror';
+import { EditorThemeRegistry } from '@jupyterlab/codemirror';
 import { oneDark } from './onedarktheme';
 
 describe('themes', () => {

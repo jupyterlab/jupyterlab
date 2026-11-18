@@ -1,11 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { Debouncer } from '@lumino/polling';
 
-import { IDebugger } from '../../tokens';
+import type { IDebugger } from '../../tokens';
+
+import filterData from '../../../kernelSourcesFilters.json';
 
 /**
  * The rate limit for the filter debouncer
@@ -32,6 +35,9 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
       this.refresh,
       DEBOUNCER_RATE_LIMIT_MS
     );
+
+    /* initialize native kernel sources once */
+    this._hiddenSources = new Set(filterData);
   }
 
   /**
@@ -48,6 +54,21 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
   set filter(filter: string) {
     this._filter = filter;
     this._filterChanged.emit(filter);
+    void this._refreshDebouncer.invoke();
+  }
+
+  /**
+   * Whether native kernel sources should be hidden.
+   */
+  get hideNativeSources(): boolean {
+    return this._hideNativeSources;
+  }
+
+  set hideNativeSources(value: boolean) {
+    if (this._hideNativeSources === value) {
+      return;
+    }
+    this._hideNativeSources = value;
     void this._refreshDebouncer.invoke();
   }
 
@@ -114,7 +135,7 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
   }
 
   private getFilteredKernelSources() {
-    const regexp = new RegExp(this._filter);
+    const regexp = new RegExp(this._filter, 'i');
     return this._kernelSources!.filter(module => regexp.test(module.name));
   }
 
@@ -123,6 +144,13 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
       this._filteredKernelSources = this._filter
         ? this.getFilteredKernelSources()
         : this._kernelSources;
+
+      if (this._hideNativeSources) {
+        this._filteredKernelSources = this._filteredKernelSources.filter(
+          m => !this._hiddenSources.has(m.name)
+        );
+      }
+
       this._filteredKernelSources.sort(compare);
     } else {
       this._kernelSources = new Array<IDebugger.KernelSource>();
@@ -131,6 +159,8 @@ export class KernelSourcesModel implements IDebugger.Model.IKernelSources {
     this._changed.emit(this._filteredKernelSources);
   }
 
+  private _hiddenSources: Set<string>;
+  private _hideNativeSources = false;
   private _filteredKernelSources: IDebugger.KernelSource[] | null = null;
   private _filter = '';
   private _isDisposed = false;

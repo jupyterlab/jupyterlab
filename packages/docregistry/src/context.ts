@@ -1,34 +1,35 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   Dialog,
-  ISessionContext,
   SessionContext,
   SessionContextDialogs,
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
+import type { IUrlResolverFactory } from '@jupyterlab/rendermime';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import {
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import type {
   Contents,
   ServerConnection,
   ServiceManager
 } from '@jupyterlab/services';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
-import { PartialJSONValue, PromiseDelegate } from '@lumino/coreutils';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { PartialJSONValue } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
-import { DocumentRegistry } from './registry';
+import type { DocumentRegistry } from './registry';
 
 /**
  * An implementation of a document context.
@@ -37,14 +38,14 @@ import { DocumentRegistry } from './registry';
  */
 export class Context<
   T extends DocumentRegistry.IModel = DocumentRegistry.IModel
-> implements DocumentRegistry.IContext<T>
-{
+> implements DocumentRegistry.IContext<T> {
   /**
    * Construct a new document context.
    */
   constructor(options: Context.IOptions<T>) {
     const manager = (this._manager = options.manager);
     this.translator = options.translator || nullTranslator;
+    this._contentProviderId = options.contentProviderId;
     this._trans = this.translator.load('jupyterlab');
     this._factory = options.factory;
     this._dialogs =
@@ -52,15 +53,16 @@ export class Context<
       new SessionContextDialogs({ translator: options.translator });
     this._opener = options.opener || Private.noOp;
     this._path = this._manager.contents.normalize(options.path);
-    this._lastModifiedCheckMargin = options.lastModifiedCheckMargin || 500;
+    this._lastModifiedCheckMargin = options.lastModifiedCheckMargin ?? 500;
     const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
     const sharedFactory = this._manager.contents.getSharedModelFactory(
-      this._path
+      this._path,
+      { contentProviderId: options.contentProviderId }
     );
     const sharedModel = sharedFactory?.createNew({
-      path: localPath,
+      path: this._path,
       format: this._factory.fileFormat,
       contentType: this._factory.contentType,
       collaborative: this._factory.collaborative
@@ -78,10 +80,11 @@ export class Context<
 
     const ext = PathExt.extname(this._path);
     this.sessionContext = new SessionContext({
+      driveName: manager.contents.driveName(this._path),
       kernelManager: manager.kernels,
       sessionManager: manager.sessions,
       specsManager: manager.kernelspecs,
-      path: localPath,
+      path: this._path,
       type: ext === '.ipynb' ? 'notebook' : 'file',
       name: PathExt.basename(localPath),
       kernelPreference: options.kernelPreference || { shouldStart: false },
@@ -90,9 +93,18 @@ export class Context<
     this.sessionContext.propertyChanged.connect(this._onSessionChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
 
-    this.urlResolver = new RenderMimeRegistry.UrlResolver({
+    const urlResolverFactory = options.urlResolverFactory
+      ? options.urlResolverFactory
+      : {
+          createResolver: (
+            resolverOptions: RenderMimeRegistry.IUrlResolverOptions
+          ) => new RenderMimeRegistry.UrlResolver(resolverOptions)
+        };
+
+    this._urlResolver = urlResolverFactory.createResolver({
       path: this._path,
-      contents: manager.contents
+      contents: manager.contents,
+      getKernelId: () => this.sessionContext.session?.kernel?.id
     });
   }
 
@@ -225,14 +237,16 @@ export class Context<
   /**
    * Whether the document can be saved via the Contents API.
    */
-  protected get canSave(): boolean {
+  get canSave(): boolean {
     return !!(this._contentsModel?.writable && !this._model.collaborative);
   }
 
   /**
    * The url resolver for the context.
    */
-  readonly urlResolver: IRenderMime.IResolver;
+  get urlResolver(): IRenderMime.IResolver {
+    return this._urlResolver;
+  }
 
   /**
    * Initialize the context.
@@ -274,35 +288,52 @@ export class Context<
   /**
    * Save the document to a different path chosen by the user.
    *
-   * It will be rejected if the user abort providing a new path.
+   * @returns A promise that resolves to `true` if the save operation was initiated.
+   * Returns `false` if the user cancelled the operation.
+   *
+   * Note:
+   * - If the save operation proceeds but fails due to an error in the content manager,
+   *   the returned value will still be `true`.
+   * - Consumers interested in the actual result of the save should listen to the
+   *   {@link saveState} signal to be notified when the save succeeds or fails.
    */
-  async saveAs(): Promise<void> {
+  async saveAs(): Promise<boolean> {
     await this.ready;
     const localPath = this._manager.contents.localPath(this.path);
     const newLocalPath = await Private.getSavePath(localPath);
 
     if (this.isDisposed || !newLocalPath) {
-      return;
+      return false;
     }
 
     const drive = this._manager.contents.driveName(this.path);
     const newPath = drive == '' ? newLocalPath : `${drive}:${newLocalPath}`;
 
     if (newPath === this._path) {
-      return this.save();
+      await this.save();
+      return true;
     }
 
     // Make sure the path does not exist.
     try {
       await this._manager.ready;
-      await this._manager.contents.get(newPath);
+      await this._manager.contents.get(newPath, {
+        contentProviderId: this._contentProviderId,
+        content: false
+      });
       await this._maybeOverWrite(newPath);
-    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       if (!err.response || err.response.status !== 404) {
+        // Dialog rejection (user cancelled)
+        if (!err.response) {
+          return false;
+        }
         throw err;
       }
-      await this._finishSaveAs(newPath);
     }
+    await this._finishSaveAs(newPath);
+    return true;
   }
 
   /**
@@ -414,6 +445,11 @@ export class Context<
     change: Contents.IChangedArgs
   ): void {
     if (change.type === 'save' && this._model.collaborative) {
+      // Skip if the change isn't related to current file.
+      if (this._contentsModel?.path !== change.newValue?.path) {
+        return;
+      }
+
       // Update the contents model with the new values provided on save.
       // This is needed for save operations performed on the server-side
       // by the collaborative drive which needs to update the `hash`
@@ -437,7 +473,6 @@ export class Context<
 
       if (oldPath !== this._path) {
         newPath = this._path.replace(new RegExp(`^${oldPath}/`), `${newPath}/`);
-        oldPath = this._path;
 
         // Update client file model from folder change
         changeModel = {
@@ -464,7 +499,9 @@ export class Context<
     // The session uses local paths.
     // We need to convert it to a global path.
     const driveName = this._manager.contents.driveName(this.path);
-    let newPath = this.sessionContext.session!.path;
+    let newPath = this._manager.contents.localPath(
+      this.sessionContext.session!.path
+    );
     if (driveName) {
       newPath = `${driveName}:${newPath}`;
     }
@@ -477,12 +514,11 @@ export class Context<
   private _updateContentsModel(
     model: Contents.IModel | Omit<Contents.IModel, 'content'>
   ): void {
-    const writable = model.writable && !this._model.collaborative;
     const newModel: Omit<Contents.IModel, 'content'> = {
       path: model.path,
       name: model.name,
       type: model.type,
-      writable,
+      writable: model.writable,
       created: model.created,
       last_modified: model.last_modified,
       mimetype: model.mimetype,
@@ -493,6 +529,7 @@ export class Context<
     const mod = this._contentsModel?.last_modified ?? null;
     const hash = this._contentsModel?.hash ?? null;
     this._contentsModel = newModel;
+    this._model.readOnly = newModel.writable === false;
     if (
       // If neither modification date nor hash available, assume the file has changed
       (!mod && !hash) ||
@@ -513,14 +550,14 @@ export class Context<
     this._path = newPath;
     const localPath = this._manager.contents.localPath(newPath);
     const name = PathExt.basename(localPath);
-    if (this.sessionContext.session?.path !== localPath) {
-      void this.sessionContext.session?.setPath(localPath);
+    if (this.sessionContext.session?.path !== newPath) {
+      void this.sessionContext.session?.setPath(newPath);
     }
     if (this.sessionContext.session?.name !== name) {
       void this.sessionContext.session?.setName(name);
     }
-    if ((this.urlResolver as RenderMimeRegistry.UrlResolver).path !== newPath) {
-      (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
+    if (this._urlResolver.path !== newPath) {
+      this._urlResolver.path = newPath;
     }
     if (
       this._contentsModel &&
@@ -596,6 +633,7 @@ export class Context<
 
     try {
       await this._manager.ready;
+
       const value = await this._maybeSave(options);
       if (this.isDisposed) {
         return;
@@ -613,16 +651,18 @@ export class Context<
     } catch (err) {
       // If the save has been canceled by the user, throw the error
       // so that whoever called save() can decide what to do.
-      const { name } = err;
-      if (name === 'ModalCancelError' || name === 'ModalDuplicateError') {
-        throw err;
+      if (err instanceof Error) {
+        const { name } = err;
+        if (name === 'ModalCancelError' || name === 'ModalDuplicateError') {
+          throw err;
+        }
       }
 
       // Otherwise show an error message and throw the error.
       const localPath = this._manager.contents.localPath(this._path);
       const file = PathExt.basename(localPath);
       void this._handleError(
-        err,
+        err as Error,
         this._trans.__('File Save Error for %1', file)
       );
 
@@ -645,7 +685,8 @@ export class Context<
       hash: this._factory.fileFormat !== null,
       ...(this._factory.fileFormat !== null
         ? { format: this._factory.fileFormat }
-        : {})
+        : {}),
+      contentProviderId: this._contentProviderId
     };
     const path = this._path;
     const model = this._model;
@@ -656,6 +697,9 @@ export class Context<
       .then(contents => {
         if (this.isDisposed) {
           return;
+        }
+        if (path !== this._path) {
+          return this._revert(initializeModel);
         }
         if (contents.content) {
           if (contents.format === 'json') {
@@ -678,16 +722,18 @@ export class Context<
         }
 
         this._updateContentsModel(contents);
-        model.dirty = false;
         if (!this._isPopulated) {
           return this._populate();
         }
       })
       .catch(async err => {
+        if (!this.isDisposed && path !== this._path) {
+          return this._revert(initializeModel);
+        }
         const localPath = this._manager.contents.localPath(this._path);
         const name = PathExt.basename(localPath);
         void this._handleError(
-          err,
+          err as Error,
           this._trans.__('File Load Error for %1', name)
         );
         throw err;
@@ -704,7 +750,8 @@ export class Context<
     // Make sure the file has not changed on disk.
     const promise = this._manager.contents.get(path, {
       content: false,
-      hash: true
+      hash: true,
+      contentProviderId: this._contentProviderId
     });
     return promise.then(
       model => {
@@ -744,13 +791,16 @@ export class Context<
           );
           return this._raiseConflict(model, options);
         }
-
         return this._manager.contents
-          .save(path, options)
+          .save(path, {
+            ...options,
+            contentProviderId: this._contentProviderId
+          })
           .then(async contentsModel => {
             const model = await this._manager.contents.get(path, {
               content: false,
-              hash: true
+              hash: true,
+              contentProviderId: this._contentProviderId
             });
             return {
               ...contentsModel,
@@ -766,7 +816,8 @@ export class Context<
             .then(async contentsModel => {
               const model = await this._manager.contents.get(path, {
                 content: false,
-                hash: true
+                hash: true,
+                contentProviderId: this._contentProviderId
               });
               return {
                 ...contentsModel,
@@ -792,7 +843,7 @@ export class Context<
   }
 
   /**
-   * Add a checkpoint the file is writable.
+   * Add a checkpoint if the file is writable.
    */
   private _maybeCheckpoint(force: boolean): Promise<void> {
     let promise = Promise.resolve(void 0);
@@ -834,7 +885,7 @@ or load the version on disk (revert)?`,
       this.path
     );
     const revertBtn = Dialog.okButton({
-      label: this._trans.__('Revert'),
+      label: this._trans.__('Reload from Disk'),
       actions: ['revert']
     });
     const overwriteBtn = Dialog.warnButton({
@@ -852,7 +903,10 @@ or load the version on disk (revert)?`,
         return Promise.reject(new Error('Disposed'));
       }
       if (result.button.actions.includes('overwrite')) {
-        return this._manager.contents.save(this._path, options);
+        return this._manager.contents.save(this._path, {
+          ...options,
+          contentProviderId: this._contentProviderId
+        });
       }
       if (result.button.actions.includes('revert')) {
         return this.revert().then(() => {
@@ -890,6 +944,8 @@ or load the version on disk (revert)?`,
         return this._manager.contents.delete(path).then(() => {
           return this._finishSaveAs(path);
         });
+      } else {
+        return Promise.reject(new Error('Cancelled'));
       }
     });
   }
@@ -912,8 +968,9 @@ or load the version on disk (revert)?`,
       // throw the error so that whoever called save()
       // can decide what to do.
       if (
-        err.message === 'Cancel' ||
-        err.message === 'Modal is already displayed'
+        err instanceof Error &&
+        (err.message === 'Cancel' ||
+          err.message === 'Modal is already displayed')
       ) {
         throw err;
       }
@@ -922,7 +979,7 @@ or load the version on disk (revert)?`,
       const localPath = this._manager.contents.localPath(this._path);
       const name = PathExt.basename(localPath);
       void this._handleError(
-        err,
+        err as Error,
         this._trans.__('File Save Error for %1', name)
       );
 
@@ -933,7 +990,7 @@ or load the version on disk (revert)?`,
   }
 
   private _createSaveOptions(): Partial<Contents.IModel> {
-    let content: PartialJSONValue = null;
+    let content: PartialJSONValue;
     if (this._factory.fileFormat === 'json') {
       content = this._model.toJSON();
     } else {
@@ -956,6 +1013,7 @@ or load the version on disk (revert)?`,
   private _isDisposed = false;
   private _isPopulated = false;
   private _trans: TranslationBundle;
+  private _contentProviderId?: string;
   private _manager: ServiceManager.IManager;
   private _opener: (
     widget: Widget,
@@ -975,6 +1033,7 @@ or load the version on disk (revert)?`,
     this
   );
   private _saveState = new Signal<this, DocumentRegistry.SaveState>(this);
+  private _urlResolver: RenderMimeRegistry.IUrlResolver;
   private _disposed = new Signal<this, void>(this);
   private _dialogs: ISessionContext.IDialogs;
   private _lastModifiedCheckMargin = 500;
@@ -1030,9 +1089,20 @@ export namespace Context {
     translator?: ITranslator;
 
     /**
-     * Max acceptable difference, in milliseconds, between last modified timestamps on disk and client
+     * Max acceptable difference, in milliseconds, between last modified timestamps on disk and client.
      */
     lastModifiedCheckMargin?: number;
+
+    /**
+     * Identifier of the content provider used for file operations.
+     * @experimental
+     */
+    contentProviderId?: string;
+
+    /**
+     * A factory for the URL resolver.
+     */
+    urlResolverFactory?: IUrlResolverFactory;
   }
 }
 

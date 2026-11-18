@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { ServerConnection } from '../serverconnection';
 
@@ -20,14 +21,24 @@ export class BuildManager {
   constructor(options: BuildManager.IOptions = {}) {
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
-    const { baseUrl, appUrl } = this.serverSettings;
-    this._url = URLExt.join(baseUrl, appUrl, BUILD_SETTINGS_URL);
+    this.translator = options.translator ?? null;
   }
 
   /**
    * The server settings used to make API requests.
    */
   readonly serverSettings: ServerConnection.ISettings;
+
+  /**
+   * The application language translator.
+   */
+  get translator(): IRenderMime.ITranslator | null {
+    return this._translator;
+  }
+  set translator(value: IRenderMime.ITranslator | null) {
+    this._translator = value;
+    this._trans = value?.load('jupyterlab') ?? null;
+  }
 
   /**
    * Test whether the build service is available.
@@ -79,7 +90,10 @@ export class BuildManager {
 
     return promise.then(response => {
       if (response.status === 400) {
-        throw new ServerConnection.ResponseError(response, 'Build aborted');
+        throw new ServerConnection.ResponseError(
+          response,
+          this._trans?.__('Build aborted') ?? 'Build aborted'
+        );
       }
       if (response.status !== 200) {
         const message = `Build failed with ${response.status}.
@@ -87,7 +101,10 @@ export class BuildManager {
         If you are experiencing the build failure after installing an extension (or trying to include previously installed extension after updating JupyterLab) please check the extension repository for new installation instructions as many extensions migrated to the prebuilt extensions system which no longer requires rebuilding JupyterLab (but uses a different installation procedure, typically involving a package manager such as 'pip' or 'conda').
 
         If you specifically intended to install a source extension, please run 'jupyter lab build' on the server for full output.`;
-        throw new ServerConnection.ResponseError(response, message);
+        throw new ServerConnection.ResponseError(
+          response,
+          this._trans?.__('%1', message) ?? message
+        );
       }
     });
   }
@@ -107,7 +124,16 @@ export class BuildManager {
     });
   }
 
-  private _url = '';
+  /**
+   * Get the build API URL.
+   */
+  private get _url(): string {
+    const { baseUrl, appUrl } = this.serverSettings;
+    return URLExt.join(baseUrl, appUrl, BUILD_SETTINGS_URL);
+  }
+
+  private _translator: IRenderMime.ITranslator | null = null;
+  private _trans: IRenderMime.TranslationBundle | null = null;
 }
 
 /**
@@ -122,6 +148,11 @@ export namespace BuildManager {
      * The server settings used to make API requests.
      */
     serverSettings?: ServerConnection.ISettings;
+
+    /**
+     * The application language translator.
+     */
+    translator?: IRenderMime.ITranslator;
   }
 
   /**

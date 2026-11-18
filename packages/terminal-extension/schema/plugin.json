@@ -4,6 +4,11 @@
   "jupyter.lab.menus": {
     "context": [
       {
+        "command": "terminal:copy-link",
+        "selector": ".jp-Terminal",
+        "rank": 0
+      },
+      {
         "command": "terminal:copy",
         "selector": ".jp-Terminal",
         "rank": 1
@@ -17,6 +22,11 @@
         "command": "terminal:refresh",
         "selector": ".jp-Terminal",
         "rank": 3
+      },
+      {
+        "command": "terminal:open-folder-in-terminal",
+        "selector": ".jp-DirListing-item[data-isdir=\"true\"]",
+        "rank": 2
       }
     ]
   },
@@ -36,7 +46,12 @@
       "minimum": 1.0
     },
     "theme": {
-      "enum": ["dark", "light", "inherit"]
+      "type": "string",
+      "oneOf": [
+        { "const": "dark", "title": "Dark" },
+        { "const": "light", "title": "Light" },
+        { "const": "inherit", "title": "Inherit" }
+      ]
     },
     "scrollback": {
       "type": "number"
@@ -53,7 +68,7 @@
       "title": "Font family",
       "description": "The font family used to render text.",
       "$ref": "#/definitions/fontFamily",
-      "default": "monospace"
+      "default": "ui-monospace, monospace"
     },
     "fontSize": {
       "title": "Font size",
@@ -77,7 +92,8 @@
       "title": "Screen Reader Mode",
       "description": "Add accessibility elements for use with screen readers.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "tags": ["accessibility"]
     },
     "scrollback": {
       "title": "Scrollback Buffer",
@@ -113,7 +129,28 @@
       "title": "Blinking cursor",
       "description": "Whether to blink the cursor. Changes require reopening the terminal.",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "tags": ["accessibility"]
+    },
+    "showStatusBarItem": {
+      "type": "string",
+      "title": "Show the status bar item",
+      "description": "Whether to show the running terminals item in the status bar",
+      "default": "if-any",
+      "oneOf": [
+        {
+          "const": "if-any",
+          "title": "Show if one or more"
+        },
+        {
+          "const": "always",
+          "title": "Always show"
+        },
+        {
+          "const": "never",
+          "title": "Don't show"
+        }
+      ]
     }
   },
   "additionalProperties": false,

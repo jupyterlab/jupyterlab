@@ -2,44 +2,36 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  Notification,
-  NotificationManager,
-  ReactWidget
-} from '@jupyterlab/apputils';
+import type { NotificationManager } from '@jupyterlab/apputils';
+import { Notification, ReactWidget } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { Popup } from '@jupyterlab/statusbar';
 import {
   GroupItem,
   IStatusBar,
-  Popup,
   showPopup,
   TextItem
 } from '@jupyterlab/statusbar';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type { TranslationBundle } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { LabIcon } from '@jupyterlab/ui-components';
 import {
   bellIcon,
   Button,
   closeIcon,
   deleteIcon,
-  LabIcon,
   ToolbarButtonComponent,
   UseSignal,
   VDomModel
 } from '@jupyterlab/ui-components';
-import {
-  PromiseDelegate,
-  ReadonlyJSONObject,
-  ReadonlyJSONValue
-} from '@lumino/coreutils';
+import type { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';
@@ -195,8 +187,8 @@ function NotificationCenter(props: INotificationCenterProps): JSX.Element {
                 type === 'default'
                   ? null
                   : type === 'in-progress'
-                  ? icons?.spinner ?? null
-                  : icons && icons[type];
+                    ? (icons?.spinner ?? null)
+                    : icons && icons[type];
               return (
                 <li
                   className="jp-Notification-List-Item"
@@ -345,9 +337,17 @@ interface INotificationStatusProps {
 function NotificationStatus(props: INotificationStatusProps): JSX.Element {
   return (
     <GroupItem
+      role="button"
+      tabIndex={0}
+      aria-haspopup
       spacing={HALF_SPACING}
       onClick={() => {
         props.onClick();
+      }}
+      onKeyDown={(event: React.KeyboardEvent): void => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          props.onClick();
+        }
       }}
       title={
         props.count > 0
@@ -403,6 +403,67 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
       caption: trans.__(
         'Notification is described by {message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.'
       ),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              description: 'The notification message text'
+            },
+            type: {
+              type: 'string',
+              description:
+                'The notification type (e.g., "default", "info", "warning", "error")'
+            },
+            options: {
+              type: 'object',
+              description: 'Additional notification options',
+              properties: {
+                autoClose: {
+                  oneOf: [{ type: 'number' }, { type: 'boolean' }],
+                  description:
+                    'Auto-close timeout in milliseconds, or false to disable'
+                },
+                actions: {
+                  type: 'array',
+                  description: 'Array of action buttons for the notification',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      label: {
+                        type: 'string',
+                        description: 'The action button label'
+                      },
+                      commandId: {
+                        type: 'string',
+                        description: 'The command ID to execute when clicked'
+                      },
+                      args: {
+                        description: 'Arguments to pass to the command'
+                      },
+                      caption: {
+                        type: 'string',
+                        description: 'The action button caption/tooltip'
+                      },
+                      className: {
+                        type: 'string',
+                        description: 'CSS class name for the action button'
+                      }
+                    },
+                    required: ['label', 'commandId']
+                  }
+                },
+                data: {
+                  description:
+                    'Additional data associated with the notification'
+                }
+              }
+            }
+          },
+          required: ['message']
+        }
+      },
       execute: args => {
         const { message, type } = args as any;
         const options = (args.options as any) ?? {};
@@ -441,6 +502,71 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
       caption: trans.__(
         'Notification is described by {id: string, message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.'
       ),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The notification ID to update'
+            },
+            message: {
+              type: 'string',
+              description: 'The notification message text'
+            },
+            type: {
+              type: 'string',
+              description:
+                'The notification type (e.g., "default", "info", "warning", "error")'
+            },
+            options: {
+              type: 'object',
+              description: 'Additional notification options',
+              properties: {
+                autoClose: {
+                  oneOf: [{ type: 'number' }, { type: 'boolean' }],
+                  description:
+                    'Auto-close timeout in milliseconds, or false to disable'
+                },
+                actions: {
+                  type: 'array',
+                  description: 'Array of action buttons for the notification',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      label: {
+                        type: 'string',
+                        description: 'The action button label'
+                      },
+                      commandId: {
+                        type: 'string',
+                        description: 'The command ID to execute when clicked'
+                      },
+                      args: {
+                        description: 'Arguments to pass to the command'
+                      },
+                      caption: {
+                        type: 'string',
+                        description: 'The action button caption/tooltip'
+                      },
+                      className: {
+                        type: 'string',
+                        description: 'CSS class name for the action button'
+                      }
+                    },
+                    required: ['label', 'commandId']
+                  }
+                },
+                data: {
+                  description:
+                    'Additional data associated with the notification'
+                }
+              }
+            }
+          },
+          required: ['id', 'message']
+        }
+      },
       execute: args => {
         const { id, message, type, ...options } = args as any;
 
@@ -478,6 +604,18 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
 
     app.commands.addCommand(CommandIDs.dismiss, {
       label: trans.__('Dismiss a notification'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'The notification ID to dismiss'
+            }
+          },
+          required: ['id']
+        }
+      },
       execute: args => {
         const { id } = args as any;
 
@@ -599,6 +737,12 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
 
     app.commands.addCommand(CommandIDs.display, {
       label: trans.__('Show Notifications'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: displayNotifications
     });
 
@@ -658,11 +802,10 @@ namespace Private {
   /**
    * Interface for CloseButton component
    */
-  export interface ICloseButtonProps
-    extends React.DetailedHTMLProps<
-      React.ButtonHTMLAttributes<HTMLButtonElement>,
-      HTMLButtonElement
-    > {
+  export interface ICloseButtonProps extends React.DetailedHTMLProps<
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
+    HTMLButtonElement
+  > {
     /**
      * A function to handle a close event when the CloseButton is clicked
      */

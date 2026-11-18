@@ -110,7 +110,16 @@
 }
 
 .jp-CodeCell.jp-mod-outputsScrolled .jp-OutputArea-promptOverlay {
-  left: calc(-1 * var(--jp-private-cell-scrolling-output-offset));
+  position: fixed;
+  top: anchor(top);
+  bottom: anchor(bottom);
+  left: anchor(left);
+  position-anchor: --jp-output-area;
+  height: unset;
+  width: calc(
+    var(--jp-cell-prompt-width) - 1 *
+      var(--jp-private-cell-scrolling-output-offset)
+  );
 }
 
 /*-----------------------------------------------------------------------------
@@ -123,6 +132,12 @@
 
 .jp-MarkdownOutput {
   flex: 1 1 auto;
+
+  /*
+   * A stretched item would count as having a fixed height, and a height in
+   * percent inside it would then resolve against the height of the row.
+   */
+  align-self: flex-start;
   width: 100%;
   margin-top: 0;
   margin-bottom: 0;
@@ -131,6 +146,15 @@
 
 .jp-MarkdownOutput.jp-RenderedHTMLCommon {
   overflow: auto;
+}
+
+.jp-MarkdownCell.jp-mod-emptyMarkdownPlaceholder .jp-MarkdownOutput {
+  color: var(--jp-content-font-color2);
+  font-style: italic;
+}
+
+.jp-MarkdownCell .cm-editor:not(.cm-focused) .cm-placeholder {
+  display: none;
 }
 
 /* collapseHeadingButton (show always if hiddenCellsButton is _not_ shown) */

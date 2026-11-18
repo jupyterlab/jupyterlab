@@ -9,12 +9,7 @@ import os
 import shutil
 import sys
 import tempfile
-
-try:
-    from importlib.resources import files
-except ImportError:
-    from importlib_resources import files
-
+from importlib.resources import files
 from os import path as osp
 from os.path import join as pjoin
 from stat import S_IRGRP, S_IROTH, S_IRUSR

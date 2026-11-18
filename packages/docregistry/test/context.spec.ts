@@ -2,13 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { SessionContext } from '@jupyterlab/apputils';
-import {
-  Context,
-  DocumentRegistry,
-  TextModelFactory
-} from '@jupyterlab/docregistry';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
+import { Context, TextModelFactory } from '@jupyterlab/docregistry';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
-import { Contents, Drive, ServiceManager } from '@jupyterlab/services';
+import type { Contents, ServiceManager } from '@jupyterlab/services';
+import { Drive } from '@jupyterlab/services';
 import {
   acceptDialog,
   dismissDialog,
@@ -16,7 +14,7 @@ import {
   waitForDialog
 } from '@jupyterlab/testing';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
-import { UUID } from '@lumino/coreutils';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
 describe('docregistry/context', () => {
@@ -55,15 +53,22 @@ describe('docregistry/context', () => {
         expect(context).toBeInstanceOf(Context);
       });
 
-      it('should set the session path with local path', () => {
+      it('should set and start the session with global path', async () => {
         const localPath = `${UUID.uuid4()}.txt`;
+        const globalPath = `TestDrive:${localPath}`;
+        const startNew = jest.mocked(manager.sessions.startNew);
+        startNew.mockClear();
         context = new Context({
           manager,
           factory,
-          path: `TestDrive:${localPath}`
+          path: globalPath,
+          kernelPreference: { name: manager.kernelspecs.specs!.default }
         });
 
-        expect(context.sessionContext.path).toEqual(localPath);
+        await context.sessionContext.initialize();
+
+        expect(context.sessionContext.path).toEqual(globalPath);
+        expect(startNew.mock.calls[0][0].path).toMatch(/^TestDrive:\//);
       });
     });
 
@@ -296,6 +301,99 @@ describe('docregistry/context', () => {
         await context.initialize(false);
         await expect(context.ready).resolves.not.toThrow();
       });
+
+      it('should resolve if the file is renamed while it is loading', async () => {
+        const oldPath = context.path;
+        const newPath = UUID.uuid4() + '.txt';
+        await manager.contents.save(oldPath, {
+          type: factory.contentType,
+          format: factory.fileFormat,
+          content: 'foo'
+        });
+
+        const get = manager.contents.get as jest.MockedFunction<
+          typeof manager.contents.get
+        >;
+        const getImplementation = get.getMockImplementation();
+        if (!getImplementation) {
+          throw new Error('Missing contents get mock implementation');
+        }
+
+        const started = new PromiseDelegate<void>();
+        const delayedGet = new PromiseDelegate<Contents.IModel>();
+        let isFirstGet = true;
+        get.mockImplementation((path, options) => {
+          if (path === oldPath && isFirstGet) {
+            isFirstGet = false;
+            started.resolve();
+            return delayedGet.promise;
+          }
+          return getImplementation(path, options);
+        });
+
+        try {
+          const initialized = context.initialize(false);
+          await started.promise;
+          await manager.contents.rename(oldPath, newPath);
+          delayedGet.reject(new Error('Stale path'));
+
+          await expect(initialized).resolves.not.toThrow();
+          await expect(context.ready).resolves.not.toThrow();
+          expect(context.path).toBe(newPath);
+          expect(context.contentsModel!.path).toBe(newPath);
+          expect(context.model.toString()).toBe('foo');
+          expect(
+            document.body.getElementsByClassName('jp-Dialog')
+          ).toHaveLength(0);
+        } finally {
+          get.mockImplementation(getImplementation);
+        }
+      });
+
+      it('should ignore stale contents if the file is renamed while it is loading', async () => {
+        const oldPath = context.path;
+        const newPath = UUID.uuid4() + '.txt';
+        const staleContents = await manager.contents.save(oldPath, {
+          type: factory.contentType,
+          format: factory.fileFormat,
+          content: 'foo'
+        });
+
+        const get = manager.contents.get as jest.MockedFunction<
+          typeof manager.contents.get
+        >;
+        const getImplementation = get.getMockImplementation();
+        if (!getImplementation) {
+          throw new Error('Missing contents get mock implementation');
+        }
+
+        const started = new PromiseDelegate<void>();
+        const delayedGet = new PromiseDelegate<Contents.IModel>();
+        let isFirstGet = true;
+        get.mockImplementation((path, options) => {
+          if (path === oldPath && isFirstGet) {
+            isFirstGet = false;
+            started.resolve();
+            return delayedGet.promise;
+          }
+          return getImplementation(path, options);
+        });
+
+        try {
+          const initialized = context.initialize(false);
+          await started.promise;
+          await manager.contents.rename(oldPath, newPath);
+          delayedGet.resolve(staleContents);
+
+          await expect(initialized).resolves.not.toThrow();
+          await expect(context.ready).resolves.not.toThrow();
+          expect(context.path).toBe(newPath);
+          expect(context.contentsModel!.path).toBe(newPath);
+          expect(context.model.toString()).toBe('foo');
+        } finally {
+          get.mockImplementation(getImplementation);
+        }
+      });
     });
 
     describe('#disposed', () => {
@@ -490,8 +588,11 @@ describe('docregistry/context', () => {
 
         const changed = signalToPromise(manager.contents.fileChanged);
         const oldPath = context.path;
-        await context.saveAs();
+        const result = await context.saveAs();
         await promise;
+
+        // Should return true on successful save
+        expect(result).toBe(true);
 
         // We no longer rename the current document
         //expect(context.path).toBe(newPath);
@@ -533,8 +634,11 @@ describe('docregistry/context', () => {
         const promise = func();
 
         const oldPath = context.path;
-        await context.saveAs();
+        const result = await context.saveAs();
         await promise;
+
+        // Should return true when overwrite is accepted
+        expect(result).toBe(true);
 
         // We no longer rename the current document
         //expect(context.path).toBe(newPath);
@@ -567,8 +671,11 @@ describe('docregistry/context', () => {
         });
         await context.initialize(true);
         const promise = func();
-        await context.saveAs();
+        const result = await context.saveAs();
         await promise;
+
+        // Should return false when overwrite is cancelled
+        expect(result).toBe(false);
         expect(context.path).toBe(oldPath);
       });
 
@@ -673,10 +780,25 @@ describe('docregistry/context', () => {
     });
 
     describe('#urlResolver', () => {
+      class TestResolver extends RenderMimeRegistry.UrlResolver {
+        // no-op
+      }
       it('should be a url resolver', () => {
         expect(context.urlResolver).toBeInstanceOf(
           RenderMimeRegistry.UrlResolver
         );
+        expect(context.urlResolver).not.toBeInstanceOf(TestResolver);
+      });
+      it('should use preferred url resolver', () => {
+        context = new Context({
+          manager,
+          factory,
+          path: UUID.uuid4() + '.txt',
+          urlResolverFactory: {
+            createResolver: options => new TestResolver(options)
+          }
+        });
+        expect(context.urlResolver).toBeInstanceOf(TestResolver);
       });
     });
 

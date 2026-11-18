@@ -3,14 +3,16 @@
 
 import { Dialog, setToolbar, ToolbarButton } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import { IDocumentManager } from '@jupyterlab/docmanager';
-import { Contents } from '@jupyterlab/services';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { IScore, newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
+import type { IDocumentManager } from '@jupyterlab/docmanager';
+import type { Contents } from '@jupyterlab/services';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { IScore } from '@jupyterlab/ui-components';
+import { newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { FileBrowser } from './browser';
 import { FilterFileBrowserModel } from './model';
-import { IFileBrowserFactory } from './tokens';
+import type { IFileBrowserFactory } from './tokens';
 import { PromiseDelegate } from '@lumino/coreutils';
 
 /**
@@ -30,16 +32,15 @@ export namespace FileDialog {
   /**
    * Options for the open directory dialog
    */
-  export interface IDirectoryOptions
-    extends Partial<
-      Pick<
-        Dialog.IOptions<Promise<Contents.IModel[]>>,
-        Exclude<
-          keyof Dialog.IOptions<Promise<Contents.IModel[]>>,
-          'body' | 'buttons' | 'defaultButton'
-        >
+  export interface IDirectoryOptions extends Partial<
+    Pick<
+      Dialog.IOptions<Promise<Contents.IModel[]>>,
+      Exclude<
+        keyof Dialog.IOptions<Promise<Contents.IModel[]>>,
+        'body' | 'buttons' | 'defaultButton'
       >
-    > {
+    >
+  > {
     /**
      * Document manager
      */
@@ -54,6 +55,18 @@ export namespace FileDialog {
      * Default path to open
      */
     defaultPath?: string;
+
+    /**
+     * The root path for navigation.
+     *
+     * When set, navigation will be restricted to this path and its
+     * subdirectories. Users will not be able to navigate above this path.
+     *
+     * The dialog applies this restriction in the browser, so it is not a
+     * security boundary. Users can still open any path under the server
+     * root, for example in the file browser.
+     */
+    root?: string;
 
     /**
      * Text to display above the file browser.
@@ -89,32 +102,8 @@ export namespace FileDialog {
   export async function getOpenFiles(
     options: IFileOptions
   ): Promise<Dialog.IResult<Contents.IModel[]>> {
-    const translator = options.translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
-    const openDialog = new OpenDialog(
-      options.manager,
-      options.filter,
-      translator,
-      options.defaultPath,
-      options.label
-    );
-    const dialogOptions: Partial<Dialog.IOptions<Contents.IModel[]>> = {
-      title: options.title,
-      buttons: [
-        Dialog.cancelButton(),
-        Dialog.okButton({
-          label: trans.__('Select')
-        })
-      ],
-      focusNodeSelector: options.focusNodeSelector,
-      host: options.host,
-      renderer: options.renderer,
-      body: openDialog
-    };
+    const dialog = new OpenDialog(options);
 
-    await openDialog.ready;
-
-    const dialog = new Dialog(dialogOptions);
     return dialog.launch();
   }
 
@@ -140,10 +129,47 @@ export namespace FileDialog {
   }
 }
 
+class OpenDialog extends Dialog<Contents.IModel[]> {
+  constructor(options: FileDialog.IFileOptions) {
+    const translator = options.translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+
+    const handleOpenFile = () => {
+      // Resolve the dialog with current filebrowser selection
+      this.resolve();
+    };
+
+    const openDialog = new OpenDialogBody(
+      options.manager,
+      options.filter,
+      translator,
+      options.defaultPath,
+      options.root,
+      options.label,
+      true,
+      handleOpenFile
+    );
+
+    super({
+      title: options.title,
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.okButton({
+          label: trans.__('Select')
+        })
+      ],
+      focusNodeSelector: options.focusNodeSelector,
+      host: options.host,
+      renderer: options.renderer,
+      body: openDialog
+    });
+  }
+}
+
 /**
  * Open dialog widget
  */
-class OpenDialog
+class OpenDialogBody
   extends Widget
   implements Dialog.IBodyWidget<Contents.IModel[]>
 {
@@ -152,8 +178,10 @@ class OpenDialog
     filter?: (value: Contents.IModel) => Partial<IScore> | null,
     translator?: ITranslator,
     defaultPath?: string,
+    root?: string,
     label?: string,
-    filterDirectories?: boolean
+    filterDirectories?: boolean,
+    handleOpenFile?: (path: string) => void
   ) {
     super();
     translator = translator ?? nullTranslator;
@@ -167,7 +195,9 @@ class OpenDialog
       {},
       translator,
       defaultPath,
-      filterDirectories
+      root,
+      filterDirectories,
+      handleOpenFile
     )
       .then(browser => {
         this._browser = browser;
@@ -212,7 +242,7 @@ class OpenDialog
         layout.addWidget(this._browser);
 
         /**
-         * Dispose browser model when OpenDialog
+         * Dispose browser model when OpenDialogBody
          * is disposed.
          */
         this.dispose = () => {
@@ -303,7 +333,9 @@ namespace Private {
     options: IFileBrowserFactory.IOptions = {},
     translator?: ITranslator,
     defaultPath?: string,
-    filterDirectories?: boolean
+    root?: string,
+    filterDirectories?: boolean,
+    handleOpenFile?: (path: string) => void
   ): Promise<FileBrowser> => {
     translator = translator || nullTranslator;
     const model = new FilterFileBrowserModel({
@@ -312,14 +344,18 @@ namespace Private {
       translator,
       driveName: options.driveName,
       refreshInterval: options.refreshInterval,
+      root,
       filterDirectories
     });
 
     const widget = new FileBrowser({
       id,
       model,
-      translator
+      translator,
+      handleOpenFile
     });
+
+    widget.clearFilterOnNavigation = false;
 
     if (defaultPath) {
       await widget.model.cd(defaultPath);

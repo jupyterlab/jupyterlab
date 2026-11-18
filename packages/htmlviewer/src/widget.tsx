@@ -4,13 +4,13 @@
 |----------------------------------------------------------------------------*/
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
-import {
-  ABCWidgetFactory,
+import type {
   DocumentRegistry,
-  DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { ABCWidgetFactory, DocumentWidget } from '@jupyterlab/docregistry';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import {
   IFrame,
   ReactWidget,
@@ -19,8 +19,9 @@ import {
   ToolbarButtonComponent,
   UseSignal
 } from '@jupyterlab/ui-components';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
 import * as React from 'react';
 
 /**
@@ -32,6 +33,12 @@ const RENDER_TIMEOUT = 1000;
  * The CSS class to add to the HTMLViewer Widget.
  */
 const CSS_CLASS = 'jp-HTMLViewer';
+
+/**
+ * Viewers whose next render must reload the document, even if the rendered
+ * HTML is unchanged: after a Refresh click or a trust change.
+ */
+const refreshRequested = new WeakSet<HTMLViewer>();
 
 const UNTRUSTED_LINK_STYLE = (options: { warning: string }) => `<style>
 a[target="_blank"],
@@ -87,12 +94,14 @@ export class HTMLViewer
     super({
       ...options,
       content: new IFrame({
-        sandbox: ['allow-same-origin'],
+        sandbox: Private.common,
         loading: 'lazy'
       })
     });
     this.translator = options.translator || nullTranslator;
     this.content.addClass(CSS_CLASS);
+
+    this.content.node.querySelector('iframe')?.classList.add('jp-zoom-target');
     void this.context.ready.then(() => {
       this.update();
       // Throttle the rendering rate of the widget.
@@ -116,11 +125,13 @@ export class HTMLViewer
       return;
     }
     if (value) {
-      this.content.sandbox = Private.trusted;
+      this.content.sandbox = [...Private.common, ...Private.trusted];
     } else {
-      this.content.sandbox = Private.untrusted;
+      this.content.sandbox = [...Private.common, ...Private.untrusted];
     }
-    this.update(); // Force a refresh.
+    // A new sandbox applies only when the iframe loads a document.
+    refreshRequested.add(this);
+    this.update();
     this._trustedChanged.emit(value);
   }
 
@@ -149,19 +160,42 @@ export class HTMLViewer
    * Handle and update request.
    */
   protected onUpdateRequest(): void {
-    if (this._renderPending) {
+    // The layout requests an update when the tab is shown, also before the
+    // file is loaded. The constructor renders once the context is ready.
+    if (this._renderPending || !this.context.isReady) {
       return;
     }
+    const force = refreshRequested.delete(this);
     this._renderPending = true;
-    void this._renderModel().then(() => (this._renderPending = false));
+    void this._renderModel(force).then(() => {
+      this._renderPending = false;
+      if (refreshRequested.has(this)) {
+        this.update();
+      }
+    });
   }
 
   /**
    * Render HTML in IFrame into this widget's node.
    */
-  private async _renderModel(): Promise<void> {
-    let data = this.context.model.toString();
-    data = await this._setupDocument(data);
+  private async _renderModel(force = false): Promise<void> {
+    const source = this.context.model.toString();
+    const path = this.context.path;
+    const trusted = this.trusted;
+    // Compare the inputs, so that showing the tab again does not parse
+    // and serialize the whole document.
+    const rendered = this._rendered;
+    if (
+      !force &&
+      rendered !== null &&
+      rendered.source === source &&
+      rendered.path === path &&
+      rendered.trusted === trusted
+    ) {
+      return;
+    }
+    const data = await this._setupDocument(source);
+    this._rendered = { source, path, trusted };
 
     // Set the new iframe url.
     const blob = new Blob([data], { type: 'text/html' });
@@ -215,6 +249,7 @@ export class HTMLViewer
 
   protected translator: ITranslator;
   private _renderPending = false;
+  private _rendered: Private.IRenderedDocument | null = null;
   private _parser = new DOMParser();
   private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null =
     null;
@@ -275,6 +310,7 @@ export namespace ToolbarItems {
       onClick: async () => {
         if (!widget.context.model.dirty) {
           await widget.context.revert();
+          refreshRequested.add(widget);
           widget.update();
         }
       },
@@ -306,6 +342,11 @@ export namespace ToolbarItems {
  */
 namespace Private {
   /**
+   * Sandbox exceptions for all HTML.
+   */
+  export const common: IFrame.SandboxExceptions[] = ['allow-same-origin'];
+
+  /**
    * Sandbox exceptions for untrusted HTML.
    */
   export const untrusted: IFrame.SandboxExceptions[] = [];
@@ -317,6 +358,15 @@ namespace Private {
     'allow-scripts',
     'allow-popups'
   ];
+
+  /**
+   * The inputs of the document shown in an HTML viewer.
+   */
+  export interface IRenderedDocument {
+    source: string;
+    path: string;
+    trusted: boolean;
+  }
 
   /**
    * Namespace for TrustedButton.

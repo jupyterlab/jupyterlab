@@ -4,7 +4,7 @@
 import { VDomRenderer } from '@jupyterlab/ui-components';
 import * as React from 'react';
 import { TableOfContentsTree } from './toctree';
-import { TableOfContents } from './tokens';
+import type { TableOfContents } from './tokens';
 
 /**
  * Table of contents widget.

@@ -6,11 +6,11 @@
  * @packageDocumentation
  * @module pluginmanager-extension
  */
-import {
-  ILayoutRestorer,
-  JupyterFrontEndPlugin,
-  JupyterLab
+import type {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILayoutRestorer, JupyterLab } from '@jupyterlab/application';
 import {
   ICommandPalette,
   MainAreaWidget,
@@ -22,7 +22,7 @@ import {
   extensionIcon,
   refreshIcon
 } from '@jupyterlab/ui-components';
-import { ReadonlyJSONObject } from '@lumino/coreutils';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import {
   IPluginManager,
   PluginListModel,
@@ -47,11 +47,12 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
   id: PLUGIN_ID,
   description: 'Enable or disable individual plugins.',
   autoStart: true,
-  requires: [],
+  requires: [JupyterLab.IInfo],
   optional: [ITranslator, ICommandPalette, ILayoutRestorer],
   provides: IPluginManager,
   activate: (
-    app: JupyterLab,
+    app: JupyterFrontEnd,
+    appInfo: JupyterLab.IInfo,
     translator: ITranslator | null,
     palette: ICommandPalette | null,
     restorer: ILayoutRestorer | null
@@ -77,11 +78,14 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
       const model = new PluginListModel({
         ...args,
         pluginData: {
-          availablePlugins: app.info.availablePlugins
+          availablePlugins: appInfo.availablePlugins,
+          availablePluginsChanged: appInfo.availablePluginsChanged
         },
         serverSettings: app.serviceManager.serverSettings,
         extraLockedPlugins: [
           PLUGIN_ID,
+          // The app needs a service manager to function
+          '@jupyterlab/services-extension:service-manager',
           // UI will not proceed beyond splash without `layout` plugin
           '@jupyterlab/application-extension:layout',
           // State restoration does not work well without resolver,
@@ -99,6 +103,11 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
       content.title.icon = extensionIcon;
       content.title.caption = trans.__('Plugin Manager');
       const main = new MainAreaWidget({ content, reveal: model.ready });
+      // The model listens to the application info, which outlives the widget,
+      // so it has to be disposed together with the widget which owns it.
+      main.disposed.connect(() => {
+        model.dispose();
+      });
 
       main.toolbar.addItem(
         'refresh-plugins',
@@ -125,6 +134,21 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
           void tracker.save(main);
         });
         return main;
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            query: {
+              type: 'string',
+              description: trans.__('The search query for plugins')
+            },
+            isDisclaimed: {
+              type: 'boolean',
+              description: trans.__('Whether the disclaimer has been accepted')
+            }
+          }
+        }
       }
     });
 
@@ -140,6 +164,17 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
               `Failed to refresh the available plugins list:\n${reason}`
             );
           });
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            noLabel: {
+              type: 'boolean',
+              description: trans.__('Whether to hide the label')
+            }
+          }
+        }
       }
     });
 
@@ -169,6 +204,6 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
   }
 };
 
-const plugins: JupyterFrontEndPlugin<any>[] = [pluginmanager];
+const plugins: JupyterFrontEndPlugin<unknown>[] = [pluginmanager];
 
 export default plugins;

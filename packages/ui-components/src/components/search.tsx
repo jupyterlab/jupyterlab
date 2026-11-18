@@ -1,10 +1,27 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ReactWidget } from './vdom';
 import { StringExt } from '@lumino/algorithm';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Search } from '@jupyter/react-components';
 import { searchIcon } from '../icon';
+import type { ISignal } from '@lumino/signaling';
+
+/**
+ * A suggestion shown under the filter box.
+ */
+export interface IFilterSuggestion {
+  /**
+   * The text shown in the list of suggestions.
+   */
+  label: string;
+
+  /**
+   * The query set in the filter box when the suggestion is picked.
+   */
+  value: string;
+}
 
 /**
  * The class name added to the filebrowser crumbs node.
@@ -24,6 +41,11 @@ export interface IFilterBoxProps {
    * Whether to force a refresh.
    */
   forceRefresh?: boolean;
+
+  /**
+   * Get the suggestions to show under the filter box for a query.
+   */
+  getSuggestions?: (query: string) => IFilterSuggestion[];
 
   /**
    * An optional initial search value.
@@ -56,7 +78,15 @@ export interface IFilterBoxProps {
   /**
    * Whether to use the fuzzy filter.
    */
-  useFuzzyFilter: boolean;
+  useFuzzyFilter?: boolean;
+
+  /**
+   * Signal emitted when filter settings change
+   */
+  filterSettingsChanged?: ISignal<
+    unknown,
+    { [P in keyof IFilterBoxProps]?: IFilterBoxProps[P] }
+  >;
 }
 
 /**
@@ -105,7 +135,7 @@ export function fuzzySearch(source: string, query: string): IScore | null {
     }
 
     // Update the match if the score is better.
-    if (match && match.score <= score) {
+    if (match.score <= score) {
       score = match.score;
       indices = match.indices;
     }
@@ -125,7 +155,7 @@ export function fuzzySearch(source: string, query: string): IScore | null {
 
 export const updateFilterFunction = (
   value: string,
-  useFuzzyFilter: boolean,
+  useFuzzyFilter?: boolean,
   caseSensitive?: boolean
 ) => {
   return (item: string): Partial<IScore> | null => {
@@ -144,7 +174,7 @@ export const updateFilterFunction = (
       return null;
     }
     return {
-      indices: [...Array(item.length).keys()].map(x => x + 1)
+      indices: [...Array(value.length).keys()].map(x => x + i)
     };
   };
 };
@@ -159,20 +189,56 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
       });
     }, []);
   }
+  const firstRender = useRef(true);
+  const inputRef = props.inputRef ?? useRef<HTMLInputElement>();
 
   useEffect(() => {
     // If there is an initial search value, pass the parent the initial filter function for that value.
-    if (props.initialQuery !== undefined) {
-      props.updateFilter(
-        updateFilterFunction(
-          props.initialQuery,
-          props.useFuzzyFilter,
-          props.caseSensitive
-        ),
-        props.initialQuery
-      );
+    if (firstRender.current) {
+      firstRender.current = false;
+      if (props.initialQuery !== undefined) {
+        props.updateFilter(
+          updateFilterFunction(
+            props.initialQuery,
+            props.useFuzzyFilter,
+            props.caseSensitive
+          ),
+          props.initialQuery
+        );
+      }
+    } else {
+      if (inputRef.current) {
+        // If filter settings changed, update the filter
+        props.updateFilter(
+          updateFilterFunction(
+            inputRef.current.value,
+            props.useFuzzyFilter,
+            props.caseSensitive
+          ),
+          inputRef.current.value
+        );
+      }
     }
-  }, []);
+  }, [props.updateFilter, props.useFuzzyFilter, props.caseSensitive]);
+
+  const [suggestions, setSuggestions] = useState<IFilterSuggestion[]>([]);
+  const searchRef = useRef<HTMLInputElement | null>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  const [listId] = useState(
+    () => `jp-FilterBox-suggestions-${Private.nextId++}`
+  );
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const setSearchRef = useCallback(
+    (node: HTMLInputElement | null) => {
+      searchRef.current = node;
+      if (props.inputRef) {
+        (
+          props.inputRef as React.MutableRefObject<HTMLInputElement | null>
+        ).current = node;
+      }
+    },
+    [props.inputRef]
+  );
 
   /**
    * Handler for search input changes.
@@ -181,6 +247,7 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
     (e: Event) => {
       const target = e.target as HTMLInputElement;
       setFilter(target.value);
+      setSuggestions(props.getSuggestions?.(target.value) ?? []);
       props.updateFilter(
         updateFilterFunction(
           target.value,
@@ -190,31 +257,183 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
         target.value
       );
     },
-    [props.updateFilter, props.useFuzzyFilter, props.caseSensitive]
+    [
+      props.updateFilter,
+      props.useFuzzyFilter,
+      props.caseSensitive,
+      props.getSuggestions
+    ]
   );
+
+  const options = (): HTMLElement[] =>
+    Array.from(
+      listRef.current?.querySelectorAll<HTMLElement>('[role="option"]') ?? []
+    );
+
+  /**
+   * Set the query of a suggestion in the filter box.
+   */
+  const pickSuggestion = (suggestion: IFilterSuggestion) => {
+    // The value attribute only sets the initial value of the search box.
+    if (searchRef.current) {
+      searchRef.current.value = suggestion.value;
+    }
+    setFilter(suggestion.value);
+    setSuggestions([]);
+    props.updateFilter(
+      updateFilterFunction(
+        suggestion.value,
+        props.useFuzzyFilter,
+        props.caseSensitive
+      ),
+      suggestion.value
+    );
+    searchRef.current?.focus();
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowDown' && suggestions.length > 0) {
+      e.preventDefault();
+      options()[0]?.focus();
+    } else if (e.key === 'Escape' && suggestions.length > 0) {
+      e.stopPropagation();
+      setSuggestions([]);
+    }
+  };
+
+  const handleOptionKeyDown = (
+    e: React.KeyboardEvent,
+    suggestion: IFilterSuggestion,
+    index: number
+  ) => {
+    const items = options();
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        items[Math.min(index + 1, items.length - 1)]?.focus();
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        if (index === 0) {
+          searchRef.current?.focus();
+        } else {
+          items[index - 1]?.focus();
+        }
+        break;
+      case 'Enter':
+        e.preventDefault();
+        pickSuggestion(suggestion);
+        break;
+      case 'Escape':
+        e.preventDefault();
+        e.stopPropagation();
+        setSuggestions([]);
+        searchRef.current?.focus();
+        break;
+    }
+  };
+
+  const handleBlur = (e: React.FocusEvent) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+      setSuggestions([]);
+    }
+  };
 
   // Show the icon by default, or if the caller specifically requests it
   const showSearchIcon = props.showIcon ?? true;
 
   // Cast typing is required because HTMLInputElement and JupyterSearch element types don't exactly match
-  return (
+  const search = (
     <Search
+      role="search"
       className="jp-FilterBox"
-      ref={props.inputRef as React.Ref<any>}
+      ref={setSearchRef as React.Ref<any>}
       value={filter}
       onChange={handleChange}
       onInput={handleChange}
+      onKeyDown={props.getSuggestions ? handleSearchKeyDown : undefined}
       placeholder={props.placeholder}
       disabled={props.disabled}
+      aria-controls={props.getSuggestions ? listId : undefined}
+      aria-expanded={props.getSuggestions ? suggestions.length > 0 : undefined}
     >
       {showSearchIcon && <searchIcon.react slot="end" tag={null} />}
     </Search>
+  );
+
+  if (!props.getSuggestions) {
+    return search;
+  }
+
+  return (
+    <div className="jp-FilterBox-wrapper" onBlur={handleBlur}>
+      {search}
+      {suggestions.length > 0 && (
+        <ul
+          ref={listRef}
+          id={listId}
+          role="listbox"
+          className="jp-FilterBox-suggestions"
+        >
+          {suggestions.map((suggestion, index) => (
+            <li
+              key={suggestion.value}
+              role="option"
+              aria-selected={index === activeIndex}
+              tabIndex={-1}
+              className="jp-FilterBox-suggestion"
+              onMouseDown={e => e.preventDefault()}
+              onClick={() => pickSuggestion(suggestion)}
+              onFocus={() => setActiveIndex(index)}
+              onBlur={() => setActiveIndex(-1)}
+              onKeyDown={e => handleOptionKeyDown(e, suggestion, index)}
+            >
+              {suggestion.label}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 };
 
 /**
  * A widget which hosts a input textbox to filter on file names.
  */
+class FilenameSearcherWidget extends ReactWidget {
+  constructor(props: IFilterBoxProps) {
+    super();
+    this._filterBoxProps = { ...props };
+    props?.filterSettingsChanged?.connect((_, args) => {
+      this._updateProps(args);
+    }, this);
+  }
+
+  render(): JSX.Element {
+    return <FilterBox {...this._filterBoxProps} />;
+  }
+
+  /**
+   * Update a specific prop.
+   */
+  private _updateProps(props: Partial<IFilterBoxProps>): void {
+    Object.assign(this._filterBoxProps, props);
+    this.update();
+  }
+
+  private _filterBoxProps: IFilterBoxProps;
+}
+
+/**
+ * Function which returns a widget that hosts an input textbox to filter on file names.
+ */
 export const FilenameSearcher = (props: IFilterBoxProps): ReactWidget => {
-  return ReactWidget.create(<FilterBox {...props} />);
+  return new FilenameSearcherWidget(props);
 };
+
+namespace Private {
+  /**
+   * The id of the next list of suggestions.
+   */
+  export let nextId = 0;
+}

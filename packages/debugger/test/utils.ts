@@ -5,7 +5,7 @@
 
 import { ServerConnection } from '@jupyterlab/services';
 
-import { JSONObject } from '@lumino/coreutils';
+import type { JSONObject } from '@lumino/coreutils';
 
 export const KERNELSPECS: JSONObject = {
   default: 'python3',
@@ -59,7 +59,6 @@ export interface IService {
  * @param status The status code for the response.
  * @param body The body for the response.
  */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function handleRequest(item: IService, status: number, body: any): void {
   // Store the existing fetch function.
   const oldFetch = item.serverSettings.fetch;

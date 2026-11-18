@@ -7,12 +7,14 @@
 
 import { Button, TreeItem, TreeView } from '@jupyter/react-components';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { IStateDB } from '@jupyterlab/statedb';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import type {
+  IMovableSectionSource,
+  ISectionEntry
+} from '@jupyterlab/apputils';
+import type { IStateDB } from '@jupyterlab/statedb';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { IScore, LabIcon, Toolbar } from '@jupyterlab/ui-components';
 import {
   closeIcon,
   collapseAllIcon,
@@ -20,25 +22,26 @@ import {
   expandAllIcon,
   FilterBox,
   getTreeItemElement,
-  IScore,
-  LabIcon,
   PanelWithToolbar,
   ReactWidget,
   refreshIcon,
   SidePanel,
   tableRowsIcon,
-  Toolbar,
   ToolbarButton,
   treeViewIcon,
   UseSignal
 } from '@jupyterlab/ui-components';
 import { Token } from '@lumino/coreutils';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
 import { ElementExt } from '@lumino/domutils';
-import { Message } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { Message } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { AccordionPanel } from '@lumino/widgets';
 import { Panel, Widget } from '@lumino/widgets';
-import React, { isValidElement, ReactNode, useCallback, useRef } from 'react';
+import type { ReactNode } from 'react';
+import React, { isValidElement, useCallback, useRef } from 'react';
 
 /**
  * The class name added to a running widget.
@@ -225,7 +228,7 @@ function Item(props: {
   const children = runningItem.children;
 
   // Manage collapsed state. Use the shutdown flag in lieu of `stopPropagation`.
-  const collapsible = !!children?.length;
+  const collapsible = (children?.length ?? 0) > 0;
   const onClick = useCallback(
     (event: React.MouseEvent) => {
       if (shuttingDown.current) {
@@ -417,7 +420,6 @@ class ListWidget extends ReactWidget {
   constructor(
     private _options: {
       manager: IRunningSessions.IManager;
-      runningItems: IRunningSessions.IRunningItem[];
       filterProvider?: IFilterProvider;
       translator?: ITranslator;
       collapseToggled: ISignal<Section, boolean>;
@@ -456,17 +458,9 @@ class ListWidget extends ReactWidget {
 
   render(): JSX.Element {
     const options = this._options;
-    let cached = true;
     return (
       <UseSignal signal={this._update}>
         {() => {
-          // Cache the running items for the initial load and request from
-          // the service every subsequent load.
-          if (cached) {
-            cached = false;
-          } else {
-            options.runningItems = options.manager.running({ mode: this.mode });
-          }
           const classes = ['jp-TreeView'];
           if (this.mode === 'list') {
             classes.push('jp-mod-flat');
@@ -475,7 +469,7 @@ class ListWidget extends ReactWidget {
             <div className={CONTAINER_CLASS}>
               <TreeView className={classes.join(' ')}>
                 <List
-                  runningItems={options.runningItems}
+                  runningItems={options.manager.running({ mode: this.mode })}
                   shutdownLabel={options.manager.shutdownLabel}
                   shutdownItemIcon={options.manager.shutdownItemIcon}
                   filter={options.filterProvider?.filter}
@@ -490,31 +484,8 @@ class ListWidget extends ReactWidget {
     );
   }
 
-  /**
-   * Check if the widget or any of it's parents is hidden.
-   *
-   * Checking parents is necessary as lumino does not propagate visibility
-   * changes from parents down to children (although it does notify parents
-   * about changes to children visibility).
-   */
-  private _isAnyHidden() {
-    let isHidden = this.isHidden;
-    if (isHidden) {
-      return isHidden;
-    }
-    let parent: Widget | null = this.parent;
-    while (parent != null) {
-      if (parent.isHidden) {
-        isHidden = true;
-        break;
-      }
-      parent = parent.parent;
-    }
-    return isHidden;
-  }
-
   private _emitUpdate() {
-    if (this._isAnyHidden()) {
+    if (!this.isVisible) {
       return;
     }
     this._update.emit();
@@ -529,7 +500,7 @@ class ListWidget extends ReactWidget {
  *
  * It is specialized for each based on its props.
  */
-class Section extends PanelWithToolbar {
+export class Section extends PanelWithToolbar {
   constructor(options: Section.IOptions) {
     super();
     this._listView = (options.viewMode ?? 'tree') === 'list';
@@ -559,7 +530,6 @@ class Section extends PanelWithToolbar {
     }
 
     this._listWidget = new ListWidget({
-      runningItems,
       collapseToggled: this._collapseToggled,
       ...options
     });
@@ -634,9 +604,7 @@ class Section extends PanelWithToolbar {
 
     const shutdownAllButton = new ToolbarButton({
       label: shutdownAllLabel,
-      className: `${SHUTDOWN_ALL_BUTTON_CLASS}${
-        !enabled ? ' jp-mod-disabled' : ''
-      }`,
+      className: `${SHUTDOWN_ALL_BUTTON_CLASS}${!enabled ? ' jp-mod-disabled' : ''}`,
       enabled,
       onClick: onShutdown.bind(this)
     });
@@ -689,6 +657,10 @@ class Section extends PanelWithToolbar {
       );
     }
     this.toolbar.addClass('jp-RunningSessions-toolbar');
+    this._toolbar.node.setAttribute(
+      'aria-label',
+      this._trans.__('%1 toolbar', this.title.label)
+    );
   }
 
   private _onListChanged(): void {
@@ -791,7 +763,7 @@ namespace Section {
 /**
  * The interface exposing the running sessions sidebar widget properties.
  */
-export interface IRunningSessionSidebar {
+export interface IRunningSessionSidebar extends IMovableSectionSource {
   /**
    * The toolbar of the running sidebar.
    */
@@ -813,7 +785,7 @@ export class RunningSessions
     translator?: ITranslator,
     stateDB?: IStateDB | null
   ) {
-    super();
+    super({ translator });
     this.managers = managers;
     this._stateDB = stateDB ?? null;
     this.translator = translator ?? nullTranslator;
@@ -834,6 +806,9 @@ export class RunningSessions
     managers.items().forEach(manager => this.addSection(managers, manager));
     managers.added.connect(this.addSection, this);
   }
+  get accordionPanel(): AccordionPanel {
+    return this.content as AccordionPanel;
+  }
 
   /**
    * Dispose the resources held by the widget
@@ -844,6 +819,31 @@ export class RunningSessions
     }
     this.managers.added.disconnect(this.addSection, this);
     super.dispose();
+  }
+
+  // IMovableSectionSource implementation
+
+  /**
+   * Remove a section by manager name and return the widget.
+   *
+   * @param managerName - The name of the manager whose section to remove.
+   * @returns The removed section widget, or null if not found.
+   */
+  removeSectionById(managerName: string): Widget | null {
+    const widget = this._sectionMap.get(managerName) ?? null;
+    if (widget) {
+      widget.parent = null;
+    }
+    return widget;
+  }
+
+  /**
+   * Re-insert a previously removed section back into the sidebar.
+   *
+   * @param widget - The section widget to re-insert.
+   */
+  reinsertSection(widget: Widget): void {
+    this.addWidget(widget);
   }
 
   /**
@@ -857,6 +857,8 @@ export class RunningSessions
     manager: IRunningSessions.IManager
   ) {
     const section = new Section({ manager, translator: this.translator });
+    section.id = manager.id ?? `jp-running-${encodeURIComponent(manager.name)}`;
+    this._sectionMap.set(manager.name, section);
     this.addWidget(section);
 
     const state = await this._getState();
@@ -871,6 +873,16 @@ export class RunningSessions
         await this._updateState(sectionId, viewState.mode);
       }
     );
+
+    const panel = this.content as AccordionPanel;
+    const idx = Array.from(panel.widgets).indexOf(section);
+    if (idx >= 0) {
+      this._sectionAdded.emit({
+        id: manager.name,
+        titleNode: panel.titles[idx],
+        widget: section
+      });
+    }
   }
 
   /**
@@ -904,9 +916,33 @@ export class RunningSessions
     );
   }
 
+  /**
+   * Signal emitted when a section is added to this sidebar.
+   */
+  get sectionAdded(): ISignal<this, ISectionEntry> {
+    return this._sectionAdded;
+  }
+
+  /**
+   * Return the currently-available sections with their accordion title nodes.
+   */
+  getSections(): ReadonlyArray<ISectionEntry> {
+    const panel = this.content as AccordionPanel;
+    const result: ISectionEntry[] = [];
+    for (const [id, widget] of this._sectionMap) {
+      const idx = Array.from(panel.widgets).indexOf(widget);
+      if (idx >= 0 && panel.titles[idx]) {
+        result.push({ id, titleNode: panel.titles[idx], widget: widget });
+      }
+    }
+    return result;
+  }
+
   protected managers: IRunningSessionManagers;
   protected translator: ITranslator;
   private _stateDB: IStateDB | null;
+  private _sectionMap = new Map<string, Widget>();
+  private readonly _sectionAdded = new Signal<this, ISectionEntry>(this);
 }
 
 /**
@@ -1169,6 +1205,11 @@ export namespace IRunningSessions {
    */
   export interface IManager {
     /**
+     * Unique section ID, stable across sessions and translations.
+     */
+    id?: string;
+
+    /**
      * Name that is shown to the user in plural.
      */
     name: string;
@@ -1196,7 +1237,7 @@ export namespace IRunningSessions {
     /**
      * A signal that should be emitted when the item list has changed.
      */
-    runningChanged: ISignal<any, any>;
+    runningChanged: ISignal<unknown, unknown>;
 
     /**
      * A string used to describe the shutdown action.

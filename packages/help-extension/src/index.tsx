@@ -5,12 +5,12 @@
  * @module help-extension
  */
 
-import {
-  ILabShell,
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import {
   Dialog,
   ICommandPalette,
@@ -18,23 +18,17 @@ import {
   showDialog,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
-import { ITranslator } from '@jupyterlab/translation';
+import type { Kernel, KernelMessage, KernelSpec } from '@jupyterlab/services';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
-  CommandToolbarButton,
-  copyrightIcon,
   IFrame,
   jupyterIcon,
-  jupyterlabWordmarkIcon,
-  refreshIcon,
-  Toolbar
+  jupyterlabWordmarkIcon
 } from '@jupyterlab/ui-components';
-import { ReadonlyJSONObject } from '@lumino/coreutils';
-import { Menu } from '@lumino/widgets';
+import type { Menu, Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { Licenses } from './licenses';
 
 /**
  * The command IDs used by the help plugin.
@@ -54,10 +48,9 @@ namespace CommandIDs {
 
   export const jupyterForum = 'help:jupyter-forum';
 
+  // Commands kept for backwards compatibility after the move to the apputils-extension
   export const licenses = 'help:licenses';
-
   export const licenseReport = 'help:license-report';
-
   export const refreshLicenses = 'help:licenses-refresh';
 }
 
@@ -70,6 +63,77 @@ const LAB_IS_SECURE = window.location.protocol === 'https:';
  * The class name added to the help widget.
  */
 const HELP_CLASS = 'jp-Help';
+
+/**
+ * A plugin to keep licenses commands that were previously defined in the help-extension.
+ * This is mostly for backwards compatibility, in case some other plugins were manually executing these commands.
+ */
+const licensesCommands: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/help-extension:licenses-commands',
+  autoStart: true,
+  optional: [ITranslator],
+  description: 'Add licenses commands for backwards compatibility.',
+  activate: (app: JupyterFrontEnd, translator: ITranslator | null): void => {
+    const { commands } = app;
+
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+
+    const licensesText = trans.__('Licenses');
+    const downloadAsText = trans.__('Download All Licenses');
+    const refreshLicenses = trans.__('Refresh Licenses');
+
+    const apputilsLicencesCommand = 'apputils:licenses';
+    commands.addCommand(CommandIDs.licenses, {
+      label: licensesText,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: args => {
+        console.warn(
+          `The command ${CommandIDs.licenses} is deprecated, use ${apputilsLicencesCommand} instead.`
+        );
+        return commands.execute(apputilsLicencesCommand, args);
+      }
+    });
+
+    const apputilsLicenseReportCommand = 'apputils:license-report';
+    commands.addCommand(CommandIDs.licenseReport, {
+      label: downloadAsText,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: args => {
+        console.warn(
+          `The command ${CommandIDs.licenseReport} is deprecated, use ${apputilsLicenseReportCommand} instead.`
+        );
+        return commands.execute(apputilsLicenseReportCommand, args);
+      }
+    });
+
+    const apputilsRefreshLicensesCommand = 'apputils:licenses-refresh';
+    commands.addCommand(CommandIDs.refreshLicenses, {
+      label: refreshLicenses,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: args => {
+        console.warn(
+          `The command ${CommandIDs.refreshLicenses} is deprecated, use ${apputilsRefreshLicensesCommand} instead.`
+        );
+        return commands.execute(apputilsRefreshLicensesCommand, args);
+      }
+    });
+  }
+};
 
 /**
  * Add a command to show an About dialog.
@@ -91,6 +155,12 @@ const about: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.about, {
       label: trans.__('About %1', app.name),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         // Create the header of the about dialog
         const versionNumber = trans.__('Version %1', app.version);
@@ -135,7 +205,7 @@ const about: JupyterFrontEndPlugin<void> = {
         );
         const copyright = (
           <span className="jp-About-copyright">
-            {trans.__('© %1-%2 Project Jupyter Contributors', 2015, 2024)}
+            {trans.__('© %1-%2 Project Jupyter Contributors', 2015, 2026)}
           </span>
         );
         const body = (
@@ -183,6 +253,12 @@ const jupyterForum: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.jupyterForum, {
       label: trans.__('Jupyter Forum'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
       execute: () => {
         window.open('https://discourse.jupyter.org/c/jupyterlab');
       }
@@ -237,14 +313,50 @@ const open: JupyterFrontEndPlugin<void> = {
       return widget;
     }
 
+    // CVE-2026-40171 / GHSA-rch3-82jr-f9w9
+    function isUrlSafe(url: string): boolean {
+      try {
+        const parsed = new URL(url, window.location.href);
+        const protocol = parsed.protocol.toLowerCase();
+        return ['http:', 'https:', 'mailto:'].includes(protocol);
+      } catch {
+        return false;
+      }
+    }
+
     commands.addCommand(CommandIDs.open, {
       label: args =>
         (args['text'] as string) ??
         trans.__('Open the provided `url` in a tab.'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            url: {
+              type: 'string',
+              description: 'The URL to open'
+            },
+            text: {
+              type: 'string',
+              description: 'The text label for the tab'
+            },
+            newBrowserTab: {
+              type: 'boolean',
+              description: 'Whether to open in a new browser tab'
+            }
+          },
+          required: ['url']
+        }
+      },
       execute: args => {
         const url = args['url'] as string;
         const text = args['text'] as string;
         const newBrowserTab = (args['newBrowserTab'] as boolean) || false;
+
+        if (!isUrlSafe(url)) {
+          console.warn(`Blocked unsafe URL: ${url}`);
+          return;
+        }
 
         // If help resource will generate a mixed content error, load externally.
         if (
@@ -314,7 +426,7 @@ const resources: JupyterFrontEndPlugin<void> = {
       }
     ];
 
-    resources.sort((a: any, b: any) => {
+    resources.sort((a, b) => {
       return a.text.localeCompare(b.text);
     });
 
@@ -327,136 +439,153 @@ const resources: JupyterFrontEndPlugin<void> = {
     }));
     helpMenu.addGroup(resourcesGroup, 10);
 
-    // Generate a cache of the kernel help links.
-    const kernelInfoCache = new Map<
-      string,
-      KernelMessage.IInfoReplyMsg['content']
-    >();
+    // Names of the kernels whose help entries were added.
+    const kernelsWithEntries = new Set<string>();
+    // Name of the kernel the current widget uses or last used; its entries
+    // are shown.
+    let currentKernel: string | null = null;
+    // The last kernel name of each widget, kept after the kernel dies or is
+    // shut down, as this is when users are likely to look for help.
+    const widgetKernels = new WeakMap<Widget, string>();
+    // Commands of the kernel entries, re-evaluated when the kernel changes.
+    const kernelCommands: string[] = [];
+    let updates = 0;
 
-    const onSessionRunningChanged = (
-      m: Session.IManager,
-      sessions: Session.IModel[]
+    const addKernelEntries = (
+      name: string,
+      spec: KernelSpec.ISpecModel,
+      kernelInfo: KernelMessage.IInfoReply
     ) => {
-      // If a new session has been added, it is at the back
-      // of the session list. If one has changed or stopped,
-      // it does not hurt to check it.
-      if (!sessions.length) {
-        return;
-      }
-      const sessionModel = sessions[sessions.length - 1];
-      if (
-        !sessionModel.kernel ||
-        kernelInfoCache.has(sessionModel.kernel.name)
-      ) {
-        return;
-      }
-      const session = serviceManager.sessions.connectTo({
-        model: sessionModel,
-        kernelConnectionOptions: { handleComms: false }
+      kernelsWithEntries.add(name);
+      const isEnabled = () => currentKernel === name;
+
+      // Add the kernel banner to the Help Menu.
+      const bannerCommand = `help-menu-${name}:banner`;
+      const kernelName = spec.display_name;
+      const kernelIconUrl =
+        spec.resources['logo-svg'] || spec.resources['logo-64x64'];
+      commands.addCommand(bannerCommand, {
+        label: trans.__('About the %1 Kernel', kernelName),
+        describedBy: {
+          args: {
+            type: 'object',
+            properties: {}
+          }
+        },
+        isVisible: isEnabled,
+        isEnabled,
+        execute: () => {
+          // Create the header of the about dialog
+          const headerLogo = (
+            <img src={kernelIconUrl} alt={trans.__('Kernel Icon')} />
+          );
+          const title = (
+            <span className="jp-About-header">
+              {headerLogo}
+              <div className="jp-About-header-info">{kernelName}</div>
+            </span>
+          );
+          const banner = <pre>{kernelInfo.banner}</pre>;
+          const body = <div className="jp-About-body">{banner}</div>;
+
+          return showDialog({
+            title,
+            body,
+            buttons: [
+              Dialog.cancelButton({
+                label: trans.__('Close')
+              })
+            ]
+          });
+        }
       });
+      helpMenu.addGroup([{ command: bannerCommand }], 20);
+      kernelCommands.push(bannerCommand);
 
-      void session.kernel?.info
-        .then(kernelInfo => {
-          const name = session.kernel!.name;
-
-          // Check the cache second time so that, if two callbacks get scheduled,
-          // they don't try to add the same commands.
-          if (kernelInfoCache.has(name)) {
-            return;
-          }
-
-          const spec = serviceManager.kernelspecs?.specs?.kernelspecs[name];
-          if (!spec) {
-            return;
-          }
-
-          // Set the Kernel Info cache.
-          kernelInfoCache.set(name, kernelInfo);
-
-          // Utility function to check if the current widget
-          // has registered itself with the help menu.
-          let usesKernel = false;
-          const onCurrentChanged = async () => {
-            const kernel: Kernel.IKernelConnection | null =
-              await commands.execute('helpmenu:get-kernel');
-            usesKernel = kernel?.name === name;
-          };
-          // Set the status for the current widget
-          onCurrentChanged().catch(error => {
-            console.error(
-              'Failed to get the kernel for the current widget.',
-              error
-            );
-          });
-          if (labShell) {
-            // Update status when current widget changes
-            labShell.currentChanged.connect(onCurrentChanged);
-          }
-          const isEnabled = () => usesKernel;
-
-          // Add the kernel banner to the Help Menu.
-          const bannerCommand = `help-menu-${name}:banner`;
-          const kernelName = spec.display_name;
-          const kernelIconUrl =
-            spec.resources['logo-svg'] || spec.resources['logo-64x64'];
-          commands.addCommand(bannerCommand, {
-            label: trans.__('About the %1 Kernel', kernelName),
-            isVisible: isEnabled,
-            isEnabled,
-            execute: () => {
-              // Create the header of the about dialog
-              const headerLogo = (
-                <img src={kernelIconUrl} alt={trans.__('Kernel Icon')} />
-              );
-              const title = (
-                <span className="jp-About-header">
-                  {headerLogo}
-                  <div className="jp-About-header-info">{kernelName}</div>
-                </span>
-              );
-              const banner = <pre>{kernelInfo.banner}</pre>;
-              const body = <div className="jp-About-body">{banner}</div>;
-
-              return showDialog({
-                title,
-                body,
-                buttons: [
-                  Dialog.cancelButton({
-                    label: trans.__('Close')
-                  })
-                ]
-              });
+      // Add the kernel info help_links to the Help menu.
+      const kernelGroup: Menu.IItemOptions[] = [];
+      (kernelInfo.help_links || []).forEach(link => {
+        const commandId = `help-menu-${name}:${link.text}`;
+        commands.addCommand(commandId, {
+          describedBy: {
+            args: {
+              type: 'object',
+              properties: {}
             }
-          });
-          helpMenu.addGroup([{ command: bannerCommand }], 20);
-
-          // Add the kernel info help_links to the Help menu.
-          const kernelGroup: Menu.IItemOptions[] = [];
-          (kernelInfo.help_links || []).forEach(link => {
-            const commandId = `help-menu-${name}:${link.text}`;
-            commands.addCommand(commandId, {
-              label: commands.label(CommandIDs.open, link),
-              isVisible: isEnabled,
-              isEnabled,
-              execute: () => {
-                return commands.execute(CommandIDs.open, link);
-              }
-            });
-            kernelGroup.push({ command: commandId });
-          });
-          helpMenu.addGroup(kernelGroup, 21);
-        })
-        .then(() => {
-          // Dispose of the session object since we no longer need it.
-          session.dispose();
+          },
+          label: commands.label(CommandIDs.open, link),
+          isVisible: isEnabled,
+          isEnabled,
+          execute: () => {
+            return commands.execute(CommandIDs.open, link);
+          }
         });
+        kernelGroup.push({ command: commandId });
+        kernelCommands.push(commandId);
+      });
+      helpMenu.addGroup(kernelGroup, 21);
     };
 
-    // Create menu items for currently running sessions
-    for (const model of serviceManager.sessions.running()) {
-      onSessionRunningChanged(serviceManager.sessions, [model]);
-    }
-    serviceManager.sessions.runningChanged.connect(onSessionRunningChanged);
+    // Show the entries of the current widget's kernel, adding them the first
+    // time. The info comes from the widget's own kernel connection: opening
+    // another one just for the menu can break the widget's connection.
+    const update = async () => {
+      const request = ++updates;
+      const widget = app.shell.currentWidget;
+      const kernel: Kernel.IKernelConnection | null = await commands.execute(
+        'helpmenu:get-kernel'
+      );
+      // Only the latest request decides which entries are shown.
+      if (request !== updates) {
+        return;
+      }
+      if (widget && kernel) {
+        widgetKernels.set(widget, kernel.name);
+      }
+      const name =
+        kernel?.name ?? (widget && widgetKernels.get(widget)) ?? null;
+      if (currentKernel !== name) {
+        currentKernel = name;
+        kernelCommands.forEach(id => commands.notifyCommandChanged(id));
+      }
+      if (!kernel || kernelsWithEntries.has(kernel.name)) {
+        return;
+      }
+      const spec = serviceManager.kernelspecs?.specs?.kernelspecs[kernel.name];
+      if (!spec) {
+        return;
+      }
+      const kernelInfo = await kernel.info;
+      if (!kernelsWithEntries.has(kernel.name)) {
+        addKernelEntries(kernel.name, spec, kernelInfo);
+      }
+    };
+    const onChanged = () => {
+      update().catch(reason => {
+        console.warn(
+          'Failed to get the kernel info for the Help menu.',
+          reason
+        );
+      });
+    };
+
+    // The current widget may get its kernel after it became current, e.g.
+    // while its session starts or reconnects, so also follow its kernel.
+    let currentSession: ISessionContext | null = null;
+    const onCurrentChanged = () => {
+      currentSession?.kernelChanged.disconnect(onChanged);
+      const widget = app.shell.currentWidget as {
+        sessionContext?: ISessionContext;
+      } | null;
+      currentSession = widget?.sessionContext ?? null;
+      currentSession?.kernelChanged.connect(onChanged);
+      onChanged();
+    };
+    (labShell ?? app.shell).currentChanged?.connect(onCurrentChanged);
+    serviceManager.sessions.runningChanged.connect(onChanged);
+    // The kernel specs can arrive after the kernel info.
+    serviceManager.kernelspecs?.specsChanged.connect(onChanged);
+    onCurrentChanged();
 
     if (palette) {
       resources.forEach(args => {
@@ -471,187 +600,12 @@ const resources: JupyterFrontEndPlugin<void> = {
   }
 };
 
-/**
- * A plugin to add a licenses reporting tools.
- */
-const licenses: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/help-extension:licenses',
-  description: 'Adds licenses used report tools.',
-  autoStart: true,
-  requires: [ITranslator],
-  optional: [IMainMenu, ICommandPalette, ILayoutRestorer],
-  activate: (
-    app: JupyterFrontEnd,
-    translator: ITranslator,
-    menu: IMainMenu | null,
-    palette: ICommandPalette | null,
-    restorer: ILayoutRestorer | null
-  ) => {
-    // bail if no license API is available from the server
-    if (!PageConfig.getOption('licensesUrl')) {
-      return;
-    }
-
-    const { commands, shell } = app;
-    const trans = translator.load('jupyterlab');
-
-    // translation strings
-    const category = trans.__('Help');
-    const downloadAsText = trans.__('Download All Licenses as');
-    const licensesText = trans.__('Licenses');
-    const refreshLicenses = trans.__('Refresh Licenses');
-
-    // an incrementer for license widget ids
-    let counter = 0;
-
-    const licensesUrl =
-      URLExt.join(
-        PageConfig.getBaseUrl(),
-        PageConfig.getOption('licensesUrl')
-      ) + '/';
-
-    const licensesNamespace = 'help-licenses';
-    const licensesTracker = new WidgetTracker<MainAreaWidget<Licenses>>({
-      namespace: licensesNamespace
-    });
-
-    /**
-     * Return a full license report format based on a format name
-     */
-    function formatOrDefault(format: string): Licenses.IReportFormat {
-      return (
-        Licenses.REPORT_FORMATS[format] ||
-        Licenses.REPORT_FORMATS[Licenses.DEFAULT_FORMAT]
-      );
-    }
-
-    /**
-     * Create a MainAreaWidget for a license viewer
-     */
-    function createLicenseWidget(args: Licenses.ICreateArgs) {
-      const licensesModel = new Licenses.Model({
-        ...args,
-        licensesUrl,
-        trans,
-        serverSettings: app.serviceManager.serverSettings
-      });
-      const content = new Licenses({ model: licensesModel });
-      content.id = `${licensesNamespace}-${++counter}`;
-      content.title.label = licensesText;
-      content.title.icon = copyrightIcon;
-      const main = new MainAreaWidget({
-        content,
-        reveal: licensesModel.licensesReady
-      });
-
-      main.toolbar.addItem(
-        'refresh-licenses',
-        new CommandToolbarButton({
-          id: CommandIDs.refreshLicenses,
-          args: { noLabel: 1 },
-          commands
-        })
-      );
-
-      main.toolbar.addItem('spacer', Toolbar.createSpacerItem());
-
-      for (const format of Object.keys(Licenses.REPORT_FORMATS)) {
-        const button = new CommandToolbarButton({
-          id: CommandIDs.licenseReport,
-          args: { format, noLabel: 1 },
-          commands
-        });
-        main.toolbar.addItem(`download-${format}`, button);
-      }
-
-      return main;
-    }
-
-    // register license-related commands
-    commands.addCommand(CommandIDs.licenses, {
-      label: licensesText,
-      execute: (args: any) => {
-        const licenseMain = createLicenseWidget(args as Licenses.ICreateArgs);
-        shell.add(licenseMain, 'main', { type: 'Licenses' });
-
-        // add to tracker so it can be restored, and update when choices change
-        void licensesTracker.add(licenseMain);
-        licenseMain.content.model.trackerDataChanged.connect(() => {
-          void licensesTracker.save(licenseMain);
-        });
-        return licenseMain;
-      }
-    });
-
-    commands.addCommand(CommandIDs.refreshLicenses, {
-      label: args => (args.noLabel ? '' : refreshLicenses),
-      caption: refreshLicenses,
-      icon: refreshIcon,
-      execute: async () => {
-        return licensesTracker.currentWidget?.content.model.initLicenses();
-      }
-    });
-
-    commands.addCommand(CommandIDs.licenseReport, {
-      label: args => {
-        if (args.noLabel) {
-          return '';
-        }
-        const format = formatOrDefault(`${args.format}`);
-        return `${downloadAsText} ${format.title}`;
-      },
-      caption: args => {
-        const format = formatOrDefault(`${args.format}`);
-        return `${downloadAsText} ${format.title}`;
-      },
-      icon: args => {
-        const format = formatOrDefault(`${args.format}`);
-        return format.icon;
-      },
-      execute: async args => {
-        const format = formatOrDefault(`${args.format}`);
-        return await licensesTracker.currentWidget?.content.model.download({
-          format: format.id
-        });
-      }
-    });
-
-    // handle optional integrations
-    if (palette) {
-      palette.addItem({ command: CommandIDs.licenses, category });
-    }
-
-    if (menu) {
-      const helpMenu = menu.helpMenu;
-      helpMenu.addGroup([{ command: CommandIDs.licenses }], 0);
-    }
-
-    if (restorer) {
-      void restorer.restore(licensesTracker, {
-        command: CommandIDs.licenses,
-        name: widget => 'licenses',
-        args: widget => {
-          const { currentBundleName, currentPackageIndex, packageFilter } =
-            widget.content.model;
-
-          const args: Licenses.ICreateArgs = {
-            currentBundleName,
-            currentPackageIndex,
-            packageFilter
-          };
-          return args as ReadonlyJSONObject;
-        }
-      });
-    }
-  }
-};
-
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<unknown>[] = [
   about,
   jupyterForum,
+  licensesCommands,
   open,
-  resources,
-  licenses
+  resources
 ];
 
 export default plugins;

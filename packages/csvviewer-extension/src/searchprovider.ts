@@ -2,9 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 import { CSVViewer } from '@jupyterlab/csvviewer';
 import { DocumentWidget } from '@jupyterlab/docregistry';
-import { ISearchProvider, SearchProvider } from '@jupyterlab/documentsearch';
-import { ITranslator } from '@jupyterlab/translation';
-import { Widget } from '@lumino/widgets';
+import type { ISearchProvider } from '@jupyterlab/documentsearch';
+import { SearchProvider } from '@jupyterlab/documentsearch';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { Widget } from '@lumino/widgets';
 
 // The type for which isApplicable returns true
 export type CSVDocumentWidget = DocumentWidget<CSVViewer>;
@@ -13,6 +14,16 @@ export type CSVDocumentWidget = DocumentWidget<CSVViewer>;
  * CSV viewer search provider
  */
 export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
+  /**
+   * Construct a CSV viewer search provider.
+   *
+   * @param widget - The widget to search on
+   */
+  constructor(widget: CSVDocumentWidget) {
+    super(widget);
+    widget.content.dataChanged.connect(this._onDataChanged, this);
+  }
+
   /**
    * Instantiate a search provider for the widget.
    *
@@ -49,6 +60,20 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
    * the replace option.
    */
   readonly isReadOnly = true;
+
+  /**
+   * The current index of the selected match.
+   */
+  get currentMatchIndex(): number | null {
+    return this.widget.content.searchService?.currentMatchIndex ?? null;
+  }
+
+  /**
+   * The number of matches.
+   */
+  get matchesCount(): number | null {
+    return this.widget.content.searchService?.matchesCount ?? null;
+  }
 
   /**
    * Clear currently highlighted match.
@@ -128,6 +153,13 @@ export class CSVSearchProvider extends SearchProvider<CSVDocumentWidget> {
     this.widget.content.searchService.clear();
 
     return Promise.resolve();
+  }
+
+  /**
+   * Run the search again on the new data, as the matches may have changed.
+   */
+  private _onDataChanged(): void {
+    this._stateChanged.emit();
   }
 
   private _query: RegExp;

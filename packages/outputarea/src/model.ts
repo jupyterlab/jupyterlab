@@ -2,16 +2,18 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as nbformat from '@jupyterlab/nbformat';
-import {
+import type {
   IObservableList,
-  IObservableString,
-  ObservableList
+  IObservableString
 } from '@jupyterlab/observables';
-import { IOutputModel, OutputModel } from '@jupyterlab/rendermime';
+import { ObservableList } from '@jupyterlab/observables';
+import type { IOutputModel } from '@jupyterlab/rendermime';
+import { OutputModel } from '@jupyterlab/rendermime';
 import { map } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IDisposable } from '@lumino/disposable';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
 /**
  * The model for an output area.
@@ -358,7 +360,7 @@ export class OutputAreaModel implements IOutputAreaModel {
       const curText = prev.streamText!;
       const newText =
         typeof value.text === 'string' ? value.text : value.text.join('');
-      Private.addText(curText, newText);
+      this._streamIndex = Private.addText(this._streamIndex, curText, newText);
       return this.length;
     }
 
@@ -366,7 +368,9 @@ export class OutputAreaModel implements IOutputAreaModel {
       if (typeof value.text !== 'string') {
         value.text = value.text.join('');
       }
-      value.text = Private.processText(value.text);
+      const { text, index } = Private.processText(0, value.text);
+      this._streamIndex = index;
+      value.text = text;
     }
 
     // Create the new item.
@@ -445,6 +449,13 @@ export class OutputAreaModel implements IOutputAreaModel {
           item.changed.disconnect(this._onGenericChange, this);
         });
         break;
+      case 'move':
+        break;
+      case 'clear':
+        args.oldValues.forEach(item => {
+          item.changed.disconnect(this._onGenericChange, this);
+        });
+        break;
     }
     this._changed.emit(args);
   }
@@ -480,6 +491,7 @@ export class OutputAreaModel implements IOutputAreaModel {
   private _changed = new Signal<OutputAreaModel, IOutputAreaModel.ChangedArgs>(
     this
   );
+  private _streamIndex = 0;
 }
 
 /**
@@ -530,20 +542,31 @@ namespace Private {
   /*
    * Handle backspaces in `newText` and concatenates to `text`, if any.
    */
-  export function processText(newText: string, text?: string): string {
+  export function processText(
+    index: number,
+    newText: string,
+    text?: string
+  ): { text: string; index: number } {
     if (text === undefined) {
       text = '';
     }
-    if (!(newText.includes('\b') || newText.includes('\r'))) {
-      return text + newText;
+    if (
+      !(
+        newText.includes('\b') ||
+        newText.includes('\r') ||
+        newText.includes('\n')
+      )
+    ) {
+      text =
+        text.slice(0, index) + newText + text.slice(index + newText.length);
+      return { text, index: index + newText.length };
     }
-    let idx0 = text.length;
+    let idx0 = index;
     let idx1: number = -1;
     let lastEnd: number = 0;
-    const regex = /[\n\b\r]/;
-    // TODO: once we upgrade eslint to 9.1.0 we can toggle `allExceptWhileTrue`
-    // option and remove the ignore rule below.
-    // eslint-disable-next-line no-constant-condition
+    // Matching the backspace (not word boundary) here is intended.
+    const regex = /[\n\b\r]/; // eslint-disable-line regexp/no-escape-backspace
+
     while (true) {
       idx1 = indexOfAny(newText, regex, lastEnd);
 
@@ -554,11 +577,11 @@ namespace Private {
       );
       text = text.slice(0, idx0) + prefix + text.slice(idx0 + prefix.length);
       lastEnd = idx1 + 1;
+      idx0 += prefix.length;
 
       if (idx1 === -1) {
         break;
       }
-      idx0 += prefix.length;
 
       const newChar = newText[idx1];
       if (newChar === '\b') {
@@ -587,14 +610,28 @@ namespace Private {
         throw Error(`This should not happen`);
       }
     }
-    return text;
+    return { text, index: idx0 };
+  }
+
+  /**
+   * Reallocate the string to prevent memory leak,
+   * workaround for issue in Chrome and Firefox:
+   * - https://issues.chromium.org/issues/41480525
+   * - https://bugzilla.mozilla.org/show_bug.cgi?id=727615
+   */
+  function unleakString(s: string) {
+    return JSON.parse(JSON.stringify(s));
   }
 
   /*
    * Concatenate a string to an observable string, handling backspaces.
    */
-  export function addText(curText: IObservableString, newText: string): void {
-    const text = processText(newText, curText.text);
+  export function addText(
+    prevIndex: number,
+    curText: IObservableString,
+    newText: string
+  ): number {
+    const { text, index } = processText(prevIndex, newText, curText.text);
     // Compute the difference between current text and new text.
     let done = false;
     let idx = 0;
@@ -608,16 +645,17 @@ namespace Private {
         }
       } else if (idx === curText.text.length) {
         if (idx !== text.length) {
-          curText.insert(curText.text.length, text.slice(idx));
+          curText.insert(curText.text.length, unleakString(text.slice(idx)));
           done = true;
         }
       } else if (text[idx] !== curText.text[idx]) {
         curText.remove(idx, curText.text.length);
-        curText.insert(idx, text.slice(idx));
+        curText.insert(idx, unleakString(text.slice(idx)));
         done = true;
       } else {
         idx++;
       }
     }
+    return index;
   }
 }

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import { ILayoutRestorer } from '@jupyterlab/application';
@@ -46,8 +45,12 @@ const plugin = {
 /**
  * Activate the markdown viewer plugin.
  */
+// eslint-disable-next-line no-unused-vars
 function activate(app, restorer, rendermime, settingRegistry, middleToken) {
   const { commands, docRegistry } = app;
+  // Read content fetched without options, so that the example test can check
+  // that the deprecation warning names each prebuilt extension.
+  void app.serviceManager.contents.get('').then(model => model.content);
   // Add the markdown renderer factory.
   rendermime.addFactory(markdownRendererFactory);
   const namespace = 'markdownviewer-widget';

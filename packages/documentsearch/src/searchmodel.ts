@@ -2,10 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { VDomModel } from '@jupyterlab/ui-components';
-import { IObservableDisposable } from '@lumino/disposable';
+import type { IObservableDisposable } from '@lumino/disposable';
 import { Debouncer } from '@lumino/polling';
-import { ISignal, Signal } from '@lumino/signaling';
-import {
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type {
   IFilter,
   IFilters,
   IReplaceOptionsSupport,
@@ -84,6 +85,28 @@ export class SearchDocumentModel
   }
 
   /**
+   * Whether the current match can be replaced.
+   *
+   * Without a current match, it has the value of `replaceAllEnabled`.
+   */
+  get replaceEnabled(): boolean {
+    const match = this.searchProvider.getCurrentMatch?.();
+    return match ? !match.readOnly : this.replaceAllEnabled;
+  }
+
+  /**
+   * Whether Replace All has a match to replace.
+   *
+   * It stays enabled when there are no matches, and when the provider does
+   * not count the matches which can be replaced.
+   */
+  get replaceAllEnabled(): boolean {
+    return (
+      !this.totalMatches || this.searchProvider.replaceableMatchesCount !== 0
+    );
+  }
+
+  /**
    * Filter definitions for the current provider.
    */
   get filtersDefinition(): { [n: string]: IFilter } {
@@ -104,13 +127,8 @@ export class SearchDocumentModel
     return this._initialQuery;
   }
   set initialQuery(v: string) {
-    if (v) {
-      // Usually the value comes from user selection (set by search provider).
-      this._initialQuery = v;
-    } else {
-      // If user selection is empty, we fall back to most recent value (if any).
-      this._initialQuery = this._searchExpression;
-    }
+    // The value comes from user selection (set by search provider).
+    this._initialQuery = v;
   }
 
   /**
@@ -309,6 +327,9 @@ export class SearchDocumentModel
    * Replace the current match.
    */
   async replaceCurrentMatch(): Promise<void> {
+    if (!this.replaceEnabled) {
+      return;
+    }
     await this.searchProvider.replaceCurrentMatch(this._replaceText, true, {
       preserveCase: this.preserveCase,
       regularExpression: this.useRegex
@@ -364,7 +385,7 @@ export class SearchDocumentModel
       // Emit state change as the index needs to be updated
       this.stateChanged.emit();
     } catch (reason) {
-      this._parsingError = reason.toString();
+      this._parsingError = String(reason);
       this.stateChanged.emit();
       console.error(
         `Failed to parse expression ${this.searchExpression}`,

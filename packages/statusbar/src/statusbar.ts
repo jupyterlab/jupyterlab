@@ -2,14 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ArrayExt } from '@lumino/algorithm';
-import {
-  DisposableDelegate,
-  DisposableSet,
-  IDisposable
-} from '@lumino/disposable';
-import { Message } from '@lumino/messaging';
+import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
+import type { Message } from '@lumino/messaging';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-import { IStatusBar } from './tokens';
+import type { IStatusBar } from './tokens';
 
 /**
  * Main status bar object which contains all items.
@@ -28,6 +25,8 @@ export class StatusBar extends Widget implements IStatusBar {
     leftPanel.addClass('jp-StatusBar-Left');
     middlePanel.addClass('jp-StatusBar-Middle');
     rightPanel.addClass('jp-StatusBar-Right');
+
+    rightPanel.node.style.flexDirection = 'row';
 
     rootLayout.addWidget(leftPanel);
     rootLayout.addWidget(middlePanel);
@@ -78,7 +77,10 @@ export class StatusBar extends Widget implements IStatusBar {
         this._leftSide.insertWidget(insertIndex, item);
       }
     } else if (align === 'right') {
-      const insertIndex = this._findInsertIndex(this._rightRankItems, rankItem);
+      const insertIndex = ArrayExt.findFirstIndex(
+        this._rightRankItems,
+        item => item.rank < rankItem.rank
+      );
       if (insertIndex === -1) {
         this._rightSide.addWidget(item);
         this._rightRankItems.push(rankItem);

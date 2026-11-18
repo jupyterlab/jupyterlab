@@ -2,13 +2,18 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { PanelWithToolbar, ToolbarButton } from '@jupyterlab/ui-components';
-import { CommandRegistry } from '@lumino/commands';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import {
+  closeAllIcon,
+  exceptionsIcon,
+  PanelWithToolbar,
+  ToolbarButton
+} from '@jupyterlab/ui-components';
+import type { CommandRegistry } from '@lumino/commands';
 import { Signal } from '@lumino/signaling';
-import { Panel } from '@lumino/widgets';
-import { closeAllIcon, exceptionIcon } from '../../icons';
-import { IDebugger } from '../../tokens';
+import type { Panel } from '@lumino/widgets';
+import type { IDebugger } from '../../tokens';
 import { BreakpointsBody } from './body';
 import { PauseOnExceptionsWidget } from './pauseonexceptions';
 
@@ -29,12 +34,16 @@ export class Breakpoints extends PanelWithToolbar {
 
     const body = new BreakpointsBody(model);
 
+    this.toolbar.node.setAttribute(
+      'aria-label',
+      trans.__('Breakpoints panel toolbar')
+    );
     this.toolbar.addItem(
       'pauseOnException',
       new PauseOnExceptionsWidget({
         service: service,
         commands: commands,
-        icon: exceptionIcon,
+        icon: exceptionsIcon,
         tooltip: trans.__('Pause on exception filter')
       })
     );
@@ -89,6 +98,7 @@ export namespace Breakpoints {
      */
     pauseOnExceptions: string;
   }
+
   /**
    * Instantiation options for `Breakpoints`.
    */

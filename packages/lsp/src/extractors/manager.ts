@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ILSPCodeExtractorsManager } from '../tokens';
-import { IForeignCodeExtractor } from './types';
+import type { ILSPCodeExtractorsManager } from '../tokens';
+import type { IForeignCodeExtractor } from './types';
 
 /**
  * Manager for the code extractors

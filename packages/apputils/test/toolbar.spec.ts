@@ -1,21 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { SessionContext, ToolbarRegistry } from '@jupyterlab/apputils';
 import {
   createToolbarFactory,
-  SessionContext,
   SessionContextDialogs,
   Toolbar,
-  ToolbarRegistry,
   ToolbarWidgetRegistry
 } from '@jupyterlab/apputils';
-import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
-import { IDataConnector } from '@jupyterlab/statedb';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { SettingRegistry } from '@jupyterlab/settingregistry';
+import type { IDataConnector } from '@jupyterlab/statedb';
 import { framePromise, JupyterServer } from '@jupyterlab/testing';
-import { ITranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
 import { JSONExt, PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
+
+const DEFAULT_LANGUAGE_CODE = 'en';
 
 const server = new JupyterServer();
 
@@ -297,7 +299,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       const translator: ITranslator = {
-        languageCode: 'en',
+        languageCode: DEFAULT_LANGUAGE_CODE,
         load: jest.fn()
       };
 
@@ -406,7 +408,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       const translator: ITranslator = {
-        languageCode: 'en',
+        languageCode: DEFAULT_LANGUAGE_CODE,
         load: jest.fn()
       };
 
@@ -507,7 +509,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       const translator: ITranslator = {
-        languageCode: 'en',
+        languageCode: DEFAULT_LANGUAGE_CODE,
         load: jest.fn()
       };
 
@@ -601,7 +603,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       const translator: ITranslator = {
-        languageCode: 'en',
+        languageCode: DEFAULT_LANGUAGE_CODE,
         load: jest.fn()
       };
 
@@ -625,6 +627,112 @@ describe('@jupyterlab/apputils', () => {
       toolbarRegistry.addFactory(factoryName, 'test', itemFactory);
       expect(toolbar).toHaveLength(1);
       expect(toolbar.get(0).widget.node.textContent).toContain(textContent);
+    });
+
+    const loadToolbarFactory = async (
+      items: ISettingRegistry.IToolbarItem[]
+    ) => {
+      const pluginId = 'test-plugin:settings';
+      const defaultFactory = jest.fn().mockImplementation(() => new Widget());
+      const toolbarRegistry = new ToolbarWidgetRegistry({ defaultFactory });
+
+      const bar: ISettingRegistry.IPlugin = {
+        data: {
+          composite: {},
+          user: {}
+        },
+        id: pluginId,
+        raw: '{}',
+        schema: {
+          'jupyter.lab.toolbars': {
+            dummyFactory: items
+          },
+          'jupyter.lab.transform': true,
+          properties: {
+            toolbar: {
+              type: 'array'
+            }
+          },
+          type: 'object'
+        },
+        version: 'test'
+      };
+
+      const connector: IDataConnector<
+        ISettingRegistry.IPlugin,
+        string,
+        string,
+        string
+      > = {
+        fetch: jest.fn().mockImplementation((id: string) => {
+          switch (id) {
+            case bar.id:
+              return bar;
+            default:
+              return {};
+          }
+        }),
+        list: jest.fn(),
+        save: jest.fn(),
+        remove: jest.fn()
+      };
+
+      const settingRegistry = new SettingRegistry({
+        connector
+      });
+
+      const translator: ITranslator = {
+        languageCode: DEFAULT_LANGUAGE_CODE,
+        load: jest.fn()
+      };
+
+      const factory = createToolbarFactory(
+        toolbarRegistry,
+        settingRegistry,
+        'dummyFactory',
+        pluginId,
+        translator
+      );
+
+      await settingRegistry.load(bar.id);
+
+      return { factory, defaultFactory };
+    };
+
+    it('should add the command arguments to every item', async () => {
+      const { factory, defaultFactory } = await loadToolbarFactory([
+        { name: 'insert', command: 'notebook:insert-cell-below', rank: 20 },
+        {
+          name: 'cut',
+          command: 'notebook:cut-cell',
+          args: { extra: 'value' },
+          rank: 21
+        }
+      ]);
+
+      factory(new Widget(), { widgetId: 'panel-id' });
+
+      expect(defaultFactory.mock.calls.map(call => call[2].args)).toEqual([
+        { widgetId: 'panel-id' },
+        { extra: 'value', widgetId: 'panel-id' }
+      ]);
+    });
+
+    it('should keep the arguments set by the item', async () => {
+      const { factory, defaultFactory } = await loadToolbarFactory([
+        {
+          name: 'viewer',
+          command: 'fileeditor:open-code-viewer',
+          args: { content: 'x = 1', widgetId: 'viewer-id' },
+          rank: 20
+        }
+      ]);
+
+      factory(new Widget(), { widgetId: 'panel-id' });
+
+      expect(defaultFactory.mock.calls.map(call => call[2].args)).toEqual([
+        { content: 'x = 1', widgetId: 'viewer-id' }
+      ]);
     });
   });
 });

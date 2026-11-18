@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IRankedMenu, RankedMenu } from '@jupyterlab/ui-components';
+import type { IRankedMenu } from '@jupyterlab/ui-components';
+import { RankedMenu } from '@jupyterlab/ui-components';
 import { SemanticCommand } from '@jupyterlab/apputils';
 
 /**
@@ -25,8 +26,10 @@ export class ViewMenu extends RankedMenu implements IViewMenu {
     super(options);
     this.editorViewers = {
       toggleLineNumbers: new SemanticCommand(),
+      toggleMinimap: new SemanticCommand(),
       toggleMatchBrackets: new SemanticCommand(),
-      toggleWordWrap: new SemanticCommand()
+      toggleWordWrap: new SemanticCommand(),
+      toggleToolbar: new SemanticCommand()
     };
   }
 
@@ -51,6 +54,11 @@ export namespace IViewMenu {
     toggleLineNumbers: SemanticCommand;
 
     /**
+     * A semantic command to show minmap in the editor.
+     */
+    toggleMinimap: SemanticCommand;
+
+    /**
      * A semantic command to word-wrap the editor.
      */
     toggleWordWrap: SemanticCommand;
@@ -59,5 +67,10 @@ export namespace IViewMenu {
      * A semantic command to match brackets in the editor.
      */
     toggleMatchBrackets: SemanticCommand;
+
+    /**
+     * A semantic command to show or hide the document toolbar.
+     */
+    toggleToolbar: SemanticCommand;
   }
 }

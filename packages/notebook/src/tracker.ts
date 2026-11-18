@@ -2,11 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { WidgetTracker } from '@jupyterlab/apputils';
-import { Cell } from '@jupyterlab/cells';
-import { ISignal, Signal } from '@lumino/signaling';
-import { NotebookPanel } from './panel';
-import { INotebookTracker } from './tokens';
-import { Notebook } from './widget';
+import type { Cell } from '@jupyterlab/cells';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { NotebookPanel } from './panel';
+import type { INotebookTracker } from './tokens';
+import type { Notebook } from './widget';
 
 export class NotebookTracker
   extends WidgetTracker<NotebookPanel>

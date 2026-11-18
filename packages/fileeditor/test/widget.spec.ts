@@ -6,9 +6,9 @@ import {
   CodeMirrorMimeTypeService,
   EditorLanguageRegistry
 } from '@jupyterlab/codemirror';
+import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import {
   Context,
-  DocumentRegistry,
   DocumentWidget,
   TextModelFactory
 } from '@jupyterlab/docregistry';
@@ -17,11 +17,12 @@ import {
   FileEditorFactory,
   FileEditorWidget
 } from '@jupyterlab/fileeditor';
-import { ServiceManager } from '@jupyterlab/services';
+import type { ServiceManager } from '@jupyterlab/services';
 import { framePromise } from '@jupyterlab/testing';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { UUID } from '@lumino/coreutils';
-import { Message, MessageLoop } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
+import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 

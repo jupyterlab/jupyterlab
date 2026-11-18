@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /* eslint-disable camelcase */
 import * as fs from 'fs-extra';
@@ -84,6 +85,21 @@ packages:
     fs.unlinkSync(log_file);
   }
 
+  // Run the verdaccio dependency, so that the lockfile pins its version
+  const verdaccio = path.join(
+    path.dirname(require.resolve('verdaccio/package.json')),
+    'bin',
+    'verdaccio'
+  );
+
+  // Print out the version info for debugging
+  const version = child_process
+    .execFileSync(process.execPath, [verdaccio, '--version'], {
+      encoding: 'utf-8'
+    })
+    .trim();
+  console.log(`Verdaccio version: ${version}`);
+
   // Assign as `any`` for compatibility with spawn `OpenMode`` options
   const out: any = fs.openSync(log_file, 'a');
   const err: any = fs.openSync(log_file, 'a');
@@ -91,8 +107,8 @@ packages:
   const options = { cwd: out_dir, detached: true, stdio: ['ignore', out, err] };
 
   const subproc = child_process.spawn(
-    'npx',
-    ['verdaccio'].concat(args.split(' ')),
+    process.execPath,
+    [verdaccio].concat(args.split(' ')),
     options
   );
   subproc.unref();

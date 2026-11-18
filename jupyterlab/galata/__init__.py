@@ -4,10 +4,12 @@
 import getpass
 import os
 from pathlib import Path
-from tempfile import mkdtemp
+from tempfile import NamedTemporaryFile, mkdtemp
+
+from traitlets.config import Config
 
 
-def configure_jupyter_server(c):
+def configure_jupyter_server(c: Config):
     """Helper to configure the Jupyter Server for integration testing
     with Galata.
 
@@ -33,6 +35,11 @@ def configure_jupyter_server(c):
 
     c.LabApp.workspaces_dir = mkdtemp(prefix="galata-workspaces-")
 
+    with NamedTemporaryFile(mode="w", delete=False) as tmp:
+        tmp.write('PS1="$ "\n')
+        rcfile_path = tmp.name
+
+    c.ServerApp.terminado_settings = {"shell_command": ["/bin/bash", "--rcfile", rcfile_path]}
     c.ServerApp.root_dir = os.environ.get(
         "JUPYTERLAB_GALATA_ROOT_DIR", mkdtemp(prefix="galata-test-")
     )

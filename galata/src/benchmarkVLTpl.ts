@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 // Vega-Lite configuration
 
@@ -11,6 +12,7 @@
 const GENERAL_CONFIG = {
   $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
   description: 'Box plots of some action time.',
+  // eslint-disable-next-line jupyter/no-untranslated-string -- Benchmark report, outside the application.
   title: 'Duration of common actions',
   data: {} as Record<string, any>,
   config: { facet: { spacing: 80 } }
@@ -41,6 +43,7 @@ function configPerFile(
             y: { field: comparison, type: 'nominal' },
             x: {
               field: 'time',
+              // eslint-disable-next-line jupyter/no-untranslated-string -- Benchmark report, outside the application.
               title: 'Time (ms)',
               type: 'quantitative',
               scale: { zero: false }

@@ -1,35 +1,48 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+import type { IDisposable } from '@lumino/disposable';
 
-import { IDisposable } from '@lumino/disposable';
+import type { Poll } from '@lumino/polling';
 
-import { Poll } from '@lumino/polling';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { ISignal, Signal } from '@lumino/signaling';
+import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import { Builder, BuildManager } from './builder';
+import type { Builder } from './builder';
+import { BuildManager } from './builder';
 
-import { Contents, ContentsManager } from './contents';
+import type { Contents } from './contents';
+import { ContentsManager } from './contents';
 
-import { Event, EventManager } from './event';
+import type { Event } from './event';
+import { EventManager } from './event';
 
-import { Kernel, KernelManager } from './kernel';
+import type { Kernel } from './kernel';
+import { KernelManager } from './kernel';
 
-import { KernelSpec, KernelSpecManager } from './kernelspec';
+import type { KernelSpec } from './kernelspec';
+import { KernelSpecManager } from './kernelspec';
 
-import { NbConvert, NbConvertManager } from './nbconvert';
+import type { NbConvert } from './nbconvert';
+import { NbConvertManager } from './nbconvert';
 
 import { ServerConnection } from './serverconnection';
 
-import { Session, SessionManager } from './session';
+import type { Session } from './session';
+import { SessionManager } from './session';
 
-import { Setting, SettingManager } from './setting';
+import type { Setting } from './setting';
+import { SettingManager } from './setting';
 
-import { Terminal, TerminalManager } from './terminal';
+import type { Terminal } from './terminal';
+import { TerminalManager } from './terminal';
 
-import { User, UserManager } from './user';
+import type { User } from './user';
+import { UserManager } from './user';
 
-import { Workspace, WorkspaceManager } from './workspace';
+import type { Workspace } from './workspace';
+import { WorkspaceManager } from './workspace';
 
 /**
  * A Jupyter services manager.
@@ -57,7 +70,9 @@ export class ServiceManager implements ServiceManager.IManager {
       });
     this.settings = options.settings || new SettingManager(normalized);
     this.terminals = options.terminals || new TerminalManager(normalized);
-    this.builder = options.builder || new BuildManager(normalized);
+    this.builder =
+      options.builder ||
+      new BuildManager({ serverSettings, translator: options.translator });
     this.workspaces = options.workspaces || new WorkspaceManager(normalized);
     this.nbconvert = options.nbconvert || new NbConvertManager(normalized);
     this.kernelspecs = options.kernelspecs || new KernelSpecManager(normalized);
@@ -183,7 +198,7 @@ export class ServiceManager implements ServiceManager.IManager {
     return this._readyPromise;
   }
 
-  private _onConnectionFailure(sender: any, err: Error): void {
+  private _onConnectionFailure(sender: unknown, err: Error): void {
     this._connectionFailure.emit(err);
   }
 
@@ -225,6 +240,11 @@ export namespace ServiceManager {
      * The default drive for the contents manager.
      */
     readonly defaultDrive: Contents.IDrive;
+
+    /**
+     * The application language translator.
+     */
+    readonly translator?: IRenderMime.ITranslator;
 
     /**
      * When the manager stops polling the API. Defaults to `when-hidden`.

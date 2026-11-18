@@ -1,10 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import type { ISessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { JupyterServer } from '@jupyterlab/testing';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { JupyterServer, testEmission } from '@jupyterlab/testing';
 import {
   ExecutionIndicator,
   ExecutionIndicatorComponent,
@@ -57,29 +57,12 @@ describe('@jupyterlab/notebook', () => {
 
   describe('ExecutionIndicator', () => {
     let widget: Notebook;
-    let sessionContext: ISessionContext;
     let ipySessionContext: ISessionContext;
     let indicator: ExecutionIndicator;
 
-    async function createContext(options?: Partial<SessionContext.IOptions>) {
-      const context = await createSessionContext(options);
-      await context.initialize();
-      await context.session?.kernel?.info;
-      return context;
-    }
-
-    async function setupSessions() {
-      [sessionContext, ipySessionContext] = await Promise.all([
-        createContext(),
-        createContext({ kernelPreference: { name: 'ipython' } })
-      ]);
-    }
-
-    beforeAll(async () => {
+    beforeAll(() => {
       rendermime = utils.defaultRenderMime();
-
-      await setupSessions();
-    }, SESSION_SETUP_TIMEOUT);
+    });
 
     beforeEach(async () => {
       widget = new Notebook({
@@ -106,28 +89,30 @@ describe('@jupyterlab/notebook', () => {
       for (let idx = 0; idx < widget.widgets.length; idx++) {
         widget.select(widget.widgets[idx]);
       }
+      ipySessionContext = await createSessionContext({
+        kernelPreference: { name: 'ipython' }
+      });
+      await ipySessionContext.initialize();
+      await ipySessionContext.session?.kernel?.info;
+
       indicator = new ExecutionIndicator();
       indicator.model.attachNotebook({
         content: widget,
         context: ipySessionContext
       });
-      await ipySessionContext.restartKernel();
-    });
+    }, SESSION_SETUP_TIMEOUT);
 
-    afterEach(() => {
+    afterEach(async () => {
       widget.model?.dispose();
       widget.dispose();
       utils.clipboard.clear();
-      indicator.model.dispose();
       indicator.dispose();
-    });
-
-    afterAll(async () => {
-      await Promise.all([
-        sessionContext.shutdown(),
-        ipySessionContext.shutdown()
-      ]);
-    });
+      try {
+        await ipySessionContext.shutdown();
+      } finally {
+        ipySessionContext.dispose();
+      }
+    }, SESSION_SETUP_TIMEOUT);
 
     describe('executedAllCell', () => {
       it('should count correctly number of scheduled cell', async () => {
@@ -177,14 +162,12 @@ describe('@jupyterlab/notebook', () => {
       it(
         'should reset to idle when kernel gets abruptly terminated',
         async () => {
-          const model = new NotebookModel();
           const modelJson = {
             ...utils.DEFAULT_CONTENT,
             cells: [killerCellModel, slowCellModel]
           };
 
-          model.fromJSON(modelJson);
-          widget.model = model;
+          widget.model!.fromJSON(modelJson);
 
           widget.activeCellIndex = 0;
           for (let idx = 0; idx < widget.widgets.length; idx++) {
@@ -198,18 +181,29 @@ describe('@jupyterlab/notebook', () => {
             );
           });
 
+          const kernel = ipySessionContext.session!.kernel!;
+          const reconnected = testEmission(kernel.connectionStatusChanged, {
+            find: (_, status) => status === 'connected'
+          });
           let completed = await NotebookActions.run(widget, ipySessionContext);
           expect(completed).toBe(false);
 
           expect(scheduledTally).toEqual(expect.arrayContaining([2, 0]));
-          await setupSessions();
+
+          // Let the server fixture shut down the restarting kernel.
+          await reconnected;
+          ipySessionContext.dispose();
         },
         SESSION_SETUP_TIMEOUT
       );
     });
   });
   describe('testProgressCircle', () => {
-    let displayOption: { showOnToolBar: boolean; showProgress: boolean };
+    let displayOption: {
+      showOnToolBar: boolean;
+      showProgress: boolean;
+      showJumpToCell: boolean;
+    };
     let defaultState: {
       interval: number;
       kernelStatus: ISessionContext.KernelDisplayStatus;
@@ -226,7 +220,11 @@ describe('@jupyterlab/notebook', () => {
     const FILLED_CIRCLE = 'M 0 0 v -104 A 104 104 1 1 0 0.1815 -103.9998 z';
 
     beforeEach(() => {
-      displayOption = { showOnToolBar: false, showProgress: true };
+      displayOption = {
+        showOnToolBar: false,
+        showProgress: true,
+        showJumpToCell: false
+      };
       defaultState = {
         interval: 0,
         kernelStatus: 'idle',

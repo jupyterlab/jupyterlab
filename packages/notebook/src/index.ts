@@ -6,6 +6,7 @@
  */
 
 export * from './actions';
+export * from './cellcounterstatus';
 export * from './cellexecutor';
 export * from './celllist';
 export * from './default-toolbar';

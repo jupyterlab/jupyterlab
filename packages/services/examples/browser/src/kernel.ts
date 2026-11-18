@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { KernelAPI, KernelManager, KernelMessage } from '@jupyterlab/services';
+import type { KernelMessage } from '@jupyterlab/services';
+import { KernelAPI, KernelManager } from '@jupyterlab/services';
 
 import { log } from './log';
 

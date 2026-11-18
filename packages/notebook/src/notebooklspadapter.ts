@@ -1,26 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { SessionContext } from '@jupyterlab/apputils';
-import { Cell, ICellModel } from '@jupyterlab/cells';
+import type { SessionContext } from '@jupyterlab/apputils';
+import type { Cell, ICellModel } from '@jupyterlab/cells';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-import {
+import type {
   Document,
   IAdapterOptions,
-  IVirtualPosition,
-  untilReady,
-  VirtualDocument,
-  WidgetLSPAdapter
+  IVirtualPosition
 } from '@jupyterlab/lsp';
-import * as nbformat from '@jupyterlab/nbformat';
-import { IObservableList } from '@jupyterlab/observables';
-import { Session } from '@jupyterlab/services';
+import { untilReady, VirtualDocument, WidgetLSPAdapter } from '@jupyterlab/lsp';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { IObservableList } from '@jupyterlab/observables';
+import type { Session } from '@jupyterlab/services';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 
-import { NotebookPanel } from './panel';
-import { Notebook } from './widget';
-import { CellList } from './celllist';
+import type { NotebookPanel } from './panel';
+import type { Notebook } from './widget';
+import type { CellList } from './celllist';
 
 type ILanguageInfoMetadata = nbformat.ILanguageInfoMetadata;
 
@@ -33,15 +31,29 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
     this._editorToCell = new Map();
     this.editor = editorWidget.content;
     this._cellToEditor = new WeakMap();
-    Promise.all([
-      this.widget.context.sessionContext.ready,
-      this.connectionManager.ready
-    ])
+    this.isReady = this.isReady.bind(this);
+    const sessionContextReady = this.widget.context.sessionContext.ready;
+    const connectionManagerReady = this.connectionManager.ready;
+    const adapter: { current: NotebookAdapter | null } = { current: this };
+    this.disposed.connect(() => {
+      adapter.current = null;
+    });
+    void Promise.all([sessionContextReady, connectionManagerReady])
       .then(async () => {
-        await this.initOnceReady();
-        this._readyDelegate.resolve();
+        const currentAdapter = adapter.current;
+        if (!currentAdapter) {
+          return;
+        }
+        await currentAdapter.initOnceReady();
+        currentAdapter._readyDelegate.resolve();
       })
-      .catch(console.error);
+      .catch(reason => {
+        const currentAdapter = adapter.current;
+        if (!currentAdapter || currentAdapter.isDisposed) {
+          return;
+        }
+        console.error(reason);
+      });
   }
 
   /**
@@ -69,7 +81,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
       mimeType = languageMetadata.mimetype;
     }
     return Array.isArray(mimeType)
-      ? mimeType[0] ?? IEditorMimeTypeService.defaultMimeType
+      ? (mimeType[0] ?? IEditorMimeTypeService.defaultMimeType)
       : mimeType;
   }
 
@@ -186,8 +198,14 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
     try {
       // note: we need to wait until ready before updating language info
       const oldLanguageInfo = this._languageInfo;
-      await untilReady(this.isReady, -1);
+      await untilReady(() => this.isDisposed || this.isReady(), -1);
+      if (this.isDisposed) {
+        return;
+      }
       await this._updateLanguageInfo();
+      if (this.isDisposed) {
+        return;
+      }
       const newLanguageInfo = this._languageInfo;
       if (
         oldLanguageInfo?.name != newLanguageInfo.name ||
@@ -200,7 +218,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
         this.reloadConnection();
       } else {
         console.log(
-          'Keeping old LSP connection as the new kernel uses the same langauge'
+          'Keeping old LSP connection as the new kernel uses the same language'
         );
       }
     } catch (err) {
@@ -298,7 +316,8 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
       cellsAdded.length ||
       change.type === 'set' ||
       change.type === 'move' ||
-      change.type === 'remove'
+      change.type === 'remove' ||
+      change.type === 'clear'
     ) {
       // in contrast to the file editor document which can be only changed by the modification of the editor content,
       // the notebook document can also get modified by a change in the number or arrangement of editors themselves;
@@ -350,8 +369,14 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
    * connect various signals.
    */
   protected async initOnceReady(): Promise<void> {
-    await untilReady(this.isReady.bind(this), -1);
+    await untilReady(() => this.isDisposed || this.isReady(), -1);
+    if (this.isDisposed) {
+      return;
+    }
     await this._updateLanguageInfo();
+    if (this.isDisposed) {
+      return;
+    }
     this.initVirtual();
 
     // connect the document, but do not open it as the adapter will handle this

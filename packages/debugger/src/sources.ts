@@ -1,14 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterFrontEnd } from '@jupyterlab/application';
+import type { JupyterFrontEnd } from '@jupyterlab/application';
 import { DOMUtils, MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
-import { CodeEditorWrapper, IEditorServices } from '@jupyterlab/codeeditor';
-import { IConsoleTracker } from '@jupyterlab/console';
-import { IEditorTracker } from '@jupyterlab/fileeditor';
-import { INotebookTracker } from '@jupyterlab/notebook';
+import type {
+  CodeEditorWrapper,
+  IEditorServices
+} from '@jupyterlab/codeeditor';
+import type { IConsoleTracker } from '@jupyterlab/console';
+import type { IEditorTracker } from '@jupyterlab/fileeditor';
+import type { INotebookTracker } from '@jupyterlab/notebook';
 import { textEditorIcon } from '@jupyterlab/ui-components';
-import { IDebugger } from './tokens';
+import type { IDebugger } from './tokens';
 
 /**
  * The source and editor manager for a debugger instance.
@@ -147,15 +150,19 @@ export class DebuggerSources implements IDebugger.ISources {
         return;
       }
 
-      const cells = consoleWidget.console.cells;
+      const cells = [...consoleWidget.console.cells];
+      const promptCell = consoleWidget.console.promptCell;
+      if (promptCell) {
+        cells.push(promptCell);
+      }
       for (const cell of cells) {
         const code = cell.model.sharedModel.getSource();
         const codeId = this._getCodeId(code, kernel);
         if (!codeId) {
-          break;
+          continue;
         }
         if (source !== codeId) {
-          break;
+          continue;
         }
 
         editors.push(

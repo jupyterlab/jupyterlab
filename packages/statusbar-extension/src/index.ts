@@ -5,11 +5,11 @@
  * @module statusbar-extension
  */
 
-import {
-  ILabShell,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabShell } from '@jupyterlab/application';
 import { ICommandPalette } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar, StatusBar } from '@jupyterlab/statusbar';
@@ -60,7 +60,13 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
           );
         }
       },
-      isToggled: () => statusBar.isVisible
+      isToggled: () => statusBar.isVisible,
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
     });
 
     app.commands.commandExecuted.connect((registry, executed) => {

@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 
 /**

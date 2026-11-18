@@ -2,10 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { URLExt } from '@jupyterlab/coreutils';
-import { JSONObject, ReadonlyJSONObject } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
+import type { JSONObject, ReadonlyJSONObject } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
-import { IStream, Signal, Stream } from '@lumino/signaling';
+import type { IStream } from '@lumino/signaling';
+import { Signal, Stream } from '@lumino/signaling';
 import { ServerConnection } from '../serverconnection';
 
 /**
@@ -25,7 +26,10 @@ export class EventManager implements Event.IManager {
       options.serverSettings ?? ServerConnection.makeSettings();
 
     // If subscription fails, the poll attempts to reconnect and backs off.
-    this._poll = new Poll({ factory: () => this._subscribe() });
+    this._poll = new Poll({
+      factory: () => this._subscribe(),
+      standby: options.standby ?? 'when-hidden'
+    });
     this._stream = new Stream(this);
 
     // Subscribe to the events socket.
@@ -129,6 +133,11 @@ export namespace EventManager {
    * The instantiation options for an event manager.
    */
   export interface IOptions {
+    /**
+     * When the manager stops polling the API. Defaults to `when-hidden`.
+     */
+    standby?: Poll.Standby | (() => boolean | Poll.Standby);
+
     /**
      * The server settings used to make API requests.
      */

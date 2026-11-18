@@ -1,16 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  expect,
-  galata,
-  IJupyterLabPageFixture,
-  test
-} from '@jupyterlab/galata';
-import { stubGitHubUserIcons } from './utils';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
+import { boundsAround, stubGitHubUserIcons } from './utils';
 import { default as extensionsList } from './data/extensions.json';
-import { default as allExtensionsList } from './data/extensions-search-all.json';
-import { default as drawioExtensionsList } from './data/extensions-search-drawio.json';
+import { default as languagePacks } from './data/extensions-search-all.json';
 import { JSONExt } from '@lumino/coreutils';
 
 test.use({
@@ -19,32 +14,31 @@ test.use({
   viewport: { height: 720, width: 1280 }
 });
 
+test.beforeEach(async ({ page }) => {
+  await stubGitHubUserIcons(page);
+});
+
 test.describe('Extension Manager', () => {
   test.beforeEach(async ({ page }) => {
     // Mock get extensions list
     await page.route(galata.Routes.extensions, async (route, request) => {
-      const url = request.url();
       switch (request.method()) {
-        case 'GET':
-          if (!url.includes('query')) {
-            return route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              body: JSON.stringify(extensionsList)
-            });
-          } else if (url.includes('query=drawio')) {
-            return route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              body: JSON.stringify(drawioExtensionsList)
-            });
-          } else {
-            return route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              body: JSON.stringify(allExtensionsList)
-            });
-          }
+        case 'GET': {
+          const query = new URL(request.url()).searchParams.get('query');
+          const entries =
+            query === null
+              ? extensionsList
+              : languagePacks.filter(pack =>
+                  [pack.name, pack.description].some(value =>
+                    value.toLowerCase().includes(query.toLowerCase())
+                  )
+                );
+          return route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(entries)
+          });
+        }
         default:
           return route.continue();
       }
@@ -55,6 +49,15 @@ test.describe('Extension Manager', () => {
     await page.goto();
     await openExtensionSidebar(page);
 
+    const discover = page.locator('#jp-extensionmanager-search');
+    const browse = discover.getByRole('link', {
+      name: 'Browse extensions on PyPI'
+    });
+    await expect(browse).toBeVisible();
+    await expect(discover.getByRole('link').first()).toHaveText(
+      'Browse extensions on PyPI'
+    );
+
     expect(
       await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 600 } })
     ).toMatchSnapshot('extensions_default.png');
@@ -63,7 +66,7 @@ test.describe('Extension Manager', () => {
   test('Warning', async ({ page }) => {
     await page.goto();
 
-    await page.click('[title="Extension Manager"]');
+    await page.sidebar.openTab('extensionmanager.main-view');
     expect(
       await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 400 } })
     ).toMatchSnapshot('extensions_disabled.png');
@@ -79,28 +82,109 @@ test.describe('Extension Manager', () => {
     ).toMatchSnapshot('extensions_enabled.png');
   });
 
-  test('Search', async ({ page }) => {
-    await stubGitHubUserIcons(page);
-
+  test('Find language packs from the Language menu', async ({ page }) => {
     await page.goto();
 
-    await openExtensionSidebar(page);
-
-    await page
-      .locator('.jp-extensionmanager-view')
-      .getByRole('searchbox')
-      .fill('drawio');
-
-    await page.evaluate(() => {
-      (document.activeElement as HTMLElement).blur();
+    await page.menu.clickMenuItem('Settings>Language>Install more languages…');
+    const sidebar = page.locator('.jp-extensionmanager-view');
+    const filter = sidebar.getByRole('searchbox');
+    await expect(filter).toHaveValue('jupyterlab-language-pack');
+    await sidebar.getByRole('button', { name: 'Yes', exact: true }).click();
+    await expect(
+      sidebar.getByText('Search Results', { exact: true })
+    ).toBeVisible();
+    const french = sidebar.getByRole('link', {
+      name: 'jupyterlab-language-pack-fr-FR'
     });
+    const german = sidebar.getByRole('link', {
+      name: 'jupyterlab-language-pack-de-DE'
+    });
+    await expect(french).toBeVisible();
+    await expect(german).toBeVisible();
+    await expect(
+      sidebar.getByRole('link', { name: 'Browse extensions on PyPI' })
+    ).toHaveCount(0);
 
-    // We can not wait for extension kept by the keyword as they are already in the DOM
-    await page.locator('text=No entries').waitFor();
+    await filter.fill('French');
+    await expect(german).toHaveCount(0);
+    await expect(french).toBeVisible();
+    await expect(
+      sidebar
+        .getByRole('listitem')
+        .filter({ hasText: 'jupyterlab-language-pack-fr-FR' })
+        .locator('svg[data-icon="ui-components:jupyter"]')
+    ).toBeVisible();
+    await page.sidebar.setWidth();
 
     expect(
       await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 600 } })
     ).toMatchSnapshot('extensions_search.png');
+  });
+
+  test('List an installed language pack under Installed', async ({ page }) => {
+    const french = {
+      ...languagePacks[1],
+      installed: true,
+      installed_version: '4.6.post0',
+      latest_version: null
+    };
+    await page.route(galata.Routes.extensions, route => {
+      const { searchParams } = new URL(route.request().url());
+      return route.fulfill({
+        json: searchParams.has('query') ? languagePacks : [french]
+      });
+    });
+
+    await page.goto();
+    await page.sidebar.openTab('extensionmanager.main-view');
+    const sidebar = page.locator('.jp-extensionmanager-view');
+    await sidebar.getByRole('button', { name: 'Yes', exact: true }).click();
+    const installed = page
+      .locator('#jp-extensionmanager-installed .jp-extensionmanager-entry')
+      .filter({ hasText: french.name });
+    await expect(installed).toBeVisible();
+    await expect(
+      installed.getByRole('button', { name: 'Uninstall' })
+    ).toBeVisible();
+    await expect(installed.getByRole('button')).toHaveCount(1);
+    await expect(
+      sidebar.getByRole('link', { name: 'jupyterlab-language-pack-de-DE' })
+    ).toBeVisible();
+    await expect(
+      page.locator('#jp-extensionmanager-search').getByText(french.name)
+    ).toHaveCount(0);
+    await sidebar.getByRole('searchbox').fill('French');
+    await expect(installed).toBeVisible();
+  });
+
+  test('Retry language pack search after PyPI is unavailable', async ({
+    page
+  }) => {
+    await page.route(galata.Routes.extensions, route => {
+      const { searchParams } = new URL(route.request().url());
+      if (searchParams.has('query') && searchParams.get('refresh') !== '1') {
+        return route.fulfill({
+          status: 503,
+          json: { message: 'PyPI is temporarily unavailable.' }
+        });
+      }
+      return route.fallback();
+    });
+
+    await page.goto();
+    await page.sidebar.openTab('extensionmanager.main-view');
+    const sidebar = page.locator('.jp-extensionmanager-view');
+    await sidebar.getByRole('button', { name: 'Yes', exact: true }).click();
+    await expect(
+      sidebar.getByText(/PyPI is temporarily unavailable/)
+    ).toBeVisible();
+
+    await sidebar
+      .getByRole('button', { name: 'Refresh extensions list' })
+      .click();
+    await expect(
+      sidebar.getByRole('link', { name: 'jupyterlab-language-pack-fr-FR' })
+    ).toBeVisible();
   });
 
   test('Update button', async ({ page }) => {
@@ -123,6 +207,197 @@ test.describe('Extension Manager', () => {
     });
     await page.getByRole('button', { name: 'Update to 3.2.1' }).click();
     await waitRequest;
+  });
+
+  test('Has no unused style rules', async ({ page }) => {
+    // Layer a test-specific mock on top of the describe-level one so a
+    // single test can walk through every DOM state the extension-manager
+    // rules apply to:
+    //   - the first installed entry carries both the error status and the
+    //     disallowed flag, so the error/should-be-uninstalled rules match;
+    //   - the search endpoint returns real paginated chunks built from
+    //     250 fake geojson clones (30 per page → 9 pages), so the full
+    //     pagination UI renders including the `...` break node;
+    //   - a `query=geojson` request returns an empty array, so the search
+    //     section renders the "No entries" listview-message;
+    //   - an `install` POST replies with `status: 'error'`, so clicking
+    //     Install opens the install-error dialog; every other action
+    //     fails with HTTP 500, so `model.actionError` is set and the
+    //     header renders an ErrorMessage wrapping a <pre>.
+    const installed = JSONExt.deepCopy(extensionsList);
+    installed[0]['status'] = 'error';
+    installed[0]['is_allowed'] = false;
+
+    const fakeExtensions = Array.from({ length: 250 }, (_, i) => ({
+      ...extensionsList[0],
+      name: `@jupyterlab/geojson-extension-${i + 1}`,
+      description: `Fake extension ${i + 1}`,
+      installed: false,
+      installed_version: ''
+    }));
+
+    const paginate = (
+      url: string,
+      entries: ReadonlyArray<unknown>
+    ): { headers: Record<string, string>; chunk: ReadonlyArray<unknown> } => {
+      const params = new URL(url).searchParams;
+      const requestedPage = parseInt(params.get('page') ?? '1', 10);
+      const perPage = parseInt(params.get('per_page') ?? '30', 10);
+      const lastPage = Math.max(1, Math.ceil(entries.length / perPage));
+      const start = (requestedPage - 1) * perPage;
+      const chunk = entries.slice(start, start + perPage);
+      const lastUrl = new URL(url);
+      lastUrl.searchParams.set('page', String(lastPage));
+      return {
+        headers: { Link: `<${lastUrl.toString()}>; rel="last"` },
+        chunk
+      };
+    };
+
+    await page.route(galata.Routes.extensions, async (route, request) => {
+      const url = request.url();
+      if (request.method() === 'GET') {
+        if (!url.includes('query')) {
+          return route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(installed)
+          });
+        }
+        if (url.includes('query=geojson')) {
+          const { headers } = paginate(url, []);
+          return route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            headers,
+            body: JSON.stringify([])
+          });
+        }
+        const { headers, chunk } = paginate(url, fakeExtensions);
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          headers,
+          body: JSON.stringify(chunk)
+        });
+      }
+      if (request.method() === 'POST') {
+        const body = JSON.parse(request.postData() ?? '{}');
+        if (body.cmd === 'install') {
+          return route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              status: 'error',
+              message: 'forced test failure'
+            })
+          });
+        }
+        // uninstall / enable / disable fail with a transport error so the
+        // action-error path in the model is triggered.
+        return route.fulfill({
+          status: 500,
+          contentType: 'text/plain',
+          body: 'forced server error'
+        });
+      }
+      return route.continue();
+    });
+
+    await page.goto();
+    await openExtensionSidebar(page);
+
+    // Expand every accordion section so that rules scoped under the warning,
+    // installed and discover panels can be matched.
+    for (const section of await page
+      .locator(
+        '.jp-extensionmanager-view >> .jp-AccordionPanel-title[aria-expanded="false"]'
+      )
+      .all()) {
+      await section.click();
+    }
+
+    const options = {
+      fragments: ['jp-extensionmanager'],
+      exclude: []
+    };
+
+    // --- State A ---------------------------------------------------------
+    // Installed has an entry flagged as both error and disallowed, the
+    // search list is paginated with entries, and the install-error dialog
+    // is open on top (triggered by clicking Install).
+    await page
+      .locator(
+        '.jp-extensionmanager-entry.jp-extensionmanager-entry-error.jp-extensionmanager-entry-should-be-uninstalled'
+      )
+      .waitFor();
+    await page.locator('.jp-extensionmanager-pagination ul').waitFor();
+    // Wait for the `...` break node so `.pagination .break > a` matches.
+    await page.locator('.jp-extensionmanager-pagination .break').waitFor();
+    await page
+      .locator('.jp-extensionmanager-searchresults')
+      .getByRole('button', { name: 'Install', exact: true })
+      .first()
+      .click();
+    await page.locator('.jp-Dialog .jp-extensionmanager-dialog').waitFor();
+    const unusedA = await page.style.findUnusedStyleRules(options);
+    await page
+      .locator('.jp-Dialog')
+      .getByRole('button', { name: 'Ok' })
+      .click();
+    await page.locator('.jp-Dialog').waitFor({ state: 'detached' });
+
+    // --- State B ---------------------------------------------------------
+    // Search `geojson` so the installed section keeps rendering the
+    // flagged entry (its name matches the query) while the search
+    // section renders the "No entries" listview-message next to the
+    // pagination UI.
+    await page
+      .locator('.jp-extensionmanager-view')
+      .getByRole('searchbox')
+      .fill('geojson');
+    await page.evaluate(() => {
+      (document.activeElement as HTMLElement).blur();
+    });
+    await page
+      .locator(
+        '.jp-extensionmanager-searchresults .jp-extensionmanager-listview-message',
+        { hasText: 'No entries' }
+      )
+      .waitFor();
+    const unusedB = await page.style.findUnusedStyleRules(options);
+
+    // --- State C ---------------------------------------------------------
+    // Withdraw the disclaimer so the "Yes" (disclaimer-enable) button is
+    // rendered. The previously loaded lists stay in the DOM because the
+    // model does not clear them on un-disclaim.
+    await page.locator('.jp-extensionmanager-disclaimer-disable').click();
+    await page.locator('.jp-extensionmanager-disclaimer-enable').waitFor();
+    const unusedC = await page.style.findUnusedStyleRules(options);
+
+    // --- State D ---------------------------------------------------------
+    // Re-disclaim, then click Uninstall on the flagged installed entry.
+    // The POST fails with HTTP 500, which rejects the action request and
+    // sets `model.actionError`. The header then renders an ErrorMessage
+    // wrapping a <pre>, exercising `.jp-extensionmanager-error pre`.
+    await page.locator('.jp-extensionmanager-disclaimer-enable').click();
+    const uninstallBtn = page
+      .locator('.jp-extensionmanager-installedlist')
+      .getByRole('button', { name: 'Uninstall', exact: true });
+    await uninstallBtn.click();
+    await page
+      .locator('.jp-extensionmanager-header .jp-extensionmanager-error pre')
+      .waitFor();
+    const unusedD = await page.style.findUnusedStyleRules(options);
+
+    // A rule is only truly unused if it failed to match in every state.
+    const unused = unusedA.filter(
+      rule =>
+        unusedB.includes(rule) &&
+        unusedC.includes(rule) &&
+        unusedD.includes(rule)
+    );
+    expect(unused).toEqual([]);
   });
 });
 
@@ -147,9 +422,14 @@ test.describe('Filtered Extension Manager', () => {
 
     await openExtensionSidebar(page);
 
+    const clip = await boundsAround(
+      page,
+      [page.locator('.jp-extensionmanager-view .jp-SidePanel-content')],
+      0
+    );
     expect(
       await page.screenshot({
-        clip: { x: 33, y: 100, width: 250, height: 280 }
+        clip: { ...clip, height: 280 }
       })
     ).toMatchSnapshot('extensions_blocked_list.png');
   });
@@ -174,16 +454,21 @@ test.describe('Filtered Extension Manager', () => {
 
     await openExtensionSidebar(page);
 
+    const clip = await boundsAround(
+      page,
+      [page.locator('.jp-extensionmanager-view .jp-SidePanel-content')],
+      0
+    );
     expect(
       await page.screenshot({
-        clip: { x: 33, y: 100, width: 250, height: 280 }
+        clip: { ...clip, height: 280 }
       })
     ).toMatchSnapshot('extensions_allowed_list.png');
   });
 });
 
 async function openExtensionSidebar(page: IJupyterLabPageFixture) {
-  await page.click('[title="Extension Manager"]');
+  await page.sidebar.openTab('extensionmanager.main-view');
 
   await Promise.all([
     page.waitForResponse(new RegExp(`${galata.Routes.extensions}?refresh=0`)),
@@ -201,4 +486,20 @@ async function openExtensionSidebar(page: IJupyterLabPageFixture) {
     .waitFor();
 
   await page.sidebar.setWidth();
+  await waitForExtensionAvatars(page);
+}
+
+async function waitForExtensionAvatars(page: IJupyterLabPageFixture) {
+  // Screenshots do not wait for images, and the avatars load after the lists.
+  await page.waitForFunction(() => {
+    const avatars = Array.from(
+      document.querySelectorAll<HTMLImageElement>(
+        '.jp-extensionmanager-entry img'
+      )
+    );
+    return (
+      avatars.length > 0 &&
+      avatars.every(img => img.complete && img.naturalWidth > 0)
+    );
+  });
 }

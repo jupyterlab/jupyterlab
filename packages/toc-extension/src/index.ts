@@ -1,16 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module toc-extension
  */
 
-import {
-  ILabShell,
-  ILayoutRestorer,
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ILabShell, ILayoutRestorer } from '@jupyterlab/application';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITableOfContentsRegistry,
@@ -32,6 +32,7 @@ import {
   Toolbar,
   ToolbarButton
 } from '@jupyterlab/ui-components';
+import type { IDisposable } from '@lumino/disposable';
 
 /**
  * A namespace for command IDs of table of contents plugin.
@@ -46,6 +47,13 @@ namespace CommandIDs {
   export const showPanel = 'toc:show-panel';
 
   export const toggleCollapse = 'toc:toggle-collapse';
+}
+
+/**
+ * A namespace for toolbar item IDs of table of contents plugin.
+ */
+namespace ToolbarItemIDs {
+  export const collapseAll = 'collapse-all';
 }
 
 /**
@@ -74,6 +82,10 @@ async function activateTOC(
   // Create the ToC widget:
   const toc = new TableOfContentsPanel(translator ?? undefined);
   toc.title.icon = tocIcon;
+  toc.title.dataset = {
+    ...toc.title.dataset,
+    jpTabLabel: trans.__('Table of Contents')
+  };
   toc.title.caption = trans.__('Table of Contents');
   toc.id = 'table-of-contents';
   toc.node.setAttribute('role', 'region');
@@ -90,7 +102,13 @@ async function activateTOC(
     },
     isEnabled: () =>
       toc.model?.supportedOptions.includes('numberingH1') ?? false,
-    isToggled: () => toc.model?.configuration.numberingH1 ?? false
+    isToggled: () => toc.model?.configuration.numberingH1 ?? false,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   app.commands.addCommand(CommandIDs.displayNumbering, {
@@ -106,7 +124,18 @@ async function activateTOC(
     },
     isEnabled: () =>
       toc.model?.supportedOptions.includes('numberHeaders') ?? false,
-    isToggled: () => toc.model?.configuration.numberHeaders ?? false
+    isToggled: () => toc.model?.configuration.numberHeaders ?? false,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: trans.__('Whether the command is called from toolbar')
+          }
+        }
+      }
+    }
   });
 
   app.commands.addCommand(CommandIDs.displayOutputNumbering, {
@@ -120,13 +149,25 @@ async function activateTOC(
     },
     isEnabled: () =>
       toc.model?.supportedOptions.includes('includeOutput') ?? false,
-    isToggled: () => toc.model?.configuration.includeOutput ?? false
+    isToggled: () => toc.model?.configuration.includeOutput ?? false,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
   });
 
   app.commands.addCommand(CommandIDs.showPanel, {
     label: trans.__('Table of Contents'),
     execute: () => {
       app.shell.activateById(toc.id);
+    },
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
     }
   });
 
@@ -154,7 +195,18 @@ async function activateTOC(
         }
       }
     },
-    isEnabled: () => toc.model !== null
+    isEnabled: () => toc.model !== null,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {
+          toolbar: {
+            type: 'boolean',
+            description: trans.__('Whether the command is called from toolbar')
+          }
+        }
+      }
+    }
   });
 
   const tracker = new TableOfContentsTracker();
@@ -215,12 +267,16 @@ async function activateTOC(
     label: ''
   });
   numbering.addClass('jp-toc-numberingButton');
+  toc.toolbar.node.setAttribute(
+    'aria-label',
+    trans.__('Table of contents sidepanel toolbar')
+  );
   toc.toolbar.addItem('display-numbering', numbering);
 
   toc.toolbar.addItem('spacer', Toolbar.createSpacerItem());
 
   toc.toolbar.addItem(
-    'collapse-all',
+    ToolbarItemIDs.collapseAll,
     new CommandToolbarButton({
       commands: app.commands,
       id: CommandIDs.toggleCollapse,
@@ -251,6 +307,9 @@ async function activateTOC(
 
   // Add the ToC to the left area:
   app.shell.add(toc, 'left', { rank: 400, type: 'Table of Contents' });
+
+  // Keep track of factory items to dispose them
+  let factoryToolbarItems: IDisposable[] = [];
 
   // Update the ToC when the active widget changes:
   if (labShell) {
@@ -296,6 +355,26 @@ async function activateTOC(
       toc.model.headingsChanged.connect(onCollapseChange);
       toc.model.collapseChanged.connect(onCollapseChange);
     }
+
+    // Clean up previous factory items
+    factoryToolbarItems.forEach(item => {
+      item.dispose();
+    });
+    factoryToolbarItems = [];
+
+    const toolbarItems = tocRegistry.getToolbarItems?.(widget);
+
+    if (toolbarItems) {
+      toolbarItems.forEach(item => {
+        toc.toolbar.insertBefore(
+          ToolbarItemIDs.collapseAll,
+          `toc-item-${item.name}`,
+          item.widget
+        );
+        factoryToolbarItems.push(item.widget);
+      });
+    }
+
     setToolbarButtonsState();
   }
 

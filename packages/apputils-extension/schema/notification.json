@@ -27,7 +27,7 @@
   "properties": {
     "checkForUpdates": {
       "title": "Check for JupyterLab updates",
-      "description": "Whether to check for newer version of JupyterLab or not. It requires `fetchNews` to be `true` to be active. If `true`, it will make a request to a website.",
+      "description": "Whether to check for newer versions of JupyterLab or not. It requires `fetchNews` to be set to Always (`true`) to be active. If `true`, it will make a request to a website.",
       "type": "boolean",
       "default": true
     },
@@ -39,8 +39,13 @@
     },
     "fetchNews": {
       "title": "Fetch official Jupyter news",
-      "description": "Whether to fetch news from Jupyter news feed. If `true`, it will make a request to a website.",
-      "enum": ["true", "false", "none"],
+      "description": "Whether to fetch news from the Jupyter news feed. If Always (`true`), it will make a request to a website.",
+      "type": "string",
+      "oneOf": [
+        { "const": "true", "title": "Always" },
+        { "const": "false", "title": "Never" },
+        { "const": "none", "title": "Ask (None)" }
+      ],
       "default": "none"
     }
   },

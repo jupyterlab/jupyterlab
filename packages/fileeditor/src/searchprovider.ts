@@ -3,16 +3,16 @@
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
 import { CodeMirrorEditor, EditorSearchProvider } from '@jupyterlab/codemirror';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import {
+import type { CodeEditor } from '@jupyterlab/codeeditor';
+import type {
   IFilters,
   IReplaceOptionsSupport,
   ISearchProvider
 } from '@jupyterlab/documentsearch';
-import { ITranslator } from '@jupyterlab/translation';
-import { Widget } from '@lumino/widgets';
+import type { ITranslator } from '@jupyterlab/translation';
+import type { Widget } from '@lumino/widgets';
 import { FileEditor } from './widget';
-import { ISharedText, SourceChange } from '@jupyter/ydoc';
+import type { ISharedText, SourceChange } from '@jupyter/ydoc';
 
 /**
  * Helper type

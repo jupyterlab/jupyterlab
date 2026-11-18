@@ -1,12 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  expect,
-  galata,
-  IJupyterLabPageFixture,
-  test
-} from '@jupyterlab/galata';
+import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
+import type { Locator } from '@playwright/test';
 
 const CELL_EDITOR_SELECTOR = '.jp-InputArea-editor';
 const CODE_MIRROR_CURSOR = '.cm-cursor';
@@ -17,7 +14,8 @@ async function setupConsole(page: IJupyterLabPageFixture) {
 
   await page.click('button:has-text("Select")');
 
-  await page.locator('[aria-label="Code Cell Content"]').waitFor();
+  // A previously opened console may still be in the DOM, so only match the visible one.
+  await page.locator('[aria-label="Code Cell Content"]:visible').waitFor();
   await page.locator('text=| Idle').waitFor();
 }
 
@@ -32,7 +30,7 @@ test.describe('Console', () => {
     await executedCell.waitFor();
 
     const cellEditor = executedCell.locator(CELL_EDITOR_SELECTOR);
-    expect(await cellEditor.innerText()).toBe('2 + 2');
+    await expect(cellEditor).toHaveText('2 + 2');
 
     // Focus the editor
     await cellEditor.click();
@@ -45,7 +43,113 @@ test.describe('Console', () => {
     await cellEditor.pressSequentially('more text');
 
     // Expect the editor content to not change
-    expect(await cellEditor.innerText()).toBe('2 + 2');
+    await expect(cellEditor).toHaveText('2 + 2');
+  });
+
+  test('Should rename the console from the tab context menu', async ({
+    page
+  }) => {
+    const newName = 'Custom Name';
+
+    await page.activity.getTabLocator('Console 1').click({ button: 'right' });
+    await page.getByRole('menuitem', { name: 'Rename Console…' }).click();
+
+    await page.locator('.jp-Dialog >> input').fill(newName);
+    await page.click('.jp-Dialog >> button >> text=Rename');
+
+    await expect(page.activity.getTabLocator(newName)).toBeVisible();
+  });
+
+  test('Should ask for confirmation before showing all kernel activity', async ({
+    page
+  }) => {
+    const command = 'console:toggle-show-all-kernel-activity';
+    const isToggled = () =>
+      page.evaluate(id => window.jupyterapp.commands.isToggled(id), command);
+
+    void page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    const dialog = page.locator('.jp-Dialog');
+    await expect(dialog).toContainText('treated as trusted');
+    await dialog.getByRole('button', { name: 'Cancel' }).click();
+    expect(await isToggled()).toBe(false);
+
+    void page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    await expect(dialog).toBeVisible();
+    await page.keyboard.press('Enter');
+    await expect(dialog).toHaveCount(0);
+    expect(await isToggled()).toBe(false);
+
+    void page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    await dialog.getByRole('button', { name: 'Show All Activity' }).click();
+    await expect.poll(isToggled).toBe(true);
+
+    await page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    await expect(dialog).toHaveCount(0);
+    expect(await isToggled()).toBe(false);
+
+    // The kernel is trusted for the rest of the session.
+    await page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    await expect(dialog).toHaveCount(0);
+    expect(await isToggled()).toBe(true);
+  });
+
+  test('Should not ask again about showing all kernel activity for any kernel when checked', async ({
+    page
+  }) => {
+    const command = 'console:toggle-show-all-kernel-activity';
+    const toggle = () =>
+      page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    const isToggled = () =>
+      page.evaluate(id => window.jupyterapp.commands.isToggled(id), command);
+
+    void toggle();
+    const dialog = page.locator('.jp-Dialog');
+    await dialog.getByRole('checkbox').check();
+    await dialog.getByRole('button', { name: 'Show All Activity' }).click();
+    await expect.poll(isToggled).toBe(true);
+
+    await toggle();
+    expect(await isToggled()).toBe(false);
+
+    // A console with another kernel is not asked either.
+    await setupConsole(page);
+    await toggle();
+    await expect.poll(isToggled).toBe(true);
+    await expect(dialog).toHaveCount(0);
+  });
+
+  test('Should keep the prompt position picked for the console when a console setting changes', async ({
+    page
+  }) => {
+    await page.keyboard.type('for i in range(300): print(i)');
+    await page.keyboard.press('Shift+Enter');
+    await expect(page.locator(EXECUTED_CELL)).toContainText('299');
+
+    await page.getByLabel('Change Console Prompt Position').first().click();
+    await page.getByText('Prompt to top').click();
+
+    const input = page.locator('.jp-CodeConsole-input');
+    const content = page.locator('.jp-CodeConsole-content');
+    await content.hover();
+    await page.mouse.wheel(0, 1000);
+    await expect
+      .poll(() => content.evaluate(node => node.scrollTop))
+      .toBeGreaterThan(0);
+
+    await page.menu.clickMenuItem(
+      'Settings>Console Run Keystroke>Execute with Enter'
+    );
+    // The console gets the new mode in the same settings update that would
+    // move the prompt.
+    await expect(page.locator('.jp-CodeConsole')).toHaveAttribute(
+      'data-jp-interaction-mode',
+      'terminal'
+    );
+
+    const inputBox = await input.boundingBox();
+    const contentBox = await content.boundingBox();
+    expect(inputBox!.y).toBeLessThan(contentBox!.y);
+    expect(await content.evaluate(node => node.scrollTop)).toBeGreaterThan(0);
   });
 });
 
@@ -72,3 +176,193 @@ test.describe('Console (terminal mode)', () => {
     await expect(executedCell).toContainText('4194304');
   });
 });
+
+test.describe('Console Input Auto-Resize', () => {
+  test.beforeEach(async ({ page }) => setupConsole(page));
+
+  test('Input prompt auto-resizes with multiple lines of text', async ({
+    page
+  }) => {
+    const codeConsoleInput = page.locator('.jp-CodeConsole-input');
+
+    const initialHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(initialHeight).toBeGreaterThan(0);
+
+    const multiLineCode = `def hello_world():
+print("Hello")
+print("World")
+return "Done"`;
+
+    await page.keyboard.type(multiLineCode);
+
+    const afterTypingHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(afterTypingHeight).toBeGreaterThan(0);
+    expect(afterTypingHeight).toBeGreaterThan(initialHeight);
+  });
+
+  test('Input prompt auto-resize works with paste operations', async ({
+    page
+  }) => {
+    const codeConsoleInput = page.locator('.jp-CodeConsole-input');
+
+    const initialHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(initialHeight).toBeGreaterThan(0);
+
+    const pastedCode = `import numpy as np
+import pandas as pd
+
+data = pd.DataFrame({
+    'x': [1, 2, 3, 4, 5],
+    'y': [2, 4, 6, 8, 10]
+})
+
+print(data.head())`;
+
+    await page.evaluate(async code => {
+      await navigator.clipboard.writeText(code);
+    }, pastedCode);
+
+    await page.keyboard.press('ControlOrMeta+v');
+
+    const afterPasteHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(afterPasteHeight).toBeGreaterThan(0);
+    expect(afterPasteHeight).toBeGreaterThan(initialHeight);
+  });
+
+  test('Input prompt maintains auto-resize height when moved from bottom to top', async ({
+    page
+  }) => {
+    const codeConsoleInput = page.locator('.jp-CodeConsole-input');
+
+    const pastedCode = `def complex_function():
+    for i in range(10):
+        if i % 2 == 0:
+            print(f"Even: {i}")
+        else:
+            print(f"Odd: {i}")
+    return "Completed"`;
+
+    await page.evaluate(async code => {
+      await navigator.clipboard.writeText(code);
+    }, pastedCode);
+
+    // Since neither paste, nor initialization of CodeMirror editor
+    // (after moving the prompt position) is instantaneous, we only
+    // record height once it stabilised for both before and after.
+
+    await page.keyboard.press('ControlOrMeta+v');
+
+    const heightAtBottom = await getStabilisedHeight(page, codeConsoleInput);
+    expect(heightAtBottom).toBeGreaterThan(0);
+
+    await page.getByLabel('Change Console Prompt Position').first().click();
+    await page.getByText('Prompt to top').click();
+
+    const heightAtTop = await getStabilisedHeight(page, codeConsoleInput);
+    expect(heightAtTop).toBeGreaterThan(0);
+
+    expect(heightAtTop).toBeCloseTo(heightAtBottom, 1);
+  });
+
+  test('Input prompt continues to auto-resize after code execution', async ({
+    page
+  }) => {
+    const codeConsoleInput = page.locator('.jp-CodeConsole-input');
+
+    const initialHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(initialHeight).toBeGreaterThan(0);
+
+    const multiLineCode = `def test_function():
+    print("Line 1")
+    print("Line 2")
+    return "Done"`;
+
+    await page.keyboard.type(multiLineCode);
+
+    const heightBeforeExecution = await getStabilisedHeight(
+      page,
+      codeConsoleInput
+    );
+    expect(heightBeforeExecution).toBeGreaterThan(0);
+    expect(heightBeforeExecution).toBeGreaterThan(initialHeight);
+
+    // Execute the code
+    await page.keyboard.press('Shift+Enter');
+
+    await page.locator('text=| Idle').waitFor();
+
+    // Check that the new empty input cell has shrunk back to original size
+    const heightAfterExecution = await getStabilisedHeight(
+      page,
+      codeConsoleInput
+    );
+    expect(heightAfterExecution).toBeGreaterThan(0);
+    expect(heightAfterExecution).toBe(initialHeight);
+
+    // Type new multi-line code in the new prompt cell
+    const moreCode = `import os
+import sys
+print("Testing auto-resize")
+print("After execution")`;
+
+    await page.keyboard.type(moreCode);
+
+    const heightAfterTyping = await getStabilisedHeight(page, codeConsoleInput);
+    expect(heightAfterTyping).toBeGreaterThan(0);
+
+    // The input should have grown again for the new multi-line content
+    expect(heightAfterTyping).toBeGreaterThan(heightAfterExecution!);
+  });
+
+  test('Input prompt shrinks when content is cleared', async ({ page }) => {
+    const codeConsoleInput = page.locator('.jp-CodeConsole-input');
+
+    const initialHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(initialHeight).toBeGreaterThan(0);
+
+    const multiLineCode = `def multi_line_function():
+    print("This is line 1")
+    print("This is line 2")
+    print("This is line 3")
+    for i in range(5):
+        print(f"Loop iteration {i}")
+    return "Finished"`;
+
+    await page.keyboard.type(multiLineCode);
+
+    const expandedHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(expandedHeight).toBeGreaterThan(0);
+    expect(expandedHeight).toBeGreaterThan(initialHeight);
+
+    // Clear the input using Ctrl+A followed by Delete
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.press('Delete');
+
+    const shrunkHeight = await getStabilisedHeight(page, codeConsoleInput);
+    expect(shrunkHeight).toBeGreaterThan(0);
+    expect(shrunkHeight).toBe(initialHeight);
+  });
+});
+
+async function getStabilisedHeight(
+  page: IJupyterLabPageFixture,
+  element: Locator
+) {
+  // Poll the element's height until two consecutive reads match, i.e. it
+  // has stopped changing. There is no fixed target height to assert on
+  // (it depends on the content under test), so we rely on `toPass`'s
+  // built-in retry/backoff instead of a hand-rolled `waitForTimeout` loop.
+  let lastHeight: number | null = null;
+  let stableHeight: number | null = null;
+  await expect(async () => {
+    const box = await element.boundingBox();
+    const height = box?.height ?? null;
+    const isStable = height !== null && height === lastHeight;
+    lastHeight = height;
+    if (isStable) {
+      stableHeight = height;
+    }
+    expect(isStable).toBe(true);
+  }).toPass({ intervals: [100], timeout: 10000 });
+  return stableHeight!;
+}

@@ -3,6 +3,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import * as path from 'path';
 import * as utils from './utils';
@@ -24,7 +25,7 @@ export async function getDependency(name: string): Promise<string> {
   allDeps = [];
   allDevDeps = [];
 
-  utils.getLernaPaths().forEach(pkgRoot => {
+  utils.getYarnPaths().forEach(pkgRoot => {
     // Read in the package.json.
     const packagePath = path.join(pkgRoot, 'package.json');
     let data: any;

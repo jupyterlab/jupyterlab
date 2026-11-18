@@ -1,21 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import * as nbformat from '@jupyterlab/nbformat';
-import { IOutputPrompt, OutputArea } from '@jupyterlab/outputarea';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { Kernel, KernelMessage } from '@jupyterlab/services';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { Message } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Panel, PanelLayout, StackedPanel, Widget } from '@lumino/widgets';
-import { LoggerOutputAreaModel, LogOutputModel } from './logger';
-import {
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { IOutputPrompt } from '@jupyterlab/outputarea';
+import { OutputArea } from '@jupyterlab/outputarea';
+import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import type { Kernel, KernelMessage } from '@jupyterlab/services';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
+import type { Message } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
+import type { Panel } from '@lumino/widgets';
+import { PanelLayout, StackedPanel, Widget } from '@lumino/widgets';
+import type { LoggerOutputAreaModel, LogOutputModel } from './logger';
+import type {
   IContentChange,
   ILogger,
   ILoggerRegistry,

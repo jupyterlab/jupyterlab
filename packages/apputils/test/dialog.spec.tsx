@@ -8,7 +8,7 @@ import {
   dismissDialog,
   waitForDialog
 } from '@jupyterlab/testing';
-import { Message } from '@lumino/messaging';
+import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { generate, simulate } from 'simulate-event';
@@ -41,6 +41,12 @@ class TestDialog extends Dialog<any> {
 class ValueWidget extends Widget {
   getValue(): string {
     return 'foo';
+  }
+}
+
+class ThrowingValueWidget extends Widget {
+  getValue(): string {
+    throw new Error('getValue() failed');
   }
 }
 
@@ -166,7 +172,7 @@ describe('@jupyterlab/apputils', () => {
           const prompt = dialog.launch();
 
           await waitForDialog();
-          simulate(dialog.node, 'keydown', { keyCode: 27 });
+          simulate(dialog.node, 'keydown', { key: 'Escape' });
           expect((await prompt).button.accept).toBe(false);
         });
 
@@ -174,8 +180,209 @@ describe('@jupyterlab/apputils', () => {
           const prompt = dialog.launch();
 
           await waitForDialog();
-          simulate(dialog.node, 'keydown', { keyCode: 13 });
+          simulate(dialog.node, 'keydown', { key: 'Enter' });
           expect((await prompt).button.accept).toBe(true);
+        });
+
+        it('should not accept on enter key within textarea', async () => {
+          class CustomDialogBody
+            extends ReactWidget
+            implements Dialog.IBodyWidget<ReactWidget>
+          {
+            constructor() {
+              super();
+              this.addClass('jp-Dialog-body');
+            }
+
+            render(): JSX.Element {
+              return (
+                <div>
+                  <textarea data-testid="dialog-textarea" />
+                </div>
+              );
+            }
+
+            getValue(): ReactWidget {
+              return this;
+            }
+          }
+
+          const body = new CustomDialogBody();
+          const dialog = new Dialog({ body });
+          const promptPromise = dialog.launch();
+
+          await waitForDialog();
+
+          const textarea = dialog.node.querySelector(
+            '[data-testid="dialog-textarea"]'
+          );
+          expect(textarea).not.toBeNull();
+
+          if (textarea) {
+            (textarea as HTMLTextAreaElement).focus();
+            simulate(textarea, 'keydown', { key: 'Enter' });
+          }
+
+          expect(dialog.isVisible).toBe(true);
+          dialog.dispose();
+          await promptPromise.catch(() => {});
+        });
+
+        describe('with focus in the body', () => {
+          let bodyDialog: Dialog<unknown>;
+          let prompt: Promise<Dialog.IResult<unknown>>;
+
+          afterEach(async () => {
+            bodyDialog.dispose();
+            await prompt.catch(() => {});
+          });
+
+          const launchWithBody = async (
+            body: React.ReactElement
+          ): Promise<HTMLElement> => {
+            bodyDialog = new Dialog({ body });
+            prompt = bodyDialog.launch();
+            await waitForDialog();
+            const target = bodyDialog.node.querySelector<HTMLElement>(
+              '[data-testid="target"]'
+            )!;
+            target.focus();
+            return target;
+          };
+
+          // Returns whether the dialog canceled the event.
+          const press = (target: HTMLElement, key: string): boolean =>
+            !target.dispatchEvent(generate('keydown', { key }));
+
+          it('should leave the enter key to a link', async () => {
+            const target = await launchWithBody(
+              <a href="#target" data-testid="target">
+                link
+              </a>
+            );
+
+            expect(press(target, 'Enter')).toBe(false);
+            expect(bodyDialog.isVisible).toBe(true);
+          });
+
+          it('should leave the enter key to a button', async () => {
+            const target = await launchWithBody(
+              <button data-testid="target">button</button>
+            );
+
+            expect(press(target, 'Enter')).toBe(false);
+            expect(bodyDialog.isVisible).toBe(true);
+          });
+
+          it('should leave the enter key to a textarea', async () => {
+            const target = await launchWithBody(
+              <textarea data-testid="target" />
+            );
+
+            expect(press(target, 'Enter')).toBe(false);
+            expect(bodyDialog.isVisible).toBe(true);
+          });
+
+          it('should leave the enter key to a code editor', async () => {
+            const target = await launchWithBody(
+              <div contentEditable tabIndex={0} data-testid="target" />
+            );
+
+            expect(press(target, 'Enter')).toBe(false);
+            expect(bodyDialog.isVisible).toBe(true);
+          });
+
+          it('should accept on enter key within a text input', async () => {
+            const target = await launchWithBody(
+              <input type="text" data-testid="target" />
+            );
+
+            expect(press(target, 'Enter')).toBe(true);
+            expect((await prompt).button.accept).toBe(true);
+          });
+
+          it('should not move focus to the footer on arrow keys', async () => {
+            const target = await launchWithBody(
+              <button data-testid="target">button</button>
+            );
+
+            expect(press(target, 'ArrowRight')).toBe(false);
+            expect(document.activeElement).toBe(target);
+            expect(press(target, 'ArrowLeft')).toBe(false);
+            expect(document.activeElement).toBe(target);
+          });
+
+          it('should accept on enter key sent to the dialog node', async () => {
+            // As `acceptDialog()` from `@jupyterlab/testing` does.
+            await launchWithBody(<div tabIndex={0} data-testid="target" />);
+
+            simulate(bodyDialog.node, 'keydown', { key: 'Enter' });
+
+            expect(bodyDialog.isDisposed).toBe(true);
+            expect((await prompt).button.accept).toBe(true);
+          });
+
+          it('should accept on enter key sent to the dialog node with a body button focused', async () => {
+            await launchWithBody(<button data-testid="target">button</button>);
+
+            simulate(bodyDialog.node, 'keydown', { key: 'Enter' });
+
+            expect(bodyDialog.isDisposed).toBe(true);
+            expect((await prompt).button.accept).toBe(true);
+          });
+
+          it('should accept on enter key within the input of a web component', async () => {
+            // Such as the <jp-search> of a FilterBox, whose <input> sits in a
+            // shadow root, so that `document.activeElement` is the host.
+            if (!customElements.get('test-shadow-field')) {
+              customElements.define(
+                'test-shadow-field',
+                class extends HTMLElement {
+                  constructor() {
+                    super();
+                    this.attachShadow({ mode: 'open' }).appendChild(
+                      document.createElement('input')
+                    );
+                  }
+                }
+              );
+            }
+            const host = await launchWithBody(
+              React.createElement('test-shadow-field', {
+                'data-testid': 'target'
+              })
+            );
+            const input = host.shadowRoot!.querySelector('input')!;
+            input.focus();
+
+            expect(
+              !input.dispatchEvent(
+                generate('keydown', { key: 'Enter', composed: true })
+              )
+            ).toBe(true);
+            expect((await prompt).button.accept).toBe(true);
+          });
+        });
+
+        it('should cancel the enter key on the close button', async () => {
+          const closable = new Dialog({ title: 'foo', hasClose: true });
+          const prompt = closable.launch();
+          await waitForDialog();
+          await closable.ready;
+          const closeButton = closable.node.querySelector<HTMLElement>(
+            '.jp-Dialog-close-button'
+          )!;
+          closeButton.focus();
+
+          // Otherwise the browser passes the key on to the element that gets
+          // the focus back when the dialog closes, such as the button that
+          // opened it, or an editor that then gets a new line.
+          const event = generate('keydown', { key: 'Enter' });
+          closeButton.dispatchEvent(event);
+
+          expect(event.defaultPrevented).toBe(true);
+          closable.dispose();
+          await prompt.catch(() => {});
         });
 
         it('should resolve with currently focused button', async () => {
@@ -192,12 +399,15 @@ describe('@jupyterlab/apputils', () => {
           const prompt = dialog.launch();
 
           await waitForDialog();
+
           // press right arrow twice (focusing on "third")
-          simulate(dialog.node, 'keydown', { keyCode: 39 });
-          simulate(dialog.node, 'keydown', { keyCode: 39 });
+          simulate(dialog.node, 'keydown', { key: 'ArrowRight' });
+          simulate(dialog.node, 'keydown', { key: 'ArrowRight' });
+
           // press enter
-          simulate(dialog.node, 'keydown', { keyCode: 13 });
-          expect((await prompt).button.label).toBe('third');
+          simulate(dialog.node, 'keydown', { key: 'Enter' });
+          const promptResult = await prompt;
+          expect(promptResult.button.label).toBe('third');
           dialog.dispose();
         });
 
@@ -206,7 +416,7 @@ describe('@jupyterlab/apputils', () => {
 
           await waitForDialog();
           expect(document.activeElement!.className).toContain('jp-mod-accept');
-          simulate(dialog.node, 'keydown', { keyCode: 9 });
+          simulate(dialog.node, 'keydown', { key: 'Tab' });
           expect(document.activeElement!.className).toContain('jp-mod-reject');
           simulate(document.activeElement!, 'click');
           expect((await prompt).button.accept).toBe(false);
@@ -222,7 +432,7 @@ describe('@jupyterlab/apputils', () => {
           const canceled = !dialog.node.dispatchEvent(generate('contextmenu'));
 
           expect(canceled).toBe(true);
-          simulate(dialog.node, 'keydown', { keyCode: 27 });
+          simulate(dialog.node, 'keydown', { key: 'Escape' });
           expect((await prompt).button.accept).toBe(false);
         });
       });
@@ -270,6 +480,49 @@ describe('@jupyterlab/apputils', () => {
           dialog.resolve();
           await prompt;
           dialog.dispose();
+        });
+
+        it('should focus the primary element when focus leaves the dialog', async () => {
+          // Reproduces the case where a dialog with an input (e.g.
+          // "Open from Path…") is opened from the Command Palette: the palette
+          // steals focus back, and the dialog must redirect focus to the input,
+          // not the default accept button.
+          const host = document.createElement('div');
+          const target = document.createElement('div');
+          target.tabIndex = 0;
+          const body = (
+            <div>
+              <input type={'text'} />
+            </div>
+          );
+          const dialog = new TestDialog({
+            host,
+            body,
+            focusNodeSelector: 'input'
+          });
+
+          document.body.appendChild(target);
+          document.body.appendChild(host);
+          target.focus();
+          expect(document.activeElement).toBe(target);
+
+          const prompt = dialog.launch();
+
+          await waitForDialog();
+          await dialog.ready;
+          expect(document.activeElement!.localName).toBe('input');
+
+          simulate(target, 'focus');
+          expect(document.activeElement).not.toBe(target);
+          expect(document.activeElement!.localName).toBe('input');
+          expect(document.activeElement!.className).not.toContain(
+            'jp-mod-accept'
+          );
+          dialog.resolve();
+          await prompt;
+          dialog.dispose();
+          document.body.removeChild(target);
+          document.body.removeChild(host);
         });
       });
     });
@@ -529,6 +782,218 @@ describe('@jupyterlab/apputils', () => {
       document.body.removeChild(node);
     });
 
+    it('should accept a skipQueue option', async () => {
+      const node1 = document.createElement('div');
+      const node2 = document.createElement('div');
+      document.body.appendChild(node1);
+      document.body.appendChild(node2);
+
+      const prompt1 = showDialog({
+        title: 'foo1',
+        body: 'Hello 1',
+        host: node1,
+        buttons: [Dialog.cancelButton(), Dialog.okButton()]
+      });
+
+      await waitForDialog(node1);
+
+      const prompt2 = showDialog({
+        title: 'foo2',
+        body: 'Hello 2',
+        host: node2,
+        buttons: [Dialog.cancelButton(), Dialog.okButton()],
+        skipQueue: true
+      });
+
+      await waitForDialog(node2);
+
+      expect(node1.children.length).toBe(1);
+      expect(node2.children.length).toBe(1);
+
+      await acceptDialog(node2);
+      const result2 = await prompt2;
+      expect(result2.button.accept).toBe(true);
+
+      await acceptDialog(node1);
+      const result1 = await prompt1;
+      expect(result1.button.accept).toBe(true);
+
+      document.body.removeChild(node1);
+      document.body.removeChild(node2);
+    });
+
+    it('should keep trapping focus in an open dialog while another is queued behind it', async () => {
+      const host = document.createElement('div');
+      document.body.appendChild(host);
+      const outside = document.createElement('div');
+      outside.tabIndex = 0;
+      document.body.appendChild(outside);
+
+      const prompt1 = showDialog({ title: 'first', host });
+      await waitForDialog(host);
+
+      // Queued behind the first dialog; not yet attached.
+      const prompt2 = showDialog({ title: 'second', host });
+
+      expect(host.getElementsByClassName('jp-Dialog').length).toBe(1);
+
+      outside.focus();
+      simulate(outside, 'focus');
+      expect(document.activeElement).not.toBe(outside);
+      expect(
+        host
+          .getElementsByClassName('jp-Dialog')[0]
+          .contains(document.activeElement)
+      ).toBe(true);
+
+      await acceptDialog(host);
+      await prompt1;
+      await waitForDialog(host);
+      await acceptDialog(host);
+      await prompt2;
+
+      document.body.removeChild(outside);
+      document.body.removeChild(host);
+    });
+
+    it('should restore the focus trap on the remaining dialog after a skipQueue confirmation closes, even while another dialog is queued', async () => {
+      const host = document.createElement('div');
+      document.body.appendChild(host);
+      const outside = document.createElement('div');
+      outside.tabIndex = 0;
+      document.body.appendChild(outside);
+
+      const prompt1 = showDialog({ title: 'picker', host });
+      await waitForDialog(host);
+
+      const prompt2 = showDialog({ title: 'confirm', host, skipQueue: true });
+      await waitForDialog(host);
+
+      // Queued behind the picker; not yet attached.
+      const prompt3 = showDialog({ title: 'third', host });
+
+      let dialogNodes = host.getElementsByClassName('jp-Dialog');
+      expect(dialogNodes.length).toBe(2);
+      const confirmNode = dialogNodes[1] as HTMLElement;
+
+      outside.focus();
+      simulate(outside, 'focus');
+      expect(confirmNode.contains(document.activeElement)).toBe(true);
+
+      // Escape dismisses only the topmost (confirmation) dialog.
+      simulate(confirmNode, 'keydown', { key: 'Escape' });
+      await prompt2;
+
+      dialogNodes = host.getElementsByClassName('jp-Dialog');
+      expect(dialogNodes.length).toBe(1);
+      const pickerNode = dialogNodes[0] as HTMLElement;
+
+      outside.focus();
+      simulate(outside, 'focus');
+      expect(pickerNode.contains(document.activeElement)).toBe(true);
+
+      await acceptDialog(host);
+      await prompt1;
+      await waitForDialog(host);
+      await acceptDialog(host);
+      await prompt3;
+
+      document.body.removeChild(outside);
+      document.body.removeChild(host);
+    });
+
+    it('should keep a skipQueue dialog on top of a normal dialog launched immediately before it', async () => {
+      const host = document.createElement('div');
+      document.body.appendChild(host);
+      const outside = document.createElement('div');
+      outside.tabIndex = 0;
+      document.body.appendChild(outside);
+
+      // The normal dialog attaches from a pending promise callback, while the
+      // confirmation attaches synchronously.
+      const prompt1 = showDialog({
+        title: 'picker',
+        body: 'picker body',
+        host
+      });
+      const prompt2 = showDialog({
+        title: 'confirm',
+        body: 'confirm body',
+        host,
+        skipQueue: true
+      });
+
+      await waitForDialog(host);
+
+      let dialogNodes = host.getElementsByClassName('jp-Dialog');
+      expect(dialogNodes.length).toBe(1);
+      const confirmNode = dialogNodes[0] as HTMLElement;
+      expect(confirmNode.textContent).toContain('confirm body');
+
+      outside.focus();
+      simulate(outside, 'focus');
+      expect(confirmNode.contains(document.activeElement)).toBe(true);
+
+      simulate(confirmNode, 'keydown', { key: 'Escape' });
+      await prompt2;
+
+      // The queued dialog is only shown once the confirmation is closed.
+      await waitForDialog(host);
+      dialogNodes = host.getElementsByClassName('jp-Dialog');
+      expect(dialogNodes.length).toBe(1);
+      expect(dialogNodes[0].textContent).toContain('picker body');
+
+      await acceptDialog(host);
+      await prompt1;
+
+      document.body.removeChild(outside);
+      document.body.removeChild(host);
+    });
+
+    it('should keep a skipQueue dialog on top of a normal dialog launched a microtask earlier', async () => {
+      const host = document.createElement('div');
+      document.body.appendChild(host);
+      const outside = document.createElement('div');
+      outside.tabIndex = 0;
+      document.body.appendChild(outside);
+
+      const prompt1 = showDialog({
+        title: 'picker',
+        body: 'picker body',
+        host
+      });
+      // The normal dialog attaches from a microtask continuation, so a
+      // confirmation launched in between must still stack above it.
+      await Promise.resolve();
+      const prompt2 = showDialog({
+        title: 'confirm',
+        body: 'confirm body',
+        host,
+        skipQueue: true
+      });
+
+      await waitForDialog(host);
+
+      const dialogNodes = host.getElementsByClassName('jp-Dialog');
+      expect(dialogNodes.length).toBe(2);
+      expect(dialogNodes[0].textContent).toContain('picker body');
+      expect(dialogNodes[1].textContent).toContain('confirm body');
+
+      const confirmNode = dialogNodes[1] as HTMLElement;
+      outside.focus();
+      simulate(outside, 'focus');
+      expect(confirmNode.contains(document.activeElement)).toBe(true);
+
+      simulate(confirmNode, 'keydown', { key: 'Escape' });
+      await prompt2;
+
+      await acceptDialog(host);
+      await prompt1;
+
+      document.body.removeChild(outside);
+      document.body.removeChild(host);
+    });
+
     it('should accept a virtualdom body', async () => {
       const body = (
         <div>
@@ -566,6 +1031,17 @@ describe('@jupyterlab/apputils', () => {
 
       expect(result.button.accept).toBe(true);
       expect(result.value).toBe('foo');
+    });
+
+    it('should reject the promise when getValue() throws', async () => {
+      const prompt = showDialog({ body: new ThrowingValueWidget() });
+
+      await waitForDialog();
+
+      // Click the accept button, which will trigger _resolve → getValue() → throws
+      await acceptDialog();
+
+      await expect(prompt).rejects.toThrow('getValue() failed');
     });
 
     it('should not create a close button by default', async () => {

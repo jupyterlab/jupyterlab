@@ -1,31 +1,32 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, translateKernelStatuses } from '@jupyterlab/apputils';
+import type { ISessionContext } from '@jupyterlab/apputils';
+import { translateKernelStatuses } from '@jupyterlab/apputils';
 
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { ITranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import React from 'react';
 import { ProgressCircle } from '@jupyterlab/statusbar';
 
+import type { LabIcon } from '@jupyterlab/ui-components';
 import {
+  Button,
   circleIcon,
-  LabIcon,
   offlineBoltIcon,
   VDomModel,
   VDomRenderer
 } from '@jupyterlab/ui-components';
 
-import { Notebook } from './widget';
+import type { Notebook } from './widget';
 import { KernelMessage } from '@jupyterlab/services';
-import {
-  IAnyMessageArgs,
-  IKernelConnection
-} from '@jupyterlab/services/src/kernel/kernel';
-import { NotebookPanel } from './panel';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { Widget } from '@lumino/widgets';
-import { JSONObject } from '@lumino/coreutils';
-import { IChangedArgs } from '@jupyterlab/coreutils';
+import type { Kernel } from '@jupyterlab/services';
+import type { NotebookPanel } from './panel';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { Widget } from '@lumino/widgets';
+import type { JSONObject } from '@lumino/coreutils';
+import type { IChangedArgs } from '@jupyterlab/coreutils';
+import { NotebookActions } from './actions';
 
 /**
  * A react functional component for rendering execution indicator.
@@ -36,12 +37,27 @@ export function ExecutionIndicatorComponent(
   const translator = props.translator || nullTranslator;
   const kernelStatuses = translateKernelStatuses(translator);
   const trans = translator.load('jupyterlab');
+  const showJumpToCell = props.displayOption.showJumpToCell ?? false;
 
   const state = props.state;
   const showOnToolBar = props.displayOption.showOnToolBar;
   const showProgress = props.displayOption.showProgress;
   const tooltipClass = showOnToolBar ? 'down' : 'up';
   const emptyDiv = <div></div>;
+  const [hasExecutedCell, setHasExecutedCell] = React.useState(false);
+
+  React.useEffect(() => {
+    if (hasExecutedCell) {
+      return;
+    }
+    const onExecutionScheduled = () => {
+      setHasExecutedCell(true);
+    };
+    NotebookActions.executionScheduled.connect(onExecutionScheduled);
+    return () => {
+      NotebookActions.executionScheduled.disconnect(onExecutionScheduled);
+    };
+  }, [showJumpToCell, hasExecutedCell]);
 
   if (!state) {
     return emptyDiv;
@@ -74,6 +90,14 @@ export function ExecutionIndicatorComponent(
   const titleFactory = (translatedStatus: string) =>
     trans.__('Kernel status: %1', translatedStatus);
 
+  const onJumpToCell = () => {
+    const nb = props.notebook!;
+    NotebookActions.selectLastRunCell(nb);
+    if (nb.activeCell) {
+      void nb.scrollToCell(nb.activeCell);
+    }
+  };
+
   const reactElement = (
     status: ISessionContext.KernelDisplayStatus,
     circle: JSX.Element,
@@ -90,10 +114,18 @@ export function ExecutionIndicatorComponent(
       >
         <span> {titleFactory(kernelStatuses[status])} </span>
         {popup}
+        {showJumpToCell && hasExecutedCell && (
+          <Button
+            className="jp-Notebook-ExecutionIndicator-jumpButton"
+            onClick={onJumpToCell}
+            title={trans.__('Jump to current or last executed cell')}
+          >
+            {trans.__('Jump to cell')}
+          </Button>
+        )}
       </div>
     </div>
   );
-
   if (
     state.kernelStatus === 'connecting' ||
     state.kernelStatus === 'disconnected' ||
@@ -122,7 +154,9 @@ export function ExecutionIndicatorComponent(
     return reactElement('busy', progressBar(percentage), [
       <span key={0}>
         {trans.__(
-          `Executed ${executedCellNumber}/${scheduledCellNumber} cells`
+          'Executed %1/%2 cells',
+          executedCellNumber,
+          scheduledCellNumber
         )}
       </span>,
       <span key={1}>
@@ -178,6 +212,10 @@ namespace ExecutionIndicatorComponent {
      * The application language translator.
      */
     translator?: ITranslator;
+    /**
+     * The current notebook.
+     */
+    notebook?: Notebook;
   }
 }
 
@@ -195,6 +233,22 @@ export class ExecutionIndicator extends VDomRenderer<ExecutionIndicator.Model> {
   }
 
   /**
+   * Dispose the widget and its model.
+   *
+   * `VDomRenderer.dispose` drops its reference to the model without
+   * disposing it; undisposed, the model stays connected to the session
+   * context (which outlives this widget) and its current notebook stays
+   * reachable. The model is owned here: it is created in the constructor.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this.model?.dispose();
+    super.dispose();
+  }
+
+  /**
    * Render the execution status item.
    */
   render(): JSX.Element | null {
@@ -209,15 +263,16 @@ export class ExecutionIndicator extends VDomRenderer<ExecutionIndicator.Model> {
             displayOption={this.model.displayOption}
             state={undefined}
             translator={this.translator}
+            notebook={undefined}
           />
         );
       }
-
       return (
         <ExecutionIndicatorComponent
           displayOption={this.model.displayOption}
           state={this.model.executionState(nb)}
           translator={this.translator}
+          notebook={nb}
         />
       );
     }
@@ -287,7 +342,11 @@ export namespace ExecutionIndicator {
   export class Model extends VDomModel {
     constructor() {
       super();
-      this._displayOption = { showOnToolBar: true, showProgress: true };
+      this._displayOption = {
+        showOnToolBar: true,
+        showProgress: true,
+        showJumpToCell: false
+      };
       this._renderFlag = true;
     }
 
@@ -337,16 +396,20 @@ export namespace ExecutionIndicator {
             this
           );
 
+          // The cleanup handlers are registered with this model as receiver:
+          // without one they would sit on the context until it is disposed,
+          // keeping the notebook captured by this scope reachable even after
+          // the model itself is disposed and cleared.
           context.disposed.connect(ctx => {
             ctx.connectionStatusChanged.disconnect(
               contextConnectionStatusChanged,
               this
             );
             ctx.statusChanged.disconnect(contextStatusChanged, this);
-          });
+          }, this);
           const handleKernelMsg = (
-            sender: IKernelConnection,
-            msg: IAnyMessageArgs
+            sender: Kernel.IKernelConnection,
+            msg: Kernel.IAnyMessageArgs
           ) => {
             const message = msg.msg;
             const msgId = message.header.msg_id;
@@ -372,15 +435,16 @@ export namespace ExecutionIndicator {
               this._startTimer(nb);
             }
           };
-          context.session?.kernel?.anyMessage.connect(handleKernelMsg);
-          context.session?.kernel?.disposed.connect(kernel =>
-            kernel.anyMessage.disconnect(handleKernelMsg)
+          context.session?.kernel?.anyMessage.connect(handleKernelMsg, this);
+          context.session?.kernel?.disposed.connect(
+            kernel => kernel.anyMessage.disconnect(handleKernelMsg, this),
+            this
           );
           const kernelChangedSlot = (
             _: ISessionContext,
             kernelData: IChangedArgs<
-              IKernelConnection | null,
-              IKernelConnection | null,
+              Kernel.IKernelConnection | null,
+              Kernel.IKernelConnection | null,
               'kernel'
             >
           ) => {
@@ -388,13 +452,14 @@ export namespace ExecutionIndicator {
               this._resetTime(state);
               this.stateChanged.emit(void 0);
               if (kernelData.newValue) {
-                kernelData.newValue.anyMessage.connect(handleKernelMsg);
+                kernelData.newValue.anyMessage.connect(handleKernelMsg, this);
               }
             }
           };
-          context.kernelChanged.connect(kernelChangedSlot);
-          context.disposed.connect(ctx =>
-            ctx.kernelChanged.disconnect(kernelChangedSlot)
+          context.kernelChanged.connect(kernelChangedSlot, this);
+          context.disposed.connect(
+            ctx => ctx.kernelChanged.disconnect(kernelChangedSlot, this),
+            this
           );
         }
       }
@@ -542,6 +607,15 @@ export namespace ExecutionIndicator {
      * @param  data - the state to be updated.
      */
     private _tick(data: IExecutionState): void {
+      if (this.isDisposed) {
+        // The slots that would clear this interval are disconnected when the
+        // model is disposed, so the interval has to terminate itself
+        // (`_notebookExecutionProgress` is a `WeakMap`, so `dispose` cannot
+        // enumerate the states to clear them there).
+        clearInterval(data.interval);
+        clearTimeout(data.timeout);
+        return;
+      }
       data.totalTime += 1;
       this.stateChanged.emit(void 0);
     }
@@ -568,6 +642,7 @@ export namespace ExecutionIndicator {
     updateRenderOption(options: {
       showOnToolBar: boolean;
       showProgress: boolean;
+      showJumpToCell: boolean;
     }): void {
       if (this.displayOption.showOnToolBar) {
         if (!options.showOnToolBar) {
@@ -577,6 +652,7 @@ export namespace ExecutionIndicator {
         }
       }
       this.displayOption.showProgress = options.showProgress;
+      this.displayOption.showJumpToCell = options.showJumpToCell;
       this.stateChanged.emit(void 0);
     }
 
@@ -612,7 +688,8 @@ export namespace ExecutionIndicator {
     const toolbarItem = new ExecutionIndicator(translator);
     toolbarItem.model.displayOption = {
       showOnToolBar: true,
-      showProgress: true
+      showProgress: true,
+      showJumpToCell: false
     };
     toolbarItem.model.attachNotebook({
       content: panel.content,
@@ -623,7 +700,22 @@ export namespace ExecutionIndicator {
       loadSettings
         .then(settings => {
           const updateSettings = (newSettings: ISettingRegistry.ISettings) => {
-            toolbarItem.model.updateRenderOption(getSettingValue(newSettings));
+            const displayOptions = getSettingValue(newSettings);
+
+            // Auto-enable recordTiming if jump button is enabled
+            if (displayOptions.showJumpToCell) {
+              const recordTiming = newSettings.get('recordTiming')
+                .composite as boolean;
+              if (!recordTiming) {
+                newSettings.set('recordTiming', true).catch((reason: Error) => {
+                  console.error(
+                    'Failed to auto-enable recordTiming:',
+                    reason.message
+                  );
+                });
+              }
+            }
+            toolbarItem.model.updateRenderOption(displayOptions);
           };
           settings.changed.connect(updateSettings);
           updateSettings(settings);
@@ -641,16 +733,19 @@ export namespace ExecutionIndicator {
   export function getSettingValue(settings: ISettingRegistry.ISettings): {
     showOnToolBar: boolean;
     showProgress: boolean;
+    showJumpToCell: boolean;
   } {
     let showOnToolBar = true;
     let showProgress = true;
+    let showJumpToCell = false;
     const configValues = settings.get('kernelStatus').composite as JSONObject;
     if (configValues) {
       showOnToolBar = !(configValues.showOnStatusBar as boolean);
       showProgress = configValues.showProgress as boolean;
+      showJumpToCell = configValues.showJumpToRecentExecutionButton as boolean;
     }
 
-    return { showOnToolBar, showProgress };
+    return { showOnToolBar, showProgress, showJumpToCell };
   }
 }
 
@@ -669,5 +764,10 @@ namespace Private {
      * status circle.
      */
     showProgress: boolean;
+    /**
+     * The option to show the jump to most recently executed/executing cell button
+     * inside the tooltip
+     */
+    showJumpToCell: boolean;
   };
 }

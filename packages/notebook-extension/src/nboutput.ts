@@ -1,13 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
+import type {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ILoggerRegistry, LogLevel } from '@jupyterlab/logconsole';
-import * as nbformat from '@jupyterlab/nbformat';
-import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
+import type { LogLevel } from '@jupyterlab/logconsole';
+import { ILoggerRegistry } from '@jupyterlab/logconsole';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { NotebookPanel } from '@jupyterlab/notebook';
+import { INotebookTracker } from '@jupyterlab/notebook';
 import { KernelMessage } from '@jupyterlab/services';
 
 /**
@@ -63,12 +65,19 @@ function activateNBOutput(
     // There is overlap here since unhandled messages are also emitted in the
     // iopubMessage signal. However, unhandled messages warrant a higher log
     // severity, so we'll accept that they are logged twice.
+    //
+    // The session context outlives this panel when other views of the
+    // document stay open, so the connections are made with the panel as
+    // receiver: `Widget.dispose()` calls `Signal.clearData(this)`, which
+    // removes them when the panel is closed.
     nb.context.sessionContext.iopubMessage.connect(
-      (_, msg: KernelMessage.IIOPubMessage) => logOutput(msg, 'info', 'info')
+      (_, msg: KernelMessage.IIOPubMessage) => logOutput(msg, 'info', 'info'),
+      nb
     );
     nb.context.sessionContext.unhandledMessage.connect(
       (_, msg: KernelMessage.IIOPubMessage) =>
-        logOutput(msg, 'warning', 'error')
+        logOutput(msg, 'warning', 'error'),
+      nb
     );
   }
   nbtracker.forEach(nb => registerNB(nb));

@@ -22,6 +22,9 @@
       "path": "../codemirror"
     },
     {
+      "path": "../completer"
+    },
+    {
       "path": "../console"
     },
     {
@@ -44,6 +47,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../settingregistry"
     },
     {
       "path": "../translation"
