@@ -285,6 +285,7 @@ export class ShortcutInput extends React.Component<
       return;
     }
     this._clearIdleTimer();
+    this.props.clearCaptureError();
     this.props.toggleInput();
     this.props.onCloseAfterCancel?.();
   };
@@ -882,6 +883,7 @@ export class ShortcutInput extends React.Component<
       }
 
       this._clearIdleTimer();
+      this.props.clearCaptureError();
       this.props.toggleInput();
     });
   };
