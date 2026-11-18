@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
+import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import {
-  CodeMirrorEditor,
   CodeMirrorEditorFactory,
   EditorExtensionRegistry,
   EditorLanguageRegistry,

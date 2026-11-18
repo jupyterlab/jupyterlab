@@ -123,7 +123,7 @@ export class SettingEditorSearchProvider
   /**
    * Replace the currently selected match with the provided text.
    *
-   * @param newText The replacement text.
+   * @param newText - The replacement text.
    * @returns Whether a replace occurred.
    */
   replaceCurrentMatch(
@@ -140,7 +140,7 @@ export class SettingEditorSearchProvider
   /**
    * Replace all matches with the provided text.
    *
-   * @param newText The replacement text.
+   * @param newText - The replacement text.
    * @returns Whether a replace occurred.
    */
   replaceAllMatches(
@@ -259,14 +259,11 @@ export class SettingEditorSearchProvider
    * kept, so reopening the search box does not move the search.
    */
   private _snapshotActiveEditor(): void {
-    let active: CodeMirrorEditor | null = null;
-    if (this._defaultsEditor.hasFocus()) {
-      active = this._defaultsEditor;
-    } else if (this._userEditor.hasFocus()) {
-      active = this._userEditor;
-    } else {
-      active = this._focusedEditor;
-    }
+    const active: CodeMirrorEditor | null = this._defaultsEditor.hasFocus()
+      ? this._defaultsEditor
+      : this._userEditor.hasFocus()
+        ? this._userEditor
+        : this._focusedEditor;
     if (active && active !== this._activeEditor) {
       const previous = this._activeEditor;
       if (previous) {
