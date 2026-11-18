@@ -29,6 +29,13 @@ import {
 const RENDERED_MARKDOWN_CLASS = 'jp-RenderedMarkdown';
 
 /**
+ * The prefix of the class that records the mermaid theme of a drawn diagram.
+ *
+ * A class, unlike a data attribute, is kept when Markdown is sanitized.
+ */
+const THEME_CLASS_PREFIX = 'jp-mod-mermaidTheme-';
+
+/**
  * A mermaid diagram manager with cache.
  */
 export class MermaidManager implements IMermaidManager {
@@ -77,6 +84,8 @@ export class MermaidManager implements IMermaidManager {
       return;
     }
     this._isDisposed = true;
+    this._observer?.disconnect();
+    this._observer = null;
     Signal.clearData(this);
     this._diagrams.clear();
     this._svgs.clear();
@@ -125,6 +134,7 @@ export class MermaidManager implements IMermaidManager {
           child.cloneNode(true)
         );
         node.replaceChildren(...children);
+        Private.setDrawnTheme(node, Private.uiTheme());
         if (figure.classList.contains(WARNING_CLASS)) {
           node.classList.add(WARNING_CLASS);
         } else {
@@ -155,6 +165,11 @@ export class MermaidManager implements IMermaidManager {
     this._refreshId++;
     this._themeChanged.emit();
     void this.refreshDiagrams();
+    // Diagrams that are not in the document now, such as in a Markdown cell
+    // in edit mode, are redrawn when they are added to it again.
+    if (this._hasDrawn) {
+      this._observeDocument();
+    }
   }
 
   /**
@@ -284,6 +299,9 @@ export class MermaidManager implements IMermaidManager {
       return this.renderFigure(text);
     }
 
+    Private.setDrawnTheme(output, Private.uiTheme());
+    this._hasDrawn = true;
+
     // update the cache for use when rendering synchronously
     this._diagrams.set(text, output);
 
@@ -368,10 +386,62 @@ export class MermaidManager implements IMermaidManager {
     return figure;
   }
 
+  /**
+   * Redraw diagrams drawn in another theme when their Markdown is added to
+   * the document again.
+   */
+  private async _onDomChanged(records: MutationRecord[]): Promise<void> {
+    if (this._isDisposed) {
+      return;
+    }
+    const selector = Private.staleDiagramSelector(Private.uiTheme());
+    const stale = new Set<HTMLElement>();
+    for (const record of records) {
+      for (const node of Array.from(record.addedNodes)) {
+        if (!(node instanceof HTMLElement)) {
+          continue;
+        }
+        if (node.matches(selector)) {
+          stale.add(node);
+        }
+        for (const diagram of Array.from(
+          node.querySelectorAll<HTMLElement>(selector)
+        )) {
+          stale.add(diagram);
+        }
+      }
+    }
+    for (const diagram of stale) {
+      if (this._isDisposed) {
+        return;
+      }
+      // The diagram may have been removed again since it was added.
+      if (diagram.isConnected) {
+        await this.refreshDiagrams(diagram);
+      }
+    }
+  }
+
+  /**
+   * Start redrawing diagrams drawn in another theme when their Markdown is
+   * added to the document again.
+   */
+  private _observeDocument(): void {
+    if (this._isDisposed || this._observer || typeof document === 'undefined') {
+      return;
+    }
+    this._observer = new MutationObserver(records => {
+      void this._onDomChanged(records);
+    });
+    this._observer.observe(document.body, { childList: true, subtree: true });
+  }
+
   private _themeChanged = new Signal<this, void>(this);
   private _isDisposed = false;
   private _generation = 0;
   private _refreshId = 0;
+  private _hasDrawn = false;
+  private _observer: MutationObserver | null = null;
   private _svgs: LruCache<string, IMermaidManager.IRenderInfo>;
 }
 
@@ -405,6 +475,31 @@ namespace Private {
    */
   export function initThemes(themes: IThemeManager | null) {
     _themes = themes;
+  }
+
+  /**
+   * Record the mermaid theme a diagram was drawn in.
+   */
+  export function setDrawnTheme(
+    node: HTMLElement,
+    theme: MermaidConfig['theme']
+  ): void {
+    for (const name of Array.from(node.classList)) {
+      if (name.startsWith(THEME_CLASS_PREFIX)) {
+        node.classList.remove(name);
+      }
+    }
+    node.classList.add(`${THEME_CLASS_PREFIX}${theme}`);
+  }
+
+  /**
+   * Get a selector of diagrams in rendered Markdown drawn in another theme.
+   */
+  export function staleDiagramSelector(theme: MermaidConfig['theme']): string {
+    return (
+      `.${RENDERED_MARKDOWN_CLASS} .${MERMAID_CLASS}` +
+      `[class*="${THEME_CLASS_PREFIX}"]:not(.${THEME_CLASS_PREFIX}${theme})`
+    );
   }
 
   /**

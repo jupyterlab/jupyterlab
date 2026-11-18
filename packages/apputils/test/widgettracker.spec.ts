@@ -2,7 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { WidgetTracker } from '@jupyterlab/apputils';
+import { type IRestorable, StateDB } from '@jupyterlab/statedb';
 import { signalToPromise, testEmission } from '@jupyterlab/testing';
+import { CommandRegistry } from '@lumino/commands';
+import { PromiseDelegate } from '@lumino/coreutils';
 import { Panel, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 
@@ -431,6 +434,134 @@ describe('@jupyterlab/apputils', () => {
         expect(tracker.has(widget)).toBe(true);
         widget.dispose();
         expect(tracker.has(widget)).toBe(false);
+      });
+    });
+
+    describe('#restore()', () => {
+      let state: StateDB;
+      let widgets: Widget[];
+
+      beforeEach(() => {
+        state = new StateDB();
+        widgets = [];
+      });
+
+      afterEach(() => {
+        widgets.forEach(widget => widget.dispose());
+      });
+
+      function createRestoreOptions(
+        connector: StateDB = state,
+        beforeCreate?: () => Promise<void>
+      ): IRestorable.IOptions<Widget> {
+        const registry = new CommandRegistry();
+        registry.addCommand('test:restore', {
+          execute: async args => {
+            if (typeof args.id !== 'string' || typeof args.label !== 'string') {
+              throw new Error('Invalid saved widget');
+            }
+            if (beforeCreate) {
+              await beforeCreate();
+            }
+            const widget = createWidget();
+            widget.id = args.id;
+            widget.title.label = args.label;
+            widgets.push(widget);
+            await tracker.add(widget);
+          }
+        });
+        return {
+          command: 'test:restore',
+          connector,
+          name: (widget: Widget) => widget.id,
+          args: (widget: Widget) => ({
+            id: widget.id,
+            label: widget.title.label
+          }),
+          registry
+        };
+      }
+
+      it('should recreate widgets from saved arguments and persist changes', async () => {
+        const data = { id: 'saved-widget', label: 'Saved title' };
+        await state.save(`${namespace}:${data.id}`, { data });
+        await state.save('another-tracker:ignored', {
+          data: { id: 'ignored', label: 'Another tracker' }
+        });
+
+        await tracker.restore(createRestoreOptions());
+
+        expect(tracker.size).toBe(1);
+        const [widget] = widgets;
+        expect(tracker.find(widget => widget.id === data.id)).toBe(widget);
+        expect(widget.title.label).toBe(data.label);
+        expect(await state.fetch(`${namespace}:${data.id}`)).toEqual({ data });
+        await expect(tracker.restored).resolves.toBeUndefined();
+
+        widget.title.label = 'Updated title';
+        await tracker.save(widget);
+        expect(await state.fetch(`${namespace}:${data.id}`)).toEqual({
+          data: { ...data, label: 'Updated title' }
+        });
+      });
+
+      it('should wait for all prerequisites and command completion', async () => {
+        const appReady = new PromiseDelegate<void>();
+        const extensionReady = new PromiseDelegate<void>();
+        const commandGate = new PromiseDelegate<void>();
+        const nextTurn = () =>
+          new Promise<void>(resolve => setTimeout(resolve, 0));
+        const data = { id: 'saved-widget', label: 'Saved title' };
+        await state.save(`${namespace}:${data.id}`, { data });
+
+        let commandStarted = false;
+        let trackerRestored = false;
+        void tracker.restored.then(() => {
+          trackerRestored = true;
+        });
+        const restoring = tracker.restore({
+          ...createRestoreOptions(state, () => {
+            commandStarted = true;
+            return commandGate.promise;
+          }),
+          when: [appReady.promise, extensionReady.promise]
+        });
+
+        await nextTurn();
+        const startedBeforeAppReady = commandStarted;
+        appReady.resolve(undefined);
+        await nextTurn();
+        const startedBeforeExtensionReady = commandStarted;
+        extensionReady.resolve(undefined);
+        await nextTurn();
+        const startedAfterExtensionReady = commandStarted;
+        const restoredBeforeCommandCompleted = trackerRestored;
+
+        commandGate.resolve(undefined);
+        await restoring;
+
+        expect(startedBeforeAppReady).toBe(false);
+        expect(startedBeforeExtensionReady).toBe(false);
+        expect(startedAfterExtensionReady).toBe(true);
+        expect(restoredBeforeCommandCompleted).toBe(false);
+        expect(trackerRestored).toBe(true);
+        expect(tracker.size).toBe(1);
+      });
+
+      it('should remove failed restore records while retaining successful widgets', async () => {
+        await state.save(`${namespace}:invalid`, { data: { id: 'invalid' } });
+        const data = { id: 'valid', label: 'Valid widget' };
+        await state.save(`${namespace}:valid`, { data });
+
+        await tracker.restore(createRestoreOptions());
+
+        expect(tracker.size).toBe(1);
+        expect(tracker.find(widget => widget.id === data.id)?.title.label).toBe(
+          data.label
+        );
+        expect(await state.fetch(`${namespace}:invalid`)).toBeUndefined();
+        expect(await state.fetch(`${namespace}:valid`)).toEqual({ data });
+        await expect(tracker.restored).resolves.toBeUndefined();
       });
     });
 

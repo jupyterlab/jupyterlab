@@ -551,6 +551,7 @@ async function activateConsole(
   let interactionMode: string;
   let promptCellConfig: JSONObject = {};
   let promptCellPosition: CodeConsole.PromptCellPosition;
+  let appliedPromptCellPosition: CodeConsole.PromptCellPosition | undefined;
   let showBanner: boolean;
 
   /**
@@ -577,7 +578,7 @@ async function activateConsole(
     showBanner = (await settingRegistry.get(pluginId, 'showBanner'))
       .composite as boolean;
 
-    const setWidgetOptions = (widget: ConsolePanel) => {
+    const setWidgetOptions = (widget: ConsolePanel, setPosition: boolean) => {
       widget.console.node.dataset.jpInteractionMode = interactionMode;
       // Update future promptCells - merge with defaults to preserve tabFocusable: false for output cells
       // But prompt cells will have tabFocusable: true set explicitly in newPromptCell()
@@ -596,15 +597,19 @@ async function activateConsole(
         clearCellsOnExecute,
         clearCodeContentOnExecute,
         hideCodeInput,
-        promptCellPosition,
+        promptCellPosition: setPosition ? promptCellPosition : undefined,
         showBanner
       });
     };
 
     if (panel) {
-      setWidgetOptions(panel);
+      setWidgetOptions(panel, true);
     } else {
-      tracker.forEach(setWidgetOptions);
+      // Keep the position picked for a console with the "Prompt to ..."
+      // commands until the Prompt Cell Position setting itself changes.
+      const positionChanged = promptCellPosition !== appliedPromptCellPosition;
+      appliedPromptCellPosition = promptCellPosition;
+      tracker.forEach(widget => setWidgetOptions(widget, positionChanged));
     }
   }
 
