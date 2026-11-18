@@ -260,11 +260,6 @@ const scrollOnKeyPressCases: {
   }
 ];
 test.describe('Scrolling on keyboard interaction when active editor is above the viewport', () => {
-  test.skip(
-    ({ browserName }) => browserName === 'firefox',
-    'Needs fixing on Firefox'
-  );
-
   for (const testCase of scrollOnKeyPressCases) {
     test(`Show ${testCase.showCell} cell on pressing ${testCase.key} ${testCase.times} times`, async ({
       page,
@@ -462,10 +457,8 @@ test.describe('Scrollback cancellation', () => {
 
 test('should detach a markdown code cell when scrolling out of the viewport', async ({
   page,
-  tmpPath,
-  browserName
+  tmpPath
 }) => {
-  test.skip(browserName === 'firefox', 'Needs fixing on Firefox');
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 
   const h = await page.notebook.getNotebookInPanelLocator();
@@ -490,10 +483,8 @@ test('should detach a markdown code cell when scrolling out of the viewport', as
 
 test('should reattach a markdown code cell when scrolling back into the viewport', async ({
   page,
-  tmpPath,
-  browserName
+  tmpPath
 }) => {
-  test.skip(browserName === 'firefox', 'Needs fixing on Firefox');
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 
   const h = await page.notebook.getNotebookInPanelLocator();
@@ -553,10 +544,8 @@ test('should remove all cells including hidden outputs artifacts', async ({
 
 test('should display cells below on scrolling after inserting a cell on top', async ({
   page,
-  tmpPath,
-  browserName
+  tmpPath
 }) => {
-  test.skip(browserName === 'firefox', 'Needs fixing on Firefox');
   // Regression test against "disappearing cells" issue:
   // https://github.com/jupyterlab/jupyterlab/issues/16978
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
@@ -616,6 +605,7 @@ test('should not scroll back to a newly inserted cell when scrolling away', asyn
 
   const notebook = (await page.notebook.getNotebookInPanelLocator())!;
   const firstCell = notebook.locator('.jp-Cell[data-windowed-list-index="1"]');
+  const lastCell = notebook.locator('.jp-Cell[data-windowed-list-index="18"]');
   await firstCell.waitFor();
 
   // Select the first cell and insert a new cell below it.
@@ -638,9 +628,9 @@ test('should not scroll back to a newly inserted cell when scrolling away', asyn
   await page.waitForTimeout(500);
 
   // The view must stay where the user scrolled, not snap back to the
-  // newly inserted cell. Firefox scrolls at most one page per wheel event,
-  // so the new cell can stay rendered just above the view.
-  await expect(newCell).not.toBeInViewport();
+  // newly inserted cell.
+  await expect(newCell).toBeHidden();
+  await expect(lastCell).toBeVisible();
 });
 
 test('should center on next cell after rendering markdown cell and advancing', async ({

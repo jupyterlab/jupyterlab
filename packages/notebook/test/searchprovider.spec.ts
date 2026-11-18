@@ -1246,6 +1246,25 @@ describe('@jupyterlab/notebook', () => {
         expect(provider.getFilters().selection.title).toContain('Cell');
         await provider.endQuery();
       });
+
+      it('should report the correct selected-cell count when provider is created with two cells already selected', () => {
+        // Arrange: put the notebook in command mode and select both cells
+        // before the search provider is instantiated, mimicking the
+        // user workflow: Shift+Up selects cells → Ctrl+F opens search.
+        panel.content.mode = 'command';
+        panel.content.activeCellIndex = 1;
+        panel.content.select(panel.content.widgets[0]);
+        panel.content.select(panel.content.widgets[1]);
+
+        // Act: create a fresh provider now that the selection is in place.
+        const freshProvider = new NotebookSearchProvider(panel);
+        const filters = freshProvider.getFilters();
+
+        // Assert: both cells must be counted immediately, with no signal needed.
+        expect(filters['selection'].title).toBe('Search in 2 Selected Cells');
+
+        freshProvider.dispose();
+      });
     });
 
     describe('#getSelectionState()', () => {

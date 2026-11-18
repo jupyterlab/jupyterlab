@@ -48,6 +48,9 @@ const plugin = {
 // eslint-disable-next-line no-unused-vars
 function activate(app, restorer, rendermime, settingRegistry, middleToken) {
   const { commands, docRegistry } = app;
+  // Read content fetched without options, so that the example test can check
+  // that the deprecation warning names each prebuilt extension.
+  void app.serviceManager.contents.get('').then(model => model.content);
   // Add the markdown renderer factory.
   rendermime.addFactory(markdownRendererFactory);
   const namespace = 'markdownviewer-widget';

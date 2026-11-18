@@ -10,7 +10,6 @@ import type {
   IRunningSessions
 } from '@jupyterlab/running';
 import type { Kernel, KernelSpec, Session } from '@jupyterlab/services';
-import { KernelAPI } from '@jupyterlab/services';
 import type { ITranslator } from '@jupyterlab/translation';
 import type {
   IDisposableMenuItem,
@@ -118,7 +117,7 @@ export async function addKernelRunningSessionManager(
 
       if (confirmed.button.accept) {
         await Promise.allSettled(
-          unusedKernels.map(kernel => KernelAPI.shutdownKernel(kernel.id))
+          unusedKernels.map(kernel => kernels.shutdown(kernel.id))
         );
         await Promise.all([
           kernels.refreshRunning(),

@@ -318,7 +318,7 @@ const jsonPlugin: JupyterFrontEndPlugin<IJSONSettingEditorTracker> = {
     ILabStatus,
     ITranslator
   ],
-  optional: [ILayoutRestorer, ICommandPalette],
+  optional: [ILayoutRestorer, ICommandPalette, IFormRendererRegistry],
   autoStart: true,
   provides: IJSONSettingEditorTracker,
   activate: activateJSON
@@ -336,7 +336,8 @@ function activateJSON(
   status: ILabStatus,
   translator: ITranslator,
   restorer: ILayoutRestorer | null,
-  palette: ICommandPalette | null
+  palette: ICommandPalette | null,
+  editorRegistry: IFormRendererRegistry | null
 ): IJSONSettingEditorTracker {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
@@ -390,6 +391,7 @@ function activateJSON(
           });
           return cmEditor;
         },
+        editorRegistry: editorRegistry ?? undefined,
         key,
         registry,
         rendermime,
