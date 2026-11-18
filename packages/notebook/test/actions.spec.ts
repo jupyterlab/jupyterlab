@@ -2378,7 +2378,7 @@ describe('@jupyterlab/notebook', () => {
         await Promise.all([inIdleState, executionCompleted]);
 
         expect(Object.keys(getTiming(cellAfterMove)).sort()).toEqual(
-          RUN_TIMING_KEYS
+          EXECUTION_TIMING_KEYS
         );
       }, 20000);
 
@@ -2409,7 +2409,7 @@ describe('@jupyterlab/notebook', () => {
         await Promise.all([inIdleState, executionCompleted]);
 
         expect(Object.keys(getTiming(queuedAfterMove)).sort()).toEqual(
-          RUN_TIMING_KEYS
+          EXECUTION_TIMING_KEYS
         );
       }, 20000);
     });
