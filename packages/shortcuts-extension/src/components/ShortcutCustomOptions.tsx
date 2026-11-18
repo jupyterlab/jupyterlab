@@ -205,6 +205,7 @@ export class CustomOptionsDialogBody
 
   constructor(options: ICustomOptionsDialogBodyOptions) {
     super();
+    this.addClass('jp-Shortcuts-DialogBody');
     this.addClass('jp-Shortcuts-CustomOptionsDialogBody');
     this._fields = appendCustomOptionFields(this.node, options);
   }

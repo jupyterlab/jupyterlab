@@ -86,8 +86,7 @@
 }
 
 /* Invalid field: 4px left accent in dialogs only. */
-.jp-Shortcuts-AddDialogBody .jp-Shortcuts-Field:has(.jp-mod-error),
-.jp-Shortcuts-CustomOptionsDialogBody .jp-Shortcuts-Field:has(.jp-mod-error) {
+.jp-Shortcuts-DialogBody .jp-Shortcuts-Field:has(.jp-mod-error) {
   box-shadow: inset 4px 0 0 var(--jp-error-color0);
 }
 
@@ -113,8 +112,8 @@
   color: var(--jp-content-font-color3);
 }
 
-button.jp-mod-styled.jp-Shortcuts-Overwrite.jp-mod-defunc-Submit,
-button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
+.jp-Button.jp-Shortcuts-Overwrite.jp-mod-defunc-Submit,
+.jp-Button.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
   cursor: not-allowed;
   background-color: transparent;
   color: var(--jp-content-font-color3);
@@ -149,12 +148,7 @@ button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
   padding: 0 5px;
 }
 
-.jp-Shortcuts-Cell button.jp-Shortcuts-Overwrite:focus-visible,
-.jp-Shortcuts-Cell button.jp-Shortcuts-Icon:focus-visible {
-  outline-offset: 1px;
-}
-
-.jp-Shortcuts-Cell button.jp-Shortcuts-Icon {
+.jp-Shortcuts-Cell .jp-Shortcuts-Icon {
   width: 24px;
   min-width: 24px;
   display: inline-flex;
@@ -163,13 +157,13 @@ button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
   padding: 0;
 }
 
-.jp-Shortcuts-Cell button.jp-Shortcuts-Icon svg {
+.jp-Shortcuts-Cell .jp-Shortcuts-Icon svg {
   height: 16px;
   width: 16px;
 }
 
-.jp-Shortcuts-AddShortcut.jp-mod-styled .jp-icon3[fill],
-.jp-Shortcuts-Cell button.jp-Shortcuts-Icon .jp-icon3[fill] {
+.jp-Shortcuts-AddShortcut .jp-icon3[fill],
+.jp-Shortcuts-Cell .jp-Shortcuts-Icon .jp-icon3[fill] {
   fill: currentcolor;
 }
 
@@ -192,8 +186,8 @@ button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
   border-top: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
-.jp-Shortcuts-Row button.jp-Shortcuts-Plus:focus-visible,
-.jp-Shortcuts-Row:hover button.jp-Shortcuts-Plus,
+.jp-Shortcuts-Row .jp-Shortcuts-Plus:focus-visible,
+.jp-Shortcuts-Row:hover .jp-Shortcuts-Plus,
 .jp-Shortcuts-Row:hover .jp-Shortcuts-Or,
 .jp-Shortcuts-Or:has(+ .jp-Shortcuts-Plus:focus-visible) {
   opacity: 1;
@@ -283,7 +277,7 @@ button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
   opacity: 0;
 }
 
-.jp-Shortcuts-Cell button.jp-Shortcuts-Plus {
+.jp-Shortcuts-Cell .jp-Shortcuts-Plus {
   margin: 0;
 }
 
@@ -291,17 +285,14 @@ button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
   display: inline-block;
 }
 
-/* Shortcut List Style */
 .jp-Shortcuts-ShortcutList {
   max-width: 90rem;
-  /* separate + spacing 0: sticky header borders/shadows behave predictably */
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
   border: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
-/* Fixed columns stay compact; Shortcut absorbs remaining width. */
 .jp-Shortcuts-Col {
   width: 10rem;
 }
@@ -315,12 +306,11 @@ button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
   width: auto;
 }
 
-/* No nested overflow: the settings panel (.jp-SettingsPanel) is the scrollport. */
 .jp-Shortcuts-ShortcutListContainer {
   overflow: visible;
 }
 
-.jp-Shortcuts-ShortcutList thead th.jp-Shortcuts-Cell {
+.jp-Shortcuts-ShortcutList thead .jp-Shortcuts-Cell {
   position: sticky;
   top: 0;
   z-index: 1;
@@ -331,17 +321,10 @@ button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
   padding-top: 10px;
   padding-bottom: 10px;
   text-align: left;
-  /* box-shadow sticks with the header; avoids collapsed-border quirks */
   box-shadow: 0 var(--jp-border-width) 0 0 var(--jp-border-color1);
 }
 
-.jp-Shortcuts-ShortcutList thead th.jp-Shortcuts-Cell button {
-  /* To compensate for the padding */
-  margin-left: -5px;
-}
-
-/* Shortcut Title Item Style */
-button.jp-Shortcuts-Header {
+.jp-Shortcuts-Header {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -351,6 +334,10 @@ button.jp-Shortcuts-Header {
   text-align: left;
   cursor: pointer;
   color: inherit;
+}
+
+.jp-Shortcuts-Cell .jp-Shortcuts-Header {
+  margin-left: -5px;
 }
 
 .jp-Shortcuts-SortButton {
@@ -368,7 +355,7 @@ button.jp-Shortcuts-Header {
   fill: var(--jp-ui-font-color1);
 }
 
-button.jp-Shortcuts-Header:focus-visible {
+.jp-Shortcuts-Header:focus-visible {
   outline: var(--jp-focus-outline-width) solid var(--jp-focus-outline-color);
 }
 
@@ -406,25 +393,24 @@ button.jp-Shortcuts-Header:focus-visible {
   align-items: center;
 }
 
-button.jp-mod-styled.jp-Shortcuts-SelectorsToggle {
+.jp-Shortcuts-SelectorsToggle {
   margin-right: 15px;
   min-width: fit-content;
 }
 
-button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
-  outline-offset: 1px;
-}
-
-.jp-Shortcuts-AddShortcut.jp-mod-styled.jp-mod-accept {
+.jp-Button.jp-Shortcuts-AddShortcut {
   width: 32px;
   height: 32px;
+  min-width: 32px;
+  min-height: 32px;
   padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
-.jp-Shortcuts-AddShortcut.jp-mod-styled:disabled {
+.jp-Button.jp-Shortcuts-AddShortcut:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
@@ -432,14 +418,17 @@ button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
 .jp-Shortcuts-AddShortcut.jp-Shortcuts-Icon svg {
   height: 20px;
   width: 20px;
+  flex-shrink: 0;
 }
 
-.jp-Shortcuts-AddShortcut.jp-mod-styled:focus-visible {
+.jp-Shortcuts-Cell .jp-Shortcuts-Overwrite:focus-visible,
+.jp-Shortcuts-Cell .jp-Shortcuts-Icon:focus-visible,
+.jp-Button.jp-Shortcuts-SelectorsToggle:focus-visible,
+.jp-Button.jp-Shortcuts-AddShortcut:focus-visible {
   outline-offset: 1px;
 }
 
-.jp-Shortcuts-AddDialogBody,
-.jp-Shortcuts-CustomOptionsDialogBody {
+.jp-Shortcuts-DialogBody {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -451,25 +440,15 @@ button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
   box-sizing: border-box;
 }
 
-.jp-Dialog-content:has(.jp-Shortcuts-AddDialogBody),
-.jp-Dialog-content:has(.jp-Shortcuts-CustomOptionsDialogBody) {
-  /* Body is 500px; content padding is 24px on each side. */
+.jp-Dialog-content:has(.jp-Shortcuts-DialogBody) {
   width: max-content;
   max-width: calc(500px + 48px);
   max-height: 90vh;
   resize: vertical;
-  /* Keep overflow hidden for resize/radius; scrolling belongs on .jp-Dialog-body. */
   overflow: hidden;
 }
 
-/*
- * When shrinking the card, the body must be allowed to shrink (min-height: 0)
- * and scroll so that the scrollbar is not clipped by .jp-Dialog-content's
- * overflow: hidden.
- */
-.jp-Dialog-content:has(.jp-Shortcuts-AddDialogBody) > .jp-Dialog-body,
-.jp-Dialog-content:has(.jp-Shortcuts-CustomOptionsDialogBody)
-  > .jp-Dialog-body {
+.jp-Dialog-content:has(.jp-Shortcuts-DialogBody) > .jp-Dialog-body {
   flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
@@ -479,18 +458,16 @@ button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
 .jp-Shortcuts-AddDialog-capture .jp-Shortcuts-InputBox-controls,
 .jp-Shortcuts-AddDialog-capture .jp-Shortcuts-Input,
 .jp-Shortcuts-AddDialog-capture .jp-Shortcuts-StartRecording,
-.jp-Shortcuts-AddDialogBody select.jp-mod-styled,
-.jp-Shortcuts-Field > input.jp-mod-styled {
+.jp-Shortcuts-DialogBody select,
+.jp-Shortcuts-Field > input {
   width: 100%;
   box-sizing: border-box;
 }
 
 .jp-Shortcuts-AddDialog-capture .jp-Shortcuts-Input {
-  /* Inline table uses slide-animation (0→120px); full-width dialog must not. */
   animation: none;
 }
 
-/* Explicit start control before keystroke capture begins. */
 .jp-Shortcuts-AddDialog-capture .jp-Shortcuts-StartRecording {
   display: flex;
   align-items: center;
@@ -530,8 +507,7 @@ button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
   gap: 12px;
 }
 
-.jp-Shortcuts-AddDialogBody .jp-Shortcuts-Field,
-.jp-Shortcuts-CustomOptionsDialogBody .jp-Shortcuts-Field {
+.jp-Shortcuts-DialogBody .jp-Shortcuts-Field {
   padding: 0 12px;
 }
 
@@ -541,7 +517,7 @@ button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
   font-size: var(--jp-ui-font-size1);
 }
 
-.jp-Shortcuts-Field > input.jp-mod-styled {
+.jp-Shortcuts-Field > input {
   padding: 8px;
 }
 
@@ -554,12 +530,9 @@ button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
   margin-bottom: 0;
 }
 
-/* Shared field chrome in shortcut dialogs. */
-.jp-Shortcuts-AddDialogBody .jp-Shortcuts-Input,
-.jp-Shortcuts-AddDialogBody .jp-Shortcuts-Field > input,
-.jp-Shortcuts-AddDialogBody .jp-JSONEditor-host,
-.jp-Shortcuts-CustomOptionsDialogBody .jp-Shortcuts-Field > input,
-.jp-Shortcuts-CustomOptionsDialogBody .jp-JSONEditor-host {
+.jp-Shortcuts-DialogBody .jp-Shortcuts-Input,
+.jp-Shortcuts-DialogBody .jp-Shortcuts-Field > input,
+.jp-Shortcuts-DialogBody .jp-JSONEditor-host {
   background: var(--jp-input-background);
   color: var(--jp-ui-font-color0);
   font-family: var(--jp-ui-font-family);
@@ -569,67 +542,31 @@ button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
   box-sizing: border-box;
 }
 
-.jp-Shortcuts-AddDialogBody .jp-Shortcuts-Input:focus,
-.jp-Shortcuts-AddDialogBody .jp-Shortcuts-Field > input:focus,
-.jp-Shortcuts-AddDialogBody .jp-JSONEditor-host.jp-mod-focused,
-.jp-Shortcuts-CustomOptionsDialogBody .jp-Shortcuts-Field > input:focus,
-.jp-Shortcuts-CustomOptionsDialogBody .jp-JSONEditor-host.jp-mod-focused {
+.jp-Shortcuts-DialogBody .jp-Shortcuts-Input:focus,
+.jp-Shortcuts-DialogBody .jp-Shortcuts-Field > input:focus,
+.jp-Shortcuts-DialogBody .jp-JSONEditor-host.jp-mod-focused {
   border-color: var(--jp-input-active-border-color);
   box-shadow: var(--jp-input-box-shadow);
 }
 
-/* Keep JSON host border normal; field wrapper shows the error accent. */
-.jp-Shortcuts-Field .jp-JSONEditor.jp-mod-error .jp-JSONEditor-host {
+.jp-JSONEditor.jp-mod-error .jp-JSONEditor-host {
   border-color: var(--jp-input-border-color);
   outline-color: transparent;
 }
 
-.jp-Shortcuts-AddDialogBody
-  .jp-JSONEditor.jp-mod-error
-  .jp-JSONEditor-host.jp-mod-focused,
-.jp-Shortcuts-CustomOptionsDialogBody
-  .jp-JSONEditor.jp-mod-error
-  .jp-JSONEditor-host.jp-mod-focused {
+.jp-JSONEditor.jp-mod-error .jp-JSONEditor-host.jp-mod-focused {
   border-color: var(--jp-input-active-border-color);
 }
 
-.jp-Shortcuts-AddDialogBody select:focus-visible,
-.jp-Shortcuts-AddDialogBody .jp-Shortcuts-Input:focus-visible,
-.jp-Shortcuts-AddDialogBody .jp-Shortcuts-Field > input:focus-visible,
-.jp-Shortcuts-AddDialogBody .jp-JSONEditor-host:has(:focus-visible),
-.jp-Shortcuts-CustomOptionsDialogBody .jp-Shortcuts-Field > input:focus-visible,
-.jp-Shortcuts-CustomOptionsDialogBody .jp-JSONEditor-host:has(:focus-visible) {
+.jp-Shortcuts-DialogBody select:focus-visible,
+.jp-Shortcuts-DialogBody .jp-Shortcuts-Input:focus-visible,
+.jp-Shortcuts-DialogBody .jp-Shortcuts-Field > input:focus-visible,
+.jp-Shortcuts-DialogBody .jp-JSONEditor-host:has(:focus-visible) {
   outline: var(--jp-focus-outline-width) solid var(--jp-focus-outline-color);
 }
 
-.jp-Shortcuts-AddDialogBody .jp-Shortcuts-InputText,
-.jp-Shortcuts-CustomOptionsDialogBody .jp-Shortcuts-InputText {
-  color: inherit;
-  font-family: inherit;
-  font-size: inherit;
-}
-
-.jp-Shortcuts-AddDialogBody .jp-JSONEditor-host .cm-editor,
-.jp-Shortcuts-CustomOptionsDialogBody .jp-JSONEditor-host .cm-editor {
+.jp-JSONEditor-host .cm-editor {
   height: 100%;
-  background: transparent;
-  color: inherit;
-  font-family: inherit;
-  font-size: inherit;
-}
-
-.jp-Shortcuts-AddDialogBody .jp-JSONEditor-host .cm-content,
-.jp-Shortcuts-CustomOptionsDialogBody .jp-JSONEditor-host .cm-content {
-  background: transparent;
-  color: inherit;
-  font-family: inherit;
-  font-size: inherit;
-}
-
-.jp-Shortcuts-AddDialogBody .jp-JSONEditor-host .cm-gutter,
-.jp-Shortcuts-CustomOptionsDialogBody .jp-JSONEditor-host .cm-gutter {
-  background: var(--jp-layout-color3);
-  color: var(--jp-ui-font-color3);
 }
 
 .jp-JSONEditor {

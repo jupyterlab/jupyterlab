@@ -213,6 +213,7 @@ class NewShortcutDialogBody
     this._checkValidation = options.checkValidation;
     this._commands = this._listCommands(options.commandRegistry);
 
+    this.addClass('jp-Shortcuts-DialogBody');
     this.addClass('jp-Shortcuts-AddDialogBody');
 
     // Command
