@@ -1437,23 +1437,20 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     const translator = this._translator;
     const trans = translator.load('jupyterlab');
 
-    // Check whether the kernel choice is locked.
-    const wasLocked = sessionContext.kernelPreference.locked === true;
+    const name = sessionContext.kernelPreference.name;
+    // A lock without a kernel name applies to the kernel chosen in this dialog.
+    const wasLocked = sessionContext.kernelPreference.locked === true && !!name;
     if (wasLocked) {
-      const name = sessionContext.kernelPreference.name;
       const specs = sessionContext.specsManager.specs;
-      const nameAvailable = !!name && !!specs?.kernelspecs[name];
-      if (sessionContext.hasNoKernel && !nameAvailable) {
-        if (name) {
-          await showDialog({
-            title: trans.__('Kernel Unavailable'),
-            body: trans.__(
-              'This notebook requires the %1 kernel, which is not available.',
-              name
-            ),
-            buttons: [Dialog.okButton({ label: trans.__('Ok') })]
-          });
-        }
+      if (sessionContext.hasNoKernel && !specs?.kernelspecs[name]) {
+        await showDialog({
+          title: trans.__('Kernel Unavailable'),
+          body: trans.__(
+            'This notebook requires the %1 kernel, which is not available.',
+            name
+          ),
+          buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+        });
         return;
       }
     }
@@ -2034,7 +2031,7 @@ namespace Private {
       };
       select.addEventListener('change', updateLock);
       updateLock();
-      if (preference.locked) {
+      if (preference.locked && preference.name) {
         // A choice in the list is ignored while the lock stays checked.
         const updateSelect = () => {
           select.disabled = options.disabled || lockInput.checked;

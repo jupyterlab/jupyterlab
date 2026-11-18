@@ -1041,6 +1041,25 @@ describe('@jupyterlab/apputils', () => {
         await select;
       });
 
+      it('should offer the kernel list for a locked notebook without a kernel name', async () => {
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          name: '',
+          locked: true,
+          shouldStart: false
+        };
+        await sessionContext.initialize();
+
+        const select = sessionContextDialogs.selectKernel(sessionContext);
+        await expect(waitForDialog()).resolves.toBeUndefined();
+        const dropdown = document.querySelector<HTMLSelectElement>(
+          '.jp-Dialog-body select'
+        )!;
+        expect(dropdown.disabled).toBe(false);
+        await dismissDialog();
+        await select;
+      });
+
       it('should show warning when a locked kernel is unavailable', async () => {
         sessionContext.kernelPreference = {
           ...sessionContext.kernelPreference,
