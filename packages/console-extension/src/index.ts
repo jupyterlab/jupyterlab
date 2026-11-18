@@ -1536,7 +1536,7 @@ function activateConsoleCompleterService(
         editor: cell.editor,
         session: codeConsole.sessionContext.session,
         widget: consolePanel,
-        sanitzer: sanitizer
+        sanitizer: sanitizer
       };
       manager.updateCompleter(newContext).catch(console.error);
     });
