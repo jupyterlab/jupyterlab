@@ -2034,6 +2034,14 @@ namespace Private {
       };
       select.addEventListener('change', updateLock);
       updateLock();
+      if (preference.locked) {
+        // A choice in the list is ignored while the lock stays checked.
+        const updateSelect = () => {
+          select.disabled = options.disabled || lockInput.checked;
+        };
+        lockInput.addEventListener('change', updateSelect);
+        updateSelect();
+      }
     }
 
     return body;

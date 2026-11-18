@@ -1018,6 +1018,29 @@ describe('@jupyterlab/apputils', () => {
         expect(sessionContext.session?.kernel).toBeFalsy();
       });
 
+      it('should disable the kernel list while the lock is checked', async () => {
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          locked: true
+        };
+        await sessionContext.initialize();
+
+        const select = sessionContextDialogs.selectKernel(sessionContext);
+        await waitForDialog();
+        const dropdown = document.querySelector<HTMLSelectElement>(
+          '.jp-Dialog-body select'
+        )!;
+        expect(dropdown.disabled).toBe(true);
+        document
+          .querySelector<HTMLInputElement>(
+            '.jp-Dialog-body input[data-role="kernelLock"]'
+          )!
+          .click();
+        expect(dropdown.disabled).toBe(false);
+        await dismissDialog();
+        await select;
+      });
+
       it('should show warning when a locked kernel is unavailable', async () => {
         sessionContext.kernelPreference = {
           ...sessionContext.kernelPreference,
