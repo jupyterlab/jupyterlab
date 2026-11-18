@@ -2519,7 +2519,7 @@ function activateNotebookHandler(
     widget.title.iconClass = ft?.iconClass ?? '';
     widget.title.iconLabel = ft?.iconLabel ?? '';
     widget.content.scrollbar = factory.notebookConfig.showMinimap ?? false;
-    widget.content.navigationRail =
+    widget.content.showCellNavigationRail =
       factory.notebookConfig.showCellNavigationRail ?? false;
 
     // Notify the widget tracker if restore data needs to update. The context
@@ -2567,7 +2567,7 @@ function activateNotebookHandler(
     tracker.forEach(widget => {
       widget.setConfig(options);
       widget.content.scrollbar = options.notebookConfig.showMinimap ?? false;
-      widget.content.navigationRail =
+      widget.content.showCellNavigationRail =
         options.notebookConfig.showCellNavigationRail ?? false;
     });
   }
@@ -5692,7 +5692,7 @@ function addCommands(
 
   commands.addCommand(CommandIDs.toggleCellNavigationRail, {
     label: trans.__('Show Cell Navigation Rail'),
-    caption: trans.__('Show or hide the cell prompt and error navigation rail'),
+    caption: trans.__('Show or hide the cell navigation rail'),
     execute: async args => {
       const current = getCurrent(tracker, shell, args);
       if (!current) {

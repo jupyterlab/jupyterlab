@@ -71,6 +71,7 @@ describe('@jupyterlab/notebook', () => {
       expect(rail.node.classList.contains('jp-Notebook-navigationRail')).toBe(
         true
       );
+      expect(rail.node.getAttribute('role')).toBe('navigation');
     });
 
     it('should render a line for each cell in the notebook', () => {
@@ -118,11 +119,15 @@ describe('@jupyterlab/notebook', () => {
         '.jp-Notebook-navigationRail-line'
       );
       expect(lines[1].classList.contains('jp-mod-active')).toBe(true);
+      expect(lines[1].getAttribute('aria-current')).toBe('true');
       expect(lines[0].classList.contains('jp-mod-active')).toBe(false);
+      expect(lines[0].getAttribute('aria-current')).toBeNull();
 
       notebook.activeCellIndex = 2;
       expect(lines[2].classList.contains('jp-mod-active')).toBe(true);
+      expect(lines[2].getAttribute('aria-current')).toBe('true');
       expect(lines[1].classList.contains('jp-mod-active')).toBe(false);
+      expect(lines[1].getAttribute('aria-current')).toBeNull();
     });
 
     it('should mark a line when a cell has an error output', () => {
@@ -192,7 +197,7 @@ describe('@jupyterlab/notebook', () => {
     });
 
     it('should toggle visibility when notebookConfig.showCellNavigationRail changes', () => {
-      expect(notebook.navigationRail).toBe(false);
+      expect(notebook.showCellNavigationRail).toBe(false);
       expect(notebook.node.classList.contains('jp-mod-navigationRail')).toBe(
         false
       );
@@ -201,7 +206,7 @@ describe('@jupyterlab/notebook', () => {
         ...notebook.notebookConfig,
         showCellNavigationRail: true
       };
-      expect(notebook.navigationRail).toBe(true);
+      expect(notebook.showCellNavigationRail).toBe(true);
       expect(notebook.node.classList.contains('jp-mod-navigationRail')).toBe(
         true
       );
@@ -210,7 +215,7 @@ describe('@jupyterlab/notebook', () => {
         ...notebook.notebookConfig,
         showCellNavigationRail: false
       };
-      expect(notebook.navigationRail).toBe(false);
+      expect(notebook.showCellNavigationRail).toBe(false);
       expect(notebook.node.classList.contains('jp-mod-navigationRail')).toBe(
         false
       );

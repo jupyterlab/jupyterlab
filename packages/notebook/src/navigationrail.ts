@@ -22,12 +22,15 @@ const LINE_SPACING = 16;
 const MAX_TRACK_HEIGHT = 360;
 const MIN_HIT_HEIGHT = 4;
 const MAX_HIT_HEIGHT = 10;
+const ANSI_ESCAPE_REGEX = new RegExp(
+  `${String.fromCharCode(0x1b)}\\[[0-9;]*m`,
+  'g'
+);
 
 export interface ICellErrorInfo {
   hasError: boolean;
   ename?: string;
   evalue?: string;
-  traceback?: string[];
 }
 
 /**
@@ -43,6 +46,11 @@ export class NotebookNavigationRail extends Widget {
     this.notebook = options.notebook;
     this.translator = options.translator ?? nullTranslator;
     this._trans = this.translator.load('jupyterlab');
+    this.node.setAttribute('role', 'navigation');
+    this.node.setAttribute(
+      'aria-label',
+      this._trans.__('Cell navigation rail')
+    );
 
     this._track = document.createElement('div');
     this._track.className = TRACK_CLASS;
@@ -145,7 +153,13 @@ export class NotebookNavigationRail extends Widget {
   private _onActiveCellChanged(): void {
     const activeIndex = this.notebook.activeCellIndex;
     Array.from(this._track.children).forEach((line, index) => {
-      line.classList.toggle(ACTIVE_LINE_CLASS, index === activeIndex);
+      const isActive = index === activeIndex;
+      line.classList.toggle(ACTIVE_LINE_CLASS, isActive);
+      if (isActive) {
+        line.setAttribute('aria-current', 'true');
+      } else {
+        line.removeAttribute('aria-current');
+      }
     });
   }
 
@@ -162,7 +176,7 @@ export class NotebookNavigationRail extends Widget {
    */
   private _updateLines(): void {
     this._clearCellListeners();
-    this._track.innerHTML = '';
+    this._track.replaceChildren();
 
     if (!this.notebook.model) {
       this._track.style.height = '0';
@@ -199,6 +213,7 @@ export class NotebookNavigationRail extends Widget {
 
       if (i === activeIndex) {
         line.classList.add(ACTIVE_LINE_CLASS);
+        line.setAttribute('aria-current', 'true');
       }
 
       this._track.appendChild(line);
@@ -379,8 +394,7 @@ export class NotebookNavigationRail extends Widget {
         return {
           hasError: true,
           ename: errorJson.ename || 'Error',
-          evalue: errorJson.evalue || '',
-          traceback: errorJson.traceback || []
+          evalue: errorJson.evalue || ''
         };
       }
     }
@@ -439,7 +453,7 @@ export class NotebookNavigationRail extends Widget {
   }
 
   /**
-   * Populate the tooltip HTML content using native cell typography.
+   * Populate the tooltip DOM content using native cell typography.
    */
   private _renderTooltipContent(cell: ICellModel, index: number): void {
     const errorInfo = this._getCellError(cell);
@@ -451,73 +465,76 @@ export class NotebookNavigationRail extends Widget {
     );
     const cellLabel = this._trans.__('Cell %1 of %2', index + 1, totalCells);
 
-    let bodyHtml: string;
+    this._tooltip.replaceChildren();
+
+    const header = document.createElement('div');
+    header.className = 'jp-Notebook-navigationRail-tooltip-header';
+    header.textContent = cellLabel;
+    this._tooltip.appendChild(header);
+
     if (cell.type === 'markdown') {
       if (lines.length > 0) {
-        const firstLine = lines[0];
-        const headingMatch = /^#{1,6}[ \t]+(\S.*)$/.exec(firstLine);
-        const headingText = headingMatch ? headingMatch[1] : '';
+        const container = document.createElement('div');
+        container.className = 'jp-Notebook-navigationRail-tooltip-markdown';
+
+        const headingMatch = /^#{1,6}[ \t]+(\S.*)$/.exec(lines[0]);
+        if (headingMatch) {
+          const heading = document.createElement('div');
+          heading.className =
+            'jp-Notebook-navigationRail-tooltip-markdown-heading';
+          heading.textContent = headingMatch[1];
+          container.appendChild(heading);
+        }
+
         const bodyLines = (headingMatch ? lines.slice(1, 4) : lines.slice(0, 4))
           .map(line => line.trim())
           .filter(Boolean);
-        const truncated = lines.length > 4;
-        bodyHtml = `
-          <div class="jp-Notebook-navigationRail-tooltip-markdown">
-            ${
-              headingText
-                ? `<div class="jp-Notebook-navigationRail-tooltip-markdown-heading">${this._escape(
-                    headingText
-                  )}</div>`
-                : ''
-            }
-            ${
-              bodyLines.length > 0
-                ? `<div class="jp-Notebook-navigationRail-tooltip-markdown-body">${this._escape(
-                    bodyLines.join('\n') + (truncated ? '\n...' : '')
-                  )}</div>`
-                : ''
-            }
-          </div>
-        `;
+        if (bodyLines.length > 0) {
+          const body = document.createElement('div');
+          body.className = 'jp-Notebook-navigationRail-tooltip-markdown-body';
+          body.textContent =
+            bodyLines.join('\n') + (lines.length > 4 ? '\n...' : '');
+          container.appendChild(body);
+        }
+
+        this._tooltip.appendChild(container);
       } else {
-        bodyHtml = `<div class="jp-Notebook-navigationRail-tooltip-empty">${this._escape(
-          this._trans.__('Empty markdown cell')
-        )}</div>`;
+        const empty = document.createElement('div');
+        empty.className = 'jp-Notebook-navigationRail-tooltip-empty';
+        empty.textContent = this._trans.__('Empty markdown cell');
+        this._tooltip.appendChild(empty);
       }
     } else if (lines.length > 0) {
-      const preview =
+      const code = document.createElement('pre');
+      code.className = 'jp-Notebook-navigationRail-tooltip-code';
+      code.textContent =
         lines.slice(0, 4).join('\n') + (lines.length > 4 ? '\n...' : '');
-      bodyHtml = `<pre class="jp-Notebook-navigationRail-tooltip-code">${this._escape(
-        preview
-      )}</pre>`;
+      this._tooltip.appendChild(code);
     } else {
-      const emptyLabel =
+      const empty = document.createElement('div');
+      empty.className = 'jp-Notebook-navigationRail-tooltip-empty';
+      empty.textContent =
         cell.type === 'raw'
           ? this._trans.__('Empty raw cell')
           : this._trans.__('Empty cell');
-      bodyHtml = `<div class="jp-Notebook-navigationRail-tooltip-empty">${this._escape(
-        emptyLabel
-      )}</div>`;
+      this._tooltip.appendChild(empty);
     }
 
-    let errorHtml = '';
     if (errorInfo.hasError) {
-      const ename = errorInfo.ename || this._trans.__('Error');
+      const errorEl = document.createElement('div');
+      errorEl.className = 'jp-Notebook-navigationRail-tooltip-error';
+
+      const nameEl = document.createElement('span');
+      nameEl.className = 'jp-Notebook-navigationRail-tooltip-error-name';
+      nameEl.textContent = errorInfo.ename || this._trans.__('Error');
+      errorEl.appendChild(nameEl);
+
       const evalue = this._stripAnsi(
         errorInfo.evalue || this._trans.__('Execution failed')
       );
-      errorHtml = `<div class="jp-Notebook-navigationRail-tooltip-error"><span class="jp-Notebook-navigationRail-tooltip-error-name">${this._escape(
-        ename
-      )}</span>: ${this._escape(evalue)}</div>`;
+      errorEl.appendChild(document.createTextNode(`: ${evalue}`));
+      this._tooltip.appendChild(errorEl);
     }
-
-    this._tooltip.innerHTML = `
-      <div class="jp-Notebook-navigationRail-tooltip-header">${this._escape(
-        cellLabel
-      )}</div>
-      ${bodyHtml}
-      ${errorHtml}
-    `;
   }
 
   /**
@@ -529,23 +546,10 @@ export class NotebookNavigationRail extends Widget {
   }
 
   /**
-   * Escape special HTML characters.
-   */
-  private _escape(text: string): string {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
-
-  /**
    * Strip ANSI escape sequences from traceback and error strings.
    */
   private _stripAnsi(str: string): string {
-    // eslint-disable-next-line no-control-regex
-    return str.replace(/\u001b\[[0-9;]*m/g, '');
+    return str.replace(ANSI_ESCAPE_REGEX, '');
   }
 
   /**

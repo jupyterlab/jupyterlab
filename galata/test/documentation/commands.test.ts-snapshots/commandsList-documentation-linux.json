@@ -5667,6 +5667,21 @@
     }
   },
   {
+    "id": "notebook:toggle-cell-navigation-rail",
+    "label": "Show Cell Navigation Rail",
+    "caption": "Show or hide the cell navigation rail",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the notebook panel"
+        }
+      }
+    }
+  },
+  {
     "id": "notebook:toggle-cell-outputs",
     "label": "Toggle Visibility of Selected Outputs",
     "caption": "",

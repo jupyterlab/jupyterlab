@@ -1890,16 +1890,6 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
-   * Whether the cell navigation rail is visible (alias for backwards compatibility).
-   */
-  get navigationRail(): boolean {
-    return this.showCellNavigationRail;
-  }
-  set navigationRail(value: boolean) {
-    this.showCellNavigationRail = value;
-  }
-
-  /**
    * The navigation rail widget instance.
    */
   get navigationRailWidget(): NotebookNavigationRail | null {
