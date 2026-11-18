@@ -208,11 +208,15 @@ export class SettingsFormEditor extends React.Component<
         this.props.updateDirtyState(false);
         if (this._isFocused) {
           this._needsSyncOnBlur = true;
-          this.setState({ isModified: this.props.settings.isModified });
+          this.setState((prevState, props) => ({
+            isModified: props.settings.isModified
+          }));
           return;
         }
         this._formData = this.props.settings.composite as ReadonlyJSONObject;
-        this.setState({ isModified: this.props.settings.isModified });
+        this.setState((prevState, props) => ({
+          isModified: props.settings.isModified
+        }));
       })
       .catch((reason: string) => {
         if (changeId !== this._changeId) {
@@ -326,7 +330,9 @@ export class SettingsFormEditor extends React.Component<
       } else if (this._needsSyncOnBlur) {
         this._needsSyncOnBlur = false;
         this._formData = this.props.settings.composite as ReadonlyJSONObject;
-        this.setState({ isModified: this.props.settings.isModified });
+        this.setState((prevState, props) => ({
+          isModified: props.settings.isModified
+        }));
       }
     }, 0);
   };
