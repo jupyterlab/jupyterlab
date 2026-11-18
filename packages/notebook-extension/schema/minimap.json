@@ -1,0 +1,23 @@
+{
+  "jupyter.lab.setting-icon": "ui-components:notebook",
+  "jupyter.lab.setting-icon-label": "Notebook Minimap",
+  "title": "Notebook Minimap",
+  "description": "Notebook minimap settings.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "showSourceCode": {
+      "title": "Show source code",
+      "description": "Whether to display cell source code snippets in the minimap.",
+      "type": "boolean",
+      "default": true
+    },
+    "maxLines": {
+      "title": "Maximum number of lines",
+      "description": "Maximum number of lines of source code to display per cell in the minimap. Set to 0 for unlimited lines.",
+      "type": "integer",
+      "minimum": 0,
+      "default": 10
+    }
+  }
+}

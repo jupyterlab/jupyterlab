@@ -6,8 +6,9 @@ import type {
   ISessionContextDialogs,
   IWidgetTracker
 } from '@jupyterlab/apputils';
-import type { Cell } from '@jupyterlab/cells';
+import type { Cell, ICellModel } from '@jupyterlab/cells';
 import type { ITranslator } from '@jupyterlab/translation';
+import type { WindowedList } from '@jupyterlab/ui-components';
 import { Token } from '@lumino/coreutils';
 import type { ISignal } from '@lumino/signaling';
 import type { Widget } from '@lumino/widgets';
@@ -204,4 +205,24 @@ export interface INotebookCellExecutor {
 export const INotebookCellExecutor = new Token<INotebookCellExecutor>(
   '@jupyterlab/notebook:INotebookCellExecutor',
   `The notebook cell executor`
+);
+
+/**
+ * Custom renderer hooks for the notebook minimap (virtual scrollbar).
+ */
+export type INotebookMinimapRenderer = Partial<
+  Pick<
+    WindowedList.IRenderer<ICellModel>,
+    | 'createScrollbar'
+    | 'createScrollbarViewportIndicator'
+    | 'createScrollbarItem'
+  >
+>;
+
+/**
+ * The notebook minimap renderer token.
+ */
+export const INotebookMinimapRenderer = new Token<INotebookMinimapRenderer>(
+  '@jupyterlab/notebook:INotebookMinimapRenderer',
+  'A service providing custom rendering for the notebook minimap.'
 );

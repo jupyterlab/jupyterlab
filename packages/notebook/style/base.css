@@ -476,6 +476,7 @@
 
 .jp-Notebook .jp-WindowedPanel-scrollbar-item {
   max-width: 60px;
+  min-height: 1em;
   display: flex;
 }
 
@@ -494,8 +495,18 @@
   /* stylelint-disable-next-line declaration-property-value-allowed-list */
   font-size: 3px;
   vertical-align: middle;
-  max-height: 10em;
+  max-height: var(
+    --jp-notebook-minimap-max-height,
+    calc(
+      var(--jp-notebook-minimap-max-lines, 10) *
+        var(--jp-code-line-height, 1.3077) * 1em
+    )
+  );
   overflow: hidden;
+}
+
+.jp-Notebook .jp-scrollbarItem-source.jp-mod-hidden {
+  display: none;
 }
 
 .jp-Notebook

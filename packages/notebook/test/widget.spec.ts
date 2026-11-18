@@ -15,8 +15,10 @@ import type { INotebookModel } from '@jupyterlab/notebook';
 import {
   Notebook,
   NotebookActions,
+  NotebookMinimapRenderer,
   NotebookModel,
   NotebookPanel,
+  ScrollbarItem,
   StaticNotebook
 } from '@jupyterlab/notebook';
 import {
@@ -2309,6 +2311,143 @@ describe('@jupyter/notebook', () => {
         widget.model!.sharedModel.deleteCell(1);
         expect(widget.activeCell).toBe(widget.widgets[1]);
       });
+    });
+
+    describe('#minimapRenderer', () => {
+      it('should allow overriding minimap item and viewport indicator creation', async () => {
+        const createScrollbarViewportIndicator = jest.fn(() => {
+          const indicator = document.createElement('div');
+          indicator.className = 'custom-minimap-indicator';
+          return indicator;
+        });
+        const createScrollbarItem = jest.fn(
+          (_notebook: Notebook, index: number) => {
+            const item = document.createElement('li');
+            item.className = 'custom-minimap-item';
+            item.textContent = `cell-${index}`;
+            return item;
+          }
+        );
+
+        const widget = new Notebook({
+          ...options,
+          minimapRenderer: {
+            createScrollbarViewportIndicator,
+            createScrollbarItem
+          }
+        });
+        const model = new NotebookModel();
+        model.fromJSON(utils.DEFAULT_CONTENT);
+        widget.model = model;
+        Widget.attach(widget, document.body);
+        widget.scrollbar = true;
+        await framePromise();
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+
+        expect(createScrollbarViewportIndicator).toHaveBeenCalledTimes(1);
+        expect(
+          widget.node.querySelector('.custom-minimap-indicator')
+        ).not.toBeNull();
+        expect(createScrollbarItem).toHaveBeenCalled();
+        expect(
+          widget.node.querySelector('.custom-minimap-item')?.textContent
+        ).toBe('cell-0');
+
+        widget.dispose();
+        model.dispose();
+      });
+    });
+  });
+
+  describe('NotebookMinimapRenderer', () => {
+    it('should update rendered items dynamically when configuration changes', () => {
+      const notebook = new Notebook(options);
+      const model = new CodeCellModel();
+      model.sharedModel.setSource('line1\nline2\nline3\nline4');
+
+      const renderer = new NotebookMinimapRenderer();
+      const item = renderer.createScrollbarItem(
+        notebook,
+        0,
+        model
+      ) as ScrollbarItem;
+      const element = item.render({ index: 0 });
+      const source = element.querySelector(
+        '.jp-scrollbarItem-source'
+      ) as HTMLElement;
+
+      expect(source.classList.contains('jp-mod-hidden')).toBe(false);
+      expect(source.textContent).toBe('line1\nline2\nline3\nline4');
+      expect(
+        source.style.getPropertyValue('--jp-notebook-minimap-max-lines')
+      ).toBe('10');
+
+      renderer.maxLines = 2;
+      expect(source.textContent).toBe('line1\nline2');
+      expect(
+        source.style.getPropertyValue('--jp-notebook-minimap-max-lines')
+      ).toBe('2');
+
+      renderer.maxLines = 0;
+      expect(source.textContent).toBe('line1\nline2\nline3\nline4');
+      expect(
+        source.style.getPropertyValue('--jp-notebook-minimap-max-height')
+      ).toBe('none');
+
+      renderer.showSource = false;
+      expect(source.classList.contains('jp-mod-hidden')).toBe(true);
+      expect(source.textContent).toBe('');
+      expect(
+        element.querySelector('.jp-scrollbarItem-executionIndicator')
+      ).not.toBeNull();
+
+      renderer.showSource = true;
+      expect(source.classList.contains('jp-mod-hidden')).toBe(false);
+      expect(source.textContent).toBe('line1\nline2\nline3\nline4');
+
+      item.dispose();
+      renderer.showSource = false;
+      expect(source.classList.contains('jp-mod-hidden')).toBe(false);
+
+      model.dispose();
+      notebook.dispose();
+    });
+  });
+
+  describe('ScrollbarItem', () => {
+    it('should support static showSource and maxLines options', () => {
+      const notebook = new Notebook(options);
+      const model = new CodeCellModel();
+      model.sharedModel.setSource('alpha\nbeta\ngamma');
+
+      const hiddenItem = new ScrollbarItem({
+        notebook,
+        model,
+        showSource: false
+      });
+      const hiddenEl = hiddenItem.render({ index: 0 });
+      const hiddenSource = hiddenEl.querySelector(
+        '.jp-scrollbarItem-source'
+      ) as HTMLElement;
+      expect(hiddenSource.classList.contains('jp-mod-hidden')).toBe(true);
+      expect(hiddenSource.textContent).toBe('');
+      hiddenItem.dispose();
+
+      const limitedItem = new ScrollbarItem({
+        notebook,
+        model,
+        maxLines: 2
+      });
+      const limitedEl = limitedItem.render({ index: 0 });
+      const limitedSource = limitedEl.querySelector(
+        '.jp-scrollbarItem-source'
+      ) as HTMLElement;
+      expect(limitedSource.classList.contains('jp-mod-hidden')).toBe(false);
+      expect(limitedSource.textContent).toBe('alpha\nbeta');
+      limitedItem.dispose();
+
+      model.dispose();
+      notebook.dispose();
     });
   });
 });

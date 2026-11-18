@@ -8,6 +8,7 @@ import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { ITranslator } from '@jupyterlab/translation';
 import type { INotebookModel } from './model';
 import { NotebookPanel } from './panel';
+import type { INotebookMinimapRenderer } from './tokens';
 import { StaticNotebook } from './widget';
 import { NotebookHistory } from './history';
 
@@ -33,6 +34,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     this._notebookConfig =
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
     this._pageHandler = options.pageHandler;
+    this._minimapRenderer = options.minimapRenderer;
   }
 
   /*
@@ -96,6 +98,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
         ? source.content.notebookConfig
         : this._notebookConfig,
       pageHandler: this._pageHandler,
+      minimapRenderer: this._minimapRenderer,
       translator,
       kernelHistory
     };
@@ -107,6 +110,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
   private _editorConfig: StaticNotebook.IEditorConfig;
   private _notebookConfig: StaticNotebook.INotebookConfig;
   private _pageHandler: IPageHandler | undefined;
+  private _minimapRenderer: INotebookMinimapRenderer | undefined;
 }
 
 /**
@@ -148,6 +152,11 @@ export namespace NotebookWidgetFactory {
      * Optional handler for pager payloads (`source: page`).
      */
     pageHandler?: IPageHandler;
+
+    /**
+     * Custom renderer overrides for the notebook minimap.
+     */
+    minimapRenderer?: INotebookMinimapRenderer;
 
     /**
      * The application language translator.

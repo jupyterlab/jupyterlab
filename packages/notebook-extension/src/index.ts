@@ -80,11 +80,13 @@ import {
   CommandEditStatus,
   ExecutionIndicator,
   INotebookCellExecutor,
+  INotebookMinimapRenderer,
   INotebookTools,
   INotebookTracker,
   INotebookWidgetFactory,
   NotebookActions,
   NotebookAdapter,
+  NotebookMinimapRenderer,
   NotebookModelFactory,
   NotebookPanel,
   NotebookSearchProvider,
@@ -1038,11 +1040,24 @@ const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory>
       ISettingRegistry,
       ISessionContextDialogs,
       ITranslator,
-      IPageHandler
+      IPageHandler,
+      INotebookMinimapRenderer
     ],
     activate: activateWidgetFactory,
     autoStart: true
   };
+
+/**
+ * The notebook minimap renderer provider.
+ */
+const minimapPlugin: JupyterFrontEndPlugin<INotebookMinimapRenderer> = {
+  id: '@jupyterlab/notebook-extension:minimap',
+  description: 'Provides the notebook minimap renderer.',
+  provides: INotebookMinimapRenderer,
+  optional: [ISettingRegistry],
+  activate: activateMinimap,
+  autoStart: true
+};
 
 /**
  * The pager output handler provider.
@@ -1589,6 +1604,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   commandEditItem,
   notebookTrustItem,
   widgetFactoryPlugin,
+  minimapPlugin,
   logNotebookOutput,
   clonedOutputsPlugin,
   codeConsolePlugin,
@@ -1750,7 +1766,8 @@ function activateWidgetFactory(
   settingRegistry: ISettingRegistry | null,
   sessionContextDialogs_: ISessionContextDialogs | null,
   translator_: ITranslator | null,
-  pageHandler: IPageHandler | null
+  pageHandler: IPageHandler | null,
+  minimapRenderer: INotebookMinimapRenderer | null
 ): NotebookWidgetFactory.IFactory {
   const translator = translator_ ?? nullTranslator;
   const sessionContextDialogs =
@@ -1837,6 +1854,7 @@ function activateWidgetFactory(
     editorConfig: StaticNotebook.defaultEditorConfig,
     notebookConfig: StaticNotebook.defaultNotebookConfig,
     pageHandler: pageHandler ?? undefined,
+    minimapRenderer: minimapRenderer ?? undefined,
     mimeTypeService: editorServices.mimeTypeService,
     toolbarFactory,
     translator
@@ -1844,6 +1862,38 @@ function activateWidgetFactory(
   app.docRegistry.addWidgetFactory(factory);
 
   return factory;
+}
+
+/**
+ * Activate the configurable notebook minimap renderer.
+ */
+function activateMinimap(
+  _app: JupyterFrontEnd,
+  settingRegistry: ISettingRegistry | null
+): INotebookMinimapRenderer {
+  const renderer = new NotebookMinimapRenderer();
+
+  const updateSettings = (settings: ISettingRegistry.ISettings): void => {
+    renderer.showSource = settings.get('showSourceCode').composite as boolean;
+    renderer.maxLines = settings.get('maxLines').composite as number;
+  };
+
+  if (settingRegistry) {
+    void settingRegistry
+      .load(minimapPlugin.id)
+      .then(settings => {
+        updateSettings(settings);
+        settings.changed.connect(updateSettings);
+      })
+      .catch(reason => {
+        console.error(
+          `Failed to load settings for ${minimapPlugin.id}:`,
+          reason
+        );
+      });
+  }
+
+  return renderer;
 }
 
 /**

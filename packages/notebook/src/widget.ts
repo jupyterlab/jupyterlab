@@ -37,6 +37,7 @@ import type { CellList } from './celllist';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
 import type { INotebookHistory } from './history';
 import type { INotebookModel } from './model';
+import type { INotebookMinimapRenderer } from './tokens';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
 import { NotebookFooter } from './notebookfooter';
 import type { CodeCellModel } from '../../cells/src/model';
@@ -1301,6 +1302,11 @@ export namespace StaticNotebook {
     renderer?: WindowedList.IRenderer;
 
     /**
+     * Custom renderer overrides for the notebook minimap.
+     */
+    minimapRenderer?: INotebookMinimapRenderer;
+
+    /**
      * Optional handler for pager payloads (`source: page`).
      */
     pageHandler?: IPageHandler;
@@ -1561,17 +1567,48 @@ export namespace StaticNotebook {
   }
 }
 
+const MINIMAP_MAX_SOURCE_LENGTH = 10000;
+
+/**
+ * Truncate cell source text for minimap display.
+ */
+function truncateMinimapSource(
+  source: string,
+  maxLines?: number | null
+): string {
+  const capped =
+    source.length > MINIMAP_MAX_SOURCE_LENGTH
+      ? source.substring(0, MINIMAP_MAX_SOURCE_LENGTH)
+      : source;
+  if (maxLines === undefined || maxLines === null || maxLines <= 0) {
+    return capped;
+  }
+  let lines = 1;
+  let index = capped.indexOf('\n');
+  while (index !== -1) {
+    if (lines >= maxLines) {
+      return capped.substring(0, index);
+    }
+    lines += 1;
+    index = capped.indexOf('\n', index + 1);
+  }
+  return capped;
+}
+
 /**
  * A virtual scrollbar item representing a notebook cell.
  */
-class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
+export class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
   /**
    * Construct a scrollbar item.
    */
-  constructor(options: { notebook: Notebook; model: ICellModel }) {
+  constructor(options: ScrollbarItem.IOptions) {
     // Note: there should be no DOM operations in the constructor
     this._model = options.model;
     this._notebook = options.notebook;
+    this._showSource = options.showSource ?? true;
+    this._maxLines = options.maxLines;
+    this._changed = options.changed;
   }
 
   /**
@@ -1582,6 +1619,7 @@ class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
       this._element = this._createElement();
       this._notebook.activeCellChanged.connect(this._updateActive);
       this._notebook.selectionChanged.connect(this._updateSelection);
+      this._changed?.connect(this._updateSource);
       if (this._model.type === 'code') {
         const model = this._model as ICodeCellModel;
         model.outputs.changed.connect(this._updatePrompt);
@@ -1592,12 +1630,7 @@ class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
     if (this._model.type != this._element.dataset.type) {
       this._element.dataset.type = this._model.type;
     }
-    const source = this._model.sharedModel.source;
-    const trimmedSource =
-      source.length > 10000 ? source.substring(0, 10000) : source;
-    if (trimmedSource !== this._source.textContent) {
-      this._source.textContent = trimmedSource;
-    }
+    this._updateSource();
 
     this._updateActive();
     this._updateSelection();
@@ -1632,12 +1665,58 @@ class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
     this._isDisposed = true;
     this._notebook.activeCellChanged.disconnect(this._updateActive);
     this._notebook.selectionChanged.disconnect(this._updateSelection);
+    this._changed?.disconnect(this._updateSource);
     if (this._model.type === 'code') {
       const model = this._model as ICodeCellModel;
       if (model.outputs) {
         model.outputs.changed.disconnect(this._updatePrompt);
         model.stateChanged.disconnect(this._updateState);
       }
+    }
+  };
+
+  private _updateSource = () => {
+    if (!this._element) {
+      return;
+    }
+    const showSource =
+      typeof this._showSource === 'function'
+        ? this._showSource()
+        : this._showSource;
+    const maxLines =
+      typeof this._maxLines === 'function' ? this._maxLines() : this._maxLines;
+    if (!showSource) {
+      this._source.classList.add('jp-mod-hidden');
+      this._source.style.removeProperty('--jp-notebook-minimap-max-lines');
+      this._source.style.removeProperty('--jp-notebook-minimap-max-height');
+      if (this._source.textContent !== '') {
+        this._source.textContent = '';
+      }
+      return;
+    }
+    this._source.classList.remove('jp-mod-hidden');
+    if (maxLines === undefined || maxLines === null) {
+      this._source.style.removeProperty('--jp-notebook-minimap-max-lines');
+      this._source.style.removeProperty('--jp-notebook-minimap-max-height');
+    } else if (maxLines <= 0) {
+      this._source.style.removeProperty('--jp-notebook-minimap-max-lines');
+      this._source.style.setProperty(
+        '--jp-notebook-minimap-max-height',
+        'none'
+      );
+    } else {
+      this._source.style.removeProperty('--jp-notebook-minimap-max-height');
+      this._source.style.setProperty(
+        '--jp-notebook-minimap-max-lines',
+        String(maxLines)
+      );
+    }
+    const trimmedSource = truncateMinimapSource(
+      this._model.sharedModel.source,
+      maxLines
+    );
+    if (trimmedSource !== this._source.textContent) {
+      this._source.textContent = trimmedSource;
     }
   };
 
@@ -1758,8 +1837,110 @@ class ScrollbarItem implements WindowedList.IRenderer.IScrollbarItem {
 
   private _model: ICellModel;
   private _notebook: Notebook;
+  private _showSource: boolean | (() => boolean);
+  private _maxLines:
+    | number
+    | null
+    | (() => number | null | undefined)
+    | undefined;
+  private _changed: ISignal<unknown, void> | undefined;
   private _isDisposed: boolean = false;
   private _element: HTMLElement | null = null;
+}
+
+/**
+ * The namespace for `ScrollbarItem` statics.
+ */
+export namespace ScrollbarItem {
+  /**
+   * Options for constructing a `ScrollbarItem`.
+   */
+  export interface IOptions {
+    /**
+     * The parent notebook widget.
+     */
+    notebook: Notebook;
+
+    /**
+     * The cell model represented by the scrollbar item.
+     */
+    model: ICellModel;
+
+    /**
+     * Whether to display the cell source code, or a callback returning it.
+     */
+    showSource?: boolean | (() => boolean);
+
+    /**
+     * Maximum number of source lines to display (`<= 0` or `null` for unlimited),
+     * or a callback returning it.
+     */
+    maxLines?: number | null | (() => number | null | undefined);
+
+    /**
+     * Optional signal emitted when configuration options change.
+     */
+    changed?: ISignal<unknown, void>;
+  }
+}
+
+/**
+ * Configurable default renderer for the notebook minimap.
+ */
+export class NotebookMinimapRenderer implements INotebookMinimapRenderer {
+  /**
+   * Whether cell source code snippets are displayed in minimap items.
+   */
+  get showSource(): boolean {
+    return this._showSource;
+  }
+  set showSource(value: boolean) {
+    if (this._showSource !== value) {
+      this._showSource = value;
+      this._changed.emit();
+    }
+  }
+
+  /**
+   * Maximum number of source lines displayed per minimap item (`<= 0` for unlimited).
+   */
+  get maxLines(): number | null {
+    return this._maxLines;
+  }
+  set maxLines(value: number | null) {
+    if (this._maxLines !== value) {
+      this._maxLines = value;
+      this._changed.emit();
+    }
+  }
+
+  /**
+   * Signal emitted when minimap configuration changes.
+   */
+  get changed(): ISignal<this, void> {
+    return this._changed;
+  }
+
+  /**
+   * Create a minimap item for a notebook cell.
+   */
+  createScrollbarItem(
+    notebook: Notebook,
+    _index: number,
+    model: ICellModel
+  ): WindowedList.IRenderer.IScrollbarItem {
+    return new ScrollbarItem({
+      notebook,
+      model,
+      showSource: () => this._showSource,
+      maxLines: () => this._maxLines,
+      changed: this._changed
+    });
+  }
+
+  private _showSource = true;
+  private _maxLines: number | null = 10;
+  private _changed = new Signal<this, void>(this);
 }
 
 /**
@@ -1771,6 +1952,7 @@ export class Notebook extends StaticNotebook {
    */
   constructor(options: Notebook.IOptions) {
     const trans = (options.translator || nullTranslator).load('jupyterlab');
+    const { minimapRenderer } = options;
     super({
       renderer: {
         createOuter(): HTMLElement {
@@ -1784,23 +1966,31 @@ export class Notebook extends StaticNotebook {
           return el;
         },
 
-        createScrollbar(): HTMLOListElement {
-          return document.createElement('ol');
+        createScrollbar(): HTMLElement {
+          return (
+            minimapRenderer?.createScrollbar?.() ?? document.createElement('ol')
+          );
         },
 
         createScrollbarViewportIndicator(): HTMLElement {
-          return document.createElement('div');
+          return (
+            minimapRenderer?.createScrollbarViewportIndicator?.() ??
+            document.createElement('div')
+          );
         },
 
         createScrollbarItem(
           notebook: Notebook,
-          _index: number,
+          index: number,
           model: ICellModel
-        ): WindowedList.IRenderer.IScrollbarItem {
-          return new ScrollbarItem({
-            notebook,
-            model
-          });
+        ): HTMLElement | WindowedList.IRenderer.IScrollbarItem {
+          return (
+            minimapRenderer?.createScrollbarItem?.(notebook, index, model) ??
+            new ScrollbarItem({
+              notebook,
+              model
+            })
+          );
         }
       },
       ...options
