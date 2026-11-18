@@ -157,7 +157,8 @@ describe('cells/searchprovider', () => {
         model,
         rendermime: defaultRenderMime(),
         contentFactory: NBTestUtils.createCodeCellFactory(),
-        maxNumberOutputs: 2
+        maxNumberOutputs: 2,
+        placeholder: false
       }).initializeState();
 
       model.outputs.add({

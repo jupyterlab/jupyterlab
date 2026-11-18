@@ -284,7 +284,18 @@ export class OutputArea extends Widget {
     }
     const lastShown = this._maxNumberOutputs;
     this._maxNumberOutputs = limit;
-    if (lastShown < limit) {
+    if (lastShown < limit && lastShown < this.model.length) {
+      this._showTrimmedOutputs(lastShown);
+    }
+  }
+
+  /**
+   * Show all trimmed outputs if any are currently hidden.
+   */
+  showTrimmedOutputs(): void {
+    if (this._maxNumberOutputs < this.model.length) {
+      const lastShown = this._maxNumberOutputs;
+      this._maxNumberOutputs = Infinity;
       this._showTrimmedOutputs(lastShown);
     }
   }
@@ -740,9 +751,16 @@ export class OutputArea extends Widget {
    */
   private _showTrimmedOutputs(lastShown: number) {
     // Dispose information widget
-    this.widgets[lastShown].dispose();
+    const trimmedWidget = this.widgets.find(widget =>
+      this._isTrimmedOutputsWidget(widget)
+    );
+    trimmedWidget?.dispose();
 
-    for (let idx = lastShown; idx < this.model.length; idx++) {
+    for (
+      let idx = lastShown;
+      idx < Math.min(this.model.length, this._maxNumberOutputs + 1);
+      idx++
+    ) {
       this._insertOutput(idx, this.model.get(idx));
     }
 
