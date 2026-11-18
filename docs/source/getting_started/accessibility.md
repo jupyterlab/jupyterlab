@@ -144,6 +144,8 @@ Jupyter accessibility contributors take the following measures to ensure accessi
 - Employ formal accessibility quality assurance methods.
 - Document changes, approaches, and improvements to the above methods and to JupyterLab itself.
 
+To list the settings related to accessibility, search for `tag:accessibility` in the Settings Editor (see {ref}`settings-editor-tags`).
+
 ### Feedback and Formal complaints
 
 We welcome your feedback and formal complaints on the accessibility status of JupyterLab.
