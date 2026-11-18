@@ -163,7 +163,7 @@ export class SettingEditorSearchProvider
    */
   protected get cmHandler(): CodeMirrorSearchHighlighter {
     const editor = this.editor;
-    if (this._activeCmHandlerEditor !== editor) {
+    if (!this._activeCmHandler || this._activeCmHandlerEditor !== editor) {
       if (this._activeCmHandler) {
         void this._activeCmHandler.endQuery();
       }
