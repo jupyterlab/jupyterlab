@@ -138,4 +138,55 @@ describe('cells/searchprovider', () => {
       provider.dispose();
     });
   });
+
+  describe('CodeCellSearchProvider', () => {
+    let cell: CodeCell;
+
+    afterEach(() => {
+      cell.dispose();
+    });
+
+    it('should search trimmed outputs when output search is active', async () => {
+      const model = new CodeCellModel({
+        sharedModel: createStandaloneCell({
+          cell_type: 'code',
+          source: 'code1 code2'
+        }) as YCodeCell
+      });
+      cell = new CodeCell({
+        model,
+        rendermime: defaultRenderMime(),
+        contentFactory: NBTestUtils.createCodeCellFactory(),
+        maxNumberOutputs: 2
+      }).initializeState();
+
+      model.outputs.add({
+        output_type: 'display_data',
+        data: { 'text/plain': 'output 0' }
+      });
+      model.outputs.add({
+        output_type: 'display_data',
+        data: { 'text/plain': 'output 1' }
+      });
+      model.outputs.add({
+        output_type: 'display_data',
+        data: { 'text/plain': 'output 2' }
+      });
+      model.outputs.add({
+        output_type: 'display_data',
+        data: { 'text/plain': 'output 3' }
+      });
+
+      expect(cell.outputArea.widgets.length).toBe(3);
+
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/output [23]/, { output: true });
+
+      expect(provider.matchesCount).toBe(2);
+      const match = await provider.highlightNext();
+      expect(match).toBeDefined();
+      expect(cell.outputArea.widgets.length).toBe(4);
+      provider.dispose();
+    });
+  });
 });

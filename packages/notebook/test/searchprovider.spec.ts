@@ -596,6 +596,37 @@ describe('@jupyterlab/notebook', () => {
         await provider.endQuery();
       });
 
+      it('should search trimmed outputs when output search is active', async () => {
+        const codeCell = panel.model!.cells.get(1) as CodeCellModel;
+        codeCell.sharedModel.setSource('x = 1');
+        const cellWidget = panel.content.widgets[1] as CodeCell;
+        cellWidget.outputArea.maxNumberOutputs = 2;
+        codeCell.outputs.add({
+          output_type: 'display_data',
+          data: { 'text/plain': 'output 0' }
+        });
+        codeCell.outputs.add({
+          output_type: 'display_data',
+          data: { 'text/plain': 'output 1' }
+        });
+        codeCell.outputs.add({
+          output_type: 'display_data',
+          data: { 'text/plain': 'output 2' }
+        });
+        codeCell.outputs.add({
+          output_type: 'display_data',
+          data: { 'text/plain': 'output 3' }
+        });
+        expect(cellWidget.outputArea.widgets.length).toBe(3);
+
+        await provider.startQuery(/output [23]/, { output: true });
+        expect(provider.matchesCount).toBe(2);
+        const match = await provider.highlightNext();
+        expect(match).toBeDefined();
+        expect(cellWidget.outputArea.widgets.length).toBe(4);
+        await provider.endQuery();
+      });
+
       it('should handle no matches gracefully', async () => {
         const codeCell = panel.model!.cells.get(1) as CodeCellModel;
         codeCell.sharedModel.setSource('code1 code2');
