@@ -89,7 +89,9 @@
   position: sticky;
   bottom: 0;
   top: 0;
-  margin-top: -50%;
+
+  /* A negative margin smaller than the overlay height adds empty space below the outputs */
+  margin-top: min(-50%, calc(-1 * var(--jp-cell-scrolled-output-max-height)));
   float: left;
   display: block;
   pointer-events: none;
