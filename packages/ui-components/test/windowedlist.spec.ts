@@ -243,7 +243,7 @@ describe('@jupyterlab/ui-components', () => {
         ]);
         expect(getOffset(2)).toBe(30);
       });
-      it('should ignore entries with zero or non-positive sizes', () => {
+      it('should update the size of an item to zero', () => {
         const model = new TestModel({
           itemsList: new ObservableList({
             values: [1, 2]
@@ -257,7 +257,7 @@ describe('@jupyterlab/ui-components', () => {
             size: 0
           }
         ]);
-        expect(model.getEstimatedTotalSize()).toBe(2 * FIXED_ESTIMATED_SIZE);
+        expect(model.getEstimatedTotalSize()).toBe(FIXED_ESTIMATED_SIZE);
       });
     });
     describe('#getSpan()', () => {
@@ -291,6 +291,38 @@ describe('@jupyterlab/ui-components', () => {
         // Widget 0 has measured height 80, widget 1 has estimated height FIXED_ESTIMATED_SIZE (100)
         expect(height).toBe(80 + FIXED_ESTIMATED_SIZE);
         expect(model.getEstimatedTotalSize()).toBe(80 + FIXED_ESTIMATED_SIZE);
+
+        Widget.detach(widget0);
+        Widget.detach(widget1);
+      });
+
+      it('should measure a hidden connected widget as empty', () => {
+        const widget0 = new Widget();
+        const widget1 = new Widget();
+        Widget.attach(widget0, document.body);
+        Widget.attach(widget1, document.body);
+        widget1.hide();
+
+        jest
+          .spyOn(widget0.node, 'getBoundingClientRect')
+          .mockReturnValue({ height: 80 } as DOMRect);
+        jest
+          .spyOn(widget1.node, 'getBoundingClientRect')
+          .mockReturnValue({ height: 0 } as DOMRect);
+
+        class SpanTestModel extends WindowedListModel {
+          estimateWidgetSize = (_index: number): number => FIXED_ESTIMATED_SIZE;
+          widgetRenderer = (index: number): Widget =>
+            index === 0 ? widget0 : widget1;
+        }
+
+        const model = new SpanTestModel({
+          itemsList: new ObservableList({ values: ['a', 'b'] })
+        });
+        model.windowingActive = true;
+
+        const [, height] = model.getSpan(0, 1);
+        expect(height).toBe(80);
 
         Widget.detach(widget0);
         Widget.detach(widget1);
