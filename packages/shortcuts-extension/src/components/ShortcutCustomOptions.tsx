@@ -139,8 +139,7 @@ export function appendCustomOptionFields(
   const argsField = document.createElement('div');
   argsField.className = 'jp-Shortcuts-Field';
 
-  // Not a <label>: the JSON editor is not a labelable form control; use
-  // aria-labelledby on the editor host instead.
+  // Not a <label>: CodeMirror's .cm-content is not a labelable form control.
   const argsLabelId = `${idPrefix}-args-label`;
   const argsLabel = document.createElement('div');
   argsLabel.id = argsLabelId;
@@ -249,9 +248,6 @@ class JSONEditorWidget extends Widget {
     this._trans = trans;
     this._editorHostNode = document.createElement('div');
     this._editorHostNode.className = 'jp-JSONEditor-host';
-    if (labelledBy) {
-      this._editorHostNode.setAttribute('aria-labelledby', labelledBy);
-    }
 
     const model = new CodeEditor.Model({ mimeType: 'application/json' });
     const content = JSON.stringify(initialArgs, null, 2);
@@ -264,6 +260,13 @@ class JSONEditorWidget extends Widget {
         readOnly: false
       }
     });
+
+    // Name the contenteditable .cm-content; labelling the host is not enough.
+    if (labelledBy) {
+      this._editorHostNode
+        .querySelector('.cm-content')
+        ?.setAttribute('aria-labelledby', labelledBy);
+    }
 
     this._errorNode = document.createElement('div');
     this._errorNode.className = 'jp-Shortcuts-Field-error';
