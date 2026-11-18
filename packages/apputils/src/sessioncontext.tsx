@@ -1993,7 +1993,7 @@ namespace Private {
       label: string,
       caption: string,
       checked: boolean
-    ): void => {
+    ): HTMLInputElement => {
       const checkboxLabel = document.createElement('label');
       checkboxLabel.className = 'jp-Dialog-checkbox';
       checkboxLabel.style.alignSelf = 'flex-start';
@@ -2005,6 +2005,7 @@ namespace Private {
       input.dataset.role = role;
       checkboxLabel.insertAdjacentElement('afterbegin', input);
       body.appendChild(checkboxLabel);
+      return input;
     };
 
     if (typeof preference.autoStartDefault === 'boolean') {
@@ -2017,12 +2018,22 @@ namespace Private {
     }
 
     if (typeof preference.locked === 'boolean') {
-      addCheckbox(
+      const lockInput = addCheckbox(
         'kernelLock',
         trans.__('Lock kernel choice'),
         trans.__('Prevent changing the kernel for this notebook'),
         preference.locked
       );
+      // Do not let user lock the kernel choice for "No Kernel".
+      const updateLock = () => {
+        const noKernel = select.value === 'null';
+        lockInput.disabled = noKernel;
+        if (noKernel) {
+          lockInput.checked = preference.locked === true;
+        }
+      };
+      select.addEventListener('change', updateLock);
+      updateLock();
     }
 
     return body;
