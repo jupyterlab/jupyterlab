@@ -334,5 +334,124 @@ describe('@jupyterlab/settingeditor', () => {
         jest.useRealTimers();
       }
     });
+
+    it('should reorder array items after pressing Enter', async () => {
+      jest.useFakeTimers();
+
+      const id = 'alpha';
+      const testConnector = new RecordingConnector();
+      const testRegistry = new SettingRegistry({ connector: testConnector });
+      let component: renderer.ReactTestRenderer | null = null;
+      let input: HTMLInputElement | null = null;
+
+      try {
+        testConnector.schemas[id] = {
+          type: 'object',
+          'jupyter.lab.transform': true,
+          properties: {
+            toolbar: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  rank: { type: 'number' }
+                }
+              },
+              default: [
+                { name: 'itemA', rank: 10 },
+                { name: 'itemB', rank: 20 }
+              ]
+            }
+          }
+        };
+
+        testRegistry.transform(id, {
+          compose: plugin => {
+            const composite = { ...plugin.data.composite };
+            const user = (plugin.data.user.toolbar as any[]) ?? [];
+            const items =
+              user.length > 0 ? user : ((composite.toolbar as any[]) ?? []);
+            composite.toolbar = [...items].sort(
+              (a, b) => (a.rank ?? 50) - (b.rank ?? 50)
+            );
+            plugin.data = { composite, user: plugin.data.user };
+            return plugin;
+          }
+        });
+
+        settings = (await testRegistry.load(id)) as Settings;
+
+        component = renderer.create(
+          <SettingsFormEditor
+            filteredValues={{ kind: 'all' }}
+            hasError={() => void 0}
+            onSelect={() => void 0}
+            renderers={{}}
+            settings={settings}
+            translator={nullTranslator}
+            updateDirtyState={() => void 0}
+          />
+        );
+
+        let form = component.root.findByType(FormComponent);
+
+        // Attach an input element with the form's id prefix to document
+        input = document.createElement('input');
+        input.id = `jp-SettingsEditor-${id}_toolbar_1_rank`;
+        document.body.appendChild(input);
+        input.focus();
+
+        // Focus the rank input of itemB
+        await act(async () => {
+          form.props.onFocus?.(`jp-SettingsEditor-${id}_toolbar_1_rank`, 20);
+        });
+
+        // Change rank of itemB from 20 to 5
+        await act(async () => {
+          form.props.onChange(
+            createChangeEvent({
+              toolbar: [
+                { name: 'itemA', rank: 10 },
+                { name: 'itemB', rank: 5 }
+              ]
+            })
+          );
+        });
+
+        // Advance timers by 500ms so debouncer triggers save
+        await act(async () => {
+          jest.advanceTimersByTime(500);
+          await flushPromises();
+        });
+
+        // While still focused, toolbar items must NOT have reordered
+        form = component.root.findByType(FormComponent);
+        expect((form.props.formData.toolbar as any[])[0].name).toBe('itemA');
+        expect((form.props.formData.toolbar as any[])[1].name).toBe('itemB');
+
+        // Press Enter key while input is active
+        await act(async () => {
+          document.dispatchEvent(
+            new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })
+          );
+          form.props.onBlur?.(`jp-SettingsEditor-${id}_toolbar_1_rank`, 5);
+          jest.advanceTimersByTime(0);
+          await flushPromises();
+        });
+
+        // After Enter/blur, toolbar items should now be reordered according to rank
+        form = component.root.findByType(FormComponent);
+        expect((form.props.formData.toolbar as any[])[0].name).toBe('itemB');
+        expect((form.props.formData.toolbar as any[])[1].name).toBe('itemA');
+      } finally {
+        if (input?.parentNode) {
+          input.parentNode.removeChild(input);
+        }
+        component?.unmount();
+        await testConnector.clear();
+        jest.useRealTimers();
+      }
+    });
   });
 });
