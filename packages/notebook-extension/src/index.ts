@@ -2310,6 +2310,7 @@ function activateNotebookHandler(
       settings.changed.connect(() => {
         updateConfig(settings);
         commands.notifyCommandChanged(CommandIDs.virtualScrollbar);
+        commands.notifyCommandChanged(CommandIDs.toggleCellNavigationRail);
         commands.notifyCommandChanged(CommandIDs.makeCellEditable);
       });
 
@@ -2519,7 +2520,7 @@ function activateNotebookHandler(
     widget.title.iconLabel = ft?.iconLabel ?? '';
     widget.content.scrollbar = factory.notebookConfig.showMinimap ?? false;
     widget.content.navigationRail =
-      factory.notebookConfig.showCellNavigationRail ?? true;
+      factory.notebookConfig.showCellNavigationRail ?? false;
 
     // Notify the widget tracker if restore data needs to update. The context
     // outlives this panel when other views of the document stay open, so the
@@ -2567,7 +2568,7 @@ function activateNotebookHandler(
       widget.setConfig(options);
       widget.content.scrollbar = options.notebookConfig.showMinimap ?? false;
       widget.content.navigationRail =
-        options.notebookConfig.showCellNavigationRail ?? true;
+        options.notebookConfig.showCellNavigationRail ?? false;
     });
   }
 
@@ -5691,25 +5692,33 @@ function addCommands(
 
   commands.addCommand(CommandIDs.toggleCellNavigationRail, {
     label: trans.__('Show Cell Navigation Rail'),
-    caption: trans.__(
-      'Show or hide the cell prompt and error navigation rail'
-    ),
-    execute: args => {
+    caption: trans.__('Show or hide the cell prompt and error navigation rail'),
+    execute: async args => {
       const current = getCurrent(tracker, shell, args);
+      if (!current) {
+        return;
+      }
 
-      if (current) {
-        current.content.showCellNavigationRail =
-          !current.content.showCellNavigationRail;
+      const currentValue = settings
+        ? (settings.get('showCellNavigationRail').composite as boolean)
+        : current.content.showCellNavigationRail;
+      const nextValue = !currentValue;
+
+      if (settings) {
+        await settings.set('showCellNavigationRail', nextValue);
+      } else {
+        tracker.forEach(widget => {
+          widget.content.showCellNavigationRail = nextValue;
+        });
         commands.notifyCommandChanged(CommandIDs.toggleCellNavigationRail);
       }
     },
-    isEnabled: () => {
-      const current = tracker.currentWidget;
-      return !!current;
-    },
+    isEnabled,
     isToggled: args => {
       const current = getCurrent(tracker, shell, { ...args, activate: false });
-      return current?.content.showCellNavigationRail ?? false;
+      return settings
+        ? (settings.get('showCellNavigationRail').composite as boolean)
+        : (current?.content.showCellNavigationRail ?? false);
     },
     describedBy: {
       args: {
@@ -5940,11 +5949,6 @@ function populateMenus(mainMenu: IMainMenu, isEnabled: () => boolean): void {
   mainMenu.viewMenu.editorViewers.toggleMinimap.add({
     id: CommandIDs.virtualScrollbar,
     isEnabled: () => true
-  });
-
-  mainMenu.viewMenu.addItem({
-    command: CommandIDs.toggleCellNavigationRail,
-    rank: 10.6
   });
 
   mainMenu.viewMenu.editorViewers.toggleToolbar.add({

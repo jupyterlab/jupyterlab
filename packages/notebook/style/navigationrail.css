@@ -7,12 +7,16 @@
 | Notebook Navigation Rail (Prompt and Error Indicators)
 |----------------------------------------------------------------------------*/
 
+.jp-Notebook.jp-mod-navigationRail .jp-WindowedPanel-viewport {
+  padding-left: calc(var(--jp-notebook-padding) + 18px);
+}
+
 .jp-Notebook-navigationRail {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 6px;
-  width: 24px;
+  left: 4px;
+  width: 18px;
   z-index: 10;
   display: flex;
   align-items: center;
@@ -22,62 +26,74 @@
 }
 
 .jp-Notebook-navigationRail-track {
+  position: relative;
   pointer-events: auto;
+  width: 100%;
+  max-height: calc(100% - 32px);
+  box-sizing: border-box;
+  overflow: visible;
+  background: transparent;
+  border: 0;
+}
+
+/* One short horizontal line marker for each notebook cell. */
+.jp-Notebook-navigationRail-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  transform: translateY(-50%);
+  width: 18px;
+  height: var(--jp-nav-rail-hit-height, 10px);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 7px;
-  padding: 10px 4px;
-  max-height: 80%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: none;
-  background: var(--jp-layout-color1);
-  border-radius: 9999px;
-  border: 1px solid var(--jp-border-color1);
-  box-shadow: var(--jp-elevation-z4);
-  transition: opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.jp-Notebook-navigationRail-track::-webkit-scrollbar {
-  display: none;
-}
-
-/* Individual Cell Dot - Inactive */
-.jp-Notebook-navigationRail-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background-color: var(--jp-border-color1);
+  justify-content: center;
+  background: transparent;
   border: none;
   padding: 0;
-  margin: 0;
   cursor: pointer;
   outline: none;
-  flex-shrink: 0;
+}
+
+.jp-Notebook-navigationRail-line::after {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 2px;
+  border-radius: 1px;
+  background-color: var(--jp-border-color1);
   opacity: 0.8;
-  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+  transition:
+    width 0.15s ease,
+    height 0.15s ease,
     opacity 0.15s ease,
     background-color 0.15s ease,
     box-shadow 0.15s ease;
 }
 
-.jp-Notebook-navigationRail-dot:hover {
+.jp-Notebook-navigationRail-line:hover {
+  z-index: 1;
+}
+
+.jp-Notebook-navigationRail-line:hover::after {
   opacity: 1;
-  transform: scale(1.45);
+  width: 14px;
+  height: 2.5px;
   background-color: var(--jp-ui-font-color1);
 }
 
-/* Active Cell Dot */
-.jp-Notebook-navigationRail-dot.jp-mod-active {
+/* Active cell line */
+.jp-Notebook-navigationRail-line.jp-mod-active::after {
   opacity: 1;
+  width: 16px;
+  height: 2.5px;
   background-color: var(--jp-brand-color1);
-  transform: scale(1.35);
-  box-shadow: 0 0 0 2px var(--jp-brand-color3);
+  box-shadow: 0 0 0 1.5px var(--jp-brand-color3);
 }
 
-/* Running Cell Dot */
-.jp-Notebook-navigationRail-dot.jp-mod-running {
+/* Running cell line */
+.jp-Notebook-navigationRail-line.jp-mod-running::after {
+  width: 14px;
   background-color: var(--jp-warn-color1);
   opacity: 0.95;
   animation: jp-navigationRail-pulse 1.2s infinite ease-in-out alternate;
@@ -85,32 +101,41 @@
 
 @keyframes jp-navigationRail-pulse {
   0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 var(--jp-warn-color3, rgba(245, 158, 11, 0.5));
+    transform: scaleX(1);
+    box-shadow: 0 0 0 0 var(--jp-warn-color3);
   }
+
   100% {
-    transform: scale(1.35);
-    box-shadow: 0 0 0 4px var(--jp-warn-color4, rgba(245, 158, 11, 0));
+    transform: scaleX(1.2);
+    box-shadow: 0 0 0 3px var(--jp-warn-color3);
   }
 }
 
-/* Error Cell Dot */
-.jp-Notebook-navigationRail-dot.jp-mod-error {
+/* Error cell line */
+.jp-Notebook-navigationRail-line.jp-mod-error::after {
   opacity: 1;
+  width: 14px;
+  height: 2.5px;
   background-color: var(--jp-error-color1);
-  box-shadow: 0 0 0 2px var(--jp-error-color3);
+  box-shadow: 0 0 0 1.5px var(--jp-error-color3);
 }
 
-.jp-Notebook-navigationRail-dot.jp-mod-error:hover {
-  transform: scale(1.6);
-  box-shadow: 0 0 0 3px var(--jp-error-color2);
+.jp-Notebook-navigationRail-line.jp-mod-error:hover::after {
+  width: 16px;
+  background-color: var(--jp-error-color1);
+  box-shadow: 0 0 0 2px var(--jp-error-color2);
 }
 
-.jp-Notebook-navigationRail-dot.jp-mod-error.jp-mod-active {
-  box-shadow: 0 0 0 2px var(--jp-brand-color1), 0 0 0 4px var(--jp-error-color3);
+.jp-Notebook-navigationRail-line.jp-mod-error.jp-mod-active::after {
+  width: 16px;
+  height: 3px;
+  background-color: var(--jp-error-color1);
+  box-shadow:
+    0 0 0 1.5px var(--jp-brand-color1),
+    0 0 0 3px var(--jp-error-color3);
 }
 
-/* Tooltip - Minimalist, no unnecessary symbols */
+/* Tooltip - Minimalist, native theme tokens */
 .jp-Notebook-navigationRail-tooltip {
   position: fixed;
   z-index: 10000;
@@ -133,6 +158,7 @@
     opacity: 0;
     transform: translateX(-4px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -140,7 +166,7 @@
 }
 
 .jp-Notebook-navigationRail-tooltip-title {
-  font-size: 12px;
+  font-size: var(--jp-ui-font-size1);
   font-weight: 600;
   color: var(--jp-ui-font-color0);
   margin-bottom: 4px;
@@ -154,7 +180,7 @@
 }
 
 .jp-Notebook-navigationRail-tooltip-message {
-  font-size: 11px;
+  font-size: var(--jp-ui-font-size0);
   color: var(--jp-ui-font-color1);
   margin-bottom: 6px;
   word-break: break-word;
@@ -162,14 +188,14 @@
 }
 
 .jp-Notebook-navigationRail-tooltip-code {
-  margin: 0 0 6px 0;
+  margin: 0 0 6px;
   padding: 6px 8px;
   border-radius: 4px;
   background: var(--jp-layout-color2);
   border: 1px solid var(--jp-border-color2);
   color: var(--jp-ui-font-color1);
   font-family: var(--jp-code-font-family);
-  font-size: 11px;
+  font-size: var(--jp-code-font-size);
   line-height: 1.35;
   white-space: pre;
   overflow: hidden;
@@ -178,7 +204,7 @@
 }
 
 .jp-Notebook-navigationRail-tooltip-footer {
-  font-size: 10px;
+  font-size: var(--jp-ui-font-size0);
   color: var(--jp-ui-font-color2);
   font-weight: 500;
 }

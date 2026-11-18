@@ -2,12 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { ICodeCellModel } from '@jupyterlab/cells';
-import {
-  Notebook,
-  NotebookModel,
-  NotebookNavigationRail,
-  StaticNotebook
-} from '@jupyterlab/notebook';
+import type { NotebookNavigationRail } from '@jupyterlab/notebook';
+import { Notebook, NotebookModel, StaticNotebook } from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 const notebookConfig: StaticNotebook.INotebookConfig = {
@@ -77,27 +73,59 @@ describe('@jupyterlab/notebook', () => {
       );
     });
 
-    it('should render a dot for each cell in the notebook', () => {
-      const dots = rail.node.querySelectorAll(
-        '.jp-Notebook-navigationRail-dot'
+    it('should render a line for each cell in the notebook', () => {
+      const lines = rail.node.querySelectorAll(
+        '.jp-Notebook-navigationRail-line'
       );
-      expect(dots.length).toBe(4);
+      expect(lines.length).toBe(4);
     });
 
-    it('should update active dot when active cell changes', () => {
-      notebook.activeCellIndex = 1;
-      const dots = rail.node.querySelectorAll(
-        '.jp-Notebook-navigationRail-dot'
+    it('should render a compact, evenly spaced line for every cell', () => {
+      notebook.notebookConfig = {
+        ...notebook.notebookConfig,
+        windowingMode: 'contentVisibility'
+      };
+      const model = new NotebookModel();
+      model.fromJSON({
+        ...utils.DEFAULT_CONTENT,
+        cells: Array.from({ length: 8 }, (_, index) =>
+          createCodeCell(
+            index === 2
+              ? Array.from({ length: 12 }, () => 'long cell').join('\n')
+              : `cell ${index + 1}`
+          )
+        )
+      });
+      notebook.model = model;
+
+      const lines = rail.node.querySelectorAll(
+        '.jp-Notebook-navigationRail-line'
       );
-      expect(dots[1].classList.contains('jp-mod-active')).toBe(true);
-      expect(dots[0].classList.contains('jp-mod-active')).toBe(false);
+      expect(lines).toHaveLength(8);
+      expect(lines[0].getAttribute('aria-label')).toBe('Cell 1 of 8');
+      expect(lines[7].getAttribute('aria-label')).toBe('Cell 8 of 8');
+      const positions = Array.from(lines, line =>
+        Number.parseFloat((line as HTMLElement).style.top)
+      );
+      expect(positions[2] - positions[1]).toBeCloseTo(
+        positions[1] - positions[0]
+      );
+    });
+
+    it('should update the active line when the active cell changes', () => {
+      notebook.activeCellIndex = 1;
+      const lines = rail.node.querySelectorAll(
+        '.jp-Notebook-navigationRail-line'
+      );
+      expect(lines[1].classList.contains('jp-mod-active')).toBe(true);
+      expect(lines[0].classList.contains('jp-mod-active')).toBe(false);
 
       notebook.activeCellIndex = 2;
-      expect(dots[2].classList.contains('jp-mod-active')).toBe(true);
-      expect(dots[1].classList.contains('jp-mod-active')).toBe(false);
+      expect(lines[2].classList.contains('jp-mod-active')).toBe(true);
+      expect(lines[1].classList.contains('jp-mod-active')).toBe(false);
     });
 
-    it('should display a red dot when a cell has an error output', () => {
+    it('should mark a line when a cell has an error output', () => {
       const codeModel = notebook.model!.cells.get(0) as ICodeCellModel;
       codeModel.outputs.fromJSON([
         {
@@ -108,11 +136,13 @@ describe('@jupyterlab/notebook', () => {
         }
       ]);
 
-      const dots = rail.node.querySelectorAll(
-        '.jp-Notebook-navigationRail-dot'
+      const lines = rail.node.querySelectorAll(
+        '.jp-Notebook-navigationRail-line'
       );
-      expect(dots[0].classList.contains('jp-mod-error')).toBe(true);
-      expect(dots[0].getAttribute('aria-label')).toContain('ZeroDivisionError');
+      expect(lines[0].classList.contains('jp-mod-error')).toBe(true);
+      expect(lines[0].getAttribute('aria-label')).toContain(
+        'ZeroDivisionError'
+      );
     });
 
     it('should clear error state when cell outputs are cleared', () => {
@@ -126,53 +156,83 @@ describe('@jupyterlab/notebook', () => {
         }
       ]);
 
-      const dots = rail.node.querySelectorAll(
-        '.jp-Notebook-navigationRail-dot'
+      const lines = rail.node.querySelectorAll(
+        '.jp-Notebook-navigationRail-line'
       );
-      expect(dots[0].classList.contains('jp-mod-error')).toBe(true);
+      expect(lines[0].classList.contains('jp-mod-error')).toBe(true);
 
       codeModel.outputs.clear();
-      expect(dots[0].classList.contains('jp-mod-error')).toBe(false);
+      expect(lines[0].classList.contains('jp-mod-error')).toBe(false);
     });
 
-    it('should change active cell on dot click', () => {
-      const dots = rail.node.querySelectorAll(
-        '.jp-Notebook-navigationRail-dot'
+    it('should change the active cell when a line is clicked', () => {
+      const lines = rail.node.querySelectorAll(
+        '.jp-Notebook-navigationRail-line'
       ) as NodeListOf<HTMLElement>;
-      expect(dots.length).toBe(4);
+      expect(lines.length).toBe(4);
 
-      dots[3].click();
+      lines[3].click();
       expect(notebook.activeCellIndex).toBe(3);
     });
 
-    it('should dynamically update dots when cells are added or removed', () => {
+    it('should update lines when cells are added or removed', () => {
       notebook.model!.sharedModel.insertCell(4, {
         cell_type: 'code',
         metadata: {}
       });
 
-      let dots = rail.node.querySelectorAll('.jp-Notebook-navigationRail-dot');
-      expect(dots.length).toBe(5);
+      let lines = rail.node.querySelectorAll(
+        '.jp-Notebook-navigationRail-line'
+      );
+      expect(lines.length).toBe(5);
 
       notebook.model!.sharedModel.deleteCell(0);
-      dots = rail.node.querySelectorAll('.jp-Notebook-navigationRail-dot');
-      expect(dots.length).toBe(4);
+      lines = rail.node.querySelectorAll('.jp-Notebook-navigationRail-line');
+      expect(lines.length).toBe(4);
     });
 
     it('should toggle visibility when notebookConfig.showCellNavigationRail changes', () => {
       expect(notebook.navigationRail).toBe(false);
+      expect(notebook.node.classList.contains('jp-mod-navigationRail')).toBe(
+        false
+      );
 
       notebook.notebookConfig = {
         ...notebook.notebookConfig,
         showCellNavigationRail: true
       };
       expect(notebook.navigationRail).toBe(true);
+      expect(notebook.node.classList.contains('jp-mod-navigationRail')).toBe(
+        true
+      );
 
       notebook.notebookConfig = {
         ...notebook.notebookConfig,
         showCellNavigationRail: false
       };
       expect(notebook.navigationRail).toBe(false);
+      expect(notebook.node.classList.contains('jp-mod-navigationRail')).toBe(
+        false
+      );
+    });
+
+    it('should render a clean tooltip on hover and hide it when the rail is hidden', () => {
+      notebook.showCellNavigationRail = true;
+      const lines = rail.node.querySelectorAll(
+        '.jp-Notebook-navigationRail-line'
+      ) as NodeListOf<HTMLElement>;
+
+      lines[0].dispatchEvent(new MouseEvent('mouseenter'));
+      const tooltip = document.body.querySelector(
+        '.jp-Notebook-navigationRail-tooltip'
+      ) as HTMLElement | null;
+      expect(tooltip).not.toBeNull();
+      expect(tooltip!.style.display).toBe('block');
+      expect(tooltip!.textContent).toContain('a = 1');
+      expect(tooltip!.textContent).toContain('Cell 1 of 4');
+
+      notebook.showCellNavigationRail = false;
+      expect(tooltip!.style.display).toBe('none');
     });
   });
 });

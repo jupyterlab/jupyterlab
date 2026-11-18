@@ -4,7 +4,6 @@
 import type { ICellModel, ICodeCellModel } from '@jupyterlab/cells';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import type * as nbformat from '@jupyterlab/nbformat';
-import type { IObservableList } from '@jupyterlab/observables';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import type { Message } from '@lumino/messaging';
@@ -14,11 +13,15 @@ import type { Notebook } from './widget';
 
 const NAVIGATION_RAIL_CLASS = 'jp-Notebook-navigationRail';
 const TRACK_CLASS = 'jp-Notebook-navigationRail-track';
-const DOT_CLASS = 'jp-Notebook-navigationRail-dot';
+const LINE_CLASS = 'jp-Notebook-navigationRail-line';
 const TOOLTIP_CLASS = 'jp-Notebook-navigationRail-tooltip';
-const ACTIVE_DOT_CLASS = 'jp-mod-active';
-const ERROR_DOT_CLASS = 'jp-mod-error';
-const RUNNING_DOT_CLASS = 'jp-mod-running';
+const ACTIVE_LINE_CLASS = 'jp-mod-active';
+const ERROR_LINE_CLASS = 'jp-mod-error';
+const RUNNING_LINE_CLASS = 'jp-mod-running';
+const LINE_SPACING = 16;
+const MAX_TRACK_HEIGHT = 360;
+const MIN_HIT_HEIGHT = 4;
+const MAX_HIT_HEIGHT = 10;
 
 export interface ICellErrorInfo {
   hasError: boolean;
@@ -28,8 +31,7 @@ export interface ICellErrorInfo {
 }
 
 /**
- * A navigation rail widget providing a vertical strip of dots for prompt navigation
- * and error indicators with hover tooltips.
+ * A vertical cell navigation rail with active, running, and error indicators.
  */
 export class NotebookNavigationRail extends Widget {
   /**
@@ -48,11 +50,12 @@ export class NotebookNavigationRail extends Widget {
 
     this._tooltip = document.createElement('div');
     this._tooltip.className = TOOLTIP_CLASS;
+    this._tooltip.setAttribute('role', 'tooltip');
     this._tooltip.style.display = 'none';
     document.body.appendChild(this._tooltip);
 
     this._setupNotebookListeners();
-    this.updateDots();
+    this._updateLines();
   }
 
   /**
@@ -68,10 +71,9 @@ export class NotebookNavigationRail extends Widget {
   private _trans: TranslationBundle;
   private _track: HTMLElement;
   private _tooltip: HTMLElement;
-  private _dots: Map<string, HTMLElement> = new Map();
   private _cellListeners: Map<string, () => void> = new Map();
-  private _hoverTimeout: number | null = null;
   private _hoveredCellId: string | null = null;
+  private _connectedModel: Notebook['model'] = null;
 
   /**
    * Dispose of the resources used by the widget.
@@ -81,11 +83,6 @@ export class NotebookNavigationRail extends Widget {
       return;
     }
 
-    if (this._hoverTimeout !== null) {
-      window.clearTimeout(this._hoverTimeout);
-      this._hoverTimeout = null;
-    }
-
     this._clearCellListeners();
     this._disconnectNotebookListeners();
 
@@ -93,7 +90,6 @@ export class NotebookNavigationRail extends Widget {
       this._tooltip.parentNode.removeChild(this._tooltip);
     }
 
-    this._dots.clear();
     super.dispose();
   }
 
@@ -104,10 +100,15 @@ export class NotebookNavigationRail extends Widget {
     this.notebook.activeCellChanged.connect(this._onActiveCellChanged, this);
     this.notebook.modelChanged.connect(this._onModelChanged, this);
 
-    const model = this.notebook.model;
-    if (model) {
-      model.cells.changed.connect(this._onCellsChanged, this);
-    }
+    this._connectModelCells();
+  }
+
+  /**
+   * Connect to the current notebook model's cell list.
+   */
+  private _connectModelCells(): void {
+    this._connectedModel = this.notebook.model;
+    this._connectedModel?.cells.changed.connect(this._onCellsChanged, this);
   }
 
   /**
@@ -116,43 +117,35 @@ export class NotebookNavigationRail extends Widget {
   private _disconnectNotebookListeners(): void {
     this.notebook.activeCellChanged.disconnect(this._onActiveCellChanged, this);
     this.notebook.modelChanged.disconnect(this._onModelChanged, this);
-
-    const model = this.notebook.model;
-    if (model) {
-      model.cells.changed.disconnect(this._onCellsChanged, this);
-    }
+    this._connectedModel?.cells.changed.disconnect(this._onCellsChanged, this);
+    this._connectedModel = null;
   }
 
   /**
    * Handle when the notebook model changes.
    */
   private _onModelChanged(): void {
+    this._connectedModel?.cells.changed.disconnect(this._onCellsChanged, this);
+    this._connectedModel = null;
     this._clearCellListeners();
-    const model = this.notebook.model;
-    if (model) {
-      model.cells.changed.connect(this._onCellsChanged, this);
-    }
-    this.updateDots();
+    this._connectModelCells();
+    this._updateLines();
   }
 
   /**
    * Handle changes in the list of cells (addition, removal, movement).
    */
-  private _onCellsChanged(
-    sender: IObservableList<ICellModel>,
-    args: IObservableList.IChangedArgs<ICellModel>
-  ): void {
-    this.updateDots();
+  private _onCellsChanged(): void {
+    this._updateLines();
   }
 
   /**
    * Handle changes to the active cell.
    */
   private _onActiveCellChanged(): void {
-    const activeModel = this.notebook.activeCell?.model;
-    this._dots.forEach((dot, cellId) => {
-      const isActive = activeModel && activeModel.id === cellId;
-      dot.classList.toggle(ACTIVE_DOT_CLASS, !!isActive);
+    const activeIndex = this.notebook.activeCellIndex;
+    Array.from(this._track.children).forEach((line, index) => {
+      line.classList.toggle(ACTIVE_LINE_CLASS, index === activeIndex);
     });
   }
 
@@ -165,83 +158,125 @@ export class NotebookNavigationRail extends Widget {
   }
 
   /**
-   * Re-render all navigation dots based on current notebook cells.
+   * Re-render one line marker for each cell in the notebook model.
    */
-  updateDots(): void {
+  private _updateLines(): void {
     this._clearCellListeners();
     this._track.innerHTML = '';
-    this._dots.clear();
 
-    const model = this.notebook.model;
-    if (!model) {
+    if (!this.notebook.model) {
+      this._track.style.height = '0';
+      this._hideTooltip();
       return;
     }
 
-    const cells = model.cells;
-    const activeModel = this.notebook.activeCell?.model;
+    const cells = Array.from(this.notebook.model.cells);
+    const activeIndex = this.notebook.activeCellIndex;
+    const total = cells.length;
+    const trackHeight = Math.min(total * LINE_SPACING, MAX_TRACK_HEIGHT);
+    this._track.style.height = `${trackHeight}px`;
+    if (total > 0) {
+      const hitHeight = Math.max(
+        MIN_HIT_HEIGHT,
+        Math.min(MAX_HIT_HEIGHT, Math.floor(trackHeight / total))
+      );
+      this._track.style.setProperty(
+        '--jp-nav-rail-hit-height',
+        `${hitHeight}px`
+      );
+    }
+
+    if (
+      this._hoveredCellId &&
+      !cells.some(cell => cell.id === this._hoveredCellId)
+    ) {
+      this._hideTooltip();
+    }
 
     for (let i = 0; i < cells.length; i++) {
-      const cell = cells.get(i);
-      const dot = this._createDot(cell, i);
+      const cell = cells[i];
+      const line = this._createLine(cell, i, total);
 
-      if (activeModel && activeModel.id === cell.id) {
-        dot.classList.add(ACTIVE_DOT_CLASS);
+      if (i === activeIndex) {
+        line.classList.add(ACTIVE_LINE_CLASS);
       }
 
-      this._track.appendChild(dot);
-      this._dots.set(cell.id, dot);
-      this._attachCellListeners(cell, dot, i);
+      this._track.appendChild(line);
+      this._attachCellListeners(cell, line, i, total);
     }
+    this._updateLinePositions();
   }
 
   /**
-   * Create a dot element for a cell.
+   * Position markers evenly in the compact overview track.
    */
-  private _createDot(cell: ICellModel, index: number): HTMLElement {
-    const dot = document.createElement('button');
-    dot.className = DOT_CLASS;
-    dot.setAttribute('role', 'button');
-    dot.setAttribute('tabindex', '-1');
-    dot.dataset.cellId = cell.id;
-    dot.dataset.index = `${index}`;
-    dot.dataset.type = cell.type;
+  private _updateLinePositions(): void {
+    const total = this._track.children.length;
+    if (total === 0) {
+      return;
+    }
+
+    Array.from(this._track.children).forEach((child, index) => {
+      (child as HTMLElement).style.top = `${((index + 0.5) / total) * 100}%`;
+    });
+  }
+
+  /**
+   * Create a line marker for one cell.
+   */
+  private _createLine(
+    cell: ICellModel,
+    index: number,
+    total: number
+  ): HTMLElement {
+    const line = document.createElement('button');
+    line.className = LINE_CLASS;
+    line.type = 'button';
+    line.setAttribute('tabindex', '-1');
+    line.dataset.cellId = cell.id;
+    line.dataset.index = `${index}`;
+    line.dataset.type = cell.type;
 
     const errorInfo = this._getCellError(cell);
     if (errorInfo.hasError) {
-      dot.classList.add(ERROR_DOT_CLASS);
-      dot.setAttribute(
+      line.classList.add(ERROR_LINE_CLASS);
+      line.setAttribute(
         'aria-label',
         this._trans.__(
-          'Error in cell %1: %2',
+          'Error in cell %1 of %2: %3',
           index + 1,
+          total,
           errorInfo.ename ?? 'Error'
         )
       );
     } else {
-      dot.setAttribute('aria-label', this._trans.__('Cell %1', index + 1));
+      line.setAttribute(
+        'aria-label',
+        this._trans.__('Cell %1 of %2', index + 1, total)
+      );
     }
 
     if (cell.type === 'code') {
       const codeModel = cell as ICodeCellModel;
       if (codeModel.executionState === 'running') {
-        dot.classList.add(RUNNING_DOT_CLASS);
+        line.classList.add(RUNNING_LINE_CLASS);
       }
     }
 
-    dot.addEventListener('click', event => {
+    line.addEventListener('click', event => {
       event.stopPropagation();
-      this._onDotClick(index);
+      this._onLineClick(index);
     });
 
-    dot.addEventListener('mouseenter', () => {
-      this._showTooltip(cell, index, dot);
+    line.addEventListener('mouseenter', () => {
+      this._showTooltip(cell, index, line);
     });
 
-    dot.addEventListener('mouseleave', () => {
+    line.addEventListener('mouseleave', () => {
       this._hideTooltip();
     });
 
-    return dot;
+    return line;
   }
 
   /**
@@ -249,28 +284,34 @@ export class NotebookNavigationRail extends Widget {
    */
   private _attachCellListeners(
     cell: ICellModel,
-    dot: HTMLElement,
-    index: number
+    line: HTMLElement,
+    index: number,
+    total: number
   ): void {
     const disconnects: Array<() => void> = [];
 
     if (cell.type === 'code') {
       const codeModel = cell as ICodeCellModel;
+      const outputs = codeModel.outputs;
 
       const onOutputsChanged = () => {
         const errorInfo = this._getCellError(codeModel);
-        dot.classList.toggle(ERROR_DOT_CLASS, errorInfo.hasError);
+        line.classList.toggle(ERROR_LINE_CLASS, errorInfo.hasError);
         if (errorInfo.hasError) {
-          dot.setAttribute(
+          line.setAttribute(
             'aria-label',
             this._trans.__(
-              'Error in cell %1: %2',
+              'Error in cell %1 of %2: %3',
               index + 1,
+              total,
               errorInfo.ename ?? 'Error'
             )
           );
         } else {
-          dot.setAttribute('aria-label', this._trans.__('Cell %1', index + 1));
+          line.setAttribute(
+            'aria-label',
+            this._trans.__('Cell %1 of %2', index + 1, total)
+          );
         }
 
         // If tooltip currently open for this cell, refresh it
@@ -281,15 +322,11 @@ export class NotebookNavigationRail extends Widget {
 
       const onStateChanged = (
         _: ICellModel,
-        change: IChangedArgs<
-          any,
-          any,
-          'trusted' | 'isDirty' | 'executionCount' | 'executionState'
-        >
+        change: IChangedArgs<unknown, unknown>
       ) => {
         if (change.name === 'executionState') {
-          dot.classList.toggle(
-            RUNNING_DOT_CLASS,
+          line.classList.toggle(
+            RUNNING_LINE_CLASS,
             codeModel.executionState === 'running'
           );
         }
@@ -298,23 +335,24 @@ export class NotebookNavigationRail extends Widget {
         }
       };
 
-      codeModel.outputs.changed.connect(onOutputsChanged);
-      disconnects.push(() =>
-        codeModel.outputs.changed.disconnect(onOutputsChanged)
-      );
+      if (outputs) {
+        outputs.changed.connect(onOutputsChanged);
+        disconnects.push(() => outputs.changed.disconnect(onOutputsChanged));
+      }
 
       codeModel.stateChanged.connect(onStateChanged);
       disconnects.push(() => codeModel.stateChanged.disconnect(onStateChanged));
     }
 
+    const sharedModel = cell.sharedModel;
     const onSourceChanged = () => {
       if (this._hoveredCellId === cell.id) {
         this._renderTooltipContent(cell, index);
       }
     };
 
-    cell.sharedModel.changed.connect(onSourceChanged);
-    disconnects.push(() => cell.sharedModel.changed.disconnect(onSourceChanged));
+    sharedModel.changed.connect(onSourceChanged);
+    disconnects.push(() => sharedModel.changed.disconnect(onSourceChanged));
 
     this._cellListeners.set(cell.id, () => {
       disconnects.forEach(fn => fn());
@@ -351,10 +389,10 @@ export class NotebookNavigationRail extends Widget {
   }
 
   /**
-   * Handle clicking on a dot to scroll and focus the target cell.
+   * Handle clicking a line to scroll to and focus its cell.
    */
-  private _onDotClick(index: number): void {
-    if (index < 0 || index >= this.notebook.widgets.length) {
+  private _onLineClick(index: number): void {
+    if (index < 0 || index >= this._track.children.length) {
       return;
     }
 
@@ -369,20 +407,20 @@ export class NotebookNavigationRail extends Widget {
   }
 
   /**
-   * Display the floating preview card / tooltip for a dot.
+   * Display the floating preview card for a cell line.
    */
   private _showTooltip(
     cell: ICellModel,
     index: number,
-    dotElement: HTMLElement
+    lineElement: HTMLElement
   ): void {
     this._hoveredCellId = cell.id;
     this._renderTooltipContent(cell, index);
 
-    // Calculate position next to the dot
-    const rect = dotElement.getBoundingClientRect();
-    const tooltipX = rect.right + 10;
-    let tooltipY = rect.top - 10;
+    // Calculate position next to the line marker
+    const rect = lineElement.getBoundingClientRect();
+    let tooltipX = rect.right + 10;
+    let tooltipY = Math.max(8, rect.top - 10);
 
     this._tooltip.style.display = 'block';
     this._tooltip.style.left = `${tooltipX}px`;
@@ -390,8 +428,12 @@ export class NotebookNavigationRail extends Widget {
 
     // Ensure within window bounds
     const tooltipRect = this._tooltip.getBoundingClientRect();
-    if (tooltipY + tooltipRect.height > window.innerHeight - 20) {
-      tooltipY = Math.max(20, window.innerHeight - tooltipRect.height - 20);
+    if (tooltipX + tooltipRect.width > window.innerWidth - 12) {
+      tooltipX = Math.max(12, window.innerWidth - tooltipRect.width - 12);
+      this._tooltip.style.left = `${tooltipX}px`;
+    }
+    if (tooltipY + tooltipRect.height > window.innerHeight - 12) {
+      tooltipY = Math.max(8, window.innerHeight - tooltipRect.height - 12);
       this._tooltip.style.top = `${tooltipY}px`;
     }
   }
@@ -403,16 +445,23 @@ export class NotebookNavigationRail extends Widget {
     const errorInfo = this._getCellError(cell);
     const source = (cell.sharedModel.getSource() || '').trim();
     const lines = source ? source.split('\n') : [];
-    const totalCells = this.notebook.model?.cells.length ?? 1;
+    const totalCells = Math.max(
+      this.notebook.model?.cells.length ?? 0,
+      this._track.children.length
+    );
+    const footerLabel = this._trans.__('Cell %1 of %2', index + 1, totalCells);
 
     if (errorInfo.hasError) {
-      const preview = lines.slice(0, 3).join('\n') + (lines.length > 3 ? '\n...' : '');
+      const preview =
+        lines.slice(0, 3).join('\n') + (lines.length > 3 ? '\n...' : '');
       this._tooltip.innerHTML = `
         <div class="jp-Notebook-navigationRail-tooltip-title jp-mod-error">${this._escape(
-          errorInfo.ename ?? 'Error'
+          errorInfo.ename ?? this._trans.__('Error')
         )}</div>
         <div class="jp-Notebook-navigationRail-tooltip-message">${this._escape(
-          this._stripAnsi(errorInfo.evalue ?? 'Execution failed')
+          this._stripAnsi(
+            errorInfo.evalue || this._trans.__('Execution failed')
+          )
         )}</div>
         ${
           preview
@@ -421,14 +470,20 @@ export class NotebookNavigationRail extends Widget {
               )}</pre>`
             : ''
         }
-        <div class="jp-Notebook-navigationRail-tooltip-footer">Cell ${
-          index + 1
-        } of ${totalCells}</div>
+        <div class="jp-Notebook-navigationRail-tooltip-footer">${this._escape(
+          footerLabel
+        )}</div>
       `;
     } else {
-      const isMarkdown = cell.type === 'markdown';
-      const firstLine = lines[0] || (isMarkdown ? 'Markdown Cell' : 'Empty Cell');
-      const restLines = lines.slice(1, 4).join('\n') + (lines.length > 4 ? '\n...' : '');
+      const emptyLabel =
+        cell.type === 'markdown'
+          ? this._trans.__('Markdown Cell')
+          : cell.type === 'raw'
+            ? this._trans.__('Raw Cell')
+            : this._trans.__('Empty Cell');
+      const firstLine = lines[0] || emptyLabel;
+      const restLines =
+        lines.slice(1, 4).join('\n') + (lines.length > 4 ? '\n...' : '');
 
       this._tooltip.innerHTML = `
         <div class="jp-Notebook-navigationRail-tooltip-title">${this._escape(
@@ -441,9 +496,9 @@ export class NotebookNavigationRail extends Widget {
               )}</pre>`
             : ''
         }
-        <div class="jp-Notebook-navigationRail-tooltip-footer">Cell ${
-          index + 1
-        } of ${totalCells}</div>
+        <div class="jp-Notebook-navigationRail-tooltip-footer">${this._escape(
+          footerLabel
+        )}</div>
       `;
     }
   }
@@ -454,17 +509,6 @@ export class NotebookNavigationRail extends Widget {
   private _hideTooltip(): void {
     this._hoveredCellId = null;
     this._tooltip.style.display = 'none';
-  }
-
-  /**
-   * Truncate code or markdown source to a reasonable number of lines.
-   */
-  private _truncateSource(source: string, maxLines: number): string {
-    const lines = source.trim().split('\n');
-    if (lines.length <= maxLines) {
-      return lines.join('\n');
-    }
-    return lines.slice(0, maxLines).join('\n') + '\n...';
   }
 
   /**
@@ -488,11 +532,37 @@ export class NotebookNavigationRail extends Widget {
   }
 
   /**
+   * Show or hide the navigation rail, ensuring any open tooltip is closed.
+   */
+  setHidden(hidden: boolean): void {
+    if (hidden) {
+      this._hideTooltip();
+    }
+    super.setHidden(hidden);
+  }
+
+  /**
    * Handle after-attach event.
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
-    this.updateDots();
+    this._updateLines();
+  }
+
+  /**
+   * Handle before-hide event.
+   */
+  protected onBeforeHide(msg: Message): void {
+    this._hideTooltip();
+    super.onBeforeHide(msg);
+  }
+
+  /**
+   * Handle before-detach event.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this._hideTooltip();
+    super.onBeforeDetach(msg);
   }
 }
 

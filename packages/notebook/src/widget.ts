@@ -1483,7 +1483,7 @@ export namespace StaticNotebook {
     showMinimap?: boolean;
 
     /**
-     * Whether to show the cell navigation rail (vertical dot indicators for
+     * Whether to show the cell navigation rail (vertical line markers for
      * prompts and error statuses) along the left margin of the notebook.
      */
     showCellNavigationRail?: boolean;
@@ -1871,9 +1871,9 @@ export class Notebook extends StaticNotebook {
     });
     (this.layout as NotebookWindowedLayout).navigationRail =
       this._navigationRail;
-    if (!this.notebookConfig.showCellNavigationRail) {
-      this._navigationRail.setHidden(true);
-    }
+    const show = this.notebookConfig.showCellNavigationRail ?? false;
+    this._navigationRail.setHidden(!show);
+    this.toggleClass('jp-mod-navigationRail', show);
   }
 
   /**
@@ -1886,6 +1886,7 @@ export class Notebook extends StaticNotebook {
     if (this._navigationRail) {
       this._navigationRail.setHidden(!value);
     }
+    this.toggleClass('jp-mod-navigationRail', value);
   }
 
   /**
@@ -1910,6 +1911,7 @@ export class Notebook extends StaticNotebook {
     if (this._navigationRail) {
       const show = this.notebookConfig.showCellNavigationRail ?? false;
       this._navigationRail.setHidden(!show);
+      this.toggleClass('jp-mod-navigationRail', show);
     }
   }
 

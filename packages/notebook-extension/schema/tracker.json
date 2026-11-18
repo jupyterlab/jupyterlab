@@ -169,6 +169,10 @@
             "rank": 12
           },
           {
+            "command": "notebook:toggle-cell-navigation-rail",
+            "rank": 12
+          },
+          {
             "type": "separator",
             "rank": 12
           }
@@ -913,7 +917,7 @@
     },
     "showCellNavigationRail": {
       "title": "Show cell navigation rail",
-      "description": "Whether to show the cell navigation rail (vertical dot indicators for prompts and error statuses) on the left side of the notebook.",
+      "description": "Whether to show the cell navigation rail across notebooks. The rail marks active, running, and errored cells.",
       "type": "boolean",
       "default": false
     },
