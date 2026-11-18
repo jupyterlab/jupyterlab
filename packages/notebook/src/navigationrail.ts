@@ -439,7 +439,7 @@ export class NotebookNavigationRail extends Widget {
   }
 
   /**
-   * Populate the tooltip HTML content based on cell state.
+   * Populate the tooltip HTML content using native cell typography.
    */
   private _renderTooltipContent(cell: ICellModel, index: number): void {
     const errorInfo = this._getCellError(cell);
@@ -449,58 +449,75 @@ export class NotebookNavigationRail extends Widget {
       this.notebook.model?.cells.length ?? 0,
       this._track.children.length
     );
-    const footerLabel = this._trans.__('Cell %1 of %2', index + 1, totalCells);
+    const cellLabel = this._trans.__('Cell %1 of %2', index + 1, totalCells);
 
-    if (errorInfo.hasError) {
+    let bodyHtml: string;
+    if (cell.type === 'markdown') {
+      if (lines.length > 0) {
+        const firstLine = lines[0];
+        const headingMatch = /^#{1,6}[ \t]+(\S.*)$/.exec(firstLine);
+        const headingText = headingMatch ? headingMatch[1] : '';
+        const bodyLines = (headingMatch ? lines.slice(1, 4) : lines.slice(0, 4))
+          .map(line => line.trim())
+          .filter(Boolean);
+        const truncated = lines.length > 4;
+        bodyHtml = `
+          <div class="jp-Notebook-navigationRail-tooltip-markdown">
+            ${
+              headingText
+                ? `<div class="jp-Notebook-navigationRail-tooltip-markdown-heading">${this._escape(
+                    headingText
+                  )}</div>`
+                : ''
+            }
+            ${
+              bodyLines.length > 0
+                ? `<div class="jp-Notebook-navigationRail-tooltip-markdown-body">${this._escape(
+                    bodyLines.join('\n') + (truncated ? '\n...' : '')
+                  )}</div>`
+                : ''
+            }
+          </div>
+        `;
+      } else {
+        bodyHtml = `<div class="jp-Notebook-navigationRail-tooltip-empty">${this._escape(
+          this._trans.__('Empty markdown cell')
+        )}</div>`;
+      }
+    } else if (lines.length > 0) {
       const preview =
-        lines.slice(0, 3).join('\n') + (lines.length > 3 ? '\n...' : '');
-      this._tooltip.innerHTML = `
-        <div class="jp-Notebook-navigationRail-tooltip-title jp-mod-error">${this._escape(
-          errorInfo.ename ?? this._trans.__('Error')
-        )}</div>
-        <div class="jp-Notebook-navigationRail-tooltip-message">${this._escape(
-          this._stripAnsi(
-            errorInfo.evalue || this._trans.__('Execution failed')
-          )
-        )}</div>
-        ${
-          preview
-            ? `<pre class="jp-Notebook-navigationRail-tooltip-code">${this._escape(
-                preview
-              )}</pre>`
-            : ''
-        }
-        <div class="jp-Notebook-navigationRail-tooltip-footer">${this._escape(
-          footerLabel
-        )}</div>
-      `;
+        lines.slice(0, 4).join('\n') + (lines.length > 4 ? '\n...' : '');
+      bodyHtml = `<pre class="jp-Notebook-navigationRail-tooltip-code">${this._escape(
+        preview
+      )}</pre>`;
     } else {
       const emptyLabel =
-        cell.type === 'markdown'
-          ? this._trans.__('Markdown Cell')
-          : cell.type === 'raw'
-            ? this._trans.__('Raw Cell')
-            : this._trans.__('Empty Cell');
-      const firstLine = lines[0] || emptyLabel;
-      const restLines =
-        lines.slice(1, 4).join('\n') + (lines.length > 4 ? '\n...' : '');
-
-      this._tooltip.innerHTML = `
-        <div class="jp-Notebook-navigationRail-tooltip-title">${this._escape(
-          firstLine
-        )}</div>
-        ${
-          restLines
-            ? `<pre class="jp-Notebook-navigationRail-tooltip-code">${this._escape(
-                restLines
-              )}</pre>`
-            : ''
-        }
-        <div class="jp-Notebook-navigationRail-tooltip-footer">${this._escape(
-          footerLabel
-        )}</div>
-      `;
+        cell.type === 'raw'
+          ? this._trans.__('Empty raw cell')
+          : this._trans.__('Empty cell');
+      bodyHtml = `<div class="jp-Notebook-navigationRail-tooltip-empty">${this._escape(
+        emptyLabel
+      )}</div>`;
     }
+
+    let errorHtml = '';
+    if (errorInfo.hasError) {
+      const ename = errorInfo.ename || this._trans.__('Error');
+      const evalue = this._stripAnsi(
+        errorInfo.evalue || this._trans.__('Execution failed')
+      );
+      errorHtml = `<div class="jp-Notebook-navigationRail-tooltip-error"><span class="jp-Notebook-navigationRail-tooltip-error-name">${this._escape(
+        ename
+      )}</span>: ${this._escape(evalue)}</div>`;
+    }
+
+    this._tooltip.innerHTML = `
+      <div class="jp-Notebook-navigationRail-tooltip-header">${this._escape(
+        cellLabel
+      )}</div>
+      ${bodyHtml}
+      ${errorHtml}
+    `;
   }
 
   /**

@@ -60,12 +60,12 @@
   display: block;
   width: 14px;
   height: 2px;
-  border-radius: 1px;
+  border-radius: 0;
   background-color: var(--jp-border-color1);
   opacity: 0.75;
   transition:
-    opacity 0.15s ease,
-    background-color 0.15s ease;
+    opacity 0.12s ease,
+    background-color 0.12s ease;
 }
 
 .jp-Notebook-navigationRail-line:hover {
@@ -74,7 +74,7 @@
 
 .jp-Notebook-navigationRail-line:hover::after {
   opacity: 1;
-  background-color: var(--jp-ui-font-color1);
+  background-color: var(--jp-ui-font-color2);
 }
 
 /* Active cell bar */
@@ -119,76 +119,91 @@
   );
 }
 
-/* Tooltip - Minimalist, native theme tokens */
+/* Tooltip - Native JupyterLab popover and cell editor typography */
 .jp-Notebook-navigationRail-tooltip {
   position: fixed;
   z-index: 10000;
   pointer-events: none;
-  max-width: 320px;
-  padding: 10px 12px;
-  border-radius: 8px;
+  min-width: 180px;
+  max-width: 360px;
+  padding: 6px;
+  border-radius: var(--jp-border-radius);
   background: var(--jp-layout-color1);
-  color: var(--jp-ui-font-color0);
+  color: var(--jp-ui-font-color1);
   font-family: var(--jp-ui-font-family);
   font-size: var(--jp-ui-font-size1);
-  line-height: 1.4;
-  box-shadow: var(--jp-elevation-z6);
-  border: 1px solid var(--jp-border-color1);
-  animation: jp-navigationRail-fadeIn 0.12s ease-out;
+  box-shadow: var(--jp-elevation-z2);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  box-sizing: border-box;
 }
 
-@keyframes jp-navigationRail-fadeIn {
-  from {
-    opacity: 0;
-    transform: translateX(-4px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.jp-Notebook-navigationRail-tooltip-title {
-  font-size: var(--jp-ui-font-size1);
-  font-weight: 600;
-  color: var(--jp-ui-font-color0);
+.jp-Notebook-navigationRail-tooltip-header {
+  font-family: var(--jp-ui-font-family);
+  font-size: var(--jp-ui-font-size0);
+  color: var(--jp-ui-font-color2);
   margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.jp-Notebook-navigationRail-tooltip-code {
+  margin: 0;
+  padding: var(--jp-code-padding);
+  border-radius: 0;
+  background: var(--jp-cell-editor-background);
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  color: var(--jp-content-font-color1);
+  font-family: var(--jp-code-font-family);
+  font-size: var(--jp-code-font-size);
+  line-height: var(--jp-code-line-height);
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jp-Notebook-navigationRail-tooltip-markdown {
+  font-family: var(--jp-content-font-family);
+  font-size: var(--jp-content-font-size1);
+  color: var(--jp-content-font-color1);
+  line-height: 1.4;
+}
+
+.jp-Notebook-navigationRail-tooltip-markdown-heading {
+  font-weight: 600;
+  color: var(--jp-content-font-color0);
+  margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.jp-Notebook-navigationRail-tooltip-title.jp-mod-error {
-  color: var(--jp-error-color1);
-}
-
-.jp-Notebook-navigationRail-tooltip-message {
-  font-size: var(--jp-ui-font-size0);
-  color: var(--jp-ui-font-color1);
-  margin-bottom: 6px;
-  word-break: break-word;
-  line-height: 1.35;
-}
-
-.jp-Notebook-navigationRail-tooltip-code {
-  margin: 0 0 6px;
-  padding: 6px 8px;
-  border-radius: 4px;
-  background: var(--jp-layout-color2);
-  border: 1px solid var(--jp-border-color2);
-  color: var(--jp-ui-font-color1);
-  font-family: var(--jp-code-font-family);
-  font-size: var(--jp-code-font-size);
-  line-height: 1.35;
-  white-space: pre;
+.jp-Notebook-navigationRail-tooltip-markdown-body {
+  white-space: pre-wrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-height: 70px;
 }
 
-.jp-Notebook-navigationRail-tooltip-footer {
-  font-size: var(--jp-ui-font-size0);
+.jp-Notebook-navigationRail-tooltip-empty {
+  padding: var(--jp-code-padding);
+  background: var(--jp-cell-editor-background);
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
   color: var(--jp-ui-font-color2);
-  font-weight: 500;
+  font-family: var(--jp-code-font-family);
+  font-size: var(--jp-code-font-size);
+  line-height: var(--jp-code-line-height);
+}
+
+.jp-Notebook-navigationRail-tooltip-error {
+  margin-top: 4px;
+  padding: var(--jp-code-padding);
+  background: var(--jp-rendermime-error-background);
+  color: var(--jp-content-font-color1);
+  font-family: var(--jp-code-font-family);
+  font-size: var(--jp-code-font-size);
+  line-height: var(--jp-code-line-height);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.jp-Notebook-navigationRail-tooltip-error-name {
+  color: var(--jp-error-color1);
 }
