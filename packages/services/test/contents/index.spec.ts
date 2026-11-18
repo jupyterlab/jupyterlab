@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { serialize } from 'v8';
 import { Signal } from '@lumino/signaling';
 import {
   expectFailure,
@@ -285,6 +286,49 @@ describe('contents', () => {
       const options: Contents.IFetchOptions = { type: 'file' };
       const model = await contents.get('other:/foo', options);
       expect(model.serverPath).toBe('foo/test');
+    });
+
+    it('should warn once when the content of models fetched without options is read', async () => {
+      const warn = jest
+        .spyOn(console, 'warn')
+        .mockImplementation(() => undefined);
+      try {
+        for (let i = 0; i < 3; i++) {
+          handleRequest(contents, 200, DEFAULT_FILE);
+          const model = await contents.get('/foo');
+          expect(model.content).toBe(DEFAULT_FILE.content);
+        }
+        expect(warn).toHaveBeenCalledTimes(1);
+      } finally {
+        warn.mockRestore();
+      }
+    });
+
+    it('should not warn when the content is requested', async () => {
+      const warn = jest
+        .spyOn(console, 'warn')
+        .mockImplementation(() => undefined);
+      try {
+        handleRequest(contents, 200, DEFAULT_FILE);
+        const model = await contents.get('/foo', { content: true });
+        expect(model.content).toBe(DEFAULT_FILE.content);
+        expect(warn).not.toHaveBeenCalled();
+      } finally {
+        warn.mockRestore();
+      }
+    });
+
+    it('should return a model that can be cloned when fetched without options', async () => {
+      const warn = jest
+        .spyOn(console, 'warn')
+        .mockImplementation(() => undefined);
+      try {
+        handleRequest(contents, 200, DEFAULT_FILE);
+        const model = await contents.get('/foo');
+        expect(() => serialize(model)).not.toThrow();
+      } finally {
+        warn.mockRestore();
+      }
     });
   });
 

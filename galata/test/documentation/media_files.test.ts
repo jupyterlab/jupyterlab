@@ -27,9 +27,7 @@ test.describe('Media Files', () => {
     const audioElement = page.locator('.jp-AudioViewer audio');
     await expect(audioElement).toBeVisible();
     await expect(audioElement).toHaveAttribute('controls');
-
-    const src = await audioElement.getAttribute('src');
-    expect(src).toContain('rocket.wav');
+    await expect(audioElement).toHaveAttribute('src', /rocket\.wav/);
   });
 
   test('should open and display video file', async ({ page }) => {
@@ -48,8 +46,6 @@ test.describe('Media Files', () => {
     const videoElement = page.locator('.jp-VideoViewer video');
     await expect(videoElement).toBeVisible();
     await expect(videoElement).toHaveAttribute('controls');
-
-    const src = await videoElement.getAttribute('src');
-    expect(src).toContain('jupiter.mp4');
+    await expect(videoElement).toHaveAttribute('src', /jupiter\.mp4/);
   });
 });

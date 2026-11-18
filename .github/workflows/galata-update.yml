@@ -1,7 +1,7 @@
 name: Update Playwright Snapshots
 
 on:
-  issue_comment:
+  issue_comment: # zizmor: ignore[dangerous-triggers] update-snapshots-checkout stops unless an owner, member or collaborator wrote the comment
     types: [created, edited]
 
 permissions: {}
@@ -34,6 +34,9 @@ jobs:
           bash ./scripts/ci_install.sh
           # Build dev-mode
           jlpm build
+
+      - name: Disable git hooks for the bot commit
+        run: git config core.hooksPath /dev/null
 
       - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:
@@ -104,6 +107,9 @@ jobs:
 
           # Build dev-mode
           jlpm build
+
+      - name: Disable git hooks for the bot commit
+        run: git config core.hooksPath /dev/null
 
       - uses: jupyterlab/maintainer-tools/.github/actions/update-snapshots@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
         with:

@@ -1305,6 +1305,29 @@ describe('@jupyter/notebook', () => {
       });
     });
 
+    describe('#setFragment()', () => {
+      it('should keep a markdown target rendered when in edit mode', async () => {
+        const widget = createActiveWidget();
+        Widget.attach(widget, document.body);
+        widget.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'a = 1' },
+          { cell_type: 'markdown', source: '# Target' }
+        ]);
+        const target = widget.widgets[1] as MarkdownCell;
+        target.inViewport = true;
+        target.node.scrollIntoView = jest.fn();
+        widget.activeCellIndex = 0;
+        widget.mode = 'edit';
+        expect(target.rendered).toBe(true);
+
+        await widget.setFragment(`#cell-id=${target.model.id}`);
+
+        expect(widget.activeCell).toBe(target);
+        expect(target.rendered).toBe(true);
+        widget.dispose();
+      });
+    });
+
     describe('#isSelected()', () => {
       it('should get whether the cell is selected', () => {
         const widget = createActiveWidget();
