@@ -3,10 +3,9 @@
 
 import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
 import { expect, galata, test } from '@jupyterlab/galata';
-import { stubGitHubUserIcons } from './utils';
+import { boundsAround, stubGitHubUserIcons } from './utils';
 import { default as extensionsList } from './data/extensions.json';
-import { default as allExtensionsList } from './data/extensions-search-all.json';
-import { default as drawioExtensionsList } from './data/extensions-search-drawio.json';
+import { default as languagePacks } from './data/extensions-search-all.json';
 import { JSONExt } from '@lumino/coreutils';
 
 test.use({
@@ -23,28 +22,23 @@ test.describe('Extension Manager', () => {
   test.beforeEach(async ({ page }) => {
     // Mock get extensions list
     await page.route(galata.Routes.extensions, async (route, request) => {
-      const url = request.url();
       switch (request.method()) {
-        case 'GET':
-          if (!url.includes('query')) {
-            return route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              body: JSON.stringify(extensionsList)
-            });
-          } else if (url.includes('query=drawio')) {
-            return route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              body: JSON.stringify(drawioExtensionsList)
-            });
-          } else {
-            return route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              body: JSON.stringify(allExtensionsList)
-            });
-          }
+        case 'GET': {
+          const query = new URL(request.url()).searchParams.get('query');
+          const entries =
+            query === null
+              ? extensionsList
+              : languagePacks.filter(pack =>
+                  [pack.name, pack.description].some(value =>
+                    value.toLowerCase().includes(query.toLowerCase())
+                  )
+                );
+          return route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(entries)
+          });
+        }
         default:
           return route.continue();
       }
@@ -54,6 +48,15 @@ test.describe('Extension Manager', () => {
   test('Sidebar', async ({ page }) => {
     await page.goto();
     await openExtensionSidebar(page);
+
+    const discover = page.locator('#jp-extensionmanager-search');
+    const browse = discover.getByRole('link', {
+      name: 'Browse extensions on PyPI'
+    });
+    await expect(browse).toBeVisible();
+    await expect(discover.getByRole('link').first()).toHaveText(
+      'Browse extensions on PyPI'
+    );
 
     expect(
       await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 600 } })
@@ -79,26 +82,109 @@ test.describe('Extension Manager', () => {
     ).toMatchSnapshot('extensions_enabled.png');
   });
 
-  test('Search', async ({ page }) => {
+  test('Find language packs from the Language menu', async ({ page }) => {
     await page.goto();
 
-    await openExtensionSidebar(page);
-
-    await page
-      .locator('.jp-extensionmanager-view')
-      .getByRole('searchbox')
-      .fill('drawio');
-
-    await page.evaluate(() => {
-      (document.activeElement as HTMLElement).blur();
+    await page.menu.clickMenuItem('Settings>Language>Install more languages…');
+    const sidebar = page.locator('.jp-extensionmanager-view');
+    const filter = sidebar.getByRole('searchbox');
+    await expect(filter).toHaveValue('jupyterlab-language-pack');
+    await sidebar.getByRole('button', { name: 'Yes', exact: true }).click();
+    await expect(
+      sidebar.getByText('Search Results', { exact: true })
+    ).toBeVisible();
+    const french = sidebar.getByRole('link', {
+      name: 'jupyterlab-language-pack-fr-FR'
     });
+    const german = sidebar.getByRole('link', {
+      name: 'jupyterlab-language-pack-de-DE'
+    });
+    await expect(french).toBeVisible();
+    await expect(german).toBeVisible();
+    await expect(
+      sidebar.getByRole('link', { name: 'Browse extensions on PyPI' })
+    ).toHaveCount(0);
 
-    // We can not wait for extension kept by the keyword as they are already in the DOM
-    await page.locator('text=No entries').waitFor();
+    await filter.fill('French');
+    await expect(german).toHaveCount(0);
+    await expect(french).toBeVisible();
+    await expect(
+      sidebar
+        .getByRole('listitem')
+        .filter({ hasText: 'jupyterlab-language-pack-fr-FR' })
+        .locator('svg[data-icon="ui-components:jupyter"]')
+    ).toBeVisible();
+    await page.sidebar.setWidth();
 
     expect(
       await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 600 } })
     ).toMatchSnapshot('extensions_search.png');
+  });
+
+  test('List an installed language pack under Installed', async ({ page }) => {
+    const french = {
+      ...languagePacks[1],
+      installed: true,
+      installed_version: '4.6.post0',
+      latest_version: null
+    };
+    await page.route(galata.Routes.extensions, route => {
+      const { searchParams } = new URL(route.request().url());
+      return route.fulfill({
+        json: searchParams.has('query') ? languagePacks : [french]
+      });
+    });
+
+    await page.goto();
+    await page.sidebar.openTab('extensionmanager.main-view');
+    const sidebar = page.locator('.jp-extensionmanager-view');
+    await sidebar.getByRole('button', { name: 'Yes', exact: true }).click();
+    const installed = page
+      .locator('#jp-extensionmanager-installed .jp-extensionmanager-entry')
+      .filter({ hasText: french.name });
+    await expect(installed).toBeVisible();
+    await expect(
+      installed.getByRole('button', { name: 'Uninstall' })
+    ).toBeVisible();
+    await expect(installed.getByRole('button')).toHaveCount(1);
+    await expect(
+      sidebar.getByRole('link', { name: 'jupyterlab-language-pack-de-DE' })
+    ).toBeVisible();
+    await expect(
+      page.locator('#jp-extensionmanager-search').getByText(french.name)
+    ).toHaveCount(0);
+    await sidebar.getByRole('searchbox').fill('French');
+    await expect(installed).toBeVisible();
+  });
+
+  test('Retry language pack search after PyPI is unavailable', async ({
+    page
+  }) => {
+    await page.route(galata.Routes.extensions, route => {
+      const { searchParams } = new URL(route.request().url());
+      if (searchParams.has('query') && searchParams.get('refresh') !== '1') {
+        return route.fulfill({
+          status: 503,
+          json: { message: 'PyPI is temporarily unavailable.' }
+        });
+      }
+      return route.fallback();
+    });
+
+    await page.goto();
+    await page.sidebar.openTab('extensionmanager.main-view');
+    const sidebar = page.locator('.jp-extensionmanager-view');
+    await sidebar.getByRole('button', { name: 'Yes', exact: true }).click();
+    await expect(
+      sidebar.getByText(/PyPI is temporarily unavailable/)
+    ).toBeVisible();
+
+    await sidebar
+      .getByRole('button', { name: 'Refresh extensions list' })
+      .click();
+    await expect(
+      sidebar.getByRole('link', { name: 'jupyterlab-language-pack-fr-FR' })
+    ).toBeVisible();
   });
 
   test('Update button', async ({ page }) => {
@@ -336,9 +422,14 @@ test.describe('Filtered Extension Manager', () => {
 
     await openExtensionSidebar(page);
 
+    const clip = await boundsAround(
+      page,
+      [page.locator('.jp-extensionmanager-view .jp-SidePanel-content')],
+      0
+    );
     expect(
       await page.screenshot({
-        clip: { x: 33, y: 100, width: 250, height: 280 }
+        clip: { ...clip, height: 280 }
       })
     ).toMatchSnapshot('extensions_blocked_list.png');
   });
@@ -363,9 +454,14 @@ test.describe('Filtered Extension Manager', () => {
 
     await openExtensionSidebar(page);
 
+    const clip = await boundsAround(
+      page,
+      [page.locator('.jp-extensionmanager-view .jp-SidePanel-content')],
+      0
+    );
     expect(
       await page.screenshot({
-        clip: { x: 33, y: 100, width: 250, height: 280 }
+        clip: { ...clip, height: 280 }
       })
     ).toMatchSnapshot('extensions_allowed_list.png');
   });
@@ -390,7 +486,10 @@ async function openExtensionSidebar(page: IJupyterLabPageFixture) {
     .waitFor();
 
   await page.sidebar.setWidth();
+  await waitForExtensionAvatars(page);
+}
 
+async function waitForExtensionAvatars(page: IJupyterLabPageFixture) {
   // Screenshots do not wait for images, and the avatars load after the lists.
   await page.waitForFunction(() => {
     const avatars = Array.from(

@@ -88,10 +88,44 @@ export class AccordionPanelReorderer
   }
 
   /**
+   * The accordion panel whose sections are reordered.
+   */
+  get panel(): AccordionPanel {
+    return this._panel;
+  }
+
+  /**
    * A signal emitted after a section is reordered.
    */
   get reordered(): ISignal<this, Widget> {
     return this._reordered;
+  }
+
+  /**
+   * Move a section to another index, as a drop does.
+   */
+  move(widget: Widget, index: number): void {
+    const current = this._panel.widgets.indexOf(widget);
+    if (
+      current < 0 ||
+      index === current ||
+      index < 0 ||
+      index >= this._panel.widgets.length
+    ) {
+      return;
+    }
+    this._panel.insertWidget(index, widget);
+    // Lumino only repositions the section, so move its title, body and
+    // handle to keep the Tab order the same as the visual order.
+    const next = this._panel.titles[index + 1] ?? null;
+    for (const node of [
+      this._panel.titles[index],
+      widget.node,
+      this._panel.handles[index]
+    ]) {
+      this._panel.node.insertBefore(node, next);
+    }
+    this._reordered.emit(widget);
   }
 
   /**
@@ -279,21 +313,7 @@ export class AccordionPanelReorderer
         return;
       }
       const slot = this._getTargetSlot(position);
-      const index = slot > current ? slot - 1 : slot;
-      if (index !== current) {
-        this._panel.insertWidget(index, widget);
-        // Lumino only repositions the section, so move its title, body and
-        // handle to keep the Tab order the same as the visual order.
-        const next = this._panel.titles[index + 1] ?? null;
-        for (const node of [
-          this._panel.titles[index],
-          widget.node,
-          this._panel.handles[index]
-        ]) {
-          this._panel.node.insertBefore(node, next);
-        }
-        this._reordered.emit(widget);
-      }
+      this.move(widget, slot > current ? slot - 1 : slot);
     }
   }
 

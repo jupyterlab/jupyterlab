@@ -84,7 +84,11 @@ async function getSavedNotebook(
     .toBe(false);
   return await page.evaluate(
     async filePath =>
-      (await window.jupyterapp.serviceManager.contents.get(filePath)).content,
+      (
+        await window.jupyterapp.serviceManager.contents.get(filePath, {
+          content: true
+        })
+      ).content,
     filePath
   );
 }

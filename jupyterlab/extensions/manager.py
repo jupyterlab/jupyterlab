@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 from dataclasses import dataclass, field, fields, replace
@@ -63,7 +64,7 @@ class ExtensionPackage:
         name: Package name
         description: Package description
         homepage_url: Package home page
-        pkg_type: Type of package - ["prebuilt", "source"]
+        pkg_type: Type of package - ["prebuilt", "source", "language-pack"]
         allowed: [optional] Whether this extension is allowed or not - default True
         approved: [optional] Whether the package is approved by your administrators - default False
         companion: [optional] Type of companion for the frontend extension - [None, "kernel", "server"]; default None
@@ -474,16 +475,12 @@ class ExtensionManager(PluginManager):
             The extensions
             Last page of results
         """
-        if query not in self._extensions_cache or page not in self._extensions_cache[query].cache:
-            await self.refresh(query, page, per_page)
+        cache, last_page = await self._get_extensions_page(query, page, per_page)
 
         # filter using listings settings
         if self._listings_cache is None and self._listing_fetch is not None:
             await self._fetch_listings()
 
-        cache = self._extensions_cache[query].cache[page]
-        if cache is None:
-            cache = {}
         extensions = list(cache.values())
         if query is not None and self._listings_cache is not None:
             listing = list(self._listings_cache)
@@ -503,7 +500,16 @@ class ExtensionManager(PluginManager):
                         self.log.warning(f"Not allowed extension '{name}' is installed.")
                         extensions.append(replace(ext, allowed=False))
 
-        return extensions, self._extensions_cache[query].last_page
+        return extensions, last_page
+
+    async def _get_extensions_page(
+        self, query: str | None, page: int, per_page: int
+    ) -> tuple[dict[str, ExtensionPackage], int]:
+        if query not in self._extensions_cache or page not in self._extensions_cache[query].cache:
+            await self.refresh(query, page, per_page)
+
+        cache = self._extensions_cache[query]
+        return cache.cache[page] or {}, cache.last_page
 
     async def refresh(self, query: str | None, page: int, per_page: int) -> None:
         """Refresh the list of extensions."""
@@ -607,9 +613,6 @@ class ExtensionManager(PluginManager):
                 repository_url=data.get("repository", {}).get("url", data.get("repository")),
             )
 
-            if get_latest_version:
-                pkg = replace(pkg, latest_version=await self.get_latest_version(pkg.name))
-
             extensions[normalized_name] = pkg
 
         for name, data in info["extensions"].items():
@@ -642,15 +645,37 @@ class ExtensionManager(PluginManager):
                 bug_tracker_url=data.get("bugs", {}).get("url"),
                 repository_url=data.get("repository", {}).get("url", data.get("repository")),
             )
-            if get_latest_version:
-                pkg = replace(pkg, latest_version=await self.get_latest_version(pkg.name))
             extensions[normalized_name] = pkg
 
-        for name in build_check_info["uninstall"]:
+        extensions.update(self._get_scheduled_uninstall_packages(build_check_info["uninstall"]))
+
+        if get_latest_version:
+            installed_pkgs = [pkg for pkg in extensions.values() if pkg.installed]
+            results = await asyncio.gather(
+                *(self.get_latest_version(pkg.name) for pkg in installed_pkgs),
+                return_exceptions=True,
+            )
+            for pkg, result in zip(installed_pkgs, results, strict=True):
+                if isinstance(result, BaseException):
+                    self.log.info(
+                        "Failed to fetch latest version for %s: %s",
+                        pkg.name,
+                        result,
+                    )
+                elif result is not None:
+                    extensions[pkg.name] = replace(pkg, latest_version=result)
+
+        return extensions
+
+    def _get_scheduled_uninstall_packages(
+        self, uninstall_names: list[str]
+    ) -> dict[str, ExtensionPackage]:
+        packages = {}
+        for name in uninstall_names:
             data = self._get_scheduled_uninstall_info(name)
             if data is not None:
                 normalized_name = self._normalize_name(name)
-                pkg = ExtensionPackage(
+                packages[normalized_name] = ExtensionPackage(
                     name=normalized_name,
                     description=data.get("description", ""),
                     homepage_url=data.get("homepage", ""),
@@ -666,9 +691,7 @@ class ExtensionManager(PluginManager):
                     bug_tracker_url=data.get("bugs", {}).get("url"),
                     repository_url=data.get("repository", {}).get("url", data.get("repository")),
                 )
-                extensions[normalized_name] = pkg
-
-        return extensions
+        return packages
 
     def _get_companion(self, data: dict) -> str | None:
         companion = None

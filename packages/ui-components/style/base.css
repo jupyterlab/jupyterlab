@@ -69,6 +69,48 @@
   --density: 0;
 }
 
+.jp-FilterBox-wrapper {
+  position: relative;
+}
+
+.jp-FilterBox-wrapper > .jp-FilterBox {
+  width: 100%;
+}
+
+.jp-FilterBox-wrapper > .jp-FilterBox-suggestions {
+  position: absolute;
+  top: 100%;
+  bottom: auto;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 2px 0 0;
+  padding: 2px 0;
+  list-style: none;
+  background: var(--jp-layout-color1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  box-shadow: var(--jp-elevation-z4);
+}
+
+.jp-FilterBox-suggestion {
+  padding: 4px 8px;
+  cursor: pointer;
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-FilterBox-suggestion:hover,
+.jp-FilterBox-suggestion:focus {
+  background: var(--jp-layout-color2);
+}
+
+.jp-FilterBox-suggestion:focus-visible {
+  outline: 1px solid var(--jp-brand-color1);
+  outline-offset: -1px;
+}
+
 .jp-Button {
   color: var(--jp-ui-font-color2);
   border-radius: var(--jp-border-radius);
