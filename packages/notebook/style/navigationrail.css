@@ -36,7 +36,7 @@
   border: 0;
 }
 
-/* One short horizontal line marker for each notebook cell. */
+/* Uniform horizontal bar marker for each notebook cell. */
 .jp-Notebook-navigationRail-line {
   position: absolute;
   left: 0;
@@ -58,17 +58,14 @@
 .jp-Notebook-navigationRail-line::after {
   content: '';
   display: block;
-  width: 10px;
+  width: 14px;
   height: 2px;
   border-radius: 1px;
   background-color: var(--jp-border-color1);
-  opacity: 0.8;
+  opacity: 0.75;
   transition:
-    width 0.15s ease,
-    height 0.15s ease,
     opacity 0.15s ease,
-    background-color 0.15s ease,
-    box-shadow 0.15s ease;
+    background-color 0.15s ease;
 }
 
 .jp-Notebook-navigationRail-line:hover {
@@ -77,62 +74,49 @@
 
 .jp-Notebook-navigationRail-line:hover::after {
   opacity: 1;
-  width: 14px;
-  height: 2.5px;
   background-color: var(--jp-ui-font-color1);
 }
 
-/* Active cell line */
-.jp-Notebook-navigationRail-line.jp-mod-active::after {
+/* Active cell bar */
+.jp-Notebook-navigationRail-line.jp-mod-active::after,
+.jp-Notebook-navigationRail-line.jp-mod-active:hover::after {
   opacity: 1;
-  width: 16px;
-  height: 2.5px;
   background-color: var(--jp-brand-color1);
-  box-shadow: 0 0 0 1.5px var(--jp-brand-color3);
 }
 
-/* Running cell line */
-.jp-Notebook-navigationRail-line.jp-mod-running::after {
-  width: 14px;
+/* Running cell bar */
+.jp-Notebook-navigationRail-line.jp-mod-running::after,
+.jp-Notebook-navigationRail-line.jp-mod-running:hover::after {
   background-color: var(--jp-warn-color1);
-  opacity: 0.95;
+  opacity: 1;
   animation: jp-navigationRail-pulse 1.2s infinite ease-in-out alternate;
 }
 
 @keyframes jp-navigationRail-pulse {
   0% {
-    transform: scaleX(1);
-    box-shadow: 0 0 0 0 var(--jp-warn-color3);
+    opacity: 0.4;
   }
 
   100% {
-    transform: scaleX(1.2);
-    box-shadow: 0 0 0 3px var(--jp-warn-color3);
+    opacity: 1;
   }
 }
 
-/* Error cell line */
-.jp-Notebook-navigationRail-line.jp-mod-error::after {
-  opacity: 1;
-  width: 14px;
-  height: 2.5px;
-  background-color: var(--jp-error-color1);
-  box-shadow: 0 0 0 1.5px var(--jp-error-color3);
-}
-
+/* Error cell bar */
+.jp-Notebook-navigationRail-line.jp-mod-error::after,
 .jp-Notebook-navigationRail-line.jp-mod-error:hover::after {
-  width: 16px;
+  opacity: 1;
   background-color: var(--jp-error-color1);
-  box-shadow: 0 0 0 2px var(--jp-error-color2);
 }
 
-.jp-Notebook-navigationRail-line.jp-mod-error.jp-mod-active::after {
-  width: 16px;
-  height: 3px;
-  background-color: var(--jp-error-color1);
-  box-shadow:
-    0 0 0 1.5px var(--jp-brand-color1),
-    0 0 0 3px var(--jp-error-color3);
+.jp-Notebook-navigationRail-line.jp-mod-error.jp-mod-active::after,
+.jp-Notebook-navigationRail-line.jp-mod-error.jp-mod-active:hover::after {
+  opacity: 1;
+  background: linear-gradient(
+    90deg,
+    var(--jp-brand-color1) 0 4px,
+    var(--jp-error-color1) 4px 100%
+  );
 }
 
 /* Tooltip - Minimalist, native theme tokens */
