@@ -248,6 +248,33 @@ async function waitForStreamOutput(
   throw new Error('Timed out waiting for stream output');
 }
 
+/**
+ * The timing that ipykernel reports when `recordTiming` is on.
+ */
+const EXECUTION_TIMING_KEYS = [
+  'iopub.execute_input',
+  'iopub.status.busy',
+  'iopub.status.idle',
+  'shell.execute_reply',
+  'shell.execute_reply.started'
+];
+
+function getTiming(cell: CodeCell): JSONObject {
+  return (cell.model.getMetadata('execution') ?? {}) as JSONObject;
+}
+
+/**
+ * Wait up to 10 seconds for a timing key.
+ */
+async function waitForTiming(cell: CodeCell, key: string): Promise<void> {
+  for (let i = 0; i < 100; i++) {
+    if (getTiming(cell)[key]) {
+      return;
+    }
+    await sleep(100);
+  }
+}
+
 beforeAll(async () => {
   await server.start();
 }, 30000);
@@ -2329,6 +2356,62 @@ describe('@jupyterlab/notebook', () => {
         expect(cell.model.executionState).toBe('idle');
         expect(cell.model.executionCount).not.toBe(null);
       }, 20000);
+
+      it('should record the timing of a run on a cell moved while it runs', async () => {
+        widget.notebookConfig = {
+          ...widget.notebookConfig,
+          recordTiming: true
+        };
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        cell.model.sharedModel.setSource('import time\ntime.sleep(1)');
+
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await waitForTiming(cell, 'iopub.execute_input');
+
+        NotebookActions.moveDown(widget);
+        const cellAfterMove = widget.widgets[1] as CodeCell;
+        const inIdleState = waitForExecutionState(cellAfterMove, 'idle');
+        await Promise.all([inIdleState, executionCompleted]);
+
+        expect(Object.keys(getTiming(cellAfterMove)).sort()).toEqual(
+          RUN_TIMING_KEYS
+        );
+      }, 20000);
+
+      it('should record the timing of a run that starts after its cell moved', async () => {
+        widget.notebookConfig = {
+          ...widget.notebookConfig,
+          recordTiming: true
+        };
+        const first = widget.widgets[3] as CodeCell;
+        const queued = widget.widgets[4] as CodeCell;
+        first.model.sharedModel.setSource('import time\ntime.sleep(1)');
+        queued.model.sharedModel.setSource('1 + 1');
+        widget.activeCellIndex = 3;
+        widget.select(queued);
+
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await waitForTiming(first, 'iopub.execute_input');
+        expect(getTiming(queued)['iopub.execute_input']).toBeUndefined();
+
+        widget.deselectAll();
+        widget.activeCellIndex = 4;
+        NotebookActions.moveDown(widget);
+        const queuedAfterMove = widget.widgets[5] as CodeCell;
+        const inIdleState = waitForExecutionState(queuedAfterMove, 'idle');
+        await Promise.all([inIdleState, executionCompleted]);
+
+        expect(Object.keys(getTiming(queuedAfterMove)).sort()).toEqual(
+          RUN_TIMING_KEYS
+        );
+      }, 20000);
     });
 
     describe('#copy()', () => {
@@ -3188,6 +3271,85 @@ describe('@jupyterlab/notebook', () => {
 
         expect(cellAfterUndo.model.executionState).toBe('idle');
         expect(cellAfterUndo.model.executionCount).not.toBe(null);
+      }, 20000);
+
+      it('should record execution timing on a cell deleted and restored while running', async () => {
+        widget.notebookConfig = {
+          ...widget.notebookConfig,
+          recordTiming: true
+        };
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        cell.model.sharedModel.setSource('import time\ntime.sleep(1)');
+
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await waitForTiming(cell, 'iopub.execute_input');
+
+        NotebookActions.deleteCells(widget);
+        NotebookActions.undo(widget);
+        const cellAfterUndo = widget.widgets[0] as CodeCell;
+        const inIdleState = waitForExecutionState(cellAfterUndo, 'idle');
+        await Promise.all([inIdleState, executionCompleted]);
+
+        expect(Object.keys(getTiming(cellAfterUndo)).sort()).toEqual(
+          EXECUTION_TIMING_KEYS
+        );
+      }, 20000);
+
+      it('should record execution timing on a cell deleted while running and restored after it finished', async () => {
+        widget.notebookConfig = {
+          ...widget.notebookConfig,
+          recordTiming: true
+        };
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        cell.model.sharedModel.setSource('import time\ntime.sleep(1)');
+
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await waitForTiming(cell, 'iopub.execute_input');
+
+        NotebookActions.deleteCells(widget);
+        await executionCompleted;
+        NotebookActions.undo(widget);
+        const cellAfterUndo = widget.widgets[0] as CodeCell;
+        await waitForTiming(cellAfterUndo, 'shell.execute_reply');
+
+        expect(Object.keys(getTiming(cellAfterUndo)).sort()).toEqual(
+          EXECUTION_TIMING_KEYS
+        );
+      }, 20000);
+
+      it('should keep execution timing on a cell moved while running and moved back after it finished', async () => {
+        widget.notebookConfig = {
+          ...widget.notebookConfig,
+          recordTiming: true
+        };
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        cell.model.sharedModel.setSource('import time\ntime.sleep(1)');
+
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await waitForTiming(cell, 'iopub.execute_input');
+
+        NotebookActions.moveDown(widget);
+        const cellAfterMove = widget.widgets[1] as CodeCell;
+        await executionCompleted;
+        await waitForTiming(cellAfterMove, 'shell.execute_reply');
+        NotebookActions.undo(widget);
+        const cellAfterUndo = widget.widgets[0] as CodeCell;
+
+        expect(Object.keys(getTiming(cellAfterUndo)).sort()).toEqual(
+          EXECUTION_TIMING_KEYS
+        );
       }, 20000);
 
       it.each(['type change', 'merge'])(
