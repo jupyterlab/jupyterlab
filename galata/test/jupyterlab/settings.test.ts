@@ -408,7 +408,7 @@ test('Keyboard Shortcuts: validate "Or" button behavior when editing shortcuts',
   );
 });
 
-test('Keyboard Shortcuts: should show/hide the add shortcut row', async ({
+test('Keyboard Shortcuts: should open and cancel the add shortcut dialog', async ({
   page
 }) => {
   await page.evaluate(async () => {
@@ -418,24 +418,20 @@ test('Keyboard Shortcuts: should show/hide the add shortcut row', async ({
   });
 
   const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
-  const addShortcutRow = shortcutsForm.locator('.jp-Shortcuts-Row-newShortcut');
-  const rows = shortcutsForm.locator('.jp-Shortcuts-Row');
-  // Wait for the shortcuts to be displayed.
-  await rows.first().waitFor();
+  await shortcutsForm.locator('.jp-Shortcuts-Row').first().waitFor();
 
-  // Expect the add shortcut row to not be attached by default.
-  await expect(addShortcutRow).not.toBeAttached();
+  const dialog = page.locator('.jp-Dialog-content');
+  await expect(dialog).toHaveCount(0);
 
-  // Show the add shortcut row.
   await shortcutsForm.getByTitle('Add shortcut').click();
-  await expect(addShortcutRow).toBeAttached();
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator('.jp-Shortcuts-AddDialogBody')).toBeVisible();
 
-  // Hide the add shortcut row
-  await shortcutsForm.getByTitle('Collapse new shortcut row').click();
-  await expect(addShortcutRow).not.toBeAttached();
+  await dialog.locator('button.jp-mod-reject').click();
+  await expect(dialog).toHaveCount(0);
 });
 
-test('Keyboard Shortcuts: should filter commands in add shortcut row', async ({
+test('Keyboard Shortcuts: should list and select a command in the add shortcut dialog', async ({
   page
 }) => {
   await page.evaluate(async () => {
@@ -445,25 +441,20 @@ test('Keyboard Shortcuts: should filter commands in add shortcut row', async ({
   });
 
   const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
-  const addShortcutRow = shortcutsForm.locator('.jp-Shortcuts-Row-newShortcut');
-
-  // Locator to all options except the empty one.
-  const commandOptions = addShortcutRow.locator(
-    'select option:not([value=""])'
-  );
-
-  // Show the add shortcut row and count initial commands.
   await shortcutsForm.getByTitle('Add shortcut').click();
-  const initialCount = await commandOptions.count();
 
-  // Filtering on notebook should reduce the count.
-  const filterInput = shortcutsForm.locator('jp-search.jp-FilterBox');
-  await filterInput.locator('input').fill('notebook');
-  expect(await commandOptions.count()).toBeLessThan(initialCount);
+  const dialog = page.locator('.jp-Dialog-content');
+  await dialog.waitFor();
+  const commandSelect = dialog.locator('#jp-Shortcuts-AddDialog-command');
+  const commandOptions = commandSelect.locator('option:not([value=""])');
 
-  // Filtering on a specific command should keep only one command.
-  await filterInput.locator('input').fill('restart kernel and run all cells');
-  await expect(commandOptions).toHaveCount(1);
+  // Dialog lists all commands; table search does not filter this select.
+  expect(await commandOptions.count()).toBeGreaterThan(10);
+
+  await commandSelect.selectOption({ value: 'notebook:restart-run-all' });
+  await expect(commandSelect).toHaveValue('notebook:restart-run-all');
+
+  await dialog.locator('button.jp-mod-reject').click();
 });
 
 test('Keyboard Shortcuts: should find a shortcut by the text it inserts', async ({
@@ -515,40 +506,31 @@ test('Keyboard Shortcuts: should add a new shortcut', async ({ page }) => {
   expect(await getShortcut('notebook:restart-run-all')).toHaveLength(0);
 
   const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
-  const addShortcutRow = shortcutsForm.locator('.jp-Shortcuts-Row-newShortcut');
-
-  // Show the add shortcut row.
   await shortcutsForm.getByTitle('Add shortcut').click();
 
-  // Select the command.
-  await addShortcutRow
-    .locator('select')
-    .selectOption('notebook: Restart Kernel and Run All Cells…');
-  // Display the shortcut input and add a shortcut.
-  await addShortcutRow.locator('.jp-Shortcuts-EmptyCell').first().hover();
-  await addShortcutRow.locator('.jp-Shortcuts-Plus').click();
-  const shortcutKey = addShortcutRow.locator('.jp-Shortcuts-Input').first();
-  await shortcutKey.press('Control+r');
-  await addShortcutRow.locator('.jp-Shortcuts-Submit').click();
-
-  // Open the custom command dialog.
-  await addShortcutRow.getByTitle('Custom options').waitFor();
-  await addShortcutRow.getByTitle('Custom options').click();
-
-  // Fill some custom value for the selector and the args.
   const dialog = page.locator('.jp-Dialog-content');
   await dialog.waitFor();
-  await dialog.getByRole('textbox').first().fill(selector);
+  await expect(dialog.locator('.jp-Shortcuts-AddDialogBody')).toBeVisible();
+
+  await dialog
+    .locator('#jp-Shortcuts-AddDialog-command')
+    .selectOption({ value: 'notebook:restart-run-all' });
+
+  // Selector + args live in the add dialog (not a separate Custom options dialog).
+  await dialog.locator('input[name="shortcut-selector"]').fill(selector);
   const jsonEditorLine = dialog.locator('.jp-JSONEditor-host .cm-line').first();
   await jsonEditorLine.click();
   await jsonEditorLine.selectText();
   await jsonEditorLine.fill(JSON.stringify(args));
-  await dialog.locator('button.jp-mod-accept').click();
-  await dialog.waitFor({ state: 'detached' });
 
-  // Save the new shortcut.
-  await addShortcutRow.locator('.jp-Shortcuts-SaveNew').click();
-  await addShortcutRow.waitFor({ state: 'detached' });
+  await dialog.locator('.jp-Shortcuts-StartRecording').click();
+  const shortcutKey = dialog.locator('.jp-Shortcuts-Input').first();
+  await shortcutKey.press('Control+r');
+
+  const accept = dialog.locator('button.jp-mod-accept');
+  await expect(accept).toBeEnabled();
+  await accept.click();
+  await dialog.waitFor({ state: 'detached' });
 
   // The shortcut should now be listed with the correct selector and args.
   const shortcut = await getShortcut('notebook:restart-run-all');
