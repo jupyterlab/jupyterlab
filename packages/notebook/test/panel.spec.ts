@@ -215,9 +215,10 @@ describe('@jupyterlab/notebook', () => {
         };
         // The restart should use the locked kernel.
         await sessionContext.shutdown();
-        await sessionContext.startKernel();
+        await new SessionContextDialogs().restart(sessionContext);
 
         expect(sessionContext.session?.kernel?.name).toBe(second);
+        expect(panel.model!.defaultKernelName).toBe(second);
         expect(panel.model!.kernelLocked).toBe(true);
       }, 30000);
     });

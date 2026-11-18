@@ -1031,6 +1031,23 @@ describe('@jupyterlab/apputils', () => {
         await sessionContextDialogs.restart(sessionContext);
         expect(sessionContext?.session?.kernel).toBeTruthy();
       });
+
+      it('should start the locked kernel instead of the previously started kernel', async () => {
+        await sessionContext.initialize();
+        const first = sessionContext.session!.kernel!.name;
+        const second = Object.keys(specsManager.specs!.kernelspecs).find(
+          name => name !== first
+        )!;
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          name: second,
+          locked: true
+        };
+        await sessionContext.shutdown();
+
+        expect(await sessionContextDialogs.restart(sessionContext)).toBe(true);
+        expect(sessionContext.session?.kernel?.name).toBe(second);
+      });
     });
   });
 });

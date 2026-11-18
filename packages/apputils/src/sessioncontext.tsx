@@ -1512,7 +1512,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
    * #### Notes
    * If there is a running kernel, present a dialog.
    * If there is no kernel, we start a kernel with the last run
-   * kernel name and resolves with `true`.
+   * kernel name (or the locked kernel name) and resolves with `true`.
    */
   async restart(
     sessionContext: ISessionContext,
@@ -1525,10 +1525,13 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       throw new Error('session already disposed');
     }
     const kernel = sessionContext.session?.kernel;
-    if (!kernel && sessionContext.prevKernelName) {
-      await sessionContext.changeKernel({
-        name: sessionContext.prevKernelName
-      });
+    // Ensure a locked notebook only start its locked kernel.
+    const kernelName =
+      sessionContext.kernelPreference.locked === true
+        ? sessionContext.kernelPreference.name
+        : sessionContext.prevKernelName;
+    if (!kernel && kernelName) {
+      await sessionContext.changeKernel({ name: kernelName });
       return true;
     }
     // Bail if there is no previous kernel to start.
