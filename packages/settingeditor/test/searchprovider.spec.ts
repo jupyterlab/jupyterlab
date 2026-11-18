@@ -3,6 +3,7 @@
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
 import {
+  CodeMirrorEditor,
   CodeMirrorEditorFactory,
   EditorExtensionRegistry,
   EditorLanguageRegistry,
@@ -71,6 +72,16 @@ describe('@jupyterlab/settingeditor', () => {
       panel.dispose();
     });
 
+    const focusDefaults = (): void => {
+      const host = (editor.defaults as CodeMirrorEditor).host;
+      host.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    };
+
+    const focusUser = (): void => {
+      const host = (editor.source as CodeMirrorEditor).host;
+      host.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    };
+
     describe('#isApplicable()', () => {
       it('should apply to the Advanced Settings editor panel', () => {
         expect(SettingEditorSearchProvider.isApplicable(panel)).toBe(true);
@@ -97,6 +108,56 @@ describe('@jupyterlab/settingeditor', () => {
         expect(provider.matchesCount).toBe(3);
         await provider.startQuery(/t/, undefined);
         expect(provider.matchesCount).toBe(6);
+      });
+
+      it('should return matches from the defaults editor when it has focus', async () => {
+        editor.defaults.model.sharedModel.setSource('foo foo\nfoo');
+        focusDefaults();
+        await provider.startQuery(/foo/, undefined);
+        expect(provider.matchesCount).toBe(3);
+        await provider.endQuery();
+      });
+
+      it('should switch to the user editor when it gains focus', async () => {
+        editor.defaults.model.sharedModel.setSource('foo foo\nfoo');
+        focusDefaults();
+        await provider.startQuery(/foo/, undefined);
+        expect(provider.matchesCount).toBe(3);
+        await provider.endQuery();
+        focusUser();
+        await provider.startQuery(/test/, undefined);
+        expect(provider.matchesCount).toBe(3);
+        await provider.endQuery();
+      });
+    });
+
+    describe('#getInitialQuery()', () => {
+      it('should return the selection of the focused defaults editor', () => {
+        editor.defaults.model.sharedModel.setSource('foo foo\nfoo');
+        editor.defaults.setSelection({
+          start: { line: 0, column: 0 },
+          end: { line: 0, column: 3 }
+        });
+        focusDefaults();
+        expect(provider.getInitialQuery()).toBe('foo');
+      });
+    });
+
+    describe('#isReadOnly', () => {
+      it('should be true when the defaults editor is active', async () => {
+        editor.defaults.model.sharedModel.setSource('foo foo\nfoo');
+        focusDefaults();
+        await provider.startQuery(/foo/, undefined);
+        expect(provider.isReadOnly).toBe(true);
+        expect(provider.getCurrentMatch()?.readOnly).toBe(true);
+        await provider.endQuery();
+      });
+
+      it('should be false when the user editor is active', async () => {
+        focusUser();
+        await provider.startQuery(/test/, undefined);
+        expect(provider.isReadOnly).toBeFalsy();
+        await provider.endQuery();
       });
     });
 
@@ -178,6 +239,18 @@ describe('@jupyterlab/settingeditor', () => {
         );
         await provider.endQuery();
       });
+
+      it('should not replace a match in the defaults editor', async () => {
+        editor.defaults.model.sharedModel.setSource('foo foo\nfoo');
+        focusDefaults();
+        await provider.startQuery(/foo/, undefined);
+        expect(provider.isReadOnly).toBe(true);
+        expect(await provider.replaceCurrentMatch('bar')).toBe(false);
+        expect(editor.defaults.model.sharedModel.getSource()).toBe(
+          'foo foo\nfoo'
+        );
+        await provider.endQuery();
+      });
     });
 
     describe('#replaceAllMatches()', () => {
@@ -186,6 +259,17 @@ describe('@jupyterlab/settingeditor', () => {
         await provider.replaceAllMatches('bar');
         expect(editor.source.model.sharedModel.getSource()).toBe(
           'bar bar\nbar'
+        );
+        await provider.endQuery();
+      });
+
+      it('should not replace matches in the defaults editor', async () => {
+        editor.defaults.model.sharedModel.setSource('foo foo\nfoo');
+        focusDefaults();
+        await provider.startQuery(/foo/, undefined);
+        expect(await provider.replaceAllMatches('bar')).toBe(false);
+        expect(editor.defaults.model.sharedModel.getSource()).toBe(
+          'foo foo\nfoo'
         );
         await provider.endQuery();
       });
