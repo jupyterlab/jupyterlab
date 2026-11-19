@@ -104,8 +104,10 @@
   Error messages
 */
 
-.jp-extensionmanager-view .jp-extensionmanager-error pre {
+.jp-extensionmanager-view .jp-extensionmanager-error pre,
+.jp-extensionmanager-dialog pre {
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 /*
