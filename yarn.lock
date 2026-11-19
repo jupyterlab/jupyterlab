@@ -5038,7 +5038,7 @@ __metadata:
     "@lumino/signaling": ^2.1.6
     "@lumino/widgets": ^2.10.0
     "@types/webpack-env": ^1.18.0
-    "@xterm/addon-search": ~0.16.0
+    "@xterm/addon-search": 0.17.0-beta.331
     color: ^5.0.0
     rimraf: ~5.0.5
     typescript: ~5.9.3
@@ -5059,11 +5059,11 @@ __metadata:
     "@lumino/signaling": ^2.1.6
     "@lumino/widgets": ^2.10.0
     "@types/jest": ^29.2.0
-    "@xterm/addon-fit": ~0.11.0
-    "@xterm/addon-search": ~0.16.0
-    "@xterm/addon-web-links": ~0.12.0
-    "@xterm/addon-webgl": ~0.19.0
-    "@xterm/xterm": ~6.0.0
+    "@xterm/addon-fit": 0.12.0-beta.333
+    "@xterm/addon-search": 0.17.0-beta.331
+    "@xterm/addon-web-links": 0.13.0-beta.331
+    "@xterm/addon-webgl": 0.20.0-beta.330
+    "@xterm/xterm": 6.1.0-beta.337
     color: ^5.0.0
     jest: ^29.2.0
     jest-canvas-mock: ^2.5.2
@@ -8069,38 +8069,46 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xterm/addon-fit@npm:~0.11.0":
-  version: 0.11.0
-  resolution: "@xterm/addon-fit@npm:0.11.0"
-  checksum: 0a772c4fbeddd65f68c345c3d40ee7dae231784dd7095ccd3acba0832def24a5364c4705bf6f24c2f01016855f6bcf0ac4636267e50efa3a319474f80c8d3c7f
+"@xterm/addon-fit@npm:0.12.0-beta.333":
+  version: 0.12.0-beta.333
+  resolution: "@xterm/addon-fit@npm:0.12.0-beta.333"
+  peerDependencies:
+    "@xterm/xterm": ^6.1.0-beta.337
+  checksum: 7ec9a98ee132f32624149bef35bff0a224ebcea349b47979c99e7ef50c6ab354178a89e1d11dc9e0de2a950ad7e69bb5b84a125f8d9da50381640e9e5602f351
   languageName: node
   linkType: hard
 
-"@xterm/addon-search@npm:~0.16.0":
-  version: 0.16.0
-  resolution: "@xterm/addon-search@npm:0.16.0"
-  checksum: 73fed15118b87d9830e4b4d39e049bd03daf6f88fc05567d3dd55c4e8d3be77a35a0f7d5fa061a4dbfdf7f25e63f16463bacfaddd061d85c2bdaef59cc2efe2f
+"@xterm/addon-search@npm:0.17.0-beta.331":
+  version: 0.17.0-beta.331
+  resolution: "@xterm/addon-search@npm:0.17.0-beta.331"
+  peerDependencies:
+    "@xterm/xterm": ^6.1.0-beta.337
+  checksum: c77c2532f3cc2d32c3e6c74b875c4f0dfbcdc899a27590cd8e27fed9006fa3b3fa814406758049f42ea09bd8dcf1c5085ca69d7fa2e95ecf31565d84adc6e7c3
   languageName: node
   linkType: hard
 
-"@xterm/addon-web-links@npm:~0.12.0":
-  version: 0.12.0
-  resolution: "@xterm/addon-web-links@npm:0.12.0"
-  checksum: 3626ede0b2a8b1d9dbdfc0438b976d6848f3c931a4c67feb1b956a0d53bb413366a2758cb2133cada7d5042f6d4543613d98519208235699b9ba1bed22abb51f
+"@xterm/addon-web-links@npm:0.13.0-beta.331":
+  version: 0.13.0-beta.331
+  resolution: "@xterm/addon-web-links@npm:0.13.0-beta.331"
+  peerDependencies:
+    "@xterm/xterm": ^6.1.0-beta.337
+  checksum: 62fd3ae6908c29fb452b0285d4889cf446d8098e6ce84ea8a4f29d17eeb00cda9213c18c07d6f6e5bd6cec529e10496ae4720ca04c9269dfef928712d3670abe
   languageName: node
   linkType: hard
 
-"@xterm/addon-webgl@npm:~0.19.0":
-  version: 0.19.0
-  resolution: "@xterm/addon-webgl@npm:0.19.0"
-  checksum: ed8d94831e05f6bc4a1d368a8b7c24b01de827840c693022f1a4a0ca40ded716c72b9b59beee4c2b19c4ea5af9db3f7d1c5e0d381c7cc3a752713b5efd2bff07
+"@xterm/addon-webgl@npm:0.20.0-beta.330":
+  version: 0.20.0-beta.330
+  resolution: "@xterm/addon-webgl@npm:0.20.0-beta.330"
+  peerDependencies:
+    "@xterm/xterm": ^6.1.0-beta.337
+  checksum: 4f2a9b95529381ad74b8c9c0c98eb3b87c61c2124fcec61d9ecc1504e09b3c104deee3ec116a9e2362bcd7ba0d9b48dc5f809cd164983e8930b86c7cc2d93439
   languageName: node
   linkType: hard
 
-"@xterm/xterm@npm:~6.0.0":
-  version: 6.0.0
-  resolution: "@xterm/xterm@npm:6.0.0"
-  checksum: 913f6523fe6148d36ef6e7b6f25276faee7f48ec6a9eab48b887c77e8d0cbe8bd77d278f19db5981f45d71d5778619e0580f516cdeeae6cd7ea32341b962677f
+"@xterm/xterm@npm:6.1.0-beta.337":
+  version: 6.1.0-beta.337
+  resolution: "@xterm/xterm@npm:6.1.0-beta.337"
+  checksum: 0a4332fed03c73da5db4521d2b9208f93a213ac458c949f83f68f8cff32267444a0a567f01668ddb97e9cf275baed889e7cb3fc17423f1d5cc5b717edb8cf877
   languageName: node
   linkType: hard
 
