@@ -159,6 +159,22 @@ describe('NotebookHandler', () => {
     expect(kernel.has(service.getCodeId(CODE))).toBe(false);
   });
 
+  it('should clear the breakpoints of the previous code after a kernel restart', async () => {
+    // A restarted kernel keeps the code of the cells in a new folder, and the
+    // debugger sends the breakpoints there again.
+    kernel.clear();
+    service.config.setTmpFileParams({
+      kernel: 'python3',
+      prefix: '/tmp/ipykernel_2/',
+      suffix: '.py'
+    });
+    await service.updateBreakpoints(CODE, [{ line: 2, verified: true }]);
+    firstCell().sharedModel.setSource('def f():\n    return 2');
+    await sendBreakpoint();
+
+    expect(kernel.has(service.getCodeId(CODE))).toBe(false);
+  });
+
   it('should keep the breakpoints of a cell when a cell with the same code is edited', async () => {
     context.model.sharedModel.insertCell(1, {
       cell_type: 'code',

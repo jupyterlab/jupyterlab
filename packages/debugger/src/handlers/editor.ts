@@ -65,9 +65,9 @@ export class EditorHandler implements IDisposable {
     }
     // After a reload, a move or an undone deletion, the kernel may already
     // hold breakpoints of this code, and an edit or a deletion clears them.
+    // A kernel restart changes the folder of the code files, so keep the code.
     if (!this._path) {
-      this._lastCellPath =
-        this._debuggerService.getCodeId(src.getSource()) || null;
+      this._lastCode = src.getSource();
     }
 
     this._src.changed.connect(this._onSharedModelChanged, this);
@@ -228,11 +228,11 @@ export class EditorHandler implements IDisposable {
    * Code that has run keeps its breakpoints, because it can still run.
    */
   clearBreakpoints(): IDebugger.IBreakpoint[] {
-    if (this.isDisposed || this._path) {
+    if (this.isDisposed || this._path || this._lastCode === null) {
       return [];
     }
-    const path = this._lastCellPath;
-    this._lastCellPath = null;
+    const path = this._debuggerService.getCodeId(this._lastCode);
+    this._lastCode = null;
     if (!path || !this._canClear(path)) {
       return [];
     }
@@ -347,11 +347,10 @@ export class EditorHandler implements IDisposable {
     const code = this._src.getSource();
     let previous: string | null = null;
     if (!this._path) {
-      const path = this._debuggerService.getCodeId(code);
-      if (this._lastCellPath !== path) {
-        previous = this._lastCellPath;
+      if (this._lastCode !== null && this._lastCode !== code) {
+        previous = this._debuggerService.getCodeId(this._lastCode);
       }
-      this._lastCellPath = path || null;
+      this._lastCode = code;
     }
     await this._debuggerService.updateBreakpoints(
       code,
@@ -554,10 +553,12 @@ export class EditorHandler implements IDisposable {
       this._debuggerService.getCodeId(code)
     );
     // The model has no breakpoints for an edit that is not sent yet.
-    if (breakpoints.length || !this._lastCellPath) {
+    if (breakpoints.length || this._lastCode === null) {
       return breakpoints;
     }
-    return model.getBreakpoints(this._lastCellPath);
+    return model.getBreakpoints(
+      this._debuggerService.getCodeId(this._lastCode)
+    );
   }
 
   private _id: string;
@@ -575,7 +576,7 @@ export class EditorHandler implements IDisposable {
   private _path: string;
   private _src: ISharedText;
   private _selectedBreakpoint: IDebugger.IBreakpoint | null;
-  private _lastCellPath: string | null = null;
+  private _lastCode: string | null = null;
   private _ranPaths: Set<string>;
 }
 
