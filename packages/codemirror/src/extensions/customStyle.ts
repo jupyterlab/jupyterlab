@@ -73,8 +73,6 @@ function setContentStyle(view: EditorView): Record<string, string> | null {
     return null;
   }
 
-  // CodeMirror sets the line height on the scroller, so the content needs its
-  // own value for the change to reach the lines.
   return { style: `line-height: ${lineHeight.toString()} !important` };
 }
 
