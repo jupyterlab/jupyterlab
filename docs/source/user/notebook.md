@@ -370,3 +370,22 @@ Be cautious when editing metadata directly, as incorrect values may
 affect notebook behavior. If something goes wrong, use the revert icon
 to undo your changes before committing them.
 ```
+
+## Getting the notebook path from the kernel
+
+Jupyter Server sets the `JPY_SESSION_NAME` environment variable on the kernels
+that it starts. The variable contains the path to the notebook associated with
+the kernel, so you can read it from a cell instead of relying on a third-party
+package:
+
+```python
+import os
+
+notebook_path = os.environ.get('JPY_SESSION_NAME')
+```
+
+The value is set when the kernel starts and does not change when you rename the
+notebook. Restart the kernel to refresh it. The variable is not set for kernels
+started outside Jupyter Server, so handle a missing value in your code. This
+requires a recent version of Jupyter Server; update your environment if the
+variable is not available.
