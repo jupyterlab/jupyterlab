@@ -1,8 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { CellModel, ICellModel } from '@jupyterlab/cells';
+import type { ICellModel } from '@jupyterlab/cells';
 import {
+  CellModel,
   CodeCellModel,
   MarkdownCellModel,
   RawCellModel
@@ -175,7 +176,9 @@ export class CellList {
         for (let i = 0; i < insCount; i++) {
           const cellModel = delCellModels[i];
           const newSharedModel = insSharedCells[i];
-          cellModel.switchSharedModel?.(newSharedModel);
+          if (cellModel instanceof CellModel) {
+            cellModel.switchSharedModel(newSharedModel);
+          }
           this._cellMap.set(newSharedModel, cellModel);
           newSharedModel.disposed.connect(() => {
             this._cellMap.delete(newSharedModel);

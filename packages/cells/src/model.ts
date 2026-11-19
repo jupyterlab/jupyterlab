@@ -94,11 +94,6 @@ export interface ICellModel extends CodeEditor.IModel {
   readonly sharedModel: ISharedCell;
 
   /**
-   * Switch the shared model to a new one (used when cells are moved).
-   */
-  switchSharedModel?(sharedModel: ISharedCell): void;
-
-  /**
    * Delete a metadata.
    *
    * @param key Metadata key
@@ -318,6 +313,8 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
 
   /**
    * Switch the shared model to a new one (used when cells are moved).
+   *
+   * @internal
    */
   switchSharedModel(sharedModel: ISharedCell): void {
     this.sharedModel.changed.disconnect(this.onGenericChange, this);
@@ -469,6 +466,8 @@ export abstract class AttachmentsCellModel extends CellModel {
 
   /**
    * Switch the shared model to a new one (used when cells are moved).
+   *
+   * @internal
    */
   override switchSharedModel(sharedModel: ISharedCell): void {
     this.sharedModel.changed.disconnect(this._onSharedModelChanged, this);
@@ -745,6 +744,8 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
 
   /**
    * Switch the shared model to a new one (used when cells are moved).
+   *
+   * @internal
    */
   override switchSharedModel(sharedModel: ISharedCodeCell): void {
     this.sharedModel.changed.disconnect(this._onSharedModelChanged, this);
