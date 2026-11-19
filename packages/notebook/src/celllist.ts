@@ -61,8 +61,8 @@ export class CellList {
    * @returns A new iterator starting at the front of the cell list.
    */
   *[Symbol.iterator](): IterableIterator<ICellModel> {
-    for (const cell of this.model.cells) {
-      yield this._cellMap.get(cell)!;
+    for (const cell of this._cellList) {
+      yield cell;
     }
   }
 
@@ -76,9 +76,10 @@ export class CellList {
     this._isDisposed = true;
 
     // Clean up the cell map and cell order objects.
-    for (const cell of this.model.cells) {
-      this._cellMap.get(cell)?.dispose();
+    for (const cell of this._cellList) {
+      cell.dispose();
     }
+    this._cellList.length = 0;
     Signal.clearData(this);
   }
 
@@ -90,35 +91,32 @@ export class CellList {
    * @returns The cell at the specified index.
    */
   get(index: number): ICellModel {
-    return this._cellMap.get(this.model.cells[index])!;
+    return this._cellList[index] ?? this._cellMap.get(this.model.cells[index])!;
+  }
+
+  private _createCellModel(sharedModel: ISharedCell): CellModel {
+    switch (sharedModel.cell_type) {
+      case 'code':
+        return new CodeCellModel({
+          sharedModel: sharedModel as ISharedCodeCell
+        });
+      case 'markdown':
+        return new MarkdownCellModel({
+          sharedModel: sharedModel as ISharedMarkdownCell
+        });
+      default:
+        return new RawCellModel({
+          sharedModel: sharedModel as ISharedRawCell
+        });
+    }
   }
 
   private _insertCells(index: number, cells: Array<ISharedCell>) {
-    cells.forEach(sharedModel => {
-      let cellModel: CellModel;
-      switch (sharedModel.cell_type) {
-        case 'code': {
-          cellModel = new CodeCellModel({
-            sharedModel: sharedModel as ISharedCodeCell
-          });
-          break;
-        }
-        case 'markdown': {
-          cellModel = new MarkdownCellModel({
-            sharedModel: sharedModel as ISharedMarkdownCell
-          });
-          break;
-        }
-        default: {
-          cellModel = new RawCellModel({
-            sharedModel: sharedModel as ISharedRawCell
-          });
-        }
-      }
-
+    cells.forEach((sharedModel, offset) => {
+      const cellModel = this._createCellModel(sharedModel);
       this._cellMap.set(sharedModel, cellModel);
+      this._cellList.splice(index + offset, 0, cellModel);
       sharedModel.disposed.connect(() => {
-        cellModel.dispose();
         this._cellMap.delete(sharedModel);
       });
     });
@@ -127,10 +125,82 @@ export class CellList {
   }
 
   private _onSharedModelChanged(self: ISharedNotebook, change: NotebookChange) {
-    let currpos = 0;
-    // We differ emitting the list changes to ensure cell model for all current shared cell have been created.
+    if (!change.cellsChange) {
+      return;
+    }
+
+    let curr = 0;
+    let delIndex = -1;
+    let delCount = 0;
+    let insIndex = -1;
+    let insCount = 0;
+    let insSharedCells: ISharedCell[] = [];
+
+    for (const delta of change.cellsChange) {
+      if (delta.retain != null) {
+        curr += delta.retain;
+      } else if (delta.delete != null) {
+        delIndex = curr;
+        delCount = delta.delete;
+      } else if (delta.insert != null) {
+        insIndex = curr;
+        insCount = delta.insert.length;
+        insSharedCells = delta.insert;
+        curr += delta.insert.length;
+      }
+    }
+
     const events = new Array<IObservableList.IChangedArgs<ICellModel>>();
-    change.cellsChange?.forEach(delta => {
+
+    // Check if this change represents a move operation
+    if (delCount > 0 && insCount === delCount) {
+      const origDelIndex = insIndex < delIndex ? delIndex - insCount : delIndex;
+      const delCellModels = this._cellList.slice(
+        origDelIndex,
+        origDelIndex + delCount
+      );
+      const delIds = delCellModels.map(c => c.id);
+      const insIds = insSharedCells.map(c => c.getId());
+
+      const isMove =
+        origDelIndex !== insIndex &&
+        delIds.length === insIds.length &&
+        delIds.every((id, i) => id === insIds[i]) &&
+        delCellModels.every(
+          (model, i) => model.type === insSharedCells[i].cell_type
+        );
+
+      if (isMove) {
+        // Rewire existing cell models to the new shared models
+        for (let i = 0; i < insCount; i++) {
+          const cellModel = delCellModels[i];
+          const newSharedModel = insSharedCells[i];
+          cellModel.switchSharedModel?.(newSharedModel);
+          this._cellMap.set(newSharedModel, cellModel);
+          newSharedModel.disposed.connect(() => {
+            this._cellMap.delete(newSharedModel);
+          });
+        }
+
+        // Update _cellList positions
+        const moved = this._cellList.splice(origDelIndex, delCount);
+        this._cellList.splice(insIndex, 0, ...moved);
+
+        events.push({
+          type: 'move',
+          oldIndex: origDelIndex,
+          newIndex: insIndex,
+          oldValues: moved,
+          newValues: moved
+        });
+
+        events.forEach(msg => this._changed.emit(msg));
+        return;
+      }
+    }
+
+    let currpos = 0;
+    change.cellsChange.forEach(delta => {
       if (delta.insert != null) {
         this._insertCells(currpos, delta.insert);
         events.push({
@@ -143,13 +213,14 @@ export class CellList {
 
         currpos += delta.insert.length;
       } else if (delta.delete != null) {
+        const removed = this._cellList.splice(currpos, delta.delete);
+        removed.forEach(c => c.dispose());
         events.push({
           type: 'remove',
           newIndex: -1,
           newValues: [],
           oldIndex: currpos,
-          // Cells have been disposed, so we don't know which one are gone.
-          oldValues: new Array(delta.delete).fill(undefined)
+          oldValues: removed
         });
       } else if (delta.retain != null) {
         currpos += delta.retain;
@@ -159,6 +230,7 @@ export class CellList {
     events.forEach(msg => this._changed.emit(msg));
   }
 
+  private _cellList: ICellModel[] = [];
   private _cellMap = new WeakMap<ISharedCell, ICellModel>();
   private _changed = new Signal<this, IObservableList.IChangedArgs<ICellModel>>(
     this

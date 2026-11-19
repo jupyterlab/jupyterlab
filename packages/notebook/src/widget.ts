@@ -685,6 +685,9 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           });
         }
         break;
+      case 'move':
+        this._moveCell(args.oldIndex, args.newIndex, args.newValues.length);
+        break;
       default:
         return;
     }
@@ -830,6 +833,20 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     ArrayExt.removeAt(this.cellsArray, index);
     this.onCellRemoved(index, widget);
     widget.dispose();
+  }
+
+  /**
+   * Move cell widgets in response to a cell list move event.
+   */
+  private _moveCell(fromIndex: number, toIndex: number, count = 1): void {
+    if (fromIndex === toIndex) {
+      return;
+    }
+    const moved = this.cellsArray.splice(fromIndex, count);
+    this.cellsArray.splice(toIndex, 0, ...moved);
+    this.cellsArray.forEach((cell, idx) => {
+      cell.node.dataset.windowedListIndex = `${idx}`;
+    });
   }
 
   private _shouldTrustCell(): boolean {
