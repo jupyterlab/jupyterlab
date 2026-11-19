@@ -2412,6 +2412,62 @@ describe('@jupyterlab/notebook', () => {
           EXECUTION_TIMING_KEYS
         );
       }, 20000);
+
+      it('should keep a moved cell running when it is run again during its execution', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        cell.model.sharedModel.setSource('import time\ntime.sleep(1)');
+
+        const executionStarted = waitForExecutionState(cell, 'running');
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await executionStarted;
+
+        NotebookActions.moveDown(widget);
+        const cellAfterMove = widget.widgets[1] as CodeCell;
+        widget.deselectAll();
+        widget.activeCellIndex = 1;
+        const secondExecutionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await executionCompleted;
+        await sleep(10);
+        const stateDuringSecondExecution = cellAfterMove.model.executionState;
+        await secondExecutionCompleted;
+
+        expect(stateDuringSecondExecution).toBe('running');
+      }, 20000);
+
+      it('should not record a failure when a moved cell is run again during its execution', async () => {
+        widget.notebookConfig = {
+          ...widget.notebookConfig,
+          recordTiming: true
+        };
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        cell.model.sharedModel.setSource('import time\ntime.sleep(1)');
+
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await waitForTiming(cell, 'iopub.execute_input');
+
+        NotebookActions.moveDown(widget);
+        const cellAfterMove = widget.widgets[1] as CodeCell;
+        widget.deselectAll();
+        widget.activeCellIndex = 1;
+        const secondExecutionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await Promise.all([executionCompleted, secondExecutionCompleted]);
+
+        expect(getTiming(cellAfterMove)['execution_failed']).toBeUndefined();
+      }, 20000);
     });
 
     describe('#copy()', () => {

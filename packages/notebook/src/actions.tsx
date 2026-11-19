@@ -2832,7 +2832,11 @@ namespace Private {
         }
       },
       () => {
-        if (!cell.isDisposed) {
+        // Like `CodeCell.execute`, skip a cell that runs a newer request.
+        if (
+          !cell.isDisposed &&
+          (!cell.outputArea.future || cell.outputArea.future === future)
+        ) {
           cell.model.executionState = 'idle';
           if (recordTiming && future.isDisposed) {
             // Record the time when the cell execution was aborted
