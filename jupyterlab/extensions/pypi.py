@@ -14,7 +14,7 @@ import tempfile
 from collections.abc import Awaitable, Callable
 from functools import partial
 from http import HTTPStatus
-from importlib.metadata import Distribution, distributions, entry_points
+from importlib.metadata import Distribution, PackageNotFoundError, distribution, entry_points
 from os import environ
 from pathlib import Path
 from subprocess import CalledProcessError, run
@@ -309,8 +309,13 @@ def _canonical_project_name(text: str) -> str | None:
         return None
 
 
-def _installed_distribution_names() -> set[str]:
-    return {canonicalize_name(dist.name) for dist in distributions() if dist.name}
+# `Distribution.name` parses the METADATA file, so reading it for every package is slow.
+def _is_installed(name: str) -> bool:
+    try:
+        distribution(name)
+    except PackageNotFoundError:
+        return False
+    return True
 
 
 def _installed_language_packs() -> dict[str, Distribution]:
@@ -515,15 +520,14 @@ class PyPIExtensionManager(ExtensionManager):
 
         query = query.casefold()
         named = _canonical_project_name(query)
-        installed = _installed_distribution_names()
         names = [
             name
             for name in (*sorted(KNOWN_EXTENSIONS), *sorted(LANGUAGE_PACKS))
-            if canonicalize_name(name) not in installed
+            if not _is_installed(name)
         ]
         fetches = [self._fetch_package_metadata(name, self.base_url) for name in names]
         known = {canonicalize_name(name) for name in (*KNOWN_EXTENSIONS, *LANGUAGE_PACKS)}
-        if named is not None and named not in known and named not in installed:
+        if named is not None and named not in known and not _is_installed(named):
             # Any PyPI project can have the name that the query spells.
             names.append(named)
             fetches.append(self._fetch_prebuilt_extension_metadata(named))

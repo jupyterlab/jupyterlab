@@ -6,7 +6,7 @@ import json
 import logging
 import sys
 import tarfile
-from importlib.metadata import distributions
+from importlib.metadata import Distribution, PackageNotFoundError, distributions
 from subprocess import CompletedProcess
 from types import MethodType, SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
@@ -32,10 +32,16 @@ PREBUILT_CLASSIFIERS = ["Framework :: Jupyter :: JupyterLab :: Extensions :: Pre
 
 
 @pytest.fixture(autouse=True)
-def no_installed_language_packs(monkeypatch):
-    """Hide the packages installed in the test environment and the known extensions."""
+def no_installed_language_packs(monkeypatch, tmp_path):
+    """Look up installed packages in `tmp_path` only, and hide the known extensions."""
+
+    def distribution(name):
+        for dist in Distribution.discover(name=name, path=[str(tmp_path)]):
+            return dist
+        raise PackageNotFoundError(name)
+
     monkeypatch.setattr("jupyterlab.extensions.pypi.entry_points", lambda **_: [])
-    monkeypatch.setattr("jupyterlab.extensions.pypi.distributions", list)
+    monkeypatch.setattr("jupyterlab.extensions.pypi.distribution", distribution)
     monkeypatch.setattr("jupyterlab.extensions.pypi.KNOWN_EXTENSIONS", ())
 
 
@@ -106,11 +112,8 @@ async def test_pypi_search_lists_known_extensions_before_language_packs(monkeypa
 
 @patch("jupyterlab.extensions.pypi.KNOWN_EXTENSIONS", ("jupyterlab-git", "nbdime"))
 @patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ())
-async def test_pypi_search_leaves_out_installed_known_extensions(monkeypatch):
-    monkeypatch.setattr(
-        "jupyterlab.extensions.pypi.distributions",
-        lambda: [SimpleNamespace(name="jupyterlab_git")],
-    )
+async def test_pypi_search_leaves_out_installed_known_extensions(monkeypatch, tmp_path):
+    (tmp_path / "jupyterlab_git-0.51.0.dist-info").mkdir()
     manager = PyPIExtensionManager()
     get = AsyncMock(return_value=httpx2.Response(200, json={"info": {"version": "1.0.0"}}))
     monkeypatch.setattr(manager._httpx_client, "get", get)
@@ -170,11 +173,8 @@ async def test_pypi_search_leaves_out_full_name_match_without_prebuilt_classifie
 
 
 @patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ())
-async def test_pypi_search_leaves_out_installed_full_name_match(monkeypatch):
-    monkeypatch.setattr(
-        "jupyterlab.extensions.pypi.distributions",
-        lambda: [SimpleNamespace(name="jupytext")],
-    )
+async def test_pypi_search_leaves_out_installed_full_name_match(monkeypatch, tmp_path):
+    (tmp_path / "jupytext-1.19.6.dist-info").mkdir()
     manager = PyPIExtensionManager()
     info = {"version": "1.19.6", "classifiers": PREBUILT_CLASSIFIERS}
     get = AsyncMock(return_value=httpx2.Response(200, json={"info": info}))
@@ -237,10 +237,6 @@ async def test_pypi_lists_installed_language_packs_separately(monkeypatch, tmp_p
             for dist in distributions(path=[str(tmp_path)])
             for entry in dist.entry_points.select(group=group)
         ],
-    )
-    monkeypatch.setattr(
-        "jupyterlab.extensions.pypi.distributions",
-        lambda: list(distributions(path=[str(tmp_path)])),
     )
     monkeypatch.setattr(ExtensionManager, "_get_installed_extensions", AsyncMock(return_value={}))
     manager = PyPIExtensionManager()
