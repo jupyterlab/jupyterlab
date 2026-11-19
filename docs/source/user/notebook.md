@@ -381,7 +381,7 @@ package:
 ```python
 import os
 
-notebook_path = os.environ.get('JPY_SESSION_NAME')
+notebook_path = os.environ.get("JPY_SESSION_NAME")
 ```
 
 The value is set when the kernel starts and does not change when you rename the
