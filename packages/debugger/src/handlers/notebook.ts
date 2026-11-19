@@ -158,14 +158,19 @@ export class NotebookHandler implements IDisposable {
   }
 
   /**
-   * Whether the cell with the given ID left the notebook.
+   * Whether the code cell with the given ID left the notebook, or is no
+   * longer a code cell.
    *
-   * Moving a cell disposes its widget and inserts a copy with the same ID.
+   * Moving a cell or changing its type disposes its widget and inserts a copy
+   * with the same ID.
    */
   private _isDeleted(id: string): boolean {
     const model = this._notebookPanel.content.model;
     return (
-      !!model && !model.sharedModel.cells.some(cell => cell.getId() === id)
+      !!model &&
+      !model.sharedModel.cells.some(
+        cell => cell.getId() === id && cell.cell_type === 'code'
+      )
     );
   }
 

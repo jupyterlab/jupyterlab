@@ -366,8 +366,8 @@ export class EditorHandler implements IDisposable {
 
   /**
    * Whether the file of an earlier version of the code has breakpoints to
-   * clear: code that ran can still run, and the cells of a notebook that
-   * have the same code share one file.
+   * clear: code that ran can still run, and the code cells of a notebook
+   * that have the same code share one file.
    */
   private _canClear(path: string): boolean {
     const breakpoints = this._debuggerService.model.breakpoints;
@@ -379,6 +379,7 @@ export class EditorHandler implements IDisposable {
     return !cells.some(
       cell =>
         cell !== src &&
+        cell.cell_type === 'code' &&
         this._debuggerService.getCodeId(cell.getSource()) === path
     );
   }

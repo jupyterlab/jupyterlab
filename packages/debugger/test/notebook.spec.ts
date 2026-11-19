@@ -6,6 +6,7 @@ import type { ICodeCellModel } from '@jupyterlab/cells';
 import type { Context } from '@jupyterlab/docregistry';
 
 import type { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
+import { NotebookActions } from '@jupyterlab/notebook';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 
 import { Debugger } from '../src/debugger';
@@ -89,6 +90,14 @@ describe('NotebookHandler', () => {
 
   it('should clear the breakpoints of a deleted cell', async () => {
     context.model.sharedModel.deleteCell(0);
+    await flushRequests();
+
+    expect(kernel.has(service.getCodeId(CODE))).toBe(false);
+  });
+
+  it('should clear the breakpoints of a cell changed to Markdown', async () => {
+    panel.content.activeCellIndex = 0;
+    NotebookActions.changeCellType(panel.content, 'markdown');
     await flushRequests();
 
     expect(kernel.has(service.getCodeId(CODE))).toBe(false);
