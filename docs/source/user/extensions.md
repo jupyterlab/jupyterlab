@@ -81,9 +81,9 @@ The default manager lists the prebuilt extensions maintained in the `ipython`,
 `jupyter`, `jupyter-book`, `jupyter-lsp`, `jupyter-server`, `jupyter-widgets`,
 `jupyterhub`, `jupyterlab`, `jupyterlab-contrib` and `voila-dashboards` GitHub
 organizations and the known JupyterLab language packs from PyPI, and uses `pip`
-to install them. For other extensions,
-use [Browse extensions on PyPI](https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Prebuilt)
-to find prebuilt extensions and follow the package's installation instructions.
+to install them. To install another prebuilt extension, find its name
+with [Browse extensions on PyPI](https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Prebuilt)
+and search for that full name.
 :::
 
 :::{warning}
@@ -137,7 +137,8 @@ your screen.
 
 The "Discover" section lists the known extensions, then the JupyterLab language
 packs, and pins the "Browse extensions on PyPI" link above the list. The search
-field matches package names and descriptions.
+field matches package names and descriptions, and finds any other prebuilt
+extension on PyPI by its full name, such as `jupytext`.
 **Settings → Language → Install more languages…** opens the Extension Manager
 with the language pack search filled in.
 

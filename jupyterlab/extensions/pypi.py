@@ -170,6 +170,7 @@ async def _fetch_package_metadata(
         for k in [
             "author",
             "bugtrack_url",
+            "classifiers",
             "docs_url",
             "home_page",
             "license",
@@ -217,8 +218,8 @@ LANGUAGE_PACKS = (
 )
 
 # Prebuilt JupyterLab 4 extensions, grouped by the GitHub organization that
-# maintains them. PyPI no longer lists packages by classifier, so search is
-# limited to known packages (#19932).
+# maintains them. PyPI no longer lists packages by classifier (#19932), so
+# search finds other packages only by their full name.
 IPYTHON_ORG_EXTENSIONS = ("ipyparallel",)
 JUPYTER_ORG_EXTENSIONS = (
     "nbdime",
@@ -296,6 +297,16 @@ KNOWN_EXTENSIONS = (
     *JUPYTERLAB_CONTRIB_ORG_EXTENSIONS,
     *VOILA_DASHBOARDS_ORG_EXTENSIONS,
 )
+
+# The 4.6 search listed packages by this classifier.
+_PREBUILT_CLASSIFIER = "Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt"
+
+
+def _canonical_project_name(text: str) -> str | None:
+    try:
+        return canonicalize_name(text.strip(), validate=True)
+    except InvalidName:
+        return None
 
 
 def _installed_distribution_names() -> set[str]:
@@ -488,24 +499,35 @@ class PyPIExtensionManager(ExtensionManager):
             )
         return extensions
 
-    async def list_packages(
+    async def _fetch_prebuilt_extension_metadata(self, name: str) -> PackageMetadata:
+        """Fetch package metadata; empty when the latest release lacks the prebuilt classifier."""
+        data = await self._fetch_package_metadata(name, self.base_url)
+        if _PREBUILT_CLASSIFIER not in _json_list(data.get("classifiers")):
+            return {}
+        return data
+
+    async def list_packages(  # noqa: C901
         self, query: str, page: int, per_page: int
     ) -> tuple[dict[str, ExtensionPackage], int | None]:
-        """List known extensions and language packs matching the query."""
+        """List known packages matching the query and the prebuilt extension it names."""
         if monotonic() >= self._package_metadata_cache_expires:
             self._configure_package_metadata_cache()
 
         query = query.casefold()
+        named = _canonical_project_name(query)
         installed = _installed_distribution_names()
         names = [
             name
             for name in (*sorted(KNOWN_EXTENSIONS), *sorted(LANGUAGE_PACKS))
             if canonicalize_name(name) not in installed
         ]
-        packages = await asyncio.gather(
-            *(self._fetch_package_metadata(name, self.base_url) for name in names),
-            return_exceptions=True,
-        )
+        fetches = [self._fetch_package_metadata(name, self.base_url) for name in names]
+        known = {canonicalize_name(name) for name in (*KNOWN_EXTENSIONS, *LANGUAGE_PACKS)}
+        if named is not None and named not in known and named not in installed:
+            # Any PyPI project can have the name that the query spells.
+            names.append(named)
+            fetches.append(self._fetch_prebuilt_extension_metadata(named))
+        packages = await asyncio.gather(*fetches, return_exceptions=True)
 
         matches = []
         failed = False
@@ -520,7 +542,11 @@ class PyPIExtensionManager(ExtensionManager):
             if not latest_version:
                 continue
             description = _metadata_string(data, "summary") or ""
-            if query not in name.casefold() and query not in description.casefold():
+            if (
+                canonicalize_name(name) != named
+                and query not in name.casefold()
+                and query not in description.casefold()
+            ):
                 continue
 
             package_urls = _metadata_string_map(data, "project_urls")

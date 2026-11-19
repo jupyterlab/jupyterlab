@@ -697,7 +697,9 @@ Framework :: Jupyter :: JupyterLab :: Extensions :: Themes
 Include each relevant classifier (and its parents) to help describe what your package
 provides to prospective users in your `setup.py`, `setup.cfg`, or `pyproject.toml`.
 In particular, the "Browse extensions on PyPI" link of the extension manager lists the
-packages with `Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt` on PyPI.org.
+packages with `Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt` on PyPI.org,
+and the extension manager search finds a package by its full name only when its latest
+release declares this classifier.
 
 :::{hint}
 For example, a theme, only compatible with JupyterLab 3, and distributed as
