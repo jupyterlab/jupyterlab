@@ -567,6 +567,30 @@ If your extension has a top-level `style` key in `package.json`, the CSS file it
 
 A convention in JupyterLab for deduplicating CSS on the page is that if your extension has a top-level `styleModule` key in `package.json` giving a JavaScript module that can be imported, it will be imported (as a JavaScript module) instead of importing the `style` key CSS file as a CSS file.
 
+### Keyboard shortcuts
+
+When your extension adds a keyboard shortcut, prefer unmodified letter keys
+(`A` to `Z`) and digit keys (`0` to `9`). Many keyboard layouts place
+punctuation and symbol keys such as `` ` ``, `~`, `[`, `]`, and `{` behind
+modifiers or AltGr, so shortcuts that use those keys can fail to trigger or can
+type a different character on some layouts.
+
+Use `Accel` for the `Command` key on macOS and the `Control` key on other
+platforms. Scope a shortcut to the widget that handles its command with
+`selector`, so it does not replace a working shortcut elsewhere:
+
+```typescript
+app.commands.addKeyBinding({
+  command: 'my-extension:my-command',
+  keys: ['Accel Shift Y'],
+  selector: '.jp-MyWidget'
+});
+```
+
+Check the Keyboard Shortcuts editor for existing bindings before choosing a
+combination, and leave the combination customizable by users. Avoid a global
+shortcut for an action that is only useful in one panel.
+
 ## Prebuilt Extensions
 
 ### package.json metadata
