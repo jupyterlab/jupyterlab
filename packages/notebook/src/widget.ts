@@ -444,7 +444,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       if (!oldCell) {
         continue;
       }
-      console.log(oldCell.model.type);
+
       if (oldCell.model.type === 'markdown') {
         for (const k of ['rendered', 'headingCollapsed']) {
           // @ts-expect-error Cell has no index signature
@@ -456,7 +456,6 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
         dirtyState[i] = oldCodeCell.isDirty;
 
         const outputArea = oldCell.node.querySelector('.jp-RenderedHTMLCommon');
-        console.log(outputArea);
 
         // Save the output HTML.
         viewModel[i].outputHTML = outputArea?.innerHTML ?? '';
@@ -488,16 +487,13 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
             newCell[state] = view[state];
           }
         }
-        console.log(newCell.model.type);
+
         if (newCell.model.type === 'code') {
           (newCell.model as CodeCellModel).isDirty = dirtyState[i];
 
           const outputArea = newCell.node.querySelector(
             '.jp-RenderedHTMLCommon'
           );
-
-          console.log(outputArea);
-          console.log(newCell);
 
           if (outputArea && view.outputHTML !== undefined) {
             // Restore output HTML.
