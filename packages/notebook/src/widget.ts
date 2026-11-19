@@ -420,7 +420,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
    * @param n Number of cells to move
    */
   moveCell(from: number, to: number, n = 1): void {
-    if (!this.model) {
+    if (!this.model || n <= 0) {
       return;
     }
 
@@ -430,12 +430,21 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       return;
     }
 
-    const viewModel: { [k: string]: any }[] = new Array(n);
-    let dirtyState: boolean[] = new Array(n);
+    const viewModel: {
+      [k: string]: any;
+    }[] = new Array(n);
+
+    const dirtyState: boolean[] = new Array(n);
 
     for (let i = 0; i < n; i++) {
       viewModel[i] = {};
+
       const oldCell = this.widgets[from + i];
+
+      if (!oldCell) {
+        continue;
+      }
+      console.log(oldCell.model.type);
       if (oldCell.model.type === 'markdown') {
         for (const k of ['rendered', 'headingCollapsed']) {
           // @ts-expect-error Cell has no index signature
@@ -443,33 +452,72 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
         }
       } else if (oldCell.model.type === 'code') {
         const oldCodeCell = oldCell.model as ICodeCellModel;
+
         dirtyState[i] = oldCodeCell.isDirty;
+
+        const outputArea = oldCell.node.querySelector('.jp-RenderedHTMLCommon');
+        console.log(outputArea);
+
+        // Save the output HTML.
+        viewModel[i].outputHTML = outputArea?.innerHTML ?? '';
+
+        // Save the live HTML inside each iframe.
+        viewModel[i].iframeBodyHTMLs = Array.from(
+          outputArea?.querySelectorAll('iframe') ?? []
+        ).map(iframe => iframe.contentDocument?.body?.innerHTML ?? '');
       }
     }
 
-    this.model!.sharedModel.moveCells(from, boundedTo, n);
+    this.model.sharedModel.moveCells(from, boundedTo, n);
+    requestAnimationFrame(() => {
+      for (let i = 0; i < n; i++) {
+        const newIndex =
+          from > boundedTo ? boundedTo + i : boundedTo - n + 1 + i;
 
-    for (let i = 0; i < n; i++) {
-      const newIndex = from > boundedTo ? boundedTo + i : boundedTo - n + 1 + i;
-      const newCell = this.widgets[newIndex];
-      const view = viewModel[i];
-      for (const state in view) {
-        // @ts-expect-error Cell has no index signature
-        newCell[state] = view[state];
-      }
+        const newCell = this.widgets[newIndex];
+        const view = viewModel[i];
 
-      if (from > boundedTo) {
-        if (this.widgets[boundedTo + i].model.type === 'code') {
-          (this.widgets[boundedTo + i].model as CodeCellModel).isDirty =
-            dirtyState[i];
+        if (!newCell) {
+          continue;
         }
-      } else {
-        if (this.widgets[boundedTo + i - n + 1].model.type === 'code') {
-          (this.widgets[boundedTo + i - n + 1].model as CodeCellModel).isDirty =
-            dirtyState[i];
+
+        // Restore saved Markdown view state.
+        for (const state in view) {
+          if (state !== 'outputHTML' && state !== 'iframeBodyHTMLs') {
+            // @ts-expect-error Cell has no index signature
+            newCell[state] = view[state];
+          }
+        }
+        console.log(newCell.model.type);
+        if (newCell.model.type === 'code') {
+          (newCell.model as CodeCellModel).isDirty = dirtyState[i];
+
+          const outputArea = newCell.node.querySelector(
+            '.jp-RenderedHTMLCommon'
+          );
+
+          console.log(outputArea);
+          console.log(newCell);
+
+          if (outputArea && view.outputHTML !== undefined) {
+            // Restore output HTML.
+            outputArea.innerHTML = view.outputHTML;
+
+            // Restore iframe live HTML.
+            const iframes = Array.from(outputArea.querySelectorAll('iframe'));
+
+            iframes.forEach((iframe, iframeIndex) => {
+              const savedHTML = view.iframeBodyHTMLs?.[iframeIndex];
+
+              if (savedHTML !== undefined && savedHTML !== '') {
+                iframe.srcdoc = savedHTML;
+              }
+            });
+          }
         }
       }
-    }
+    });
+
     this._refreshCollapsedHeadingVisibility();
   }
 
