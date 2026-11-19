@@ -98,6 +98,23 @@ We are organizing our CSS files in the following manner:
   pattern in our `package.json` to declare them.
   For imports that should not be added to `index.css`, update `SKIP_CSS` in `buildutils/src/ensure-repo.ts`.
 
+### Load order
+
+At build time, JupyterLab collects CSS from extensions in this order:
+
+1. `@jupyterlab/application-extension`
+2. the remaining non-theme extensions, in alphabetical order
+
+Each extension imports the CSS of its dependencies before its local
+`style/base.css`. Lumino base styles are imported before JupyterLab styles so
+that JupyterLab rules can override them without increasing specificity. Themes
+load at runtime and provide the CSS variable values together with their icons
+and fonts.
+
+An application that uses these packages, such as the file browser example,
+loads the `application` CSS, the CSS of its dependencies in order, the theme
+CSS, and finally its local overrides.
+
 ## CSS class names
 
 ### CSS class naming conventions
