@@ -2468,6 +2468,32 @@ describe('@jupyterlab/notebook', () => {
 
         expect(getTiming(cellAfterMove)['execution_failed']).toBeUndefined();
       }, 20000);
+
+      it('should keep the failure time of an execution stopped by a restart when the cell moves', async () => {
+        widget.notebookConfig = {
+          ...widget.notebookConfig,
+          recordTiming: true
+        };
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        cell.model.sharedModel.setSource('import time\ntime.sleep(30)');
+
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await waitForTiming(cell, 'iopub.execute_input');
+        await ipySessionContext.session!.kernel!.restart();
+        await executionCompleted;
+        const failureTime = getTiming(cell)['execution_failed'];
+        await sleep(10);
+
+        NotebookActions.moveDown(widget);
+        const cellAfterMove = widget.widgets[1] as CodeCell;
+        await sleep(10);
+
+        expect(getTiming(cellAfterMove)['execution_failed']).toBe(failureTime);
+      }, 20000);
     });
 
     describe('#copy()', () => {

@@ -2838,7 +2838,15 @@ namespace Private {
           (!cell.outputArea.future || cell.outputArea.future === future)
         ) {
           cell.model.executionState = 'idle';
-          if (recordTiming && future.isDisposed) {
+          const recorded = cell.model.getMetadata('execution') as
+            | JSONObject
+            | undefined;
+          // A failure recorded before this restore keeps its time.
+          if (
+            recordTiming &&
+            future.isDisposed &&
+            !recorded?.['execution_failed']
+          ) {
             // Record the time when the cell execution was aborted
             const timing: JSONObject = {};
             timing['execution_failed'] = new Date().toISOString();
