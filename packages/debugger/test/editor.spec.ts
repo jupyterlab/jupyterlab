@@ -18,6 +18,7 @@ describe('Debugger.EditorHandler', () => {
   let src: YCodeCell;
   let handler: Debugger.EditorHandler;
   let updateBreakpoints: jest.SpyInstance;
+  let editor: CodeMirrorEditor | null = null;
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -37,6 +38,8 @@ describe('Debugger.EditorHandler', () => {
 
   afterEach(() => {
     handler.dispose();
+    editor?.dispose();
+    editor = null;
     src.dispose();
     service.dispose();
     jest.useRealTimers();
@@ -58,6 +61,41 @@ describe('Debugger.EditorHandler', () => {
   async function edit(source: string): Promise<void> {
     src.setSource(source);
     jest.advanceTimersByTime(1000);
+    await flushRequests();
+  }
+
+  /**
+   * Debug with a kernel that keeps breakpoints, in a CodeMirror editor that
+   * shows the given source.
+   */
+  async function startDebuggingInEditor(
+    source: string
+  ): Promise<Map<string, number[]>> {
+    updateBreakpoints.mockRestore();
+    const kernel = startTestSession(service);
+    handler.dispose();
+    src.setSource(source);
+    const codeEditor = new CodeMirrorEditor({
+      model: new CodeEditor.Model({ sharedModel: src }),
+      host: document.createElement('div'),
+      extensions: [ybinding({ ytext: src.ysource })]
+    });
+    editor = codeEditor;
+    handler = new Debugger.EditorHandler({
+      debuggerService: service,
+      editorReady: async () => codeEditor,
+      getEditor: () => codeEditor,
+      src
+    });
+    await flushRequests();
+    return kernel;
+  }
+
+  /**
+   * Click the breakpoint gutter of the line at the given position.
+   */
+  async function clickGutter(position: number): Promise<void> {
+    handler['_onGutterClick'](editor!.editor, position);
     await flushRequests();
   }
 
@@ -117,23 +155,8 @@ describe('Debugger.EditorHandler', () => {
   });
 
   it('should keep the breakpoints when the source changes while they are sent', async () => {
-    updateBreakpoints.mockRestore();
-    const kernel = startTestSession(service);
-    const editor = new CodeMirrorEditor({
-      model: new CodeEditor.Model({ sharedModel: src }),
-      host: document.createElement('div'),
-      extensions: [ybinding({ ytext: src.ysource })]
-    });
-    handler.dispose();
-    handler = new Debugger.EditorHandler({
-      debuggerService: service,
-      editorReady: async () => editor,
-      getEditor: () => editor,
-      src
-    });
-    await flushRequests();
-    handler['_onGutterClick'](editor.editor, 0);
-    await flushRequests();
+    const kernel = await startDebuggingInEditor('x = 1');
+    await clickGutter(0);
     src.updateSource(5, 5, '0');
     jest.advanceTimersByTime(1000);
     src.updateSource(6, 6, '0');
@@ -142,7 +165,29 @@ describe('Debugger.EditorHandler', () => {
     await flushRequests();
 
     expect(kernel.get(service.getCodeId('x = 100'))).toEqual([1]);
-    editor.dispose();
+  });
+
+  it('should keep a breakpoint on its line when the gutter is clicked before an edit is sent', async () => {
+    const kernel = await startDebuggingInEditor('x = 1\ny = 2');
+    await clickGutter(6);
+    src.updateSource(0, 0, 'w = 0\n');
+    await clickGutter(0);
+
+    expect(kernel.get(service.getCodeId('w = 0\nx = 1\ny = 2'))).toEqual([
+      1, 3
+    ]);
+  });
+
+  it('should keep a breakpoint on its line when other breakpoints change before an edit is sent', async () => {
+    const kernel = await startDebuggingInEditor('x = 1\ny = 2');
+    await clickGutter(6);
+    src.updateSource(0, 0, 'w = 0\n');
+    // Another cell sends its breakpoints.
+    await service.updateBreakpoints('z = 1', [{ line: 1, verified: true }]);
+    jest.advanceTimersByTime(1000);
+    await flushRequests();
+
+    expect(kernel.get(service.getCodeId('w = 0\nx = 1\ny = 2'))).toEqual([3]);
   });
 
   describe('#clearBreakpoints()', () => {

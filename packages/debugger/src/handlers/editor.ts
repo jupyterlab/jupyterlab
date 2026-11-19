@@ -549,16 +549,17 @@ export class EditorHandler implements IDisposable {
       return model.getBreakpoints(this._path);
     }
     const code = this._src.getSource();
-    const breakpoints = model.getBreakpoints(
-      this._debuggerService.getCodeId(code)
-    );
-    // The model has no breakpoints for an edit that is not sent yet.
-    if (breakpoints.length || this._lastCode === null) {
-      return breakpoints;
+    // Until an edit is sent, the model has the lines of the previous code,
+    // while the gutter moved the breakpoints with the edit.
+    if (this._lastCode !== null && code !== this._lastCode) {
+      return this._getBreakpointsFromEditor().map(line =>
+        Private.createBreakpoint(
+          this._debuggerService.session?.connection?.name || '',
+          line
+        )
+      );
     }
-    return model.getBreakpoints(
-      this._debuggerService.getCodeId(this._lastCode)
-    );
+    return model.getBreakpoints(this._debuggerService.getCodeId(code));
   }
 
   private _id: string;
