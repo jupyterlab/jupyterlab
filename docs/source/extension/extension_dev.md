@@ -617,6 +617,16 @@ module.exports = {
 This custom config will be merged with the [prebuilt extension config](https://github.com/jupyterlab/jupyter-builder/blob/main/src/extensionConfig.ts)
 when building the prebuilt extension.
 
+### Web workers
+
+Prebuilt extensions share modules with JupyterLab. A web worker that imports a
+shared module such as `react` or a `@jupyterlab/*` package can fail with
+`Shared module <name> doesn't exist in shared scope default`, because the
+shared modules are not available in the worker scope. Keep imports of shared
+modules on the main thread, and bundle the code that the worker needs without
+importing shared modules. See [webpack#16633](https://github.com/webpack/webpack/issues/16633)
+for the upstream limitation.
+
 (prebuilt-dev-workflow)=
 
 ### Developing a prebuilt extension
