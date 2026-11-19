@@ -193,6 +193,13 @@ browser and select the “Editor” item in the “Open With” submenu:
 JupyterLab supports rendering HTML in cell output and editing HTML files
 as text in the file editor.
 
+HTML files and HTML cell output are sanitized before they are displayed, so
+scripts do not run. While an HTML file is untrusted, the HTML viewer shows a
+JavaScript disabled notice and interactive elements of the file do not work.
+To run scripts in a file from a source you trust, open it in the HTML viewer
+and select **Trust HTML** in the toolbar. A trusted file can run code in the
+JupyterLab page, so only trust files whose source you trust.
+
 ## LaTeX
 
 - File extension: `.tex`
