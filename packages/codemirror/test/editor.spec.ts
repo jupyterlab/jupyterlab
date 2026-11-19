@@ -43,7 +43,8 @@ describe('CodeMirrorEditor', () => {
           'lineNumbers',
           'lineWrap',
           'readOnly',
-          'allowMultipleSelections'
+          'allowMultipleSelections',
+          'customStyles'
         ].includes(ext.name)
       )
       .forEach(ext => {
@@ -207,6 +208,18 @@ describe('CodeMirrorEditor', () => {
     it('should set whether the editor is readonly', () => {
       editor.setOption('readOnly', true);
       expect(editor.getOption('readOnly')).toBe(true);
+    });
+
+    it('should apply a custom line height to the editor content', () => {
+      editor.setOption('customStyles', {
+        fontFamily: null,
+        fontSize: null,
+        lineHeight: 2
+      });
+
+      expect(editor.editor.contentDOM.getAttribute('style')).toContain(
+        'line-height: 2'
+      );
     });
   });
 
