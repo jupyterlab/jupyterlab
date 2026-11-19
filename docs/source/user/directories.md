@@ -173,7 +173,7 @@ can still be ignored using `ignoredPackages` metadata in `settings`.
 The `schemas` directory contains [JSON
 Schemas](https://json-schema.org/) that describe the settings used by
 individual extensions. Users may edit these settings using the
-JupyterLab Advanced Settings Editor.
+JupyterLab JSON Settings Editor.
 
 (application-settings-directory)=
 

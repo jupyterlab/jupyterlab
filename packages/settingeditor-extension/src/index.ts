@@ -414,13 +414,13 @@ function activateJSON(
 
       container.id = namespace;
       container.title.icon = settingsIcon;
-      container.title.label = trans.__('Advanced Settings Editor');
+      container.title.label = trans.__('JSON Settings Editor');
       container.title.closable = true;
 
       void tracker.add(container);
       shell.add(container, 'main', { type: 'Advanced Settings' });
     },
-    label: trans.__('Advanced Settings Editor'),
+    label: trans.__('JSON Settings Editor'),
     describedBy: {
       args: {
         type: 'object',

@@ -345,7 +345,7 @@ export class LanguageServerManager implements ILanguageServerManager {
     const bRank = this._configuration[b]?.rank ?? DEFAULT_RANK;
     if (aRank == bRank) {
       this.warnOnce(
-        `Two matching servers: ${a} and ${b} have the same rank; choose which one to use by changing the rank in Advanced Settings Editor`
+        `Two matching servers: ${a} and ${b} have the same rank; choose which one to use by changing the rank in JSON Settings Editor`
       );
       return a.localeCompare(b);
     }

@@ -284,7 +284,7 @@ describe('@jupyterlab/lsp', () => {
           'unified-language-server'
         );
         expect((console.warn as jest.Mock).mock.calls[0][0]).toEqual(
-          'Two matching servers: pylsp and unified-language-server have the same rank; choose which one to use by changing the rank in Advanced Settings Editor'
+          'Two matching servers: pylsp and unified-language-server have the same rank; choose which one to use by changing the rank in JSON Settings Editor'
         );
         expect(value).toEqual(-1);
       });

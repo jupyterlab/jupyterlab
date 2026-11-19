@@ -196,7 +196,7 @@ notebook or other document, which uses the `Ctrl+F` (`Cmd+F` for macOS) shortcut
 Your browser's `find` function will give unexpected results because it doesn't have
 access to the full content of a document (by default), but you can still use your browser find
 function from the browser menu if you want, or you can disable the built-in search
-shortcut using the Advanced Settings Editor.
+shortcut using the JSON Settings Editor.
 
 Alternatively, you can disable windowed notebook rendering to expose the full
 document content to the browser at the expense of performance.
@@ -245,7 +245,7 @@ The browser’s native context menu can be accessed by holding down
 
 As in the classic Notebook, you can navigate the user interface through keyboard
 shortcuts. You can find and customize the current list of keyboard shortcuts by
-selecting the Advanced Settings Editor item in the Settings menu, then selecting
+selecting the JSON Settings Editor item in the Settings menu, then selecting
 Keyboard Shortcuts in the Settings tab.
 
 ```{raw} html

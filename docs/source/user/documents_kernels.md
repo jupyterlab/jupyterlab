@@ -96,7 +96,7 @@ This displays:
 
 **Communication Settings**
 
-Configure how widget communications use subshells via Settings → Advanced Settings → Kernel:
+Configure how widget communications use subshells via Settings → JSON Settings Editor → Kernel:
 
 - `disabled`: No subshells for communications
 - `perCommTarget`: One subshell per communication target (default)

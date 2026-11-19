@@ -215,7 +215,7 @@ and the associated setting.
 - TSV Viewer: _TSV Viewer_ -> _toolbar_
 
 Those settings are accessible through the interactive _Settings Editor_. But you
-may find more comfortable to use the _Advanced Settings Editor_ (accessible by clicking
+may find more comfortable to use the _JSON Settings Editor_ (accessible by clicking
 on _JSON Settings Editor_ button in the top right corner of the _Settings Editor_).
 
 Your `toolbar` customization will be merged with the default menu bar definition (this
@@ -267,11 +267,11 @@ If you want to more advanced customization please refer to the {ref}`Toolbar ite
 
 ## Menu Bar
 
-The top menu bar definition can be customized through the _Advanced Settings Editor_. You can
+The top menu bar definition can be customized through the _JSON Settings Editor_. You can
 access it by opening the _Settings Editor_ from the _Settings_ menu, then click on the
 _JSON Settings Editor_ in the top right corner.
 
-In the _Advanced Settings Editor_, you will need to select the _Main Menu_ section in
+In the _JSON Settings Editor_, you will need to select the _Main Menu_ section in
 the left panel. Your `menus` customization will be merged with the default menu bar definition (this
 is a different behavior as the other settings that are overriding the default settings).
 So to remove a default entry, you will need to disable it. To do that, you will need
@@ -358,11 +358,11 @@ please refer to the {ref}`Main Menu settings definition <mainmenu>`.
 
 ## Context Menu
 
-The context menu definition can be customized through the _Advanced Settings Editor_. You can
+The context menu definition can be customized through the _JSON Settings Editor_. You can
 access it by opening the _Settings Editor_ from the _Settings_ menu, then click on the
 _JSON Settings Editor_ in the top right corner.
 
-In the _Advanced Settings Editor_, you will need to the select the _Application Context Menu_ section in
+In the _JSON Settings Editor_, you will need to the select the _Application Context Menu_ section in
 the left panel. Your `contextMenu` customization will be merged with the default context menu definition (this
 is a different behavior as the other settings that are overriding the default settings).
 So to remove a default entry, you will need to disable it. To do that, you will need

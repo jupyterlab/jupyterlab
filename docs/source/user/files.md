@@ -213,7 +213,7 @@ You can disable file uploads in JupyterLab through multiple mechanisms:
 
 The file browser includes an "Allow file uploads" setting that can be configured
 in the Settings Editor (Settings → Settings Editor → File Browser), or by adding
-the following configuration to your settings (Settings → Advanced Settings Editor → File Browser):
+the following configuration to your settings (Settings → JSON Settings Editor → File Browser):
 
 ```json
 {
@@ -229,7 +229,7 @@ clicking the "Upload Files" button or by dragging and dropping files into the fi
 **Removing the Upload Button via Settings**
 
 You can also remove the upload button entirely in the file browser toolbar by adding the
-following configuration to your settings (Settings → Advanced Settings Editor → File Browser):
+following configuration to your settings (Settings → JSON Settings Editor → File Browser):
 
 ```json
 {
@@ -300,7 +300,7 @@ You can choose how file names are ordered when sorting by name in the file brows
 
 - When disabled: Names are ordered lexicographically, e.g. `file1.txt`, `file10.txt`, `file2.txt`.
 
-Change this in **Settings → Settings Editor → File Browser** via the “Sort file names naturally” checkbox, or in **Settings → Advanced Settings Editor → File Browser**:
+Change this in **Settings → Settings Editor → File Browser** via the “Sort file names naturally” checkbox, or in **Settings → JSON Settings Editor → File Browser**:
 
 ```json
 {
