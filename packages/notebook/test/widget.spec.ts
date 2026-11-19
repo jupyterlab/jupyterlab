@@ -634,6 +634,36 @@ describe('@jupyter/notebook', () => {
           true
         );
       });
+
+      it('should turn an option off in existing cells when it is removed', () => {
+        // The settings keep only non-default values, so turning an option
+        // off removes it from the config.
+        const widget = createWidget();
+        const cell = widget.widgets[0];
+        widget.editorConfig = {
+          ...editorConfig,
+          code: { ...editorConfig.code, autoClosingBrackets: true }
+        };
+        expect(cell.editor!.getOption('autoClosingBrackets')).toBe(true);
+
+        widget.editorConfig = editorConfig;
+
+        expect(cell.editor!.getOption('autoClosingBrackets')).toBe(false);
+        expect(cell.editorConfig).not.toHaveProperty('autoClosingBrackets');
+      });
+
+      it('should keep options set on a cell editor by other code', () => {
+        const widget = createWidget();
+        const cell = widget.widgets[0];
+        cell.editor!.setOption('readOnly', true);
+
+        widget.editorConfig = {
+          ...editorConfig,
+          code: { ...editorConfig.code, autoClosingBrackets: true }
+        };
+
+        expect(cell.editor!.getOption('readOnly')).toBe(true);
+      });
     });
 
     describe('#codeMimetype', () => {

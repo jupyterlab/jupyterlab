@@ -349,6 +349,17 @@ describe('@jupyterlab/codemirror', () => {
         const [_, args] = await configChanged;
         expect(args).toEqual({ lineNumbers: false });
       });
+
+      it('should fall back to the base value when an option is unset', async () => {
+        const handler = createHandler({ lineNumbers: false });
+
+        const configChanged = signalToPromise(handler.configChanged);
+        handler.setOption('lineNumbers', undefined);
+
+        const [_, args] = await configChanged;
+        expect(args).toEqual({ lineNumbers: true });
+        expect(handler.getOption('lineNumbers')).toBe(true);
+      });
     });
 
     describe('#setBaseOptions', () => {

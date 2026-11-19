@@ -208,6 +208,16 @@ describe('CodeMirrorEditor', () => {
       editor.setOption('readOnly', true);
       expect(editor.getOption('readOnly')).toBe(true);
     });
+
+    it('should reconfigure an unset option to its base value', () => {
+      editor.setOption('readOnly', true);
+      expect(editor.state.readOnly).toBe(true);
+
+      editor.setOption('readOnly', undefined);
+
+      expect(editor.getOption('readOnly')).toBe(false);
+      expect(editor.state.readOnly).toBe(false);
+    });
   });
 
   describe('#model', () => {
