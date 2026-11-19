@@ -296,11 +296,14 @@ export class NotebookToCModel extends TableOfContentsModel<
           // consistent with the cell.headingInfo
           if (
             this.configuration.syncCollapseState &&
-            (cell as MarkdownCell).headingCollapsed
+            (cell as MarkdownCell).headingCollapsed &&
+            cellHeadings.length > 0
           ) {
             const minLevel = Math.min(...cellHeadings.map(h => h.level));
             const minHeading = cellHeadings.find(h => h.level === minLevel);
-            minHeading!.collapsed = (cell as MarkdownCell).headingCollapsed;
+            if (minHeading) {
+              minHeading.collapsed = (cell as MarkdownCell).headingCollapsed;
+            }
           }
           headings.push(...cellHeadings);
           break;
