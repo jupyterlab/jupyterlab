@@ -66,6 +66,18 @@ function setEditorStyle(view: EditorView): Record<string, string> | null {
   return { style: style };
 }
 
+function setContentStyle(view: EditorView): Record<string, string> | null {
+  const { lineHeight } = view.state.facet(customThemeConfig);
+
+  if (lineHeight === null || lineHeight === 0) {
+    return null;
+  }
+
+  // CodeMirror sets the line height on the scroller, so the content needs its
+  // own value for the change to reach the lines.
+  return { style: `line-height: ${lineHeight.toString()} !important` };
+}
+
 /**
  * Get the extension to customize an editor theme.
  *
@@ -75,6 +87,7 @@ function setEditorStyle(view: EditorView): Record<string, string> | null {
 export function customTheme(config: CustomTheme): Extension {
   return [
     customThemeConfig.of(config),
-    EditorView.editorAttributes.of(setEditorStyle)
+    EditorView.editorAttributes.of(setEditorStyle),
+    EditorView.contentAttributes.of(setContentStyle)
   ];
 }
