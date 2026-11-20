@@ -719,13 +719,6 @@ Main reasons for UI test failures are:
    - (bot) `please open PR to update snapshots` - A bot will open a PR updating all snapshots
      generated in the most recent run of CI from your branch.
 
-   Maintainers can also use the following commands:
-   - `please update galata snapshots`: A bot will regenerate galata snapshots
-     and push a new commit to your PR branch.
-   - `please update documentation snapshots`: A bot will regenerate documentation
-     snapshots and push a new commit to your PR branch.
-   - `please update snapshots`: Combine the two previous comments effects.
-
    > The bot will react with +1 emoji to indicate that the run started and then comment
    > back once it concluded.
 
