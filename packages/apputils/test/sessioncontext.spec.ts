@@ -663,6 +663,34 @@ describe('@jupyterlab/apputils', () => {
         // could be either, just make sure it isn't the original kernel.
         expect([results[0], results[1]]).toContain(lastKernel);
       });
+
+      it('should change the kernel of the session already on the path', async () => {
+        const other = await sessionManager.startNew({
+          name: '',
+          path,
+          type: 'test'
+        });
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          shouldStart: false,
+          shouldReuse: false
+        };
+        await sessionContext.initialize();
+        expect(sessionContext.session).toBeNull();
+
+        await sessionContext.changeKernel({
+          name: specsManager.specs!.default
+        });
+
+        await sessionManager.refreshRunning();
+        const onPath = Array.from(sessionManager.running()).filter(
+          model => model.path === path
+        );
+        expect(onPath.length).toBe(1);
+        expect(sessionContext.session?.id).toBe(other.id);
+
+        other.dispose();
+      });
     });
 
     describe('#shutdown', () => {
