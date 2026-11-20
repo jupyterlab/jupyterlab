@@ -501,7 +501,8 @@ for instructions.
   `export PATH="$HOME/.local/bin:$PATH"` command.
 - At times, it may be necessary to clean your local repo with the
   command `npm run clean:slate`. This will clean the repository, and
-  re-install and rebuild.
+  re-install and rebuild. With pixi, run `pixi run python clean.py` and then
+  `pixi reinstall` instead.
 - If `pip` gives a `VersionConflict` error, it usually means that
   the installed version of `jupyterlab_server` is out of date. Run
   `pip install --upgrade jupyterlab_server` to get the latest
