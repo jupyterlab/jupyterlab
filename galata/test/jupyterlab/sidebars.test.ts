@@ -869,11 +869,6 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
       }
     }
   });
-  test.skip(
-    ({ browserName }) => browserName === 'firefox',
-    'Some cases fail on Firefox'
-  );
-
   Object.keys(sidebarElementIds).forEach(sideBar => {
     test(`Open ${sideBar} via keyboard navigation`, async ({ page }) => {
       const keyValueArray: string[] = sidebarElementIds[sideBar];
@@ -898,8 +893,13 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
 
   Object.keys(elementAriaLabels).forEach(tabName => {
     test(`Open accordion panels ${tabName} via keyboard navigation`, async ({
-      page
+      page,
+      browserName
     }) => {
+      test.skip(
+        browserName === 'firefox' && tabName === 'jp-debugger-sidebar',
+        'Tab reaches Kernel Sources before Source, which is shown above it'
+      );
       await page.sidebar.openTab(tabName);
 
       const keyValueArray: string[] = elementAriaLabels[tabName];
