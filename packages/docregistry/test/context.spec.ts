@@ -614,6 +614,32 @@ describe('docregistry/context', () => {
         expect(model1.content).toEqual(model2.content);
       });
 
+      it('should not overwrite an existing directory', async () => {
+        const dirName = UUID.uuid4();
+        const dir = await manager.contents.save(dirName, {
+          type: 'directory'
+        });
+
+        const func = async () => {
+          await waitForDialog();
+          const dialog = document.body.getElementsByClassName('jp-Dialog')[0];
+          const input = dialog.getElementsByTagName('input')[0];
+          input.value = dir.path;
+          await acceptDialog(); // Accept rename dialog
+          await waitForDialog();
+          await acceptDialog(); // Accept error dialog
+        };
+
+        await context.initialize(true);
+        const promise = func();
+        const result = await context.saveAs();
+        await promise;
+
+        expect(result).toBe(false);
+        const model = await manager.contents.get(dir.path, { content: false });
+        expect(model.type).toBe('directory');
+      });
+
       it('should bring up a conflict dialog', async () => {
         const newPath = UUID.uuid4() + '.txt';
 
@@ -634,11 +660,16 @@ describe('docregistry/context', () => {
         const promise = func();
 
         const oldPath = context.path;
+        const spySave = jest.spyOn(manager.contents, 'save');
+        spySave.mockClear();
         const result = await context.saveAs();
         await promise;
 
         // Should return true when overwrite is accepted
         expect(result).toBe(true);
+        expect(
+          spySave.mock.calls.filter(call => call[0] === newPath)
+        ).toHaveLength(1);
 
         // We no longer rename the current document
         //expect(context.path).toBe(newPath);
