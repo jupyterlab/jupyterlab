@@ -896,7 +896,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * contents adds to a heading.
    * The map is empty unless the two lists then hold the same texts: a
    * difference comes from a source match in syntax which is not listed in
-   * `_hiddenSourceRanges()`, such as the language of a code fence, and
+   * `_hiddenSourceRanges()`, such as the number of an ordered list, and
    * pairing around it would mark another occurrence than the one Replace
    * changes. The map is empty too when a character reference, such as
    * `&gt;`, adds or removes a match: its rendered text has no source match.
@@ -947,9 +947,10 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   /**
    * Ranges of the cell source that the rendered text does not show: link
    * and image destinations, reference definitions, reference labels, HTML
-   * tags, HTML comments and the content of elements whose text the search in
-   * the rendered text skips, such as the fallback text of a video. A match
-   * starting in one of these ranges is not visible in the rendered text.
+   * tags, HTML comments, the content of elements whose text the search in
+   * the rendered text skips, such as the fallback text of a video, and the
+   * info strings of code fences. A match starting in one of these ranges is
+   * not visible in the rendered text.
    *
    * @returns Source ranges the rendered text does not show.
    */
@@ -1013,6 +1014,26 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
         start: match.index ?? 0,
         end: (match.index ?? 0) + match[0].length
       });
+    }
+    // The info string of a code fence, such as the language of the code. A
+    // line in a code block can look like a fence too.
+    let fence: string | null = null;
+    let offset = 0;
+    for (const line of source.split('\n')) {
+      const marker = /^[ \t]{0,3}(`{3,}(?!`)|~{3,}(?!~))(.*)$/.exec(line);
+      if (marker && fence === null) {
+        fence = marker[1];
+        const end = offset + line.length;
+        ranges.push({ start: end - marker[2].length, end });
+      } else if (
+        marker &&
+        fence !== null &&
+        marker[1].startsWith(fence) &&
+        !marker[2].trim()
+      ) {
+        fence = null;
+      }
+      offset += line.length + 1;
     }
     return ranges;
   }

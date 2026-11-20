@@ -58,6 +58,14 @@ const LINK_PARSER: IRenderMime.IMarkdownParser = {
 };
 
 /**
+ * A Markdown parser which renders only code fences: it leaves out the fence
+ * lines, and shows the Markdown syntax in code as it is.
+ */
+const FENCE_PARSER: IRenderMime.IMarkdownParser = {
+  render: async source => source.replace(/^```.*$/gm, '')
+};
+
+/**
  * A typesetter which draws the formulas `$x$` and `$n-1$` as MathJax does:
  * each character is a mathematical symbol, such as 𝑥, in a text node of its
  * own.
@@ -91,12 +99,14 @@ function createMarkdownCell(
     editable?: boolean;
     placeholder?: boolean;
     showEditorForReadOnlyMarkdown?: boolean;
+    markdownParser?: IRenderMime.IMarkdownParser;
   } = {}
 ): MarkdownCell {
   const {
     editable = true,
     placeholder = false,
-    showEditorForReadOnlyMarkdown = true
+    showEditorForReadOnlyMarkdown = true,
+    markdownParser = LINK_PARSER
   } = options;
   const model = new MarkdownCellModel({
     sharedModel: createStandaloneCell({
@@ -108,7 +118,7 @@ function createMarkdownCell(
   return new MarkdownCell({
     model,
     rendermime: defaultRenderMime().clone({
-      markdownParser: LINK_PARSER,
+      markdownParser,
       latexTypesetter: FORMULA_TYPESETTER
     }),
     contentFactory: NBTestUtils.createBaseCellFactory(),
@@ -561,6 +571,21 @@ describe('cells/searchprovider', () => {
         provider.dispose();
       }
     );
+
+    it('should unrender the cell for a match in the language of a code block', async () => {
+      const source =
+        '```python\nprint("hello")\n```\n\nWrite `[docs](https://docs.python.org)`.';
+      cell = createMarkdownCell(source, { markdownParser: FENCE_PARSER });
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/python/, {});
+
+      const match = await provider.highlightNext();
+      expect(match?.position).toBe(source.indexOf('python'));
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
 
     it('should not mark the number which the table of contents adds to a heading', async () => {
       // The rendered text shows no number of the ordered list
