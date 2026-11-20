@@ -1,6 +1,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import asyncio
 import io
 import json
 import logging
@@ -197,6 +198,80 @@ async def test_ExtensionManager_list_extensions_installed(monkeypatch):
     extensions = await manager.list_extensions()
 
     assert extensions == ([extension1], 1)
+
+
+@pytest.fixture
+def federated_extensions(monkeypatch):
+    """Serve the given prebuilt extensions as the installed ones."""
+
+    def install(extensions):
+        info = {
+            "federated_extensions": extensions,
+            "extensions": {},
+            "disabled": [],
+            "compat_errors": {},
+            "shadowed_exts": [],
+        }
+        monkeypatch.setattr("jupyterlab.extensions.manager.get_app_info", lambda *a, **kw: info)
+        monkeypatch.setattr(
+            "jupyterlab.extensions.manager._build_check_info",
+            lambda *a, **kw: {"install": [], "uninstall": [], "update": []},
+        )
+        monkeypatch.setattr(
+            "jupyterlab.extensions.manager._ensure_compat_errors", lambda *a, **kw: None
+        )
+
+    return install
+
+
+@pytest.fixture
+def two_federated_extensions(federated_extensions):
+    federated_extensions(
+        {
+            "ext1": {"version": "1.0.0", "jupyterlab": {}, "install": {}},
+            "ext2": {"version": "2.0.0", "jupyterlab": {}, "install": {}},
+        }
+    )
+
+
+@pytest.mark.usefixtures("two_federated_extensions")
+async def test_ExtensionManager_get_installed_extensions_runs_lookups_concurrently(monkeypatch):
+    manager = ReadOnlyExtensionManager()
+    running = 0
+    most_running = 0
+
+    async def get_latest_version(name):
+        nonlocal running, most_running
+        running += 1
+        most_running = max(most_running, running)
+        await asyncio.sleep(0)
+        running -= 1
+        return f"{name}-latest"
+
+    monkeypatch.setattr(manager, "get_latest_version", get_latest_version)
+
+    installed = await manager._get_installed_extensions()
+
+    assert most_running == 2
+    assert [pkg.latest_version for pkg in installed.values()] == ["ext1-latest", "ext2-latest"]
+
+
+@pytest.mark.usefixtures("two_federated_extensions")
+async def test_ExtensionManager_get_installed_extensions_keeps_other_versions_when_a_lookup_fails(
+    monkeypatch,
+):
+    manager = ReadOnlyExtensionManager()
+
+    async def get_latest_version(name):
+        if name == "ext1":
+            raise RuntimeError("Network error")
+        return "2.1.0"
+
+    monkeypatch.setattr(manager, "get_latest_version", get_latest_version)
+
+    installed = await manager._get_installed_extensions()
+
+    assert [pkg.latest_version for pkg in installed.values()] == ["1.0.0", "2.1.0"]
 
 
 async def test_ExtensionManager_list_extensions_query(monkeypatch):
