@@ -84,6 +84,8 @@ export class NotebookHandler implements IDisposable {
       });
     });
     this._cellMap.dispose();
+    // The listeners on the cells keep this handler until the notebook closes.
+    this._deletedBreakpoints.clear();
     Signal.clearData(this);
   }
 
@@ -127,12 +129,53 @@ export class NotebookHandler implements IDisposable {
     });
     codeCell.disposed.connect(() => {
       this._cellMap.delete(modelId);
+      if (this._isDeleted(modelId)) {
+        const breakpoints = editorHandler.clearBreakpoints();
+        if (breakpoints.length) {
+          this._deletedBreakpoints.set(modelId, breakpoints);
+        }
+      }
       editorHandler.dispose();
     });
     this._cellMap.set(cell.model.id, editorHandler);
+    this._restoreBreakpoints(cell.model);
+  }
+
+  /**
+   * Restore the breakpoints that deleting a cell removed, when undo or a
+   * paste after cut brings the cell back with the same ID and code.
+   */
+  private _restoreBreakpoints(model: ICellModel): void {
+    const breakpoints = this._deletedBreakpoints.get(model.id);
+    if (!breakpoints) {
+      return;
+    }
+    this._deletedBreakpoints.delete(model.id);
+    const code = model.sharedModel.getSource();
+    if (breakpoints[0].source?.path === this._debuggerService.getCodeId(code)) {
+      void this._debuggerService.updateBreakpoints(code, breakpoints);
+    }
+  }
+
+  /**
+   * Whether the code cell with the given ID left the notebook, or is no
+   * longer a code cell.
+   *
+   * Moving a cell or changing its type disposes its widget and inserts a copy
+   * with the same ID.
+   */
+  private _isDeleted(id: string): boolean {
+    const model = this._notebookPanel.content.model;
+    return (
+      !!model &&
+      !model.sharedModel.cells.some(
+        cell => cell.getId() === id && cell.cell_type === 'code'
+      )
+    );
   }
 
   private _debuggerService: IDebugger;
+  private _deletedBreakpoints = new Map<string, IDebugger.IBreakpoint[]>();
   private _notebookPanel: NotebookPanel;
   private _cellMap: IObservableMap<EditorHandler>;
   private _pausedOverlay: DebuggerPausedOverlay;

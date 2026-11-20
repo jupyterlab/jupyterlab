@@ -10,7 +10,7 @@ import type { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
-import type { ISharedText, SourceChange } from '@jupyter/ydoc';
+import type { CellChange, ISharedCell, ISharedText } from '@jupyter/ydoc';
 
 import type { Line, Range, StateEffectType } from '@codemirror/state';
 import {
@@ -55,6 +55,23 @@ export class EditorHandler implements IDisposable {
     this._path = options.path ?? '';
     this._debuggerService = options.debuggerService;
     this._editor = options.getEditor;
+    // A console prompt can keep the code of the cell that just ran.
+    this._ranPaths = Private.getRanPaths(this._debuggerService);
+
+    // The cell may have run, or be running, before the debugger started.
+    const src = this._src;
+    if (
+      ('execution_count' in src && typeof src.execution_count === 'number') ||
+      ('executionState' in src && src.executionState === 'running')
+    ) {
+      this._ranPaths.add(this._debuggerService.getCodeId(src.getSource()));
+    }
+    // After a reload, a move or an undone deletion, the kernel may already
+    // hold breakpoints of this code, and an edit or a deletion clears them.
+    // A kernel restart changes the folder of the code files, so keep the code.
+    if (!this._path) {
+      this._lastCode = src.getSource();
+    }
 
     this._src.changed.connect(this._onSharedModelChanged, this);
     this._editorMonitor = new ActivityMonitor({
@@ -208,6 +225,28 @@ export class EditorHandler implements IDisposable {
   }
 
   /**
+   * Remove the breakpoints of a deleted cell from the kernel, and return them
+   * with their file, so that undo or paste can restore them.
+   *
+   * Code that has run keeps its breakpoints, because it can still run.
+   */
+  clearBreakpoints(): IDebugger.IBreakpoint[] {
+    if (this.isDisposed || this._path || this._lastCode === null) {
+      return [];
+    }
+    const path = this._debuggerService.getCodeId(this._lastCode);
+    this._lastCode = null;
+    if (!path || !this._canClear(path)) {
+      return [];
+    }
+    const breakpoints = this._debuggerService.model.breakpoints
+      .getBreakpoints(path)
+      .map(breakpoint => ({ ...breakpoint, source: { path } }));
+    void this._debuggerService.updateBreakpoints('', [], path);
+    return breakpoints;
+  }
+
+  /**
    * Refresh the breakpoints display
    */
   refreshBreakpoints(): void {
@@ -265,13 +304,16 @@ export class EditorHandler implements IDisposable {
   }
 
   /**
-   * Handle a change of the shared model, ignoring changes that leave the
-   * source unchanged, such as outputs or execution count.
+   * Handle a change of the shared model: note the code that starts running,
+   * and ignore other changes that leave the source unchanged, such as
+   * outputs or execution count.
    */
-  private _onSharedModelChanged(
-    sender: ISharedText,
-    change: SourceChange
-  ): void {
+  private _onSharedModelChanged(sender: ISharedText, change: CellChange): void {
+    if (change.executionStateChange?.newValue === 'running') {
+      this._ranPaths.add(
+        this._debuggerService.getCodeId(this._src.getSource())
+      );
+    }
     if (change.sourceChange) {
       this._sourceChanged.emit();
     }
@@ -292,10 +334,56 @@ export class EditorHandler implements IDisposable {
       );
     });
 
-    void this._debuggerService.updateBreakpoints(
-      this._src.getSource(),
+    void this._updateBreakpoints(breakpoints);
+  }
+
+  /**
+   * Send the breakpoints of the current code.
+   *
+   * Each version of the code of a cell is a temporary file named after the
+   * code, so an edit gives the breakpoints a new file. The file of the
+   * previous code loses its breakpoints, unless that code has run.
+   */
+  private async _updateBreakpoints(
+    breakpoints: IDebugger.IBreakpoint[]
+  ): Promise<void> {
+    const code = this._src.getSource();
+    let previous: string | null = null;
+    if (!this._path) {
+      if (this._lastCode !== null && this._lastCode !== code) {
+        previous = this._debuggerService.getCodeId(this._lastCode);
+      }
+      this._lastCode = code;
+    }
+    await this._debuggerService.updateBreakpoints(
+      code,
       breakpoints,
       this._path
+    );
+    // Clear last: each reply redraws the gutter from the model, which holds
+    // the breakpoints of the new code only once the update is done.
+    if (previous && this._canClear(previous)) {
+      await this._debuggerService.updateBreakpoints('', [], previous);
+    }
+  }
+
+  /**
+   * Whether the file of an earlier version of the code has breakpoints to
+   * clear: code that ran can still run, and the code cells of a notebook
+   * that have the same code share one file.
+   */
+  private _canClear(path: string): boolean {
+    const breakpoints = this._debuggerService.model.breakpoints;
+    if (this._ranPaths.has(path) || !breakpoints.getBreakpoints(path).length) {
+      return false;
+    }
+    const src = this._src;
+    const cells = Private.isCell(src) ? (src.notebook?.cells ?? []) : [];
+    return !cells.some(
+      cell =>
+        cell !== src &&
+        cell.cell_type === 'code' &&
+        this._debuggerService.getCodeId(cell.getSource()) === path
     );
   }
 
@@ -393,11 +481,7 @@ export class EditorHandler implements IDisposable {
 
     breakpoints.sort((a, b) => a.line! - b.line!);
 
-    void this._debuggerService.updateBreakpoints(
-      this._src.getSource(),
-      breakpoints,
-      this._path
-    );
+    void this._updateBreakpoints(breakpoints);
   }
 
   /**
@@ -464,10 +548,22 @@ export class EditorHandler implements IDisposable {
    * or its path (if it exists).
    */
   private _getBreakpoints(): IDebugger.IBreakpoint[] {
+    const model = this._debuggerService.model.breakpoints;
+    if (this._path) {
+      return model.getBreakpoints(this._path);
+    }
     const code = this._src.getSource();
-    return this._debuggerService.model.breakpoints.getBreakpoints(
-      this._path || this._debuggerService.getCodeId(code)
-    );
+    // Until an edit is sent, the model has the lines of the previous code,
+    // while the gutter moved the breakpoints with the edit.
+    if (this._lastCode !== null && code !== this._lastCode) {
+      return this._getBreakpointsFromEditor().map(line =>
+        Private.createBreakpoint(
+          this._debuggerService.session?.connection?.name || '',
+          line
+        )
+      );
+    }
+    return model.getBreakpoints(this._debuggerService.getCodeId(code));
   }
 
   private _id: string;
@@ -485,6 +581,8 @@ export class EditorHandler implements IDisposable {
   private _path: string;
   private _src: ISharedText;
   private _selectedBreakpoint: IDebugger.IBreakpoint | null;
+  private _lastCode: string | null = null;
+  private _ranPaths: Set<string>;
 }
 
 /**
@@ -624,6 +722,27 @@ namespace Private {
       return marker;
     }
   })();
+
+  const ranPaths = new WeakMap<IDebugger, Set<string>>();
+
+  /**
+   * Get the files of the code that ran in any cell of a debugger service.
+   */
+  export function getRanPaths(service: IDebugger): Set<string> {
+    let paths = ranPaths.get(service);
+    if (!paths) {
+      paths = new Set<string>();
+      ranPaths.set(service, paths);
+    }
+    return paths;
+  }
+
+  /**
+   * Whether the shared model is a cell, which may belong to a notebook.
+   */
+  export function isCell(src: ISharedText): src is ISharedCell {
+    return 'notebook' in src;
+  }
 
   /**
    * Create a new breakpoint.
