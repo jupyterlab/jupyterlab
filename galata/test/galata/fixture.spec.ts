@@ -320,4 +320,14 @@ test.describe('mockPageConfig', () => {
     });
     await page.close();
   });
+
+  test('should return the mocked value from getOption', async ({ page }) => {
+    // Read the server value first, as an earlier test would
+    expect(await page.getOption('appName')).toEqual('JupyterLab');
+
+    await galata.Mock.mockPageConfig(page, { appName: 'Mocked Lab' });
+    await page.reload();
+
+    expect(await page.getOption('appName')).toEqual('Mocked Lab');
+  });
 });
