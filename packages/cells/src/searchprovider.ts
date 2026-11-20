@@ -17,6 +17,7 @@ import type {
 } from '@jupyterlab/documentsearch';
 import { GenericSearchProvider } from '@jupyterlab/documentsearch';
 import type { OutputArea } from '@jupyterlab/outputarea';
+import { TableOfContentsUtils } from '@jupyterlab/toc';
 import type { ICellModel } from './model';
 import type { Cell, CodeCell, MarkdownCell } from './widget';
 
@@ -890,7 +891,9 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    *
    * The rendered text does not keep source positions, so the matches are
    * paired in order, after the source matches in Markdown syntax which the
-   * rendered text does not show, such as a link destination, are left out.
+   * rendered text does not show, such as a link destination, are left out,
+   * and so are the rendered matches in the number which the table of
+   * contents adds to a heading.
    * The map is empty unless the two lists then hold the same texts: a
    * difference comes from a source match in syntax which is not listed in
    * `_hiddenSourceRanges()`, such as the language of a code fence, and
@@ -920,16 +923,23 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
         shown.push(index);
       }
     });
+    const numbering = `.${TableOfContentsUtils.NUMBERING_CLASS}`;
+    const fromSource: number[] = [];
+    rendered.forEach(({ node }, index) => {
+      if (!node.parentElement?.closest(numbering)) {
+        fromSource.push(index);
+      }
+    });
     const paired = new Map<number, number>();
     if (
-      shown.length === rendered.length &&
+      shown.length === fromSource.length &&
       shown.every(
         (index, i) =>
           Private.typedText(source[index].text) ===
-          Private.typedText(rendered[i].text)
+          Private.typedText(rendered[fromSource[i]].text)
       )
     ) {
-      shown.forEach((index, i) => paired.set(index, i));
+      shown.forEach((index, i) => paired.set(index, fromSource[i]));
     }
     return paired;
   }

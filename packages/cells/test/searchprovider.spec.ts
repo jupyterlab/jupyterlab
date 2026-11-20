@@ -15,6 +15,7 @@ import { NBTestUtils } from '@jupyterlab/cells/lib/testutils';
 import type { IRenderMime } from '@jupyterlab/rendermime';
 import { defaultRenderMime } from '@jupyterlab/rendermime/lib/testutils';
 import { framePromise } from '@jupyterlab/testing';
+import { TableOfContentsUtils } from '@jupyterlab/toc';
 import { Widget } from '@lumino/widgets';
 
 /**
@@ -38,14 +39,15 @@ function createPlaceholderCell(editable = true): CodeCell {
 
 /**
  * A Markdown parser which renders only images, links, autolinks, reference
- * definitions and block quote markers. Without a parser, the rendered text of
- * a cell is its source.
+ * definitions, block quote markers and ordered list markers. Without a
+ * parser, the rendered text of a cell is its source.
  */
 const LINK_PARSER: IRenderMime.IMarkdownParser = {
   render: async source =>
     source
       .replace(/^\[[^\]]+\]:.*$/gm, '')
       .replace(/^>[ \t]?/gm, '')
+      .replace(/^\d+\.[ \t]/gm, '')
       .replace(/<(https?:[^\s<>]*)>/g, '<a href="$1">$1</a>')
       .replace(/!\[([^\]]*)\]\(([^)]*)\)/g, '<img alt="$1" src="$2">')
       .replace(
@@ -559,6 +561,25 @@ describe('cells/searchprovider', () => {
         provider.dispose();
       }
     );
+
+    it('should not mark the number which the table of contents adds to a heading', async () => {
+      // The rendered text shows no number of the ordered list
+      const source = '# Setup\n\n1. Install the package.';
+      cell = createMarkdownCell(source);
+      Widget.attach(cell, document.body);
+      await framePromise();
+      cell.renderer.node.insertAdjacentHTML(
+        'afterbegin',
+        `<span class="${TableOfContentsUtils.NUMBERING_CLASS}">1. </span>`
+      );
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/1/, {});
+
+      const match = await provider.highlightNext();
+      expect(match?.position).toBe(source.indexOf('1'));
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
 
     it('should mark the current match in a typeset formula', async () => {
       cell = createMarkdownCell('Take $x$ from the box.');
