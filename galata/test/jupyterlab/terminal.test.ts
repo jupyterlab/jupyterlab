@@ -558,6 +558,22 @@ test.describe('Terminal', () => {
     expect(await terminal.screenshot()).toMatchSnapshot('launcher-term.png');
   });
 
+  test('Terminal should open in file browser cwd from the File menu', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.menu.clickMenuItem('File>New>Terminal');
+
+    const terminal = page.locator(TERMINAL_SELECTOR);
+    await waitForTerminal(page);
+
+    await page.terminal.runCommand('basename $PWD', { terminal });
+
+    await expect(terminal.locator('.jp-Terminal-body')).toContainText(
+      path.basename(tmpPath)
+    );
+  });
+
   test('Terminal web link', async ({ page, tmpPath }) => {
     await page
       .locator(`.jp-Launcher-cwd > h3:has-text("${tmpPath}")`)
