@@ -855,6 +855,164 @@ describe('@jupyterlab/settingregistry', () => {
     });
   });
 
+  describe('reconcileShortcuts', () => {
+    const commandMode =
+      '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus';
+    const headingBelow: ISettingRegistry.IShortcut = {
+      command: 'notebook:insert-heading-below',
+      keys: ['Shift B'],
+      selector: commandMode
+    };
+    // As shipped by jupyterlab-rise, with a selector of JupyterLab 4.0.
+    const subslide: ISettingRegistry.IShortcut = {
+      command: 'RISE:set-slide-type',
+      args: { type: 'subslide' },
+      keys: ['Shift B'],
+      selector: '.jp-Notebook:focus'
+    };
+
+    it('should disable a default with a user shortcut stored with a selector of JupyterLab 4.0', () => {
+      const collapse = {
+        command: 'notebook:move-cursor-heading-above-or-collapse',
+        keys: ['ArrowLeft'],
+        selector: commandMode
+      };
+      const reconciled = SettingRegistry.reconcileShortcuts(
+        [collapse],
+        [
+          {
+            ...collapse,
+            selector: '.jp-Notebook:focus.jp-mod-commandMode',
+            disabled: true
+          }
+        ]
+      );
+      expect(reconciled).toEqual([]);
+    });
+
+    it('should upgrade a selector that contains another selector of JupyterLab 4.0', () => {
+      const reconciled = SettingRegistry.reconcileShortcuts(
+        [],
+        [
+          {
+            command: 'notebook:run-cell',
+            keys: ['Alt R'],
+            selector: '.jp-Notebook:focus.jp-mod-commandMode'
+          }
+        ]
+      );
+      expect(reconciled.map(shortcut => shortcut.selector)).toEqual([
+        commandMode
+      ]);
+    });
+
+    it('should replace a default with a user shortcut on the same keys and selector', () => {
+      const palette = {
+        command: 'apputils:activate-command-palette',
+        keys: ['Accel B'],
+        selector: 'body'
+      };
+      const reconciled = SettingRegistry.reconcileShortcuts(
+        [
+          {
+            command: 'application:toggle-left-area',
+            keys: ['Accel B'],
+            selector: 'body'
+          }
+        ],
+        [palette]
+      );
+      expect(reconciled).toEqual([{ ...palette, args: {} }]);
+    });
+
+    it('should replace a default with a user shortcut stored with a selector of JupyterLab 4.0', () => {
+      const reconciled = SettingRegistry.reconcileShortcuts(
+        [headingBelow],
+        [
+          {
+            command: 'notebook:insert-heading-above',
+            keys: ['Shift B'],
+            selector: '.jp-Notebook:focus'
+          }
+        ]
+      );
+      expect(reconciled.map(shortcut => shortcut.command)).toEqual([
+        'notebook:insert-heading-above'
+      ]);
+    });
+
+    it('should keep the defaults that share keys and selector only after the upgrade', () => {
+      const reconciled = SettingRegistry.reconcileShortcuts(
+        [headingBelow, subslide],
+        []
+      );
+      expect(reconciled.map(shortcut => shortcut.command)).toEqual([
+        'notebook:insert-heading-below',
+        'RISE:set-slide-type'
+      ]);
+    });
+
+    it('should keep the user shortcuts that share keys and selector only after the upgrade', () => {
+      const reconciled = SettingRegistry.reconcileShortcuts(
+        [],
+        [subslide, headingBelow]
+      );
+      expect(reconciled.map(shortcut => shortcut.command)).toEqual([
+        'RISE:set-slide-type',
+        'notebook:insert-heading-below'
+      ]);
+    });
+
+    it('should disable only the default of the same command when the selectors match only after the upgrade', () => {
+      expect(
+        SettingRegistry.reconcileShortcuts(
+          [headingBelow, subslide],
+          [{ ...subslide, disabled: true }]
+        ).map(shortcut => shortcut.command)
+      ).toEqual(['notebook:insert-heading-below']);
+      expect(
+        SettingRegistry.reconcileShortcuts(
+          [headingBelow, subslide],
+          [{ ...headingBelow, disabled: true }]
+        ).map(shortcut => shortcut.command)
+      ).toEqual(['RISE:set-slide-type']);
+    });
+
+    it('should keep a user shortcut that replaced a default with "Overwrite"', () => {
+      const heading = {
+        command: 'notebook:insert-heading-above',
+        keys: ['Shift B'],
+        selector: commandMode
+      };
+      const reconciled = SettingRegistry.reconcileShortcuts(
+        [headingBelow],
+        [{ ...headingBelow, disabled: true }, heading]
+      );
+      expect(reconciled).toEqual([{ ...heading, args: {} }]);
+    });
+  });
+
+  describe('upgradeShortcuts', () => {
+    it('should upgrade the selectors of JupyterLab 4.0', () => {
+      const shortcuts = [
+        { command: 'a', keys: ['A'], selector: '.jp-Notebook:focus' },
+        {
+          command: 'b',
+          keys: ['B'],
+          selector: '.jp-Notebook:focus.jp-mod-commandMode'
+        },
+        { command: 'c', keys: ['C'], selector: 'body' }
+      ];
+      const upgraded = SettingRegistry.upgradeShortcuts(shortcuts);
+      expect(upgraded.map(shortcut => shortcut.selector)).toEqual([
+        '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus',
+        '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus',
+        'body'
+      ]);
+      expect(shortcuts[0].selector).toEqual('.jp-Notebook:focus');
+    });
+  });
+
   describe('filterDisabledItems', () => {
     it('should remove disabled menu item', () => {
       const a: ISettingRegistry.IContextMenuItem[] = [

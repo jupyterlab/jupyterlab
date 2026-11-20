@@ -5,6 +5,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { SettingRegistry } from '@jupyterlab/settingregistry';
 import { CommandRegistry } from '@lumino/commands';
 import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
@@ -265,14 +266,15 @@ export class ShortcutUI
     const normalizedKeys = keys.map(CommandRegistry.normalizeKeystroke);
     const settings = await this.props.external.getSettings();
     const userShortcuts = settings.user.shortcuts ?? [];
+    const selectors = Private.upgradedSelectors(userShortcuts);
     const newUserShortcuts = [];
     let found = false;
     // Copy over existing user keybindings
-    for (let shortcut of userShortcuts) {
+    for (const [index, shortcut] of userShortcuts.entries()) {
       // If this is the query keybinding, update it with new `keys`
       if (
         shortcut.command === target.command &&
-        shortcut.selector === target.selector &&
+        selectors[index] === target.selector &&
         JSONExt.deepEqual(shortcut.args ?? {}, target.args ?? {}) &&
         keybinding &&
         // `keybinding.keys` are the resolved (normalized) platform keys exposed
@@ -296,7 +298,7 @@ export class ShortcutUI
         found = true;
       } else if (
         shortcut.command === target.command &&
-        shortcut.selector === target.selector &&
+        selectors[index] === target.selector &&
         JSONExt.deepEqual(shortcut.args ?? {}, target.args ?? {}) &&
         !keybinding &&
         keys.length === 0
@@ -315,9 +317,15 @@ export class ShortcutUI
       const shouldDisableDefault =
         keybinding && keybinding.isDefault && requiresChange;
       if (shouldDisableDefault) {
-        // If the replaced keybinding is the default, disable it.
+        // If the replaced keybinding is the default, disable it with the
+        // selector that it is stored with, as earlier versions compare that.
+        const selector = Private.storedDefaultSelector(
+          settings,
+          target,
+          keybinding
+        );
         newUserShortcuts.push(
-          this._shortcutFromTarget(target, keybinding.keys, {
+          this._shortcutFromTarget({ ...target, selector }, keybinding.keys, {
             disabled: true,
             preventDefault: keybinding.preventDefault
           })
@@ -393,10 +401,11 @@ export class ShortcutUI
   ): Promise<boolean> => {
     const settings = await this.props.external.getSettings();
     const userShortcuts = settings.user.shortcuts ?? [];
+    const selectors = Private.upgradedSelectors(userShortcuts);
     const shortcuts = userShortcuts.filter(
-      shortcut =>
+      (shortcut, index) =>
         shortcut.command === target.command &&
-        shortcut.selector === target.selector &&
+        selectors[index] === target.selector &&
         JSONExt.deepEqual(shortcut.args ?? {}, target.args ?? {})
     );
     if (!shortcuts.length) {
@@ -545,4 +554,45 @@ export class ShortcutUI
   private _newShortcutItem: NewShortcutItem;
   private _settings: ISettingRegistry.ISettings<IShortcutsSettingsLayout> | null =
     null;
+}
+
+/**
+ * A namespace for private module data.
+ */
+namespace Private {
+  /**
+   * The selectors of the stored shortcuts, upgraded as in the composite shortcuts.
+   */
+  export function upgradedSelectors(
+    shortcuts: CommandRegistry.IKeyBindingOptions[]
+  ): string[] {
+    return SettingRegistry.upgradeShortcuts(shortcuts).map(
+      shortcut => shortcut.selector
+    );
+  }
+
+  /**
+   * The selector that a default keybinding is stored with.
+   */
+  export function storedDefaultSelector(
+    settings: ISettingRegistry.ISettings<IShortcutsSettingsLayout>,
+    target: IShortcutTarget,
+    keybinding: IKeybinding
+  ): string {
+    const defaults = (settings.default('shortcuts') ??
+      []) as unknown as ShortcutOverride[];
+    const selectors = upgradedSelectors(defaults);
+    const shortcut = defaults.find(
+      (shortcut, index) =>
+        !shortcut.disabled &&
+        shortcut.command === target.command &&
+        selectors[index] === target.selector &&
+        JSONExt.deepEqual(shortcut.args ?? {}, target.args ?? {}) &&
+        JSONExt.deepEqual(
+          CommandRegistry.normalizeKeys(shortcut),
+          keybinding.keys
+        )
+    );
+    return shortcut?.selector ?? target.selector;
+  }
 }

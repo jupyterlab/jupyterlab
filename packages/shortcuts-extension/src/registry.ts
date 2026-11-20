@@ -3,9 +3,9 @@
  * Distributed under the terms of the Modified BSD License.
  */
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { SettingRegistry } from '@jupyterlab/settingregistry';
 import { ArrayExt, StringExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
-import type { PartialJSONArray } from '@lumino/coreutils';
 import type {
   IKeybinding,
   ISearchResult,
@@ -53,20 +53,21 @@ export class ShortcutRegistry
         this.set(targetKey, shortcutTarget);
       }
     } else if (settings) {
-      const userBindings = settings.user.shortcuts ?? [];
+      // The composite shortcuts have the upgraded selectors.
+      const userBindings = SettingRegistry.upgradeShortcuts(
+        settings.user.shortcuts ?? []
+      );
       const setByUser = new Set(
         userBindings.map(this._computeKeybindingId.bind(this))
       );
 
       const luminoKeybindings = settings.composite.shortcuts ?? [];
       // Compute the target ID for the shortcuts defined by an extension.
-      const shortcutsFromExtensions = (
-        settings.default('shortcuts') as PartialJSONArray
-      ).map(shortcut => {
-        return this._computeTargetId(
-          shortcut as unknown as CommandRegistry.IKeyBindingOptions
-        );
-      });
+      const shortcutsFromExtensions = SettingRegistry.upgradeShortcuts(
+        settings.default(
+          'shortcuts'
+        ) as unknown as CommandRegistry.IKeyBindingOptions[]
+      ).map(shortcut => this._computeTargetId(shortcut));
 
       for (const shortcut of luminoKeybindings) {
         const targetKey = this._computeTargetId(shortcut);
