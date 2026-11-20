@@ -10,5 +10,5 @@ import type { IShortcutUI } from './types';
 export const renderShortCut = (props: {
   external: IShortcutUI.IExternalBundle;
 }): JSX.Element => {
-  return <ShortcutUI external={props.external} height={1000} width={1000} />;
+  return <ShortcutUI external={props.external} />;
 };

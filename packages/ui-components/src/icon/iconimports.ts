@@ -22,6 +22,7 @@ import caretDownEmptyThinSvgstr from '../../style/icons/arrow/caret-down-empty-t
 import caretDownSvgstr from '../../style/icons/arrow/caret-down.svg';
 import caretLeftSvgstr from '../../style/icons/arrow/caret-left.svg';
 import caretRightSvgstr from '../../style/icons/arrow/caret-right.svg';
+import caretUpDownEmptyThinSvgstr from '../../style/icons/arrow/caret-up-down-empty-thin.svg';
 import caretUpEmptyThinSvgstr from '../../style/icons/arrow/caret-up-empty-thin.svg';
 import caretUpSvgstr from '../../style/icons/arrow/caret-up.svg';
 import caseSensitiveSvgstr from '../../style/icons/search/case-sensitive.svg';
@@ -150,6 +151,7 @@ export const caretDownEmptyThinIcon = new LabIcon({ name: 'ui-components:caret-d
 export const caretDownIcon = new LabIcon({ name: 'ui-components:caret-down', svgstr: caretDownSvgstr });
 export const caretLeftIcon = new LabIcon({ name: 'ui-components:caret-left', svgstr: caretLeftSvgstr });
 export const caretRightIcon = new LabIcon({ name: 'ui-components:caret-right', svgstr: caretRightSvgstr });
+export const caretUpDownEmptyThinIcon = new LabIcon({ name: 'ui-components:caret-up-down-empty-thin', svgstr: caretUpDownEmptyThinSvgstr });
 export const caretUpEmptyThinIcon = new LabIcon({ name: 'ui-components:caret-up-empty-thin', svgstr: caretUpEmptyThinSvgstr });
 export const caretUpIcon = new LabIcon({ name: 'ui-components:caret-up', svgstr: caretUpSvgstr });
 export const caseSensitiveIcon = new LabIcon({ name: 'ui-components:case-sensitive', svgstr: caseSensitiveSvgstr });
