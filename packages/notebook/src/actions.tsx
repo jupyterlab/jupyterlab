@@ -2842,9 +2842,12 @@ namespace Private {
   ): IStoredCellExecution | null {
     const pending = pendingOutputExecutions.get(cell);
     if (pending && !cell.outputArea.future) {
-      pending.outputs = cell.model.outputs.toJSON();
-      pending.displayIdMap = cell.outputArea.displayIdMap;
-      return pending;
+      const fresh: IStoredCellExecution = {
+        ...pending,
+        outputs: cell.model.outputs.toJSON(),
+        displayIdMap: cell.outputArea.displayIdMap
+      };
+      return fresh;
     }
     const future = cell.outputArea.detachFuture();
     if (!future) {
@@ -3016,7 +3019,9 @@ namespace Private {
       cell.disposed.disconnect(dismiss);
       model.stateChanged.disconnect(onStateChanged);
       Notification.manager.changed.disconnect(onNotificationChanged);
-      pendingOutputExecutions.delete(cell);
+      if (pendingOutputExecutions.get(cell) === storedExecution) {
+        pendingOutputExecutions.delete(cell);
+      }
       if (notificationId) {
         Notification.dismiss(notificationId);
       }

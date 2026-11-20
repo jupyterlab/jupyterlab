@@ -283,8 +283,12 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
    * The id for the cell.
    */
   get id(): string {
-    return this.sharedModel.getId();
+    if (!this._id) {
+      this._id = this.sharedModel.getId();
+    }
+    return this._id;
   }
+  private _id?: string;
 
   /**
    * The metadata associated with the cell.
@@ -305,6 +309,20 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
       this._trusted = newValue;
       this.onTrustedChanged(this, { newValue, oldValue });
     }
+  }
+
+  /**
+   * Switch the shared model to a new one (used when cells are moved).
+   *
+   * @internal
+   */
+  switchSharedModel(sharedModel: ISharedCell): void {
+    this.sharedModel.changed.disconnect(this.onGenericChange, this);
+    this.sharedModel.metadataChanged.disconnect(this._onMetadataChanged, this);
+    (this as any).sharedModel = sharedModel;
+    this._id = sharedModel.getId();
+    this.sharedModel.changed.connect(this.onGenericChange, this);
+    this.sharedModel.metadataChanged.connect(this._onMetadataChanged, this);
   }
 
   /**
@@ -444,6 +462,17 @@ export abstract class AttachmentsCellModel extends CellModel {
    */
   get attachments(): IAttachmentsModel {
     return this._attachments;
+  }
+
+  /**
+   * Switch the shared model to a new one (used when cells are moved).
+   *
+   * @internal
+   */
+  override switchSharedModel(sharedModel: ISharedCell): void {
+    this.sharedModel.changed.disconnect(this._onSharedModelChanged, this);
+    super.switchSharedModel(sharedModel);
+    this.sharedModel.changed.connect(this._onSharedModelChanged, this);
   }
 
   /**
@@ -711,6 +740,17 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     this.sharedModel.deleteMetadata('execution');
     // We trust this cell as it no longer has any outputs.
     this.trusted = true;
+  }
+
+  /**
+   * Switch the shared model to a new one (used when cells are moved).
+   *
+   * @internal
+   */
+  override switchSharedModel(sharedModel: ISharedCodeCell): void {
+    this.sharedModel.changed.disconnect(this._onSharedModelChanged, this);
+    super.switchSharedModel(sharedModel);
+    this.sharedModel.changed.connect(this._onSharedModelChanged, this);
   }
 
   /**
