@@ -652,6 +652,42 @@ jlpm start
 Tests are grouped in two projects: `galata` and `jupyterlab`. The first one is testing Galata helpers and fixtures when the other one is running all tests for Jupyterlab.
 By default, both projects will be executed when running `jlpm test`. But you can select one project with the CLI option `--project <project-id>`.
 
+### Record the Code Console creation example
+
+Follow the [contributor development installation](../docs/source/developer/contributing.md)
+and documentation screenshot prerequisites, including the `docs-screenshots` dependencies.
+Build the current UI with `jlpm build` and `jlpm build:galata` from the repository root,
+then run `jlpm start:doc` from `galata/`. In another terminal, also from `galata/`, run:
+
+```bash
+# Test console creation without recording documentation media.
+env -u GALATA_SCREENCAST_DIR jlpm test test/documentation/code-console-screencast.test.ts --project=documentation --workers=1
+
+# Record with the documentation project's default Chromium browser.
+GALATA_SCREENCAST_DIR=/tmp/jupyterlab-code-console-screencasts jlpm test test/documentation/code-console-screencast.test.ts --project=documentation --workers=1
+```
+
+An unset or empty `GALATA_SCREENCAST_DIR` disables documentation recording. Relative
+paths resolve from the command's working directory. Choose a directory outside the
+active Playwright output directory (`test-results` by default), which is cleaned by
+the runner. Each attempt creates a unique `code_console_create-*` subdirectory, so
+repeated runs and retries preserve earlier recordings. A successful run finalizes
+`code_console_create.webm` there; failed attempts retain an `-incomplete.webm` file.
+Use recordings only from passing tests.
+
+The example preserves Galata's default settings and documentation state, and uses
+a 1280×720 viewport at device pixel ratio 1. Recording uses native Playwright
+screencasts with pointer/actions and chapter captions. During recording only, this
+test disables diagnostic trace/video capture, including `--trace=on` and the video
+replay configuration, because earlier capture can downscale the native recording.
+
+Preview the complete WebM in a browser and check the File Browser + route, Python
+Console selection, pointer, readable captions and ready console. Check that a media
+inspector such as `ffprobe` reports 1280×720 video frames and that the file decodes.
+Do not commit generated media. This Chromium example does not establish broader
+browser coverage or a new hosting policy; maintainers still decide hosting and
+replacement of the existing documentation embed.
+
 ## Configuration
 
 Galata can be configured by using [command line arguments](https://playwright.dev/docs/test-cli#reference) or using [`playwright.config.js` file](https://playwright.dev/docs/test-configuration). Full list of config options can be accessed using `jlpm playwright test --help`.
