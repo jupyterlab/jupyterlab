@@ -43,9 +43,13 @@ test.describe('Workspace', () => {
   });
 
   test('should reset the workspace', async ({ page, tmpPath }) => {
-    await page.goto();
+    // Tests in other workers add and remove items in the root folder, so a
+    // double click in its listing can open the wrong item.
+    await page.goto(`tree/${tmpPath}/${nbFile}`);
 
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await expect(
+      page.locator('[role="main"] >> text=Test Notebook¶').first()
+    ).toBeVisible();
 
     await page.goto('?reset');
 
