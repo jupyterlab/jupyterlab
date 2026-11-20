@@ -66,6 +66,7 @@ for (const name of await readdir(dir)) {
   );
   for (const r of records) {
     if (r.type === 'policy-error') continue;
+    if (String(r.sample).includes('tt-probe')) continue; // the self-test's deliberate violation
     const { site, via } = await locate(r.stack);
     const key = `${site}|${r.sink}`;
     const s = sites.get(key) ?? {

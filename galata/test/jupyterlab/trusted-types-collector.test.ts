@@ -1,6 +1,6 @@
 import { expect, test } from '@jupyterlab/galata';
 
-test.use({ autoGoto: false, collectTrustedTypes: true });
+test.use({ autoGoto: false });
 
 test('Trusted Types collector is live', async ({
   page,
