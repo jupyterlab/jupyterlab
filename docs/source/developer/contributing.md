@@ -713,18 +713,17 @@ Main reasons for UI test failures are:
 
 2. **An intended update to user interface**:
 
-   If your code change is introducing an update to UI which causes existing UI Tests to
-   fail, then you will need to update reference image(s) (and/or JSON snapshots) for the failing tests.
-   In order to do that, you can post a top-level comment on your PR with the following content:
-   - (bot) `please open PR to update snapshots` - A bot will open a PR updating all snapshots
-     generated in the most recent run of CI from your branch.
+   If your code change is introducing an update to UI which causes existing UI
+   Tests to fail, then you will need to update reference image(s) (and/or JSON
+   snapshots) for the failing tests. In order to do that, you can post a
+   top-level comment on your PR with the following content:
 
-   Maintainers can also use the following commands:
-   - `please update galata snapshots`: A bot will regenerate galata snapshots
-     and push a new commit to your PR branch.
-   - `please update documentation snapshots`: A bot will regenerate documentation
-     snapshots and push a new commit to your PR branch.
-   - `please update snapshots`: Combine the two previous comments effects.
+   ```text
+   please open PR to update snapshots
+   ```
+
+   A bot will open a PR updating all snapshots generated in the most recent run
+   of CI from your branch.
 
    > The bot will react with +1 emoji to indicate that the run started and then comment
    > back once it concluded.
