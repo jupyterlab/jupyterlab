@@ -134,11 +134,21 @@ export class SettingsFormEditor extends React.Component<
     this._debouncer = new Debouncer(this._handleChange);
   }
 
+  componentDidMount(): void {
+    document.addEventListener('keydown', this._onDocumentKeyDown, true);
+  }
+
   componentDidUpdate(prevProps: SettingsFormEditor.IProps): void {
     this._setUiSchema(prevProps.renderers[prevProps.settings.id]);
     this._setFilteredSchema(prevProps.filteredValues);
 
     if (prevProps.settings !== this.props.settings) {
+      if (this._blurTimeout !== null) {
+        window.clearTimeout(this._blurTimeout);
+        this._blurTimeout = null;
+      }
+      this._isFocused = false;
+      this._needsSyncOnBlur = false;
       prevProps.settings.changed.disconnect(this._syncFormDataWithSettings);
       this.props.settings.changed.connect(this._syncFormDataWithSettings);
       this._formData = this.props.settings.composite as ReadonlyJSONObject;
@@ -155,6 +165,11 @@ export class SettingsFormEditor extends React.Component<
   }
 
   componentWillUnmount(): void {
+    document.removeEventListener('keydown', this._onDocumentKeyDown, true);
+    if (this._blurTimeout !== null) {
+      window.clearTimeout(this._blurTimeout);
+      this._blurTimeout = null;
+    }
     this.props.settings.changed.disconnect(this._syncFormDataWithSettings);
     this._debouncer.dispose();
   }
@@ -190,9 +205,18 @@ export class SettingsFormEditor extends React.Component<
           return;
         }
         this._lastSettledChangeId = changeId;
-        this._formData = this.props.settings.composite as ReadonlyJSONObject;
         this.props.updateDirtyState(false);
-        this.setState({ isModified: this.props.settings.isModified });
+        if (this._isFocused) {
+          this._needsSyncOnBlur = true;
+          this.setState((prevState, props) => ({
+            isModified: props.settings.isModified
+          }));
+          return;
+        }
+        this._formData = this.props.settings.composite as ReadonlyJSONObject;
+        this.setState((prevState, props) => ({
+          isModified: props.settings.isModified
+        }));
       })
       .catch((reason: string) => {
         if (changeId !== this._changeId) {
@@ -212,6 +236,12 @@ export class SettingsFormEditor extends React.Component<
    */
   reset = async (event: React.MouseEvent): Promise<void> => {
     event.stopPropagation();
+    if (this._blurTimeout !== null) {
+      window.clearTimeout(this._blurTimeout);
+      this._blurTimeout = null;
+    }
+    this._isFocused = false;
+    this._needsSyncOnBlur = false;
     this._changeId++;
     this._lastSettledChangeId = this._changeId;
     for (const field in this.props.settings.user) {
@@ -223,6 +253,10 @@ export class SettingsFormEditor extends React.Component<
 
   private _syncFormDataWithSettings = () => {
     if (this._changeId !== this._lastSettledChangeId) {
+      return;
+    }
+    if (this._isFocused) {
+      this._needsSyncOnBlur = true;
       return;
     }
     this._formData = this.props.settings.composite as ReadonlyJSONObject;
@@ -264,6 +298,8 @@ export class SettingsFormEditor extends React.Component<
           liveValidate
           idPrefix={`jp-SettingsEditor-${this.props.settings.id}`}
           onChange={this._onChange}
+          onFocus={this._onFocus}
+          onBlur={this._onBlur}
           translator={this.props.translator}
           experimental_defaultFormStateBehavior={{
             emptyObjectFields: 'populateRequiredDefaults'
@@ -273,6 +309,45 @@ export class SettingsFormEditor extends React.Component<
       </>
     );
   }
+
+  private _onFocus = (): void => {
+    if (this._blurTimeout !== null) {
+      window.clearTimeout(this._blurTimeout);
+      this._blurTimeout = null;
+    }
+    this._isFocused = true;
+  };
+
+  private _onBlur = (): void => {
+    if (this._blurTimeout !== null) {
+      window.clearTimeout(this._blurTimeout);
+    }
+    this._blurTimeout = window.setTimeout(() => {
+      this._blurTimeout = null;
+      this._isFocused = false;
+      if (this._changeId !== this._lastSettledChangeId) {
+        this._handleChange(this._formData, this._changeId);
+      } else if (this._needsSyncOnBlur) {
+        this._needsSyncOnBlur = false;
+        this._formData = this.props.settings.composite as ReadonlyJSONObject;
+        this.setState((prevState, props) => ({
+          isModified: props.settings.isModified
+        }));
+      }
+    }, 0);
+  };
+
+  private _onDocumentKeyDown = (event: KeyboardEvent): void => {
+    if (event.key === 'Enter') {
+      const activeEl = document.activeElement as HTMLElement | null;
+      if (
+        activeEl?.tagName === 'INPUT' &&
+        activeEl.id.startsWith(`jp-SettingsEditor-${this.props.settings.id}`)
+      ) {
+        activeEl.blur();
+      }
+    }
+  };
 
   private _onChange = (e: IChangeEvent<ReadonlyPartialJSONObject>): void => {
     this.props.hasError(e.errors.length !== 0);
@@ -394,10 +469,13 @@ export class SettingsFormEditor extends React.Component<
     return filteredFormData as ReadonlyJSONObject;
   }
 
+  private _blurTimeout: number | null = null;
   private _changeId = 0;
   private _debouncer: Debouncer<void, unknown, [ReadonlyJSONObject, number]>;
   private _formData: ReadonlyJSONObject;
+  private _isFocused = false;
   private _lastSettledChangeId = 0;
+  private _needsSyncOnBlur = false;
 }
 
 namespace Private {
