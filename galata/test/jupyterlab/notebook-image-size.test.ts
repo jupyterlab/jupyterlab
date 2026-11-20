@@ -262,6 +262,10 @@ test.describe('Image size', () => {
     tmpPath
   }) => {
     await page.notebook.openByPath(`${tmpPath}/output-height-percent.ipynb`);
+    // Until the notebook loads, its active cell is a placeholder with no outputs
+    await expect(
+      page.locator('.jp-NotebookPanel .jp-OutputArea-output img')
+    ).toBeVisible();
     await page.evaluate(async () => {
       await window.jupyterapp.commands.execute('notebook:create-output-view');
     });

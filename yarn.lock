@@ -2237,29 +2237,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyter/builder@npm:^1.0.0-beta.1":
-  version: 1.0.0-beta.1
-  resolution: "@jupyter/builder@npm:1.0.0-beta.1"
+"@jupyter/builder@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "@jupyter/builder@npm:1.3.0"
   dependencies:
-    "@jupyterlab/core-meta": 4.6.0-alpha.4
+    "@jupyterlab/core-meta": ^4.6.4
     "@module-federation/runtime-tools": ^2.0.0
-    "@rspack/core": ^2.0.2
+    "@rspack/core": ^2.3.0
     ajv: ^8.12.0
     commander: ^9.4.1
-    css-loader: ^6.7.1
+    css-loader: ^7.1.4
     duplicate-package-checker-webpack-plugin: ^3.0.0
     fs-extra: ^10.1.0
-    glob: ~7.1.6
+    glob: ^13.0.6
     license-webpack-plugin: ^4.0.2
     mini-svg-data-uri: ^1.4.4
     path-browserify: ^1.0.0
     process: ^0.11.10
-    source-map-loader: ~1.0.2
-    style-loader: ~3.3.1
+    style-loader: ^4.0.0
     supports-color: ^7.2.0
     webpack-merge: ^5.8.0
-    worker-loader: ^3.0.2
-  checksum: 70b0900546f11ceed9ce3cebeff3e21eed4b6212a20eb81a75a9aa3f94ba7232c312f8df66ba1c2dd9bc4d720abd64e58a36a423ef583ea48bb1635e918923ac
+  checksum: 3aa9d5eb14fd05d9cd33656a00e339cc9de225e2245f2054d1dbcbf8c9858341c24c8025fd0596761087aacc2e309d1952da8b0ec8c75ae66990b310ac07609f
   languageName: node
   linkType: hard
 
@@ -2340,7 +2338,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/application-top@workspace:dev_mode"
   dependencies:
-    "@jupyter/builder": ^1.0.0-beta.1
+    "@jupyter/builder": ^1.3.0
     "@jupyterlab/application": ~4.7.0-beta.2
     "@jupyterlab/application-extension": ~4.7.0-beta.2
     "@jupyterlab/apputils-extension": ~4.7.0-beta.2
@@ -2411,6 +2409,7 @@ __metadata:
     rimraf: ~5.0.5
     sort-package-json: ~1.53.1
     source-map-loader: ~1.0.2
+    style-loader: ^4.0.0
     webpack-bundle-analyzer: ^4.8.0
     webpack-merge: ^5.8.0
     worker-loader: ^3.0.2
@@ -2912,10 +2911,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/core-meta@npm:4.6.0-alpha.4":
-  version: 4.6.0-alpha.4
-  resolution: "@jupyterlab/core-meta@npm:4.6.0-alpha.4"
-  checksum: 9ee7870b1a5f41a15d20bddd716bb916bc65888bb08b6d8fe6f51d71b9d7110e701b37dd0ae3fc83342839c74555da6d7b49006c638fd32808269e3558324c06
+"@jupyterlab/core-meta@npm:^4.6.4":
+  version: 4.6.6
+  resolution: "@jupyterlab/core-meta@npm:4.6.6"
+  checksum: 8c880c86ce51b4529fd5adfcd4f3bb1aacaf07a6f99ac7188c1173bdb97410675fe6b2dc606e16b8d8f867a473704c864ba5cd3b012a7f95c353e5a85ea8dabe
   languageName: node
   linkType: hard
 
@@ -3193,7 +3192,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-app@workspace:examples/app"
   dependencies:
-    "@jupyter/builder": ^1.0.0-beta.1
+    "@jupyter/builder": ^1.3.0
     "@jupyterlab/application": ^4.7.0-beta.2
     "@jupyterlab/application-extension": ^4.7.0-beta.2
     "@jupyterlab/apputils-extension": ^4.7.0-beta.2
@@ -3296,7 +3295,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-federated-core@workspace:examples/federated/core_package"
   dependencies:
-    "@jupyter/builder": ^1.0.0-beta.1
+    "@jupyter/builder": ^1.3.0
     "@jupyterlab/application": ^4.7.0-beta.2
     "@jupyterlab/application-extension": ^4.7.0-beta.2
     "@jupyterlab/apputils-extension": ^4.7.0-beta.2
@@ -3352,7 +3351,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-federated-md@workspace:examples/federated/md_package"
   dependencies:
-    "@jupyter/builder": ^1.0.0-beta.1
+    "@jupyter/builder": ^1.3.0
     "@jupyterlab/application": ^4.7.0-beta.2
     "@jupyterlab/example-federated-middle": ^3.6.0-beta.2
     "@jupyterlab/markdownviewer-extension": ^4.7.0-beta.2
@@ -3365,7 +3364,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-federated-middle@workspace:examples/federated/middle_package"
   dependencies:
-    "@jupyter/builder": ^1.0.0-beta.1
+    "@jupyter/builder": ^1.3.0
     "@lumino/coreutils": ^2.2.3
     rimraf: ~5.0.5
   languageName: unknown
@@ -3707,7 +3706,7 @@ __metadata:
     "@fontsource-variable/noto-sans-sc": ^5.2.10
     "@fontsource/dejavu-mono": ^5.2.5
     "@fontsource/dejavu-sans": ^5.2.5
-    "@jupyter/builder": ^1.0.0-beta.1
+    "@jupyter/builder": ^1.3.0
     "@jupyterlab/application": ^4.7.0-beta.2
     "@jupyterlab/apputils": ^4.8.0-beta.2
     "@jupyterlab/cells": ^4.7.0-beta.2
@@ -4389,7 +4388,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mock-consumer@workspace:jupyterlab/tests/mock_packages/interop/consumer"
   dependencies:
-    "@jupyter/builder": ^1.0.0-beta.1
+    "@jupyter/builder": ^1.3.0
     "@jupyterlab/mock-token": ^4.7.0-beta.2
   languageName: unknown
   linkType: soft
@@ -4398,7 +4397,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mock-extension@workspace:jupyterlab/tests/mock_packages/extension"
   dependencies:
-    "@jupyter/builder": ^1.0.0-beta.1
+    "@jupyter/builder": ^1.3.0
     "@jupyterlab/launcher": ^4.7.0-beta.2
   languageName: unknown
   linkType: soft
@@ -4407,7 +4406,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mock-provider@workspace:jupyterlab/tests/mock_packages/interop/provider"
   dependencies:
-    "@jupyter/builder": ^1.0.0-beta.1
+    "@jupyter/builder": ^1.3.0
     "@jupyterlab/mock-token": ^4.7.0-beta.2
   languageName: unknown
   linkType: soft
@@ -4416,7 +4415,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mock-service-manager-extension@workspace:jupyterlab/tests/mock_packages/service-manager-extension"
   dependencies:
-    "@jupyter/builder": ^1.0.0-beta.1
+    "@jupyter/builder": ^1.3.0
     "@jupyterlab/services": ^7.7.0-beta.2
   languageName: unknown
   linkType: soft
@@ -5039,7 +5038,7 @@ __metadata:
     "@lumino/signaling": ^2.1.6
     "@lumino/widgets": ^2.10.0
     "@types/webpack-env": ^1.18.0
-    "@xterm/addon-search": ~0.16.0
+    "@xterm/addon-search": 0.17.0-beta.331
     color: ^5.0.0
     rimraf: ~5.0.5
     typescript: ~5.9.3
@@ -5060,11 +5059,11 @@ __metadata:
     "@lumino/signaling": ^2.1.6
     "@lumino/widgets": ^2.10.0
     "@types/jest": ^29.2.0
-    "@xterm/addon-fit": ~0.11.0
-    "@xterm/addon-search": ~0.16.0
-    "@xterm/addon-web-links": ~0.12.0
-    "@xterm/addon-webgl": ~0.19.0
-    "@xterm/xterm": ~6.0.0
+    "@xterm/addon-fit": 0.12.0-beta.333
+    "@xterm/addon-search": 0.17.0-beta.331
+    "@xterm/addon-web-links": 0.13.0-beta.331
+    "@xterm/addon-webgl": 0.20.0-beta.330
+    "@xterm/xterm": 6.1.0-beta.337
     color: ^5.0.0
     jest: ^29.2.0
     jest-canvas-mock: ^2.5.2
@@ -8070,38 +8069,46 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xterm/addon-fit@npm:~0.11.0":
-  version: 0.11.0
-  resolution: "@xterm/addon-fit@npm:0.11.0"
-  checksum: 0a772c4fbeddd65f68c345c3d40ee7dae231784dd7095ccd3acba0832def24a5364c4705bf6f24c2f01016855f6bcf0ac4636267e50efa3a319474f80c8d3c7f
+"@xterm/addon-fit@npm:0.12.0-beta.333":
+  version: 0.12.0-beta.333
+  resolution: "@xterm/addon-fit@npm:0.12.0-beta.333"
+  peerDependencies:
+    "@xterm/xterm": ^6.1.0-beta.337
+  checksum: 7ec9a98ee132f32624149bef35bff0a224ebcea349b47979c99e7ef50c6ab354178a89e1d11dc9e0de2a950ad7e69bb5b84a125f8d9da50381640e9e5602f351
   languageName: node
   linkType: hard
 
-"@xterm/addon-search@npm:~0.16.0":
-  version: 0.16.0
-  resolution: "@xterm/addon-search@npm:0.16.0"
-  checksum: 73fed15118b87d9830e4b4d39e049bd03daf6f88fc05567d3dd55c4e8d3be77a35a0f7d5fa061a4dbfdf7f25e63f16463bacfaddd061d85c2bdaef59cc2efe2f
+"@xterm/addon-search@npm:0.17.0-beta.331":
+  version: 0.17.0-beta.331
+  resolution: "@xterm/addon-search@npm:0.17.0-beta.331"
+  peerDependencies:
+    "@xterm/xterm": ^6.1.0-beta.337
+  checksum: c77c2532f3cc2d32c3e6c74b875c4f0dfbcdc899a27590cd8e27fed9006fa3b3fa814406758049f42ea09bd8dcf1c5085ca69d7fa2e95ecf31565d84adc6e7c3
   languageName: node
   linkType: hard
 
-"@xterm/addon-web-links@npm:~0.12.0":
-  version: 0.12.0
-  resolution: "@xterm/addon-web-links@npm:0.12.0"
-  checksum: 3626ede0b2a8b1d9dbdfc0438b976d6848f3c931a4c67feb1b956a0d53bb413366a2758cb2133cada7d5042f6d4543613d98519208235699b9ba1bed22abb51f
+"@xterm/addon-web-links@npm:0.13.0-beta.331":
+  version: 0.13.0-beta.331
+  resolution: "@xterm/addon-web-links@npm:0.13.0-beta.331"
+  peerDependencies:
+    "@xterm/xterm": ^6.1.0-beta.337
+  checksum: 62fd3ae6908c29fb452b0285d4889cf446d8098e6ce84ea8a4f29d17eeb00cda9213c18c07d6f6e5bd6cec529e10496ae4720ca04c9269dfef928712d3670abe
   languageName: node
   linkType: hard
 
-"@xterm/addon-webgl@npm:~0.19.0":
-  version: 0.19.0
-  resolution: "@xterm/addon-webgl@npm:0.19.0"
-  checksum: ed8d94831e05f6bc4a1d368a8b7c24b01de827840c693022f1a4a0ca40ded716c72b9b59beee4c2b19c4ea5af9db3f7d1c5e0d381c7cc3a752713b5efd2bff07
+"@xterm/addon-webgl@npm:0.20.0-beta.330":
+  version: 0.20.0-beta.330
+  resolution: "@xterm/addon-webgl@npm:0.20.0-beta.330"
+  peerDependencies:
+    "@xterm/xterm": ^6.1.0-beta.337
+  checksum: 4f2a9b95529381ad74b8c9c0c98eb3b87c61c2124fcec61d9ecc1504e09b3c104deee3ec116a9e2362bcd7ba0d9b48dc5f809cd164983e8930b86c7cc2d93439
   languageName: node
   linkType: hard
 
-"@xterm/xterm@npm:~6.0.0":
-  version: 6.0.0
-  resolution: "@xterm/xterm@npm:6.0.0"
-  checksum: 913f6523fe6148d36ef6e7b6f25276faee7f48ec6a9eab48b887c77e8d0cbe8bd77d278f19db5981f45d71d5778619e0580f516cdeeae6cd7ea32341b962677f
+"@xterm/xterm@npm:6.1.0-beta.337":
+  version: 6.1.0-beta.337
+  resolution: "@xterm/xterm@npm:6.1.0-beta.337"
+  checksum: 0a4332fed03c73da5db4521d2b9208f93a213ac458c949f83f68f8cff32267444a0a567f01668ddb97e9cf275baed889e7cb3fc17423f1d5cc5b717edb8cf877
   languageName: node
   linkType: hard
 
@@ -12175,14 +12182,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^13.0.3":
-  version: 13.0.6
-  resolution: "glob@npm:13.0.6"
+"glob@npm:^13.0.3, glob@npm:^13.0.6":
+  version: 13.0.7
+  resolution: "glob@npm:13.0.7"
   dependencies:
     minimatch: ^10.2.2
     minipass: ^7.1.3
     path-scurry: ^2.0.2
-  checksum: 1eb421c696c66af3c26e4845dbdd222d3b982ede17448456b49272722d872e9a91741b50e4e827370c57d17a39a69790061f45033523f085c076d8fcc0f69d2b
+  checksum: 5dde5b1f983d24e5079e68c805965e87e9380b328fda7a0e6619377379bf1faf0436450fbe218292111a1e4d185f2d4eea38e66214113f43382a88035d47731e
   languageName: node
   linkType: hard
 
@@ -17623,6 +17630,15 @@ __metadata:
   version: 2.0.1
   resolution: "strip-json-comments@npm:2.0.1"
   checksum: 1074ccb63270d32ca28edfb0a281c96b94dc679077828135141f27d52a5a398ef5e78bcf22809d23cadc2b81dfbe345eb5fd8699b385c8b1128907dec4a7d1e1
+  languageName: node
+  linkType: hard
+
+"style-loader@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "style-loader@npm:4.0.0"
+  peerDependencies:
+    webpack: ^5.27.0
+  checksum: 0b751b4cc8394a2fe1df6194bb2f6dd68e859e36f22030994bb7b5220f24f9efb5705e78b2442226e6fa4c90f74b397529c7eb0a1d7326fb016e1e140e90151c
   languageName: node
   linkType: hard
 

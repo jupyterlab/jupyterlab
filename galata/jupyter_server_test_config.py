@@ -20,7 +20,13 @@ c.LabApp.dev_mode = True
 ipython_dir = Path(mkdtemp(prefix="galata-ipython-"))
 kernel_config = ipython_dir / "profile_default" / "ipython_kernel_config.py"
 kernel_config.parent.mkdir()
-kernel_config.write_text("c.IPCompleter.jedi_compute_type_timeout = 10_000\n", encoding="utf-8")
+kernel_config.write_text(
+    "c.IPCompleter.jedi_compute_type_timeout = 10_000\n"
+    # Each kernel keeps its own history, so the history of the tests that run
+    # at the same time does not change the order of history suggestions
+    'c.HistoryManager.hist_file = ":memory:"\n',
+    encoding="utf-8",
+)
 os.environ["IPYTHONDIR"] = str(ipython_dir)
 
 # Kernels use Unix sockets: with TCP, the server picks each kernel's ports

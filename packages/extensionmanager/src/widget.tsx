@@ -613,17 +613,11 @@ class SearchResult extends ReactWidget {
 
   render(): JSX.Element {
     const query = this.model.query;
-    // The PyPI manager lists only language packs, so a search that finds
-    // nothing points to the same search on PyPI.
-    const showBrowse =
-      this.model.name === 'PyPI' &&
-      (!query ||
-        (!this.model.isSearching &&
-          this.model.searchError === null &&
-          this.model.searchResult.length === 0));
+    // The PyPI manager lists only a limited set of packages, so the same
+    // search on PyPI may find more.
     return (
       <>
-        {showBrowse && (
+        {this.model.name === 'PyPI' && (
           <div className="jp-extensionmanager-browse">
             <a
               href={
@@ -634,7 +628,7 @@ class SearchResult extends ReactWidget {
               target="_blank"
               rel="noopener noreferrer"
             >
-              {this.trans.__('Browse extensions on PyPI')}
+              {this.trans.__('Browse more extensions on PyPI')}
             </a>
           </div>
         )}

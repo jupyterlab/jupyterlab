@@ -1,12 +1,13 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import asyncio
 import io
 import json
 import logging
 import sys
 import tarfile
-from importlib.metadata import distributions
+from importlib.metadata import Distribution, PackageNotFoundError, distributions
 from subprocess import CompletedProcess
 from types import MethodType, SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
@@ -28,11 +29,21 @@ from jupyterlab.handlers.extension_manager_handler import ExtensionHandler
 
 from . import fake_client_factory
 
+PREBUILT_CLASSIFIERS = ["Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt"]
+
 
 @pytest.fixture(autouse=True)
-def no_installed_language_packs(monkeypatch):
-    """Hide the language packs installed in the test environment."""
+def no_installed_language_packs(monkeypatch, tmp_path):
+    """Look up installed packages in `tmp_path` only, and hide the known extensions."""
+
+    def distribution(name):
+        for dist in Distribution.discover(name=name, path=[str(tmp_path)]):
+            return dist
+        raise PackageNotFoundError(name)
+
     monkeypatch.setattr("jupyterlab.extensions.pypi.entry_points", lambda **_: [])
+    monkeypatch.setattr("jupyterlab.extensions.pypi.distribution", distribution)
+    monkeypatch.setattr("jupyterlab.extensions.pypi.KNOWN_EXTENSIONS", ())
 
 
 @pytest.mark.parametrize(
@@ -77,10 +88,129 @@ async def test_pypi_search_only_lists_language_packs(monkeypatch):
         assert [(pack.name, pack.latest_version) for pack in packs] == [
             ("jupyterlab-language-pack-fr-FR", "1.0.0")
         ]
-    get.assert_awaited_once_with(
+    assert [args[0] for args, _ in get.await_args_list] == [
         f"{manager.base_url}/jupyterlab-language-pack-fr-FR/json",
+        f"{manager.base_url}/jupyterlab-git/json",
+        f"{manager.base_url}/fr-fr/json",
+        f"{manager.base_url}/french/json",
+    ]
+
+
+@patch("jupyterlab.extensions.pypi.KNOWN_EXTENSIONS", ("nbdime",))
+@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ("jupyterlab-language-pack-fr-FR",))
+async def test_pypi_search_lists_known_extensions_before_language_packs(monkeypatch):
+    manager = PyPIExtensionManager()
+    get = AsyncMock(return_value=httpx2.Response(200, json={"info": {"version": "1.0.0"}}))
+    monkeypatch.setattr(manager._httpx_client, "get", get)
+
+    extensions, _ = await manager.list_extensions("")
+
+    assert [(ext.name, ext.pkg_type) for ext in extensions] == [
+        ("nbdime", "prebuilt"),
+        ("jupyterlab-language-pack-fr-FR", "language-pack"),
+    ]
+
+
+@patch("jupyterlab.extensions.pypi.KNOWN_EXTENSIONS", ("jupyterlab-git", "nbdime"))
+@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ())
+async def test_pypi_search_leaves_out_installed_known_extensions(monkeypatch, tmp_path):
+    (tmp_path / "jupyterlab_git-0.51.0.dist-info").mkdir()
+    manager = PyPIExtensionManager()
+    get = AsyncMock(return_value=httpx2.Response(200, json={"info": {"version": "1.0.0"}}))
+    monkeypatch.setattr(manager._httpx_client, "get", get)
+
+    extensions, _ = await manager.list_extensions("")
+
+    assert [ext.name for ext in extensions] == ["nbdime"]
+
+
+@patch("jupyterlab.extensions.pypi.KNOWN_EXTENSIONS", ("jupyter-ai",))
+@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ())
+async def test_pypi_search_reads_project_urls_by_label(monkeypatch):
+    manager = PyPIExtensionManager()
+    project_urls = {
+        "Documentation": "https://jupyter-ai.readthedocs.io",
+        "Source": "https://github.com/jupyterlab/jupyter-ai",
+        "Tracker": "https://github.com/jupyterlab/jupyter-ai/issues",
+    }
+    get = AsyncMock(
+        return_value=httpx2.Response(
+            200, json={"info": {"version": "1.0.0", "project_urls": project_urls}}
+        )
+    )
+    monkeypatch.setattr(manager._httpx_client, "get", get)
+
+    [extension], _ = await manager.list_extensions("")
+
+    assert extension.repository_url == "https://github.com/jupyterlab/jupyter-ai"
+    assert extension.bug_tracker_url == "https://github.com/jupyterlab/jupyter-ai/issues"
+
+
+@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ())
+async def test_pypi_search_finds_prebuilt_extension_by_full_name(monkeypatch):
+    manager = PyPIExtensionManager()
+    info = {"version": "4.1.0", "classifiers": PREBUILT_CLASSIFIERS}
+    get = AsyncMock(return_value=httpx2.Response(200, json={"info": info}))
+    monkeypatch.setattr(manager._httpx_client, "get", get)
+
+    extensions, _ = await manager.list_extensions("Jupyter_Bokeh")
+
+    assert [(ext.name, ext.pkg_type) for ext in extensions] == [("jupyter-bokeh", "prebuilt")]
+    get.assert_awaited_once_with(
+        f"{manager.base_url}/jupyter-bokeh/json",
         headers={"Content-Type": "application/json"},
     )
+
+
+@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ())
+async def test_pypi_search_leaves_out_full_name_match_without_prebuilt_classifier(monkeypatch):
+    manager = PyPIExtensionManager()
+    get = AsyncMock(return_value=httpx2.Response(200, json={"info": {"version": "2.5.5"}}))
+    monkeypatch.setattr(manager._httpx_client, "get", get)
+
+    extensions, _ = await manager.list_extensions("numpy")
+
+    assert extensions == []
+
+
+@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ())
+async def test_pypi_search_leaves_out_installed_full_name_match(monkeypatch, tmp_path):
+    (tmp_path / "jupytext-1.19.6.dist-info").mkdir()
+    manager = PyPIExtensionManager()
+    info = {"version": "1.19.6", "classifiers": PREBUILT_CLASSIFIERS}
+    get = AsyncMock(return_value=httpx2.Response(200, json={"info": info}))
+    monkeypatch.setattr(manager._httpx_client, "get", get)
+
+    extensions, _ = await manager.list_extensions("jupytext")
+
+    assert extensions == []
+
+
+@pytest.mark.parametrize("query", ("code formatter", "../simple/jupytext"))
+@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ())
+async def test_pypi_search_does_not_request_query_that_is_not_a_package_name(monkeypatch, query):
+    manager = PyPIExtensionManager()
+    get = AsyncMock()
+    monkeypatch.setattr(manager._httpx_client, "get", get)
+
+    extensions, _ = await manager.list_extensions(query)
+
+    assert extensions == []
+    get.assert_not_awaited()
+
+
+@patch("jupyterlab.extensions.pypi.KNOWN_EXTENSIONS", ("jupyter-collaboration",))
+@patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ())
+async def test_pypi_search_lists_known_extension_named_in_full_once(monkeypatch):
+    manager = PyPIExtensionManager()
+    info = {"version": "4.1.0", "classifiers": PREBUILT_CLASSIFIERS}
+    get = AsyncMock(return_value=httpx2.Response(200, json={"info": info}))
+    monkeypatch.setattr(manager._httpx_client, "get", get)
+
+    extensions, last_page = await manager.list_extensions("Jupyter_Collaboration", per_page=1)
+
+    assert [ext.name for ext in extensions] == ["jupyter-collaboration"]
+    assert last_page == 1
 
 
 @patch(
@@ -239,6 +369,15 @@ def python_packages(monkeypatch, tmp_path):
     return install
 
 
+def two_federated_extensions(federated_extensions):
+    federated_extensions(
+        {
+            "ext1": {"version": "1.0.0", "jupyterlab": {}, "install": {}},
+            "ext2": {"version": "2.0.0", "jupyterlab": {}, "install": {}},
+        }
+    )
+
+
 async def test_pypi_manager_looks_up_the_python_package_of_an_extension(
     monkeypatch, federated_extensions, python_packages
 ):
@@ -285,6 +424,46 @@ async def test_pypi_manager_reports_the_python_package_version_of_an_extension(
 
     extension = installed["jupyterlab-jupytext"]
     assert (extension.installed_version, extension.latest_version) == ("1.19.5", "1.19.5")
+
+
+@pytest.mark.usefixtures("two_federated_extensions")
+async def test_ExtensionManager_get_installed_extensions_runs_lookups_concurrently(monkeypatch):
+    manager = ReadOnlyExtensionManager()
+    running = 0
+    most_running = 0
+
+    async def get_latest_version(name):
+        nonlocal running, most_running
+        running += 1
+        most_running = max(most_running, running)
+        await asyncio.sleep(0)
+        running -= 1
+        return f"{name}-latest"
+
+    monkeypatch.setattr(manager, "get_latest_version", get_latest_version)
+
+    installed = await manager._get_installed_extensions()
+
+    assert most_running == 2
+    assert [pkg.latest_version for pkg in installed.values()] == ["ext1-latest", "ext2-latest"]
+
+
+@pytest.mark.usefixtures("two_federated_extensions")
+async def test_ExtensionManager_get_installed_extensions_keeps_other_versions_when_a_lookup_fails(
+    monkeypatch,
+):
+    manager = ReadOnlyExtensionManager()
+
+    async def get_latest_version(name):
+        if name == "ext1":
+            raise RuntimeError("Network error")
+        return "2.1.0"
+
+    monkeypatch.setattr(manager, "get_latest_version", get_latest_version)
+
+    installed = await manager._get_installed_extensions()
+
+    assert [pkg.latest_version for pkg in installed.values()] == ["1.0.0", "2.1.0"]
 
 
 async def test_ExtensionManager_list_extensions_query(monkeypatch):
@@ -587,10 +766,7 @@ async def test_pypi_language_pack_pagination_skips_unavailable_packs(monkeypatch
     assert pages_count == 2
     assert [
         record.getMessage() for record in caplog.records if record.levelno == logging.WARNING
-    ] == [
-        "Failed to fetch language pack metadata for jupyterlab-language-pack-ja-JP: "
-        "Connection refused"
-    ]
+    ] == ["Failed to fetch package metadata for jupyterlab-language-pack-ja-JP: Connection refused"]
 
     second_page, pages_count = await manager.list_extensions("", page=2, per_page=1)
     assert [pack.name for pack in second_page] == ["jupyterlab-language-pack-fr-FR"]
@@ -611,9 +787,15 @@ async def test_pypi_language_pack_pagination_skips_unavailable_packs(monkeypatch
 @patch("jupyterlab.extensions.pypi.LANGUAGE_PACKS", ("jupyterlab-language-pack-fr-FR",))
 async def test_pypi_language_pack_search_recovers(monkeypatch, failure):
     manager = PyPIExtensionManager()
-    get = AsyncMock(
+    get_pack = AsyncMock(
         side_effect=[failure, httpx2.Response(200, json={"info": {"version": "1.0.0"}})]
     )
+
+    async def get(url, *, headers):
+        if url.endswith("/jupyterlab-language-pack-fr-FR/json"):
+            return await get_pack(url, headers=headers)
+        return httpx2.Response(404)
+
     monkeypatch.setattr(manager._httpx_client, "get", get)
 
     with pytest.raises(web.HTTPError) as error:
@@ -623,7 +805,7 @@ async def test_pypi_language_pack_search_recovers(monkeypatch, failure):
     packs, _ = await manager.list_extensions("fr-FR")
     assert [pack.name for pack in packs] == ["jupyterlab-language-pack-fr-FR"]
     await manager.list_extensions("fr-FR")
-    assert get.await_count == 2
+    assert get_pack.await_count == 2
 
 
 async def test_PyPiExtensionManager_custom_server_url():

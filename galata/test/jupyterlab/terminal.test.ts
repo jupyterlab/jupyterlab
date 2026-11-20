@@ -434,7 +434,7 @@ test.describe('Terminal', () => {
       // independently of the renderer; once the output arrives the terminal
       // is scrolled to the bottom, so the slider moves away from the top.
       const slider = terminal.locator(
-        '.xterm-scrollable-element > .scrollbar.vertical > .slider'
+        '.xterm-scrollable-element > .xterm-scrollbar.xterm-vertical > .xterm-slider'
       );
       const sliderTop = () =>
         slider.evaluate(element => parseFloat(element.style.top || '0'));
@@ -470,6 +470,46 @@ test.describe('Terminal', () => {
       await page.keyboard.press('End');
       await expect.poll(sliderTop).toBeGreaterThan(pageUpPosition);
     });
+  });
+});
+
+test.describe('Terminal on macOS', () => {
+  test.beforeEach(async ({ page }) => {
+    // xterm reads the platform once when its module loads.
+    await page.addInitScript(() => {
+      Object.defineProperty(Navigator.prototype, 'platform', {
+        get: () => 'MacIntel'
+      });
+    });
+    await page.reload();
+  });
+
+  test('Option key should not be sent as a Meta prefix', async ({ page }) => {
+    const sent: string[] = [];
+    page.on('websocket', ws => {
+      if (!ws.url().includes('/terminals/websocket/')) {
+        return;
+      }
+      ws.on('framesent', ({ payload }) => {
+        const [type, data] = JSON.parse(payload.toString());
+        if (type === 'stdin') {
+          sent.push(data);
+        }
+      });
+    });
+
+    await page.menu.clickMenuItem('File>New>Terminal');
+    const terminal = page.locator(TERMINAL_SELECTOR);
+    await waitForTerminal(page);
+    await terminal.locator('.xterm-screen').click();
+    await expect(terminal.locator(TERMINAL_INPUT_SELECTOR)).toBeFocused();
+
+    await page.keyboard.press('Alt+Digit1');
+    // Plain input as a marker that the previous keystroke was processed.
+    await page.keyboard.press('KeyX');
+    await expect.poll(() => sent.join('')).toContain('x');
+
+    expect(sent.join('')).not.toContain('\x1b');
   });
 });
 

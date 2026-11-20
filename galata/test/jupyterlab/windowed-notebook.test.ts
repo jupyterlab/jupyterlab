@@ -635,10 +635,8 @@ test('should not scroll back to a newly inserted cell when scrolling away', asyn
 
 test('should center on next cell after rendering markdown cell and advancing', async ({
   page,
-  tmpPath,
-  browserName
+  tmpPath
 }) => {
-  test.skip(browserName === 'firefox', 'Needs fixing on Firefox');
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
   const mdCell = page.locator('.jp-MarkdownCell[data-windowed-list-index="2"]');
   const thirdCell = page.locator('.jp-CodeCell[data-windowed-list-index="3"]');
@@ -648,8 +646,10 @@ test('should center on next cell after rendering markdown cell and advancing', a
     .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
     .waitFor();
 
-  // Un-render markdown cell
-  await page.notebook.enterCellEditingMode(2);
+  // Un-render by keys, as a click on a partly hidden cell centers it in Firefox
+  await page.notebook.selectCells(1);
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
 
   // The next cells should not be (significantly) visible (yet)
   await expect.soft(thirdCell).not.toBeInViewport({ ratio: 0.1 });
