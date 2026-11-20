@@ -642,6 +642,10 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
 export function createCellSearchProvider(
   cell: Cell<ICellModel>
 ): CellSearchProvider {
+  if (cell.model.type === 'markdown') {
+    return new MarkdownCellSearchProvider(cell);
+  }
+
   if (cell.isPlaceholder()) {
     return new CellSearchProvider(cell);
   }
@@ -649,8 +653,6 @@ export function createCellSearchProvider(
   switch (cell.model.type) {
     case 'code':
       return new CodeCellSearchProvider(cell);
-    case 'markdown':
-      return new MarkdownCellSearchProvider(cell);
     default:
       return new CellSearchProvider(cell);
   }
