@@ -214,8 +214,8 @@ describe('completer/default/kernelprovider', () => {
         sourceChange: [{ insert }]
       });
 
-      it.each(['a', '1', '_', '$', 'é'])(
-        'should trigger for identifier character %s',
+      it.each(['a', '1', '_', '$', '.', 'é'])(
+        'should trigger for completion character %s',
         insert => {
           expect(
             provider.shouldShowContinuousHint(false, change(insert), context)
@@ -223,7 +223,7 @@ describe('completer/default/kernelprovider', () => {
         }
       );
 
-      it.each([' ', '.', ')', ':', '\n', 'ab'])(
+      it.each([' ', ')', ':', '\n', 'ab'])(
         'should not trigger for %j',
         insert => {
           expect(
