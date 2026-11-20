@@ -3067,6 +3067,7 @@ function addCommands(
       if (!panel?.content?.model?.cells || collapseSynchronized.has(panel)) {
         return;
       }
+
       collapseSynchronized.add(panel);
       // The cell list belongs to the model, which outlives this view when
       // other views of the document stay open, so the connection is made
