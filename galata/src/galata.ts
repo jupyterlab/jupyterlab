@@ -915,7 +915,8 @@ export namespace galata {
           /(<script\s[^>]*id=["']jupyter-config-data["'][^>]*>)([\s\S]*?)(<\/script>)/;
 
         if (!scriptRegex.test(body)) {
-          return route.fulfill({ response, body });
+          // Re-encoding the text of an image would change its bytes
+          return route.fulfill({ response });
         }
 
         const newBody = body.replace(
