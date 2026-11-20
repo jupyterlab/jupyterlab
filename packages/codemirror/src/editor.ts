@@ -9,7 +9,8 @@ import {
   Compartment,
   EditorSelection,
   EditorState,
-  Prec
+  Prec,
+  Transaction
 } from '@codemirror/state';
 import type { Command, ViewUpdate } from '@codemirror/view';
 import { EditorView } from '@codemirror/view';
@@ -138,6 +139,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   get editor(): EditorView {
     return this._editor;
+  }
+
+  /**
+   * Whether the last document change was applied from a remote collaborator.
+   */
+  get lastChangeIsRemote(): boolean {
+    return this._lastChangeIsRemote;
   }
 
   /**
@@ -743,6 +751,11 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Handles document changes.
    */
   private _onDocChanged(update: ViewUpdate) {
+    if (update.docChanged) {
+      this._lastChangeIsRemote = update.transactions.some(tr =>
+        Boolean(tr.annotation(Transaction.remote))
+      );
+    }
     if (update.transactions.length && update.transactions[0].selection) {
       this._onCursorActivity();
     }
@@ -795,6 +808,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _isDisposed = false;
   private _language = new Compartment();
   private _languages: IEditorLanguageRegistry;
+  private _lastChangeIsRemote = false;
   private _model: CodeEditor.IModel;
   private _uuid = '';
 }

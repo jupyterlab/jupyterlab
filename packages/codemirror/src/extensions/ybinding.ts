@@ -8,7 +8,12 @@
  * licensed under MIT License by Kevin Jahns
  */
 import type { Extension, SelectionRange } from '@codemirror/state';
-import { Annotation, EditorSelection, Facet } from '@codemirror/state';
+import {
+  Annotation,
+  EditorSelection,
+  Facet,
+  Transaction
+} from '@codemirror/state';
 import type { EditorView, ViewUpdate } from '@codemirror/view';
 import { ViewPlugin } from '@codemirror/view';
 import {
@@ -19,9 +24,9 @@ import {
 import type {
   RelativePosition,
   Text,
-  Transaction,
   UndoManager,
-  YTextEvent
+  YTextEvent,
+  Transaction as YTransaction
 } from 'yjs';
 import {
   createAbsolutePositionFromRelativePosition,
@@ -193,7 +198,7 @@ export const ySync = ViewPlugin.fromClass(
   class {
     constructor(view: EditorView) {
       this.conf = view.state.facet(ySyncFacet);
-      this._observer = (event: YTextEvent, tr: Transaction) => {
+      this._observer = (event: YTextEvent, tr: YTransaction) => {
         if (tr.origin !== this.conf) {
           const delta = event.delta;
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -210,10 +215,16 @@ export const ySync = ViewPlugin.fromClass(
               pos += d.retain ?? 0;
             }
           }
+          const annotations: Annotation<unknown>[] = [
+            ySyncAnnotation.of(this.conf)
+          ];
+          if (!tr.local) {
+            annotations.push(Transaction.remote.of(true));
+          }
           view.dispatch({
             changes,
             // Specified the changes origin to not loop when synchronizing
-            annotations: [ySyncAnnotation.of(this.conf)]
+            annotations
           });
         }
       };
@@ -257,7 +268,7 @@ export const ySync = ViewPlugin.fromClass(
     }
 
     conf: YSyncConfig;
-    _observer: (event: YTextEvent, tr: Transaction) => void;
+    _observer: (event: YTextEvent, tr: YTransaction) => void;
     _ytext: Text;
   }
 );

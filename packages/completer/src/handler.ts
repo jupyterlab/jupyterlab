@@ -343,6 +343,18 @@ export class CompletionHandler implements IDisposable {
     if (!editor) {
       return;
     }
+
+    if (model) {
+      // If there is a text selection, no completion is allowed.
+      const { start, end } = editor.getSelection();
+      if (start.column === end.column && start.line === end.line) {
+        // Dispatch the text change synchronously so active completion filtering is immediate.
+        model.handleTextChange(
+          this.getState(editor, editor.getCursorPosition())
+        );
+      }
+    }
+
     const position = editor.getCursorPosition();
     const state = this.getState(editor, position);
     if (
@@ -353,6 +365,7 @@ export class CompletionHandler implements IDisposable {
         this.completer.isVisible,
         changed
       )) &&
+      !editor.lastChangeIsRemote &&
       this._isCurrentState(editor, state)
     ) {
       void this._makeRequest(position, CompletionTriggerKind.TriggerCharacter);
@@ -369,16 +382,6 @@ export class CompletionHandler implements IDisposable {
           InlineCompletionTriggerKind.Automatic
         );
       }
-    }
-
-    if (model) {
-      // If there is a text selection, no completion is allowed.
-      const { start, end } = editor.getSelection();
-      if (start.column !== end.column || start.line !== end.line) {
-        return;
-      }
-      // Dispatch the text change.
-      model.handleTextChange(this.getState(editor, editor.getCursorPosition()));
     }
   }
 
@@ -477,6 +480,13 @@ export class CompletionHandler implements IDisposable {
     position: CodeEditor.IPosition,
     trigger: InlineCompletionTriggerKind
   ) {
+    if (trigger === InlineCompletionTriggerKind.Automatic) {
+      // For file editors (YFile), the observer registration order means
+      // CodeMirror has not yet processed the transaction when sharedModel.changed
+      // fires. Awaiting a microtask ensures CodeMirror is updated and lastChangeIsRemote
+      // is correctly set before checking it.
+      await Promise.resolve();
+    }
     const editor = this.editor;
 
     if (!editor) {
@@ -484,6 +494,13 @@ export class CompletionHandler implements IDisposable {
     }
     if (!this.inlineCompleter) {
       return Promise.reject(new Error('No inline completer'));
+    }
+    if (
+      trigger === InlineCompletionTriggerKind.Automatic &&
+      editor.lastChangeIsRemote
+    ) {
+      this._fetchingInline += 1;
+      return;
     }
 
     const line = editor.getLine(position.line);
