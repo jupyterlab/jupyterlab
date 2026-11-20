@@ -35,6 +35,7 @@ import {
   IDocumentManagerDialogs,
   IDocumentWidgetOpener,
   IRecentsManager,
+  isValidFileName,
   PathStatus,
   SavingStatus
 } from '@jupyterlab/docmanager';
@@ -1185,7 +1186,9 @@ function addCommands(
 
             if (result.button.accept) {
               newName = result.value ?? oldName;
-              (widget as IDocumentWidget).isUntitled = false;
+              if (widget && !widget.isDisposed && newName === oldName) {
+                (widget as IDocumentWidget).isUntitled = false;
+              }
               if (typeof result.isChecked === 'boolean') {
                 const currentSetting = (
                   await settingRegistry.get(
@@ -1214,7 +1217,29 @@ function addCommands(
             await context.save();
 
             if (newName !== oldName) {
-              await context.rename(newName);
+              if (!isValidFileName(newName)) {
+                void showErrorMessage(
+                  trans.__('Rename Error'),
+                  Error(
+                    trans.__(
+                      '"%1" is not a valid name for a file. Names must have nonzero length, and cannot include "/", "\\", or ":"',
+                      newName
+                    )
+                  )
+                );
+              } else {
+                try {
+                  await context.rename(newName);
+                  if (widget && !widget.isDisposed) {
+                    (widget as IDocumentWidget).isUntitled = false;
+                  }
+                } catch (err) {
+                  void showErrorMessage(
+                    trans.__('Rename Error'),
+                    err instanceof Error ? err : String(err)
+                  );
+                }
+              }
             }
 
             if (!widget?.isDisposed) {
