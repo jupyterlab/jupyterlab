@@ -1,0 +1,180 @@
+name: Trusted Types report
+
+# Measurement only: runs the UI suite against a report-only Trusted Types CSP
+# and lists every place JupyterLab passes a raw string to a DOM sink.
+# Lives on the measurement PR; not meant to be merged in this form.
+
+on:
+  pull_request:
+
+permissions: {}
+
+concurrency:
+  group: tt-report-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/pw-browsers
+
+jobs:
+  collect:
+    name: Collect (${{ matrix.browser }} ${{ matrix.shard }}/${{ matrix.shards }})
+    timeout-minutes: 45
+    runs-on: ubuntu-24.04
+    env:
+      YARN_ENABLE_GLOBAL_CACHE: '1'
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox]
+        shard: [1, 2, 3, 4, 5, 6]
+        shards: [6]
+        include:
+          - browser: chromium
+            project: tt-report
+          - browser: firefox
+            project: tt-report-firefox
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          path: core
+          persist-credentials: false
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
+        with:
+          python_package_manager: 'uv pip'
+
+      - name: Find out Playwright version
+        id: pw-version
+        run: |
+          set -e
+          PW_VERSION=$(grep -m1 '^"playwright@npm:' yarn.lock)
+          echo "version=$PW_VERSION" >> $GITHUB_OUTPUT
+        working-directory: core
+
+      - name: Set up browser cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v5
+        with:
+          path: ${{ github.workspace }}/pw-browsers
+          key: ${{ runner.os }}-${{ matrix.browser }}-${{ steps.pw-version.outputs.version }}
+
+      - name: Set up yarn cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v5
+        with:
+          path: ~/.yarn/berry/cache
+          key: ${{ runner.os }}-yarn-berry-${{ hashFiles('core/yarn.lock') }}
+
+      - name: Install dependencies
+        run: |
+          set -ex
+          bash ./scripts/ci_install.sh
+        working-directory: core
+
+      - name: Launch JupyterLab with the report-only CSP
+        run: |
+          set -ex
+          cd core/galata
+          jupyter lab --config jupyter_server_tt_report_config.py --skip-dev-build > /tmp/jupyterlab_server.log 2>&1 &
+
+      - name: Install browser
+        env:
+          BROWSER: ${{ matrix.browser }}
+        run: |
+          set -ex
+          cd core/galata
+          jlpm playwright install "${BROWSER}" --only-shell
+
+      - name: Build galata
+        run: |
+          set -ex
+          cd core/galata
+          jlpm build
+
+      - name: Wait for JupyterLab
+        run: timeout 360 bash -c 'until curl -f http://localhost:8888/lab > /dev/null 2>&1; do sleep 1; done'
+
+      - name: Run the UI suite and record violations
+        env:
+          PROJECT: ${{ matrix.project }}
+          SHARD: ${{ matrix.shard }}/${{ matrix.shards }}
+        run: |
+          cd core/galata
+          # Test failures are irrelevant here; only the recorded violations matter.
+          jlpm test --project "${PROJECT}" --shard "${SHARD}" || true
+
+      - name: Map stack traces to source and de-duplicate
+        env:
+          BROWSER: ${{ matrix.browser }}
+          SHARD_NUMBER: ${{ matrix.shard }}
+        run: |
+          set -euxo pipefail
+          cd core/galata
+          # source-map is already in yarn.lock, so Node finds it in the
+          # repository's node_modules; nothing is installed here.
+          # The server from the launch step is still running: the script needs it.
+          node tt-aggregate.mjs tt-violations --json \
+            | jq --arg b "$BROWSER" 'map(. + {browser: $b})' \
+            > "tt-sites-${BROWSER}-${SHARD_NUMBER}.json"
+
+      - name: Upload results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: tt-report-${{ matrix.browser }}-${{ matrix.shard }}
+          path: |
+            core/galata/tt-violations
+            core/galata/tt-sites-*.json
+          retention-days: 14
+
+      - name: Print JupyterLab logs
+        if: ${{ always() }}
+        run: cat /tmp/jupyterlab_server.log
+
+  summary:
+    name: Summarize Trusted Types violations
+    needs: collect
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Download per-shard results
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: tt-report-*
+          path: shards
+
+      - name: Merge shards into one list
+        run: |
+          set -euo pipefail
+          find shards -name 'tt-sites-*.json' -print0 | xargs -0 cat | jq -s '
+            (add // [])
+            | group_by(.site + "|" + .sink)
+            | map({site: .[0].site, via: .[0].via, sink: .[0].sink, type: .[0].type,
+                   hits: (map(.hits) | add), tests: (map(.tests) | add),
+                   browsers: (map(.browser) | unique | join(" ")),
+                   example_test: .[0].example_test, sample: .[0].sample})
+            | sort_by(-.tests)' > tt-sites.json
+          jq -r '(["site","via","sink","type","hits","test_runs","browsers","example_test","sample"] | @csv),
+                 (.[] | [.site, .via, .sink, .type, .hits, .tests, .browsers, .example_test, .sample] | @csv)' \
+            tt-sites.json > tt-sites.csv
+          {
+            echo "### Trusted Types violations: $(jq length tt-sites.json) distinct sites"
+            echo
+            echo "| Site | Sink | Test runs | Hits | Browsers |"
+            echo "| --- | --- | --- | --- | --- |"
+            jq -r '.[:40][] | "| `\(.site)` | \(.sink) | \(.tests) | \(.hits) | \(.browsers) |"' tt-sites.json
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload merged list
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: tt-sites-merged
+          path: |
+            tt-sites.json
+            tt-sites.csv
+          retention-days: 30
