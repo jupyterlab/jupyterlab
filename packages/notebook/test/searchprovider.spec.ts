@@ -14,6 +14,7 @@ import {
   SearchDocumentView
 } from '@jupyterlab/documentsearch';
 import type { CodeCell, CodeCellModel } from '@jupyterlab/cells';
+import type { MarkdownCell } from '@jupyterlab/cells';
 import { CellSearchProvider } from '@jupyterlab/cells';
 import { Widget } from '@lumino/widgets';
 
@@ -774,6 +775,48 @@ describe('@jupyterlab/notebook', () => {
         const source = panel.model!.cells.get(0).sharedModel.getSource();
         expect(source).toBe('bar test2');
         expect(provider.currentMatchIndex).toBe(0);
+      });
+
+      it('should keep a rendered Markdown cell rendered when the replaced match is in another cell', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1' },
+          { cell_type: 'markdown', source: 'notes' }
+        ]);
+        panel.content.activeCellIndex = 0;
+        await provider.startQuery(/test\d/, undefined);
+        expect(provider.getCurrentMatch()?.text).toBe('test1');
+
+        const markdownCell = panel.content.widgets[1] as MarkdownCell;
+        panel.content.activeCellIndex = 1;
+        await provider.cellChangeHandled;
+        expect(markdownCell.rendered).toBe(true);
+
+        await provider.replaceCurrentMatch('bar');
+
+        expect(panel.model!.cells.get(0).sharedModel.getSource()).toBe('bar');
+        expect(markdownCell.rendered).toBe(true);
+      });
+
+      it('should show the editor of the Markdown cell which holds the replaced match', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'markdown', source: 'test1 notes' },
+          { cell_type: 'code', source: 'x = 1' }
+        ]);
+        panel.content.activeCellIndex = 0;
+        await provider.startQuery(/test\d/, undefined);
+        expect(provider.getCurrentMatch()?.text).toBe('test1');
+
+        const markdownCell = panel.content.widgets[0] as MarkdownCell;
+
+        const replaced = await provider.replaceCurrentMatch('bar');
+
+        expect(replaced).toBe(true);
+        expect(panel.model!.cells.get(0).sharedModel.getSource()).toBe(
+          'bar notes'
+        );
+        expect(markdownCell.rendered).toBe(false);
       });
 
       it('should start in the middle of a code cell, replace, and highlight next', async () => {
