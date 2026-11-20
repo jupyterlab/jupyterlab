@@ -136,6 +136,22 @@ describe('@jupyterlab/notebook', () => {
         );
       });
 
+      it('should handle a collapsed markdown cell whose heading is filtered by maximalDepth', async () => {
+        panel.model!.sharedModel.insertCells(1, [
+          { cell_type: 'markdown', source: '##### Deep Heading' }
+        ]);
+        const deepCell = panel.content.widgets[1] as MarkdownCell;
+        deepCell.headingCollapsed = true;
+
+        const promise = signalToPromise(model.headingsChanged);
+        model.setConfiguration({
+          maximalDepth: 4,
+          syncCollapseState: true
+        });
+        await promise;
+        expect(model.headings).toHaveLength(1);
+      });
+
       it('should preserve execution status updates during heading refresh', async () => {
         panel.model!.sharedModel.insertCells(1, [
           { cell_type: 'code', source: '1 / 0' }
