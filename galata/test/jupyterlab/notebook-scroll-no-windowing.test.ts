@@ -370,13 +370,11 @@ test.describe('Notebook scroll on execution (no windowing)', () => {
     await page.mouse.wheel(0, 600);
 
     // Let the scroll settle before taking the reference measurement
-    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(500);
     const referenceBox = (await thirdCell!.boundingBox())!;
 
     await execution;
     // Allow the layout to settle after the last output arrived
-    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(500);
 
     // The position the user scrolled to should have been kept while the
