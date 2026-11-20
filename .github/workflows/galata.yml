@@ -77,6 +77,12 @@ jobs:
             shard: 1
             shards: 1
           - browser: chromium
+            project: tt-report
+            suite: tt-report
+            shard: 1
+            shards: 1
+            test_path: test/tt-report
+          - browser: chromium
             project: memory-leak
             suite: memory-leak
             shard: 1
@@ -207,6 +213,8 @@ jobs:
               jupyter lab --config jupyter_server_test_config.py --extensions-in-dev-mode --custom-css --skip-dev-build > /tmp/jupyterlab_server.log 2>&1 &
           elif [[ "${{ matrix.project }}" == "csp" ]]; then
             jupyter lab --config jupyter_server_csp_test_config.py --skip-dev-build > /tmp/jupyterlab_server.log 2>&1 &
+          elif [[ "${{ matrix.project }}" == "tt-report" ]]; then
+            jupyter lab --config jupyter_server_tt_report_config.py --skip-dev-build > /tmp/jupyterlab_server.log 2>&1 &
           else
             jlpm start --skip-dev-build > /tmp/jupyterlab_server.log 2>&1 &
           fi
@@ -235,6 +243,7 @@ jobs:
           MODIFIED_GALATA_TESTS: ${{ steps.modified-tests.outputs.galata || '[]' }}
           MODIFIED_JUPYTERLAB_TESTS: ${{ steps.modified-tests.outputs.jupyterlab || '[]' }}
           MODIFIED_MEMORY_LEAK_TESTS: ${{ steps.modified-tests.outputs.memory_leak || '[]' }}
+          TEST_PATH: ${{ matrix.test_path || '' }}
         run: |
           cd core/galata
           set +e  # we want to move the reports even if we fail
@@ -251,6 +260,9 @@ jobs:
           TEST_ARGS=(--project ${{ matrix.project }} --shard ${{ matrix.shard }}/${{ matrix.shards }})
           if [[ "${{ matrix.project }}" == "memory-leak" ]]; then
             TEST_ARGS+=(--workers=1)
+          fi
+          if [[ -n "${TEST_PATH}" ]]; then
+            TEST_ARGS+=("${TEST_PATH}")
           fi
           if [[ -n "${TEST_PATTERN}" ]]; then
             TEST_ARGS+=(--grep "${TEST_PATTERN}")
@@ -327,6 +339,15 @@ jobs:
             core/galata/test-results
             core/galata/test-results-replay
           if-no-files-found: ignore # expected when no tests fail
+
+      - name: Upload Trusted Types violations
+        if: ${{ !cancelled() && matrix.project == 'tt-report' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: tt-violations-${{ matrix.browser }}-${{ matrix.shard }}
+          path: core/galata/tt-violations
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Upload test report blob
         if: ${{ !cancelled() }}

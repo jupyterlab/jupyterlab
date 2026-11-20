@@ -2,6 +2,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as fs from 'fs';
 import type { Kernel, Session, TerminalAPI, User } from '@jupyterlab/services';
 import type {
   Page,
@@ -163,6 +164,16 @@ export type GalataOptions = {
    * @param helpers JupyterLab helpers
    */
   waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>;
+  /**
+   * Record raw strings reaching Trusted Types sinks, with stack traces.
+   * Needs a server that sends `require-trusted-types-for 'script'`
+   * (report-only is enough). Default: false.
+   */
+  collectTrustedTypes: boolean;
+  /**
+   * Records collected for the current test (empty unless enabled).
+   */
+  trustedTypesViolations: Record<string, unknown>[];
 };
 
 /**
@@ -431,5 +442,91 @@ export const test: TestType<
         await page.unrouteAll({ behavior: 'ignoreErrors' });
       }
     }
-  }
+  },
+
+  collectTrustedTypes: [false, { option: true }],
+
+  trustedTypesViolations: [
+    async ({ collectTrustedTypes, context }, use, testInfo) => {
+      const records: Record<string, unknown>[] = [];
+      if (!collectTrustedTypes) {
+        await use(records);
+        return;
+      }
+
+      // A function the page can call; it survives navigations and reloads.
+      // Repeats are collapsed: one record per sink and call site, with a count.
+      const bySite = new Map<string, { count: number }>();
+      await context.exposeBinding(
+        '__galataTT',
+        (_source, record: Record<string, unknown>) => {
+          // Keep only frames from served JS files (drops the init-script frame).
+          const frames = String(record.stack)
+            .split('\n')
+            .filter(line => /https?:\/\/\S+\.js:\d+:\d+/.test(line))
+            .slice(0, 6);
+          const key = `${record.sink}|${frames.slice(0, 3).join('|')}`;
+          const seen = bySite.get(key);
+          if (seen) {
+            seen.count++;
+            return;
+          }
+          const entry = { ...record, stack: frames.join('\n'), count: 1 };
+          bySite.set(key, entry);
+          records.push(entry);
+        }
+      );
+
+      // Runs in every page and frame before any JupyterLab script.
+      await context.addInitScript(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const send = (window as any).__galataTT;
+        const tap =
+          (type: string) =>
+          (input: string, ...args: unknown[]): string => {
+            void send({
+              type, // TrustedHTML, TrustedScript, ...
+              sink: String(args[1] ?? ''), // e.g. 'Element innerHTML'
+              sample: String(input).slice(0, 160),
+              stack: new Error().stack ?? '',
+              url: location.href
+            });
+            return input; // pass through: behaviour unchanged
+          };
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (window as any).trustedTypes?.createPolicy('default', {
+            createHTML: tap('TrustedHTML'),
+            createScript: tap('TrustedScript'),
+            createScriptURL: tap('TrustedScriptURL')
+          });
+        } catch (error) {
+          void send({
+            type: 'policy-error',
+            sample: String(error),
+            stack: '',
+            url: location.href
+          });
+        }
+      });
+
+      await use(records);
+
+      // One file per test, outside test-results/ (passing tests' output
+      // is deleted there because of preserveOutput: 'failures-only').
+      // Compact on purpose; pretty-print when reading with `jq . file.json`.
+      const outDir = path.resolve(process.env.GALATA_TT_DIR ?? 'tt-violations');
+      await fs.promises.mkdir(outDir, { recursive: true });
+      await fs.promises.writeFile(
+        path.join(outDir, `${testInfo.project.name}-${testInfo.testId}.json`),
+        JSON.stringify({
+          title: testInfo.titlePath.join(' › '),
+          file: testInfo.file,
+          status: testInfo.status,
+          records
+        })
+      );
+    },
+    { auto: true }
+  ]
 });

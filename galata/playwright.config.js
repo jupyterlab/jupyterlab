@@ -57,6 +57,46 @@ module.exports = {
       }
     },
     {
+      name: 'tt-report',
+      testMatch: [
+        'test/tt-report/**/*.test.ts',
+        'test/jupyterlab/**/*.test.ts',
+        'test/jupyterlab/**/*.spec.ts'
+      ],
+      testIgnore: '**/.ipynb_checkpoints/**',
+      // Only the recorded violations matter, not pass/fail or screenshots
+      retries: 0,
+      ignoreSnapshots: true,
+      use: {
+        collectTrustedTypes: true,
+        contextOptions: {
+          permissions: ['clipboard-read', 'clipboard-write']
+        },
+        launchOptions: {
+          args: chromiumArgs
+        }
+      }
+    },
+    {
+      name: 'tt-report-firefox',
+      testMatch: [
+        'test/tt-report/**/*.test.ts',
+        'test/jupyterlab/**/*.test.ts',
+        'test/jupyterlab/**/*.spec.ts'
+      ],
+      testIgnore: '**/.ipynb_checkpoints/**',
+      retries: 0,
+      ignoreSnapshots: true,
+      use: {
+        collectTrustedTypes: true,
+        contextOptions: {
+          // https://github.com/microsoft/playwright/issues/13037
+          permissions: []
+        },
+        browserName: 'firefox'
+      }
+    },
+    {
       name: 'memory-leak',
       testMatch: [
         'test/memory-leak/**/*.test.ts',
