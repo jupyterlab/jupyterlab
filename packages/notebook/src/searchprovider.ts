@@ -535,7 +535,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     if (
       value &&
       this.widget.content.widgets.some(
-        w => w instanceof CodeCell && w.isPlaceholder()
+        w =>
+          w instanceof CodeCell &&
+          (w.isPlaceholder() ||
+            w.outputArea.model.length > w.outputArea.maxNumberOutputs)
       )
     ) {
       const trans = this.translator.load('jupyterlab');
@@ -552,8 +555,11 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       });
       if (reply.button.accept) {
         this.widget.content.widgets.forEach((w, i) => {
-          if (w instanceof CodeCell && w.isPlaceholder()) {
-            this.widget.content.renderCellOutputs(i);
+          if (w instanceof CodeCell) {
+            if (w.isPlaceholder()) {
+              this.widget.content.renderCellOutputs(i);
+            }
+            w.outputArea.showTrimmedOutputs();
           }
         });
       } else {

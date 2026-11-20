@@ -365,6 +365,10 @@ class CodeCellSearchProvider extends CellSearchProvider {
    * @param filters Filter parameters to pass to provider
    */
   async startQuery(query: RegExp | null, filters?: IFilters): Promise<void> {
+    if (filters?.output !== false && this.isActive) {
+      (this.cell as CodeCell).outputArea.showTrimmedOutputs();
+    }
+
     await super.startQuery(query, filters);
 
     // Search outputs
@@ -430,16 +434,18 @@ class CodeCellSearchProvider extends CellSearchProvider {
     this.outputsProvider.length = 0;
 
     this.currentProviderIndex = -1;
-    this.outputsProvider = (this.cell as CodeCell).outputArea.widgets.map(
-      output => new GenericSearchProvider(output)
-    );
+    this.outputsProvider = (this.cell as CodeCell).outputArea.widgets
+      .filter(
+        output =>
+          !output.hasClass('jp-TrimmedOutputs') &&
+          !output.node.querySelector('.jp-TrimmedOutputs')
+      )
+      .map(output => new GenericSearchProvider(output));
 
     if (this.isActive && this.query && this.filters?.output !== false) {
-      await Promise.all([
-        this.outputsProvider.map(provider => {
-          void provider.startQuery(this.query);
-        })
-      ]);
+      await Promise.all(
+        this.outputsProvider.map(provider => provider.startQuery(this.query))
+      );
     }
 
     this._stateChanged.emit();
