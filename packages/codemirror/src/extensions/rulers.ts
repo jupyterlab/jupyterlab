@@ -58,38 +58,34 @@ const plugin = ViewPlugin.fromClass(
             `;
 
       const widths = view.state.facet(rulerConfig);
-      const guttersWidths =
-        view.scrollDOM.querySelector('.cm-gutters')?.clientWidth ?? 0;
-      this.rulers = widths.map(width => {
-        const ruler = this.rulersContainer.appendChild(
-          document.createElement('div')
-        );
-        ruler.classList.add(RULERS_CLASSNAME);
-        // Use `ch` rather than `defaultCharacterWidth`: CodeMirror does not
-        // measure it again when the code font loads after the first measure.
-        ruler.style.cssText = `
-                position: absolute;
-                left: calc(${guttersWidths}px + ${width}ch);
-                height: 100%;
-            `;
-        // FIXME: This should be equal to the amount of padding on a line.
-        // This value should be extracted from CodeMirror rather than hardcoded.
-        ruler.style.width = '6px';
-
-        return ruler;
-      });
+      const guttersWidth = this._guttersWidth(view);
+      this.rulers = widths.map(width => this._createRuler(width, guttersWidth));
     }
 
     update(update: ViewUpdate) {
       const widths = update.view.state.facet(rulerConfig);
+      const columnsChanged = !JSONExt.deepEqual(
+        widths,
+        update.startState.facet(rulerConfig)
+      );
 
-      if (
-        update.viewportChanged ||
-        update.geometryChanged ||
-        !JSONExt.deepEqual(widths, update.startState.facet(rulerConfig))
-      ) {
-        const guttersWidth =
-          update.view.scrollDOM.querySelector('.cm-gutters')?.clientWidth ?? 0;
+      if (columnsChanged || update.viewportChanged || update.geometryChanged) {
+        const guttersWidth = this._guttersWidth(update.view);
+        // The plugin instance survives a settings reconfigure, so the
+        // elements created for the previous columns have to be synced here.
+        if (columnsChanged) {
+          while (this.rulers.length < widths.length) {
+            this.rulers.push(
+              this._createRuler(widths[this.rulers.length], guttersWidth)
+            );
+          }
+          while (this.rulers.length > widths.length) {
+            const ruler = this.rulers.pop();
+            if (ruler) {
+              ruler.remove();
+            }
+          }
+        }
         this.rulers.forEach((ruler, rulerIdx) => {
           ruler.style.left = `calc(${guttersWidth}px + ${widths[rulerIdx]}ch)`;
         });
@@ -101,6 +97,28 @@ const plugin = ViewPlugin.fromClass(
         ruler.remove();
       });
       this.rulersContainer.remove();
+    }
+
+    private _guttersWidth(view: EditorView): number {
+      return view.scrollDOM.querySelector('.cm-gutters')?.clientWidth ?? 0;
+    }
+
+    private _createRuler(width: number, guttersWidth: number): HTMLDivElement {
+      const ruler = this.rulersContainer.appendChild(
+        document.createElement('div')
+      );
+      ruler.classList.add(RULERS_CLASSNAME);
+      // Use `ch` rather than `defaultCharacterWidth`: CodeMirror does not
+      // measure it again when the code font loads after the first measure.
+      ruler.style.cssText = `
+                position: absolute;
+                left: calc(${guttersWidth}px + ${width}ch);
+                height: 100%;
+            `;
+      // FIXME: This should be equal to the amount of padding on a line.
+      // This value should be extracted from CodeMirror rather than hardcoded.
+      ruler.style.width = '6px';
+      return ruler;
     }
 
     rulersContainer: HTMLDivElement;
