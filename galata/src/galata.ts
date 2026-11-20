@@ -936,7 +936,9 @@ export namespace galata {
                 mergedConfig[key] = value;
               }
             }
-            return `${openTag}${JSON.stringify(mergedConfig)}${closeTag}`;
+            // Escape < as the server does, so no value ends the element
+            const json = JSON.stringify(mergedConfig).replace(/</g, '\\u003c');
+            return `${openTag}${json}${closeTag}`;
           }
         );
 
