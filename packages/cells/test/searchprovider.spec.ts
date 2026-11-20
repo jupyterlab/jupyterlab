@@ -179,6 +179,37 @@ describe('cells/searchprovider', () => {
       expect(cell.model.sharedModel.getSource()).toBe('bar bar');
       provider.dispose();
     });
+
+    it('should not scroll the editor of a hidden input', async () => {
+      const model = new CodeCellModel({
+        sharedModel: createStandaloneCell({
+          cell_type: 'code',
+          source: 'test1 test2'
+        }) as YCodeCell
+      });
+      cell = new CodeCell({
+        model,
+        rendermime: defaultRenderMime(),
+        contentFactory: NBTestUtils.createCodeCellFactory(),
+        placeholder: false
+      }).initializeState();
+      Widget.attach(cell, document.body);
+      cell.inputHidden = true;
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+      // A hidden editor scrolls to the match when the input is shown again
+      const scrollIntoView = jest.spyOn(EditorView, 'scrollIntoView');
+
+      // The notebook scrolls each cell to the first match of a new query
+      await provider.highlightNext(false, {
+        from: 'selection-start',
+        scroll: true,
+        select: false
+      });
+      expect(scrollIntoView).not.toHaveBeenCalled();
+      scrollIntoView.mockRestore();
+      provider.dispose();
+    });
   });
 
   describe('MarkdownCellSearchProvider', () => {
