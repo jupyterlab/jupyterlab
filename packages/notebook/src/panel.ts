@@ -10,6 +10,7 @@ import { DocumentWidget } from '@jupyterlab/docregistry';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 import type { ITranslator } from '@jupyterlab/translation';
+import type { IMapChange } from '@jupyter/ydoc';
 import { Token } from '@lumino/coreutils';
 import type { INotebookModel } from './model';
 import type { StaticNotebook } from './widget';
@@ -59,6 +60,19 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       this._onSessionStatusChanged,
       this
     );
+    this.context.sessionContext.kernelPreferenceChanged.connect(
+      this._onKernelPreferenceChanged,
+      this
+    );
+    // Apply the `kernel_lock` metadata to the kernel preference once it is available.
+    void this.context.ready.then(() => {
+      if (this.isDisposed) {
+        return;
+      }
+      this._updateKernelLockPreference();
+      this.model?.metadataChanged.connect(this._onModelMetadataChanged, this);
+    });
+
     // this.content.fullyRendered.connect(this._onFullyRendered, this);
     this.context.saveState.connect(this._onSave, this);
     void this.revealed.then(() => {
@@ -293,6 +307,57 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
         spec?.display_name ?? preserved?.display_name ?? kernel.name,
       language: spec?.language ?? preserved?.language
     });
+  }
+
+  /**
+   * Propagate the `kernel_lock` metadata into the kernel preference.
+   */
+  private _updateKernelLockPreference(): void {
+    const model = this.model;
+    if (!model) {
+      return;
+    }
+    const locked = model.kernelLocked;
+    let preference = {
+      ...this.context.sessionContext.kernelPreference,
+      locked
+    };
+    // Keep the preferred kernel in sync with the locked kernelspec.
+    if (locked && model.defaultKernelName) {
+      preference = {
+        ...preference,
+        name: model.defaultKernelName,
+        language: model.defaultKernelLanguage
+      };
+    }
+    this.context.sessionContext.kernelPreference = preference;
+  }
+
+  /**
+   * Handle a change to the notebook metadata by propagating the `kernel_lock`
+   * and `kernelspec` fields into the kernel preference.
+   */
+  private _onModelMetadataChanged(
+    sender: INotebookModel,
+    change: IMapChange
+  ): void {
+    if (change.key === 'kernel_lock' || change.key === 'kernelspec') {
+      this._updateKernelLockPreference();
+    }
+  }
+
+  /**
+   * Handle a change to the kernel preference by persisting the lock state into
+   * the notebook metadata.
+   */
+  private _onKernelPreferenceChanged(
+    sender: ISessionContext,
+    args: IChangedArgs<ISessionContext.IKernelPreference>
+  ): void {
+    const locked = args.newValue.locked === true;
+    if (this.model && locked !== this.model.kernelLocked) {
+      this.model.setKernelLocked(locked);
+    }
   }
 
   /**
