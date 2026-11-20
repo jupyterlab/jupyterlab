@@ -14,7 +14,7 @@ import tempfile
 from collections.abc import Awaitable, Callable
 from functools import partial
 from http import HTTPStatus
-from importlib.metadata import Distribution, entry_points
+from importlib.metadata import Distribution, PackageNotFoundError, distribution, entry_points
 from os import environ
 from pathlib import Path
 from subprocess import CalledProcessError, run
@@ -78,6 +78,22 @@ def _metadata_string_map(data: PackageMetadata, key: str) -> dict[str, str]:
     if not isinstance(value, dict):
         return {}
     return {k: v for k, v in value.items() if isinstance(v, str)}
+
+
+# Labels of well-known project URLs, normalized as in PEP 753.
+_PROJECT_URL_LABELS = {
+    "homepage": ("homepage",),
+    "source": ("source", "repository", "sourcecode", "github"),
+    "documentation": ("documentation", "docs"),
+    "issues": ("issues", "bugs", "issue", "tracker", "issuetracker", "bugtracker"),
+}
+
+
+def _project_url(urls: dict[str, str], kind: str) -> str | None:
+    by_label = {
+        "".join(c for c in label.lower() if c.isalnum()): url for label, url in urls.items()
+    }
+    return next((by_label[label] for label in _PROJECT_URL_LABELS[kind] if label in by_label), None)
 
 
 all_proxy_url = environ.get("ALL_PROXY")
@@ -154,6 +170,7 @@ async def _fetch_package_metadata(
         for k in [
             "author",
             "bugtrack_url",
+            "classifiers",
             "docs_url",
             "home_page",
             "license",
@@ -199,6 +216,104 @@ LANGUAGE_PACKS = (
     "jupyterlab-language-pack-zh-CN",
     "jupyterlab-language-pack-zh-TW",
 )
+
+# Prebuilt JupyterLab 4 extensions, grouped by the GitHub organization that
+# maintains them. PyPI no longer lists packages by classifier (#19932), so
+# search finds other packages only by their full name.
+IPYTHON_ORG_EXTENSIONS = ("ipyparallel",)
+JUPYTER_ORG_EXTENSIONS = (
+    "nbdime",
+    "nbgrader",
+)
+JUPYTER_BOOK_ORG_EXTENSIONS = ("jupyterlab-myst",)
+JUPYTER_LSP_ORG_EXTENSIONS = ("jupyterlab-lsp",)
+JUPYTER_SERVER_ORG_EXTENSIONS = (
+    "jupyter-resource-usage",
+    "jupyter-scheduler",
+)
+JUPYTER_WIDGETS_ORG_EXTENSIONS = (
+    "jupyterlab-widgets",
+    "sidecar",
+)
+JUPYTERHUB_ORG_EXTENSIONS = ("jupyter-server-proxy",)
+JUPYTERLAB_ORG_EXTENSIONS = (
+    "jupyter-ai",
+    "jupyter-ai-lite",
+    "jupyter-collaboration",
+    "jupyterlab-chat",
+    "jupyterlab-fasta",
+    "jupyterlab-geojson",
+    "jupyterlab-git",
+    "jupyterlab-github",
+    "jupyterlab-katex",
+    "jupyterlab-latex",
+    "jupyterlab-mathjax2",
+    "jupyterlab-plugin-playground",
+    "jupyterlab-ui-profiler",
+)
+JUPYTERLAB_CONTRIB_ORG_EXTENSIONS = (
+    "jlab-enhanced-launcher",
+    "jupyter-archive",
+    "jupyter-suggestions",
+    "jupyter-theme-editor",
+    "jupyterlab-browser-storage",
+    "jupyterlab-cell-flash",
+    "jupyterlab-citation-manager",
+    "jupyterlab-code-formatter",
+    "jupyterlab-day",
+    "jupyterlab-favorites",
+    "jupyterlab-filesystem-access",
+    "jupyterlab-gitlab",
+    "jupyterlab-hybrid-kernels",
+    "jupyterlab-js-logs",
+    "jupyterlab-kernelspy",
+    "jupyterlab-logout",
+    "jupyterlab-night",
+    "jupyterlab-open-url-parameter",
+    "jupyterlab-pytutor",
+    "jupyterlab-quickopen",
+    "jupyterlab-rise",
+    "jupyterlab-search-replace",
+    "jupyterlab-slideshow",
+    "jupyterlab-spellchecker",
+    "jupyterlab-spreadsheet-editor",
+    "jupyterlab-theme-toggler",
+    "jupyterlab-topbar-text",
+    "jupyterlab-tour",
+    "jupyterlab-unfold",
+    "jupyterlab-vim",
+    "lckr-jupyterlab-variableinspector",
+)
+VOILA_DASHBOARDS_ORG_EXTENSIONS = ("voila",)
+KNOWN_EXTENSIONS = (
+    *IPYTHON_ORG_EXTENSIONS,
+    *JUPYTER_ORG_EXTENSIONS,
+    *JUPYTER_BOOK_ORG_EXTENSIONS,
+    *JUPYTER_LSP_ORG_EXTENSIONS,
+    *JUPYTER_SERVER_ORG_EXTENSIONS,
+    *JUPYTER_WIDGETS_ORG_EXTENSIONS,
+    *JUPYTERHUB_ORG_EXTENSIONS,
+    *JUPYTERLAB_ORG_EXTENSIONS,
+    *JUPYTERLAB_CONTRIB_ORG_EXTENSIONS,
+    *VOILA_DASHBOARDS_ORG_EXTENSIONS,
+)
+_PREBUILT_CLASSIFIER = "Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt"
+
+
+def _canonical_project_name(text: str) -> str | None:
+    try:
+        return canonicalize_name(text.strip(), validate=True)
+    except InvalidName:
+        return None
+
+
+# `Distribution.name` parses the METADATA file, so reading it for every package is slow.
+def _is_installed(name: str) -> bool:
+    try:
+        distribution(name)
+    except PackageNotFoundError:
+        return False
+    return True
 
 
 def _installed_language_packs() -> dict[str, Distribution]:
@@ -387,20 +502,40 @@ class PyPIExtensionManager(ExtensionManager):
             )
         return extensions
 
-    async def list_packages(
+    async def _fetch_prebuilt_extension_metadata(self, name: str) -> PackageMetadata:
+        """Fetch package metadata; empty when the latest release lacks the prebuilt classifier.
+
+        This filters out PyPI packages that are not prebuilt JupyterLab extensions.
+        In the future we could also test for the version-specific classifier,
+        `Framework :: Jupyter :: JupyterLab :: 4`, but we already set a precedent
+        of not requiring the version classifier (in JupyterLab releases 4.0-4.6).
+        """
+        data = await self._fetch_package_metadata(name, self.base_url)
+        if _PREBUILT_CLASSIFIER not in _json_list(data.get("classifiers")):
+            return {}
+        return data
+
+    async def list_packages(  # noqa: C901
         self, query: str, page: int, per_page: int
     ) -> tuple[dict[str, ExtensionPackage], int | None]:
-        """List known language packs matching the query."""
+        """List known packages matching the query and the prebuilt extension it names."""
         if monotonic() >= self._package_metadata_cache_expires:
             self._configure_package_metadata_cache()
 
         query = query.casefold()
-        installed = _installed_language_packs()
-        names = sorted(name for name in LANGUAGE_PACKS if canonicalize_name(name) not in installed)
-        packages = await asyncio.gather(
-            *(self._fetch_package_metadata(name, self.base_url) for name in names),
-            return_exceptions=True,
-        )
+        named = _canonical_project_name(query)
+        names = [
+            name
+            for name in (*sorted(KNOWN_EXTENSIONS), *sorted(LANGUAGE_PACKS))
+            if not _is_installed(name)
+        ]
+        fetches = [self._fetch_package_metadata(name, self.base_url) for name in names]
+        known = {canonicalize_name(name) for name in (*KNOWN_EXTENSIONS, *LANGUAGE_PACKS)}
+        if named is not None and named not in known and not _is_installed(named):
+            # Any PyPI project can have the name that the query spells.
+            names.append(named)
+            fetches.append(self._fetch_prebuilt_extension_metadata(named))
+        packages = await asyncio.gather(*fetches, return_exceptions=True)
 
         matches = []
         failed = False
@@ -408,25 +543,31 @@ class PyPIExtensionManager(ExtensionManager):
             if isinstance(data, BaseException):
                 if not isinstance(data, Exception):
                     raise data
-                self.log.warning("Failed to fetch language pack metadata for %s: %s", name, data)
+                self.log.warning("Failed to fetch package metadata for %s: %s", name, data)
                 failed = True
                 continue
             latest_version = _metadata_string(data, "version")
             if not latest_version:
                 continue
             description = _metadata_string(data, "summary") or ""
-            if query not in name.casefold() and query not in description.casefold():
+            if (
+                canonicalize_name(name) != named
+                and query not in name.casefold()
+                and query not in description.casefold()
+            ):
                 continue
 
             package_urls = _metadata_string_map(data, "project_urls")
 
-            source_url = package_urls.get("Source Code")
-            homepage_url = _metadata_string(data, "home_page") or package_urls.get("Homepage")
-            documentation_url = _metadata_string(data, "docs_url") or package_urls.get(
-                "Documentation"
+            source_url = _project_url(package_urls, "source")
+            homepage_url = _metadata_string(data, "home_page") or _project_url(
+                package_urls, "homepage"
             )
-            bug_tracker_url = _metadata_string(data, "bugtrack_url") or package_urls.get(
-                "Bug Tracker"
+            documentation_url = _metadata_string(data, "docs_url") or _project_url(
+                package_urls, "documentation"
+            )
+            bug_tracker_url = _metadata_string(data, "bugtrack_url") or _project_url(
+                package_urls, "issues"
             )
 
             best_guess_home_url = (
@@ -457,7 +598,7 @@ class PyPIExtensionManager(ExtensionManager):
                 author=_metadata_string(data, "author"),
                 license=_metadata_string(data, "license"),
                 latest_version=ExtensionManager.get_semver_version(latest_version),
-                pkg_type="language-pack",
+                pkg_type="language-pack" if name in LANGUAGE_PACKS else "prebuilt",
                 allowed=python_compatible,
                 bug_tracker_url=bug_tracker_url,
                 documentation_url=documentation_url,
@@ -470,7 +611,7 @@ class PyPIExtensionManager(ExtensionManager):
         if failed and not matches:
             raise HTTPError(
                 HTTPStatus.SERVICE_UNAVAILABLE,
-                "Could not load language packs from PyPI. Try refreshing the extensions list.",
+                "Could not load extensions from PyPI. Try refreshing the extensions list.",
             )
 
         start = (page - 1) * per_page
