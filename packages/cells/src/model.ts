@@ -892,7 +892,11 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
           }
           if ('insert' in outputsChange) {
             // Inserting an output always results in appending it.
-            for (const output of outputsChange.insert!) {
+            // `insert` is typed as a single `Y.Map` in ydoc, but the yjs
+            // array-event delta carries an array of outputs.
+            for (const output of outputsChange.insert! as unknown as Array<
+              { toJSON(): nbformat.IOutput } | { output_type: string }
+            >) {
               // For compatibility with older ydoc where a plain object,
               // (rather than a Map instance) could be provided.
               // In a future major release the use of Map will be required.
