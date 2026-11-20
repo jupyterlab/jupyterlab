@@ -2368,8 +2368,7 @@ export class Notebook extends StaticNotebook {
    * selection.
    */
   getContiguousSelection():
-    | { head: number; anchor: number }
-    | { head: null; anchor: null } {
+    { head: number; anchor: number } | { head: null; anchor: null } {
     const cells = this.widgets;
     const first = ArrayExt.findFirstIndex(cells, c => this.isSelected(c));
 
@@ -2502,6 +2501,10 @@ export class Notebook extends StaticNotebook {
 
     if (element == null) {
       element = cell.node;
+    }
+
+    if (element == null) {
+      return;
     }
 
     // Scroll notebook to set the target on top.
@@ -3098,14 +3101,19 @@ export class Notebook extends StaticNotebook {
     // Loop on cells, get headings and search for first matching id.
     for (let cellIdx = 0; cellIdx < this.widgets.length; cellIdx++) {
       const cell = this.widgets[cellIdx];
-      if (
-        cell.model.type === 'raw' ||
-        (cell.model.type === 'markdown' && !(cell as MarkdownCell).rendered)
-      ) {
+      if (cell.model.type === 'raw') {
         // Bail early
         continue;
       }
-      for (const heading of cell.headings) {
+
+      // Heading metadata is available from the model before a cell has been
+      // attached and rendered. Use it to locate the target first, then bring
+      // the cell into the viewport so its DOM element can be resolved. This is
+      // important for cross-notebook links: the router can deliver the hash
+      // while the target notebook is still windowed and its markdown cells are
+      // placeholders.
+      const headings = await cell.getHeadings();
+      for (const heading of headings) {
         let id: string | undefined | null = '';
         switch (heading.type) {
           case Cell.HeadingType.HTML:
@@ -3125,6 +3133,17 @@ export class Notebook extends StaticNotebook {
             break;
         }
         if (id === queryId) {
+          if (!cell.inViewport) {
+            await this.scrollToCell(cell, 'center');
+          }
+
+          if (
+            cell.model.type === 'markdown' &&
+            !(cell as MarkdownCell).rendered
+          ) {
+            await cell.ready;
+          }
+
           const attribute =
             (this.rendermime.sanitizer.allowNamedProperties ?? false)
               ? 'id'
