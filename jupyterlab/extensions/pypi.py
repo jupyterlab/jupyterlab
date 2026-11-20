@@ -297,8 +297,6 @@ KNOWN_EXTENSIONS = (
     *JUPYTERLAB_CONTRIB_ORG_EXTENSIONS,
     *VOILA_DASHBOARDS_ORG_EXTENSIONS,
 )
-
-# The 4.6 search listed packages by this classifier.
 _PREBUILT_CLASSIFIER = "Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt"
 
 
@@ -505,7 +503,13 @@ class PyPIExtensionManager(ExtensionManager):
         return extensions
 
     async def _fetch_prebuilt_extension_metadata(self, name: str) -> PackageMetadata:
-        """Fetch package metadata; empty when the latest release lacks the prebuilt classifier."""
+        """Fetch package metadata; empty when the latest release lacks the prebuilt classifier.
+
+        This filters out PyPI packages that are not prebuilt JupyterLab extensions.
+        In the future we could also test for the version-specific classifier,
+        `Framework :: Jupyter :: JupyterLab :: 4`, but we already set a precedent
+        of not requiring the version classifier (in JupyterLab releases 4.0-4.6).
+        """
         data = await self._fetch_package_metadata(name, self.base_url)
         if _PREBUILT_CLASSIFIER not in _json_list(data.get("classifiers")):
             return {}
