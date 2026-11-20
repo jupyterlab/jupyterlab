@@ -16,6 +16,12 @@
       "path": "../codeeditor"
     },
     {
+      "path": "../codemirror"
+    },
+    {
+      "path": "../documentsearch"
+    },
+    {
       "path": "../inspector"
     },
     {

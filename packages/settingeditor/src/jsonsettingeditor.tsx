@@ -143,6 +143,13 @@ export class JsonSettingEditor extends SplitPanel {
   }
 
   /**
+   * The inspectable raw defaults editor source for the currently loaded settings.
+   */
+  get defaults(): CodeEditor.IEditor {
+    return this._editor.raw.defaults;
+  }
+
+  /**
    * Dispose of the resources held by the setting editor.
    */
   dispose(): void {
