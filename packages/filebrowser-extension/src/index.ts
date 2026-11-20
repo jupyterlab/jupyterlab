@@ -83,6 +83,12 @@ const FILE_BROWSER_PLUGIN_ID = '@jupyterlab/filebrowser-extension:browser';
 const RESTORING_CLASS = 'jp-mod-restoring';
 
 /**
+ * Viewports where an open sidebar leaves too little room for the main area.
+ * Matches the narrow screen breakpoint used in the stylesheets.
+ */
+const NARROW_VIEWPORT_QUERY = 'only screen and (width <= 760px)';
+
+/**
  * The command IDs used by the file browser plugin.
  */
 namespace CommandIDs {
@@ -825,10 +831,14 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
       });
     }
 
-    // If the layout is a fresh session without saved data and not in single document
-    // mode, open file browser.
+    // If the layout is a fresh session without saved data, not in single document
+    // mode and the viewport is wide enough, open file browser.
     void labShell.restored.then(layout => {
-      if (layout.fresh && labShell.mode !== 'single-document') {
+      if (
+        layout.fresh &&
+        labShell.mode !== 'single-document' &&
+        !window.matchMedia(NARROW_VIEWPORT_QUERY).matches
+      ) {
         void commands.execute(CommandIDs.openDirectory, void 0);
       }
     });
