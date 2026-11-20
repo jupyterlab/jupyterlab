@@ -84,7 +84,9 @@ module.exports = {
         },
         launchOptions: {
           args: chromiumArgs
-        }
+        },
+        // Record raw strings reaching Trusted Types sinks
+        collectTrustedTypes: true
       }
     },
     {
@@ -99,7 +101,9 @@ module.exports = {
           // https://github.com/microsoft/playwright/issues/13037
           permissions: []
         },
-        browserName: 'firefox'
+        browserName: 'firefox',
+        // Record raw strings reaching Trusted Types sinks
+        collectTrustedTypes: true
       },
       // We do not want to match exactly on Firefox
       ignoreSnapshots: true

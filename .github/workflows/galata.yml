@@ -318,6 +318,36 @@ jobs:
             exit 1
           fi
 
+      - name: List Trusted Types violations
+        if: ${{ !cancelled() && matrix.suite == 'jupyterlab' }}
+        env:
+          BROWSER: ${{ matrix.browser }}
+          SHARD_NUMBER: ${{ matrix.shard }}
+        run: |
+          set -euxo pipefail
+          cd core/galata
+          if [[ ! -d tt-violations ]]; then
+            echo "No Trusted Types records in this shard"
+            exit 0
+          fi
+          # The server from "Launch JupyterLab" is still running; the script fetches
+          # the bundles from it to read their source maps. source-map is in yarn.lock.
+          node tt-aggregate.mjs tt-violations --json \
+            | jq --arg b "$BROWSER" 'map(. + {browser: $b})' \
+            > "tt-sites-${BROWSER}-${SHARD_NUMBER}.json"
+
+      - name: Upload Trusted Types violations
+        if: ${{ !cancelled() && matrix.suite == 'jupyterlab' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: tt-sites-${{ matrix.browser }}-${{ matrix.shard }}
+          path: |
+            core/galata/tt-sites-*.json
+            core/galata/tt-violations
+          if-no-files-found: ignore
+          overwrite: true
+          retention-days: 7
+
       - name: Upload test assets
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -601,3 +631,49 @@ jobs:
           delete-merged: true
           retention-days: 1
           compression-level: 1
+
+  trusted-types-report:
+    name: Trusted Types report
+    if: ${{ !cancelled() }}
+    needs: [test]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Download per-shard results
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: tt-sites-*
+          path: tt
+          merge-multiple: true
+
+      - name: Write the report to the run summary
+        run: |
+          set -euo pipefail
+          FILES=$(find tt -name 'tt-sites-*.json' 2> /dev/null | wc -l)
+          if [[ "$FILES" -eq 0 ]]; then
+            echo "### Trusted Types violations: no data" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          find tt -name 'tt-sites-*.json' -print0 | xargs -0 cat | jq -s '
+            add
+            | group_by(.site + "|" + .sink)
+            | map({site: .[0].site, sink: .[0].sink, type: .[0].type,
+                   tests: (map(.tests) | add), hits: (map(.hits) | add),
+                   browsers: (map(.browser) | unique | join(" "))})
+            | sort_by(-.tests)' > tt-sites.json
+          {
+            echo "### Trusted Types violations: $(jq length tt-sites.json) distinct sites"
+            echo
+            echo "Report-only CSP, nothing is blocked. Collected from ${FILES} test shards."
+            echo
+            echo "<details>"
+            echo "<summary>All sites</summary>"
+            echo
+            echo "| # | Site | Sink | Type | Test runs | Hits | Browsers |"
+            echo "| --- | --- | --- | --- | --- | --- | --- |"
+            jq -r 'to_entries[] | "| \(.key + 1) | `\(.value.site)` | \(.value.sink) | \(.value.type) | \(.value.tests) | \(.value.hits) | \(.value.browsers) |"' tt-sites.json
+            echo
+            echo "</details>"
+          } >> "$GITHUB_STEP_SUMMARY"
