@@ -288,7 +288,7 @@ export class Context<
    * Save the document to a different path chosen by the user.
    *
    * @returns A promise that resolves to `true` if the save operation was initiated.
-   * Returns `false` if the user cancelled the operation.
+   * Returns `false` if the user cancelled the operation or chose an existing folder.
    *
    * Note:
    * - If the save operation proceeds but fails due to an error in the content manager,
@@ -316,10 +316,22 @@ export class Context<
     // Make sure the path does not exist.
     try {
       await this._manager.ready;
-      await this._manager.contents.get(newPath, {
+      const model = await this._manager.contents.get(newPath, {
         contentProviderId: this._contentProviderId,
         content: false
       });
+      if (model.type === 'directory') {
+        void showErrorMessage(
+          this._trans.__('Save As Error'),
+          new Error(
+            this._trans.__(
+              'Cannot overwrite directory "%1" with a file.',
+              newPath
+            )
+          )
+        );
+        return false;
+      }
       await this._maybeOverWrite(newPath);
     } catch (err) {
       if (!err.response || err.response.status !== 404) {
@@ -936,9 +948,7 @@ or load the version on disk (revert)?`,
       }
 
       if (result.button.accept) {
-        return this._manager.contents.delete(path).then(() => {
-          return this._finishSaveAs(path);
-        });
+        return this._manager.contents.delete(path);
       } else {
         return Promise.reject(new Error('Cancelled'));
       }
