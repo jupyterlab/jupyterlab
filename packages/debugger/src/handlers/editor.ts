@@ -58,9 +58,12 @@ export class EditorHandler implements IDisposable {
     // A console prompt can keep the code of the cell that just ran.
     this._ranPaths = Private.getRanPaths(this._debuggerService);
 
-    // The cell may have run before the debugger started.
+    // The cell may have run, or be running, before the debugger started.
     const src = this._src;
-    if ('execution_count' in src && typeof src.execution_count === 'number') {
+    if (
+      ('execution_count' in src && typeof src.execution_count === 'number') ||
+      ('executionState' in src && src.executionState === 'running')
+    ) {
       this._ranPaths.add(this._debuggerService.getCodeId(src.getSource()));
     }
     // After a reload, a move or an undone deletion, the kernel may already
