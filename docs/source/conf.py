@@ -97,6 +97,12 @@ templates_path = ["_templates"]
 # Sphinx considers the files with this suffix as sources.
 # The value can be a dictionary mapping file extensions to file types.
 source_suffix = {".md": "markdown"}
+if SPELLING_BUILD_ENABLED:
+    source_suffix.update(
+        {
+            ".txt": "restructuredtext",
+        }
+    )
 
 # The master toctree document.
 master_doc = "index"
@@ -137,15 +143,19 @@ gettext_compact = False
 exclude_patterns = [
     "api/media/*.md",
 ]
+if SPELLING_BUILD_ENABLED:
+    exclude_patterns += ["spelling_wordlist.txt", "docs/source/spelling_wordlist.txt"]
 
 if "sphinxcontrib.spelling" in extensions:
     # Sphinx consumes these values dynamically by their module-global names.
     globals().update(
         {
-            "spelling_word_list_filename": ["spelling_wordlist.txt"],
+            "spelling_word_list_filename": [str(HERE / "spelling_wordlist.txt")],
             "spelling_exclude_patterns": [
                 "api/**",
+                "docs/source/api/**",
                 "getting_started/changelog*.md",
+                "docs/source/getting_started/changelog*.md",
             ],
             "spelling_filters": [
                 "spelling_filters.CodeIdentifierFilter",
