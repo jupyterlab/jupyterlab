@@ -614,11 +614,6 @@ class ExtensionManager(PluginManager):
                 repository_url=data.get("repository", {}).get("url", data.get("repository")),
             )
 
-            if get_latest_version:
-                pkg = replace(
-                    pkg, latest_version=await self.get_latest_version(self.get_normalized_name(pkg))
-                )
-
             extensions[normalized_name] = pkg
 
         for name, data in info["extensions"].items():
@@ -651,10 +646,6 @@ class ExtensionManager(PluginManager):
                 bug_tracker_url=data.get("bugs", {}).get("url"),
                 repository_url=data.get("repository", {}).get("url", data.get("repository")),
             )
-            if get_latest_version:
-                pkg = replace(
-                    pkg, latest_version=await self.get_latest_version(self.get_normalized_name(pkg))
-                )
             extensions[normalized_name] = pkg
 
         extensions.update(self._get_scheduled_uninstall_packages(build_check_info["uninstall"]))
@@ -662,7 +653,7 @@ class ExtensionManager(PluginManager):
         if get_latest_version:
             installed_pkgs = [pkg for pkg in extensions.values() if pkg.installed]
             results = await asyncio.gather(
-                *(self.get_latest_version(pkg.name) for pkg in installed_pkgs),
+                *(self.get_latest_version(self.get_normalized_name(pkg)) for pkg in installed_pkgs),
                 return_exceptions=True,
             )
             for pkg, result in zip(installed_pkgs, results, strict=True):
