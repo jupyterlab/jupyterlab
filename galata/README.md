@@ -454,6 +454,31 @@ Possible values are:
 
 By default the user is stored in-memory.
 
+### mockPageConfig
+
+- type: \< boolean | Record\<string, unknown> >
+
+Mock JupyterLab PageConfig (`#jupyter-config-data`) or not.
+Possible values are:
+
+- false (default): PageConfig will not be mocked.
+- true: Enables PageConfig mocking without initial overrides.
+- Record\<string, unknown>: Mapping of PageConfig keys and values to override (e.g. `{ serverLocale: 'fr_FR' }`).
+
+Example:
+
+```ts
+test.use({
+  mockPageConfig: {
+    serverLocale: 'fr_FR'
+  }
+});
+
+test('should return the mocked PageConfig', async ({ page }) => {
+  expect(await page.getOption('serverLocale')).toEqual('fr_FR');
+});
+```
+
 ### kernels
 
 - type: \<Map\<string, Kernel.IModel> | null>
