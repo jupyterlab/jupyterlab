@@ -10,7 +10,6 @@ import { tags } from '@lezer/highlight';
 import type { JSONObject, JSONValue } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
 import * as React from 'react';
-import Highlighter from 'react-highlight-words';
 import { JSONTree } from 'react-json-tree';
 import { StyleModule } from 'style-mod';
 
@@ -131,12 +130,7 @@ export class Component extends React.Component<IProps, IState> {
             }
             return (
               <span className={className}>
-                <Highlighter
-                  autoEscape={true}
-                  searchWords={[this.state.filter]}
-                  textToHighlight={`${raw}`}
-                  highlightClassName="jp-mod-selected"
-                ></Highlighter>
+                <Highlight text={`${raw}`} query={this.state.filter} />
               </span>
             );
           }}
@@ -193,14 +187,52 @@ function NodeLabel(props: INodeLabelProps): JSX.Element {
   }, [path, expanded, expandable, onToggle]);
   return (
     <span className={getStyle(tags.keyword)}>
-      <Highlighter
-        autoEscape={true}
-        searchWords={[props.filter]}
-        textToHighlight={props.label}
-        highlightClassName="jp-mod-selected"
-      ></Highlighter>
+      <Highlight text={props.label} query={props.filter} />
     </span>
   );
+}
+
+/**
+ * The properties for a text with marked matches.
+ */
+interface IHighlightProps {
+  text: string;
+  query: string;
+}
+
+/**
+ * A text with each match of the query marked, ignoring case.
+ */
+function Highlight(props: IHighlightProps): JSX.Element {
+  const { text, query } = props;
+  if (!query) {
+    return <span>{text ? <span>{text}</span> : null}</span>;
+  }
+  // The group keeps the matches in the split, and adjacent matches share a mark.
+  const pattern = new RegExp(`((?:${escapeRegExp(query)})+)`, 'i');
+  return (
+    <span>
+      {text.split(pattern).map((part, index) => {
+        if (!part) {
+          return null;
+        }
+        return index % 2 === 1 ? (
+          <mark key={index} className="jp-mod-selected">
+            {part}
+          </mark>
+        ) : (
+          <span key={index}>{part}</span>
+        );
+      })}
+    </span>
+  );
+}
+
+/**
+ * Escape the characters that have a meaning in a regular expression.
+ */
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\/-]/g, '\\$&');
 }
 
 // Provide an invalid theme object (this is on purpose!) to invalidate the
@@ -233,7 +265,7 @@ function objectIncludes(data: JSONValue, query: string): boolean {
 /**
  * Get the key paths of the nodes that contain the query.
  *
- * The query must be in lower case: the search ignores case, like `Highlighter`.
+ * The query must be in lower case: the search ignores case, like `Highlight`.
  */
 function filterPaths(
   data: NonNullable<JSONValue>,
