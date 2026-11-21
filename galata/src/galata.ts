@@ -170,13 +170,13 @@ export namespace galata {
      */
     mockPageConfig?: boolean | Record<string, unknown>;
     /**
-     * Mock JupyterLab state in-memory or not.
+     * Mock JupyterLab settings in-memory or not.
      *
      * Default galata.DEFAULT_SETTINGS
      */
     mockSettings?: boolean | Record<string, unknown>;
     /**
-     * Mock JupyterLab settings in-memory or not.
+     * Mock JupyterLab state in-memory or not.
      *
      * Default true
      */
