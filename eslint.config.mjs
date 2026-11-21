@@ -7,11 +7,10 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 import js from '@eslint/js';
 import globals from 'globals';
 import jestPlugin from 'eslint-plugin-jest';
-import reactPlugin from 'eslint-plugin-react';
 import tsdocPlugin from 'eslint-plugin-tsdoc';
 import regexpPlugin from 'eslint-plugin-regexp';
 import playwrightPlugin from 'eslint-plugin-playwright';
-import prettierPluginRecommended from 'eslint-plugin-prettier/recommended';
+import eslintConfigPrettier from 'eslint-config-prettier/flat';
 import tseslint from 'typescript-eslint';
 import * as jsoncParser from 'jsonc-eslint-parser';
 import jupyterPlugin from '@jupyter/eslint-plugin';
@@ -220,7 +219,6 @@ export default defineConfig([
     plugins: {
       '@typescript-eslint': tseslint.plugin,
       jest: jestPlugin,
-      react: reactPlugin,
       jupyter: jupyterPlugin,
       tsdoc: tsdocPlugin
     },
@@ -468,7 +466,6 @@ export default defineConfig([
       curly: ['error', 'all'],
       eqeqeq: 'error',
       'prefer-arrow-callback': 'error',
-      'react/prop-types': 'warn',
 
       'sort-imports': [
         'error',
@@ -480,12 +477,6 @@ export default defineConfig([
           allowSeparatedGroups: false
         }
       ]
-    },
-
-    settings: {
-      react: {
-        version: 'detect'
-      }
     }
   },
   {
@@ -615,7 +606,7 @@ export default defineConfig([
       'jupyter/no-schema-enum': 'error'
     }
   },
-  prettierPluginRecommended,
+  eslintConfigPrettier,
   {
     files: ['**/*.ts', '**/*.tsx'],
     rules: {
