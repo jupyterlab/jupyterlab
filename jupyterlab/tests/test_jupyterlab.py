@@ -216,6 +216,36 @@ class TestExtension(AppHandlerTest):
             install_extension(path)
         assert not check_extension(self.pkg_names["mimeextension"])
 
+    def test_install_by_name_with_same_name_directory_in_cwd(self):
+        # Regression test for https://github.com/jupyterlab/jupyterlab/issues/13795
+        name = self.pkg_names["extension"]
+        cwd = self.tempdir()
+        os.makedirs(pjoin(cwd, name))
+        orig_run = commands._AppHandler._run
+        packed = []
+
+        def _mock_run(handler, cmd, **kwargs):
+            if cmd[1:2] == ["pack"]:
+                packed.append(cmd[2])
+                if cmd[2] != name:
+                    return 1
+                # Stand in for downloading the package from the registry.
+                cmd = [*cmd[:2], self.mock_extension]
+            return orig_run(handler, cmd, **kwargs)
+
+        old_cwd = os.getcwd()
+        with patch.object(commands._AppHandler, "_run", _mock_run):
+            os.chdir(cwd)
+            try:
+                assert install_extension(name) is True
+            finally:
+                os.chdir(old_cwd)
+        assert packed == [name]
+        info = get_app_info()
+        assert name in info["extensions"]
+        assert name not in info["local_extensions"]
+        assert check_extension(name)
+
     def test_uninstall_extension(self):
         assert install_extension(self.mock_extension) is True
         name = self.pkg_names["extension"]
@@ -890,3 +920,20 @@ def test_labextension_list_skips_config_file_errors(jp_environ, jp_config_dir):
     )
 
     assert result.returncode == 0, result.stderr
+
+
+def test_normalize_path_only_resolves_local_packages(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    # A file or directory that is not an npm package is left as a package name.
+    (tmp_path / "some-extension").mkdir()
+    (tmp_path / "other-extension").write_text("")
+    assert commands._normalize_path("some-extension") == "some-extension"
+    assert commands._normalize_path("other-extension") == "other-extension"
+    assert commands._normalize_path("missing-extension") == "missing-extension"
+
+    (tmp_path / "some-extension" / "package.json").write_text("{}")
+    (tmp_path / "some-extension-1.0.0.tgz").write_bytes(b"")
+    assert commands._normalize_path("some-extension") == str(tmp_path / "some-extension")
+    assert commands._normalize_path("some-extension-1.0.0.tgz") == str(
+        tmp_path / "some-extension-1.0.0.tgz"
+    )
