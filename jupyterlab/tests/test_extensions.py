@@ -369,6 +369,7 @@ def python_packages(monkeypatch, tmp_path):
     return install
 
 
+@pytest.fixture
 def two_federated_extensions(federated_extensions):
     federated_extensions(
         {
