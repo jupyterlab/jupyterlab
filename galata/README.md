@@ -479,6 +479,8 @@ test('should return the mocked PageConfig', async ({ page }) => {
 });
 ```
 
+To mock PageConfig in one test, call `galata.Mock.mockPageConfig(page, pageConfig)` before the page loads or reloads. Each call replaces the mapping of the fixture and of earlier calls, so pass every key that the test changes.
+
 ### kernels
 
 - type: \<Map\<string, Kernel.IModel> | null>

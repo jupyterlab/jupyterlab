@@ -874,6 +874,9 @@ export namespace galata {
     /**
      * Mock JupyterLab PageConfig data embedded in the page HTML.
      *
+     * Each call replaces the overrides of earlier calls, including those of
+     * the `mockPageConfig` fixture option.
+     *
      * @param page Page model object
      * @param pageConfig In-memory PageConfig overrides or additions
      */
