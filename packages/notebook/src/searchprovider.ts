@@ -361,7 +361,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     if (!this.widget) {
       return;
     }
+    const queryKey = JSON.stringify([query.source, query.flags, filters ?? {}]);
+    const isNewQuery = queryKey !== this._queryKey;
     await this.endQuery();
+    this._queryKey = queryKey;
     this._searchActive = true;
     let cells = this.widget.content.widgets;
 
@@ -410,11 +413,12 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     // - the next match when starting search using ctrl + f
     // `scroll` and `select` are disabled because `startQuery` is also used as
     // "restartQuery" after each text change and if those were enabled, we would
-    // steal the cursor.
-    await this.highlightNext(true, {
+    // steal the cursor. Only a new query scrolls.
+    await this._stepNext(false, true, {
       from: 'selection-start',
       scroll: false,
-      select: false
+      select: false,
+      scrollInCell: isNewQuery
     });
 
     return Promise.resolve();
@@ -435,6 +439,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._searchActive = false;
     this._searchProviders.length = 0;
     this._currentProviderIndex = null;
+    this._queryKey = null;
   }
 
   /**
@@ -500,9 +505,14 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       }
     }
 
-    // TODO: markdown unrendering/highlighting sequence is likely incorrect
-    // Force highlighting the first hit in the unrendered cell
-    await unrenderMarkdownCell(true);
+    const current = this.getCurrentMatch();
+    // A match marked in the rendered text is already current, and
+    // highlighting the next match would skip it
+    if (!current || !('node' in current)) {
+      // TODO: markdown unrendering/highlighting sequence is likely incorrect
+      // Force highlighting the first hit in the unrendered cell
+      await unrenderMarkdownCell(true);
+    }
     return replaceOccurred;
   }
 
@@ -639,7 +649,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   private async _stepNext(
     reverse = false,
     loop = false,
-    options?: IHighlightAdjacentMatchOptions
+    options?: Private.IStepOptions
   ): Promise<ISearchMatch | null> {
     const activateNewMatch = async (match: ISearchMatch) => {
       const shouldScroll = options?.scroll ?? true;
@@ -692,15 +702,19 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     };
 
     const highlightInCell = async (
-      searchEngine: CellSearchProvider
+      index: number
     ): Promise<ISearchMatch | undefined> => {
+      const searchEngine = this._searchProviders[index];
       if (options?.skipReadOnly && searchEngine.isReadOnlyProvider()) {
         // Treat it as a cell without matches, so the loop below still ends
         return undefined;
       }
+      const cellOptions = options?.scrollInCell
+        ? { ...options, scroll: true }
+        : options;
       return reverse
-        ? searchEngine.highlightPrevious(false, options)
-        : searchEngine.highlightNext(false, options);
+        ? searchEngine.highlightPrevious(false, cellOptions)
+        : searchEngine.highlightNext(false, cellOptions);
     };
 
     if (this._currentProviderIndex === null) {
@@ -749,9 +763,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this._currentProviderIndex += atEndOfCurrentCell ? 1 : 0;
     }
     do {
-      const searchEngine = this._searchProviders[this._currentProviderIndex];
-
-      const match = await highlightInCell(searchEngine);
+      const match = await highlightInCell(this._currentProviderIndex);
 
       if (match) {
         await activateNewMatch(match);
@@ -776,7 +788,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
     if (loop) {
       // try the first provider again
-      const match = await highlightInCell(this._searchProviders[startIndex]);
+      const match = await highlightInCell(startIndex);
       if (match) {
         await activateNewMatch(match);
         return match;
@@ -1012,6 +1024,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   private _selectedCells: number = 1;
   private _selectedLines: number = 0;
   private _query: RegExp | null = null;
+  private _queryKey: string | null = null;
   private _searchProviders: CellSearchProvider[] = [];
   private _editorSelectionsObservable: IObservableMap<
     CodeEditor.ITextSelection[]
@@ -1020,4 +1033,20 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   private _selectionLock: boolean = false;
   private _searchActive: boolean = false;
   private _cellSelectionChangePending = false;
+}
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * Options of a step to an adjacent match in the notebook.
+   */
+  export interface IStepOptions extends IHighlightAdjacentMatchOptions {
+    /**
+     * Whether the cell scrolls to its match when `scroll` is false, which
+     * leaves the active cell as it is.
+     */
+    scrollInCell?: boolean;
+  }
 }
