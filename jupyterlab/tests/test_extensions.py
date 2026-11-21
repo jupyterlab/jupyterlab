@@ -354,6 +354,22 @@ def federated_extensions(monkeypatch):
 
 
 @pytest.fixture
+def python_packages(monkeypatch, tmp_path):
+    """Make the given Python packages, a mapping {name: version}, look installed."""
+
+    def install(packages):
+        for name, version in packages.items():
+            dist_info = tmp_path / f"{name.replace('-', '_')}-{version}.dist-info"
+            dist_info.mkdir()
+            (dist_info / "METADATA").write_text(
+                f"Name: {name}\nVersion: {version}\n", encoding="utf-8"
+            )
+        monkeypatch.syspath_prepend(str(tmp_path))
+
+    return install
+
+
+@pytest.fixture
 def two_federated_extensions(federated_extensions):
     federated_extensions(
         {
@@ -361,6 +377,54 @@ def two_federated_extensions(federated_extensions):
             "ext2": {"version": "2.0.0", "jupyterlab": {}, "install": {}},
         }
     )
+
+
+async def test_pypi_manager_looks_up_the_python_package_of_an_extension(
+    monkeypatch, federated_extensions, python_packages
+):
+    federated_extensions(
+        {
+            "@jupyter-lsp/jupyterlab-lsp": {
+                "version": "5.3.0",
+                "jupyterlab": {},
+                "install": {"packageManager": "python", "packageName": "jupyterlab-lsp"},
+            },
+            "jupyter-matplotlib": {"version": "0.12.0", "jupyterlab": {}, "install": {}},
+        }
+    )
+    python_packages({"jupyterlab-lsp": "5.3.0"})
+    manager = PyPIExtensionManager()
+    get_latest_version = AsyncMock(return_value=None)
+    monkeypatch.setattr(manager, "get_latest_version", get_latest_version)
+
+    await manager._get_installed_extensions()
+
+    assert [call.args[0] for call in get_latest_version.await_args_list] == [
+        "jupyterlab-lsp",
+        "jupyter-matplotlib",
+    ]
+
+
+async def test_pypi_manager_reports_the_python_package_version_of_an_extension(
+    monkeypatch, federated_extensions, python_packages
+):
+    federated_extensions(
+        {
+            "jupyterlab-jupytext": {
+                "version": "1.4.6",
+                "jupyterlab": {},
+                "install": {"packageManager": "python", "packageName": "jupytext"},
+            }
+        }
+    )
+    python_packages({"jupytext": "1.19.5"})
+    manager = PyPIExtensionManager()
+    monkeypatch.setattr(manager, "get_latest_version", AsyncMock(return_value="1.19.5"))
+
+    installed = await manager._get_installed_extensions()
+
+    extension = installed["jupyterlab-jupytext"]
+    assert (extension.installed_version, extension.latest_version) == ("1.19.5", "1.19.5")
 
 
 @pytest.mark.usefixtures("two_federated_extensions")
