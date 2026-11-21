@@ -905,6 +905,7 @@ export namespace galata {
 
         let response: APIResponse;
         try {
+          // Playwright does not route a redirected request, so follow it here
           response = await route.fetch();
         } catch {
           return route.abort();
