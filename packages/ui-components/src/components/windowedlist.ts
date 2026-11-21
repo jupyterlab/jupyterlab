@@ -704,7 +704,8 @@ export abstract class WindowedListModel implements WindowedList.IModel {
             measured = true;
           } else {
             size = this.estimateWidgetSize(i);
-            measured = false;
+            // The resize observer measures the item once it is in view
+            measured = isConnected;
           }
         }
 

@@ -296,6 +296,39 @@ describe('@jupyterlab/ui-components', () => {
         Widget.detach(widget1);
       });
 
+      it('should estimate a connected widget with zero height once', () => {
+        const widget0 = new Widget();
+        const widget1 = new Widget();
+        Widget.attach(widget0, document.body);
+        Widget.attach(widget1, document.body);
+        widget1.node.style.display = 'none';
+
+        jest
+          .spyOn(widget0.node, 'getBoundingClientRect')
+          .mockReturnValue({ height: 80 } as DOMRect);
+        const getRect = jest
+          .spyOn(widget1.node, 'getBoundingClientRect')
+          .mockReturnValue({ height: 0 } as DOMRect);
+
+        class SpanTestModel extends WindowedListModel {
+          estimateWidgetSize = (_index: number): number => FIXED_ESTIMATED_SIZE;
+          widgetRenderer = (index: number): Widget =>
+            index === 0 ? widget0 : widget1;
+        }
+
+        const model = new SpanTestModel({
+          itemsList: new ObservableList({ values: ['a', 'b'] })
+        });
+        model.windowingActive = true;
+
+        model.getSpan(0, 1);
+        model.getSpan(0, 1);
+        expect(getRect).toHaveBeenCalledTimes(1);
+
+        Widget.detach(widget0);
+        Widget.detach(widget1);
+      });
+
       it('should measure a hidden connected widget as empty', () => {
         const widget0 = new Widget();
         const widget1 = new Widget();
