@@ -31,6 +31,9 @@ export interface IFilter {
   description: string;
   /**
    * Filter description to be used when the filter is disabled in replace mode.
+   *
+   * @deprecated since 4.7.0, will be removed in 5.0. Filters are no longer
+   * disabled in replace mode.
    */
   disabledDescription?: string;
   /**
@@ -39,8 +42,12 @@ export interface IFilter {
   default: boolean;
   /**
    * Does the filter support replace?
+   *
+   * @deprecated since 4.7.0, will be removed in 5.0. Filters are no longer
+   * disabled in replace mode; the search box disables Replace for matches
+   * which cannot be replaced.
    */
-  supportReplace: boolean;
+  supportReplace?: boolean;
 }
 
 /**
@@ -174,6 +181,11 @@ export interface ISearchMatch {
    * Start location of the match (in a text, this is the column)
    */
   position: number;
+
+  /**
+   * Indicates whether the match belongs to a cell output or non-editable cell.
+   */
+  readOnly?: boolean;
 }
 
 /**
@@ -184,6 +196,15 @@ export interface IHTMLSearchMatch extends ISearchMatch {
    * Node containing the match
    */
   readonly node: Text;
+
+  /**
+   * The parts of a match that spans several text nodes, such as the
+   * characters of a formula, one per node in document order.
+   *
+   * The first part has the same `node` and `position` as the match, and
+   * `text` joins the text of all parts.
+   */
+  readonly parts?: ReadonlyArray<IHTMLSearchMatch>;
 }
 
 /**
@@ -393,4 +414,19 @@ export interface ISearchProvider extends IBaseSearchProvider {
    * which will influence the heuristic auto-enabling "search in selection" mode.
    */
   getSelectionState?(): SelectionState;
+
+  /**
+   * Gets the currently highlighted match, if any.
+   *
+   * The search box disables Replace while this match is read-only.
+   */
+  getCurrentMatch?(): ISearchMatch | undefined;
+
+  /**
+   * The number of matches which can be replaced, if known.
+   *
+   * The search box disables Replace All, and Replace while no match is
+   * current, when there are matches but none of them can be replaced.
+   */
+  readonly replaceableMatchesCount?: number | null;
 }

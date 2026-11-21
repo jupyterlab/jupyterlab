@@ -613,8 +613,13 @@ export class NotebookHelper {
    *
    * @deprecated You should use locator instead {@link getCellLocator}
    */
-  async getCell(cellIndex: number): Promise<ElementHandle<Element> | null> {
-    return (await this.getCellLocator(cellIndex))?.elementHandle() ?? null;
+  async getCell(
+    cellIndex: number,
+    name?: string
+  ): Promise<ElementHandle<Element> | null> {
+    return (
+      (await this.getCellLocator(cellIndex, name))?.elementHandle() ?? null
+    );
   }
 
   /**
@@ -624,8 +629,11 @@ export class NotebookHelper {
    * @param name Notebook name
    * @returns Handle to the cell
    */
-  async getCellLocator(cellIndex: number): Promise<Locator | null> {
-    const notebook = await this.getNotebookInPanelLocator();
+  async getCellLocator(
+    cellIndex: number,
+    name?: string
+  ): Promise<Locator | null> {
+    const notebook = await this.getNotebookInPanelLocator(name);
     if (!notebook) {
       return null;
     }
@@ -1089,17 +1097,18 @@ export class NotebookHelper {
    */
   async clickCellGutter(
     cellIndex: number,
-    lineNumber: number
+    lineNumber: number,
+    name?: string
   ): Promise<boolean> {
     if (lineNumber < 1) {
       return false;
     }
 
-    if (!(await this.isCellGutterPresent(cellIndex))) {
+    if (!(await this.isCellGutterPresent(cellIndex, name))) {
       return false;
     }
 
-    const cell = await this.getCellLocator(cellIndex);
+    const cell = await this.getCellLocator(cellIndex, name);
     return this._clickOnGutter(cell!, lineNumber);
   }
 
@@ -1108,8 +1117,11 @@ export class NotebookHelper {
    *
    * @param cellIndex
    */
-  async isCellGutterPresent(cellIndex: number): Promise<boolean> {
-    const cell = await this.getCellLocator(cellIndex);
+  async isCellGutterPresent(
+    cellIndex: number,
+    name?: string
+  ): Promise<boolean> {
+    const cell = await this.getCellLocator(cellIndex, name);
     if (!cell) {
       return false;
     }
@@ -1121,8 +1133,10 @@ export class NotebookHelper {
    *
    * @param cellIndex
    */
-  waitForCellGutter(cellIndex: number): Promise<void> {
-    return Utils.waitForCondition(() => this.isCellGutterPresent(cellIndex));
+  waitForCellGutter(cellIndex: number, name?: string): Promise<void> {
+    return Utils.waitForCondition(() =>
+      this.isCellGutterPresent(cellIndex, name)
+    );
   }
 
   /**
@@ -1164,7 +1178,7 @@ export class NotebookHelper {
     if (!(panel && (await panel.count()))) {
       return false;
     }
-    return (await panel.locator('.cm-gutters')?.isVisible()) !== null;
+    return await panel.locator('.cm-gutters').isVisible();
   }
 
   /**

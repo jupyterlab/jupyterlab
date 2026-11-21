@@ -36,6 +36,15 @@ function isInScrollingNotebook(element: Element | null): boolean {
 }
 
 /**
+ * Check whether the element is a cell node of a windowed notebook.
+ */
+function isNotebookCell(element: Element): boolean {
+  return !!element.parentElement?.classList.contains(
+    'jp-WindowedPanel-viewport'
+  );
+}
+
+/**
  * Check whether the element is part of a CodeMirror editor.
  */
 function isCodeMirrorElement(element: Element | null): boolean {
@@ -114,7 +123,11 @@ window.ResizeObserver = class extends window.ResizeObserver {
     const entriesInScrollingNotebook = [];
     const nonOutputEntries = [];
     for (const entry of entries) {
-      if (isInScrollingNotebook(entry.target)) {
+      // The list needs the cell sizes during a scroll to keep the view in place
+      if (
+        isInScrollingNotebook(entry.target) &&
+        !isNotebookCell(entry.target)
+      ) {
         entriesInScrollingNotebook.push(entry);
       } else {
         nonOutputEntries.push(entry);
@@ -129,6 +142,11 @@ window.ResizeObserver = class extends window.ResizeObserver {
   };
   private _throttler: Throttler;
 };
+
+/**
+ * Output lines that fit in a scrolled output area, which has a `max-height` of 24em
+ */
+const SCROLLED_OUTPUT_LINES = 18;
 
 /**
  * Notebook view model for the windowed list.
@@ -184,14 +202,44 @@ export class NotebookViewModel extends WindowedListModel {
     const nLines = model.sharedModel.getSource().split('\n').length;
     let outputsLines = 0;
     if (model instanceof CodeCellModel && !model.isDisposed) {
-      for (let outputIdx = 0; outputIdx < model.outputs.length; outputIdx++) {
-        const output = model.outputs.get(outputIdx);
-        const data = output.data['text/plain'];
-        if (typeof data === 'string') {
-          outputsLines += data.split('\n').length;
-        } else if (Array.isArray(data)) {
-          outputsLines += data.join('').split('\n').length;
+      const supportedOutputTypes = [
+        'text/markdown',
+        'text/plain',
+        'application/vnd.jupyter.stderr',
+        'application/vnd.jupyter.stdout',
+        'text'
+      ];
+      // The output area shows a button in place of the outputs past its limit
+      const shownOutputs = Math.min(
+        model.outputs.length,
+        cell instanceof CodeCell && !cell.isDisposed
+          ? cell.outputArea.maxNumberOutputs
+          : Infinity
+      );
+      for (let outputIdx = 0; outputIdx < shownOutputs; outputIdx++) {
+        // `data` copies the output on every read
+        const data = model.outputs.get(outputIdx).data;
+        const preferredType = supportedOutputTypes.find(
+          mimeType => data[mimeType] !== undefined
+        );
+        if (preferredType) {
+          const value = data[preferredType];
+          const text = Array.isArray(value) ? value.join('') : value;
+          if (typeof text === 'string') {
+            // A trailing newline ends the last line
+            outputsLines +=
+              text.split('\n').length - (text.endsWith('\n') ? 1 : 0);
+          }
         }
+      }
+      if (shownOutputs < model.outputs.length) {
+        outputsLines += 1;
+      }
+      if (model.getMetadata('collapsed') === true) {
+        // Collapsed outputs show a one-line placeholder
+        outputsLines = Math.min(outputsLines, 1);
+      } else if (model.getMetadata('scrolled') === true) {
+        outputsLines = Math.min(outputsLines, SCROLLED_OUTPUT_LINES);
       }
     }
     return (

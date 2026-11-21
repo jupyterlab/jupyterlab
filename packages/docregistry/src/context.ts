@@ -289,7 +289,7 @@ export class Context<
    * Save the document to a different path chosen by the user.
    *
    * @returns A promise that resolves to `true` if the save operation was initiated.
-   * Returns `false` if the user cancelled the operation.
+   * Returns `false` if the user cancelled the operation or chose an existing folder.
    *
    * Note:
    * - If the save operation proceeds but fails due to an error in the content manager,
@@ -317,12 +317,25 @@ export class Context<
     // Make sure the path does not exist.
     try {
       await this._manager.ready;
-      await this._manager.contents.get(newPath, {
+      const model = await this._manager.contents.get(newPath, {
         contentProviderId: this._contentProviderId,
         content: false
       });
+      if (model.type === 'directory') {
+        void showErrorMessage(
+          this._trans.__('Save As Error'),
+          new Error(
+            this._trans.__(
+              'Cannot overwrite directory "%1" with a file.',
+              newPath
+            )
+          )
+        );
+        return false;
+      }
       await this._maybeOverWrite(newPath);
-    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       if (!err.response || err.response.status !== 404) {
         // Dialog rejection (user cancelled)
         if (!err.response) {
@@ -650,16 +663,18 @@ export class Context<
     } catch (err) {
       // If the save has been canceled by the user, throw the error
       // so that whoever called save() can decide what to do.
-      const { name } = err;
-      if (name === 'ModalCancelError' || name === 'ModalDuplicateError') {
-        throw err;
+      if (err instanceof Error) {
+        const { name } = err;
+        if (name === 'ModalCancelError' || name === 'ModalDuplicateError') {
+          throw err;
+        }
       }
 
       // Otherwise show an error message and throw the error.
       const localPath = this._manager.contents.localPath(this._path);
       const file = PathExt.basename(localPath);
       void this._handleError(
-        err,
+        err as Error,
         this._trans.__('File Save Error for %1', file)
       );
 
@@ -730,7 +745,7 @@ export class Context<
         const localPath = this._manager.contents.localPath(this._path);
         const name = PathExt.basename(localPath);
         void this._handleError(
-          err,
+          err as Error,
           this._trans.__('File Load Error for %1', name)
         );
         throw err;
@@ -938,9 +953,7 @@ or load the version on disk (revert)?`,
       }
 
       if (result.button.accept) {
-        return this._manager.contents.delete(path).then(() => {
-          return this._finishSaveAs(path);
-        });
+        return this._manager.contents.delete(path);
       } else {
         return Promise.reject(new Error('Cancelled'));
       }
@@ -965,8 +978,9 @@ or load the version on disk (revert)?`,
       // throw the error so that whoever called save()
       // can decide what to do.
       if (
-        err.message === 'Cancel' ||
-        err.message === 'Modal is already displayed'
+        err instanceof Error &&
+        (err.message === 'Cancel' ||
+          err.message === 'Modal is already displayed')
       ) {
         throw err;
       }
@@ -975,7 +989,7 @@ or load the version on disk (revert)?`,
       const localPath = this._manager.contents.localPath(this._path);
       const name = PathExt.basename(localPath);
       void this._handleError(
-        err,
+        err as Error,
         this._trans.__('File Save Error for %1', name)
       );
 

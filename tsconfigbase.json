@@ -27,6 +27,7 @@
     "strictBindCallApply": true,
     "strictBuiltinIteratorReturn": true,
     "strictNullChecks": true,
+    "useUnknownInCatchVariables": true,
     "noImplicitThis": true,
     "target": "ES2018",
     "types": [],

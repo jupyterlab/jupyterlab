@@ -65,7 +65,7 @@ export class MimeContent extends Widget {
         });
         void showErrorMessage(
           this._trans.__('Renderer Failure: %1', this._context.path),
-          reason
+          reason instanceof Error ? reason : String(reason)
         );
       });
   }
@@ -169,7 +169,7 @@ export class MimeContent extends Widget {
       });
       void showErrorMessage(
         this._trans.__('Renderer Failure: %1', context.path),
-        reason
+        reason instanceof Error ? reason : String(reason)
       );
     }
   }
@@ -301,7 +301,8 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
         sanitizer: rendermime.sanitizer,
         linkHandler: rendermime.linkHandler,
         latexTypesetter: rendermime.latexTypesetter,
-        markdownParser: rendermime.markdownParser
+        markdownParser: rendermime.markdownParser,
+        translator: this.translator
       });
     } else {
       renderer = rendermime.createRenderer(mimeType);

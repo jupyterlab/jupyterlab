@@ -125,13 +125,19 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 
 .jp-OutputArea-output pre {
   border: none;
-  margin: 0;
-  padding: 0;
   overflow-x: auto;
   overflow-y: auto;
   word-break: break-all;
   word-wrap: break-word;
   white-space: pre-wrap;
+}
+
+/*
+ * A stretched item would count as having a fixed height, and a height in
+ * percent in rendered HTML would then resolve against the height of the row.
+ */
+.jp-OutputArea-output.jp-RenderedHTMLCommon {
+  align-self: flex-start;
 }
 
 /* tables */
@@ -244,6 +250,7 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 .jp-Stdin-prompt {
   color: var(--jp-content-font-color0);
   padding-right: var(--jp-code-padding);
+  margin: 16px 0 0 16px;
   vertical-align: baseline;
   flex: 0 0 auto;
 }
@@ -253,15 +260,14 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
   font-size: inherit;
   color: inherit;
   background-color: inherit;
-  width: 42%;
-  min-width: 200px;
+  width: 212px;
+  min-width: fit-content;
+  margin: 0 0 0 0.5rem;
+  border: 1px solid var(--jp-border-color1);
 
   /* make sure input baseline aligns with prompt */
   vertical-align: baseline;
-
-  /* padding + margin = 0.5em between prompt and cursor */
-  padding: 0 0.25em;
-  margin: 0 0.25em;
+  padding: 4px 8px;
   flex: 0 0 70%;
 }
 
@@ -271,6 +277,8 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 
 .jp-Stdin-input:focus {
   box-shadow: none;
+  outline: none;
+  border: 1px solid var(--jp-input-active-border-color);
 }
 
 .jp-Stdin-input:focus-visible {

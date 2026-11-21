@@ -77,14 +77,13 @@ You can use the Extension Manager in JupyterLab to manage extensions. That featu
 may have been disabled by your system administrator for security reasons.
 
 :::{note}
-Since JupyterLab v4, the default manager uses PyPI.org as the source for the available
-extensions and `pip` to install them.
-
-An extension will be listed if the Python package has the classifier:
-[Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt](https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Prebuilt)
-
-Moreover it is advised that the extension author to provide the `install.json` file
-to specify the exact Python package name.
+The default manager lists the prebuilt extensions maintained in the `ipython`,
+`jupyter`, `jupyter-book`, `jupyter-lsp`, `jupyter-server`, `jupyter-widgets`,
+`jupyterhub`, `jupyterlab`, `jupyterlab-contrib` and `voila-dashboards` GitHub
+organizations and the known JupyterLab language packs from PyPI, and uses `pip`
+to install them. To install another prebuilt extension, find its name
+with [Browse more extensions on PyPI](https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Prebuilt)
+and search for that full name.
 :::
 
 :::{warning}
@@ -98,8 +97,8 @@ The Extension Manager is in the {ref}`left sidebar <left-sidebar>`.
 :align: center
 :class: jp-screenshot
 
-**Figure:** The default view has three components: a search bar, an "Installed"
-section, and a "Discover" section.
+**Figure:** The default view has a search field, a link to PyPI, and sections for
+installed and discoverable packages.
 :::
 
 ### Disclaimer
@@ -119,10 +118,8 @@ By default, the disclaimer is not acknowledged.
 **Figure:** User has not acknowledged the disclaimer
 :::
 
-As the disclaimer is not acknowledged, you can search for an extension,
-but can not install it (no install button is available).
-
-To install an extension, you first have to explicitly acknowledge the disclaimer.
+To list available extensions and language packs or install one, first
+acknowledge the disclaimer.
 Once done, this will remain across sessions and the user does not have to
 check it again.
 
@@ -138,30 +135,25 @@ your screen.
 
 ### Finding Extensions
 
-You can use the extension manager to find extensions for JupyterLab. To look
-through the currently available extensions, expand the "Discovery" section.
-This triggers a search for all JupyterLab extensions on the PyPI.org registry, and
-the results are listed alphabetically.
-
-:::{figure} ../images/extensions-default.png
-:align: center
-:alt: The discovery extension listing.
-:class: jp-screenshot
-:::
-
-Alternatively, you can limit your discovery by using the search bar. This
-performs a free-text search of JupyterLab extensions on the PyPI.org registry.
+The "Discover" section lists the known extensions, then the JupyterLab language
+packs, and pins the "Browse more extensions on PyPI" link above the list and
+the search results. The search field matches package names and descriptions,
+and finds any other prebuilt extension on PyPI by its full name, such as
+`jupytext`.
+**Settings → Language → Install more languages…** opens the Extension Manager
+with the language pack search filled in.
 
 ```{image} ../images/extensions-search.png
 :align: center
-:alt: An example search result in the discovery extension listing.
+:alt: An example of filtering available language packs.
 :class: jp-screenshot
 ```
 
 ### Installing an Extension
 
-Once you have found an extension that you think is interesting, install
-it by clicking the "Install" button of the extension list entry.
+Click "Install" next to a listed extension or language pack to install it from
+the Extension Manager. For other extensions, follow the installation instructions
+on the package's PyPI page.
 
 :::{danger}
 Installing an extension allows it to execute arbitrary code on the
@@ -174,9 +166,9 @@ The newly installed extension may require JupyterLab to be restarted.
 
 ### Managing Installed Extensions
 
-When there are some installed extensions, they will be shown in the "Installed"
-section. These can then be uninstalled or disabled. Disabling an extension will
-prevent it from being activated, but without rebuilding the application.
+Installed extensions and language packs appear in the "Installed" section,
+where you can uninstall them. You can also disable extensions to prevent them
+from being activated without rebuilding the application.
 
 ### Configuring the Extension Manager
 
@@ -194,6 +186,21 @@ The following environment variables are respected
 1. `HTTPS_PROXY`
 2. `HTTP_PROXY`
 3. `ALL_PROXY`
+
+#### Authorization
+
+The extension manager, the plugin manager and the build API check the
+[authorizer](https://jupyter-server.readthedocs.io/en/stable/operators/security.html#authentication-and-authorization)
+configured in Jupyter Server, so that a custom authorizer can restrict who may
+change the installed extensions. They use these resources and actions:
+
+| Resource                | Actions                                                                                                           |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `jupyterlab:extensions` | `read` to list extensions; `write` to install, uninstall, enable or disable one; `execute` as well to install one |
+| `jupyterlab:plugins`    | `read` to list plugin locks; `write` to enable or disable a plugin                                                |
+| `jupyterlab:build`      | `read` to get the build status; `write` to start or cancel a build                                                |
+
+The default authorizer allows every request.
 
 ### Extension manager implementations
 
@@ -214,16 +221,16 @@ jupyter lab --LabApp.extension_manager=readonly
 The `pypi` manager has specific options that can be set using command line options:
 
 - `--PyPIExtensionManager.base_url`: PyPI warehouse base URL - default to <https://pypi.org/pypi>.
-- `--PyPIExtensionManager.rpc_request_throttling`: Throttling time between requests to the PyPI XML-RPC API in seconds - default 1.
-- `--PyPIExtensionManager.cache_timeout`: PyPI extensions list cache timeout in seconds - default 300.
+- `--PyPIExtensionManager.rpc_request_throttling`: Deprecated, has no effect since PyPI retired its XML-RPC API.
+- `--PyPIExtensionManager.cache_timeout`: PyPI language pack metadata cache timeout in seconds - default 300.
 - `--PyPIExtensionManager.package_metadata_cache_size`: The cache size for package metadata - default 1500.
 
 (extension-listings)=
 
 ### Listings
 
-When searching extensions in the Extension Manager, JupyterLab displays the complete
-search result and the user is free to install any source extension. This is the {ref}`default-mode`.
+The Extension Manager displays the complete results from its provider by default.
+This is the {ref}`default-mode`.
 
 To bring more security, you or your administrator can enable `blocklists` or `allowlists`
 mode. JupyterLab will check the extensions against the defined listings.

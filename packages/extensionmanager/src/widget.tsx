@@ -14,7 +14,8 @@ import {
   ToolbarButtonComponent
 } from '@jupyterlab/ui-components';
 import type { Message } from '@lumino/messaging';
-import type { AccordionLayout, AccordionPanel } from '@lumino/widgets';
+import type { AccordionLayout } from '@lumino/widgets';
+import { AccordionPanel } from '@lumino/widgets';
 import * as React from 'react';
 import ReactPaginate from 'react-paginate';
 import type { Action, IActionOptions, IEntry } from './model';
@@ -22,6 +23,8 @@ import { ListModel } from './model';
 
 const BADGE_SIZE = 32;
 const BADGE_QUERY_SIZE = Math.floor(devicePixelRatio * BADGE_SIZE);
+const PYPI_BROWSE_URL =
+  'https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab+%3A%3A+Extensions+%3A%3A+Prebuilt';
 
 function getExtensionGitHubUser(entry: IEntry) {
   if (
@@ -53,11 +56,13 @@ function isProtocolAllowed(url: string): boolean {
  */
 function ListEntry(props: ListEntry.IProperties): React.ReactElement {
   const { canFetch, entry, supportInstallation, trans } = props;
+  const isLanguagePack = entry.pkg_type === 'language-pack';
   const flagClasses = [];
   if (entry.status && ['ok', 'warning', 'error'].indexOf(entry.status) !== -1) {
     flagClasses.push(`jp-extensionmanager-entry-${entry.status}`);
   }
-  const githubUser = canFetch ? getExtensionGitHubUser(entry) : null;
+  const githubUser =
+    canFetch && !isLanguagePack ? getExtensionGitHubUser(entry) : null;
 
   if (!entry.allowed) {
     flagClasses.push(`jp-extensionmanager-entry-should-be-uninstalled`);
@@ -69,7 +74,12 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement {
       style={{ display: 'flex' }}
     >
       <div style={{ marginRight: '8px' }}>
-        {githubUser ? (
+        {isLanguagePack ? (
+          <jupyterIcon.react
+            height={`${BADGE_SIZE}px`}
+            width={`${BADGE_SIZE}px`}
+          />
+        ) : githubUser ? (
           <img
             src={`https://github.com/${githubUser}.png?size=${BADGE_QUERY_SIZE}`}
             style={{ width: '32px', height: '32px' }}
@@ -165,25 +175,26 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement {
                       </Button>
                     </>
                   )}
-                  {entry.enabled ? (
-                    <Button
-                      onClick={() => props.performAction!('disable', entry)}
-                      title={trans.__('Disable "%1"', entry.name)}
-                      minimal
-                      small
-                    >
-                      {trans.__('Disable')}
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={() => props.performAction!('enable', entry)}
-                      title={trans.__('Enable "%1"', entry.name)}
-                      minimal
-                      small
-                    >
-                      {trans.__('Enable')}
-                    </Button>
-                  )}
+                  {!isLanguagePack &&
+                    (entry.enabled ? (
+                      <Button
+                        onClick={() => props.performAction!('disable', entry)}
+                        title={trans.__('Disable "%1"', entry.name)}
+                        minimal
+                        small
+                      >
+                        {trans.__('Disable')}
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => props.performAction!('enable', entry)}
+                        title={trans.__('Enable "%1"', entry.name)}
+                        minimal
+                        small
+                      >
+                        {trans.__('Enable')}
+                      </Button>
+                    ))}
                 </>
               ) : (
                 supportInstallation && (
@@ -386,7 +397,6 @@ class Header extends ReactWidget {
           useFuzzyFilter={false}
           inputRef={this.searchInputRef}
         />
-
         <div
           className={`jp-extensionmanager-pending ${
             this.model.hasPendingActions() ? 'jp-mod-hasPending' : ''
@@ -489,6 +499,7 @@ class InstalledList extends ReactWidget {
   }
 
   render(): JSX.Element {
+    const query = this.model.query.toLowerCase();
     return (
       <>
         {this.model.installedError !== null ? (
@@ -504,8 +515,11 @@ class InstalledList extends ReactWidget {
         ) : (
           <ListView
             canFetch={this.model.canFetch}
-            entries={this.model.installed.filter(pkg =>
-              new RegExp(this.model.query.toLowerCase()).test(pkg.name)
+            entries={this.model.installed.filter(
+              pkg =>
+                pkg.name.toLowerCase().includes(query) ||
+                (pkg.pkg_type === 'language-pack' &&
+                  pkg.description.toLowerCase().includes(query))
             )}
             numPages={1}
             trans={this.trans}
@@ -598,8 +612,26 @@ class SearchResult extends ReactWidget {
   }
 
   render(): JSX.Element {
+    const query = this.model.query;
+    // The PyPI manager lists only a limited set of packages, so the same
+    // search on PyPI may find more.
     return (
       <>
+        {this.model.name === 'PyPI' && (
+          <div className="jp-extensionmanager-browse">
+            <a
+              href={
+                query
+                  ? `${PYPI_BROWSE_URL}&q=${encodeURIComponent(query)}`
+                  : PYPI_BROWSE_URL
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {this.trans.__('Browse more extensions on PyPI')}
+            </a>
+          </div>
+        )}
         {this.model.searchError !== null ? (
           <ErrorMessage>
             {`Error searching for extensions${
@@ -661,13 +693,15 @@ export class ExtensionsPanel extends SidePanel {
 
     this.header.addWidget(new Header(model, this.trans, this._searchInputRef));
 
-    const warning = new Warning(model, this.trans);
+    const warning = (this._warning = new Warning(model, this.trans));
+    warning.id = 'jp-extensionmanager-warning';
     warning.title.label = model.canInstall
       ? this.trans.__('Warning')
       : this.trans.__('Author avatars');
     this.addWidget(warning);
 
     const installed = new PanelWithToolbar();
+    installed.id = 'jp-extensionmanager-installed';
     installed.addClass('jp-extensionmanager-installedlist');
     installed.toolbar.node.setAttribute(
       'aria-label',
@@ -680,10 +714,8 @@ export class ExtensionsPanel extends SidePanel {
       new ToolbarButton({
         icon: refreshIcon,
         onClick: () => {
-          model.refreshInstalled(true).catch(reason => {
-            console.error(
-              `Failed to refresh the installed extensions list:\n${reason}`
-            );
+          model.refresh().catch(reason => {
+            console.error(`Failed to refresh the extensions list:\n${reason}`);
           });
         },
         tooltip: this.trans.__('Refresh extensions list')
@@ -696,6 +728,7 @@ export class ExtensionsPanel extends SidePanel {
 
     if (this.model.canInstall) {
       const searchResults = new SearchResult(model, this.trans);
+      searchResults.id = 'jp-extensionmanager-search';
       searchResults.addClass('jp-extensionmanager-searchresults');
       this.addWidget(searchResults);
     }
@@ -818,11 +851,15 @@ export class ExtensionsPanel extends SidePanel {
 
   private _onStateChanged(): void {
     if (!this._wasDisclaimed && this.model.isDisclaimed) {
-      (this.content as AccordionPanel).collapse(0);
-      (this.content as AccordionPanel).expand(1);
-      if (this.model.canInstall) {
-        // Only an installable manager has a search results panel.
-        (this.content as AccordionPanel).expand(2);
+      const accordion = this.content;
+      if (accordion instanceof AccordionPanel) {
+        accordion.widgets.forEach((widget, index) => {
+          if (widget === this._warning) {
+            accordion.collapse(index);
+          } else {
+            accordion.expand(index);
+          }
+        });
       }
     }
     this._wasDisclaimed = this.model.isDisclaimed;
@@ -839,6 +876,7 @@ export class ExtensionsPanel extends SidePanel {
   protected model: ListModel;
   protected trans: TranslationBundle;
   private _searchInputRef: React.RefObject<HTMLInputElement>;
+  private _warning: Warning;
   private _wasInitialized = false;
   private _wasDisclaimed = true;
 }

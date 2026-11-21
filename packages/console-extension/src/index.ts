@@ -551,6 +551,7 @@ async function activateConsole(
   let interactionMode: string;
   let promptCellConfig: JSONObject = {};
   let promptCellPosition: CodeConsole.PromptCellPosition;
+  let appliedPromptCellPosition: CodeConsole.PromptCellPosition | undefined;
   let showBanner: boolean;
 
   /**
@@ -577,7 +578,7 @@ async function activateConsole(
     showBanner = (await settingRegistry.get(pluginId, 'showBanner'))
       .composite as boolean;
 
-    const setWidgetOptions = (widget: ConsolePanel) => {
+    const setWidgetOptions = (widget: ConsolePanel, setPosition: boolean) => {
       widget.console.node.dataset.jpInteractionMode = interactionMode;
       // Update future promptCells - merge with defaults to preserve tabFocusable: false for output cells
       // But prompt cells will have tabFocusable: true set explicitly in newPromptCell()
@@ -596,15 +597,19 @@ async function activateConsole(
         clearCellsOnExecute,
         clearCodeContentOnExecute,
         hideCodeInput,
-        promptCellPosition,
+        promptCellPosition: setPosition ? promptCellPosition : undefined,
         showBanner
       });
     };
 
     if (panel) {
-      setWidgetOptions(panel);
+      setWidgetOptions(panel, true);
     } else {
-      tracker.forEach(setWidgetOptions);
+      // Keep the position picked for a console with the "Prompt to ..."
+      // commands until the Prompt Cell Position setting itself changes.
+      const positionChanged = promptCellPosition !== appliedPromptCellPosition;
+      appliedPromptCellPosition = promptCellPosition;
+      tracker.forEach(widget => setWidgetOptions(widget, positionChanged));
     }
   }
 
@@ -1117,7 +1122,12 @@ async function activateConsole(
   });
 
   commands.addCommand(CommandIDs.replaceSelection, {
-    label: trans.__('Replace Selection in Console'),
+    label: args => {
+      const text = args['text'];
+      return typeof text === 'string' && text
+        ? trans.__('Replace Selection in Console with "%1"', text)
+        : trans.__('Replace Selection in Console');
+    },
     describedBy: {
       args: {
         type: 'object',
@@ -1289,7 +1299,10 @@ async function activateConsole(
       try {
         await session.setName(result.value);
       } catch (error) {
-        void showErrorMessage(trans.__('Rename Error'), error);
+        void showErrorMessage(
+          trans.__('Rename Error'),
+          error instanceof Error ? error : String(error)
+        );
       }
     },
     isEnabled: () => contextMenuConsole() !== null || isEnabled(),
@@ -1332,21 +1345,35 @@ async function activateConsole(
         required: ['path', 'code']
       }
     },
-    execute: args => {
+    execute: async args => {
       const path = args['path'];
-      tracker.find(widget => {
-        if (widget.console.sessionContext.session?.path === path) {
-          if (args['activate'] !== false) {
-            shell.activateById(widget.id);
-          }
-          void widget.console.inject(
-            args['code'] as string,
-            args['metadata'] as JSONObject
-          );
-          return true;
-        }
-        return false;
+      const widget = tracker.find(widget => {
+        const sessionContext = widget.console.sessionContext;
+        return (
+          sessionContext.path === path || sessionContext.session?.path === path
+        );
       });
+      if (!widget) {
+        return;
+      }
+      if (args['activate'] !== false) {
+        shell.activateById(widget.id);
+      }
+      const sessionContext = widget.console.sessionContext;
+      if (sessionContext.hasNoKernel) {
+        return;
+      }
+      await sessionContext.ready;
+      if (widget.isDisposed || widget.console.isDisposed) {
+        return;
+      }
+      if (!sessionContext.session?.kernel) {
+        return;
+      }
+      return widget.console.inject(
+        args['code'] as string,
+        args['metadata'] as JSONObject
+      );
     },
     isEnabled
   });
@@ -1507,7 +1534,11 @@ async function activateConsole(
           args['interactionMode'] as string
         );
       } catch (reason) {
-        console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
+        console.error(
+          `Failed to set ${pluginId}:${key} - ${
+            reason instanceof Error ? reason.message : String(reason)
+          }`
+        );
       }
     },
     isToggled: args => args['interactionMode'] === interactionMode,
@@ -1599,7 +1630,7 @@ function activateConsoleCompleterService(
         editor: cell.editor,
         session: codeConsole.sessionContext.session,
         widget: consolePanel,
-        sanitzer: sanitizer
+        sanitizer: sanitizer
       };
       manager.updateCompleter(newContext).catch(console.error);
     });

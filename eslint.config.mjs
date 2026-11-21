@@ -17,29 +17,12 @@ import * as jsoncParser from 'jsonc-eslint-parser';
 import jupyterPlugin from '@jupyter/eslint-plugin';
 import lazyImports from '@jupyter/eslint-plugin/lib/utils/lazy-imports.js';
 
-// Application-lifetime sender types for the signal lifetime rules. The
-// `longLivedTypes` option replaces the plugin's built-in list, so the twelve
-// defaults are restated here, followed by the kernel session types: a session
-// (and its context) outlives the widgets built on it, e.g. when one of
-// several views of a document is closed.
+// Kernel session types added to the plugin's application-lifetime sender
+// types for the signal lifetime rules: a session (and its context) outlives
+// the widgets built on it, e.g. when one of several views of a document is
+// closed.
 const LONG_LIVED_TYPES = [
-  // Plugin defaults:
-  'CommandRegistry',
-  'IDebugger',
-  'IDocumentManager',
-  'ILSPConnection',
-  'ILabShell',
-  'ILanguageServerManager',
-  'IRenderMimeRegistry',
-  'ISettingRegistry',
-  'IShell',
-  'IStateDB',
-  'IThemeManager',
-  'ServiceManager',
-  // Kernel session types:
-  'ISessionContext',
   'SessionContext',
-  'ISessionConnection',
   'IKernelConnection',
   'KernelConnection'
 ];
@@ -131,6 +114,7 @@ export default defineConfig([
             'allow_stdin',
             'allowed_extensions',
             'allowed_extensions_uris',
+            'avatar_url',
             'blocked_extensions',
             'blocked_extensions_uris',
             'bundles_extension',
@@ -265,8 +249,10 @@ export default defineConfig([
 
     rules: {
       'jupyter/command-described-by': 'error',
+      'jupyter/command-id-convention': 'error',
       'jupyter/plugin-activation-args': 'error',
       'jupyter/plugin-description': 'error',
+      'jupyter/plugin-id-convention': 'error',
       'jupyter/token-format': 'error',
       'jupyter/no-translation-concatenation': 'error',
       'jupyter/no-dynamic-translation': 'error',
@@ -286,7 +272,7 @@ export default defineConfig([
             'marked',
             'marked-gfm-heading-id',
             'marked-mangle',
-            'mathjax-full',
+            '@mathjax/*',
             'regexp-match-indices',
             'vega-embed'
           ],
@@ -385,6 +371,7 @@ export default defineConfig([
             'allow_stdin',
             'allowed_extensions',
             'allowed_extensions_uris',
+            'avatar_url',
             'blocked_extensions',
             'blocked_extensions_uris',
             'bundles_extension',
@@ -534,6 +521,8 @@ export default defineConfig([
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/non-nullable-type-assertion-style': 'off',
+      // Mock plugins do not participate in extension-level configuration.
+      'jupyter/plugin-id-convention': 'off',
       // Tests load their modules up front; there is no startup to protect.
       'jupyter/prefer-lazy-imports': 'off'
     }
@@ -579,9 +568,20 @@ export default defineConfig([
   },
   {
     files: ['galata/test/**/*.ts', 'galata/test/**/*.tsx'],
+    // Benchmarks use plain Playwright fixtures without Galata page helpers.
+    ignores: ['galata/test/benchmark/**'],
+    rules: {
+      'jupyter/galata-prefer-context-menu-helper': 'error',
+      'jupyter/galata-prefer-filebrowser-helper': 'error',
+      'jupyter/galata-prefer-menu-helper': 'error',
+      'jupyter/galata-prefer-notebook-cell-helper': 'error',
+      'jupyter/galata-prefer-sidebar-activity-helper': 'error'
+    }
+  },
+  {
+    files: ['galata/test/**/*.ts', 'galata/test/**/*.tsx'],
     plugins: { playwright: playwrightPlugin, jupyter: jupyterPlugin },
     rules: {
-      'jupyter/galata-prefer-filebrowser-helper': 'error',
       // Custom Galata guards not covered by eslint-plugin-playwright.
       'no-restricted-syntax': [
         'error',
