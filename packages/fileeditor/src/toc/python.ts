@@ -21,17 +21,9 @@ type RegExpExecArrayWithIndices = RegExpExecArray & {
 /**
  * Regular expression to create the outline
  */
-let KEYWORDS: RegExp;
-try {
-  // https://github.com/tc39/proposal-regexp-match-indices was accepted
-  // in May 2021 (https://github.com/tc39/proposals/blob/main/finished-proposals.md)
-  // So we will fallback to the polyfill regexp-match-indices if not available
-  // eslint-disable-next-line prefer-regex-literals
-  KEYWORDS = new RegExp('^\\s*(class |def |async def |from |import )', 'd');
-} catch {
-  // eslint-disable-next-line prefer-regex-literals
-  KEYWORDS = new RegExp('^\\s*(class |def |async def |from |import )');
-}
+// TypeScript accepts the `d` flag in a literal only for an ES2022 target.
+// eslint-disable-next-line prefer-regex-literals
+const KEYWORDS = new RegExp('^\\s*(class |def |async def |from |import )', 'd');
 
 /**
  * Table of content model for Python files.
@@ -75,14 +67,7 @@ export class PythonTableOfContentsModel extends TableOfContentsModel<
     let lineIdx = -1;
     for (const line of lines) {
       lineIdx++;
-      let hasKeyword: RegExpExecArray | null;
-      if (KEYWORDS.flags.includes('d')) {
-        hasKeyword = KEYWORDS.exec(line);
-      } else {
-        const { default: execWithIndices } =
-          await import('regexp-match-indices');
-        hasKeyword = execWithIndices(KEYWORDS, line);
-      }
+      const hasKeyword = KEYWORDS.exec(line);
       if (hasKeyword) {
         // Index 0 contains the spaces, index 1 is the keyword group
         const [start] = (hasKeyword as RegExpExecArrayWithIndices).indices[1];

@@ -272,7 +272,6 @@ export default defineConfig([
             'marked-gfm-heading-id',
             'marked-mangle',
             '@mathjax/*',
-            'regexp-match-indices',
             'vega-embed'
           ],
           allowedPackages: [
