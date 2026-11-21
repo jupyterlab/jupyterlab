@@ -878,7 +878,8 @@ export namespace galata {
      * the `mockPageConfig` fixture option.
      *
      * @param page Page model object
-     * @param pageConfig In-memory PageConfig overrides or additions
+     * @param pageConfig PageConfig values to set over the server values; a key
+     * set to `undefined` is removed
      */
     export async function mockPageConfig(
       page: Page,

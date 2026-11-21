@@ -89,7 +89,7 @@ export type GalataOptions = {
    * Possible values are:
    * - false (default): PageConfig won't be mocked
    * - true: PageConfig will be mocked (keeping existing server values)
-   * - Record<string, unknown>: Initial JupyterLab PageConfig data - Mapping (PageConfig key, value).
+   * - Record<string, unknown>: PageConfig values to set over the server values - Mapping (PageConfig key, value); a key set to `undefined` is removed.
    *
    * By default PageConfig is not mocked.
    */
@@ -248,7 +248,7 @@ export const test: TestType<
    * Possible values are:
    * - false (default): PageConfig won't be mocked
    * - true: PageConfig will be mocked (keeping existing server values)
-   * - Record<string, unknown>: Initial JupyterLab PageConfig data - Mapping (PageConfig key, value).
+   * - Record<string, unknown>: PageConfig values to set over the server values - Mapping (PageConfig key, value); a key set to `undefined` is removed.
    *
    * By default PageConfig is not mocked.
    */

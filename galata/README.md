@@ -463,7 +463,7 @@ Possible values are:
 
 - false (default): PageConfig will not be mocked.
 - true: Same as an empty mapping, PageConfig keeps the server values.
-- Record\<string, unknown>: Mapping of PageConfig keys and values to override (e.g. `{ serverLocale: 'fr_FR' }`).
+- Record\<string, unknown>: Mapping of PageConfig keys and values to override (e.g. `{ serverLocale: 'fr_FR' }`). A key set to `undefined` is removed.
 
 Example:
 
