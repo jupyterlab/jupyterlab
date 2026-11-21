@@ -474,8 +474,8 @@ test.use({
   }
 });
 
-test('should load with mocked pageConfig', async ({ page }) => {
-  // Test with custom locale or other mocked pageConfig data
+test('should return the mocked PageConfig', async ({ page }) => {
+  expect(await page.getOption('serverLocale')).toEqual('fr_FR');
 });
 ```
 
