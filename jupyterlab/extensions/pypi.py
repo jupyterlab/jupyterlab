@@ -15,6 +15,7 @@ import xmlrpc.client
 from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
 from functools import partial
+from importlib.metadata import Distribution, PackageNotFoundError, distribution
 from itertools import groupby
 from os import environ
 from pathlib import Path
@@ -190,6 +191,19 @@ LANGUAGE_PACKS = (
 )
 
 
+def _python_distribution(install: dict | None) -> Distribution | None:
+    """Get the installed Python package that an extension's install.json names."""
+    if not install or install.get("packageManager") != "python":
+        return None
+    name = install.get("packageName")
+    if not isinstance(name, str) or not name:
+        return None
+    try:
+        return distribution(name)
+    except PackageNotFoundError:
+        return None
+
+
 class PyPIExtensionManager(ExtensionManager):
     """Extension manager using pip as package manager and PyPi.org as packages source."""
 
@@ -298,23 +312,24 @@ class PyPIExtensionManager(ExtensionManager):
             return ExtensionManager.get_semver_version(data.get("version", "")) or None
 
     def get_normalized_name(self, extension: ExtensionPackage) -> str:
-        """Normalize extension name.
-
-        Extension have multiple parts, npm package, Python package,...
-        Sub-classes may override this method to ensure the name of
-        an extension from the service provider and the local installed
-        listing is matching.
+        """Get the name of the Python package that installed an extension.
 
         Args:
             extension: The extension metadata
         Returns:
-            The normalized name
+            The package name from install.json if that package is installed,
+            the normalized extension name otherwise
         """
-        if extension.install is not None:
-            install_metadata = extension.install
-            if install_metadata["packageManager"] == "python":
-                return self._normalize_name(install_metadata["packageName"])
-        return self._normalize_name(extension.name)
+        installed = _python_distribution(extension.install)
+        return self._normalize_name(installed.name if installed else extension.name)
+
+    @override
+    def _get_installed_version(self, data: dict) -> str:
+        # The labextension version can differ from the Python package version that PyPI reports.
+        installed = _python_distribution(data.get("install"))
+        if installed is None:
+            return super()._get_installed_version(data)
+        return self.get_semver_version(installed.version)
 
     async def __throttleRequest(self, recursive: bool, fn: Callable, *args) -> Any:  # noqa
         """Throttle XMLRPC API request
