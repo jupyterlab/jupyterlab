@@ -462,7 +462,7 @@ Mock JupyterLab PageConfig (`#jupyter-config-data`) or not.
 Possible values are:
 
 - false (default): PageConfig will not be mocked.
-- true: Enables PageConfig mocking without initial overrides.
+- true: Same as an empty mapping, PageConfig keeps the server values.
 - Record\<string, unknown>: Mapping of PageConfig keys and values to override (e.g. `{ serverLocale: 'fr_FR' }`).
 
 Example:
