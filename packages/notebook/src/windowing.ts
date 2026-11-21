@@ -36,6 +36,15 @@ function isInScrollingNotebook(element: Element | null): boolean {
 }
 
 /**
+ * Check whether the element is a cell node of a windowed notebook.
+ */
+function isNotebookCell(element: Element): boolean {
+  return !!element.parentElement?.classList.contains(
+    'jp-WindowedPanel-viewport'
+  );
+}
+
+/**
  * Check whether the element is part of a CodeMirror editor.
  */
 function isCodeMirrorElement(element: Element | null): boolean {
@@ -114,7 +123,11 @@ window.ResizeObserver = class extends window.ResizeObserver {
     const entriesInScrollingNotebook = [];
     const nonOutputEntries = [];
     for (const entry of entries) {
-      if (isInScrollingNotebook(entry.target)) {
+      // The list needs the cell sizes during a scroll to keep the view in place
+      if (
+        isInScrollingNotebook(entry.target) &&
+        !isNotebookCell(entry.target)
+      ) {
         entriesInScrollingNotebook.push(entry);
       } else {
         nonOutputEntries.push(entry);
