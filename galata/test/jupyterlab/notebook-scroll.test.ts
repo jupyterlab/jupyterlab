@@ -601,7 +601,6 @@ test.describe('Notebook scroll on execution (with windowing)', () => {
 
     await execution;
     // Allow the layout to settle after the last output arrived
-    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(500);
 
     // The user scrolls down, so the cells in view should never move down
