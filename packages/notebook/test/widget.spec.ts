@@ -27,6 +27,7 @@ import {
   sleep
 } from '@jupyterlab/testing';
 import { CommandRegistry } from '@lumino/commands';
+import { PromiseDelegate } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
@@ -63,6 +64,36 @@ const options: Notebook.IOptions = {
   mimeTypeService: utils.mimeTypeService,
   editorConfig,
   notebookConfig
+};
+
+const getMarkdownHeading = (
+  content: string
+): { level: number; text: string } | null => {
+  let level = 0;
+  while (level < content.length && level < 6 && content[level] === '#') {
+    level++;
+  }
+  if (level === 0 || ![' ', '\t'].includes(content[level])) {
+    return null;
+  }
+  return { level, text: content.slice(level).trim() };
+};
+const headingParser: IMarkdownParser = {
+  render: async (content: string) => {
+    const heading = getMarkdownHeading(content);
+    if (!heading) {
+      return content;
+    }
+    return `<h${heading.level}>${heading.text}</h${heading.level}>`;
+  },
+  getHeadingTokens: async (
+    content: string
+  ): Promise<IMarkdownHeadingToken[]> => {
+    return content
+      .split('\n')
+      .map((line, lineNumber) => ({ line: lineNumber, raw: line }))
+      .filter(token => getMarkdownHeading(token.raw) !== null);
+  }
 };
 
 function createWidget(): LogStaticNotebook {
@@ -690,39 +721,6 @@ describe('@jupyter/notebook', () => {
 
     describe('#moveCell()', () => {
       it('should refresh hidden cells after moving a collapsed heading down', async () => {
-        const getMarkdownHeading = (
-          content: string
-        ): { level: number; text: string } | null => {
-          let level = 0;
-          while (
-            level < content.length &&
-            level < 6 &&
-            content[level] === '#'
-          ) {
-            level++;
-          }
-          if (level === 0 || ![' ', '\t'].includes(content[level])) {
-            return null;
-          }
-          return { level, text: content.slice(level).trim() };
-        };
-        const headingParser: IMarkdownParser = {
-          render: async (content: string) => {
-            const heading = getMarkdownHeading(content);
-            if (!heading) {
-              return content;
-            }
-            return `<h${heading.level}>${heading.text}</h${heading.level}>`;
-          },
-          getHeadingTokens: async (
-            content: string
-          ): Promise<IMarkdownHeadingToken[]> => {
-            return content
-              .split('\n')
-              .map((line, lineNumber) => ({ line: lineNumber, raw: line }))
-              .filter(token => getMarkdownHeading(token.raw) !== null);
-          }
-        };
         const widget = new LogStaticNotebook({
           ...options,
           rendermime: rendermime.clone({ markdownParser: headingParser })
@@ -1306,6 +1304,84 @@ describe('@jupyter/notebook', () => {
     });
 
     describe('#setFragment()', () => {
+      const originalScrollIntoView = HTMLElement.prototype.scrollIntoView;
+      let scrollIntoView: jest.Mock;
+
+      beforeEach(() => {
+        scrollIntoView = jest.fn();
+        HTMLElement.prototype.scrollIntoView = scrollIntoView;
+      });
+
+      afterEach(() => {
+        HTMLElement.prototype.scrollIntoView = originalScrollIntoView;
+      });
+
+      const markdown = (source: string) => ({
+        cell_type: 'markdown',
+        metadata: {},
+        source
+      });
+      const content = {
+        ...utils.DEFAULT_CONTENT,
+        cells: [
+          markdown('# Top'),
+          ...Array.from({ length: 12 }, (_, i) => markdown(`Filler ${i}`)),
+          markdown('## Target section\n\nThe requested section.')
+        ]
+      };
+
+      // Render the first line only, so that the target gets a heading id
+      // matching the link.
+      const firstLineParser: IMarkdownParser = {
+        ...headingParser,
+        render: (source: string) => headingParser.render(source.split('\n')[0])
+      };
+
+      const createNotebook = (
+        windowingMode: 'defer' | 'none',
+        markdownParser: IMarkdownParser = firstLineParser
+      ) => {
+        const widget = new LogNotebook({
+          ...options,
+          rendermime: rendermime.clone({ markdownParser }),
+          notebookConfig: { ...notebookConfig, windowingMode }
+        });
+        widget.model = new NotebookModel();
+        Widget.attach(widget, document.body);
+        widget.model!.fromJSON(content);
+        const target = widget.widgets[widget.widgets.length - 1];
+        return { widget, target, link: `#cell-id=${target.model.id}` };
+      };
+
+      // A notebook whose target stays unrendered until `rendering` is resolved.
+      // Heading ids are computed from single lines, which are not held back.
+      const createWaitingNotebook = () => {
+        const rendering = new PromiseDelegate<void>();
+        const notebook = createNotebook('none', {
+          ...firstLineParser,
+          render: async (source: string) => {
+            if (source.includes('\n')) {
+              await rendering.promise;
+            }
+            return firstLineParser.render(source);
+          }
+        });
+        jest.spyOn(notebook.widget, 'scrollToItem').mockResolvedValue();
+        return { ...notebook, rendering };
+      };
+
+      // Compare identities: a diff of DOM nodes is too large to print.
+      const scrolledOnlyTo = (element: Element | null) =>
+        scrollIntoView.mock.contexts.length === 1 &&
+        scrollIntoView.mock.contexts[0] === element;
+
+      // Keep a cell from becoming ready until the returned delegate resolves.
+      const holdCellReady = (cell: Cell) => {
+        const ready = new PromiseDelegate<void>();
+        jest.spyOn(cell, 'ready', 'get').mockReturnValue(ready.promise);
+        return ready;
+      };
+
       it('should keep a markdown target rendered when in edit mode', async () => {
         const widget = createActiveWidget();
         Widget.attach(widget, document.body);
@@ -1315,7 +1391,6 @@ describe('@jupyter/notebook', () => {
         ]);
         const target = widget.widgets[1] as MarkdownCell;
         target.inViewport = true;
-        target.node.scrollIntoView = jest.fn();
         widget.activeCellIndex = 0;
         widget.mode = 'edit';
         expect(target.rendered).toBe(true);
@@ -1325,6 +1400,285 @@ describe('@jupyter/notebook', () => {
         expect(widget.activeCell).toBe(target);
         expect(target.rendered).toBe(true);
         widget.dispose();
+      });
+
+      it('should clear the selection', async () => {
+        const { widget, link } = createNotebook('none');
+        jest.spyOn(widget, 'scrollToItem').mockResolvedValue();
+        widget.activeCellIndex = 0;
+        widget.extendContiguousSelectionTo(2);
+        expect(selected(widget)).toEqual([0, 1, 2]);
+
+        await widget.setFragment(link);
+
+        expect(selected(widget)).toEqual([]);
+        widget.dispose();
+      });
+
+      it.each(['defer', 'none'] as const)(
+        'should scroll to a heading of a notebook that was just loaded (%s windowing)',
+        async mode => {
+          const { widget, target } = createNotebook(mode);
+          jest.spyOn(widget, 'scrollToItem').mockResolvedValue();
+
+          await widget.setFragment('#Target-section');
+
+          // The heading only exists once the target has been rendered.
+          const heading = target.node.querySelector('h2');
+          expect(heading).not.toBeNull();
+          expect(scrolledOnlyTo(heading)).toBe(true);
+          widget.dispose();
+        }
+      );
+
+      it('should wait for the target to be rendered', async () => {
+        const { widget, target, link, rendering } = createWaitingNotebook();
+
+        const navigation = widget.setFragment(link);
+        await framePromise();
+        expect(scrollIntoView).not.toHaveBeenCalled();
+
+        rendering.resolve();
+        await navigation;
+        expect(scrolledOnlyTo(target.node)).toBe(true);
+        widget.dispose();
+      });
+
+      it('should still scroll if the scroll request was replaced', async () => {
+        const { widget, target, link } = createNotebook('none');
+        jest
+          .spyOn(widget, 'scrollToItem')
+          .mockRejectedValue(
+            new Error('Scrolling to a new item is requested.')
+          );
+
+        await widget.setFragment(link);
+
+        expect(scrolledOnlyTo(target.node)).toBe(true);
+        widget.dispose();
+      });
+
+      it('should scroll to a heading rendered after following the link', async () => {
+        const { widget, target, rendering } = createWaitingNotebook();
+
+        const navigation = widget.setFragment('#Target-section');
+        await framePromise();
+        expect(target.node.querySelector('h2')).toBeNull();
+        rendering.resolve();
+        await navigation;
+
+        const heading = target.node.querySelector('h2');
+        expect(heading).not.toBeNull();
+        expect(scrolledOnlyTo(heading)).toBe(true);
+        widget.dispose();
+      });
+
+      it('should scroll to an element with an unprefixed id', async () => {
+        const warn = jest.spyOn(console, 'warn').mockImplementation();
+        const { widget } = createNotebook('none');
+        widget.model!.sharedModel.insertCell(0, {
+          cell_type: 'markdown',
+          source:
+            '<p data-jupyter-id="id">Other</p><p data-jupyter-id="custom=id">Anchor</p>'
+        });
+        const cell = widget.widgets[0];
+        jest.spyOn(widget, 'scrollToItem').mockResolvedValue();
+        await cell.ready;
+        MessageLoop.sendMessage(cell, Widget.Msg.UpdateRequest);
+        while (!cell.node.querySelector('p[data-jupyter-id]')) {
+          await framePromise();
+        }
+
+        await widget.setFragment('#custom=id');
+
+        const anchor = cell.node.querySelector('[data-jupyter-id="custom=id"]');
+        expect(anchor).not.toBeNull();
+        expect(scrolledOnlyTo(anchor)).toBe(true);
+        warn.mockRestore();
+        widget.dispose();
+      });
+
+      it('should wait for the cells above the target', async () => {
+        const { widget, target, link } = createNotebook('none');
+        const scrollToItem = jest
+          .spyOn(widget, 'scrollToItem')
+          .mockResolvedValue();
+        const ready = holdCellReady(widget.widgets[0]);
+
+        const navigation = widget.setFragment(link);
+        await framePromise();
+        expect(scrollToItem).not.toHaveBeenCalled();
+
+        ready.resolve();
+        await navigation;
+        expect(scrollToItem).toHaveBeenCalledTimes(1);
+        expect(scrolledOnlyTo(target.node)).toBe(true);
+        widget.dispose();
+      });
+
+      it('should stay on the cell found first', async () => {
+        const { widget, target, rendering } = createWaitingNotebook();
+        widget.model!.sharedModel.insertCell(0, {
+          cell_type: 'markdown',
+          source: '<p data-jupyter-id="Target-section">Other</p>'
+        });
+        const other = widget.widgets[0];
+
+        const navigation = widget.setFragment('#Target-section');
+        await other.ready;
+        MessageLoop.sendMessage(other, Widget.Msg.UpdateRequest);
+        while (!other.node.querySelector('p[data-jupyter-id]')) {
+          await framePromise();
+        }
+        rendering.resolve();
+        await navigation;
+
+        expect(scrolledOnlyTo(target.node.querySelector('h2'))).toBe(true);
+        widget.dispose();
+      });
+
+      it('should not wait for a cell above that is deleted', async () => {
+        const { widget, target, link } = createNotebook('none');
+        jest.spyOn(widget, 'scrollToItem').mockResolvedValue();
+        holdCellReady(widget.widgets[0]);
+
+        const navigation = widget.setFragment(link);
+        await framePromise();
+        widget.model!.sharedModel.deleteCell(0);
+        await navigation;
+
+        expect(scrolledOnlyTo(target.node)).toBe(true);
+        widget.dispose();
+      });
+
+      it.each(['wheel', 'touchmove', 'pointerdown', 'keydown'])(
+        'should not scroll after a %s event in the notebook',
+        async type => {
+          const { widget, link, rendering } = createWaitingNotebook();
+
+          const navigation = widget.setFragment(link);
+          await framePromise();
+          widget.node.dispatchEvent(new Event(type));
+          rendering.resolve();
+          await navigation;
+
+          expect(scrollIntoView).not.toHaveBeenCalled();
+          widget.dispose();
+        }
+      );
+
+      it('should not activate the target if the user moved on', async () => {
+        const { widget, link } = createNotebook('none');
+        widget.activeCellIndex = 0;
+
+        const navigation = widget.setFragment(link);
+        widget.node.dispatchEvent(new Event('wheel'));
+        await navigation;
+
+        expect(widget.activeCellIndex).toBe(0);
+        widget.dispose();
+      });
+
+      it('should only follow the latest link', async () => {
+        const { widget, rendering } = createWaitingNotebook();
+        const other = widget.widgets[1];
+
+        // The heading takes longer to find than the cell of the second link.
+        const first = widget.setFragment('#Target-section');
+        const second = widget.setFragment(`#cell-id=${other.model.id}`);
+        rendering.resolve();
+        await Promise.all([first, second]);
+
+        expect(widget.activeCellIndex).toBe(1);
+        expect(scrolledOnlyTo(other.node)).toBe(true);
+        widget.dispose();
+      });
+
+      it('should not scroll if another cell was activated', async () => {
+        const { widget, link, rendering } = createWaitingNotebook();
+
+        const navigation = widget.setFragment(link);
+        await framePromise();
+        widget.activeCellIndex = 0;
+        rendering.resolve();
+        await navigation;
+
+        expect(widget.activeCellIndex).toBe(0);
+        expect(scrollIntoView).not.toHaveBeenCalled();
+        widget.dispose();
+      });
+
+      it('should stop if a target that is not ready is deleted', async () => {
+        const { widget, target, link } = createNotebook('none');
+        jest.spyOn(widget, 'scrollToItem').mockResolvedValue();
+        holdCellReady(target);
+
+        const navigation = widget.setFragment(link);
+        await framePromise();
+        widget.model!.sharedModel.deleteCell(widget.widgets.length - 1);
+
+        await expect(navigation).resolves.toBeUndefined();
+        expect(scrollIntoView).not.toHaveBeenCalled();
+        widget.dispose();
+      });
+
+      it('should keep the active cell if the target is deleted while searching', async () => {
+        const { widget, target } = createNotebook('none');
+        jest.spyOn(widget, 'scrollToItem').mockResolvedValue();
+        widget.activeCellIndex = 2;
+        const headings = await target.getHeadings();
+        const parsing = new PromiseDelegate<Cell.IHeading[]>();
+        const getHeadings = jest
+          .spyOn(target, 'getHeadings')
+          .mockReturnValue(parsing.promise);
+
+        const navigation = widget.setFragment('#heading=Target-section');
+        await framePromise();
+        expect(getHeadings).toHaveBeenCalled();
+        expect(widget.activeCellIndex).toBe(2);
+        widget.model!.sharedModel.deleteCell(widget.widgets.length - 1);
+        parsing.resolve(headings);
+        await navigation;
+
+        expect(widget.activeCellIndex).toBe(2);
+        expect(scrollIntoView).not.toHaveBeenCalled();
+        widget.dispose();
+      });
+
+      it('should stop if the target is deleted', async () => {
+        const { widget, link, rendering } = createWaitingNotebook();
+
+        const navigation = widget.setFragment(link);
+        await framePromise();
+        widget.model!.sharedModel.deleteCell(widget.widgets.length - 1);
+        rendering.resolve();
+
+        await expect(navigation).resolves.toBeUndefined();
+        expect(scrollIntoView).not.toHaveBeenCalled();
+        widget.dispose();
+      });
+
+      it('should stop if the notebook is disposed right away', async () => {
+        const { widget, link } = createNotebook('none');
+
+        const navigation = widget.setFragment(link);
+        widget.dispose();
+
+        await expect(navigation).resolves.toBeUndefined();
+        expect(scrollIntoView).not.toHaveBeenCalled();
+      });
+
+      it('should stop if the notebook is disposed', async () => {
+        const { widget, link } = createNotebook('none');
+        jest.spyOn(widget, 'scrollToItem').mockResolvedValue();
+        holdCellReady(widget.widgets[0]);
+
+        const navigation = widget.setFragment(link);
+        await framePromise();
+        widget.dispose();
+
+        await expect(navigation).resolves.toBeUndefined();
+        expect(scrollIntoView).not.toHaveBeenCalled();
       });
     });
 

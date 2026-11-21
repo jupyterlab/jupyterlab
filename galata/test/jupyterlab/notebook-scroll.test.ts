@@ -256,6 +256,89 @@ test.describe('Notebook scroll on navigation (content visibility)', () => {
   }
 });
 
+for (const windowingMode of [
+  'contentVisibility',
+  'defer',
+  'full',
+  'none'
+] as const) {
+  test.describe(`Notebook heading links (${windowingMode} windowing)`, () => {
+    test.use({
+      mockSettings: {
+        ...galata.DEFAULT_SETTINGS,
+        '@jupyterlab/notebook-extension:tracker': {
+          ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
+          windowingMode
+        }
+      }
+    });
+
+    test('should reach a heading of a closed notebook on the first click', async ({
+      page,
+      tmpPath
+    }) => {
+      const notebook = {
+        nbformat: 4,
+        nbformat_minor: 5,
+        metadata: {
+          kernelspec: { name: 'python3', display_name: 'Python 3' }
+        }
+      };
+      const markdownCell = (id: string, source: string) => ({
+        cell_type: 'markdown',
+        id,
+        metadata: {},
+        source
+      });
+      await page.contents.uploadContent(
+        JSON.stringify({
+          ...notebook,
+          cells: Array.from({ length: 40 }, (_, index) =>
+            markdownCell(
+              `cell-${index}`,
+              index === 30
+                ? '## Target section'
+                : `Paragraph ${index}\n\n`.repeat(6)
+            )
+          )
+        }),
+        'text',
+        `${tmpPath}/target.ipynb`
+      );
+      await page.contents.uploadContent(
+        JSON.stringify({
+          ...notebook,
+          cells: [
+            markdownCell('link', '[Go to section](target.ipynb#Target-section)')
+          ]
+        }),
+        'text',
+        `${tmpPath}/links.ipynb`
+      );
+      await page.notebook.openByPath(`${tmpPath}/links.ipynb`);
+
+      await page.getByRole('link', { name: 'Go to section' }).click();
+
+      await expect
+        .poll(() => page.activity.isTabActive('target.ipynb'))
+        .toBe(true);
+      const heading = page.locator('h2', { hasText: 'Target section' });
+      const panel = page.locator('.jp-NotebookPanel').filter({ has: heading });
+      await expect(heading).toBeInViewport();
+      // The heading must end up at the top of the notebook.
+      await expect
+        .poll(async () => {
+          const list = await panel
+            .locator('.jp-WindowedPanel-outer')
+            .boundingBox();
+          const box = await heading.boundingBox();
+          return list && box ? Math.abs(box.y - list.y) < 50 : false;
+        })
+        .toBe(true);
+    });
+  });
+}
+
 test.describe('Notebook scroll on dragging cells (with windowing)', () => {
   test.beforeEach(async ({ page, tmpPath }) => {
     await page.contents.uploadFile(

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { WindowedListModel } from '@jupyterlab/ui-components';
+import { WindowedList, WindowedListModel } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
 import { ObservableList } from '@jupyterlab/observables';
 
@@ -242,6 +242,222 @@ describe('@jupyterlab/ui-components', () => {
           }
         ]);
         expect(getOffset(2)).toBe(30);
+      });
+    });
+  });
+
+  describe('WindowedList', () => {
+    describe('#scrollElementIntoView()', () => {
+      class TestList extends WindowedList {
+        scrollElementIntoView(index: number, element: HTMLElement): void {
+          super.scrollElementIntoView(index, element);
+        }
+      }
+
+      const OriginalResizeObserver = window.ResizeObserver;
+      let resizeCallbacks: ResizeObserverCallback[];
+      let model: TestModel;
+      let list: TestList;
+      let element: HTMLElement;
+      let scrollIntoView: jest.Mock;
+
+      // Report a size change, as the browser would.
+      const reportResize = (observer: '_onItemResize' | '_onAreaResize') => {
+        resizeCallbacks
+          .filter(callback => callback.name.includes(observer))
+          .forEach(callback => callback([], {} as ResizeObserver));
+      };
+
+      beforeEach(() => {
+        resizeCallbacks = [];
+        window.ResizeObserver = class extends OriginalResizeObserver {
+          constructor(callback: ResizeObserverCallback) {
+            super(callback);
+            resizeCallbacks.push(callback);
+          }
+        };
+        model = new TestModel({ count: 3, windowingActive: true });
+        list = new TestList({ model });
+        Widget.attach(list, document.body);
+        element = document.createElement('h2');
+        scrollIntoView = jest.fn();
+        element.scrollIntoView = scrollIntoView;
+        list.viewportNode.appendChild(element);
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+        list.dispose();
+        window.ResizeObserver = OriginalResizeObserver;
+      });
+
+      it('should scroll the element into view', () => {
+        list.scrollElementIntoView(1, element);
+        expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      });
+
+      it.each([
+        [true, '_onItemResize'],
+        [true, '_onAreaResize'],
+        [false, '_onItemResize'],
+        [false, '_onAreaResize']
+      ] as const)(
+        'should follow the element (windowing: %s, %s)',
+        (windowingActive, observer) => {
+          if (!windowingActive) {
+            // Changing the mode creates new observers.
+            resizeCallbacks = [];
+            model.windowingActive = false;
+          }
+          list.scrollElementIntoView(1, element);
+          scrollIntoView.mockClear();
+          reportResize(observer);
+          expect(scrollIntoView).toHaveBeenCalledTimes(1);
+        }
+      );
+
+      it('should keep the scroll offset while hidden', () => {
+        list.outerNode.scrollTop = 500;
+        list.outerNode.dispatchEvent(new Event('scroll'));
+        list.scrollElementIntoView(1, element);
+        scrollIntoView.mockClear();
+        list.hide();
+        list.outerNode.scrollTop = 0;
+        reportResize('_onAreaResize');
+        expect(scrollIntoView).not.toHaveBeenCalled();
+        expect(model.scrollOffset).toBe(500);
+      });
+
+      it('should update the items when the scroll moved the list', () => {
+        const update = jest.spyOn(list, 'update');
+        scrollIntoView.mockImplementation(() => {
+          list.outerNode.scrollTop = 500;
+        });
+        list.scrollElementIntoView(1, element);
+        expect(model.scrollOffset).toBe(500);
+        expect(update).toHaveBeenCalledTimes(1);
+
+        update.mockClear();
+        reportResize('_onAreaResize');
+        expect(update).not.toHaveBeenCalled();
+      });
+
+      it('should update the scrollbar when the scroll moved the list', () => {
+        list.scrollbar = true;
+        const createScrollbarItem = jest.spyOn(
+          WindowedList.defaultRenderer,
+          'createScrollbarItem'
+        );
+        scrollIntoView.mockImplementation(() => {
+          list.outerNode.scrollTop = 500;
+        });
+        list.scrollElementIntoView(1, element);
+        expect(createScrollbarItem).toHaveBeenCalled();
+        createScrollbarItem.mockRestore();
+      });
+
+      it('should request the item while the element is detached', () => {
+        const scrollToItem = jest.spyOn(list, 'scrollToItem');
+        element.remove();
+        list.scrollElementIntoView(1, element);
+        expect(scrollIntoView).not.toHaveBeenCalled();
+        expect(scrollToItem).toHaveBeenCalledWith(1, 'start', 0);
+
+        list.viewportNode.appendChild(element);
+        reportResize('_onItemResize');
+        expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      });
+
+      it('should forget the item requested for a detached element', () => {
+        jest.useFakeTimers();
+        element.remove();
+        list.scrollElementIntoView(1, element);
+        list.viewportNode.appendChild(element);
+        reportResize('_onItemResize');
+        jest.advanceTimersByTime(3000);
+
+        const scrollToItem = jest.spyOn(list, 'scrollToItem');
+        reportResize('_onAreaResize');
+        expect(scrollToItem).not.toHaveBeenCalled();
+      });
+
+      it('should stop after a fixed time despite resizes', () => {
+        jest.useFakeTimers();
+        list.scrollElementIntoView(1, element);
+        jest.advanceTimersByTime(2000);
+        reportResize('_onItemResize');
+        scrollIntoView.mockClear();
+        jest.advanceTimersByTime(1000);
+        reportResize('_onItemResize');
+        reportResize('_onAreaResize');
+        expect(scrollIntoView).not.toHaveBeenCalled();
+      });
+
+      it('should stop when the user scrolls', () => {
+        list.scrollElementIntoView(1, element);
+        scrollIntoView.mockClear();
+        list.outerNode.scrollTop = 500;
+        list.outerNode.dispatchEvent(new Event('scroll'));
+        reportResize('_onItemResize');
+        expect(scrollIntoView).not.toHaveBeenCalled();
+      });
+
+      it.each(['wheel', 'touchmove', 'pointerdown', 'keydown'])(
+        'should stop after a %s event',
+        type => {
+          list.scrollElementIntoView(1, element);
+          scrollIntoView.mockClear();
+          list.node.dispatchEvent(new Event(type));
+          reportResize('_onItemResize');
+          expect(scrollIntoView).not.toHaveBeenCalled();
+        }
+      );
+
+      it('should stop on user input after requesting its item', () => {
+        element.remove();
+        list.scrollElementIntoView(1, element);
+        list.viewportNode.appendChild(element);
+        list.node.dispatchEvent(new Event('pointerdown'));
+        reportResize('_onItemResize');
+        expect(scrollIntoView).not.toHaveBeenCalled();
+      });
+
+      it.each([1, 2])('should stop when item %d is requested', index => {
+        list.scrollElementIntoView(1, element);
+        scrollIntoView.mockClear();
+        void list.scrollToItem(index, 'start');
+        reportResize('_onItemResize');
+        expect(scrollIntoView).not.toHaveBeenCalled();
+      });
+
+      it('should stop listening for user input when disposed', () => {
+        list.scrollElementIntoView(1, element);
+        const removeEventListener = jest.spyOn(
+          list.node,
+          'removeEventListener'
+        );
+        list.dispose();
+        for (const type of ['wheel', 'touchmove', 'pointerdown', 'keydown']) {
+          expect(removeEventListener).toHaveBeenCalledWith(
+            type,
+            expect.any(Function),
+            { capture: true }
+          );
+        }
+      });
+
+      it('should not return to an item requested earlier', () => {
+        jest.useFakeTimers();
+        void list.scrollToItem(2, 'start');
+        list.scrollElementIntoView(1, element);
+        // An item resize would keep the earlier request alive.
+        jest.advanceTimersByTime(2000);
+        reportResize('_onItemResize');
+        jest.advanceTimersByTime(1000);
+
+        const scrollToItem = jest.spyOn(list, 'scrollToItem');
+        reportResize('_onAreaResize');
+        expect(scrollToItem).not.toHaveBeenCalled();
       });
     });
   });
