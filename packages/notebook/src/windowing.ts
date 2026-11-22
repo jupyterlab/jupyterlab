@@ -309,7 +309,7 @@ export class NotebookViewModel extends WindowedListModel {
   protected cellsEstimatedHeight = new Map<string, number>();
 
   /**
-   * Get the number of output lines that fit in a scrolled output area.
+   * Get the height of a scrolled output area in output lines.
    */
   private _getScrolledOutputLines(): number {
     // Measure again only when the setting changes the maximum height
@@ -319,10 +319,11 @@ export class NotebookViewModel extends WindowedListModel {
     if (maxHeight !== this._scrolledOutputMaxHeight) {
       this._scrolledOutputMaxHeight = maxHeight;
       const height = Private.measureScrolledOutputHeight();
+      // A fraction of a line keeps the measured height exact
       this._scrolledOutputLines =
         height === null
           ? SCROLLED_OUTPUT_LINES
-          : Math.floor(height / NotebookViewModel.DEFAULT_EDITOR_LINE_HEIGHT);
+          : height / NotebookViewModel.DEFAULT_EDITOR_LINE_HEIGHT;
     }
     return this._scrolledOutputLines;
   }

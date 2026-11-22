@@ -342,10 +342,10 @@ describe('@jupyterlab/notebook', () => {
       expect(height).toBe(362); // (2 + 18) * 17 + 22
     });
 
-    test('should count the lines that fit in the maximum height of scrolled outputs', () => {
+    test('should cap scrolled outputs at their maximum height', () => {
       const style = document.createElement('style');
       style.textContent =
-        '.jp-CodeCell.jp-mod-outputsScrolled .jp-Cell-outputArea { max-height: 170px; }';
+        '.jp-CodeCell.jp-mod-outputsScrolled .jp-Cell-outputArea { max-height: 120px; }';
       document.head.appendChild(style);
       const outputObj = [
         {
@@ -367,8 +367,8 @@ describe('@jupyterlab/notebook', () => {
 
       const height = notebook.estimateWidgetSize(0);
       style.remove();
-      // 2 source lines, 10 lines of 17 px in the scrolled output area
-      expect(height).toBe(226); // (2 + 10) * 17 + 22
+      // 2 source lines and the scrolled output area
+      expect(height).toBe(176); // 2 * 17 + 120 + 22
     });
 
     test('should count the outputs past the limit of the output area as one line', () => {
