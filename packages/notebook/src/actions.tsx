@@ -2867,8 +2867,11 @@ namespace Private {
     storedExecution: IStoredCellExecution
   ): void {
     const { future, isDone, buffered, timing } = storedExecution;
+    // An undo or redo of a move can restore the timing of an earlier execution.
     if (timing) {
-      addTiming(cell, timing);
+      cell.model.setMetadata('execution', timing);
+    } else {
+      cell.model.deleteMetadata('execution');
     }
     for (const buf of buffered) {
       if (buf.channel === 'iopub') {

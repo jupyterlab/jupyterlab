@@ -3434,6 +3434,37 @@ describe('@jupyterlab/notebook', () => {
         );
       }, 20000);
 
+      it('should keep only the timing of the latest execution when a move is undone', async () => {
+        widget.notebookConfig = {
+          ...widget.notebookConfig,
+          recordTiming: true
+        };
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        cell.model.sharedModel.setSource('1 + 1');
+        await NotebookActions.run(widget, ipySessionContext);
+        cell.model.sharedModel.setSource('import time\ntime.sleep(1)');
+        (widget.model!.sharedModel as YNotebook).undoManager.stopCapturing();
+
+        NotebookActions.moveDown(widget);
+        const cellAfterMove = widget.widgets[1] as CodeCell;
+        await sleep(10);
+        widget.deselectAll();
+        widget.activeCellIndex = 1;
+        const executionCompleted = NotebookActions.run(
+          widget,
+          ipySessionContext
+        );
+        await waitForTiming(cellAfterMove, 'iopub.execute_input');
+        const timingBeforeUndo = getTiming(cellAfterMove);
+        NotebookActions.undo(widget);
+        const cellAfterUndo = widget.widgets[0] as CodeCell;
+        const timingAfterUndo = getTiming(cellAfterUndo);
+        await executionCompleted;
+
+        expect(timingAfterUndo).toEqual(timingBeforeUndo);
+      }, 20000);
+
       it.each(['type change', 'merge'])(
         'should restore finished output without a notification after undoing a %s',
         async action => {
