@@ -303,8 +303,24 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
           // Test if the node type is one of the math expression
           const delimiterLength = DELIMITER_LENGTH[node.type.name];
           if (delimiterLength) {
-            const contentFrom = node.from + delimiterLength;
-            const contentTo = node.to - delimiterLength;
+            let contentFrom = node.from + delimiterLength;
+            let contentTo = node.to - delimiterLength;
+            // Trim leading and trailing newlines so that the LaTeX parser
+            // does not start on a blank line, which would reset stex out of math mode.
+            while (
+              contentFrom < contentTo &&
+              (input.read(contentFrom, contentFrom + 1) === '\n' ||
+                input.read(contentFrom, contentFrom + 1) === '\r')
+            ) {
+              contentFrom++;
+            }
+            while (
+              contentTo > contentFrom &&
+              (input.read(contentTo - 1, contentTo) === '\n' ||
+                input.read(contentTo - 1, contentTo) === '\r')
+            ) {
+              contentTo--;
+            }
             if (contentTo - contentFrom > 0) {
               return {
                 parser: latexParser,
