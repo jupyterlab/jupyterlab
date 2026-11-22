@@ -642,6 +642,12 @@ export class Context<
   private async _save(): Promise<void> {
     this._saveState.emit('started');
     const options = this._createSaveOptions();
+    // Edits made while saving are not in `options`, so they are not saved.
+    let changed = false;
+    const onContentChanged = () => {
+      changed = true;
+    };
+    this._model.contentChanged.connect(onContentChanged);
 
     try {
       await this._manager.ready;
@@ -651,7 +657,9 @@ export class Context<
         return;
       }
 
-      this._model.dirty = false;
+      if (!changed) {
+        this._model.dirty = false;
+      }
       this._updateContentsModel(value);
 
       if (!this._isPopulated) {
@@ -681,6 +689,8 @@ export class Context<
       // Emit failure.
       this._saveState.emit('failed');
       throw err;
+    } finally {
+      this._model.contentChanged.disconnect(onContentChanged);
     }
   }
 
