@@ -17,29 +17,12 @@ import * as jsoncParser from 'jsonc-eslint-parser';
 import jupyterPlugin from '@jupyter/eslint-plugin';
 import lazyImports from '@jupyter/eslint-plugin/lib/utils/lazy-imports.js';
 
-// Application-lifetime sender types for the signal lifetime rules. The
-// `longLivedTypes` option replaces the plugin's built-in list, so the twelve
-// defaults are restated here, followed by the kernel session types: a session
-// (and its context) outlives the widgets built on it, e.g. when one of
-// several views of a document is closed.
+// Kernel session types added to the plugin's application-lifetime sender
+// types for the signal lifetime rules: a session (and its context) outlives
+// the widgets built on it, e.g. when one of several views of a document is
+// closed.
 const LONG_LIVED_TYPES = [
-  // Plugin defaults:
-  'CommandRegistry',
-  'IDebugger',
-  'IDocumentManager',
-  'ILSPConnection',
-  'ILabShell',
-  'ILanguageServerManager',
-  'IRenderMimeRegistry',
-  'ISettingRegistry',
-  'IShell',
-  'IStateDB',
-  'IThemeManager',
-  'ServiceManager',
-  // Kernel session types:
-  'ISessionContext',
   'SessionContext',
-  'ISessionConnection',
   'IKernelConnection',
   'KernelConnection'
 ];
@@ -161,6 +144,7 @@ export default defineConfig([
             'execution_state',
             'extension_data',
             'extension_name',
+            'extension_version',
             'file_extension',
             'file_size',
             'hash_algorithm',
@@ -418,6 +402,7 @@ export default defineConfig([
             'execution_state',
             'extension_data',
             'extension_name',
+            'extension_version',
             'file_extension',
             'file_size',
             'hash_algorithm',

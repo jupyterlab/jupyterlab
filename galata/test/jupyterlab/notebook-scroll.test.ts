@@ -130,6 +130,132 @@ test.describe('Notebook scroll on navigation (with windowing), named properties 
   }
 });
 
+test.describe('Notebook scroll on navigation (content visibility)', () => {
+  test.use({
+    autoGoto: false,
+    mockState: async ({ tmpPath }, use) => {
+      const target = `notebook:${tmpPath}/target.ipynb`;
+      const source = `notebook:${tmpPath}/links.ipynb`;
+      await use({
+        'layout-restorer:data': {
+          main: {
+            current: source,
+            dock: {
+              type: 'tab-area',
+              currentIndex: 1,
+              widgets: [target, source]
+            }
+          }
+        },
+        ...Object.fromEntries(
+          [target, source].map(name => [
+            name,
+            {
+              data: {
+                path: name.slice('notebook:'.length),
+                factory: 'Notebook',
+                kernelPreference: { shouldStart: false }
+              }
+            }
+          ])
+        )
+      });
+    },
+    waitForApplication: async ({ baseURL }, use) => {
+      await use(async page => {
+        await page.evaluate(async () => {
+          await window.jupyterapp.restored;
+        });
+      });
+    },
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:tracker': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
+        windowingMode: 'contentVisibility'
+      }
+    }
+  });
+
+  for (const cellType of ['code', 'markdown'] as const) {
+    test(`should follow a cell-id link to a ${cellType} cell in a restored background notebook on the first click`, async ({
+      page,
+      tmpPath
+    }) => {
+      const targetName = 'target.ipynb';
+      const sourceName = 'links.ipynb';
+      const cellCount = 50;
+      const targetIndex = 40;
+      const notebook = {
+        nbformat: 4,
+        nbformat_minor: 5,
+        metadata: {}
+      };
+      await page.contents.uploadContent(
+        JSON.stringify({
+          ...notebook,
+          cells: Array.from({ length: cellCount }, (_, index) => ({
+            cell_type: cellType,
+            id: `cell-${index}`,
+            metadata: {},
+            source:
+              cellType === 'code'
+                ? `# Cell ${index}\nvalue = ${index}\nprint(value)`
+                : `## Cell ${index}\n\nContent of cell ${index}.`,
+            ...(cellType === 'code'
+              ? { execution_count: null, outputs: [] }
+              : {})
+          }))
+        }),
+        'text',
+        `${tmpPath}/${targetName}`
+      );
+      await page.contents.uploadContent(
+        JSON.stringify({
+          ...notebook,
+          cells: [
+            {
+              cell_type: 'markdown',
+              id: 'link',
+              metadata: {},
+              source: `[Go to cell](${targetName}#cell-id=cell-${targetIndex})`
+            }
+          ]
+        }),
+        'text',
+        `${tmpPath}/${sourceName}`
+      );
+
+      await page.goto();
+
+      const targetNotebook = page.locator('.jp-NotebookPanel').filter({
+        has: page.locator(`[data-windowed-list-index="${cellCount - 1}"]`)
+      });
+      await expect(
+        targetNotebook.locator(
+          cellType === 'code' ? '.cm-editor' : '.jp-MarkdownOutput'
+        )
+      ).toHaveCount(cellCount);
+      expect(await page.activity.isTabActive(targetName)).toBe(false);
+
+      await page.getByRole('link', { name: 'Go to cell' }).click();
+
+      await expect.poll(() => page.activity.isTabActive(targetName)).toBe(true);
+      await expect(
+        targetNotebook.locator(`[data-windowed-list-index="${targetIndex}"]`)
+      ).toBeInViewport({ ratio: 0.99 });
+      // Cells measured while the notebook was hidden would keep a zero size.
+      expect(
+        await targetNotebook
+          .locator('.jp-Cell')
+          .evaluateAll(cells =>
+            cells.map(cell => getComputedStyle(cell).containIntrinsicSize)
+          )
+      ).not.toContain('auto 0px');
+    });
+  }
+});
+
 test.describe('Notebook scroll on dragging cells (with windowing)', () => {
   test.beforeEach(async ({ page, tmpPath }) => {
     await page.contents.uploadFile(
@@ -348,6 +474,161 @@ test.describe('Notebook scroll on execution (with windowing)', () => {
     expect(await notebookViewportRatio(notebook!, thirdCell!)).toBeGreaterThan(
       0
     );
+  });
+
+  test('should keep the position the user scrolled to while a cell above generates a lot of output', async ({
+    page
+  }) => {
+    const notebook = await page.notebook.getNotebookInPanelLocator();
+    const thirdCell = await page.notebook.getCellLocator(2);
+
+    // Set second cell to produce long output with a delay long enough
+    // to allow scrolling away while the execution is ongoing.
+    await page.notebook.setCell(
+      1,
+      'code',
+      'from time import sleep\nsleep(2)\nfor i in range(100):\n    print(i)\n    sleep(0.05)\n'
+    );
+
+    // Select the second cell and clear its output
+    await page.notebook.selectCells(1);
+    await page.evaluate(() => {
+      return window.jupyterapp.commands.execute('notebook:clear-cell-output');
+    });
+
+    // Show the top of the third cell at the bottom of the viewport. Its long
+    // existing output, taller than the viewport, provides space to scroll into.
+    await positionCellPartiallyBelowViewport(page, notebook!, thirdCell!, 0.2);
+
+    // Start running the second cell with advance, without waiting for it
+    const execution = page.evaluate(() => {
+      return window.jupyterapp.commands.execute(
+        'notebook:run-cell-and-select-next'
+      );
+    });
+
+    // Scroll away while the initial `sleep` holds the output back
+    const bbox = (await notebook!.boundingBox())!;
+    await page.mouse.move(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
+    await page.mouse.wheel(0, 600);
+
+    // Let the scroll settle before taking the reference measurement
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await page.waitForTimeout(500);
+    const referenceBox = (await thirdCell!.boundingBox())!;
+
+    // Record the top of the third cell each time the second cell grows. This
+    // observer runs after the observer of the list, just before the paint.
+    await thirdCell!.evaluate(cell => {
+      const tops: number[] = [];
+      (window as any).thirdCellTops = tops;
+      const secondCell = cell.parentElement!.querySelector(
+        '[data-windowed-list-index="1"]'
+      )!;
+      new ResizeObserver(() => {
+        tops.push(cell.getBoundingClientRect().top);
+      }).observe(secondCell);
+    });
+
+    await execution;
+    // Allow the layout to settle after the last output arrived
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await page.waitForTimeout(500);
+
+    // The position the user scrolled to should have been kept while the
+    // output of the cell above was growing
+    const finalBox = (await thirdCell!.boundingBox())!;
+    expect(Math.abs(finalBox.y - referenceBox.y)).toBeLessThan(150);
+
+    // The cells in view should not move for a single frame either
+    const tops: number[] = await page.evaluate(
+      () => (window as any).thirdCellTops
+    );
+    for (const top of tops) {
+      expect(Math.abs(top - referenceBox.y)).toBeLessThan(5);
+    }
+  });
+
+  test('should keep the cells in view in place while the user scrolls and a cell above generates output', async ({
+    page,
+    browserName
+  }) => {
+    test.skip(
+      browserName !== 'chromium',
+      'A wheel scroll ends within one frame, so this test uses a Chromium scroll gesture'
+    );
+    const notebook = await page.notebook.getNotebookInPanelLocator();
+    const thirdCell = await page.notebook.getCellLocator(2);
+
+    await page.notebook.setCell(
+      1,
+      'code',
+      'from time import sleep\nsleep(2)\nfor i in range(100):\n    print(i)\n    sleep(0.05)\n'
+    );
+    await page.notebook.selectCells(1);
+    await page.evaluate(() => {
+      return window.jupyterapp.commands.execute('notebook:clear-cell-output');
+    });
+    await positionCellPartiallyBelowViewport(page, notebook!, thirdCell!, 0.2);
+
+    const execution = page.evaluate(() => {
+      return window.jupyterapp.commands.execute(
+        'notebook:run-cell-and-select-next'
+      );
+    });
+
+    // Scroll the second cell out of view while the initial `sleep` holds the
+    // output back
+    const bbox = (await notebook!.boundingBox())!;
+    await page.mouse.move(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
+    await page.mouse.wheel(0, 600);
+
+    // Record the top of the third cell before every paint: the element below
+    // resizes on every frame, and its observer runs after the list's observer.
+    await thirdCell!.evaluate(cell => {
+      const tops: number[] = [];
+      (window as any).thirdCellTops = tops;
+      const ticker = document.createElement('div');
+      ticker.style.cssText = 'position: fixed; width: 1px; height: 1px;';
+      document.body.appendChild(ticker);
+      new ResizeObserver(() => {
+        tops.push(cell.getBoundingClientRect().top);
+      }).observe(ticker);
+      const tick = () => {
+        ticker.style.height = ticker.style.height === '1px' ? '2px' : '1px';
+        if (!(window as any).stopThirdCellTops) {
+          requestAnimationFrame(tick);
+        }
+      };
+      tick();
+    });
+
+    // Scroll down slowly while the output arrives
+    await page
+      .locator('.jp-Cell[data-windowed-list-index="1"] .jp-OutputArea-output')
+      .first()
+      .waitFor({ state: 'attached' });
+    const client = await page.context().newCDPSession(page.mainFrame());
+    await client.send('Input.synthesizeScrollGesture', {
+      x: Math.round(bbox.x + bbox.width / 2),
+      y: Math.round(bbox.y + bbox.height / 2),
+      yDistance: -200,
+      speed: 100,
+      gestureSourceType: 'mouse'
+    });
+
+    await execution;
+    // Allow the layout to settle after the last output arrived
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await page.waitForTimeout(500);
+
+    // The user scrolls down, so the cells in view should never move down
+    const tops: number[] = await page.evaluate(() => {
+      (window as any).stopThirdCellTops = true;
+      return (window as any).thirdCellTops;
+    });
+    const moves = tops.slice(1).map((top, i) => top - tops[i]);
+    expect(Math.max(...moves)).toBeLessThan(5);
   });
 
   test('should not scroll when advancing if top is non-marginally visible', async ({

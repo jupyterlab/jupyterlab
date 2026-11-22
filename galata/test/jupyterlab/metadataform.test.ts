@@ -2,7 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as path from 'path';
-import type { APIRequestContext, Page, TestInfo } from '@playwright/test';
+import type {
+  APIRequestContext,
+  Locator,
+  Page,
+  TestInfo
+} from '@playwright/test';
 import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
 import { expect, galata, test } from '@jupyterlab/galata';
 import type { ObservableJSON } from '@jupyterlab/observables';
@@ -179,6 +184,21 @@ async function getNotebookMetadata(
     let nb = window.jupyterapp.shell.currentWidget;
     return nb.model.metadata;
   });
+}
+
+/*
+ * Replace the text of a metadata editor.
+ *
+ * `fill()` selects the text before CodeMirror handles the focus, and on Firefox
+ * CodeMirror can then put its previous cursor back over that selection.
+ */
+async function replaceEditorText(
+  page: IJupyterLabPageFixture,
+  editor: Locator,
+  text: string
+): Promise<void> {
+  await editor.press('ControlOrMeta+a');
+  await page.keyboard.insertText(text);
 }
 
 test.describe('Required metadata', () => {
@@ -812,8 +832,8 @@ test.describe('Advanced tools', () => {
       const notebookMetadata = await getNotebookMetadata(page);
       const cellDraft = JSON.stringify({ ...cellMetadata, draft: 'cell' });
 
-      await cellEditor.fill(cellDraft);
-      await notebookEditor.fill(notebookDraft);
+      await replaceEditorText(page, cellEditor, cellDraft);
+      await replaceEditorText(page, notebookEditor, notebookDraft);
       await notebookEditor.press('ControlOrMeta+s');
 
       const dialog = page.getByRole('dialog', { name: 'Invalid Metadata' });
@@ -824,7 +844,9 @@ test.describe('Advanced tools', () => {
       expect(await getCellMetadata(page)).toEqual(cellMetadata);
       expect(await getNotebookMetadata(page)).toEqual(notebookMetadata);
 
-      await notebookEditor.fill(
+      await replaceEditorText(
+        page,
+        notebookEditor,
         JSON.stringify({ ...notebookMetadata, draft: 'notebook' })
       );
       await notebookEditor.press('ControlOrMeta+s');
