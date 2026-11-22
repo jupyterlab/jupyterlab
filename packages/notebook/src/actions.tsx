@@ -3177,6 +3177,8 @@ namespace Private {
               dismiss();
               if (restore) {
                 storedExecution.pendingOutputs = false;
+                // The timing recorded since the undo is newer than the copy.
+                storedExecution.timing = model.getMetadata('execution');
                 restoreExecution(notebook, storedExecution);
               }
             }

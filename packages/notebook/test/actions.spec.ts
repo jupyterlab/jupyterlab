@@ -3465,6 +3465,49 @@ describe('@jupyterlab/notebook', () => {
         expect(timingAfterUndo).toEqual(timingBeforeUndo);
       }, 20000);
 
+      it('should keep the failure time when showing newer outputs of a restored cell', async () => {
+        widget.notebookConfig = {
+          ...widget.notebookConfig,
+          recordTiming: true
+        };
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        cell.model.setMetadata('execution', {
+          'iopub.status.busy': '2026-01-01T00:00:00.000Z',
+          'iopub.execute_input': '2026-01-01T00:00:00.001Z'
+        });
+        const stoppedFuture = {
+          ...createResolvedFuture(),
+          done: Promise.reject(new Error('Canceled future')),
+          isDisposed: true
+        };
+        cell.outputArea.reattachFuture(stoppedFuture);
+
+        NotebookActions.deleteCells(widget);
+        void stoppedFuture.onIOPub(createStreamMessage('after'));
+        await Promise.resolve();
+        const notificationInfo = jest
+          .spyOn(Notification, 'info')
+          .mockImplementation(() => '');
+        try {
+          NotebookActions.undo(widget);
+          const cellAfterUndo = widget.widgets[0] as CodeCell;
+          await sleep(10);
+          const failureTime = getTiming(cellAfterUndo)['execution_failed'];
+          await sleep(10);
+          notificationInfo.mock.calls[0][1]!.actions![0].callback(
+            new MouseEvent('click')
+          );
+          await sleep(10);
+
+          expect(getTiming(cellAfterUndo)['execution_failed']).toBe(
+            failureTime
+          );
+        } finally {
+          notificationInfo.mockRestore();
+        }
+      });
+
       it.each(['type change', 'merge'])(
         'should restore finished output without a notification after undoing a %s',
         async action => {
