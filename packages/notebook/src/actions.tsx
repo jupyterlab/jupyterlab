@@ -2779,6 +2779,8 @@ namespace Private {
     pendingOutputs?: boolean;
     /** Execution timing metadata to restore after an undo, like `outputs`. */
     timing?: JSONObject;
+    /** Whether the execution was still running when it was captured. */
+    wasRunning: boolean;
   }
 
   const pendingOutputExecutions = new WeakMap<CodeCell, IStoredCellExecution>();
@@ -2944,6 +2946,7 @@ namespace Private {
       pending.outputs = cell.model.outputs.toJSON();
       pending.displayIdMap = cell.outputArea.displayIdMap;
       pending.timing = cell.model.getMetadata('execution');
+      pending.wasRunning = cell.model.executionState === 'running';
       return pending;
     }
     const future = cell.outputArea.detachFuture();
@@ -2978,7 +2981,8 @@ namespace Private {
       isDone: () => done,
       buffered,
       displayIdMap,
-      timing: cell.model.getMetadata('execution')
+      timing: cell.model.getMetadata('execution'),
+      wasRunning: cell.model.executionState === 'running'
     };
   }
 
@@ -3079,7 +3083,12 @@ namespace Private {
       // Restore the running state on the recreated cell widget.
       cell.model.executionState = 'running';
     }
-    syncExecutionStateWithFuture(cell, future, recordTiming);
+    syncExecutionStateWithFuture(
+      cell,
+      future,
+      // The restored timing of an execution that had ended is final.
+      recordTiming && storedExecution.wasRunning
+    );
   }
 
   /**
@@ -3106,7 +3115,12 @@ namespace Private {
     if (recordTiming) {
       restoreTiming(cell, storedExecution);
     }
-    syncExecutionStateWithFuture(cell, future, recordTiming);
+    syncExecutionStateWithFuture(
+      cell,
+      future,
+      // The restored timing of an execution that had ended is final.
+      recordTiming && storedExecution.wasRunning
+    );
     const hasOutputChanges = storedExecution.buffered.some(
       buffered =>
         buffered.channel === 'iopub' &&

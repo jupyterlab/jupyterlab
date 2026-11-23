@@ -2469,6 +2469,24 @@ describe('@jupyterlab/notebook', () => {
         expect(getTiming(cellAfterMove)['execution_failed']).toBeUndefined();
       }, 20000);
 
+      it('should not restore the timing of a cleared cell when it moves', async () => {
+        widget.notebookConfig = {
+          ...widget.notebookConfig,
+          recordTiming: true
+        };
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        cell.model.sharedModel.setSource('1 + 1');
+        await NotebookActions.run(widget, ipySessionContext);
+        NotebookActions.clearOutputs(widget);
+
+        NotebookActions.moveDown(widget);
+        const cellAfterMove = widget.widgets[1] as CodeCell;
+        await sleep(10);
+
+        expect(getTiming(cellAfterMove)).toEqual({});
+      }, 20000);
+
       it('should keep the failure time of an execution stopped by a restart when the cell moves', async () => {
         widget.notebookConfig = {
           ...widget.notebookConfig,
@@ -3476,6 +3494,7 @@ describe('@jupyterlab/notebook', () => {
           'iopub.status.busy': '2026-01-01T00:00:00.000Z',
           'iopub.execute_input': '2026-01-01T00:00:00.001Z'
         });
+        cell.model.executionState = 'running';
         const stoppedFuture = {
           ...createResolvedFuture(),
           done: Promise.reject(new Error('Canceled future')),
