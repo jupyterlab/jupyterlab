@@ -373,6 +373,17 @@ export class CompletionHandler implements IDisposable {
 
     const inlineModel = this.inlineCompleter?.model;
     if (inlineModel) {
+      // CodeMirror sets `lastChangeIsRemote` after `changed` fires for local
+      // typing, and for a collaborator's change in a file editor.
+      await Promise.resolve();
+      if (editor.lastChangeIsRemote) {
+        // Filtering by a collaborator's text corrupts the suggestion.
+        this._fetchingInline += 1;
+        if (inlineModel.completions) {
+          inlineModel.reset();
+        }
+        return;
+      }
       // Dispatch the text change to inline completer
       // (this happens before request is sent)
       inlineModel.handleTextChange(changed);
@@ -480,13 +491,6 @@ export class CompletionHandler implements IDisposable {
     position: CodeEditor.IPosition,
     trigger: InlineCompletionTriggerKind
   ) {
-    if (trigger === InlineCompletionTriggerKind.Automatic) {
-      // For file editors (YFile), the observer registration order means
-      // CodeMirror has not yet processed the transaction when sharedModel.changed
-      // fires. Awaiting a microtask ensures CodeMirror is updated and lastChangeIsRemote
-      // is correctly set before checking it.
-      await Promise.resolve();
-    }
     const editor = this.editor;
 
     if (!editor) {
@@ -494,13 +498,6 @@ export class CompletionHandler implements IDisposable {
     }
     if (!this.inlineCompleter) {
       return Promise.reject(new Error('No inline completer'));
-    }
-    if (
-      trigger === InlineCompletionTriggerKind.Automatic &&
-      editor.lastChangeIsRemote
-    ) {
-      this._fetchingInline += 1;
-      return;
     }
 
     const line = editor.getLine(position.line);

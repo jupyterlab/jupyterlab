@@ -8,7 +8,7 @@ import {
   EditorLanguageRegistry,
   ybinding
 } from '@jupyterlab/codemirror';
-import type { Signal } from '@lumino/signaling';
+import { Signal } from '@lumino/signaling';
 import type {
   ICompletionContext,
   ICompletionProvider
@@ -621,118 +621,108 @@ describe('@jupyterlab/completer', () => {
         );
         expect(handler.editor!.lastChangeIsRemote).toBe(false);
       });
+    });
 
-      it('should not trigger inline auto-completion on remote collaborator changes', async () => {
-        const inlineEditorWidget = createEditorWidget();
-        Widget.attach(inlineEditorWidget, document.body);
+    describe('#onTextChanged() (inline completer)', () => {
+      let widget: CodeEditorWrapper;
+      let handler: CompletionHandler;
+      let inlineModel: InlineCompleter.Model;
+      let fetchInline: jest.SpyInstance;
+
+      // Insert text in another Y.Doc and apply the update, as a collaborator does.
+      const remoteInsert = (index: number, text: string) => {
+        const currentDoc = (widget.editor.model.sharedModel as YFile).ysource
+          .doc!;
+        const remoteDoc = new Doc();
+        applyUpdate(remoteDoc, encodeStateAsUpdate(currentDoc));
+        remoteDoc.getText('source').insert(index, text);
+        applyUpdate(currentDoc, encodeStateAsUpdate(remoteDoc), 'remote');
+      };
+
+      beforeEach(async () => {
+        widget = createEditorWidget();
+        Widget.attach(widget, document.body);
         const reconciliator = new ProviderReconciliator({
           context: Symbol() as any,
           providers: [],
           timeout: 0
         });
-        const fetchInlineSpy = jest
+        fetchInline = jest
           .spyOn(reconciliator, 'fetchInline')
           .mockReturnValue([]);
-        const inlineModel = new InlineCompleter.Model();
-        const inlineCompleter = new InlineCompleter({
-          editor: inlineEditorWidget.editor,
-          model: inlineModel,
-          trans: nullTranslator.load('test')
-        });
-        const inlineHandler = new CompletionHandler({
+        inlineModel = new InlineCompleter.Model();
+        handler = new CompletionHandler({
           reconciliator,
           completer: new Completer({
             editor: null,
             model: new CompleterModel()
           }),
-          inlineCompleter
+          inlineCompleter: new InlineCompleter({
+            editor: widget.editor,
+            model: inlineModel,
+            trans: nullTranslator.load('test')
+          })
         });
-        inlineHandler.editor = inlineEditorWidget.editor;
+        handler.editor = widget.editor;
+        widget.editor.model.sharedModel.setSource('foo');
+        await new Promise(process.nextTick);
+        widget.editor.setCursorPosition({ line: 0, column: 3 });
+        fetchInline.mockClear();
+      });
 
-        try {
-          inlineEditorWidget.editor.model.sharedModel.setSource('foo');
-          await new Promise(process.nextTick);
-          inlineEditorWidget.editor.setCursorPosition({
-            line: 0,
-            column: 3
-          });
-          fetchInlineSpy.mockClear();
+      afterEach(() => {
+        handler.inlineCompleter?.dispose();
+        handler.completer.dispose();
+        handler.dispose();
+        widget.dispose();
+      });
 
-          const currentDoc = (
-            inlineEditorWidget.editor.model.sharedModel as YFile
-          ).ysource.doc!;
-          const remoteDoc = new Doc();
-          const remoteText = remoteDoc.getText('source');
-          applyUpdate(remoteDoc, encodeStateAsUpdate(currentDoc));
+      it('should not trigger inline auto-completion on remote collaborator changes', async () => {
+        remoteInsert(3, 'bar');
+        await new Promise(process.nextTick);
 
-          remoteText.insert(remoteText.length, 'bar');
-          const update = encodeStateAsUpdate(remoteDoc);
-          applyUpdate(currentDoc, update, 'remote-collaborator');
-          await new Promise(process.nextTick);
-
-          expect(fetchInlineSpy).not.toHaveBeenCalled();
-        } finally {
-          inlineEditorWidget.dispose();
-          inlineHandler.completer.dispose();
-          inlineHandler.inlineCompleter?.dispose();
-          inlineHandler.dispose();
-          fetchInlineSpy.mockRestore();
-        }
+        expect(fetchInline).not.toHaveBeenCalled();
       });
 
       it('should trigger inline auto-completion on local text changes', async () => {
-        const inlineEditorWidget = createEditorWidget();
-        Widget.attach(inlineEditorWidget, document.body);
-        const reconciliator = new ProviderReconciliator({
-          context: Symbol() as any,
-          providers: [],
-          timeout: 0
-        });
-        const fetchInlineSpy = jest
-          .spyOn(reconciliator, 'fetchInline')
-          .mockReturnValue([]);
-        const inlineModel = new InlineCompleter.Model();
-        const inlineCompleter = new InlineCompleter({
-          editor: inlineEditorWidget.editor,
-          model: inlineModel,
-          trans: nullTranslator.load('test')
-        });
-        const inlineHandler = new CompletionHandler({
-          reconciliator,
-          completer: new Completer({
-            editor: null,
-            model: new CompleterModel()
-          }),
-          inlineCompleter
-        });
-        inlineHandler.editor = inlineEditorWidget.editor;
+        widget.editor.model.sharedModel.updateSource(3, 3, 'z');
+        await new Promise(process.nextTick);
 
-        try {
-          inlineEditorWidget.editor.model.sharedModel.setSource('foo');
-          await new Promise(process.nextTick);
-          const srcLength =
-            inlineEditorWidget.editor.model.sharedModel.getSource().length;
-          inlineEditorWidget.editor.setCursorPosition({
-            line: 0,
-            column: srcLength
-          });
-          fetchInlineSpy.mockClear();
+        expect(fetchInline).toHaveBeenCalled();
+      });
 
-          inlineEditorWidget.editor.model.sharedModel.updateSource(
-            srcLength,
-            srcLength,
-            'z'
-          );
-          await new Promise(process.nextTick);
+      it('should trigger inline auto-completion on a keystroke after a remote change', async () => {
+        remoteInsert(0, '# note\n');
+        await new Promise(process.nextTick);
+        fetchInline.mockClear();
 
-          expect(fetchInlineSpy).toHaveBeenCalled();
-        } finally {
-          inlineEditorWidget.dispose();
-          inlineHandler.completer.dispose();
-          inlineHandler.inlineCompleter?.dispose();
-          inlineHandler.dispose();
-          fetchInlineSpy.mockRestore();
-        }
+        (widget.editor as CodeMirrorEditor).editor.dispatch({
+          changes: { from: 10, insert: 'z' },
+          selection: { anchor: 11 },
+          userEvent: 'input.type'
+        });
+        await new Promise(process.nextTick);
+
+        expect(fetchInline).toHaveBeenCalledTimes(1);
+      });
+
+      it('should clear the inline suggestion on remote collaborator changes', async () => {
+        inlineModel.cursor = { line: 0, column: 3 };
+        inlineModel.setCompletions({
+          items: [
+            {
+              insertText: 'bar()',
+              streaming: false,
+              provider: { name: 'test', identifier: 'test' },
+              stream: new Signal({} as any)
+            }
+          ]
+        });
+
+        remoteInsert(0, 'b');
+        await new Promise(process.nextTick);
+
+        expect(inlineModel.completions).toBeNull();
       });
     });
 
