@@ -2507,6 +2507,7 @@ describe('@jupyterlab/notebook', () => {
         await ipySessionContext.session!.kernel!.restart();
         await executionCompleted;
         const failureTime = getTiming(cell)['execution_failed'];
+        expect(failureTime).toBeDefined();
         await sleep(10);
 
         NotebookActions.moveDown(widget);
@@ -3512,6 +3513,7 @@ describe('@jupyterlab/notebook', () => {
           const cellAfterUndo = widget.widgets[0] as CodeCell;
           await sleep(10);
           const failureTime = getTiming(cellAfterUndo)['execution_failed'];
+          expect(failureTime).toBeDefined();
           await sleep(10);
           notificationInfo.mock.calls[0][1]!.actions![0].callback(
             new MouseEvent('click')
