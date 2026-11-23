@@ -348,7 +348,8 @@ export class CompletionHandler implements IDisposable {
       // If there is a text selection, no completion is allowed.
       const { start, end } = editor.getSelection();
       if (start.column === end.column && start.line === end.line) {
-        // Dispatch the text change synchronously so active completion filtering is immediate.
+        // Run before the first `await`: `onSelectionsChanged()` compares the
+        // new cursor with this state, and resets an open completer if it is stale.
         model.handleTextChange(
           this.getState(editor, editor.getCursorPosition())
         );

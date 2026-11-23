@@ -621,6 +621,37 @@ describe('@jupyterlab/completer', () => {
         );
         expect(handler.editor!.lastChangeIsRemote).toBe(false);
       });
+
+      it('should filter an open completer when a letter is typed', async () => {
+        handler.editor!.model.sharedModel.setSource('getopt.');
+        await new Promise(process.nextTick);
+        anchor.editor.focus();
+        anchor.editor.setCursorPosition({ line: 0, column: 7 });
+        handler.completer.reset();
+        const fetch = jest.spyOn(provider, 'fetch').mockResolvedValue({
+          start: 7,
+          end: 7,
+          items: [{ label: 'getopt' }, { label: 'error' }]
+        });
+        const shouldShow = jest
+          .spyOn(provider, 'shouldShowContinuousHint')
+          .mockReturnValue(false);
+        const model = handler.completer.model!;
+        handler.invoke();
+        await new Promise(process.nextTick);
+        expect(model.completionItems()).toHaveLength(2);
+
+        (anchor.editor as CodeMirrorEditor).editor.dispatch({
+          changes: { from: 7, insert: 'g' },
+          selection: { anchor: 8 },
+          userEvent: 'input.type'
+        });
+        await new Promise(process.nextTick);
+
+        expect(model.completionItems()).toHaveLength(1);
+        fetch.mockRestore();
+        shouldShow.mockRestore();
+      });
     });
 
     describe('#onTextChanged() (inline completer)', () => {
