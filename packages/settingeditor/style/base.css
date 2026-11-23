@@ -235,7 +235,7 @@
   position: relative;
 }
 
-.jp-SettingsForm > .rjsf > .form-group {
+.jp-SettingsForm .rjsf > .form-group {
   padding-top: 0;
   margin-top: 0;
 }

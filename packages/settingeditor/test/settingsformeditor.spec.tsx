@@ -21,10 +21,11 @@ class RecordingConnector extends TestConnector {
 }
 
 function createChangeEvent(
-  formData: ReadonlyPartialJSONObject
+  formData: ReadonlyPartialJSONObject,
+  errors: any[] = []
 ): IChangeEvent<ReadonlyPartialJSONObject> {
   return {
-    errors: [],
+    errors,
     formData
   } as unknown as IChangeEvent<ReadonlyPartialJSONObject>;
 }
@@ -431,16 +432,20 @@ describe('@jupyterlab/settingeditor', () => {
         expect((form.props.formData.toolbar as any[])[1].name).toBe('itemB');
 
         // Press Enter key while input is active
+        const wrapper = component.root.findByProps({
+          className: 'jp-SettingsFormWrapper'
+        });
         await act(async () => {
-          document.dispatchEvent(
-            new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })
-          );
-          form.props.onBlur?.(`jp-SettingsEditor-${id}_toolbar_1_rank`, 5);
-          jest.advanceTimersByTime(0);
+          wrapper.props.onKeyDown({
+            key: 'Enter',
+            target: input,
+            nativeEvent: { isComposing: false },
+            keyCode: 13
+          });
           await flushPromises();
         });
 
-        // After Enter/blur, toolbar items should now be reordered according to rank
+        // After Enter, toolbar items should now be reordered according to rank
         form = component.root.findByType(FormComponent);
         expect((form.props.formData.toolbar as any[])[0].name).toBe('itemB');
         expect((form.props.formData.toolbar as any[])[1].name).toBe('itemA');
@@ -451,6 +456,195 @@ describe('@jupyterlab/settingeditor', () => {
         component?.unmount();
         await testConnector.clear();
         jest.useRealTimers();
+      }
+    });
+
+    it('should ignore Enter key during IME composition', async () => {
+      jest.useFakeTimers();
+
+      const id = 'alpha';
+      const testConnector = new RecordingConnector();
+      const testRegistry = new SettingRegistry({ connector: testConnector });
+      let component: renderer.ReactTestRenderer | null = null;
+      let input: HTMLInputElement | null = null;
+
+      try {
+        testConnector.schemas[id] = {
+          type: 'object',
+          'jupyter.lab.transform': true,
+          properties: {
+            toolbar: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  rank: { type: 'number' }
+                }
+              },
+              default: [
+                { name: 'itemA', rank: 10 },
+                { name: 'itemB', rank: 20 }
+              ]
+            }
+          }
+        };
+
+        testRegistry.transform(id, {
+          compose: plugin => {
+            const composite = { ...plugin.data.composite };
+            const user = (plugin.data.user.toolbar as any[]) ?? [];
+            const items =
+              user.length > 0 ? user : ((composite.toolbar as any[]) ?? []);
+            composite.toolbar = [...items].sort(
+              (a, b) => (a.rank ?? 50) - (b.rank ?? 50)
+            );
+            plugin.data = { composite, user: plugin.data.user };
+            return plugin;
+          }
+        });
+
+        settings = (await testRegistry.load(id)) as Settings;
+
+        component = renderer.create(
+          <SettingsFormEditor
+            filteredValues={{ kind: 'all' }}
+            hasError={() => void 0}
+            onSelect={() => void 0}
+            renderers={{}}
+            settings={settings}
+            translator={nullTranslator}
+            updateDirtyState={() => void 0}
+          />
+        );
+
+        let form = component.root.findByType(FormComponent);
+
+        input = document.createElement('input');
+        input.id = `jp-SettingsEditor-${id}_toolbar_1_rank`;
+        document.body.appendChild(input);
+        input.focus();
+
+        await act(async () => {
+          form.props.onFocus?.(`jp-SettingsEditor-${id}_toolbar_1_rank`, 20);
+        });
+
+        await act(async () => {
+          form.props.onChange(
+            createChangeEvent({
+              toolbar: [
+                { name: 'itemA', rank: 10 },
+                { name: 'itemB', rank: 5 }
+              ]
+            })
+          );
+        });
+
+        await act(async () => {
+          jest.advanceTimersByTime(500);
+          await flushPromises();
+        });
+
+        // Press Enter key while IME composition is active
+        const wrapper = component.root.findByProps({
+          className: 'jp-SettingsFormWrapper'
+        });
+        await act(async () => {
+          wrapper.props.onKeyDown({
+            key: 'Enter',
+            target: input,
+            nativeEvent: { isComposing: true },
+            keyCode: 229
+          });
+          await flushPromises();
+        });
+
+        // Items must NOT have reordered because IME was composing
+        form = component.root.findByType(FormComponent);
+        expect((form.props.formData.toolbar as any[])[0].name).toBe('itemA');
+        expect((form.props.formData.toolbar as any[])[1].name).toBe('itemB');
+      } finally {
+        if (input?.parentNode) {
+          input.parentNode.removeChild(input);
+        }
+        component?.unmount();
+        await testConnector.clear();
+        jest.useRealTimers();
+      }
+    });
+
+    it('should not save invalid values on blur', async () => {
+      const id = 'alpha';
+      const testConnector = new RecordingConnector();
+      const testRegistry = new SettingRegistry({ connector: testConnector });
+      let component: renderer.ReactTestRenderer | null = null;
+      let hasErrorCalled = false;
+
+      try {
+        testConnector.schemas[id] = {
+          type: 'object',
+          properties: {
+            count: {
+              type: 'number',
+              minimum: 0,
+              default: 10
+            }
+          }
+        };
+
+        settings = (await testRegistry.load(id)) as Settings;
+        const saveSpy = jest.spyOn(settings, 'save');
+
+        component = renderer.create(
+          <SettingsFormEditor
+            filteredValues={{ kind: 'all' }}
+            hasError={err => {
+              hasErrorCalled = err;
+            }}
+            onSelect={() => void 0}
+            renderers={{}}
+            settings={settings}
+            translator={nullTranslator}
+            updateDirtyState={() => void 0}
+          />
+        );
+
+        let form = component.root.findByType(FormComponent);
+
+        // Focus input
+        await act(async () => {
+          form.props.onFocus?.(`jp-SettingsEditor-${id}_count`, 10);
+        });
+
+        // Type invalid value -5 with validation error
+        await act(async () => {
+          form.props.onChange(
+            createChangeEvent({ count: -5 }, [
+              {
+                message: 'should be >= 0',
+                name: 'minimum',
+                params: {},
+                property: '.count',
+                schemaPath: '#/properties/count/minimum',
+                stack: ''
+              }
+            ])
+          );
+        });
+
+        expect(hasErrorCalled).toBe(true);
+
+        // Blur input
+        await act(async () => {
+          form.props.onBlur?.(`jp-SettingsEditor-${id}_count`, -5);
+          await flushPromises();
+        });
+
+        // Should NOT have called settings.save on blur with invalid data
+        expect(saveSpy).not.toHaveBeenCalled();
+      } finally {
+        component?.unmount();
+        await testConnector.clear();
       }
     });
   });

@@ -763,3 +763,40 @@ test('Setting for "Show Filter Bar by Default" should work on reload', async ({
   // The filter bar should now be hidden oonce the setting is disabled
   await expect(filterBox).toBeHidden();
 });
+
+test('Toolbar items rank editing does not reorder while typing and reorders after Enter', async ({
+  page
+}) => {
+  await page.evaluate(() =>
+    window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Cell Toolbar'
+    })
+  );
+
+  const settingsForm = page.locator('.jp-SettingsForm');
+  await expect(settingsForm).toBeVisible();
+
+  const rankInputs = settingsForm.locator(
+    'input[id*="_toolbar_"][id*="_rank"]'
+  );
+  await expect(rankInputs.first()).toBeVisible();
+
+  const secondInput = rankInputs.nth(1);
+  const secondId = await secondInput.getAttribute('id');
+
+  // Focus and type a smaller rank into the second item
+  await secondInput.click();
+  await secondInput.fill('1');
+
+  // While still focused, the input at this position must retain focus and position
+  await expect(secondInput).toBeFocused();
+  await expect(secondInput).toHaveAttribute('id', secondId);
+
+  // Press Enter to commit the change
+  await secondInput.press('Enter');
+
+  // After Enter, the item with rank 1 is sorted to the first position and remains focused
+  const firstInput = rankInputs.first();
+  await expect(firstInput).toHaveValue('1');
+  await expect(firstInput).toBeFocused();
+});
