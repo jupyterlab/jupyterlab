@@ -294,8 +294,6 @@ export class SettingsFormEditor extends React.Component<
           liveValidate
           idPrefix={`jp-SettingsEditor-${this.props.settings.id}`}
           onChange={this._onChange}
-          onFocus={this._onFormFocus}
-          onBlur={this._onFormBlur}
           translator={this.props.translator}
           experimental_defaultFormStateBehavior={{
             emptyObjectFields: 'populateRequiredDefaults'
@@ -321,23 +319,15 @@ export class SettingsFormEditor extends React.Component<
     }
   };
 
-  private _onFormFocus = (): void => {
-    this._isFocused = true;
-  };
-
-  private _onFormBlur = (): void => {
-    this._isFocused = false;
-    if (this._needsSyncOnBlur) {
-      this._applyOrDeferSettingsUpdate();
-    }
-  };
-
   private _onKeyDown = (event: React.KeyboardEvent<HTMLDivElement>): void => {
     if (event.nativeEvent.isComposing || event.keyCode === 229) {
       return;
     }
 
     if (event.key === 'Enter' && event.target instanceof HTMLInputElement) {
+      if (this._hasErrors) {
+        return;
+      }
       const input = event.target;
       const inputId = input.id;
       const idPrefix = `jp-SettingsEditor-${this.props.settings.id}`;
@@ -389,7 +379,11 @@ export class SettingsFormEditor extends React.Component<
           const el = newId ? document.getElementById(newId) : input;
           if (el instanceof HTMLElement) {
             el.focus();
-            if (el instanceof HTMLInputElement) {
+            if (
+              el instanceof HTMLInputElement &&
+              el.type !== 'checkbox' &&
+              el.type !== 'radio'
+            ) {
               el.select();
             }
           }

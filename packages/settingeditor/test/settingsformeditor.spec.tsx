@@ -290,9 +290,13 @@ describe('@jupyterlab/settingeditor', () => {
         expect((form.props.formData.toolbar as any[])[0].name).toBe('itemA');
         expect((form.props.formData.toolbar as any[])[1].name).toBe('itemB');
 
-        // Focus the rank input of itemB
+        const wrapper = component.root.findByProps({
+          className: 'jp-SettingsFormWrapper'
+        });
+
+        // Focus inside the form
         await act(async () => {
-          form.props.onFocus?.(`jp-SettingsEditor-${id}_toolbar_1_rank`, 20);
+          wrapper.props.onFocus();
         });
 
         // Change rank of itemB from 20 to 5 (which would sort before itemA)
@@ -318,10 +322,26 @@ describe('@jupyterlab/settingeditor', () => {
         expect((form.props.formData.toolbar as any[])[0].name).toBe('itemA');
         expect((form.props.formData.toolbar as any[])[1].name).toBe('itemB');
 
-        // Blur the input (user finishes editing)
+        // When focus moves between elements inside the form wrapper, items must NOT reorder
         await act(async () => {
-          form.props.onBlur?.(`jp-SettingsEditor-${id}_toolbar_1_rank`, 5);
-          jest.advanceTimersByTime(0);
+          const insideElement = {};
+          wrapper.props.onBlur({
+            currentTarget: { contains: (node: any) => node === insideElement },
+            relatedTarget: insideElement
+          });
+          await flushPromises();
+        });
+
+        form = component.root.findByType(FormComponent);
+        expect((form.props.formData.toolbar as any[])[0].name).toBe('itemA');
+        expect((form.props.formData.toolbar as any[])[1].name).toBe('itemB');
+
+        // Blur the input (user finishes editing and focus leaves the form)
+        await act(async () => {
+          wrapper.props.onBlur({
+            currentTarget: { contains: () => false },
+            relatedTarget: null
+          });
           await flushPromises();
         });
 
@@ -403,9 +423,12 @@ describe('@jupyterlab/settingeditor', () => {
         document.body.appendChild(input);
         input.focus();
 
-        // Focus the rank input of itemB
+        // Focus inside the form
+        const wrapper = component.root.findByProps({
+          className: 'jp-SettingsFormWrapper'
+        });
         await act(async () => {
-          form.props.onFocus?.(`jp-SettingsEditor-${id}_toolbar_1_rank`, 20);
+          wrapper.props.onFocus();
         });
 
         // Change rank of itemB from 20 to 5
@@ -432,9 +455,6 @@ describe('@jupyterlab/settingeditor', () => {
         expect((form.props.formData.toolbar as any[])[1].name).toBe('itemB');
 
         // Press Enter key while input is active
-        const wrapper = component.root.findByProps({
-          className: 'jp-SettingsFormWrapper'
-        });
         await act(async () => {
           wrapper.props.onKeyDown({
             key: 'Enter',
@@ -525,8 +545,11 @@ describe('@jupyterlab/settingeditor', () => {
         document.body.appendChild(input);
         input.focus();
 
+        const wrapper = component.root.findByProps({
+          className: 'jp-SettingsFormWrapper'
+        });
         await act(async () => {
-          form.props.onFocus?.(`jp-SettingsEditor-${id}_toolbar_1_rank`, 20);
+          wrapper.props.onFocus();
         });
 
         await act(async () => {
@@ -546,9 +569,6 @@ describe('@jupyterlab/settingeditor', () => {
         });
 
         // Press Enter key while IME composition is active
-        const wrapper = component.root.findByProps({
-          className: 'jp-SettingsFormWrapper'
-        });
         await act(async () => {
           wrapper.props.onKeyDown({
             key: 'Enter',
@@ -610,10 +630,13 @@ describe('@jupyterlab/settingeditor', () => {
         );
 
         let form = component.root.findByType(FormComponent);
+        const wrapper = component.root.findByProps({
+          className: 'jp-SettingsFormWrapper'
+        });
 
-        // Focus input
+        // Focus inside the form
         await act(async () => {
-          form.props.onFocus?.(`jp-SettingsEditor-${id}_count`, 10);
+          wrapper.props.onFocus();
         });
 
         // Type invalid value -5 with validation error
@@ -634,15 +657,105 @@ describe('@jupyterlab/settingeditor', () => {
 
         expect(hasErrorCalled).toBe(true);
 
-        // Blur input
+        // Blur input (focus leaves the form)
         await act(async () => {
-          form.props.onBlur?.(`jp-SettingsEditor-${id}_count`, -5);
+          wrapper.props.onBlur({
+            currentTarget: { contains: () => false },
+            relatedTarget: null
+          });
           await flushPromises();
         });
 
         // Should NOT have called settings.save on blur with invalid data
         expect(saveSpy).not.toHaveBeenCalled();
       } finally {
+        component?.unmount();
+        await testConnector.clear();
+      }
+    });
+
+    it('should not commit or sync on Enter when form has validation errors', async () => {
+      const id = 'alpha';
+      const testConnector = new RecordingConnector();
+      const testRegistry = new SettingRegistry({ connector: testConnector });
+      let component: renderer.ReactTestRenderer | null = null;
+      let input: HTMLInputElement | null = null;
+
+      try {
+        testConnector.schemas[id] = {
+          type: 'object',
+          properties: {
+            count: {
+              type: 'number',
+              minimum: 0,
+              default: 10
+            }
+          }
+        };
+
+        settings = (await testRegistry.load(id)) as Settings;
+        const saveSpy = jest.spyOn(settings, 'save');
+
+        component = renderer.create(
+          <SettingsFormEditor
+            filteredValues={{ kind: 'all' }}
+            hasError={() => void 0}
+            onSelect={() => void 0}
+            renderers={{}}
+            settings={settings}
+            translator={nullTranslator}
+            updateDirtyState={() => void 0}
+          />
+        );
+
+        let form = component.root.findByType(FormComponent);
+        const wrapper = component.root.findByProps({
+          className: 'jp-SettingsFormWrapper'
+        });
+
+        input = document.createElement('input');
+        input.id = `jp-SettingsEditor-${id}_count`;
+        document.body.appendChild(input);
+        input.focus();
+
+        await act(async () => {
+          wrapper.props.onFocus();
+        });
+
+        // Type invalid value -5 with validation error
+        await act(async () => {
+          form.props.onChange(
+            createChangeEvent({ count: -5 }, [
+              {
+                message: 'should be >= 0',
+                name: 'minimum',
+                params: {},
+                property: '.count',
+                schemaPath: '#/properties/count/minimum',
+                stack: ''
+              }
+            ])
+          );
+        });
+
+        // Press Enter on the input while it has errors
+        await act(async () => {
+          wrapper.props.onKeyDown({
+            key: 'Enter',
+            target: input,
+            nativeEvent: { isComposing: false },
+            keyCode: 13
+          });
+          await flushPromises();
+        });
+
+        // Should NOT have saved and settings should remain unchanged
+        expect(saveSpy).not.toHaveBeenCalled();
+        expect((settings.composite as any).count).toBe(10);
+      } finally {
+        if (input?.parentNode) {
+          input.parentNode.removeChild(input);
+        }
         component?.unmount();
         await testConnector.clear();
       }
