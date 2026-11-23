@@ -3049,12 +3049,13 @@ namespace Private {
       // not tracked by the undo manager, so this does not pollute history).
       cell.model.outputs.fromJSON(outputs);
     }
+    // Like `CodeCell.execute`, use the `recordTiming` value sent with the request.
+    const recordTiming = !!future.msg.metadata.recordTiming;
     // Reattach the future (without clearing existing outputs) and replay any
     // messages buffered while it was detached, in arrival order. This is done
     // whether or not the execution has already finished, so that final outputs
     // (or a pending stdin request) that arrived while detached are not lost
     // (e.g. if the kernel completed in the brief window during the undo).
-    const recordTiming = notebook.notebookConfig.recordTiming;
     if (recordTiming) {
       restoreTiming(cell, storedExecution);
     }
@@ -3111,7 +3112,7 @@ namespace Private {
     }
     cell.outputArea.displayIdMap = storedExecution.displayIdMap;
     cell.model.executionState = 'idle';
-    const recordTiming = notebook.notebookConfig.recordTiming;
+    const recordTiming = !!future.msg.metadata.recordTiming;
     if (recordTiming) {
       restoreTiming(cell, storedExecution);
     }

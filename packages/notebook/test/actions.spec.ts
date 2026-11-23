@@ -126,7 +126,8 @@ function waitForExecutionState(cell: CodeCell, state: IExecutionState) {
 }
 
 function createResolvedFuture(
-  executionCount = 1
+  executionCount = 1,
+  metadata: JSONObject = {}
 ): Kernel.IShellFuture<
   KernelMessage.IExecuteRequestMsg,
   KernelMessage.IExecuteReplyMsg
@@ -146,6 +147,7 @@ function createResolvedFuture(
   );
   return {
     done,
+    msg: { metadata },
     onIOPub: () => undefined,
     onReply: () => undefined,
     onStdin: () => undefined,
@@ -171,6 +173,7 @@ function createPendingFuture(): {
   });
   const future = {
     done,
+    msg: { metadata: {} },
     onIOPub: () => undefined,
     onReply: () => undefined,
     onStdin: () => undefined,
@@ -3484,10 +3487,6 @@ describe('@jupyterlab/notebook', () => {
       }, 20000);
 
       it('should keep the failure time when showing newer outputs of a restored cell', async () => {
-        widget.notebookConfig = {
-          ...widget.notebookConfig,
-          recordTiming: true
-        };
         const cell = widget.widgets[0] as CodeCell;
         widget.activeCellIndex = 0;
         cell.model.setMetadata('execution', {
@@ -3496,7 +3495,7 @@ describe('@jupyterlab/notebook', () => {
         });
         cell.model.executionState = 'running';
         const stoppedFuture = {
-          ...createResolvedFuture(),
+          ...createResolvedFuture(1, { recordTiming: true }),
           done: Promise.reject(new Error('Canceled future')),
           isDisposed: true
         };
