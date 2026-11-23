@@ -94,6 +94,8 @@
 
 - If you keep your own `transformIgnorePatterns`, add `dom-serializer`, `domelementtype`, `domhandler`, `domutils`, `entities`, `htmlparser2` and `sanitize-html` to its list. `sanitize-html` itself is not an ES module, but the other packages can be installed in its own `node_modules` folder, and with the pattern of the extension template Jest transforms them there only when `sanitize-html` is listed too.
 
+- `@jupyterlab/testing` no longer installs `@babel/preset-env`. Instead, it installs three Babel plugins, and its Babel configuration applies them: `@babel/plugin-transform-modules-commonjs`, `@babel/plugin-transform-dynamic-import` and `@babel/plugin-transform-export-namespace-from`. If your `babel.config.js` reuses this configuration with `require('@jupyterlab/testutils/lib/babel.config')`, as the extension template does, your extension does not need `@babel/preset-env` in its `devDependencies`. If your own Babel configuration names `@babel/preset-env`, add it to your `devDependencies`.
+
 ## JupyterLab 4.5 to 4.6
 
 ### Migrating to `jupyter-builder`

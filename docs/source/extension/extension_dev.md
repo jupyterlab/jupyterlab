@@ -849,7 +849,7 @@ that `node` does not support.
 To transpile jupyterlab packages, you need to install the following package:
 
 ```shell
-jlpm add --dev jest @types/jest ts-jest @babel/core@^7 @babel/preset-env@^7
+jlpm add --dev jest @types/jest ts-jest @babel/core@^7
 ```
 
 Then in `jest.config.js`, extend the configuration from `@jupyterlab/testutils`. It uses babel for JavaScript files, and it transforms the JupyterLab packages and their dependencies that ship ES modules:
