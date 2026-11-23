@@ -335,13 +335,28 @@ export class SettingsFormEditor extends React.Component<
       let getNewIdToFocus: (() => string | null) | null = null;
       if (inputId.startsWith(idPrefix + '_')) {
         const suffix = inputId.slice(idPrefix.length + 1);
-        const match = suffix.match(/^(.+)_(\d+)_(.+)$/);
-        if (match) {
-          const propName = match[1];
-          const oldIndex = parseInt(match[2], 10);
-          const fieldName = match[3];
-          const currentArray = (this._formData as any)?.[propName];
-          if (Array.isArray(currentArray) && currentArray[oldIndex]) {
+        for (const [propName, currentArray] of Object.entries(
+          (this._formData as any) ?? {}
+        )) {
+          if (!Array.isArray(currentArray)) {
+            continue;
+          }
+          const propPrefix = `${propName}_`;
+          if (!suffix.startsWith(propPrefix)) {
+            continue;
+          }
+          const rest = suffix.slice(propPrefix.length);
+          const nextUnderscore = rest.indexOf('_');
+          if (nextUnderscore === -1) {
+            continue;
+          }
+          const indexStr = rest.slice(0, nextUnderscore);
+          if (!/^\d+$/.test(indexStr)) {
+            continue;
+          }
+          const oldIndex = parseInt(indexStr, 10);
+          const fieldName = rest.slice(nextUnderscore + 1);
+          if (fieldName && currentArray[oldIndex]) {
             const editedItem = currentArray[oldIndex];
             getNewIdToFocus = () => {
               const compositeArray = (this.props.settings.composite as any)?.[
@@ -366,6 +381,7 @@ export class SettingsFormEditor extends React.Component<
               }
               return null;
             };
+            break;
           }
         }
       }
