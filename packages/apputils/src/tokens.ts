@@ -7,7 +7,12 @@ import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { Token } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
-import type { AccordionPanel, CommandPalette, Widget } from '@lumino/widgets';
+import type {
+  AccordionPanel,
+  CommandPalette,
+  Menu,
+  Widget
+} from '@lumino/widgets';
 import type { ISessionContext } from './sessioncontext';
 import type { Licenses } from './licenses';
 
@@ -649,3 +654,65 @@ export const IMovableSectionRegistry = new Token<IMovableSectionRegistry>(
   '@jupyterlab/apputils:IMovableSectionRegistry',
   'A registry for panels that can exchange moveable sections.'
 );
+
+/**
+ * The user menu token.
+ */
+export const IUserMenu = new Token<IUserMenu>(
+  '@jupyterlab/apputils:IUserMenu',
+  `The user menu displayed in the top bar with the current user's avatar.
+  Require this to add items to the user menu; it is empty by default.`
+);
+
+/**
+ * An interface describing the user menu.
+ */
+export interface IUserMenu {
+  /**
+   * Dispose of the resources held by the menu.
+   */
+  dispose(): void;
+
+  /**
+   * Test whether the widget has been disposed.
+   */
+  readonly isDisposed: boolean;
+
+  /**
+   * A read-only array of the menu items in the menu.
+   */
+  readonly items: ReadonlyArray<Menu.IItem>;
+
+  /**
+   * Add a menu item to the end of the menu.
+   *
+   * @param options - The options for creating the menu item.
+   *
+   * @returns The menu item added to the menu.
+   */
+  addItem(options: Menu.IItemOptions): Menu.IItem;
+
+  /**
+   * Insert a menu item into the menu at the specified index.
+   *
+   * @param index - The index at which to insert the item.
+   *
+   * @param options - The options for creating the menu item.
+   *
+   * @returns The menu item added to the menu.
+   *
+   * #### Notes
+   * The index will be clamped to the bounds of the items.
+   */
+  insertItem(index: number, options: Menu.IItemOptions): Menu.IItem;
+
+  /**
+   * Remove an item from the menu.
+   *
+   * @param item - The item to remove from the menu.
+   *
+   * #### Notes
+   * This is a no-op if the item is not in the menu.
+   */
+  removeItem(item: Menu.IItem): void;
+}

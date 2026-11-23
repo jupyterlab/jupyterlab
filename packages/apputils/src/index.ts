@@ -59,6 +59,7 @@ export {
   createToolbarFactory,
   setToolbar
 } from './toolbar';
+export * from './usermenu';
 export * from './widgettracker';
 export * from './windowresolver';
 

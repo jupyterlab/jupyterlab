@@ -7,6 +7,10 @@
         "name": "spacer",
         "type": "spacer",
         "rank": 50
+      },
+      {
+        "name": "user-menu",
+        "rank": 100
       }
     ]
   },
