@@ -153,7 +153,10 @@ test('should load the example', async ({ page }) => {
     expect
       .soft(
         await page.screenshot({
-          mask: [page.locator('.jp-DirListing-itemModified')],
+          mask: [
+            page.locator('.jp-DirListing-itemModified'),
+            page.locator('#jp-UserMenu')
+          ],
           style: `
             .cm-cursorLayer {
               animation: none !important;
