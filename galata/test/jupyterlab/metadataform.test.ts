@@ -906,4 +906,47 @@ test.describe('Advanced tools', () => {
     await expect(cmLinesAfter).toHaveCount(1);
     await expect(cellMetadataEditor).toContainText('{}');
   });
+
+  test('should not commit hidden metadata drafts to another notebook', async ({
+    page,
+    baseURL,
+    request,
+    tmpPath
+  }, testInfo) => {
+    const name = await uploadNotebookCopy(request, tmpPath, testInfo);
+    const other = `${testInfo.testId}-other.ipynb`;
+    await galata
+      .newContentsHelper(request)
+      .uploadFile(
+        path.resolve(__dirname, `./notebooks/${nbFile}`),
+        `${tmpPath}/${other}`
+      );
+    await page.goto(baseURL);
+    await openNotebook(page, tmpPath, name);
+    await openForm(page, 'Advanced Tools');
+    await replaceEditorText(
+      page,
+      page.locator('.jp-CellMetadataEditor .cm-content'),
+      JSON.stringify({ ...(await getCellMetadata(page)), draft: 'cell' })
+    );
+    await replaceEditorText(
+      page,
+      page.locator('.jp-NotebookMetadataEditor .cm-content'),
+      JSON.stringify({
+        ...(await getNotebookMetadata(page)),
+        draft: 'notebook'
+      })
+    );
+    await page.sidebar.close('right');
+    await openNotebook(page, tmpPath, other);
+    const cellMetadata = await getCellMetadata(page);
+    const notebookMetadata = await getNotebookMetadata(page);
+
+    await page.evaluate(() =>
+      window.jupyterapp.commands.execute('notebook:commit-metadata-and-save')
+    );
+
+    expect(await getCellMetadata(page)).toEqual(cellMetadata);
+    expect(await getNotebookMetadata(page)).toEqual(notebookMetadata);
+  });
 });
