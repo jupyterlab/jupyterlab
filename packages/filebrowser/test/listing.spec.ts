@@ -189,6 +189,84 @@ describe('filebrowser/listing', () => {
     });
 
     describe('#rename', () => {
+      it.each([-1, 4])(
+        'should rename the last selection when focus index is %s',
+        async focusIndex => {
+          dirListing.selectNext();
+          dirListing.selectNext(true);
+          const selected = [...dirListing.selectedItems()];
+          dirListing['_focusIndex'] = focusIndex;
+          const renamed = dirListing.rename().catch((error: unknown) => error);
+          const editNode = dirListing['_editNode'];
+          expect(editNode.value).toBe(selected[1].name);
+          simulate(editNode, 'keydown', { key: 'Escape' });
+          await expect(renamed).resolves.toBe(selected[1].name);
+          simulate(document.activeElement!, 'keydown', { key: 'ArrowDown' });
+          expect([...dirListing.selectedItems()]).toEqual([
+            [...dirListing.sortedItems()][2]
+          ]);
+        }
+      );
+
+      it('should rename a surviving selection after filtering removes the focused item', async () => {
+        const items = [...dirListing.sortedItems()];
+        dirListing.selectNext();
+        dirListing.selectNext(true);
+        dirListing['_focusItem'](3);
+        const refreshed = signalToPromise(dirListing.model.refreshed);
+        dirListing.model.setFilter(item =>
+          item.path === items[0].path || item.path === items[1].path ? {} : null
+        );
+        await refreshed;
+        await framePromise();
+        expect([...dirListing.sortedItems()]).toHaveLength(2);
+        expect(dirListing['_focusIndex']).toBe(3);
+        const renamed = dirListing.rename().catch((error: unknown) => error);
+        const editNode = dirListing['_editNode'];
+        expect(editNode.value).toBe(items[1].name);
+        simulate(editNode, 'keydown', { key: 'Escape' });
+        await expect(renamed).resolves.toBe(items[1].name);
+        simulate(document.activeElement!, 'keydown', { key: 'ArrowUp' });
+        expect([...dirListing.selectedItems()]).toEqual([items[0]]);
+      });
+
+      it('should do nothing when the selected item is no longer listed', async () => {
+        dirListing.selectNext();
+        dirListing['_sortedItems'] = [...dirListing.sortedItems()].slice(1);
+        await expect(dirListing.rename()).resolves.toBe('');
+        expect(dirListing['_editNode'].isConnected).toBe(false);
+        expect(dirListing['_inRename']).toBe(false);
+      });
+
+      it('should do nothing when the selected row is not rendered', async () => {
+        dirListing.selectNext();
+        const rows = dirListing['_items'];
+        dirListing['_items'] = [];
+        try {
+          await expect(dirListing.rename()).resolves.toBe('');
+          expect(dirListing['_editNode'].isConnected).toBe(false);
+          expect(dirListing['_inRename']).toBe(false);
+        } finally {
+          dirListing['_items'] = rows;
+        }
+      });
+
+      it('should restore keyboard navigation if the renderer throws during rename', async () => {
+        dirListing.selectNext();
+        jest
+          .spyOn(dirListing.renderer, 'getNameNode')
+          .mockImplementationOnce(() => {
+            throw new Error('Rename rendering failed');
+          });
+        await expect(dirListing.rename()).rejects.toThrow(
+          'Rename rendering failed'
+        );
+        simulate(document.activeElement!, 'keydown', { key: 'ArrowDown' });
+        expect([...dirListing.selectedItems()]).toEqual([
+          [...dirListing.sortedItems()][1]
+        ]);
+      });
+
       it('backspace during rename does not trigger goUp method', async () => {
         dirListing.selectNext();
         const newNamePromise = dirListing.rename();
