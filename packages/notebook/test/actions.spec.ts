@@ -2620,9 +2620,77 @@ describe('@jupyterlab/notebook', () => {
           false
         );
       });
+
+      it('should activate the last added cell when duplicating above', () => {
+        widget.activeCellIndex = 1;
+        const targetSource = widget.activeCell!.model.sharedModel.getSource();
+        NotebookActions.duplicate(widget, 'above');
+        // The newly duplicated cell is inserted at index 1 and should be the active cell
+        expect(widget.activeCellIndex).toBe(1);
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(
+          targetSource
+        );
+        // The original cell should have been pushed down to index 2
+        expect(widget.widgets[2].model.sharedModel.getSource()).toBe(
+          targetSource
+        );
+      });
+
+      it('should activate the last added cell when duplicating with mode replace', () => {
+        widget.activeCellIndex = 1;
+        const next = widget.widgets[2];
+        widget.select(next);
+        NotebookActions.duplicate(widget, 'replace');
+        // Replaced cells 1 and 2 with 2 new cells; last added cell is at index 2
+        expect(widget.activeCellIndex).toBe(2);
+      });
+
+      it('should activate the last added cell when duplicating below a collapsed heading', () => {
+        const heading = widget.widgets[1] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+        widget.activeCellIndex = 1;
+
+        NotebookActions.duplicate(widget, 'below');
+        // Heading (index 1) and its 2 children are duplicated (3 cells).
+        // They are inserted after the collapsed children at index 1 + 2 + 1 = 4.
+        // The last added cell is at index 4 + 3 - 1 = 6.
+        expect(widget.activeCellIndex).toBe(6);
+      });
     });
 
     describe('#paste()', () => {
+      it('should activate the last added cell when pasting below a collapsed heading', () => {
+        widget.activeCellIndex = 0;
+        NotebookActions.copy(widget);
+
+        const heading = widget.widgets[1] as MarkdownCell;
+        heading.numberChildNodes = 2;
+        heading.headingCollapsed = true;
+        widget.activeCellIndex = 1;
+
+        NotebookActions.paste(widget, 'below');
+        // The pasted cell is inserted after all collapsed children at index 1 + 2 + 1 = 4
+        expect(widget.activeCellIndex).toBe(4);
+      });
+      it('should activate the last added cell when pasting above', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        NotebookActions.copy(widget);
+        widget.activeCellIndex = 1;
+        NotebookActions.paste(widget, 'above');
+        expect(widget.activeCellIndex).toBe(1);
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+      });
+
+      it('should activate the last added cell when pasting with mode replace', () => {
+        NotebookActions.copy(widget);
+        widget.activeCellIndex = 1;
+        const next = widget.widgets[2];
+        widget.select(next);
+        NotebookActions.paste(widget, 'replace');
+        expect(widget.activeCellIndex).toBe(1);
+      });
+
       it('should paste cells from a utils.clipboard', () => {
         const source = widget.activeCell!.model.sharedModel.getSource();
         const next = widget.widgets[1];

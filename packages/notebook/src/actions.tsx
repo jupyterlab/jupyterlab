@@ -1610,7 +1610,7 @@ export namespace NotebookActions {
     cellsFromClipboard: boolean = false,
     clipboardInteractionValues: nbformat.IBaseCell[] = values
   ): void {
-    if (!notebook.model || !notebook.activeCell) {
+    if (!notebook.model || !notebook.activeCell || values.length === 0) {
       return;
     }
 
@@ -1620,7 +1620,6 @@ export namespace NotebookActions {
     notebook.mode = 'command';
 
     let index = 0;
-    const prevActiveCellIndex = notebook.activeCellIndex;
 
     model.sharedModel.transact(() => {
       // Set the starting index of the paste operation depending upon the mode.
@@ -1686,12 +1685,14 @@ export namespace NotebookActions {
 
           // If cells are not deletable, we may not have anything to delete.
           if (toDelete.length > 0) {
+            index = toDelete[0];
             // Delete the cells as one undo event.
             toDelete.reverse().forEach(i => {
               model.sharedModel.deleteCell(i);
             });
+          } else {
+            index = notebook.activeCellIndex;
           }
-          index = toDelete[0];
           break;
         }
         default:
@@ -1712,7 +1713,7 @@ export namespace NotebookActions {
       );
     });
 
-    notebook.activeCellIndex = prevActiveCellIndex + values.length;
+    notebook.activeCellIndex = index + values.length - 1;
     notebook.deselectAll();
     if (cellsFromClipboard) {
       notebook.recordCellClipboardInteraction(
