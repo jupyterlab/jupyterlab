@@ -15,7 +15,7 @@ from jupyter_server.extension.handler import ExtensionHandlerMixin
 from tornado import gen, web
 from tornado.concurrent import run_on_executor
 
-from jupyterlab.commands import AppOptions, _ensure_options, build, build_check, clean
+from jupyterlab.commands import AppOptions, _ensure_options, build, build_check
 from jupyterlab.coreconfig import CoreConfig
 
 AUTH_RESOURCE = "jupyterlab:build"
@@ -148,9 +148,8 @@ class Builder:
         except Exception:
             if kill_event.is_set():
                 return
-            self.log.warning("Build failed, running a clean and rebuild")
-            clean(app_options=app_options)
-            build(app_options=app_options)
+            self.log.warning("Build failed, running a clean and rebuild", exc_info=True)
+            build(app_options=app_options, clean_staging=True)
 
 
 class BuildHandler(ExtensionHandlerMixin, APIHandler):
