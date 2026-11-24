@@ -2601,6 +2601,105 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    for (const action of ['duplicate', 'paste'] as const) {
+      describe(`#${action}()`, () => {
+        it.each([
+          { mode: 'below', active: 1, selected: [2], insertion: 2 },
+          { mode: 'above', active: 1, selected: [2], insertion: 1 },
+          { mode: 'belowSelected', active: 1, selected: [2], insertion: 3 },
+          { mode: 'replace', active: 1, selected: [2], insertion: 1 },
+          { mode: 'replace', active: 2, selected: [1], insertion: 1 }
+        ] as const)(
+          'should activate the last added cell in $mode mode with active cell $active',
+          ({ mode, active, selected, insertion }) => {
+            widget.model!.fromJSON({
+              cells: ['A', 'B', 'C', 'D', 'E'].map(source => ({
+                cell_type: 'code',
+                source,
+                metadata: {},
+                outputs: [],
+                execution_count: null
+              })),
+              metadata: {},
+              nbformat: 4,
+              nbformat_minor: 5
+            });
+            widget.activeCellIndex = active;
+            selected.forEach(index => widget.select(widget.widgets[index]));
+            const sources = widget.widgets
+              .filter(cell => widget.isSelectedOrActive(cell))
+              .map(cell => cell.model.sharedModel.getSource());
+            NotebookActions.copy(widget);
+            selected.forEach(index => widget.select(widget.widgets[index]));
+
+            NotebookActions[action](widget, mode);
+
+            expect(widget.activeCellIndex).toBe(insertion + sources.length - 1);
+            expect(widget.activeCell!.model.sharedModel.getSource()).toBe(
+              sources[sources.length - 1]
+            );
+            expect(
+              widget.widgets
+                .slice(insertion, insertion + sources.length)
+                .map(cell => cell.model.sharedModel.getSource())
+            ).toEqual(sources);
+            expect(widget.widgets.length).toBe(mode === 'replace' ? 5 : 7);
+            expect(widget.mode).toBe('command');
+            expect(widget.widgets.some(cell => widget.isSelected(cell))).toBe(
+              false
+            );
+          }
+        );
+
+        it('should insert at the active cell when no selected cells are deletable', () => {
+          widget.activeCellIndex = 1;
+          widget.activeCell!.model.setMetadata('deletable', false);
+          const original = widget.activeCell;
+          NotebookActions.copy(widget);
+
+          NotebookActions[action](widget, 'replace');
+
+          expect(widget.activeCellIndex).toBe(1);
+          expect(widget.activeCell).not.toBe(original);
+          expect(widget.widgets[2]).toBe(original);
+        });
+
+        it.each(['below', 'belowSelected'] as const)(
+          'should activate the last added cell %s a collapsed heading',
+          mode => {
+            widget.model!.fromJSON({
+              cells: [
+                { cell_type: 'markdown', source: '# Heading', metadata: {} },
+                ...['A', 'B', 'C'].map(source => ({
+                  cell_type: 'code',
+                  source,
+                  metadata: {},
+                  outputs: [],
+                  execution_count: null
+                }))
+              ],
+              metadata: {},
+              nbformat: 4,
+              nbformat_minor: 5
+            });
+            const heading = widget.widgets[0] as MarkdownCell;
+            heading.numberChildNodes = 2;
+            heading.headingCollapsed = true;
+            widget.activeCellIndex = 0;
+            NotebookActions.copy(widget);
+
+            NotebookActions[action](widget, mode);
+
+            expect(widget.activeCellIndex).toBe(5);
+            expect(widget.activeCell!.model.sharedModel.getSource()).toBe('B');
+            expect(widget.widgets[3]).toBeInstanceOf(MarkdownCell);
+            expect(widget.widgets[6].model.sharedModel.getSource()).toBe('C');
+            expect(heading.headingCollapsed).toBe(true);
+          }
+        );
+      });
+    }
+
     describe('#duplicate()', () => {
       it('should delete metadata.deletable', () => {
         widget.activeCellIndex = 0;
@@ -2623,6 +2722,22 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#paste()', () => {
+      it.each(['below', 'belowSelected', 'above', 'replace'] as const)(
+        'should preserve cells and selection when pasting empty data in %s mode',
+        mode => {
+          widget.activeCellIndex = 1;
+          widget.select(widget.widgets[2]);
+          const cells = widget.widgets.map(cell => cell.model.id);
+          utils.clipboard.setData(JUPYTER_CELL_MIME, []);
+
+          NotebookActions.paste(widget, mode);
+
+          expect(widget.widgets.map(cell => cell.model.id)).toEqual(cells);
+          expect(widget.activeCellIndex).toBe(1);
+          expect(widget.isSelected(widget.widgets[2])).toBe(true);
+        }
+      );
+
       it('should paste cells from a utils.clipboard', () => {
         const source = widget.activeCell!.model.sharedModel.getSource();
         const next = widget.widgets[1];
