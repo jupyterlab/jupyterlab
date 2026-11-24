@@ -101,9 +101,11 @@ class Builder:
             raise ValueError(msg)
         self._canceling = True
         future = self._future
-        if future is None:
+        kill_event = self._kill_event
+        if future is None or kill_event is None:
             msg = "No current build"
             raise ValueError(msg)
+        kill_event.set()
         yield future
         self._canceling = False
         self.canceled = True
