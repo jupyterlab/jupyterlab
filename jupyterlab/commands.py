@@ -2455,7 +2455,7 @@ def _test_overlap(
     return cmp == 0
 
 
-def _compare_ranges(  # noqa: PLR0912
+def _compare_ranges(  # noqa: PLR0912, PLR0915
     spec1: str,
     spec2: str,
     drop_prerelease1: bool = False,
@@ -2499,32 +2499,46 @@ def _compare_ranges(  # noqa: PLR0912
         if o1.startswith("<") or o2.startswith("<"):
             continue
 
-        # Handle single value specifiers.
-        lx = lte if x1 == x2 else lt
-        ly = lte if y1 == y2 else lt
-        gx = gte if x1 == x2 else gt
-        gy = gte if x1 == x2 else gt
+        # Each branch is an interval. A lower bound is exclusive for a
+        # strict (>) specifier: `>1.0.0` does not contain 1.0.0 itself.
+        # An upper bound is inclusive for a single value specifier and for
+        # the (<=) end of a hyphen range, and exclusive otherwise. A branch
+        # ending in (>) or (>=) is unbounded above.
+        x_lo_inc = o1 != ">"
+        y_lo_inc = o2 != ">"
+        x_hi = None if r1set[-1].operator.startswith(">") else x2
+        y_hi = None if r2set[-1].operator.startswith(">") else y2
+        x_hi_inc = x1 == x2 or r1set[-1].operator == "<="
+        y_hi_inc = y1 == y2 or r2set[-1].operator == "<="
 
-        # Handle unbounded (>) specifiers.
-        def noop(x: object, y: object, loose: bool) -> bool:
-            return True
+        # Lower bound of the intersection.
+        if gt(x1, y1, True):
+            lo, lo_inc = x1, x_lo_inc
+        elif gt(y1, x1, True):
+            lo, lo_inc = y1, y_lo_inc
+        else:
+            lo, lo_inc = x1, x_lo_inc and y_lo_inc
 
-        if x1 == x2 and o1.startswith(">"):
-            lx = noop
-        if y1 == y2 and o2.startswith(">"):
-            ly = noop
+        # Upper bound of the intersection.
+        if x_hi is None:
+            hi, hi_inc = y_hi, y_hi_inc
+        elif y_hi is None or lt(x_hi, y_hi, True):
+            hi, hi_inc = x_hi, x_hi_inc
+        elif lt(y_hi, x_hi, True):
+            hi, hi_inc = y_hi, y_hi_inc
+        else:
+            hi, hi_inc = x_hi, x_hi_inc and y_hi_inc
 
-        # Check for overlap.
-        if (
-            (gte(x1, y1, True) and ly(x1, y2, True))
-            or (gy(x2, y1, True) and ly(x2, y2, True))
-            or (gte(y1, x1, True) and lx(y1, x2, True))
-            or (gx(y2, x1, True) and lx(y2, x2, True))
-        ):
+        # The ranges overlap when the intersection is non-empty: either it
+        # spans versions, or it is a single version included in both.
+        if hi is None or gt(hi, lo, True) or (gte(hi, lo, True) and lo_inc and hi_inc):
             # if we ever find an overlap, we can return immediately
             return 0
 
-        if gte(y1, x2, True):
+        # spec1 is lower when its upper end is at or below spec2's lower
+        # end (the shared point, if any, is excluded from at least one
+        # side, since a shared included point would be an overlap).
+        if x_hi is not None and lte(x_hi, y1, True):
             if return_value is False:
                 # We can possibly return 1
                 return_value = 1
@@ -2533,7 +2547,7 @@ def _compare_ranges(  # noqa: PLR0912
                 return_value = None
             continue
 
-        if gte(x1, y2, True):
+        if y_hi is not None and lte(y_hi, x1, True):
             if return_value is False:
                 return_value = -1
             elif return_value == 1:
