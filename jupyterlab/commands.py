@@ -2499,11 +2499,14 @@ def _compare_ranges(  # noqa: PLR0912
         if o1.startswith("<") or o2.startswith("<"):
             continue
 
-        # Handle single value specifiers.
-        lx = lte if x1 == x2 else lt
-        ly = lte if y1 == y2 else lt
-        gx = gte if x1 == x2 else gt
-        gy = gte if x1 == x2 else gt
+        # An upper bound is inclusive for a single value specifier and for
+        # the (<=) end of a hyphen range, and exclusive otherwise.
+        x2_inclusive = x1 == x2 or r1set[-1].operator == "<="
+        y2_inclusive = y1 == y2 or r2set[-1].operator == "<="
+        lx = lte if x2_inclusive else lt
+        ly = lte if y2_inclusive else lt
+        gx = gte if x2_inclusive else gt
+        gy = gte if y2_inclusive else gt
 
         # Handle unbounded (>) specifiers.
         def noop(x: object, y: object, loose: bool) -> bool:
@@ -2517,9 +2520,9 @@ def _compare_ranges(  # noqa: PLR0912
         # Check for overlap.
         if (
             (gte(x1, y1, True) and ly(x1, y2, True))
-            or (gy(x2, y1, True) and ly(x2, y2, True))
+            or (gx(x2, y1, True) and ly(x2, y2, True))
             or (gte(y1, x1, True) and lx(y1, x2, True))
-            or (gx(y2, x1, True) and lx(y2, x2, True))
+            or (gy(y2, x1, True) and lx(y2, x2, True))
         ):
             # if we ever find an overlap, we can return immediately
             return 0

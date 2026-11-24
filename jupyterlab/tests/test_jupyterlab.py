@@ -654,6 +654,18 @@ class TestExtension(AppHandlerTest):
         assert not _test_overlap("^0.5.0", "^0.6.0")
         assert not _test_overlap("~1.5.0", "^1.6.0")
 
+        # The upper bound of a hyphen range is inclusive.
+        assert _test_overlap("~4.2.0", "4.0.0 - 4.2.0")
+        assert _test_overlap("^4.2.0", "4.0.0 - 4.2.0")
+        assert _test_overlap("1.0.0 - 1.5.0", "1.5.0")
+        assert _test_overlap("1.5.0", "1.0.0 - 1.5.0")
+        assert not _test_overlap("4.0.0 - 4.2.0", "^4.3.0")
+
+        # The upper bound of a caret or tilde range is exclusive.
+        assert not _test_overlap("1.5.0", "~1.4.0")
+        assert not _test_overlap("2.0.0", "^1.4.0")
+        assert not _test_overlap("~1.4.0", "1.5.0")
+
         assert _test_overlap("*", "0.6") is None
         assert _test_overlap("<0.6", "0.1") is None
 
