@@ -494,29 +494,73 @@ function selectByOffsets(
 }
 
 /**
+ * The frame in which `selectionRanges` were read.
+ */
+let selectionFrame: number | null = null;
+
+/**
+ * The ranges of the user selection, as read in `selectionFrame`.
+ */
+let selectionRanges: Range[] = [];
+
+/**
+ * Get the ranges of the user selection, reading them at most once per frame.
+ *
+ * In Chromium every read of the selection lays out the page when the DOM has
+ * changed since the last layout (https://crbug.com/590369), so reading it for
+ * every output would lay out the page once per output. Drop this cache when
+ * Chromium reads the selection without a layout.
+ *
+ * @param frame - The timestamp of the frame; calls in one animation frame
+ *   share it.
+ */
+function getSelectionRanges(frame: number): Range[] {
+  if (frame !== selectionFrame) {
+    const selection = window.getSelection();
+    selectionRanges = selection
+      ? Array.from({ length: selection.rangeCount }, (_, index) =>
+          selection.getRangeAt(index)
+        )
+      : [];
+    selectionFrame = frame;
+  }
+  return selectionRanges;
+}
+
+/**
  * Run a DOM mutation, preserving the user selection (mapped through
- * character offsets relative to `root`) when it intersects any of the
- * `touched` nodes. Because the offsets are restored against the
- * post-mutation DOM, the mutation must keep them stable: the text content
- * of `root` up to and including the mutated region must be unchanged.
- * Appending new text strictly after it (as the stream-adoption path does)
- * is fine - such text lies beyond every restorable offset.
+ * character offsets relative to `root`) when it lies within `root` and
+ * intersects any of the `touched` nodes. Because the offsets are restored
+ * against the post-mutation DOM, the mutation must keep them stable: the
+ * text content of `root` up to and including the mutated region must be
+ * unchanged. Appending new text strictly after it (as the stream-adoption
+ * path does) is fine - such text lies beyond every restorable offset.
+ *
+ * @param frame - The timestamp of the frame (see `getSelectionRanges`).
  */
 function withSelectionPreserved(
   root: HTMLElement,
   touched: Node[],
+  frame: number,
   mutate: () => void
 ): void {
-  const selection = window.getSelection();
-  const affected =
-    selection && touched.some(node => selection.containsNode(node, true));
-  const offsets = affected
-    ? computeSelectionCharacterOffset(root, selection!)
-    : null;
-  mutate();
-  if (selection && offsets) {
-    selectByOffsets(root, selection, offsets);
+  // Offsets restore only a selection with both ends within `root`.
+  const affected = getSelectionRanges(frame).some(
+    range =>
+      root.contains(range.startContainer) &&
+      root.contains(range.endContainer) &&
+      touched.some(node => range.intersectsNode(node))
+  );
+  const selection = affected ? window.getSelection() : null;
+  if (!selection) {
+    mutate();
+    return;
   }
+  const offsets = computeSelectionCharacterOffset(root, selection);
+  mutate();
+  selectByOffsets(root, selection, offsets);
+  // Read the selection again: restoring it set a new range.
+  selectionFrame = null;
 }
 
 /**
@@ -536,7 +580,7 @@ const liveRenderStates = new WeakMap<HTMLElement, ILiveRenderState>();
  * next instance (see `seed`).
  *
  * The render feeds it the auto-linking progress on each call as
- * `(linkedNodes, processedLength)`:
+ * `(linkedNodes, processedLength, frame)`:
  *
  * - `linkedNodes` is the working list of linkified nodes (Text / `<a>`) built
  *   so far. Per the *aliasing contract*, these nodes NEVER enter the DOM -
@@ -545,6 +589,9 @@ const liveRenderStates = new WeakMap<HTMLElement, ILiveRenderState>();
  *   rendered DOM.
  * - `processedLength` is the number of characters of the source that
  *   `linkedNodes` covers.
+ * - `frame` is the timestamp of the frame the call runs in: the calls of all
+ *   outputs in one animation frame share one read of the user selection (see
+ *   `getSelectionRanges`).
  *
  * Invariant maintained across `seed`/`commit`: the commit cursor
  * (`_workingIndex`, `_workingOffset`) addresses the position within
@@ -580,8 +627,10 @@ export class LiveText {
    */
   seed(
     linkedNodes: (HTMLAnchorElement | Text)[],
-    processedLength: number
+    processedLength: number,
+    frame: number
   ): void {
+    this._frame = frame;
     this._ensureState(linkedNodes, processedLength);
   }
 
@@ -595,8 +644,10 @@ export class LiveText {
    */
   commit(
     linkedNodes: (HTMLAnchorElement | Text)[],
-    processedLength: number
+    processedLength: number,
+    frame: number
   ): void {
+    this._frame = frame;
     this._ensureState(linkedNodes, processedLength);
     if (this._attemptCommit(linkedNodes, processedLength)) {
       return;
@@ -651,7 +702,7 @@ export class LiveText {
     for (const segment of segments) {
       live.appendChild(segment.node);
     }
-    withSelectionPreserved(this._host, [this._host], () => {
+    withSelectionPreserved(this._host, [this._host], this._frame, () => {
       this._host.replaceChildren(live);
     });
     this._state = {
@@ -742,7 +793,7 @@ export class LiveText {
       existing.fullText.length,
       fullText.length
     );
-    withSelectionPreserved(existing.pre, removals, () => {
+    withSelectionPreserved(existing.pre, removals, this._frame, () => {
       for (const node of removals) {
         existing.pre.removeChild(node);
       }
@@ -894,7 +945,7 @@ export class LiveText {
       ? boundary.node
       : (state.tail[index]?.node ?? null);
 
-    withSelectionPreserved(state.pre, touched, () => {
+    withSelectionPreserved(state.pre, touched, this._frame, () => {
       // Detach the consumed segments; they become the source-formatting side
       // of the merge (mutating them is fine - they are being replaced).
       const preNodes: (Text | HTMLSpanElement)[] = [];
@@ -992,7 +1043,7 @@ export class LiveText {
     for (let n: ChildNode | null = firstTail; n !== null; n = n.nextSibling) {
       removals.push(n);
     }
-    withSelectionPreserved(state.pre, removals, () => {
+    withSelectionPreserved(state.pre, removals, this._frame, () => {
       for (const n of removals) {
         state.pre.removeChild(n);
       }
@@ -1018,4 +1069,9 @@ export class LiveText {
   // Commit cursor into `linkedNodes` (see the class invariant).
   private _workingIndex = 0;
   private _workingOffset = 0;
+
+  /**
+   * The frame of the current `seed` or `commit` call.
+   */
+  private _frame = 0;
 }

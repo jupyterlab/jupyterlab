@@ -1148,7 +1148,7 @@ function renderTextual(
       // the seeded progress: adoption trims the committed region back to
       // exactly this point, before the steps below advance it.
       liveText = new LiveText(host, pre, fullPreTextContent);
-      liveText.seed(linkedNodes, alreadyAutoLinked.length);
+      liveText.seed(linkedNodes, alreadyAutoLinked.length, timestamp);
     }
     let moreWorkToBeDone: boolean;
     let elapsed: number;
@@ -1219,7 +1219,7 @@ function renderTextual(
     // Note: we set `keepExisting` to `true` in `IRenderMime.IRenderer`s which
     // use this method to ensure that the previous node is not removed from DOM
     // when new chunks of data comes from the stream.
-    liveText!.commit(linkedNodes, alreadyAutoLinked.length);
+    liveText!.commit(linkedNodes, alreadyAutoLinked.length, timestamp);
 
     if (invocation === FrameInvocation.animation) {
       lastFrameEnd = performance.now();
