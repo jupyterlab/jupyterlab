@@ -53,5 +53,26 @@ describe('@jupyterlab/coreutils', () => {
         expect(cache.get('a')).toBeNull();
       });
     });
+
+    describe('#get()', () => {
+      it('should return falsy values instead of null and mark them as recently used', () => {
+        const numCache = new LruCache<string, number>({ maxSize: 2 });
+        numCache.set('zero', 0);
+        numCache.set('one', 1);
+
+        expect(numCache.get('zero')).toBe(0);
+        numCache.set('two', 2);
+        expect(numCache.get('zero')).toBe(0);
+        expect(numCache.get('one')).toBeNull();
+
+        const boolCache = new LruCache<string, boolean>({ maxSize: 2 });
+        boolCache.set('no', false);
+        expect(boolCache.get('no')).toBe(false);
+
+        const strCache = new LruCache<string, string>({ maxSize: 2 });
+        strCache.set('empty', '');
+        expect(strCache.get('empty')).toBe('');
+      });
+    });
   });
 });
