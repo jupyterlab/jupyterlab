@@ -881,13 +881,33 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   }
 
   /**
-   * Mark the rendered match at the given index as the current match.
+   * Mark the rendered match at the given index as the current match, after
+   * the marking in progress: a step and a new search of the changed rendered
+   * text can both mark a match, and stepping at the same time overshoots.
    *
    * @param index - Index of the rendered match to mark.
    * @param scroll - Whether to scroll the match into view.
    * @returns The marked match, if any.
    */
-  private async _highlightRenderedMatch(
+  private _highlightRenderedMatch(
+    index: number,
+    scroll: boolean
+  ): Promise<IHTMLSearchMatch | undefined> {
+    const marked = this._marking.then(() =>
+      this._stepToRenderedMatch(index, scroll)
+    );
+    this._marking = marked.catch(() => undefined);
+    return marked;
+  }
+
+  /**
+   * Step the rendered provider to the match at the given index.
+   *
+   * @param index - Index of the rendered match to mark.
+   * @param scroll - Whether to scroll the match into view.
+   * @returns The marked match, if any.
+   */
+  private async _stepToRenderedMatch(
     index: number,
     scroll: boolean
   ): Promise<IHTMLSearchMatch | undefined> {
@@ -1003,6 +1023,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   private _placement: { key: string; placement: Private.Placement } | null =
     null;
   private _renderedMatches: Private.IRenderedMatches | null = null;
+  private _marking: Promise<unknown> = Promise.resolve();
 }
 
 /**

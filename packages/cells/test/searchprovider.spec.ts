@@ -767,6 +767,37 @@ describe('cells/searchprovider', () => {
       provider.dispose();
     });
 
+    it('should mark the current match when the rendered text changes while a step renders the source', async () => {
+      let pause: Promise<void> | null = null;
+      let resume: () => void = () => undefined;
+      // The character reference puts a rendered match before the first
+      // source match, so marking it takes more than one step
+      cell = createMarkdownCell('&#116;est9 test1 test2 test3', {
+        markdownParser: {
+          render: async source => {
+            await pause;
+            return source;
+          }
+        }
+      });
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+      pause = new Promise(resolve => (resume = resolve));
+      const step = provider.highlightNext();
+      await framePromise();
+
+      // A formula typeset while the step waits for the offscreen rendering
+      cell.renderer.node.appendChild(document.createElement('span'));
+      await framePromise();
+      resume();
+      await step;
+
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+      provider.dispose();
+    });
+
     it('should re-highlight the same source match when the cell is un-rendered mid-search', async () => {
       cell = createMarkdownCell('test1 test2');
       Widget.attach(cell, document.body);
