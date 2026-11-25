@@ -1904,11 +1904,11 @@ export namespace NotebookActions {
       const child = notebook.widgets[++index];
 
       if (notebook.isSelectedOrActive(child) && cell.type === 'code') {
-        cell.sharedModel.transact(() => {
-          (cell as ICodeCellModel).clearExecution();
-          (child as CodeCell).outputHidden = false;
-        }, false);
-        Private.outputCleared.emit({ notebook, cell: child });
+        Private.clearCodeCellOutputs(
+          notebook,
+          cell as ICodeCellModel,
+          child as CodeCell
+        );
       }
     }
     void Private.handleState(notebook, state, true);
@@ -1933,11 +1933,11 @@ export namespace NotebookActions {
       const child = notebook.widgets[++index];
 
       if (cell.type === 'code') {
-        cell.sharedModel.transact(() => {
-          (cell as ICodeCellModel).clearExecution();
-          (child as CodeCell).outputHidden = false;
-        }, false);
-        Private.outputCleared.emit({ notebook, cell: child });
+        Private.clearCodeCellOutputs(
+          notebook,
+          cell as ICodeCellModel,
+          child as CodeCell
+        );
       }
     }
     void Private.handleState(notebook, state, true);
@@ -2777,6 +2777,23 @@ namespace Private {
     displayIdMap: ReadonlyMap<string, readonly number[]>;
     /** Whether newer outputs are waiting for the user to accept them. */
     pendingOutputs?: boolean;
+  }
+
+  export function clearCodeCellOutputs(
+    notebook: Notebook,
+    cell: ICodeCellModel,
+    child: CodeCell
+  ): void {
+    cell.sharedModel.transact(() => {
+      cell.clearExecution();
+      child.outputHidden = false;
+    }, false);
+    // Detach a finished future so moving the cell later does not replay its
+    // execution count; keep in-flight futures attached for running cells.
+    if (cell.executionState === 'idle') {
+      child.outputArea.detachFuture()?.dispose();
+    }
+    outputCleared.emit({ notebook, cell: child });
   }
 
   const pendingOutputExecutions = new WeakMap<CodeCell, IStoredCellExecution>();
