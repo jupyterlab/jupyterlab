@@ -230,7 +230,7 @@ export class EditorHandler implements IDisposable {
    *
    * Code that has run keeps its breakpoints, because it can still run.
    */
-  clearBreakpoints(): IDebugger.IBreakpoint[] {
+  clearDeletedBreakpoints(): IDebugger.IBreakpoint[] {
     if (this.isDisposed || this._path || this._lastCode === null) {
       return [];
     }

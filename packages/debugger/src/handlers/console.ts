@@ -127,7 +127,7 @@ export class ConsoleHandler implements IDisposable {
       this._cellMap.delete(modelId);
       // Closing the console disposes its cells after its kernel connection.
       if (!this._consolePanel.console.isDisposed) {
-        editorHandler.clearBreakpoints();
+        editorHandler.clearDeletedBreakpoints();
       }
       editorHandler.dispose();
     });

@@ -225,12 +225,12 @@ describe('Debugger.EditorHandler', () => {
     expect(kernel.size).toBe(0);
   });
 
-  describe('#clearBreakpoints()', () => {
+  describe('#clearDeletedBreakpoints()', () => {
     it('should clear the breakpoints of the cell', async () => {
       const kernel = startDebugging([1]);
       await edit('x = 2');
 
-      handler.clearBreakpoints();
+      handler.clearDeletedBreakpoints();
       await flushRequests();
 
       expect(kernel.size).toBe(0);

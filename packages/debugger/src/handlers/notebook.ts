@@ -138,7 +138,7 @@ export class NotebookHandler implements IDisposable {
     codeCell.disposed.connect(() => {
       this._cellMap.delete(modelId);
       if (this._isDeleted(modelId)) {
-        const breakpoints = editorHandler.clearBreakpoints();
+        const breakpoints = editorHandler.clearDeletedBreakpoints();
         if (breakpoints.length) {
           this._deletedBreakpoints.set(modelId, breakpoints);
         }
