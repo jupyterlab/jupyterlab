@@ -56,7 +56,7 @@ export class EditorHandler implements IDisposable {
     this._debuggerService = options.debuggerService;
     this._editor = options.getEditor;
     // A console prompt can keep the code of the cell that just ran.
-    this._ranPaths = Private.getRanPaths(this._debuggerService);
+    this._ranCode = Private.getRanCode(this._debuggerService);
 
     // The cell may have run, or be running, before the debugger started.
     const src = this._src;
@@ -64,7 +64,7 @@ export class EditorHandler implements IDisposable {
       ('execution_count' in src && typeof src.execution_count === 'number') ||
       ('executionState' in src && src.executionState === 'running')
     ) {
-      this._ranPaths.add(this._debuggerService.getCodeId(src.getSource()));
+      this._ranCode.add(src.getSource());
     }
     // After a reload, a move or an undone deletion, the kernel may already
     // hold breakpoints of this code, and an edit or a deletion clears them.
@@ -234,9 +234,10 @@ export class EditorHandler implements IDisposable {
     if (this.isDisposed || this._path || this._lastCode === null) {
       return [];
     }
-    const path = this._debuggerService.getCodeId(this._lastCode);
+    const code = this._lastCode;
     this._lastCode = null;
-    if (!path || !this._canClear(path)) {
+    const path = this._debuggerService.getCodeId(code);
+    if (!path || !this._canClear(code)) {
       return [];
     }
     const breakpoints = this._debuggerService.model.breakpoints
@@ -310,9 +311,7 @@ export class EditorHandler implements IDisposable {
    */
   private _onSharedModelChanged(sender: ISharedText, change: CellChange): void {
     if (change.executionStateChange?.newValue === 'running') {
-      this._ranPaths.add(
-        this._debuggerService.getCodeId(this._src.getSource())
-      );
+      this._ranCode.add(this._src.getSource());
     }
     if (change.sourceChange) {
       this._sourceChanged.emit();
@@ -351,7 +350,7 @@ export class EditorHandler implements IDisposable {
     let previous: string | null = null;
     if (!this._path) {
       if (this._lastCode !== null && this._lastCode !== code) {
-        previous = this._debuggerService.getCodeId(this._lastCode);
+        previous = this._lastCode;
       }
       this._lastCode = code;
     }
@@ -362,8 +361,12 @@ export class EditorHandler implements IDisposable {
     );
     // Clear last: each reply redraws the gutter from the model, which holds
     // the breakpoints of the new code only once the update is done.
-    if (previous && this._canClear(previous)) {
-      await this._debuggerService.updateBreakpoints('', [], previous);
+    if (previous !== null && this._canClear(previous)) {
+      await this._debuggerService.updateBreakpoints(
+        '',
+        [],
+        this._debuggerService.getCodeId(previous)
+      );
     }
   }
 
@@ -372,18 +375,17 @@ export class EditorHandler implements IDisposable {
    * clear: code that ran can still run, and the code cells of a notebook
    * that have the same code share one file.
    */
-  private _canClear(path: string): boolean {
+  private _canClear(code: string): boolean {
+    const path = this._debuggerService.getCodeId(code);
     const breakpoints = this._debuggerService.model.breakpoints;
-    if (this._ranPaths.has(path) || !breakpoints.getBreakpoints(path).length) {
+    if (this._ranCode.has(code) || !breakpoints.getBreakpoints(path).length) {
       return false;
     }
     const src = this._src;
     const cells = Private.isCell(src) ? (src.notebook?.cells ?? []) : [];
     return !cells.some(
       cell =>
-        cell !== src &&
-        cell.cell_type === 'code' &&
-        this._debuggerService.getCodeId(cell.getSource()) === path
+        cell !== src && cell.cell_type === 'code' && cell.getSource() === code
     );
   }
 
@@ -582,7 +584,7 @@ export class EditorHandler implements IDisposable {
   private _src: ISharedText;
   private _selectedBreakpoint: IDebugger.IBreakpoint | null;
   private _lastCode: string | null = null;
-  private _ranPaths: Set<string>;
+  private _ranCode: Set<string>;
 }
 
 /**
@@ -723,18 +725,21 @@ namespace Private {
     }
   })();
 
-  const ranPaths = new WeakMap<IDebugger, Set<string>>();
+  const ranCode = new WeakMap<IDebugger, Set<string>>();
 
   /**
-   * Get the files of the code that ran in any cell of a debugger service.
+   * Get the code that ran in any cell of a debugger service.
+   *
+   * After a kernel restart, cells can run before the debugger has the folder
+   * of the new kernel's code files, so this holds the code itself.
    */
-  export function getRanPaths(service: IDebugger): Set<string> {
-    let paths = ranPaths.get(service);
-    if (!paths) {
-      paths = new Set<string>();
-      ranPaths.set(service, paths);
+  export function getRanCode(service: IDebugger): Set<string> {
+    let code = ranCode.get(service);
+    if (!code) {
+      code = new Set<string>();
+      ranCode.set(service, code);
     }
-    return paths;
+    return code;
   }
 
   /**
