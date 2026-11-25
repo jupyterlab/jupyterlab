@@ -694,12 +694,18 @@ export abstract class WindowedListModel implements WindowedList.IModel {
           measured = true;
         } else {
           const widget = this.widgetRenderer(i);
-          if (widget?.node && widget.node.isConnected) {
-            size = widget.node.getBoundingClientRect().height;
+          const isConnected = !!widget?.node?.isConnected;
+          const height = isConnected
+            ? widget.node.getBoundingClientRect().height
+            : 0;
+          // Hidden widgets are empty; items kept out of view have an unknown height
+          if (height > 0 || (isConnected && widget.isHidden)) {
+            size = height;
             measured = true;
           } else {
             size = this.estimateWidgetSize(i);
-            measured = false;
+            // The resize observer measures the item once it is in view
+            measured = isConnected;
           }
         }
 
