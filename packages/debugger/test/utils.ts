@@ -90,13 +90,9 @@ export function handleRequest(item: IService, status: number, body: any): void {
 
 /**
  * Give a debugger service a started session with a fake kernel that keeps
- * the breakpoints of each file, and return those breakpoints by file. The
- * history of the kernel lists the given code.
+ * the breakpoints of each file, and return those breakpoints by file.
  */
-export function startTestSession(
-  service: IDebugger,
-  history: string[] = []
-): Map<string, number[]> {
+export function startTestSession(service: IDebugger): Map<string, number[]> {
   const kernel = 'python3';
   service.config.setHashParams({ kernel, method: 'Murmur2', seed: '0' });
   service.config.setTmpFileParams({
@@ -109,15 +105,7 @@ export function startTestSession(
     connection: {
       id: 'test',
       name: 'test.ipynb',
-      kernel: {
-        name: kernel,
-        requestHistory: async () => ({
-          content: {
-            status: 'ok',
-            history: history.map((input, index) => [0, index + 1, input])
-          }
-        })
-      }
+      kernel: { name: kernel }
     },
     isStarted: true,
     eventMessage: new Signal<unknown, IDebugger.ISession.Event>(service),

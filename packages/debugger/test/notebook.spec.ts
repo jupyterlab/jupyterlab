@@ -172,7 +172,6 @@ describe('NotebookHandler', () => {
       cell.executionCount = 1;
       cell.executionState = 'idle';
       cell.clearExecution();
-      kernel = startTestSession(service, [CODE]);
       handler = new NotebookHandler({
         debuggerService: service,
         widget: panel
