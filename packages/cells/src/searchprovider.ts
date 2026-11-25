@@ -851,15 +851,17 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
 
   /**
    * Whether the user can see the rendered match at the given index. A closed
-   * `<details>` element hides its content, and a style can hide rendered text,
-   * as it hides the source of a Mermaid diagram.
+   * `<details>` element hides its content, a text area shows its text without
+   * the mark of the match, and a style can hide rendered text, as it hides the
+   * source of a Mermaid diagram.
    */
   private _isRenderedMatchVisible(index: number): boolean {
     const element = this.renderedProvider.matches[index]?.node.parentElement;
     if (
       !element ||
       element.matches('details:not([open])') ||
-      element.closest('details:not([open]) > :not(summary)')
+      element.closest('details:not([open]) > :not(summary)') ||
+      element.closest('textarea')
     ) {
       return false;
     }
