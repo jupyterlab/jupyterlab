@@ -3916,6 +3916,27 @@ describe('@jupyterlab/notebook', () => {
         expect(cell.model.outputs.length).toBe(0);
         expect(outputsAfter.length).toBe(0);
       });
+
+      it('should not restore executionCount when moving a cleared cell', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        const cellId = cell.model.id;
+        widget.activeCellIndex = 0;
+        const future = createResolvedFuture(1);
+        cell.outputArea.reattachFuture(future);
+        cell.model.executionCount = 1;
+        cell.model.executionState = 'idle';
+
+        NotebookActions.clearOutputs(widget);
+        expect(cell.model.executionCount).toBeNull();
+
+        NotebookActions.moveDown(widget);
+        await Promise.resolve();
+
+        const movedCell = widget.widgets.find(
+          w => w.model.id === cellId
+        ) as CodeCell;
+        expect(movedCell.model.executionCount).toBeNull();
+      });
     });
 
     describe('#clearAllOutputs()', () => {
@@ -3945,6 +3966,27 @@ describe('@jupyterlab/notebook', () => {
         widget.model = null;
         NotebookActions.clearAllOutputs(widget);
         expect(widget.activeCellIndex).toBe(-1);
+      });
+
+      it('should not restore executionCount when moving a cell after clearing all outputs', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        const cellId = cell.model.id;
+        widget.activeCellIndex = 0;
+        const future = createResolvedFuture(1);
+        cell.outputArea.reattachFuture(future);
+        cell.model.executionCount = 1;
+        cell.model.executionState = 'idle';
+
+        NotebookActions.clearAllOutputs(widget);
+        expect(cell.model.executionCount).toBeNull();
+
+        NotebookActions.moveDown(widget);
+        await Promise.resolve();
+
+        const movedCell = widget.widgets.find(
+          w => w.model.id === cellId
+        ) as CodeCell;
+        expect(movedCell.model.executionCount).toBeNull();
       });
     });
 
