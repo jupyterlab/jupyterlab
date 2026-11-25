@@ -2760,6 +2760,8 @@ namespace Private {
       KernelMessage.IExecuteReplyMsg
     >;
     isDone: () => boolean;
+    /** When the execution stopped without a reply, as on a kernel restart. */
+    failedAt: () => string | undefined;
     /**
      * Kernel messages (IOPub, stdin and reply) that arrived while the future
      * was detached, in arrival order, so they can be replayed on reattach.
@@ -2809,12 +2811,10 @@ namespace Private {
    */
   export function syncExecutionStateWithFuture(
     cell: CodeCell,
-    future: Kernel.IShellFuture<
-      KernelMessage.IExecuteRequestMsg,
-      KernelMessage.IExecuteReplyMsg
-    >,
+    storedExecution: IStoredCellExecution,
     recordTiming: boolean
   ): void {
+    const { future } = storedExecution;
     void future.done.then(
       reply => {
         if (!cell.isDisposed) {
@@ -2851,7 +2851,8 @@ namespace Private {
           ) {
             // Record the time when the cell execution was aborted
             const timing: JSONObject = {};
-            timing['execution_failed'] = new Date().toISOString();
+            timing['execution_failed'] =
+              storedExecution.failedAt() ?? new Date().toISOString();
             addTiming(cell, timing);
           }
         }
@@ -2956,12 +2957,14 @@ namespace Private {
     const displayIdMap = cell.outputArea.displayIdMap;
     const outputs = cell.model.outputs.toJSON();
     let done = false;
+    let failedAt: string | undefined;
     void future.done.then(
       () => {
         done = true;
       },
       () => {
         done = true;
+        failedAt = new Date().toISOString();
       }
     );
     const buffered: IBufferedMessage[] = [];
@@ -2979,6 +2982,7 @@ namespace Private {
       outputs,
       future,
       isDone: () => done,
+      failedAt: () => failedAt,
       buffered,
       displayIdMap,
       timing: cell.model.getMetadata('execution'),
@@ -3086,7 +3090,7 @@ namespace Private {
     }
     syncExecutionStateWithFuture(
       cell,
-      future,
+      storedExecution,
       // The restored timing of an execution that had ended is final.
       recordTiming && storedExecution.wasRunning
     );
@@ -3118,7 +3122,7 @@ namespace Private {
     }
     syncExecutionStateWithFuture(
       cell,
-      future,
+      storedExecution,
       // The restored timing of an execution that had ended is final.
       recordTiming && storedExecution.wasRunning
     );

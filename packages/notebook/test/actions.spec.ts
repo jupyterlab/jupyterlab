@@ -3528,6 +3528,39 @@ describe('@jupyterlab/notebook', () => {
         }
       });
 
+      it('should record the failure time of an execution stopped while its cell was deleted', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        cell.model.setMetadata('execution', {
+          'iopub.status.busy': '2026-01-01T00:00:00.000Z',
+          'iopub.execute_input': '2026-01-01T00:00:00.001Z'
+        });
+        cell.model.executionState = 'running';
+        let stop: (reason: Error) => void = () => undefined;
+        const stoppedFuture = {
+          ...createResolvedFuture(1, { recordTiming: true }),
+          done: new Promise<never>((_, reject) => {
+            stop = reject;
+          }),
+          isDisposed: true
+        };
+        cell.outputArea.reattachFuture(stoppedFuture);
+
+        NotebookActions.deleteCells(widget);
+        stop(new Error('Canceled future'));
+        await sleep(0);
+        const stoppedAt = Date.now();
+        await sleep(10);
+        NotebookActions.undo(widget);
+        const cellAfterUndo = widget.widgets[0] as CodeCell;
+        await sleep(10);
+
+        const failureTime = getTiming(cellAfterUndo)['execution_failed'];
+        expect(Date.parse(failureTime as string)).toBeLessThanOrEqual(
+          stoppedAt
+        );
+      });
+
       it.each(['type change', 'merge'])(
         'should restore finished output without a notification after undoing a %s',
         async action => {
