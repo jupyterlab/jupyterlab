@@ -920,11 +920,57 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           return;
         }
         NotebookActions.setHeadingCollapse(cell, collapsed, this);
+        if (!collapsed) {
+          this._sizeExpandedCells(cell);
+        }
         this._cellCollapsed.emit(cell);
       })
       .catch(error => {
         console.warn('Failed to resolve headings: ', error);
       });
+  }
+
+  /**
+   * Size the expanded cells that are out of view by their estimate.
+   *
+   * #### Notes
+   * The windowed list measured them at 0 px while they were hidden, and it
+   * measures them again only once it renders them.
+   *
+   * @param heading - Heading of the expanded section
+   */
+  private _sizeExpandedCells(heading: Cell): void {
+    const start = this.widgets.indexOf(heading) + 1;
+    if (
+      !this.viewModel.windowingActive ||
+      !(heading instanceof MarkdownCell) ||
+      start === 0
+    ) {
+      return;
+    }
+    const end = Math.min(start + heading.numberChildNodes, this.widgets.length);
+    const indices: number[] = [];
+    for (let index = start; index < end; index++) {
+      const cell = this.widgets[index];
+      if (!cell.isHidden && !cell.inViewport) {
+        indices.push(index);
+      }
+    }
+    // Cells above the view keep their size, so the visible cells do not move
+    if (
+      indices.length === 0 ||
+      this.viewModel.getSpan(indices[0], indices[0])[0] <
+        this.viewModel.scrollOffset
+    ) {
+      return;
+    }
+    this.viewModel.setWidgetSize(
+      indices.map(index => ({
+        index,
+        size: this.viewModel.estimateWidgetSize(index)
+      }))
+    );
+    this.update();
   }
 
   /**

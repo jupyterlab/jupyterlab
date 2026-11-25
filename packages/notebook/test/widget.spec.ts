@@ -2328,6 +2328,52 @@ describe('@jupyter/notebook', () => {
         }
       });
 
+      it('should size the cells of an expanded section that are out of view in full windowing mode', async () => {
+        const markdownParser: IMarkdownParser = {
+          render: async (content: string) =>
+            content.startsWith('# ') ? `<h1>${content.slice(2)}</h1>` : content,
+          getHeadingTokens: async (
+            content: string
+          ): Promise<IMarkdownHeadingToken[]> =>
+            content.startsWith('# ') ? [{ line: 0, raw: content }] : []
+        };
+        const widget = new Notebook({
+          ...options,
+          rendermime: rendermime.clone({ markdownParser }),
+          notebookConfig: { ...notebookConfig, windowingMode: 'full' }
+        });
+        widget.model = new NotebookModel();
+        widget.model.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Section', metadata: {} },
+            ...Array.from({ length: 3 }, (_, n) => ({
+              cell_type: 'code',
+              source: `# cell ${n + 1}`,
+              metadata: {},
+              outputs: [],
+              execution_count: null
+            }))
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+        const heading = widget.widgets[0] as MarkdownCell;
+        await heading.getHeadings();
+        NotebookActions.setHeadingCollapse(heading, true, widget);
+        // The windowed list measures the hidden cells it renders at 0 px
+        widget['viewModel'].setWidgetSize(
+          [1, 2, 3].map(index => ({ index, size: 0 }))
+        );
+
+        heading.headingCollapsed = false;
+        await heading.getHeadings();
+
+        expect(widget.widgets[3].isHidden).toBe(false);
+        expect(widget['viewModel'].getSpan(3, 3)[1]).toBe(39); // 1 line * 17 + 22
+        widget.dispose();
+      });
+
       it('should keep a cell visible when an idle callback runs between its type change and the next frame in full windowing mode', async () => {
         const idleCallbacks: IdleRequestCallback[] = [];
         const requestIdleCallback = jest
