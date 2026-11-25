@@ -957,7 +957,8 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * tags, HTML comments, the content of elements whose text the search in
    * the rendered text skips, such as the fallback text of a video, and the
    * info strings of code fences. A match starting in one of these ranges is
-   * not visible in the rendered text.
+   * not visible in the rendered text. Code shows the syntax as it is, so the
+   * ranges leave out code.
    *
    * @returns Source ranges the rendered text does not show.
    */
@@ -1022,27 +1023,17 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
         end: (match.index ?? 0) + match[0].length
       });
     }
-    // The info string of a code fence, such as the language of the code. A
-    // line in a code block can look like a fence too.
-    let fence: string | null = null;
-    let offset = 0;
-    for (const line of source.split('\n')) {
-      const marker = /^[ \t]{0,3}(`{3,}(?!`)|~{3,}(?!~))(.*)$/.exec(line);
-      if (marker && fence === null) {
-        fence = marker[1];
-        const end = offset + line.length;
-        ranges.push({ start: end - marker[2].length, end });
-      } else if (
-        marker &&
-        fence !== null &&
-        marker[1].startsWith(fence) &&
-        !marker[2].trim()
-      ) {
-        fence = null;
-      }
-      offset += line.length + 1;
-    }
-    return ranges;
+    // Code shows the syntax above as it is, as in `[docs](https://x.org)`.
+    // The info string of a code fence, such as the language of the code, is
+    // hidden.
+    const { code, infoStrings } = Private.findCode(source);
+    return [
+      ...ranges.filter(
+        ({ start }) =>
+          !code.some(range => start >= range.start && start < range.end)
+      ),
+      ...infoStrings
+    ];
   }
 
   protected renderedProvider: GenericSearchProvider;
@@ -1152,6 +1143,59 @@ namespace Private {
       end++;
     }
     return text.slice(start, end);
+  }
+
+  /**
+   * Find the code of a Markdown source: the lines between two code fences,
+   * the code spans outside them, and the info strings of the fences.
+   */
+  export function findCode(source: string): {
+    code: Array<{ start: number; end: number }>;
+    infoStrings: Array<{ start: number; end: number }>;
+  } {
+    const code: Array<{ start: number; end: number }> = [];
+    const infoStrings: Array<{ start: number; end: number }> = [];
+    // A line in a code block can look like a fence too
+    let fence: string | null = null;
+    let start = 0;
+    let offset = 0;
+    for (const line of source.split('\n')) {
+      const marker = /^[ \t]{0,3}(`{3,}(?!`)|~{3,}(?!~))(.*)$/.exec(line);
+      if (marker && fence === null) {
+        fence = marker[1];
+        const end = offset + line.length;
+        infoStrings.push({ start: end - marker[2].length, end });
+        start = end + 1;
+      } else if (
+        marker &&
+        fence !== null &&
+        marker[1].startsWith(fence) &&
+        !marker[2].trim()
+      ) {
+        fence = null;
+        code.push({ start, end: offset });
+      }
+      offset += line.length + 1;
+    }
+    if (fence !== null) {
+      code.push({ start, end: source.length });
+    }
+    // A backtick in a code block does not start a code span
+    let outside = source;
+    for (const block of code) {
+      outside =
+        outside.slice(0, block.start) +
+        ' '.repeat(block.end - block.start) +
+        outside.slice(block.end);
+    }
+    // A code span ends at a blank line
+    for (const span of outside.matchAll(
+      /(?<!`)(`+)(?!`)(?:(?!\n[ \t]*\n)[\s\S])*?[^`]\1(?!`)/g
+    )) {
+      const spanStart = span.index ?? 0;
+      code.push({ start: spanStart, end: spanStart + span[0].length });
+    }
+    return { code, infoStrings };
   }
 
   /**

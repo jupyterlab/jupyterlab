@@ -610,6 +610,22 @@ describe('cells/searchprovider', () => {
       provider.dispose();
     });
 
+    it('should not mark a link written in code for a match in a formula command', async () => {
+      // The formula hides its \lambda, while the code shows the link as it is
+      const source =
+        'Write `\\lambda` to get $\\lambda$, or link with `[docs](https://example.com/lambda)`.';
+      cell = createMarkdownCell(source, { markdownParser: FENCE_PARSER });
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/lambda/, {});
+
+      await provider.highlightNext();
+      const match = await provider.highlightNext();
+      expect(match?.position).toBe(source.indexOf('$\\lambda$') + 2);
+      provider.dispose();
+    });
+
     it('should not mark the number which the table of contents adds to a heading', async () => {
       // The rendered text shows no number of the ordered list
       const source = '# Setup\n\n1. Install the package.';
