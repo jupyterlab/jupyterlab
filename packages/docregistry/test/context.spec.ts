@@ -394,6 +394,45 @@ describe('docregistry/context', () => {
           get.mockImplementation(getImplementation);
         }
       });
+
+      it('should resolve if the file is renamed before its checkpoint is created', async () => {
+        const oldPath = context.path;
+        const newPath = UUID.uuid4() + '.txt';
+        await manager.contents.save(oldPath, {
+          type: factory.contentType,
+          format: factory.fileFormat,
+          content: 'foo'
+        });
+
+        const createCheckpoint = manager.contents
+          .createCheckpoint as jest.MockedFunction<
+          typeof manager.contents.createCheckpoint
+        >;
+        const createImplementation = createCheckpoint.getMockImplementation();
+        if (!createImplementation) {
+          throw new Error(
+            'Missing contents createCheckpoint mock implementation'
+          );
+        }
+        // The server fails to copy the file that the rename moved away.
+        createCheckpoint.mockImplementation(path =>
+          path === oldPath
+            ? Promise.reject(new Error('Unhandled error'))
+            : createImplementation(path)
+        );
+
+        try {
+          await expect(context.initialize(false)).resolves.not.toThrow();
+          await manager.contents.rename(oldPath, newPath);
+          expect(context.path).toBe(newPath);
+          expect(context.model.toString()).toBe('foo');
+          expect(
+            document.body.getElementsByClassName('jp-Dialog')
+          ).toHaveLength(0);
+        } finally {
+          createCheckpoint.mockImplementation(createImplementation);
+        }
+      });
     });
 
     describe('#disposed', () => {
