@@ -1593,9 +1593,6 @@ namespace Private {
       iframe.scrolling = 'auto';
 
       iframe.addEventListener('load', () => {
-        // Workaround needed by Firefox, to properly render svg inside
-        // iframes, see https://stackoverflow.com/questions/10177190/
-        // svg-dynamically-added-to-iframe-does-not-render-correctly
         if (this.isDisposed) {
           return;
         }
@@ -1614,7 +1611,9 @@ namespace Private {
             void this._wrapped.renderModel(this._model);
           }
         } else {
-          // Preserve the existing behavior for other MIME renderers.
+          // Workaround needed by Firefox, to properly render svg inside
+          // iframes, see https://stackoverflow.com/questions/10177190/
+          // svg-dynamically-added-to-iframe-does-not-render-correctly
           doc.open();
           doc.write(this._wrapped.node.innerHTML);
           doc.close();
