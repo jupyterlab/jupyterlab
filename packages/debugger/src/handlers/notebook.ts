@@ -35,6 +35,14 @@ export class NotebookHandler implements IDisposable {
     const notebook = this._notebookPanel.content;
     notebook.model!.cells.changed.connect(this._onCellsChanged, this);
 
+    // Undo must not restore breakpoints that Remove All Breakpoints removed.
+    const breakpoints = this._debuggerService.model.breakpoints;
+    breakpoints.restored.connect(() => {
+      if (breakpoints.breakpoints.size === 0) {
+        this._deletedBreakpoints.clear();
+      }
+    }, this);
+
     this._debuggerService.session?.eventMessage.connect((_, event) => {
       const session = this._debuggerService.session;
       const contextSession = this._notebookPanel.sessionContext.session;

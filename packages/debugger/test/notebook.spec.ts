@@ -269,6 +269,21 @@ describe('NotebookHandler', () => {
     expect(kernel.get(service.getCodeId(CODE))).toEqual([2]);
   });
 
+  it('should not restore the breakpoints of a cut cell after all breakpoints are removed', async () => {
+    const id = firstCell().id;
+    context.model.sharedModel.deleteCell(0);
+    await flushRequests();
+    await service.clearBreakpoints();
+    context.model.sharedModel.insertCell(0, {
+      id,
+      cell_type: 'code',
+      source: CODE
+    });
+    await flushRequests();
+
+    expect(kernel.has(service.getCodeId(CODE))).toBe(false);
+  });
+
   it('should clear the restored breakpoints of a pasted cell when it is edited', async () => {
     await cutAndPaste();
     firstCell().sharedModel.setSource('def f():\n    return 2');
