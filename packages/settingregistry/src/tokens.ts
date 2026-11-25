@@ -397,6 +397,11 @@ export namespace ISettingRegistry {
      * The type or types of the data.
      */
     type?: Primitive | Primitive[];
+
+    /**
+     * Tags that the Settings Editor search finds with `tag:<tag>`.
+     */
+    tags?: string[];
   }
 
   /**

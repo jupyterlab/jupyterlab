@@ -70,9 +70,9 @@ export interface IEntry {
   status: 'ok' | 'warning' | 'error' | 'deprecated' | null;
 
   /**
-   * The package type (prebuilt or source).
+   * The package type.
    */
-  pkg_type: 'prebuilt' | 'source';
+  pkg_type: 'prebuilt' | 'source' | 'language-pack';
 
   /**
    * The information about extension installation.
@@ -476,6 +476,16 @@ export class ListModel extends VDomModel {
   }
 
   /**
+   * Refresh the installed list and any available search results.
+   */
+  async refresh(): Promise<void> {
+    await this.refreshInstalled(true);
+    if (this.canInstall && this.isDisclaimed) {
+      await this._debouncedSearch.invoke(true);
+    }
+  }
+
+  /**
    * Fetch the list of installed extensions.
    *
    * @param force Force refreshing the list of installed packages
@@ -571,7 +581,10 @@ export class ListModel extends VDomModel {
   ): Promise<IActionReply> {
     const bodyJson: Record<string, string> = {
       cmd: action,
-      extension_name: entry.name
+      extension_name:
+        action === 'install' || action === 'uninstall'
+          ? Private.packageName(entry)
+          : entry.name
     };
 
     if (actionOptions.useVersion) {
@@ -689,7 +702,7 @@ export class ListModel extends VDomModel {
   private _installed: IEntry[];
   private _lastSearchResult: IEntry[];
   private _pendingActions: Promise<any>[] = [];
-  private _debouncedSearch: Debouncer<void, void>;
+  private _debouncedSearch: Debouncer<void, void, [force?: boolean]>;
 }
 
 /**
@@ -723,6 +736,21 @@ namespace Private {
    */
   export function installedComparator(a: IEntry, b: IEntry): number {
     return a.name.localeCompare(b.name);
+  }
+
+  /**
+   * Get the name of the Python package that installed an extension.
+   *
+   * #### Notes
+   * It can differ from the extension name: `jupyterlab-lsp` installs
+   * `@jupyter-lsp/jupyterlab-lsp`.
+   */
+  export function packageName(entry: IEntry): string {
+    const install = entry.install;
+    if (install?.packageManager === 'python' && install.packageName) {
+      return install.packageName;
+    }
+    return entry.name;
   }
 
   const LINK_PARSER = /<([^>]+)>; rel="([^"]+)",?/g;

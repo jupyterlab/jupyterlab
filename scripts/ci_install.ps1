@@ -29,6 +29,10 @@ if (-not (Test-Path Env:OPTIONAL_DEPENDENCIES)) {
 }
 # Keep OPTIONAL_DEPENDENCIES handling in sync with scripts/ci_install.sh.
 
+# The Linux lint job type checks `.d.ts` files: the Windows jobs build only to run tests.
+node scripts/ci_skip_lib_check.js
+if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
+
 # Show a verbose install if the install fails, for debugging
 uv pip install --system -e "${spec}" || uv pip install --verbose --system -e "${spec}"
 if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }

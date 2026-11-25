@@ -1042,12 +1042,21 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   ): Promise<void> {
     const startTime = Date.now();
     let cellIdx = 0;
+    // The list renders the cells in its window, and the removal below can hide them
+    const listRange =
+      this.notebookConfig.windowingMode === 'full'
+        ? this.viewModel.getRangeToRender({ virtual: true })
+        : null;
     while (
       Date.now() - startTime < remainingTime &&
       cellIdx < this.cellsArray.length
     ) {
       const cell = this.cellsArray[cellIdx];
-      if (cell.isPlaceholder()) {
+      const inListRange =
+        listRange !== null &&
+        cellIdx >= listRange[0] &&
+        cellIdx <= listRange[1];
+      if (cell.isPlaceholder() && !inListRange) {
         if (
           ['defer', 'full', 'contentVisibility'].includes(
             this.notebookConfig.windowingMode
@@ -1064,7 +1073,9 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
               this.layout.removeWidget(cell);
             });
           } else if (
-            this.notebookConfig.windowingMode === 'contentVisibility'
+            this.notebookConfig.windowingMode === 'contentVisibility' &&
+            // Cells in hidden notebooks do not have a measurable height.
+            this.isVisible
           ) {
             // Update height estimate in the view model
             const height = cell.node.getBoundingClientRect().height;
@@ -2488,6 +2499,11 @@ export class Notebook extends StaticNotebook {
       return;
     }
     let { cell, element } = result;
+
+    // Activating a markdown cell in edit mode would unrender the target.
+    this.setMode('command', { focus: false });
+    // Scroll anchoring is enabled only for the active cell.
+    this.activeCellIndex = this.widgets.indexOf(cell);
 
     if (!cell.inViewport) {
       await this.scrollToCell(cell, 'center');

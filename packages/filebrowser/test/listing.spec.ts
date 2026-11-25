@@ -3,6 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+import { Time } from '@jupyterlab/coreutils';
 import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
@@ -235,6 +236,22 @@ describe('filebrowser/listing', () => {
         await newNamePromise;
         const itemNode = dirListing['_items'][0];
         expect(itemNode.contains(document.activeElement)).toBe(true);
+      });
+
+      it('should keep the focus on an element focused during the rename', async () => {
+        const input = document.createElement('input');
+        document.body.appendChild(input);
+        dirListing.selectNext();
+        const newNamePromise = dirListing.rename();
+        const editNode = dirListing['_editNode'];
+        editNode.value = 'z.txt';
+        simulate(editNode, 'keydown', {
+          key: 'Enter'
+        });
+        input.focus();
+        await newNamePromise;
+        expect(document.activeElement).toBe(input);
+        input.remove();
       });
     });
 
@@ -1208,6 +1225,42 @@ describe('filebrowser/listing', () => {
             expect(Array.from(dirListing.selectedItems())).toHaveLength(0);
           });
         });
+      });
+    });
+
+    describe('last modified column', () => {
+      const ITEM_MODIFIED_CLASS = 'jp-DirListing-itemModified';
+
+      it('should pick the modified date style from the listing width', () => {
+        // jsdom does not load the stylesheet, and without this variable the
+        // listing does not fit its columns to its width.
+        dirListing.node.style.setProperty(
+          '--jp-dirlisting-padding-width',
+          '12px'
+        );
+        // The contents manager mock stamps `last_modified` with the current
+        // time, which reads "now" in every style.
+        const lastModified = new Date(2020, 0, 1).toISOString();
+        Object.assign([...dirListing.sortedItems()][0], {
+          last_modified: lastModified
+        });
+        const modifiedCell = dirListing.contentNode.children[0].querySelector(
+          `.${ITEM_MODIFIED_CLASS}`
+        )!;
+
+        const rendered: (string | null)[] = [];
+        // The modified column is then about 70, 110, 145 and 90 px wide.
+        for (const width of [200, 360, 500, 200]) {
+          dirListing.onResize(new Widget.ResizeMessage(width, -1));
+          rendered.push(modifiedCell.textContent);
+        }
+
+        expect(rendered).toEqual([
+          Time.formatHuman(lastModified, 'narrow'),
+          Time.formatHuman(lastModified, 'short'),
+          Time.formatHuman(lastModified, 'long'),
+          Time.formatHuman(lastModified, 'narrow')
+        ]);
       });
     });
 
