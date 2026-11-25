@@ -2651,117 +2651,111 @@ export class DirListing extends Widget {
    * Allow the user to rename item on a given row.
    */
   private async _doRename(): Promise<string> {
+    this._inRename = true;
+
     const selectedPaths = Object.keys(this.selection);
 
     // Bail out if nothing has been selected.
     if (selectedPaths.length === 0) {
-      return '';
+      this._inRename = false;
+      return Promise.resolve('');
     }
 
     // Figure out which selected path to use for the rename.
     const items = this._sortedItems;
-    const focusedItem = items[this._focusIndex];
-    // If the focused item is missing or not selected, use the last selection.
-    const path =
-      focusedItem && this.selection[focusedItem.path]
-        ? focusedItem.path
-        : selectedPaths[selectedPaths.length - 1];
+    let path = items[this._focusIndex]?.path;
+    if (!path || !this.selection[path]) {
+      // If the focused item is not selected, or is no longer listed after
+      // filtering or a refresh, then choose the last selected item.
+      path = selectedPaths.slice(-1)[0];
+    }
 
     // Get the corresponding model, nodes, and file name.
     const index = ArrayExt.findFirstIndex(items, value => value.path === path);
     const row = this._items[index];
     const item = items[index];
-    if (!item || !row) {
-      return '';
+    const nameNode = this.renderer.getNameNode(row);
+    const original = item.name;
+
+    // Seed the text input with current file name, and select and focus it.
+    this._editNode.value = original;
+    this._selectItem(index, false, true);
+
+    // Wait for user input
+    const newName = await Private.userInputForRename(
+      nameNode,
+      this._editNode,
+      original
+    );
+
+    // Check if the widget was disposed during the `await`.
+    if (this.isDisposed) {
+      this._inRename = false;
+      throw new Error('File browser is disposed.');
     }
 
-    this._inRename = true;
-    try {
-      const nameNode = this.renderer.getNameNode(row);
-      if (!nameNode) {
-        return '';
-      }
-      const original = item.name;
+    let finalFilename = newName;
 
-      // Seed the text input with current file name, and select and focus it.
-      this._editNode.value = original;
-      this._selectItem(index, false, true);
-
-      // Wait for user input
-      const newName = await Private.userInputForRename(
-        nameNode,
-        this._editNode,
-        original
+    if (!newName || newName === original) {
+      finalFilename = original;
+    } else if (!isValidFileName(newName)) {
+      void showErrorMessage(
+        this._trans.__('Rename Error'),
+        Error(
+          this._trans._p(
+            'showErrorMessage',
+            '"%1" is not a valid name for a file. Names must have nonzero length, and cannot include "/", "\\", or ":"',
+            newName
+          )
+        )
       );
+      finalFilename = original;
+    } else {
+      // Attempt rename at the file system level.
+
+      const manager = this._manager;
+      const oldPath = PathExt.join(this._model.path, original);
+      const newPath = PathExt.join(this._model.path, newName);
+      try {
+        await renameFile(manager, oldPath, newPath);
+      } catch (error) {
+        if (error !== 'File not renamed') {
+          void showErrorMessage(
+            this._trans._p('showErrorMessage', 'Rename Error'),
+            error instanceof Error ? error : String(error)
+          );
+        }
+        finalFilename = original;
+      }
 
       // Check if the widget was disposed during the `await`.
       if (this.isDisposed) {
+        this._inRename = false;
         throw new Error('File browser is disposed.');
       }
-
-      let finalFilename = newName;
-
-      if (!newName || newName === original) {
-        finalFilename = original;
-      } else if (!isValidFileName(newName)) {
-        void showErrorMessage(
-          this._trans.__('Rename Error'),
-          Error(
-            this._trans._p(
-              'showErrorMessage',
-              '"%1" is not a valid name for a file. Names must have nonzero length, and cannot include "/", "\\", or ":"',
-              newName
-            )
-          )
-        );
-        finalFilename = original;
-      } else {
-        // Attempt rename at the file system level.
-
-        const manager = this._manager;
-        const oldPath = PathExt.join(this._model.path, original);
-        const newPath = PathExt.join(this._model.path, newName);
-        try {
-          await renameFile(manager, oldPath, newPath);
-        } catch (error) {
-          if (error !== 'File not renamed') {
-            void showErrorMessage(
-              this._trans._p('showErrorMessage', 'Rename Error'),
-              error instanceof Error ? error : String(error)
-            );
-          }
-          finalFilename = original;
-        }
-
-        // Check if the widget was disposed during the `await`.
-        if (this.isDisposed) {
-          throw new Error('File browser is disposed.');
-        }
-      }
-
-      // If nothing else has been selected, then select the renamed file. In
-      // other words, don't select the renamed file if the user has clicked
-      // away to some other file.
-      if (
-        !this.isDisposed &&
-        Object.keys(this.selection).length === 1 &&
-        // We haven't updated the instance yet to reflect the rename, so unless
-        // the user or something else has updated the selection, the original file
-        // path and not the new file path will be in `this.selection`.
-        this.selection[item.path]
-      ) {
-        try {
-          await this._selectItemByName(finalFilename, true, true);
-        } catch {
-          // do nothing
-          console.warn('After rename, failed to select file', finalFilename);
-        }
-      }
-
-      return finalFilename;
-    } finally {
-      this._inRename = false;
     }
+
+    // If nothing else has been selected, then select the renamed file. In
+    // other words, don't select the renamed file if the user has clicked
+    // away to some other file.
+    if (
+      !this.isDisposed &&
+      Object.keys(this.selection).length === 1 &&
+      // We haven't updated the instance yet to reflect the rename, so unless
+      // the user or something else has updated the selection, the original file
+      // path and not the new file path will be in `this.selection`.
+      this.selection[item.path]
+    ) {
+      try {
+        await this._selectItemByName(finalFilename, true, true);
+      } catch {
+        // do nothing
+        console.warn('After rename, failed to select file', finalFilename);
+      }
+    }
+
+    this._inRename = false;
+    return finalFilename;
   }
 
   /**
