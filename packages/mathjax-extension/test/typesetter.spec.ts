@@ -104,6 +104,14 @@ describe('@jupyterlab/mathjax-extension', () => {
         );
       });
 
+      it('should not let TeX set data attributes', async () => {
+        const host = document.createElement('div');
+        host.textContent = '$\\data{example=1}{x}$';
+        document.body.appendChild(host);
+        await typesetter.typeset(host);
+        expect(host.querySelector('[data-example]')).toBeNull();
+      });
+
       it('should draw mhchem reaction arrows with a bundled font', async () => {
         const host = document.createElement('div');
         host.textContent = '$\\ce{A -> B <=> C}$';
