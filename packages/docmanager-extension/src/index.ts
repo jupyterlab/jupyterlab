@@ -21,7 +21,8 @@ import {
   Notification,
   SessionContextDialogs,
   showDialog,
-  showErrorMessage
+  showErrorMessage,
+  ToolbarRegistry
 } from '@jupyterlab/apputils';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PathExt, Time } from '@jupyterlab/coreutils';
@@ -643,13 +644,17 @@ export namespace ToolbarItems {
    */
   export function createSaveButton(
     commands: CommandRegistry,
-    fileChanged: ISignal<any, Omit<Contents.IModel, 'content'>>
+    fileChanged: ISignal<any, Omit<Contents.IModel, 'content'>>,
+    widgetId?: string
   ): Widget {
     return new CommandToolbarButton({
       commands,
       id: CommandIDs.save,
       label: '',
-      args: { toolbar: true },
+      args: {
+        toolbar: true,
+        ...(widgetId ? { [ToolbarRegistry.WIDGET_ID_ARG]: widgetId } : {})
+      },
       additionalSignals: [fileChanged]
     });
   }
@@ -700,17 +705,35 @@ function addCommands(
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
   const category = trans.__('File Operations');
-  const isEnabled = () => {
-    const { currentWidget } = shell;
-    return !!(currentWidget && docManager.contextForWidget(currentWidget));
+
+  /**
+   * Get a widget in shell using the ToolbarRegistry.WIDGET_ID_ARG defined in args if
+   * available. Fallback to the current widget.
+   */
+  const getWidget = (args?: ReadonlyPartialJSONObject): Widget | null => {
+    let widget = shell.currentWidget;
+    if (args?.[ToolbarRegistry.WIDGET_ID_ARG]) {
+      for (let w of shell.widgets()) {
+        if (w.id === args[ToolbarRegistry.WIDGET_ID_ARG]) {
+          widget = w;
+          break;
+        }
+      }
+    }
+    return widget;
   };
 
-  const isWritable = () => {
-    const { currentWidget } = shell;
-    if (!currentWidget) {
+  const isEnabled = (args?: ReadonlyPartialJSONObject) => {
+    const widget = getWidget(args);
+    return !!(widget && docManager.contextForWidget(widget));
+  };
+
+  const isWritable = (args?: ReadonlyPartialJSONObject) => {
+    const widget = getWidget(args);
+    if (!widget) {
       return false;
     }
-    const context = docManager.contextForWidget(currentWidget);
+    const context = docManager.contextForWidget(widget);
     return !!context?.contentsModel?.writable;
   };
 
@@ -968,9 +991,9 @@ function addCommands(
         properties: {}
       }
     },
-    execute: () => {
-      // Checks that shell.currentWidget is valid:
-      if (!isEnabled()) {
+    execute: args => {
+      // Checks that the widget is valid:
+      if (!isEnabled(args)) {
         return;
       }
       const context = docManager.contextForWidget(shell.currentWidget!);
@@ -1020,9 +1043,9 @@ function addCommands(
         properties: {}
       }
     },
-    execute: () => {
-      // Checks that shell.currentWidget is valid:
-      if (!isEnabled()) {
+    execute: args => {
+      // Checks that the widget is valid:
+      if (!isEnabled(args)) {
         return;
       }
       const context = docManager.contextForWidget(shell.currentWidget!);
@@ -1079,13 +1102,11 @@ function addCommands(
     }
   });
 
-  const caption = () => {
-    if (shell.currentWidget) {
-      if (!isWritable()) {
-        return trans.__(
-          `Document is read-only. "Save" is disabled; use "Save as…" instead`
-        );
-      }
+  const caption = (args?: ReadonlyPartialJSONObject) => {
+    if (!isWritable(args)) {
+      return trans.__(
+        `Document is read-only. "Save" is disabled; use "Save as…" instead`
+      );
     }
 
     return trans.__('Save and create checkpoint');
@@ -1102,12 +1123,12 @@ function addCommands(
         return (args._luminoEvent as ReadonlyPartialJSONObject).type ===
           'keybinding'
           ? true
-          : isWritable();
+          : isWritable(args);
       } else {
-        return isWritable();
+        return isWritable(args);
       }
     },
-    isVisible: args => !args.toolbar || isWritable(),
+    isVisible: args => !args.toolbar || isWritable(args),
     describedBy: {
       args: {
         type: 'object',
@@ -1125,9 +1146,9 @@ function addCommands(
     },
     execute: async args => {
       // Checks that shell.currentWidget is valid:
-      const widget = shell.currentWidget;
+      const widget = getWidget(args);
       const context = docManager.contextForWidget(widget!);
-      if (isEnabled()) {
+      if (isEnabled(args)) {
         if (!context) {
           return showDialog({
             title: trans.__('Cannot Save'),
@@ -1270,9 +1291,9 @@ function addCommands(
         properties: {}
       }
     },
-    execute: () => {
-      // Checks that shell.currentWidget is valid:
-      if (isEnabled()) {
+    execute: args => {
+      // Checks that the widget is valid:
+      if (isEnabled(args)) {
         const context = docManager.contextForWidget(shell.currentWidget!);
         if (!context) {
           return showDialog({
