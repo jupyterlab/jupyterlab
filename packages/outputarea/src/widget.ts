@@ -745,11 +745,7 @@ export class OutputArea extends Widget {
     );
     trimmedWidget?.dispose();
 
-    for (
-      let idx = lastShown;
-      idx < Math.min(this.model.length, this._maxNumberOutputs + 1);
-      idx++
-    ) {
+    for (let idx = lastShown; idx < this.model.length; idx++) {
       this._insertOutput(idx, this.model.get(idx));
     }
 
