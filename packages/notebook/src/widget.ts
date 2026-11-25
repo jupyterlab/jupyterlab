@@ -3179,10 +3179,7 @@ export class Notebook extends StaticNotebook {
         // Bail early
         continue;
       }
-      const headings =
-        cell.model.type === 'markdown'
-          ? await (cell as MarkdownCell).getHeadings()
-          : cell.headings;
+      const headings = await cell.getHeadings();
       for (const heading of headings) {
         let id: string | undefined | null = '';
         switch (heading.type) {

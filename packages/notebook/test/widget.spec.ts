@@ -1473,6 +1473,28 @@ describe('@jupyter/notebook', () => {
         widget.dispose();
       });
 
+      it('should scroll to a heading in a code cell output', async () => {
+        const { widget } = createNotebook('none');
+        jest.spyOn(widget, 'scrollToItem').mockResolvedValue();
+        widget.model!.sharedModel.insertCell(widget.widgets.length, {
+          cell_type: 'code',
+          source: 'show()',
+          outputs: [
+            {
+              output_type: 'display_data',
+              data: { 'text/markdown': '## Output section' },
+              metadata: {}
+            }
+          ]
+        });
+        const cell = widget.widgets[widget.widgets.length - 1];
+
+        await widget.setFragment('#heading=Output-section');
+
+        expect(cell.node.contains(scrollIntoView.mock.contexts[0])).toBe(true);
+        widget.dispose();
+      });
+
       it('should scroll to an element with an unprefixed id', async () => {
         const warn = jest.spyOn(console, 'warn').mockImplementation();
         const { widget } = createNotebook('none');
