@@ -2258,6 +2258,76 @@ describe('@jupyter/notebook', () => {
         }
       );
 
+      it('should not keep the height a cell measured while hidden once it is shown in full windowing mode', async () => {
+        const idleCallbacks: IdleRequestCallback[] = [];
+        const requestIdleCallback = jest
+          .spyOn(window, 'requestIdleCallback')
+          .mockImplementation(callback => {
+            idleCallbacks.push(callback);
+            return idleCallbacks.length;
+          });
+        const widget = createActiveWidget();
+        try {
+          widget.notebookConfig = {
+            ...widget.notebookConfig,
+            windowingMode: 'full'
+          };
+          widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+          Widget.attach(widget, document.body);
+          // The cells under a collapsed heading are hidden
+          const last = widget.widgets.length - 1;
+          const hidden = widget.widgets.slice(1);
+          hidden.forEach(cell => cell.setHidden(true));
+          // Render every cell once, as the idle callbacks do after a notebook opens
+          while (idleCallbacks.length) {
+            for (const callback of idleCallbacks.splice(0)) {
+              callback({ didTimeout: false, timeRemaining: () => 50 });
+            }
+            await framePromise();
+          }
+          hidden.forEach(cell => cell.setHidden(false));
+          expect(widget['viewModel'].estimateWidgetSize(last)).toBeGreaterThan(
+            0
+          );
+        } finally {
+          widget.dispose();
+          requestIdleCallback.mockRestore();
+        }
+      });
+
+      it('should not give a hidden cell the height it measured while hidden in content visibility mode', async () => {
+        const idleCallbacks: IdleRequestCallback[] = [];
+        const requestIdleCallback = jest
+          .spyOn(window, 'requestIdleCallback')
+          .mockImplementation(callback => {
+            idleCallbacks.push(callback);
+            return idleCallbacks.length;
+          });
+        const widget = createActiveWidget();
+        try {
+          widget.notebookConfig = {
+            ...widget.notebookConfig,
+            windowingMode: 'contentVisibility'
+          };
+          widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+          Widget.attach(widget, document.body);
+          // The cells under a collapsed heading are hidden
+          const last = widget.widgets[widget.widgets.length - 1];
+          widget.widgets.slice(1).forEach(cell => cell.setHidden(true));
+          // Render every cell once, as the idle callbacks do after a notebook opens
+          while (idleCallbacks.length) {
+            for (const callback of idleCallbacks.splice(0)) {
+              callback({ didTimeout: false, timeRemaining: () => 50 });
+            }
+            await framePromise();
+          }
+          expect(last.node.style.containIntrinsicSize).not.toBe('auto 0px');
+        } finally {
+          widget.dispose();
+          requestIdleCallback.mockRestore();
+        }
+      });
+
       it('should keep a cell visible when an idle callback runs between its type change and the next frame in full windowing mode', async () => {
         const idleCallbacks: IdleRequestCallback[] = [];
         const requestIdleCallback = jest
