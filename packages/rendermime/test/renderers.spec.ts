@@ -2,7 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Sanitizer } from '@jupyterlab/apputils';
-import { renderText } from '@jupyterlab/rendermime';
+import { MimeModel, RenderedText, renderText } from '@jupyterlab/rendermime';
+import { Widget } from '@lumino/widgets';
 
 // Keep in sync with `AUTO_LINK_STRIDE` in `src/renderers.ts`: each incremental
 // auto-linking step advances to the first whitespace at or after this offset.
@@ -194,46 +195,85 @@ describe('@jupyterlab/rendermime', () => {
       detached.remove();
     });
 
-    it('clears the first-paint watchdog when a never-attached host gives up', async () => {
-      // A host that is discarded before ever being attached (e.g. a completer
-      // documentation node replaced while typing) stops rendering after a
-      // bounded number of frames. The first-paint watchdog must be cleared on
-      // that path too. The leak only shows while animation frames keep being
-      // produced (a healthy foreground tab): the watchdog then never
-      // force-paints (it only acts under frame starvation) and instead keeps
-      // re-arming its timer - and strongly referencing the host - forever. A
-      // second, still-rendering host keeps the frames alive here; without it
-      // the very next tick would see the frames as starved, force-paint into
-      // the give-up path and dissolve on its own, masking the leak.
-      const sanitizer = new Sanitizer();
-      const neverAttached = document.createElement('div');
-      const laterStarted = document.createElement('div');
+    it('paints a renderer widget attached after more than 1,000 frames', async () => {
+      // A windowed notebook creates the outputs of a cell before it attaches
+      // the cell, and it attaches cells in idle time, which a busy page can
+      // delay by more than 1,000 frames. Collapsed outputs are attached only
+      // when they are expanded.
+      const widget = new RenderedText({
+        mimeType: 'text/plain',
+        sanitizer: new Sanitizer(),
+        resolver: null,
+        linkHandler: null,
+        latexTypesetter: null
+      });
+      void widget.renderModel(
+        new MimeModel({ data: { 'text/plain': 'see www.example.com here' } })
+      );
 
+      // About 1,250 frames at ~16ms per fake-timer frame.
+      jest.advanceTimersByTime(20000);
+      Widget.attach(widget, document.body);
+      jest.runAllTimers();
+
+      expect(widget.node.textContent).toBe('see www.example.com here');
+      widget.dispose();
+    });
+
+    it('resolves the render promise while the host waits to be attached', async () => {
+      // The debugger variable viewer attaches the renderer widget only after
+      // `renderModel()` resolves.
+      const detached = document.createElement('div');
+      let resolved = false;
       void renderText({
-        host: neverAttached,
-        sanitizer,
+        host: detached,
+        sanitizer: new Sanitizer(),
+        source: 'see www.example.com here'
+      }).then(() => {
+        resolved = true;
+      });
+
+      jest.advanceTimersByTime(100);
+      for (let i = 0; i < 5; i++) {
+        await Promise.resolve();
+      }
+
+      expect(resolved).toBe(true);
+    });
+
+    it('keeps a single timer for hosts waiting to be attached', async () => {
+      // A notebook can create thousands of outputs before it attaches their
+      // cells. A frame request and a watchdog timer for each output fill every
+      // frame, which delays the idle callbacks that attach the cells.
+      const sanitizer = new Sanitizer();
+      for (let i = 0; i < 10; i++) {
+        void renderText({
+          host: document.createElement('div'),
+          sanitizer,
+          source: `output ${i}`
+        });
+      }
+
+      // Past the first frame and the first watchdog tick.
+      jest.advanceTimersByTime(200);
+
+      expect(jest.getTimerCount()).toBe(1);
+    });
+
+    it('stops checking a never-attached host after a bounded number of frames', async () => {
+      // A host that is discarded before ever being attached (e.g. a completer
+      // documentation node replaced while typing) must not keep a frame
+      // request or a timer alive, as either would also keep the host in memory.
+      void renderText({
+        host: document.createElement('div'),
+        sanitizer: new Sanitizer(),
         source: 'see www.example.com here'
       });
 
-      // Let the first render burn through half of its allotted frames, then
-      // start the second one so that it is still producing frames (each host
-      // gets ~1000 frames at ~16ms per fake-timer frame) when the first gives
-      // up.
-      jest.advanceTimersByTime(8000);
-      void renderText({
-        host: laterStarted,
-        sanitizer,
-        source: 'other www.example.org output'
-      });
+      // About 1,900 frames at ~16ms per fake-timer frame.
+      jest.advanceTimersByTime(30000);
 
-      // Advance to a point where the first render has given up while the
-      // second is still running.
-      jest.advanceTimersByTime(13000);
-      expect(neverAttached.textContent).toBe('');
-
-      // Only the second render's timers may remain: its frame request and its
-      // watchdog. A third pending timer is the first render's leaked watchdog.
-      expect(jest.getTimerCount()).toBe(2);
+      expect(jest.getTimerCount()).toBe(0);
     });
 
     it('reuses a single persistent intersection observer while streaming', async () => {
