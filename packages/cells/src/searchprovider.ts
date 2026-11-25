@@ -998,7 +998,8 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     const candidates = inFormula[place.formula];
     if (
       inFormula.length !== place.formulas ||
-      candidates?.length !== place.count
+      candidates?.length !== place.count ||
+      Private.inStackedParts(candidates.map(index => rendered[index]))
     ) {
       return undefined;
     }
@@ -1075,6 +1076,48 @@ namespace Private {
       .replace(/\u2032/g, "'")
       .replace(/\u2061(?=[\p{L}\p{N}])/gu, ' ')
       .replace(/\u2061/g, '');
+  }
+
+  /**
+   * The elements of a typeset formula which stack their parts. They put the
+   * upper part first, whichever part the source writes first: `mjx-script`
+   * holds the superscript and the subscript of a base, and the others hold
+   * the parts over and under an operator, as in `\sum_{i=1}^{n}`.
+   */
+  const STACKS = new Set([
+    'MJX-SCRIPT',
+    'MJX-MOVER',
+    'MJX-MUNDER',
+    'MJX-MUNDEROVER',
+    'MJX-MMULTISCRIPTS'
+  ]);
+
+  /**
+   * Whether two matches of a typeset formula are in different parts of a
+   * stack, so that their order can differ from the order of the source: the
+   * formula `x_a^a` shows its superscript first.
+   *
+   * @param matches - The matches of one formula, in the order of the text.
+   */
+  export function inStackedParts(matches: IHTMLSearchMatch[]): boolean {
+    for (let i = 1; i < matches.length; i++) {
+      const ancestors = new Set<Element>();
+      for (
+        let element = matches[i - 1].node.parentElement;
+        element;
+        element = element.parentElement
+      ) {
+        ancestors.add(element);
+      }
+      let common = matches[i].node.parentElement;
+      while (common && !ancestors.has(common)) {
+        common = common.parentElement;
+      }
+      if (common && STACKS.has(common.nodeName)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

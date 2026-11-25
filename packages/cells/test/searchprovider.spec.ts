@@ -66,9 +66,10 @@ const FENCE_PARSER: IRenderMime.IMarkdownParser = {
 };
 
 /**
- * A typesetter which draws the formulas `$x$`, `$n-1$` and `$\lambda$` as
- * MathJax does: each character is a mathematical symbol, such as 𝑥, in a text
- * node of its own.
+ * A typesetter which draws the formulas `$x$`, `$x_a^a$`, `$n-1$` and
+ * `$\lambda$` as MathJax does: each character is a mathematical symbol, such
+ * as 𝑥, in a text node of its own, and a superscript comes before the
+ * subscript of the same base.
  */
 const FORMULA_TYPESETTER: IRenderMime.ILatexTypesetter = {
   typeset: host => {
@@ -84,6 +85,16 @@ const FORMULA_TYPESETTER: IRenderMime.ILatexTypesetter = {
         '$x$',
         '<mjx-container class="MathJax" jax="CHTML"><mjx-math>' +
           '<mjx-mi><mjx-c>𝑥</mjx-c></mjx-mi></mjx-math></mjx-container>'
+      );
+    }
+    if (host.innerHTML.includes('$x_a^a$')) {
+      host.innerHTML = host.innerHTML.replace(
+        '$x_a^a$',
+        '<mjx-container class="MathJax" jax="CHTML"><mjx-math><mjx-msubsup>' +
+          '<mjx-mi><mjx-c>𝑥</mjx-c></mjx-mi><mjx-script>' +
+          '<mjx-mi><mjx-c>𝑎</mjx-c></mjx-mi><mjx-spacer></mjx-spacer>' +
+          '<mjx-mi><mjx-c>𝑎</mjx-c></mjx-mi></mjx-script></mjx-msubsup>' +
+          '</mjx-math></mjx-container>'
       );
     }
     if (host.innerHTML.includes('$n-1$')) {
@@ -697,6 +708,20 @@ describe('cells/searchprovider', () => {
       const match = await provider.highlightNext();
       expect(match?.text).toBe('𝑛−1');
       expect(cell.rendered).toBe(true);
+      provider.dispose();
+    });
+
+    it('should unrender the cell for a match in a subscript which the formula shows after the superscript', async () => {
+      const source = 'Sum $x_a^a$ here.';
+      cell = createMarkdownCell(source);
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/a/, {});
+
+      const match = await provider.highlightNext();
+      expect(match?.position).toBe(source.indexOf('_a') + 1);
+      expect(cell.rendered).toBe(false);
       provider.dispose();
     });
 
