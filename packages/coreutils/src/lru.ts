@@ -40,7 +40,7 @@ export class LruCache<T, U> {
    * Get a value (or null) from the cache, pushing the item to the front of the cache.
    */
   get(key: T): U | null {
-    const item = this._map.get(key) || null;
+    const item = this._map.get(key) ?? null;
     if (item != null) {
       this._map.delete(key);
       this._map.set(key, item);
