@@ -2459,7 +2459,10 @@ export namespace NotebookActions {
       // Defer until subCell's asynchronous heading parsing is complete
       if (subCellHeadingInfo.headingLevel === -1 && !isHeadingResolved) {
         requestAnimationFrame(() => {
-          setHeadingCollapse(cell, collapsing, notebook);
+          // A later call may have set the other state in the meantime.
+          if (cell.headingCollapsed === collapsing) {
+            setHeadingCollapse(cell, collapsing, notebook);
+          }
         });
         break;
       }

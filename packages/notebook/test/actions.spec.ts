@@ -34,6 +34,7 @@ import type { YNotebook } from '@jupyter/ydoc';
 import {
   acceptDialog,
   dismissDialog,
+  framePromise,
   JupyterServer,
   signalToPromise,
   sleep,
@@ -1137,6 +1138,33 @@ describe('@jupyterlab/notebook', () => {
         // Selection should remain unchanged
         expect(widget.selectedCells.length).toBe(initialSelectedCount);
         expect(widget.isSelected(widget.widgets[3])).toBe(true);
+      });
+    });
+
+    describe('#setHeadingCollapse()', () => {
+      it('should not collapse a heading again after it was expanded', async () => {
+        widget.model!.fromJSON({
+          cells: [
+            { cell_type: 'markdown', source: '# Heading', metadata: {} },
+            { cell_type: 'markdown', source: 'Text', metadata: {} }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+        const [heading, child] = widget.widgets as MarkdownCell[];
+        jest
+          .spyOn(heading, 'headingInfo', 'get')
+          .mockReturnValue({ text: 'Heading', level: 1 });
+        // The child has no parsed headings yet, so the collapse is retried.
+        NotebookActions.setHeadingCollapse(heading, true, widget);
+        jest.spyOn(child, 'headingsResolved', 'get').mockReturnValue(true);
+        NotebookActions.setHeadingCollapse(heading, false, widget);
+
+        await framePromise();
+
+        expect(heading.headingCollapsed).toBe(false);
+        expect(child.isHidden).toBe(false);
       });
     });
 
