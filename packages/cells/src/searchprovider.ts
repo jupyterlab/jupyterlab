@@ -874,10 +874,17 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     ) {
       return false;
     }
-    // The style of the match is not known for a cell outside the document,
-    // nor for a hidden cell, as in a background tab
-    if (!element.isConnected || !(this.cell.node.checkVisibility?.() ?? true)) {
+    // The style of the match is not known for a cell outside the document
+    if (!element.isConnected) {
       return true;
+    }
+    if (!(this.cell.node.checkVisibility?.() ?? true)) {
+      // A background tab or a collapsed section hides the cell for now: check
+      // only the style of the rendered text
+      return Private.isShownWithin(
+        element,
+        (this.cell as MarkdownCell).renderer.node
+      );
     }
     // `visibility: hidden` and `opacity: 0` keep the box of the text, and hide
     // its mark too
@@ -1118,6 +1125,32 @@ namespace Private {
       }
     }
     return false;
+  }
+
+  /**
+   * Whether the style of an element and of its ancestors up to a root shows
+   * the element, whether the root itself is shown or not.
+   *
+   * @param element - The element to check.
+   * @param root - The ancestor at which the check stops.
+   */
+  export function isShownWithin(element: Element, root: Element): boolean {
+    // `visibility` is inherited, unlike `display` and `opacity`
+    const { visibility } = getComputedStyle(element);
+    if (visibility === 'hidden' || visibility === 'collapse') {
+      return false;
+    }
+    for (
+      let current: Element | null = element;
+      current && current !== root.parentElement;
+      current = current.parentElement
+    ) {
+      const { display, opacity } = getComputedStyle(current);
+      if (display === 'none' || opacity === '0') {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**

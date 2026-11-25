@@ -340,6 +340,24 @@ describe('cells/searchprovider', () => {
       provider.dispose();
     });
 
+    it('should unrender a cell in a collapsed section for a match in hidden text', async () => {
+      cell = createMarkdownCell(
+        'A needle. <span style="display: none">A hidden needle.</span>'
+      );
+      Widget.attach(cell, document.body);
+      await framePromise();
+      // The section shows the cell when the search activates it
+      cell.node.checkVisibility = () => false;
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/needle/, {});
+
+      await provider.highlightNext();
+      expect(renderedCurrentMatch(cell)).toBe('needle');
+      await provider.highlightNext();
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
     it('should not skip the matches before the cursor of the hidden editor', async () => {
       cell = createMarkdownCell('test1 test2');
       Widget.attach(cell, document.body);
