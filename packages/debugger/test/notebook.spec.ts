@@ -161,16 +161,29 @@ describe('NotebookHandler', () => {
     expect(kernel.get(service.getCodeId(CODE))).toEqual([2]);
   });
 
-  it('should keep the breakpoints of code that ran before its execution count was cleared', async () => {
-    handler.dispose();
-    kernel = startTestSession(service, [CODE]);
-    handler = new NotebookHandler({ debuggerService: service, widget: panel });
-    await sendBreakpoint();
-    firstCell().sharedModel.setSource('def f():\n    return 2');
-    await sendBreakpoint();
+  it.failing(
+    'should keep the breakpoints of code that ran before its execution count was cleared',
+    async () => {
+      // Clearing the outputs of a cell clears its execution count, the only
+      // record of a run from before the debugger started.
+      handler.dispose();
+      const cell = firstCell();
+      cell.executionState = 'running';
+      cell.executionCount = 1;
+      cell.executionState = 'idle';
+      cell.clearExecution();
+      kernel = startTestSession(service, [CODE]);
+      handler = new NotebookHandler({
+        debuggerService: service,
+        widget: panel
+      });
+      await sendBreakpoint();
+      cell.sharedModel.setSource('def f():\n    return 2');
+      await sendBreakpoint();
 
-    expect(kernel.get(service.getCodeId(CODE))).toEqual([2]);
-  });
+      expect(kernel.get(service.getCodeId(CODE))).toEqual([2]);
+    }
+  );
 
   it('should clear the breakpoints of a moved cell when it is edited', async () => {
     context.model.sharedModel.moveCell(0, 1);

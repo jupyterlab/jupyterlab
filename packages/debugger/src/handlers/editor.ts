@@ -6,8 +6,6 @@ import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
 
-import type { Kernel } from '@jupyterlab/services';
-
 import type { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
@@ -68,8 +66,6 @@ export class EditorHandler implements IDisposable {
     ) {
       this._ranCode.add(src.getSource());
     }
-    // A cell that ran has no execution count after its outputs are cleared.
-    void Private.loadKernelHistory(this._debuggerService);
     // After a reload, a move or an undone deletion, the kernel may already
     // hold breakpoints of this code, and an edit or a deletion clears them.
     // A kernel restart changes the folder of the code files, so keep the code.
@@ -365,11 +361,7 @@ export class EditorHandler implements IDisposable {
     );
     // Clear last: each reply redraws the gutter from the model, which holds
     // the breakpoints of the new code only once the update is done.
-    if (previous === null) {
-      return;
-    }
-    await Private.loadKernelHistory(this._debuggerService);
-    if (this._canClear(previous)) {
+    if (previous !== null && this._canClear(previous)) {
       await this._debuggerService.updateBreakpoints(
         '',
         [],
@@ -748,44 +740,6 @@ namespace Private {
       ranCode.set(service, code);
     }
     return code;
-  }
-
-  const kernelHistory = new WeakMap<Kernel.IKernelConnection, Promise<void>>();
-
-  /**
-   * Add the code in the history of the kernel of the debug session to the
-   * code that ran, once for each kernel.
-   */
-  export function loadKernelHistory(service: IDebugger): Promise<void> {
-    const kernel = service.session?.connection?.kernel;
-    if (!kernel) {
-      return Promise.resolve();
-    }
-    let loaded = kernelHistory.get(kernel);
-    if (!loaded) {
-      loaded = kernel
-        .requestHistory({
-          hist_access_type: 'range',
-          session: 0,
-          start: 0,
-          // xeus reads the stop as a 32-bit integer.
-          stop: 2 ** 31 - 1,
-          raw: true,
-          output: false
-        })
-        .then(reply => {
-          if (reply.content.status !== 'ok') {
-            return;
-          }
-          const code = getRanCode(service);
-          for (const [, , input] of reply.content.history) {
-            code.add(input as string);
-          }
-        })
-        .catch(() => undefined);
-      kernelHistory.set(kernel, loaded);
-    }
-    return loaded;
   }
 
   /**
