@@ -56,6 +56,17 @@ const MAXIMUM_TIME_WAITING_FOR_ITEM = 10000;
  */
 const USER_NAVIGATION_EVENTS = ['wheel', 'touchmove', 'pointerdown', 'keydown'];
 
+/**
+ * Whether an event shows that the user is moving on from a requested position.
+ */
+function isUserNavigation(event: Event): boolean {
+  // A lone modifier key starts a tab or window switch, or a shortcut.
+  return !(
+    event instanceof KeyboardEvent &&
+    ['Alt', 'AltGraph', 'Control', 'Meta', 'Shift'].includes(event.key)
+  );
+}
+
 /*
  * Feature detection
  *
@@ -1253,21 +1264,26 @@ export class WindowedList<
 
   /**
    * Call a function when the user scrolls, clicks, touches or presses a key
-   * in the list.
+   * other than a lone modifier in the list.
    *
    * @param callback - Function to call
    * @returns A disposable that removes the listeners
    */
   protected addUserNavigationListener(callback: () => void): IDisposable {
+    const listener = (event: Event) => {
+      if (isUserNavigation(event)) {
+        callback();
+      }
+    };
     for (const type of USER_NAVIGATION_EVENTS) {
-      this.node.addEventListener(type, callback, {
+      this.node.addEventListener(type, listener, {
         capture: true,
         passive: true
       });
     }
     return new DisposableDelegate(() => {
       for (const type of USER_NAVIGATION_EVENTS) {
-        this.node.removeEventListener(type, callback, { capture: true });
+        this.node.removeEventListener(type, listener, { capture: true });
       }
     });
   }

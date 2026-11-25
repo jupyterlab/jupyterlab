@@ -1591,6 +1591,21 @@ describe('@jupyter/notebook', () => {
         }
       );
 
+      it('should scroll after a lone modifier key in the notebook', async () => {
+        const { widget, target, link, rendering } = createWaitingNotebook();
+
+        const navigation = widget.setFragment(link);
+        await framePromise();
+        widget.node.dispatchEvent(
+          new KeyboardEvent('keydown', { key: 'Control' })
+        );
+        rendering.resolve();
+        await navigation;
+
+        expect(scrolledOnlyTo(target.node)).toBe(true);
+        widget.dispose();
+      });
+
       it('should not activate the target if the user moved on', async () => {
         const { widget, link } = createNotebook('none');
         widget.activeCellIndex = 0;

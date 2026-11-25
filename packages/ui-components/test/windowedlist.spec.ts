@@ -596,6 +596,14 @@ describe('@jupyterlab/ui-components', () => {
         }
       );
 
+      it('should keep following after a lone modifier key', () => {
+        list.scrollElementIntoView(1, element);
+        scrollIntoView.mockClear();
+        list.node.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift' }));
+        reportResize('_onItemResize');
+        expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      });
+
       it('should stop on user input after requesting its item', () => {
         element.remove();
         list.scrollElementIntoView(1, element);
