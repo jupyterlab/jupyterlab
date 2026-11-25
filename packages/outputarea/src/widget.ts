@@ -7,6 +7,7 @@ import { WidgetTracker } from '@jupyterlab/apputils';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { IObservableString } from '@jupyterlab/observables';
 import type { IOutputModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { RenderedText } from '@jupyterlab/rendermime';
 import type { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import type { Kernel } from '@jupyterlab/services';
 import { KernelMessage } from '@jupyterlab/services';
@@ -1585,7 +1586,7 @@ namespace Private {
 
       // Once the iframe is loaded, the subarea is dynamically inserted
       const iframe = this.node as HTMLIFrameElement & {
-        heightChangeObserver: ResizeObserver;
+        heightChangeObserver?: ResizeObserver;
       };
 
       iframe.frameBorder = '0';
@@ -1595,16 +1596,27 @@ namespace Private {
         // Workaround needed by Firefox, to properly render svg inside
         // iframes, see https://stackoverflow.com/questions/10177190/
         // svg-dynamically-added-to-iframe-does-not-render-correctly
-        iframe.contentDocument!.open();
+        if (this.isDisposed) {
+          return;
+        }
 
-        // Insert the subarea into the iframe
-        // We must directly write the html. At this point, subarea doesn't
-        // contain any user content.
-        iframe.contentDocument!.write(this._wrapped.node.innerHTML);
+        iframe.heightChangeObserver?.disconnect();
 
-        iframe.contentDocument!.close();
+        const doc = iframe.contentDocument!;
 
-        const body = iframe.contentDocument!.body;
+        if (this._wrapped instanceof RenderedText) {
+          // Text rendering requires a connected DOM node.
+          // Keep the renderer inside the iframe without using
+          // Lumino's widget attachment lifecycle.
+          doc.body.replaceChildren(this._wrapped.node);
+        } else {
+          // Preserve the existing behavior for other MIME renderers.
+          doc.open();
+          doc.write(this._wrapped.node.innerHTML);
+          doc.close();
+        }
+
+        const body = doc.body;
 
         // Adjust the iframe height automatically
         iframe.style.height = `${body.scrollHeight}px`;
@@ -1613,6 +1625,29 @@ namespace Private {
         });
         iframe.heightChangeObserver.observe(body);
       });
+    }
+
+    /**
+     * Dispose of the isolated renderer and its resources.
+     */
+    dispose(): void {
+      if (this.isDisposed) {
+        return;
+      }
+
+      const iframe = this.node as HTMLIFrameElement & {
+        heightChangeObserver?: ResizeObserver;
+      };
+
+      iframe.heightChangeObserver?.disconnect();
+
+      // Remove the renderer node from the iframe, if present.
+      this._wrapped.node.remove();
+
+      // The renderer was not attached with Widget.attach().
+      this._wrapped.dispose();
+
+      super.dispose();
     }
 
     /**
