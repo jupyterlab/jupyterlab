@@ -523,6 +523,14 @@ describe('cells/searchprovider', () => {
       ],
       ['a text area', 'An apple, <textarea>an apple</textarea>'],
       [
+        'the fallback text of a progress bar',
+        'An apple, <progress value="0.4">an apple</progress>'
+      ],
+      [
+        'the fallback text of a meter',
+        'An apple, <meter value="0.4">an apple</meter>'
+      ],
+      [
         'text for screen readers only',
         'An apple, <span class="jp-sr-only">an apple</span>'
       ]

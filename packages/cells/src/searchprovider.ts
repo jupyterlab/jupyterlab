@@ -858,9 +858,10 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   /**
    * Whether the user can see the rendered match at the given index. A closed
    * `<details>` element hides its content, a text area shows its text without
-   * the mark of the match, the caption of a Mermaid diagram is only for screen
-   * readers, and a style can hide rendered text, as it hides the source of a
-   * Mermaid diagram.
+   * the mark of the match, a progress bar and a meter show a bar instead of
+   * their text, the caption of a Mermaid diagram is only for screen readers,
+   * and a style can hide rendered text, as it hides the source of a Mermaid
+   * diagram.
    */
   private _isRenderedMatchVisible(index: number): boolean {
     const element =
@@ -869,7 +870,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
       !element ||
       element.matches('details:not([open])') ||
       element.closest('details:not([open]) > :not(summary)') ||
-      element.closest('textarea, .jp-sr-only')
+      element.closest('textarea, progress, meter, .jp-sr-only')
     ) {
       return false;
     }
@@ -878,8 +879,14 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     if (!element.isConnected || !(this.cell.node.checkVisibility?.() ?? true)) {
       return true;
     }
-    // `visibility: hidden` keeps the box of the text, and hides its mark too
-    return element.checkVisibility?.({ visibilityProperty: true }) ?? true;
+    // `visibility: hidden` and `opacity: 0` keep the box of the text, and hide
+    // its mark too
+    return (
+      element.checkVisibility?.({
+        visibilityProperty: true,
+        opacityProperty: true
+      }) ?? true
+    );
   }
 
   /**
