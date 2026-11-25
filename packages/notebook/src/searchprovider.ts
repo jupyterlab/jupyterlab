@@ -559,7 +559,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
             if (w.isPlaceholder()) {
               this.widget.content.renderCellOutputs(i);
             }
-            w.outputArea.showTrimmedOutputs();
+            w.outputArea.maxNumberOutputs = Infinity;
           }
         });
       } else {

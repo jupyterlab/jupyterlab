@@ -290,17 +290,6 @@ export class OutputArea extends Widget {
   }
 
   /**
-   * Show all trimmed outputs if any are currently hidden.
-   */
-  showTrimmedOutputs(): void {
-    if (this._maxNumberOutputs < this.model.length) {
-      const lastShown = this._maxNumberOutputs;
-      this._maxNumberOutputs = Infinity;
-      this._showTrimmedOutputs(lastShown);
-    }
-  }
-
-  /**
    * Dispose of the resources used by the output area.
    */
   dispose(): void {

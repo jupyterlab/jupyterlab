@@ -366,7 +366,7 @@ class CodeCellSearchProvider extends CellSearchProvider {
    */
   async startQuery(query: RegExp | null, filters?: IFilters): Promise<void> {
     if (filters?.output !== false && this.isActive) {
-      (this.cell as CodeCell).outputArea.showTrimmedOutputs();
+      (this.cell as CodeCell).outputArea.maxNumberOutputs = Infinity;
     }
 
     await super.startQuery(query, filters);

@@ -245,7 +245,7 @@ describe('outputarea/widget', () => {
         expect(widget.widgets.length).toEqual(model.length);
       });
 
-      test('should display all trimmed outputs via showTrimmedOutputs()', () => {
+      test('should display all trimmed outputs when setting maxNumberOutputs to Infinity', () => {
         const widget = new OutputArea({
           rendermime,
           model,
@@ -253,7 +253,7 @@ describe('outputarea/widget', () => {
         });
 
         expect(widget.widgets.length).toBeLessThan(model.length);
-        widget.showTrimmedOutputs();
+        widget.maxNumberOutputs = Infinity;
         expect(widget.widgets.length).toEqual(model.length);
       });
 
