@@ -324,6 +324,83 @@ describe('@jupyterlab/ui-components', () => {
 
       wrapper.dispose();
     });
+
+    it('should re-render when an additional signal fires', async () => {
+      const id = 'test:additional-signal-component';
+      let caption = 'Initial caption';
+      commands.addCommand(id, {
+        execute: () => {
+          /* no op */
+        },
+        icon: blankIcon,
+        caption: () => caption
+      });
+      const signal = new Signal<object, void>({});
+
+      class Wrapper extends ReactWidget {
+        render(): React.ReactElement {
+          return React.createElement(CommandToolbarButtonComponent, {
+            commands,
+            id,
+            additionalSignals: [signal]
+          });
+        }
+      }
+
+      const wrapper = new Wrapper();
+      Widget.attach(wrapper, document.body);
+      await framePromise();
+      await wrapper.renderPromise;
+      expect(wrapper.node.firstElementChild!.getAttribute('title')).toBe(
+        'Initial caption'
+      );
+
+      caption = 'Updated caption';
+      signal.emit();
+      await framePromise();
+      expect(wrapper.node.firstElementChild!.getAttribute('title')).toBe(
+        'Updated caption'
+      );
+
+      wrapper.dispose();
+    });
+
+    it('should disconnect from additional signals on unmount', async () => {
+      const id = 'test:additional-signal-unmount';
+      commands.addCommand(id, {
+        execute: () => {
+          /* no op */
+        },
+        icon: blankIcon
+      });
+      const signal = {
+        connect: jest.fn((_slot: unknown, _thisArg?: unknown) => true),
+        disconnect: jest.fn((_slot: unknown, _thisArg?: unknown) => true)
+      };
+
+      class Wrapper extends ReactWidget {
+        render(): React.ReactElement {
+          return React.createElement(CommandToolbarButtonComponent, {
+            commands,
+            id,
+            additionalSignals: [signal]
+          });
+        }
+      }
+
+      const wrapper = new Wrapper();
+      Widget.attach(wrapper, document.body);
+      await framePromise();
+      await wrapper.renderPromise;
+      expect(signal.connect).toHaveBeenCalledTimes(1);
+
+      wrapper.dispose();
+      await framePromise();
+      expect(signal.disconnect).toHaveBeenCalledTimes(1);
+      expect(signal.disconnect.mock.calls[0][0]).toBe(
+        signal.connect.mock.calls[0][0]
+      );
+    });
   });
 
   describe('Toolbar', () => {

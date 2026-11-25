@@ -1135,6 +1135,15 @@ export namespace CommandToolbarButtonComponent {
 export function CommandToolbarButtonComponent(
   props: CommandToolbarButtonComponent.IProps
 ): JSX.Element {
+  const { additionalSignals } = props;
+  const [, forceUpdate] = React.useReducer((x: number) => x + 1, 0);
+  React.useEffect(() => {
+    additionalSignals?.forEach(signal => signal.connect(forceUpdate));
+    return () => {
+      additionalSignals?.forEach(signal => signal.disconnect(forceUpdate));
+    };
+  }, [additionalSignals]);
+
   return (
     <UseSignal
       signal={props.commands.commandChanged}
@@ -1190,7 +1199,6 @@ export class CommandToolbarButton extends ReactWidget {
     additionalSignals?.forEach(signal => {
       signal.connect(() => {
         this.setCommandAttributes(commands, id, args);
-        this.update();
       }, this);
     });
   }
