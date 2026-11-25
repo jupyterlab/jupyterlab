@@ -220,6 +220,34 @@ describe('@jupyterlab/rendermime', () => {
       widget.dispose();
     });
 
+    it('paints text streamed into a detached renderer widget once it is attached again', async () => {
+      // Collapsing an output detaches it, while a running cell can still
+      // stream into it.
+      const widget = new RenderedText({
+        mimeType: 'text/plain',
+        sanitizer: new Sanitizer(),
+        resolver: null,
+        linkHandler: null,
+        latexTypesetter: null
+      });
+      Widget.attach(widget, document.body);
+      void widget.renderModel(
+        new MimeModel({ data: { 'text/plain': 'line 1\n' } })
+      );
+      jest.runAllTimers();
+
+      Widget.detach(widget);
+      void widget.renderModel(
+        new MimeModel({ data: { 'text/plain': 'line 1\nline 2\n' } })
+      );
+      jest.advanceTimersByTime(1000);
+      Widget.attach(widget, document.body);
+      jest.runAllTimers();
+
+      expect(widget.node.textContent).toBe('line 1\nline 2\n');
+      widget.dispose();
+    });
+
     it('resolves the render promise while the host waits to be attached', async () => {
       // The debugger variable viewer attaches the renderer widget only after
       // `renderModel()` resolves.

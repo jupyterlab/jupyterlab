@@ -1001,20 +1001,14 @@ function renderTextual(
       // The host is not in the DOM. Note that even in full windowing notebook
       // mode the output nodes are never removed; instead the cell gets hidden
       // (usually with `display: none`, or for the active cell via opacity), so
-      // it stays connected. A disconnected host therefore means one of:
-      // - it has not been attached yet (a windowed notebook attaches its cells
-      //   in idle time, long after their outputs are created, and collapsed
-      //   outputs are attached only when expanded) - in which case we wait for
-      //   it to be attached, however long that takes, otherwise the first paint
-      //   is lost while the synchronously-rendered siblings (HTML/Markdown)
-      //   still appear;
-      // - it has already painted and was then detached (e.g. the cell was
-      //   removed) - in which case we stop.
-      if (!Private.hasPainted(host)) {
-        Private.waitForAttach(host, startRendering);
-        return RenderingResult.delay;
-      }
-      return stopRendering();
+      // it stays connected. A disconnected host is either not attached yet (a
+      // windowed notebook attaches its cells in idle time, long after their
+      // outputs are created) or detached for now (collapsed outputs are
+      // detached until expanded, and a running cell still streams into them).
+      // Wait for it to be attached, however long that takes, otherwise the
+      // text stays blank or stale.
+      Private.waitForAttach(host, startRendering);
+      return RenderingResult.delay;
     }
 
     // Gates applied to regular animation frames only:
@@ -1684,7 +1678,7 @@ namespace Private {
   }
 
   /**
-   * Wait for a host that is not attached yet, without a frame request or a
+   * Wait for a host that is not attached, without a frame request or a
    * watchdog, then call `resume`. The first-paint promise resolves now,
    * because some callers attach the host only after it resolves.
    */
