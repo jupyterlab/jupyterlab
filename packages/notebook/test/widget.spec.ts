@@ -1579,6 +1579,22 @@ describe('@jupyter/notebook', () => {
         widget.dispose();
       });
 
+      it('should not activate the target if the user moved on while waiting', async () => {
+        const { widget, link } = createNotebook('none');
+        jest.spyOn(widget, 'scrollToItem').mockResolvedValue();
+        widget.activeCellIndex = 2;
+        const ready = holdCellReady(widget.widgets[0]);
+
+        const navigation = widget.setFragment(link);
+        await framePromise();
+        widget.node.dispatchEvent(new Event('wheel'));
+        ready.resolve();
+        await navigation;
+
+        expect(widget.activeCellIndex).toBe(2);
+        widget.dispose();
+      });
+
       it('should only follow the latest link', async () => {
         const { widget, rendering } = createWaitingNotebook();
         const other = widget.widgets[1];

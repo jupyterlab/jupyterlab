@@ -2487,6 +2487,16 @@ export class Notebook extends StaticNotebook {
         // The target was deleted while the cells were searched.
         return;
       }
+
+      // Cells above the target that are still placeholders would push it down
+      // when they render.
+      const above = this.widgets.slice(0, this.widgets.indexOf(cell));
+      await Promise.all(above.map(Private.whenReadyOrDisposed));
+      // A link cancelled while waiting must not move the active cell.
+      if (isCancelled() || !this.widgets.includes(cell)) {
+        return;
+      }
+
       // Deleting the target also changes the active cell.
       const isTargetGone = () => isCancelled() || this.activeCell !== cell;
 
@@ -2495,14 +2505,6 @@ export class Notebook extends StaticNotebook {
       this.setMode('command', { focus: false });
       // Scroll anchoring is enabled only for the active cell.
       this.activeCellIndex = this.widgets.indexOf(cell);
-
-      // Cells above the target that are still placeholders would push it down
-      // when they render.
-      const above = this.widgets.slice(0, this.widgets.indexOf(cell));
-      await Promise.all(above.map(Private.whenReadyOrDisposed));
-      if (isTargetGone()) {
-        return;
-      }
 
       // Bring the cell into view: it may not be attached or rendered yet.
       try {
