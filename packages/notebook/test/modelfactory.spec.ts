@@ -342,6 +342,35 @@ describe('@jupyterlab/notebook', () => {
       expect(height).toBe(362); // (2 + 18) * 17 + 22
     });
 
+    test('should cap scrolled outputs at their maximum height', () => {
+      const style = document.createElement('style');
+      style.textContent =
+        '.jp-CodeCell.jp-mod-outputsScrolled .jp-Cell-outputArea { max-height: 120px; }';
+      document.head.appendChild(style);
+      const outputObj = [
+        {
+          output_type: 'stream',
+          name: 'stdout',
+          text: 'epoch\n'.repeat(400)
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['for i in range(400):\n    print("epoch")'],
+        metadata: { scrolled: true }
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      style.remove();
+      // 2 source lines and the scrolled output area
+      expect(height).toBe(176); // 2 * 17 + 120 + 22
+    });
+
     test('should count the outputs past the limit of the output area as one line', () => {
       const outputObj = Array.from({ length: 10 }, (_, i) => ({
         output_type: 'stream',

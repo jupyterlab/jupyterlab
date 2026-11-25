@@ -2747,7 +2747,17 @@ export class DirListing extends Widget {
       this.selection[item.path]
     ) {
       try {
-        await this._selectItemByName(finalFilename, true, true);
+        await this._selectItemByName(finalFilename, false, true);
+        // The user may have moved the focus while the rename was saved.
+        const active = document.activeElement;
+        if (!active || active === document.body || this.node.contains(active)) {
+          this._focusItem(
+            ArrayExt.findFirstIndex(
+              this._sortedItems,
+              value => value.name === finalFilename
+            )
+          );
+        }
       } catch {
         // do nothing
         console.warn('After rename, failed to select file', finalFilename);

@@ -90,9 +90,7 @@ test.describe('Notebook Search and Replace', () => {
     ).toMatchSnapshot('replace-in-markdown-rendered-cell.png');
   });
 
-  test('Replace all', async ({ page, browserName }) => {
-    test.skip(browserName === 'firefox', 'Flaky on Firefox');
-
+  test('Replace all', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 
@@ -116,11 +114,8 @@ test.describe('Notebook Search and Replace', () => {
   ['code', 'markdown', 'raw'].forEach(cell1Type => {
     ['code', 'markdown', 'raw'].forEach(cell2Type => {
       test(`Replace step-by-step across ${cell1Type} and ${cell2Type} cell boundaries`, async ({
-        page,
-        browserName
+        page
       }) => {
-        test.skip(browserName === 'firefox', 'Flaky on Firefox');
-
         // Create a small test notebook
         await page.notebook.createNew();
         await page.notebook.setCell(0, cell1Type, 'test\ntest');
@@ -156,10 +151,8 @@ test.describe('Notebook Search and Replace', () => {
       });
 
       test(`Replace in a ${cell1Type} cell and a ${cell2Type} cell with a string containing the query string`, async ({
-        page,
-        browserName
+        page
       }) => {
-        test.skip(browserName === 'firefox', 'Flaky on Firefox');
         // Create a small test notebook
         await page.notebook.createNew();
         await page.notebook.setCell(0, cell1Type, 'test\ntest');
@@ -195,10 +188,8 @@ test.describe('Notebook Search and Replace', () => {
       });
 
       test(`Replace in a ${cell1Type} cell and a ${cell2Type} cell with a string containing the query string twice`, async ({
-        page,
-        browserName
+        page
       }) => {
-        test.skip(browserName === 'firefox', 'Flaky on Firefox');
         // Create a small test notebook
         await page.notebook.createNew();
         await page.notebook.setCell(0, cell1Type, 'test\ntest');
@@ -235,10 +226,8 @@ test.describe('Notebook Search and Replace', () => {
       });
 
       test(`Replace in a ${cell1Type} cell and a ${cell2Type} cell with a string containing the query string three times`, async ({
-        page,
-        browserName
+        page
       }) => {
-        test.skip(browserName === 'firefox', 'Flaky on Firefox');
         // Create a small test notebook
         await page.notebook.createNew();
         await page.notebook.setCell(0, cell1Type, 'test\ntest');

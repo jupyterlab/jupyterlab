@@ -2628,6 +2628,50 @@ describe('@jupyter/notebook', () => {
         }
       );
 
+      it('should keep a cell visible when an idle callback runs between its type change and the next frame in full windowing mode', async () => {
+        const idleCallbacks: IdleRequestCallback[] = [];
+        const requestIdleCallback = jest
+          .spyOn(window, 'requestIdleCallback')
+          .mockImplementation(callback => {
+            idleCallbacks.push(callback);
+            return idleCallbacks.length;
+          });
+        const runIdleCallbacks = () => {
+          for (const callback of idleCallbacks.splice(0)) {
+            callback({ didTimeout: false, timeRemaining: () => 50 });
+          }
+        };
+        const widget = createActiveWidget();
+        try {
+          widget.notebookConfig = {
+            ...widget.notebookConfig,
+            windowingMode: 'full'
+          };
+          widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+          Widget.attach(widget, document.body);
+          // Render every cell once, as the idle callbacks do after a notebook opens
+          while (idleCallbacks.length) {
+            runIdleCallbacks();
+            await framePromise();
+          }
+          widget.activeCellIndex = 0;
+          const type = widget.widgets[0].model.type;
+          NotebookActions.changeCellType(
+            widget,
+            type === 'markdown' ? 'code' : 'markdown'
+          );
+          // Let the message loop request the next frame, then run the idle callback
+          await Promise.resolve();
+          runIdleCallbacks();
+          await framePromise();
+          await framePromise();
+          expect(widget.widgets[0].node.style.opacity).not.toBe('0');
+        } finally {
+          widget.dispose();
+          requestIdleCallback.mockRestore();
+        }
+      });
+
       describe('`edgeRequested` signal', () => {
         it('should activate the previous cell if top is requested', async () => {
           const widget = createActiveWidget();

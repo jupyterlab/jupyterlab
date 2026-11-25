@@ -694,12 +694,18 @@ export abstract class WindowedListModel implements WindowedList.IModel {
           measured = true;
         } else {
           const widget = this.widgetRenderer(i);
-          if (widget?.node && widget.node.isConnected) {
-            size = widget.node.getBoundingClientRect().height;
+          const isConnected = !!widget?.node?.isConnected;
+          const height = isConnected
+            ? widget.node.getBoundingClientRect().height
+            : 0;
+          // Hidden widgets are empty; items kept out of view have an unknown height
+          if (height > 0 || (isConnected && widget.isHidden)) {
+            size = height;
             measured = true;
           } else {
             size = this.estimateWidgetSize(i);
-            measured = false;
+            // The resize observer measures the item once it is in view
+            measured = isConnected;
           }
         }
 
@@ -1704,8 +1710,37 @@ export class WindowedList<
       }
     }
 
+    // When no scrollback is pending, compensate the scroll offset for size
+    // changes of items lying entirely above the viewport so that the content
+    // the user is looking at does not shift. This is the windowed equivalent
+    // of the browser-native scroll anchoring, which has to be disabled in
+    // full windowing mode. The sizes must be read before `setWidgetSize`.
+    let scrollCompensation = 0;
+    let scrollOffset = 0;
+    if (this.viewModel.windowingActive && this._scrollToItem === null) {
+      // The view model offset trails the scroller until its `scroll` event
+      // runs, so start from the scroller unless the list has a scroll pending.
+      scrollOffset = this._scrollUpdateWasRequested
+        ? this.viewModel.scrollOffset
+        : this._outerElement.scrollTop;
+      for (const { index, size } of newSizes) {
+        const [offset, oldSize] = this.viewModel.getSpan(index, index);
+        if (offset + oldSize <= scrollOffset) {
+          scrollCompensation += size - oldSize;
+        }
+      }
+    }
+
     // If some sizes changed
     if (this.viewModel.setWidgetSize(newSizes)) {
+      if (scrollCompensation !== 0) {
+        this.viewModel.scrollOffset = scrollOffset + scrollCompensation;
+        // Scroll before the paint, as `update()` waits for the next frame, and
+        // grow the list first, also during a scroll, or the browser clamps the
+        // offset at the end.
+        this._updateTotalSize(true);
+        this._outerElement.scrollTop = this.viewModel.scrollOffset;
+      }
       this._scrollBackToItemOnResize();
       // Update the list
       this.update();
@@ -1967,10 +2002,12 @@ export class WindowedList<
 
   /**
    * Update the total size
+   *
+   * @param force - Update also while the user scrolls.
    */
-  private _updateTotalSize(): void {
+  private _updateTotalSize(force = false): void {
     if (this.viewModel.windowingActive) {
-      if (this._viewport.dataset.isScrolling == 'true') {
+      if (!force && this._viewport.dataset.isScrolling == 'true') {
         // Do not update while scrolling, delay until later
         this._requiresTotalSizeUpdate = true;
         return;

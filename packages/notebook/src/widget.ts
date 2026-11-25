@@ -1042,12 +1042,21 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   ): Promise<void> {
     const startTime = Date.now();
     let cellIdx = 0;
+    // The list renders the cells in its window, and the removal below can hide them
+    const listRange =
+      this.notebookConfig.windowingMode === 'full'
+        ? this.viewModel.getRangeToRender({ virtual: true })
+        : null;
     while (
       Date.now() - startTime < remainingTime &&
       cellIdx < this.cellsArray.length
     ) {
       const cell = this.cellsArray[cellIdx];
-      if (cell.isPlaceholder()) {
+      const inListRange =
+        listRange !== null &&
+        cellIdx >= listRange[0] &&
+        cellIdx <= listRange[1];
+      if (cell.isPlaceholder() && !inListRange) {
         if (
           ['defer', 'full', 'contentVisibility'].includes(
             this.notebookConfig.windowingMode

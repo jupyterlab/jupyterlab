@@ -36,6 +36,15 @@ function isInScrollingNotebook(element: Element | null): boolean {
 }
 
 /**
+ * Check whether the element is a cell node of a windowed notebook.
+ */
+function isNotebookCell(element: Element): boolean {
+  return !!element.parentElement?.classList.contains(
+    'jp-WindowedPanel-viewport'
+  );
+}
+
+/**
  * Check whether the element is part of a CodeMirror editor.
  */
 function isCodeMirrorElement(element: Element | null): boolean {
@@ -114,7 +123,11 @@ window.ResizeObserver = class extends window.ResizeObserver {
     const entriesInScrollingNotebook = [];
     const nonOutputEntries = [];
     for (const entry of entries) {
-      if (isInScrollingNotebook(entry.target)) {
+      // The list needs the cell sizes during a scroll to keep the view in place
+      if (
+        isInScrollingNotebook(entry.target) &&
+        !isNotebookCell(entry.target)
+      ) {
         entriesInScrollingNotebook.push(entry);
       } else {
         nonOutputEntries.push(entry);
@@ -131,9 +144,14 @@ window.ResizeObserver = class extends window.ResizeObserver {
 };
 
 /**
- * Output lines that fit in a scrolled output area, which has a `max-height` of 24em
+ * Output lines that fit in a scrolled output area at the default `max-height` of 24em
  */
 const SCROLLED_OUTPUT_LINES = 18;
+
+/**
+ * Variable that the notebook settings set to the `max-height` of scrolled output areas
+ */
+const SCROLLED_OUTPUT_MAX_HEIGHT = '--jp-cell-scrolled-output-max-height';
 
 /**
  * Notebook view model for the windowed list.
@@ -226,7 +244,7 @@ export class NotebookViewModel extends WindowedListModel {
         // Collapsed outputs show a one-line placeholder
         outputsLines = Math.min(outputsLines, 1);
       } else if (model.getMetadata('scrolled') === true) {
-        outputsLines = Math.min(outputsLines, SCROLLED_OUTPUT_LINES);
+        outputsLines = Math.min(outputsLines, this._getScrolledOutputLines());
       }
     }
     return (
@@ -290,6 +308,26 @@ export class NotebookViewModel extends WindowedListModel {
    */
   protected cellsEstimatedHeight = new Map<string, number>();
 
+  /**
+   * Get the height of a scrolled output area in output lines.
+   */
+  private _getScrolledOutputLines(): number {
+    // Measure again only when the setting changes the maximum height
+    const maxHeight = document.documentElement.style.getPropertyValue(
+      SCROLLED_OUTPUT_MAX_HEIGHT
+    );
+    if (maxHeight !== this._scrolledOutputMaxHeight) {
+      this._scrolledOutputMaxHeight = maxHeight;
+      const height = Private.measureScrolledOutputHeight();
+      // A fraction of a line keeps the measured height exact
+      this._scrolledOutputLines =
+        height === null
+          ? SCROLLED_OUTPUT_LINES
+          : height / NotebookViewModel.DEFAULT_EDITOR_LINE_HEIGHT;
+    }
+    return this._scrolledOutputLines;
+  }
+
   private _emitEstimatedHeightChanged = new Debouncer(() => {
     this._stateChanged.emit({
       name: 'estimatedWidgetSize',
@@ -297,6 +335,8 @@ export class NotebookViewModel extends WindowedListModel {
       oldValue: null
     });
   });
+  private _scrolledOutputLines = SCROLLED_OUTPUT_LINES;
+  private _scrolledOutputMaxHeight: string | null = null;
 }
 
 /**
@@ -689,4 +729,26 @@ export class NotebookWindowedLayout extends WindowedLayout {
 
   private _willBeRemoved: Widget | null = null;
   private _topHiddenCodeCells: number = -1;
+}
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * Measure the `max-height` of a scrolled output area in pixels.
+   *
+   * Returns `null` when the styles do not give a length in pixels.
+   */
+  export function measureScrolledOutputHeight(): number | null {
+    const cell = document.createElement('div');
+    cell.className = 'jp-CodeCell jp-mod-outputsScrolled';
+    const outputArea = document.createElement('div');
+    outputArea.className = 'jp-Cell-outputArea';
+    cell.appendChild(outputArea);
+    document.body.appendChild(cell);
+    const maxHeight = getComputedStyle(outputArea).maxHeight;
+    cell.remove();
+    return maxHeight.endsWith('px') ? parseFloat(maxHeight) : null;
+  }
 }

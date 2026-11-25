@@ -595,6 +595,44 @@ test('should display cells below on scrolling after inserting a cell on top', as
   await expect(lastCell).toBeVisible();
 });
 
+test('should show the next heading after collapsing a long section', async ({
+  page,
+  tmpPath
+}) => {
+  const notebookName = 'two_sections.ipynb';
+  const cells = ['A', 'B'].flatMap(section => [
+    galata.Notebook.makeCell({
+      cell_type: 'markdown',
+      source: [`# Section ${section}`]
+    }),
+    ...Array.from({ length: 30 }, (_, i) =>
+      galata.Notebook.makeCell({ cell_type: 'code', source: [`x = ${i}`] })
+    )
+  ]);
+  await page.contents.uploadContent(
+    JSON.stringify(galata.Notebook.makeNotebook(cells)),
+    'text',
+    `${tmpPath}/${notebookName}`
+  );
+  await page.notebook.openByPath(`${tmpPath}/${notebookName}`);
+  // Code cells rendered on idle time stay in the DOM with `display: none`
+  await page.waitForFunction(() => {
+    const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+    return panel.content.widgets.every(cell => !cell.isPlaceholder());
+  });
+
+  const notebook = (await page.notebook.getNotebookInPanelLocator())!;
+  const firstHeading = notebook.locator(
+    '.jp-Cell[data-windowed-list-index="0"]'
+  );
+  await firstHeading.hover();
+  await firstHeading.locator('.jp-collapseHeadingButton').click();
+
+  await expect(
+    notebook.locator('.jp-Cell[data-windowed-list-index="31"]')
+  ).toBeInViewport();
+});
+
 test('should not scroll back to a newly inserted cell when scrolling away', async ({
   page,
   tmpPath
@@ -635,10 +673,8 @@ test('should not scroll back to a newly inserted cell when scrolling away', asyn
 
 test('should center on next cell after rendering markdown cell and advancing', async ({
   page,
-  tmpPath,
-  browserName
+  tmpPath
 }) => {
-  test.skip(browserName === 'firefox', 'Needs fixing on Firefox');
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
   const mdCell = page.locator('.jp-MarkdownCell[data-windowed-list-index="2"]');
   const thirdCell = page.locator('.jp-CodeCell[data-windowed-list-index="3"]');
@@ -648,8 +684,10 @@ test('should center on next cell after rendering markdown cell and advancing', a
     .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
     .waitFor();
 
-  // Un-render markdown cell
-  await page.notebook.enterCellEditingMode(2);
+  // Un-render by keys, as a click on a partly hidden cell centers it in Firefox
+  await page.notebook.selectCells(1);
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
 
   // The next cells should not be (significantly) visible (yet)
   await expect.soft(thirdCell).not.toBeInViewport({ ratio: 0.1 });

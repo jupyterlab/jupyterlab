@@ -394,6 +394,45 @@ describe('docregistry/context', () => {
           get.mockImplementation(getImplementation);
         }
       });
+
+      it('should resolve if the file is renamed before its checkpoint is created', async () => {
+        const oldPath = context.path;
+        const newPath = UUID.uuid4() + '.txt';
+        await manager.contents.save(oldPath, {
+          type: factory.contentType,
+          format: factory.fileFormat,
+          content: 'foo'
+        });
+
+        const createCheckpoint = manager.contents
+          .createCheckpoint as jest.MockedFunction<
+          typeof manager.contents.createCheckpoint
+        >;
+        const createImplementation = createCheckpoint.getMockImplementation();
+        if (!createImplementation) {
+          throw new Error(
+            'Missing contents createCheckpoint mock implementation'
+          );
+        }
+        // The server fails to copy the file that the rename moved away.
+        createCheckpoint.mockImplementation(path =>
+          path === oldPath
+            ? Promise.reject(new Error('Unhandled error'))
+            : createImplementation(path)
+        );
+
+        try {
+          await expect(context.initialize(false)).resolves.not.toThrow();
+          await manager.contents.rename(oldPath, newPath);
+          expect(context.path).toBe(newPath);
+          expect(context.model.toString()).toBe('foo');
+          expect(
+            document.body.getElementsByClassName('jp-Dialog')
+          ).toHaveLength(0);
+        } finally {
+          createCheckpoint.mockImplementation(createImplementation);
+        }
+      });
     });
 
     describe('#disposed', () => {
@@ -614,6 +653,32 @@ describe('docregistry/context', () => {
         expect(model1.content).toEqual(model2.content);
       });
 
+      it('should not overwrite an existing directory', async () => {
+        const dirName = UUID.uuid4();
+        const dir = await manager.contents.save(dirName, {
+          type: 'directory'
+        });
+
+        const func = async () => {
+          await waitForDialog();
+          const dialog = document.body.getElementsByClassName('jp-Dialog')[0];
+          const input = dialog.getElementsByTagName('input')[0];
+          input.value = dir.path;
+          await acceptDialog(); // Accept rename dialog
+          await waitForDialog();
+          await acceptDialog(); // Accept error dialog
+        };
+
+        await context.initialize(true);
+        const promise = func();
+        const result = await context.saveAs();
+        await promise;
+
+        expect(result).toBe(false);
+        const model = await manager.contents.get(dir.path, { content: false });
+        expect(model.type).toBe('directory');
+      });
+
       it('should bring up a conflict dialog', async () => {
         const newPath = UUID.uuid4() + '.txt';
 
@@ -634,11 +699,16 @@ describe('docregistry/context', () => {
         const promise = func();
 
         const oldPath = context.path;
+        const spySave = jest.spyOn(manager.contents, 'save');
+        spySave.mockClear();
         const result = await context.saveAs();
         await promise;
 
         // Should return true when overwrite is accepted
         expect(result).toBe(true);
+        expect(
+          spySave.mock.calls.filter(call => call[0] === newPath)
+        ).toHaveLength(1);
 
         // We no longer rename the current document
         //expect(context.path).toBe(newPath);
