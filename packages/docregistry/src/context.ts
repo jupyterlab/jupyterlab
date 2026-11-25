@@ -595,7 +595,12 @@ export class Context<
     this._populatedPromise.resolve(void 0);
 
     // Add a checkpoint if none exists and the file is writable.
-    await this._maybeCheckpoint(false);
+    try {
+      await this._maybeCheckpoint(false);
+    } catch (reason) {
+      // A rename before the server copies the file makes the checkpoint fail.
+      console.warn(`Failed to create a checkpoint for ${this._path}`, reason);
+    }
     if (this.isDisposed) {
       return;
     }

@@ -118,6 +118,13 @@ test.describe('General', () => {
     await page.mouse.move(viewerBBox.x + 0.5 * viewerBBox.width, 600);
     await page.mouse.up();
 
+    // The file browser selects lorenz.py only after refreshing its listing.
+    await expect(
+      page.locator(
+        '.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemText'
+      )
+    ).toHaveText('lorenz.py');
+
     expect(await page.screenshot()).toMatchSnapshot('jupyterlab.png');
   });
 
@@ -635,9 +642,11 @@ test.describe('General', () => {
     await page.keyboard.type(`clear && cat ${tmpPath}/${fileName}`);
     await page.keyboard.press('Enter');
 
-    // Wait for command answer
-    // eslint-disable-next-line playwright/no-wait-for-timeout
-    await page.waitForTimeout(200);
+    // The screenshot shows the end of the fixture and the prompt after it.
+    await expect(page.locator('.jp-Terminal-body')).toContainText(
+      '6 directories, 27 files $',
+      { useInnerText: true }
+    );
 
     // Starting the kernel updates the outdated kernel metadata of Data.ipynb.
     await expect(page.activity.getTabLocator('Data.ipynb')).toHaveClass(
