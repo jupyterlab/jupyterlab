@@ -1094,6 +1094,21 @@ describe('@jupyterlab/rendermime', () => {
       expect(window.getSelection()!.toString()).toBe('post');
     });
 
+    it('preserves a selection when a stream chunk ends mid-line', async () => {
+      // The next chunk restores the selection twice in one frame.
+      const sanitizer = new Sanitizer();
+
+      void renderText({ host, sanitizer, source: 'word0 word1 word2 ' });
+      jest.runAllTimers();
+
+      const text = host.querySelector('pre')!.firstChild as Text;
+      window.getSelection()!.setBaseAndExtent(text, 6, text, 11);
+      void renderText({ host, sanitizer, source: 'word0 word1 word2 word3 ' });
+      jest.runAllTimers();
+
+      expect(window.getSelection()!.toString()).toBe('word1');
+    });
+
     // In Chromium every read of the selection lays out the page when the DOM
     // has changed since the last layout (https://crbug.com/590369), so text
     // outputs read it once per frame. Drop the next two tests together with
