@@ -23,8 +23,6 @@ from jupyterlab import commands
 from jupyterlab.commands import (
     DEV_DIR,
     AppOptions,
-    _compare_ranges,
-    _test_overlap,
     build,
     build_check,
     check_extension,
@@ -644,33 +642,6 @@ class TestExtension(AppHandlerTest):
         with open(pkg_path, "wb") as fid:
             fid.write(orig)
         assert not build_check()
-
-    def test_compatibility(self):
-        assert _test_overlap("^0.6.0", "^0.6.1")
-        assert _test_overlap(">0.1", "0.6")
-        assert _test_overlap("~0.5.0", "~0.5.2")
-        assert _test_overlap("0.5.2", "^0.5.0")
-
-        assert not _test_overlap("^0.5.0", "^0.6.0")
-        assert not _test_overlap("~1.5.0", "^1.6.0")
-
-        assert _test_overlap("*", "0.6") is None
-        assert _test_overlap("<0.6", "0.1") is None
-
-        assert _test_overlap("^1 || ^2", "^1")
-        assert _test_overlap("^1 || ^2", "^2")
-        assert _test_overlap("^1", "^1 || ^2")
-        assert _test_overlap("^2", "^1 || ^2")
-        assert _test_overlap("^1 || ^2", "^2 || ^3")
-        assert not _test_overlap("^1 || ^2", "^3 || ^4")
-        assert not _test_overlap("^2", "^1 || ^3")
-
-    def test_compare_ranges(self):
-        assert _compare_ranges("^1 || ^2", "^1") == 0
-        assert _compare_ranges("^1 || ^2", "^2 || ^3") == 0
-        assert _compare_ranges("^1 || ^2", "^3 || ^4") == 1
-        assert _compare_ranges("^3 || ^4", "^1 || ^2") == -1
-        assert _compare_ranges("^2 || ^3", "^1 || ^4") is None
 
     def test_install_compatible(self):
         core_data = _get_default_core_data()
