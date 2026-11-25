@@ -65,11 +65,15 @@ export class FileEditorSearchProvider
     query: RegExp,
     filters: IFilters | undefined
   ): Promise<void> {
+    const queryKey = JSON.stringify([query.source, query.flags, filters ?? {}]);
+    // `startQuery` also restarts the search after each change of the text
+    const isNewQuery = queryKey !== this._queryKey;
+    this._queryKey = queryKey;
     this._searchActive = true;
     await super.startQuery(query, filters);
     await this.highlightNext(true, {
       from: 'selection-start',
-      scroll: false,
+      scroll: isNewQuery,
       select: false
     });
   }
@@ -79,6 +83,7 @@ export class FileEditorSearchProvider
    */
   async endQuery(): Promise<void> {
     this._searchActive = false;
+    this._queryKey = null;
     await super.endQuery();
   }
 
@@ -143,4 +148,5 @@ export class FileEditorSearchProvider
   }
 
   private _searchActive = false;
+  private _queryKey: string | null = null;
 }
