@@ -2783,6 +2783,11 @@ namespace Private {
     timing?: JSONObject;
     /** Whether the execution was still running when it was captured. */
     wasRunning: boolean;
+    /**
+     * The prompt number when it was captured: final for an execution that
+     * had ended, even if its outputs were cleared since its reply.
+     */
+    executionCount: nbformat.ExecutionCount;
   }
 
   const pendingOutputExecutions = new WeakMap<CodeCell, IStoredCellExecution>();
@@ -2814,14 +2819,23 @@ namespace Private {
     storedExecution: IStoredCellExecution,
     recordTiming: boolean
   ): void {
-    const { future } = storedExecution;
+    const { future, wasRunning, executionCount } = storedExecution;
+    if (!wasRunning && cell.model.executionCount !== executionCount) {
+      // An execution that had ended keeps the prompt it had then, also
+      // after an undo that rolled it back, and its reply does not bring
+      // back a prompt cleared since.
+      cell.model.executionCount = executionCount;
+    }
     void future.done.then(
       reply => {
         if (!cell.isDisposed) {
-          // The future is authoritative for the prompt number; a snapshot
-          // taken before completion would be stale (still null). Setting a
-          // non-null execution count also flips the state back to 'idle'.
-          cell.model.executionCount = reply.content.execution_count;
+          // For an execution that was running, the future is authoritative
+          // for the prompt number; a snapshot taken before completion would
+          // be stale (still null). Setting a non-null execution count also
+          // flips the state back to 'idle'.
+          if (wasRunning) {
+            cell.model.executionCount = reply.content.execution_count;
+          }
           cell.model.executionState = 'idle';
           if (recordTiming) {
             const started = reply.metadata.started as string | undefined;
@@ -2948,6 +2962,7 @@ namespace Private {
       pending.displayIdMap = cell.outputArea.displayIdMap;
       pending.timing = cell.model.getMetadata('execution');
       pending.wasRunning = cell.model.executionState === 'running';
+      pending.executionCount = cell.model.executionCount;
       return pending;
     }
     const future = cell.outputArea.detachFuture();
@@ -2986,7 +3001,8 @@ namespace Private {
       buffered,
       displayIdMap,
       timing: cell.model.getMetadata('execution'),
-      wasRunning: cell.model.executionState === 'running'
+      wasRunning: cell.model.executionState === 'running',
+      executionCount: cell.model.executionCount
     };
   }
 

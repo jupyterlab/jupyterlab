@@ -3717,6 +3717,8 @@ describe('@jupyterlab/notebook', () => {
         });
         const future = createResolvedFuture(2);
         cell.outputArea.reattachFuture(future);
+        // Running, as an execution that has output to come is.
+        cell.model.executionState = 'running';
 
         NotebookActions.deleteCells(widget);
         // Simulate output that arrived while the cell was deleted.
