@@ -931,12 +931,19 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
       }
     });
     const paired = new Map<number, number>();
+    const nodeTexts = new Map<Text, string>();
     if (
       shown.length === fromSource.length &&
       shown.every(
         (index, i) =>
           Private.typedText(source[index].text) ===
-          Private.typedText(rendered[fromSource[i]].text)
+            Private.typedText(rendered[fromSource[i]].text) &&
+          Private.isInSameWord(
+            text,
+            source[index],
+            rendered[fromSource[i]],
+            nodeTexts
+          )
       )
     ) {
       shown.forEach((index, i) => paired.set(index, fromSource[i]));
@@ -1084,6 +1091,67 @@ namespace Private {
       .replace(/\u2032/g, "'")
       .replace(/\u2061(?=[\p{L}\p{N}])/gu, ' ')
       .replace(/\u2061/g, '');
+  }
+
+  /**
+   * Whether a source match and a rendered match are in the same word. A
+   * source match which the rendered text does not show, such as the `l` of
+   * `$\lambda$`, and a rendered match whose source match is left out, such
+   * as an `l` in code, can take each other's places in two lists of the same
+   * texts.
+   *
+   * @param source - The cell source.
+   * @param sourceMatch - The match in the source.
+   * @param renderedMatch - The match in the rendered text.
+   * @param nodeTexts - Text of each rendered text node before the search
+   * split it, filled on demand.
+   */
+  export function isInSameWord(
+    source: string,
+    sourceMatch: ISearchMatch,
+    renderedMatch: IHTMLSearchMatch,
+    nodeTexts: Map<Text, string>
+  ): boolean {
+    const { node } = renderedMatch;
+    if (renderedMatch.parts || node.parentElement?.closest('mjx-container')) {
+      // A formula has one text node per character
+      return true;
+    }
+    let rendered = nodeTexts.get(node);
+    if (rendered === undefined) {
+      // The search split the text node to mark its matches
+      rendered = node.data;
+      let next = node.nextSibling;
+      while (next && (next instanceof Text || next.nodeName === 'MARK')) {
+        rendered += next.textContent ?? '';
+        next = next.nextSibling;
+      }
+      nodeTexts.set(node, rendered);
+    }
+    return (
+      wordAt(source, sourceMatch.position, sourceMatch.text.length) ===
+      wordAt(rendered, renderedMatch.position, renderedMatch.text.length)
+    );
+  }
+
+  /**
+   * A letter or a digit.
+   */
+  const WORD_CHARACTER = /[\p{L}\p{N}]/u;
+
+  /**
+   * The text of a match with the letters and digits next to it.
+   */
+  function wordAt(text: string, position: number, length: number): string {
+    let start = position;
+    while (start > 0 && WORD_CHARACTER.test(text[start - 1])) {
+      start--;
+    }
+    let end = position + length;
+    while (end < text.length && WORD_CHARACTER.test(text[end])) {
+      end++;
+    }
+    return text.slice(start, end);
   }
 
   /**

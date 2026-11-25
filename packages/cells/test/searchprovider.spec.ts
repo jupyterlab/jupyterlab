@@ -66,12 +66,19 @@ const FENCE_PARSER: IRenderMime.IMarkdownParser = {
 };
 
 /**
- * A typesetter which draws the formulas `$x$` and `$n-1$` as MathJax does:
- * each character is a mathematical symbol, such as 𝑥, in a text node of its
- * own.
+ * A typesetter which draws the formulas `$x$`, `$n-1$` and `$\lambda$` as
+ * MathJax does: each character is a mathematical symbol, such as 𝑥, in a text
+ * node of its own.
  */
 const FORMULA_TYPESETTER: IRenderMime.ILatexTypesetter = {
   typeset: host => {
+    if (host.innerHTML.includes('$\\lambda$')) {
+      host.innerHTML = host.innerHTML.replace(
+        '$\\lambda$',
+        '<mjx-container class="MathJax" jax="CHTML"><mjx-math>' +
+          '<mjx-mi><mjx-c>𝜆</mjx-c></mjx-mi></mjx-math></mjx-container>'
+      );
+    }
     if (host.innerHTML.includes('$x$')) {
       host.innerHTML = host.innerHTML.replace(
         '$x$',
@@ -584,6 +591,22 @@ describe('cells/searchprovider', () => {
       const match = await provider.highlightNext();
       expect(match?.position).toBe(source.indexOf('python'));
       expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
+    it('should not mark another occurrence for a match in a formula command', async () => {
+      // The l of \lambda would be paired with the l of wavelength
+      cell = createMarkdownCell(
+        'See $\\lambda$ for wavelength, and `[x](link)` for links.',
+        { markdownParser: FENCE_PARSER }
+      );
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/l/, {});
+
+      await provider.highlightNext();
+      expect(renderedCurrentMatch(cell)).toBeNull();
       provider.dispose();
     });
 
