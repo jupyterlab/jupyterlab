@@ -96,6 +96,22 @@ describe('@jupyterlab/coreutils', () => {
         monitor.dispose();
         expect(monitor.isDisposed).toBe(true);
       });
+
+      it('should clear any pending timeout', () => {
+        jest.useFakeTimers();
+        try {
+          const monitor = new ActivityMonitor<TestObject, number>({
+            signal,
+            timeout: 100
+          });
+          signal.emit(10);
+          expect(jest.getTimerCount()).toBe(1);
+          monitor.dispose();
+          expect(jest.getTimerCount()).toBe(0);
+        } finally {
+          jest.useRealTimers();
+        }
+      });
     });
   });
 });
