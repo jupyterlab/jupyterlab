@@ -595,6 +595,44 @@ test('should display cells below on scrolling after inserting a cell on top', as
   await expect(lastCell).toBeVisible();
 });
 
+test('should show the next heading after collapsing a long section', async ({
+  page,
+  tmpPath
+}) => {
+  const notebookName = 'two_sections.ipynb';
+  const cells = ['A', 'B'].flatMap(section => [
+    galata.Notebook.makeCell({
+      cell_type: 'markdown',
+      source: [`# Section ${section}`]
+    }),
+    ...Array.from({ length: 30 }, (_, i) =>
+      galata.Notebook.makeCell({ cell_type: 'code', source: [`x = ${i}`] })
+    )
+  ]);
+  await page.contents.uploadContent(
+    JSON.stringify(galata.Notebook.makeNotebook(cells)),
+    'text',
+    `${tmpPath}/${notebookName}`
+  );
+  await page.notebook.openByPath(`${tmpPath}/${notebookName}`);
+  // Code cells rendered on idle time stay in the DOM with `display: none`
+  await page.waitForFunction(() => {
+    const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+    return panel.content.widgets.every(cell => !cell.isPlaceholder());
+  });
+
+  const notebook = (await page.notebook.getNotebookInPanelLocator())!;
+  const firstHeading = notebook.locator(
+    '.jp-Cell[data-windowed-list-index="0"]'
+  );
+  await firstHeading.hover();
+  await firstHeading.locator('.jp-collapseHeadingButton').click();
+
+  await expect(
+    notebook.locator('.jp-Cell[data-windowed-list-index="31"]')
+  ).toBeInViewport();
+});
+
 test('should not scroll back to a newly inserted cell when scrolling away', async ({
   page,
   tmpPath
