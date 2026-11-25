@@ -186,11 +186,14 @@ test.describe('Output Scrolling', () => {
       );
       await expect(outputArea).toHaveCSS('max-height', '120px');
 
-      await outputArea.evaluate(el => {
-        (el as HTMLElement).style.height = '50px';
-      });
+      // The resize handle is in the bottom right corner
+      const box = (await outputArea.boundingBox())!;
+      await page.mouse.move(box.x + box.width - 3, box.y + box.height - 3);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width - 3, box.y + box.height + 97);
+      await page.mouse.up();
       await expect(outputArea).toHaveCSS('max-height', 'none');
-      await expect(outputArea).toHaveCSS('height', '50px');
+      await expect(outputArea).toHaveCSS('height', '220px');
     });
 
     test('does not scroll an output shorter than the maximum height', async ({
