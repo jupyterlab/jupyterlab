@@ -248,6 +248,39 @@ describe('@jupyterlab/rendermime', () => {
       widget.dispose();
     });
 
+    it('does not resume a superseded render when the host is attached again', async () => {
+      // A render that waits for the host is superseded by the next stream
+      // chunk; turning incremental auto-linking off renders that chunk at once.
+      const sanitizer = new Sanitizer();
+      const widget = new RenderedText({
+        mimeType: 'text/plain',
+        sanitizer,
+        resolver: null,
+        linkHandler: null,
+        latexTypesetter: null
+      });
+      Widget.attach(widget, document.body);
+      void widget.renderModel(
+        new MimeModel({ data: { 'text/plain': 'line 1\n' } })
+      );
+      jest.runAllTimers();
+
+      Widget.detach(widget);
+      void widget.renderModel(
+        new MimeModel({ data: { 'text/plain': 'line 1\nline 2\n' } })
+      );
+      jest.advanceTimersByTime(1000);
+      sanitizer.setIncrementalAutolink(false);
+      void widget.renderModel(
+        new MimeModel({ data: { 'text/plain': 'line 1\nline 2\nline 3\n' } })
+      );
+      Widget.attach(widget, document.body);
+      jest.runAllTimers();
+
+      expect(widget.node.textContent).toBe('line 1\nline 2\nline 3\n');
+      widget.dispose();
+    });
+
     it('resolves the render promise while the host waits to be attached', async () => {
       // The debugger variable viewer attaches the renderer widget only after
       // `renderModel()` resolves.
