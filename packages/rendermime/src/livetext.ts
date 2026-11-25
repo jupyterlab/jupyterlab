@@ -523,6 +523,13 @@ function getSelectionRanges(frame: number): Range[] {
         )
       : [];
     selectionFrame = frame;
+    // Two frames can share a timestamp (Firefox with
+    // `privacy.resistFingerprinting` rounds it to 16.67 ms), so a timer clears
+    // the cache before the next frame.
+    window.setTimeout(() => {
+      selectionFrame = null;
+      selectionRanges = [];
+    });
   }
   return selectionRanges;
 }

@@ -1109,6 +1109,45 @@ describe('@jupyterlab/rendermime', () => {
       expect(window.getSelection()!.toString()).toBe('word1');
     });
 
+    it('preserves a selection made between two frames that share a timestamp', async () => {
+      // Firefox with `privacy.resistFingerprinting` rounds frame timestamps to
+      // 16.67 ms, so two consecutive frames can share one.
+      const pending = new Map<number, FrameRequestCallback>();
+      let rafId = 0;
+      jest
+        .spyOn(window, 'requestAnimationFrame')
+        .mockImplementation((callback: FrameRequestCallback) => {
+          rafId += 1;
+          pending.set(rafId, callback);
+          return rafId;
+        });
+      jest
+        .spyOn(window, 'cancelAnimationFrame')
+        .mockImplementation((handle: number) => {
+          pending.delete(handle);
+        });
+      const runFrame = () => {
+        const callbacks = [...pending.values()];
+        pending.clear();
+        for (const callback of callbacks) {
+          callback(1000);
+        }
+      };
+      window.getSelection()!.removeAllRanges();
+      const sanitizer = new Sanitizer();
+
+      void renderText({ host, sanitizer, source: 'word0 word1 word2 ' });
+      runFrame();
+      jest.advanceTimersByTime(16);
+
+      const text = host.querySelector('pre')!.firstChild as Text;
+      window.getSelection()!.setBaseAndExtent(text, 6, text, 11);
+      void renderText({ host, sanitizer, source: 'word0 word1 word2 word3 ' });
+      runFrame();
+
+      expect(window.getSelection()!.toString()).toBe('word1');
+    });
+
     // In Chromium every read of the selection lays out the page when the DOM
     // has changed since the last layout (https://crbug.com/590369), so text
     // outputs read it once per frame. Drop the next two tests together with
