@@ -35,9 +35,7 @@ describe('@jupyterlab/coreutils', () => {
         const promise = signalToPromise(obj.changed, 100);
 
         jest.advanceTimersByTime(100);
-        await expect(promise).rejects.toBe(
-          'Signal not emitted within 100 ms.'
-        );
+        await expect(promise).rejects.toBe('Signal not emitted within 100 ms.');
         expect(jest.getTimerCount()).toBe(0);
       } finally {
         jest.useRealTimers();
