@@ -521,7 +521,11 @@ describe('cells/searchprovider', () => {
         'the fallback text of a video',
         'An apple, <video src="clip.mp4">an apple</video>'
       ],
-      ['a text area', 'An apple, <textarea>an apple</textarea>']
+      ['a text area', 'An apple, <textarea>an apple</textarea>'],
+      [
+        'text for screen readers only',
+        'An apple, <span class="jp-sr-only">an apple</span>'
+      ]
     ])('should unrender the cell for a match in %s', async (_, source) => {
       cell = createMarkdownCell(source);
       Widget.attach(cell, document.body);
