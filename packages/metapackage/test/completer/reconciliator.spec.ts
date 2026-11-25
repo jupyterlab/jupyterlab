@@ -269,6 +269,22 @@ describe('completer/reconciliator', () => {
         const result = await reconciliator.fetch({ offset: 0, text: '' });
         expect(result).toEqual(DEFAULT_REPLY);
       });
+      it('should return completions even if `isApplicable` of one of providers rejects', async () => {
+        const failing = new FooCompletionProvider();
+        failing.isApplicable = () => Promise.reject(new Error('provider bug'));
+        const working = new FooCompletionProvider();
+        const reconciliator = new ProviderReconciliator({
+          ...defaultOptions,
+          providers: [failing, working]
+        });
+        const error = jest.spyOn(console, 'error').mockImplementation(() => {
+          // no-op
+        });
+        await expect(
+          reconciliator.fetch({ offset: 0, text: '' })
+        ).resolves.toEqual(DEFAULT_REPLY);
+        error.mockRestore();
+      });
       it('should include `resolve` in reply items', async () => {
         const fooProvider1 = new FooCompletionProvider();
         const reconciliator = new ProviderReconciliator({
@@ -431,6 +447,28 @@ describe('completer/reconciliator', () => {
         );
         spy1.mockRestore();
         spy2.mockRestore();
+      });
+      it('should leave out and log providers whose `isApplicable` fails', async () => {
+        const rejecting = new FooCompletionProvider();
+        rejecting.isApplicable = () =>
+          Promise.reject(new Error('provider bug'));
+        const throwing = new FooCompletionProvider();
+        throwing.isApplicable = () => {
+          throw new Error('provider bug');
+        };
+        const working = new FooCompletionProvider();
+        const reconciliator = new ProviderReconciliator({
+          ...defaultOptions,
+          providers: [rejecting, throwing, working]
+        });
+        const error = jest.spyOn(console, 'error').mockImplementation(() => {
+          // no-op
+        });
+        await expect(reconciliator['applicableProviders']()).resolves.toEqual([
+          working
+        ]);
+        expect(error).toHaveBeenCalledTimes(2);
+        error.mockRestore();
       });
     });
   });
