@@ -214,6 +214,17 @@ describe('Debugger.EditorHandler', () => {
     expect(kernel.get(service.getCodeId('w = 0\nx = 1\ny = 2'))).toEqual([3]);
   });
 
+  it('should remove the breakpoints of an edit that is not sent when all breakpoints are removed', async () => {
+    const kernel = await startDebuggingInEditor('x = 1');
+    await clickGutter(0);
+    src.updateSource(5, 5, '0');
+    await service.clearBreakpoints();
+    jest.advanceTimersByTime(1000);
+    await flushRequests();
+
+    expect(kernel.size).toBe(0);
+  });
+
   describe('#clearBreakpoints()', () => {
     it('should clear the breakpoints of the cell', async () => {
       const kernel = startDebugging([1]);

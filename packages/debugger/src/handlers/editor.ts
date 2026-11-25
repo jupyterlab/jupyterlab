@@ -560,8 +560,13 @@ export class EditorHandler implements IDisposable {
     }
     const code = this._src.getSource();
     // Until an edit is sent, the model has the lines of the previous code,
-    // while the gutter moved the breakpoints with the edit.
-    if (this._lastCode !== null && code !== this._lastCode) {
+    // while the gutter moved the breakpoints with the edit. An empty model
+    // means that all breakpoints were removed.
+    if (
+      this._lastCode !== null &&
+      code !== this._lastCode &&
+      model.breakpoints.size > 0
+    ) {
       return this._getBreakpointsFromEditor().map(line =>
         Private.createBreakpoint(
           this._debuggerService.session?.connection?.name || '',
