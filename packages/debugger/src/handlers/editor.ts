@@ -376,13 +376,17 @@ export class EditorHandler implements IDisposable {
    * that have the same code share one file.
    */
   private _canClear(code: string): boolean {
+    const src = this._src;
+    // A file runs in a console, and this handler does not record those runs.
+    if (!Private.isCell(src)) {
+      return false;
+    }
     const path = this._debuggerService.getCodeId(code);
     const breakpoints = this._debuggerService.model.breakpoints;
     if (this._ranCode.has(code) || !breakpoints.getBreakpoints(path).length) {
       return false;
     }
-    const src = this._src;
-    const cells = Private.isCell(src) ? (src.notebook?.cells ?? []) : [];
+    const cells = src.notebook?.cells ?? [];
     return !cells.some(
       cell =>
         cell !== src && cell.cell_type === 'code' && cell.getSource() === code

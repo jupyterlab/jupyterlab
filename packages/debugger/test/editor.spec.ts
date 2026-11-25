@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { YCodeCell } from '@jupyter/ydoc';
+import { YCodeCell, YFile } from '@jupyter/ydoc';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -152,6 +152,30 @@ describe('Debugger.EditorHandler', () => {
     expect(kernel.get(service.getCodeId('x = 2'))).toEqual([1]);
     promptHandler.dispose();
     prompt.dispose();
+  });
+
+  it('should keep the breakpoints of the previous code of a file', async () => {
+    const kernel = startDebugging([]);
+    // Run All Code runs a file in a console, and the handler records no run.
+    const file = YFile.create();
+    file.setSource('x = 1');
+    const fileHandler = new Debugger.EditorHandler({
+      debuggerService: service,
+      editorReady: () => new Promise<CodeEditor.IEditor>(() => undefined),
+      getEditor: () => null,
+      src: file
+    });
+    fileHandler['_getBreakpointsFromEditor'] = () => [1];
+    file.setSource('x = 2');
+    jest.advanceTimersByTime(1000);
+    await flushRequests();
+    file.setSource('x = 3');
+    jest.advanceTimersByTime(1000);
+    await flushRequests();
+
+    expect(kernel.get(service.getCodeId('x = 2'))).toEqual([1]);
+    fileHandler.dispose();
+    file.dispose();
   });
 
   it('should keep the breakpoints when the source changes while they are sent', async () => {
