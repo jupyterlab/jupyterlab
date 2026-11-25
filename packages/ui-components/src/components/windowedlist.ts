@@ -1780,6 +1780,21 @@ export class WindowedList<
     }
     if (target?.element.isConnected) {
       this._scrollToItem = null;
+      if (this.viewModel.windowingActive) {
+        // The window comes from the stored sizes, which lag behind a resize.
+        const item = target.element.closest<HTMLElement>(
+          '[data-windowed-list-index]'
+        );
+        const height = item?.getBoundingClientRect().height ?? 0;
+        if (item && height > 0) {
+          this.viewModel.setWidgetSize([
+            {
+              index: parseInt(item.dataset.windowedListIndex!, 10),
+              size: height
+            }
+          ]);
+        }
+      }
       target.element.scrollIntoView();
       const { scrollTop } = this._outerElement;
       if (scrollTop !== this.viewModel.scrollOffset) {

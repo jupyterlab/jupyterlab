@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { framePromise } from '@jupyterlab/testing';
 import { WindowedList, WindowedListModel } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
 import { ObservableList } from '@jupyterlab/observables';
@@ -504,6 +505,38 @@ describe('@jupyterlab/ui-components', () => {
         list.scrollElementIntoView(1, element);
         expect(createScrollbarItem).toHaveBeenCalled();
         createScrollbarItem.mockRestore();
+      });
+
+      it('should keep the element attached when its item grew', async () => {
+        const items = Array.from({ length: 10 }, () => new Widget());
+        class ItemsModel extends WindowedListModel {
+          estimateWidgetSize = (_index: number): number => FIXED_ESTIMATED_SIZE;
+          widgetRenderer = (index: number): Widget => items[index];
+        }
+        const itemsList = new TestList({
+          model: new ItemsModel({ count: items.length, windowingActive: true })
+        });
+        Widget.attach(itemsList, document.body);
+        itemsList.update();
+        while (!items[1].isAttached) {
+          await framePromise();
+        }
+        // The item is now taller than the size that the list stored for it.
+        jest
+          .spyOn(items[1].node, 'getBoundingClientRect')
+          .mockReturnValue({ height: 4 * FIXED_ESTIMATED_SIZE } as DOMRect);
+        const heading = document.createElement('h2');
+        heading.scrollIntoView = () => {
+          itemsList.outerNode.scrollTop = 3.5 * FIXED_ESTIMATED_SIZE;
+        };
+        items[1].node.appendChild(heading);
+
+        itemsList.scrollElementIntoView(1, heading);
+        await framePromise();
+        await framePromise();
+
+        expect(heading.isConnected).toBe(true);
+        itemsList.dispose();
       });
 
       it('should request the item while the element is detached', () => {
