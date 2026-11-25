@@ -246,5 +246,62 @@ describe('@jupyterlab/cell-toolbar', () => {
         expect(buttonUpB.disabled).toBe(false);
       });
     });
+
+    describe('#_onActiveCellChanged()', () => {
+      it('should reuse one range to measure the first line of code', async () => {
+        const measuredRanges = new Set<object>();
+        let measurements = 0;
+        const createRange = jest
+          .spyOn(document, 'createRange')
+          .mockImplementation(() => {
+            const range = {
+              setEnd: jest.fn(),
+              setStart: jest.fn(),
+              selectNode: jest.fn(),
+              selectNodeContents: jest.fn((node: Node) => {
+                // Ignore trackers of notebooks from other tests
+                if (panel.node.contains(node)) {
+                  measuredRanges.add(range);
+                  measurements++;
+                }
+              }),
+              getBoundingClientRect: () => ({ width: 0, right: 0, top: 0 }),
+              getClientRects: (): DOMRect[] => []
+            };
+            return range as unknown as Range;
+          });
+
+        try {
+          const context = await NBTestUtils.createMockContext();
+          panel = NBTestUtils.createNotebookPanel(context);
+          NBTestUtils.populateNotebook(panel.content);
+          Widget.attach(panel, document.body);
+          await panel.revealed;
+
+          extension = new CellBarExtension(commands, testToolbarFactory());
+          const tracker = extension.createNew(panel);
+          await framePromise();
+
+          const codeCells = panel.content.widgets
+            .map((cell, index) => (cell.model.type === 'code' ? index : -1))
+            .filter(index => index >= 0)
+            .slice(0, 3);
+          expect(codeCells.length).toBe(3);
+
+          for (const index of codeCells) {
+            panel.content.activeCellIndex = index;
+            await framePromise();
+            // Let the idle callback that measures the overlap run
+            await new Promise(resolve => setTimeout(resolve, 20));
+          }
+
+          expect(measurements).toBeGreaterThanOrEqual(codeCells.length);
+          expect(measuredRanges.size).toBe(1);
+          tracker.dispose();
+        } finally {
+          createRange.mockRestore();
+        }
+      });
+    });
   });
 });
