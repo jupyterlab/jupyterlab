@@ -605,6 +605,55 @@ test.describe('Notebook Search', () => {
     ).toBeInViewport({ ratio: 1 });
   });
 
+  test('Scroll to the next match in rendered Markdown of a collapsed section', async ({
+    page,
+    tmpPath
+  }) => {
+    const paragraphs = Array.from(
+      { length: 40 },
+      (_, i) => `Paragraph ${i + 1} has only hay.\n\n`
+    );
+    const notebook = galata.Notebook.makeNotebook([
+      galata.Notebook.makeCell({
+        cell_type: 'markdown',
+        source: ['# Section 1\n\n', 'The needle is in section 1.']
+      }),
+      galata.Notebook.makeCell({
+        cell_type: 'markdown',
+        source: ['# Section 2'],
+        metadata: { 'jp-MarkdownHeadingCollapsed': true }
+      }),
+      galata.Notebook.makeCell({
+        cell_type: 'markdown',
+        source: ['## Details\n\n', ...paragraphs, 'The needle is in section 2.']
+      })
+    ]);
+    await page.contents.uploadContent(
+      JSON.stringify(notebook),
+      'text',
+      `${tmpPath}/sections.ipynb`
+    );
+    await page.notebook.openByPath(`${tmpPath}/sections.ipynb`);
+    await page.notebook.activate('sections.ipynb');
+    // Cells of a collapsed section are rendered when the browser is idle
+    await page.waitForFunction(() => {
+      const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+      return panel.content.widgets.every(cell => !cell.isPlaceholder());
+    });
+
+    await page.keyboard.press('Control+f');
+    await page.fill('[placeholder="Find"]', 'needle');
+    const counter = page.locator('.jp-DocumentSearch-index-counter');
+    await expect(counter).toHaveText('1/2');
+    // The search activates the cell, which expands the section
+    await page.keyboard.press('Enter');
+    await expect(counter).toHaveText('2/2');
+
+    await expect(
+      page.locator('.jp-RenderedMarkdown .jp-current-match')
+    ).toBeInViewport({ ratio: 1 });
+  });
+
   test('Mark the first match of a read-only cell after the query changes', async ({
     page,
     tmpPath
