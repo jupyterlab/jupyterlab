@@ -66,20 +66,15 @@ export class ActivityMonitor<Sender, Args> implements IDisposable {
    * A signal handler for the monitored signal.
    */
   private _onSignalFired(sender: Sender, args: Args): void {
-    if (this._isDisposed) {
-      return;
-    }
     clearTimeout(this._timer);
     this._sender = sender;
     this._args = args;
     this._timer = setTimeout(() => {
       this._timer = undefined;
-      if (!this._isDisposed) {
-        this._activityStopped.emit({
-          sender: this._sender,
-          args: this._args
-        });
-      }
+      this._activityStopped.emit({
+        sender: this._sender,
+        args: this._args
+      });
     }, this._timeout);
   }
 
