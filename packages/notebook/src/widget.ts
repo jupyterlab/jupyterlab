@@ -2476,13 +2476,9 @@ export class Notebook extends StaticNotebook {
     // A newer link, or the user moving on, cancels this navigation.
     const request = ++this._fragmentRequest;
     let interrupted = false;
-    const interrupt = () => {
+    const userNavigationListener = this.addUserNavigationListener(() => {
       interrupted = true;
-    };
-    const listenerOptions = { capture: true, passive: true };
-    for (const type of Notebook.USER_NAVIGATION_EVENTS) {
-      this.node.addEventListener(type, interrupt, listenerOptions);
-    }
+    });
     const isCancelled = () =>
       interrupted || request !== this._fragmentRequest || this.isDisposed;
 
@@ -2544,9 +2540,7 @@ export class Notebook extends StaticNotebook {
         element ?? result.element ?? cell.node
       );
     } finally {
-      for (const type of Notebook.USER_NAVIGATION_EVENTS) {
-        this.node.removeEventListener(type, interrupt, listenerOptions);
-      }
+      userNavigationListener.dispose();
     }
   }
 

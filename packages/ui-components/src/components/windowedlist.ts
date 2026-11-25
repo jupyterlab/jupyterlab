@@ -16,6 +16,7 @@ import type { IObservableList } from '@jupyterlab/observables';
 import { ArrayExt } from '@lumino/algorithm';
 import { PromiseDelegate } from '@lumino/coreutils';
 import type { IDisposable } from '@lumino/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
 import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { Throttler } from '@lumino/polling';
@@ -49,6 +50,11 @@ const PROGRAMMATIC_SCROLL_TIMEOUT = 3000;
  * The time is given in milliseconds.
  */
 const MAXIMUM_TIME_WAITING_FOR_ITEM = 10000;
+
+/**
+ * Events showing that the user is moving on from a requested position.
+ */
+const USER_NAVIGATION_EVENTS = ['wheel', 'touchmove', 'pointerdown', 'keydown'];
 
 /*
  * Feature detection
@@ -904,16 +910,6 @@ export class WindowedList<
   static readonly DEFAULT_WIDGET_SIZE = 50;
 
   /**
-   * Events showing that the user is moving on from a requested position.
-   */
-  protected static readonly USER_NAVIGATION_EVENTS: ReadonlyArray<string> = [
-    'wheel',
-    'touchmove',
-    'pointerdown',
-    'keydown'
-  ];
-
-  /**
    * Constructor
    *
    * @param options Constructor options
@@ -1253,6 +1249,27 @@ export class WindowedList<
     // A scroll requested earlier must not override this one.
     this._scrollUpdateWasRequested = false;
     this._scrollBackToItemOnResize();
+  }
+
+  /**
+   * Call a function when the user scrolls, clicks, touches or presses a key
+   * in the list.
+   *
+   * @param callback - Function to call
+   * @returns A disposable that removes the listeners
+   */
+  protected addUserNavigationListener(callback: () => void): IDisposable {
+    for (const type of USER_NAVIGATION_EVENTS) {
+      this.node.addEventListener(type, callback, {
+        capture: true,
+        passive: true
+      });
+    }
+    return new DisposableDelegate(() => {
+      for (const type of USER_NAVIGATION_EVENTS) {
+        this.node.removeEventListener(type, callback, { capture: true });
+      }
+    });
   }
 
   /**
@@ -1831,11 +1848,10 @@ export class WindowedList<
    */
   private _followElement(target: { index: number; element: HTMLElement }) {
     this._scrollToElement = target;
-    for (const type of WindowedList.USER_NAVIGATION_EVENTS) {
-      this.node.addEventListener(type, this._stopFollowingElement, {
-        capture: true,
-        passive: true
-      });
+    if (!this._userNavigationListener) {
+      this._userNavigationListener = this.addUserNavigationListener(
+        this._stopFollowingElement
+      );
     }
   }
 
@@ -1844,11 +1860,8 @@ export class WindowedList<
    */
   private _stopFollowingElement = () => {
     this._scrollToElement = null;
-    for (const type of WindowedList.USER_NAVIGATION_EVENTS) {
-      this.node.removeEventListener(type, this._stopFollowingElement, {
-        capture: true
-      });
-    }
+    this._userNavigationListener?.dispose();
+    this._userNavigationListener = null;
   };
 
   /**
@@ -2067,6 +2080,7 @@ export class WindowedList<
     null;
   private _scrollUpdateWasRequested: boolean;
   private _updater: Throttler;
+  private _userNavigationListener: IDisposable | null = null;
   private _viewport: HTMLElement;
 }
 
