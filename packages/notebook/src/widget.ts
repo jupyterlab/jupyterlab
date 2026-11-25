@@ -1066,16 +1066,22 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           if (this.notebookConfig.windowingMode === 'full') {
             // We need to delay slightly the removal to let codemirror properly initialize
             requestAnimationFrame(() => {
-              this.viewModel.setEstimatedWidgetSize(
-                cell.model.id,
-                cell.node.getBoundingClientRect().height
-              );
+              // A hidden cell measures 0 px, which is not its height once
+              // its heading is expanded.
+              if (!cell.isHidden) {
+                this.viewModel.setEstimatedWidgetSize(
+                  cell.model.id,
+                  cell.node.getBoundingClientRect().height
+                );
+              }
               this.layout.removeWidget(cell);
             });
           } else if (
             this.notebookConfig.windowingMode === 'contentVisibility' &&
-            // Cells in hidden notebooks do not have a measurable height.
-            this.isVisible
+            // Cells in hidden notebooks, and hidden cells, do not have a
+            // measurable height.
+            this.isVisible &&
+            !cell.isHidden
           ) {
             // Update height estimate in the view model
             const height = cell.node.getBoundingClientRect().height;
