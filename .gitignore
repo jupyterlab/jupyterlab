@@ -154,6 +154,7 @@ untitled*.txt
 
 # pixi environments
 .pixi
+pixi.lock
 
 # temporary files, useful for testing
 tmp

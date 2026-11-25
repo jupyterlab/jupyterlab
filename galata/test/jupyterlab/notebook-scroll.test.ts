@@ -771,10 +771,8 @@ test.describe('Notebook scroll beyond a cell with long output (with windowing)',
   });
 
   test('should not change height of the scrollbar when scrolling beyond the cell long', async ({
-    page,
-    browserName
+    page
   }) => {
-    test.skip(browserName === 'firefox', 'Needs fixing on Firefox');
     // Make the first cell active
     await page.notebook.selectCells(0);
 
