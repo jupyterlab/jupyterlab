@@ -285,6 +285,38 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#highlightNext()', () => {
+      afterEach(() => {
+        if (panel.isAttached) {
+          Widget.detach(panel);
+        }
+        jest.useFakeTimers();
+      });
+
+      it('should not mark an escaped link for a match in a link destination', async () => {
+        // A Markdown cell renders only in the document, on a real timer
+        jest.useRealTimers();
+        Widget.attach(panel, document.body);
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          {
+            cell_type: 'markdown',
+            source:
+              'Get the [Paper [PDF]](https://example.com/paper.pdf). Write \\[name\\](file.pdf) to show the syntax.'
+          }
+        ]);
+        const cell = panel.content.widgets[0] as MarkdownCell;
+        while (!cell.renderer.node.textContent) {
+          await framePromise();
+        }
+        await provider.startQuery(/pdf/i, undefined);
+
+        // The second match is in the URL, which the rendered text hides
+        await provider.highlightNext();
+        expect(
+          cell.renderer.node.querySelector('.jp-current-match')
+        ).toBeNull();
+      });
+
       it('should highlight next match', async () => {
         await provider.startQuery(/test/, undefined);
         expect(provider.currentMatchIndex).toBe(0);

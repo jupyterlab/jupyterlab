@@ -15,8 +15,17 @@ import type {
   IReplaceOptions,
   ISearchMatch
 } from '@jupyterlab/documentsearch';
-import { GenericSearchProvider } from '@jupyterlab/documentsearch';
+import {
+  GenericSearchProvider,
+  HTMLSearchEngine
+} from '@jupyterlab/documentsearch';
 import type { OutputArea } from '@jupyterlab/outputarea';
+import type { IRenderMime } from '@jupyterlab/rendermime';
+import {
+  removeMath,
+  RenderedCommon,
+  replaceMath
+} from '@jupyterlab/rendermime';
 import { TableOfContentsUtils } from '@jupyterlab/toc';
 import type { ICellModel } from './model';
 import type { Cell, CodeCell, MarkdownCell } from './widget';
@@ -497,6 +506,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    */
   async endQuery(): Promise<void> {
     this._currentMatchInRendered = false;
+    this._placement = null;
     await super.endQuery();
     await this.renderedProvider.endQuery();
   }
@@ -703,14 +713,22 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     // The text can change while the match is being marked, before
     // `_currentMatchInRendered` is set, as when the table of contents numbers
     // the heading of a cell which rendered again.
+    const sourceIndex = this.currentIndex;
     if (
       !this.isActive ||
       !(this.cell as MarkdownCell).rendered ||
-      this.currentIndex === null
+      sourceIndex === null
     ) {
       return;
     }
-    const index = this._pairMatches().get(this.currentIndex);
+    const index = await this._renderedMatchIndex(sourceIndex);
+    if (
+      this.currentIndex !== sourceIndex ||
+      !(this.cell as MarkdownCell).rendered
+    ) {
+      // The current match moved while the source was rendered again
+      return;
+    }
     if (index === undefined || !this._isRenderedMatchVisible(index)) {
       this._currentMatchInRendered = false;
       return;
@@ -782,7 +800,13 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
       return undefined;
     }
 
-    const renderedIndex = this._pairMatches().get(this.currentIndex);
+    const sourceIndex = this.currentIndex;
+    const renderedIndex = await this._renderedMatchIndex(sourceIndex);
+    if (this.currentIndex !== sourceIndex || !cell.rendered) {
+      // Another step moved the current match, or the cell shows its editor,
+      // while the source was rendered again
+      return match;
+    }
     if (
       renderedIndex === undefined ||
       !this._isRenderedMatchVisible(renderedIndex)
@@ -886,160 +910,74 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   }
 
   /**
-   * Pair each match in the rendered text with the source match it shows.
-   * Returns a map from source match index to rendered match index.
+   * The index of the rendered match which shows a source match, if the
+   * rendered text shows it.
    *
-   * The rendered text does not keep source positions, so the matches are
-   * paired in order, after the source matches in Markdown syntax which the
-   * rendered text does not show, such as a link destination, are left out,
-   * and so are the rendered matches in the number which the table of
-   * contents adds to a heading.
-   * The map is empty unless the two lists then hold the same texts: a
-   * difference comes from a source match in syntax which is not listed in
-   * `_hiddenSourceRanges()`, such as the number of an ordered list, and
-   * pairing around it would mark another occurrence than the one Replace
-   * changes. The map is empty too when a character reference, such as
-   * `&gt;`, adds or removes a match: its rendered text has no source match.
+   * The rendered text does not keep source positions, so `Private.Placement`
+   * renders the source again offscreen, with a marker before each match. The
+   * matches found here in the rendered text must be the ones found in the
+   * offscreen rendering, apart from those in the number which the table of
+   * contents adds to a heading and in the anchor link of a heading.
    *
-   * @returns Map from source match index to rendered match index.
+   * @param sourceIndex - Index of the source match.
+   * @returns Index of the rendered match, if any.
    */
-  private _pairMatches(): Map<number, number> {
-    const text = this.model.sharedModel.getSource();
-    if (
-      this.query &&
-      Private.countMatches(this.query, text) !==
-        Private.countMatches(this.query, Private.decodeReferences(text))
-    ) {
-      return new Map();
-    }
-    const rendered = this.renderedProvider.matches;
-    const source = this.cmHandler.matches;
-    const hidden = this._hiddenSourceRanges();
-    const shown: number[] = [];
-    source.forEach(({ position }, index) => {
-      if (
-        !hidden.some(range => position >= range.start && position < range.end)
-      ) {
-        shown.push(index);
-      }
-    });
-    const numbering = `.${TableOfContentsUtils.NUMBERING_CLASS}`;
-    const fromSource: number[] = [];
-    rendered.forEach(({ node }, index) => {
-      if (!node.parentElement?.closest(numbering)) {
-        fromSource.push(index);
-      }
-    });
-    const paired = new Map<number, number>();
-    const nodeTexts = new Map<Text, string>();
-    if (
-      shown.length === fromSource.length &&
-      shown.every(
-        (index, i) =>
-          Private.typedText(source[index].text) ===
-            Private.typedText(rendered[fromSource[i]].text) &&
-          Private.isInSameWord(
-            text,
-            source[index],
-            rendered[fromSource[i]],
-            nodeTexts
-          )
-      )
-    ) {
-      shown.forEach((index, i) => paired.set(index, fromSource[i]));
-    }
-    return paired;
-  }
-
-  /**
-   * Ranges of the cell source that the rendered text does not show: link
-   * and image destinations, reference definitions, reference labels, HTML
-   * tags, HTML comments, the content of elements whose text the search in
-   * the rendered text skips, such as the fallback text of a video, and the
-   * info strings of code fences. A match starting in one of these ranges is
-   * not visible in the rendered text. Code shows the syntax as it is, so the
-   * ranges leave out code.
-   *
-   * @returns Source ranges the rendered text does not show.
-   */
-  private _hiddenSourceRanges(): Array<{ start: number; end: number }> {
+  private async _renderedMatchIndex(
+    sourceIndex: number
+  ): Promise<number | undefined> {
+    const renderer = (this.cell as MarkdownCell).renderer;
+    const query = this.query;
     const source = this.model.sharedModel.getSource();
-    const ranges: Array<{ start: number; end: number }> = [];
-    // Images: ![alt](destination). The alt text is not rendered either. A
-    // destination can hold pairs of parentheses, as in
-    // https://example.com/Python_(language).
-    const images = /!\[[^\]]*\]\((?:[^()]|\([^()]*\))*\)/g;
-    for (const match of source.matchAll(images)) {
-      const start = match.index ?? 0;
-      ranges.push({ start, end: start + match[0].length });
+    const matches = this.cmHandler.matches;
+    if (
+      !query ||
+      !matches[sourceIndex] ||
+      !(renderer instanceof RenderedCommon) ||
+      !renderer.markdownParser
+    ) {
+      return undefined;
     }
-    // Link destinations: [text](destination). Blank out the images first, so
-    // that a link whose text is an image is found too, as in a badge:
-    // [![alt](image)](destination).
-    const withoutImages = source.replace(images, image =>
-      ' '.repeat(image.length)
+    const key = `${query.source}/${query.flags}/${source}`;
+    if (this._placement?.key !== key) {
+      this._placement = {
+        key,
+        placement: new Private.Placement(source, matches, query, renderer)
+      };
+    }
+    const place = await this._placement.placement.place(sourceIndex);
+    if (!place || this.cmHandler.matches !== matches) {
+      return undefined;
+    }
+
+    const rendered = this.renderedProvider.matches;
+    const { inText, inFormula } = Private.groupRenderedMatches(
+      rendered,
+      renderer.node
     );
-    for (const match of withoutImages.matchAll(
-      /\[[^\]]*\]\(((?:[^()]|\([^()]*\))*)\)/g
-    )) {
-      const destination = match[1] ?? '';
-      const end = (match.index ?? 0) + match[0].length;
-      ranges.push({ start: end - destination.length - 2, end });
+    if (place.kind === 'text') {
+      return inText.length === place.count ? inText[place.index] : undefined;
     }
-    // Reference definitions: the whole [label]: destination line.
-    for (const match of source.matchAll(
-      /^[ \t]{0,3}\[[^\]]+\]:[ \t]*\S.*$/gm
-    )) {
-      ranges.push({
-        start: match.index ?? 0,
-        end: (match.index ?? 0) + match[0].length
-      });
+    const candidates = inFormula[place.formula];
+    if (
+      inFormula.length !== place.formulas ||
+      candidates?.length !== place.count
+    ) {
+      return undefined;
     }
-    // Reference labels: the second [...] in [text][label] and [text][].
-    for (const match of source.matchAll(/\[[^\]]*\]\[([^\]]*)\]/g)) {
-      const label = match[1] ?? '';
-      const openBracket = (match.index ?? 0) + match[0].lastIndexOf('[');
-      ranges.push({
-        start: openBracket,
-        end: openBracket + label.length + 2
-      });
-    }
-    // The content of elements that `HTMLSearchEngine` does not search, such
-    // as the fallback text of a video.
-    for (const match of source.matchAll(
-      /<(audio|canvas|iframe|map|noscript|object|picture|script|style|svg|video)\b[\s\S]*?<\/\1\s*>/gi
-    )) {
-      ranges.push({
-        start: match.index ?? 0,
-        end: (match.index ?? 0) + match[0].length
-      });
-    }
-    // HTML tags with their attributes, and HTML comments.
-    for (const match of source.matchAll(
-      /<\/?[a-z][a-z0-9-]*(?:\s(?:[^>"']|"[^"]*"|'[^']*')*)?\/?>|<!--[\s\S]*?-->/gi
-    )) {
-      ranges.push({
-        start: match.index ?? 0,
-        end: (match.index ?? 0) + match[0].length
-      });
-    }
-    // Code shows the syntax above as it is, as in `[docs](https://x.org)`.
-    // The info string of a code fence, such as the language of the code, is
-    // hidden.
-    const { code, infoStrings } = Private.findCode(source);
-    return [
-      ...ranges.filter(
-        ({ start }) =>
-          !code.some(range => start >= range.start && start < range.end)
-      ),
-      ...infoStrings
-    ];
+    const index = candidates[place.index];
+    // MathJax draws letters as mathematical symbols
+    return Private.typedText(rendered[index].text) ===
+      Private.typedText(matches[sourceIndex].text)
+      ? index
+      : undefined;
   }
 
   protected renderedProvider: GenericSearchProvider;
   private _unrenderedByHighlight = false;
   private _currentMatchInRendered = false;
   private _showsReadOnlyEditor = false;
+  private _placement: { key: string; placement: Private.Placement } | null =
+    null;
 }
 
 /**
@@ -1085,138 +1023,431 @@ namespace Private {
   }
 
   /**
-   * Whether a source match and a rendered match are in the same word. A
-   * source match which the rendered text does not show, such as the `l` of
-   * `$\lambda$`, and a rendered match whose source match is left out, such
-   * as an `l` in code, can take each other's places in two lists of the same
-   * texts.
-   *
-   * @param source - The cell source.
-   * @param sourceMatch - The match in the source.
-   * @param renderedMatch - The match in the rendered text.
-   * @param nodeTexts - Text of each rendered text node before the search
-   * split it, filled on demand.
+   * The indices of the rendered matches outside formulas, and of those in
+   * each formula, without those in the text which the table of contents and
+   * the anchor links of headings add after rendering.
    */
-  export function isInSameWord(
-    source: string,
-    sourceMatch: ISearchMatch,
-    renderedMatch: IHTMLSearchMatch,
-    nodeTexts: Map<Text, string>
-  ): boolean {
-    const { node } = renderedMatch;
-    if (renderedMatch.parts || node.parentElement?.closest('mjx-container')) {
-      // A formula has one text node per character
-      return true;
-    }
-    let rendered = nodeTexts.get(node);
-    if (rendered === undefined) {
-      // The search split the text node to mark its matches
-      rendered = node.data;
-      let next = node.nextSibling;
-      while (next && (next instanceof Text || next.nodeName === 'MARK')) {
-        rendered += next.textContent ?? '';
-        next = next.nextSibling;
+  export function groupRenderedMatches(
+    rendered: IHTMLSearchMatch[],
+    root: HTMLElement
+  ): { inText: number[]; inFormula: number[][] } {
+    const containers = Array.from(root.querySelectorAll('mjx-container'));
+    const added = `.${TableOfContentsUtils.NUMBERING_CLASS}, .jp-InternalAnchorLink`;
+    const inText: number[] = [];
+    const inFormula: number[][] = containers.map(() => []);
+    rendered.forEach(({ node }, index) => {
+      const element = node.parentElement;
+      const container = element?.closest('mjx-container');
+      if (container) {
+        inFormula[containers.indexOf(container)]?.push(index);
+      } else if (!element?.closest(added)) {
+        inText.push(index);
       }
-      nodeTexts.set(node, rendered);
-    }
-    return (
-      wordAt(source, sourceMatch.position, sourceMatch.text.length) ===
-      wordAt(rendered, renderedMatch.position, renderedMatch.text.length)
-    );
-  }
-
-  /**
-   * A letter or a digit.
-   */
-  const WORD_CHARACTER = /[\p{L}\p{N}]/u;
-
-  /**
-   * The text of a match with the letters and digits next to it.
-   */
-  function wordAt(text: string, position: number, length: number): string {
-    let start = position;
-    while (start > 0 && WORD_CHARACTER.test(text[start - 1])) {
-      start--;
-    }
-    let end = position + length;
-    while (end < text.length && WORD_CHARACTER.test(text[end])) {
-      end++;
-    }
-    return text.slice(start, end);
-  }
-
-  /**
-   * Find the code of a Markdown source: the lines between two code fences,
-   * the code spans outside them, and the info strings of the fences.
-   */
-  export function findCode(source: string): {
-    code: Array<{ start: number; end: number }>;
-    infoStrings: Array<{ start: number; end: number }>;
-  } {
-    const code: Array<{ start: number; end: number }> = [];
-    const infoStrings: Array<{ start: number; end: number }> = [];
-    // A line in a code block can look like a fence too
-    let fence: string | null = null;
-    let start = 0;
-    let offset = 0;
-    for (const line of source.split('\n')) {
-      const marker = /^[ \t]{0,3}(`{3,}(?!`)|~{3,}(?!~))(.*)$/.exec(line);
-      if (marker && fence === null) {
-        fence = marker[1];
-        const end = offset + line.length;
-        infoStrings.push({ start: end - marker[2].length, end });
-        start = end + 1;
-      } else if (
-        marker &&
-        fence !== null &&
-        marker[1].startsWith(fence) &&
-        !marker[2].trim()
-      ) {
-        fence = null;
-        code.push({ start, end: offset });
-      }
-      offset += line.length + 1;
-    }
-    if (fence !== null) {
-      code.push({ start, end: source.length });
-    }
-    // A backtick in a code block does not start a code span
-    let outside = source;
-    for (const block of code) {
-      outside =
-        outside.slice(0, block.start) +
-        ' '.repeat(block.end - block.start) +
-        outside.slice(block.end);
-    }
-    // A code span ends at a blank line
-    for (const span of outside.matchAll(
-      /(?<!`)(`+)(?!`)(?:(?!\n[ \t]*\n)[\s\S])*?[^`]\1(?!`)/g
-    )) {
-      const spanStart = span.index ?? 0;
-      code.push({ start: spanStart, end: spanStart + span[0].length });
-    }
-    return { code, infoStrings };
-  }
-
-  /**
-   * The number of matches of a query in a text.
-   */
-  export function countMatches(query: RegExp, text: string): number {
-    const global = query.global
-      ? query
-      : new RegExp(query.source, query.flags + 'g');
-    return text.match(global)?.length ?? 0;
-  }
-
-  /**
-   * The text with each character reference, such as `&gt;`, replaced by the
-   * character it renders.
-   */
-  export function decodeReferences(text: string): string {
-    const decoder = document.createElement('textarea');
-    return text.replace(/&(?:#\d+|#x[\da-f]+|[a-z][a-z\d]*);/gi, reference => {
-      decoder.innerHTML = reference;
-      return decoder.value;
     });
+    return { inText, inFormula };
+  }
+
+  /**
+   * The parts of the renderer of a Markdown cell which render a source as the
+   * cell does.
+   */
+  export interface IMarkdownRenderer {
+    readonly markdownParser: IRenderMime.IMarkdownParser | null;
+    readonly sanitizer: IRenderMime.ISanitizer;
+    readonly latexTypesetter: IRenderMime.ILatexTypesetter | null;
+  }
+
+  /**
+   * The place of a source match in the rendered text, or `null` when the
+   * rendered text does not show the match or its place is not known.
+   */
+  export type Place =
+    | {
+        kind: 'text';
+        /**
+         * Index among the rendered matches outside formulas.
+         */
+        index: number;
+        /**
+         * Number of rendered matches outside formulas.
+         */
+        count: number;
+      }
+    | {
+        kind: 'formula';
+        /**
+         * Index of the formula among the formulas of the rendered text.
+         */
+        formula: number;
+        /**
+         * Number of formulas in the rendered text.
+         */
+        formulas: number;
+        /**
+         * Index among the source matches in the formula.
+         */
+        index: number;
+        /**
+         * Number of source matches in the formula.
+         */
+        count: number;
+      }
+    | null;
+
+  /**
+   * Finds where the rendered text shows the matches of a query in a Markdown
+   * source, by rendering the source again offscreen and without typesetting,
+   * with a private-use character before each match. A marker in the text
+   * gives the place of its match, and a missing marker shows that the
+   * rendered text hides the match. When the markers change the text, as one
+   * in a reference label or a character reference does, each match is placed
+   * with its own marker only. A match in a formula is placed by its order in
+   * the formula, as the markers do not reach the typeset formula.
+   */
+  export class Placement {
+    constructor(
+      source: string,
+      matches: ReadonlyArray<ISearchMatch>,
+      query: RegExp,
+      renderer: IMarkdownRenderer
+    ) {
+      this._source = source;
+      this._matches = matches;
+      this._query = query;
+      this._renderer = renderer;
+      this._original = renderSource(source, renderer);
+      this._members = findMembers(source, matches, renderer);
+    }
+
+    /**
+     * The place of the source match at the given index.
+     */
+    async place(index: number): Promise<Place> {
+      const original = await this._original;
+      if (!original || this._matches.length > MARKERS) {
+        return null;
+      }
+      const members = this._members;
+      const math = members?.findIndex(inMath => inMath.includes(index)) ?? -1;
+      if (members && math >= 0) {
+        // A formula outside the text, as in a link destination, is hidden
+        const formula = original.formulas.indexOf(math);
+        return formula < 0
+          ? null
+          : {
+              kind: 'formula',
+              formula,
+              formulas: original.formulas.length,
+              index: members[math].indexOf(index),
+              count: members[math].length
+            };
+      }
+      if (!this._all) {
+        this._all = this._placeInText(this._matches.map((_, i) => i));
+      }
+      const places = await this._all;
+      if (places) {
+        return places.get(index) ?? null;
+      }
+      let single = this._single.get(index);
+      if (!single) {
+        single = this._placeInText([index]).then(
+          found => found?.get(index) ?? null
+        );
+        this._single.set(index, single);
+      }
+      return single;
+    }
+
+    /**
+     * Render the source with a marker before each of the given matches, and
+     * place those matches in the text.
+     *
+     * @returns The places of the matches, or `null` when the markers change
+     * the text.
+     */
+    private async _placeInText(
+      indices: number[]
+    ): Promise<Map<number, Place> | null> {
+      const original = await this._original;
+      const marked = await render(
+        addMarkers(this._source, this._matches, indices),
+        this._renderer
+      );
+      if (!original || !marked) {
+        return null;
+      }
+      const { text, offsets } = removeMarkers(marked.text);
+      if (
+        text !== original.text ||
+        marked.formulas.join() !== original.formulas.join()
+      ) {
+        return null;
+      }
+      if (!this._starts) {
+        this._starts = findStarts(original, this._query);
+      }
+      const starts = this._starts;
+      const places = new Map<number, Place>();
+      for (const index of indices) {
+        const offset = offsets.get(index);
+        const ordinal = offset === undefined ? undefined : starts.get(offset);
+        places.set(
+          index,
+          ordinal === undefined
+            ? null
+            : { kind: 'text', index: ordinal, count: starts.size }
+        );
+      }
+      return places;
+    }
+
+    private _source: string;
+    private _matches: ReadonlyArray<ISearchMatch>;
+    private _query: RegExp;
+    private _renderer: IMarkdownRenderer;
+    private _original: Promise<IRendered | null>;
+    private _members: number[][] | null;
+    private _starts: Map<number, number> | null = null;
+    private _all: Promise<Map<number, Place> | null> | null = null;
+    private _single = new Map<number, Promise<Place>>();
+  }
+
+  /**
+   * A Markdown source rendered offscreen, without typesetting.
+   */
+  interface IRendered {
+    /**
+     * The text which the search reads, with `FORMULA` for each formula.
+     */
+    text: string;
+    /**
+     * The text of each text node, with its offset in `text`. A formula splits
+     * the text node which holds it, as its typeset form does.
+     */
+    nodes: Array<{ data: string; start: number }>;
+    /**
+     * The index of each formula among the formulas of the source, in the
+     * order of the text.
+     */
+    formulas: number[];
+  }
+
+  /**
+   * The character which stands for a formula in `IRendered.text`.
+   */
+  const FORMULA = '\uFFFC';
+
+  /**
+   * The code point of the marker of the first match. Each match has its own
+   * private-use character.
+   */
+  const MARKER = 0xf0000;
+
+  /**
+   * The number of private-use code points from `MARKER` on.
+   */
+  const MARKERS = 0xfffe;
+
+  /**
+   * The last offscreen rendering of the source of each renderer. The search
+   * starts again with new cell providers for each query, and the source
+   * rarely changes in between.
+   */
+  const renderings = new WeakMap<
+    IMarkdownRenderer,
+    { source: string; rendered: Promise<IRendered | null> }
+  >();
+
+  /**
+   * Render the source of a renderer offscreen, or reuse the last rendering
+   * of the same source.
+   */
+  function renderSource(
+    source: string,
+    renderer: IMarkdownRenderer
+  ): Promise<IRendered | null> {
+    const last = renderings.get(renderer);
+    if (last?.source === source) {
+      return last.rendered;
+    }
+    const rendered = render(source, renderer);
+    renderings.set(renderer, { source, rendered });
+    return rendered;
+  }
+
+  /**
+   * Render a Markdown source as a Markdown cell does, without typesetting its
+   * formulas, in a document which neither loads images nor runs scripts.
+   */
+  async function render(
+    source: string,
+    renderer: IMarkdownRenderer
+  ): Promise<IRendered | null> {
+    const { markdownParser, sanitizer, latexTypesetter } = renderer;
+    if (!markdownParser) {
+      return null;
+    }
+    try {
+      const parts = removeMath(source, latexTypesetter?.mathParseOptions);
+      let html = await markdownParser.render(parts.text);
+      if (!latexTypesetter) {
+        // Without a typesetter, the cell shows formulas as they are written
+        html = replaceMath(html, parts.math);
+      }
+      const root = document.implementation
+        .createHTMLDocument('')
+        .createElement('div');
+      root.innerHTML = sanitizer.sanitize(html);
+      return readText(root);
+    } catch (reason) {
+      console.warn('Failed to render Markdown for the search.', reason);
+      return null;
+    }
+  }
+
+  /**
+   * The text of a rendering, read as `HTMLSearchEngine` reads it.
+   */
+  function readText(root: HTMLElement): IRendered {
+    const rendered: IRendered = { text: '', nodes: [], formulas: [] };
+    const walker = root.ownerDocument.createTreeWalker(
+      root,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: node => {
+          for (
+            let element = node.parentElement;
+            element && element !== root;
+            element = element.parentElement
+          ) {
+            if (element.nodeName in HTMLSearchEngine.UNSUPPORTED_ELEMENTS) {
+              return NodeFilter.FILTER_REJECT;
+            }
+          }
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      }
+    );
+    let node: Node | null;
+    while ((node = walker.nextNode()) !== null) {
+      // The placeholder of a formula stands where the typeset formula splits
+      // the text node
+      for (const piece of (node as Text).data.split(/(@@\d+@@)/)) {
+        const formula = /^@@(\d+)@@$/.exec(piece);
+        if (formula) {
+          rendered.formulas.push(Number(formula[1]));
+          rendered.text += FORMULA;
+        } else if (piece) {
+          rendered.nodes.push({ data: piece, start: rendered.text.length });
+          rendered.text += piece;
+        }
+      }
+    }
+    return rendered;
+  }
+
+  /**
+   * The offset in the text of each match of a query in a rendering, with its
+   * index in the order of the text. The search finds the matches in one text
+   * node at a time.
+   */
+  function findStarts(rendered: IRendered, query: RegExp): Map<number, number> {
+    const global = query.global
+      ? new RegExp(query.source, query.flags)
+      : new RegExp(query.source, query.flags + 'g');
+    const starts = new Map<number, number>();
+    for (const { data, start } of rendered.nodes) {
+      global.lastIndex = 0;
+      let match: RegExpExecArray | null;
+      while ((match = global.exec(data)) !== null) {
+        if (!match[0]) {
+          // Step over an empty match, which would otherwise repeat forever
+          global.lastIndex += 1;
+          continue;
+        }
+        starts.set(start + match.index, starts.size);
+      }
+    }
+    return starts;
+  }
+
+  /**
+   * The source with a marker before each of the given matches.
+   */
+  function addMarkers(
+    source: string,
+    matches: ReadonlyArray<ISearchMatch>,
+    indices: number[]
+  ): string {
+    let marked = '';
+    let last = 0;
+    for (const index of [...indices].sort((a, b) => a - b)) {
+      const { position } = matches[index];
+      marked +=
+        source.slice(last, position) + String.fromCodePoint(MARKER + index);
+      last = position;
+    }
+    return marked + source.slice(last);
+  }
+
+  /**
+   * A text without its markers, and the offset of each marker in it.
+   */
+  function removeMarkers(marked: string): {
+    text: string;
+    offsets: Map<number, number>;
+  } {
+    let text = '';
+    const offsets = new Map<number, number>();
+    for (const character of marked) {
+      const code = character.codePointAt(0)!;
+      if (code >= MARKER && code < MARKER + MARKERS) {
+        offsets.set(code - MARKER, text.length);
+      } else {
+        text += character;
+      }
+    }
+    return { text, offsets };
+  }
+
+  /**
+   * The source matches in each formula of a source, in order, or `null` when
+   * the markers change the formulas.
+   */
+  function findMembers(
+    source: string,
+    matches: ReadonlyArray<ISearchMatch>,
+    renderer: IMarkdownRenderer
+  ): number[][] | null {
+    if (!renderer.latexTypesetter) {
+      // The cell shows formulas as they are written, in its text
+      return [];
+    }
+    if (matches.length > MARKERS) {
+      return null;
+    }
+    const options = renderer.latexTypesetter.mathParseOptions;
+    const math = removeMath(source, options).math;
+    const marked = removeMath(
+      addMarkers(
+        source,
+        matches,
+        matches.map((_, i) => i)
+      ),
+      options
+    ).math;
+    if (marked.length !== math.length) {
+      return null;
+    }
+    const members: number[][] = [];
+    for (let i = 0; i < math.length; i++) {
+      const { text, offsets } = removeMarkers(marked[i]);
+      if (text !== math[i]) {
+        return null;
+      }
+      members.push([...offsets.keys()]);
+    }
+    return members;
   }
 }
