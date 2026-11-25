@@ -17,16 +17,12 @@ import {
 } from '@jupyterlab/ui-components';
 import { framePromise, JupyterServer } from '@jupyterlab/testing';
 import { CommandRegistry } from '@lumino/commands';
-<<<<<<< HEAD
 import type {
   ReadonlyJSONObject,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
 import { MessageLoop } from '@lumino/messaging';
-=======
-import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
->>>>>>> 8c5c7f0bc7 (add tests)
 import type { PanelLayout } from '@lumino/widgets';
 import { Panel, Widget } from '@lumino/widgets';
 import * as React from 'react';
