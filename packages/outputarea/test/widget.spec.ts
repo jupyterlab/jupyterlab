@@ -725,6 +725,27 @@ describe('outputarea/widget', () => {
         expect(widget.node.innerHTML).not.toContain('<iframe');
       });
 
+      it('should show isolated text in its frame', async () => {
+        jest.useFakeTimers();
+        model.clear();
+        const area = new OutputArea({
+          rendermime: incrementalRendermime,
+          model
+        });
+        model.add({
+          output_type: 'display_data',
+          data: { 'text/plain': 'hello, world' },
+          metadata: { isolated: true }
+        });
+
+        const iframe = await attachIsolated(area);
+        jest.runAllTimers();
+
+        expect(iframe.contentDocument!.body?.textContent).toBe('hello, world');
+        area.dispose();
+        jest.useRealTimers();
+      });
+
       it('should show isolated text attached after more than 1,000 frames', async () => {
         // Collapsed outputs are attached when they are expanded.
         jest.useFakeTimers();
