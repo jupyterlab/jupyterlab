@@ -507,6 +507,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   async endQuery(): Promise<void> {
     this._currentMatchInRendered = false;
     this._placement = null;
+    this._renderedMatches = null;
     await super.endQuery();
     await this.renderedProvider.endQuery();
   }
@@ -683,8 +684,12 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     // match marked in the rendered text is no longer current.
     this._currentMatchInRendered = false;
     if (this.isActive) {
+      this._renderedMatches = null;
       if (rendered) {
-        void this.renderedProvider.startQuery(this.query);
+        void this.renderedProvider.startQuery(this.query).then(() => {
+          // Group the matches of the new search
+          this._renderedMatches = null;
+        });
       } else {
         // Force cursor position to ensure reverse search is working as
         // expected, without a scroll: a restarted search keeps the scroll
@@ -710,6 +715,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * search has no current match.
    */
   private async _onRenderedTextSearched(): Promise<void> {
+    this._renderedMatches = null;
     // The text can change while the match is being marked, before
     // `_currentMatchInRendered` is set, as when the table of contents numbers
     // the heading of a cell which rendered again.
@@ -856,7 +862,8 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * source of a Mermaid diagram.
    */
   private _isRenderedMatchVisible(index: number): boolean {
-    const element = this.renderedProvider.matches[index]?.node.parentElement;
+    const element =
+      this._groupRenderedMatches().matches[index]?.node.parentElement;
     if (
       !element ||
       element.matches('details:not([open])') ||
@@ -951,11 +958,11 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
       return undefined;
     }
 
-    const rendered = this.renderedProvider.matches;
-    const { inText, inFormula } = Private.groupRenderedMatches(
-      rendered,
-      renderer.node
-    );
+    const {
+      matches: rendered,
+      inText,
+      inFormula
+    } = this._groupRenderedMatches();
     if (place.kind === 'text') {
       return inText.length === place.count ? inText[place.index] : undefined;
     }
@@ -974,12 +981,28 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
       : undefined;
   }
 
+  /**
+   * The matches of the search in the rendered text, grouped by where they
+   * are. Grouping looks up the ancestors of every match, so the groups are
+   * kept until the rendered text is searched again.
+   */
+  private _groupRenderedMatches(): Private.IRenderedMatches {
+    if (!this._renderedMatches) {
+      this._renderedMatches = Private.groupRenderedMatches(
+        this.renderedProvider.matches,
+        (this.cell as MarkdownCell).renderer.node
+      );
+    }
+    return this._renderedMatches;
+  }
+
   protected renderedProvider: GenericSearchProvider;
   private _unrenderedByHighlight = false;
   private _currentMatchInRendered = false;
   private _showsReadOnlyEditor = false;
   private _placement: { key: string; placement: Private.Placement } | null =
     null;
+  private _renderedMatches: Private.IRenderedMatches | null = null;
 }
 
 /**
@@ -1025,14 +1048,33 @@ namespace Private {
   }
 
   /**
-   * The indices of the rendered matches outside formulas, and of those in
-   * each formula, without those in the text which the table of contents and
-   * the anchor links of headings add after rendering.
+   * The matches of a search in the rendered text, grouped by where they are.
+   */
+  export interface IRenderedMatches {
+    /**
+     * The matches, in the order of the text.
+     */
+    matches: IHTMLSearchMatch[];
+    /**
+     * The indices of the matches outside formulas, without those in the text
+     * which the table of contents and the anchor links of headings add.
+     */
+    inText: number[];
+    /**
+     * The indices of the matches in each formula.
+     */
+    inFormula: number[][];
+  }
+
+  /**
+   * Group the rendered matches into those outside formulas and those in each
+   * formula, without those in the text which the table of contents and the
+   * anchor links of headings add after rendering.
    */
   export function groupRenderedMatches(
     rendered: IHTMLSearchMatch[],
     root: HTMLElement
-  ): { inText: number[]; inFormula: number[][] } {
+  ): IRenderedMatches {
     const containers = Array.from(root.querySelectorAll('mjx-container'));
     const added = `.${TableOfContentsUtils.NUMBERING_CLASS}, .jp-InternalAnchorLink`;
     const inText: number[] = [];
@@ -1046,7 +1088,7 @@ namespace Private {
         inText.push(index);
       }
     });
-    return { inText, inFormula };
+    return { matches: rendered, inText, inFormula };
   }
 
   /**
