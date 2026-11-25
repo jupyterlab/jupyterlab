@@ -1491,7 +1491,9 @@ describe('@jupyter/notebook', () => {
 
         await widget.setFragment('#heading=Output-section');
 
-        expect(cell.node.contains(scrollIntoView.mock.contexts[0])).toBe(true);
+        const heading = cell.node.querySelector('h2');
+        expect(heading).not.toBeNull();
+        expect(scrolledOnlyTo(heading)).toBe(true);
         widget.dispose();
       });
 
