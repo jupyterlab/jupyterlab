@@ -822,6 +822,61 @@ describe('@jupyter/notebook', () => {
         expect((widget.widgets[3].model as CodeCellModel).isDirty).toBe(false);
         expect((widget.widgets[4].model as CodeCellModel).isDirty).toBe(true);
       });
+
+      it('should preserve rendered output state after moving a code cell', async () => {
+        const widget = createWidget();
+        widget.model!.fromJSON({
+          cells: [
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: { trusted: true },
+              outputs: [
+                {
+                  output_type: 'display_data',
+                  data: {
+                    'text/html': '<button class="test-btn">0</button>'
+                  },
+                  metadata: {}
+                }
+              ],
+              execution_count: 1
+            },
+            {
+              cell_type: 'code',
+              source: '',
+              metadata: { trusted: true },
+              outputs: [],
+              execution_count: null
+            }
+          ],
+          metadata: {},
+          nbformat: 4,
+          nbformat_minor: 5
+        });
+
+        Widget.attach(widget, document.body);
+        try {
+          await framePromise();
+
+          const cell = widget.widgets[0] as CodeCell;
+          const btn = cell.node.querySelector('.test-btn') as HTMLButtonElement;
+          expect(btn).not.toBeNull();
+          btn.textContent = '3';
+
+          widget.moveCell(0, 1);
+          await framePromise();
+
+          const movedCell = widget.widgets[1] as CodeCell;
+          expect(movedCell === cell).toBe(true);
+          const movedBtn = movedCell.node.querySelector(
+            '.test-btn'
+          ) as HTMLButtonElement;
+          expect(movedBtn.textContent).toBe('3');
+        } finally {
+          widget.dispose();
+        }
+      });
     });
 
     describe('#onModelChanged()', () => {

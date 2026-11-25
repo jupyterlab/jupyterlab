@@ -600,10 +600,22 @@ export class NotebookWindowedLayout extends WindowedLayout {
 
     const ref =
       this.parent!.viewportNode.children[toIndex + this._topHiddenCodeCells];
-    if (fromIndex < toIndex) {
-      ref.insertAdjacentElement('afterend', widget.node);
+    const parentNode = this.parent!.viewportNode;
+    const parent = parentNode as HTMLElement & {
+      moveBefore?: (node: Node, child: Node | null) => void;
+    };
+    if (typeof parent.moveBefore === 'function') {
+      const target =
+        fromIndex < toIndex ? (ref?.nextElementSibling ?? null) : (ref ?? null);
+      parent.moveBefore(widget.node, target);
     } else {
-      ref.insertAdjacentElement('beforebegin', widget.node);
+      if (!ref) {
+        parentNode.appendChild(widget.node);
+      } else if (fromIndex < toIndex) {
+        ref.insertAdjacentElement('afterend', widget.node);
+      } else {
+        ref.insertAdjacentElement('beforebegin', widget.node);
+      }
     }
   }
 
