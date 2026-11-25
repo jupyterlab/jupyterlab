@@ -47,7 +47,7 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 import type { TranslationBundle } from '@jupyterlab/translation';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { saveIcon } from '@jupyterlab/ui-components';
-import { some } from '@lumino/algorithm';
+import { find, some } from '@lumino/algorithm';
 import type { CommandRegistry } from '@lumino/commands';
 import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
@@ -711,16 +711,20 @@ function addCommands(
    * available. Fallback to the current widget.
    */
   const getWidget = (args?: ReadonlyPartialJSONObject): Widget | null => {
-    let widget = shell.currentWidget;
     if (args?.[ToolbarRegistry.WIDGET_ID_ARG]) {
-      for (let w of shell.widgets()) {
-        if (w.id === args[ToolbarRegistry.WIDGET_ID_ARG]) {
-          widget = w;
-          break;
+      if (labShell) {
+        for (const area of ['main', 'left', 'right', 'down'] as const) {
+          const widget = find(
+            labShell.widgets(area),
+            widget => widget.id === args[ToolbarRegistry.WIDGET_ID_ARG]
+          );
+          if (widget) {
+            return widget;
+          }
         }
       }
     }
-    return widget;
+    return shell.currentWidget;
   };
 
   const isEnabled = (args?: ReadonlyPartialJSONObject) => {
@@ -991,9 +995,9 @@ function addCommands(
         properties: {}
       }
     },
-    execute: args => {
-      // Checks that the widget is valid:
-      if (!isEnabled(args)) {
+    execute: () => {
+      // Checks that shell.currentWidget is valid:
+      if (!isEnabled()) {
         return;
       }
       const context = docManager.contextForWidget(shell.currentWidget!);
@@ -1043,9 +1047,9 @@ function addCommands(
         properties: {}
       }
     },
-    execute: args => {
-      // Checks that the widget is valid:
-      if (!isEnabled(args)) {
+    execute: () => {
+      // Checks that shell.currentWidget is valid:
+      if (!isEnabled()) {
         return;
       }
       const context = docManager.contextForWidget(shell.currentWidget!);
@@ -1140,12 +1144,16 @@ function addCommands(
           _luminoEvent: {
             type: 'object',
             description: 'The lumino event object'
+          },
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the document widget')
           }
         }
       }
     },
     execute: async args => {
-      // Checks that shell.currentWidget is valid:
+      // Checks that the widget is valid:
       const widget = getWidget(args);
       const context = docManager.contextForWidget(widget!);
       if (isEnabled(args)) {
@@ -1291,9 +1299,9 @@ function addCommands(
         properties: {}
       }
     },
-    execute: args => {
-      // Checks that the widget is valid:
-      if (isEnabled(args)) {
+    execute: () => {
+      // Checks that shell.currentWidget is valid:
+      if (isEnabled()) {
         const context = docManager.contextForWidget(shell.currentWidget!);
         if (!context) {
           return showDialog({
