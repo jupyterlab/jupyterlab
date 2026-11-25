@@ -1609,6 +1609,10 @@ namespace Private {
           // Keep the renderer inside the iframe without using
           // Lumino's widget attachment lifecycle.
           doc.body.replaceChildren(this._wrapped.node);
+          // A render started before the load stops waiting after 1,000 frames.
+          if (this._model) {
+            void this._wrapped.renderModel(this._model);
+          }
         } else {
           // Preserve the existing behavior for other MIME renderers.
           doc.open();
@@ -1662,9 +1666,11 @@ namespace Private {
      * of the widget to update it if and when new data is available.
      */
     renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+      this._model = model;
       return this._wrapped.renderModel(model);
     }
 
+    private _model: IRenderMime.IMimeModel | null = null;
     private _wrapped: IRenderMime.IRenderer;
   }
 
