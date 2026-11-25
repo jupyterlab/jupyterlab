@@ -317,6 +317,30 @@ describe('@jupyterlab/notebook', () => {
         ).toBeNull();
       });
 
+      it('should not mark a bracket in the link text for a match in the bracket that opens the link', async () => {
+        // A Markdown cell renders only in the document, on a real timer
+        jest.useRealTimers();
+        Widget.attach(panel, document.body);
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          {
+            cell_type: 'markdown',
+            source: 'See [[1]](https://example.com/paper) for details.'
+          }
+        ]);
+        const cell = panel.content.widgets[0] as MarkdownCell;
+        while (!cell.renderer.node.textContent) {
+          await framePromise();
+        }
+
+        // The first match is the bracket of the link, which the rendered
+        // text hides
+        await provider.startQuery(/\[/, undefined);
+        expect(
+          cell.renderer.node.querySelector('.jp-current-match')
+        ).toBeNull();
+      });
+
       it('should highlight next match', async () => {
         await provider.startQuery(/test/, undefined);
         expect(provider.currentMatchIndex).toBe(0);

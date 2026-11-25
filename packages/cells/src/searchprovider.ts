@@ -914,7 +914,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * rendered text shows it.
    *
    * The rendered text does not keep source positions, so `Private.Placement`
-   * renders the source again offscreen, with a marker before each match. The
+   * renders the source again offscreen, with markers in each match. The
    * matches found here in the rendered text must be the ones found in the
    * offscreen rendering, apart from those in the number which the table of
    * contents adds to a heading and in the anchor link of a heading.
@@ -1097,12 +1097,14 @@ namespace Private {
   /**
    * Finds where the rendered text shows the matches of a query in a Markdown
    * source, by rendering the source again offscreen and without typesetting,
-   * with a private-use character before each match. A marker in the text
-   * gives the place of its match, and a missing marker shows that the
-   * rendered text hides the match. When the markers change the text, as one
-   * in a reference label or a character reference does, each match is placed
-   * with its own marker only. A match in a formula is placed by its order in
-   * the formula, as the markers do not reach the typeset formula.
+   * with a private-use character before each match and another after its
+   * first character. A marker in the text gives the place of its match. A
+   * missing marker, or two markers at the same place, shows that the rendered
+   * text hides the match, as it hides the bracket of the link in `[[1]](url)`
+   * while it shows the bracket after it. When the markers change the text, as
+   * one in a reference label or a character reference does, each match is
+   * placed with its own markers only. A match in a formula is placed by its
+   * order in the formula, as the markers do not reach the typeset formula.
    */
   export class Placement {
     constructor(
@@ -1160,8 +1162,8 @@ namespace Private {
     }
 
     /**
-     * Render the source with a marker before each of the given matches, and
-     * place those matches in the text.
+     * Render the source with a marker before each of the given matches and
+     * after its first character, and place those matches in the text.
      *
      * @returns The places of the matches, or `null` when the markers change
      * the text.
@@ -1171,13 +1173,13 @@ namespace Private {
     ): Promise<Map<number, Place> | null> {
       const original = await this._original;
       const marked = await render(
-        addMarkers(this._source, this._matches, indices),
+        addMarkers(this._source, this._matches, indices, true),
         this._renderer
       );
       if (!original || !marked) {
         return null;
       }
-      const { text, offsets } = removeMarkers(marked.text);
+      const { text, offsets, afterFirst } = removeMarkers(marked.text);
       if (
         text !== original.text ||
         marked.formulas.join() !== original.formulas.join()
@@ -1191,7 +1193,12 @@ namespace Private {
       const places = new Map<number, Place>();
       for (const index of indices) {
         const offset = offsets.get(index);
-        const ordinal = offset === undefined ? undefined : starts.get(offset);
+        const after = afterFirst.get(index);
+        // The text shows the first character of the match between its markers
+        const ordinal =
+          offset === undefined || after === undefined || after <= offset
+            ? undefined
+            : starts.get(offset);
         places.set(
           index,
           ordinal === undefined
@@ -1240,14 +1247,16 @@ namespace Private {
 
   /**
    * The code point of the marker of the first match. Each match has its own
-   * private-use character.
+   * private-use character before it, and `MARKERS` code points further on,
+   * another one after its first character.
    */
   const MARKER = 0xf0000;
 
   /**
-   * The number of private-use code points from `MARKER` on.
+   * The number of matches which can have markers: half of the 0xfffe
+   * private-use code points from `MARKER` on.
    */
-  const MARKERS = 0xfffe;
+  const MARKERS = 0x7fff;
 
   /**
    * The last offscreen rendering of the source of each renderer. The search
@@ -1373,12 +1382,14 @@ namespace Private {
   }
 
   /**
-   * The source with a marker before each of the given matches.
+   * The source with a marker before each of the given matches, and with
+   * `afterFirst`, another after the first character of each.
    */
   function addMarkers(
     source: string,
     matches: ReadonlyArray<ISearchMatch>,
-    indices: number[]
+    indices: number[],
+    afterFirst = false
   ): string {
     let marked = '';
     let last = 0;
@@ -1387,28 +1398,41 @@ namespace Private {
       marked +=
         source.slice(last, position) + String.fromCodePoint(MARKER + index);
       last = position;
+      if (afterFirst) {
+        const end =
+          position + String.fromCodePoint(source.codePointAt(position)!).length;
+        marked +=
+          source.slice(last, end) +
+          String.fromCodePoint(MARKER + MARKERS + index);
+        last = end;
+      }
     }
     return marked + source.slice(last);
   }
 
   /**
-   * A text without its markers, and the offset of each marker in it.
+   * A text without its markers, the offset of the marker before each match,
+   * and the offset of the marker after its first character.
    */
   function removeMarkers(marked: string): {
     text: string;
     offsets: Map<number, number>;
+    afterFirst: Map<number, number>;
   } {
     let text = '';
     const offsets = new Map<number, number>();
+    const afterFirst = new Map<number, number>();
     for (const character of marked) {
       const code = character.codePointAt(0)!;
       if (code >= MARKER && code < MARKER + MARKERS) {
         offsets.set(code - MARKER, text.length);
+      } else if (code >= MARKER + MARKERS && code < MARKER + 2 * MARKERS) {
+        afterFirst.set(code - MARKER - MARKERS, text.length);
       } else {
         text += character;
       }
     }
-    return { text, offsets };
+    return { text, offsets, afterFirst };
   }
 
   /**

@@ -554,6 +554,21 @@ describe('cells/searchprovider', () => {
       provider.dispose();
     });
 
+    it('should not mark the text of a character reference for a match at the start of an HTML tag', async () => {
+      // The rendered `<` comes from `&lt;`, and the source `<` from the tag
+      const source = 'Press <kbd>&lt;</kbd> to go back.';
+      cell = createMarkdownCell(source);
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/</, {});
+
+      const match = await provider.highlightNext();
+      expect(match?.position).toBe(source.indexOf('<kbd>'));
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
     it.each([
       ['a block quote marker', '> Use &gt; to redirect the output.', '>'],
       [
