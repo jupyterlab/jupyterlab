@@ -284,6 +284,27 @@ describe('NotebookHandler', () => {
     expect(kernel.get(service.getCodeId(CODE))).toEqual([2]);
   });
 
+  it('should restore the breakpoints of a cut cell pasted after a kernel restart', async () => {
+    const id = firstCell().id;
+    context.model.sharedModel.deleteCell(0);
+    await flushRequests();
+    // A restarted kernel keeps the code of the cells in a new folder.
+    kernel.clear();
+    service.config.setTmpFileParams({
+      kernel: 'python3',
+      prefix: '/tmp/ipykernel_2/',
+      suffix: '.py'
+    });
+    context.model.sharedModel.insertCell(0, {
+      id,
+      cell_type: 'code',
+      source: CODE
+    });
+    await flushRequests();
+
+    expect(kernel.get(service.getCodeId(CODE))).toEqual([2]);
+  });
+
   it('should not restore the breakpoints of a cut cell after all breakpoints are removed', async () => {
     // Remove All Breakpoints does nothing when no breakpoint is listed.
     await service.updateBreakpoints('x = 1', [{ line: 1, verified: true }]);

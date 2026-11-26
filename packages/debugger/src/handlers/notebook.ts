@@ -168,7 +168,9 @@ export class NotebookHandler implements IDisposable {
     }
     this._deletedBreakpoints.delete(model.id);
     const code = model.sharedModel.getSource();
-    if (breakpoints[0].source?.path === this._debuggerService.getCodeId(code)) {
+    const deletedFile = Private.fileName(breakpoints[0].source?.path ?? '');
+    const file = Private.fileName(this._debuggerService.getCodeId(code));
+    if (deletedFile === file) {
       void this._debuggerService.updateBreakpoints(code, breakpoints);
     }
   }
@@ -221,5 +223,18 @@ export namespace NotebookHandler {
      * The application language translator.
      */
     translator?: ITranslator;
+  }
+}
+
+/**
+ * A namespace for module private data.
+ */
+namespace Private {
+  /**
+   * Get the name of a code file without its folder. A kernel restart moves
+   * the code files to a new folder and keeps their names.
+   */
+  export function fileName(path: string): string {
+    return path.split(/[/\\]/).pop() ?? '';
   }
 }
