@@ -148,7 +148,8 @@ export class NotebookHandler implements IDisposable {
       if (this._isDeleted(modelId)) {
         const breakpoints = editorHandler.clearDeletedBreakpoints();
         if (breakpoints.length) {
-          this._deletedBreakpoints.set(modelId, breakpoints);
+          const file = Private.fileName(breakpoints[0].source?.path ?? '');
+          this._deletedBreakpoints.set(file, breakpoints);
         }
       }
       editorHandler.dispose();
@@ -159,20 +160,20 @@ export class NotebookHandler implements IDisposable {
 
   /**
    * Restore the breakpoints that deleting a cell removed, when undo or a
-   * paste after cut brings the cell back with the same ID and code.
+   * paste after cut or copy brings back a cell with the same code.
    */
   private _restoreBreakpoints(model: ICellModel): void {
-    const breakpoints = this._deletedBreakpoints.get(model.id);
+    if (!this._deletedBreakpoints.size) {
+      return;
+    }
+    const code = model.sharedModel.getSource();
+    const file = Private.fileName(this._debuggerService.getCodeId(code));
+    const breakpoints = this._deletedBreakpoints.get(file);
     if (!breakpoints) {
       return;
     }
-    this._deletedBreakpoints.delete(model.id);
-    const code = model.sharedModel.getSource();
-    const deletedFile = Private.fileName(breakpoints[0].source?.path ?? '');
-    const file = Private.fileName(this._debuggerService.getCodeId(code));
-    if (deletedFile === file) {
-      void this._debuggerService.updateBreakpoints(code, breakpoints);
-    }
+    this._deletedBreakpoints.delete(file);
+    void this._debuggerService.updateBreakpoints(code, breakpoints);
   }
 
   /**

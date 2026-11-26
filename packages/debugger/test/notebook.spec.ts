@@ -268,6 +268,19 @@ describe('NotebookHandler', () => {
     expect(kernel.get(service.getCodeId(CODE))).toEqual([2]);
   });
 
+  it('should restore the breakpoints of a deleted cell when a copy of it is pasted', async () => {
+    context.model.sharedModel.deleteCell(0);
+    await flushRequests();
+    // A pasted copy gets a new ID.
+    context.model.sharedModel.insertCell(1, {
+      cell_type: 'code',
+      source: CODE
+    });
+    await flushRequests();
+
+    expect(kernel.get(service.getCodeId(CODE))).toEqual([2]);
+  });
+
   it('should restore the breakpoints of a cut cell pasted after a switch to a kernel without breakpoints', async () => {
     const id = firstCell().id;
     context.model.sharedModel.deleteCell(0);
