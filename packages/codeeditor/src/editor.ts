@@ -332,17 +332,6 @@ export namespace CodeEditor {
    */
   export interface IEditor extends ISelectionOwner, IDisposable {
     /**
-     * Whether the last document change was applied from a remote collaborator.
-     *
-     * #### Notes
-     * The editor sets this value when it applies a change. For local typing,
-     * and for a collaborator's change in a file editor, that is after
-     * `model.sharedModel.changed` fires, so a handler of that signal must
-     * `await` before it reads this value.
-     */
-    readonly lastChangeIsRemote?: boolean;
-
-    /**
      * A signal emitted when either the top or bottom edge is requested.
      */
     readonly edgeRequested: ISignal<IEditor, EdgeLocation>;

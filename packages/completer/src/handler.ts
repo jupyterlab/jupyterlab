@@ -366,7 +366,7 @@ export class CompletionHandler implements IDisposable {
         this.completer.isVisible,
         changed
       )) &&
-      !editor.lastChangeIsRemote &&
+      !(editor as CodeMirrorEditor).lastChangeIsRemote &&
       this._isCurrentState(editor, state)
     ) {
       void this._makeRequest(position, CompletionTriggerKind.TriggerCharacter);
@@ -377,7 +377,7 @@ export class CompletionHandler implements IDisposable {
       // CodeMirror sets `lastChangeIsRemote` after `changed` fires for local
       // typing, and for a collaborator's change in a file editor.
       await Promise.resolve();
-      if (editor.lastChangeIsRemote) {
+      if ((editor as CodeMirrorEditor).lastChangeIsRemote) {
         // Filtering by a collaborator's text corrupts the suggestion.
         this._fetchingInline += 1;
         if (inlineModel.completions) {
