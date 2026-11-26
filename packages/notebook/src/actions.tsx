@@ -2826,9 +2826,8 @@ namespace Private {
   ): void {
     const { future, wasRunning, hadEnded, executionCount } = storedExecution;
     if (!wasRunning && cell.model.executionCount !== executionCount) {
-      // An execution that had ended keeps the prompt it had then, also
-      // after an undo that rolled it back, and its reply does not bring
-      // back a prompt cleared since.
+      // A cell that was not running keeps the prompt it had then, also
+      // after an undo that rolled it back.
       cell.model.executionCount = executionCount;
     }
     void future.done.then(
