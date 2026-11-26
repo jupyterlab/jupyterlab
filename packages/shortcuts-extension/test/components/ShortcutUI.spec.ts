@@ -616,6 +616,23 @@ describe('@jupyterlab/shortcut-extension', () => {
         expect(updated).toBe(true);
         expect(data.user.shortcuts[0].selector).toEqual('body');
       });
+
+      it('should update a new shortcut saved with a selector of JupyterLab 4.0', async () => {
+        const target = {
+          id: 'new shortcut',
+          command: 'test:command',
+          keybindings: [{ keys: ['Ctrl A'], isDefault: false }],
+          args: {},
+          selector: '.jp-Notebook:focus',
+          category: 'test'
+        };
+        await shortcutUI.addKeybinding(target, ['Ctrl A']);
+        const updated = await shortcutUI.setCustomOptions(target, {
+          selector: '.jp-Notebook:focus',
+          args: { foo: 'bar' }
+        });
+        expect(updated).toBe(true);
+      });
     });
 
     describe('#resetKeybindings()', () => {

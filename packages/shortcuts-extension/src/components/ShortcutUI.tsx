@@ -405,7 +405,9 @@ export class ShortcutUI
     const shortcuts = userShortcuts.filter(
       (shortcut, index) =>
         shortcut.command === target.command &&
-        selectors[index] === target.selector &&
+        // The target of a new shortcut has the selector as typed.
+        (shortcut.selector === target.selector ||
+          selectors[index] === target.selector) &&
         JSONExt.deepEqual(shortcut.args ?? {}, target.args ?? {})
     );
     if (!shortcuts.length) {
