@@ -1393,7 +1393,10 @@ export class WindowedList<
       ) > 1
     ) {
       this._scrollToItem = null;
-      this._stopFollowingElement();
+      // Scroll anchoring scrolls the list but keeps the element in place.
+      if (!this._isFollowedElementInPlace()) {
+        this._stopFollowingElement();
+      }
     }
 
     // TBC Firefox is emitting two events one with 1px diff then the _real_ scroll
@@ -1829,6 +1832,7 @@ export class WindowedList<
         }
       }
       target.element.scrollIntoView();
+      target.top = this._getElementTop(target.element);
       const { scrollTop } = this._outerElement;
       if (scrollTop !== this.viewModel.scrollOffset) {
         // This scroll must not be mistaken for one made by the user.
@@ -1862,7 +1866,11 @@ export class WindowedList<
   /**
    * Keep an element in view until the user moves on.
    */
-  private _followElement(target: { index: number; element: HTMLElement }) {
+  private _followElement(target: {
+    index: number;
+    element: HTMLElement;
+    top?: number;
+  }) {
     this._scrollToElement = target;
     if (!this._userNavigationListener) {
       this._userNavigationListener = this.addUserNavigationListener(
@@ -1879,6 +1887,27 @@ export class WindowedList<
     this._userNavigationListener?.dispose();
     this._userNavigationListener = null;
   };
+
+  /**
+   * Whether the followed element is where the list last scrolled it to.
+   */
+  private _isFollowedElementInPlace(): boolean {
+    const target = this._scrollToElement;
+    if (!target?.element.isConnected || target.top === undefined) {
+      return false;
+    }
+    return Math.abs(this._getElementTop(target.element) - target.top) <= 1;
+  }
+
+  /**
+   * Get the distance from the top of the list to an element.
+   */
+  private _getElementTop(element: HTMLElement): number {
+    return (
+      element.getBoundingClientRect().top -
+      this._outerElement.getBoundingClientRect().top
+    );
+  }
 
   /**
    * Clear any outstanding timeout and enqueue scrolling to a new item.
@@ -2092,8 +2121,12 @@ export class WindowedList<
         WindowedList.BaseScrollToAlignment | undefined
       ]
     | null;
-  private _scrollToElement: { index: number; element: HTMLElement } | null =
-    null;
+  private _scrollToElement: {
+    index: number;
+    element: HTMLElement;
+    // Distance to the top of the list after the last scroll to the element.
+    top?: number;
+  } | null = null;
   private _scrollUpdateWasRequested: boolean;
   private _updater: Throttler;
   private _userNavigationListener: IDisposable | null = null;

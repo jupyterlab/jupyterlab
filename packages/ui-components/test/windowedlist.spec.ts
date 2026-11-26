@@ -577,12 +577,28 @@ describe('@jupyterlab/ui-components', () => {
       });
 
       it('should stop when the user scrolls', () => {
+        // A scroll by the user moves the element with the content.
+        jest
+          .spyOn(element, 'getBoundingClientRect')
+          .mockImplementation(
+            () => ({ top: 100 - list.outerNode.scrollTop }) as DOMRect
+          );
         list.scrollElementIntoView(1, element);
         scrollIntoView.mockClear();
         list.outerNode.scrollTop = 500;
         list.outerNode.dispatchEvent(new Event('scroll'));
         reportResize('_onItemResize');
         expect(scrollIntoView).not.toHaveBeenCalled();
+      });
+
+      it('should keep following when a scroll keeps the element in place', () => {
+        list.scrollElementIntoView(1, element);
+        scrollIntoView.mockClear();
+        // Scroll anchoring scrolls the list when the content above grows.
+        list.outerNode.scrollTop = 500;
+        list.outerNode.dispatchEvent(new Event('scroll'));
+        reportResize('_onItemResize');
+        expect(scrollIntoView).toHaveBeenCalledTimes(1);
       });
 
       it.each(['wheel', 'touchmove', 'pointerdown', 'keydown'])(
