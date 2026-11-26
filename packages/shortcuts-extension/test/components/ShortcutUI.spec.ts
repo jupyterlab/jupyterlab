@@ -745,6 +745,24 @@ describe('@jupyterlab/shortcut-extension', () => {
         await shortcutUI.resetKeybindings(target);
         expect(data.user.shortcuts).toHaveLength(1);
       });
+
+      it('should clear user overrides stored with a selector of JupyterLab 4.0', async () => {
+        data.user.shortcuts.push({
+          command: 'test:command',
+          keys: ['Ctrl A'],
+          selector: '.jp-Notebook:focus'
+        });
+        const target = {
+          id: 'test-id',
+          command: 'test:command',
+          keybindings: [{ keys: ['Ctrl A'], isDefault: false }],
+          args: {},
+          selector: COMMAND_MODE,
+          category: 'test'
+        };
+        await shortcutUI.resetKeybindings(target);
+        expect(data.user.shortcuts).toHaveLength(0);
+      });
     });
 
     describe('#sortShortcuts()', () => {
