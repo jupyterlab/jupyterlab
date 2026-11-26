@@ -512,6 +512,27 @@ export const test: TestType<
 
       await use(records);
 
+      // Show this test's sites in the Playwright HTML report, one line each.
+      if (records.length > 0) {
+        const lines = records.map(r => {
+          const frame = (String(r.stack).split('\n')[0] ?? '')
+            .trim()
+            .replace(
+              /https?:\/\/[^/]+\/(?:static\/lab\/|lab\/extensions\/)/,
+              ''
+            );
+          return `${String(r.sink)}  <-  ${frame}  (x${String(r.count)})`;
+        });
+        testInfo.annotations.push({
+          type: 'Trusted Types',
+          description: `${records.length} call sites pass raw strings to DOM sinks; see the trusted-types.txt attachment`
+        });
+        await testInfo.attach('trusted-types.txt', {
+          body: lines.join('\n'),
+          contentType: 'text/plain'
+        });
+      }
+
       // One file per test, outside test-results/ (passing tests' output
       // is deleted there because of preserveOutput: 'failures-only').
       // Compact on purpose; pretty-print when reading with `jq . file.json`.
