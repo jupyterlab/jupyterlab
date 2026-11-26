@@ -171,6 +171,7 @@ describe('outputarea/widget', () => {
   afterEach(() => {
     model.dispose();
     widget.dispose();
+    jest.useRealTimers();
   });
 
   describe('OutputArea', () => {
@@ -743,7 +744,6 @@ describe('outputarea/widget', () => {
 
         expect(iframe.contentDocument!.body?.textContent).toBe('hello, world');
         area.dispose();
-        jest.useRealTimers();
       });
 
       it('should show isolated stderr in its frame', async () => {
@@ -765,7 +765,6 @@ describe('outputarea/widget', () => {
 
         expect(iframe.contentDocument!.body?.textContent).toBe('hello, world');
         area.dispose();
-        jest.useRealTimers();
       });
 
       it('should show isolated text attached after more than 1,000 frames', async () => {
@@ -789,7 +788,6 @@ describe('outputarea/widget', () => {
 
         expect(iframe.contentDocument!.body?.textContent).toBe('hello, world');
         area.dispose();
-        jest.useRealTimers();
       });
     });
 
