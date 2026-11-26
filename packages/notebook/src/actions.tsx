@@ -2678,6 +2678,16 @@ namespace Private {
     timing?: JSONObject;
     /** Whether the execution was still running when it was captured. */
     wasRunning: boolean;
+    /**
+     * Whether the execution had ended when it was captured, known from the
+     * next microtask on; clearing the outputs of a running cell makes it idle.
+     */
+    hadEnded: () => boolean;
+    /**
+     * The prompt number when it was captured: final for an execution that
+     * had ended, even if its outputs were cleared since its reply.
+     */
+    executionCount: nbformat.ExecutionCount;
   }
 
   /**
@@ -2777,6 +2787,11 @@ namespace Private {
         failedAt = new Date().toISOString();
       }
     );
+    // Runs after the callbacks above when `done` had already settled.
+    let hadEnded = false;
+    void Promise.resolve().then(() => {
+      hadEnded = done;
+    });
     const buffered: IBufferedMessage[] = [];
     future.onIOPub = msg => {
       buffered.push({ channel: 'iopub', msg });
@@ -2794,7 +2809,9 @@ namespace Private {
       failedAt: () => failedAt,
       buffered,
       timing: cell.model.getMetadata('execution'),
-      wasRunning: cell.model.executionState === 'running'
+      wasRunning: cell.model.executionState === 'running',
+      hadEnded: () => hadEnded,
+      executionCount: cell.model.executionCount
     };
   }
 
@@ -2807,7 +2824,16 @@ namespace Private {
     notebook: Notebook,
     storedExecution: IStoredCellExecution
   ): void {
-    const { cellId, future, isDone, buffered, outputs } = storedExecution;
+    const {
+      cellId,
+      future,
+      isDone,
+      buffered,
+      outputs,
+      wasRunning,
+      hadEnded,
+      executionCount
+    } = storedExecution;
     const cell = notebook.widgets.find(w => w.model.id === cellId);
     if (!(cell instanceof CodeCell)) {
       return;
@@ -2854,16 +2880,24 @@ namespace Private {
       // Restore the running state on the recreated cell widget.
       cell.model.executionState = 'running';
     }
+    if (!wasRunning && cell.model.executionCount !== executionCount) {
+      // A cell that was not running keeps the prompt it had then, also
+      // after an undo that rolled it back.
+      cell.model.executionCount = executionCount;
+    }
     // The restored timing of an execution that had ended is final.
     const recordEndTiming = recordTiming && storedExecution.wasRunning;
     const cellRef = cell;
     void future.done.then(
       reply => {
         if (!cellRef.isDisposed) {
-          // The future is authoritative for the prompt number; a snapshot
-          // taken before completion would be stale (still null). Setting a
-          // non-null execution count also flips the state back to 'idle'.
-          cellRef.model.executionCount = reply.content.execution_count;
+          // For an execution that had not ended, the future is authoritative
+          // for the prompt number; a snapshot taken before completion would
+          // be stale (still null). Setting a non-null execution count also
+          // flips the state back to 'idle'.
+          if (!hadEnded()) {
+            cellRef.model.executionCount = reply.content.execution_count;
+          }
           cellRef.model.executionState = 'idle';
           if (recordEndTiming) {
             const started = reply.metadata.started as string | undefined;

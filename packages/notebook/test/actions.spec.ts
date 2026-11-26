@@ -125,6 +125,50 @@ function waitForExecutionState(cell: CodeCell, state: IExecutionState) {
   });
 }
 
+function createPendingFuture(): {
+  future: Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  >;
+  resolve: (executionCount?: number) => void;
+} {
+  let resolveDone: (msg: KernelMessage.IExecuteReplyMsg) => void = () => {
+    return;
+  };
+  const done = new Promise<KernelMessage.IExecuteReplyMsg>(resolve => {
+    resolveDone = resolve;
+  });
+  const future = {
+    done,
+    msg: { metadata: {} },
+    onIOPub: () => undefined,
+    onReply: () => undefined,
+    onStdin: () => undefined,
+    dispose: () => undefined
+  } as unknown as Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  >;
+  return {
+    future,
+    resolve: (executionCount = 1) => {
+      resolveDone(
+        KernelMessage.createMessage<KernelMessage.IExecuteReplyMsg>({
+          channel: 'shell',
+          msgType: 'execute_reply',
+          session: UUID.uuid4(),
+          content: {
+            status: 'ok',
+            execution_count: executionCount,
+            user_expressions: {},
+            payload: []
+          }
+        })
+      );
+    }
+  };
+}
+
 function createResolvedFuture(
   executionCount = 1,
   metadata: JSONObject = {}
@@ -1874,6 +1918,54 @@ describe('@jupyterlab/notebook', () => {
         expect(cellAfterMove.model.executionCount).not.toBe(null);
       }, 20000);
 
+      it('should keep the prompt of a moved cell whose outputs were cleared', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        cell.model.sharedModel.setSource('1 + 1');
+        await NotebookActions.run(widget, ipySessionContext);
+        expect(cell.model.executionCount).not.toBe(null);
+
+        NotebookActions.clearOutputs(widget);
+        expect(cell.model.executionCount).toBe(null);
+        NotebookActions.moveDown(widget);
+        // The reply of the request that ended before the move is in hand.
+        await sleep(10);
+
+        const cellAfterMove = widget.widgets[1] as CodeCell;
+        expect(cellAfterMove.model.executionCount).toBe(null);
+        expect(cellAfterMove.model.executionState).toBe('idle');
+      }, 20000);
+
+      it('should keep the prompt of a moved cell after all outputs were cleared', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        widget.activeCellIndex = 0;
+        cell.model.sharedModel.setSource('1 + 1');
+        await NotebookActions.run(widget, ipySessionContext);
+
+        NotebookActions.clearAllOutputs(widget);
+        widget.activeCellIndex = 0;
+        NotebookActions.moveDown(widget);
+        await sleep(10);
+
+        const cellAfterMove = widget.widgets[1] as CodeCell;
+        expect(cellAfterMove.model.executionCount).toBe(null);
+      }, 20000);
+
+      it('should show the count of a cell moved while it runs after its outputs were cleared', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        const { future, resolve } = createPendingFuture();
+        cell.outputArea.future = future;
+        cell.model.executionState = 'running';
+
+        NotebookActions.clearOutputs(widget);
+        NotebookActions.moveDown(widget);
+        resolve(5);
+        await sleep(10);
+
+        const cellAfterMove = widget.widgets[1] as CodeCell;
+        expect(cellAfterMove.model.executionCount).toBe(5);
+      });
+
       it('should not lose outputs received after first move when moving a second time', async () => {
         const finalOutput = '0\n1\n2\n3\n4\n';
         const cell = widget.widgets[0] as CodeCell;
@@ -2642,6 +2734,46 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#undo()', () => {
+      it('should keep a prompt cleared after a move when the move is undone', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        const cellId = cell.model.id;
+        widget.activeCellIndex = 0;
+        cell.model.sharedModel.setSource('1 + 1');
+        await NotebookActions.run(widget, ipySessionContext);
+        widget.deselectAll();
+        widget.activeCellIndex = 0;
+
+        NotebookActions.moveDown(widget);
+        NotebookActions.clearOutputs(widget);
+        expect(widget.widgets[1].model.id).toBe(cellId);
+        expect((widget.widgets[1] as CodeCell).model.executionCount).toBe(null);
+        NotebookActions.undo(widget);
+        await sleep(10);
+
+        const cellAfterUndo = widget.widgets[0] as CodeCell;
+        expect(cellAfterUndo.model.id).toBe(cellId);
+        expect(cellAfterUndo.model.executionCount).toBe(null);
+      }, 20000);
+
+      it('should keep a prompt cleared before a deletion when the deletion is undone', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        const cellId = cell.model.id;
+        widget.activeCellIndex = 0;
+        cell.model.sharedModel.setSource('1 + 1');
+        await NotebookActions.run(widget, ipySessionContext);
+        widget.deselectAll();
+        widget.activeCellIndex = 0;
+
+        NotebookActions.clearOutputs(widget);
+        NotebookActions.deleteCells(widget);
+        NotebookActions.undo(widget);
+        await sleep(10);
+
+        const cellAfterUndo = widget.widgets[0] as CodeCell;
+        expect(cellAfterUndo.model.id).toBe(cellId);
+        expect(cellAfterUndo.model.executionCount).toBe(null);
+      }, 20000);
+
       it('should undo a cell action', () => {
         const count = widget.widgets.length;
         const next = widget.widgets[1];
