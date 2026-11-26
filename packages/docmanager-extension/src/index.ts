@@ -655,7 +655,7 @@ export namespace ToolbarItems {
         toolbar: true,
         ...(widgetId ? { [ToolbarRegistry.WIDGET_ID_ARG]: widgetId } : {})
       },
-      additionalSignals: [fileChanged]
+      refreshSignals: [fileChanged]
     });
   }
 }

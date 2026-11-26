@@ -1120,9 +1120,9 @@ export namespace CommandToolbarButtonComponent {
      */
     noFocusOnClick?: boolean;
     /**
-     * Additional signals that trigger a re-render of the button.
+     * Signals, in addition to `commandChanged`, that refresh the button state.
      */
-    additionalSignals?: ISignal<unknown, unknown>[];
+    refreshSignals?: ISignal<unknown, unknown>[];
   }
 }
 
@@ -1135,14 +1135,14 @@ export namespace CommandToolbarButtonComponent {
 export function CommandToolbarButtonComponent(
   props: CommandToolbarButtonComponent.IProps
 ): JSX.Element {
-  const { additionalSignals } = props;
+  const { refreshSignals } = props;
   const [, forceUpdate] = React.useReducer((x: number) => x + 1, 0);
   React.useEffect(() => {
-    additionalSignals?.forEach(signal => signal.connect(forceUpdate));
+    refreshSignals?.forEach(signal => signal.connect(forceUpdate));
     return () => {
-      additionalSignals?.forEach(signal => signal.disconnect(forceUpdate));
+      refreshSignals?.forEach(signal => signal.disconnect(forceUpdate));
     };
-  }, [additionalSignals]);
+  }, [refreshSignals]);
 
   return (
     <UseSignal
@@ -1188,7 +1188,7 @@ export class CommandToolbarButton extends ReactWidget {
    */
   constructor(private props: CommandToolbarButtonComponent.IProps) {
     super();
-    const { commands, id, args, additionalSignals } = props;
+    const { commands, id, args, refreshSignals } = props;
     addCommandToolbarButtonClass(this);
     this.setCommandAttributes(commands, id, args);
     commands.commandChanged.connect((_, change) => {
@@ -1196,7 +1196,7 @@ export class CommandToolbarButton extends ReactWidget {
         this.setCommandAttributes(commands, id, args);
       }
     }, this);
-    additionalSignals?.forEach(signal => {
+    refreshSignals?.forEach(signal => {
       signal.connect(() => {
         this.setCommandAttributes(commands, id, args);
       }, this);

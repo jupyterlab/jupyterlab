@@ -325,8 +325,8 @@ describe('@jupyterlab/ui-components', () => {
       wrapper.dispose();
     });
 
-    it('should re-render when an additional signal fires', async () => {
-      const id = 'test:additional-signal-component';
+    it('should re-render when a refresh signal fires', async () => {
+      const id = 'test:refresh-signal-component';
       let caption = 'Initial caption';
       commands.addCommand(id, {
         execute: () => {
@@ -342,7 +342,7 @@ describe('@jupyterlab/ui-components', () => {
           return React.createElement(CommandToolbarButtonComponent, {
             commands,
             id,
-            additionalSignals: [signal]
+            refreshSignals: [signal]
           });
         }
       }
@@ -365,8 +365,8 @@ describe('@jupyterlab/ui-components', () => {
       wrapper.dispose();
     });
 
-    it('should disconnect from additional signals on unmount', async () => {
-      const id = 'test:additional-signal-unmount';
+    it('should disconnect from refresh signals on unmount', async () => {
+      const id = 'test:refresh-signal-unmount';
       commands.addCommand(id, {
         execute: () => {
           /* no op */
@@ -383,7 +383,7 @@ describe('@jupyterlab/ui-components', () => {
           return React.createElement(CommandToolbarButtonComponent, {
             commands,
             id,
-            additionalSignals: [signal]
+            refreshSignals: [signal]
           });
         }
       }
@@ -699,14 +699,14 @@ describe('@jupyterlab/ui-components', () => {
         }
       });
 
-      it('should update state classes when an additional signal fires', async () => {
+      it('should update state classes when a refresh signal fires', async () => {
         visible = false;
         const emitter = {};
         const signal = new Signal<typeof emitter, void>(emitter);
         const button = new CommandToolbarButton({
           commands,
           id: testLogCommandId,
-          additionalSignals: [signal]
+          refreshSignals: [signal]
         });
         await render(button);
         expect(button.hasClass('lm-mod-hidden')).toBe(true);
@@ -719,11 +719,11 @@ describe('@jupyterlab/ui-components', () => {
         button.dispose();
       });
 
-      it('should re-render when an additional signal fires', async () => {
+      it('should re-render when a refresh signal fires', async () => {
         enabled = true;
         visible = true;
         let iconClassValue = 'initial-icon-class';
-        const id = 'test:additional-signal-rerender';
+        const id = 'test:refresh-signal-rerender';
         const cmd = commands.addCommand(id, {
           execute: () => {
             /* no op */
@@ -735,7 +735,7 @@ describe('@jupyterlab/ui-components', () => {
         const button = new CommandToolbarButton({
           commands,
           id,
-          additionalSignals: [signal]
+          refreshSignals: [signal]
         });
         await render(button);
         const buttonNode = button.node.firstChild as HTMLButtonElement;

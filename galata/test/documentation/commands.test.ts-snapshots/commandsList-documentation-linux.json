@@ -2326,6 +2326,10 @@
         "_luminoEvent": {
           "type": "object",
           "description": "The lumino event object"
+        },
+        "widgetId": {
+          "type": "string",
+          "description": "The ID of the document widget"
         }
       }
     }
