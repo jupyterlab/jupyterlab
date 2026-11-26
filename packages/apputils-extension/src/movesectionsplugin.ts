@@ -291,15 +291,23 @@ export const moveSectionsPlugin: JupyterFrontEndPlugin<void> = {
           const target = Math.max(0, Math.min(index, total - 1));
           if (accordion.widgets[target] !== widget) {
             accordion.insertWidget(target, widget);
-            // Lumino only repositions the section, so move its title, body
-            // and handle to keep the Tab order the same as the visual order.
-            const next = accordion.titles[target + 1] ?? null;
-            for (const node of [
-              accordion.titles[target],
-              widget.node,
-              accordion.handles[target]
-            ]) {
-              accordion.node.insertBefore(node, next);
+            // Without `moveBefore` (Safari), Lumino leaves the nodes in place,
+            // so move them to keep the Tab order; moving placed nodes resets
+            // their scroll.
+            const title = accordion.titles[target];
+            const previous =
+              target > 0
+                ? accordion.handles[target - 1].nextSibling
+                : accordion.node.firstChild;
+            if (previous !== title) {
+              const next = accordion.titles[target + 1] ?? null;
+              for (const node of [
+                title,
+                widget.node,
+                accordion.handles[target]
+              ]) {
+                accordion.node.insertBefore(node, next);
+              }
             }
           }
         }
