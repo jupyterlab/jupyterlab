@@ -9,7 +9,7 @@ import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { framePromise, signalToPromise } from '@jupyterlab/testing';
 import * as utils from './utils';
 import type { IReplaceOptions } from '@jupyterlab/documentsearch';
-import type { CodeCellModel, CodeCell, MarkdownCell } from '@jupyterlab/cells';
+import type { CodeCellModel, MarkdownCell } from '@jupyterlab/cells';
 
 /**
  * To avoid relying on ydoc passing the selections via server
