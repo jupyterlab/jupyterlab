@@ -934,9 +934,9 @@ test.describe('Notebook Search in the full windowing mode', () => {
       '1/1'
     );
 
-    await expect(
-      page.locator('.jp-CodeCell .jp-current-match')
-    ).toBeInViewport({ ratio: 1 });
+    await expect(page.locator('.jp-CodeCell .jp-current-match')).toBeInViewport(
+      { ratio: 1 }
+    );
   });
 });
 
