@@ -12,6 +12,7 @@ import type {
 import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import * as renderers from './renderers';
+import { notifyAttached } from './utils';
 
 /**
  * A common base class for mime renderers.
@@ -140,6 +141,15 @@ export abstract class RenderedCommon
    * Whether to keep the existing rendering by default.
    */
   readonly keepExisting?: boolean = false;
+
+  /**
+   * Handle `after-attach` messages: resume a text render that waits for the
+   * node to be attached.
+   */
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    notifyAttached(this.node);
+  }
 
   /**
    * Set the URI fragment identifier.
