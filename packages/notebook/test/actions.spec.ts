@@ -2296,6 +2296,21 @@ describe('@jupyterlab/notebook', () => {
         expect(cellAfterMove.model.executionCount).toBe(null);
       }, 20000);
 
+      it('should show the count of a cell moved while it runs after its outputs were cleared', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        const { future, resolve } = createPendingFuture();
+        cell.outputArea.future = future;
+        cell.model.executionState = 'running';
+
+        NotebookActions.clearOutputs(widget);
+        NotebookActions.moveDown(widget);
+        resolve(5);
+        await sleep(10);
+
+        const cellAfterMove = widget.widgets[1] as CodeCell;
+        expect(cellAfterMove.model.executionCount).toBe(5);
+      });
+
       it('should not lose outputs received after first move when moving a second time', async () => {
         const finalOutput = '0\n1\n2\n3\n4\n';
         const cell = widget.widgets[0] as CodeCell;
@@ -3715,7 +3730,7 @@ describe('@jupyterlab/notebook', () => {
           name: 'stdout',
           text: initialVisibleOutput
         });
-        const future = createResolvedFuture(2);
+        const { future, resolve } = createPendingFuture();
         cell.outputArea.reattachFuture(future);
         // Running, as an execution that has output to come is.
         cell.model.executionState = 'running';
@@ -3724,6 +3739,7 @@ describe('@jupyterlab/notebook', () => {
         // Simulate output that arrived while the cell was deleted.
         void future.onIOPub(createClearOutputMessage());
         void future.onIOPub(createStreamMessage(finalOutput));
+        resolve(2);
         await Promise.resolve();
 
         const notificationInfo = jest
