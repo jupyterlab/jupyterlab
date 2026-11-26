@@ -448,11 +448,13 @@ describe('completer/reconciliator', () => {
         spy1.mockRestore();
         spy2.mockRestore();
       });
-      it('should leave out and log providers whose `isApplicable` fails', async () => {
+      function failingSetup() {
         const rejecting = new FooCompletionProvider();
+        rejecting.identifier = 'CompletionProvider:rejecting';
         rejecting.isApplicable = () =>
           Promise.reject(new Error('provider bug'));
         const throwing = new FooCompletionProvider();
+        throwing.identifier = 'CompletionProvider:throwing';
         throwing.isApplicable = () => {
           throw new Error('provider bug');
         };
@@ -464,10 +466,27 @@ describe('completer/reconciliator', () => {
         const error = jest.spyOn(console, 'error').mockImplementation(() => {
           // no-op
         });
+        return { reconciliator, working, error };
+      }
+
+      it('should leave out providers whose `isApplicable` fails', async () => {
+        const { reconciliator, working, error } = failingSetup();
         await expect(reconciliator['applicableProviders']()).resolves.toEqual([
           working
         ]);
-        expect(error).toHaveBeenCalledTimes(2);
+        error.mockRestore();
+      });
+      it('should log the identifier of each provider whose `isApplicable` fails', async () => {
+        const { reconciliator, error } = failingSetup();
+        await reconciliator['applicableProviders']().catch(() => undefined);
+        expect(error).toHaveBeenCalledWith(
+          expect.stringContaining('CompletionProvider:rejecting'),
+          expect.any(Error)
+        );
+        expect(error).toHaveBeenCalledWith(
+          expect.stringContaining('CompletionProvider:throwing'),
+          expect.any(Error)
+        );
         error.mockRestore();
       });
     });
