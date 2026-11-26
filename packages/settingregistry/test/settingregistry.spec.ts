@@ -978,6 +978,26 @@ describe('@jupyterlab/settingregistry', () => {
       ).toEqual(['RISE:set-slide-type']);
     });
 
+    it('should disable a default of another command when the stored selectors match', () => {
+      const launcher = {
+        command: 'launcher:create',
+        keys: ['Accel Shift L'],
+        selector: 'body'
+      };
+      const reconciled = SettingRegistry.reconcileShortcuts(
+        [launcher],
+        [
+          {
+            ...launcher,
+            // JupyterLab 3 bound this command to these keys.
+            command: 'filebrowser:create-main-launcher',
+            disabled: true
+          }
+        ]
+      );
+      expect(reconciled).toEqual([]);
+    });
+
     it('should keep a user shortcut that replaced a default with "Overwrite"', () => {
       const heading = {
         command: 'notebook:insert-heading-above',
