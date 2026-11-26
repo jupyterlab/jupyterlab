@@ -4,6 +4,9 @@
 
 # Performance tricks
 
+To list the settings related to performance, search for `tag:performance` in the Settings Editor (see {ref}`settings-editor-tags`).
+If you add such a setting, add `"tags": ["performance"]` to it in the schema.
+
 ## Windowed list
 
 A list windowing algorithm is implemented in a dedicated widget `WindowedList` provided by `@jupyterlab/ui-components`.

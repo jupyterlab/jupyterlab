@@ -43,9 +43,13 @@ test.describe('Workspace', () => {
   });
 
   test('should reset the workspace', async ({ page, tmpPath }) => {
-    await page.goto();
+    // Tests in other workers add and remove items in the root folder, so a
+    // double click in its listing can open the wrong item.
+    await page.goto(`tree/${tmpPath}/${nbFile}`);
 
-    await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
+    await expect(
+      page.locator('[role="main"] >> text=Test Notebook¶').first()
+    ).toBeVisible();
 
     await page.goto('?reset');
 
@@ -456,11 +460,8 @@ test.describe('Workspace in doc mode', () => {
   test('should restore workspace when switching back to lab mode', async ({
     baseURL,
     page,
-    tmpPath,
-    browserName
+    tmpPath
   }) => {
-    test.skip(browserName === 'firefox', 'Flaky on Firefox');
-
     // Open the browser in doc mode.
     // This should not change the saved workspace's main area information,
     // the document opened from URL should not be saved in workspace.

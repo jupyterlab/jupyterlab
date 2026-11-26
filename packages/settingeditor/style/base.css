@@ -111,7 +111,7 @@
   position: relative;
 }
 
-.jp-PluginList-wrapper > .jp-FilterBox {
+.jp-PluginList-wrapper > .jp-FilterBox-wrapper {
   margin: 8px 12px 0;
 }
 

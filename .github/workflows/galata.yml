@@ -29,6 +29,8 @@ env:
 jobs:
   test:
     name: Integration Tests (${{ matrix.browser }} - ${{ matrix.suite }} ${{ matrix.shard }}/${{ matrix.shards }})
+    # The scheduled runs are used for flakiness report, and only from jupyterlab/jupyterlab
+    if: ${{ github.event_name != 'schedule' || github.repository == 'jupyterlab/jupyterlab' }}
     timeout-minutes: 30
     runs-on: ubuntu-24.04
     env:
@@ -346,6 +348,7 @@ jobs:
 
   examples:
     name: Example Tests
+    if: ${{ github.event_name != 'schedule' || github.repository == 'jupyterlab/jupyterlab' }}
     timeout-minutes: 45
     runs-on: ubuntu-24.04
     env:
@@ -447,7 +450,7 @@ jobs:
 
   merge-reports:
     name: Merge Test Reports and Results
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && (github.event_name != 'schedule' || github.repository == 'jupyterlab/jupyterlab') }}
     needs: [test, examples]
     runs-on: ubuntu-22.04
     permissions:

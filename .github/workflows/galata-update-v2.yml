@@ -2,7 +2,7 @@ name: Create snapshot update PR
 
 on:
   # act on comments on PR
-  issue_comment:
+  issue_comment: # zizmor: ignore[dangerous-triggers] no pull request code runs; the bot only commits files that match SNAPSHOT_PATH_REGEX
     types: [created, edited]
   # act on review body (the "main" review comment)
   pull_request_review:
