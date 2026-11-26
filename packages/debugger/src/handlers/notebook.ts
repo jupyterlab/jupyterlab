@@ -172,12 +172,17 @@ export class NotebookHandler implements IDisposable {
       return;
     }
     const code = model.sharedModel.getSource();
-    const file = Private.fileName(this._debuggerService.getCodeId(code));
+    const path = this._debuggerService.getCodeId(code);
+    const file = Private.fileName(path);
     const breakpoints = this._deletedBreakpoints.get(file);
     if (!breakpoints) {
       return;
     }
     this._deletedBreakpoints.delete(file);
+    // Another cell set breakpoints for this code after the deletion.
+    if (this._debuggerService.model.breakpoints.getBreakpoints(path).length) {
+      return;
+    }
     void this._debuggerService.updateBreakpoints(code, breakpoints);
   }
 

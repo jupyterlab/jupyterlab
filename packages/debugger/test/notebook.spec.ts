@@ -341,6 +341,26 @@ describe('NotebookHandler', () => {
     expect(kernel.get(service.getCodeId(CODE))).toEqual([2]);
   });
 
+  it('should keep the breakpoints of a moved cell that has the code of a deleted cell', async () => {
+    context.model.sharedModel.deleteCell(0);
+    await flushRequests();
+    // The remaining cell gets the code of the deleted cell, with another line.
+    const cell = context.model.cells.get(0);
+    cell.sharedModel.setSource(CODE);
+    const cellHandler = handler['_cellMap'].get(cell.id)!;
+    cellHandler['_getBreakpointsFromEditor'] = () => [1];
+    cellHandler['_sendEditorBreakpoints']();
+    await flushRequests();
+    context.model.sharedModel.insertCell(1, {
+      cell_type: 'code',
+      source: 'y = 2'
+    });
+    context.model.sharedModel.moveCell(0, 1);
+    await flushRequests();
+
+    expect(kernel.get(service.getCodeId(CODE))).toEqual([1]);
+  });
+
   it('should not restore the breakpoints of a cut cell after all breakpoints are removed', async () => {
     // Remove All Breakpoints does nothing when no breakpoint is listed.
     await service.updateBreakpoints('x = 1', [{ line: 1, verified: true }]);
