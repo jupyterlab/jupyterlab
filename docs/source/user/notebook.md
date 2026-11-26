@@ -251,6 +251,15 @@ implementation details of relevance to advanced users:
 A notebook can be locked to its kernel, so that the kernel is not changed by
 mistake, for example by students who work on a course notebook.
 
+```{note}
+Locking the kernel is experimental. The `kernel_lock` field is not part of the
+notebook format, and its name and meaning may change in a future version of
+JupyterLab, depending on the discussion in
+[jupyter/nbformat#433](https://github.com/jupyter/nbformat/issues/433).
+Applications that do not support the field let users change the kernel of a
+locked notebook.
+```
+
 To lock the kernel of a notebook, either:
 
 - click the kernel name in the notebook toolbar, choose a kernel in the Select
