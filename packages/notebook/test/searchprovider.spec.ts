@@ -284,6 +284,25 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#startQuery()', () => {
+      it('should start from the first match of a cell below the active cell', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: '' },
+          { cell_type: 'code', source: "print('test')" }
+        ]);
+        // The cursor of the cell stays after the text typed last
+        panel.content.widgets[1].editor!.setCursorPosition({
+          line: 0,
+          column: 13
+        });
+        panel.content.activeCellIndex = 0;
+        await provider.startQuery(/test/, undefined);
+        expect(provider.currentMatchIndex).toBe(0);
+        await provider.endQuery();
+      });
+    });
+
     describe('#highlightNext()', () => {
       it('should highlight next match', async () => {
         await provider.startQuery(/test/, undefined);

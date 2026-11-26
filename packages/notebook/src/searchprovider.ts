@@ -742,10 +742,18 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this._selectionLock = false;
     };
 
+    // Only the first cell that the search visits starts from its selection,
+    // because the selection of another cell stays where it was last edited
+    let isFirstVisit = true;
+
     const highlightInCell = async (
       index: number
     ): Promise<ISearchMatch | undefined> => {
       const searchEngine = this._searchProviders[index];
+      const searchWholeCell =
+        !isFirstVisit &&
+        (options?.from === 'selection' || options?.from === 'selection-start');
+      isFirstVisit = false;
       if (options?.skipReadOnly && searchEngine.isReadOnlyProvider()) {
         // Treat it as a cell without matches, so the loop below still ends
         return undefined;
@@ -754,9 +762,17 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       // does not attach a cell out of the view
       const cell = this.widget.content.widgets[index];
       cellWasShown = !cell.isPlaceholder() && cell.isAttached;
-      const cellOptions = options?.scrollInCell
-        ? { ...options, scroll: true }
-        : options;
+      let cellOptions = options;
+      if (searchWholeCell) {
+        // Without a match in the cell yet, 'previous-match' starts at its end
+        cellOptions = {
+          ...cellOptions,
+          from: reverse ? 'previous-match' : 'start'
+        };
+      }
+      if (options?.scrollInCell) {
+        cellOptions = { ...cellOptions, scroll: true };
+      }
       return reverse
         ? searchEngine.highlightPrevious(false, cellOptions)
         : searchEngine.highlightNext(false, cellOptions);
