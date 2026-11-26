@@ -10,9 +10,6 @@ import { framePromise, signalToPromise } from '@jupyterlab/testing';
 import * as utils from './utils';
 import type { IReplaceOptions } from '@jupyterlab/documentsearch';
 import type { CodeCellModel, CodeCell, MarkdownCell } from '@jupyterlab/cells';
-import { CellSearchProvider } from '@jupyterlab/cells';
-import { SearchDocumentModel, SearchDocumentView } from '@jupyterlab/documentsearch';
-import { Widget } from '@lumino/widgets';
 
 /**
  * To avoid relying on ydoc passing the selections via server
