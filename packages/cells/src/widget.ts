@@ -2380,7 +2380,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * not settle if the cell is disposed before that. Nothing is rendered while
    * the cell shows its editor.
    */
-  async whenRendered(): Promise<void> {
+  async waitForRendering(): Promise<void> {
     await this.ready;
     if (this.isDisposed || !this._rendered) {
       return;

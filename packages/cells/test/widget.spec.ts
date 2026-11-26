@@ -1298,7 +1298,7 @@ describe('cells/widget', () => {
       });
     });
 
-    describe('#whenRendered()', () => {
+    describe('#waitForRendering()', () => {
       const createCell = (render: (source: string) => Promise<string>) => {
         const model = new MarkdownCellModel();
         model.sharedModel.setSource('Rendered text');
@@ -1329,14 +1329,14 @@ describe('cells/widget', () => {
         });
         const widget = createCell(render);
 
-        const whenRendered = widget.whenRendered();
-        const state = trackDone(whenRendered);
+        const waiting = widget.waitForRendering();
+        const state = trackDone(waiting);
         await framePromise();
         expect(render).toHaveBeenCalledTimes(1);
         expect(state.isDone).toBe(false);
 
         rendering.resolve();
-        await whenRendered;
+        await waiting;
 
         const output = widget.node.querySelector('.jp-MarkdownOutput');
         expect(output?.textContent).toContain('Rendered text');
@@ -1354,14 +1354,14 @@ describe('cells/widget', () => {
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(render).toHaveBeenCalledTimes(1);
 
-        const whenRendered = widget.whenRendered();
-        const state = trackDone(whenRendered);
+        const waiting = widget.waitForRendering();
+        const state = trackDone(waiting);
         await framePromise();
         expect(render).toHaveBeenCalledTimes(1);
         expect(state.isDone).toBe(false);
 
         rendering.resolve();
-        await whenRendered;
+        await waiting;
         widget.dispose();
       });
 
@@ -1373,7 +1373,7 @@ describe('cells/widget', () => {
         render.mockClear();
         const showEditor = jest.spyOn(widget.inputArea!, 'showEditor');
 
-        await widget.whenRendered();
+        await widget.waitForRendering();
 
         expect(render).not.toHaveBeenCalled();
         expect(showEditor).not.toHaveBeenCalled();

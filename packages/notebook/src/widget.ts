@@ -2532,7 +2532,7 @@ export class Notebook extends StaticNotebook {
         return;
       }
       if (cell instanceof MarkdownCell) {
-        await cell.whenRendered();
+        await cell.waitForRendering();
         if (isTargetGone()) {
           return;
         }
