@@ -3229,6 +3229,25 @@ describe('@jupyterlab/notebook', () => {
         expect(cellAfterUndo.model.executionCount).toBe(null);
       }, 20000);
 
+      it('should keep a prompt cleared before a deletion when the deletion is undone', async () => {
+        const cell = widget.widgets[0] as CodeCell;
+        const cellId = cell.model.id;
+        widget.activeCellIndex = 0;
+        cell.model.sharedModel.setSource('1 + 1');
+        await NotebookActions.run(widget, ipySessionContext);
+        widget.deselectAll();
+        widget.activeCellIndex = 0;
+
+        NotebookActions.clearOutputs(widget);
+        NotebookActions.deleteCells(widget);
+        NotebookActions.undo(widget);
+        await sleep(10);
+
+        const cellAfterUndo = widget.widgets[0] as CodeCell;
+        expect(cellAfterUndo.model.id).toBe(cellId);
+        expect(cellAfterUndo.model.executionCount).toBe(null);
+      }, 20000);
+
       it('should undo a cell action', () => {
         const count = widget.widgets.length;
         const next = widget.widgets[1];
