@@ -237,6 +237,22 @@ describe('filebrowser/listing', () => {
         const itemNode = dirListing['_items'][0];
         expect(itemNode.contains(document.activeElement)).toBe(true);
       });
+
+      it('should keep the focus on an element focused during the rename', async () => {
+        const input = document.createElement('input');
+        document.body.appendChild(input);
+        dirListing.selectNext();
+        const newNamePromise = dirListing.rename();
+        const editNode = dirListing['_editNode'];
+        editNode.value = 'z.txt';
+        simulate(editNode, 'keydown', {
+          key: 'Enter'
+        });
+        input.focus();
+        await newNamePromise;
+        expect(document.activeElement).toBe(input);
+        input.remove();
+      });
     });
 
     describe('#copy()', () => {

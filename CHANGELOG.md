@@ -67,6 +67,7 @@ These smaller changes also improve notebooks:
 - Selecting a collapsed heading now selects all the cells in its section, so cut, move and delete act on the whole section.
 - In command mode, moving into a tall cell with the arrow keys now shows the top of the cell instead of the end of its output.
 - Collapsing a long output, or enabling scrolling for it, now keeps the top of the cell in view.
+- The maximum height of outputs with scrolling enabled can now be changed: set "Scrolled output max height" in the Notebook settings to a CSS length such as `400px` or `50vh` (`24em` by default).
 - Saving with <kbd>Ctrl</kbd> + <kbd>S</kbd> (<kbd>Cmd</kbd> + <kbd>S</kbd> on macOS) while editing metadata in the Property Inspector now saves the metadata edits too, instead of losing them.
 - Opening the Common Tools section of the Property Inspector no longer adds default metadata, such as `editable: true`, to the cell.
 - When no export format is available, File → Save and Export Notebook As now shows "Enable notebook exports", which explains how to enable exports.
