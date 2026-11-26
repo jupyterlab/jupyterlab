@@ -2479,6 +2479,12 @@ export class Notebook extends StaticNotebook {
     const userNavigationListener = this.addUserNavigationListener(() => {
       interrupted = true;
     });
+    // The table of contents moves on by activating another cell.
+    const activeCell = this.activeCell;
+    const isActivatedElsewhere = () =>
+      activeCell !== null &&
+      this.activeCell !== activeCell &&
+      this.widgets.includes(activeCell);
     const isCancelled = () =>
       interrupted || request !== this._fragmentRequest || this.isDisposed;
 
@@ -2498,7 +2504,11 @@ export class Notebook extends StaticNotebook {
       const above = this.widgets.slice(0, this.widgets.indexOf(cell));
       await Promise.all(above.map(Private.whenReadyOrDisposed));
       // A link cancelled while waiting must not move the active cell.
-      if (isCancelled() || !this.widgets.includes(cell)) {
+      if (
+        isCancelled() ||
+        isActivatedElsewhere() ||
+        !this.widgets.includes(cell)
+      ) {
         return;
       }
 

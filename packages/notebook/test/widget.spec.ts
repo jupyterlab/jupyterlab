@@ -1634,6 +1634,22 @@ describe('@jupyter/notebook', () => {
         widget.dispose();
       });
 
+      it('should not activate the target if another cell is activated while waiting', async () => {
+        const { widget, link } = createNotebook('none');
+        jest.spyOn(widget, 'scrollToItem').mockResolvedValue();
+        const ready = holdCellReady(widget.widgets[0]);
+
+        const navigation = widget.setFragment(link);
+        await framePromise();
+        // As the table of contents does, with no input in the notebook.
+        widget.activeCellIndex = 2;
+        ready.resolve();
+        await navigation;
+
+        expect(widget.activeCellIndex).toBe(2);
+        widget.dispose();
+      });
+
       it('should only follow the latest link', async () => {
         const { widget, rendering } = createWaitingNotebook();
         const other = widget.widgets[1];
