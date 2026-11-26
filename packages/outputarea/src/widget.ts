@@ -1644,10 +1644,11 @@ namespace Private {
 
       iframe.heightChangeObserver?.disconnect();
 
-      // Remove the renderer node from the iframe, if present.
+      // In a removed frame the node stays connected, so an unfinished text
+      // render would continue.
       this._wrapped.node.remove();
 
-      // The renderer was not attached with Widget.attach().
+      // Lumino does not dispose the renderer: it is not a child widget.
       this._wrapped.dispose();
 
       super.dispose();
