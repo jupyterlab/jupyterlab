@@ -30,6 +30,8 @@ class="jp-screenshot">
 
 Read-only Markdown cells now stay rendered when you double-click them or press <kbd>Enter</kbd>. The "Show editor for read-only Markdown cells" setting brings back the read-only editor.
 
+Notebooks can now be [locked to their kernel](https://jupyterlab.readthedocs.io/en/latest/user/notebook.html#locking-the-kernel), so that the kernel is not changed by mistake: check "Lock kernel choice" in the Select Kernel dialog, or set "Notebook kernel" to "Locked" in the Common Tools section of the Property Inspector.
+
 The help that IPython shows for `object?` and `object??` can now open in a panel at the bottom of the window, as in the classic notebook, instead of in the cell output. Enable "Show Help in Bottom Panel" in the Notebook settings; it applies to code consoles too.
 
 <img alt="A notebook with the signature and the docstring of statistics.median shown in a Help panel below it"

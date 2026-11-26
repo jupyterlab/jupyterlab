@@ -244,6 +244,33 @@ implementation details of relevance to advanced users:
    when copy-pasting cells from an untrusted notebook),
 3. only code cells can be trusted; the Markdown cells are always sanitised.
 
+(kernel-lock)=
+
+## Locking the Kernel
+
+A notebook can be locked to its kernel, so that the kernel is not changed by
+mistake, for example by students who work on a course notebook.
+
+To lock the kernel of a notebook, either:
+
+- click the kernel name in the notebook toolbar, choose a kernel in the Select
+  Kernel dialog, check "Lock kernel choice" and click "Select";
+- open the Property Inspector, expand Common Tools and set "Notebook kernel" to
+  "Locked".
+
+JupyterLab saves the lock in the `kernel_lock` field of the notebook metadata.
+When a notebook is locked:
+
+- the kernel name in the notebook toolbar and Kernel → Change Kernel… are
+  disabled;
+- JupyterLab starts only the kernel named in the `kernelspec` field of the
+  notebook metadata. When that kernel is not installed, JupyterLab shows a
+  message and does not start another kernel.
+
+To unlock the kernel, set "Notebook kernel" to "Unlocked" in Common Tools, or
+click the kernel name in the status bar, uncheck "Lock kernel choice" and click
+"Select".
+
 (plotting)=
 
 ## Plotting and Visualization
