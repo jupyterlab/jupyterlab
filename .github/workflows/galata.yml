@@ -639,6 +639,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+      pull-requests: read
     steps:
       - name: Download per-shard results
         continue-on-error: true
@@ -647,6 +648,21 @@ jobs:
           pattern: tt-sites-*
           path: tt
           merge-multiple: true
+      - name: List files changed by this PR
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              per_page: 100
+            });
+            require('fs').writeFileSync(
+              'changed-files.json',
+              JSON.stringify(files.map(f => f.filename))
+            );
 
       - name: Write the report to the run summary
         run: |
@@ -677,6 +693,16 @@ jobs:
               "::warning title=Trusted Types::\(.site + ": " + $msg | esc)"
             end
           JQ
+          # Annotation order: sites in files this PR changes, other repository files,
+          # then job-level sites; most test runs first within each group.
+          [[ -f changed-files.json ]] || echo '[]' > changed-files.json
+          jq --slurpfile changed changed-files.json '
+            map(. + {file: ((.site | capture("^(?<f>(?:packages|dev_mode)/.+):[0-9]+$") | .f) // null)})
+            | sort_by(
+                (if .file != null and (.file | IN($changed[0][])) then 0
+                 elif .file != null then 1
+                 else 2 end),
+                -.tests)' tt-sites.json > tt-annotate.json
           {
             echo "### Trusted Types violations: $(jq length tt-sites.json) distinct sites"
             echo
@@ -693,24 +719,24 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Annotate Trusted Types sites 1-10
         run: |
-          [[ -f tt-sites.json ]] || exit 0
-          jq -r --argjson start 0 -f annotate.jq tt-sites.json
+          [[ -f tt-annotate.json ]] || exit 0
+          jq -r --argjson start 0 -f annotate.jq tt-annotate.json
 
       - name: Annotate Trusted Types sites 11-20
         run: |
-          [[ -f tt-sites.json ]] || exit 0
-          jq -r --argjson start 10 -f annotate.jq tt-sites.json
+          [[ -f tt-annotate.json ]] || exit 0
+          jq -r --argjson start 10 -f annotate.jq tt-annotate.json
 
       - name: Annotate Trusted Types sites 21-30
         run: |
-          [[ -f tt-sites.json ]] || exit 0
-          jq -r --argjson start 20 -f annotate.jq tt-sites.json
+          [[ -f tt-annotate.json ]] || exit 0
+          jq -r --argjson start 20 -f annotate.jq tt-annotate.json
 
       - name: Annotate Trusted Types sites 31-40
         run: |
-          [[ -f tt-sites.json ]] || exit 0
-          jq -r --argjson start 30 -f annotate.jq tt-sites.json
-          TOTAL=$(jq length tt-sites.json)
+          [[ -f tt-annotate.json ]] || exit 0
+          jq -r --argjson start 30 -f annotate.jq tt-annotate.json
+          TOTAL=$(jq length tt-annotate.json)
           if (( TOTAL > 40 )); then
             echo "::notice title=Trusted Types::$((TOTAL - 40)) more sites are listed only in the run summary"
           fi
