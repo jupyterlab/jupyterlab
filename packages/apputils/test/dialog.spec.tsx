@@ -132,6 +132,22 @@ describe('@jupyterlab/apputils', () => {
         expect(document.activeElement).toBe(input);
         document.body.removeChild(input);
       });
+
+      it('should return focus without scrolling to the original focused element', async () => {
+        const input = document.createElement('input');
+        document.body.appendChild(input);
+        input.focus();
+        const focus = jest.spyOn(input, 'focus');
+
+        const prompt = dialog.launch();
+        await waitForDialog();
+        dialog.reject();
+        await prompt;
+        expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+        expect(document.activeElement).toBe(input);
+        focus.mockRestore();
+        document.body.removeChild(input);
+      });
     });
 
     describe('#resolve()', () => {
