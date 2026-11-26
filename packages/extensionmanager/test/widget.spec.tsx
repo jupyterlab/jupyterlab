@@ -47,7 +47,13 @@ class TestModel extends ListModel {
   }
 }
 
-class NoResultsModel extends TestModel {
+class SearchModel extends TestModel {
+  results: IEntry[] = [];
+
+  get searchResult(): ReadonlyArray<IEntry> {
+    return this.results;
+  }
+
   protected async search(): Promise<void> {
     this.stateChanged.emit();
   }
@@ -101,32 +107,56 @@ describe('@jupyterlab/extensionmanager', () => {
       expect(content).not.toContain('jupyterlab-git');
     });
 
-    it('should link to a PyPI search when a search finds nothing', async () => {
+    it('should link to the PyPI search whether or not it finds packages', async () => {
       PageConfig.setOption(
         'extensionManager',
         JSON.stringify({ name: 'PyPI', can_install: true })
       );
-      const pypiModel = new NoResultsModel(new ServiceManagerMock());
+      const pypiModel = new SearchModel(new ServiceManagerMock());
       pypiModel.isDisclaimed = true;
       const pypiPanel = new ExtensionsPanel({
         model: pypiModel,
         translator: nullTranslator
       });
       Widget.attach(pypiPanel, document.body);
-      pypiModel.query = 'jupyterlab-git';
+      const search = pypiPanel.node.querySelector(
+        '#jp-extensionmanager-search'
+      )!;
+      const browseHref = () =>
+        search
+          .querySelector('.jp-extensionmanager-browse a')
+          ?.getAttribute('href');
+      const listed = () =>
+        search.querySelector('.jp-extensionmanager-listview') !== null;
+
+      pypiModel.query = 'no-such-extension';
       pypiModel.stateChanged.emit();
-      let link: HTMLAnchorElement | null = null;
-      for (let i = 0; i < 10 && !link; i++) {
+      for (
+        let i = 0;
+        i < 10 && !browseHref()?.includes('q=no-such-extension');
+        i++
+      ) {
         await framePromise();
-        link = pypiPanel.node.querySelector(
-          '#jp-extensionmanager-search .jp-extensionmanager-browse a'
-        );
       }
-      const href = link?.getAttribute('href');
+      const resultsShownWhenEmpty = listed();
+      const linkWhenEmpty = browseHref();
+
+      const found = { ...INSTALLED[0], installed: false };
+      pypiModel.query = found.name;
+      pypiModel.results = [found];
+      pypiModel.stateChanged.emit();
+      for (let i = 0; i < 10 && !listed(); i++) {
+        await framePromise();
+      }
+      const resultsShownWhenFound = listed();
+      const linkWhenFound = browseHref();
       pypiPanel.dispose();
       pypiModel.dispose();
 
-      expect(href).toContain('q=jupyterlab-git');
+      expect(resultsShownWhenEmpty).toBe(false);
+      expect(linkWhenEmpty).toContain('q=no-such-extension');
+      expect(resultsShownWhenFound).toBe(true);
+      expect(linkWhenFound).toContain(`q=${found.name}`);
     });
   });
 });

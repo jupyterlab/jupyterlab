@@ -4,12 +4,13 @@
 import type { YCodeCell } from '@jupyter/ydoc';
 import { createStandaloneCell } from '@jupyter/ydoc';
 import type { Cell, ICodeCellModel } from '@jupyterlab/cells';
-import { CodeCellModel } from '@jupyterlab/cells';
+import { CodeCell, CodeCellModel } from '@jupyterlab/cells';
 import {
   NotebookModel,
   NotebookModelFactory,
   NotebookViewModel
 } from '@jupyterlab/notebook';
+import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 
 describe('@jupyterlab/notebook', () => {
   describe('NotebookModelFactory', () => {
@@ -100,6 +101,23 @@ describe('@jupyterlab/notebook', () => {
       expect(height).toBe(0);
     });
 
+    test('should estimate no height for a cell hidden under a collapsed heading', () => {
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        source: ['x = 1'],
+        metadata: {}
+      }) as YCodeCell;
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      notebook.cells.push({ model, isHidden: true } as Cell<ICodeCellModel>);
+      notebook.cells.push({ model, isHidden: false } as Cell<ICodeCellModel>);
+
+      expect(notebook.estimateWidgetSize(0)).toBe(0);
+      expect(notebook.estimateWidgetSize(1)).toBe(39); // 1 source_line * 17 (line_height) + 22 (cell_margin)
+      // Without windowing, the estimate is the cell's size once it is shown.
+      notebook.windowingActive = false;
+      expect(notebook.estimateWidgetSize(0)).toBe(39);
+    });
+
     test('should calculate height based on number of lines in source and output (string output)', () => {
       const outputObj = [
         {
@@ -126,6 +144,277 @@ describe('@jupyterlab/notebook', () => {
 
       const height = notebook.estimateWidgetSize(0);
       expect(height).toBe(56); // (1 source_line + 1 output_line) * 17 (line_height) + 22 (cell_margin)
+    });
+
+    test('should prefer text/markdown over text/plain for height estimation', () => {
+      const outputObj = [
+        {
+          output_type: 'execute_result',
+          data: {
+            'text/markdown': '# Header\n\nSome paragraph\n\nAnother paragraph',
+            'text/plain': 'short fallback'
+          },
+          execution_count: 1,
+          metadata: {}
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['display(md)'],
+        metadata: {}
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      // 1 source line, 5 markdown lines
+      expect(height).toBe(124); // (1 + 5) * 17 + 22
+    });
+
+    test('should count lines from stdout stream output', () => {
+      const outputObj = [
+        {
+          output_type: 'stream',
+          name: 'stdout',
+          text: 'line 1\nline 2\nline 3\n'
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['print("line 1")\nprint("line 2")\nprint("line 3")'],
+        metadata: {}
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      // 3 source lines, 3 output lines
+      expect(height).toBe(124); // (3 + 3) * 17 + 22
+    });
+
+    test('should count lines from stderr stream output', () => {
+      const outputObj = [
+        {
+          output_type: 'stream',
+          name: 'stderr',
+          text: 'Warning: something\nTraceback:\n  File "test.py"\n'
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['import warnings\nwarnings.warn("something")'],
+        metadata: {}
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      // 2 source lines, 3 stderr lines
+      expect(height).toBe(107); // (2 + 3) * 17 + 22
+    });
+
+    test('should count lines from the traceback of an error output', () => {
+      const outputObj = [
+        {
+          output_type: 'error',
+          ename: 'ZeroDivisionError',
+          evalue: 'division by zero',
+          traceback: [
+            'ZeroDivisionError                         Traceback (most recent call last)',
+            'Cell In[1], line 1\n----> 1 1 / 0',
+            'ZeroDivisionError: division by zero'
+          ]
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['1 / 0'],
+        metadata: {}
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      // 1 source line, 4 traceback lines
+      expect(height).toBe(107); // (1 + 4) * 17 + 22
+    });
+
+    test('should add up the lines of all outputs', () => {
+      const outputObj = [
+        {
+          output_type: 'stream',
+          name: 'stdout',
+          text: 'hello\nworld\n'
+        },
+        {
+          output_type: 'execute_result',
+          data: {
+            'text/plain': '42'
+          },
+          execution_count: 1,
+          metadata: {}
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['print("hello")\nprint("world")\n42'],
+        metadata: {}
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      // 3 source lines, 2 stdout lines + 1 text/plain line = 3 output lines
+      expect(height).toBe(124); // (3 + 3) * 17 + 22
+    });
+
+    test('should count blank lines in the output', () => {
+      const outputObj = [
+        {
+          output_type: 'execute_result',
+          data: {
+            'text/plain':
+              'array([[[0., 0.],\n        [0., 0.]],\n\n       [[0., 0.],\n        [0., 0.]]])'
+          },
+          execution_count: 1,
+          metadata: {}
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['np.zeros((2, 2, 2))'],
+        metadata: {}
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      // 1 source line, 5 output lines
+      expect(height).toBe(124); // (1 + 5) * 17 + 22
+    });
+
+    test('should count collapsed outputs as one line', () => {
+      const outputObj = [
+        {
+          output_type: 'stream',
+          name: 'stdout',
+          text: 'line 1\nline 2\nline 3\n'
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['print("line 1\\nline 2\\nline 3")'],
+        metadata: { collapsed: true }
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      // 1 source line, 1 placeholder line
+      expect(height).toBe(56); // (1 + 1) * 17 + 22
+    });
+
+    test('should count at most 18 lines of scrolled outputs', () => {
+      const outputObj = [
+        {
+          output_type: 'stream',
+          name: 'stdout',
+          text: 'epoch\n'.repeat(400)
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['for i in range(400):\n    print("epoch")'],
+        metadata: { scrolled: true }
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      // 2 source lines, 18 lines in the scrolled output area
+      expect(height).toBe(362); // (2 + 18) * 17 + 22
+    });
+
+    test('should cap scrolled outputs at their maximum height', () => {
+      const style = document.createElement('style');
+      style.textContent =
+        '.jp-CodeCell.jp-mod-outputsScrolled .jp-Cell-outputArea { max-height: 120px; }';
+      document.head.appendChild(style);
+      const outputObj = [
+        {
+          output_type: 'stream',
+          name: 'stdout',
+          text: 'epoch\n'.repeat(400)
+        }
+      ];
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['for i in range(400):\n    print("epoch")'],
+        metadata: { scrolled: true }
+      }) as YCodeCell;
+
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      notebook.cells.push({ model } as Cell<ICodeCellModel>);
+
+      const height = notebook.estimateWidgetSize(0);
+      style.remove();
+      // 2 source lines and the scrolled output area
+      expect(height).toBe(176); // 2 * 17 + 120 + 22
+    });
+
+    test('should count the outputs past the limit of the output area as one line', () => {
+      const outputObj = Array.from({ length: 10 }, (_, i) => ({
+        output_type: 'stream',
+        name: i % 2 ? 'stderr' : 'stdout',
+        text: `step ${i}\n`
+      }));
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        execution_count: 1,
+        outputs: outputObj,
+        source: ['for i in range(5):\n    print(i)\n    log.warning(i)'],
+        metadata: {}
+      }) as YCodeCell;
+
+      const model = new CodeCellModel({ sharedModel });
+      const cell = new CodeCell({
+        model,
+        rendermime: NBTestUtils.defaultRenderMime(),
+        contentFactory: NBTestUtils.createCodeCellFactory(),
+        maxNumberOutputs: 4
+      });
+      notebook.cells.push(cell);
+
+      const height = notebook.estimateWidgetSize(0);
+      // 3 source lines, 4 output lines and the button that shows the rest
+      expect(height).toBe(158); // (3 + 4 + 1) * 17 + 22
+      cell.dispose();
     });
 
     test('should calculate height based on number of lines in source and output (string[] output)', () => {
@@ -157,7 +446,7 @@ describe('@jupyterlab/notebook', () => {
       notebook.cells.push({ model } as Cell<ICodeCellModel>);
 
       const height = notebook.estimateWidgetSize(0);
-      expect(height).toBe(124); // (2 source_line + 4 output_line) * 17 (line_height) + 22 (cell_margin)
+      expect(height).toBe(107); // (2 source_lines + 3 output_lines) * 17 (line_height) + 22 (cell_margin)
     });
   });
 });

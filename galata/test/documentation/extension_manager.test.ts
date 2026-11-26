@@ -51,11 +51,11 @@ test.describe('Extension Manager', () => {
 
     const discover = page.locator('#jp-extensionmanager-search');
     const browse = discover.getByRole('link', {
-      name: 'Browse extensions on PyPI'
+      name: 'Browse more extensions on PyPI'
     });
     await expect(browse).toBeVisible();
     await expect(discover.getByRole('link').first()).toHaveText(
-      'Browse extensions on PyPI'
+      'Browse more extensions on PyPI'
     );
 
     expect(
@@ -102,8 +102,8 @@ test.describe('Extension Manager', () => {
     await expect(french).toBeVisible();
     await expect(german).toBeVisible();
     await expect(
-      sidebar.getByRole('link', { name: 'Browse extensions on PyPI' })
-    ).toHaveCount(0);
+      sidebar.getByRole('link', { name: 'Browse more extensions on PyPI' })
+    ).toBeVisible();
 
     await filter.fill('French');
     await expect(german).toHaveCount(0);
@@ -191,22 +191,18 @@ test.describe('Extension Manager', () => {
     await page.goto();
     await openExtensionSidebar(page);
 
-    const waitRequest = page.waitForRequest(request => {
-      if (
-        request.method() !== 'POST' ||
-        !galata.Routes.extensions.test(request.url())
-      ) {
-        return false;
-      }
-      const data = request.postDataJSON();
-      return (
-        data.cmd === 'install' &&
-        data.extension_name === '@jupyterlab/geojson-extension' &&
-        data.extension_version === '3.2.1'
-      );
-    });
+    const waitRequest = page.waitForRequest(
+      request =>
+        request.method() === 'POST' &&
+        galata.Routes.extensions.test(request.url())
+    );
     await page.getByRole('button', { name: 'Update to 3.2.1' }).click();
-    await waitRequest;
+    const updateRequest = await waitRequest;
+    expect(updateRequest.postDataJSON()).toEqual({
+      cmd: 'install',
+      extension_name: 'jupyterlab-geojson',
+      extension_version: '3.2.1'
+    });
   });
 
   test('Has no unused style rules', async ({ page }) => {

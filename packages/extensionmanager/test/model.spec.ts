@@ -4,6 +4,7 @@
 // The extension entries mirror the snake_case JSON returned by the server.
 /* eslint-disable camelcase */
 
+import { Dialog } from '@jupyterlab/apputils';
 import { PageConfig } from '@jupyterlab/coreutils';
 import type { ServiceManager } from '@jupyterlab/services';
 import { ServerConnection } from '@jupyterlab/services';
@@ -28,6 +29,33 @@ function createEntry(name: string): IEntry {
     status: 'ok',
     pkg_type: 'prebuilt'
   };
+}
+
+/**
+ * Create an installed extension entry whose Python package has another name.
+ */
+function createPythonEntry(): IEntry {
+  return {
+    ...createEntry('jupyter-lsp-jupyterlab-lsp'),
+    install: {
+      packageManager: 'python',
+      packageName: 'jupyterlab-lsp',
+      uninstallInstructions: 'Use pip to uninstall jupyterlab-lsp'
+    }
+  };
+}
+
+/**
+ * Reply to every request as the server does to a successful action, and
+ * return the spy.
+ */
+function mockActionReply(): jest.SpyInstance {
+  return jest.spyOn(ServerConnection, 'makeRequest').mockImplementation(
+    async () =>
+      new Response(JSON.stringify({ status: 'ok', needs_restart: [] }), {
+        status: 201
+      })
+  );
 }
 
 /**
@@ -223,6 +251,45 @@ describe('@jupyterlab/extensionmanager', () => {
           ).toHaveLength(expectedSearches);
         }
       );
+    });
+
+    describe('#install()', () => {
+      afterEach(() => {
+        Dialog.flush();
+        jest.restoreAllMocks();
+      });
+
+      it('should update the Python package that installed the extension', async () => {
+        const request = mockActionReply();
+        const model = createModel({ can_install: true });
+
+        await model.install(createPythonEntry(), { useVersion: '5.4.0' });
+
+        expect(JSON.parse(request.mock.calls[0][1].body)).toEqual({
+          cmd: 'install',
+          extension_name: 'jupyterlab-lsp',
+          extension_version: '5.4.0'
+        });
+      });
+    });
+
+    describe('#uninstall()', () => {
+      afterEach(() => {
+        Dialog.flush();
+        jest.restoreAllMocks();
+      });
+
+      it('should uninstall the Python package that installed the extension', async () => {
+        const request = mockActionReply();
+        const model = createModel({ can_install: true });
+
+        await model.uninstall(createPythonEntry());
+
+        expect(JSON.parse(request.mock.calls[0][1].body)).toEqual({
+          cmd: 'uninstall',
+          extension_name: 'jupyterlab-lsp'
+        });
+      });
     });
 
     describe('#fetchInstalled()', () => {

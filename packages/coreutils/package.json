@@ -48,7 +48,9 @@
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",
-    "@babel/preset-env": "^7.10.2",
+    "@babel/plugin-transform-dynamic-import": "^7.27.1",
+    "@babel/plugin-transform-export-namespace-from": "^7.27.1",
+    "@babel/plugin-transform-modules-commonjs": "^7.28.6",
     "@types/jest": "^29.2.0",
     "@types/minimist": "^1.2.0",
     "@types/url-parse": "^1.4.3",
