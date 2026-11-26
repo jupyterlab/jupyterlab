@@ -354,11 +354,20 @@ export class EditorHandler implements IDisposable {
       }
       this._lastCode = code;
     }
-    await this._debuggerService.updateBreakpoints(
-      code,
-      breakpoints,
-      this._path
-    );
+    this._sending++;
+    try {
+      await this._debuggerService.updateBreakpoints(
+        code,
+        breakpoints,
+        this._path
+      );
+    } finally {
+      this._sending--;
+    }
+    // The gutter kept its markers during the send: show the kernel's lines.
+    if (this._sending === 0 && !this.isDisposed) {
+      this._addBreakpointsToEditor();
+    }
     // Clear last: each reply redraws the gutter from the model, which holds
     // the breakpoints of the new code only once the update is done.
     if (previous !== null && this._canClear(previous)) {
@@ -559,12 +568,12 @@ export class EditorHandler implements IDisposable {
       return model.getBreakpoints(this._path);
     }
     const code = this._src.getSource();
-    // Until an edit is sent, the model has the lines of the previous code,
-    // while the gutter moved the breakpoints with the edit. An empty model
-    // means that all breakpoints were removed.
+    // Until an edit is sent, and while it is sent, the model has the lines of
+    // the previous code, while the gutter moved the breakpoints with the edit.
+    // An empty model means that all breakpoints were removed.
     if (
       this._lastCode !== null &&
-      code !== this._lastCode &&
+      (code !== this._lastCode || this._sending > 0) &&
       model.breakpoints.size > 0
     ) {
       return this._getBreakpointsFromEditor().map(line =>
@@ -594,6 +603,7 @@ export class EditorHandler implements IDisposable {
   private _selectedBreakpoint: IDebugger.IBreakpoint | null;
   private _lastCode: string | null = null;
   private _ranCode: Set<string>;
+  private _sending = 0;
 }
 
 /**

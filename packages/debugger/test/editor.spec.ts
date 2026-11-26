@@ -7,6 +7,8 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { CodeMirrorEditor, ybinding } from '@jupyterlab/codemirror';
 
+import { PromiseDelegate } from '@lumino/coreutils';
+
 import { Debugger } from '../src/debugger';
 
 import { DebuggerService } from '../src/service';
@@ -184,6 +186,30 @@ describe('Debugger.EditorHandler', () => {
     src.updateSource(5, 5, '0');
     jest.advanceTimersByTime(1000);
     src.updateSource(6, 6, '0');
+    await flushRequests();
+    jest.advanceTimersByTime(1000);
+    await flushRequests();
+
+    expect(kernel.get(service.getCodeId('x = 100'))).toEqual([1]);
+  });
+
+  it('should keep the breakpoints when the source changes while the kernel sets them', async () => {
+    const kernel = await startDebuggingInEditor('x = 1');
+    await clickGutter(0);
+    const session = service.session!;
+    const sendRequest = session.sendRequest.bind(session);
+    const setBreakpoints = new PromiseDelegate<void>();
+    session.sendRequest = async (command, args) => {
+      if (command === 'setBreakpoints') {
+        await setBreakpoints.promise;
+      }
+      return sendRequest(command, args);
+    };
+    src.updateSource(5, 5, '0');
+    jest.advanceTimersByTime(1000);
+    await flushRequests();
+    src.updateSource(6, 6, '0');
+    setBreakpoints.resolve();
     await flushRequests();
     jest.advanceTimersByTime(1000);
     await flushRequests();
