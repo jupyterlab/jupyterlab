@@ -318,6 +318,29 @@ describe('NotebookHandler', () => {
     expect(kernel.get(service.getCodeId(CODE))).toEqual([2]);
   });
 
+  it('should restore the breakpoints of a cut cell pasted after Restart Kernel and Debug', async () => {
+    await service.updateBreakpoints('x = 1', [{ line: 1, verified: true }]);
+    const id = firstCell().id;
+    context.model.sharedModel.deleteCell(0);
+    await flushRequests();
+    // The command stops the debugger, which empties the model, and replaces
+    // the handler of the notebook.
+    const session = service.session as unknown as { isStarted: boolean };
+    session.isStarted = false;
+    service.model.clear();
+    handler.dispose();
+    session.isStarted = true;
+    handler = new NotebookHandler({ debuggerService: service, widget: panel });
+    context.model.sharedModel.insertCell(0, {
+      id,
+      cell_type: 'code',
+      source: CODE
+    });
+    await flushRequests();
+
+    expect(kernel.get(service.getCodeId(CODE))).toEqual([2]);
+  });
+
   it('should not restore the breakpoints of a cut cell after all breakpoints are removed', async () => {
     // Remove All Breakpoints does nothing when no breakpoint is listed.
     await service.updateBreakpoints('x = 1', [{ line: 1, verified: true }]);

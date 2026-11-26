@@ -34,10 +34,13 @@ export class NotebookHandler implements IDisposable {
 
     const notebook = this._notebookPanel.content;
     notebook.model!.cells.changed.connect(this._onCellsChanged, this);
+    // Kept per notebook: Restart Kernel and Debug replaces this handler.
+    this._deletedBreakpoints = Private.getDeletedBreakpoints(notebook.model!);
 
     // Undo must not restore breakpoints that Remove All Breakpoints removed,
     // which empties a model with breakpoints: switching to a kernel without
-    // breakpoints restores an empty model too.
+    // breakpoints restores an empty model too, and so does stopping the
+    // debugger, which turns `isStarted` off first.
     const breakpoints = this._debuggerService.model.breakpoints;
     this._hadBreakpoints = breakpoints.breakpoints.size > 0;
     breakpoints.changed.connect(() => {
@@ -45,7 +48,11 @@ export class NotebookHandler implements IDisposable {
     }, this);
     breakpoints.restored.connect(() => {
       const hasBreakpoints = breakpoints.breakpoints.size > 0;
-      if (this._hadBreakpoints && !hasBreakpoints) {
+      if (
+        this._hadBreakpoints &&
+        !hasBreakpoints &&
+        this._debuggerService.isStarted
+      ) {
         this._deletedBreakpoints.clear();
       }
       this._hadBreakpoints = hasBreakpoints;
@@ -100,8 +107,6 @@ export class NotebookHandler implements IDisposable {
       });
     });
     this._cellMap.dispose();
-    // The listeners on the cells keep this handler until the notebook closes.
-    this._deletedBreakpoints.clear();
     Signal.clearData(this);
   }
 
@@ -194,7 +199,7 @@ export class NotebookHandler implements IDisposable {
   }
 
   private _debuggerService: IDebugger;
-  private _deletedBreakpoints = new Map<string, IDebugger.IBreakpoint[]>();
+  private _deletedBreakpoints: Map<string, IDebugger.IBreakpoint[]>;
   private _hadBreakpoints = false;
   private _notebookPanel: NotebookPanel;
   private _cellMap: IObservableMap<EditorHandler>;
@@ -231,6 +236,26 @@ export namespace NotebookHandler {
  * A namespace for module private data.
  */
 namespace Private {
+  const deletedBreakpoints = new WeakMap<
+    INotebookModel,
+    Map<string, IDebugger.IBreakpoint[]>
+  >();
+
+  /**
+   * Get the breakpoints that deleting cells of a notebook removed, by the
+   * name of their code file.
+   */
+  export function getDeletedBreakpoints(
+    model: INotebookModel
+  ): Map<string, IDebugger.IBreakpoint[]> {
+    let breakpoints = deletedBreakpoints.get(model);
+    if (!breakpoints) {
+      breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
+      deletedBreakpoints.set(model, breakpoints);
+    }
+    return breakpoints;
+  }
+
   /**
    * Get the name of a code file without its folder. A kernel restart moves
    * the code files to a new folder and keeps their names.
