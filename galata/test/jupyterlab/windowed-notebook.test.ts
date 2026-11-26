@@ -788,6 +788,19 @@ test('should rendered injected JavaScript snippets of out-of-viewport cells', as
   );
 });
 
+/**
+ * Scroll the notebook back to its first cell with the mouse wheel.
+ */
+async function scrollToTop(page: IJupyterLabPageFixture) {
+  const notebook = (await page.notebook.getNotebookInPanelLocator())!;
+  const bbox = (await notebook.boundingBox())!;
+  await page.mouse.move(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
+  await Promise.all([
+    notebook.locator('.jp-Cell[data-windowed-list-index="0"]').waitFor(),
+    page.mouse.wheel(0, -10000)
+  ]);
+}
+
 test('should navigate to a search hit in a out-of-viewport cell', async ({
   page,
   tmpPath
@@ -799,6 +812,8 @@ test('should navigate to a search hit in a out-of-viewport cell', async ({
 
   await page.getByPlaceholder('Find').fill('IFrame');
   await page.getByText('1/2').waitFor();
+  // Typing a query scrolls to its first match
+  await scrollToTop(page);
   await expect
     .soft(page.locator('.jp-Cell[data-windowed-list-index="11"]'))
     .not.toBeVisible();
@@ -812,6 +827,7 @@ test('should navigate to a search hit in a out-of-viewport cell', async ({
 
   await page.getByPlaceholder('Find').fill('Final');
   await page.getByText('1/1').waitFor();
+  await scrollToTop(page);
   await expect
     .soft(page.locator('.jp-Cell[data-windowed-list-index="18"]'))
     .not.toBeVisible();
