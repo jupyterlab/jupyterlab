@@ -746,6 +746,28 @@ describe('outputarea/widget', () => {
         jest.useRealTimers();
       });
 
+      it('should show isolated stderr in its frame', async () => {
+        // A stderr stream has no metadata, so it cannot be isolated.
+        jest.useFakeTimers();
+        model.clear();
+        const area = new OutputArea({
+          rendermime: incrementalRendermime,
+          model
+        });
+        model.add({
+          output_type: 'display_data',
+          data: { 'application/vnd.jupyter.stderr': 'hello, world' },
+          metadata: { isolated: true }
+        });
+
+        const iframe = await attachIsolated(area);
+        jest.runAllTimers();
+
+        expect(iframe.contentDocument!.body?.textContent).toBe('hello, world');
+        area.dispose();
+        jest.useRealTimers();
+      });
+
       it('should show isolated text attached after more than 1,000 frames', async () => {
         // Collapsed outputs are attached when they are expanded.
         jest.useFakeTimers();
