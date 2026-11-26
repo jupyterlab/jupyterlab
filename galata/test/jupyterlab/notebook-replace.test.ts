@@ -127,13 +127,6 @@ test.describe('Notebook Search and Replace', () => {
         await page.click('button[title="Show Replace"]');
         await page.fill('[placeholder="Replace"]', 'egg');
 
-        // TODO: Next Match press count should be one less
-        // (the -/4 state should not be necessary).
-        await page.locator('text=-/4').waitFor();
-        await page.click('button[title^="Next Match"]', {
-          clickCount: 3
-        });
-
         await page.locator('text=1/4').waitFor();
         await page.click('button:has-text("Replace")');
 
@@ -163,13 +156,6 @@ test.describe('Notebook Search and Replace', () => {
 
         await page.click('button[title="Show Replace"]');
         await page.fill('[placeholder="Replace"]', 'tester');
-
-        // TODO: Next Match press count should be one less
-        // (the -/4 state should not be necessary).
-        await page.locator('text=-/4').waitFor();
-        await page.click('button[title^="Next Match"]', {
-          clickCount: 3
-        });
 
         await page.locator('text=1/4').waitFor();
         await page.click('button:has-text("Replace")');
@@ -201,13 +187,6 @@ test.describe('Notebook Search and Replace', () => {
         await page.click('button[title="Show Replace"]');
         await page.fill('[placeholder="Replace"]', 'testtest');
 
-        // TODO: Next Match press count should be one less
-        // (the -/4 state should not be necessary).
-        await page.locator('text=-/4').waitFor();
-        await page.click('button[title^="Next Match"]', {
-          clickCount: 3
-        });
-
         await page.locator('text=1/4').waitFor();
         await page.click('button:has-text("Replace")');
 
@@ -238,13 +217,6 @@ test.describe('Notebook Search and Replace', () => {
 
         await page.click('button[title="Show Replace"]');
         await page.fill('[placeholder="Replace"]', 'testtesttest');
-
-        // TODO: Next Match press count should be one less
-        // (the -/4 state should not be necessary).
-        await page.locator('text=-/4').waitFor();
-        await page.click('button[title^="Next Match"]', {
-          clickCount: 3
-        });
 
         await page.locator('text=1/4').waitFor();
         await page.click('button:has-text("Replace")');
