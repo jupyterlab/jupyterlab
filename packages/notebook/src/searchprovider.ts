@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 import type { IMapChange } from '@jupyter/ydoc';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import type {
-  CellSearchProvider,
-  ICellModel,
+import type { CellSearchProvider, ICellModel } from '@jupyterlab/cells';
+import {
+  CodeCell,
+  createCellSearchProvider,
   MarkdownCell
 } from '@jupyterlab/cells';
-import { CodeCell, createCellSearchProvider } from '@jupyterlab/cells';
 import type { IHighlightAdjacentMatchOptions } from '@jupyterlab/codemirror';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
@@ -465,25 +465,25 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     let replaceOccurred = false;
 
     const unrenderMarkdownCell = async (
+      cellIndex: number | null,
       highlightNext = false
     ): Promise<void> => {
-      // Unrendered markdown cell
-      const activeCell = this.widget?.content.activeCell;
-      if (
-        activeCell?.model.type === 'markdown' &&
-        (activeCell as MarkdownCell).rendered
-      ) {
-        (activeCell as MarkdownCell).rendered = false;
+      if (cellIndex === null || !this.widget) {
+        return;
+      }
+      const cell = this.widget.content.widgets[cellIndex];
+      if (cell instanceof MarkdownCell && cell.rendered) {
+        cell.rendered = false;
         // A read-only cell stays rendered when its editor is hidden, and
         // highlighting the next match would then skip the current one
-        if (highlightNext && !(activeCell as MarkdownCell).rendered) {
+        if (highlightNext && !cell.rendered) {
           await this.highlightNext(loop);
         }
       }
     };
 
     if (this._currentProviderIndex !== null) {
-      await unrenderMarkdownCell();
+      await unrenderMarkdownCell(this._currentProviderIndex);
 
       const searchEngine = this._searchProviders[this._currentProviderIndex];
       replaceOccurred = await searchEngine.replaceCurrentMatch(
@@ -500,9 +500,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       }
     }
 
-    // TODO: markdown unrendering/highlighting sequence is likely incorrect
     // Force highlighting the first hit in the unrendered cell
-    await unrenderMarkdownCell(true);
+    await unrenderMarkdownCell(this._currentProviderIndex, true);
     return replaceOccurred;
   }
 
