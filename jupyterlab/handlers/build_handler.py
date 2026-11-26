@@ -11,7 +11,7 @@ from jupyter_server.extension.handler import ExtensionHandlerMixin
 from tornado import gen, web
 from tornado.concurrent import run_on_executor
 
-from jupyterlab.commands import AppOptions, _ensure_options, build, build_check, clean
+from jupyterlab.commands import AppOptions, _ensure_options, build, build_check
 
 
 class Builder:
@@ -87,6 +87,7 @@ class Builder:
             msg = "No current build"
             raise ValueError(msg)
         self._canceling = True
+        self._kill_event.set()
         yield self._future
         self._canceling = False
         self.canceled = True
@@ -116,9 +117,8 @@ class Builder:
         except Exception:
             if self._kill_event.is_set():
                 return
-            self.log.warning("Build failed, running a clean and rebuild")
-            clean(app_options=app_options)
-            return build(app_options=app_options)
+            self.log.warning("Build failed, running a clean and rebuild", exc_info=True)
+            return build(app_options=app_options, clean_staging=True)
 
 
 class BuildHandler(ExtensionHandlerMixin, APIHandler):
