@@ -35,12 +35,20 @@ export class NotebookHandler implements IDisposable {
     const notebook = this._notebookPanel.content;
     notebook.model!.cells.changed.connect(this._onCellsChanged, this);
 
-    // Undo must not restore breakpoints that Remove All Breakpoints removed.
+    // Undo must not restore breakpoints that Remove All Breakpoints removed,
+    // which empties a model with breakpoints: switching to a kernel without
+    // breakpoints restores an empty model too.
     const breakpoints = this._debuggerService.model.breakpoints;
+    this._hadBreakpoints = breakpoints.breakpoints.size > 0;
+    breakpoints.changed.connect(() => {
+      this._hadBreakpoints = breakpoints.breakpoints.size > 0;
+    }, this);
     breakpoints.restored.connect(() => {
-      if (breakpoints.breakpoints.size === 0) {
+      const hasBreakpoints = breakpoints.breakpoints.size > 0;
+      if (this._hadBreakpoints && !hasBreakpoints) {
         this._deletedBreakpoints.clear();
       }
+      this._hadBreakpoints = hasBreakpoints;
     }, this);
 
     this._debuggerService.session?.eventMessage.connect((_, event) => {
@@ -184,6 +192,7 @@ export class NotebookHandler implements IDisposable {
 
   private _debuggerService: IDebugger;
   private _deletedBreakpoints = new Map<string, IDebugger.IBreakpoint[]>();
+  private _hadBreakpoints = false;
   private _notebookPanel: NotebookPanel;
   private _cellMap: IObservableMap<EditorHandler>;
   private _pausedOverlay: DebuggerPausedOverlay;
