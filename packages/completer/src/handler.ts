@@ -354,7 +354,12 @@ export class CompletionHandler implements IDisposable {
       return;
     }
 
-    if (model) {
+    if (model && isRemote) {
+      // Accepting after a collaborator's change would replace the wrong text.
+      if (model.original) {
+        model.reset(true);
+      }
+    } else if (model) {
       // If there is a text selection, no completion is allowed.
       const { start, end } = editor.getSelection();
       if (start.column === end.column && start.line === end.line) {

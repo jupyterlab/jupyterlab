@@ -655,6 +655,35 @@ describe('@jupyterlab/completer', () => {
         fetch.mockRestore();
         shouldShow.mockRestore();
       });
+
+      it('should close an open completer on remote collaborator changes', async () => {
+        handler.editor!.model.sharedModel.setSource('getopt.\nx = 1');
+        await new Promise(process.nextTick);
+        anchor.editor.focus();
+        anchor.editor.setCursorPosition({ line: 0, column: 7 });
+        handler.completer.reset();
+        const fetch = jest.spyOn(provider, 'fetch').mockResolvedValue({
+          start: 7,
+          end: 7,
+          items: [{ label: 'getopt' }, { label: 'error' }]
+        });
+        const model = handler.completer.model!;
+        handler.invoke();
+        await new Promise(process.nextTick);
+        expect(model.completionItems()).toHaveLength(2);
+
+        const currentDoc = (handler.editor!.model.sharedModel as YFile).ysource
+          .doc!;
+        const remoteDoc = new Doc();
+        const remoteText = remoteDoc.getText('source');
+        applyUpdate(remoteDoc, encodeStateAsUpdate(currentDoc));
+        remoteText.insert(remoteText.length, ' + 2');
+        applyUpdate(currentDoc, encodeStateAsUpdate(remoteDoc), 'remote');
+        await new Promise(process.nextTick);
+
+        expect(model.original).toBeNull();
+        fetch.mockRestore();
+      });
     });
 
     describe('#onTextChanged() (inline completer)', () => {
