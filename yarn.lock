@@ -16323,9 +16323,11 @@ __metadata:
   linkType: hard
 
 "vega-interpreter@npm:^1.0.4":
-  version: 1.0.5
-  resolution: "vega-interpreter@npm:1.0.5"
-  checksum: ed54bbeddc7942aa442ddf224b620fe68122ef4b93967376a03b6463feddf3da7a837e7b1e0a8d23fbf55898d3ac4a00a034f07acecb05b2d3e09621609dd19e
+  version: 1.2.1
+  resolution: "vega-interpreter@npm:1.2.1"
+  dependencies:
+    vega-util: ^1.17.4
+  checksum: 259762ee5710efa894778cad2ce7cae120a573c50ade0fd460d5240f06048d5786d0859f53e17d19e930737b9497f4cc2de49e8d5382e932d36c18a33edba526
   languageName: node
   linkType: hard
 

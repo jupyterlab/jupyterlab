@@ -84,6 +84,17 @@ export type GalataOptions = {
    */
   mockConfig: boolean | Record<string, unknown>;
   /**
+   * Mock JupyterLab PageConfig in-memory or not.
+   *
+   * Possible values are:
+   * - false (default): PageConfig won't be mocked
+   * - true: PageConfig will be mocked (keeping existing server values)
+   * - Record<string, unknown>: PageConfig values to set over the server values - Mapping (PageConfig key, value); a key set to `undefined` is removed.
+   *
+   * By default PageConfig is not mocked.
+   */
+  mockPageConfig: boolean | Record<string, unknown>;
+  /**
    * Mock JupyterLab state in-memory or not.
    *
    * Possible values are:
@@ -231,6 +242,17 @@ export const test: TestType<
    * By default the config is stored in-memory.
    */
   mockConfig: [true, { option: true }],
+  /**
+   * Mock JupyterLab PageConfig in-memory or not.
+   *
+   * Possible values are:
+   * - false (default): PageConfig won't be mocked
+   * - true: PageConfig will be mocked (keeping existing server values)
+   * - Record<string, unknown>: PageConfig values to set over the server values - Mapping (PageConfig key, value); a key set to `undefined` is removed.
+   *
+   * By default PageConfig is not mocked.
+   */
+  mockPageConfig: [false, { option: true }],
   /**
    * Mock JupyterLab state in-memory or not.
    *
@@ -395,6 +417,7 @@ export const test: TestType<
       baseURL,
       kernels,
       mockConfig,
+      mockPageConfig,
       mockSettings,
       mockState,
       mockUser,
@@ -423,7 +446,8 @@ export const test: TestType<
           tmpPath,
           waitForApplication,
           kernels,
-          resetWorkspace
+          resetWorkspace,
+          mockPageConfig
         )
       );
     } finally {
