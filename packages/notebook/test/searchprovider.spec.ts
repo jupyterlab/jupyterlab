@@ -9,7 +9,7 @@ import type { CodeEditor } from '@jupyterlab/codeeditor';
 import { framePromise, signalToPromise } from '@jupyterlab/testing';
 import * as utils from './utils';
 import type { IReplaceOptions } from '@jupyterlab/documentsearch';
-import type { CodeCellModel } from '@jupyterlab/cells';
+import type { CodeCellModel, MarkdownCell } from '@jupyterlab/cells';
 
 /**
  * To avoid relying on ydoc passing the selections via server
@@ -614,6 +614,26 @@ describe('@jupyterlab/notebook', () => {
 
         await provider.replaceCurrentMatch('bar');
         expect(provider.currentMatchIndex).toBe(0);
+      });
+
+      it('should not unrender an active markdown cell when replacing a match in another cell', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'markdown', source: 'active markdown cell' },
+          { cell_type: 'code', source: 'target match' }
+        ]);
+        const mdCell = panel.content.widgets[0] as MarkdownCell;
+        mdCell.rendered = true;
+        panel.content.activeCellIndex = 0;
+        await provider.cellChangeHandled;
+
+        await provider.startQuery(/target/, undefined);
+        expect(provider.currentMatchIndex).toBe(0);
+        expect(mdCell.rendered).toBe(true);
+
+        const replaced = await provider.replaceCurrentMatch('replaced');
+        expect(replaced).toBe(true);
+        expect(mdCell.rendered).toBe(true);
       });
     });
 
