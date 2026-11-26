@@ -599,17 +599,17 @@ describe('@jupyterlab/completer', () => {
         await new Promise(process.nextTick);
 
         expect(provider.triggers.length).toEqual(0);
-        expect((handler.editor as CodeMirrorEditor)!.lastChangeIsRemote).toBe(
-          true
-        );
       });
 
       it('should trigger on local text change after remote change', async () => {
-        // this test depends on the previous one ('should not trigger auto-completion on remote collaborator changes')
-        // to have left editor.lastChangeIsRemote as true.
-        expect((handler.editor as CodeMirrorEditor)!.lastChangeIsRemote).toBe(
-          true
-        );
+        const currentDoc = (handler.editor!.model.sharedModel as YFile).ysource
+          .doc!;
+        const remoteDoc = new Doc();
+        const remoteText = remoteDoc.getText('source');
+        applyUpdate(remoteDoc, encodeStateAsUpdate(currentDoc));
+        remoteText.insert(remoteText.length, 'x');
+        applyUpdate(currentDoc, encodeStateAsUpdate(remoteDoc), 'remote');
+        await new Promise(process.nextTick);
         provider.triggers.length = 0;
         const srcLength = handler.editor!.model.sharedModel.getSource().length;
         handler.editor!.model.sharedModel.updateSource(
@@ -622,9 +622,6 @@ describe('@jupyterlab/completer', () => {
         expect(provider.triggers.length).toEqual(1);
         expect(provider.triggers).toEqual(
           expect.arrayContaining([CompletionTriggerKind.TriggerCharacter])
-        );
-        expect((handler.editor as CodeMirrorEditor)!.lastChangeIsRemote).toBe(
-          false
         );
       });
 

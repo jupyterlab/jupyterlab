@@ -9,8 +9,7 @@ import {
   Compartment,
   EditorSelection,
   EditorState,
-  Prec,
-  Transaction
+  Prec
 } from '@codemirror/state';
 import type { Command, ViewUpdate } from '@codemirror/view';
 import { EditorView } from '@codemirror/view';
@@ -139,19 +138,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   get editor(): EditorView {
     return this._editor;
-  }
-
-  /**
-   * Whether the last document change was applied from a remote collaborator.
-   *
-   * #### Notes
-   * The editor sets this value when it applies a change. For local typing,
-   * and for a collaborator's change in a file editor, that is after
-   * `model.sharedModel.changed` fires, so a handler of that signal must
-   * `await` before it reads this value.
-   */
-  get lastChangeIsRemote(): boolean {
-    return this._lastChangeIsRemote;
   }
 
   /**
@@ -757,11 +743,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Handles document changes.
    */
   private _onDocChanged(update: ViewUpdate) {
-    if (update.docChanged) {
-      this._lastChangeIsRemote = update.transactions.some(tr =>
-        Boolean(tr.annotation(Transaction.remote))
-      );
-    }
     if (update.transactions.length && update.transactions[0].selection) {
       this._onCursorActivity();
     }
@@ -814,7 +795,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _isDisposed = false;
   private _language = new Compartment();
   private _languages: IEditorLanguageRegistry;
-  private _lastChangeIsRemote = false;
   private _model: CodeEditor.IModel;
   private _uuid = '';
 }
