@@ -646,9 +646,49 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     loop = false,
     options?: Private.IStepOptions
   ): Promise<ISearchMatch | null> {
+    // Whether the cell was rendered and attached when it was searched, so
+    // that its editor could scroll to the match
+    let cellWasShown = true;
+
+    // Scroll to the match of a new query without activating its cell. The
+    // search does not wait for it, because a cell may render only when the
+    // browser is idle.
+    const scrollToMatchInCell = async (match: ISearchMatch) => {
+      const index = this._currentProviderIndex!;
+      const queryKey = this._queryKey;
+      const cell = this.widget.content.widgets[index];
+      const isCurrent = () =>
+        this._queryKey === queryKey &&
+        this._currentProviderIndex === index &&
+        this.getCurrentMatch()?.position === match.position;
+      await cell.ready;
+      if (!isCurrent()) {
+        return;
+      }
+      try {
+        await this.widget.content.scrollToItem(index);
+      } catch {
+        // A newer scroll request replaced this one
+      }
+      const editor = cell.editor;
+      // A hidden editor, as in a rendered Markdown cell, would scroll when it
+      // is shown again
+      if (
+        isCurrent() &&
+        !('node' in match) &&
+        editor &&
+        editor.host.checkVisibility?.() !== false
+      ) {
+        editor.revealPosition(editor.getPositionAt(match.position)!);
+      }
+    };
+
     const activateNewMatch = async (match: ISearchMatch) => {
       const shouldScroll = options?.scroll ?? true;
       if (!shouldScroll) {
+        if (options?.scrollInCell && !cellWasShown) {
+          void scrollToMatchInCell(match);
+        }
         // do not activate the match if scrolling was disabled
         return;
       }
@@ -710,6 +750,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         // Treat it as a cell without matches, so the loop below still ends
         return undefined;
       }
+      // A placeholder cell has no editor yet, and the full windowing mode
+      // does not attach a cell out of the view
+      const cell = this.widget.content.widgets[index];
+      cellWasShown = !cell.isPlaceholder() && cell.isAttached;
       const cellOptions = options?.scrollInCell
         ? { ...options, scroll: true }
         : options;
