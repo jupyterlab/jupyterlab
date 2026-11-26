@@ -1066,18 +1066,24 @@ describe('@jupyterlab/rendermime', () => {
       expect(anchors[0].querySelector('span')).not.toBeNull();
     });
 
-    // Selection preservation across streamed re-renders. `replaceChangedNodes`
-    // records the selection as character offsets before mutating the DOM and
-    // restores it afterwards. jsdom's `Selection.containsNode` always returns
-    // `false`, which would short-circuit that path, so it is stubbed to `true`
-    // (matching a real browser where the selection is inside the output host).
+    // Selection preservation across streamed re-renders.
+    // `withSelectionPreserved` records the selection as character offsets
+    // before mutating the DOM and restores it afterwards. `intersectsNode` of
+    // the selection ranges is stubbed to `true`, so that every DOM change of
+    // the output saves and restores the selection, also a change that does
+    // not touch the selected nodes. The test environment replaces the global
+    // `Range` (see `jest-shim.ts`), so the prototype comes from a jsdom range.
+    const rangePrototype: Range = Object.getPrototypeOf(
+      Document.prototype.createRange.call(document)
+    );
+
     it('preserves a selection starting at the first character of a linkified URL', async () => {
       // Regression test: the selection-offset code must treat a character
       // offset of 0 as a real position. Selecting from the very start of a
       // linkified URL exercises both the save path (a nested offset of 0,
       // previously discarded by a truthiness check) and the restore path
       // (locating offset 0, previously missed by a strict `>` comparison).
-      jest.spyOn(Selection.prototype, 'containsNode').mockReturnValue(true);
+      jest.spyOn(rangePrototype, 'intersectsNode').mockReturnValue(true);
       const sanitizer = new Sanitizer();
 
       void renderText({ host, sanitizer, source: 'www.example.com and more' });
@@ -1104,7 +1110,7 @@ describe('@jupyterlab/rendermime', () => {
     it('preserves a mid-content selection across a streamed append', async () => {
       // Baseline: an offset strictly inside a node (away from any boundary) is
       // preserved. Complements the offset-0 case above.
-      jest.spyOn(Selection.prototype, 'containsNode').mockReturnValue(true);
+      jest.spyOn(rangePrototype, 'intersectsNode').mockReturnValue(true);
       const sanitizer = new Sanitizer();
 
       void renderText({ host, sanitizer, source: 'www.example.com and more' });
@@ -1133,7 +1139,7 @@ describe('@jupyterlab/rendermime', () => {
       // measure the anchor by its full text length, not just its first child;
       // otherwise an offset inside a *later* child (here "com") is treated as
       // outside the anchor and the selection is restored to the wrong place.
-      jest.spyOn(Selection.prototype, 'containsNode').mockReturnValue(true);
+      jest.spyOn(rangePrototype, 'intersectsNode').mockReturnValue(true);
       const sanitizer = new Sanitizer();
 
       // Only "com" is background-colored, so the anchor's first child is the
@@ -1165,7 +1171,7 @@ describe('@jupyterlab/rendermime', () => {
       // Companion to the above: under-counting the multi-child anchor's length
       // shifts every character offset after it, so a selection in the text
       // following the anchor is mis-restored too.
-      jest.spyOn(Selection.prototype, 'containsNode').mockReturnValue(true);
+      jest.spyOn(rangePrototype, 'intersectsNode').mockReturnValue(true);
       const sanitizer = new Sanitizer();
 
       const source = 'pre www.example.\x1b[48;2;113;0;119mcom\x1b[0m post\n';
@@ -1187,6 +1193,60 @@ describe('@jupyterlab/rendermime', () => {
       jest.runAllTimers();
 
       expect(window.getSelection()!.toString()).toBe('post');
+    });
+
+    it('preserves a selection when a stream chunk ends mid-line', async () => {
+      // The next chunk restores the selection twice in one frame.
+      const sanitizer = new Sanitizer();
+
+      void renderText({ host, sanitizer, source: 'word0 word1 word2 ' });
+      jest.runAllTimers();
+
+      const text = host.querySelector('pre')!.firstChild as Text;
+      window.getSelection()!.setBaseAndExtent(text, 6, text, 11);
+      void renderText({ host, sanitizer, source: 'word0 word1 word2 word3 ' });
+      jest.runAllTimers();
+
+      expect(window.getSelection()!.toString()).toBe('word1');
+    });
+
+    it('preserves a selection made between two frames that share a timestamp', async () => {
+      // Firefox with `privacy.resistFingerprinting` rounds frame timestamps to
+      // 16.67 ms, so two consecutive frames can share one.
+      const pending = new Map<number, FrameRequestCallback>();
+      let rafId = 0;
+      jest
+        .spyOn(window, 'requestAnimationFrame')
+        .mockImplementation((callback: FrameRequestCallback) => {
+          rafId += 1;
+          pending.set(rafId, callback);
+          return rafId;
+        });
+      jest
+        .spyOn(window, 'cancelAnimationFrame')
+        .mockImplementation((handle: number) => {
+          pending.delete(handle);
+        });
+      const runFrame = () => {
+        const callbacks = [...pending.values()];
+        pending.clear();
+        for (const callback of callbacks) {
+          callback(1000);
+        }
+      };
+      window.getSelection()!.removeAllRanges();
+      const sanitizer = new Sanitizer();
+
+      void renderText({ host, sanitizer, source: 'word0 word1 word2 ' });
+      runFrame();
+      jest.advanceTimersByTime(16);
+
+      const text = host.querySelector('pre')!.firstChild as Text;
+      window.getSelection()!.setBaseAndExtent(text, 6, text, 11);
+      void renderText({ host, sanitizer, source: 'word0 word1 word2 word3 ' });
+      runFrame();
+
+      expect(window.getSelection()!.toString()).toBe('word1');
     });
   });
 });
