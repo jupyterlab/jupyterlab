@@ -2576,12 +2576,15 @@ export class Notebook extends StaticNotebook {
           // Cells may not be rendered yet; match headings from their source.
           (await this._findHeading(parsedFragment.value));
         break;
-      default:
+      default: {
         console.warn(
           `Unknown target type for URI fragment ${fragment}, interpreting as a heading`
         );
-        result = await this._findLegacy(Private.elementId(parsedFragment));
+        // The id of a heading such as `k = 2` contains `=`.
+        const id = Private.elementId(parsedFragment);
+        result = (await this._findLegacy(id)) ?? (await this._findHeading(id));
         break;
+      }
     }
     return result;
   }

@@ -1522,6 +1522,25 @@ describe('@jupyter/notebook', () => {
         widget.dispose();
       });
 
+      it('should scroll to a heading with an equals sign of a notebook that was just loaded', async () => {
+        const warn = jest.spyOn(console, 'warn').mockImplementation();
+        const { widget } = createNotebook('defer');
+        jest.spyOn(widget, 'scrollToItem').mockResolvedValue();
+        widget.model!.sharedModel.insertCell(widget.widgets.length, {
+          cell_type: 'markdown',
+          source: '## Case k = 2'
+        });
+        const cell = widget.widgets[widget.widgets.length - 1];
+
+        await widget.setFragment('#Case-k-=-2');
+
+        const heading = cell.node.querySelector('h2');
+        expect(heading).not.toBeNull();
+        expect(scrolledOnlyTo(heading)).toBe(true);
+        warn.mockRestore();
+        widget.dispose();
+      });
+
       it('should wait for the cells above the target', async () => {
         const { widget, target, link } = createNotebook('none');
         const scrollToItem = jest
