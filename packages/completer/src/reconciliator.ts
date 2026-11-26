@@ -42,9 +42,19 @@ export class ProviderReconciliator implements IProviderReconciliator {
    * @return  List of applicable providers
    */
   protected async applicableProviders(): Promise<Array<ICompletionProvider>> {
-    const isApplicablePromises = this._providers.map(p =>
-      p.isApplicable(this._context)
-    );
+    // A provider whose check fails is left out, so that it does not stop
+    // the other providers from completing.
+    const isApplicablePromises = this._providers.map(async p => {
+      try {
+        return await p.isApplicable(this._context);
+      } catch (error) {
+        console.error(
+          `Completion provider ${p.identifier} failed to check if it is applicable:`,
+          error
+        );
+        return false;
+      }
+    });
     const applicableProviders = await Promise.all(isApplicablePromises);
     return this._providers.filter((_, idx) => applicableProviders[idx]);
   }
