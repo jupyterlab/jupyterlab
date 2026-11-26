@@ -1266,8 +1266,6 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     treeResolver: JupyterFrontEnd.ITreeResolver,
     connectionLost: IConnectionLost | null
   ) => {
-    document.createElement('div').innerHTML =
-      '<b>trusted-types-annotation-test</b>';
     const trans = translator.load('jupyterlab');
 
     if (!(app instanceof JupyterLab)) {
