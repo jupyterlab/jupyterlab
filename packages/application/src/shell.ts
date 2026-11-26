@@ -1186,8 +1186,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     if (this.isDisposed) {
       return;
     }
-    this._layoutDebouncer.dispose();
+    // Disposing the main area widgets can invoke the layout debouncer.
     super.dispose();
+    this._layoutDebouncer.dispose();
   }
 
   /**

@@ -7,6 +7,7 @@ import { framePromise } from '@jupyterlab/testing';
 import { SidePanel } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import type { Message } from '@lumino/messaging';
+import { Signal } from '@lumino/signaling';
 import type { DockPanel } from '@lumino/widgets';
 import { AccordionPanel, SplitPanel, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
@@ -557,6 +558,25 @@ describe('LabShell', () => {
       shell.closeAll();
       expect(foo.parent).toBe(null);
       expect(bar.parent).toBe(null);
+    });
+  });
+
+  describe('#dispose()', () => {
+    it('should dispose of the current widget without errors', () => {
+      const errors: unknown[] = [];
+      const handler = Signal.setExceptionHandler(error => {
+        errors.push(error);
+      });
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'main');
+      simulate(widget.node, 'focus');
+      try {
+        shell.dispose();
+      } finally {
+        Signal.setExceptionHandler(handler);
+      }
+      expect(errors).toEqual([]);
     });
   });
 
