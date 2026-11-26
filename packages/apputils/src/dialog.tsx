@@ -318,7 +318,9 @@ export class Dialog<T> extends Widget {
     document.removeEventListener('focus', this, true);
     document.removeEventListener('mousedown', this, true);
     document.removeEventListener('input', this, true);
-    this._original.focus();
+    // Without scrolling: the element can be out of view by now, such as a
+    // notebook's active cell after the notebook was scrolled.
+    this._original.focus({ preventScroll: true });
   }
 
   /**

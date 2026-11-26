@@ -2659,6 +2659,8 @@ namespace Private {
       KernelMessage.IExecuteReplyMsg
     >;
     isDone: () => boolean;
+    /** When the execution stopped without a reply, as on a kernel restart. */
+    failedAt: () => string | undefined;
     /**
      * Kernel messages (IOPub, stdin and reply) that arrived while the future
      * was detached, in arrival order, so they can be replayed on reattach.
@@ -2672,6 +2674,79 @@ namespace Private {
      * since. Re-applying this snapshot after the undo prevents that loss.
      */
     outputs?: nbformat.IOutput[];
+    /** Execution timing metadata to restore after an undo, like `outputs`. */
+    timing?: JSONObject;
+    /** Whether the execution was still running when it was captured. */
+    wasRunning: boolean;
+  }
+
+  /**
+   * Restore the timing of a detached execution on the cell that holds it now,
+   * and record its IOPub timing there from now on, because the original
+   * execute() call records it on the model of the previous cell widget.
+   */
+  function restoreTiming(
+    cell: CodeCell,
+    storedExecution: IStoredCellExecution
+  ): void {
+    const { future, isDone, buffered, timing } = storedExecution;
+    // An undo or redo of a move can restore the timing of an earlier execution.
+    if (timing) {
+      cell.model.setMetadata('execution', timing);
+    } else {
+      cell.model.deleteMetadata('execution');
+    }
+    for (const buf of buffered) {
+      if (buf.channel === 'iopub') {
+        addIOPubTiming(cell, buf.msg);
+      }
+    }
+    if (isDone() || future.isDisposed) {
+      return;
+    }
+    const hook = (msg: KernelMessage.IIOPubMessage) => {
+      if (!cell.isDisposed) {
+        addIOPubTiming(cell, msg);
+      }
+      return true;
+    };
+    future.registerMessageHook(hook);
+    cell.disposed.connect(() => future.removeMessageHook(hook));
+  }
+
+  /**
+   * Record the time of a status or execute input message like
+   * `CodeCell.execute` does.
+   */
+  function addIOPubTiming(
+    cell: CodeCell,
+    msg: KernelMessage.IIOPubMessage
+  ): void {
+    let label: string;
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+    switch (msg.header.msg_type) {
+      case 'status':
+        label = `status.${
+          (msg as KernelMessage.IStatusMsg).content.execution_state
+        }`;
+        break;
+      case 'execute_input':
+        label = 'execute_input';
+        break;
+      default:
+        return;
+    }
+    // The date was added in version 5.1 of the messaging protocol.
+    addTiming(cell, {
+      [`iopub.${label}`]: msg.header.date || new Date().toISOString()
+    });
+  }
+
+  function addTiming(cell: CodeCell, timing: JSONObject): void {
+    cell.model.setMetadata('execution', {
+      ...(cell.model.getMetadata('execution') as JSONObject | undefined),
+      ...timing
+    });
   }
 
   /**
@@ -2692,9 +2767,16 @@ namespace Private {
       return null;
     }
     let done = false;
-    void future.done.finally(() => {
-      done = true;
-    });
+    let failedAt: string | undefined;
+    void future.done.then(
+      () => {
+        done = true;
+      },
+      () => {
+        done = true;
+        failedAt = new Date().toISOString();
+      }
+    );
     const buffered: IBufferedMessage[] = [];
     future.onIOPub = msg => {
       buffered.push({ channel: 'iopub', msg });
@@ -2705,7 +2787,15 @@ namespace Private {
     future.onReply = msg => {
       buffered.push({ channel: 'reply', msg });
     };
-    return { cellId: cell.model.id, future, isDone: () => done, buffered };
+    return {
+      cellId: cell.model.id,
+      future,
+      isDone: () => done,
+      failedAt: () => failedAt,
+      buffered,
+      timing: cell.model.getMetadata('execution'),
+      wasRunning: cell.model.executionState === 'running'
+    };
   }
 
   /**
@@ -2715,8 +2805,9 @@ namespace Private {
    */
   export function restoreExecution(
     notebook: Notebook,
-    { cellId, future, isDone, buffered, outputs }: IStoredCellExecution
+    storedExecution: IStoredCellExecution
   ): void {
+    const { cellId, future, isDone, buffered, outputs } = storedExecution;
     const cell = notebook.widgets.find(w => w.model.id === cellId);
     if (!(cell instanceof CodeCell)) {
       return;
@@ -2729,11 +2820,16 @@ namespace Private {
       // not tracked by the undo manager, so this does not pollute history).
       cell.model.outputs.fromJSON(outputs);
     }
+    // Like `CodeCell.execute`, use the `recordTiming` value sent with the request.
+    const recordTiming = !!future.msg.metadata.recordTiming;
     // Reattach the future (without clearing existing outputs) and replay any
     // messages buffered while it was detached, in arrival order. This is done
     // whether or not the execution has already finished, so that final outputs
     // (or a pending stdin request) that arrived while detached are not lost
     // (e.g. if the kernel completed in the brief window during the undo).
+    if (recordTiming) {
+      restoreTiming(cell, storedExecution);
+    }
     cell.outputArea.reattachFuture(future);
     for (const buf of buffered) {
       switch (buf.channel) {
@@ -2758,6 +2854,8 @@ namespace Private {
       // Restore the running state on the recreated cell widget.
       cell.model.executionState = 'running';
     }
+    // The restored timing of an execution that had ended is final.
+    const recordEndTiming = recordTiming && storedExecution.wasRunning;
     const cellRef = cell;
     void future.done.then(
       reply => {
@@ -2767,11 +2865,38 @@ namespace Private {
           // non-null execution count also flips the state back to 'idle'.
           cellRef.model.executionCount = reply.content.execution_count;
           cellRef.model.executionState = 'idle';
+          if (recordEndTiming) {
+            const started = reply.metadata.started as string | undefined;
+            addTiming(cellRef, {
+              ...(started ? { 'shell.execute_reply.started': started } : {}),
+              'shell.execute_reply':
+                reply.header.date || new Date().toISOString()
+            });
+          }
         }
       },
       () => {
-        if (!cellRef.isDisposed) {
+        // Like `CodeCell.execute`, skip a cell that runs a newer request.
+        if (
+          !cellRef.isDisposed &&
+          (!cellRef.outputArea.future || cellRef.outputArea.future === future)
+        ) {
           cellRef.model.executionState = 'idle';
+          const recorded = cellRef.model.getMetadata('execution') as
+            | JSONObject
+            | undefined;
+          // A failure recorded before this restore keeps its time.
+          if (
+            recordEndTiming &&
+            future.isDisposed &&
+            !recorded?.['execution_failed']
+          ) {
+            // Record the time when the cell execution was aborted
+            const timing: JSONObject = {};
+            timing['execution_failed'] =
+              storedExecution.failedAt() ?? new Date().toISOString();
+            addTiming(cellRef, timing);
+          }
         }
       }
     );
