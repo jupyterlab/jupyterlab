@@ -1683,15 +1683,14 @@ export namespace NotebookActions {
             }
           });
 
+          index = toDelete[0] ?? notebook.activeCellIndex;
+
           // If cells are not deletable, we may not have anything to delete.
           if (toDelete.length > 0) {
-            index = toDelete[0];
             // Delete the cells as one undo event.
             toDelete.reverse().forEach(i => {
               model.sharedModel.deleteCell(i);
             });
-          } else {
-            index = notebook.activeCellIndex;
           }
           break;
         }
