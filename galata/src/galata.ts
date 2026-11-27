@@ -18,7 +18,10 @@ import type {
   APIRequestContext,
   APIResponse,
   Browser,
-  Page
+  BrowserContext,
+  Page,
+  Request,
+  Route
 } from '@playwright/test';
 import * as json5 from 'json5';
 import { ContentsHelper } from './contents';
@@ -651,6 +654,138 @@ export namespace galata {
    */
   export namespace Mock {
     /**
+     * Custom error thrown when a response is disposed.
+     */
+    class ResponseDisposedError extends Error {
+      constructor(error: string) {
+        super(error);
+        this.name = 'ResponseDisposedError';
+      }
+    }
+
+    /**
+     * Parse response JSON with response disposal error detection.
+     *
+     * @param response The API response to parse
+     * @returns Parsed JSON data
+     * @throws ResponseDisposedError if response was disposed
+     * @throws Error if parsing fails for other reasons
+     */
+    async function handleJsonResponse(
+      response: Awaited<ReturnType<APIRequestContext['fetch']>>
+    ): Promise<any> {
+      try {
+        return await response.json();
+      } catch (error) {
+        // Check if this is a disposal error
+        const isDisposalError =
+          error instanceof Error &&
+          error.message.toLowerCase().includes('disposed');
+        if (isDisposalError) {
+          throw new ResponseDisposedError(error.message);
+        }
+        // Re-throw other errors
+        throw error;
+      }
+    }
+
+    /**
+     * Proxy a route request and parse its JSON body, aborting cleanly if the
+     * page or context closes while the request or response is in flight.
+     *
+     * @param route Playwright route to fulfill or abort
+     * @param request Playwright request to proxy
+     * @param ctxt Browser context
+     * @param page Playwright page
+     * @param isClosed Callback returning whether the context or browser closed
+     * @returns Parsed JSON data and response, or undefined if already handled
+     */
+    async function fetchJsonForRoute(
+      route: Route,
+      request: Request,
+      ctxt: BrowserContext,
+      page: Page,
+      isClosed: () => boolean
+    ): Promise<
+      | {
+          data: any;
+          response: Awaited<ReturnType<APIRequestContext['fetch']>>;
+        }
+      | undefined
+    > {
+      if (page.isClosed() || isClosed()) {
+        console.warn(
+          `Route handler: aborting ${request.url()} because page/context is closed`
+        );
+        await route.abort();
+        return undefined;
+      }
+
+      let response: Awaited<ReturnType<APIRequestContext['fetch']>>;
+      try {
+        response = await ctxt.request.fetch(request);
+      } catch (error) {
+        if (page.isClosed() || isClosed()) {
+          console.warn(
+            `Route handler: aborting ${request.url()} during teardown`
+          );
+          await route.abort();
+          return undefined;
+        }
+        throw error;
+      }
+
+      if (page.isClosed() || isClosed()) {
+        console.warn(
+          `Route handler: aborting ${request.url()} because page/context is closed`
+        );
+        await route.abort();
+        return undefined;
+      }
+
+      if (!response.ok()) {
+        let body = '';
+        try {
+          body = await response.text();
+        } catch (error) {
+          if (page.isClosed() || isClosed()) {
+            console.warn(
+              `Route handler: aborting ${request.url()} during teardown`
+            );
+            await route.abort();
+            return undefined;
+          }
+          throw error;
+        }
+        if (!page.isClosed() && !isClosed()) {
+          await route.fulfill({
+            status: response.status(),
+            body
+          });
+        } else {
+          await route.abort();
+        }
+        return undefined;
+      }
+
+      try {
+        const data = await handleJsonResponse(response);
+        return { data, response };
+      } catch (error) {
+        if (
+          (error instanceof ResponseDisposedError ||
+            error instanceof SyntaxError) &&
+          (page.isClosed() || isClosed())
+        ) {
+          console.warn(`Route handler: ${error.message} during teardown`);
+          await route.abort();
+          return undefined;
+        }
+        throw error;
+      }
+    }
+
+    /**
      * Set last modified attributes one day ago one listing
      * directory content.
      *
@@ -677,23 +812,17 @@ export namespace galata {
         switch (request.method()) {
           case 'GET': {
             // Proxy the GET request
-            if (page.isClosed() || isClosed) {
-              console.warn(
-                `Route handler: aborting ${request.url()} because page/context is closed`
-              );
-              return route.abort();
-            }
-            const response = await ctxt.request.fetch(request);
-            if (!response.ok()) {
-              if (!page.isClosed() && !isClosed) {
-                return route.fulfill({
-                  status: response.status(),
-                  body: await response.text()
-                });
-              }
+            const result = await fetchJsonForRoute(
+              route,
+              request,
+              ctxt,
+              page,
+              () => isClosed
+            );
+            if (!result) {
               break;
             }
-            const data = await response.json();
+            const { data } = result;
             // Modify the last_modified values to be set one day before now.
             if (
               data['type'] === 'directory' &&
@@ -748,23 +877,17 @@ export namespace galata {
         switch (request.method()) {
           case 'GET': {
             // Proxy the GET request
-            if (page.isClosed() || isClosed) {
-              console.warn(
-                `Route handler: aborting ${request.url()} because page/context is closed`
-              );
-              return route.abort();
-            }
-            const response = await ctxt.request.fetch(request);
-            if (!response.ok()) {
-              if (!page.isClosed() && !isClosed) {
-                return route.fulfill({
-                  status: response.status(),
-                  body: await response.text()
-                });
-              }
+            const result = await fetchJsonForRoute(
+              route,
+              request,
+              ctxt,
+              page,
+              () => isClosed
+            );
+            if (!result) {
               break;
             }
-            const data = await response.json();
+            const { data } = result;
             if (data['type'] === 'notebook') {
               data['writable'] = false;
             }
@@ -966,42 +1089,6 @@ export namespace galata {
     };
 
     /**
-     * Custom error thrown when a response is disposed.
-     */
-    class ResponseDisposedError extends Error {
-      constructor(error: string) {
-        super(error);
-        this.name = 'ResponseDisposedError';
-      }
-    }
-
-    /**
-     * Parse response JSON with response disposal error detection.
-     *
-     * @param response The API response to parse
-     * @returns Parsed JSON data
-     * @throws ResponseDisposedError if response was disposed
-     * @throws Error if parsing fails for other reasons
-     */
-    async function handleJsonResponse(
-      response: Awaited<ReturnType<APIRequestContext['fetch']>>
-    ): Promise<any> {
-      try {
-        return await response.json();
-      } catch (error) {
-        // Check if this is a disposal error
-        const isDisposalError =
-          error instanceof Error &&
-          error.message.toLowerCase().includes('disposed');
-        if (isDisposalError) {
-          throw new ResponseDisposedError(error.message);
-        }
-        // Re-throw other errors
-        throw error;
-      }
-    }
-
-    /**
      * Mock the runners API to display only those created during a test
      *
      * @param page Page model object
@@ -1045,45 +1132,26 @@ export namespace galata {
             if (id) {
               if (runners.has(id)) {
                 // Proxy the GET request
-                if (page.isClosed() || isClosed) {
-                  console.warn(
-                    `Route handler: aborting ${request.url()} because page/context is closed`
-                  );
-                  return route.abort();
-                }
-                const response = await ctxt.request.fetch(request);
-                if (!response.ok()) {
-                  if (!page.isClosed() && !isClosed) {
-                    return route.fulfill({
-                      status: response.status(),
-                      body: await response.text()
-                    });
-                  }
+                const result = await fetchJsonForRoute(
+                  route,
+                  request,
+                  ctxt,
+                  page,
+                  () => isClosed
+                );
+                if (!result) {
                   break;
                 }
-                try {
-                  const data = await handleJsonResponse(response);
-                  // Update stored runners
-                  runners.set(type === 'terminals' ? data.name : data.id, data);
+                const { data } = result;
+                // Update stored runners
+                runners.set(type === 'terminals' ? data.name : data.id, data);
 
-                  if (!page.isClosed() && !isClosed) {
-                    return route.fulfill({
-                      status: 200,
-                      body: JSON.stringify(data),
-                      contentType: 'application/json'
-                    });
-                  }
-                } catch (error) {
-                  if (
-                    error instanceof ResponseDisposedError &&
-                    (page.isClosed() || isClosed)
-                  ) {
-                    console.warn(
-                      `Route handler: ${error.message} during teardown`
-                    );
-                    return route.abort();
-                  }
-                  throw error;
+                if (!page.isClosed() && !isClosed) {
+                  return route.fulfill({
+                    status: 200,
+                    body: JSON.stringify(data),
+                    contentType: 'application/json'
+                  });
                 }
                 break;
               } else {
@@ -1096,37 +1164,17 @@ export namespace galata {
               }
             } else {
               // Proxy the GET request
-              if (page.isClosed() || isClosed) {
-                console.warn(
-                  `Route handler: aborting ${request.url()} because page/context is closed`
-                );
-                return route.abort();
-              }
-              const response = await ctxt.request.fetch(request);
-              if (!response.ok()) {
-                if (!page.isClosed() && !isClosed) {
-                  return route.fulfill({
-                    status: response.status(),
-                    body: await response.text()
-                  });
-                }
+              const result = await fetchJsonForRoute(
+                route,
+                request,
+                ctxt,
+                page,
+                () => isClosed
+              );
+              if (!result) {
                 break;
               }
-              let data: any[];
-              try {
-                data = (await handleJsonResponse(response)) as any[];
-              } catch (error) {
-                if (
-                  error instanceof ResponseDisposedError &&
-                  (page.isClosed() || isClosed)
-                ) {
-                  console.warn(
-                    `Route handler: ${error.message} during teardown`
-                  );
-                  return route.abort();
-                }
-                throw error;
-              }
+              const data = result.data as any[];
               const updated = new Set<string>();
               data.forEach(item => {
                 const itemID: string =
@@ -1157,35 +1205,17 @@ export namespace galata {
           }
           case 'PATCH': {
             // Proxy the PATCH request
-            if (page.isClosed() || isClosed) {
-              console.warn(
-                `Route handler: aborting ${request.url()} because page/context is closed`
-              );
-              return route.abort();
-            }
-            const response = await ctxt.request.fetch(request);
-            if (!response.ok()) {
-              if (!page.isClosed() && !isClosed) {
-                return route.fulfill({
-                  status: response.status(),
-                  body: await response.text()
-                });
-              }
+            const result = await fetchJsonForRoute(
+              route,
+              request,
+              ctxt,
+              page,
+              () => isClosed
+            );
+            if (!result) {
               break;
             }
-            let data: any;
-            try {
-              data = await handleJsonResponse(response);
-            } catch (error) {
-              if (
-                error instanceof ResponseDisposedError &&
-                (page.isClosed() || isClosed)
-              ) {
-                console.warn(`Route handler: ${error.message} during teardown`);
-                return route.abort();
-              }
-              throw error;
-            }
+            const { data } = result;
             // Update stored runners
             runners.set(type === 'terminals' ? data.name : data.id, data);
             // Update kernels
@@ -1204,35 +1234,17 @@ export namespace galata {
           }
           case 'POST': {
             // Proxy the POST request
-            if (page.isClosed() || isClosed) {
-              console.warn(
-                `Route handler: aborting ${request.url()} because page/context is closed`
-              );
-              return route.abort();
-            }
-            const response = await ctxt.request.fetch(request);
-            if (!response.ok()) {
-              if (!page.isClosed() && !isClosed) {
-                return route.fulfill({
-                  status: response.status(),
-                  body: await response.text()
-                });
-              }
+            const result = await fetchJsonForRoute(
+              route,
+              request,
+              ctxt,
+              page,
+              () => isClosed
+            );
+            if (!result) {
               break;
             }
-            let data: any;
-            try {
-              data = await handleJsonResponse(response);
-            } catch (error) {
-              if (
-                error instanceof ResponseDisposedError &&
-                (page.isClosed() || isClosed)
-              ) {
-                console.warn(`Route handler: ${error.message} during teardown`);
-                return route.abort();
-              }
-              throw error;
-            }
+            const { data, response } = result;
             const id = type === 'terminals' ? data.name : data.id;
             runners.set(id, data);
             // Update kernels
@@ -1334,14 +1346,17 @@ export namespace galata {
             if (!id) {
               // Get all settings
               if (settings.length === 0) {
-                if (page.isClosed() || isClosed) {
-                  console.warn(
-                    `Route handler: aborting ${request.url()} because page/context is closed`
-                  );
-                  return route.abort();
+                const result = await fetchJsonForRoute(
+                  route,
+                  request,
+                  ctxt,
+                  page,
+                  () => isClosed
+                );
+                if (!result) {
+                  break;
                 }
-                const response = await ctxt.request.fetch(request);
-                const loadedSettings = (await response.json())
+                const loadedSettings = result.data
                   .settings as ISettingRegistry.IPlugin[];
 
                 settings.push(
@@ -1366,14 +1381,17 @@ export namespace galata {
               // Get specific settings
               let pluginSettings = settings.find(setting => setting.id === id);
               if (!pluginSettings) {
-                if (page.isClosed() || isClosed) {
-                  console.warn(
-                    `Route handler: aborting ${request.url()} because page/context is closed`
-                  );
-                  return route.abort();
+                const result = await fetchJsonForRoute(
+                  route,
+                  request,
+                  ctxt,
+                  page,
+                  () => isClosed
+                );
+                if (!result) {
+                  break;
                 }
-                const response = await ctxt.request.fetch(request);
-                pluginSettings = await response.json();
+                pluginSettings = result.data;
                 if (pluginSettings) {
                   const mocked = mockedSettings[id] ?? {};
                   pluginSettings = {
