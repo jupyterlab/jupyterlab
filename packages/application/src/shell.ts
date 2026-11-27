@@ -1186,8 +1186,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     if (this.isDisposed) {
       return;
     }
-    this._layoutDebouncer.dispose();
+    // Disposing the main area widgets can invoke the layout debouncer.
     super.dispose();
+    this._layoutDebouncer.dispose();
   }
 
   /**
@@ -2571,15 +2572,23 @@ namespace Private {
                   continue;
                 }
                 w.content.insertWidget(index, wi);
-                // Lumino only repositions the section, so move its title, body
-                // and handle to keep the Tab order the same as the visual order.
-                const next = w.content.titles[index + 1] ?? null;
-                for (const node of [
-                  w.content.titles[index],
-                  wi.node,
-                  w.content.handles[index]
-                ]) {
-                  w.content.node.insertBefore(node, next);
+                // Without `moveBefore` (Safari), Lumino leaves the nodes in place,
+                // so move them to keep the Tab order; moving placed nodes resets
+                // their scroll.
+                const title = w.content.titles[index];
+                const previous =
+                  index > 0
+                    ? w.content.handles[index - 1].nextSibling
+                    : w.content.node.firstChild;
+                if (previous !== title) {
+                  const next = w.content.titles[index + 1] ?? null;
+                  for (const node of [
+                    title,
+                    wi.node,
+                    w.content.handles[index]
+                  ]) {
+                    w.content.node.insertBefore(node, next);
+                  }
                 }
               }
             }
