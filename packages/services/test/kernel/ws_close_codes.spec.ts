@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { testEmission } from '@jupyterlab/testing';
-import { Kernel, KernelConnection, ServerConnection } from '../../src';
+import { type Kernel, KernelConnection, ServerConnection } from '../../src';
 import { KernelTester } from '../utils';
 
 /**
@@ -127,8 +127,11 @@ describe('KernelConnection', () => {
       await Promise.resolve();
 
       expect(getModel).toHaveBeenCalledTimes(1);
+      expect(jest.getTimerCount()).toBe(1);
 
       kernel.dispose();
+      expect(jest.getTimerCount()).toBe(0);
+
       jest.advanceTimersByTime(35000);
       await Promise.resolve();
 
