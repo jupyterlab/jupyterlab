@@ -1120,7 +1120,12 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
                   cell.node.getBoundingClientRect().height
                 );
               }
-              this.layout.removeWidget(cell);
+              // A search can scroll to the cell before this frame
+              const range = this.viewModel.getRangeToRender({ virtual: true });
+              const index = parseInt(cell.dataset.windowedListIndex!, 10);
+              if (range === null || index < range[0] || index > range[1]) {
+                this.layout.removeWidget(cell);
+              }
             });
           } else if (
             this.notebookConfig.windowingMode === 'contentVisibility' &&
