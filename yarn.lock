@@ -4163,6 +4163,7 @@ __metadata:
     "@types/jest": ^29.2.0
     "@xterm/addon-fit": 0.12.0-beta.333
     "@xterm/addon-search": 0.17.0-beta.331
+    "@xterm/addon-unicode11": 0.10.0-beta.331
     "@xterm/addon-web-links": 0.13.0-beta.331
     "@xterm/addon-webgl": 0.20.0-beta.330
     "@xterm/xterm": 6.1.0-beta.337
@@ -6777,6 +6778,15 @@ __metadata:
   peerDependencies:
     "@xterm/xterm": ^6.1.0-beta.337
   checksum: c77c2532f3cc2d32c3e6c74b875c4f0dfbcdc899a27590cd8e27fed9006fa3b3fa814406758049f42ea09bd8dcf1c5085ca69d7fa2e95ecf31565d84adc6e7c3
+  languageName: node
+  linkType: hard
+
+"@xterm/addon-unicode11@npm:0.10.0-beta.331":
+  version: 0.10.0-beta.331
+  resolution: "@xterm/addon-unicode11@npm:0.10.0-beta.331"
+  peerDependencies:
+    "@xterm/xterm": ^6.1.0-beta.337
+  checksum: 1434ccbf08d3b9010183a56e784c6693b4d2891b3bd6bb49684e9fd0e70afd8e003c5ac3cc3b3ba6b7ad9b203bb4ab011d7703abfda3a69fa064ccde7458b92b
   languageName: node
   linkType: hard
 
