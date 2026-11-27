@@ -37,7 +37,7 @@ and is part of the new system introduced in JupyterLab v2.0.
 
 ### How JupyterLab handles icons
 
-The @jupyterlab/ui-components package provides icons to the rest of
+The `@jupyterlab/ui-components` package provides icons to the rest of
 JupyterLab, in the form of a set of `LabIcon` instances (currently
 about 80). All of the icons in the core JupyterLab packages are rendered
 using one of these `LabIcon` instances.

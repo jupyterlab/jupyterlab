@@ -9,8 +9,8 @@
 Like the classic notebook, JupyterLab provides a way for users to copy URLs that
 open a specific notebook or file. Additionally, JupyterLab URLs are an advanced
 part of the user interface that allows for managing workspaces. These two
-functions -- file paths and workspaces -- can be {ref}`combined in URLs that open a
-specific file in a specific workspace <url-combine>`.
+functions -- file paths and workspaces -- can be
+{ref}`combined in URLs that open a specific file in a specific workspace <url-combine>`.
 
 (url-tree)=
 

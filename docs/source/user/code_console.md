@@ -14,47 +14,39 @@ cells.
 
 (create-console)=
 
-Create a new code console by clicking the `+` button in the {ref}`file
-browser <left-sidebar>` and selecting the kernel:
+Create a new code console by clicking the `+` button in the {ref}`file browser <left-sidebar>`
+and selecting the kernel:
 
-```{raw} html
-<div class="jp-youtube-video">
-   <iframe src="https://www.youtube-nocookie.com/embed/7Sb_a6veU1s?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/7Sb_a6veU1s?rel=0&showinfo=0
+:width: 100%
+:::
 
 (run-code)=
 
 Run code using `Shift Enter`. Use the up and down arrows to browse the
 history of previously-run code:
 
-```{raw} html
-<div class="jp-youtube-video">
-   <iframe src="https://www.youtube-nocookie.com/embed/L52yh9FPAtY?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/L52yh9FPAtY?rel=0&showinfo=0
+:width: 100%
+:::
 
 (tab-completion)=
 
 Tab completion (`Tab`) and tooltips (`Shift Tab`) work as in the
 notebook:
 
-```{raw} html
-<div class="jp-youtube-video">
-   <iframe src="https://www.youtube-nocookie.com/embed/WoqFgmSuigE?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/WoqFgmSuigE?rel=0&showinfo=0
+:width: 100%
+:::
 
 (clear-cell)=
 
 Clear the cells of the code console without restarting the kernel by
 right-clicking on the code console and selecting “Clear Console Cells”:
 
-```{raw} html
-<div class="jp-youtube-video">
-   <iframe src="https://www.youtube-nocookie.com/embed/Aj7sQgP39z8?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/Aj7sQgP39z8?rel=0&showinfo=0
+:width: 100%
+:::
 
 (rename-console)=
 
@@ -68,8 +60,6 @@ kernel for the code console. The code console then acts as a log of
 computations in that kernel, and a place you can interactively inspect
 and run code in the kernel:
 
-```{raw} html
-<div class="jp-youtube-video">
-   <iframe src="https://www.youtube-nocookie.com/embed/QyRuPrLrIOs?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/QyRuPrLrIOs?rel=0&showinfo=0
+:width: 100%
+:::

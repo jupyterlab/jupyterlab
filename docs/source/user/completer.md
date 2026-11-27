@@ -57,6 +57,8 @@ The other settings of this section allow you to:
 - **Suppress when the inline completer is active**: avoid showing both completers
   at once by hiding the code completer while an inline suggestion is presented
 
+(documentation-panel)=
+
 ### Documentation panel
 
 The documentation panel presents additional information about the completion candidate.

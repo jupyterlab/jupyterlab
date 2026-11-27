@@ -12,11 +12,11 @@ traditional integrated development environments (IDEs), it remains
 focused on interactive, exploratory computing.
 
 The JupyterLab interface consists of a {ref}`main work area <main-area>`
-containing tabs of documents and activities, a collapsible {ref}`left sidebar
-<left-sidebar>`, and a {ref}`menu bar <menu-bar>`. The left sidebar contains a
-{ref}`file browser <working-with-files>`, the {ref}`list of running kernels and
-terminals <running>`, the {ref}`command palette <commands>`, the {ref}`notebook
-cell tools inspector <notebook>`, and the {ref}`tabs list <tabs>`.
+containing tabs of documents and activities, a collapsible
+{ref}`left sidebar <left-sidebar>`, and a {ref}`menu bar <menu-bar>`. The left sidebar contains a
+{ref}`file browser <working-with-files>`, the {ref}`list of running kernels and terminals <running>`,
+the {ref}`command palette <commands>`, the {ref}`notebook cell tools inspector <notebook>`,
+and the {ref}`tabs list <tabs>`.
 
 ```{image} ../images/interface-jupyterlab.png
 :align: center
@@ -107,11 +107,9 @@ The tabs can be moved between the left sidebar, the right sidebar,
 the {ref}`main work area <main-area>`, and the down area from the
 {ref}`context menu <context-menus-rightclick>`.
 
-```{raw} html
-<div class="jp-youtube-video">
-   <iframe src="https://www.youtube-nocookie.com/embed/PlJGecfetek?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/PlJGecfetek?rel=0&showinfo=0
+:width: 100%
+:::
 
 JupyterLab extensions can add additional panels to the sidebars.
 
@@ -127,11 +125,9 @@ panels of tabs that can be resized or subdivided. Drag a tab to the center of a
 tab panel to move the tab to the panel. Subdivide a tab panel by dragging a tab to
 the left, right, top, or bottom of the panel:
 
-```{raw} html
-<div class="jp-youtube-video">
-  <iframe src="https://www.youtube-nocookie.com/embed/Ka8qS7CO1XQ?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/Ka8qS7CO1XQ?rel=0&showinfo=0
+:width: 100%
+:::
 
 The work area has a single current activity. The tab for the current activity is
 marked with a colored top border (blue by default).
@@ -179,11 +175,9 @@ other tabs in the main work area. Simple Interface mode enables this, while maki
 it easy to return to your multi-activity layout in the main work area.
 Toggle Simple Interface mode using the View menu:
 
-```{raw} html
-<div class="jp-youtube-video">
-  <iframe src="https://www.youtube-nocookie.com/embed/DO7NOenMQC0?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/DO7NOenMQC0?rel=0&showinfo=0
+:width: 100%
+:::
 
 When you leave Simple Interface mode, the original layout of the main
 area is restored.
@@ -220,22 +214,18 @@ Many parts of JupyterLab, such as notebooks, text files, code consoles,
 and tabs, have context menus that can be accessed by right-clicking on
 the element:
 
-```{raw} html
-<div class="jp-youtube-video">
-  <iframe src="https://www.youtube-nocookie.com/embed/y30fs6kg6fc?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/y30fs6kg6fc?rel=0&showinfo=0
+:width: 100%
+:::
 
 (context-menus-shiftrightclick)=
 
 The browser’s native context menu can be accessed by holding down
 `Shift` and right-clicking:
 
-```{raw} html
-<div class="jp-youtube-video">
-  <iframe src="https://www.youtube-nocookie.com/embed/XPPWW-7WJ40?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/XPPWW-7WJ40?rel=0&showinfo=0
+:width: 100%
+:::
 
 (user-shortcuts)=
 
@@ -248,11 +238,9 @@ shortcuts. You can find and customize the current list of keyboard shortcuts by
 selecting the Advanced Settings Editor item in the Settings menu, then selecting
 Keyboard Shortcuts in the Settings tab.
 
-```{raw} html
-<div class="jp-youtube-video">
-   <iframe src="https://www.youtube-nocookie.com/embed/rhW3kAExCik?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/rhW3kAExCik?rel=0&showinfo=0
+:width: 100%
+:::
 
 ### Assigning a shortcut to a command without a default
 
@@ -382,8 +370,6 @@ You can also customize the {ref}`text editor <file-editor>` to use vim, emacs, o
 keyboard maps by using the Text Editor Key Map submenu in the Settings
 menu:
 
-```{raw} html
-<div class="jp-youtube-video">
-   <iframe src="https://www.youtube-nocookie.com/embed/COheO7sA4-U?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/COheO7sA4-U?rel=0&showinfo=0
+:width: 100%
+:::

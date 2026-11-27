@@ -8,8 +8,8 @@
 
 The table of contents makes it easy to see and navigate the structure of a document.
 
-A table of contents is auto-generated in the {ref}`left sidebar
-<left-sidebar>` when you have a notebook, markdown, latex or python files opened.
+A table of contents is auto-generated in the {ref}`left sidebar <left-sidebar>`
+when you have a notebook, markdown, latex or python files opened.
 The entries are clickable, and scroll the document to the heading in question.
 
 In the sidebar panel, you can number headings, collapse sections, and navigate into the file.
