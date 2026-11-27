@@ -166,6 +166,11 @@ test.describe('Notebook Edit', () => {
 
     // The pasted Markdown cell is active and its text hides the toolbar
     await waitForActiveCellToolbar(page);
+    // The pasted heading can get its collapse button after the toolbar
+    const pastedCell = await page.notebook.getCellLocator(0);
+    await pastedCell!
+      .locator('.jp-collapseHeadingButton')
+      .waitFor({ state: 'attached' });
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
