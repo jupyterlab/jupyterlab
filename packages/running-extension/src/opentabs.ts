@@ -19,7 +19,7 @@ import type { Widget } from '@lumino/widgets';
 class OpenTabsSignaler {
   constructor(labShell: ILabShell) {
     this._labShell = labShell;
-    this._labShell.layoutModified.connect(this._emitTabsChanged, this);
+    this._labShell.layoutModified.connect(this._onLayoutModified, this);
   }
 
   /**
@@ -35,8 +35,26 @@ class OpenTabsSignaler {
    * @param widget A widget whose title may change.
    */
   addWidget(widget: Widget): void {
+    if (this._widgets.includes(widget)) {
+      return;
+    }
     widget.title.changed.connect(this._emitTabsChanged, this);
     this._widgets.push(widget);
+  }
+
+  /**
+   * Emit `tabsChanged` only when the main area widgets or their order changed,
+   * ignoring unrelated layout modifications such as sidebar resizing.
+   */
+  private _onLayoutModified(): void {
+    const widgets = Array.from(this._labShell.widgets('main'));
+    if (
+      widgets.length === this._widgets.length &&
+      widgets.every((widget, index) => widget === this._widgets[index])
+    ) {
+      return;
+    }
+    this._emitTabsChanged();
   }
 
   /**
