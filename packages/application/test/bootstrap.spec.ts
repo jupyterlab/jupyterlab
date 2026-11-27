@@ -170,6 +170,7 @@ interface IHarnessOptions {
     extension?: string;
     mimeExtension?: string;
     style?: string;
+    plugins?: Record<string, { id: string }[]>;
   }[];
   /**
    * Modules the federated containers expose, by package and then module name.
@@ -619,21 +620,35 @@ describe('bootstrap federated extensions', () => {
   });
 
   it('disables every plugin of a package disabled by name', async () => {
-    // Both packages provide a plugin whose id does not start with the package
+    // Each package provides a plugin whose id does not start with the package
     // name, which the plugin id convention discourages but does not prevent.
+    // Whether the package is statically linked, prebuilt with its plugin ids
+    // recorded, or prebuilt without them, disabling it by name disables every
+    // plugin it provides.
     const harness = createHarness({
       federated: [
         {
-          name: '@jupyterlab/federated-disabled-extension',
+          name: '@jupyterlab/recorded-extension',
+          extension: './extension',
+          plugins: {
+            './extension': [
+              { id: 'recorded-other-prefix:plugin' },
+              { id: '@jupyterlab/recorded-extension:plugin' }
+            ]
+          }
+        },
+        {
+          name: '@jupyterlab/unrecorded-extension',
           extension: './extension'
         }
       ],
       disabled: [
-        '@jupyterlab/federated-disabled-extension',
-        '@jupyterlab/static-disabled-extension'
+        '@jupyterlab/static-extension',
+        '@jupyterlab/recorded-extension',
+        '@jupyterlab/unrecorded-extension'
       ],
       staticExtensions: {
-        '@jupyterlab/static-disabled-extension': {
+        '@jupyterlab/static-extension': {
           __esModule: true,
           default: [
             {
@@ -642,7 +657,7 @@ describe('bootstrap federated extensions', () => {
               autoStart: true
             },
             {
-              id: '@jupyterlab/static-disabled-extension:plugin',
+              id: '@jupyterlab/static-extension:plugin',
               description: 'Static plugin',
               autoStart: true
             }
@@ -650,18 +665,35 @@ describe('bootstrap federated extensions', () => {
         }
       },
       modules: {
-        '@jupyterlab/federated-disabled-extension': {
+        '@jupyterlab/recorded-extension': {
           './extension': {
             __esModule: true,
             default: [
               {
-                id: 'federated-other-prefix:plugin',
-                description: 'Federated plugin with a mismatched id',
+                id: 'recorded-other-prefix:plugin',
+                description: 'Recorded plugin with a mismatched id',
                 autoStart: true
               },
               {
-                id: '@jupyterlab/federated-disabled-extension:plugin',
-                description: 'Federated plugin',
+                id: '@jupyterlab/recorded-extension:plugin',
+                description: 'Recorded plugin',
+                autoStart: true
+              }
+            ]
+          }
+        },
+        '@jupyterlab/unrecorded-extension': {
+          './extension': {
+            __esModule: true,
+            default: [
+              {
+                id: 'unrecorded-other-prefix:plugin',
+                description: 'Unrecorded plugin with a mismatched id',
+                autoStart: true
+              },
+              {
+                id: '@jupyterlab/unrecorded-extension:plugin',
+                description: 'Unrecorded plugin',
                 autoStart: true
               }
             ]
@@ -672,8 +704,9 @@ describe('bootstrap federated extensions', () => {
 
     await harness.main();
 
-    // No plugin of the statically linked package is registered, including the
-    // one whose id does not start with the package name.
+    // Neither prebuilt package is loaded during the initial page load, and no
+    // plugin of the statically linked one is registered.
+    expect(harness.moduleRequests).toEqual([]);
     expect(harness.registeredPlugins).toEqual([]);
     expect(
       harness
@@ -681,14 +714,14 @@ describe('bootstrap federated extensions', () => {
         .availablePlugins.map(plugin => [plugin.id, plugin.enabled])
     ).toEqual([
       ['static-other-prefix:plugin', false],
-      ['@jupyterlab/static-disabled-extension:plugin', false]
+      ['@jupyterlab/static-extension:plugin', false]
     ]);
     expect(harness.labOptions().disabled.matches).toEqual([
       'static-other-prefix:plugin',
-      '@jupyterlab/static-disabled-extension:plugin'
+      '@jupyterlab/static-extension:plugin'
     ]);
-    // Only the plugin which does not follow the id convention is reported, as
-    // the user cannot tell from the config that it was disabled too.
+    // Only the plugin the disable list does not name is reported, as the user
+    // cannot tell from the config that it was disabled too.
     expect(harness.console.warn).toHaveBeenCalledTimes(1);
     expect(harness.console.warn).toHaveBeenCalledWith(
       expect.stringContaining('static-other-prefix:plugin')
@@ -699,9 +732,9 @@ describe('bootstrap federated extensions', () => {
     await flushPromises();
     await flushPromises();
 
-    // The federated package is treated the same way once it is loaded.
     expect(harness.moduleRequests).toEqual([
-      '@jupyterlab/federated-disabled-extension:./extension'
+      '@jupyterlab/recorded-extension:./extension',
+      '@jupyterlab/unrecorded-extension:./extension'
     ]);
     expect(harness.registeredPlugins).toEqual([]);
     expect(
@@ -710,13 +743,187 @@ describe('bootstrap federated extensions', () => {
       )
     ).toEqual([
       [
-        ['federated-other-prefix:plugin', false],
-        ['@jupyterlab/federated-disabled-extension:plugin', false]
+        ['recorded-other-prefix:plugin', false],
+        ['@jupyterlab/recorded-extension:plugin', false],
+        ['unrecorded-other-prefix:plugin', false],
+        ['@jupyterlab/unrecorded-extension:plugin', false]
       ]
     ]);
-    expect(harness.console.warn).toHaveBeenCalledTimes(2);
-    expect(harness.console.warn).toHaveBeenLastCalledWith(
-      expect.stringContaining('federated-other-prefix:plugin')
+    expect(harness.console.warn).toHaveBeenCalledTimes(3);
+    expect(harness.console.warn).toHaveBeenCalledWith(
+      expect.stringContaining('recorded-other-prefix:plugin')
+    );
+    expect(harness.console.warn).toHaveBeenCalledWith(
+      expect.stringContaining('unrecorded-other-prefix:plugin')
+    );
+    expect(harness.console.error).not.toHaveBeenCalled();
+  });
+
+  it('defers a module whose recorded plugins are all disabled by id', async () => {
+    const harness = createHarness({
+      federated: [
+        {
+          name: '@jupyterlab/recorded-extension',
+          extension: './extension',
+          mimeExtension: './mimeExtension',
+          style: './style',
+          // Recorded when the extension was built, so the ids are known before
+          // any of its modules is loaded.
+          plugins: {
+            './extension': [
+              { id: '@jupyterlab/recorded-extension:one' },
+              { id: 'other-prefix:two' }
+            ],
+            './mimeExtension': [{ id: '@jupyterlab/recorded-extension:mime' }]
+          }
+        },
+        {
+          name: '@jupyterlab/partly-disabled-extension',
+          extension: './extension',
+          plugins: {
+            './extension': [
+              { id: '@jupyterlab/partly-disabled-extension:disabled' },
+              { id: '@jupyterlab/partly-disabled-extension:enabled' }
+            ]
+          }
+        }
+      ],
+      // Every plugin of the first package is disabled by id, none of them by
+      // the name of the package providing them.
+      disabled: [
+        '@jupyterlab/recorded-extension:one',
+        'other-prefix:two',
+        '@jupyterlab/recorded-extension:mime',
+        '@jupyterlab/partly-disabled-extension:disabled'
+      ],
+      modules: {
+        '@jupyterlab/recorded-extension': {
+          './extension': {
+            __esModule: true,
+            default: [
+              {
+                id: '@jupyterlab/recorded-extension:one',
+                description: 'First plugin',
+                autoStart: true
+              },
+              {
+                id: 'other-prefix:two',
+                description: 'Plugin with a mismatched id',
+                autoStart: true
+              }
+            ]
+          },
+          './mimeExtension': {
+            __esModule: true,
+            default: {
+              id: '@jupyterlab/recorded-extension:mime',
+              description: 'Mime plugin',
+              autoStart: true
+            }
+          },
+          './style': { __esModule: true, default: [] }
+        },
+        '@jupyterlab/partly-disabled-extension': {
+          './extension': {
+            __esModule: true,
+            default: [
+              {
+                id: '@jupyterlab/partly-disabled-extension:disabled',
+                description: 'Disabled plugin',
+                autoStart: true
+              },
+              {
+                id: '@jupyterlab/partly-disabled-extension:enabled',
+                description: 'Sibling plugin',
+                autoStart: true
+              }
+            ]
+          }
+        }
+      }
+    });
+
+    await harness.main();
+
+    // Neither module of the first package is loaded, and its styles are left
+    // out too. The second package still has an enabled plugin, so it loads.
+    expect(harness.moduleRequests).toEqual([
+      '@jupyterlab/partly-disabled-extension:./extension'
+    ]);
+    expect(harness.registeredPlugins.map(plugin => plugin.id)).toEqual([
+      '@jupyterlab/partly-disabled-extension:enabled'
+    ]);
+
+    harness.resolveRestored();
+    harness.resolveAllPluginsActivated();
+    await flushPromises();
+    await flushPromises();
+
+    expect(harness.moduleRequests).toEqual([
+      '@jupyterlab/partly-disabled-extension:./extension',
+      '@jupyterlab/recorded-extension:./extension',
+      '@jupyterlab/recorded-extension:./mimeExtension'
+    ]);
+    expect(harness.registeredPlugins.map(plugin => plugin.id)).toEqual([
+      '@jupyterlab/partly-disabled-extension:enabled'
+    ]);
+    expect(
+      harness.announcedPlugins.map(batch =>
+        batch.map(plugin => [plugin.id, plugin.enabled])
+      )
+    ).toEqual([
+      [
+        ['@jupyterlab/recorded-extension:one', false],
+        ['other-prefix:two', false],
+        ['@jupyterlab/recorded-extension:mime', false]
+      ]
+    ]);
+    // The ids were known, so nothing was disabled that the config did not name.
+    expect(harness.console.warn).not.toHaveBeenCalled();
+    expect(harness.console.error).not.toHaveBeenCalled();
+  });
+
+  it('reports a plugin missing from the recorded plugin ids', async () => {
+    const harness = createHarness({
+      federated: [
+        {
+          name: '@jupyterlab/stale-extension',
+          extension: './extension',
+          plugins: {
+            './extension': [{ id: '@jupyterlab/stale-extension:recorded' }]
+          }
+        }
+      ],
+      disabled: ['@jupyterlab/stale-extension:recorded'],
+      modules: {
+        '@jupyterlab/stale-extension': {
+          './extension': {
+            __esModule: true,
+            default: [
+              {
+                id: '@jupyterlab/stale-extension:recorded',
+                description: 'Recorded plugin',
+                autoStart: true
+              },
+              {
+                id: '@jupyterlab/stale-extension:added-since',
+                description: 'Plugin added after the ids were recorded',
+                autoStart: true
+              }
+            ]
+          }
+        }
+      }
+    });
+
+    await harness.main();
+    harness.resolveRestored();
+    harness.resolveAllPluginsActivated();
+    await flushPromises();
+    await flushPromises();
+
+    expect(harness.console.error).toHaveBeenCalledWith(
+      expect.stringContaining('@jupyterlab/stale-extension:added-since')
     );
   });
 });

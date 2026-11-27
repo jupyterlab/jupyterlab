@@ -144,11 +144,36 @@ export async function main() {
     return disabledExtensions.some(val => val === name);
   }
 
-  // Report a plugin which is only disabled because the whole package providing
-  // it is disabled. Such a plugin does not follow the plugin id convention, so
-  // the user cannot tell from the config that it was disabled too.
+  // Whether a federated module has no plugin left to register: either the
+  // package providing it is disabled as a whole, or every plugin it provides is
+  // disabled on its own. The plugin ids are recorded at build time by the
+  // extension builder, and are absent for an extension built before the builder
+  // recorded them.
+  const isModuleDisabled = (data, module) => {
+    if (isExtensionDisabled(data.name)) {
+      return true;
+    }
+    const plugins = data.plugins && data.plugins[module];
+    return (
+      plugins !== undefined && plugins.every(plugin => isPluginDisabled(plugin.id))
+    );
+  }
+
+  // Report a plugin which is disabled only because the package providing it is
+  // disabled by name. Its id does not follow the plugin id convention, so the
+  // disable list does not name it and the user cannot tell from the config that
+  // it was disabled too.
   const warnAboutPackageLevelDisable = (pluginId, scope) => {
     console.warn(`Plugin ${pluginId} does not start with the name of the extension providing it (${scope}), which is disabled, so this plugin is disabled too. To keep it enabled, list the plugin ids to disable in disabledExtensions instead of ${scope}.`);
+  }
+
+  // Report a plugin the extension provides but did not record at build time.
+  // The recorded ids said every plugin of the module was disabled, which is why
+  // the module was not loaded during startup, so this plugin was skipped even
+  // though the config leaves it enabled. Rebuilding the extension records the
+  // ids again and fixes it.
+  const warnAboutStaleMetadata = (pluginId, scope) => {
+    console.error(`Plugin ${pluginId} is provided by extension ${scope} but is missing from the plugin ids recorded when the extension was built, so it was not activated. Rebuild the extension to record its plugins again.`);
   }
 
   // This is basically a copy of PageConfig.Extension.isDeferred to
@@ -165,31 +190,39 @@ export async function main() {
   const queuedFederated = [];
 
   extensions.forEach(data => {
-    const isDisabled = isExtensionDisabled(data.name);
+    // A module is deferred when it has no plugin left to register. Styles
+    // belong to the package as a whole, so they are loaded as long as one of
+    // its modules is; a package providing no module follows the disable list
+    // by name.
+    let hasEnabledModule =
+      !data.extension && !data.mimeExtension && !isExtensionDisabled(data.name);
+
     if (data.extension) {
       queuedFederated.push(data.name);
-      if (isDisabled) {
+      if (isModuleDisabled(data, data.extension)) {
         deferredDisabledFederatedModules.push({
           name: data.name,
           module: data.extension
         });
       } else {
+        hasEnabledModule = true;
         federatedExtensionPromises.push(createModule(data.name, data.extension));
       }
     }
     if (data.mimeExtension) {
       queuedFederated.push(data.name);
-      if (isDisabled) {
+      if (isModuleDisabled(data, data.mimeExtension)) {
         deferredDisabledFederatedModules.push({
           name: data.name,
           module: data.mimeExtension
         });
       } else {
+        hasEnabledModule = true;
         federatedMimeExtensionPromises.push(createModule(data.name, data.mimeExtension));
       }
     }
 
-    if (data.style && !isDisabled) {
+    if (data.style && hasEnabledModule) {
       federatedStylePromises.push(createModule(data.name, data.style));
     }
   });
@@ -233,13 +266,23 @@ export async function main() {
   }
 
   /**
-   * Collect the metadata of the plugins of an extension disabled as a whole.
+   * Collect the metadata of the plugins of a module which was not loaded
+   * during startup.
+   *
+   * #### Notes
+   * A plugin which the config does not disable can only turn up here when the
+   * plugin ids recorded at build time are out of date, so the module was
+   * skipped without this plugin being known.
    */
   function collectDisabledPlugins(extension) {
     const plugins = [];
     for (let plugin of getPlugins(extension)) {
       if (!isPluginDisabled(plugin.id)) {
-        warnAboutPackageLevelDisable(plugin.id, extension.__scope__);
+        if (isExtensionDisabled(extension.__scope__)) {
+          warnAboutPackageLevelDisable(plugin.id, extension.__scope__);
+        } else {
+          warnAboutStaleMetadata(plugin.id, extension.__scope__);
+        }
       }
       plugins.push(createPluginInfo(plugin, extension, true));
     }
@@ -277,7 +320,9 @@ export async function main() {
   // to discover their plugin metadata; they must not be registered or activated.
   async function loadDeferredDisabledFederatedPlugins() {
     const deferredDisabledFederatedPlugins = await Promise.allSettled(
-      deferredDisabledFederatedModules.map(data => createModule(data.name, data.module))
+      deferredDisabledFederatedModules.map(data =>
+        createModule(data.name, data.module)
+      )
     );
     const disabledPlugins = [];
 
