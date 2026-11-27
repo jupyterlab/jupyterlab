@@ -136,4 +136,27 @@ describe('MarkdownViewer', () => {
     readySpy.mockRestore();
     isReadySpy.mockRestore();
   });
+
+  it('should not create an ActivityMonitor if disposed before context is ready', async () => {
+    viewer.dispose();
+    const ready = new PromiseDelegate<void>();
+    const readySpy = jest.spyOn(context, 'ready', 'get');
+    readySpy.mockReturnValue(ready.promise);
+    const isReadySpy = jest.spyOn(context, 'isReady', 'get');
+    isReadySpy.mockReturnValue(false);
+
+    renderer = new TestRenderer();
+    viewer = new MarkdownViewer({ context, renderer });
+    viewer.dispose();
+
+    isReadySpy.mockReturnValue(true);
+    ready.resolve(undefined);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect((viewer as unknown as { _monitor: unknown })._monitor).toBeNull();
+    expect(renderer.renderCount).toBe(0);
+    readySpy.mockRestore();
+    isReadySpy.mockRestore();
+  });
 });
