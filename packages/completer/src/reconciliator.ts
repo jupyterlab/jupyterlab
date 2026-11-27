@@ -72,6 +72,13 @@ export class ProviderReconciliator implements IProviderReconciliator {
       const settings = this._inlineProvidersSettings[provider.identifier];
       if (
         trigger !== InlineCompletionTriggerKind.Invoke &&
+        settings?.autoInvoke === false
+      ) {
+        // Skip automatic trigger when provider is configured for manual invocation only
+        continue;
+      }
+      if (
+        trigger !== InlineCompletionTriggerKind.Invoke &&
         isMiddleOfLine &&
         !settings.autoFillInMiddle
       ) {

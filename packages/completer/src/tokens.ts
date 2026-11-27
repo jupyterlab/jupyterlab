@@ -501,6 +501,7 @@ export interface IInlineCompleterSettings {
     [providerId: string]: {
       enabled: boolean;
       autoFillInMiddle: boolean;
+      autoInvoke: boolean;
       debouncerDelay: number;
       timeout: number;
       [property: string]: JSONValue;

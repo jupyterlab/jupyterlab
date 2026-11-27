@@ -2,7 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 import { EditorState } from '@codemirror/state';
 import type { IInlineCompletionProvider } from '@jupyterlab/completer';
-import { CompletionHandler, InlineCompleter } from '@jupyterlab/completer';
+import {
+  CompletionHandler,
+  InlineCompleter,
+  InlineCompletionTriggerKind,
+  ProviderReconciliator
+} from '@jupyterlab/completer';
 import type { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -704,6 +709,59 @@ describe('completer/inline', () => {
           end: { line: 1, column: 5 }
         });
         expect(model.completions).toBeNull();
+      });
+    });
+
+    describe('ProviderReconciliator#fetchInline()', () => {
+      it('should skip automatic trigger when autoInvoke is false and allow manual invoke', async () => {
+        const manualProvider: IInlineCompletionProvider = {
+          name: 'Manual provider',
+          identifier: 'manual-provider',
+          fetch: jest.fn(async () => ({ items: [{ insertText: 'manual' }] }))
+        };
+        const autoProvider: IInlineCompletionProvider = {
+          name: 'Auto provider',
+          identifier: 'auto-provider',
+          fetch: jest.fn(async () => ({ items: [{ insertText: 'auto' }] }))
+        };
+        const reconciliator = new ProviderReconciliator({
+          context: {} as any,
+          providers: [],
+          timeout: 1000,
+          inlineProviders: [manualProvider, autoProvider],
+          inlineProvidersSettings: {
+            'manual-provider': {
+              enabled: true,
+              autoFillInMiddle: false,
+              autoInvoke: false,
+              debouncerDelay: 0,
+              timeout: 1000
+            },
+            'auto-provider': {
+              enabled: true,
+              autoFillInMiddle: false,
+              autoInvoke: true,
+              debouncerDelay: 0,
+              timeout: 1000
+            }
+          }
+        });
+
+        const autoPromises = reconciliator.fetchInline(
+          { text: 'x', offset: 1 },
+          InlineCompletionTriggerKind.Automatic
+        );
+        await Promise.all(autoPromises);
+        expect(manualProvider.fetch).not.toHaveBeenCalled();
+        expect(autoProvider.fetch).toHaveBeenCalledTimes(1);
+
+        const invokePromises = reconciliator.fetchInline(
+          { text: 'x', offset: 1 },
+          InlineCompletionTriggerKind.Invoke
+        );
+        await Promise.all(invokePromises);
+        expect(manualProvider.fetch).toHaveBeenCalledTimes(1);
+        expect(autoProvider.fetch).toHaveBeenCalledTimes(2);
       });
     });
   });
