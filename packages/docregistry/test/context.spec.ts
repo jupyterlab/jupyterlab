@@ -788,6 +788,19 @@ describe('docregistry/context', () => {
         expect(context.model.toString()).toBe('foo');
       });
 
+      it('should revert to an empty file on disk', async () => {
+        await context.initialize(true);
+        context.model.fromString('foo');
+        await context.save();
+        await manager.contents.save(context.path, {
+          type: factory.contentType,
+          format: factory.fileFormat,
+          content: ''
+        });
+        await context.revert();
+        expect(context.model.toString()).toBe('');
+      });
+
       it('should normalize CRLF line endings to LF', async () => {
         await context.initialize(true);
         await manager.contents.save(context.path, {

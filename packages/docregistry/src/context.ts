@@ -718,7 +718,7 @@ export class Context<
         if (path !== this._path) {
           return this._revert(initializeModel);
         }
-        if (contents.content) {
+        if (contents.content != null) {
           if (contents.format === 'json') {
             model.fromJSON(contents.content);
           } else {
