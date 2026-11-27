@@ -6,7 +6,11 @@ import { NotebookSearchProvider } from '@jupyterlab/notebook';
 import type { Context } from '@jupyterlab/docregistry';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
-import { framePromise, signalToPromise } from '@jupyterlab/testing';
+import {
+  acceptDialog,
+  framePromise,
+  signalToPromise
+} from '@jupyterlab/testing';
 import * as utils from './utils';
 import type { IReplaceOptions } from '@jupyterlab/documentsearch';
 import {
@@ -644,6 +648,43 @@ describe('@jupyterlab/notebook', () => {
         expect(match).toBeDefined();
         expect(cellWidget.outputArea.widgets.length).toBe(4);
         await provider.endQuery();
+      });
+
+      it('should keep trimming the outputs of cells without hidden outputs', async () => {
+        const trimmedModel = panel.model!.cells.get(1) as CodeCellModel;
+        (panel.content.widgets[1] as CodeCell).outputArea.maxNumberOutputs = 2;
+        for (let i = 0; i < 3; i++) {
+          trimmedModel.outputs.add({
+            output_type: 'display_data',
+            data: { 'text/plain': `output ${i}` }
+          });
+        }
+        panel.model!.sharedModel.insertCell(2, {
+          cell_type: 'code',
+          source: 'test4'
+        });
+        const cell = panel.content.widgets[2] as CodeCell;
+        cell.outputArea.maxNumberOutputs = 2;
+        // `acceptDialog` polls for the dialog with `setTimeout`
+        jest.useRealTimers();
+        try {
+          const accepted = provider.validateFilter('output', true);
+          await acceptDialog();
+          expect(await accepted).toBe(true);
+        } finally {
+          jest.useFakeTimers();
+        }
+
+        const model = panel.model!.cells.get(2) as CodeCellModel;
+        for (let i = 0; i < 4; i++) {
+          model.outputs.add({
+            output_type: 'display_data',
+            data: { 'text/plain': `output ${i}` }
+          });
+        }
+
+        // Two outputs and the "Show more outputs" button
+        expect(cell.outputArea.widgets.length).toBe(3);
       });
 
       it('should handle no matches gracefully', async () => {

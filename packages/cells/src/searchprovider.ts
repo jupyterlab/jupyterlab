@@ -365,8 +365,14 @@ class CodeCellSearchProvider extends CellSearchProvider {
    * @param filters Filter parameters to pass to provider
    */
   async startQuery(query: RegExp | null, filters?: IFilters): Promise<void> {
-    if (filters?.output !== false && this.isActive) {
-      (this.cell as CodeCell).outputArea.maxNumberOutputs = Infinity;
+    const outputArea = (this.cell as CodeCell).outputArea;
+    // A cell without hidden outputs keeps the limit for later runs
+    if (
+      filters?.output !== false &&
+      this.isActive &&
+      outputArea.model.length > outputArea.maxNumberOutputs
+    ) {
+      outputArea.maxNumberOutputs = Infinity;
     }
 
     await super.startQuery(query, filters);

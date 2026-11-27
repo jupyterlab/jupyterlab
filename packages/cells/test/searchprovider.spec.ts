@@ -242,5 +242,34 @@ describe('cells/searchprovider', () => {
       expect(cell.outputArea.widgets.length).toBe(4);
       provider.dispose();
     });
+
+    it('should keep trimming the outputs of a cell without hidden outputs', async () => {
+      const model = new CodeCellModel({
+        sharedModel: createStandaloneCell({
+          cell_type: 'code',
+          source: 'code1'
+        }) as YCodeCell
+      });
+      cell = new CodeCell({
+        model,
+        rendermime: defaultRenderMime(),
+        contentFactory: NBTestUtils.createCodeCellFactory(),
+        maxNumberOutputs: 2,
+        placeholder: false
+      }).initializeState();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/code/, { output: true });
+      provider.dispose();
+
+      for (let i = 0; i < 4; i++) {
+        model.outputs.add({
+          output_type: 'display_data',
+          data: { 'text/plain': `output ${i}` }
+        });
+      }
+
+      // Two outputs and the "Show more outputs" button
+      expect(cell.outputArea.widgets.length).toBe(3);
+    });
   });
 });
