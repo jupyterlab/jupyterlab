@@ -39,9 +39,6 @@ export class OptimizedDockPanelSvg extends DockPanelSvg {
       this._isResizeDragActive = this._isHandlePointerDown(event);
       if (this._isResizeDragActive) {
         this._dragPointerId = (event as PointerEvent).pointerId;
-        // Installed here rather than below, so that the listener and the flag
-        // are always set together, whether or not the freeze is enabled.
-        this._listenForCancel();
       }
     }
 
@@ -143,27 +140,7 @@ export class OptimizedDockPanelSvg extends DockPanelSvg {
   private _endDrag(): void {
     this._isResizeDragActive = false;
     this._dragPointerId = -1;
-    if (this._cancelListener) {
-      this._cancelListener.removeEventListener('pointercancel', this, true);
-      this._cancelListener = null;
-    }
     this._unfreezeElements();
-  }
-
-  /**
-   * Listen for the drag being cancelled, which Lumino does not listen for.
-   *
-   * #### Notes
-   * A pen or touch drag taken over by a system gesture ends with
-   * `pointercancel` and no `pointerup`, so without this the panels would stay
-   * frozen.
-   */
-  private _listenForCancel(): void {
-    if (this._cancelListener) {
-      return;
-    }
-    this._cancelListener = this.node.ownerDocument;
-    this._cancelListener.addEventListener('pointercancel', this, true);
   }
 
   private _isHandlePointerDown(event: Event): boolean {
@@ -382,7 +359,6 @@ export class OptimizedDockPanelSvg extends DockPanelSvg {
   private _optimizeResize = true;
   private _isResizeDragActive = false;
   private _dragPointerId = -1;
-  private _cancelListener: Document | null = null;
   private _frozenGroups: Private.IFrozenElement[][] = [];
   private _refreshTimerId = 0;
   private _refreshRAFId = 0;
@@ -421,7 +397,7 @@ namespace Private {
 
   /**
    * Whether the event ends a handle drag, matching the rules Lumino releases
-   * the drag on, plus the cancellation Lumino does not listen for.
+   * the drag on.
    */
   export function endsDrag(event: Event, dragPointerId: number): boolean {
     switch (event.type) {
@@ -432,9 +408,9 @@ namespace Private {
         // and no further event able to unfreeze them.
         return (event as PointerEvent).button === 0;
       case 'pointercancel':
-        // Matched, because Lumino has no cancel case to keep in step with. An
-        // unrelated pointer being cancelled, a palm resting on a touch screen
-        // for instance, must not end a drag it was never part of.
+        // Matched, as Lumino matches it. An unrelated pointer being cancelled,
+        // a palm resting on a touch screen for instance, must not end a drag
+        // it was never part of.
         return (event as PointerEvent).pointerId === dragPointerId;
       case 'keydown':
         return (event as KeyboardEvent).keyCode === 27;
