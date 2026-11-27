@@ -34,7 +34,9 @@ export namespace ColorUtils {
    * Parse a CSS color with the browser.
    *
    * @param color - The CSS color, such as the value of a theme variable.
-   * @returns The color, or `null` when the browser does not accept it.
+   * @returns The color, or `null` when the browser does not accept it or
+   * reads it back in a syntax other than `#rrggbb` and `rgba()`, as Chromium
+   * does for `oklch()` and `color-mix()`.
    */
   export function parse(color: string): IRGBA | null {
     const context = document.createElement('canvas').getContext('2d');
