@@ -131,6 +131,18 @@ collapser button on left of each cell:
 </div>
 ```
 
+When you collapse a cell, the first line of the code remains visible. This allows you
+to identify the cell's purpose without viewing the entire code block, which is
+particularly useful when working with large notebooks containing many cells:
+
+```{image} ../images/notebook-cell-folding-first-line.png
+:align: center
+:alt: Two collapsed code cells that show only their first line, a comment, above an expanded code cell
+:class: jp-screenshot
+```
+
+Click the first line of a collapsed cell to expand it.
+
 (enable-scrolling)=
 
 Enable scrolling for long outputs by right-clicking on a cell and
