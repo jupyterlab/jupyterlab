@@ -48,7 +48,7 @@ class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
    */
   set timestamp(value: Date) {
     this._timestamp = value;
-    this._timestampNode.innerHTML = this._timestamp.toLocaleTimeString();
+    this._timestampNode.textContent = this._timestamp.toLocaleTimeString();
     this.update();
   }
 
