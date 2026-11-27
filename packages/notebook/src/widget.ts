@@ -230,9 +230,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     });
     this.addClass(NB_CLASS);
     this.cellsArray = cells;
-
     this._idleCallBack = null;
-
     this._editorConfig = StaticNotebook.defaultEditorConfig;
     this._notebookConfig = StaticNotebook.defaultNotebookConfig;
     this._mimetype = IEditorMimeTypeService.defaultMimeType;
@@ -363,6 +361,10 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   }
 
   get renderingLayout(): RenderingLayout | undefined {
+    if (this instanceof Notebook) {
+      void this.setFragment(window.location.hash);
+    }
+
     return this._renderingLayout;
   }
   set renderingLayout(value: RenderingLayout | undefined) {
@@ -528,7 +530,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     oldValue: INotebookModel | null,
     newValue: INotebookModel | null
   ): void {
-    // No-op.
+    // This is intentionally a no-op.
   }
 
   /**
@@ -2531,7 +2533,7 @@ export class Notebook extends StaticNotebook {
    * notebook, or the activation of another cell cancels a fragment that is
    * still waiting.
    */
-  async setFragment(fragment: string): Promise<void> {
+  public async setFragment(fragment: string): Promise<void> {
     const parsedFragment = this._parseFragment(fragment);
 
     if (!parsedFragment) {
@@ -2631,7 +2633,7 @@ export class Notebook extends StaticNotebook {
         result = await this._findHeading(parsedFragment.value);
         break;
       case 'cell-id':
-        result = this._findCellById(parsedFragment.value);
+        result = await this._findCellById(parsedFragment.value);
         break;
       case 'legacy':
         result =
@@ -3294,7 +3296,11 @@ export class Notebook extends StaticNotebook {
   private _findCellById(queryId: string): Private.IScrollTarget | null {
     for (let cellIdx = 0; cellIdx < this.widgets.length; cellIdx++) {
       const cell = this.widgets[cellIdx];
-      if (cell.model.id === queryId) {
+      if (
+        cell.model.id === queryId ||
+        cell.node.dataset.windowedListIndex === queryId ||
+        `cell-${cell.node.dataset.windowedListIndex}` === queryId
+      ) {
         return {
           cell
         };
@@ -4076,6 +4082,10 @@ export namespace Notebook {
      */
     cellCount: number;
   }
+
+  export function setFragment(hash: string) {
+    throw new Error('Function not implemented.');
+  }
 }
 
 /**
@@ -4277,6 +4287,7 @@ namespace Private {
     /*
      * The value of the fragment query.
      */
+
     value: string;
   }
 }
