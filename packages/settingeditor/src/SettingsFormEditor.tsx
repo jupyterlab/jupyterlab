@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { showErrorMessage } from '@jupyterlab/apputils';
+import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import type { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import type { ITranslator } from '@jupyterlab/translation';
 import { FormComponent } from '@jupyterlab/ui-components';
@@ -206,12 +206,29 @@ export class SettingsFormEditor extends React.Component<
   };
 
   /**
-   * Handler for the "Restore to defaults" button - clears all
-   * modified settings then calls `setFormData` to restore the
-   * values.
+   * Handler for the "Restore to defaults" button - asks for confirmation,
+   * then clears all modified settings.
    */
   reset = async (event: React.MouseEvent): Promise<void> => {
     event.stopPropagation();
+    const trans = this.props.translator.load('jupyterlab');
+    const title = this.props.settings.schema.title || this.props.settings.id;
+    const result = await showDialog({
+      title: trans.__('Restore to Defaults'),
+      body: trans.__(
+        'Are you sure you want to restore default settings for "%1"? This action cannot be undone.',
+        title
+      ),
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.warnButton({ label: trans.__('Restore to Defaults') })
+      ],
+      defaultButton: 0
+    });
+    if (!result.button.accept) {
+      return;
+    }
+
     this._changeId++;
     this._lastSettledChangeId = this._changeId;
     for (const field in this.props.settings.user) {

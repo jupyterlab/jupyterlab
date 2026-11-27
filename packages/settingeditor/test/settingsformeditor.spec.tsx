@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+import { dangerDialog, dismissDialog } from '@jupyterlab/testing';
 import { nullTranslator } from '@jupyterlab/translation';
 import { SettingsFormEditor } from '../src/SettingsFormEditor';
 import React from 'react';
@@ -223,6 +224,53 @@ describe('@jupyterlab/settingeditor', () => {
         await raceConnector.clear();
         jest.useRealTimers();
       }
+    });
+
+    describe('#reset()', () => {
+      let component: renderer.ReactTestRenderer;
+
+      beforeEach(async () => {
+        connector.schemas['alpha'] = {
+          type: 'object',
+          properties: { keyA: { type: 'string', default: 'A' } }
+        };
+        settings = (await registry.load('alpha')) as Settings;
+        await settings.set('keyA', 'user-modified');
+        component = renderer.create(
+          <SettingsFormEditor
+            filteredValues={{ kind: 'all' }}
+            hasError={() => void 0}
+            onSelect={() => void 0}
+            renderers={{}}
+            settings={settings}
+            translator={nullTranslator}
+            updateDirtyState={() => void 0}
+          />
+        );
+      });
+
+      afterEach(() => {
+        component.unmount();
+      });
+
+      async function clickRestore(answer: () => Promise<void>): Promise<void> {
+        const button = component.root.findByProps({
+          className: 'jp-RestoreButton'
+        });
+        const reset = button.props.onClick({ stopPropagation: () => void 0 });
+        await answer();
+        await act(() => reset);
+      }
+
+      it('should restore the defaults once the dialog is accepted', async () => {
+        await clickRestore(dangerDialog);
+        expect(settings!.user).toEqual({});
+      });
+
+      it('should keep the user settings when the dialog is dismissed', async () => {
+        await clickRestore(dismissDialog);
+        expect(settings!.user).toEqual({ keyA: 'user-modified' });
+      });
     });
   });
 });
