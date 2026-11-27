@@ -413,6 +413,10 @@ function useTreeItem(
           Home: 0,
           End: items.length - 1
         }[event.key];
+        if (!items[target]) {
+          // Leave the key to the notebook, which moves to the adjacent cell.
+          return;
+        }
         focusItem(items[target]);
         break;
       }
