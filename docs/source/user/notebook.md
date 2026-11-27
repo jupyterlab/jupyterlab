@@ -31,7 +31,7 @@ visualizations and other rich output:
 **Jupyter notebooks (.ipynb files) are fully supported in JupyterLab.** The
 [notebook document format](https://nbformat.readthedocs.io/en/latest/) used in
 JupyterLab is the same as in the classic Jupyter Notebook. Your existing notebooks
-should open correctly in JupyterLab. If they don't, please open an issue on our
+should open correctly in JupyterLab. If they don’t, please open an issue on our
 [GitHub issues](https://github.com/jupyterlab/jupyterlab/issues) page.
 
 (create-notebook)=
@@ -48,7 +48,7 @@ then selecting a kernel in the new Launcher tab:
 (rename-file)=
 
 A new file is created with a default name. Rename a file by
-right-clicking on its name in the file browser and selecting "Rename"
+right-clicking on its name in the file browser and selecting “Rename”
 from the context menu:
 
 ```{raw} html
@@ -146,7 +146,7 @@ Click the first line of a collapsed cell to expand it.
 (enable-scrolling)=
 
 Enable scrolling for long outputs by right-clicking on a cell and
-selecting "Enable Scrolling for Outputs":
+selecting “Enable Scrolling for Outputs”:
 
 ```{raw} html
 <div class="jp-youtube-video">
@@ -156,7 +156,7 @@ selecting "Enable Scrolling for Outputs":
 
 (cell-output-mirror)=
 
-Create a new synchronized view of a cell's output:
+Create a new synchronized view of a cell’s output:
 
 ```{raw} html
 <div class="jp-youtube-video">
@@ -196,7 +196,7 @@ You can connect a {ref}`code console <code-console>` to a notebook kernel to hav
 computations done in the kernel, in the order in which they were done.
 The attached code console also provides a place to interactively inspect
 kernel state without changing the notebook. Right-click on a notebook
-and select "New Console for Notebook":
+and select “New Console for Notebook”:
 
 ```{raw} html
 <div class="jp-youtube-video">
