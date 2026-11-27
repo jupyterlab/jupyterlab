@@ -3,6 +3,7 @@
 import { EditorState } from '@codemirror/state';
 import type { IInlineCompletionProvider } from '@jupyterlab/completer';
 import { CompletionHandler, InlineCompleter } from '@jupyterlab/completer';
+import { GhostTextManager } from '../src/ghost';
 import type { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -704,6 +705,51 @@ describe('completer/inline', () => {
           end: { line: 1, column: 5 }
         });
         expect(model.completions).toBeNull();
+      });
+    });
+  });
+
+  describe('GhostTextManager', () => {
+    let editorWidget: CodeEditorWrapper;
+    let manager: GhostTextManager;
+
+    beforeEach(() => {
+      editorWidget = createEditorWidget();
+      manager = new GhostTextManager({ onBlur: () => true });
+    });
+
+    afterEach(() => {
+      editorWidget.dispose();
+    });
+
+    describe('#clearGhosts()', () => {
+      it('should not dispatch transaction when no ghost text is present', () => {
+        const view = (editorWidget.editor as CodeMirrorEditor).editor;
+        const spy = jest.spyOn(view, 'dispatch');
+
+        manager.clearGhosts(view);
+
+        expect(spy).not.toHaveBeenCalled();
+      });
+
+      it('should dispatch transaction when ghost text is present and skip on subsequent clear', () => {
+        const view = (editorWidget.editor as CodeMirrorEditor).editor;
+        const spy = jest.spyOn(view, 'dispatch');
+
+        manager.placeGhost(view, {
+          content: 'suggestion',
+          from: 0,
+          providerId: 'test-provider'
+        });
+        expect(spy).toHaveBeenCalledTimes(1);
+
+        spy.mockClear();
+        manager.clearGhosts(view);
+        expect(spy).toHaveBeenCalledTimes(1);
+
+        spy.mockClear();
+        manager.clearGhosts(view);
+        expect(spy).not.toHaveBeenCalled();
       });
     });
   });
