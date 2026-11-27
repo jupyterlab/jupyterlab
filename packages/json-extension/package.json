@@ -43,7 +43,6 @@
     "@lumino/widgets": "^2.11.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-json-tree": "^0.18.0",
     "style-mod": "^4.0.0"
   },
   "devDependencies": {
