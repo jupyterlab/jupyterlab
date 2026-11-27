@@ -120,12 +120,9 @@ export class GhostTextManager {
               if (this.options.onBlur(event) === false) {
                 return true;
               }
-              const effects: StateEffect<unknown>[] = [
-                Private.removeMark.of(null)
-              ];
               // Only execute it after editor update has completed.
               setTimeout(() => {
-                view.dispatch({ effects });
+                this.clearGhosts(view);
               }, 0);
             }
           })
@@ -138,6 +135,10 @@ export class GhostTextManager {
    * Clear all ghost texts from the editor.
    */
   clearGhosts(view: EditorView) {
+    const marks = view.state.field(Private.markField, false);
+    if (!marks || marks.size === 0) {
+      return;
+    }
     const effects: StateEffect<unknown>[] = [Private.removeMark.of(null)];
     view.dispatch({ effects });
   }
