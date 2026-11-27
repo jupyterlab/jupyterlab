@@ -271,6 +271,30 @@ describe('outputarea/widget', () => {
         expect(widget.widgets.length).toEqual(model.length);
       });
 
+      test('should display all trimmed outputs when setting maxNumberOutputs to Infinity', () => {
+        const widget = new OutputArea({
+          rendermime,
+          model,
+          maxNumberOutputs: 2
+        });
+
+        expect(widget.widgets.length).toBeLessThan(model.length);
+        widget.maxNumberOutputs = Infinity;
+        expect(widget.widgets.length).toEqual(model.length);
+      });
+
+      test('should safely increase maxNumberOutputs when larger than model length', () => {
+        const widget = new OutputArea({
+          rendermime,
+          model,
+          maxNumberOutputs: 20
+        });
+
+        expect(() => {
+          widget.maxNumberOutputs = Infinity;
+        }).not.toThrow();
+      });
+
       test('should display new widgets if increased', () => {
         const widget = new OutputArea({
           rendermime,

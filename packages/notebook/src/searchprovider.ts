@@ -539,7 +539,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     if (
       value &&
       this.widget.content.widgets.some(
-        w => w instanceof CodeCell && w.isPlaceholder()
+        w =>
+          w instanceof CodeCell &&
+          (w.isPlaceholder() ||
+            w.outputArea.model.length > w.outputArea.maxNumberOutputs)
       )
     ) {
       const trans = this.translator.load('jupyterlab');
@@ -547,7 +550,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       const reply = await showDialog({
         title: trans.__('Confirmation'),
         body: trans.__(
-          'Searching outputs requires you to run all cells and render their outputs. Are you sure you want to search in the cell outputs?'
+          'Searching outputs requires rendering all cell outputs, including the ones hidden by the output limit. Are you sure you want to search in the cell outputs?'
         ),
         buttons: [
           Dialog.cancelButton({ label: trans.__('Cancel') }),
@@ -556,8 +559,13 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       });
       if (reply.button.accept) {
         this.widget.content.widgets.forEach((w, i) => {
-          if (w instanceof CodeCell && w.isPlaceholder()) {
-            this.widget.content.renderCellOutputs(i);
+          if (w instanceof CodeCell) {
+            if (w.isPlaceholder()) {
+              this.widget.content.renderCellOutputs(i);
+            }
+            if (w.outputArea.model.length > w.outputArea.maxNumberOutputs) {
+              w.outputArea.maxNumberOutputs = Infinity;
+            }
           }
         });
       } else {

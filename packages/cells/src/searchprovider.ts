@@ -365,6 +365,16 @@ class CodeCellSearchProvider extends CellSearchProvider {
    * @param filters Filter parameters to pass to provider
    */
   async startQuery(query: RegExp | null, filters?: IFilters): Promise<void> {
+    const outputArea = (this.cell as CodeCell).outputArea;
+    // A cell without hidden outputs keeps the limit for later runs
+    if (
+      filters?.output !== false &&
+      this.isActive &&
+      outputArea.model.length > outputArea.maxNumberOutputs
+    ) {
+      outputArea.maxNumberOutputs = Infinity;
+    }
+
     await super.startQuery(query, filters);
 
     // Search outputs
@@ -430,16 +440,15 @@ class CodeCellSearchProvider extends CellSearchProvider {
     this.outputsProvider.length = 0;
 
     this.currentProviderIndex = -1;
-    this.outputsProvider = (this.cell as CodeCell).outputArea.widgets.map(
-      output => new GenericSearchProvider(output)
-    );
+    this.outputsProvider = (this.cell as CodeCell).outputArea.widgets
+      // The "Show more outputs" widget is wrapped in an output panel
+      .filter(output => !output.node.querySelector('.jp-TrimmedOutputs'))
+      .map(output => new GenericSearchProvider(output));
 
     if (this.isActive && this.query && this.filters?.output !== false) {
-      await Promise.all([
-        this.outputsProvider.map(provider => {
-          void provider.startQuery(this.query);
-        })
-      ]);
+      await Promise.all(
+        this.outputsProvider.map(provider => provider.startQuery(this.query))
+      );
     }
 
     this._stateChanged.emit();
