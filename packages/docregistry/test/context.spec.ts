@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { ISharedFile } from '@jupyter/ydoc';
 import { SessionContext } from '@jupyterlab/apputils';
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Context, TextModelFactory } from '@jupyterlab/docregistry';
@@ -14,7 +15,7 @@ import {
   waitForDialog
 } from '@jupyterlab/testing';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
-import { UUID } from '@lumino/coreutils';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
 describe('docregistry/context', () => {
@@ -53,16 +54,22 @@ describe('docregistry/context', () => {
         expect(context).toBeInstanceOf(Context);
       });
 
-      it('should set the session path with global path', () => {
+      it('should set and start the session with global path', async () => {
         const localPath = `${UUID.uuid4()}.txt`;
         const globalPath = `TestDrive:${localPath}`;
+        const startNew = jest.mocked(manager.sessions.startNew);
+        startNew.mockClear();
         context = new Context({
           manager,
           factory,
-          path: globalPath
+          path: globalPath,
+          kernelPreference: { name: manager.kernelspecs.specs!.default }
         });
 
+        await context.sessionContext.initialize();
+
         expect(context.sessionContext.path).toEqual(globalPath);
+        expect(startNew.mock.calls[0][0].path).toMatch(/^TestDrive:\//);
       });
     });
 
@@ -295,6 +302,138 @@ describe('docregistry/context', () => {
         await context.initialize(false);
         await expect(context.ready).resolves.not.toThrow();
       });
+
+      it('should resolve if the file is renamed while it is loading', async () => {
+        const oldPath = context.path;
+        const newPath = UUID.uuid4() + '.txt';
+        await manager.contents.save(oldPath, {
+          type: factory.contentType,
+          format: factory.fileFormat,
+          content: 'foo'
+        });
+
+        const get = manager.contents.get as jest.MockedFunction<
+          typeof manager.contents.get
+        >;
+        const getImplementation = get.getMockImplementation();
+        if (!getImplementation) {
+          throw new Error('Missing contents get mock implementation');
+        }
+
+        const started = new PromiseDelegate<void>();
+        const delayedGet = new PromiseDelegate<Contents.IModel>();
+        let isFirstGet = true;
+        get.mockImplementation((path, options) => {
+          if (path === oldPath && isFirstGet) {
+            isFirstGet = false;
+            started.resolve();
+            return delayedGet.promise;
+          }
+          return getImplementation(path, options);
+        });
+
+        try {
+          const initialized = context.initialize(false);
+          await started.promise;
+          await manager.contents.rename(oldPath, newPath);
+          delayedGet.reject(new Error('Stale path'));
+
+          await expect(initialized).resolves.not.toThrow();
+          await expect(context.ready).resolves.not.toThrow();
+          expect(context.path).toBe(newPath);
+          expect(context.contentsModel!.path).toBe(newPath);
+          expect(context.model.toString()).toBe('foo');
+          expect(
+            document.body.getElementsByClassName('jp-Dialog')
+          ).toHaveLength(0);
+        } finally {
+          get.mockImplementation(getImplementation);
+        }
+      });
+
+      it('should ignore stale contents if the file is renamed while it is loading', async () => {
+        const oldPath = context.path;
+        const newPath = UUID.uuid4() + '.txt';
+        const staleContents = await manager.contents.save(oldPath, {
+          type: factory.contentType,
+          format: factory.fileFormat,
+          content: 'foo'
+        });
+
+        const get = manager.contents.get as jest.MockedFunction<
+          typeof manager.contents.get
+        >;
+        const getImplementation = get.getMockImplementation();
+        if (!getImplementation) {
+          throw new Error('Missing contents get mock implementation');
+        }
+
+        const started = new PromiseDelegate<void>();
+        const delayedGet = new PromiseDelegate<Contents.IModel>();
+        let isFirstGet = true;
+        get.mockImplementation((path, options) => {
+          if (path === oldPath && isFirstGet) {
+            isFirstGet = false;
+            started.resolve();
+            return delayedGet.promise;
+          }
+          return getImplementation(path, options);
+        });
+
+        try {
+          const initialized = context.initialize(false);
+          await started.promise;
+          await manager.contents.rename(oldPath, newPath);
+          delayedGet.resolve(staleContents);
+
+          await expect(initialized).resolves.not.toThrow();
+          await expect(context.ready).resolves.not.toThrow();
+          expect(context.path).toBe(newPath);
+          expect(context.contentsModel!.path).toBe(newPath);
+          expect(context.model.toString()).toBe('foo');
+        } finally {
+          get.mockImplementation(getImplementation);
+        }
+      });
+
+      it('should resolve if the file is renamed before its checkpoint is created', async () => {
+        const oldPath = context.path;
+        const newPath = UUID.uuid4() + '.txt';
+        await manager.contents.save(oldPath, {
+          type: factory.contentType,
+          format: factory.fileFormat,
+          content: 'foo'
+        });
+
+        const createCheckpoint = manager.contents
+          .createCheckpoint as jest.MockedFunction<
+          typeof manager.contents.createCheckpoint
+        >;
+        const createImplementation = createCheckpoint.getMockImplementation();
+        if (!createImplementation) {
+          throw new Error(
+            'Missing contents createCheckpoint mock implementation'
+          );
+        }
+        // The server fails to copy the file that the rename moved away.
+        createCheckpoint.mockImplementation(path =>
+          path === oldPath
+            ? Promise.reject(new Error('Unhandled error'))
+            : createImplementation(path)
+        );
+
+        try {
+          await expect(context.initialize(false)).resolves.not.toThrow();
+          await manager.contents.rename(oldPath, newPath);
+          expect(context.path).toBe(newPath);
+          expect(context.model.toString()).toBe('foo');
+          expect(
+            document.body.getElementsByClassName('jp-Dialog')
+          ).toHaveLength(0);
+        } finally {
+          createCheckpoint.mockImplementation(createImplementation);
+        }
+      });
     });
 
     describe('#disposed', () => {
@@ -401,6 +540,15 @@ describe('docregistry/context', () => {
     });
 
     describe('#save()', () => {
+      // Edit the text as the editor does, which marks the document as dirty.
+      const edit = (
+        context: Context<DocumentRegistry.IModel>,
+        from: number,
+        to: number,
+        text: string
+      ) =>
+        (context.model.sharedModel as ISharedFile).updateSource(from, to, text);
+
       it('should save the contents of the file to disk', async () => {
         await context.initialize(true);
         context.model.fromString('foo');
@@ -414,6 +562,69 @@ describe('docregistry/context', () => {
         const model = await manager.contents.get(context.path, opts);
 
         expect(model.content).toBe('foo');
+      });
+
+      it('should mark the document as saved', async () => {
+        await context.initialize(true);
+        edit(context, 0, 0, 'foo');
+        expect(context.model.dirty).toBe(true);
+        await context.save();
+        expect(context.model.dirty).toBe(false);
+      });
+
+      it('should keep the document dirty if it changes during the save', async () => {
+        await context.initialize(true);
+        edit(context, 0, 0, 'foo');
+        const save = manager.contents.save.bind(manager.contents);
+        jest
+          .mocked(manager.contents.save)
+          .mockImplementationOnce((path, options) => {
+            // The content to save was read before this edit.
+            edit(context, 3, 3, ' bar');
+            return save(path, options);
+          });
+        await context.save();
+
+        const opts: Contents.IFetchOptions = {
+          format: factory.fileFormat,
+          type: factory.contentType,
+          content: true
+        };
+        expect((await manager.contents.get(context.path, opts)).content).toBe(
+          'foo'
+        );
+        expect(context.model.dirty).toBe(true);
+
+        await context.save();
+        expect((await manager.contents.get(context.path, opts)).content).toBe(
+          'foo bar'
+        );
+        expect(context.model.dirty).toBe(false);
+      });
+
+      it('should mark the document as not dirty if the save reloads it from disk', async () => {
+        context = new Context({
+          manager,
+          factory,
+          // The contents manager mock returns a random hash for this path,
+          // so the save finds that the file changed on disk.
+          path: 'random-hash.txt'
+        });
+        context.model.fromString('foo');
+        await context.initialize(true);
+        edit(context, 3, 3, ' bar');
+
+        const promise = context.save();
+        await waitForDialog();
+        const dialog = document.body.getElementsByClassName('jp-Dialog')[0];
+        const reload = Array.from(dialog.getElementsByTagName('button')).find(
+          button => button.textContent === 'Reload from Disk'
+        );
+        reload!.click();
+        await promise;
+
+        expect(context.model.toString()).toBe('foo');
+        expect(context.model.dirty).toBe(false);
       });
 
       it('should should preserve LF line endings upon save', async () => {
@@ -515,6 +726,32 @@ describe('docregistry/context', () => {
         expect(model1.content).toEqual(model2.content);
       });
 
+      it('should not overwrite an existing directory', async () => {
+        const dirName = UUID.uuid4();
+        const dir = await manager.contents.save(dirName, {
+          type: 'directory'
+        });
+
+        const func = async () => {
+          await waitForDialog();
+          const dialog = document.body.getElementsByClassName('jp-Dialog')[0];
+          const input = dialog.getElementsByTagName('input')[0];
+          input.value = dir.path;
+          await acceptDialog(); // Accept rename dialog
+          await waitForDialog();
+          await acceptDialog(); // Accept error dialog
+        };
+
+        await context.initialize(true);
+        const promise = func();
+        const result = await context.saveAs();
+        await promise;
+
+        expect(result).toBe(false);
+        const model = await manager.contents.get(dir.path, { content: false });
+        expect(model.type).toBe('directory');
+      });
+
       it('should bring up a conflict dialog', async () => {
         const newPath = UUID.uuid4() + '.txt';
 
@@ -535,11 +772,16 @@ describe('docregistry/context', () => {
         const promise = func();
 
         const oldPath = context.path;
+        const spySave = jest.spyOn(manager.contents, 'save');
+        spySave.mockClear();
         const result = await context.saveAs();
         await promise;
 
         // Should return true when overwrite is accepted
         expect(result).toBe(true);
+        expect(
+          spySave.mock.calls.filter(call => call[0] === newPath)
+        ).toHaveLength(1);
 
         // We no longer rename the current document
         //expect(context.path).toBe(newPath);
@@ -617,6 +859,16 @@ describe('docregistry/context', () => {
         context.model.fromString('bar');
         await context.revert();
         expect(context.model.toString()).toBe('foo');
+      });
+
+      it('should mark the document as not dirty', async () => {
+        await context.initialize(true);
+        context.model.fromString('foo');
+        await context.save();
+        context.model.fromString('bar');
+        context.model.dirty = true;
+        await context.revert();
+        expect(context.model.dirty).toBe(false);
       });
 
       it('should normalize CRLF line endings to LF', async () => {

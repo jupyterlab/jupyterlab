@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { ToolbarRegistry } from '@jupyterlab/apputils';
+import { ToolbarRegistry } from '@jupyterlab/apputils';
 import { createDefaultFactory } from '@jupyterlab/apputils';
 import type {
   Cell,
@@ -372,7 +372,7 @@ export class CellToolbarTracker implements IDisposable {
   /**
    * Check for overlap between rendered Markdown and the cell toolbar
    *
-   * @param activeCell A rendered MarkdownCell
+   * @param activeCell - A rendered MarkdownCell
    * @returns `true` if the first line of the output overlaps with the cell toolbar, `false` otherwise
    */
   private _markdownOverlapsToolbar(activeCell: MarkdownCell): boolean {
@@ -476,7 +476,7 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _cellToolbarLeft(activeCell: Cell<ICellModel>): number | null {
-    return this._cellToolbarRect(activeCell)?.left || null;
+    return this._cellToolbarRect(activeCell)?.left ?? null;
   }
 
   private _enabled: boolean;
@@ -525,7 +525,10 @@ const defaultToolbarItems: ToolbarRegistry.IWidget[] = [
  */
 export class CellBarExtension implements DocumentRegistry.WidgetExtension {
   static readonly FACTORY_NAME = 'Cell';
-  static readonly WIDGET_ID_ARG = 'widgetId';
+  /**
+   * @deprecated use `ToolbarRegistry.WIDGET_ID_ARG`
+   */
+  static readonly WIDGET_ID_ARG = ToolbarRegistry.WIDGET_ID_ARG;
 
   constructor(
     commands: CommandRegistry,
@@ -573,22 +576,31 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
     // Create a factory that passes the widget ID to the toolbar factory
     const factoryWithWidgetId = (widget: Widget) => {
       return this._toolbarFactory(widget, {
-        [CellBarExtension.WIDGET_ID_ARG]: panel.id
+        [ToolbarRegistry.WIDGET_ID_ARG]: panel.id
       });
     };
 
-    return (this._tracker = new CellToolbarTracker(
+    const tracker = (this._tracker = new CellToolbarTracker(
       panel,
       undefined,
       factoryWithWidgetId
     ));
+    // This extension lives as long as the document registry while the tracker
+    // belongs to one panel: left in place, the reference would keep the
+    // disposed panel reachable through the factory closure above.
+    panel.disposed.connect(() => {
+      if (this._tracker === tracker) {
+        this._tracker = null;
+      }
+    });
+    return tracker;
   }
 
   /**
    * Whether the cell toolbar is displayed, if there is enough room for it
    */
   get enabled(): boolean {
-    return this._tracker.enabled;
+    return this._tracker?.enabled ?? false;
   }
 
   /**
@@ -605,5 +617,5 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
     widget: Widget,
     commandArgs?: Record<string, any>
   ) => IObservableList<ToolbarRegistry.IToolbarItem>;
-  private _tracker: CellToolbarTracker;
+  private _tracker: CellToolbarTracker | null = null;
 }

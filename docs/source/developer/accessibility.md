@@ -77,6 +77,12 @@ codebase defines a set of [color variables](https://github.com/jupyterlab/jupyte
 that can be used for borders, icons, and such. If you're adding any CSS that
 needs a color value, please use one of the variables defined.
 
+### Tag accessibility settings
+
+If you add a setting related to accessibility, add `"tags": ["accessibility"]`
+to it in the schema, so that users can find it with `tag:accessibility` in the
+Settings Editor (see {ref}`settings-editor-tags`).
+
 ### Upstream fixes in Lumino
 
 JupyterLab uses a front-end framework that was built specifically for it called
@@ -99,7 +105,7 @@ should be made:
   just JupyterLab—specifically, by JupyterLab extensions—one should be careful
   making changes to Lumino that might break downstream consumers/extensions.
 - So an additional rule of thumb is: if you can't make the fix in Lumino without
-  breaking dependants, then it might be better to make the fix in JupyterLab. In
+  breaking dependents, then it might be better to make the fix in JupyterLab. In
   this case, you might take a two-track approach, where you fix the
   accessibility issue in JupyterLab and also submit a breaking fix in Lumino
   that targets a future, major, API-breaking release/version of Lumino.

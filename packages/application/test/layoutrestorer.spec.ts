@@ -7,6 +7,7 @@ import { WidgetTracker } from '@jupyterlab/apputils';
 import { StateDB } from '@jupyterlab/statedb';
 import { CommandRegistry } from '@lumino/commands';
 import { PromiseDelegate } from '@lumino/coreutils';
+import type { DockLayout } from '@lumino/widgets';
 import { Widget } from '@lumino/widgets';
 
 describe('apputils', () => {
@@ -196,6 +197,264 @@ describe('apputils', () => {
         await restorer.save(dehydrated);
         const layout = await restorer.fetch();
         expect(layout).toEqual(dehydrated);
+      });
+    });
+
+    describe('#fetch() of the main area', () => {
+      const layoutWith = (
+        mainArea: ILabShell.IMainArea
+      ): ILabShell.ILayout => ({
+        mainArea,
+        downArea: { currentWidget: null, widgets: null, size: null },
+        leftArea: {
+          collapsed: true,
+          currentWidget: null,
+          widgets: null,
+          visible: false,
+          widgetStates: {}
+        },
+        rightArea: {
+          collapsed: true,
+          currentWidget: null,
+          widgets: null,
+          visible: false,
+          widgetStates: {}
+        },
+        relativeSizes: null,
+        topArea: { simpleVisibility: true }
+      });
+
+      const tabArea = (layout: ILabShell.ILayout): DockLayout.ITabAreaConfig =>
+        layout.mainArea!.dock!.main as DockLayout.ITabAreaConfig;
+
+      it('should keep the current tab when a tab before it is not tracked', async () => {
+        const restorer = new LayoutRestorer({
+          connector: new StateDB(),
+          first: Promise.resolve(void 0),
+          registry: new CommandRegistry()
+        });
+        const [notebook, untracked, view] = [
+          new Widget(),
+          new Widget(),
+          new Widget()
+        ];
+        restorer.add(notebook, 'notebook');
+        restorer.add(view, 'view');
+        await restorer.restored;
+        await restorer.save(
+          layoutWith({
+            currentWidget: view,
+            dock: {
+              main: {
+                type: 'tab-area',
+                currentIndex: 2,
+                widgets: [notebook, untracked, view]
+              }
+            }
+          })
+        );
+        const layout = await restorer.fetch();
+        expect(tabArea(layout).widgets).toEqual([notebook, view]);
+        expect(tabArea(layout).currentIndex).toBe(1);
+        expect(layout.mainArea?.currentWidget).toBe(view);
+      });
+
+      it('should make the tab before an untracked current tab current', async () => {
+        const restorer = new LayoutRestorer({
+          connector: new StateDB(),
+          first: Promise.resolve(void 0),
+          registry: new CommandRegistry()
+        });
+        // A plugin adds a widget with no tracker on each start, after the view.
+        const [notebook, view, untracked] = [
+          new Widget(),
+          new Widget(),
+          new Widget()
+        ];
+        restorer.add(notebook, 'notebook');
+        restorer.add(view, 'view');
+        await restorer.restored;
+        await restorer.save(
+          layoutWith({
+            currentWidget: untracked,
+            dock: {
+              main: {
+                type: 'tab-area',
+                currentIndex: 2,
+                widgets: [notebook, view, untracked]
+              }
+            }
+          })
+        );
+        const layout = await restorer.fetch();
+        expect(tabArea(layout).widgets).toEqual([notebook, view]);
+        expect(tabArea(layout).currentIndex).toBe(1);
+        expect(layout.mainArea?.currentWidget).toBe(view);
+      });
+
+      it('should keep the current tab when a saved tab is not restored', async () => {
+        const state = new StateDB();
+        const before = new LayoutRestorer({
+          connector: state,
+          first: Promise.resolve(void 0),
+          registry: new CommandRegistry()
+        });
+        const [first, gone, last] = [new Widget(), new Widget(), new Widget()];
+        before.add(first, 'first');
+        before.add(gone, 'gone');
+        before.add(last, 'last');
+        await before.restored;
+        await before.save(
+          layoutWith({
+            currentWidget: last,
+            dock: {
+              main: {
+                type: 'tab-area',
+                currentIndex: 2,
+                widgets: [first, gone, last]
+              }
+            }
+          })
+        );
+
+        // After a reload, the widget named "gone" does not come back.
+        const after = new LayoutRestorer({
+          connector: state,
+          first: Promise.resolve(void 0),
+          registry: new CommandRegistry()
+        });
+        const [firstAgain, lastAgain] = [new Widget(), new Widget()];
+        after.add(firstAgain, 'first');
+        after.add(lastAgain, 'last');
+        await after.restored;
+        const layout = await after.fetch();
+        expect(tabArea(layout).widgets).toEqual([firstAgain, lastAgain]);
+        expect(tabArea(layout).currentIndex).toBe(1);
+      });
+
+      it('should make the tab before a current tab that is not restored current', async () => {
+        const state = new StateDB();
+        const before = new LayoutRestorer({
+          connector: state,
+          first: Promise.resolve(void 0),
+          registry: new CommandRegistry()
+        });
+        const [first, middle, gone] = [
+          new Widget(),
+          new Widget(),
+          new Widget()
+        ];
+        before.add(first, 'first');
+        before.add(middle, 'middle');
+        before.add(gone, 'gone');
+        await before.restored;
+        await before.save(
+          layoutWith({
+            currentWidget: gone,
+            dock: {
+              main: {
+                type: 'tab-area',
+                currentIndex: 2,
+                widgets: [first, middle, gone]
+              }
+            }
+          })
+        );
+
+        // After a reload, the current widget does not come back, as when its
+        // file was deleted.
+        const after = new LayoutRestorer({
+          connector: state,
+          first: Promise.resolve(void 0),
+          registry: new CommandRegistry()
+        });
+        const [firstAgain, middleAgain] = [new Widget(), new Widget()];
+        after.add(firstAgain, 'first');
+        after.add(middleAgain, 'middle');
+        await after.restored;
+        const layout = await after.fetch();
+        expect(tabArea(layout).currentIndex).toBe(1);
+        expect(layout.mainArea?.currentWidget).toBe(middleAgain);
+      });
+
+      it('should make a tab of the same area current when the current tab is not restored', async () => {
+        const state = new StateDB();
+        const before = new LayoutRestorer({
+          connector: state,
+          first: Promise.resolve(void 0),
+          registry: new CommandRegistry()
+        });
+        const [left, middle, gone] = [new Widget(), new Widget(), new Widget()];
+        before.add(left, 'left');
+        before.add(middle, 'middle');
+        before.add(gone, 'gone');
+        await before.restored;
+        await before.save(
+          layoutWith({
+            currentWidget: gone,
+            dock: {
+              main: {
+                type: 'split-area',
+                orientation: 'horizontal',
+                sizes: [0.5, 0.5],
+                children: [
+                  { type: 'tab-area', currentIndex: 0, widgets: [left] },
+                  { type: 'tab-area', currentIndex: 1, widgets: [middle, gone] }
+                ]
+              }
+            }
+          })
+        );
+
+        const after = new LayoutRestorer({
+          connector: state,
+          first: Promise.resolve(void 0),
+          registry: new CommandRegistry()
+        });
+        const [leftAgain, middleAgain] = [new Widget(), new Widget()];
+        after.add(leftAgain, 'left');
+        after.add(middleAgain, 'middle');
+        await after.restored;
+        const layout = await after.fetch();
+        expect(layout.mainArea?.currentWidget).toBe(middleAgain);
+      });
+
+      it('should make the shown tab current when an untracked current tab is alone in its area', async () => {
+        const restorer = new LayoutRestorer({
+          connector: new StateDB(),
+          first: Promise.resolve(void 0),
+          registry: new CommandRegistry()
+        });
+        const [notebook, view, untracked] = [
+          new Widget(),
+          new Widget(),
+          new Widget()
+        ];
+        restorer.add(notebook, 'notebook');
+        restorer.add(view, 'view');
+        await restorer.restored;
+        await restorer.save(
+          layoutWith({
+            currentWidget: untracked,
+            dock: {
+              main: {
+                type: 'split-area',
+                orientation: 'horizontal',
+                sizes: [0.5, 0.5],
+                children: [
+                  {
+                    type: 'tab-area',
+                    currentIndex: 1,
+                    widgets: [notebook, view]
+                  },
+                  { type: 'tab-area', currentIndex: 0, widgets: [untracked] }
+                ]
+              }
+            }
+          })
+        );
+        const layout = await restorer.fetch();
+        expect(layout.mainArea?.currentWidget).toBe(view);
       });
     });
 

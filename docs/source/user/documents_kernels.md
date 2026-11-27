@@ -79,6 +79,7 @@ This displays:
 
    ```python
    import time
+
    for i in range(100):
        print(f"Main shell: {i}")
        time.sleep(1)

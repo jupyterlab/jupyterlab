@@ -15,15 +15,17 @@
     "hiddenMode": {
       "type": "string",
       "title": "Hidden mode of main panel widgets",
-      "description": "The method for hiding widgets in the main dock panel. Using `scale` will increase performance on Firefox but don't use it with Chrome, Chromium or Edge. Similar performance gains are seen with `contentVisibility` which is only available in Chromium-based browsers.",
+      "description": "The method for hiding widgets in the main dock panel. Using `scale` will increase performance on Firefox but don't use it with Chrome, Chromium or Edge. Using `contentVisibility` improves performance on browsers that support it.",
       "oneOf": [
         { "const": "display", "title": "Display" },
         { "const": "scale", "title": "Scale" },
         { "const": "contentVisibility", "title": "Content visibility" }
       ],
-      "default": "display"
+      "default": "contentVisibility",
+      "tags": ["performance"]
     },
     "startMode": {
+      "type": "string",
       "oneOf": [
         { "const": "", "title": "Default" },
         { "const": "single", "title": "Single" },
@@ -79,13 +81,15 @@
       "type": "boolean",
       "title": "Optimize panel resize",
       "description": "Freeze panel dimensions during handle drag to improve resize performance when panels contain heavy DOM content.",
-      "default": true
+      "default": true,
+      "tags": ["performance"]
     },
     "zoomOnWheel": {
       "type": "boolean",
       "title": "Enable Ctrl+ Scroll Zoom",
       "description": "Zoom the widget under the mouse when using Ctrl+ mouse wheel.",
-      "default": false
+      "default": false,
+      "tags": ["accessibility"]
     }
   },
   "additionalProperties": false,
@@ -98,6 +102,7 @@
           "type": "object",
           "properties": {
             "area": {
+              "type": "string",
               "oneOf": [
                 { "const": "main", "title": "Main" },
                 { "const": "left", "title": "Left" },

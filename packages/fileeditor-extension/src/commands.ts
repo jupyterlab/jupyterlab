@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { selectAll } from '@codemirror/commands';
-import { findNext, gotoLine } from '@codemirror/search';
 import type { JupyterFrontEnd } from '@jupyterlab/application';
 import type {
   ICommandPalette,
@@ -309,7 +308,11 @@ export namespace Commands {
         try {
           return await settingRegistry.set(id, 'editorConfig', config);
         } catch (reason) {
-          console.error(`Failed to set ${id}: ${reason.message}`);
+          console.error(
+            `Failed to set ${id}: ${
+              reason instanceof Error ? reason.message : String(reason)
+            }`
+          );
         }
       },
       isEnabled,
@@ -361,7 +364,11 @@ export namespace Commands {
         try {
           return await settingRegistry.set(id, 'editorConfig', config);
         } catch (reason) {
-          console.error(`Failed to set ${id}: ${reason.message}`);
+          console.error(
+            `Failed to set ${id}: ${
+              reason instanceof Error ? reason.message : String(reason)
+            }`
+          );
         }
       },
       isEnabled,
@@ -433,7 +440,11 @@ export namespace Commands {
         try {
           return await settingRegistry.set(id, 'editorConfig', config);
         } catch (reason) {
-          console.error(`Failed to set ${id}: ${reason.message}`);
+          console.error(
+            `Failed to set ${id}: ${
+              reason instanceof Error ? reason.message : String(reason)
+            }`
+          );
         }
       },
       isToggled: args => {
@@ -469,7 +480,11 @@ export namespace Commands {
         try {
           return await settingRegistry.set(id, 'editorConfig', config);
         } catch (reason) {
-          console.error(`Failed to set ${id}: ${reason.message}`);
+          console.error(
+            `Failed to set ${id}: ${
+              reason instanceof Error ? reason.message : String(reason)
+            }`
+          );
         }
       },
       label: trans.__('Match Brackets'),
@@ -527,7 +542,11 @@ export namespace Commands {
         try {
           return await settingRegistry.set(id, 'editorConfig', config);
         } catch (reason) {
-          console.error(`Failed to set ${id}: ${reason.message}`);
+          console.error(
+            `Failed to set ${id}: ${
+              reason instanceof Error ? reason.message : String(reason)
+            }`
+          );
         }
       },
       label: trans.__('Auto Close Brackets in Text Editor'),
@@ -599,7 +618,11 @@ export namespace Commands {
         try {
           return await settingRegistry.set(id, 'editorConfig', config);
         } catch (reason) {
-          console.error(`Failed to set theme - ${reason.message}`);
+          console.error(
+            `Failed to set theme - ${
+              reason instanceof Error ? reason.message : String(reason)
+            }`
+          );
         }
       },
       isToggled: args =>
@@ -623,12 +646,13 @@ export namespace Commands {
 
     commands.addCommand(CommandIDs.find, {
       label: trans.__('Find…'),
-      execute: () => {
+      execute: async () => {
         const widget = tracker.currentWidget;
         if (!widget) {
           return;
         }
         const editor = widget.content.editor as CodeMirrorEditor;
+        const { findNext } = await import('@codemirror/search');
         editor.execCommand(findNext);
       },
       isEnabled,
@@ -642,7 +666,7 @@ export namespace Commands {
 
     commands.addCommand(CommandIDs.goToLine, {
       label: trans.__('Go to Line…'),
-      execute: args => {
+      execute: async args => {
         const widget = tracker.currentWidget;
         if (!widget) {
           return;
@@ -657,6 +681,7 @@ export namespace Commands {
             column: (column ?? 1) - 1
           });
         } else {
+          const { gotoLine } = await import('@codemirror/search');
           editor.execCommand(gotoLine);
         }
       },
@@ -740,7 +765,12 @@ export namespace Commands {
         widget.content.editor.replaceSelection?.(text);
       },
       isEnabled,
-      label: trans.__('Replace Selection in Editor'),
+      label: args => {
+        const text = args['text'];
+        return typeof text === 'string' && text
+          ? trans.__('Replace Selection in Editor with "%1"', text)
+          : trans.__('Replace Selection in Editor');
+      },
       describedBy: {
         args: {
           type: 'object',
@@ -780,6 +810,18 @@ export namespace Commands {
       }
     });
 
+    const getConsoleForEditor = () => {
+      const current = tracker.currentWidget;
+      return (
+        current &&
+        consoleTracker?.find(
+          widget =>
+            widget.sessionContext.path === current.context.path ||
+            widget.sessionContext.session?.path === current.context.path
+        )
+      );
+    };
+
     /**
      * Restart the Console Kernel linked to the current Editor
      */
@@ -799,7 +841,14 @@ export namespace Commands {
         }
       },
       label: trans.__('Restart Kernel'),
-      isEnabled: () => consoleTracker !== null && isEnabled(),
+      isEnabled: () =>
+        isEnabled() &&
+        !!consoleTracker?.find(
+          widget =>
+            widget.sessionContext.session?.path ===
+              tracker.currentWidget?.context.path &&
+            !!widget.sessionContext.session?.kernel
+        ),
       describedBy: {
         args: {
           type: 'object',
@@ -850,18 +899,20 @@ export namespace Commands {
         if (!selected) {
           // no selection, submit whole line and advance
           code = editor.getLine(selection.start.line);
-          const cursor = editor.getCursorPosition();
-          const nextLine = editor.getLine(cursor.line + 1);
+          if (getConsoleForEditor()?.sessionContext.hasNoKernel === false) {
+            const cursor = editor.getCursorPosition();
+            const nextLine = editor.getLine(cursor.line + 1);
 
-          if (cursor.line + 1 === editor.lineCount) {
-            const text = editor.model.sharedModel.getSource();
-            editor.model.sharedModel.setSource(text + '\n');
+            if (cursor.line + 1 === editor.lineCount) {
+              const text = editor.model.sharedModel.getSource();
+              editor.model.sharedModel.setSource(text + '\n');
+            }
+
+            editor.setCursorPosition({
+              line: cursor.line + 1,
+              column: nextLine?.length ?? 0 // Place cursor at end of line if line has content else place at start of line
+            });
           }
-
-          editor.setCursorPosition({
-            line: cursor.line + 1,
-            column: nextLine?.length ?? 0 // Place cursor at end of line if line has content else place at start of line
-          });
         }
 
         const activate = false;
@@ -871,7 +922,9 @@ export namespace Commands {
           return Promise.resolve(void 0);
         }
       },
-      isEnabled,
+      isEnabled: () =>
+        isEnabled() &&
+        getConsoleForEditor()?.sessionContext.hasNoKernel === false,
       label: trans.__('Run Selected Code'),
       describedBy: {
         args: {
@@ -915,7 +968,9 @@ export namespace Commands {
           return Promise.resolve(void 0);
         }
       },
-      isEnabled,
+      isEnabled: () =>
+        isEnabled() &&
+        getConsoleForEditor()?.sessionContext.hasNoKernel === false,
       label: trans.__('Run All Code'),
       describedBy: {
         args: {
@@ -945,7 +1000,10 @@ export namespace Commands {
       isVisible: () => {
         const widget = tracker.currentWidget;
         return (
-          (widget && PathExt.extname(widget.context.path) === '.md') || false
+          (isEnabled() &&
+            widget &&
+            PathExt.extname(widget.context.path) === '.md') ||
+          false
         );
       },
       icon: markdownIcon,
@@ -1481,6 +1539,8 @@ export namespace Commands {
 
     addCreateNewMarkdownCommandToPalette(palette, trans);
 
+    addMarkdownPreviewCommandToPalette(palette, trans);
+
     addChangeFontSizeCommandsToPalette(palette, trans);
   }
 
@@ -1532,6 +1592,20 @@ export namespace Commands {
     palette.addItem({
       command: CommandIDs.createNewMarkdown,
       args: { isPalette: true },
+      category: paletteCategory
+    });
+  }
+
+  /**
+   * Add a Markdown Preview command to the File Editor palette
+   */
+  export function addMarkdownPreviewCommandToPalette(
+    palette: ICommandPalette,
+    trans: TranslationBundle
+  ): void {
+    const paletteCategory = trans.__('Text Editor');
+    palette.addItem({
+      command: CommandIDs.markdownPreview,
       category: paletteCategory
     });
   }
@@ -1668,23 +1742,25 @@ export namespace Commands {
     consoleTracker: IConsoleTracker,
     isEnabled: () => boolean
   ): void {
-    const isEnabled_ = (current: IDocumentWidget<FileEditor>) =>
+    const hasConsoleForEditor = (current: IDocumentWidget<FileEditor>) =>
       isEnabled() &&
       current.context &&
       !!consoleTracker.find(
-        widget => widget.sessionContext.session?.path === current.context.path
+        widget =>
+          widget.sessionContext.path === current.context.path ||
+          widget.sessionContext.session?.path === current.context.path
       );
     menu.runMenu.codeRunners.restart.add({
       id: CommandIDs.restartConsole,
-      isEnabled: isEnabled_
+      isEnabled: hasConsoleForEditor
     });
     menu.runMenu.codeRunners.run.add({
       id: CommandIDs.runCode,
-      isEnabled: isEnabled_
+      isEnabled: hasConsoleForEditor
     });
     menu.runMenu.codeRunners.runAll.add({
       id: CommandIDs.runAllCode,
-      isEnabled: isEnabled_
+      isEnabled: hasConsoleForEditor
     });
   }
 

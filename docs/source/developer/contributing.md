@@ -34,10 +34,9 @@ please assume that no one else is working on it (even if someone previously
 volunteered) and open a pull request with proposed implementation.
 If you are not certain about the implementation, using draft pull requests is encouraged.
 
-If you believe you’ve found a security vulnerability in JupyterLab or
-any Jupyter project, please report it to [security@ipython.org](mailto:security@ipython.org). If you
-prefer to encrypt your security reports, you can use [this PGP public
-key](https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipython_security.asc).
+If you believe you've found a security vulnerability in JupyterLab or
+any Jupyter project, please report it as described in the
+[security policy](https://github.com/jupyterlab/jupyterlab/security/policy).
 
 ```{toctree}
 :hidden: true
@@ -125,6 +124,12 @@ pre-commit run
 
 which should run any autoformatting on your code
 and tell you about any errors it couldn't fix automatically.
+To run the GitHub Actions security analysis locally before pushing, use
+`pre-commit run zizmor --files .github/workflows/<workflow>.yml` or
+`pre-commit run zizmor --all-files`.
+
+The local hook is pinned and kept aligned with the CI `zizmor` version.
+For day-to-day development, prefer targeted runs with `--files`.
 You may also install [ruff integration](https://docs.astral.sh/ruff/integrations)
 into your text editor to format code automatically.
 
@@ -350,7 +355,7 @@ node -v
 While there is a lot to learn by following the steps above, they can be automated to save time.
 The main advantages of using automation are: reduced time to get the environment up-and-running, reduced time to
 re-build the environment, better standardisation ("baseline", reproducible environments).
-This section shows how to do that using VS Code dev containers, Docker and Vagrant.
+This section shows how to do that using VS Code dev containers, Docker, pixi and Vagrant.
 
 #### **Setup for VS Code**
 
@@ -413,6 +418,36 @@ exit
 bash docker/start.sh build
 ```
 
+#### **Setup using pixi**
+
+[pixi](https://pixi.sh) creates the development environment from the `[tool.pixi]`
+section of `pyproject.toml`. It installs Python and Node.js from conda-forge, and
+installs JupyterLab in editable mode with the `dev` and `test` extras, as
+`pip install -e ".[dev,test]"` does.
+
+1. [Install pixi](https://pixi.sh/latest/installation/).
+2. Fork the JupyterLab [repository](https://github.com/jupyterlab/jupyterlab/fork).
+3. Clone your fork and create the environment. The first install builds the dev mode
+   assets, which takes several minutes.
+
+```bash
+git clone https://github.com/<your-github-username>/jupyterlab.git
+cd jupyterlab
+pixi install
+```
+
+Run commands in the environment with `pixi run`, or start a shell in it with `pixi shell`:
+
+```bash
+pixi run jupyter lab --dev-mode
+```
+
+The git hooks use tools from the environment, so run `git commit` and `git push` from
+a `pixi shell`, as you would from an activated virtual environment.
+
+The `docs` environment has the documentation dependencies, see
+[Writing Documentation](#writing-documentation).
+
 #### **Setup using Vagrant**
 
 A practical example can be found [there](https://github.com/markgreene74/jupyterlab-local-dev-with-vagrant) and
@@ -442,7 +477,7 @@ jupyter lab build
 ### Frequent issues
 
 :::{important}
-On Windows, symbolic links need to be activated on Windows 10 or above for Python version 3.8 or higher
+On Windows, symbolic links need to be activated on Windows 10 or above
 by activating the 'Developer Mode'. That may not be allowed by your administrators.
 See [Activate Developer Mode on Windows](https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development)
 for instructions.
@@ -466,7 +501,8 @@ for instructions.
   `export PATH="$HOME/.local/bin:$PATH"` command.
 - At times, it may be necessary to clean your local repo with the
   command `npm run clean:slate`. This will clean the repository, and
-  re-install and rebuild.
+  re-install and rebuild. With pixi, run `pixi run python clean.py` and then
+  `pixi reinstall` instead.
 - If `pip` gives a `VersionConflict` error, it usually means that
   the installed version of `jupyterlab_server` is out of date. Run
   `pip install --upgrade jupyterlab_server` to get the latest
@@ -493,19 +529,40 @@ jupyter lab --dev-mode
 ```
 
 Development mode ensures that you are running the JavaScript assets that
-are built in the dev-installed Python package. Note that when running in
-dev mode, extensions will not be activated by default - refer
-{ref}`documentation on extension development <prebuilt-dev-workflow>` to know more.
+are built in the dev-installed Python package. This includes the core
+packages in `packages/`, so changes there only require rebuilding those
+assets (see `--watch` below); no extra flag is needed for them.
+
+:::{note}
+Dev mode skips the prebuilt extensions found in the `labextensions` search
+paths, that is third-party extensions installed with `pip`/`conda` or with
+`jupyter-builder develop` (`@jupyterlab/galata-extension`, used by the UI
+tests, is the only exception). To load them as well, for example when
+developing a prebuilt extension against the JupyterLab source repository,
+add `--extensions-in-dev-mode`:
+
+```bash
+jupyter lab --dev-mode --extensions-in-dev-mode
+```
+
+Refer to the {ref}`documentation on extension development <prebuilt-dev-workflow>`
+to learn more.
+:::
 
 When running in dev mode, a red stripe will appear at the top of the
 page; this is to indicate running an unreleased version.
 
-If you want to change the TypeScript code and rebuild on the fly
-(needs page refresh after each rebuild):
+If you want to change the TypeScript code in the core packages and
+rebuild on the fly (needs page refresh after each rebuild):
 
 ```bash
 jupyter lab --dev-mode --watch
 ```
+
+The watch mode rebuilds TypeScript sources in the JupyterLab repository.
+When developing a separate extension, run that extension's build or watch
+command as well so its TypeScript changes are compiled before refreshing
+JupyterLab.
 
 ### Build and Run the Tests
 
@@ -569,6 +626,35 @@ sometimes have to set a sentinel value inside a `Promise` and then
 check that the sentinel was set if we need a promise to run without
 blocking.
 
+#### Grouping Tests
+
+Group the tests of a spec file by the code that they test. The outer
+`describe` names the package, the next one names the class, and the
+innermost one names the member under test, as `#property` or
+`#method()`. For example, in `packages/notebook/test/model.spec.ts`:
+
+```typescript
+describe('@jupyterlab/notebook', () => {
+  describe('NotebookModel', () => {
+    describe('#constructor()', () => {
+      it('should create a notebook model', () => {
+        // ...
+      });
+    });
+
+    describe('#metadataChanged', () => {
+      it('should be emitted when a metadata field changes', () => {
+        // ...
+      });
+    });
+  });
+});
+```
+
+Write the behavior in the `it('should ...')` text. Instead of a group
+named after a topic, such as `describe('id references')`, put each test
+under the member that it tests.
+
 ## Internationalization
 
 ### Translatable strings update
@@ -578,7 +664,8 @@ must be delayed on minor or major versions.
 
 ## Performance Testing
 
-Benchmark of JupyterLab is done using Playwright. The actions measured are:
+JupyterLab performance benchmarks are implemented with Playwright. The actions
+measured are:
 
 - Opening a file
 - Switching from the file to a simple text file
@@ -587,15 +674,8 @@ Benchmark of JupyterLab is done using Playwright. The actions measured are:
 
 Two files are tested: a notebook with many code cells and another with many markdown cells.
 
-The test is run on the CI by comparing the result in the commit at which a PR branch started and the PR branch head on
-the same CI job to ensure using the same hardware.
-The benchmark job is triggered on:
-
-- Approved PR review
-- PR review that contains the sentence `please run benchmark`
-
-The tests are located in the subfolder `galata/test/benchmark`. And they can be
-executed with the following command:
+The tests are located in the subfolder `galata/test/benchmark`. They can be
+executed locally with the following command:
 
 ```bash
 jlpm test:benchmark
@@ -611,6 +691,19 @@ A special report will be generated in the folder `benchmark-results` that will c
 The reference, tagged _expected_, is stored in `lab-benchmark-expected.json`. It can be
 created using the `-u` option of Playwright; i.e. `jlpm test:benchmark -u`.
 
+Branch comparisons can be run from the
+[jupyterlab/benchmarks](https://github.com/jupyterlab/benchmarks/#readme)
+repository, which runs the challenger and reference branches on the same CI
+hardware.
+
+Memory leak regression tests live in the subfolder `galata/test/memory-leak`.
+They run in the Galata CI workflow as a Chromium-only project with one worker for
+deterministic object counts, and can be executed locally with:
+
+```bash
+jlpm test:memory-leak
+```
+
 ### Benchmark parameters
 
 The benchmark can be customized using the following environment variables:
@@ -618,9 +711,6 @@ The benchmark can be customized using the following environment variables:
 - `BENCHMARK_NUMBER_SAMPLES`: Number of samples to compute the execution time distribution; default 20.
 - `BENCHMARK_OUTPUTFILE`: Benchmark result output file; default `benchmark.json`. It is overridden in the `playwright-benchmark.config.js`.
 - `BENCHMARK_REFERENCE`: Reference name of the data; default is `actual` for current data and `expected` for the reference.
-
-More tests can be carried out manually on JupyterLab branches and run weekly on the default branch in
-[jupyterlab/benchmarks](https://github.com/jupyterlab/benchmarks/#readme) repository.
 
 ## Visual Regression and UI Tests
 
@@ -656,7 +746,7 @@ Main reasons for UI test failures are:
 
    If your code change is introducing an update to UI which causes existing UI Tests to
    fail, then you will need to update reference image(s) (and/or JSON snapshots) for the failing tests.
-   In order to do that, you can post a comment on your PR with the following content:
+   In order to do that, you can post a top-level comment on your PR with the following content:
    - (bot) `please open PR to update snapshots` - A bot will open a PR updating all snapshots
      generated in the most recent run of CI from your branch.
 
@@ -696,8 +786,10 @@ Here are some good practices to follow when writing integration tests:
 
 - Don't compare multiple screenshots in the same test, unless using `expect.soft`;
   if the first comparison breaks, it will require multiple re-runs of CI workflow to update all snapshots.
-- Don't include more UI elements than necessary, as that increases review burden when elements other than
-  the one tested change - reviewing hundreds of unrelated snapshots is exhausting and error-prone.
+- Crop the screenshot to the smallest area that still shows a reviewer the tested element in context.
+  Each extra UI element makes the test fail when that element changes. Reviewing hundreds of
+  unrelated snapshots is exhausting and error-prone. If the crop is too tight, the reviewer cannot
+  tell what the screenshot shows, or where the tested element is in the interface.
 - When cropping snapshots, prefer retrieving the required dimensions programmatically over hard-coding them.
 - Always use `toMatchSnapshot()` for comparing snapshots; do not implement custom logic reading/writing snapshots.
 - Do not use `waitForTimeout()` as this slows down tests and makes them flaky when CI runs slower than expected.
@@ -846,8 +938,8 @@ provides additional architecture information.
 
 ## The NPM Packages
 
-The repository consists of many npm packages that are managed using the
-lerna build tool. The npm package source files are in the `packages/`
+The repository consists of many npm packages that are managed as Yarn
+workspaces. The npm package source files are in the `packages/`
 subdirectory.
 
 ### Build the NPM Packages from Source
@@ -873,8 +965,11 @@ Documentation is written in Markdown. To ensure that the Read the Docs page buil
 need to install the documentation dependencies with `pip`:
 
 ```bash
-pip install -e ".[docs]"
+pip install -e . --group docs
 ```
+
+With [pixi](https://pixi.sh), use the `docs` environment instead, by prefixing the
+commands below with `pixi run -e docs`, for example `pixi run -e docs make html`.
 
 To test the docs run:
 
@@ -1040,7 +1135,7 @@ The key utility is `jlpm integrity`, which ensures the integrity
 of the packages in the repo. It will:
 
 - Ensure the core package version dependencies match everywhere.
-- Ensure imported packages match dependencies.
+- Ensure imported packages match dependencies, counting dynamic `import()` calls as imports.
 - Ensure a consistent version of all packages.
 - Manage the meta package.
 

@@ -22,6 +22,7 @@
 
 .jp-extensionmanager-title svg {
   width: 14px;
+  height: 14px;
 }
 
 .jp-extensionmanager-title .jp-icon3[fill] {
@@ -77,6 +78,26 @@
   min-height: 0;
   flex: 1 1 auto;
   overflow: auto;
+}
+
+.jp-extensionmanager-searchresults {
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-extensionmanager-searchresults > .jp-extensionmanager-listview-wrapper {
+  flex: 1;
+  min-height: 0;
+}
+
+.jp-extensionmanager-browse {
+  padding: 8px;
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
+}
+
+.jp-extensionmanager-browse > a {
+  color: var(--jp-content-link-color);
+  text-decoration: underline;
 }
 
 /*

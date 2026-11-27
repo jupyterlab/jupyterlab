@@ -188,7 +188,7 @@ export class RankedMenu extends Menu implements IRankedMenu {
   addItem(options: IRankedMenu.IItemOptions): IDisposableMenuItem {
     let insertIndex = -1;
 
-    if (options.rank) {
+    if (options.rank !== undefined) {
       insertIndex = this._ranks.findIndex(rank => options.rank! < rank);
     }
     if (insertIndex < 0) {

@@ -172,7 +172,7 @@ function activate(
         toSkip,
         translator,
         status,
-        query: args.query as string
+        query: args.query!
       })
     });
 
@@ -303,7 +303,7 @@ const jsonPlugin: JupyterFrontEndPlugin<IJSONSettingEditorTracker> = {
     ILabStatus,
     ITranslator
   ],
-  optional: [ILayoutRestorer, ICommandPalette],
+  optional: [ILayoutRestorer, ICommandPalette, IFormRendererRegistry],
   autoStart: true,
   provides: IJSONSettingEditorTracker,
   activate: activateJSON
@@ -321,7 +321,8 @@ function activateJSON(
   status: ILabStatus,
   translator: ITranslator,
   restorer: ILayoutRestorer | null,
-  palette: ICommandPalette | null
+  palette: ICommandPalette | null,
+  editorRegistry: IFormRendererRegistry | null
 ): IJSONSettingEditorTracker {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
@@ -375,6 +376,7 @@ function activateJSON(
           });
           return cmEditor;
         },
+        editorRegistry: editorRegistry ?? undefined,
         key,
         registry,
         rendermime,
@@ -533,16 +535,16 @@ function activateJSON(
             if (settingsEntries.length) {
               const successCount =
                 settingsEntries.length - errorUploading.length;
-              const successMessage = trans.__(
-                `Imported settings across ${successCount} ${
-                  successCount === 1 ? 'category' : 'categories'
-                } successfully.`
+              const successMessage = trans._n(
+                'Imported settings across %1 category successfully.',
+                'Imported settings across %1 categories successfully.',
+                successCount
               );
               const failureMessage = errorUploading.length
-                ? trans.__(
-                    `Failed to upload settings for the following ${
-                      errorUploading.length
-                    } ${errorUploading.length === 1 ? 'plugin' : 'plugins'}`
+                ? trans._n(
+                    'Failed to upload settings for the following %1 plugin',
+                    'Failed to upload settings for the following %1 plugins',
+                    errorUploading.length
                   )
                 : '';
 
@@ -572,7 +574,10 @@ function activateJSON(
           app.shell.add(widget, 'main');
           app.shell.activateById(widget.id);
         } catch (error) {
-          await showErrorMessage('Failed to import settings', error);
+          await showErrorMessage(
+            'Failed to import settings',
+            error instanceof Error ? error : String(error)
+          );
         }
       });
 

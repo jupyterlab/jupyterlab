@@ -1,16 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { JSONExt } from '@lumino/coreutils';
 import minimist from 'minimist';
+import type * as Path from 'path';
 import { URLExt } from './url';
 
 /**
  * Declare stubs for the node variables.
  */
-declare let process: any;
-declare let require: any;
+declare const process: {
+  argv?: string[];
+  env: Record<string, string | undefined>;
+};
+declare const require: (module: string) => unknown;
 
 /**
  * The namespace for `PageConfig` functions.
@@ -56,12 +59,15 @@ export namespace PageConfig {
     if (!found && typeof process !== 'undefined' && process.argv) {
       try {
         const cli = minimist(process.argv.slice(2));
-        const path: any = require('path');
+        const path = require('path') as typeof Path;
         let fullPath = '';
         if ('jupyter-config-data' in cli) {
           fullPath = path.resolve(cli['jupyter-config-data']);
         } else if ('JUPYTER_CONFIG_DATA' in process.env) {
-          fullPath = path.resolve(process.env['JUPYTER_CONFIG_DATA']);
+          const configPath = process.env['JUPYTER_CONFIG_DATA'];
+          if (configPath) {
+            fullPath = path.resolve(configPath);
+          }
         }
         if (fullPath) {
           // Force Rspack to ignore this require and not treat it as requiring a package.

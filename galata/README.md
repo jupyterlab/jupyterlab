@@ -109,7 +109,7 @@ report will be created in `playwright-report` folder. That report can be see by 
 jlpm playwright show-report
 ```
 
-## User advices
+## User advice
 
 ### Create tests
 
@@ -454,6 +454,33 @@ Possible values are:
 
 By default the user is stored in-memory.
 
+### mockPageConfig
+
+- type: \< boolean | Record\<string, unknown> >
+
+Mock JupyterLab PageConfig (`#jupyter-config-data`) or not.
+Possible values are:
+
+- false (default): PageConfig will not be mocked.
+- true: Same as an empty mapping, PageConfig keeps the server values.
+- Record\<string, unknown>: Mapping of PageConfig keys and values to override (e.g. `{ serverLocale: 'fr_FR' }`). A key set to `undefined` is removed.
+
+Example:
+
+```ts
+test.use({
+  mockPageConfig: {
+    serverLocale: 'fr_FR'
+  }
+});
+
+test('should return the mocked PageConfig', async ({ page }) => {
+  expect(await page.getOption('serverLocale')).toEqual('fr_FR');
+});
+```
+
+To mock PageConfig in one test, call `galata.Mock.mockPageConfig(page, pageConfig)` before the page loads or reloads. Each call replaces the mapping of the fixture and of earlier calls, so pass every key that the test changes.
+
 ### kernels
 
 - type: \<Map\<string, Kernel.IModel> | null>
@@ -700,6 +727,6 @@ of a test. You can also update them by running `jlpm playwright test --update-sn
 
 Galata framework is named after [Galata Tower](https://en.wikipedia.org/wiki/Galata_Tower) in Istanbul. Centuries ago, Galata Tower was used to spot fires in the city. Tower was also used as astronomical observatory in the past.
 
-## Acknowledgement
+## Acknowledgment
 
 Development of this project began under [Bloomberg](https://github.com/bloomberg) organization by [Mehmet Bektas](https://github.com/mbektas), then it was transferred to [JupyterLab](https://github.com/jupyterlab) organization. We gratefully acknowledge **Bloomberg** for the generous contribution and supporting open-source software community.

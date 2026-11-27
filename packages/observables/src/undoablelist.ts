@@ -23,6 +23,8 @@ export interface ISerializer<T> {
 
 /**
  * An observable list that supports undo/redo.
+ *
+ * @deprecated since 4.7.0, will be removed in 5.0. Observable lists with undo/redo are no longer used by JupyterLab core since document models migrated to Yjs.
  */
 export interface IObservableUndoableList<T> extends IObservableList<T> {
   /**
@@ -66,6 +68,8 @@ export interface IObservableUndoableList<T> extends IObservableList<T> {
 
 /**
  * A concrete implementation of an observable undoable list.
+ *
+ * @deprecated since 4.7.0, will be removed in 5.0. Observable lists with undo/redo are no longer used by JupyterLab core since document models migrated to Yjs.
  */
 export class ObservableUndoableList<T>
   extends ObservableList<T>
@@ -126,8 +130,8 @@ export class ObservableUndoableList<T>
     }
     const changes = this._stack[this._index];
     this._isUndoable = false;
-    for (const change of changes.reverse()) {
-      this._undoChange(change);
+    for (let i = changes.length - 1; i >= 0; i--) {
+      this._undoChange(changes[i]);
     }
     this._isUndoable = true;
     this._index--;
@@ -191,7 +195,7 @@ export class ObservableUndoableList<T>
    * Undo a change event.
    */
   private _undoChange(change: IObservableList.IChangedArgs<JSONValue>): void {
-    let index = 0;
+    let index: number;
     const serializer = this._serializer;
     switch (change.type) {
       case 'add':
@@ -229,7 +233,7 @@ export class ObservableUndoableList<T>
    * Redo a change event.
    */
   private _redoChange(change: IObservableList.IChangedArgs<JSONValue>): void {
-    let index = 0;
+    let index: number;
     const serializer = this._serializer;
     switch (change.type) {
       case 'add':
@@ -241,7 +245,7 @@ export class ObservableUndoableList<T>
       case 'set':
         index = change.newIndex;
         for (const value of change.newValues) {
-          this.set(change.newIndex++, serializer.fromJSON(value));
+          this.set(index++, serializer.fromJSON(value));
         }
         break;
       case 'remove':
@@ -297,6 +301,8 @@ export class ObservableUndoableList<T>
 export namespace ObservableUndoableList {
   /**
    * A default, identity serializer.
+   *
+   * @deprecated since 4.7.0, will be removed in 5.0. Observable lists with undo/redo are no longer used by JupyterLab core since document models migrated to Yjs.
    */
   export class IdentitySerializer<
     T extends JSONValue

@@ -27,6 +27,7 @@ async function enterEditingModeForScreenshot(
     cellBox.height != cellNewBox.height
   ) {
     // Wait a bit if the bounding box have changed
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(100);
   }
   // Scroll the cell into the middle of the viewport to ensure we do not include
@@ -34,6 +35,7 @@ async function enterEditingModeForScreenshot(
   await cell!.evaluate(element => {
     element.scrollIntoView({ block: 'center', inline: 'nearest' });
   });
+  // eslint-disable-next-line playwright/no-wait-for-timeout
   await page.waitForTimeout(50);
 }
 
@@ -92,6 +94,11 @@ test.describe('Notebook Markdown', () => {
     await cell!.scrollIntoViewIfNeeded();
     const output = cell!.locator('.jp-RenderedMermaid');
     await output.waitFor();
+    // Scroll the cell into the middle of the viewport, so that the last row
+    // of the screenshot does not show the border below the notebook.
+    await cell!.evaluate(element => {
+      element.scrollIntoView({ block: 'center', inline: 'nearest' });
+    });
     expect(await cell!.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -101,6 +108,11 @@ test.describe('Notebook Markdown', () => {
     await cell!.scrollIntoViewIfNeeded();
     const output = cell!.locator('.jp-RenderedMermaid');
     await output.waitFor();
+    // Scroll the cell into the middle of the viewport, so that the last row
+    // of the screenshot does not show the border below the notebook.
+    await cell!.evaluate(element => {
+      element.scrollIntoView({ block: 'center', inline: 'nearest' });
+    });
     expect(await cell!.screenshot()).toMatchSnapshot(imageName);
   });
 });
@@ -140,5 +152,67 @@ test.describe('Notebook Markdown Editing', () => {
     const cellTextAfterUnwrap = await page.notebook.getCellTextInput(0);
     expect(cellTextAfterUnwrap).not.toContain('**Bold**');
     expect(cellTextAfterUnwrap).toBe('Bold text');
+  });
+});
+
+test.describe('Notebook Markdown Math', () => {
+  test('Do not make cells that end with inline math scrollable', async ({
+    page
+  }) => {
+    const sources = [
+      '$7+7=14$',
+      '$\\frac{a}{b}$',
+      '$\\int_0^1 f(x)\\,dx$',
+      '$\\underline{x}$',
+      '$\\underleftarrow{AB}$',
+      '$\\left|\\frac{a}{b}\\right|$'
+    ];
+    await page.notebook.createNew();
+    await page.notebook.setCell(0, 'markdown', sources[0]);
+    for (const source of sources.slice(1)) {
+      await page.notebook.addCell('markdown', source);
+    }
+    for (let index = 0; index < sources.length; index++) {
+      await page.notebook.runCell(index);
+    }
+    await expect(page.locator('.jp-MarkdownOutput mjx-container')).toHaveCount(
+      sources.length
+    );
+    await page.evaluate(() => document.fonts.ready);
+
+    const scrollable = await page
+      .locator('.jp-MarkdownOutput')
+      .evaluateAll(nodes =>
+        nodes.map(
+          node =>
+            /auto|scroll/.test(getComputedStyle(node).overflowY) &&
+            node.scrollHeight > node.clientHeight
+        )
+      );
+    expect(scrollable).toEqual(sources.map(() => false));
+  });
+
+  test('Do not cut the characters of formulas', async ({ page }) => {
+    await page.notebook.createNew();
+    await page.notebook.setCell(
+      0,
+      'markdown',
+      '$A \\not\\perp B$, $\\not\\propto$, $\\not a$, $\\overleftarrow{AB}$, ' +
+        '$x \\xleftarrow[a]{b} y$ and ' +
+        '$\\left(\\begin{matrix}a\\\\b\\\\c\\end{matrix}\\right)$'
+    );
+    await page.notebook.runCell(0);
+    const output = page.locator('.jp-MarkdownOutput');
+    await expect(output.locator('mjx-container')).toHaveCount(6);
+    await page.evaluate(() => document.fonts.ready);
+
+    const clipped = await output.screenshot();
+    await page.addStyleTag({
+      content:
+        "mjx-container[jax='CHTML'] :is(mjx-c, mjx-stretchy-h, mjx-stretchy-v)" +
+        ' { overflow: visible !important; }'
+    });
+    const unclipped = await output.screenshot();
+    expect(clipped.equals(unclipped)).toBe(true);
   });
 });

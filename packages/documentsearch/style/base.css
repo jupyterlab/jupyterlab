@@ -34,7 +34,9 @@
   outline: 0;
 }
 
-.jp-DocumentSearch-button-wrapper:disabled > .jp-DocumentSearch-button-content {
+.jp-DocumentSearch-button-wrapper:disabled > .jp-DocumentSearch-button-content,
+.jp-DocumentSearch-replace-button-wrapper:disabled
+  > .jp-DocumentSearch-button-content {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -222,10 +224,6 @@ button:not(:disabled) > .jp-DocumentSearch-up-down-button:active {
   justify-items: stretch;
 }
 
-.jp-DocumentSearch-search-filter-disabled {
-  color: var(--jp-ui-font-color2);
-}
-
 .jp-DocumentSearch-search-filter {
   display: flex;
   align-items: center;
@@ -318,4 +316,9 @@ button:not(:disabled) > .jp-DocumentSearch-up-down-button:active {
   appearance: none;
   border: none;
   overflow: hidden;
+}
+
+/* Keep the current match off the edge of a scrolled area, as in code cells */
+mark.jp-current-match {
+  scroll-margin: 5px;
 }

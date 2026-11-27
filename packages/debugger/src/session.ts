@@ -77,7 +77,8 @@ export class DebuggerSession implements IDebugger.ISession {
 
     this._connection.iopubMessage.connect(this._handleEvent, this);
 
-    this._ready = new PromiseDelegate<void>();
+    const ready = new PromiseDelegate<void>();
+    this._ready = ready;
     const future = this.connection?.kernel?.requestDebug({
       type: 'request',
       seq: 0,
@@ -85,9 +86,16 @@ export class DebuggerSession implements IDebugger.ISession {
     });
     if (future) {
       future.onReply = (msg: KernelMessage.IDebugReplyMsg): void => {
-        this._ready.resolve();
+        ready.resolve();
         future.dispose();
       };
+      // A restart, a kernel change or a closed connection disposes the future
+      // before the reply: fail the requests waiting for it instead of leaving
+      // them pending forever.
+      future.done.catch(error => {
+        ready.promise.catch(() => undefined);
+        ready.reject(error);
+      });
     }
   }
 

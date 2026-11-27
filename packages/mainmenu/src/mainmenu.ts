@@ -1,7 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { TranslationBundle } from '@jupyterlab/translation';
 import { IRankedMenu, MenuSvg, RankedMenu } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
@@ -162,7 +160,7 @@ export class MainMenu extends MenuBar implements IMainMenu {
       'rank' in options
         ? options.rank
         : 'rank' in menu
-          ? (menu as any).rank
+          ? (menu as RankedMenu).rank
           : IRankedMenu.DEFAULT_RANK;
     const rankItem = { menu, rank };
     const index = ArrayExt.upperBound(this._items, rankItem, Private.itemCmp);
@@ -316,6 +314,9 @@ export class MainMenu extends MenuBar implements IMainMenu {
     }
 
     if (label) {
+      // The label comes from the `jupyter.lab.menus` key of a settings schema,
+      // from which it is extracted by the schema selectors.
+      // eslint-disable-next-line jupyter/no-dynamic-translation
       menu.title.label = trans._p('menu', label);
     }
 

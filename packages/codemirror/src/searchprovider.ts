@@ -85,6 +85,11 @@ export interface IHighlightAdjacentMatchOptions extends IHighlightMatchOptions {
    * Defaults to `'auto'`.
    */
   from?: SearchStartAnchor;
+
+  /**
+   * Skips highlighting readOnly cells
+   */
+  skipReadOnly?: boolean;
 }
 
 /**
@@ -364,7 +369,7 @@ export abstract class EditorSearchProvider<
                 match!.position + insertText.length;
               let nextMatchFound = false;
               for (
-                let matchIdx = this.currentIndex || 0;
+                let matchIdx = this.currentIndex ?? 0;
                 matchIdx < allMatches.length;
                 matchIdx++
               ) {
@@ -797,17 +802,30 @@ export class CodeMirrorSearchHighlighter {
         if (this._cm.hasFocus()) {
           // If editor is focused we actually set the cursor on the match.
           this._selectCurrentMatch(options?.scroll ?? true);
-        } else if (options?.scroll ?? true) {
+        } else if ((options?.scroll ?? true) && this._isShown()) {
           // otherwise we just scroll to preserve the selection.
           this._cm.editor.dispatch({
             effects: EditorView.scrollIntoView(match.position)
           });
         }
+      } else if (options?.scroll === true && this._isShown()) {
+        this._cm.editor.dispatch({
+          effects: EditorView.scrollIntoView(match.position)
+        });
       }
     } else {
       this._current = null;
     }
     this._refresh();
+  }
+
+  /**
+   * Whether the editor is shown. A hidden editor keeps a scroll request
+   * until it is shown again.
+   */
+  private _isShown(): boolean {
+    const host = this._cm!.host;
+    return host.isConnected && (host.checkVisibility?.() ?? true);
   }
 
   private _refresh(): void {

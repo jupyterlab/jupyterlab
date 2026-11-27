@@ -1060,8 +1060,8 @@ export namespace EditorLanguageRegistry {
         mime: 'text/x-julia',
         extensions: ['jl'],
         async load() {
-          const m = await import('@codemirror/legacy-modes/mode/julia');
-          return legacy(m.julia);
+          const m = await import('@plutojl/lang-julia');
+          return m.julia();
         }
       },
       {

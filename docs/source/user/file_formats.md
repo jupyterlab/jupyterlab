@@ -31,7 +31,8 @@ classes for displaying rich output:
 
 ```python
 from IPython.display import display, HTML
-display(HTML('<h1>Hello World</h1>'))
+
+display(HTML("<h1>Hello World</h1>"))
 ```
 
 Running this code will display the HTML in the output of a notebook or
@@ -47,7 +48,8 @@ message from a dictionary of keys (MIME types) and values (MIME data):
 
 ```python
 from IPython.display import display
-display({'text/html': '<h1>Hello World</h1>', 'text/plain': 'Hello World'}, raw=True)
+
+display({"text/html": "<h1>Hello World</h1>", "text/plain": "Hello World"}, raw=True)
 ```
 
 Other Jupyter kernels offer similar APIs.
@@ -128,6 +130,10 @@ semicolon-separated values:
 
 While tab-separated value files can be read by the grid viewer, it currently does not automatically recognize `.tsv` files.
 To view, you must change the extension to `.csv` and set the delimiter to tabs.
+
+To open every CSV file with another delimiter, such as a semicolon, change **Default delimiter**
+in the CSV Viewer settings (_Settings > Settings Editor > CSV Viewer_). The delimiter
+selector in the viewer toolbar still changes the delimiter of an open file.
 
 (edit-csv)=
 

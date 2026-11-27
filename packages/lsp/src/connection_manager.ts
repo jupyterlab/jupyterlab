@@ -214,18 +214,33 @@ export class DocumentConnectionManager implements ILSPDocumentConnectionManager 
    * @param  adapter - the adapter to be registered
    */
   registerAdapter(path: string, adapter: WidgetLSPAdapter): void {
-    this.adapters.set(path, adapter);
+    // Track the path across renames so the disposal cleanup below removes
+    // the entry the adapter is actually filed under.
+    let currentPath = path;
+    this.adapters.set(currentPath, adapter);
 
-    adapter.widget.context.pathChanged.connect((context, newPath) => {
-      this.adapters.delete(path);
+    const onPathChanged = (context: unknown, newPath: string) => {
+      this.adapters.delete(currentPath);
       this.adapters.set(newPath, adapter);
-    });
+      currentPath = newPath;
+    };
+    const context = adapter.widget.context;
+    context.pathChanged.connect(onPathChanged);
 
     adapter.disposed.connect(() => {
-      if (adapter.virtualDocument) {
-        this.documents.delete(adapter.virtualDocument.uri);
+      // The adapter clears its `virtualDocument` reference before this
+      // handler runs, so disposed documents are swept by scanning instead of
+      // being looked up through the adapter.
+      for (const [uri, virtualDocument] of this.documents) {
+        if (virtualDocument.isDisposed) {
+          this.documents.delete(uri);
+        }
       }
-      this.adapters.delete(path);
+      this.adapters.delete(currentPath);
+      // The context outlives the adapter when other views of the document
+      // stay open; left connected, this slot would keep the adapter (and
+      // its widget) reachable from the context.
+      context.pathChanged.disconnect(onPathChanged);
     });
   }
 
@@ -370,7 +385,8 @@ export class DocumentConnectionManager implements ILSPDocumentConnectionManager 
 
   /**
    * Create a new connection to the language server
-   * @return A promise of the LSP connection
+   *
+   * Returns a promise of the LSP connection.
    */
   async connect(
     options: ISocketConnectionOptions,
@@ -487,7 +503,7 @@ export class DocumentConnectionManager implements ILSPDocumentConnectionManager 
   /**
    * Create the LSP connection for requested virtual document.
    *
-   * @return  Return the promise of the LSP connection.
+   * Returns a promise of the LSP connection.
    */
 
   private async _connectSocket(
@@ -725,8 +741,17 @@ namespace Private {
   ): Promise<LSPConnection> {
     let connection = _connections.get(languageServerId);
     if (!connection) {
-      const { settings } = Private.getLanguageServerManager();
-      const socket = new settings.WebSocket(uris.socket);
+      const serverManager = Private.getLanguageServerManager();
+      const { settings } = serverManager;
+      const transportFactory =
+        serverManager.getTransportFactory(languageServerId);
+      const socket = transportFactory
+        ? transportFactory({
+            languageServerId,
+            socketUrl: uris.socket,
+            settings
+          })
+        : new settings.WebSocket(uris.socket);
       const connection = new LSPConnection({
         languageId: language,
         serverUri: uris.server,

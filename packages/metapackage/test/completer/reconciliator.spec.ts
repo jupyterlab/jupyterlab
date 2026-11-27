@@ -6,9 +6,14 @@
 import type {
   CompletionHandler,
   ICompletionContext,
-  ICompletionProvider
+  ICompletionProvider,
+  IInlineCompleterSettings,
+  IInlineCompletionProvider
 } from '@jupyterlab/completer';
-import { ProviderReconciliator } from '@jupyterlab/completer';
+import {
+  InlineCompletionTriggerKind,
+  ProviderReconciliator
+} from '@jupyterlab/completer';
 import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
 import { Context } from '@jupyterlab/docregistry';
 import type { INotebookModel } from '@jupyterlab/notebook';
@@ -264,6 +269,22 @@ describe('completer/reconciliator', () => {
         const result = await reconciliator.fetch({ offset: 0, text: '' });
         expect(result).toEqual(DEFAULT_REPLY);
       });
+      it('should return completions even if `isApplicable` of one of providers rejects', async () => {
+        const failing = new FooCompletionProvider();
+        failing.isApplicable = () => Promise.reject(new Error('provider bug'));
+        const working = new FooCompletionProvider();
+        const reconciliator = new ProviderReconciliator({
+          ...defaultOptions,
+          providers: [failing, working]
+        });
+        const error = jest.spyOn(console, 'error').mockImplementation(() => {
+          // no-op
+        });
+        await expect(
+          reconciliator.fetch({ offset: 0, text: '' })
+        ).resolves.toEqual(DEFAULT_REPLY);
+        error.mockRestore();
+      });
       it('should include `resolve` in reply items', async () => {
         const fooProvider1 = new FooCompletionProvider();
         const reconciliator = new ProviderReconciliator({
@@ -285,6 +306,79 @@ describe('completer/reconciliator', () => {
         });
         const res = await reconciliator.fetch({ offset: 0, text: '' });
         expect(res).toEqual(null);
+      });
+    });
+    describe('#fetchInline()', () => {
+      const INLINE_PROVIDER_ID = 'InlineCompletionProvider:sample';
+
+      function inlineSetup(debouncerDelay: number) {
+        const fetch = jest.fn(async (request: CompletionHandler.IRequest) => ({
+          items: []
+        }));
+        const provider: IInlineCompletionProvider = {
+          identifier: INLINE_PROVIDER_ID,
+          name: 'a sample inline provider',
+          fetch
+        };
+        const reconciliator = new ProviderReconciliator({
+          context: { widget },
+          providers: [],
+          inlineProviders: [provider],
+          inlineProvidersSettings: {
+            [INLINE_PROVIDER_ID]: {
+              enabled: true,
+              autoFillInMiddle: false,
+              debouncerDelay,
+              timeout: 1000
+            }
+          } as IInlineCompleterSettings['providers'],
+          timeout: 1000
+        });
+        return { fetch, reconciliator };
+      }
+
+      it('should only fetch once when typing faster than the debouncer delay', async () => {
+        const { fetch, reconciliator } = inlineSetup(100);
+        const request = { offset: 1, text: 'a' };
+        const superseded = reconciliator.fetchInline(
+          request,
+          InlineCompletionTriggerKind.Automatic
+        );
+        const latest = reconciliator.fetchInline(
+          { offset: 2, text: 'ab' },
+          InlineCompletionTriggerKind.Automatic
+        );
+        await Promise.all([...superseded, ...latest]);
+        expect(fetch).toHaveBeenCalledTimes(1);
+        expect(fetch.mock.calls[0][0]).toEqual({ offset: 2, text: 'ab' });
+      });
+
+      it('should fetch for every request slower than the debouncer delay', async () => {
+        const { fetch, reconciliator } = inlineSetup(20);
+        await Promise.all(
+          reconciliator.fetchInline(
+            { offset: 1, text: 'a' },
+            InlineCompletionTriggerKind.Automatic
+          )
+        );
+        await Promise.all(
+          reconciliator.fetchInline(
+            { offset: 2, text: 'ab' },
+            InlineCompletionTriggerKind.Automatic
+          )
+        );
+        expect(fetch).toHaveBeenCalledTimes(2);
+      });
+
+      it('should not debounce requests invoked by the user', async () => {
+        const { fetch, reconciliator } = inlineSetup(5000);
+        await Promise.all(
+          reconciliator.fetchInline(
+            { offset: 1, text: 'a' },
+            InlineCompletionTriggerKind.Invoke
+          )
+        );
+        expect(fetch).toHaveBeenCalledTimes(1);
       });
     });
     describe('#shouldShowContinuousHint()', () => {
@@ -353,6 +447,47 @@ describe('completer/reconciliator', () => {
         );
         spy1.mockRestore();
         spy2.mockRestore();
+      });
+      function failingSetup() {
+        const rejecting = new FooCompletionProvider();
+        rejecting.identifier = 'CompletionProvider:rejecting';
+        rejecting.isApplicable = () =>
+          Promise.reject(new Error('provider bug'));
+        const throwing = new FooCompletionProvider();
+        throwing.identifier = 'CompletionProvider:throwing';
+        throwing.isApplicable = () => {
+          throw new Error('provider bug');
+        };
+        const working = new FooCompletionProvider();
+        const reconciliator = new ProviderReconciliator({
+          ...defaultOptions,
+          providers: [rejecting, throwing, working]
+        });
+        const error = jest.spyOn(console, 'error').mockImplementation(() => {
+          // no-op
+        });
+        return { reconciliator, working, error };
+      }
+
+      it('should leave out providers whose `isApplicable` fails', async () => {
+        const { reconciliator, working, error } = failingSetup();
+        await expect(reconciliator['applicableProviders']()).resolves.toEqual([
+          working
+        ]);
+        error.mockRestore();
+      });
+      it('should log the identifier of each provider whose `isApplicable` fails', async () => {
+        const { reconciliator, error } = failingSetup();
+        await reconciliator['applicableProviders']().catch(() => undefined);
+        expect(error).toHaveBeenCalledWith(
+          expect.stringContaining('CompletionProvider:rejecting'),
+          expect.any(Error)
+        );
+        expect(error).toHaveBeenCalledWith(
+          expect.stringContaining('CompletionProvider:throwing'),
+          expect.any(Error)
+        );
+        error.mockRestore();
       });
     });
   });

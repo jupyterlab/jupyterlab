@@ -2,8 +2,51 @@
 // Distributed under the terms of the Modified BSD License.
 import { PluginList } from '../src/pluginlist';
 import { signalToPromise } from '@jupyterlab/coreutils';
+import { framePromise, simulate } from '@jupyterlab/testing';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import {
+  FormRendererRegistry,
+  updateFilterFunction
+} from '@jupyterlab/ui-components';
+import { MessageLoop } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
 import { TestConnector, TestRegistry } from './utils';
+
+const ENTRY_QUERY = '.jp-PluginList-entry';
+
+function entries(list: PluginList): HTMLElement[] {
+  return Array.from(list.node.querySelectorAll(ENTRY_QUERY));
+}
+
+function tabStop(list: PluginList): HTMLElement {
+  const items = entries(list);
+  return items.find(entry => entry.tabIndex === 0) ?? items[0];
+}
+
+function key(target: EventTarget, keyName: string): void {
+  simulate(target, 'keydown', { key: keyName, bubbles: true });
+}
+
+async function setupList(
+  registry: TestRegistry,
+  selection?: string,
+  query = ''
+): Promise<PluginList> {
+  const model = new PluginList.Model({ registry });
+  await model.ready;
+  // The search box sets the filter to its initial query after it renders.
+  const list = new PluginList({ registry, model, query });
+  Widget.attach(list, document.body);
+  list.setFilter(updateFilterFunction(query, false, false), query);
+  if (selection) {
+    list.selection = selection;
+  }
+  MessageLoop.sendMessage(list, Widget.Msg.UpdateRequest);
+  for (let i = 0; i < 10 && entries(list).length === 0; i++) {
+    await framePromise();
+  }
+  return list;
+}
 
 describe('@jupyterlab/settingeditor', () => {
   describe('PluginList.Model', () => {
@@ -199,6 +242,531 @@ describe('@jupyterlab/settingeditor', () => {
         await signalToPromise(model.changed);
         expect(Object.keys(model.settings)).toHaveLength(1);
         expect(model.settings[id].schema.transformed).toBe(true);
+      });
+    });
+  });
+
+  describe('PluginList', () => {
+    let connector: TestConnector;
+    let registry: TestRegistry;
+    let list: PluginList;
+
+    const IDS = ['plugin-alpha', 'plugin-beta', 'plugin-gamma'];
+    const mkSchema = (title: string): ISettingRegistry.ISchema => ({
+      type: 'object',
+      title,
+      properties: { value: { type: 'string', default: 'x' } }
+    });
+
+    beforeAll(() => {
+      connector = new TestConnector();
+    });
+
+    beforeEach(async () => {
+      registry = new TestRegistry({ connector });
+      connector.schemas = {
+        [IDS[0]]: mkSchema('Alpha'),
+        [IDS[1]]: mkSchema('Beta'),
+        [IDS[2]]: mkSchema('Gamma')
+      };
+      await Promise.all(IDS.map(id => registry.load(id)));
+    });
+
+    afterEach(async () => {
+      list?.dispose();
+      if (list?.node.isConnected) {
+        Widget.detach(list);
+      }
+      connector.schemas = {};
+      await connector.clear();
+    });
+
+    it('should rove tabindex and move focus with arrows without selecting', async () => {
+      list = await setupList(registry, IDS[0]);
+      expect(entries(list).length).toBe(3);
+
+      const focused = tabStop(list);
+      focused.focus();
+      key(focused, 'ArrowDown');
+
+      expect(document.activeElement?.getAttribute('data-id')).toBe(IDS[1]);
+      expect(list.selection).toBe(IDS[0]);
+      expect(entries(list).filter(entry => entry.tabIndex === 0)).toHaveLength(
+        1
+      );
+
+      let emitted = false;
+      list.handleSelectSignal.connect(() => {
+        emitted = true;
+      });
+      key(document.activeElement!, 'ArrowDown');
+      expect(emitted).toBe(false);
+    });
+
+    it('should select the focused entry on Enter', async () => {
+      list = await setupList(registry, IDS[0]);
+      const focused = tabStop(list);
+      focused.focus();
+      key(focused, 'ArrowDown');
+
+      const selected = signalToPromise(list.handleSelectSignal);
+      key(document.activeElement!, 'Enter');
+      const [, pluginId] = await selected;
+      expect(pluginId).toBe(IDS[1]);
+      expect(list.selection).toBe(IDS[1]);
+    });
+
+    describe('#getFilterString()', () => {
+      it('should match properties nested inside an object setting', () => {
+        const props = {
+          properties: {
+            breadcrumbs: {
+              title: 'Breadcrumbs',
+              type: 'object',
+              properties: {
+                minimumLeftItems: {
+                  title: 'Minimum breadcrumbs left items',
+                  type: 'number'
+                }
+              }
+            }
+          }
+        } as unknown as ISettingRegistry.IProperty;
+        const filter = (item: string) =>
+          item.toLowerCase().includes('left') ? {} : null;
+        const matches = PluginList.prototype.getFilterString.call(
+          PluginList.prototype,
+          filter,
+          props
+        );
+        expect(matches).toEqual([
+          'Breadcrumbs',
+          'Minimum breadcrumbs left items',
+          'minimumLeftItems'
+        ]);
+      });
+
+      it('should skip a property whose schema is false', () => {
+        const props = {
+          properties: {
+            agents: { title: 'Agents', type: 'object', properties: {} },
+            additionalProperties: false
+          }
+        } as unknown as ISettingRegistry.IProperty;
+        const filter = (item: string) =>
+          item.toLowerCase().includes('add') ? {} : null;
+        const matches = PluginList.prototype.getFilterString.call(
+          PluginList.prototype,
+          filter,
+          props
+        );
+        expect(matches).toEqual([]);
+      });
+
+      it('should not match the keywords of an array item schema', () => {
+        const props = {
+          properties: {
+            rulers: {
+              title: 'Rulers',
+              type: 'array',
+              items: { type: 'number', minimum: 0 }
+            }
+          }
+        } as unknown as ISettingRegistry.IProperty;
+        const filter = (item: string) =>
+          item.toLowerCase().includes('min') ? {} : null;
+        const matches = PluginList.prototype.getFilterString.call(
+          PluginList.prototype,
+          filter,
+          props
+        );
+        expect(matches).toEqual([]);
+      });
+
+      it('should match properties of the items of an array setting', () => {
+        const props = {
+          properties: {
+            agents: {
+              title: 'Agents',
+              type: 'array',
+              items: {
+                type: 'object',
+                additionalProperties: false,
+                properties: { label: { title: 'Label', type: 'string' } }
+              }
+            }
+          }
+        } as unknown as ISettingRegistry.IProperty;
+        const filter = (item: string) =>
+          item.toLowerCase().includes('label') ? {} : null;
+        const matches = PluginList.prototype.getFilterString.call(
+          PluginList.prototype,
+          filter,
+          props
+        );
+        expect(matches).toEqual(['Agents', 'Label', 'label']);
+      });
+
+      it('should match properties of array items given by a reference', () => {
+        const props = {
+          properties: {
+            toolbar: {
+              title: 'Toolbar items',
+              type: 'array',
+              items: { $ref: '#/definitions/toolbarItem' }
+            }
+          }
+        } as unknown as ISettingRegistry.IProperty;
+        const definitions = {
+          toolbarItem: {
+            type: 'object',
+            properties: { type: { title: 'Item type', type: 'string' } }
+          }
+        };
+        const filter = (item: string) =>
+          item.toLowerCase().includes('item type') ? {} : null;
+        const matches = PluginList.prototype.getFilterString.call(
+          PluginList.prototype,
+          filter,
+          props,
+          definitions
+        );
+        expect(matches).toEqual(['Toolbar items', 'Item type']);
+      });
+    });
+
+    describe('#mapPlugins()', () => {
+      it('should not list a parent whose matches are listed under an earlier parent', async () => {
+        const pluginId = 'plugin-cells';
+        const cellConfig = (title: string): ISettingRegistry.IProperty => ({
+          title,
+          type: 'object',
+          properties: { fontSize: { title: 'Font Size', type: 'number' } }
+        });
+        connector.schemas[pluginId] = {
+          type: 'object',
+          title: 'Cells',
+          properties: {
+            codeCellConfig: cellConfig('Code Cell Configuration'),
+            rawCellConfig: cellConfig('Raw Cell Configuration')
+          }
+        };
+        await registry.load(pluginId);
+        list = await setupList(registry, undefined, 'font');
+
+        const matches = () =>
+          Array.from(
+            list.node.querySelectorAll(`[data-id="${pluginId}"] li`),
+            item => item.textContent!.trim()
+          );
+        for (let i = 0; i < 10 && matches().length === 0; i++) {
+          await framePromise();
+        }
+
+        expect(matches()).toEqual([
+          'Code Cell Configuration',
+          'Font Size',
+          'fontSize'
+        ]);
+      });
+
+      it('should mark only the text that matches the query', async () => {
+        const pluginId = 'plugin-codemirror';
+        connector.schemas[pluginId] = {
+          type: 'object',
+          title: 'Editor',
+          properties: {
+            defaultConfig: {
+              title: 'Default editor configuration',
+              type: 'object',
+              properties: { fontSize: { title: 'Font Size', type: 'number' } }
+            }
+          }
+        };
+        await registry.load(pluginId);
+        list = await setupList(registry, undefined, 'font');
+
+        const marks = () =>
+          Array.from(
+            list.node.querySelectorAll(`[data-id="${pluginId}"] li`),
+            item =>
+              Array.from(item.querySelectorAll('mark'), m => m.textContent)
+          );
+        for (let i = 0; i < 10 && marks().length === 0; i++) {
+          await framePromise();
+        }
+
+        expect(marks()).toEqual([[], ['Font'], ['font']]);
+      });
+
+      it('should indent a setting under the setting it is nested in', async () => {
+        const pluginId = 'plugin-tours';
+        connector.schemas[pluginId] = {
+          type: 'object',
+          title: 'Tours',
+          properties: {
+            floaterProps: {
+              type: 'object',
+              properties: { options: { type: 'object' } }
+            },
+            styles: {
+              type: 'object',
+              properties: {
+                options: {
+                  type: 'object',
+                  properties: { primaryColor: { type: 'string' } }
+                }
+              }
+            }
+          }
+        };
+        await registry.load(pluginId);
+        list = await setupList(registry, undefined, 'p');
+
+        const rows = () =>
+          Array.from(
+            list.node.querySelectorAll<HTMLElement>(
+              `[data-id="${pluginId}"] li`
+            ),
+            item => [item.textContent!.trim(), item.style.paddingLeft]
+          );
+        for (let i = 0; i < 10 && rows().length === 0; i++) {
+          await framePromise();
+        }
+
+        expect(rows()).toEqual([
+          ['floaterProps', '0px'],
+          ['options', '12px'],
+          ['styles', '0px'],
+          ['options', '12px'],
+          ['primaryColor', '24px']
+        ]);
+      });
+
+      it('should show the key of a setting as code', async () => {
+        const pluginId = 'plugin-viewer';
+        connector.schemas[pluginId] = {
+          type: 'object',
+          title: 'Viewer',
+          properties: { fontSize: { title: 'Font Size', type: 'number' } }
+        };
+        await registry.load(pluginId);
+        list = await setupList(registry, undefined, 'font');
+
+        const codes = () =>
+          Array.from(
+            list.node.querySelectorAll(`[data-id="${pluginId}"] li`),
+            item => item.querySelector('code')?.textContent ?? null
+          );
+        for (let i = 0; i < 10 && codes().length === 0; i++) {
+          await framePromise();
+        }
+
+        expect(codes()).toEqual([null, 'fontSize']);
+      });
+    });
+
+    describe('#setFilter()', () => {
+      const pluginId = 'plugin-editor';
+
+      beforeEach(async () => {
+        connector.schemas[pluginId] = {
+          type: 'object',
+          title: 'Editor',
+          properties: {
+            cellConfig: {
+              title: 'Cell Configuration',
+              type: 'object',
+              default: {}
+            }
+          }
+        };
+        await registry.load(pluginId);
+      });
+
+      it('should emit the filter once the query stops changing', async () => {
+        list = await setupList(registry);
+        const emitted: unknown[] = [];
+        list.updateFilterSignal.connect((_, filter) => emitted.push(filter));
+
+        for (const query of ['e', 'ed', 'edi']) {
+          list.setFilter(updateFilterFunction(query, false, false), query);
+        }
+        expect(emitted).toEqual([]);
+
+        await signalToPromise(list.updateFilterSignal);
+        expect(emitted).toEqual([list.filter]);
+      });
+
+      it('should match properties provided by a form renderer', async () => {
+        const editorRegistry = new FormRendererRegistry();
+        const renderer = {
+          fieldRenderer: () => null,
+          getSchemaProperties: () => ({
+            customStyles: {
+              title: 'Custom editor styles',
+              type: 'object',
+              properties: {
+                fontSize: { title: 'Font Size', type: 'number' }
+              }
+            }
+          })
+        };
+        editorRegistry.addRenderer(`${pluginId}.cellConfig`, renderer);
+        const model = new PluginList.Model({ registry });
+        await model.ready;
+        const options = { registry, model, editorRegistry };
+        list = new PluginList(options);
+
+        list.setFilter(updateFilterFunction('font', false, false), 'font');
+
+        expect(list.filter!(registry.plugins[pluginId]!)).toEqual({
+          kind: 'properties',
+          matches: [
+            {
+              matchedBy: 'nested',
+              label: 'Cell Configuration',
+              path: ['cellConfig']
+            },
+            {
+              matchedBy: 'nested',
+              label: 'Custom editor styles',
+              path: ['cellConfig', 'customStyles']
+            },
+            {
+              matchedBy: 'title',
+              label: 'Font Size',
+              path: ['cellConfig', 'customStyles', 'fontSize']
+            },
+            {
+              matchedBy: 'key',
+              label: 'fontSize',
+              path: ['cellConfig', 'customStyles', 'fontSize']
+            }
+          ]
+        });
+      });
+    });
+
+    describe('setFilter', () => {
+      let model: PluginList.Model;
+
+      const taggedId = 'plugin-tagged';
+      const taggedSchema: ISettingRegistry.ISchema = {
+        type: 'object',
+        title: 'Tagged Plugin',
+        tags: ['my-tag'],
+        properties: {
+          value: { title: 'Value', type: 'string', default: 'x' },
+          taggedProp: {
+            title: 'Tagged Property',
+            type: 'string',
+            default: 'y',
+            tags: ['prop-tag']
+          }
+        }
+      };
+
+      const untaggedId = 'plugin-untagged';
+
+      beforeEach(async () => {
+        connector.schemas[taggedId] = taggedSchema;
+        connector.schemas[untaggedId] = {
+          type: 'object',
+          title: 'Untagged Plugin',
+          properties: {}
+        };
+        await registry.load(taggedId);
+        await registry.load(untaggedId);
+        model = new PluginList.Model({ registry });
+        await model.ready;
+        list = new PluginList({ registry, model });
+        Widget.attach(list, document.body);
+        MessageLoop.sendMessage(list, Widget.Msg.UpdateRequest);
+      });
+
+      const search = (query: string, id = taggedId) => {
+        list.setFilter(updateFilterFunction(query, false, false), query);
+        return list.filter!(model.plugins.find(p => p.id === id)!);
+      };
+
+      it('should match a schema tag with the tag: prefix', () => {
+        expect(search('tag:my-tag')).toEqual({ kind: 'tag' });
+      });
+
+      it('should match a part of a schema tag, ignoring the case', () => {
+        expect(search('TAG:Y-T')).toEqual({ kind: 'tag' });
+      });
+
+      it('should not match tags without the tag: prefix', () => {
+        expect(search('my-tag')).toEqual({ kind: 'properties', matches: [] });
+      });
+
+      it('should not match titles and keys with the tag: prefix', () => {
+        expect(search('tag:Tagged')).toEqual({
+          kind: 'properties',
+          matches: []
+        });
+      });
+
+      it('should return all when query matches title but not tag', () => {
+        expect(search('Tagged')).toEqual({ kind: 'all' });
+      });
+
+      it('should match a part of a property tag', () => {
+        expect(search('tag:PROP')).toEqual({
+          kind: 'properties',
+          matches: [
+            { matchedBy: 'tag', label: 'Tagged Property', path: ['taggedProp'] }
+          ]
+        });
+      });
+
+      describe('tag suggestions', () => {
+        const suggest = async (query: string) => {
+          let search: HTMLInputElement | null = null;
+          for (let i = 0; i < 10 && !search; i++) {
+            await framePromise();
+            search = list.node.querySelector('jp-search');
+          }
+          search!.value = query;
+          search!.dispatchEvent(new Event('input', { bubbles: true }));
+          await framePromise();
+          return Array.from(list.node.querySelectorAll('[role="option"]')).map(
+            option => option.textContent
+          );
+        };
+
+        it('should suggest the tags that start with the query', async () => {
+          expect(await suggest('P')).toEqual(['tag:prop-tag']);
+        });
+
+        it('should suggest the tags that start with the text after tag:', async () => {
+          expect(await suggest('tag:pro')).toEqual(['tag:prop-tag']);
+        });
+
+        it('should not suggest the tags that only contain the query', async () => {
+          expect(await suggest('tag:t')).toEqual([]);
+        });
+
+        it('should suggest all the tags while typing tag:', async () => {
+          for (const query of ['t', 'TA', 'tag', 'tag:']) {
+            expect(await suggest(query)).toEqual([
+              'tag:my-tag',
+              'tag:prop-tag'
+            ]);
+          }
+        });
+
+        it('should not suggest the tag already in the query', async () => {
+          expect(await suggest('tag:prop-tag')).toEqual([]);
+        });
+      });
+
+      it('should match tags with an initial tag: query', () => {
+        list = new PluginList({ registry, model, query: 'tag:my' });
+        const plugin = model.plugins.find(p => p.id === taggedId)!;
+        expect(list.filter!(plugin)).toEqual({ kind: 'tag' });
       });
     });
   });

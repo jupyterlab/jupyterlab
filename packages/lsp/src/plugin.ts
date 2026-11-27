@@ -11,7 +11,7 @@
 /**
  * Enable or disable the language server services.
  */
-export type Activate = Off | On;
+export type Activate = (Off | On) & string;
 export type Off = 'off';
 export type On = 'on';
 /**
@@ -21,7 +21,8 @@ export type RankOfTheServer = number;
 /**
  * Whether to ask server to send logs with execution trace (for debugging). Accepted values are: "off", "messages", "verbose". Servers are allowed to ignore this request.
  */
-export type AskServersToSendTraceNotifications = Off1 | Messages | Verbose;
+export type AskServersToSendTraceNotifications = (Off1 | Messages | Verbose) &
+  string;
 export type Off1 = 'off';
 export type Messages = 'messages';
 export type Verbose = 'verbose';

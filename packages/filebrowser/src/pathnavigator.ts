@@ -12,6 +12,7 @@ import type {
   FileBrowserModel,
   TogglableHiddenFileBrowserModel
 } from './model';
+import { isPathWithinRoot } from './utils';
 
 /**
  * We cache per directory; in case the filesystem changes below us, we refresh
@@ -211,7 +212,11 @@ export class PathNavigator extends Widget {
       const fetchId = ++this._fetchId;
       try {
         const contents = this._model.manager.services.contents;
-        const result = await contents.get(dirPart || '', { content: true });
+        // Only list directories that `cd()` would navigate to.
+        const path = contents.resolvePath(this._model.path, '/' + dirPart);
+        const result = isPathWithinRoot(path, this._model.root)
+          ? await contents.get(path, { content: true })
+          : null;
         // Discard result if a newer fetch has started or the widget was closed.
         if (fetchId !== this._fetchId || !this._isOpen) {
           return;
@@ -219,7 +224,7 @@ export class PathNavigator extends Widget {
         this._suggestionDirPath = dirPart;
         this._suggestionFetchTime = Date.now();
         const items =
-          result.type === 'directory'
+          result?.type === 'directory'
             ? (result.content as Array<{ name: string; type: string }>)
             : [];
         this._suggestions = items
@@ -331,7 +336,7 @@ export class PathNavigator extends Widget {
         }
         return;
       }
-      target = target.parentElement as HTMLElement;
+      target = target.parentElement!;
     }
   }
 

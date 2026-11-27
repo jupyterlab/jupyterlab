@@ -4,6 +4,11 @@
   "jupyter.lab.menus": {
     "context": [
       {
+        "command": "terminal:copy-link",
+        "selector": ".jp-Terminal",
+        "rank": 0
+      },
+      {
         "command": "terminal:copy",
         "selector": ".jp-Terminal",
         "rank": 1
@@ -41,6 +46,7 @@
       "minimum": 1.0
     },
     "theme": {
+      "type": "string",
       "oneOf": [
         { "const": "dark", "title": "Dark" },
         { "const": "light", "title": "Light" },
@@ -86,7 +92,8 @@
       "title": "Screen Reader Mode",
       "description": "Add accessibility elements for use with screen readers.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "tags": ["accessibility"]
     },
     "scrollback": {
       "title": "Scrollback Buffer",
@@ -122,7 +129,8 @@
       "title": "Blinking cursor",
       "description": "Whether to blink the cursor. Changes require reopening the terminal.",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "tags": ["accessibility"]
     },
     "showStatusBarItem": {
       "type": "string",

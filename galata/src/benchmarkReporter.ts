@@ -14,7 +14,6 @@ import type {
   TestCase,
   TestResult
 } from '@playwright/test/reporter';
-import { dists, meanpw, variancepn } from '@stdlib/stats/base';
 import fs from 'fs';
 import path from 'path';
 import os from 'node:os';
@@ -179,10 +178,10 @@ export namespace benchmark {
   ): IDistributionChange {
     const { mean: yO, variance: sO } = oldDistribution;
     const { mean: yN, variance: sN } = newDistribution;
-    const dof = n - 1;
-    const t = dists.t.quantile(1 - (1 - confidenceInterval) / 2, dof);
-    const oldFactor = sq(yO) - (sq(t) * sO) / n;
-    const newFactor = sq(yN) - (sq(t) * sN) / n;
+    // The normal quantile is within 7% of Student's t from 20 samples on.
+    const z = vs.quantileNormal(1 - (1 - confidenceInterval) / 2);
+    const oldFactor = sq(yO) - (sq(z) * sO) / n;
+    const newFactor = sq(yN) - (sq(z) * sN) / n;
     const meanNum = yO * yN;
     const ciNum = Math.sqrt(sq(yO * yN) - newFactor * oldFactor);
     return {
@@ -253,11 +252,15 @@ export namespace benchmark {
   }
 
   function mean(...x: number[]): number {
-    return meanpw(x.length, x, 1);
+    return x.reduce((sum, value) => sum + value, 0) / x.length;
   }
 
+  /**
+   * The sample variance, which divides by `n - 1`.
+   */
   function variance(...x: number[]): number {
-    return variancepn(x.length, 1, x, 1);
+    const m = mean(...x);
+    return x.reduce((sum, value) => sum + sq(value - m), 0) / (x.length - 1);
   }
 }
 
@@ -544,17 +547,13 @@ class BenchmarkReporter implements Reporter {
     });
 
     // If the reference | project lists has two items, the intervals will be compared.
-    if (!groups.values().next().value) {
+    const firstTestGroup = groups.values().next().value;
+    if (!firstTestGroup) {
       return ['## Benchmark report\n\nNot enough data', reportExtension];
     }
 
-    const compare =
-      (
-        groups.values().next().value?.values().next().value as Map<
-          string,
-          Map<string, number[]>
-        >
-      ).size === 2;
+    const firstBrowserGroup = firstTestGroup.values().next().value!;
+    const compare = firstBrowserGroup.size === 2;
 
     // - Create report
     const reportContent = new Array<string>(
@@ -576,8 +575,6 @@ class BenchmarkReporter implements Reporter {
     let header = '| Test file |';
     let nFiles = 0;
     // groups is non-empty (checked above), so all nested maps have at least one entry
-    const firstTestGroup = groups.values().next().value!;
-    const firstBrowserGroup = firstTestGroup.values().next().value!;
     const firstFileGroup = firstBrowserGroup.values().next().value!;
     for (const [file] of firstFileGroup) {
       header += ` ${file} |`;

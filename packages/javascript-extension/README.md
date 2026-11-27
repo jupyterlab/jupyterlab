@@ -1,6 +1,6 @@
 # javascript-extension
 
-A JupyterLab extension for running Javascript from a notebook in JupyterLab.
+A JupyterLab extension for running JavaScript from a notebook in JupyterLab.
 
 This extension is in the official JupyterLab distribution.
 

@@ -111,7 +111,7 @@
   position: relative;
 }
 
-.jp-PluginList-wrapper > .jp-FilterBox {
+.jp-PluginList-wrapper > .jp-FilterBox-wrapper {
   margin: 8px 12px 0;
 }
 
@@ -136,12 +136,24 @@
   background: var(--jp-layout-color2);
 }
 
+.jp-PluginList-entry:focus-visible {
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-focus-outline-color);
+  outline-style: solid;
+  outline-offset: calc(var(--jp-focus-outline-width) * -1);
+}
+
 .jp-PluginList-entry li {
   margin-left: 27px;
   margin-top: 5px;
   color: var(--jp-ui-font-color1);
   overflow-x: hidden;
   text-overflow: ellipsis;
+}
+
+.jp-PluginList-settingKey {
+  font-family: var(--jp-code-font-family);
+  font-size: var(--jp-code-font-size);
 }
 
 .jp-PluginList-entry-label {
@@ -264,7 +276,14 @@
 .jp-SettingsHeader-buttonbar > .jp-RestoreButton {
   background-color: var(--jp-warn-color-normal);
   border: 0;
-  color: var(--jp-ui-inverse-font-color0);
+  color: var(--jp-warn-color-foreground, var(--jp-ui-inverse-font-color0));
+}
+
+.jp-SettingsHeader-buttonbar > .jp-RestoreButton:focus-visible {
+  outline-width: var(--jp-focus-outline-width);
+  outline-color: var(--jp-warn-outline-color, var(--jp-warn-color-normal));
+  outline-style: solid;
+  outline-offset: 2px;
 }
 
 .jp-PluginEditor {

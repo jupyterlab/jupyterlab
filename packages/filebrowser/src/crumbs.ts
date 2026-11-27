@@ -1,14 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { DOMUtils, showErrorMessage } from '@jupyterlab/apputils';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import { renameFile } from '@jupyterlab/docmanager';
+import type { Contents } from '@jupyterlab/services';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import {
   ellipsesIcon,
+  homeIcon,
   folderFavoriteIcon as preferredIcon,
   folderIcon as rootIcon
 } from '@jupyterlab/ui-components';
@@ -95,7 +95,7 @@ export class BreadCrumbs extends Widget {
     this._onPathEdited = options.onPathEdited;
     this._onPathActivated = options.onPathActivated;
     this.addClass(BREADCRUMB_CLASS);
-    this._crumbs = Private.createCrumbs();
+    this._crumbs = Private.createCrumbs(this._trans);
     const hasPreferred = PageConfig.getOption('preferredPath');
     this._hasPreferred = hasPreferred && hasPreferred !== '/' ? true : false;
     this._crumbContainer = document.createElement('span');
@@ -520,7 +520,7 @@ export class BreadCrumbs extends Widget {
         event.stopPropagation();
         return;
       }
-      node = node.parentElement as HTMLElement;
+      node = node.parentElement!;
     }
 
     // Click landed on the breadcrumb background (including separators
@@ -542,15 +542,21 @@ export class BreadCrumbs extends Widget {
         if (index !== -1) {
           break;
         }
-        target = target.parentElement as HTMLElement;
+        target = target.parentElement!;
       }
       if (index !== -1) {
         const hitElement = breadcrumbElements[index];
-        // Don't allow dropping on the current path
-        const currentPath = this._model.manager.services.contents.localPath(
-          this._model.path
+        // Refuse the drop when no item would move. The items can come from
+        // another file browser, so compare with their folders instead of the
+        // current folder. The root and preferred breadcrumbs store their path
+        // with a leading slash.
+        const contents = this._model.manager.services.contents;
+        const hitPath = PathExt.removeSlash(hitElement.dataset.path ?? '');
+        const paths = event.mimeData.getData(CONTENTS_MIME) as string[];
+        const moves = paths.some(
+          path => PathExt.dirname(contents.localPath(path)) !== hitPath
         );
-        if (hitElement.dataset.path !== currentPath) {
+        if (moves) {
           hitElement.classList.add(DROP_TARGET_CLASS);
           event.preventDefault();
           event.stopPropagation();
@@ -590,7 +596,7 @@ export class BreadCrumbs extends Widget {
       if (index !== -1) {
         break;
       }
-      target = target.parentElement as HTMLElement;
+      target = target.parentElement!;
     }
     if (index !== -1) {
       breadcrumbElements[index].classList.add(DROP_TARGET_CLASS);
@@ -639,11 +645,16 @@ export class BreadCrumbs extends Widget {
     const manager = model.manager;
 
     // Move all of the items.
-    const promises: Promise<any>[] = [];
+    const promises: Promise<Contents.IModel | null>[] = [];
     const oldPaths = event.mimeData.getData(CONTENTS_MIME) as string[];
     for (const oldPath of oldPaths) {
-      const name = PathExt.basename(oldPath);
+      const localPath = manager.services.contents.localPath(oldPath);
+      const name = PathExt.basename(localPath);
       const newPath = PathExt.join(destinationPath, name);
+      // Skip files that are not moving.
+      if (newPath === localPath) {
+        continue;
+      }
       promises.push(renameFile(manager, oldPath, newPath));
     }
     void Promise.all(promises).catch(err => {
@@ -729,7 +740,7 @@ export class BreadCrumbs extends Widget {
     this._cachedWidths = {
       home: (home.getBoundingClientRect().width || 22) + 4,
       ellipsis: (ellipsis.getBoundingClientRect().width || 28) + 4,
-      separator: separator?.getBoundingClientRect().width || 4,
+      separator: (separator?.getBoundingClientRect().width ?? 0) || 4,
       preferred: this._hasPreferred
         ? (preferred.getBoundingClientRect().width || 22) + 4
         : 0,
@@ -1119,11 +1130,14 @@ namespace Private {
   /**
    * Create the breadcrumb nodes.
    */
-  export function createCrumbs(): ReadonlyArray<HTMLElement> {
+  export function createCrumbs(
+    trans: TranslationBundle
+  ): ReadonlyArray<HTMLElement> {
     const home = rootIcon.element({
       className: BREADCRUMB_ROOT_CLASS,
       tag: 'span',
-      title: PageConfig.getOption('serverRoot') || 'Jupyter Server Root',
+      title:
+        PageConfig.getOption('serverRoot') || trans.__('Jupyter Server Root'),
       stylesheet: 'breadCrumb'
     });
     home.dataset.path = '/';
@@ -1137,11 +1151,16 @@ namespace Private {
     ellipsis.tabIndex = -1;
 
     const preferredPath = PageConfig.getOption('preferredPath');
-    const path = preferredPath ? '/' + preferredPath : preferredPath;
-    const preferred = preferredIcon.element({
+    const path =
+      preferredPath && preferredPath !== '/'
+        ? '/' + preferredPath
+        : preferredPath;
+    const preferredPathIsHome =
+      PageConfig.getOption('preferredPathIsHome').toLowerCase() === 'true';
+    const preferred = (preferredPathIsHome ? homeIcon : preferredIcon).element({
       className: BREADCRUMB_PREFERRED_CLASS,
       tag: 'span',
-      title: path || 'Jupyter Preferred Path',
+      title: path || trans.__('Jupyter Preferred Path'),
       stylesheet: 'breadCrumb'
     });
     preferred.dataset.path = path || '/';

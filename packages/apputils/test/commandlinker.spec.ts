@@ -233,8 +233,10 @@ describe('@jupyterlab/apputils', () => {
           }
         });
         const trustDisposable = commands.addCommand(trustCommand, {
-          execute: () => {
+          execute: args => {
             calls.push('trust');
+            expect(args[CommandLinker.TRUST_BOUNDARY_ID_ARG]).toBe(wrapper.id);
+            linker.markTrusted(wrapper);
             return { trusted: true };
           }
         });

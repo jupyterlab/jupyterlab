@@ -1,6 +1,5 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @packageDocumentation
  * @module filebrowser-extension
@@ -71,7 +70,7 @@ import {
   stopIcon,
   textEditorIcon
 } from '@jupyterlab/ui-components';
-import { map } from '@lumino/algorithm';
+import { find, map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import type { ReadonlyPartialJSONValue } from '@lumino/coreutils';
 import type { AccordionPanel, ContextMenu } from '@lumino/widgets';
@@ -81,6 +80,7 @@ import type { AccordionPanel, ContextMenu } from '@lumino/widgets';
  */
 const FILE_BROWSER_FACTORY = 'FileBrowser';
 const FILE_BROWSER_PLUGIN_ID = '@jupyterlab/filebrowser-extension:browser';
+const RESTORING_CLASS = 'jp-mod-restoring';
 
 /**
  * The command IDs used by the file browser plugin.
@@ -133,12 +133,17 @@ namespace CommandIDs {
   // For main browser only.
   export const copyPath = 'filebrowser:copy-path';
 
-  export const showBrowser = 'filebrowser:activate';
+  export const openDirectory = 'filebrowser:open-directory';
 
   export const shutdown = 'filebrowser:shutdown';
 
   // For main browser only.
-  export const toggleBrowser = 'filebrowser:toggle-main';
+  export const showPanel = 'filebrowser:show-panel';
+
+  /**
+   * @deprecated Use `filebrowser:open-directory` instead.
+   */
+  export const activate = 'filebrowser:activate';
 
   export const toggleFileFilter = 'filebrowser:toggle-file-filter';
 
@@ -163,6 +168,11 @@ namespace CommandIDs {
   export const toggleFileCheckboxes = 'filebrowser:toggle-file-checkboxes';
 
   export const editPath = 'filebrowser:edit-path';
+
+  /**
+   * @deprecated Use `filebrowser:show-panel` instead.
+   */
+  export const toggleMain = 'filebrowser:toggle-main';
 }
 
 /**
@@ -230,13 +240,22 @@ const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
       commandPalette
     );
 
-    void Promise.all([app.restored, browser.model.restored]).then(() => {
-      if (treePathUpdater) {
-        browser.model.pathChanged.connect((sender, args) => {
-          treePathUpdater(args.newValue);
-        });
+    // The default file browser plugin restores the browser and opens the path
+    // from the URL: report the folder once that is done, and follow it after.
+    // A default browser restored by another plugin is followed from `restored`.
+    const restoring = Private.restoring.get(browser);
+    void Promise.all([app.restored, restoring ?? browser.model.restored]).then(
+      () => {
+        if (treePathUpdater) {
+          if (restoring) {
+            treePathUpdater(browser.model.path);
+          }
+          browser.model.pathChanged.connect((sender, args) => {
+            treePathUpdater(args.newValue);
+          });
+        }
       }
-    });
+    );
     return {
       openPath: CommandIDs.openPath
     };
@@ -276,14 +295,21 @@ const browserSettings: JupyterFrontEndPlugin<void> = {
           allowFileUploads: true
         };
 
-        browser.showFileFilter = settings.get('showFileFilter')
-          .composite as boolean;
+        // The toolbar button also toggles the filter bar, so apply the setting
+        // only when it changes, and not when another setting changes.
+        let showFileFilter: boolean | undefined;
 
         function onSettingsChanged(settings: ISettingRegistry.ISettings): void {
           let key: keyof typeof defaultFileBrowserConfig;
           for (key in defaultFileBrowserConfig) {
             const value = settings.get(key).composite as boolean;
             browser[key] = value;
+          }
+          const showFileFilterSetting = settings.get('showFileFilter')
+            .composite as boolean;
+          if (showFileFilterSetting !== showFileFilter) {
+            showFileFilter = showFileFilterSetting;
+            browser.showFileFilter = showFileFilterSetting;
           }
           const breadcrumbs = settings.get('breadcrumbs')
             .composite as unknown as IBreadcrumbsSettings;
@@ -419,7 +445,7 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
     // Show the current file browser shortcut in its title.
     const updateBrowserTitle = () => {
       const binding = app.commands.keyBindings.find(
-        b => b.command === CommandIDs.toggleBrowser
+        b => b.command === CommandIDs.showPanel
       );
       if (binding) {
         const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
@@ -480,14 +506,19 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
       });
     }
 
-    void Private.restoreBrowser(
+    defaultBrowser.addClass(RESTORING_CLASS);
+    const restored = Private.restoreBrowser(
       defaultBrowser,
       commands,
       router,
       tree,
-      app,
       labShell
-    );
+    )
+      .catch(error => {
+        console.error('Failed to restore the file browser.', error);
+      })
+      .finally(() => defaultBrowser.removeClass(RESTORING_CLASS));
+    Private.restoring.set(defaultBrowser, restored);
     return defaultBrowser;
   }
 };
@@ -582,12 +613,12 @@ const createNewLanguageFilePlugin: JupyterFrontEndPlugin<void> = {
     const specsManager = app.serviceManager.kernelspecs;
 
     const updateFileBrowserContextMenu = async () => {
-      if (filebrowsermenuDisposables) {
-        filebrowsermenuDisposables.dispose();
-        filebrowsermenuDisposables = new DisposableSet();
-      }
-
       const updatedFileTypes = await getAvailableKernelFileTypes(specsManager);
+
+      // Replace the entries only now: updates that overlap while waiting for
+      // the kernel specs would otherwise each add their own entries.
+      filebrowsermenuDisposables.dispose();
+      filebrowsermenuDisposables = new DisposableSet();
 
       for (const filetype of updatedFileTypes) {
         filebrowsermenuDisposables.add(
@@ -666,7 +697,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
 
     labShell.add(browser, 'left', { rank: 100, type: 'File Browser' });
 
-    commands.addCommand(CommandIDs.toggleBrowser, {
+    commands.addCommand(CommandIDs.showPanel, {
       label: trans.__('File Browser'),
       describedBy: {
         args: {
@@ -675,15 +706,40 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
         }
       },
       execute: () => {
-        if (browser.isHidden) {
-          return commands.execute(CommandIDs.showBrowser, void 0);
-        }
-
-        return commands.execute(CommandIDs.hideBrowser, void 0);
+        labShell.activateById(browser.id);
       }
     });
 
-    commands.addCommand(CommandIDs.showBrowser, {
+    // Backward-compatible alias for older command ID.
+    commands.addCommand(CommandIDs.activate, {
+      label: trans.__('Open the file browser for the provided `path`.'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {
+            path: {
+              type: 'string',
+              description: trans.__('The path to open in the file browser')
+            }
+          }
+        }
+      },
+      execute: args => commands.execute(CommandIDs.openDirectory, args)
+    });
+
+    // Backward-compatible alias for older command ID.
+    commands.addCommand(CommandIDs.toggleMain, {
+      label: trans.__('File Browser'),
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      execute: args => commands.execute(CommandIDs.showPanel, args)
+    });
+
+    commands.addCommand(CommandIDs.openDirectory, {
       label: trans.__('Open the file browser for the provided `path`.'),
       describedBy: {
         args: {
@@ -773,7 +829,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     // mode, open file browser.
     void labShell.restored.then(layout => {
       if (layout.fresh && labShell.mode !== 'single-document') {
-        void commands.execute(CommandIDs.showBrowser, void 0);
+        void commands.execute(CommandIDs.openDirectory, void 0);
       }
     });
 
@@ -1065,7 +1121,7 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
             (
               await InputDialog.getText({
                 label: trans.__('URL'),
-                placeholder: 'https://example.com/path/to/file',
+                placeholder: trans.__('https://example.com/path/to/file'),
                 title: trans.__('Open URL'),
                 okLabel: trans.__('Open')
               })
@@ -1081,13 +1137,19 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
         // fetch the file from the URL
         try {
           const req = await fetch(url);
+          if (!req.ok) {
+            return showErrorMessage(
+              trans.__('Cannot fetch'),
+              trans.__('Could not open URL: %1', url)
+            );
+          }
           blob = await req.blob();
           type = req.headers.get('Content-Type') ?? '';
         } catch (reason) {
-          if (reason.response && reason.response.status !== 200) {
-            reason.message = trans.__('Could not open URL: %1', url);
-          }
-          return showErrorMessage(trans.__('Cannot fetch'), reason);
+          return showErrorMessage(
+            trans.__('Cannot fetch'),
+            reason instanceof Error ? reason : String(reason)
+          );
         }
 
         // upload the content of the file to the server
@@ -1101,7 +1163,7 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
         } catch (error) {
           return showErrorMessage(
             trans._p('showErrorMessage', 'Upload Error'),
-            error
+            error instanceof Error ? error : String(error)
           );
         }
       },
@@ -1187,7 +1249,8 @@ const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
           const file = models[0];
           if (
             autoOpen &&
-            file.size &&
+            file.size !== null &&
+            file.size !== undefined &&
             file.size <= maxSize &&
             isAllowedFileType
           ) {
@@ -1203,7 +1266,9 @@ const notifyUploadPlugin: JupyterFrontEndPlugin<void> = {
               trans.__(
                 'Uploaded %1%2',
                 file.name,
-                file.size ? ` (${formatFileSize(file.size, 1, 1024)})` : ''
+                file.size !== null && file.size !== undefined
+                  ? ` (${formatFileSize(file.size, 1, 1024)})`
+                  : ''
               ),
               'info',
               {
@@ -1385,7 +1450,7 @@ function addCommands(
     },
     execute: async args => {
       const path = (args.path as string) || '';
-      const showBrowser = !(args?.dontShowBrowser ?? false);
+      const openDirectory = !(args?.dontShowBrowser ?? false);
       try {
         const item = await Private.navigateToPath(
           path,
@@ -1393,7 +1458,7 @@ function addCommands(
           factory,
           translator
         );
-        if (item.type !== 'directory' && showBrowser) {
+        if (item.type !== 'directory' && openDirectory) {
           const browserForPath = Private.getBrowserForPath(
             path,
             browser,
@@ -1411,8 +1476,8 @@ function addCommands(
       } catch (reason) {
         console.warn(`${CommandIDs.goToPath} failed to go to: ${path}`, reason);
       }
-      if (showBrowser) {
-        return commands.execute(CommandIDs.showBrowser, { path });
+      if (openDirectory) {
+        return commands.execute(CommandIDs.openDirectory, { path });
       }
     }
   });
@@ -1450,7 +1515,7 @@ function addCommands(
           (
             await InputDialog.getText({
               label: trans.__('Path'),
-              placeholder: '/path/relative/to/jlab/root',
+              placeholder: trans.__('/path/relative/to/jlab/root'),
               title: trans.__('Open Path'),
               okLabel: trans.__('Open')
             })
@@ -1484,12 +1549,23 @@ function addCommands(
         if (item.type === 'directory') {
           return;
         }
-        return commands.execute('docmanager:open', { path });
-      } catch (reason) {
+        const widgetFactory = Private.resolveOpenWithFactory(
+          registry,
+          (args.factory as string) || undefined
+        );
+        return commands.execute('docmanager:open', {
+          path,
+          factory: widgetFactory
+        });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (reason: any) {
         if (reason.response && reason.response.status === 404) {
           reason.message = trans.__('Could not find path: %1', path);
         }
-        return showErrorMessage(trans.__('Cannot open'), reason);
+        return showErrorMessage(
+          trans.__('Cannot open'),
+          reason instanceof Error ? reason : String(reason)
+        );
       }
     },
     describedBy: {
@@ -1503,6 +1579,12 @@ function addCommands(
           dontShowBrowser: {
             type: 'boolean',
             description: trans.__('Whether to avoid showing the file browser')
+          },
+          factory: {
+            type: 'string',
+            description: trans.__(
+              'The widget factory, file type, or file extension used to open a file'
+            )
           }
         }
       }
@@ -1627,7 +1709,14 @@ function addCommands(
         : textEditorIcon.bindprops({ stylesheet: 'menuItem' });
     },
     label: (args: { ext: string; label: string }) => {
-      return trans.__(args.label ?? 'New File');
+      if (args.label === undefined || args.label === null) {
+        return trans.__('New File');
+      }
+      // The label is supplied by the caller, most often from the
+      // `jupyter.lab.menus` key of a settings schema, from which it is
+      // extracted by the schema selectors.
+      // eslint-disable-next-line jupyter/no-dynamic-translation
+      return trans.__(args.label);
     },
     describedBy: {
       args: {
@@ -1988,7 +2077,7 @@ function addCommands(
         );
         return;
       }
-      await commands.execute(CommandIDs.showBrowser);
+      await commands.execute(CommandIDs.openDirectory);
       const targetBrowser = tracker.currentWidget ?? browser;
       targetBrowser.editPath();
     },
@@ -2013,7 +2102,7 @@ function addCommands(
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<unknown>[] = [
   factory,
   defaultFileBrowser,
   browser,
@@ -2034,6 +2123,10 @@ export default plugins;
  * A namespace for private module data.
  */
 namespace Private {
+  /**
+   * Restoration of the default file browser, set by its plugin.
+   */
+  export const restoring = new WeakMap<FileBrowser, Promise<void>>();
   /**
    * Get browser object given file path.
    */
@@ -2095,6 +2188,44 @@ namespace Private {
   }
 
   /**
+   * Resolve an `open-with` value to a widget factory name.
+   *
+   * Returns `undefined`, which opens the default viewer, when no widget
+   * factory, file type or file extension matches the value.
+   */
+  export function resolveOpenWithFactory(
+    docRegistry: DocumentRegistry,
+    openWith: string | undefined
+  ): string | undefined {
+    if (!openWith) {
+      return undefined;
+    }
+
+    const factory = docRegistry.getWidgetFactory(openWith);
+    if (factory) {
+      return factory.name;
+    }
+
+    const extension = openWith.startsWith('.') ? openWith : `.${openWith}`;
+    const fileType =
+      docRegistry.getFileType(openWith) ??
+      Array.from(docRegistry.fileTypes()).find(fileType =>
+        fileType.extensions.some(
+          value => value.toLowerCase() === extension.toLowerCase()
+        )
+      );
+    const name = fileType
+      ? docRegistry.preferredWidgetFactories(fileType)[0]?.name
+      : undefined;
+    if (!name) {
+      console.warn(
+        `No viewer matches open-with value "${openWith}", using the default viewer.`
+      );
+    }
+    return name;
+  }
+
+  /**
    * Restores file browser state and overrides state if tree resolver resolves.
    */
   export async function restoreBrowser(
@@ -2102,50 +2233,80 @@ namespace Private {
     commands: CommandRegistry,
     router: IRouter | null,
     tree: JupyterFrontEnd.ITreeResolver | null,
-    app: JupyterFrontEnd,
     labShell: ILabShell | null
   ): Promise<void> {
-    const restoring = 'jp-mod-restoring';
-
-    browser.addClass(restoring);
-
     if (!router) {
       await browser.model.restore(browser.id);
       await browser.model.refresh();
-      browser.removeClass(restoring);
       return;
     }
 
-    const listener = async () => {
-      router.routed.disconnect(listener);
+    const { manager } = browser.model;
+    // Capture the restored view before later interactions can dispose it.
+    const restoredDocument = labShell?.restored.then(layout => {
+      const widget = layout.mainArea?.currentWidget;
+      const path = widget ? manager.contextForWidget(widget)?.path : undefined;
+      return {
+        widget,
+        path,
+        factory: path
+          ? find(
+              manager.registry.widgetFactories(),
+              factory => manager.findWidget(path, factory.name) === widget
+            )?.name
+          : undefined
+      };
+    });
 
-      const paths = await tree?.paths;
-      if (paths?.file || paths?.browser) {
-        // Restore the model without populating it.
-        await browser.model.restore(browser.id, false);
-        if (paths.file) {
-          await commands.execute(CommandIDs.openPath, {
+    await new Promise<void>(resolve => {
+      const listener = () => {
+        router.routed.disconnect(listener);
+        resolve();
+      };
+      router.routed.connect(listener);
+    });
+
+    const paths = await tree?.paths;
+    if (paths?.file || paths?.browser) {
+      // Restore the model without populating it.
+      await browser.model.restore(browser.id, false);
+      if (paths.file) {
+        const restored = await restoredDocument;
+        const factory = Private.resolveOpenWithFactory(
+          manager.registry,
+          paths.openWith
+        );
+        const alreadyRestored =
+          restored?.widget &&
+          restored.path === manager.services.contents.normalize(paths.file) &&
+          (!paths.openWith || (factory && restored.factory === factory));
+        if (alreadyRestored) {
+          await commands.execute(CommandIDs.goToPath, {
             path: paths.file,
             dontShowBrowser: true
           });
-        }
-        if (paths.browser) {
+        } else {
           await commands.execute(CommandIDs.openPath, {
-            path: paths.browser,
-            dontShowBrowser: true
+            path: paths.file,
+            dontShowBrowser: true,
+            factory: paths.openWith
           });
         }
-      } else {
-        await browser.model.restore(browser.id);
-        await browser.model.refresh();
       }
-      browser.removeClass(restoring);
+      if (paths.browser) {
+        await commands.execute(CommandIDs.openPath, {
+          path: paths.browser,
+          dontShowBrowser: true
+        });
+      }
+    } else {
+      await browser.model.restore(browser.id);
+      await browser.model.refresh();
+    }
 
-      if (labShell?.isEmpty('main')) {
-        void commands.execute('launcher:create');
-      }
-    };
-    router.routed.connect(listener);
+    if (labShell?.isEmpty('main')) {
+      void commands.execute('launcher:create');
+    }
   }
 
   export namespace OpenWith {

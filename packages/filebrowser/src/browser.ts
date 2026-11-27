@@ -25,6 +25,7 @@ import { createRef } from 'react';
 import { BreadCrumbs } from './crumbs';
 import { DirListing } from './listing';
 import type { FilterFileBrowserModel } from './model';
+import type { Message } from '@lumino/messaging';
 
 /**
  * The class name added to file browsers.
@@ -465,6 +466,13 @@ export class FileBrowser
   }
 
   /**
+   * Handle `'activate-request'` messages.
+   */
+  protected onActivateRequest(msg: Message): void {
+    this._focusListingContentOrCrumb();
+  }
+
+  /**
    * Rename the first currently selected item.
    *
    * @returns A promise that resolves with the new name of the item.
@@ -532,7 +540,10 @@ export class FileBrowser
       await this.rename();
       return model;
     } catch (err) {
-      void showErrorMessage(this._trans.__('Error'), err);
+      void showErrorMessage(
+        this._trans.__('Error'),
+        err instanceof Error ? err : String(err)
+      );
       throw err;
     }
   }

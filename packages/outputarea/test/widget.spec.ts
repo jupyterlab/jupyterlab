@@ -2,20 +2,27 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { SessionContext } from '@jupyterlab/apputils';
+import { Sanitizer } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
-import type { IOutputAreaModel, Stdin } from '@jupyterlab/outputarea';
+import type {
+  IOutputAreaModel,
+  IPageHandler,
+  Stdin
+} from '@jupyterlab/outputarea';
 import {
   OutputArea,
   OutputAreaModel,
   SimplifiedOutputArea
 } from '@jupyterlab/outputarea';
 import type { Kernel } from '@jupyterlab/services';
-import { KernelManager } from '@jupyterlab/services';
+import { KernelManager, KernelMessage } from '@jupyterlab/services';
 import { JupyterServer, signalToPromise } from '@jupyterlab/testing';
 import {
   DEFAULT_OUTPUTS,
   defaultRenderMime
 } from '@jupyterlab/rendermime/lib/testutils';
+import { UUID } from '@lumino/coreutils';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
@@ -25,10 +32,102 @@ import { simulate } from 'simulate-event';
  */
 const rendermime = defaultRenderMime();
 
+/**
+ * A rendermime instance that writes text once the output is attached, as the
+ * application does.
+ */
+const incrementalRendermime = defaultRenderMime().clone({
+  sanitizer: new Sanitizer()
+});
+
 const CODE = 'print("hello")';
+
+function createResolvedFuture(): Kernel.IShellFuture<
+  KernelMessage.IExecuteRequestMsg,
+  KernelMessage.IExecuteReplyMsg
+> {
+  const done = Promise.resolve(
+    KernelMessage.createMessage<KernelMessage.IExecuteReplyMsg>({
+      channel: 'shell',
+      msgType: 'execute_reply',
+      session: UUID.uuid4(),
+      content: {
+        status: 'ok',
+        execution_count: 1,
+        user_expressions: {},
+        payload: []
+      }
+    })
+  );
+  return {
+    done,
+    onIOPub: () => undefined,
+    onReply: () => undefined,
+    onStdin: () => undefined,
+    dispose: () => undefined
+  } as unknown as Kernel.IShellFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+  >;
+}
+
+function createUpdateDisplayDataMessage(
+  data: Record<string, string>,
+  displayId: string
+): KernelMessage.IUpdateDisplayDataMsg {
+  return KernelMessage.createMessage<KernelMessage.IUpdateDisplayDataMsg>({
+    channel: 'iopub',
+    msgType: 'update_display_data',
+    session: UUID.uuid4(),
+    content: {
+      data,
+      metadata: {},
+      transient: { display_id: displayId }
+    }
+  });
+}
+
+function createDisplayDataMessage(
+  data: Record<string, string>,
+  displayId: string
+): KernelMessage.IDisplayDataMsg {
+  return KernelMessage.createMessage<KernelMessage.IDisplayDataMsg>({
+    channel: 'iopub',
+    msgType: 'display_data',
+    session: UUID.uuid4(),
+    content: {
+      data,
+      metadata: {},
+      transient: { display_id: displayId }
+    }
+  });
+}
+
+/**
+ * Attach an output area and wait for the frame of its isolated output to load.
+ */
+async function attachIsolated(widget: OutputArea): Promise<HTMLIFrameElement> {
+  Widget.attach(widget, document.body);
+  const iframe = widget.node.querySelector('iframe')!;
+  // jsdom fires the load event again on close(), which browsers do not.
+  jest
+    .spyOn(iframe.contentDocument!, 'close')
+    .mockImplementation(() => undefined);
+  await new Promise(resolve =>
+    iframe.addEventListener('load', resolve, { once: true })
+  );
+  return iframe;
+}
 
 class LogOutputArea extends OutputArea {
   methods: string[] = [];
+
+  requestInputForTest(
+    msg: KernelMessage.IInputRequestMsg,
+    future: Kernel.IShellFuture
+  ): void {
+    this.onInputRequest(msg, future);
+  }
 
   protected onUpdateRequest(msg: Message): void {
     super.onUpdateRequest(msg);
@@ -72,6 +171,7 @@ describe('outputarea/widget', () => {
   afterEach(() => {
     model.dispose();
     widget.dispose();
+    jest.useRealTimers();
   });
 
   describe('OutputArea', () => {
@@ -107,6 +207,23 @@ describe('outputarea/widget', () => {
     });
 
     describe('#maxNumberOutputs', () => {
+      function requestInput(widget: LogOutputArea): void {
+        const future = {
+          sendInputReply: jest.fn()
+        } as unknown as Kernel.IShellFuture;
+        const msg = KernelMessage.createMessage({
+          msgType: 'input_request',
+          channel: 'stdin',
+          username: 'test',
+          session: 'test',
+          content: {
+            prompt: 'Your age:',
+            password: false
+          }
+        });
+        widget.requestInputForTest(msg, future);
+      }
+
       test.each([20, 6, 5, 2])(
         'should control the list of visible outputs',
         maxNumberOutputs => {
@@ -182,6 +299,90 @@ describe('outputarea/widget', () => {
           widget.maxNumberOutputs + 1
         );
         expect(widget.widgets.length).toBeLessThan(model.length);
+      });
+
+      test('should not expand visible outputs when input is requested', () => {
+        const widget = new LogOutputArea({
+          rendermime,
+          model,
+          maxNumberOutputs: 2
+        });
+
+        try {
+          requestInput(widget);
+
+          expect(widget.maxNumberOutputs).toEqual(2);
+          expect(widget.widgets.length).toEqual(widget.maxNumberOutputs + 2);
+          expect(widget.node.querySelector('.jp-Stdin')).not.toBeNull();
+        } finally {
+          widget.dispose();
+        }
+      });
+
+      test('should preserve pending input when a hidden output is removed', () => {
+        const widget = new LogOutputArea({
+          rendermime,
+          model,
+          maxNumberOutputs: 2
+        });
+
+        try {
+          requestInput(widget);
+
+          const input = widget.node.querySelector('.jp-Stdin');
+          const widgetCount = widget.widgets.length;
+          expect(input).not.toBeNull();
+
+          model.remove(widget.maxNumberOutputs + 1);
+
+          expect(widget.node.querySelector('.jp-Stdin')).toBe(input);
+          expect(widget.widgets.length).toBe(widgetCount);
+        } finally {
+          widget.dispose();
+        }
+      });
+
+      test('should preserve the trimmed marker when a hidden output is removed', () => {
+        const widget = new LogOutputArea({
+          rendermime,
+          model,
+          maxNumberOutputs: 2
+        });
+
+        try {
+          requestInput(widget);
+
+          const trimmed = widget.node.querySelector('.jp-TrimmedOutputs');
+          expect(trimmed).not.toBeNull();
+
+          model.remove(widget.maxNumberOutputs);
+
+          expect(widget.node.querySelector('.jp-TrimmedOutputs')).toBe(trimmed);
+        } finally {
+          widget.dispose();
+        }
+      });
+
+      test('should backfill visible outputs when a visible output is removed', () => {
+        const maxNumberOutputs = 2;
+        const widget = new LogOutputArea({
+          rendermime,
+          model,
+          maxNumberOutputs
+        });
+
+        try {
+          model.remove(0);
+
+          expect(widget.widgets.length).toBe(maxNumberOutputs + 1);
+          expect(
+            widget.widgets[maxNumberOutputs].node.querySelector(
+              '.jp-TrimmedOutputs'
+            )
+          ).not.toBeNull();
+        } finally {
+          widget.dispose();
+        }
       });
     });
 
@@ -304,6 +505,114 @@ describe('outputarea/widget', () => {
       });
     });
 
+    describe('#reattachFuture()', () => {
+      it('should keep display id targets when reattaching to the same output area', () => {
+        const displayId = 'display-id';
+        const initialData = { 'text/plain': 'before' };
+        const updatedData = { 'text/plain': 'after' };
+        const future = createResolvedFuture();
+
+        widget.future = future;
+        void future.onIOPub(createDisplayDataMessage(initialData, displayId));
+        const detachedFuture = widget.detachFuture();
+        expect(detachedFuture).not.toBeNull();
+        if (!detachedFuture) {
+          throw new Error('Expected a detached future.');
+        }
+        expect(detachedFuture).toBe(future);
+        widget.reattachFuture(detachedFuture);
+        void future.onIOPub(
+          createUpdateDisplayDataMessage(updatedData, displayId)
+        );
+
+        expect(model.get(0).data).toEqual(updatedData);
+        expect(model.toJSON()[0]).not.toHaveProperty('transient');
+      });
+
+      it('should use captured display id targets for restored JSON outputs', () => {
+        const displayId = 'display-id';
+        const initialData = { 'text/plain': 'before' };
+        const updatedData = { 'text/plain': 'after' };
+        const future = createResolvedFuture();
+
+        widget.future = future;
+        void future.onIOPub(createDisplayDataMessage(initialData, displayId));
+        const restoredOutputs = model.toJSON();
+        const displayIdMap = widget.displayIdMap;
+        const detachedFuture = widget.detachFuture();
+        expect(detachedFuture).not.toBeNull();
+        if (!detachedFuture) {
+          throw new Error('Expected a detached future.');
+        }
+        expect(detachedFuture).toBe(future);
+
+        widget.dispose();
+        model.dispose();
+        model = new OutputAreaModel({ trusted: true });
+        widget = new LogOutputArea({ rendermime, model });
+        model.fromJSON(restoredOutputs);
+
+        widget.reattachFuture(detachedFuture, displayIdMap);
+        void future.onIOPub(
+          createUpdateDisplayDataMessage(updatedData, displayId)
+        );
+
+        expect(model.get(0).data).toEqual(updatedData);
+      });
+    });
+
+    describe('#displayIdMap', () => {
+      it('should copy display id targets on get and set', () => {
+        const targets = [0];
+        const displayIdMap = new Map([['display-id', targets]]);
+        widget.displayIdMap = displayIdMap;
+        const captured = widget.displayIdMap;
+
+        targets.push(1);
+        displayIdMap.clear();
+        expect(widget.displayIdMap.get('display-id')).toEqual([0]);
+
+        widget.displayIdMap = new Map();
+        expect(captured.get('display-id')).toEqual([0]);
+      });
+    });
+
+    it('should delegate page payloads to an optional page handler', () => {
+      widget.dispose();
+      model.dispose();
+
+      model = new OutputAreaModel({ trusted: true });
+      const receivedPayloads: ReadonlyJSONObject[] = [];
+      const pageHandler: IPageHandler = {
+        handlePage: payload => {
+          receivedPayloads.push(payload);
+          return true;
+        }
+      };
+      widget = new LogOutputArea({ rendermime, model, pageHandler });
+
+      const message = {
+        content: {
+          status: 'ok',
+          payload: [
+            {
+              source: 'page',
+              data: { 'text/plain': 'pager output' }
+            }
+          ]
+        }
+      } as unknown as KernelMessage.IExecuteReplyMsg;
+
+      const testWidget = widget as unknown as {
+        _onExecuteReply: (msg: KernelMessage.IExecuteReplyMsg) => void;
+      };
+      testWidget._onExecuteReply(message);
+
+      expect(receivedPayloads).toHaveLength(1);
+      expect(receivedPayloads[0]['source']).toBe('page');
+      expect(model.length).toBe(0);
+    });
+
     describe('#onModelChanged()', () => {
       it('should handle an added output', () => {
         widget.model.clear();
@@ -325,7 +634,7 @@ describe('outputarea/widget', () => {
         expect(widget.widgets.length).toBe(0);
       });
 
-      it('should follow changes to initial stdout stream', () => {
+      it('should follow changes to initial stdout stream', async () => {
         model = new OutputAreaModel({
           values: [DEFAULT_OUTPUTS[0]],
           trusted: true
@@ -335,6 +644,9 @@ describe('outputarea/widget', () => {
         const streamOutput = 'nctvjd745fdk56';
         expect(widget.node.innerHTML).not.toContain(streamOutput);
         widget.model.appendStreamOutput(streamOutput);
+        // Rendering is asynchronous (the renderer defers work off the initial
+        // task), so wait for it to settle before inspecting the DOM.
+        await new Promise(resolve => setTimeout(resolve, 0));
         expect(widget.node.innerHTML).toContain(streamOutput);
       });
 
@@ -412,6 +724,70 @@ describe('outputarea/widget', () => {
           }
         });
         expect(widget.node.innerHTML).not.toContain('<iframe');
+      });
+
+      it('should show isolated text in its frame', async () => {
+        jest.useFakeTimers();
+        model.clear();
+        const area = new OutputArea({
+          rendermime: incrementalRendermime,
+          model
+        });
+        model.add({
+          output_type: 'display_data',
+          data: { 'text/plain': 'hello, world' },
+          metadata: { isolated: true }
+        });
+
+        const iframe = await attachIsolated(area);
+        jest.runAllTimers();
+
+        expect(iframe.contentDocument!.body?.textContent).toBe('hello, world');
+        area.dispose();
+      });
+
+      it('should show isolated stderr in its frame', async () => {
+        // A stderr stream has no metadata, so it cannot be isolated.
+        jest.useFakeTimers();
+        model.clear();
+        const area = new OutputArea({
+          rendermime: incrementalRendermime,
+          model
+        });
+        model.add({
+          output_type: 'display_data',
+          data: { 'application/vnd.jupyter.stderr': 'hello, world' },
+          metadata: { isolated: true }
+        });
+
+        const iframe = await attachIsolated(area);
+        jest.runAllTimers();
+
+        expect(iframe.contentDocument!.body?.textContent).toBe('hello, world');
+        area.dispose();
+      });
+
+      it('should show isolated text attached after more than 1,000 frames', async () => {
+        // Collapsed outputs are attached when they are expanded.
+        jest.useFakeTimers();
+        model.clear();
+        const area = new OutputArea({
+          rendermime: incrementalRendermime,
+          model
+        });
+        model.add({
+          output_type: 'display_data',
+          data: { 'text/plain': 'hello, world' },
+          metadata: { isolated: true }
+        });
+        // About 1,250 frames at ~16ms per fake-timer frame.
+        jest.advanceTimersByTime(20000);
+
+        const iframe = await attachIsolated(area);
+        jest.runAllTimers();
+
+        expect(iframe.contentDocument!.body?.textContent).toBe('hello, world');
+        area.dispose();
       });
     });
 

@@ -25,6 +25,7 @@ import type { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { IObservableList } from '@jupyterlab/observables';
 import { ObservableList } from '@jupyterlab/observables';
+import type { IPageHandler } from '@jupyterlab/outputarea';
 import type { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import type { KernelMessage } from '@jupyterlab/services';
 import type { ITranslator } from '@jupyterlab/translation';
@@ -137,6 +138,7 @@ export class CodeConsole extends Widget {
     this.modelFactory = options.modelFactory ?? CodeConsole.defaultModelFactory;
     this.rendermime = options.rendermime;
     this.sessionContext = options.sessionContext;
+    this._pageHandler = options.pageHandler;
     this._mimeTypeService = options.mimeTypeService;
 
     // Add top-level CSS classes.
@@ -486,6 +488,7 @@ export class CodeConsole extends Widget {
       promptCellPosition,
       showBanner
     } = config;
+    const previousPosition = this._config.promptCellPosition;
     this._config = {
       clearCellsOnExecute:
         clearCellsOnExecute ?? this._config.clearCellsOnExecute,
@@ -495,7 +498,16 @@ export class CodeConsole extends Widget {
       promptCellPosition: promptCellPosition ?? this._config.promptCellPosition,
       showBanner: showBanner ?? this._config.showBanner
     };
-    this._updateLayout();
+    // Only promptCellPosition affects the layout; the other options are
+    // read when cells execute or banners are created. Rebuilding the
+    // layout detaches the panes, resets their sizes and scrolls the
+    // output to the top, so skip it when the position did not change.
+    if (
+      this._config.promptCellPosition !== previousPosition ||
+      !this._content.parent
+    ) {
+      this._updateLayout();
+    }
   }
 
   /**
@@ -934,6 +946,7 @@ export class CodeConsole extends Widget {
       rendermime,
       contentFactory,
       editorConfig,
+      pageHandler: this._pageHandler,
       placeholder: false,
       translator: this._translator
     };
@@ -1188,6 +1201,11 @@ export class CodeConsole extends Widget {
    * Update the layout of the code console.
    */
   private _updateLayout(): void {
+    // Remember whether focus was inside this console: detaching the
+    // panes drops focus, and re-focusing unconditionally would steal
+    // focus from another console or the settings editor.
+    const hadFocus = this.node.contains(document.activeElement);
+
     // Detach from split panel to reset DOM/tab order when re-inserting
     this._input.parent = null;
     this._content.parent = null;
@@ -1222,7 +1240,9 @@ export class CodeConsole extends Widget {
       this._adjustSplitPanelForInputGrowth();
     });
 
-    this.promptCell?.editor?.focus();
+    if (hadFocus) {
+      this.promptCell?.editor?.focus();
+    }
   }
 
   private _banner: RawCell | null = null;
@@ -1245,6 +1265,7 @@ export class CodeConsole extends Widget {
   } | null = null;
   private _drag: Drag | null = null;
   private _focusedCell: Cell | null = null;
+  private _pageHandler: IPageHandler | undefined;
   private _translator: ITranslator;
   private _splitPanel: SplitPanel;
   private _promptResizeObserver: ResizeObserver | null = null;
@@ -1329,6 +1350,11 @@ export namespace CodeConsole {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * Optional handler for pager payloads (`source: page`).
+     */
+    pageHandler?: IPageHandler;
   }
 
   /**

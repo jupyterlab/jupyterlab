@@ -79,6 +79,9 @@ function createReporter(options?: {
 }
 
 test.describe('BenchmarkReporter', () => {
+  // The tests share their report files, so they must not run in parallel.
+  test.describe.configure({ mode: 'default' });
+
   test('should generate report with default builders', async () => {
     const reporter = createReporter({
       outputFile: 'test.json',
@@ -117,13 +120,14 @@ test.describe('BenchmarkReporter', () => {
 });
 
 test.describe('benchmark.distributionChange', () => {
-  test('matches result from paper', () => {
+  test('applies the formula of the paper with the normal quantile', () => {
     const change = benchmark.distributionChange(
       [7.75, 12.25, 11.5],
       [8.75, 6.25, 4.5]
     );
 
-    expect(change.mean).toBeCloseTo(68.3 / 74.5);
-    expect(change.confidenceInterval).toBeCloseTo(60.2 / 74.5);
+    // The paper gives 68.3 / 74.5 and 60.2 / 74.5 with Student's t for 3 samples.
+    expect(change.mean).toBeCloseTo(0.664);
+    expect(change.confidenceInterval).toBeCloseTo(0.294);
   });
 });

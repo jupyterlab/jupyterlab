@@ -2,8 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { ISessionContext, SessionContext } from '@jupyterlab/apputils';
-import type { CodeEditorWrapper } from '@jupyterlab/codeeditor';
-import type { Signal } from '@lumino/signaling';
+import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import {
+  CodeMirrorEditor,
+  EditorLanguageRegistry,
+  ybinding
+} from '@jupyterlab/codemirror';
+import { Signal } from '@lumino/signaling';
 import type {
   ICompletionContext,
   ICompletionProvider
@@ -13,11 +18,23 @@ import {
   CompleterModel,
   CompletionHandler,
   CompletionTriggerKind,
+  ContextCompleterProvider,
+  InlineCompleter,
+  KernelCompleterProvider,
   ProviderReconciliator
 } from '@jupyterlab/completer';
 import { isHintableMimeType } from '@jupyterlab/completer/lib/utils';
 import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
+import { nullTranslator } from '@jupyterlab/translation';
+import { KernelMessage } from '@jupyterlab/services';
+import {
+  KernelMock,
+  SessionConnectionMock
+} from '@jupyterlab/services/lib/testutils';
+import { sleep } from '@jupyterlab/testing';
 import { Widget } from '@lumino/widgets';
+import { applyUpdate, Doc, encodeStateAsUpdate } from 'yjs';
+import { YFile } from '@jupyter/ydoc';
 import type { ISharedFile, ISharedText, SourceChange } from '@jupyter/ydoc';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 
@@ -345,6 +362,98 @@ describe('@jupyterlab/completer', () => {
       });
     });
 
+    describe('#invoke()', () => {
+      const kernel = new KernelMock({});
+      let anchor: CodeEditorWrapper;
+      let handler: CompletionHandler;
+
+      beforeAll(async () => {
+        const languages = new EditorLanguageRegistry();
+        for (const spec of EditorLanguageRegistry.getDefaultLanguages().filter(
+          language => language.name === 'Python'
+        )) {
+          languages.addLanguage(spec);
+          await languages.getLanguage(spec.name);
+        }
+        const sharedModel = new YFile();
+        anchor = new CodeEditorWrapper({
+          model: new CodeEditor.Model({ sharedModel }),
+          factory: options =>
+            new CodeMirrorEditor({
+              ...options,
+              languages,
+              extensions: [
+                ...(options.extensions ?? []),
+                ybinding({
+                  ytext: sharedModel.ysource,
+                  undoManager: sharedModel.undoManager ?? undefined
+                })
+              ]
+            })
+        });
+        anchor.model.mimeType = 'text/x-python';
+        Widget.attach(anchor, document.body);
+
+        handler = new CompletionHandler({
+          reconciliator: new ProviderReconciliator({
+            context: {
+              widget: anchor,
+              editor: anchor.editor,
+              session: new SessionConnectionMock({}, kernel)
+            },
+            providers: [
+              new ContextCompleterProvider(),
+              new KernelCompleterProvider()
+            ],
+            timeout: 1000
+          }),
+          completer: new Completer({
+            editor: null,
+            model: new CompleterModel()
+          })
+        });
+        handler.editor = anchor.editor;
+      });
+
+      afterAll(() => {
+        anchor.dispose();
+        handler.completer.dispose();
+        handler.dispose();
+      });
+
+      it('should replace the typed prefix after characters outside the BMP', async () => {
+        // Kernels count code points, so in this text `wa` starts at 49.
+        kernel.requestComplete = async () =>
+          KernelMessage.createMessage<KernelMessage.ICompleteReplyMsg>({
+            session: '',
+            channel: 'shell',
+            msgType: 'complete_reply',
+            content: {
+              status: 'ok',
+              matches: ['waterfall'],
+              cursor_start: 49,
+              cursor_end: 51,
+              metadata: {}
+            }
+          });
+        anchor.model.sharedModel.setSource(
+          'print("🔬 XRD ANALYSIS PROGRAM 🔬")\n\nwaterfall = 1\nwa'
+        );
+        await sleep(10);
+        anchor.editor.setCursorPosition({ line: 3, column: 2 });
+
+        handler.invoke();
+        await sleep(10);
+        (handler.completer.selected as Signal<Completer, string>).emit(
+          'waterfall'
+        );
+
+        expect(anchor.model.sharedModel.getSource()).toBe(
+          'print("🔬 XRD ANALYSIS PROGRAM 🔬")\n\nwaterfall = 1\nwaterfall'
+        );
+      });
+    });
+
     describe('#autoCompletion', () => {
       let anchor: CodeEditorWrapper;
       let provider: FooCompletionProvider;
@@ -474,6 +583,209 @@ describe('@jupyterlab/completer', () => {
         expect(model.completionItems()).toHaveLength(0);
         fetch.mockRestore();
         shouldShow.mockRestore();
+      });
+
+      it('should not trigger auto-completion on remote collaborator changes', async () => {
+        provider.triggers.length = 0;
+        const currentDoc = (handler.editor!.model.sharedModel as YFile).ysource
+          .doc!;
+        const remoteDoc = new Doc();
+        const remoteText = remoteDoc.getText('source');
+        applyUpdate(remoteDoc, encodeStateAsUpdate(currentDoc));
+
+        remoteText.insert(remoteText.length, 'x');
+        const update = encodeStateAsUpdate(remoteDoc);
+        applyUpdate(currentDoc, update, 'remote-collaborator');
+        await new Promise(process.nextTick);
+
+        expect(provider.triggers.length).toEqual(0);
+      });
+
+      it('should trigger on local text change after remote change', async () => {
+        const currentDoc = (handler.editor!.model.sharedModel as YFile).ysource
+          .doc!;
+        const remoteDoc = new Doc();
+        const remoteText = remoteDoc.getText('source');
+        applyUpdate(remoteDoc, encodeStateAsUpdate(currentDoc));
+        remoteText.insert(remoteText.length, 'x');
+        applyUpdate(currentDoc, encodeStateAsUpdate(remoteDoc), 'remote');
+        await new Promise(process.nextTick);
+        provider.triggers.length = 0;
+        const srcLength = handler.editor!.model.sharedModel.getSource().length;
+        handler.editor!.model.sharedModel.updateSource(
+          srcLength,
+          srcLength,
+          'y'
+        );
+        await new Promise(process.nextTick);
+
+        expect(provider.triggers.length).toEqual(1);
+        expect(provider.triggers).toEqual(
+          expect.arrayContaining([CompletionTriggerKind.TriggerCharacter])
+        );
+      });
+
+      it('should filter an open completer when a letter is typed', async () => {
+        handler.editor!.model.sharedModel.setSource('getopt.');
+        await new Promise(process.nextTick);
+        anchor.editor.focus();
+        anchor.editor.setCursorPosition({ line: 0, column: 7 });
+        handler.completer.reset();
+        const fetch = jest.spyOn(provider, 'fetch').mockResolvedValue({
+          start: 7,
+          end: 7,
+          items: [{ label: 'getopt' }, { label: 'error' }]
+        });
+        const shouldShow = jest
+          .spyOn(provider, 'shouldShowContinuousHint')
+          .mockReturnValue(false);
+        const model = handler.completer.model!;
+        handler.invoke();
+        await new Promise(process.nextTick);
+        expect(model.completionItems()).toHaveLength(2);
+
+        (anchor.editor as CodeMirrorEditor).editor.dispatch({
+          changes: { from: 7, insert: 'g' },
+          selection: { anchor: 8 },
+          userEvent: 'input.type'
+        });
+        await new Promise(process.nextTick);
+
+        expect(model.completionItems()).toHaveLength(1);
+        fetch.mockRestore();
+        shouldShow.mockRestore();
+      });
+
+      it('should close an open completer on remote collaborator changes', async () => {
+        handler.editor!.model.sharedModel.setSource('getopt.\nx = 1');
+        await new Promise(process.nextTick);
+        anchor.editor.focus();
+        anchor.editor.setCursorPosition({ line: 0, column: 7 });
+        handler.completer.reset();
+        const fetch = jest.spyOn(provider, 'fetch').mockResolvedValue({
+          start: 7,
+          end: 7,
+          items: [{ label: 'getopt' }, { label: 'error' }]
+        });
+        const model = handler.completer.model!;
+        handler.invoke();
+        await new Promise(process.nextTick);
+        expect(model.completionItems()).toHaveLength(2);
+
+        const currentDoc = (handler.editor!.model.sharedModel as YFile).ysource
+          .doc!;
+        const remoteDoc = new Doc();
+        const remoteText = remoteDoc.getText('source');
+        applyUpdate(remoteDoc, encodeStateAsUpdate(currentDoc));
+        remoteText.insert(remoteText.length, ' + 2');
+        applyUpdate(currentDoc, encodeStateAsUpdate(remoteDoc), 'remote');
+        await new Promise(process.nextTick);
+
+        expect(model.original).toBeNull();
+        fetch.mockRestore();
+      });
+    });
+
+    describe('#onTextChanged() (inline completer)', () => {
+      let widget: CodeEditorWrapper;
+      let handler: CompletionHandler;
+      let inlineModel: InlineCompleter.Model;
+      let fetchInline: jest.SpyInstance;
+
+      // Insert text in another Y.Doc and apply the update, as a collaborator does.
+      const remoteInsert = (index: number, text: string) => {
+        const currentDoc = (widget.editor.model.sharedModel as YFile).ysource
+          .doc!;
+        const remoteDoc = new Doc();
+        applyUpdate(remoteDoc, encodeStateAsUpdate(currentDoc));
+        remoteDoc.getText('source').insert(index, text);
+        applyUpdate(currentDoc, encodeStateAsUpdate(remoteDoc), 'remote');
+      };
+
+      beforeEach(async () => {
+        widget = createEditorWidget();
+        Widget.attach(widget, document.body);
+        const reconciliator = new ProviderReconciliator({
+          context: Symbol() as any,
+          providers: [],
+          timeout: 0
+        });
+        fetchInline = jest
+          .spyOn(reconciliator, 'fetchInline')
+          .mockReturnValue([]);
+        inlineModel = new InlineCompleter.Model();
+        handler = new CompletionHandler({
+          reconciliator,
+          completer: new Completer({
+            editor: null,
+            model: new CompleterModel()
+          }),
+          inlineCompleter: new InlineCompleter({
+            editor: widget.editor,
+            model: inlineModel,
+            trans: nullTranslator.load('test')
+          })
+        });
+        handler.editor = widget.editor;
+        widget.editor.model.sharedModel.setSource('foo');
+        await new Promise(process.nextTick);
+        widget.editor.setCursorPosition({ line: 0, column: 3 });
+        fetchInline.mockClear();
+      });
+
+      afterEach(() => {
+        handler.inlineCompleter?.dispose();
+        handler.completer.dispose();
+        handler.dispose();
+        widget.dispose();
+      });
+
+      it('should not trigger inline auto-completion on remote collaborator changes', async () => {
+        remoteInsert(3, 'bar');
+        await new Promise(process.nextTick);
+
+        expect(fetchInline).not.toHaveBeenCalled();
+      });
+
+      it('should trigger inline auto-completion on local text changes', async () => {
+        widget.editor.model.sharedModel.updateSource(3, 3, 'z');
+        await new Promise(process.nextTick);
+
+        expect(fetchInline).toHaveBeenCalled();
+      });
+
+      it('should trigger inline auto-completion on a keystroke after a remote change', async () => {
+        remoteInsert(0, '# note\n');
+        await new Promise(process.nextTick);
+        fetchInline.mockClear();
+
+        (widget.editor as CodeMirrorEditor).editor.dispatch({
+          changes: { from: 10, insert: 'z' },
+          selection: { anchor: 11 },
+          userEvent: 'input.type'
+        });
+        await new Promise(process.nextTick);
+
+        expect(fetchInline).toHaveBeenCalledTimes(1);
+      });
+
+      it('should clear the inline suggestion on remote collaborator changes', async () => {
+        inlineModel.cursor = { line: 0, column: 3 };
+        inlineModel.setCompletions({
+          items: [
+            {
+              insertText: 'bar()',
+              streaming: false,
+              provider: { name: 'test', identifier: 'test' },
+              stream: new Signal({} as any)
+            }
+          ]
+        });
+
+        remoteInsert(0, 'b');
+        await new Promise(process.nextTick);
+
+        expect(inlineModel.completions).toBeNull();
       });
     });
 

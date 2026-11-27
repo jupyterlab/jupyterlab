@@ -3,9 +3,12 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+/* global WeakRef */
+
 import React from 'react';
 import type { FieldProps } from '@rjsf/utils';
-import type { INotebookTracker } from '@jupyterlab/notebook';
+import type { ICellModel } from '@jupyterlab/cells';
+import type { INotebookModel, INotebookTracker } from '@jupyterlab/notebook';
 import { NotebookTools } from '@jupyterlab/notebook';
 import type { ITranslator } from '@jupyterlab/translation';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
@@ -61,8 +64,16 @@ export class CellMetadataField extends NotebookTools.MetadataEditorTool {
   }
 
   private _onSourceChanged() {
+    if (this._tracker.currentWidget?.viewOnly === true) {
+      return;
+    }
     const activeCell = this._tracker.activeCell?.model.sharedModel;
-    if (activeCell && this.editor.source) {
+    // A hidden editor keeps the source of the cell it last rendered.
+    if (
+      activeCell &&
+      activeCell === this._sourceCell?.deref() &&
+      this.editor.source
+    ) {
       const metadataKeys = Object.keys(activeCell.metadata ?? {});
       const source = this.editor.source.toJSON() ?? {};
 
@@ -77,10 +88,21 @@ export class CellMetadataField extends NotebookTools.MetadataEditorTool {
 
   render(props: FieldProps): JSX.Element {
     const cell = this._tracker.activeCell;
+    // Replace and dispose the source created for the previous render.
+    const previousSource = this.editor.source;
     this.editor.source = cell
       ? new ObservableJSON({ values: cell.model.metadata as JSONObject })
       : null;
+    this._sourceCell = cell ? new WeakRef(cell.model.sharedModel) : null;
+    previousSource?.dispose();
     this.editor.source?.changed.connect(this._onSourceChanged, this);
+    // The `source` setter above resets `readOnly` based only on whether a
+    // cell is selected, so it must be re-applied here to also account for
+    // view-only notebooks.
+    this.editor.editor.setOption(
+      'readOnly',
+      this._tracker.currentWidget?.viewOnly === true
+    );
 
     return (
       <div className={CELL_METADATA_EDITOR_CLASS}>
@@ -90,6 +112,7 @@ export class CellMetadataField extends NotebookTools.MetadataEditorTool {
   }
 
   private _tracker: INotebookTracker;
+  private _sourceCell: WeakRef<ICellModel['sharedModel']> | null = null;
 }
 
 /**
@@ -111,19 +134,34 @@ export class NotebookMetadataField extends NotebookTools.MetadataEditorTool {
   }
 
   private _onSourceChanged() {
-    if (this.editor.source) {
-      this._tracker.currentWidget?.model?.sharedModel.setMetadata(
-        this.editor.source.toJSON()
-      );
+    if (this._tracker.currentWidget?.viewOnly === true) {
+      return;
+    }
+    const notebook = this._tracker.currentWidget?.model;
+    // A hidden editor keeps the source of the notebook it last rendered.
+    if (
+      notebook &&
+      notebook === this._sourceNotebook?.deref() &&
+      this.editor.source
+    ) {
+      notebook.sharedModel.setMetadata(this.editor.source.toJSON());
     }
   }
 
   render(props: FieldProps): JSX.Element {
     const notebook = this._tracker.currentWidget;
+    // Replace and dispose the source created for the previous render.
+    const previousSource = this.editor.source;
     this.editor.source = notebook
       ? new ObservableJSON({ values: notebook.model?.metadata as JSONObject })
       : null;
+    this._sourceNotebook = notebook?.model ? new WeakRef(notebook.model) : null;
+    previousSource?.dispose();
     this.editor.source?.changed.connect(this._onSourceChanged, this);
+    // The `source` setter above resets `readOnly` based only on whether a
+    // notebook is active, so it must be re-applied here to also account for
+    // view-only notebooks.
+    this.editor.editor.setOption('readOnly', notebook?.viewOnly === true);
 
     return (
       <div className={NOTEBOOK_METADATA_EDITOR_CLASS}>
@@ -133,4 +171,5 @@ export class NotebookMetadataField extends NotebookTools.MetadataEditorTool {
   }
 
   private _tracker: INotebookTracker;
+  private _sourceNotebook: WeakRef<INotebookModel> | null = null;
 }

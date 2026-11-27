@@ -5,7 +5,6 @@ import { expect, test } from '@jupyterlab/galata';
 
 test.describe('Notebook No Kernel', () => {
   const NOTEBOOK_NAME = 'test-notebook-no-kernel.ipynb';
-  test.skip(({ browserName }) => browserName === 'firefox', 'Flaky on Firefox');
 
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew(NOTEBOOK_NAME);
@@ -15,12 +14,7 @@ test.describe('Notebook No Kernel', () => {
 
     // Open notebook with "Open With > Notebook (no kernel)" from the context menu
     await page.sidebar.openTab('filebrowser');
-    await page.click(`.jp-DirListing-item span:has-text("${NOTEBOOK_NAME}")`, {
-      button: 'right'
-    });
-    expect(await page.menu.isAnyOpen()).toBe(true);
-    await page.hover('text=Open With');
-    await page.click('text=Notebook (no kernel)');
+    await page.notebook.open(NOTEBOOK_NAME, { noKernel: true });
     await page.waitForSelector('.jp-NotebookPanel');
   });
 

@@ -110,7 +110,9 @@ export class InputArea extends Widget {
    */
   renderInput(widget: Widget): void {
     const layout = this.layout as PanelLayout;
-    if (this._rendered) {
+    // Keep the widget attached if it is rendered again, as removing it from
+    // the DOM moves any text selection boundary out of it.
+    if (this._rendered && this._rendered !== widget) {
       this._rendered.parent = null;
     }
     this._editor.hide();
@@ -143,10 +145,18 @@ export class InputArea extends Widget {
     if (this.isDisposed) {
       return;
     }
+    const editor = this._editor;
+    const rendered = this._rendered;
     this._prompt = null!;
     this._editor = null!;
     this._rendered = null!;
     super.dispose();
+    // The rendered widget is swapped out of the layout when the editor is
+    // shown (`showEditor` sets `parent = null`), and `Widget.dispose()` only
+    // disposes layout children. The editor itself only ever gets hidden, so
+    // disposing it here is an idempotent safety net.
+    editor?.dispose();
+    rendered?.dispose();
   }
 
   private _prompt: IInputPrompt;

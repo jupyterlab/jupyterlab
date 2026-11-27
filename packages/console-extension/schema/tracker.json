@@ -75,6 +75,11 @@
         "rank": 10
       },
       {
+        "command": "console:rename",
+        "selector": "[data-type=\"console-title\"]",
+        "rank": 20
+      },
+      {
         "command": "console:restart-kernel",
         "selector": ".jp-CodeConsole",
         "rank": 30
@@ -82,6 +87,18 @@
     ]
   },
   "jupyter.lab.shortcuts": [
+    {
+      "command": "console:replace-selection",
+      "keys": ["Alt -"],
+      "selector": ".jp-CodeConsole-promptCell [data-jp-editor-language='r']",
+      "args": { "text": "<- " }
+    },
+    {
+      "command": "console:replace-selection",
+      "keys": ["Accel Shift M"],
+      "selector": ".jp-CodeConsole-promptCell [data-jp-editor-language='r']",
+      "args": { "text": "%>% " }
+    },
     {
       "command": "console:run-forced",
       "keys": ["Shift Enter"],
@@ -150,7 +167,7 @@
     },
     "showAllKernelActivity": {
       "title": "Show All Kernel Activity",
-      "description": "Whether the console defaults to showing all\nkernel activity or just kernel activity originating from itself.",
+      "description": "Whether the console defaults to showing all kernel activity or just kernel activity originating from itself. Warning: outputs of code executed by other clients of the kernel, such as collaborators, are rendered as trusted, so JavaScript and HTML they contain run in your browser with your permissions.",
       "type": "boolean",
       "default": false
     },

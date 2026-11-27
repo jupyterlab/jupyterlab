@@ -74,7 +74,7 @@ export class ConsoleHandler implements IDisposable {
       } else if (event.event === 'continued' || event.event === 'terminated') {
         void this._pausedOverlay.hide();
       }
-    });
+    }, this);
 
     // If already paused when initialized
     if (this._debuggerService.hasStoppedThreads()) {
@@ -125,6 +125,10 @@ export class ConsoleHandler implements IDisposable {
     });
     codeCell.disposed.connect(() => {
       this._cellMap.delete(modelId);
+      // Closing the console disposes its cells after its kernel connection.
+      if (!this._consolePanel.console.isDisposed) {
+        editorHandler.clearDeletedBreakpoints();
+      }
       editorHandler.dispose();
     });
     this._cellMap.set(modelId, editorHandler);

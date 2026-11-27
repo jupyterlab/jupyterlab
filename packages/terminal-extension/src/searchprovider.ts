@@ -224,6 +224,10 @@ export class TerminalSearchProvider extends SearchProvider<TerminalWidget> {
       // The following two need to be in string #rrggbb format to be acceptable to xtermjs.
       activeMatchBackground,
       matchBackground,
+      // The selection is rendered above the search decorations and hides
+      // activeMatchBackground on the active match; the border is drawn on
+      // the decoration overlay itself and stays visible.
+      activeMatchBorder: activeMatchBackground,
       // The following two are compulsory so they need to be set but we do not use them.
       matchOverviewRuler: '',
       activeMatchColorOverviewRuler: ''

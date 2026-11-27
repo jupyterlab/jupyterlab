@@ -18,13 +18,15 @@ test.use({
 test('Limit cell outputs', async ({ page }) => {
   await page.notebook.createNew();
 
-  await page.locator(
-    '.jp-Cell-inputArea >> .cm-editor >> .cm-content[contenteditable="true"]'
-  ).fill(`from IPython.display import display, Markdown
+  await page.notebook.setCell(
+    0,
+    'code',
+    `from IPython.display import display, Markdown
 
 for i in range(10):
     display(Markdown('_Markdown_ **text**'))
-`);
+`
+  );
 
   await page.notebook.run();
 
@@ -34,9 +36,10 @@ for i in range(10):
   );
 });
 
-test("Don't limit cell outputs if input is requested", async ({ page }) => {
+test('Limit cell outputs even when input is requested', async ({ page }) => {
   await page.notebook.createNew();
 
+  // eslint-disable-next-line jupyter/galata-prefer-notebook-cell-helper -- Preserve Python indentation; setCell types through editor auto-indentation.
   await page.locator(
     '.jp-Cell-inputArea >> .cm-editor >> .cm-content[contenteditable="true"]'
   ).fill(`from IPython.display import display, Markdown
@@ -47,10 +50,12 @@ for i in range(10):
 input('Your age:')
 `);
 
+  await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
   await page.menu.clickMenuItem('Run>Run All Cells');
   await page.locator('.jp-Stdin >> text=Your age:').waitFor();
-  expect(await page.locator('.jp-RenderedMarkdown').count()).toBeGreaterThan(
-    MAX_OUTPUTS
+  await expect(page.locator('.jp-RenderedMarkdown')).toHaveCount(MAX_OUTPUTS);
+  await expect(page.locator('.jp-TrimmedOutputs')).toHaveText(
+    'Show more outputs'
   );
 
   await page.keyboard.press('Enter');
@@ -59,6 +64,7 @@ input('Your age:')
 test('Display input value', async ({ page }) => {
   await page.notebook.createNew();
 
+  // eslint-disable-next-line jupyter/galata-prefer-notebook-cell-helper -- Preserve Python indentation; setCell types through editor auto-indentation.
   await page.locator(
     '.jp-Cell-inputArea >> .cm-editor >> .cm-content[contenteditable="true"]'
   ).fill(`from IPython.display import display, Markdown
@@ -72,16 +78,55 @@ for i in range(10):
     display(Markdown('_Markdown_ **text**'))
 `);
 
+  await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
   await page.menu.clickMenuItem('Run>Run All Cells');
   await page.locator('.jp-Stdin >> text=Your age:').waitFor();
 
   await page.keyboard.type('42');
   await page.keyboard.press('Enter');
 
-  expect(await page.locator('.jp-RenderedMarkdown').count()).toBeGreaterThan(
-    MAX_OUTPUTS
-  );
+  // The outputs displayed after the input arrive after Enter is pressed.
+  await expect
+    .poll(() => page.locator('.jp-RenderedMarkdown').count())
+    .toBeGreaterThan(MAX_OUTPUTS);
   await expect(page.locator('.jp-RenderedText').first()).toHaveText(
     'Your age: 42'
   );
+});
+
+test('Show more outputs without a layout for each output', async ({
+  page,
+  browserName
+}) => {
+  test.skip(
+    browserName !== 'chromium',
+    'Layouts are counted with the Chrome DevTools Protocol'
+  );
+  const outputCount = 1000;
+  await page.notebook.createNew();
+  await page.notebook.setCell(
+    0,
+    'code',
+    `for i in range(${outputCount}): display(i)`
+  );
+  await page.notebook.run();
+  const showMore = page.getByRole('button', { name: 'Show more outputs' });
+  await expect(showMore).toBeVisible();
+
+  // Unlike a duration, the layout count does not depend on the machine speed.
+  const client = await page.context().newCDPSession(page.mainFrame());
+  await client.send('Performance.enable');
+  const countLayouts = async () => {
+    const { metrics } = await client.send('Performance.getMetrics');
+    return metrics.find(metric => metric.name === 'LayoutCount')!.value;
+  };
+  const layoutsBefore = await countLayouts();
+
+  await showMore.click();
+  await expect(page.locator('.jp-RenderedText').last()).toHaveText(
+    `${outputCount - 1}`
+  );
+
+  // A layout for each output freezes the page for seconds.
+  expect((await countLayouts()) - layoutsBefore).toBeLessThan(50);
 });

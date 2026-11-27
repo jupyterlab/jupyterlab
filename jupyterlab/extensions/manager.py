@@ -3,10 +3,14 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+from __future__ import annotations
+
+import asyncio
 import json
 import re
 from dataclasses import dataclass, field, fields, replace
 from pathlib import Path
+from typing import Any
 
 import tornado
 from jupyterlab_server.translation_utils import translator
@@ -14,6 +18,7 @@ from traitlets import Enum
 from traitlets.config import Configurable, LoggingConfigurable
 
 from jupyterlab.commands import (
+    AppOptions,
     _AppHandler,
     _ensure_options,
     disable_extension,
@@ -24,7 +29,7 @@ from jupyterlab.commands import (
 PYTHON_TO_SEMVER = {"a": "-alpha.", "b": "-beta.", "rc": "-rc."}
 
 
-def _ensure_compat_errors(info, app_options):
+def _ensure_compat_errors(info: dict, app_options: AppOptions | dict | None):
     """Ensure that the app info has compat_errors field"""
     handler = _AppHandler(app_options)
     info["compat_errors"] = handler._get_extension_compat()
@@ -37,12 +42,12 @@ _message_map = {
 }
 
 
-def _build_check_info(app_options):
+def _build_check_info(app_options: AppOptions | dict | None) -> dict[str, list[str]]:
     """Get info about packages scheduled for (un)install/update"""
     handler = _AppHandler(app_options)
     messages = handler.build_check(fast=True)
     # Decode the messages into a dict:
-    status = {"install": [], "uninstall": [], "update": []}
+    status: dict[str, list[str]] = {"install": [], "uninstall": [], "update": []}
     for msg in messages:
         for key, pattern in _message_map.items():
             match = pattern.match(msg)
@@ -59,7 +64,7 @@ class ExtensionPackage:
         name: Package name
         description: Package description
         homepage_url: Package home page
-        pkg_type: Type of package - ["prebuilt", "source"]
+        pkg_type: Type of package - ["prebuilt", "source", "language-pack"]
         allowed: [optional] Whether this extension is allowed or not - default True
         approved: [optional] Whether the package is approved by your administrators - default False
         companion: [optional] Type of companion for the frontend extension - [None, "kernel", "server"]; default None
@@ -90,7 +95,7 @@ class ExtensionPackage:
     install: dict | None = None
     installed: bool | None = None
     installed_version: str = ""
-    latest_version: str = ""
+    latest_version: str | None = ""
     status: str = "ok"
     author: str | None = None
     license: str | None = None
@@ -146,7 +151,7 @@ class ExtensionManagerOptions(PluginManagerOptions):
     allowed_extensions_uris: set[str] = field(default_factory=set)
     blocked_extensions_uris: set[str] = field(default_factory=set)
     listings_refresh_seconds: int = 60 * 60
-    listings_tornado_options: dict = field(default_factory=dict)
+    listings_tornado_options: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -215,7 +220,7 @@ class PluginManager(LoggingConfigurable):
             for option, value in (ext_options or {}).items()
             if option in plugin_options_field
         }
-        self.options = PluginManagerOptions(**plugin_options)
+        self.options: PluginManagerOptions = PluginManagerOptions(**plugin_options)
 
     async def plugin_locks(self) -> dict:
         """Get information about locks on plugin enabling/disabling"""
@@ -227,21 +232,22 @@ class PluginManager(LoggingConfigurable):
     def _find_locked(self, plugins_or_extensions: list[str]) -> frozenset[str]:
         """Find a subset of plugins (or extensions) which are locked"""
         if self.options.lock_all:
-            return set(plugins_or_extensions)
-        locked_subset = set()
+            return frozenset(plugins_or_extensions)
+        locked_subset: set[str] = set()
         extensions_with_locked_plugins = {
             plugin.split(":")[0] for plugin in self.options.lock_rules
         }
         for plugin in plugins_or_extensions:
             if ":" in plugin:
                 # check directly if this is a plugin identifier (has colon)
-                if plugin in self.options.lock_rules:
+                extension = plugin.split(":")[0]
+                if plugin in self.options.lock_rules or extension in self.options.lock_rules:
                     locked_subset.add(plugin)
             elif plugin in extensions_with_locked_plugins:
                 # this is an extension - we need to check for >any< plugin
                 # belonging to said extension
                 locked_subset.add(plugin)
-        return locked_subset
+        return frozenset(locked_subset)
 
     async def disable(self, plugins: str | list[str]) -> ActionResult:
         """Disable a set of plugins (or an extension).
@@ -300,7 +306,7 @@ class ExtensionManager(PluginManager):
     """Base abstract extension manager.
 
     Note:
-        Any concrete implementation will need to implement the five
+        Each concrete implementation will need to implement the five
         following abstract methods:
         - :ref:`metadata`
         - :ref:`get_latest_version`
@@ -334,9 +340,9 @@ class ExtensionManager(PluginManager):
         self.log = self.app_options.logger
         self.app_dir = Path(self.app_options.app_dir)
         self.core_config = self.app_options.core_config
-        self.options = ExtensionManagerOptions(**(ext_options or {}))
+        self.options: ExtensionManagerOptions = ExtensionManagerOptions(**(ext_options or {}))
         self._extensions_cache: dict[str | None, ExtensionsCache] = {}
-        self._listings_cache: dict | None = None
+        self._listings_cache: dict[str, dict[str, object]] | None = None
         self._listings_block_mode = True
         self._listing_fetch: tornado.ioloop.PeriodicCallback | None = None
 
@@ -469,16 +475,12 @@ class ExtensionManager(PluginManager):
             The extensions
             Last page of results
         """
-        if query not in self._extensions_cache or page not in self._extensions_cache[query].cache:
-            await self.refresh(query, page, per_page)
+        cache, last_page = await self._get_extensions_page(query, page, per_page)
 
         # filter using listings settings
         if self._listings_cache is None and self._listing_fetch is not None:
-            await self._listing_fetch.callback()
+            await self._fetch_listings()
 
-        cache = self._extensions_cache[query].cache[page]
-        if cache is None:
-            cache = {}
         extensions = list(cache.values())
         if query is not None and self._listings_cache is not None:
             listing = list(self._listings_cache)
@@ -498,7 +500,16 @@ class ExtensionManager(PluginManager):
                         self.log.warning(f"Not allowed extension '{name}' is installed.")
                         extensions.append(replace(ext, allowed=False))
 
-        return extensions, self._extensions_cache[query].last_page
+        return extensions, last_page
+
+    async def _get_extensions_page(
+        self, query: str | None, page: int, per_page: int
+    ) -> tuple[dict[str, ExtensionPackage], int]:
+        if query not in self._extensions_cache or page not in self._extensions_cache[query].cache:
+            await self.refresh(query, page, per_page)
+
+        cache = self._extensions_cache[query]
+        return cache.cache[page] or {}, cache.last_page
 
     async def refresh(self, query: str | None, page: int, per_page: int) -> None:
         """Refresh the list of extensions."""
@@ -542,8 +553,12 @@ class ExtensionManager(PluginManager):
             return True
         if self._listings_cache is None:
             await self._fetch_listings()
-        normalized = self._normalize_name(name)
-        normalized_cache = {self._normalize_name(k) for k in self._listings_cache}
+        listings_cache = self._listings_cache
+        if listings_cache is None:
+            msg = "Extensions listing cache is not initialized"
+            raise RuntimeError(msg)
+        normalized = self._canonicalize_name(name)
+        normalized_cache = {self._canonicalize_name(k) for k in listings_cache}
         if self._listings_block_mode:
             return normalized not in normalized_cache
         else:
@@ -552,8 +567,11 @@ class ExtensionManager(PluginManager):
     async def is_install_allowed(self, name: str, _version: str | None = None) -> bool:
         return await self._is_allowed_by_listing(name)
 
+    async def is_uninstall_allowed(self, _name: str) -> bool:
+        return True
+
     async def _get_installed_extensions(
-        self, get_latest_version=True
+        self, get_latest_version: bool = True
     ) -> dict[str, ExtensionPackage]:
         """Get the installed extensions.
 
@@ -576,15 +594,16 @@ class ExtensionManager(PluginManager):
                 status = "error"
 
             normalized_name = self._normalize_name(name)
+            version = self._get_installed_version(data)
             pkg = ExtensionPackage(
                 name=normalized_name,
                 description=pkg_info.get("description", ""),
                 homepage_url=data.get("url", ""),
                 enabled=(name not in info["disabled"]),
                 core=False,
-                latest_version=ExtensionManager.get_semver_version(data["version"]),
+                latest_version=version,
                 installed=True,
-                installed_version=ExtensionManager.get_semver_version(data["version"]),
+                installed_version=version,
                 status=status,
                 install=data.get("install", {}),
                 pkg_type="prebuilt",
@@ -594,9 +613,6 @@ class ExtensionManager(PluginManager):
                 bug_tracker_url=data.get("bugs", {}).get("url"),
                 repository_url=data.get("repository", {}).get("url", data.get("repository")),
             )
-
-            if get_latest_version:
-                pkg = replace(pkg, latest_version=await self.get_latest_version(pkg.name))
 
             extensions[normalized_name] = pkg
 
@@ -630,15 +646,37 @@ class ExtensionManager(PluginManager):
                 bug_tracker_url=data.get("bugs", {}).get("url"),
                 repository_url=data.get("repository", {}).get("url", data.get("repository")),
             )
-            if get_latest_version:
-                pkg = replace(pkg, latest_version=await self.get_latest_version(pkg.name))
             extensions[normalized_name] = pkg
 
-        for name in build_check_info["uninstall"]:
+        extensions.update(self._get_scheduled_uninstall_packages(build_check_info["uninstall"]))
+
+        if get_latest_version:
+            installed_pkgs = [pkg for pkg in extensions.values() if pkg.installed]
+            results = await asyncio.gather(
+                *(self.get_latest_version(self.get_normalized_name(pkg)) for pkg in installed_pkgs),
+                return_exceptions=True,
+            )
+            for pkg, result in zip(installed_pkgs, results, strict=True):
+                if isinstance(result, BaseException):
+                    self.log.info(
+                        "Failed to fetch latest version for %s: %s",
+                        pkg.name,
+                        result,
+                    )
+                elif result is not None:
+                    extensions[pkg.name] = replace(pkg, latest_version=result)
+
+        return extensions
+
+    def _get_scheduled_uninstall_packages(
+        self, uninstall_names: list[str]
+    ) -> dict[str, ExtensionPackage]:
+        packages = {}
+        for name in uninstall_names:
             data = self._get_scheduled_uninstall_info(name)
             if data is not None:
                 normalized_name = self._normalize_name(name)
-                pkg = ExtensionPackage(
+                packages[normalized_name] = ExtensionPackage(
                     name=normalized_name,
                     description=data.get("description", ""),
                     homepage_url=data.get("homepage", ""),
@@ -654,9 +692,17 @@ class ExtensionManager(PluginManager):
                     bug_tracker_url=data.get("bugs", {}).get("url"),
                     repository_url=data.get("repository", {}).get("url", data.get("repository")),
                 )
-                extensions[normalized_name] = pkg
+        return packages
 
-        return extensions
+    def _get_installed_version(self, data: dict) -> str:
+        """Get the installed version of a prebuilt extension.
+
+        Args:
+            data: The extension metadata from its package.json and install.json
+        Returns:
+            The installed version
+        """
+        return ExtensionManager.get_semver_version(data["version"])
 
     def _get_companion(self, data: dict) -> str | None:
         companion = None
@@ -667,7 +713,7 @@ class ExtensionManager(PluginManager):
                 companion = "kernel"
         return companion
 
-    def _get_scheduled_uninstall_info(self, name) -> dict | None:
+    def _get_scheduled_uninstall_info(self, name: str) -> dict | None:
         """Get information about a package that is scheduled for uninstallation"""
         target = self.app_dir / "staging" / "node_modules" / name / "package.json"
         if target.exists():
@@ -685,6 +731,10 @@ class ExtensionManager(PluginManager):
             Normalized name
         """
         return name
+
+    def _canonicalize_name(self, name: str) -> str:
+        """Canonicalize extension name for listing policy comparisons."""
+        return self._normalize_name(name)
 
     async def _update_extensions_list(
         self, query: str | None = None, page: int = 1, per_page: int = 30

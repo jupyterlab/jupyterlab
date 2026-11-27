@@ -1,14 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
+import type { IMapChange } from '@jupyter/ydoc';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import type {
-  CellSearchProvider,
-  ICellModel,
+import type { CellSearchProvider, ICellModel } from '@jupyterlab/cells';
+import {
+  CodeCell,
+  createCellSearchProvider,
   MarkdownCell
 } from '@jupyterlab/cells';
-import { CodeCell, createCellSearchProvider } from '@jupyterlab/cells';
 import type { IHighlightAdjacentMatchOptions } from '@jupyterlab/codemirror';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
@@ -26,6 +25,7 @@ import type { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import type { ITranslator } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt } from '@lumino/algorithm';
+import { Debouncer } from '@lumino/polling';
 import type { Widget } from '@lumino/widgets';
 import type { CellList } from './celllist';
 import { NotebookPanel } from './panel';
@@ -64,22 +64,26 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     );
     this._observeActiveCell();
     this._filtersChanged.connect(this._setEnginesSelectionSearchMode, this);
+
+    // Synchronously initialize _selectedCells from the widget's current
+    // selection state. The reactive path (_onCellSelectionChanged →
+    // _updateCellSelection) only fires on future changes, so without this
+    // initialization a provider created while multiple cells are already
+    // selected would always report "Search in 1 Selected Cell".
+    let initialSelectedCells = 0;
+    for (const cell of this.widget.content.widgets) {
+      if (this.widget.content.isSelectedOrActive(cell)) {
+        initialSelectedCells += 1;
+      }
+    }
+    this._selectedCells = initialSelectedCells;
   }
 
-  private _onNotebookStateChanged(_: Notebook, args: IChangedArgs<any>) {
+  private _onNotebookStateChanged(_: Notebook, args: IChangedArgs<unknown>) {
     if (args.name === 'mode') {
-      // Delay the update to ensure that `document.activeElement` settled.
-      window.setTimeout(() => {
-        if (
-          args.newValue === 'command' &&
-          document.activeElement?.closest('.jp-DocumentSearch-overlay')
-        ) {
-          // Do not request updating mode when user switched focus to search overlay.
-          return;
-        }
-        this._updateSelectionMode();
-        this._filtersChanged.emit();
-      }, 0);
+      // Debounce to ensure that `document.activeElement` settled, and to keep
+      // only the most recent mode transition.
+      void this._modeChangeDebouncer.invoke();
     }
   }
 
@@ -148,6 +152,16 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   /**
+   * The number of matches which can be replaced.
+   */
+  get replaceableMatchesCount(): number {
+    return this._searchProviders.reduce(
+      (sum, provider) => sum + provider.replaceableMatchesCount,
+      0
+    );
+  }
+
+  /**
    * Set to true if the widget under search is read-only, false
    * if it is editable. Will be used to determine whether to show
    * the replace option.
@@ -208,6 +222,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     );
     this._stopObservingLastCell();
 
+    this._modeChangeDebouncer.dispose();
+
     super.dispose();
 
     const index = this.widget.content.activeCellIndex;
@@ -234,11 +250,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       output: {
         title: trans.__('Search Cell Outputs'),
         description: trans.__('Search in the cell outputs.'),
-        disabledDescription: trans.__(
-          'Search in the cell outputs (not available when replace options are shown).'
-        ),
-        default: false,
-        supportReplace: false
+        default: false
       },
       selection: {
         title:
@@ -256,8 +268,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         description: trans.__(
           'Search only in the selected cells or text (depending on edit/command mode).'
         ),
-        default: false,
-        supportReplace: true
+        default: false
       }
     };
   }
@@ -350,7 +361,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     if (!this.widget) {
       return;
     }
+    const queryKey = JSON.stringify([query.source, query.flags, filters ?? {}]);
+    const isNewQuery = queryKey !== this._queryKey;
     await this.endQuery();
+    this._queryKey = queryKey;
     this._searchActive = true;
     let cells = this.widget.content.widgets;
 
@@ -369,6 +383,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._searchProviders = await Promise.all(
       cells.map(async (cell, index) => {
         const cellSearchProvider = createCellSearchProvider(cell);
+        cell.model.metadataChanged.connect(this._onCellMetadataChanged, this);
 
         await cellSearchProvider.setIsActive(
           !this._filters!.selection ||
@@ -398,11 +413,12 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     // - the next match when starting search using ctrl + f
     // `scroll` and `select` are disabled because `startQuery` is also used as
     // "restartQuery" after each text change and if those were enabled, we would
-    // steal the cursor.
-    await this.highlightNext(true, {
+    // steal the cursor. Only a new query scrolls.
+    await this._stepNext(false, true, {
       from: 'selection-start',
       scroll: false,
-      select: false
+      select: false,
+      scrollInCell: isNewQuery
     });
 
     return Promise.resolve();
@@ -423,6 +439,19 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._searchActive = false;
     this._searchProviders.length = 0;
     this._currentProviderIndex = null;
+    this._queryKey = null;
+  }
+
+  /**
+   * Get the current match, if any.
+   */
+  getCurrentMatch(): ISearchMatch | undefined {
+    if (this._currentProviderIndex === null) {
+      return undefined;
+    }
+    // The index points past the last cell after cells are deleted, until the
+    // search restarts.
+    return this._searchProviders[this._currentProviderIndex]?.getCurrentMatch();
   }
 
   /**
@@ -441,23 +470,25 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     let replaceOccurred = false;
 
     const unrenderMarkdownCell = async (
+      cellIndex: number | null,
       highlightNext = false
     ): Promise<void> => {
-      // Unrendered markdown cell
-      const activeCell = this.widget?.content.activeCell;
-      if (
-        activeCell?.model.type === 'markdown' &&
-        (activeCell as MarkdownCell).rendered
-      ) {
-        (activeCell as MarkdownCell).rendered = false;
-        if (highlightNext) {
+      if (cellIndex === null || !this.widget) {
+        return;
+      }
+      const cell = this.widget.content.widgets[cellIndex];
+      if (cell instanceof MarkdownCell && cell.rendered) {
+        cell.rendered = false;
+        // A read-only cell stays rendered when its editor is hidden, and
+        // highlighting the next match would then skip the current one
+        if (highlightNext && !cell.rendered) {
           await this.highlightNext(loop);
         }
       }
     };
 
     if (this._currentProviderIndex !== null) {
-      await unrenderMarkdownCell();
+      await unrenderMarkdownCell(this._currentProviderIndex);
 
       const searchEngine = this._searchProviders[this._currentProviderIndex];
       replaceOccurred = await searchEngine.replaceCurrentMatch(
@@ -467,13 +498,15 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       );
       if (searchEngine.currentMatchIndex === null) {
         // switch to next cell
-        await this.highlightNext(loop, { from: 'previous-match' });
+        await this.highlightNext(loop, {
+          from: 'previous-match',
+          skipReadOnly: true
+        });
       }
     }
 
-    // TODO: markdown unrendering/highlighting sequence is likely incorrect
     // Force highlighting the first hit in the unrendered cell
-    await unrenderMarkdownCell(true);
+    await unrenderMarkdownCell(this._currentProviderIndex, true);
     return replaceOccurred;
   }
 
@@ -538,6 +571,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   private _addCellProvider(index: number) {
     const cell = this.widget.content.widgets[index];
     const cellSearchProvider = createCellSearchProvider(cell);
+    cell.model.metadataChanged.connect(this._onCellMetadataChanged, this);
 
     ArrayExt.insert(this._searchProviders, index, cellSearchProvider);
 
@@ -599,14 +633,61 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._stateChanged.emit();
   }
 
+  private _onCellMetadataChanged(_: ICellModel, change: IMapChange): void {
+    if (change.key === 'editable') {
+      // The search box disables Replace for matches in read-only cells
+      this._stateChanged.emit();
+    }
+  }
+
   private async _stepNext(
     reverse = false,
     loop = false,
-    options?: IHighlightAdjacentMatchOptions
+    options?: Private.IStepOptions
   ): Promise<ISearchMatch | null> {
+    // Whether the cell was rendered and attached when it was searched, so
+    // that its editor could scroll to the match
+    let cellWasShown = true;
+
+    // Scroll to the match of a new query without activating its cell. The
+    // search does not wait for it, because a cell may render only when the
+    // browser is idle.
+    const scrollToMatchInCell = async (match: ISearchMatch) => {
+      const index = this._currentProviderIndex!;
+      const queryKey = this._queryKey;
+      const cell = this.widget.content.widgets[index];
+      const isCurrent = () =>
+        this._queryKey === queryKey &&
+        this._currentProviderIndex === index &&
+        this.getCurrentMatch()?.position === match.position;
+      await cell.ready;
+      if (!isCurrent()) {
+        return;
+      }
+      try {
+        await this.widget.content.scrollToItem(index);
+      } catch {
+        // A newer scroll request replaced this one
+      }
+      const editor = cell.editor;
+      // A hidden editor, as in a rendered Markdown cell, would scroll when it
+      // is shown again
+      if (
+        isCurrent() &&
+        !('node' in match) &&
+        editor &&
+        editor.host.checkVisibility?.() !== false
+      ) {
+        editor.revealPosition(editor.getPositionAt(match.position)!);
+      }
+    };
+
     const activateNewMatch = async (match: ISearchMatch) => {
       const shouldScroll = options?.scroll ?? true;
       if (!shouldScroll) {
+        if (options?.scrollInCell && !cellWasShown) {
+          void scrollToMatchInCell(match);
+        }
         // do not activate the match if scrolling was disabled
         return;
       }
@@ -642,9 +723,58 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       }
 
       await activeCell.ready;
-      const editor = activeCell.editor!;
-      editor.revealPosition(editor.getPositionAt(match.position)!);
+      // Matches in the cell source come from `EditorSearchProvider` as plain
+      // `ISearchMatch` objects, without `node`. Output matches come from
+      // `GenericSearchProvider` as `IHTMLSearchMatch` objects: `node` is the
+      // text node holding the match, and `position` counts from the start of
+      // that node.
+      if (!('node' in match)) {
+        const editor = activeCell.editor!;
+        editor.revealPosition(editor.getPositionAt(match.position)!);
+      } else {
+        // The cell was hidden when its provider scrolled to the match, as in a
+        // collapsed section
+        activeCell.node
+          .querySelector('mark.jp-current-match')
+          ?.scrollIntoView({ block: 'nearest' });
+      }
       this._selectionLock = false;
+    };
+
+    // Only the first cell that the search visits starts from its selection,
+    // because the selection of another cell stays where it was last edited
+    let isFirstVisit = true;
+
+    const highlightInCell = async (
+      index: number
+    ): Promise<ISearchMatch | undefined> => {
+      const searchEngine = this._searchProviders[index];
+      const searchWholeCell =
+        !isFirstVisit &&
+        (options?.from === 'selection' || options?.from === 'selection-start');
+      isFirstVisit = false;
+      if (options?.skipReadOnly && searchEngine.isReadOnlyProvider()) {
+        // Treat it as a cell without matches, so the loop below still ends
+        return undefined;
+      }
+      // A placeholder cell has no editor yet, and the full windowing mode
+      // does not attach a cell out of the view
+      const cell = this.widget.content.widgets[index];
+      cellWasShown = !cell.isPlaceholder() && cell.isAttached;
+      let cellOptions = options;
+      if (searchWholeCell) {
+        // Without a match in the cell yet, 'previous-match' starts at its end
+        cellOptions = {
+          ...cellOptions,
+          from: reverse ? 'previous-match' : 'start'
+        };
+      }
+      if (options?.scrollInCell) {
+        cellOptions = { ...cellOptions, scroll: true };
+      }
+      return reverse
+        ? searchEngine.highlightPrevious(false, cellOptions)
+        : searchEngine.highlightNext(false, cellOptions);
     };
 
     if (this._currentProviderIndex === null) {
@@ -693,11 +823,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this._currentProviderIndex += atEndOfCurrentCell ? 1 : 0;
     }
     do {
-      const searchEngine = this._searchProviders[this._currentProviderIndex];
-
-      const match = reverse
-        ? await searchEngine.highlightPrevious(false, options)
-        : await searchEngine.highlightNext(false, options);
+      const match = await highlightInCell(this._currentProviderIndex);
 
       if (match) {
         await activateNewMatch(match);
@@ -722,10 +848,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
     if (loop) {
       // try the first provider again
-      const searchEngine = this._searchProviders[startIndex];
-      const match = reverse
-        ? await searchEngine.highlightPrevious(false, options)
-        : await searchEngine.highlightNext(false, options);
+      const match = await highlightInCell(startIndex);
       if (match) {
         await activateNewMatch(match);
         return match;
@@ -782,6 +905,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     }
 
     await this._ensureCurrentMatch();
+    this._filtersChanged.emit();
   }
 
   /**
@@ -796,7 +920,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         return;
       }
       const currentMatch = searchEngine.getCurrentMatch();
-      if (!currentMatch && this.matchesCount) {
+      const matchesCount = this.matchesCount;
+      if (!currentMatch && matchesCount !== null && matchesCount > 0) {
         // Select a match as current by highlighting next (with looping) from
         // the selection start, to prevent "current" match from jumping around.
         await this.highlightNext(true, {
@@ -893,6 +1018,14 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       clearTimeout(this._delayedActiveCellChangeHandler);
       this._delayedActiveCellChangeHandler = null;
     }
+    if (this._cellSelectionChangePending) {
+      return;
+    }
+    // Selection can change before the active cell changes in the same event,
+    // and entering edit mode deselects the cells one by one: handle it once.
+    this._cellSelectionChangePending = true;
+    await Promise.resolve();
+    this._cellSelectionChangePending = false;
     await this._updateCellSelection();
     if (this._currentProviderIndex === null) {
       // For consistency we set the first cell in selection as current provider.
@@ -901,7 +1034,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       );
       this._currentProviderIndex = firstSelectedCellIndex;
     }
+    // Search the new selection before choosing a current match in it.
+    await this._setEnginesSelectionSearchMode();
     await this._ensureCurrentMatch();
+    this._filtersChanged.emit();
   }
 
   private async _updateCellSelection() {
@@ -924,19 +1060,31 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this._selectedCells = selectedCells;
       this._updateSelectionMode();
     }
-
-    this._filtersChanged.emit();
   }
 
   // used for testing only
   protected delayedActiveCellChangeHandlerReady: Promise<void>;
   private _currentProviderIndex: number | null = null;
   private _delayedActiveCellChangeHandler: number | null = null;
+  private _modeChangeDebouncer = new Debouncer(() => {
+    // The mode can change again before this handler runs; check the
+    // current mode because this is what `_updateSelectionMode()` acts on.
+    if (
+      this.widget.content.mode === 'command' &&
+      document.activeElement?.closest('.jp-DocumentSearch-overlay')
+    ) {
+      // Do not request updating mode when user switched focus to search overlay.
+      return;
+    }
+    this._updateSelectionMode();
+    this._filtersChanged.emit();
+  }, 0);
   private _filters: IFilters | undefined;
   private _onSelection = false;
   private _selectedCells: number = 1;
   private _selectedLines: number = 0;
   private _query: RegExp | null = null;
+  private _queryKey: string | null = null;
   private _searchProviders: CellSearchProvider[] = [];
   private _editorSelectionsObservable: IObservableMap<
     CodeEditor.ITextSelection[]
@@ -944,4 +1092,21 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   private _selectionSearchMode: 'cells' | 'text' = 'cells';
   private _selectionLock: boolean = false;
   private _searchActive: boolean = false;
+  private _cellSelectionChangePending = false;
+}
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * Options of a step to an adjacent match in the notebook.
+   */
+  export interface IStepOptions extends IHighlightAdjacentMatchOptions {
+    /**
+     * Whether the cell scrolls to its match when `scroll` is false, which
+     * leaves the active cell as it is.
+     */
+    scrollInCell?: boolean;
+  }
 }

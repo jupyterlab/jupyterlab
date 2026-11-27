@@ -14,7 +14,8 @@ async function setupConsole(page: IJupyterLabPageFixture) {
 
   await page.click('button:has-text("Select")');
 
-  await page.locator('[aria-label="Code Cell Content"]').waitFor();
+  // A previously opened console may still be in the DOM, so only match the visible one.
+  await page.locator('[aria-label="Code Cell Content"]:visible').waitFor();
   await page.locator('text=| Idle').waitFor();
 }
 
@@ -29,7 +30,7 @@ test.describe('Console', () => {
     await executedCell.waitFor();
 
     const cellEditor = executedCell.locator(CELL_EDITOR_SELECTOR);
-    expect(await cellEditor.innerText()).toBe('2 + 2');
+    await expect(cellEditor).toHaveText('2 + 2');
 
     // Focus the editor
     await cellEditor.click();
@@ -42,7 +43,113 @@ test.describe('Console', () => {
     await cellEditor.pressSequentially('more text');
 
     // Expect the editor content to not change
-    expect(await cellEditor.innerText()).toBe('2 + 2');
+    await expect(cellEditor).toHaveText('2 + 2');
+  });
+
+  test('Should rename the console from the tab context menu', async ({
+    page
+  }) => {
+    const newName = 'Custom Name';
+
+    await page.activity.getTabLocator('Console 1').click({ button: 'right' });
+    await page.getByRole('menuitem', { name: 'Rename Console…' }).click();
+
+    await page.locator('.jp-Dialog >> input').fill(newName);
+    await page.click('.jp-Dialog >> button >> text=Rename');
+
+    await expect(page.activity.getTabLocator(newName)).toBeVisible();
+  });
+
+  test('Should ask for confirmation before showing all kernel activity', async ({
+    page
+  }) => {
+    const command = 'console:toggle-show-all-kernel-activity';
+    const isToggled = () =>
+      page.evaluate(id => window.jupyterapp.commands.isToggled(id), command);
+
+    void page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    const dialog = page.locator('.jp-Dialog');
+    await expect(dialog).toContainText('treated as trusted');
+    await dialog.getByRole('button', { name: 'Cancel' }).click();
+    expect(await isToggled()).toBe(false);
+
+    void page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    await expect(dialog).toBeVisible();
+    await page.keyboard.press('Enter');
+    await expect(dialog).toHaveCount(0);
+    expect(await isToggled()).toBe(false);
+
+    void page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    await dialog.getByRole('button', { name: 'Show All Activity' }).click();
+    await expect.poll(isToggled).toBe(true);
+
+    await page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    await expect(dialog).toHaveCount(0);
+    expect(await isToggled()).toBe(false);
+
+    // The kernel is trusted for the rest of the session.
+    await page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    await expect(dialog).toHaveCount(0);
+    expect(await isToggled()).toBe(true);
+  });
+
+  test('Should not ask again about showing all kernel activity for any kernel when checked', async ({
+    page
+  }) => {
+    const command = 'console:toggle-show-all-kernel-activity';
+    const toggle = () =>
+      page.evaluate(id => window.jupyterapp.commands.execute(id), command);
+    const isToggled = () =>
+      page.evaluate(id => window.jupyterapp.commands.isToggled(id), command);
+
+    void toggle();
+    const dialog = page.locator('.jp-Dialog');
+    await dialog.getByRole('checkbox').check();
+    await dialog.getByRole('button', { name: 'Show All Activity' }).click();
+    await expect.poll(isToggled).toBe(true);
+
+    await toggle();
+    expect(await isToggled()).toBe(false);
+
+    // A console with another kernel is not asked either.
+    await setupConsole(page);
+    await toggle();
+    await expect.poll(isToggled).toBe(true);
+    await expect(dialog).toHaveCount(0);
+  });
+
+  test('Should keep the prompt position picked for the console when a console setting changes', async ({
+    page
+  }) => {
+    await page.keyboard.type('for i in range(300): print(i)');
+    await page.keyboard.press('Shift+Enter');
+    await expect(page.locator(EXECUTED_CELL)).toContainText('299');
+
+    await page.getByLabel('Change Console Prompt Position').first().click();
+    await page.getByText('Prompt to top').click();
+
+    const input = page.locator('.jp-CodeConsole-input');
+    const content = page.locator('.jp-CodeConsole-content');
+    await content.hover();
+    await page.mouse.wheel(0, 1000);
+    await expect
+      .poll(() => content.evaluate(node => node.scrollTop))
+      .toBeGreaterThan(0);
+
+    await page.menu.clickMenuItem(
+      'Settings>Console Run Keystroke>Execute with Enter'
+    );
+    // The console gets the new mode in the same settings update that would
+    // move the prompt.
+    await expect(page.locator('.jp-CodeConsole')).toHaveAttribute(
+      'data-jp-interaction-mode',
+      'terminal'
+    );
+
+    const inputBox = await input.boundingBox();
+    const contentBox = await content.boundingBox();
+    expect(inputBox!.y).toBeLessThan(contentBox!.y);
+    expect(await content.evaluate(node => node.scrollTop)).toBeGreaterThan(0);
   });
 });
 
@@ -241,18 +348,21 @@ async function getStabilisedHeight(
   page: IJupyterLabPageFixture,
   element: Locator
 ) {
-  // Wait for the height to stabilize over 100ms
-  let lastBox: { height: number } | null = null;
-  let currentBox: { height: number } | null = null;
-  let attempts = 0;
-  do {
-    lastBox = currentBox;
-    await page.waitForTimeout(100);
-    currentBox = await element.boundingBox();
-    attempts += 1;
-    if (attempts >= 100) {
-      throw new Error('Height did not stabilize after 100 attempts');
+  // Poll the element's height until two consecutive reads match, i.e. it
+  // has stopped changing. There is no fixed target height to assert on
+  // (it depends on the content under test), so we rely on `toPass`'s
+  // built-in retry/backoff instead of a hand-rolled `waitForTimeout` loop.
+  let lastHeight: number | null = null;
+  let stableHeight: number | null = null;
+  await expect(async () => {
+    const box = await element.boundingBox();
+    const height = box?.height ?? null;
+    const isStable = height !== null && height === lastHeight;
+    lastHeight = height;
+    if (isStable) {
+      stableHeight = height;
     }
-  } while (!(currentBox && lastBox && currentBox.height === lastBox.height));
-  return currentBox.height;
+    expect(isStable).toBe(true);
+  }).toPass({ intervals: [100], timeout: 10000 });
+  return stableHeight!;
 }
