@@ -10,11 +10,9 @@
 
 A JupyterLab architecture walkthrough from June 16, 2016, provides an overview of the notebook architecture.
 
-```{raw} html
-<div class="jp-youtube-video">
-   <iframe src="https://www.youtube-nocookie.com/embed/4Qm6oD_Rlw8?rel=0&amp;showinfo=0&amp;start=3326" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/4Qm6oD_Rlw8?rel=0&showinfo=0&start=3326
+:width: 100%
+:::
 
 The most complicated plugin included in the **JupyterLab application**
 is the **Notebook plugin**.

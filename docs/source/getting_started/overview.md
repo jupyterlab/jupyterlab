@@ -20,11 +20,10 @@ JupyterLab enables you to work with documents and activities such as
 components in a flexible, integrated, and extensible manner. For a demonstration
 of JupyterLab and its features, you can view this video:
 
-```{raw} html
-<div class="jp-youtube-video">
-  <iframe src="https://www.youtube-nocookie.com/embed/A5YyoCKxEOU?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/A5YyoCKxEOU
+:width: 100%
+:::
+
 
 You can {ref}`arrange <interface>` multiple documents and activities side by side in the
 work area using tabs and splitters. Documents and activities integrate with each

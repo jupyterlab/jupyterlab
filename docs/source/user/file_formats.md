@@ -72,11 +72,9 @@ the Jupyter Notebook.
 
 Markdown documents can be edited as text files or rendered inline:
 
-```{raw} html
-<div class="jp-youtube-video">
-  <iframe src="https://www.youtube-nocookie.com/embed/eQsRlqK-z1c?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/eQsRlqK-z1c?rel=0&showinfo=0
+:width: 100%
+:::
 
 The Markdown syntax supported in this mode is the same syntax used in
 the Jupyter Notebook (for example, LaTeX equations work). As seen in the
@@ -102,11 +100,9 @@ To edit an SVG image as a text file, right-click on the SVG filename in
 the file browser and select the “Editor” item in the “Open With”
 submenu:
 
-```{raw} html
-<div class="jp-youtube-video">
-  <iframe src="https://www.youtube-nocookie.com/embed/y_ydmAmVdCA?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/y_ydmAmVdCA?rel=0&showinfo=0
+:width: 100%
+:::
 
 (user-csv)=
 
@@ -122,11 +118,9 @@ tabular data. The default viewer for these files in JupyterLab is a
 high-performance data grid viewer which can display comma-separated, tab-separated, and
 semicolon-separated values:
 
-```{raw} html
-<div class="jp-youtube-video">
-  <iframe src="https://www.youtube-nocookie.com/embed/z6xuZ9H3Imo?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/z6xuZ9H3Imo?rel=0&showinfo=0
+:width: 100%
+:::
 
 While tab-separated value files can be read by the grid viewer, it currently does not automatically recognize `.tsv` files.
 To view, you must change the extension to `.csv` and set the delimiter to tabs.
@@ -140,11 +134,9 @@ selector in the viewer toolbar still changes the delimiter of an open file.
 To edit a CSV file as a text file, right-click on the file in the file
 browser and select the “Editor” item in the “Open With” submenu:
 
-```{raw} html
-<div class="jp-youtube-video">
-  <iframe src="https://www.youtube-nocookie.com/embed/b5oAoVB3Wd4?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/b5oAoVB3Wd4?rel=0&showinfo=0
+:width: 100%
+:::
 
 JupyterLab's grid viewer can open large files, up to the maximum string size of the particular browser.
 Below is a table that shows the sizes of the largest test files we successfully opened in each browser we support:
@@ -168,22 +160,18 @@ JavaScript Object Notation (JSON) files are common in data science.
 JupyterLab supports displaying JSON data in cell output or viewing a
 JSON file using a searchable tree view:
 
-```{raw} html
-<div class="jp-youtube-video">
-  <iframe src="https://www.youtube-nocookie.com/embed/FRj1r7-7kiQ?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/FRj1r7-7kiQ?rel=0&showinfo=0
+:width: 100%
+:::
 
 (edit-json)=
 
 To edit the JSON as a text file, right-click on the filename in the file
 browser and select the “Editor” item in the “Open With” submenu:
 
-```{raw} html
-<div class="jp-youtube-video">
-  <iframe src="https://www.youtube-nocookie.com/embed/HKcJAGZngzw?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/HKcJAGZngzw?rel=0&showinfo=0
+:width: 100%
+:::
 
 ## HTML
 
@@ -211,11 +199,9 @@ LaTeX files as text in the file editor.
 PDF is a common standard file format for documents. To view a PDF file
 in JupyterLab, double-click on the file in the file browser:
 
-```{raw} html
-<div class="jp-youtube-video">
-  <iframe src="https://www.youtube-nocookie.com/embed/vLAEzD5dxQw?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/vLAEzD5dxQw?rel=0&showinfo=0
+:width: 100%
+:::
 
 (vega-lite)=
 
@@ -241,22 +227,18 @@ documentation of Vega or Vega-Lite. JupyterLab supports rendering Vega
 Vega-Lite 1.x files, with a `.vl` or `.vl.json` file extension, can
 be opened by double-clicking the file in the file browser:
 
-```{raw} html
-<div class="jp-youtube-video">
-  <iframe src="https://www.youtube-nocookie.com/embed/Dddtyz5fWkU?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/Dddtyz5fWkU?rel=0&showinfo=0
+:width: 100%
+:::
 
 (open-vega-with)=
 
 The files can also be opened in the JSON viewer or file editor through
 the “Open With…” submenu in the file browser content menu:
 
-```{raw} html
-<div class="jp-youtube-video">
-  <iframe src="https://www.youtube-nocookie.com/embed/qaiGRXh4jxc?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/qaiGRXh4jxc?rel=0&showinfo=0
+:width: 100%
+:::
 
 (vega-multiple-views)=
 
@@ -264,11 +246,9 @@ As with other files in JupyterLab, multiple views of a single file
 remain synchronized, enabling you to interactively edit and render
 Vega/Vega-Lite visualizations:
 
-```{raw} html
-<div class="jp-youtube-video">
-  <iframe src="https://www.youtube-nocookie.com/embed/4Me4rCeS8To?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-```
+:::{iframe} https://www.youtube-nocookie.com/embed/4Me4rCeS8To?rel=0&showinfo=0
+:width: 100%
+:::
 
 The same workflow also works for Vega 2.x files, with a `.vg` or
 `.vg.json` file extension.
