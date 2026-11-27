@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { showErrorMessage } from '@jupyterlab/apputils';
+import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 import type { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import type { ITranslator } from '@jupyterlab/translation';
 import { FormComponent } from '@jupyterlab/ui-components';
@@ -155,6 +155,7 @@ export class SettingsFormEditor extends React.Component<
   }
 
   componentWillUnmount(): void {
+    this._isUnmounted = true;
     this.props.settings.changed.disconnect(this._syncFormDataWithSettings);
     this._debouncer.dispose();
   }
@@ -207,17 +208,38 @@ export class SettingsFormEditor extends React.Component<
 
   /**
    * Handler for the "Restore to defaults" button - clears all
-   * modified settings then calls `setFormData` to restore the
-   * values.
+   * modified settings after user confirmation then calls `setFormData`
+   * to restore the values.
    */
   reset = async (event: React.MouseEvent): Promise<void> => {
     event.stopPropagation();
+    const trans = this.props.translator.load('jupyterlab');
+    const title = this.props.settings.schema.title || this.props.settings.id;
+    const result = await showDialog({
+      title: trans.__('Restore to Defaults'),
+      body: trans.__(
+        'Are you sure you want to restore default settings for "%1"? This action cannot be undone.',
+        title
+      ),
+      buttons: [
+        Dialog.cancelButton({ label: trans.__('Cancel') }),
+        Dialog.warnButton({ label: trans.__('Restore to Defaults') })
+      ]
+    });
+
+    if (!result.button.accept) {
+      return;
+    }
+
     this._changeId++;
     this._lastSettledChangeId = this._changeId;
     for (const field in this.props.settings.user) {
       await this.props.settings.remove(field);
     }
     this._formData = this.props.settings.composite as ReadonlyJSONObject;
+    if (this._isUnmounted) {
+      return;
+    }
     this.setState({ isModified: false });
   };
 
@@ -397,6 +419,7 @@ export class SettingsFormEditor extends React.Component<
   private _changeId = 0;
   private _debouncer: Debouncer<void, unknown, [ReadonlyJSONObject, number]>;
   private _formData: ReadonlyJSONObject;
+  private _isUnmounted = false;
   private _lastSettledChangeId = 0;
 }
 

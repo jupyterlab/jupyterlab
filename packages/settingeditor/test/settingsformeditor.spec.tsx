@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+import { dangerDialog, dismissDialog } from '@jupyterlab/testing';
 import { nullTranslator } from '@jupyterlab/translation';
 import { SettingsFormEditor } from '../src/SettingsFormEditor';
 import React from 'react';
@@ -223,6 +224,92 @@ describe('@jupyterlab/settingeditor', () => {
         await raceConnector.clear();
         jest.useRealTimers();
       }
+    });
+
+    it('should show confirmation dialog and reset settings when confirmed', async () => {
+      const id = 'alpha';
+      const schema: ISettingRegistry.ISchema = {
+        type: 'object',
+        title: 'Alpha Settings',
+        properties: {
+          keyA: { type: 'string', default: 'A' },
+          keyB: { type: 'string', default: 'B' }
+        }
+      };
+      connector.schemas[id] = schema;
+      settings = (await registry.load(id)) as Settings;
+      await settings.set('keyA', 'user-modified');
+
+      const component = renderer.create(
+        <SettingsFormEditor
+          filteredValues={{ kind: 'all' }}
+          hasError={() => void 0}
+          onSelect={() => void 0}
+          renderers={{}}
+          settings={settings}
+          translator={nullTranslator}
+          updateDirtyState={() => void 0}
+        />
+      );
+
+      const restoreButton = component.root.findByProps({
+        className: 'jp-RestoreButton'
+      });
+      await act(async () => {
+        const resetPromise = restoreButton.props.onClick({
+          stopPropagation: () => void 0
+        });
+        await dangerDialog();
+        await resetPromise;
+      });
+
+      expect(settings.isModified).toBe(false);
+      expect(settings.user).toEqual({});
+
+      component.unmount();
+    });
+
+    it('should not reset settings when confirmation dialog is canceled', async () => {
+      const id = 'alpha';
+      const schema: ISettingRegistry.ISchema = {
+        type: 'object',
+        title: 'Alpha Settings',
+        properties: {
+          keyA: { type: 'string', default: 'A' },
+          keyB: { type: 'string', default: 'B' }
+        }
+      };
+      connector.schemas[id] = schema;
+      settings = (await registry.load(id)) as Settings;
+      await settings.set('keyA', 'user-modified');
+
+      const component = renderer.create(
+        <SettingsFormEditor
+          filteredValues={{ kind: 'all' }}
+          hasError={() => void 0}
+          onSelect={() => void 0}
+          renderers={{}}
+          settings={settings}
+          translator={nullTranslator}
+          updateDirtyState={() => void 0}
+        />
+      );
+
+      const restoreButton = component.root.findByProps({
+        className: 'jp-RestoreButton'
+      });
+      await act(async () => {
+        const resetPromise = restoreButton.props.onClick({
+          stopPropagation: () => void 0
+        });
+        await dismissDialog();
+        await resetPromise;
+      });
+
+      expect(settings.isModified).toBe(true);
+      expect(settings.user).toEqual({ keyA: 'user-modified' });
+
+      component.unmount();
     });
   });
 });
