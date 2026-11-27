@@ -3,10 +3,12 @@
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
 import { CodeMirrorEditor, EditorSearchProvider } from '@jupyterlab/codemirror';
+import type { IHighlightAdjacentMatchOptions } from '@jupyterlab/codemirror';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import type {
   IFilters,
   IReplaceOptionsSupport,
+  ISearchMatch,
   ISearchProvider
 } from '@jupyterlab/documentsearch';
 import type { ITranslator } from '@jupyterlab/translation';
@@ -72,6 +74,43 @@ export class FileEditorSearchProvider
       scroll: false,
       select: false
     });
+  }
+
+  /**
+   * Highlight the next match, or the first one after the last match.
+   *
+   * @param loop - Whether to go on from the last match to the first one.
+   * @param options - Options of the step.
+   * @returns The next match if there is one.
+   */
+  async highlightNext(
+    loop = true,
+    options?: IHighlightAdjacentMatchOptions
+  ): Promise<ISearchMatch | undefined> {
+    const match = await super.highlightNext(false, options);
+    if (match || !loop || this.matchesCount === 0) {
+      return match;
+    }
+    return super.highlightNext(false, { ...options, from: 'start' });
+  }
+
+  /**
+   * Highlight the previous match, or the last one before the first match.
+   *
+   * @param loop - Whether to go on from the first match to the last one.
+   * @param options - Options of the step.
+   * @returns The previous match if there is one.
+   */
+  async highlightPrevious(
+    loop = true,
+    options?: IHighlightAdjacentMatchOptions
+  ): Promise<ISearchMatch | undefined> {
+    const match = await super.highlightPrevious(false, options);
+    if (match || !loop || this.matchesCount === 0) {
+      return match;
+    }
+    // Without a current match, a step back from the start begins at the end
+    return super.highlightPrevious(false, { ...options, from: 'start' });
   }
 
   /**
