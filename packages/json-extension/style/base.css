@@ -46,6 +46,10 @@
   padding-left: 1.25em;
 }
 
+.jp-RenderedJSON-row {
+  width: fit-content;
+}
+
 .jp-RenderedJSON-tree [aria-expanded] > .jp-RenderedJSON-row {
   cursor: pointer;
 }
