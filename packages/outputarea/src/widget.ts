@@ -108,7 +108,10 @@ export class OutputArea extends Widget {
     this.contentFactory =
       options.contentFactory ?? OutputArea.defaultContentFactory;
     this.rendermime = options.rendermime;
-    this._maxNumberOutputs = options.maxNumberOutputs ?? Infinity;
+    this._maxNumberOutputs =
+      options.maxNumberOutputs && options.maxNumberOutputs > 0
+        ? options.maxNumberOutputs
+        : Infinity;
     this._translator = options.translator ?? nullTranslator;
     this._inputHistoryScope = options.inputHistoryScope ?? 'global';
     this._showInputPlaceholder = options.showInputPlaceholder ?? true;
@@ -273,14 +276,16 @@ export class OutputArea extends Widget {
    * The maximum number of output items to display on top and bottom of cell output.
    *
    * ### Notes
-   * It is set to Infinity if no trim is applied.
+   * It is set to Infinity if no trim is applied. Setting to 0 or negative applies no trim (Infinity).
    */
   get maxNumberOutputs(): number {
     return this._maxNumberOutputs;
   }
   set maxNumberOutputs(limit: number) {
     if (limit <= 0) {
-      console.warn(`OutputArea.maxNumberOutputs must be strictly positive.`);
+      limit = Infinity;
+    }
+    if (this._maxNumberOutputs === limit) {
       return;
     }
     const lastShown = this._maxNumberOutputs;
@@ -740,10 +745,17 @@ export class OutputArea extends Widget {
    * @param lastShown Starting model index to insert.
    */
   private _showTrimmedOutputs(lastShown: number) {
-    // Dispose information widget
-    this.widgets[lastShown].dispose();
+    const trimmedIndex = this.widgets.findIndex(widget =>
+      this._isTrimmedOutputsWidget(widget)
+    );
+    if (trimmedIndex === -1) {
+      return;
+    }
 
-    for (let idx = lastShown; idx < this.model.length; idx++) {
+    // Dispose information widget
+    this.widgets[trimmedIndex].dispose();
+
+    for (let idx = trimmedIndex; idx < this.model.length; idx++) {
       this._insertOutput(idx, this.model.get(idx));
     }
 
