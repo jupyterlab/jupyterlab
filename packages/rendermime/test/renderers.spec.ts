@@ -2,7 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Sanitizer } from '@jupyterlab/apputils';
-import { renderText } from '@jupyterlab/rendermime';
+import { MimeModel, RenderedText, renderText } from '@jupyterlab/rendermime';
+import { Widget } from '@lumino/widgets';
 
 // Keep in sync with `AUTO_LINK_STRIDE` in `src/renderers.ts`: each incremental
 // auto-linking step advances to the first whitespace at or after this offset.
@@ -194,46 +195,146 @@ describe('@jupyterlab/rendermime', () => {
       detached.remove();
     });
 
-    it('clears the first-paint watchdog when a never-attached host gives up', async () => {
-      // A host that is discarded before ever being attached (e.g. a completer
-      // documentation node replaced while typing) stops rendering after a
-      // bounded number of frames. The first-paint watchdog must be cleared on
-      // that path too. The leak only shows while animation frames keep being
-      // produced (a healthy foreground tab): the watchdog then never
-      // force-paints (it only acts under frame starvation) and instead keeps
-      // re-arming its timer - and strongly referencing the host - forever. A
-      // second, still-rendering host keeps the frames alive here; without it
-      // the very next tick would see the frames as starved, force-paint into
-      // the give-up path and dissolve on its own, masking the leak.
-      const sanitizer = new Sanitizer();
-      const neverAttached = document.createElement('div');
-      const laterStarted = document.createElement('div');
+    it('paints a renderer widget attached after more than 1,000 frames', async () => {
+      // A windowed notebook creates the outputs of a cell before it attaches
+      // the cell, and it attaches cells in idle time, which a busy page can
+      // delay by more than 1,000 frames. Collapsed outputs are attached only
+      // when they are expanded.
+      const widget = new RenderedText({
+        mimeType: 'text/plain',
+        sanitizer: new Sanitizer(),
+        resolver: null,
+        linkHandler: null,
+        latexTypesetter: null
+      });
+      void widget.renderModel(
+        new MimeModel({ data: { 'text/plain': 'see www.example.com here' } })
+      );
 
-      void renderText({
-        host: neverAttached,
+      // About 1,250 frames at ~16ms per fake-timer frame.
+      jest.advanceTimersByTime(20000);
+      Widget.attach(widget, document.body);
+      jest.runAllTimers();
+
+      expect(widget.node.textContent).toBe('see www.example.com here');
+      widget.dispose();
+    });
+
+    it('paints text streamed into a detached renderer widget once it is attached again', async () => {
+      // Collapsing an output detaches it, while a running cell can still
+      // stream into it.
+      const widget = new RenderedText({
+        mimeType: 'text/plain',
+        sanitizer: new Sanitizer(),
+        resolver: null,
+        linkHandler: null,
+        latexTypesetter: null
+      });
+      Widget.attach(widget, document.body);
+      void widget.renderModel(
+        new MimeModel({ data: { 'text/plain': 'line 1\n' } })
+      );
+      jest.runAllTimers();
+
+      Widget.detach(widget);
+      void widget.renderModel(
+        new MimeModel({ data: { 'text/plain': 'line 1\nline 2\n' } })
+      );
+      jest.advanceTimersByTime(1000);
+      Widget.attach(widget, document.body);
+      jest.runAllTimers();
+
+      expect(widget.node.textContent).toBe('line 1\nline 2\n');
+      widget.dispose();
+    });
+
+    it('does not resume a superseded render when the host is attached again', async () => {
+      // A render that waits for the host is superseded by the next stream
+      // chunk; turning incremental auto-linking off renders that chunk at once.
+      const sanitizer = new Sanitizer();
+      const widget = new RenderedText({
+        mimeType: 'text/plain',
         sanitizer,
+        resolver: null,
+        linkHandler: null,
+        latexTypesetter: null
+      });
+      Widget.attach(widget, document.body);
+      void widget.renderModel(
+        new MimeModel({ data: { 'text/plain': 'line 1\n' } })
+      );
+      jest.runAllTimers();
+
+      Widget.detach(widget);
+      void widget.renderModel(
+        new MimeModel({ data: { 'text/plain': 'line 1\nline 2\n' } })
+      );
+      jest.advanceTimersByTime(1000);
+      sanitizer.setIncrementalAutolink(false);
+      void widget.renderModel(
+        new MimeModel({ data: { 'text/plain': 'line 1\nline 2\nline 3\n' } })
+      );
+      Widget.attach(widget, document.body);
+      jest.runAllTimers();
+
+      expect(widget.node.textContent).toBe('line 1\nline 2\nline 3\n');
+      widget.dispose();
+    });
+
+    it('resolves the render promise while the host waits to be attached', async () => {
+      // The debugger variable viewer attaches the renderer widget only after
+      // `renderModel()` resolves.
+      const detached = document.createElement('div');
+      let resolved = false;
+      void renderText({
+        host: detached,
+        sanitizer: new Sanitizer(),
+        source: 'see www.example.com here'
+      }).then(() => {
+        resolved = true;
+      });
+
+      jest.advanceTimersByTime(100);
+      for (let i = 0; i < 5; i++) {
+        await Promise.resolve();
+      }
+
+      expect(resolved).toBe(true);
+    });
+
+    it('keeps a single timer for hosts waiting to be attached', async () => {
+      // A notebook can create thousands of outputs before it attaches their
+      // cells. A frame request and a watchdog timer for each output fill every
+      // frame, which delays the idle callbacks that attach the cells.
+      const sanitizer = new Sanitizer();
+      for (let i = 0; i < 10; i++) {
+        void renderText({
+          host: document.createElement('div'),
+          sanitizer,
+          source: `output ${i}`
+        });
+      }
+
+      // Past the first frame and the first watchdog tick.
+      jest.advanceTimersByTime(200);
+
+      expect(jest.getTimerCount()).toBe(1);
+    });
+
+    it('stops checking a never-attached host after a bounded number of frames', async () => {
+      // A host that is discarded before ever being attached (e.g. a completer
+      // documentation node replaced while typing) must not keep a frame
+      // request or a timer alive, as either would also keep the host in memory.
+      void renderText({
+        host: document.createElement('div'),
+        sanitizer: new Sanitizer(),
         source: 'see www.example.com here'
       });
 
-      // Let the first render burn through half of its allotted frames, then
-      // start the second one so that it is still producing frames (each host
-      // gets ~1000 frames at ~16ms per fake-timer frame) when the first gives
-      // up.
-      jest.advanceTimersByTime(8000);
-      void renderText({
-        host: laterStarted,
-        sanitizer,
-        source: 'other www.example.org output'
-      });
+      // About 1,900 frames at ~16ms per fake-timer frame.
+      jest.advanceTimersByTime(30000);
 
-      // Advance to a point where the first render has given up while the
-      // second is still running.
-      jest.advanceTimersByTime(13000);
-      expect(neverAttached.textContent).toBe('');
-
-      // Only the second render's timers may remain: its frame request and its
-      // watchdog. A third pending timer is the first render's leaked watchdog.
-      expect(jest.getTimerCount()).toBe(2);
+      expect(jest.getTimerCount()).toBe(0);
     });
 
     it('reuses a single persistent intersection observer while streaming', async () => {
@@ -965,18 +1066,24 @@ describe('@jupyterlab/rendermime', () => {
       expect(anchors[0].querySelector('span')).not.toBeNull();
     });
 
-    // Selection preservation across streamed re-renders. `replaceChangedNodes`
-    // records the selection as character offsets before mutating the DOM and
-    // restores it afterwards. jsdom's `Selection.containsNode` always returns
-    // `false`, which would short-circuit that path, so it is stubbed to `true`
-    // (matching a real browser where the selection is inside the output host).
+    // Selection preservation across streamed re-renders.
+    // `withSelectionPreserved` records the selection as character offsets
+    // before mutating the DOM and restores it afterwards. `intersectsNode` of
+    // the selection ranges is stubbed to `true`, so that every DOM change of
+    // the output saves and restores the selection, also a change that does
+    // not touch the selected nodes. The test environment replaces the global
+    // `Range` (see `jest-shim.ts`), so the prototype comes from a jsdom range.
+    const rangePrototype: Range = Object.getPrototypeOf(
+      Document.prototype.createRange.call(document)
+    );
+
     it('preserves a selection starting at the first character of a linkified URL', async () => {
       // Regression test: the selection-offset code must treat a character
       // offset of 0 as a real position. Selecting from the very start of a
       // linkified URL exercises both the save path (a nested offset of 0,
       // previously discarded by a truthiness check) and the restore path
       // (locating offset 0, previously missed by a strict `>` comparison).
-      jest.spyOn(Selection.prototype, 'containsNode').mockReturnValue(true);
+      jest.spyOn(rangePrototype, 'intersectsNode').mockReturnValue(true);
       const sanitizer = new Sanitizer();
 
       void renderText({ host, sanitizer, source: 'www.example.com and more' });
@@ -1003,7 +1110,7 @@ describe('@jupyterlab/rendermime', () => {
     it('preserves a mid-content selection across a streamed append', async () => {
       // Baseline: an offset strictly inside a node (away from any boundary) is
       // preserved. Complements the offset-0 case above.
-      jest.spyOn(Selection.prototype, 'containsNode').mockReturnValue(true);
+      jest.spyOn(rangePrototype, 'intersectsNode').mockReturnValue(true);
       const sanitizer = new Sanitizer();
 
       void renderText({ host, sanitizer, source: 'www.example.com and more' });
@@ -1032,7 +1139,7 @@ describe('@jupyterlab/rendermime', () => {
       // measure the anchor by its full text length, not just its first child;
       // otherwise an offset inside a *later* child (here "com") is treated as
       // outside the anchor and the selection is restored to the wrong place.
-      jest.spyOn(Selection.prototype, 'containsNode').mockReturnValue(true);
+      jest.spyOn(rangePrototype, 'intersectsNode').mockReturnValue(true);
       const sanitizer = new Sanitizer();
 
       // Only "com" is background-colored, so the anchor's first child is the
@@ -1064,7 +1171,7 @@ describe('@jupyterlab/rendermime', () => {
       // Companion to the above: under-counting the multi-child anchor's length
       // shifts every character offset after it, so a selection in the text
       // following the anchor is mis-restored too.
-      jest.spyOn(Selection.prototype, 'containsNode').mockReturnValue(true);
+      jest.spyOn(rangePrototype, 'intersectsNode').mockReturnValue(true);
       const sanitizer = new Sanitizer();
 
       const source = 'pre www.example.\x1b[48;2;113;0;119mcom\x1b[0m post\n';
@@ -1086,6 +1193,60 @@ describe('@jupyterlab/rendermime', () => {
       jest.runAllTimers();
 
       expect(window.getSelection()!.toString()).toBe('post');
+    });
+
+    it('preserves a selection when a stream chunk ends mid-line', async () => {
+      // The next chunk restores the selection twice in one frame.
+      const sanitizer = new Sanitizer();
+
+      void renderText({ host, sanitizer, source: 'word0 word1 word2 ' });
+      jest.runAllTimers();
+
+      const text = host.querySelector('pre')!.firstChild as Text;
+      window.getSelection()!.setBaseAndExtent(text, 6, text, 11);
+      void renderText({ host, sanitizer, source: 'word0 word1 word2 word3 ' });
+      jest.runAllTimers();
+
+      expect(window.getSelection()!.toString()).toBe('word1');
+    });
+
+    it('preserves a selection made between two frames that share a timestamp', async () => {
+      // Firefox with `privacy.resistFingerprinting` rounds frame timestamps to
+      // 16.67 ms, so two consecutive frames can share one.
+      const pending = new Map<number, FrameRequestCallback>();
+      let rafId = 0;
+      jest
+        .spyOn(window, 'requestAnimationFrame')
+        .mockImplementation((callback: FrameRequestCallback) => {
+          rafId += 1;
+          pending.set(rafId, callback);
+          return rafId;
+        });
+      jest
+        .spyOn(window, 'cancelAnimationFrame')
+        .mockImplementation((handle: number) => {
+          pending.delete(handle);
+        });
+      const runFrame = () => {
+        const callbacks = [...pending.values()];
+        pending.clear();
+        for (const callback of callbacks) {
+          callback(1000);
+        }
+      };
+      window.getSelection()!.removeAllRanges();
+      const sanitizer = new Sanitizer();
+
+      void renderText({ host, sanitizer, source: 'word0 word1 word2 ' });
+      runFrame();
+      jest.advanceTimersByTime(16);
+
+      const text = host.querySelector('pre')!.firstChild as Text;
+      window.getSelection()!.setBaseAndExtent(text, 6, text, 11);
+      void renderText({ host, sanitizer, source: 'word0 word1 word2 word3 ' });
+      runFrame();
+
+      expect(window.getSelection()!.toString()).toBe('word1');
     });
   });
 });

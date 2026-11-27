@@ -647,6 +647,12 @@ export class Context<
   private async _save(): Promise<void> {
     this._saveState.emit('started');
     const options = this._createSaveOptions();
+    // Edits made while saving are not in `options`, so they are not saved.
+    let changed = false;
+    const onContentChanged = () => {
+      changed = true;
+    };
+    this._model.contentChanged.connect(onContentChanged);
 
     try {
       await this._manager.ready;
@@ -656,7 +662,9 @@ export class Context<
         return;
       }
 
-      this._model.dirty = false;
+      if (!changed) {
+        this._model.dirty = false;
+      }
       this._updateContentsModel(value);
 
       if (!this._isPopulated) {
@@ -686,6 +694,8 @@ export class Context<
       // Emit failure.
       this._saveState.emit('failed');
       throw err;
+    } finally {
+      this._model.contentChanged.disconnect(onContentChanged);
     }
   }
 
@@ -723,8 +733,7 @@ export class Context<
             model.fromJSON(contents.content);
           } else {
             let content = contents.content;
-            // Convert line endings if necessary, marking the file
-            // as dirty.
+            // Convert line endings if necessary.
             if (content.indexOf('\r\n') !== -1) {
               this._lineEnding = '\r\n';
               content = content.replace(/\r\n/g, '\n');
@@ -735,6 +744,8 @@ export class Context<
               this._lineEnding = null;
             }
             model.fromString(content);
+            // Saving restores the line endings, so the text matches the disk.
+            model.dirty = false;
           }
         }
 

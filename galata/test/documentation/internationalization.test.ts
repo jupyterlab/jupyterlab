@@ -88,16 +88,8 @@ test.describe('Internationalization', () => {
 
     // Fake the server locale as Chinese, as the default language of an
     // English server is not requested
-    await page.route('**/*', async (route, request) => {
-      if (!request.isNavigationRequest()) {
-        return route.fallback();
-      }
-      const response = await route.fetch();
-      const body = (await response.text()).replace(
-        /"serverLocale": "[^"]*"/,
-        '"serverLocale": "zh_CN"'
-      );
-      return route.fulfill({ response, body });
+    await galata.Mock.mockPageConfig(page, {
+      serverLocale: 'zh_CN'
     });
 
     await page.route(galata.Routes.translations, async (route, request) => {

@@ -93,3 +93,40 @@ for i in range(10):
     'Your age: 42'
   );
 });
+
+test('Show more outputs without a layout for each output', async ({
+  page,
+  browserName
+}) => {
+  test.skip(
+    browserName !== 'chromium',
+    'Layouts are counted with the Chrome DevTools Protocol'
+  );
+  const outputCount = 1000;
+  await page.notebook.createNew();
+  await page.notebook.setCell(
+    0,
+    'code',
+    `for i in range(${outputCount}): display(i)`
+  );
+  await page.notebook.run();
+  const showMore = page.getByRole('button', { name: 'Show more outputs' });
+  await expect(showMore).toBeVisible();
+
+  // Unlike a duration, the layout count does not depend on the machine speed.
+  const client = await page.context().newCDPSession(page.mainFrame());
+  await client.send('Performance.enable');
+  const countLayouts = async () => {
+    const { metrics } = await client.send('Performance.getMetrics');
+    return metrics.find(metric => metric.name === 'LayoutCount')!.value;
+  };
+  const layoutsBefore = await countLayouts();
+
+  await showMore.click();
+  await expect(page.locator('.jp-RenderedText').last()).toHaveText(
+    `${outputCount - 1}`
+  );
+
+  // A layout for each output freezes the page for seconds.
+  expect((await countLayouts()) - layoutsBefore).toBeLessThan(50);
+});
