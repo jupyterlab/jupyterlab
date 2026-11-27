@@ -25,6 +25,8 @@ import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 
 import { JupyterServer, signalToPromise, sleep } from '@jupyterlab/testing';
 
+import { CommandRegistry } from '@lumino/commands';
+
 import { UUID } from '@lumino/coreutils';
 
 import { Widget } from '@lumino/widgets';
@@ -101,6 +103,9 @@ describe('DebuggerHandler', () => {
     }
     if (!widget.isDisposed) {
       widget.dispose();
+    }
+    if (handler && !handler.isDisposed) {
+      handler.dispose();
     }
     service.dispose();
     await connection.shutdown();
@@ -242,6 +247,9 @@ describe('DebuggerHandler', () => {
       // the kernel is shut down.
       if (service.isStarted) {
         await service.stop();
+      }
+      if (handler && !handler.isDisposed) {
+        handler.dispose();
       }
       fileWidget.dispose();
       context.dispose();
@@ -394,6 +402,154 @@ describe('DebuggerHandler', () => {
       spy.mockRestore();
 
       expect(outcome).toBe('resolved');
+    }, 30000);
+  });
+
+  describe('enable, disable, and commands', () => {
+    const shell: { currentWidget: Widget | null } = { currentWidget: null };
+    let context: Context<DocumentRegistry.ICodeModel>;
+    let fileWidget: FileEditorWidget;
+
+    const createContext = (): Context<DocumentRegistry.ICodeModel> =>
+      new Context({
+        manager: new ServiceManagerMock(),
+        factory: new TextModelFactory(),
+        path: UUID.uuid4() + '.py'
+      });
+
+    const createFileWidget = (
+      context: Context<DocumentRegistry.ICodeModel>
+    ): FileEditorWidget => {
+      const editorFactory = new CodeMirrorEditorFactory();
+      const content = new FileEditor({
+        factory: options => editorFactory.newDocumentEditor(options),
+        mimeTypeService: new CodeMirrorMimeTypeService(
+          new EditorLanguageRegistry()
+        ),
+        context
+      });
+      return new FileEditorWidget({ content, context });
+    };
+
+    beforeEach(() => {
+      context = createContext();
+      fileWidget = createFileWidget(context);
+      shell.currentWidget = fileWidget;
+    });
+
+    afterEach(async () => {
+      if (service.isStarted) {
+        await service.stop();
+      }
+      if (handler && !handler.isDisposed) {
+        handler.dispose();
+      }
+      fileWidget.dispose();
+      context.dispose();
+    });
+
+    it('enables and disables debugging programmatically', async () => {
+      handler = new DebuggerHandler({
+        type: 'file',
+        shell: shell as any,
+        service
+      });
+      await handler.update(fileWidget, connection);
+
+      expect(handler.isAvailable(fileWidget)).toBe(true);
+      expect(handler.isDebuggerOn(fileWidget)).toBe(false);
+
+      await handler.enable(fileWidget);
+      expect(handler.isDebuggerOn(fileWidget)).toBe(true);
+      expect(fileWidget.node.hasAttribute('data-jp-debugger')).toBe(true);
+      const button = handler['_iconButtons'][fileWidget.id]!;
+      expect(button.pressed).toBe(true);
+
+      await handler.disable(fileWidget);
+      expect(handler.isDebuggerOn(fileWidget)).toBe(false);
+      expect(fileWidget.node.hasAttribute('data-jp-debugger')).toBe(false);
+      expect(button.pressed).toBe(false);
+    }, 30000);
+
+    it('toggles debugging via toggle()', async () => {
+      handler = new DebuggerHandler({
+        type: 'file',
+        shell: shell as any,
+        service
+      });
+      await handler.update(fileWidget, connection);
+
+      await handler.toggle(fileWidget);
+      expect(handler.isDebuggerOn(fileWidget)).toBe(true);
+
+      await handler.toggle(fileWidget);
+      expect(handler.isDebuggerOn(fileWidget)).toBe(false);
+    }, 30000);
+
+    it('finds the handler for a tracked widget or active widget', async () => {
+      handler = new DebuggerHandler({
+        type: 'file',
+        shell: shell as any,
+        service
+      });
+      await handler.update(fileWidget, connection);
+
+      const matchByWidget = DebuggerHandler.findHandler(fileWidget);
+      expect(matchByWidget).not.toBeNull();
+      expect(matchByWidget?.handler).toBe(handler);
+      expect(matchByWidget?.widget).toBe(fileWidget);
+
+      const matchByChild = DebuggerHandler.findHandler(fileWidget.content);
+      expect(matchByChild).not.toBeNull();
+      expect(matchByChild?.handler).toBe(handler);
+      expect(matchByChild?.widget).toBe(fileWidget);
+
+      const matchActive = DebuggerHandler.findHandler();
+      expect(matchActive).not.toBeNull();
+      expect(matchActive?.handler).toBe(handler);
+      expect(matchActive?.widget).toBe(fileWidget);
+    });
+
+    it('dispatches to commands when commands registry is provided', async () => {
+      const commands = new CommandRegistry();
+      let enabledCalled = false;
+      let disabledCalled = false;
+
+      commands.addCommand(Debugger.CommandIDs.enable, {
+        execute: async (args: any) => {
+          enabledCalled = true;
+          await handler.enable(args.widget);
+        }
+      });
+      commands.addCommand(Debugger.CommandIDs.disable, {
+        execute: async (args: any) => {
+          disabledCalled = true;
+          await handler.disable(args.widget);
+        }
+      });
+
+      handler = new DebuggerHandler({
+        type: 'file',
+        shell: shell as any,
+        service,
+        commands
+      });
+      await handler.update(fileWidget, connection);
+      const button = handler['_iconButtons'][fileWidget.id]!;
+
+      button.onClick();
+      while (!handler.isDebuggerOn(fileWidget)) {
+        await sleep(50);
+      }
+      expect(enabledCalled).toBe(true);
+      expect(handler.isDebuggerOn(fileWidget)).toBe(true);
+
+      button.onClick();
+      while (handler.isDebuggerOn(fileWidget)) {
+        await sleep(50);
+      }
+      expect(disabledCalled).toBe(true);
+      expect(handler.isDebuggerOn(fileWidget)).toBe(false);
     }, 30000);
   });
 });

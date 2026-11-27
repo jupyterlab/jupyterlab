@@ -19,8 +19,12 @@ import { ConsoleHandler } from './handlers/console';
 import { FileHandler } from './handlers/file';
 import { NotebookHandler } from './handlers/notebook';
 import type { IDebugger } from './tokens';
+import type { CommandRegistry } from '@lumino/commands';
+import type { ReadonlyJSONObject } from '@lumino/coreutils';
+import type { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import type { ISignal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
 
 const TOOLBAR_DEBUGGER_ITEM = 'debugger-icon';
 
@@ -90,18 +94,336 @@ function updateIconButtonState(
 /**
  * A handler for debugging a widget.
  */
-export class DebuggerHandler implements DebuggerHandler.IHandler {
+export class DebuggerHandler implements DebuggerHandler.IHandler, IDisposable {
+  private static _instances = new Set<DebuggerHandler>();
+
+  /**
+   * Find a DebuggerHandler that can handle the given widget (or the active widget).
+   *
+   * @param widget - The widget to check.
+   */
+  static findHandler(widget?: Widget | null): {
+    handler: DebuggerHandler;
+    widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType];
+  } | null {
+    for (const handler of DebuggerHandler._instances) {
+      if (widget) {
+        const target = handler.getWidget(widget);
+        if (target) {
+          return { handler, widget: target };
+        }
+      } else if (handler.activeWidget) {
+        return { handler, widget: handler.activeWidget };
+      }
+    }
+    return null;
+  }
+
   /**
    * Instantiate a new DebuggerHandler.
    *
-   * @param options The instantiation options for a DebuggerHandler.
+   * @param options - The instantiation options for a DebuggerHandler.
    */
   constructor(options: DebuggerHandler.IOptions) {
     this._type = options.type;
     this._shell = options.shell;
     this._service = options.service;
     this._translator = options.translator || nullTranslator;
+    this._commands = options.commands || null;
     this._executionDone = new Signal(this);
+    DebuggerHandler._instances.add(this);
+  }
+
+  /**
+   * Whether the handler is disposed.
+   */
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
+
+  /**
+   * Dispose of the resources held by the handler.
+   */
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    DebuggerHandler._instances.delete(this);
+    Signal.clearData(this);
+  }
+
+  /**
+   * Get the session widget tracked by this handler that matches or contains the given widget.
+   *
+   * @param widget - The widget to check.
+   */
+  getWidget(
+    widget: Widget
+  ): DebuggerHandler.SessionWidget[DebuggerHandler.SessionType] | null {
+    if (this._widgets[widget.id]) {
+      return this._widgets[widget.id];
+    }
+    for (const id in this._widgets) {
+      const w = this._widgets[id];
+      if (w && (w === widget || w.node.contains(widget.node))) {
+        return w;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Whether the handler tracks the given widget.
+   *
+   * @param widget - The widget to check.
+   */
+  hasWidget(widget: Widget): boolean {
+    return this.getWidget(widget) !== null;
+  }
+
+  /**
+   * Whether debugging is on for the given widget (or the active widget).
+   *
+   * @param widget - The widget to check.
+   */
+  isDebuggerOn(
+    widget?: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
+  ): boolean {
+    const target = widget ?? this._activeWidget;
+    if (!target) {
+      return false;
+    }
+    const connection = this._connections[target.id];
+    return (
+      this._service.isStarted && this._previousConnection?.id === connection?.id
+    );
+  }
+
+  /**
+   * Whether debugging is available for the given widget (or the active widget).
+   *
+   * @param widget - The widget to check.
+   */
+  isAvailable(
+    widget?: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
+  ): boolean {
+    const target = widget ?? this._activeWidget;
+    if (!target) {
+      return false;
+    }
+    return this._debuggerAvailability[target.id]?.available ?? false;
+  }
+
+  /**
+   * Enable debugging for the given widget (or the active widget).
+   *
+   * @param widget - The widget to enable debugging for.
+   */
+  async enable(
+    widget?: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
+  ): Promise<void> {
+    const target = widget ?? this._activeWidget;
+    if (!target || target.isDisposed) {
+      return;
+    }
+    const connection = this._connections[target.id];
+    if (!connection || !this.isAvailable(target) || this.isDebuggerOn(target)) {
+      return;
+    }
+    const debugButton = this._iconButtons[target.id];
+    if (this._pendingToggle) {
+      return;
+    }
+    this._pendingToggle = true;
+    try {
+      if (!this._service.session) {
+        this._service.session = new Debugger.Session({
+          connection,
+          config: this._service.config
+        });
+      } else {
+        this._previousConnection = this._service.session.connection?.kernel
+          ? this._service.session.connection
+          : null;
+        this._service.session.connection = connection;
+      }
+      this._previousConnection = connection;
+      await this._service.restoreState(true);
+      await this._service.displayDefinedVariables();
+      if (this._service.session?.capabilities?.supportsModulesRequest) {
+        await this._service.displayModules();
+      }
+      this._createHandler(target);
+      if (debugButton) {
+        updateIconButtonState(debugButton, true);
+      }
+    } catch (error) {
+      console.error(
+        'Could not enable the debugger:',
+        error instanceof Error ? error.message : String(error)
+      );
+      if (debugButton && !debugButton.isDisposed) {
+        debugButton.pressed = this.isDebuggerOn(target);
+      }
+    } finally {
+      this._pendingToggle = false;
+      this._notifyCommands();
+    }
+  }
+
+  /**
+   * Disable debugging for the given widget (or the active widget).
+   *
+   * @param widget - The widget to disable debugging for.
+   */
+  async disable(
+    widget?: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
+  ): Promise<void> {
+    const target = widget ?? this._activeWidget;
+    if (!target || target.isDisposed) {
+      return;
+    }
+    const connection = this._connections[target.id];
+    if (!connection || !this.isDebuggerOn(target)) {
+      return;
+    }
+    const debugButton = this._iconButtons[target.id];
+    if (this._pendingToggle) {
+      return;
+    }
+    this._pendingToggle = true;
+    try {
+      this._service.session!.connection = connection;
+      await this._service.stop();
+      this._removeHandlers(target, connection);
+      if (debugButton) {
+        updateIconButtonState(debugButton, false);
+      }
+    } catch (error) {
+      console.error(
+        'Could not disable the debugger:',
+        error instanceof Error ? error.message : String(error)
+      );
+      if (debugButton && !debugButton.isDisposed) {
+        debugButton.pressed = this.isDebuggerOn(target);
+      }
+    } finally {
+      this._pendingToggle = false;
+      this._notifyCommands();
+    }
+  }
+
+  /**
+   * Toggle debugging for the given widget (or the active widget).
+   *
+   * @param widget - The widget to toggle debugging for.
+   */
+  async toggle(
+    widget?: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
+  ): Promise<void> {
+    const target = widget ?? this._activeWidget;
+    if (!target) {
+      return;
+    }
+    if (this.isDebuggerOn(target)) {
+      await this.disable(target);
+    } else {
+      await this.enable(target);
+    }
+  }
+
+  private _createHandler(
+    widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
+  ): void {
+    if (this._handlers[widget.id] || widget.isDisposed) {
+      return;
+    }
+
+    switch (this._type) {
+      case 'notebook':
+        this._handlers[widget.id] = new NotebookHandler({
+          debuggerService: this._service,
+          widget: widget as NotebookPanel,
+          translator: this._translator || undefined
+        });
+        break;
+      case 'console':
+        this._handlers[widget.id] = new ConsoleHandler({
+          debuggerService: this._service,
+          widget: widget as ConsolePanel,
+          translator: this._translator || undefined
+        });
+        break;
+      case 'file':
+        this._handlers[widget.id] = new FileHandler({
+          debuggerService: this._service,
+          widget: widget as DocumentWidget<FileEditor>,
+          translator: this._translator || undefined
+        });
+        break;
+      default:
+        throw Error(`No handler for the type ${this._type}`);
+    }
+    this._updateAttribute(widget);
+  }
+
+  private _removeHandlers(
+    widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
+    connection?: Session.ISessionConnection | null,
+    onStopped?: () => void
+  ): void {
+    if (onStopped) {
+      this._service.stopped.disconnect(onStopped, widget);
+    }
+
+    const conn = connection ?? this._connections[widget.id];
+    const handler = this._handlers[widget.id];
+    if (!handler) {
+      return;
+    }
+
+    if (conn) {
+      Signal.disconnectBetween(conn, widget);
+    }
+    delete this._kernelChangedHandlers[widget.id];
+    delete this._statusChangedHandlers[widget.id];
+    delete this._iopubMessageHandlers[widget.id];
+    delete this._shellMessageHandlers[widget.id];
+
+    handler.dispose();
+    delete this._handlers[widget.id];
+    delete this._contextKernelChangedHandlers[widget.id];
+
+    if (
+      this._service.session?.connection?.path === conn?.path ||
+      !this._service.session?.connection?.kernel
+    ) {
+      const model = this._service.model;
+      model.clear();
+    }
+
+    this._updateAttribute(widget);
+  }
+
+  private _updateAttribute(
+    widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
+  ): void {
+    if (!this._handlers[widget.id]) {
+      widget.node.removeAttribute('data-jp-debugger');
+      return;
+    }
+    widget.node.setAttribute('data-jp-debugger', 'true');
+  }
+
+  private _notifyCommands(): void {
+    if (this._commands) {
+      Object.values(Debugger.CommandIDs).forEach(command => {
+        if (this._commands!.hasCommand(command)) {
+          this._commands!.notifyCommandChanged(command);
+        }
+      });
+    }
   }
 
   /**
@@ -137,6 +459,8 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     if (widget.isDisposed) {
       return;
     }
+    this._widgets[widget.id] = widget;
+    this._connections[widget.id] = connection;
     if (!connection) {
       delete this._kernelChangedHandlers[widget.id];
       delete this._statusChangedHandlers[widget.id];
@@ -276,111 +600,43 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     if (widget.isDisposed || !this._service.model || !connection) {
       return;
     }
-
-    const hasFocus = (): boolean => {
-      return this._shell.currentWidget === widget;
-    };
-
-    const updateAttribute = (): void => {
-      if (!this._handlers[widget.id]) {
-        widget.node.removeAttribute('data-jp-debugger');
-        return;
-      }
-      widget.node.setAttribute('data-jp-debugger', 'true');
-    };
-
-    const createHandler = (): void => {
-      // The widget may have been disposed during one of the awaits leading
-      // here; a handler created for it now would never be removed, since the
-      // widget's disposed signal has already fired.
-      if (this._handlers[widget.id] || widget.isDisposed) {
-        return;
-      }
-
-      switch (this._type) {
-        case 'notebook':
-          this._handlers[widget.id] = new NotebookHandler({
-            debuggerService: this._service,
-            widget: widget as NotebookPanel,
-            translator: this._translator || undefined
-          });
-          break;
-        case 'console':
-          this._handlers[widget.id] = new ConsoleHandler({
-            debuggerService: this._service,
-            widget: widget as ConsolePanel,
-            translator: this._translator || undefined
-          });
-          break;
-        case 'file':
-          this._handlers[widget.id] = new FileHandler({
-            debuggerService: this._service,
-            widget: widget as DocumentWidget<FileEditor>,
-            translator: this._translator || undefined
-          });
-          break;
-        default:
-          throw Error(`No handler for the type ${this._type}`);
-      }
-      updateAttribute();
-    };
-
-    const removeHandlers = (): void => {
-      this._service.stopped.disconnect(onDebuggerStopped, widget);
-
-      const handler = this._handlers[widget.id];
-      if (!handler) {
-        // The kernel message handlers registered by `update()` stay in place
-        // for widgets without a debug handler: this branch runs on every
-        // update that does not start debugging, and stripping them here
-        // would leave a subsequently started debug session without restart
-        // detection, variable display and `executionDone`. They are released
-        // when the widget is disposed: the map entries in the disposal hook
-        // below, the connections by `Signal.clearData(widget)` since every
-        // connect passes the widget as receiver.
-        return;
-      }
-
-      if (connection) {
-        // Removes the kernelChanged, statusChanged, iopubMessage and
-        // anyMessage slots in one call: they are the only connections
-        // between this connection and the widget.
-        Signal.disconnectBetween(connection, widget);
-      }
-      delete this._kernelChangedHandlers[widget.id];
-      delete this._statusChangedHandlers[widget.id];
-      delete this._iopubMessageHandlers[widget.id];
-      delete this._shellMessageHandlers[widget.id];
-
-      handler.dispose();
-      delete this._handlers[widget.id];
-      delete this._contextKernelChangedHandlers[widget.id];
-
-      // Clear the model if the handler being removed corresponds
-      // to the current active debug session, or if the connection
-      // does not have a kernel.
-      if (
-        this._service.session?.connection?.path === connection?.path ||
-        !this._service.session?.connection?.kernel
-      ) {
-        const model = this._service.model;
-        model.clear();
-      }
-
-      updateAttribute();
-    };
+    this._widgets[widget.id] = widget;
+    this._connections[widget.id] = connection;
 
     const onDebuggerStopped = (): void => {
       const debugButton = this._iconButtons[widget.id];
 
-      removeHandlers();
+      this._removeHandlers(widget, connection, onDebuggerStopped);
 
       if (debugButton) {
         updateIconButtonState(debugButton, false, true);
       }
+      this._notifyCommands();
     };
 
     this._service.stopped.connect(onDebuggerStopped, widget);
+
+    const toggleDebugging = async (): Promise<void> => {
+      // bail if the widget doesn't have focus
+      if (this._shell.currentWidget !== widget) {
+        return;
+      }
+      const debugButton = this._iconButtons[widget.id]!;
+      if (this._pendingToggle) {
+        debugButton.pressed = !debugButton.pressed;
+        return;
+      }
+      if (this._commands) {
+        const cmd = this.isDebuggerOn(widget)
+          ? Debugger.CommandIDs.disable
+          : Debugger.CommandIDs.enable;
+        await this._commands.execute(cmd, {
+          widget
+        } as unknown as ReadonlyJSONObject);
+      } else {
+        await this.toggle(widget);
+      }
+    };
 
     const addToolbarButton = (enabled: boolean = true): void => {
       const debugButton = this._iconButtons[widget.id];
@@ -389,7 +645,8 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
           widget,
           toggleDebugging,
           enabled,
-          this._service.isStarted
+          this._service.isStarted,
+          this._translator || undefined
         );
       } else {
         updateIconButtonState(
@@ -398,28 +655,6 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
           enabled,
           toggleDebugging
         );
-      }
-    };
-
-    const isDebuggerOn = (): boolean => {
-      return (
-        this._service.isStarted &&
-        this._previousConnection?.id === connection?.id
-      );
-    };
-
-    const stopDebugger = async (): Promise<void> => {
-      this._service.session!.connection = connection;
-      await this._service.stop();
-    };
-
-    const startDebugger = async (): Promise<void> => {
-      this._service.session!.connection = connection;
-      this._previousConnection = connection;
-      await this._service.restoreState(true);
-      await this._service.displayDefinedVariables();
-      if (this._service.session?.capabilities?.supportsModulesRequest) {
-        await this._service.displayModules();
       }
     };
 
@@ -442,47 +677,6 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       }
     };
 
-    const toggleDebugging = async (): Promise<void> => {
-      // bail if the widget doesn't have focus
-      if (!hasFocus()) {
-        return;
-      }
-      const debugButton = this._iconButtons[widget.id]!;
-      if (this._pendingToggle) {
-        // An earlier click is still starting or stopping the debugger: the
-        // service turns `isStarted` on before it attaches, so acting on this
-        // click would stop it halfway. Undo the toggle the button made itself.
-        debugButton.pressed = !debugButton.pressed;
-        return;
-      }
-      this._pendingToggle = true;
-      try {
-        if (isDebuggerOn()) {
-          await stopDebugger();
-          removeHandlers();
-          updateIconButtonState(debugButton, false);
-        } else {
-          await startDebugger();
-          createHandler();
-          updateIconButtonState(debugButton, true);
-        }
-      } catch (error) {
-        // A restart, a kernel change or closing the document drops the debug
-        // requests of this click.
-        console.error(
-          'Could not toggle the debugger:',
-          error instanceof Error ? error.message : String(error)
-        );
-        // The button toggled itself on this click: show the state of the
-        // debugger instead.
-        if (!debugButton.isDisposed) {
-          debugButton.pressed = isDebuggerOn();
-        }
-      } finally {
-        this._pendingToggle = false;
-      }
-    };
-
     const kernelId = connection.kernel?.id ?? connection.id;
     const debuggingAvailable = this._debuggerAvailability[widget.id];
     addToolbarButton(
@@ -493,14 +687,17 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
 
     // listen to the disposed signals
     widget.disposed.connect(async () => {
-      if (isDebuggerOn()) {
-        await stopDebugger();
+      if (this.isDebuggerOn(widget)) {
+        this._service.session!.connection = connection;
+        await this._service.stop();
       }
-      removeHandlers();
+      this._removeHandlers(widget, connection, onDebuggerStopped);
       // The connections made by `update()` are removed by
       // `Signal.clearData(widget)` during widget disposal (every connect
       // passes the widget as receiver); the id-keyed entries on this
       // application-lifetime object have to be deleted explicitly.
+      delete this._widgets[widget.id];
+      delete this._connections[widget.id];
       delete this._kernelChangedHandlers[widget.id];
       delete this._statusChangedHandlers[widget.id];
       delete this._iopubMessageHandlers[widget.id];
@@ -511,6 +708,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       if (this._activeWidget === widget) {
         this._activeWidget = null;
       }
+      this._notifyCommands();
     });
 
     const debuggingEnabled = await this._service.isAvailable(connection);
@@ -525,8 +723,9 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       available: debuggingEnabled
     };
     if (!debuggingEnabled) {
-      removeHandlers();
+      this._removeHandlers(widget, connection, onDebuggerStopped);
       updateIconButtonState(this._iconButtons[widget.id]!, false, false);
+      this._notifyCommands();
       return;
     }
 
@@ -543,7 +742,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       this._service.session.connection = connection;
     }
 
-    if (!(await restoreDebuggerState(isDebuggerOn()))) {
+    if (!(await restoreDebuggerState(this.isDebuggerOn(widget)))) {
       return;
     }
 
@@ -562,15 +761,16 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
 
     // check the state of the debug session
     if (!this._service.isStarted) {
-      removeHandlers();
+      this._removeHandlers(widget, connection, onDebuggerStopped);
       this._service.session.connection = this._previousConnection ?? connection;
       await restoreDebuggerState(false);
       return;
     }
 
     // if the debugger is started but there is no handler, create a new one
-    createHandler();
+    this._createHandler(widget);
     this._previousConnection = connection;
+    this._notifyCommands();
   }
 
   private _type: DebuggerHandler.SessionType;
@@ -578,12 +778,20 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
   private _service: IDebugger;
   private _previousConnection: Session.ISessionConnection | null;
   private _pendingToggle = false;
+  private _isDisposed = false;
   private _activeWidget:
     | DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
     | null;
   private _handlers: {
     [id: string]: DebuggerHandler.SessionHandler[DebuggerHandler.SessionType];
   } = {};
+  private _widgets: {
+    [id: string]: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType];
+  } = {};
+  private _connections: {
+    [id: string]: Session.ISessionConnection | null;
+  } = {};
+  private _commands: CommandRegistry | null = null;
   private _translator: ITranslator | null;
 
   private _contextKernelChangedHandlers: {
@@ -665,12 +873,22 @@ export namespace DebuggerHandler {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * The application command registry.
+     */
+    commands?: CommandRegistry;
   }
 
   /**
    * An interface for debugger handler.
    */
   export interface IHandler {
+    /**
+     * Dispose of the resources held by the handler.
+     */
+    dispose(): void;
+
     /**
      * Get the active widget.
      */
@@ -700,6 +918,67 @@ export namespace DebuggerHandler {
     updateContext(
       widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
       sessionContext: ISessionContext
+    ): Promise<void>;
+
+    /**
+     * Whether the handler tracks the given widget.
+     *
+     * @param widget - The widget to check.
+     */
+    hasWidget(widget: Widget): boolean;
+
+    /**
+     * Get the session widget tracked by this handler that matches or contains the given widget.
+     *
+     * @param widget - The widget to look for.
+     */
+    getWidget(
+      widget: Widget
+    ): DebuggerHandler.SessionWidget[DebuggerHandler.SessionType] | null;
+
+    /**
+     * Whether debugging is on for the given widget (or the active widget).
+     *
+     * @param widget - The widget to check.
+     */
+    isDebuggerOn(
+      widget?: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
+    ): boolean;
+
+    /**
+     * Whether debugging is available for the given widget (or the active widget).
+     *
+     * @param widget - The widget to check.
+     */
+    isAvailable(
+      widget?: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
+    ): boolean;
+
+    /**
+     * Enable debugging for the given widget (or the active widget).
+     *
+     * @param widget - The widget to enable debugging for.
+     */
+    enable(
+      widget?: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
+    ): Promise<void>;
+
+    /**
+     * Disable debugging for the given widget (or the active widget).
+     *
+     * @param widget - The widget to disable debugging for.
+     */
+    disable(
+      widget?: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
+    ): Promise<void>;
+
+    /**
+     * Toggle debugging for the given widget (or the active widget).
+     *
+     * @param widget - The widget to toggle debugging for.
+     */
+    toggle(
+      widget?: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType]
     ): Promise<void>;
   }
 

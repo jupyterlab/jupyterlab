@@ -2,6 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  bugDotIcon,
+  bugIcon,
   closeAllIcon as closeAll,
   codeIcon,
   pauseIcon as pause,
@@ -101,6 +103,10 @@ export namespace Debugger {
    * The command IDs used by the debugger plugin.
    */
   export namespace CommandIDs {
+    export const enable = 'debugger:enable';
+
+    export const disable = 'debugger:disable';
+
     export const debugContinue = 'debugger:continue';
 
     export const terminate = 'debugger:terminate';
@@ -144,6 +150,8 @@ export namespace Debugger {
    * The debugger user interface icons.
    */
   export namespace Icons {
+    export const enableIcon = bugIcon;
+    export const disableIcon = bugDotIcon;
     export const closeAllIcon = closeAll;
     export const evaluateIcon = codeIcon;
     export const continueIcon = runIcon;
