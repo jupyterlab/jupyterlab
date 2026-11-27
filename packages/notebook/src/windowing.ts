@@ -198,6 +198,11 @@ export class NotebookViewModel extends WindowedListModel {
       );
       return 0;
     }
+    // In the windowed list, a cell under a collapsed heading takes no room.
+    // Without windowing the estimate is the cell's size once it is shown.
+    if (this.windowingActive && cell.isHidden) {
+      return 0;
+    }
     const model = cell.model;
     const height = this.cellsEstimatedHeight.get(model.id);
     if (typeof height === 'number') {

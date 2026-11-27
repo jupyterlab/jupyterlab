@@ -2663,10 +2663,10 @@ export class DirListing extends Widget {
 
     // Figure out which selected path to use for the rename.
     const items = this._sortedItems;
-    let { path } = items[this._focusIndex];
-    if (!this.selection[path]) {
-      // If the currently focused item is not selected, then choose the last
-      // selected item.
+    let path = items[this._focusIndex]?.path;
+    if (!path || !this.selection[path]) {
+      // If the focused item is not selected, or is no longer listed after
+      // filtering or a refresh, then choose the last selected item.
       path = selectedPaths.slice(-1)[0];
     }
 

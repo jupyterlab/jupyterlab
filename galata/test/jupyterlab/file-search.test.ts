@@ -192,9 +192,6 @@ test.describe('File search from selection', () => {
 
     // Wait for search to complete
     await page.locator('text=1/2').waitFor();
-
-    // Workaround selection not showing up initially (bug!)
-    await page.getByRole('button', { name: 'Next Match (Ctrl+G)' }).click();
     await page.locator('.jp-current-match').first().waitFor();
 
     // Take a screenshot to verify the search results

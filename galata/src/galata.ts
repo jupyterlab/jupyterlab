@@ -14,7 +14,12 @@ import type {
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { JSONObject } from '@lumino/coreutils';
 import { UUID } from '@lumino/coreutils';
-import type { APIRequestContext, Browser, Page } from '@playwright/test';
+import type {
+  APIRequestContext,
+  APIResponse,
+  Browser,
+  Page
+} from '@playwright/test';
 import * as json5 from 'json5';
 import { ContentsHelper } from './contents';
 import { PerformanceHelper } from './helpers';
@@ -159,13 +164,19 @@ export namespace galata {
      */
     mockConfig?: boolean | Record<string, unknown>;
     /**
-     * Mock JupyterLab state in-memory or not.
+     * Mock JupyterLab PageConfig in-memory or not.
+     *
+     * Default false
+     */
+    mockPageConfig?: boolean | Record<string, unknown>;
+    /**
+     * Mock JupyterLab settings in-memory or not.
      *
      * Default galata.DEFAULT_SETTINGS
      */
     mockSettings?: boolean | Record<string, unknown>;
     /**
-     * Mock JupyterLab settings in-memory or not.
+     * Mock JupyterLab state in-memory or not.
      *
      * Default true
      */
@@ -250,7 +261,8 @@ export namespace galata {
     tmpPath: string,
     waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>,
     kernels?: Map<string, Kernel.IModel> | null,
-    resetWorkspace?: boolean
+    resetWorkspace?: boolean,
+    mockPageConfig?: boolean | Record<string, unknown>
   ): Promise<IJupyterLabPageFixture> {
     // Hook the helpers
     const jlabWithPage = addHelpersToPage(
@@ -261,6 +273,12 @@ export namespace galata {
     );
 
     // Add server mocks
+    if (mockPageConfig) {
+      const pageConfig: Record<string, unknown> =
+        typeof mockPageConfig !== 'boolean' ? { ...mockPageConfig } : {};
+      await Mock.mockPageConfig(page, pageConfig);
+    }
+
     if (mockConfig) {
       const config: Record<string, JSONObject> =
         typeof mockConfig !== 'boolean' ? ({ ...mockConfig } as any) : {};
@@ -363,6 +381,7 @@ export namespace galata {
       waitForApplication,
       mockConfig,
       mockKernels,
+      mockPageConfig,
       mockSessions,
       mockSettings,
       mockState,
@@ -375,6 +394,7 @@ export namespace galata {
       autoGoto: true,
       mockConfig: true,
       mockKernels: true,
+      mockPageConfig: false,
       mockSessions: true,
       mockSettings: galata.DEFAULT_SETTINGS,
       mockState: true,
@@ -408,7 +428,8 @@ export namespace galata {
         tmpPath,
         waitForApplication,
         kernels,
-        resetWorkspace
+        resetWorkspace,
+        mockPageConfig
       ),
       kernels,
       sessions,
@@ -847,6 +868,94 @@ export namespace galata {
           default:
             return route.continue();
         }
+      });
+    }
+
+    /**
+     * Mock JupyterLab PageConfig data embedded in the page HTML.
+     *
+     * Each call replaces the overrides of earlier calls, including those of
+     * the `mockPageConfig` fixture option.
+     *
+     * @param page Page model object
+     * @param pageConfig PageConfig values to set over the server values; a key
+     * set to `undefined` is removed
+     */
+    export async function mockPageConfig(
+      page: Page,
+      pageConfig: Record<string, unknown>
+    ): Promise<void> {
+      let isClosed = false;
+      const ctxt = page.context();
+      ctxt.once('close', () => {
+        isClosed = true;
+      });
+      ctxt.browser()?.once('disconnected', () => {
+        isClosed = true;
+      });
+
+      await page.route('**/*', async (route, request) => {
+        if (!request.isNavigationRequest()) {
+          return route.fallback();
+        }
+
+        if (page.isClosed() || isClosed) {
+          return route.abort();
+        }
+
+        let response: APIResponse;
+        try {
+          // Playwright does not route a redirected request, so follow it here
+          response = await route.fetch();
+        } catch {
+          return route.abort();
+        }
+
+        if (!response.ok()) {
+          return route.fulfill({ response });
+        }
+
+        const body = await response.text();
+        const scriptRegex =
+          /(<script\s[^>]*id=["']jupyter-config-data["'][^>]*>)([\s\S]*?)(<\/script>)/;
+
+        if (!scriptRegex.test(body)) {
+          // Re-encoding the text of an image would change its bytes
+          return route.fulfill({ response });
+        }
+
+        const newBody = body.replace(
+          scriptRegex,
+          (_match, openTag, content, closeTag) => {
+            let currentConfig: Record<string, unknown>;
+            try {
+              currentConfig = JSON.parse(content);
+            } catch {
+              currentConfig = {};
+            }
+            const mergedConfig = { ...currentConfig };
+            for (const [key, value] of Object.entries(pageConfig)) {
+              if (value === undefined) {
+                delete mergedConfig[key];
+              } else {
+                mergedConfig[key] = value;
+              }
+            }
+            // Escape < as the server does, so no value ends the element
+            const json = JSON.stringify(mergedConfig).replace(/</g, '\\u003c');
+            return `${openTag}${json}${closeTag}`;
+          }
+        );
+
+        const headers = { ...response.headers() };
+        delete headers['content-encoding'];
+        delete headers['content-length'];
+
+        return route.fulfill({
+          response,
+          body: newBody,
+          headers
+        });
       });
     }
 
