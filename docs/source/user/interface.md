@@ -201,6 +201,17 @@ shortcut using the Advanced Settings Editor.
 Alternatively, you can disable windowed notebook rendering to expose the full
 document content to the browser at the expense of performance.
 
+(settings-editor-tags)=
+
+## Finding Settings by Tag
+
+In the Settings Editor, a search starting with `tag:` lists only the settings
+with a matching tag. The search box suggests the available tags as you type.
+JupyterLab exposes some tags in its settings:
+
+- `tag:accessibility`: settings that help with accessibility, such as the theme or zooming with `Ctrl` + scroll.
+- `tag:performance`: settings that affect performance, such as notebook windowing or the maximum number of rendered outputs.
+
 ## Context Menus
 
 (context-menus-rightclick)=

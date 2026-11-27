@@ -338,7 +338,7 @@ node -v
 While there is a lot to learn by following the steps above, they can be automated to save time.
 The main advantages of using automation are: reduced time to get the environment up-and-running, reduced time to
 re-build the environment, better standardisation ("baseline", reproducible environments).
-This section shows how to do that using VS Code dev containers, Docker and Vagrant.
+This section shows how to do that using VS Code dev containers, Docker, pixi and Vagrant.
 
 #### **Setup for VS Code**
 
@@ -401,6 +401,36 @@ exit
 bash docker/start.sh build
 ```
 
+#### **Setup using pixi**
+
+[pixi](https://pixi.sh) creates the development environment from the `[tool.pixi]`
+section of `pyproject.toml`. It installs Python and Node.js from conda-forge, and
+installs JupyterLab in editable mode with the `dev` and `test` extras, as
+`pip install -e ".[dev,test]"` does.
+
+1. [Install pixi](https://pixi.sh/latest/installation/).
+2. Fork the JupyterLab [repository](https://github.com/jupyterlab/jupyterlab/fork).
+3. Clone your fork and create the environment. The first install builds the dev mode
+   assets, which takes several minutes.
+
+```bash
+git clone https://github.com/<your-github-username>/jupyterlab.git
+cd jupyterlab
+pixi install
+```
+
+Run commands in the environment with `pixi run`, or start a shell in it with `pixi shell`:
+
+```bash
+pixi run jupyter lab --dev-mode
+```
+
+The git hooks use tools from the environment, so run `git commit` and `git push` from
+a `pixi shell`, as you would from an activated virtual environment.
+
+The `docs` environment has the documentation dependencies, see
+[Writing Documentation](#writing-documentation).
+
 #### **Setup using Vagrant**
 
 A practical example can be found [there](https://github.com/markgreene74/jupyterlab-local-dev-with-vagrant) and
@@ -454,7 +484,8 @@ for instructions.
   `export PATH="$HOME/.local/bin:$PATH"` command.
 - At times, it may be necessary to clean your local repo with the
   command `npm run clean:slate`. This will clean the repository, and
-  re-install and rebuild.
+  re-install and rebuild. With pixi, run `pixi run python clean.py` and then
+  `pixi reinstall` instead.
 - If `pip` gives a `VersionConflict` error, it usually means that
   the installed version of `jupyterlab_server` is out of date. Run
   `pip install --upgrade jupyterlab_server` to get the latest
@@ -922,6 +953,9 @@ need to install the documentation dependencies with `pip`:
 ```bash
 pip install -e . --group docs
 ```
+
+With [pixi](https://pixi.sh), use the `docs` environment instead, by prefixing the
+commands below with `pixi run -e docs`, for example `pixi run -e docs make html`.
 
 To test the docs run:
 

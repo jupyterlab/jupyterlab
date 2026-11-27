@@ -3,7 +3,6 @@ $schema: https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/sc
 extends:
   - stylelint-config-recommended
   - stylelint-config-standard
-  - stylelint-prettier/recommended
 
 plugins:
   - stylelint-csstree-validator

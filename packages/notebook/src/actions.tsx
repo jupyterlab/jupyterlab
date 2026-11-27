@@ -2760,6 +2760,8 @@ namespace Private {
       KernelMessage.IExecuteReplyMsg
     >;
     isDone: () => boolean;
+    /** When the execution stopped without a reply, as on a kernel restart. */
+    failedAt: () => string | undefined;
     /**
      * Kernel messages (IOPub, stdin and reply) that arrived while the future
      * was detached, in arrival order, so they can be replayed on reattach.
@@ -2777,6 +2779,20 @@ namespace Private {
     displayIdMap: ReadonlyMap<string, readonly number[]>;
     /** Whether newer outputs are waiting for the user to accept them. */
     pendingOutputs?: boolean;
+    /** Execution timing metadata to restore after an undo, like `outputs`. */
+    timing?: JSONObject;
+    /** Whether the execution was still running when it was captured. */
+    wasRunning: boolean;
+    /**
+     * Whether the execution had ended when it was captured, known from the
+     * next microtask on; clearing the outputs of a running cell makes it idle.
+     */
+    hadEnded: () => boolean;
+    /**
+     * The prompt number when it was captured: final for an execution that
+     * had ended, even if its outputs were cleared since its reply.
+     */
+    executionCount: nbformat.ExecutionCount;
   }
 
   const pendingOutputExecutions = new WeakMap<CodeCell, IStoredCellExecution>();
@@ -2800,31 +2816,135 @@ namespace Private {
 
   /**
    * The original execute() call targeted a previous cell widget instance, so it
-   * may not update executionCount/executionState on the resurrected one.
+   * may not update executionCount/executionState or record the timing on the
+   * resurrected one.
    */
   export function syncExecutionStateWithFuture(
     cell: CodeCell,
-    future: Kernel.IShellFuture<
-      KernelMessage.IExecuteRequestMsg,
-      KernelMessage.IExecuteReplyMsg
-    >
+    storedExecution: IStoredCellExecution,
+    recordTiming: boolean
   ): void {
+    const { future, wasRunning, hadEnded, executionCount } = storedExecution;
+    if (!wasRunning && cell.model.executionCount !== executionCount) {
+      // A cell that was not running keeps the prompt it had then, also
+      // after an undo that rolled it back.
+      cell.model.executionCount = executionCount;
+    }
     void future.done.then(
       reply => {
         if (!cell.isDisposed) {
-          // The future is authoritative for the prompt number; a snapshot
-          // taken before completion would be stale (still null). Setting a
-          // non-null execution count also flips the state back to 'idle'.
-          cell.model.executionCount = reply.content.execution_count;
+          // For an execution that had not ended, the future is authoritative
+          // for the prompt number; a snapshot taken before completion would
+          // be stale (still null). Setting a non-null execution count also
+          // flips the state back to 'idle'.
+          if (!hadEnded()) {
+            cell.model.executionCount = reply.content.execution_count;
+          }
           cell.model.executionState = 'idle';
+          if (recordTiming) {
+            const started = reply.metadata.started as string | undefined;
+            addTiming(cell, {
+              ...(started ? { 'shell.execute_reply.started': started } : {}),
+              'shell.execute_reply':
+                reply.header.date || new Date().toISOString()
+            });
+          }
         }
       },
       () => {
-        if (!cell.isDisposed) {
+        // Like `CodeCell.execute`, skip a cell that runs a newer request.
+        if (
+          !cell.isDisposed &&
+          (!cell.outputArea.future || cell.outputArea.future === future)
+        ) {
           cell.model.executionState = 'idle';
+          const recorded = cell.model.getMetadata('execution') as
+            | JSONObject
+            | undefined;
+          // A failure recorded before this restore keeps its time.
+          if (
+            recordTiming &&
+            future.isDisposed &&
+            !recorded?.['execution_failed']
+          ) {
+            // Record the time when the cell execution was aborted
+            const timing: JSONObject = {};
+            timing['execution_failed'] =
+              storedExecution.failedAt() ?? new Date().toISOString();
+            addTiming(cell, timing);
+          }
         }
       }
     );
+  }
+
+  /**
+   * Restore the timing of a detached execution on the cell that holds it now,
+   * and record its IOPub timing there from now on, because the original
+   * execute() call records it on the model of the previous cell widget.
+   */
+  function restoreTiming(
+    cell: CodeCell,
+    storedExecution: IStoredCellExecution
+  ): void {
+    const { future, isDone, buffered, timing } = storedExecution;
+    // An undo or redo of a move can restore the timing of an earlier execution.
+    if (timing) {
+      cell.model.setMetadata('execution', timing);
+    } else {
+      cell.model.deleteMetadata('execution');
+    }
+    for (const buf of buffered) {
+      if (buf.channel === 'iopub') {
+        addIOPubTiming(cell, buf.msg);
+      }
+    }
+    if (isDone() || future.isDisposed) {
+      return;
+    }
+    const hook = (msg: KernelMessage.IIOPubMessage) => {
+      if (!cell.isDisposed) {
+        addIOPubTiming(cell, msg);
+      }
+      return true;
+    };
+    future.registerMessageHook(hook);
+    cell.disposed.connect(() => future.removeMessageHook(hook));
+  }
+
+  /**
+   * Record the time of a status or execute input message like
+   * `CodeCell.execute` does.
+   */
+  function addIOPubTiming(
+    cell: CodeCell,
+    msg: KernelMessage.IIOPubMessage
+  ): void {
+    let label: string;
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+    switch (msg.header.msg_type) {
+      case 'status':
+        label = `status.${
+          (msg as KernelMessage.IStatusMsg).content.execution_state
+        }`;
+        break;
+      case 'execute_input':
+        label = 'execute_input';
+        break;
+      default:
+        return;
+    }
+    // The date was added in version 5.1 of the messaging protocol.
+    addTiming(cell, {
+      [`iopub.${label}`]: msg.header.date || new Date().toISOString()
+    });
+  }
+
+  function addTiming(cell: CodeCell, timing: JSONObject): void {
+    cell.model.setMetadata('execution', {
+      ...(cell.model.getMetadata('execution') as JSONObject | undefined),
+      ...timing
+    });
   }
 
   /**
@@ -2844,6 +2964,11 @@ namespace Private {
     if (pending && !cell.outputArea.future) {
       pending.outputs = cell.model.outputs.toJSON();
       pending.displayIdMap = cell.outputArea.displayIdMap;
+      pending.timing = cell.model.getMetadata('execution');
+      pending.wasRunning = cell.model.executionState === 'running';
+      // Outputs wait for the user only once the execution has ended.
+      pending.hadEnded = () => true;
+      pending.executionCount = cell.model.executionCount;
       return pending;
     }
     const future = cell.outputArea.detachFuture();
@@ -2853,14 +2978,21 @@ namespace Private {
     const displayIdMap = cell.outputArea.displayIdMap;
     const outputs = cell.model.outputs.toJSON();
     let done = false;
+    let failedAt: string | undefined;
     void future.done.then(
       () => {
         done = true;
       },
       () => {
         done = true;
+        failedAt = new Date().toISOString();
       }
     );
+    // Runs after the callbacks above when `done` had already settled.
+    let hadEnded = false;
+    void Promise.resolve().then(() => {
+      hadEnded = done;
+    });
     const buffered: IBufferedMessage[] = [];
     future.onIOPub = msg => {
       buffered.push({ channel: 'iopub', msg });
@@ -2876,8 +3008,13 @@ namespace Private {
       outputs,
       future,
       isDone: () => done,
+      failedAt: () => failedAt,
       buffered,
-      displayIdMap
+      displayIdMap,
+      timing: cell.model.getMetadata('execution'),
+      wasRunning: cell.model.executionState === 'running',
+      hadEnded: () => hadEnded,
+      executionCount: cell.model.executionCount
     };
   }
 
@@ -2944,11 +3081,16 @@ namespace Private {
       // not tracked by the undo manager, so this does not pollute history).
       cell.model.outputs.fromJSON(outputs);
     }
+    // Like `CodeCell.execute`, use the `recordTiming` value sent with the request.
+    const recordTiming = !!future.msg.metadata.recordTiming;
     // Reattach the future (without clearing existing outputs) and replay any
     // messages buffered while it was detached, in arrival order. This is done
     // whether or not the execution has already finished, so that final outputs
     // (or a pending stdin request) that arrived while detached are not lost
     // (e.g. if the kernel completed in the brief window during the undo).
+    if (recordTiming) {
+      restoreTiming(cell, storedExecution);
+    }
     cell.outputArea.reattachFuture(future, displayIdMap);
     for (const buf of buffered) {
       switch (buf.channel) {
@@ -2974,7 +3116,12 @@ namespace Private {
       // Restore the running state on the recreated cell widget.
       cell.model.executionState = 'running';
     }
-    syncExecutionStateWithFuture(cell, future);
+    syncExecutionStateWithFuture(
+      cell,
+      storedExecution,
+      // The restored timing of an execution that had ended is final.
+      recordTiming && storedExecution.wasRunning
+    );
   }
 
   /**
@@ -2997,7 +3144,16 @@ namespace Private {
     }
     cell.outputArea.displayIdMap = storedExecution.displayIdMap;
     cell.model.executionState = 'idle';
-    syncExecutionStateWithFuture(cell, future);
+    const recordTiming = !!future.msg.metadata.recordTiming;
+    if (recordTiming) {
+      restoreTiming(cell, storedExecution);
+    }
+    syncExecutionStateWithFuture(
+      cell,
+      storedExecution,
+      // The restored timing of an execution that had ended is final.
+      recordTiming && storedExecution.wasRunning
+    );
     const hasOutputChanges = storedExecution.buffered.some(
       buffered =>
         buffered.channel === 'iopub' &&
@@ -3068,6 +3224,8 @@ namespace Private {
               dismiss();
               if (restore) {
                 storedExecution.pendingOutputs = false;
+                // The timing recorded since the undo is newer than the copy.
+                storedExecution.timing = model.getMetadata('execution');
                 restoreExecution(notebook, storedExecution);
               }
             }

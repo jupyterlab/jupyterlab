@@ -80,6 +80,26 @@
   overflow: auto;
 }
 
+.jp-extensionmanager-searchresults {
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-extensionmanager-searchresults > .jp-extensionmanager-listview-wrapper {
+  flex: 1;
+  min-height: 0;
+}
+
+.jp-extensionmanager-browse {
+  padding: 8px;
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
+}
+
+.jp-extensionmanager-browse > a {
+  color: var(--jp-content-link-color);
+  text-decoration: underline;
+}
+
 /*
   Error messages
 */

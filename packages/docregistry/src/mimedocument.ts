@@ -301,7 +301,8 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
         sanitizer: rendermime.sanitizer,
         linkHandler: rendermime.linkHandler,
         latexTypesetter: rendermime.latexTypesetter,
-        markdownParser: rendermime.markdownParser
+        markdownParser: rendermime.markdownParser,
+        translator: this.translator
       });
     } else {
       renderer = rendermime.createRenderer(mimeType);

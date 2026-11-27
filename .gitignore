@@ -57,6 +57,8 @@ galata/benchmark-results
 galata/playwright-report
 galata/test-results
 galata/*benchmark-expected.json
+galata/tt-violations
+galata/tt-sites-*.json
 
 package_json.tar.gz
 
@@ -157,6 +159,7 @@ untitled*.txt
 
 # pixi environments
 .pixi
+pixi.lock
 
 # temporary files, useful for testing
 tmp

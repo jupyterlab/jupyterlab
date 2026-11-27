@@ -13,4 +13,10 @@ declare module 'vega-statistics' {
     array: number[],
     accessor?: (t: any) => number
   ): [number, number, number];
+
+  export function quantileNormal(
+    p: number,
+    mean?: number,
+    stdev?: number
+  ): number;
 }

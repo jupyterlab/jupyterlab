@@ -76,7 +76,9 @@ const UNUSED: Dict<string[]> = {
   '@jupyterlab/services': ['ws'],
   '@jupyterlab/testing': [
     '@babel/core',
-    '@babel/preset-env',
+    '@babel/plugin-transform-dynamic-import',
+    '@babel/plugin-transform-export-namespace-from',
+    '@babel/plugin-transform-modules-commonjs',
     'identity-obj-proxy',
     'jest-junit'
   ],
