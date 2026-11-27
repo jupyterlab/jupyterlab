@@ -102,6 +102,7 @@ export class MarkdownViewer extends Widget {
       case 'fontSize':
         style.setProperty('font-size', value ? value + 'px' : null);
         break;
+      case 'frontMatter':
       case 'hideFrontMatter':
         this._requestRender();
         break;
@@ -192,10 +193,20 @@ export class MarkdownViewer extends Widget {
     const { model } = context;
     const source = model.toString();
     const data: JSONObject = {};
-    // If `hideFrontMatter`is true remove front matter.
-    data[MIMETYPE] = this._config.hideFrontMatter
-      ? Private.removeFrontMatter(source)
-      : source;
+    const frontMatter =
+      this._config.frontMatter ??
+      (this._config.hideFrontMatter ? 'hide' : 'markdown');
+    switch (frontMatter) {
+      case 'hide':
+        data[MIMETYPE] = Private.removeFrontMatter(source);
+        break;
+      case 'markdown':
+        data[MIMETYPE] = source;
+        break;
+      case 'raw':
+        data[MIMETYPE] = Private.fenceFrontMatter(source);
+        break;
+    }
     const mimeModel = new MimeModel({
       data,
       metadata: { fragment: this._fragment }
@@ -286,9 +297,14 @@ export namespace MarkdownViewer {
     lineWidth: number | null;
 
     /**
-     * Whether to hide the YAML front matter.
+     * Whether to hide the YAML front matter when no display mode is set.
      */
     hideFrontMatter: boolean;
+
+    /**
+     * How to display YAML front matter.
+     */
+    frontMatter?: 'hide' | 'markdown' | 'raw';
 
     /**
      * The render timeout.
@@ -402,5 +418,25 @@ namespace Private {
     }
     const { length } = match[0];
     return source.slice(length);
+  }
+
+  /**
+   * Wrap a complete opening YAML front matter block in a Markdown code fence.
+   */
+  export function fenceFrontMatter(source: string): string {
+    const match =
+      /^\uFEFF?(---[ \t]*\r?\n[\s\S]*?^(?:---|\.\.\.)[ \t]*)(?:\r?\n|$)/m.exec(
+        source
+      );
+    if (!match || match.index !== 0) {
+      return source;
+    }
+
+    let fenceLength = 3;
+    for (const run of match[1].match(/`+/g) ?? []) {
+      fenceLength = Math.max(fenceLength, run.length + 1);
+    }
+    const fence = '`'.repeat(fenceLength);
+    return `${fence}\n${match[1]}\n${fence}\n\n${source.slice(match[0].length)}`;
   }
 }

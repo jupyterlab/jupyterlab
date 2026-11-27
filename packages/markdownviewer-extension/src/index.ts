@@ -116,6 +116,30 @@ function activate(
   }
 
   if (settingRegistry) {
+    settingRegistry.transform(plugin.id, {
+      fetch: plugin => {
+        const properties = plugin.schema.properties;
+        if (properties?.frontMatter && properties.hideFrontMatter) {
+          // Honor old application defaults and show only the new setting.
+          properties.frontMatter.default ??=
+            properties.hideFrontMatter.default === false ? 'markdown' : 'hide';
+          delete properties.hideFrontMatter;
+        }
+        return plugin;
+      },
+      compose: plugin => {
+        const { user, composite } = plugin.data;
+        if (
+          user.frontMatter === undefined &&
+          typeof user.hideFrontMatter === 'boolean'
+        ) {
+          const mode = user.hideFrontMatter ? 'hide' : 'markdown';
+          user.frontMatter = composite.frontMatter = mode;
+        }
+        return plugin;
+      }
+    });
+
     const updateSettings = (settings: ISettingRegistry.ISettings) => {
       config = settings.composite as Partial<MarkdownViewer.IConfig>;
       tracker.forEach(widget => {

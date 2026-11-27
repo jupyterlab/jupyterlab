@@ -12,10 +12,12 @@ import { MarkdownViewer } from '../src';
 class TestRenderer extends Widget implements IRenderMime.IRenderer {
   renderCount = 0;
   fragments: unknown[] = [];
+  source: unknown;
 
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     this.renderCount += 1;
     this.fragments.push(model.metadata.fragment);
+    this.source = model.data['text/markdown'];
   }
 }
 
@@ -65,6 +67,58 @@ describe('MarkdownViewer', () => {
     await Promise.resolve();
 
     expect(renderer.renderCount).toBe(2);
+  });
+
+  describe('#setOption()', () => {
+    it('should preserve the legacy front matter behavior and let the display mode override it', async () => {
+      const block = '---\ntitle: **Example**\n---';
+      const body = '# Body';
+      const source = `${block}\n${body}`;
+      context.model.fromString(source);
+      MessageLoop.sendMessage(viewer, Widget.Msg.UpdateRequest);
+      expect(renderer.source).toBe(body);
+      await Promise.resolve();
+
+      viewer.setOption('hideFrontMatter', false);
+      MessageLoop.flush();
+      expect(renderer.source).toBe(source);
+      await Promise.resolve();
+
+      viewer.setOption('frontMatter', 'hide');
+      MessageLoop.flush();
+      expect(renderer.source).toBe(body);
+      await Promise.resolve();
+
+      viewer.setOption('hideFrontMatter', true);
+      viewer.setOption('frontMatter', 'markdown');
+      MessageLoop.flush();
+      expect(renderer.source).toBe(source);
+    });
+
+    it.each([
+      [
+        '---\ntitle: "`code` and ```"\n---\n# Body',
+        '````\n---\ntitle: "`code` and ```"\n---\n````\n\n# Body'
+      ],
+      [
+        '---\r\ntitle: example\r\n...',
+        '```\n---\r\ntitle: example\r\n...\n```\n\n'
+      ],
+      ['---\n# Unclosed', '---\n# Unclosed'],
+      [
+        '# Body\n---\ntitle: example\n---\n',
+        '# Body\n---\ntitle: example\n---\n'
+      ]
+    ])(
+      'should display literal front matter in raw mode for %p',
+      (source, expected) => {
+        context.model.fromString(source);
+        viewer.setOption('frontMatter', 'raw');
+        MessageLoop.flush();
+        expect(renderer.source).toBe(expected);
+        expect(context.model.toString()).toBe(source);
+      }
+    );
   });
 
   it('should not repeat the initial render for options set before readiness', async () => {
