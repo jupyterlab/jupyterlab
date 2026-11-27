@@ -155,7 +155,6 @@ export class SettingsFormEditor extends React.Component<
   }
 
   componentWillUnmount(): void {
-    this._isUnmounted = true;
     this.props.settings.changed.disconnect(this._syncFormDataWithSettings);
     this._debouncer.dispose();
   }
@@ -207,9 +206,8 @@ export class SettingsFormEditor extends React.Component<
   };
 
   /**
-   * Handler for the "Restore to defaults" button - clears all
-   * modified settings after user confirmation then calls `setFormData`
-   * to restore the values.
+   * Handler for the "Restore to defaults" button - asks for confirmation,
+   * then clears all modified settings.
    */
   reset = async (event: React.MouseEvent): Promise<void> => {
     event.stopPropagation();
@@ -222,12 +220,12 @@ export class SettingsFormEditor extends React.Component<
         title
       ),
       buttons: [
-        Dialog.cancelButton({ label: trans.__('Cancel') }),
+        Dialog.cancelButton(),
         Dialog.warnButton({ label: trans.__('Restore to Defaults') })
-      ]
+      ],
+      defaultButton: 0
     });
-
-    if (this._isUnmounted || !result.button.accept) {
+    if (!result.button.accept) {
       return;
     }
 
@@ -237,9 +235,6 @@ export class SettingsFormEditor extends React.Component<
       await this.props.settings.remove(field);
     }
     this._formData = this.props.settings.composite as ReadonlyJSONObject;
-    if (this._isUnmounted) {
-      return;
-    }
     this.setState({ isModified: false });
   };
 
@@ -419,7 +414,6 @@ export class SettingsFormEditor extends React.Component<
   private _changeId = 0;
   private _debouncer: Debouncer<void, unknown, [ReadonlyJSONObject, number]>;
   private _formData: ReadonlyJSONObject;
-  private _isUnmounted = false;
   private _lastSettledChangeId = 0;
 }
 
