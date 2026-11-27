@@ -219,11 +219,15 @@ export class FileEditorWidget extends DocumentWidget<FileEditor> {
 
     // TODO: expand to allow more schemes of Fragment Identification Syntax
     // reference: https://datatracker.ietf.org/doc/html/rfc5147#section-3
-    if (parsedFragments[0] !== '#line') {
+    if (parsedFragments[0] !== '#line' || parsedFragments.length < 2) {
       return;
     }
 
     const positionOrRange = parsedFragments[1];
+    if (!positionOrRange) {
+      return;
+    }
+
     let firstLine: string;
     if (positionOrRange.includes(',')) {
       // Only respect range start for now.
@@ -232,10 +236,18 @@ export class FileEditorWidget extends DocumentWidget<FileEditor> {
       firstLine = positionOrRange;
     }
 
+    const line = parseInt(firstLine, 10);
+    if (!Number.isInteger(line) || line < 0) {
+      return;
+    }
+
     // Reveal the line
     return this.context.ready.then(() => {
+      if (this.isDisposed) {
+        return;
+      }
       const position = {
-        line: parseInt(firstLine, 10),
+        line,
         column: 0
       };
       this.content.editor.setCursorPosition(position);
