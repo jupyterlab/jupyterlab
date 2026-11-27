@@ -728,8 +728,7 @@ export class Context<
             model.fromJSON(contents.content);
           } else {
             let content = contents.content;
-            // Convert line endings if necessary, marking the file
-            // as dirty.
+            // Convert line endings if necessary.
             if (content.indexOf('\r\n') !== -1) {
               this._lineEnding = '\r\n';
               content = content.replace(/\r\n/g, '\n');
@@ -740,6 +739,8 @@ export class Context<
               this._lineEnding = null;
             }
             model.fromString(content);
+            // Saving restores the line endings, so the text matches the disk.
+            model.dirty = false;
           }
         }
 

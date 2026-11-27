@@ -563,6 +563,31 @@ describe('docregistry/context', () => {
         expect(context.model.dirty).toBe(false);
       });
 
+      it('should mark the document as not dirty if the save reloads it from disk', async () => {
+        context = new Context({
+          manager,
+          factory,
+          // The contents manager mock returns a random hash for this path,
+          // so the save finds that the file changed on disk.
+          path: 'random-hash.txt'
+        });
+        context.model.fromString('foo');
+        await context.initialize(true);
+        edit(context, 3, 3, ' bar');
+
+        const promise = context.save();
+        await waitForDialog();
+        const dialog = document.body.getElementsByClassName('jp-Dialog')[0];
+        const reload = Array.from(dialog.getElementsByTagName('button')).find(
+          button => button.textContent === 'Reload from Disk'
+        );
+        reload!.click();
+        await promise;
+
+        expect(context.model.toString()).toBe('foo');
+        expect(context.model.dirty).toBe(false);
+      });
+
       it('should should preserve LF line endings upon save', async () => {
         await context.initialize(true);
         await manager.contents.save(context.path, {
@@ -795,6 +820,16 @@ describe('docregistry/context', () => {
         context.model.fromString('bar');
         await context.revert();
         expect(context.model.toString()).toBe('foo');
+      });
+
+      it('should mark the document as not dirty', async () => {
+        await context.initialize(true);
+        context.model.fromString('foo');
+        await context.save();
+        context.model.fromString('bar');
+        context.model.dirty = true;
+        await context.revert();
+        expect(context.model.dirty).toBe(false);
       });
 
       it('should normalize CRLF line endings to LF', async () => {
