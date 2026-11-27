@@ -347,8 +347,9 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     return this._editorConfig;
   }
   set editorConfig(value: StaticNotebook.IEditorConfig) {
+    const previous = this._editorConfig;
     this._editorConfig = value;
-    this._updateEditorConfig();
+    this._updateEditorConfig(previous);
   }
 
   /**
@@ -1064,22 +1065,31 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   /**
    * Update editor settings for notebook cells.
    */
-  private _updateEditorConfig() {
+  private _updateEditorConfig(previous: StaticNotebook.IEditorConfig) {
     for (let i = 0; i < this.widgets.length; i++) {
       const cell = this.widgets[i];
-      let config: Record<string, any> = {};
+      let type: keyof StaticNotebook.IEditorConfig;
       switch (cell.model.type) {
         case 'code':
-          config = this._editorConfig.code;
+          type = 'code';
           break;
         case 'markdown':
-          config = this._editorConfig.markdown;
+          type = 'markdown';
           break;
         default:
-          config = this._editorConfig.raw;
+          type = 'raw';
           break;
       }
-      cell.updateEditorConfig({ ...config });
+      const config = this._editorConfig[type];
+      // The settings keep only non-default values, so an option turned off
+      // is missing from the new config: unset it in the cell.
+      const removed: Record<string, undefined> = {};
+      for (const key of Object.keys(previous[type] ?? {})) {
+        if (!(key in config)) {
+          removed[key] = undefined;
+        }
+      }
+      cell.updateEditorConfig({ ...removed, ...config });
     }
   }
 

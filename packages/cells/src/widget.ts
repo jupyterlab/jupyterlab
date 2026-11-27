@@ -600,12 +600,29 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Update the editor configuration with the partial provided dictionary.
    *
+   * An option set to `undefined` is removed, so the editor goes back to
+   * its value from the global editor settings.
+   *
    * @param v Partial editor configuration
    */
   updateEditorConfig(v: Record<string, any>): void {
-    this._editorConfig = { ...this._editorConfig, ...v };
+    const previous = this._editorConfig;
+    const config = { ...previous, ...v };
+    for (const [key, value] of Object.entries(v)) {
+      if (value === undefined) {
+        delete config[key];
+      }
+    }
+    this._editorConfig = config;
     if (this.editor) {
-      this.editor.setBaseOptions(this._editorConfig);
+      // Set changed options one by one, in the layer the editor was created
+      // with, so options other code set on this editor (such as `readOnly`)
+      // are kept.
+      for (const key of Object.keys(v)) {
+        if (previous[key] !== config[key]) {
+          this.editor.setOption(key, config[key]);
+        }
+      }
     }
   }
 

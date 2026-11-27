@@ -164,14 +164,23 @@ export class ExtensionsHandler
   /**
    * Set a config option for the editor.
    *
+   * Setting an option to `undefined` removes it, so the base configuration
+   * applies again.
+   *
    * You will need to reconfigure the editor extensions by listening
    * to `IExtensionsHandler.configChanged`.
    */
   setOption(option: string, value: unknown): void {
     // Don't bother setting the option if it is already the same.
     if (this._config[option] !== value) {
-      this._config[option] = value;
-      this._configChanged.emit({ [option]: value });
+      if (value === undefined) {
+        delete this._config[option];
+      } else {
+        this._config[option] = value;
+      }
+      this._configChanged.emit({
+        [option]: value === undefined ? this._baseConfig[option] : value
+      });
     }
   }
 
