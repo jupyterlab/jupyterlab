@@ -14,6 +14,10 @@ arcu fringilla interdum. Maecenas elit nulla, imperdiet nec blandit et, consequa
 ut elit.
 in`;
 
+const LONG_FILE_CONTENT = Array.from({ length: 300 }, (_, i) =>
+  i === 249 ? 'The needle is here.' : `Line ${i + 1} has only hay.`
+).join('\n');
+
 function getSelectionRange(textarea: HTMLTextAreaElement) {
   return {
     start: textarea.selectionStart,
@@ -25,6 +29,49 @@ test.beforeEach(async ({ page }) => {
   await page.menu.clickMenuItem('File>New>Text File');
   await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
   await page.locator('[role="main"] .cm-content').fill(TEST_FILE_CONTENT);
+});
+
+test('Scroll to the first match when typing a query', async ({ page }) => {
+  await page.locator('[role="main"] .cm-content').fill(LONG_FILE_CONTENT);
+  await page.keyboard.press('Control+Home');
+
+  await page.keyboard.press('Control+f');
+  await page.fill('[placeholder="Find"]', 'needle');
+
+  await expect(page.locator('.jp-DocumentSearch-index-counter')).toHaveText(
+    '1/1'
+  );
+  await expect(page.locator('[role="main"] .jp-current-match')).toBeInViewport({
+    ratio: 1
+  });
+});
+
+test('Keep the scroll position when the search restarts after the text changes', async ({
+  page
+}) => {
+  await page.locator('[role="main"] .cm-content').fill(LONG_FILE_CONTENT);
+  await page.keyboard.press('Control+Home');
+
+  await page.keyboard.press('Control+f');
+  await page.fill('[placeholder="Find"]', 'needle');
+  const counter = page.locator('.jp-DocumentSearch-index-counter');
+  await expect(counter).toHaveText('1/1');
+
+  const firstLine = page.locator('[role="main"] .cm-line', {
+    hasText: 'Line 1 has only hay.'
+  });
+  await page.locator('[role="main"] .cm-content').hover();
+  await page.mouse.wheel(0, -10000);
+  await expect(firstLine).toBeInViewport();
+
+  // The search box covers the right part of the first line
+  await firstLine.click({ position: { x: 5, y: 5 } });
+  await page.keyboard.press('Home');
+  // A second match starts the search again
+  await page.keyboard.type('needle ');
+  await expect(counter).toHaveText(/\/2$/);
+
+  await expect(firstLine).toBeInViewport();
 });
 
 test('Search with a text', async ({ page }) => {

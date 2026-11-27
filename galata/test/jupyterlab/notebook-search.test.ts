@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { galata, test } from '@jupyterlab/galata';
+import type { NotebookPanel } from '@jupyterlab/notebook';
 import { expect } from '@playwright/test';
 import * as path from 'path';
 
@@ -561,6 +562,228 @@ test.describe('Notebook Search', () => {
     );
   });
 
+  test.describe('Scrolling to a match in a code cell', () => {
+    test.beforeEach(async ({ page, tmpPath }) => {
+      const notebook = galata.Notebook.generateNotebook(40, 'code', [
+        'Only hay here.'
+      ]);
+      notebook.cells[30].source = ['The needle is here.'];
+      await page.contents.uploadContent(
+        JSON.stringify(notebook),
+        'text',
+        `${tmpPath}/haystack.ipynb`
+      );
+      await page.notebook.openByPath(`${tmpPath}/haystack.ipynb`);
+      await page.notebook.activate('haystack.ipynb');
+      // Off-screen cells are rendered when the browser is idle
+      await page.waitForFunction(() => {
+        const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+        return panel.content.widgets.every(cell => !cell.isPlaceholder());
+      });
+
+      await page.keyboard.press('Control+f');
+      await page.fill('[placeholder="Find"]', 'needle');
+      await expect(page.locator('.jp-DocumentSearch-index-counter')).toHaveText(
+        '1/1'
+      );
+    });
+
+    test('Scroll to the first match when typing a query', async ({ page }) => {
+      await expect(
+        page.locator('.jp-CodeCell .jp-current-match')
+      ).toBeInViewport({ ratio: 1 });
+    });
+
+    test('Keep the scroll position when the search restarts after a cell is added', async ({
+      page
+    }) => {
+      const firstCell = (await page.notebook.getCellLocator(0))!;
+      await (await page.notebook.getNotebookInPanelLocator())!.hover();
+      await page.mouse.wheel(0, -10000);
+      await expect(firstCell).toBeInViewport();
+
+      const mark = page.locator('.jp-CodeCell .jp-current-match');
+      const previousMark = await mark.elementHandle();
+      await firstCell.locator('.jp-InputPrompt').click();
+      await page.keyboard.press('b');
+      // The search starts again and marks the match anew
+      await page.waitForFunction(
+        element => !element?.isConnected,
+        previousMark
+      );
+      await expect(mark).toHaveCount(1);
+
+      await expect(firstCell).toBeInViewport();
+    });
+  });
+
+  test('Keep the scroll position when the search restarts after a cell is added, with a match in an output', async ({
+    page,
+    tmpPath
+  }) => {
+    const notebook = galata.Notebook.generateNotebook(
+      40,
+      'code',
+      ['print("hay")'],
+      [{ output_type: 'stream', name: 'stdout', text: ['Only hay here.\n'] }]
+    );
+    notebook.cells[30].outputs = [
+      { output_type: 'stream', name: 'stdout', text: ['The needle is here.\n'] }
+    ];
+    await page.contents.uploadContent(
+      JSON.stringify(notebook),
+      'text',
+      `${tmpPath}/haystack.ipynb`
+    );
+    await page.notebook.openByPath(`${tmpPath}/haystack.ipynb`);
+    await page.notebook.activate('haystack.ipynb');
+    // Off-screen cells are rendered when the browser is idle
+    await page.waitForFunction(() => {
+      const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+      return panel.content.widgets.every(cell => !cell.isPlaceholder());
+    });
+
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+    await page.click('text=Search Cell Outputs');
+    // If the notebook is not fully loaded yet a confirmation dialog will show up
+    if (await page.locator('.jp-Dialog').isVisible()) {
+      await page.click('.jp-Dialog .jp-mod-accept');
+    }
+    await page.fill('[placeholder="Find"]', 'needle');
+    await expect(page.locator('.jp-DocumentSearch-index-counter')).toHaveText(
+      '1/1'
+    );
+
+    const firstCell = (await page.notebook.getCellLocator(0))!;
+    await (await page.notebook.getNotebookInPanelLocator())!.hover();
+    await page.mouse.wheel(0, -10000);
+    await expect(firstCell).toBeInViewport();
+
+    const mark = page.locator('.jp-OutputArea .jp-current-match');
+    const previousMark = await mark.elementHandle();
+    await firstCell.locator('.jp-InputPrompt').click();
+    await page.keyboard.press('b');
+    // The search starts again and marks the match anew
+    await page.waitForFunction(element => !element?.isConnected, previousMark);
+    await expect(mark).toHaveCount(1);
+
+    await expect(firstCell).toBeInViewport();
+  });
+
+  test('Scroll to the next match in an output above another panel', async ({
+    page,
+    tmpPath
+  }) => {
+    const lines = Array.from(
+      { length: 40 },
+      (_, i) => `Line ${i + 1} has ${i % 24 === 0 ? 'a needle' : 'only hay'}.\n`
+    );
+    const notebook = galata.Notebook.generateNotebook(
+      1,
+      'code',
+      ['print("hay")'],
+      [{ output_type: 'stream', name: 'stdout', text: lines }]
+    );
+    await page.contents.uploadContent(
+      JSON.stringify(notebook),
+      'text',
+      `${tmpPath}/output.ipynb`
+    );
+    await page.contents.uploadContent('', 'text', `${tmpPath}/notes.txt`);
+    await page.notebook.openByPath(`${tmpPath}/output.ipynb`);
+    // A console opened for the notebook takes the same place
+    await page.evaluate(async path => {
+      await window.jupyterapp.commands.execute('docmanager:open', {
+        path,
+        options: { mode: 'split-bottom' }
+      });
+    }, `${tmpPath}/notes.txt`);
+    await page.notebook.activate('output.ipynb');
+
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+    await page.click('text=Search Cell Outputs');
+    await page.fill('[placeholder="Find"]', 'needle');
+    const counter = page.locator('.jp-DocumentSearch-index-counter');
+    await expect(counter).toHaveText('1/2');
+    await page.keyboard.press('Enter');
+    await expect(counter).toHaveText('2/2');
+
+    await expect(
+      page.locator('.jp-OutputArea .jp-current-match')
+    ).toBeInViewport({ ratio: 1 });
+  });
+
+  test('Scroll to the next match in an output of a collapsed section', async ({
+    page,
+    tmpPath
+  }) => {
+    const hay = Array.from(
+      { length: 40 },
+      (_, i) => `Line ${i + 1} has only hay.\n`
+    );
+    const notebook = galata.Notebook.makeNotebook([
+      galata.Notebook.makeCell({
+        cell_type: 'markdown',
+        source: ['# Section 1']
+      }),
+      galata.Notebook.makeCell({
+        cell_type: 'code',
+        source: ['print("first")'],
+        outputs: [
+          {
+            output_type: 'stream',
+            name: 'stdout',
+            text: ['The needle is in section 1.\n']
+          }
+        ]
+      }),
+      galata.Notebook.makeCell({
+        cell_type: 'markdown',
+        source: ['# Section 2'],
+        metadata: { 'jp-MarkdownHeadingCollapsed': true }
+      }),
+      galata.Notebook.makeCell({
+        cell_type: 'code',
+        source: ['print("second")'],
+        outputs: [
+          {
+            output_type: 'stream',
+            name: 'stdout',
+            text: [...hay, 'The needle is in section 2.\n']
+          }
+        ]
+      })
+    ]);
+    await page.contents.uploadContent(
+      JSON.stringify(notebook),
+      'text',
+      `${tmpPath}/sections.ipynb`
+    );
+    await page.notebook.openByPath(`${tmpPath}/sections.ipynb`);
+    await page.notebook.activate('sections.ipynb');
+    // Cells of a collapsed section are rendered when the browser is idle
+    await page.waitForFunction(() => {
+      const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+      return panel.content.widgets.every(cell => !cell.isPlaceholder());
+    });
+
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+    await page.click('text=Search Cell Outputs');
+    await page.fill('[placeholder="Find"]', 'needle');
+    const counter = page.locator('.jp-DocumentSearch-index-counter');
+    await expect(counter).toHaveText('1/2');
+    // The search activates the cell, which expands the section
+    await page.keyboard.press('Enter');
+    await expect(counter).toHaveText('2/2');
+
+    await expect(
+      page.locator('.jp-OutputArea .jp-current-match')
+    ).toBeInViewport({ ratio: 1 });
+  });
+
   test('Search on typing', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
@@ -678,6 +901,42 @@ test.describe('Notebook Search', () => {
         'label[title="Search only in the selected cells or text (depending on edit/command mode). (Alt+L)"]'
       )
     ).toHaveCount(1);
+  });
+});
+
+test.describe('Notebook Search in the full windowing mode', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:tracker': { windowingMode: 'full' }
+    }
+  });
+
+  test('Scroll to the first match when typing a query', async ({
+    page,
+    tmpPath
+  }) => {
+    const notebook = galata.Notebook.generateNotebook(40, 'code', [
+      'Only hay here.'
+    ]);
+    notebook.cells[30].source = ['The needle is here.'];
+    await page.contents.uploadContent(
+      JSON.stringify(notebook),
+      'text',
+      `${tmpPath}/haystack.ipynb`
+    );
+    await page.notebook.openByPath(`${tmpPath}/haystack.ipynb`);
+    await page.notebook.activate('haystack.ipynb');
+
+    await page.keyboard.press('Control+f');
+    await page.fill('[placeholder="Find"]', 'needle');
+    await expect(page.locator('.jp-DocumentSearch-index-counter')).toHaveText(
+      '1/1'
+    );
+
+    await expect(page.locator('.jp-CodeCell .jp-current-match')).toBeInViewport(
+      { ratio: 1 }
+    );
   });
 });
 

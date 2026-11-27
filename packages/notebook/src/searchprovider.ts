@@ -361,7 +361,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     if (!this.widget) {
       return;
     }
+    const queryKey = JSON.stringify([query.source, query.flags, filters ?? {}]);
+    const isNewQuery = queryKey !== this._queryKey;
     await this.endQuery();
+    this._queryKey = queryKey;
     this._searchActive = true;
     let cells = this.widget.content.widgets;
 
@@ -410,11 +413,12 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     // - the next match when starting search using ctrl + f
     // `scroll` and `select` are disabled because `startQuery` is also used as
     // "restartQuery" after each text change and if those were enabled, we would
-    // steal the cursor.
-    await this.highlightNext(true, {
+    // steal the cursor. Only a new query scrolls.
+    await this._stepNext(false, true, {
       from: 'selection-start',
       scroll: false,
-      select: false
+      select: false,
+      scrollInCell: isNewQuery
     });
 
     return Promise.resolve();
@@ -435,6 +439,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._searchActive = false;
     this._searchProviders.length = 0;
     this._currentProviderIndex = null;
+    this._queryKey = null;
   }
 
   /**
@@ -638,11 +643,51 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   private async _stepNext(
     reverse = false,
     loop = false,
-    options?: IHighlightAdjacentMatchOptions
+    options?: Private.IStepOptions
   ): Promise<ISearchMatch | null> {
+    // Whether the cell was rendered and attached when it was searched, so
+    // that its editor could scroll to the match
+    let cellWasShown = true;
+
+    // Scroll to the match of a new query without activating its cell. The
+    // search does not wait for it, because a cell may render only when the
+    // browser is idle.
+    const scrollToMatchInCell = async (match: ISearchMatch) => {
+      const index = this._currentProviderIndex!;
+      const queryKey = this._queryKey;
+      const cell = this.widget.content.widgets[index];
+      const isCurrent = () =>
+        this._queryKey === queryKey &&
+        this._currentProviderIndex === index &&
+        this.getCurrentMatch()?.position === match.position;
+      await cell.ready;
+      if (!isCurrent()) {
+        return;
+      }
+      try {
+        await this.widget.content.scrollToItem(index);
+      } catch {
+        // A newer scroll request replaced this one
+      }
+      const editor = cell.editor;
+      // A hidden editor, as in a rendered Markdown cell, would scroll when it
+      // is shown again
+      if (
+        isCurrent() &&
+        !('node' in match) &&
+        editor &&
+        editor.host.checkVisibility?.() !== false
+      ) {
+        editor.revealPosition(editor.getPositionAt(match.position)!);
+      }
+    };
+
     const activateNewMatch = async (match: ISearchMatch) => {
       const shouldScroll = options?.scroll ?? true;
       if (!shouldScroll) {
+        if (options?.scrollInCell && !cellWasShown) {
+          void scrollToMatchInCell(match);
+        }
         // do not activate the match if scrolling was disabled
         return;
       }
@@ -681,25 +726,55 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       // Matches in the cell source come from `EditorSearchProvider` as plain
       // `ISearchMatch` objects, without `node`. Output matches come from
       // `GenericSearchProvider` as `IHTMLSearchMatch` objects: `node` is the
-      // text node holding the match, `position` counts from the start of that
-      // node, and that provider already scrolled the match into view.
+      // text node holding the match, and `position` counts from the start of
+      // that node.
       if (!('node' in match)) {
         const editor = activeCell.editor!;
         editor.revealPosition(editor.getPositionAt(match.position)!);
+      } else {
+        // The cell was hidden when its provider scrolled to the match, as in a
+        // collapsed section
+        activeCell.node
+          .querySelector('mark.jp-current-match')
+          ?.scrollIntoView({ block: 'nearest' });
       }
       this._selectionLock = false;
     };
 
+    // Only the first cell that the search visits starts from its selection,
+    // because the selection of another cell stays where it was last edited
+    let isFirstVisit = true;
+
     const highlightInCell = async (
-      searchEngine: CellSearchProvider
+      index: number
     ): Promise<ISearchMatch | undefined> => {
+      const searchEngine = this._searchProviders[index];
+      const searchWholeCell =
+        !isFirstVisit &&
+        (options?.from === 'selection' || options?.from === 'selection-start');
+      isFirstVisit = false;
       if (options?.skipReadOnly && searchEngine.isReadOnlyProvider()) {
         // Treat it as a cell without matches, so the loop below still ends
         return undefined;
       }
+      // A placeholder cell has no editor yet, and the full windowing mode
+      // does not attach a cell out of the view
+      const cell = this.widget.content.widgets[index];
+      cellWasShown = !cell.isPlaceholder() && cell.isAttached;
+      let cellOptions = options;
+      if (searchWholeCell) {
+        // Without a match in the cell yet, 'previous-match' starts at its end
+        cellOptions = {
+          ...cellOptions,
+          from: reverse ? 'previous-match' : 'start'
+        };
+      }
+      if (options?.scrollInCell) {
+        cellOptions = { ...cellOptions, scroll: true };
+      }
       return reverse
-        ? searchEngine.highlightPrevious(false, options)
-        : searchEngine.highlightNext(false, options);
+        ? searchEngine.highlightPrevious(false, cellOptions)
+        : searchEngine.highlightNext(false, cellOptions);
     };
 
     if (this._currentProviderIndex === null) {
@@ -748,9 +823,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this._currentProviderIndex += atEndOfCurrentCell ? 1 : 0;
     }
     do {
-      const searchEngine = this._searchProviders[this._currentProviderIndex];
-
-      const match = await highlightInCell(searchEngine);
+      const match = await highlightInCell(this._currentProviderIndex);
 
       if (match) {
         await activateNewMatch(match);
@@ -775,7 +848,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
     if (loop) {
       // try the first provider again
-      const match = await highlightInCell(this._searchProviders[startIndex]);
+      const match = await highlightInCell(startIndex);
       if (match) {
         await activateNewMatch(match);
         return match;
@@ -1011,6 +1084,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   private _selectedCells: number = 1;
   private _selectedLines: number = 0;
   private _query: RegExp | null = null;
+  private _queryKey: string | null = null;
   private _searchProviders: CellSearchProvider[] = [];
   private _editorSelectionsObservable: IObservableMap<
     CodeEditor.ITextSelection[]
@@ -1019,4 +1093,20 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   private _selectionLock: boolean = false;
   private _searchActive: boolean = false;
   private _cellSelectionChangePending = false;
+}
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * Options of a step to an adjacent match in the notebook.
+   */
+  export interface IStepOptions extends IHighlightAdjacentMatchOptions {
+    /**
+     * Whether the cell scrolls to its match when `scroll` is false, which
+     * leaves the active cell as it is.
+     */
+    scrollInCell?: boolean;
+  }
 }
