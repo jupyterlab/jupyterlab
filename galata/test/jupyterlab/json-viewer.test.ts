@@ -39,6 +39,31 @@ async function openJSON(
   return viewer;
 }
 
+test('opens JSON as a highlighted tree or as source text', async ({
+  page,
+  tmpPath
+}) => {
+  const fileName = 'example.json';
+  const data = { name: 'JupyterLab', count: 42, enabled: true };
+  const viewer = await openJSON(page, tmpPath, fileName, data);
+  const stringColor = await viewer
+    .getByText('"JupyterLab"', { exact: true })
+    .evaluate(el => getComputedStyle(el).color);
+  await expect(viewer.getByText('42', { exact: true })).not.toHaveCSS(
+    'color',
+    stringColor
+  );
+  expect(
+    await viewer.locator('.container > ul').screenshot({
+      style: '.jp-RenderedJSON ul { width: max-content; }'
+    })
+  ).toMatchSnapshot('json-syntax-highlighting.png');
+
+  await page.filebrowser.open(`${tmpPath}/${fileName}`, 'Editor');
+  const editor = page.locator('.jp-FileEditor').getByRole('textbox');
+  await expect(editor).toHaveText(JSON.stringify(data));
+});
+
 test.describe('JSON viewer find', () => {
   test('expands only the nodes whose exact path matches', async ({
     page,
