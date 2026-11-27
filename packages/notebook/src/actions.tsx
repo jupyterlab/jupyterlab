@@ -28,7 +28,7 @@ import type { ISharedAttachmentsCell } from '@jupyter/ydoc';
 import type { YNotebook } from '@jupyter/ydoc';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
-import { every, findIndex } from '@lumino/algorithm';
+import { ArrayExt, every, findIndex } from '@lumino/algorithm';
 import type { JSONObject } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
 import type { ISignal } from '@lumino/signaling';
@@ -1562,7 +1562,7 @@ export namespace NotebookActions {
    * @param options - Optional. Set `preserveMetadata: true` to keep the metadata of duplicated cells.
    *
    * #### Notes
-   * The last pasted cell becomes the active cell.
+   * The copy of the last visible cell becomes the active cell.
    * This is a no-op if there is no cell data on the clipboard.
    * This action can be undone.
    */
@@ -1571,13 +1571,21 @@ export namespace NotebookActions {
     mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below',
     options?: { preserveMetadata?: boolean }
   ): void {
-    const values = Private.selectedCells(notebook, options?.preserveMetadata);
+    const cells = Private.selectedCellWidgets(notebook);
 
-    if (!values || values.length === 0) {
+    if (cells.length === 0) {
       return;
     }
 
-    addCells(notebook, mode, values, false); // Cells not from the clipboard
+    // Copies of hidden cells are hidden too, so activate the last visible copy.
+    addCells(
+      notebook,
+      mode,
+      Private.cellsToJSON(cells, options?.preserveMetadata),
+      false, // Cells not from the clipboard
+      undefined,
+      ArrayExt.findLastIndex(cells, cell => !cell.isHidden)
+    );
   }
 
   /**
@@ -1597,8 +1605,10 @@ export namespace NotebookActions {
    *
    * @param clipboardInteractionValues — The cells to use for clipboard signal comparison.
    *
+   * @param activeIndex - The index in `values` of the cell to activate.
+   *
    * #### Notes
-   * The last added cell becomes the active cell.
+   * The last added cell becomes the active cell, unless `activeIndex` is given.
    * This is a no-op if values is an empty array.
    * This action can be undone.
    */
@@ -1608,7 +1618,8 @@ export namespace NotebookActions {
     mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below',
     values: nbformat.IBaseCell[],
     cellsFromClipboard: boolean = false,
-    clipboardInteractionValues: nbformat.IBaseCell[] = values
+    clipboardInteractionValues: nbformat.IBaseCell[] = values,
+    activeIndex: number = values.length - 1
   ): void {
     if (!notebook.model || !notebook.activeCell || values.length === 0) {
       return;
@@ -1712,7 +1723,7 @@ export namespace NotebookActions {
       );
     });
 
-    notebook.activeCellIndex = index + values.length - 1;
+    notebook.activeCellIndex = index + activeIndex;
     notebook.deselectAll();
     if (cellsFromClipboard) {
       notebook.recordCellClipboardInteraction(
@@ -3441,6 +3452,14 @@ namespace Private {
     notebook: Notebook,
     preserveMetadata: boolean = false
   ): nbformat.ICell[] {
+    return cellsToJSON(selectedCellWidgets(notebook), preserveMetadata);
+  }
+
+  /**
+   * Get the selected or active cell widgets, with the hidden cells of the
+   * collapsed headings among them.
+   */
+  export function selectedCellWidgets(notebook: Notebook): Cell[] {
     const cellsToInclude = new Set<Cell>();
 
     // Collect all selected/active cells and expand collapsed sections
@@ -3464,7 +3483,20 @@ namespace Private {
       }
     }
 
-    return Array.from(cellsToInclude)
+    return Array.from(cellsToInclude);
+  }
+
+  /**
+   * Convert cell widgets to cell data.
+   *
+   * @param cells - The cell widgets.
+   * @param preserveMetadata - Whether to preserve the `deletable` metadata.
+   */
+  export function cellsToJSON(
+    cells: Cell[],
+    preserveMetadata: boolean = false
+  ): nbformat.ICell[] {
+    return cells
       .map(cell => cell.model.toJSON())
       .map(cellJSON => {
         if (
