@@ -14,6 +14,7 @@ import { find, map, some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import type { ReadonlyJSONObject } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
+import type { ISignal } from '@lumino/signaling';
 import { MessageLoop } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
 import type { Layout } from '@lumino/widgets';
@@ -1118,6 +1119,10 @@ export namespace CommandToolbarButtonComponent {
      * the focus on the button.
      */
     noFocusOnClick?: boolean;
+    /**
+     * Signals, in addition to `commandChanged`, that refresh the button state.
+     */
+    refreshSignals?: ISignal<unknown, unknown>[];
   }
 }
 
@@ -1130,6 +1135,15 @@ export namespace CommandToolbarButtonComponent {
 export function CommandToolbarButtonComponent(
   props: CommandToolbarButtonComponent.IProps
 ): JSX.Element {
+  const { refreshSignals } = props;
+  const [, forceUpdate] = React.useReducer((x: number) => x + 1, 0);
+  React.useEffect(() => {
+    refreshSignals?.forEach(signal => signal.connect(forceUpdate));
+    return () => {
+      refreshSignals?.forEach(signal => signal.disconnect(forceUpdate));
+    };
+  }, [refreshSignals]);
+
   return (
     <UseSignal
       signal={props.commands.commandChanged}
@@ -1174,7 +1188,7 @@ export class CommandToolbarButton extends ReactWidget {
    */
   constructor(private props: CommandToolbarButtonComponent.IProps) {
     super();
-    const { commands, id, args } = props;
+    const { commands, id, args, refreshSignals } = props;
     addCommandToolbarButtonClass(this);
     this.setCommandAttributes(commands, id, args);
     commands.commandChanged.connect((_, change) => {
@@ -1182,6 +1196,11 @@ export class CommandToolbarButton extends ReactWidget {
         this.setCommandAttributes(commands, id, args);
       }
     }, this);
+    refreshSignals?.forEach(signal => {
+      signal.connect(() => {
+        this.setCommandAttributes(commands, id, args);
+      }, this);
+    });
   }
   protected setCommandAttributes(
     commands: CommandRegistry,

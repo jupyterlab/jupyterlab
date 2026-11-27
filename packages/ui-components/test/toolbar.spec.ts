@@ -22,6 +22,7 @@ import type {
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
 import { MessageLoop } from '@lumino/messaging';
+import { Signal } from '@lumino/signaling';
 import type { PanelLayout } from '@lumino/widgets';
 import { Panel, Widget } from '@lumino/widgets';
 import * as React from 'react';
@@ -323,6 +324,83 @@ describe('@jupyterlab/ui-components', () => {
 
       wrapper.dispose();
     });
+
+    it('should re-render when a refresh signal fires', async () => {
+      const id = 'test:refresh-signal-component';
+      let caption = 'Initial caption';
+      commands.addCommand(id, {
+        execute: () => {
+          /* no op */
+        },
+        icon: blankIcon,
+        caption: () => caption
+      });
+      const signal = new Signal<object, void>({});
+
+      class Wrapper extends ReactWidget {
+        render(): React.ReactElement {
+          return React.createElement(CommandToolbarButtonComponent, {
+            commands,
+            id,
+            refreshSignals: [signal]
+          });
+        }
+      }
+
+      const wrapper = new Wrapper();
+      Widget.attach(wrapper, document.body);
+      await framePromise();
+      await wrapper.renderPromise;
+      expect(wrapper.node.firstElementChild!.getAttribute('title')).toBe(
+        'Initial caption'
+      );
+
+      caption = 'Updated caption';
+      signal.emit();
+      await framePromise();
+      expect(wrapper.node.firstElementChild!.getAttribute('title')).toBe(
+        'Updated caption'
+      );
+
+      wrapper.dispose();
+    });
+
+    it('should disconnect from refresh signals on unmount', async () => {
+      const id = 'test:refresh-signal-unmount';
+      commands.addCommand(id, {
+        execute: () => {
+          /* no op */
+        },
+        icon: blankIcon
+      });
+      const signal = {
+        connect: jest.fn((_slot: unknown, _thisArg?: unknown) => true),
+        disconnect: jest.fn((_slot: unknown, _thisArg?: unknown) => true)
+      };
+
+      class Wrapper extends ReactWidget {
+        render(): React.ReactElement {
+          return React.createElement(CommandToolbarButtonComponent, {
+            commands,
+            id,
+            refreshSignals: [signal]
+          });
+        }
+      }
+
+      const wrapper = new Wrapper();
+      Widget.attach(wrapper, document.body);
+      await framePromise();
+      await wrapper.renderPromise;
+      expect(signal.connect).toHaveBeenCalledTimes(1);
+
+      wrapper.dispose();
+      await framePromise();
+      expect(signal.disconnect).toHaveBeenCalledTimes(1);
+      expect(signal.disconnect.mock.calls[0][0]).toBe(
+        signal.connect.mock.calls[0][0]
+      );
+    });
   });
 
   describe('Toolbar', () => {
@@ -619,6 +697,60 @@ describe('@jupyterlab/ui-components', () => {
           visible = false;
           button.dispose();
         }
+      });
+
+      it('should update state classes when a refresh signal fires', async () => {
+        visible = false;
+        const emitter = {};
+        const signal = new Signal<typeof emitter, void>(emitter);
+        const button = new CommandToolbarButton({
+          commands,
+          id: testLogCommandId,
+          refreshSignals: [signal]
+        });
+        await render(button);
+        expect(button.hasClass('lm-mod-hidden')).toBe(true);
+        visible = true;
+        signal.emit();
+        await framePromise();
+        await button.renderPromise;
+        expect(button.hasClass('lm-mod-hidden')).toBe(false);
+        visible = false;
+        button.dispose();
+      });
+
+      it('should re-render when a refresh signal fires', async () => {
+        enabled = true;
+        visible = true;
+        let iconClassValue = 'initial-icon-class';
+        const id = 'test:refresh-signal-rerender';
+        const cmd = commands.addCommand(id, {
+          execute: () => {
+            /* no op */
+          },
+          iconClass: () => iconClassValue
+        });
+        const emitter = {};
+        const signal = new Signal<typeof emitter, void>(emitter);
+        const button = new CommandToolbarButton({
+          commands,
+          id,
+          refreshSignals: [signal]
+        });
+        await render(button);
+        const buttonNode = button.node.firstChild as HTMLButtonElement;
+        const iconNode = buttonNode.firstChild as HTMLElement;
+        expect(iconNode.classList.contains('initial-icon-class')).toBe(true);
+        iconClassValue = 'updated-icon-class';
+        signal.emit();
+        await framePromise();
+        await button.renderPromise;
+        const updatedIconNode = buttonNode.firstChild as HTMLElement;
+        expect(updatedIconNode.classList.contains('updated-icon-class')).toBe(
+          true
+        );
+        cmd.dispose();
+        button.dispose();
       });
 
       it('should use the command label if no icon class/label', async () => {

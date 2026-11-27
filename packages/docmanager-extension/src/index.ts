@@ -13,18 +13,16 @@ import type {
 import { ILabShell, ILabStatus, JupyterLab } from '@jupyterlab/application';
 import type { ISessionContext } from '@jupyterlab/apputils';
 import {
-  addCommandToolbarButtonClass,
-  CommandToolbarButtonComponent,
+  CommandToolbarButton,
   Dialog,
   ICommandPalette,
   InputDialog,
   ISessionContextDialogs,
   Notification,
-  ReactWidget,
   SessionContextDialogs,
   showDialog,
   showErrorMessage,
-  UseSignal
+  ToolbarRegistry
 } from '@jupyterlab/apputils';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
 import { PathExt, Time } from '@jupyterlab/coreutils';
@@ -49,7 +47,7 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 import type { TranslationBundle } from '@jupyterlab/translation';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { saveIcon } from '@jupyterlab/ui-components';
-import { some } from '@lumino/algorithm';
+import { find, some } from '@lumino/algorithm';
 import type { CommandRegistry } from '@lumino/commands';
 import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { JSONExt } from '@lumino/coreutils';
@@ -57,7 +55,6 @@ import type { IDisposable } from '@lumino/disposable';
 import type { ISignal } from '@lumino/signaling';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import * as React from 'react';
 import { recentsManagerPlugin } from './recents';
 
 /**
@@ -647,22 +644,19 @@ export namespace ToolbarItems {
    */
   export function createSaveButton(
     commands: CommandRegistry,
-    fileChanged: ISignal<any, Omit<Contents.IModel, 'content'>>
+    fileChanged: ISignal<any, Omit<Contents.IModel, 'content'>>,
+    widgetId?: string
   ): Widget {
-    return addCommandToolbarButtonClass(
-      ReactWidget.create(
-        <UseSignal signal={fileChanged}>
-          {() => (
-            <CommandToolbarButtonComponent
-              commands={commands}
-              id={CommandIDs.save}
-              label={''}
-              args={{ toolbar: true }}
-            />
-          )}
-        </UseSignal>
-      )
-    );
+    return new CommandToolbarButton({
+      commands,
+      id: CommandIDs.save,
+      label: '',
+      args: {
+        toolbar: true,
+        ...(widgetId ? { [ToolbarRegistry.WIDGET_ID_ARG]: widgetId } : {})
+      },
+      refreshSignals: [fileChanged]
+    });
   }
 }
 
@@ -711,17 +705,39 @@ function addCommands(
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
   const category = trans.__('File Operations');
-  const isEnabled = () => {
-    const { currentWidget } = shell;
-    return !!(currentWidget && docManager.contextForWidget(currentWidget));
+
+  /**
+   * Get a widget in shell using the ToolbarRegistry.WIDGET_ID_ARG defined in args if
+   * available. Fallback to the current widget.
+   */
+  const getWidget = (args?: ReadonlyPartialJSONObject): Widget | null => {
+    if (args?.[ToolbarRegistry.WIDGET_ID_ARG]) {
+      if (labShell) {
+        for (const area of ['main', 'left', 'right', 'down'] as const) {
+          const widget = find(
+            labShell.widgets(area),
+            widget => widget.id === args[ToolbarRegistry.WIDGET_ID_ARG]
+          );
+          if (widget) {
+            return widget;
+          }
+        }
+      }
+    }
+    return shell.currentWidget;
   };
 
-  const isWritable = () => {
-    const { currentWidget } = shell;
-    if (!currentWidget) {
+  const isEnabled = (args?: ReadonlyPartialJSONObject) => {
+    const widget = getWidget(args);
+    return !!(widget && docManager.contextForWidget(widget));
+  };
+
+  const isWritable = (args?: ReadonlyPartialJSONObject) => {
+    const widget = getWidget(args);
+    if (!widget) {
       return false;
     }
-    const context = docManager.contextForWidget(currentWidget);
+    const context = docManager.contextForWidget(widget);
     return !!context?.contentsModel?.writable;
   };
 
@@ -1061,9 +1077,10 @@ function addCommands(
         if (!targetCheckpoint) {
           return;
         }
+        const body = new RevertConfirmWidget(targetCheckpoint, trans, type);
         return showDialog({
           title: trans.__('Revert %1 to checkpoint', type),
-          body: new RevertConfirmWidget(targetCheckpoint, trans, type),
+          body,
           buttons: [
             Dialog.cancelButton(),
             Dialog.warnButton({
@@ -1072,6 +1089,7 @@ function addCommands(
             })
           ]
         }).then(result => {
+          body.dispose();
           if (context.isDisposed) {
             return;
           }
@@ -1088,13 +1106,11 @@ function addCommands(
     }
   });
 
-  const caption = () => {
-    if (shell.currentWidget) {
-      if (!isWritable()) {
-        return trans.__(
-          `Document is read-only. "Save" is disabled; use "Save as…" instead`
-        );
-      }
+  const caption = (args?: ReadonlyPartialJSONObject) => {
+    if (!isWritable(args)) {
+      return trans.__(
+        `Document is read-only. "Save" is disabled; use "Save as…" instead`
+      );
     }
 
     return trans.__('Save and create checkpoint');
@@ -1111,11 +1127,12 @@ function addCommands(
         return (args._luminoEvent as ReadonlyPartialJSONObject).type ===
           'keybinding'
           ? true
-          : isWritable();
+          : isWritable(args);
       } else {
-        return isWritable();
+        return isWritable(args);
       }
     },
+    isVisible: args => !args.toolbar || isWritable(args),
     describedBy: {
       args: {
         type: 'object',
@@ -1127,15 +1144,19 @@ function addCommands(
           _luminoEvent: {
             type: 'object',
             description: 'The lumino event object'
+          },
+          [ToolbarRegistry.WIDGET_ID_ARG]: {
+            type: 'string',
+            description: trans.__('The ID of the document widget')
           }
         }
       }
     },
     execute: async args => {
-      // Checks that shell.currentWidget is valid:
-      const widget = shell.currentWidget;
+      // Checks that the widget is valid:
+      const widget = getWidget(args);
       const context = docManager.contextForWidget(widget!);
-      if (isEnabled()) {
+      if (isEnabled(args)) {
         if (!context) {
           return showDialog({
             title: trans.__('Cannot Save'),
