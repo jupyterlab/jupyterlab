@@ -181,6 +181,7 @@ export class CellToolbarTracker implements IDisposable {
     this._toolbar?.dispose();
 
     this._panel = null;
+    this._range = null;
 
     Signal.clearData(this);
   }
@@ -415,7 +416,7 @@ export class CellToolbarTracker implements IDisposable {
         return some(outputs, output => {
           const node = output.firstElementChild;
           if (node) {
-            const range = new Range();
+            const range = this._getRange();
             if (
               TEXT_MIME_TYPES.includes(
                 output.getAttribute('data-mime-type') || ''
@@ -457,7 +458,7 @@ export class CellToolbarTracker implements IDisposable {
     }
 
     let lineRight = codeMirrorLines[0].getBoundingClientRect().left;
-    const range = document.createRange();
+    const range = this._getRange();
     range.selectNodeContents(codeMirrorLines[0]);
     lineRight += range.getBoundingClientRect().width;
 
@@ -479,10 +480,24 @@ export class CellToolbarTracker implements IDisposable {
     return this._cellToolbarRect(activeCell)?.left ?? null;
   }
 
+  /**
+   * Get the range used to measure cell contents.
+   *
+   * Every range slows down DOM updates in the page until it is garbage
+   * collected, so the tracker reuses one.
+   */
+  private _getRange(): Range {
+    if (this._range === null) {
+      this._range = document.createRange();
+    }
+    return this._range;
+  }
+
   private _enabled: boolean;
   private _isDisposed = false;
   private _panel: NotebookPanel | null;
   private _previousActiveCell: Cell<ICellModel> | null;
+  private _range: Range | null = null;
   private _toolbar: Widget | null = null;
   private _toolbarItems: IObservableList<ToolbarRegistry.IToolbarItem> | null =
     null;
