@@ -27,4 +27,19 @@ test.describe('Inspector (contextual help) tooltip', () => {
     await expect(tooltip).toHaveCount(1);
     await expect(tooltip).toContainText('int');
   });
+
+  test('Should dismiss on Escape after clicking inside tooltip', async ({
+    page
+  }) => {
+    await page.notebook.setCell(0, 'code', 'int');
+    await page.notebook.enterCellEditingMode(0);
+    await page.keyboard.press('End');
+    await page.locator('text=| Idle').waitFor();
+    const tooltip = page.locator(TOOLTIP_SELECTOR);
+    await page.keyboard.press('Shift+Tab');
+    await expect(tooltip).toHaveCount(1);
+    await tooltip.click();
+    await page.keyboard.press('Escape');
+    await expect(tooltip).toHaveCount(0);
+  });
 });
