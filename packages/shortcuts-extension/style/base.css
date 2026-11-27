@@ -85,8 +85,9 @@
   border-color: var(--jp-focus-outline-color);
 }
 
-.jp-mod-unavailable-Input:focus {
-  border-color: var(--jp-error-color2);
+/* Invalid field: 4px left accent in dialogs only. */
+.jp-Shortcuts-DialogBody .jp-Shortcuts-Field:has(.jp-mod-error) {
+  box-shadow: inset 4px 0 0 var(--jp-error-color0);
 }
 
 .jp-Shortcuts-InputText {
@@ -111,9 +112,8 @@
   color: var(--jp-content-font-color3);
 }
 
-button.jp-mod-styled.jp-Shortcuts-Overwrite.jp-mod-defunc-Submit,
-button.jp-mod-styled.jp-Shortcuts-Submit.jp-mod-defunc-Submit,
-button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
+.jp-Button.jp-Shortcuts-Overwrite.jp-mod-defunc-Submit,
+.jp-Button.jp-Shortcuts-Submit.jp-mod-defunc-Submit {
   cursor: not-allowed;
   background-color: transparent;
   color: var(--jp-content-font-color3);
@@ -138,23 +138,7 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
 /* Shortcut Item Style */
 .jp-Shortcuts-Cell {
   padding: 6px 12px;
-  display: table-cell;
-  width: 20%;
   vertical-align: middle;
-}
-
-.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell .jp-HTMLSelect {
-  position: relative;
-  max-width: 300px;
-}
-
-.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell .jp-HTMLSelect select {
-  max-width: 300px;
-  white-space: pre-wrap;
-}
-
-.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell .jp-HTMLSelect svg {
-  top: 4px;
 }
 
 .jp-Shortcuts-Cell button {
@@ -164,12 +148,7 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
   padding: 0 5px;
 }
 
-.jp-Shortcuts-Cell button.jp-Shortcuts-Overwrite:focus-visible,
-.jp-Shortcuts-Cell button.jp-Shortcuts-Icon:focus-visible {
-  outline-offset: 1px;
-}
-
-.jp-Shortcuts-Cell button.jp-Shortcuts-Icon {
+.jp-Shortcuts-Cell .jp-Shortcuts-Icon {
   width: 24px;
   min-width: 24px;
   display: inline-flex;
@@ -178,21 +157,19 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
   padding: 0;
 }
 
-.jp-Shortcuts-Cell button.jp-Shortcuts-Icon svg {
+.jp-Shortcuts-Cell .jp-Shortcuts-Icon svg {
   height: 16px;
   width: 16px;
 }
 
-.jp-Shortcuts-AddShortcut.jp-mod-styled .jp-icon3[fill],
-.jp-Shortcuts-Cell button.jp-Shortcuts-Icon .jp-icon3[fill],
-.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-SaveNew .jp-icon3[fill] {
+.jp-Shortcuts-AddShortcut .jp-icon3[fill],
+.jp-Shortcuts-Cell .jp-Shortcuts-Icon .jp-icon3[fill] {
   fill: currentcolor;
 }
 
 .jp-Shortcuts-ShortcutCell {
   display: flex;
   align-items: center;
-  min-width: max-content;
   flex-wrap: wrap;
 }
 
@@ -201,28 +178,16 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
 }
 
 .jp-Shortcuts-Row {
-  width: 100%;
-  display: table-row;
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
   vertical-align: middle;
   background-color: var(--jp-layout-color0);
 }
 
-.jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut {
-  background-color: var(--jp-layout-color2);
+.jp-Shortcuts-ShortcutList tbody .jp-Shortcuts-Cell {
+  border-top: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
-.jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut
-  .jp-Shortcuts-Cell:first-of-type {
-  display: none;
-}
-
-.jp-Shortcuts-Row.jp-Shortcuts-Row-newShortcut .jp-Shortcuts-Cell:nth-child(2) {
-  width: 40%;
-}
-
-.jp-Shortcuts-Row button.jp-Shortcuts-Plus:focus-visible,
-.jp-Shortcuts-Row:hover button.jp-Shortcuts-Plus,
+.jp-Shortcuts-Row .jp-Shortcuts-Plus:focus-visible,
+.jp-Shortcuts-Row:hover .jp-Shortcuts-Plus,
 .jp-Shortcuts-Row:hover .jp-Shortcuts-Or,
 .jp-Shortcuts-Or:has(+ .jp-Shortcuts-Plus:focus-visible) {
   opacity: 1;
@@ -238,9 +203,14 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
   position: relative;
 }
 
+.jp-Shortcuts-RowWithConflict > .jp-Shortcuts-Cell {
+  padding: 0;
+  position: relative;
+}
+
 .jp-Shortcuts-ShortcutContainer {
   display: inline-flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
   border-radius: var(--jp-border-radius);
   padding: 3px;
@@ -267,7 +237,6 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
   display: flex;
   align-items: center;
   padding: 6px 12px;
-  position: absolute;
   height: 100%;
   width: 100%;
   box-sizing: border-box;
@@ -308,7 +277,7 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
   opacity: 0;
 }
 
-.jp-Shortcuts-Cell button.jp-Shortcuts-Plus {
+.jp-Shortcuts-Cell .jp-Shortcuts-Plus {
   margin: 0;
 }
 
@@ -316,35 +285,78 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
   display: inline-block;
 }
 
-/* Shortcut List Style */
 .jp-Shortcuts-ShortcutList {
-  width: 100%;
-  display: table;
-  border-collapse: collapse;
-}
-
-.jp-Shortcuts-ShortcutListContainer {
-  overflow-y: scroll;
+  max-width: 90rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
   border: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
-/* Shortcut Title Item Style */
+.jp-Shortcuts-Col {
+  width: 10rem;
+}
+
+.jp-Shortcuts-Col-selector {
+  width: 18rem;
+}
+
+.jp-Shortcuts-Col-shortcut {
+  min-width: 18rem;
+  width: auto;
+}
+
+.jp-Shortcuts-ShortcutListContainer {
+  overflow: visible;
+}
+
+.jp-Shortcuts-ShortcutList thead .jp-Shortcuts-Cell {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+  font-weight: bold;
+  font-size: var(--jp-ui-font-size1);
+  padding-top: 10px;
+  padding-bottom: 10px;
+  text-align: left;
+  box-shadow: 0 var(--jp-border-width) 0 0 var(--jp-border-color1);
+}
+
 .jp-Shortcuts-Header {
   display: flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  font-weight: bold;
+  text-align: left;
   cursor: pointer;
+  color: inherit;
 }
 
-.jp-Shortcuts-Header:hover .jp-ShortcutTitleItem-sortButton .jp-icon3[fill],
-.jp-Shortcuts-Header:focus .jp-ShortcutTitleItem-sortButton .jp-icon3[fill] {
-  fill: var(--jp-ui-font-color0);
+.jp-Shortcuts-Cell .jp-Shortcuts-Header {
+  margin-left: -5px;
 }
 
-.jp-Shortcuts-Header:active .jp-ShortcutTitleItem-sortButton {
-  outline: none;
+.jp-Shortcuts-SortButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.jp-Shortcuts-SortButton svg {
+  display: block;
 }
 
 .jp-Shortcuts-CurrentHeader .jp-icon3[fill] {
-  fill: var(--jp-ui-font-color0);
+  fill: var(--jp-ui-font-color1);
+}
+
+.jp-Shortcuts-Header:focus-visible {
+  outline: var(--jp-focus-outline-width) solid var(--jp-focus-outline-color);
 }
 
 /* Shortcut UI Style */
@@ -368,6 +380,7 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
   box-sizing: border-box;
   font-size: var(--jp-ui-font-size1);
   background-color: var(--jp-layout-color0);
+  margin-bottom: 24px;
 }
 
 .jp-Shortcuts-TopNav > .jp-FilterBox {
@@ -380,25 +393,24 @@ button.jp-mod-styled.jp-Shortcuts-SaveNew:disabled {
   align-items: center;
 }
 
-button.jp-mod-styled.jp-Shortcuts-SelectorsToggle {
+.jp-Shortcuts-SelectorsToggle {
   margin-right: 15px;
   min-width: fit-content;
 }
 
-button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
-  outline-offset: 1px;
-}
-
-.jp-Shortcuts-AddShortcut.jp-mod-styled.jp-mod-accept {
+.jp-Button.jp-Shortcuts-AddShortcut {
   width: 32px;
   height: 32px;
+  min-width: 32px;
+  min-height: 32px;
   padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
-.jp-Shortcuts-AddShortcut.jp-mod-styled:disabled {
+.jp-Button.jp-Shortcuts-AddShortcut:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
@@ -406,53 +418,168 @@ button.jp-mod-styled.jp-Shortcuts-SelectorsToggle:focus-visible {
 .jp-Shortcuts-AddShortcut.jp-Shortcuts-Icon svg {
   height: 20px;
   width: 20px;
+  flex-shrink: 0;
 }
 
-.jp-Shortcuts-AddShortcut.jp-mod-styled:focus-visible {
+.jp-Shortcuts-Cell .jp-Shortcuts-Overwrite:focus-visible,
+.jp-Shortcuts-Cell .jp-Shortcuts-Icon:focus-visible,
+.jp-Button.jp-Shortcuts-SelectorsToggle:focus-visible,
+.jp-Button.jp-Shortcuts-AddShortcut:focus-visible {
   outline-offset: 1px;
 }
 
-.jp-Shortcuts-HeaderRowContainer {
-  padding-right: 14px;
-}
-
-.jp-Shortcuts-HeaderRow {
-  font-weight: bold;
-  font-size: var(--jp-ui-font-size1);
-  background-color: var(--jp-layout-color0);
-  width: 100%;
-  z-index: 1;
-  display: table;
-  padding: 10px 0;
-}
-
-.jp-Shortcuts-CustomOptionsDialogBody {
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-}
-
-.jp-Shortcuts-CustomOptionDialog-container {
+.jp-Shortcuts-DialogBody {
   display: flex;
   flex-direction: column;
   gap: 12px;
   width: 500px;
-  height: 400px;
-  padding: 12px;
+  max-width: 500px;
+  min-height: 400px;
+  height: auto;
+  padding: 12px 0;
+  box-sizing: border-box;
 }
 
-.jp-Shortcuts-CustomOptionDialog-container label {
+.jp-Dialog-content:has(.jp-Shortcuts-DialogBody) {
+  width: max-content;
+  max-width: calc(500px + 48px);
+  max-height: 90vh;
+  resize: vertical;
+  overflow: hidden;
+}
+
+.jp-Dialog-content:has(.jp-Shortcuts-DialogBody) > .jp-Dialog-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.jp-Shortcuts-AddDialog-capture .jp-Shortcuts-InputBox,
+.jp-Shortcuts-AddDialog-capture .jp-Shortcuts-InputBox-controls,
+.jp-Shortcuts-AddDialog-capture .jp-Shortcuts-Input,
+.jp-Shortcuts-AddDialog-capture .jp-Shortcuts-StartRecording,
+.jp-Shortcuts-DialogBody select,
+.jp-Shortcuts-Field > input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.jp-Shortcuts-AddDialog-capture .jp-Shortcuts-Input {
+  animation: none;
+}
+
+.jp-Shortcuts-AddDialog-capture .jp-Shortcuts-StartRecording {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  background: var(--jp-layout-color2);
+  color: var(--jp-ui-font-color0);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  border-radius: var(--jp-border-radius);
+  min-height: 32px;
+  height: auto;
+  line-height: normal;
+  padding: 4px 8px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.jp-Shortcuts-AddDialog-capture .jp-Shortcuts-StartRecording:hover {
+  background: var(--jp-layout-color3);
+  border-color: var(--jp-border-color0);
+}
+
+.jp-Shortcuts-AddDialog-capture .jp-Shortcuts-StartRecording:focus-visible {
+  outline: var(--jp-focus-outline-width) solid var(--jp-focus-outline-color);
+  outline-offset: 1px;
+}
+
+.jp-Shortcuts-Field-error {
+  color: var(--jp-error-color1);
+  min-height: 1.2em;
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-Shortcuts-Field {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.jp-Shortcuts-DialogBody .jp-Shortcuts-Field {
+  padding: 0 12px;
+}
+
+.jp-Shortcuts-Field > .jp-Dialog-label {
   margin: 0;
   font-weight: bold;
   font-size: var(--jp-ui-font-size1);
 }
 
-.jp-Shortcuts-CustomOptionDialog-container input {
+.jp-Shortcuts-Field > input {
   padding: 8px;
-  border: 1px solid var(--jp-border-color1);
-  border-radius: 2px;
+}
+
+.jp-Shortcuts-Field:has(.jp-JSONEditor) {
+  flex: 1 1 auto;
+  min-height: 8rem;
+}
+
+.jp-Shortcuts-Field .jp-select-wrapper {
+  margin-bottom: 0;
+}
+
+.jp-Shortcuts-DialogBody .jp-Shortcuts-Input,
+.jp-Shortcuts-DialogBody .jp-Shortcuts-Field > input,
+.jp-Shortcuts-DialogBody .jp-JSONEditor-host {
+  background: var(--jp-input-background);
+  color: var(--jp-ui-font-color0);
+  font-family: var(--jp-ui-font-family);
+  font-size: var(--jp-ui-font-size2);
+  border: var(--jp-border-width) solid var(--jp-input-border-color);
+  border-radius: var(--jp-border-radius);
+  box-sizing: border-box;
+}
+
+.jp-Shortcuts-DialogBody .jp-Shortcuts-Input:focus,
+.jp-Shortcuts-DialogBody .jp-Shortcuts-Field > input:focus,
+.jp-Shortcuts-DialogBody .jp-JSONEditor-host.jp-mod-focused {
+  border-color: var(--jp-input-active-border-color);
+  box-shadow: var(--jp-input-box-shadow);
+}
+
+.jp-JSONEditor.jp-mod-error .jp-JSONEditor-host {
+  border-color: var(--jp-input-border-color);
+  outline-color: transparent;
+}
+
+.jp-JSONEditor.jp-mod-error .jp-JSONEditor-host.jp-mod-focused {
+  border-color: var(--jp-input-active-border-color);
+}
+
+.jp-Shortcuts-DialogBody select:focus-visible,
+.jp-Shortcuts-DialogBody .jp-Shortcuts-Input:focus-visible,
+.jp-Shortcuts-DialogBody .jp-Shortcuts-Field > input:focus-visible,
+.jp-Shortcuts-DialogBody .jp-JSONEditor-host:has(:focus-visible) {
+  outline: var(--jp-focus-outline-width) solid var(--jp-focus-outline-color);
+}
+
+.jp-JSONEditor-host .cm-editor {
+  height: 100%;
 }
 
 .jp-JSONEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.jp-JSONEditor .jp-JSONEditor-host {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
 }

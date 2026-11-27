@@ -351,16 +351,18 @@ test('Keyboard Shortcuts: overwriting a shortcut can be dismissed', async ({
   const filterInput = shortcutsForm.locator('jp-search.jp-FilterBox');
   await filterInput.locator('input').fill('merge cell below');
 
-  const addShortcutButton = shortcutsForm.locator('.jp-Shortcuts-Plus');
-  await expect(addShortcutButton).toHaveCount(1);
+  // Row-level "add keybinding" (not the TopNav Add Shortcut dialog).
+  const addKeybindingButton = shortcutsForm.getByTitle('Add keybinding');
+  await expect(addKeybindingButton).toHaveCount(1);
 
   const conflict = shortcutsForm.locator('.jp-Shortcuts-Conflict');
   await expect(conflict).toHaveCount(0);
 
-  await addShortcutButton.click();
+  await addKeybindingButton.click();
 
-  const newShortcutInput = shortcutsForm.locator('.jp-Shortcuts-InputBoxNew');
-  await newShortcutInput.press('Shift+M');
+  const shortcutInput = shortcutsForm.locator('.jp-Shortcuts-Input').first();
+  await expect(shortcutInput).toBeVisible();
+  await shortcutInput.press('Shift+M');
 
   await expect(conflict).toHaveCount(1);
 
@@ -375,7 +377,7 @@ test('Keyboard Shortcuts: overwriting a shortcut can be dismissed', async ({
   // Cancel by dismissing the input (blur closes the editor and clears conflicts).
   await filterInput.click();
 
-  await expect(newShortcutInput).toHaveCount(0);
+  await expect(shortcutInput).toHaveCount(0);
   await expect(conflict).toHaveCount(0);
 });
 
@@ -408,7 +410,7 @@ test('Keyboard Shortcuts: validate "Or" button behavior when editing shortcuts',
   );
 });
 
-test('Keyboard Shortcuts: should show/hide the add shortcut row', async ({
+test('Keyboard Shortcuts: should open and cancel the add shortcut dialog', async ({
   page
 }) => {
   await page.evaluate(async () => {
@@ -418,24 +420,20 @@ test('Keyboard Shortcuts: should show/hide the add shortcut row', async ({
   });
 
   const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
-  const addShortcutRow = shortcutsForm.locator('.jp-Shortcuts-Row-newShortcut');
-  const rows = shortcutsForm.locator('.jp-Shortcuts-Row');
-  // Wait for the shortcuts to be displayed.
-  await rows.first().waitFor();
+  await shortcutsForm.locator('.jp-Shortcuts-Row').first().waitFor();
 
-  // Expect the add shortcut row to not be attached by default.
-  await expect(addShortcutRow).not.toBeAttached();
+  const dialog = page.locator('.jp-Dialog-content');
+  await expect(dialog).toHaveCount(0);
 
-  // Show the add shortcut row.
   await shortcutsForm.getByTitle('Add shortcut').click();
-  await expect(addShortcutRow).toBeAttached();
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator('.jp-Shortcuts-AddDialogBody')).toBeVisible();
 
-  // Hide the add shortcut row
-  await shortcutsForm.getByTitle('Collapse new shortcut row').click();
-  await expect(addShortcutRow).not.toBeAttached();
+  await dialog.locator('button.jp-mod-reject').click();
+  await expect(dialog).toHaveCount(0);
 });
 
-test('Keyboard Shortcuts: should filter commands in add shortcut row', async ({
+test('Keyboard Shortcuts: should list and select a command in the add shortcut dialog', async ({
   page
 }) => {
   await page.evaluate(async () => {
@@ -445,25 +443,20 @@ test('Keyboard Shortcuts: should filter commands in add shortcut row', async ({
   });
 
   const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
-  const addShortcutRow = shortcutsForm.locator('.jp-Shortcuts-Row-newShortcut');
-
-  // Locator to all options except the empty one.
-  const commandOptions = addShortcutRow.locator(
-    'select option:not([value=""])'
-  );
-
-  // Show the add shortcut row and count initial commands.
   await shortcutsForm.getByTitle('Add shortcut').click();
-  const initialCount = await commandOptions.count();
 
-  // Filtering on notebook should reduce the count.
-  const filterInput = shortcutsForm.locator('jp-search.jp-FilterBox');
-  await filterInput.locator('input').fill('notebook');
-  expect(await commandOptions.count()).toBeLessThan(initialCount);
+  const dialog = page.locator('.jp-Dialog-content');
+  await dialog.waitFor();
+  const commandSelect = dialog.locator('#jp-Shortcuts-AddDialog-command');
+  const commandOptions = commandSelect.locator('option:not([value=""])');
 
-  // Filtering on a specific command should keep only one command.
-  await filterInput.locator('input').fill('restart kernel and run all cells');
-  await expect(commandOptions).toHaveCount(1);
+  // Dialog lists all commands; table search does not filter this select.
+  expect(await commandOptions.count()).toBeGreaterThan(10);
+
+  await commandSelect.selectOption({ value: 'notebook:restart-run-all' });
+  await expect(commandSelect).toHaveValue('notebook:restart-run-all');
+
+  await dialog.locator('button.jp-mod-reject').click();
 });
 
 test('Keyboard Shortcuts: should find a shortcut by the text it inserts', async ({
@@ -492,9 +485,12 @@ test('Keyboard Shortcuts: should add a new shortcut', async ({ page }) => {
   // Function that get the shortcuts related to a command.
   const getShortcut = async (command: string) => {
     return await page.evaluate(async command => {
-      const settingsRegistry = window.jupyterapp.pluginRegistry._plugins.get(
+      const settingsRegistry = await window.galata.getPlugin(
         '@jupyterlab/apputils-extension:settings'
-      ).service;
+      );
+      if (!settingsRegistry) {
+        throw new Error('Settings registry plugin is unavailable');
+      }
       const shortcuts = (
         await settingsRegistry.load('@jupyterlab/shortcuts-extension:shortcuts')
       ).composite.shortcuts as any[];
@@ -515,46 +511,160 @@ test('Keyboard Shortcuts: should add a new shortcut', async ({ page }) => {
   expect(await getShortcut('notebook:restart-run-all')).toHaveLength(0);
 
   const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
-  const addShortcutRow = shortcutsForm.locator('.jp-Shortcuts-Row-newShortcut');
-
-  // Show the add shortcut row.
   await shortcutsForm.getByTitle('Add shortcut').click();
 
-  // Select the command.
-  await addShortcutRow
-    .locator('select')
-    .selectOption('notebook: Restart Kernel and Run All Cells…');
-  // Display the shortcut input and add a shortcut.
-  await addShortcutRow.locator('.jp-Shortcuts-EmptyCell').first().hover();
-  await addShortcutRow.locator('.jp-Shortcuts-Plus').click();
-  const shortcutKey = addShortcutRow.locator('.jp-Shortcuts-Input').first();
-  await shortcutKey.press('Control+r');
-  await addShortcutRow.locator('.jp-Shortcuts-Submit').click();
-
-  // Open the custom command dialog.
-  await addShortcutRow.getByTitle('Custom options').waitFor();
-  await addShortcutRow.getByTitle('Custom options').click();
-
-  // Fill some custom value for the selector and the args.
   const dialog = page.locator('.jp-Dialog-content');
   await dialog.waitFor();
-  await dialog.getByRole('textbox').first().fill(selector);
+  await expect(dialog.locator('.jp-Shortcuts-AddDialogBody')).toBeVisible();
+
+  await dialog
+    .locator('#jp-Shortcuts-AddDialog-command')
+    .selectOption({ value: 'notebook:restart-run-all' });
+
+  // Selector + args live in the add dialog (not a separate Custom options dialog).
+  await dialog.locator('input[name="shortcut-selector"]').fill(selector);
   const jsonEditorLine = dialog.locator('.jp-JSONEditor-host .cm-line').first();
   await jsonEditorLine.click();
   await jsonEditorLine.selectText();
   await jsonEditorLine.fill(JSON.stringify(args));
-  await dialog.locator('button.jp-mod-accept').click();
+
+  await dialog.locator('.jp-Shortcuts-StartRecording').click();
+  const shortcutKey = dialog.locator('.jp-Shortcuts-Input').first();
+  await shortcutKey.press('Control+r');
+
+  const accept = dialog.locator('button.jp-mod-accept');
+  await expect(accept).toBeEnabled();
+  await accept.click();
   await dialog.waitFor({ state: 'detached' });
 
-  // Save the new shortcut.
-  await addShortcutRow.locator('.jp-Shortcuts-SaveNew').click();
-  await addShortcutRow.waitFor({ state: 'detached' });
+  // Dialog closes before saveNewShortcut finishes writing settings; poll.
+  await expect
+    .poll(async () => {
+      const shortcut = await getShortcut('notebook:restart-run-all');
+      return shortcut.map(s => ({
+        selector: s.selector,
+        args: s.args
+      }));
+    })
+    .toContainEqual({ selector, args });
+});
 
-  // The shortcut should now be listed with the correct selector and args.
-  const shortcut = await getShortcut('notebook:restart-run-all');
-  expect(shortcut).toHaveLength(1);
-  expect(shortcut[0].selector).toBe(selector);
-  expect(JSON.stringify(shortcut[0].args)).toBe(JSON.stringify(args));
+test('Keyboard Shortcuts: Overwrite in add dialog replaces a conflicting shortcut', async ({
+  page
+}) => {
+  const notebookCommandSelector =
+    '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus';
+
+  const getCompositeShortcuts = async (command: string) => {
+    return await page.evaluate(async command => {
+      const settingsRegistry = await window.galata.getPlugin(
+        '@jupyterlab/apputils-extension:settings'
+      );
+      if (!settingsRegistry) {
+        throw new Error('Settings registry plugin is unavailable');
+      }
+      const shortcuts = (
+        await settingsRegistry.load('@jupyterlab/shortcuts-extension:shortcuts')
+      ).composite.shortcuts as Array<{
+        command: string;
+        keys: string[];
+        selector: string;
+        disabled?: boolean;
+      }>;
+      return shortcuts.filter(shortcut => shortcut.command === command);
+    }, command);
+  };
+
+  const getUserShortcuts = async () => {
+    return await page.evaluate(async () => {
+      const settingsRegistry = await window.galata.getPlugin(
+        '@jupyterlab/apputils-extension:settings'
+      );
+      if (!settingsRegistry) {
+        throw new Error('Settings registry plugin is unavailable');
+      }
+      const settings = await settingsRegistry.load(
+        '@jupyterlab/shortcuts-extension:shortcuts'
+      );
+      return (settings.user.shortcuts ?? []) as Array<{
+        command: string;
+        keys?: string[];
+        winKeys?: string[];
+        macKeys?: string[];
+        linuxKeys?: string[];
+        selector: string;
+        disabled?: boolean;
+      }>;
+    });
+  };
+
+  const shortcutKeys = (shortcut: {
+    keys?: string[];
+    winKeys?: string[];
+    macKeys?: string[];
+    linuxKeys?: string[];
+  }): string[] | undefined =>
+    shortcut.keys ?? shortcut.linuxKeys ?? shortcut.winKeys ?? shortcut.macKeys;
+
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Keyboard Shortcuts'
+    });
+  });
+
+  const shortcutsForm = page.locator('.jp-Shortcuts-ShortcutUI');
+  await shortcutsForm.getByTitle('Add shortcut').click();
+
+  const dialog = page.locator('.jp-Dialog-content');
+  await dialog.waitFor();
+
+  await dialog
+    .locator('#jp-Shortcuts-AddDialog-command')
+    .selectOption({ value: 'notebook:restart-run-all' });
+  await dialog
+    .locator('input[name="shortcut-selector"]')
+    .fill(notebookCommandSelector);
+
+  await dialog.locator('.jp-Shortcuts-StartRecording').click();
+  const captureInput = dialog.locator('.jp-Shortcuts-Input').first();
+  await captureInput.press('Shift+M');
+  await expect(dialog.locator('.jp-Shortcuts-InputText')).not.toHaveClass(
+    /jp-mod-waiting-InputText/
+  );
+  await expect(dialog.locator('.jp-Shortcuts-InputText')).toContainText(
+    'Shift'
+  );
+
+  const error = dialog.locator('#jp-Shortcuts-AddDialog-shortcut-error');
+  await expect(error).toContainText('Press Overwrite to replace it.');
+
+  const accept = dialog.getByRole('button', { name: 'Overwrite' });
+  await expect(accept).toBeEnabled();
+  await accept.click();
+  await dialog.waitFor({ state: 'detached' });
+
+  // Dialog closes before saveNewShortcut finishes writing settings; poll.
+  await expect
+    .poll(async () => {
+      const list = await getCompositeShortcuts('notebook:restart-run-all');
+      return list.map(s => ({ selector: s.selector, keys: s.keys }));
+    })
+    .toContainEqual({
+      selector: notebookCommandSelector,
+      keys: ['Shift M']
+    });
+
+  await expect
+    .poll(async () => {
+      const disabledConflict = (await getUserShortcuts()).find(
+        s =>
+          s.command === 'notebook:merge-cells' &&
+          s.disabled === true &&
+          s.selector === notebookCommandSelector
+      );
+      return shortcutKeys(disabledConflict ?? {});
+    })
+    .toEqual(['Shift M']);
 });
 
 test('Settings Export: Clicking the export button triggers a download and matches content', async ({

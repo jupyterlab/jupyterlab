@@ -3,9 +3,10 @@
  * Distributed under the terms of the Modified BSD License.
  */
 import * as React from 'react';
-import type { ITranslator } from '@jupyterlab/translation';
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONExt } from '@lumino/coreutils';
+import { Platform } from '@lumino/domutils';
 import { EN_US } from '@lumino/keyboard';
 import { checkIcon } from '@jupyterlab/ui-components';
 import type {
@@ -17,13 +18,16 @@ import type {
 
 /** Idle time after the last keystroke before leaving active capture. */
 const CAPTURE_IDLE_MS = 2000;
-const CAPTURE_IDLE_SECONDS = CAPTURE_IDLE_MS / 1000;
 
-type CapturePhase = 'capturing' | 'ready' | 'incompleteIdle';
+type CapturePhase = 'idle' | 'capturing' | 'ready' | 'incompleteIdle';
 
-export interface IConflicts {
+export interface ICaptureError {
   keys: string[];
+  /** Empty when the error is not a binding clash. */
   conflictsWith: IShortcutTarget[];
+  /** Human-readable message for the error UI. */
+  message: string;
+  kind: 'conflict' | 'incomplete';
 }
 
 export interface IShortcutInputProps {
@@ -31,8 +35,8 @@ export interface IShortcutInputProps {
   replaceKeybinding: IShortcutUI['replaceKeybinding'];
   deleteKeybinding: IShortcutUI['deleteKeybinding'];
   findConflictsFor: IShortcutRegistry['findConflictsFor'];
-  displayConflicts: (conflicts: IConflicts) => void;
-  clearConflict: () => void;
+  displayCaptureError: (error: ICaptureError) => void;
+  clearCaptureError: () => void;
   toggleInput: () => void;
   onCloseAfterSubmit?: () => void;
   onCloseAfterCancel?: () => void;
@@ -43,6 +47,36 @@ export interface IShortcutInputProps {
   displayInput: boolean;
   placeholder: string;
   translator: ITranslator;
+  /**
+   * When true, do not persist on Submit and keep the capture open for a parent
+   * dialog to commit later. Hides the Submit control and reports keys via
+   * {@link onKeysChange}.
+   */
+  deferPersist?: boolean;
+  /**
+   * Called when the captured key sequence changes (deferred mode and after edits).
+   * Keys omit empty segments; may be incomplete while modifiers are held.
+   */
+  onKeysChange?: (keys: string[]) => void;
+  /**
+   * Id of a visible label element. When set, used as `aria-labelledby`
+   * (preferred over {@link ariaLabel}). Needed because the capture control is
+   * a `div`, which is not associated via a label's `htmlFor`.
+   */
+  labelledBy?: string;
+  /**
+   * Accessible name when {@link labelledBy} is not set.
+   */
+  ariaLabel?: string;
+  /**
+   * Id for the capture textbox. Generated when omitted.
+   */
+  id?: string;
+  /**
+   * Id of an external error element that owns assertive announcements.
+   * When set, used in `aria-describedby` and the internal alert is omitted.
+   */
+  externalErrorId?: string;
 }
 
 export interface IShortcutInputState {
@@ -60,6 +94,8 @@ export interface IShortcutInputState {
   timerRunning: boolean;
   /** One-shot start announcement for the polite live region. */
   announceCaptureStart: boolean;
+  /** Whether the capture textbox itself has focus. */
+  inputFocused: boolean;
 }
 
 export class ShortcutInput extends React.Component<
@@ -69,8 +105,11 @@ export class ShortcutInput extends React.Component<
   constructor(props: IShortcutInputProps) {
     super(props);
     this._ref = React.createRef();
-    this._hintId = `jp-Shortcuts-CaptureHint-${ShortcutInput._nextHintId++}`;
-    this._conflictId = `${this._hintId}-conflict`;
+    const idSuffix = ShortcutInput._nextHintId++;
+    this._inputId = props.id ?? `jp-Shortcuts-CaptureInput-${idSuffix}`;
+    this._hintId = `jp-Shortcuts-CaptureHint-${idSuffix}`;
+    this._errorId = `${this._hintId}-error`;
+    this._startLabelId = `${this._hintId}-start`;
 
     this.state = {
       value: this.props.placeholder,
@@ -81,20 +120,26 @@ export class ShortcutInput extends React.Component<
       currentChain: '',
       selected: true,
       activeConflicts: [],
-      phase: 'capturing',
+      // Dialog waits for an explicit start; inline edit records immediately.
+      phase: props.deferPersist ? 'idle' : 'capturing',
       timerGeneration: 0,
       timerRunning: false,
-      announceCaptureStart: false
+      announceCaptureStart: false,
+      // Inline edit focuses immediately; the add dialog focuses the command list first.
+      inputFocused: !props.deferPersist
     };
   }
 
   componentDidMount(): void {
-    this._inputRef.current?.focus();
-    // Defer so aria-live announces; initial mount content is often skipped.
-    this._announceStartRaf = requestAnimationFrame(() => {
-      this._announceStartRaf = null;
-      this.setState({ announceCaptureStart: true });
-    });
+    // In dialog mode the parent owns initial focus (e.g. command select).
+    if (!this._deferPersist) {
+      this._inputRef.current?.focus();
+      // Defer so aria-live announces; initial mount content is often skipped.
+      this._announceStartRaf = requestAnimationFrame(() => {
+        this._announceStartRaf = null;
+        this.setState({ announceCaptureStart: true });
+      });
+    }
   }
 
   componentWillUnmount(): void {
@@ -114,20 +159,71 @@ export class ShortcutInput extends React.Component<
     return !!this.props.keybinding;
   }
 
-  private _emitConflicts(conflicts: IShortcutTarget[]) {
-    const keys = [...this.state.keys, this.state.currentChain];
+  private _buildCaptureError(
+    conflicts: IShortcutTarget[],
+    phase: CapturePhase = this.state.phase,
+    keys: string[] = this._capturedKeys()
+  ): ICaptureError | null {
+    const trans = this.props.translator.load('jupyterlab');
+    if (conflicts.length > 0) {
+      return {
+        keys,
+        conflictsWith: conflicts,
+        kind: 'conflict',
+        message: trans.__(
+          'Shortcut already in use by %1.',
+          conflicts.map(target => target.label ?? target.command).join(', ')
+        )
+      };
+    }
+    if (phase === 'incompleteIdle') {
+      return {
+        keys,
+        conflictsWith: [],
+        kind: 'incomplete',
+        message: trans.__('Incomplete shortcut. Continue typing.')
+      };
+    }
+    return null;
+  }
+
+  private _emitCaptureError(
+    conflicts: IShortcutTarget[],
+    phase: CapturePhase = this.state.phase,
+    keys?: string[]
+  ): void {
     this.setState({ activeConflicts: conflicts });
-    this.props.displayConflicts({
-      conflictsWith: conflicts,
-      keys
-    });
+    const error = this._buildCaptureError(conflicts, phase, keys);
+    if (error) {
+      this.props.displayCaptureError(error);
+    } else {
+      this.props.clearCaptureError();
+    }
+  }
+
+  private get _deferPersist(): boolean {
+    return !!this.props.deferPersist;
+  }
+
+  private _capturedKeys(
+    keys: string[] = this.state.keys,
+    currentChain: string = this.state.currentChain
+  ): string[] {
+    return [...keys, currentChain].filter(key => key !== '');
+  }
+
+  private _emitKeysChange(
+    keys: string[] = this.state.keys,
+    currentChain: string = this.state.currentChain
+  ): void {
+    this.props.onKeysChange?.(this._capturedKeys(keys, currentChain));
   }
 
   private _overwriteConflicts = async (
     conflicts: IShortcutTarget[],
     keys: string[]
   ): Promise<void> => {
-    this.props.clearConflict();
+    this.props.clearCaptureError();
     this.setState({
       // Since user decided to overwrite, no need to show it as conflicted anymore
       isAvailable: true,
@@ -143,8 +239,53 @@ export class ShortcutInput extends React.Component<
     this.props.onCloseAfterSubmit?.();
   };
 
-  private _cancel = (): void => {
+  private _resetCapture = (): void => {
     this._clearIdleTimer();
+    this.setState(
+      {
+        value: '',
+        userInput: '',
+        keys: [],
+        currentChain: '',
+        selected: true,
+        isAvailable: true,
+        isFunctional: false,
+        activeConflicts: [],
+        phase: this._deferPersist ? 'idle' : 'capturing',
+        timerRunning: false,
+        announceCaptureStart: !this._deferPersist
+      },
+      () => {
+        this.props.clearCaptureError();
+        this._emitKeysChange([], '');
+      }
+    );
+  };
+
+  private _startRecording = (): void => {
+    if (this.state.phase !== 'idle') {
+      return;
+    }
+    this.setState({ phase: 'capturing', announceCaptureStart: false }, () => {
+      this._inputRef.current?.focus();
+      if (this._announceStartRaf !== null) {
+        cancelAnimationFrame(this._announceStartRaf);
+      }
+      this._announceStartRaf = requestAnimationFrame(() => {
+        this._announceStartRaf = null;
+        this.setState({ announceCaptureStart: true });
+      });
+    });
+  };
+
+  private _cancel = (): void => {
+    if (this._deferPersist) {
+      this._resetCapture();
+      this.props.onCloseAfterCancel?.();
+      return;
+    }
+    this._clearIdleTimer();
+    this.props.clearCaptureError();
     this.props.toggleInput();
     this.props.onCloseAfterCancel?.();
   };
@@ -175,13 +316,23 @@ export class ShortcutInput extends React.Component<
 
   private _onIdleTimerFire = (): void => {
     this._idleTimer = null;
-    this.setState(prev => ({
-      phase: prev.isFunctional ? 'ready' : 'incompleteIdle',
-      timerRunning: false
-    }));
+    this.setState(
+      prev => ({
+        phase: prev.isFunctional ? 'ready' : 'incompleteIdle',
+        timerRunning: false
+      }),
+      () => {
+        this._emitCaptureError(this.state.activeConflicts, this.state.phase);
+      }
+    );
   };
 
   handleSubmit = async () => {
+    if (this._deferPersist) {
+      // Persistence is owned by the parent dialog Save action.
+      this._emitKeysChange();
+      return;
+    }
     if (!this.state.isAvailable && this.state.activeConflicts.length > 0) {
       const keys = [...this.state.keys, this.state.currentChain];
       await this._overwriteConflicts(this.state.activeConflicts, keys);
@@ -254,12 +405,15 @@ export class ShortcutInput extends React.Component<
       value = '';
       keys = [];
       currentChain = '';
-      this.setState({
-        value: value,
-        userInput: userInput,
-        keys: keys,
-        currentChain: currentChain
-      });
+      this.setState(
+        {
+          value: value,
+          userInput: userInput,
+          keys: keys,
+          currentChain: currentChain
+        },
+        () => this._emitKeysChange([], '')
+      );
     } else if (event.key !== 'CapsLock') {
       const lastKey = userInput
         .substr(userInput.lastIndexOf(' ') + 1, userInput.length)
@@ -332,6 +486,14 @@ export class ShortcutInput extends React.Component<
 
           /** if not a modifier key, add it regularly */
         } else {
+          // Shift keydown may have been skipped after idle (for Shift+Tab).
+          if (
+            event.shiftKey &&
+            !currentChain.split(' ').filter(Boolean).includes('Shift')
+          ) {
+            userInput = (userInput + ' Shift').trim();
+            currentChain = (currentChain + ' Shift').trim();
+          }
           userInput = (userInput + ' ' + (key ?? event.key)).trim();
           currentChain = (currentChain + ' ' + (key ?? event.key)).trim();
         }
@@ -396,8 +558,8 @@ export class ShortcutInput extends React.Component<
         this._cancel();
         return;
       }
-      if (event.key === 'Tab') {
-        // Allow normal focus movement; blur will dismiss the input.
+      // Allow normal focus movement (Tab | Shift + Tab)
+      if (event.key === 'Tab' || event.key === 'Shift') {
         return;
       }
     }
@@ -434,34 +596,98 @@ export class ShortcutInput extends React.Component<
         announceCaptureStart: false
       },
       () => {
-        this._emitConflicts(conflicts);
+        this._emitCaptureError(
+          conflicts,
+          'capturing',
+          this._capturedKeys(keys, currentChain)
+        );
+        this._emitKeysChange(keys, currentChain);
         this._resetIdleTimer();
       }
     );
   };
 
-  private _statusMessage(trans: ReturnType<ITranslator['load']>): string {
+  /**
+   * Speak a single key token in words (not glyphs) for the live region.
+   */
+  private _spokenKey(token: string, trans: TranslationBundle): string {
+    switch (token) {
+      case 'Ctrl':
+        return trans.__('Control');
+      case 'Accel':
+        return Platform.IS_MAC ? trans.__('Command') : trans.__('Control');
+      case 'Alt':
+        return Platform.IS_MAC ? trans.__('Option') : trans.__('Alt');
+      case 'Shift':
+        return trans.__('Shift');
+      default:
+        return token;
+    }
+  }
+
+  /**
+   * Speak the current captured sequence in words, e.g. "Control Shift E".
+   */
+  private _spokenShortcut(trans: TranslationBundle): string {
+    if (!this.state.userInput.trim()) {
+      return '';
+    }
+    // Split on ', ' so a comma key is not treated as a chord separator.
+    return this.state.userInput
+      .split(', ')
+      .map(chord =>
+        chord
+          .trim()
+          .split(/\s+/)
+          .filter(Boolean)
+          .map(token => this._spokenKey(token, trans))
+          .join(' ')
+      )
+      .filter(Boolean)
+      .join(', ');
+  }
+
+  private _statusMessage(trans: TranslationBundle): string {
+    if (this.state.phase === 'idle') {
+      return '';
+    }
+
+    const spoken = this._spokenShortcut(trans);
+
     if (this.state.phase === 'ready') {
-      return trans.__('Shortcut ready.');
+      return spoken
+        ? trans.__('Shortcut ready: %1.', spoken)
+        : trans.__('Shortcut ready.');
     }
+
+    // Incomplete is announced via the error channel, not the status region.
     if (this.state.phase === 'incompleteIdle') {
-      return trans.__('Incomplete shortcut. Continue typing.');
+      return '';
     }
-    if (this.state.announceCaptureStart) {
+
+    if (this.state.isFunctional && spoken) {
+      return spoken;
+    }
+
+    // Only claim capturing while the textbox is focused.
+    if (
+      this.state.inputFocused &&
+      (this.state.announceCaptureStart ||
+        this.state.userInput !== '' ||
+        this.state.keys.length > 0)
+    ) {
       return trans.__('Capturing shortcut keys.');
     }
+
     return '';
   }
 
-  private _conflictMessage(trans: ReturnType<ITranslator['load']>): string {
-    if (this.state.isAvailable || this.state.activeConflicts.length === 0) {
-      return '';
-    }
-    return trans.__(
-      'Shortcut already in use by %1.',
-      this.state.activeConflicts
-        .map(target => target.label ?? target.command)
-        .join(', ')
+  private _errorMessage(trans: TranslationBundle): string {
+    return (
+      this._buildCaptureError(
+        !this.state.isAvailable ? this.state.activeConflicts : [],
+        this.state.phase
+      )?.message ?? ''
     );
   }
 
@@ -469,64 +695,110 @@ export class ShortcutInput extends React.Component<
     const trans = this.props.translator.load('jupyterlab');
     const hasConflict =
       !this.state.isAvailable && this.state.activeConflicts.length > 0;
+    const hasCapture =
+      this.state.userInput !== '' ||
+      this.state.keys.length > 0 ||
+      this.state.phase === 'incompleteIdle';
+    const isIncomplete = hasCapture && !this.state.isFunctional;
+    const isInvalid = hasConflict || isIncomplete;
+    // In the add dialog, conflicts must not use jp-mod-error or Dialog disables
+    // the accept button; the footer becomes Overwrite instead.
+    const showErrorClass = this._deferPersist ? isIncomplete : isInvalid;
+    const isIdle = this.state.phase === 'idle';
     let inputClassName = 'jp-Shortcuts-Input';
     if (!this.state.isAvailable) {
       inputClassName += ' jp-mod-unavailable-Input';
     }
     const statusMessage = this._statusMessage(trans);
-    const conflictMessage = this._conflictMessage(trans);
-    const describedBy = conflictMessage
-      ? `${this._hintId} ${this._conflictId}`
+    const errorMessage = this._errorMessage(trans);
+    const externalErrorId = this.props.externalErrorId;
+    const errorDescribedBy = externalErrorId ?? this._errorId;
+    const describedBy = errorMessage
+      ? `${this._hintId} ${errorDescribedBy}`
       : this._hintId;
-    const captureHint = trans._n(
-      'Capture pauses %1 second after the last key.',
-      'Capture pauses %1 seconds after the last key.',
-      CAPTURE_IDLE_SECONDS
-    );
+    const activelyRecording =
+      this.state.phase === 'capturing' && this.state.inputFocused;
+    const captureHint = isIdle
+      ? trans.__('Press Start recording to capture a shortcut.')
+      : activelyRecording
+        ? trans.__('Recording…')
+        : this.state.phase === 'capturing'
+          ? trans.__('Focus this field to record a shortcut.')
+          : trans.__(
+              'Recording paused. Press Tab or Shift+Tab to navigate normally.'
+            );
+    const commandName =
+      this.props.shortcut.label ?? this.props.shortcut.command;
+    const defaultAriaLabel = this._isReplacingExistingKeybinding
+      ? trans.__('Shortcut for %1', commandName)
+      : trans.__('New shortcut for %1', commandName);
+    const labelledBy = this.props.labelledBy;
+    const ariaLabel = labelledBy
+      ? undefined
+      : (this.props.ariaLabel ?? defaultAriaLabel);
+    const placeholderText =
+      this.state.value === '' ? trans.__('press keys') : this.state.value;
+    const boxClass = [
+      'jp-Shortcuts-InputBox',
+      !this._isReplacingExistingKeybinding ? 'jp-Shortcuts-InputBoxNew' : '',
+      showErrorClass ? 'jp-mod-error' : '',
+      this.props.displayInput ? '' : 'jp-mod-hidden'
+    ]
+      .filter(Boolean)
+      .join(' ');
     return (
-      <div
-        className={
-          this.props.displayInput
-            ? !this._isReplacingExistingKeybinding
-              ? 'jp-Shortcuts-InputBox jp-Shortcuts-InputBoxNew'
-              : 'jp-Shortcuts-InputBox'
-            : 'jp-mod-hidden'
-        }
-        ref={this._ref}
-        onBlur={this._handleBlur}
-      >
+      <div className={boxClass} ref={this._ref} onBlur={this._handleBlur}>
         <div className="jp-Shortcuts-InputBox-controls">
-          <div
-            tabIndex={0}
-            className={inputClassName}
-            onKeyDown={this.handleInput}
-            ref={this._inputRef}
-            data-lm-suppress-shortcuts="true"
-            aria-invalid={hasConflict || undefined}
-            aria-describedby={describedBy}
-          >
-            <p
-              className={
-                this.state.selected && this._isReplacingExistingKeybinding
-                  ? 'jp-Shortcuts-InputText jp-mod-selected-InputText'
-                  : this.state.value === ''
-                    ? 'jp-Shortcuts-InputText jp-mod-waiting-InputText'
-                    : 'jp-Shortcuts-InputText'
+          {isIdle ? (
+            <button
+              type="button"
+              className="jp-Button jp-mod-styled jp-Shortcuts-StartRecording"
+              onClick={this._startRecording}
+              aria-labelledby={
+                labelledBy ? `${labelledBy} ${this._startLabelId}` : undefined
               }
+              aria-describedby={this._hintId}
             >
-              {this.state.value === ''
-                ? trans.__('press keys')
-                : this.state.value}
-            </p>
-            {this.state.timerRunning ? (
-              <div
-                key={this.state.timerGeneration}
-                className="jp-Shortcuts-CaptureTimer jp-mod-running"
-                style={{ animationDuration: `${CAPTURE_IDLE_MS}ms` }}
-                aria-hidden="true"
-              />
-            ) : null}
-          </div>
+              <span id={this._startLabelId}>{trans.__('Start recording')}</span>
+            </button>
+          ) : (
+            <div
+              id={this._inputId}
+              role="textbox"
+              aria-readonly="true"
+              tabIndex={0}
+              className={inputClassName}
+              onKeyDown={this.handleInput}
+              onFocus={this._handleInputFocus}
+              onBlur={this._handleInputBlur}
+              ref={this._inputRef}
+              data-lm-suppress-shortcuts="true"
+              aria-invalid={isInvalid || undefined}
+              aria-describedby={describedBy}
+              aria-labelledby={labelledBy}
+              aria-label={ariaLabel}
+            >
+              <p
+                className={
+                  this.state.selected && this._isReplacingExistingKeybinding
+                    ? 'jp-Shortcuts-InputText jp-mod-selected-InputText'
+                    : this.state.value === ''
+                      ? 'jp-Shortcuts-InputText jp-mod-waiting-InputText'
+                      : 'jp-Shortcuts-InputText'
+                }
+              >
+                {placeholderText}
+              </p>
+              {this.state.timerRunning ? (
+                <div
+                  key={this.state.timerGeneration}
+                  className="jp-Shortcuts-CaptureTimer jp-mod-running"
+                  style={{ animationDuration: `${CAPTURE_IDLE_MS}ms` }}
+                  aria-hidden="true"
+                />
+              ) : null}
+            </div>
+          )}
           <div
             className="jp-sr-only"
             role="status"
@@ -535,44 +807,47 @@ export class ShortcutInput extends React.Component<
           >
             {statusMessage}
           </div>
-          <div
-            id={this._conflictId}
-            className="jp-sr-only"
-            role="alert"
-            aria-live="assertive"
-            aria-atomic="true"
-          >
-            {conflictMessage}
-          </div>
-          {hasConflict ? (
-            <button
-              ref={this._submitRef}
-              type="button"
-              className={`jp-Button jp-mod-styled jp-mod-warn jp-Shortcuts-Overwrite${
-                !this.state.isFunctional ? ' jp-mod-defunc-Submit' : ''
-              }`}
-              disabled={!this.state.isFunctional}
-              onClick={this.handleSubmit}
-              title={trans.__('Overwrite')}
-              aria-label={trans.__('Overwrite')}
+          {!externalErrorId && (
+            <div
+              id={this._errorId}
+              className="jp-sr-only"
+              role="alert"
+              aria-live="assertive"
+              aria-atomic="true"
             >
-              {trans.__('Overwrite')}
-            </button>
-          ) : (
-            <button
-              ref={this._submitRef}
-              type="button"
-              className={`jp-Button jp-mod-styled jp-Shortcuts-Submit jp-mod-accept jp-Shortcuts-Icon${
-                !this.state.isFunctional ? ' jp-mod-defunc-Submit' : ''
-              }`}
-              disabled={!this.state.isFunctional}
-              onClick={this.handleSubmit}
-              title={trans.__('Save shortcut')}
-              aria-label={trans.__('Save shortcut')}
-            >
-              <checkIcon.react tag={null} />
-            </button>
+              {errorMessage}
+            </div>
           )}
+          {!this._deferPersist &&
+            (hasConflict ? (
+              <button
+                ref={this._submitRef}
+                type="button"
+                className={`jp-Button jp-mod-styled jp-mod-warn jp-Shortcuts-Overwrite${
+                  !this.state.isFunctional ? ' jp-mod-defunc-Submit' : ''
+                }`}
+                disabled={!this.state.isFunctional}
+                onClick={this.handleSubmit}
+                title={trans.__('Overwrite')}
+                aria-label={trans.__('Overwrite')}
+              >
+                {trans.__('Overwrite')}
+              </button>
+            ) : (
+              <button
+                ref={this._submitRef}
+                type="button"
+                className={`jp-Button jp-mod-styled jp-Shortcuts-Submit jp-mod-accept jp-Shortcuts-Icon${
+                  !this.state.isFunctional ? ' jp-mod-defunc-Submit' : ''
+                }`}
+                disabled={!this.state.isFunctional}
+                onClick={this.handleSubmit}
+                title={trans.__('Save shortcut')}
+                aria-label={trans.__('Save shortcut')}
+              >
+                <checkIcon.react tag={null} />
+              </button>
+            ))}
         </div>
         <p id={this._hintId} className="jp-Shortcuts-CaptureHint">
           {captureHint}
@@ -581,7 +856,19 @@ export class ShortcutInput extends React.Component<
     );
   }
 
+  private _handleInputFocus = (): void => {
+    this.setState({ inputFocused: true });
+  };
+
+  private _handleInputBlur = (): void => {
+    this.setState({ inputFocused: false });
+  };
+
   private _handleBlur = (): void => {
+    if (this._deferPersist) {
+      // Keep capture mounted while the parent dialog owns focus movement.
+      return;
+    }
     if (this._blurRaf !== null) {
       cancelAnimationFrame(this._blurRaf);
     }
@@ -596,6 +883,7 @@ export class ShortcutInput extends React.Component<
       }
 
       this._clearIdleTimer();
+      this.props.clearCaptureError();
       this.props.toggleInput();
     });
   };
@@ -603,8 +891,10 @@ export class ShortcutInput extends React.Component<
   private _ref: React.RefObject<HTMLDivElement>;
   private _inputRef = React.createRef<HTMLDivElement>();
   private _submitRef = React.createRef<HTMLButtonElement>();
+  private _inputId: string;
   private _hintId: string;
-  private _conflictId: string;
+  private _errorId: string;
+  private _startLabelId: string;
   private _idleTimer: number | null = null;
   private _announceStartRaf: number | null = null;
   private _blurRaf: number | null = null;
