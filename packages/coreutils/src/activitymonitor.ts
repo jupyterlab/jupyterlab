@@ -56,6 +56,8 @@ export class ActivityMonitor<Sender, Args> implements IDisposable {
     if (this._isDisposed) {
       return;
     }
+    clearTimeout(this._timer);
+    this._timer = undefined;
     this._isDisposed = true;
     Signal.clearData(this);
   }
@@ -68,6 +70,7 @@ export class ActivityMonitor<Sender, Args> implements IDisposable {
     this._sender = sender;
     this._args = args;
     this._timer = setTimeout(() => {
+      this._timer = undefined;
       this._activityStopped.emit({
         sender: this._sender,
         args: this._args
