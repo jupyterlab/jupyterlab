@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { WindowedListModel } from '@jupyterlab/ui-components';
+import { framePromise } from '@jupyterlab/testing';
+import { WindowedList, WindowedListModel } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
 import { ObservableList } from '@jupyterlab/observables';
 
@@ -392,6 +393,297 @@ describe('@jupyterlab/ui-components', () => {
 
         Widget.detach(widget0);
         Widget.detach(widget1);
+      });
+    });
+  });
+
+  describe('WindowedList', () => {
+    describe('#scrollElementIntoView()', () => {
+      class TestList extends WindowedList {
+        scrollElementIntoView(element: HTMLElement): void {
+          super.scrollElementIntoView(element);
+        }
+      }
+
+      // Items keep their widget, as the cells of a notebook do.
+      class ItemsModel extends WindowedListModel {
+        constructor(
+          readonly items: Widget[],
+          options: WindowedList.IModelOptions = {}
+        ) {
+          super({ ...options, count: items.length });
+        }
+        estimateWidgetSize = (_index: number): number => FIXED_ESTIMATED_SIZE;
+        widgetRenderer = (index: number): Widget => this.items[index];
+      }
+
+      const OriginalResizeObserver = window.ResizeObserver;
+      let resizeCallbacks: ResizeObserverCallback[];
+      let model: ItemsModel;
+      let list: TestList;
+      let element: HTMLElement;
+      let scrollIntoView: jest.Mock;
+
+      // Report a size change, as the browser would.
+      const reportResize = (observer: '_onItemResize' | '_onAreaResize') => {
+        resizeCallbacks
+          .filter(callback => callback.name.includes(observer))
+          .forEach(callback => callback([], {} as ResizeObserver));
+      };
+
+      beforeEach(() => {
+        resizeCallbacks = [];
+        window.ResizeObserver = class extends OriginalResizeObserver {
+          constructor(callback: ResizeObserverCallback) {
+            super(callback);
+            resizeCallbacks.push(callback);
+          }
+        };
+        model = new ItemsModel(
+          Array.from({ length: 3 }, () => new Widget()),
+          { windowingActive: true }
+        );
+        list = new TestList({ model });
+        Widget.attach(list, document.body);
+        element = document.createElement('h2');
+        scrollIntoView = jest.fn();
+        element.scrollIntoView = scrollIntoView;
+        list.viewportNode.appendChild(element);
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+        list.dispose();
+        window.ResizeObserver = OriginalResizeObserver;
+      });
+
+      // Put the element in item 1, which the list does not show.
+      const putInItem = () => {
+        const item = model.items[1];
+        item.dataset.windowedListIndex = '1';
+        item.node.appendChild(element);
+        return item;
+      };
+
+      it('should scroll the element into view', () => {
+        list.scrollElementIntoView(element);
+        expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      });
+
+      it.each([
+        [true, '_onItemResize'],
+        [true, '_onAreaResize'],
+        [false, '_onItemResize'],
+        [false, '_onAreaResize']
+      ] as const)(
+        'should follow the element (windowing: %s, %s)',
+        (windowingActive, observer) => {
+          if (!windowingActive) {
+            // Changing the mode creates new observers.
+            resizeCallbacks = [];
+            model.windowingActive = false;
+          }
+          list.scrollElementIntoView(element);
+          scrollIntoView.mockClear();
+          reportResize(observer);
+          expect(scrollIntoView).toHaveBeenCalledTimes(1);
+        }
+      );
+
+      it('should keep the scroll offset while hidden', () => {
+        list.outerNode.scrollTop = 500;
+        list.outerNode.dispatchEvent(new Event('scroll'));
+        list.scrollElementIntoView(element);
+        scrollIntoView.mockClear();
+        list.hide();
+        list.outerNode.scrollTop = 0;
+        reportResize('_onAreaResize');
+        expect(scrollIntoView).not.toHaveBeenCalled();
+        expect(model.scrollOffset).toBe(500);
+      });
+
+      it('should update the items when the scroll moved the list', () => {
+        const update = jest.spyOn(list, 'update');
+        scrollIntoView.mockImplementation(() => {
+          list.outerNode.scrollTop = 500;
+        });
+        list.scrollElementIntoView(element);
+        expect(model.scrollOffset).toBe(500);
+        expect(update).toHaveBeenCalledTimes(1);
+
+        update.mockClear();
+        reportResize('_onAreaResize');
+        expect(update).not.toHaveBeenCalled();
+      });
+
+      it('should update the scrollbar when the scroll moved the list', () => {
+        list.scrollbar = true;
+        const createScrollbarItem = jest.spyOn(
+          WindowedList.defaultRenderer,
+          'createScrollbarItem'
+        );
+        scrollIntoView.mockImplementation(() => {
+          list.outerNode.scrollTop = 500;
+        });
+        list.scrollElementIntoView(element);
+        expect(createScrollbarItem).toHaveBeenCalled();
+        createScrollbarItem.mockRestore();
+      });
+
+      it('should keep the element attached when its item grew', async () => {
+        const items = Array.from({ length: 10 }, () => new Widget());
+        const itemsList = new TestList({
+          model: new ItemsModel(items, { windowingActive: true })
+        });
+        Widget.attach(itemsList, document.body);
+        itemsList.update();
+        while (!items[1].isAttached) {
+          await framePromise();
+        }
+        // The item is now taller than the size that the list stored for it.
+        jest
+          .spyOn(items[1].node, 'getBoundingClientRect')
+          .mockReturnValue({ height: 4 * FIXED_ESTIMATED_SIZE } as DOMRect);
+        const heading = document.createElement('h2');
+        heading.scrollIntoView = () => {
+          itemsList.outerNode.scrollTop = 3.5 * FIXED_ESTIMATED_SIZE;
+        };
+        items[1].node.appendChild(heading);
+
+        itemsList.scrollElementIntoView(heading);
+        await framePromise();
+        await framePromise();
+
+        expect(heading.isConnected).toBe(true);
+        itemsList.dispose();
+      });
+
+      it('should request the item while the element is detached', () => {
+        const scrollToItem = jest.spyOn(list, 'scrollToItem');
+        const item = putInItem();
+        list.scrollElementIntoView(element);
+        expect(scrollIntoView).not.toHaveBeenCalled();
+        expect(scrollToItem).toHaveBeenCalledWith(1, 'start', 0);
+
+        list.viewportNode.appendChild(item.node);
+        reportResize('_onItemResize');
+        expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      });
+
+      it('should forget the item requested for a detached element', () => {
+        jest.useFakeTimers();
+        const item = putInItem();
+        list.scrollElementIntoView(element);
+        list.viewportNode.appendChild(item.node);
+        reportResize('_onItemResize');
+        jest.advanceTimersByTime(3000);
+
+        const scrollToItem = jest.spyOn(list, 'scrollToItem');
+        reportResize('_onAreaResize');
+        expect(scrollToItem).not.toHaveBeenCalled();
+      });
+
+      it('should stop after a fixed time despite resizes', () => {
+        jest.useFakeTimers();
+        list.scrollElementIntoView(element);
+        jest.advanceTimersByTime(2000);
+        reportResize('_onItemResize');
+        scrollIntoView.mockClear();
+        jest.advanceTimersByTime(1000);
+        reportResize('_onItemResize');
+        reportResize('_onAreaResize');
+        expect(scrollIntoView).not.toHaveBeenCalled();
+      });
+
+      it('should stop when the user scrolls', () => {
+        // A scroll by the user moves the element with the content.
+        jest
+          .spyOn(element, 'getBoundingClientRect')
+          .mockImplementation(
+            () => ({ top: 100 - list.outerNode.scrollTop }) as DOMRect
+          );
+        list.scrollElementIntoView(element);
+        scrollIntoView.mockClear();
+        list.outerNode.scrollTop = 500;
+        list.outerNode.dispatchEvent(new Event('scroll'));
+        reportResize('_onItemResize');
+        expect(scrollIntoView).not.toHaveBeenCalled();
+      });
+
+      it('should keep following when a scroll keeps the element in place', () => {
+        list.scrollElementIntoView(element);
+        scrollIntoView.mockClear();
+        // Scroll anchoring scrolls the list when the content above grows.
+        list.outerNode.scrollTop = 500;
+        list.outerNode.dispatchEvent(new Event('scroll'));
+        reportResize('_onItemResize');
+        expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      });
+
+      it.each(['wheel', 'touchmove', 'pointerdown', 'keydown'])(
+        'should stop after a %s event',
+        type => {
+          list.scrollElementIntoView(element);
+          scrollIntoView.mockClear();
+          list.node.dispatchEvent(new Event(type));
+          reportResize('_onItemResize');
+          expect(scrollIntoView).not.toHaveBeenCalled();
+        }
+      );
+
+      it('should keep following after a lone modifier key', () => {
+        list.scrollElementIntoView(element);
+        scrollIntoView.mockClear();
+        list.node.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift' }));
+        reportResize('_onItemResize');
+        expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      });
+
+      it('should stop on user input after requesting its item', () => {
+        const item = putInItem();
+        list.scrollElementIntoView(element);
+        list.viewportNode.appendChild(item.node);
+        list.node.dispatchEvent(new Event('pointerdown'));
+        reportResize('_onItemResize');
+        expect(scrollIntoView).not.toHaveBeenCalled();
+      });
+
+      it.each([1, 2])('should stop when item %d is requested', index => {
+        list.scrollElementIntoView(element);
+        scrollIntoView.mockClear();
+        void list.scrollToItem(index, 'start');
+        reportResize('_onItemResize');
+        expect(scrollIntoView).not.toHaveBeenCalled();
+      });
+
+      it('should stop listening for user input when disposed', () => {
+        list.scrollElementIntoView(element);
+        const removeEventListener = jest.spyOn(
+          list.node,
+          'removeEventListener'
+        );
+        list.dispose();
+        for (const type of ['wheel', 'touchmove', 'pointerdown', 'keydown']) {
+          expect(removeEventListener).toHaveBeenCalledWith(
+            type,
+            expect.any(Function),
+            { capture: true }
+          );
+        }
+      });
+
+      it('should not return to an item requested earlier', () => {
+        jest.useFakeTimers();
+        void list.scrollToItem(2, 'start');
+        list.scrollElementIntoView(element);
+        // An item resize would keep the earlier request alive.
+        jest.advanceTimersByTime(2000);
+        reportResize('_onItemResize');
+        jest.advanceTimersByTime(1000);
+
+        const scrollToItem = jest.spyOn(list, 'scrollToItem');
+        reportResize('_onAreaResize');
+        expect(scrollToItem).not.toHaveBeenCalled();
       });
     });
   });

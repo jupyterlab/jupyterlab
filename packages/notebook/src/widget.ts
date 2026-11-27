@@ -2521,6 +2521,15 @@ export class Notebook extends StaticNotebook {
 
   /**
    * Set URI fragment identifier.
+   *
+   * #### Notes
+   * The notebook scrolls to the target of the fragment (a heading, an element
+   * or a cell) once the cells above the target are ready and the target is
+   * rendered. The notebook then keeps the target in view for a few seconds
+   * while the content above the target changes size (see
+   * `scrollElementIntoView`). A newer fragment, input from the user in the
+   * notebook, or the activation of another cell cancels a fragment that is
+   * still waiting.
    */
   async setFragment(fragment: string): Promise<void> {
     const parsedFragment = this._parseFragment(fragment);
@@ -2530,7 +2539,92 @@ export class Notebook extends StaticNotebook {
       return;
     }
 
-    let result;
+    // A newer link, or the user moving on, cancels this navigation.
+    const request = ++this._fragmentRequest;
+    let interrupted = false;
+    const userNavigationListener = this.addUserNavigationListener(() => {
+      interrupted = true;
+    });
+    // The table of contents moves on by activating another cell.
+    const activeCell = this.activeCell;
+    const isActivatedElsewhere = () =>
+      activeCell !== null &&
+      this.activeCell !== activeCell &&
+      this.widgets.includes(activeCell);
+    const isCancelled = () =>
+      interrupted || request !== this._fragmentRequest || this.isDisposed;
+
+    try {
+      const result = await this._findFragmentTarget(parsedFragment, fragment);
+      if (result == null || isCancelled()) {
+        return;
+      }
+      const { cell } = result;
+      if (!this.widgets.includes(cell)) {
+        // The target was deleted while the cells were searched.
+        return;
+      }
+
+      // Cells above the target that are still placeholders would push it down
+      // when they render.
+      const above = this.widgets.slice(0, this.widgets.indexOf(cell));
+      await Promise.all(above.map(Private.whenReadyOrDisposed));
+      // A link cancelled while waiting must not move the active cell.
+      if (
+        isCancelled() ||
+        isActivatedElsewhere() ||
+        !this.widgets.includes(cell)
+      ) {
+        return;
+      }
+
+      // Deleting the target also changes the active cell.
+      const isTargetGone = () => isCancelled() || this.activeCell !== cell;
+
+      this.deselectAll();
+      // Activating a markdown cell in edit mode would unrender the target.
+      this.setMode('command', { focus: false });
+      // Scroll anchoring is enabled only for the active cell.
+      this.activeCellIndex = this.widgets.indexOf(cell);
+
+      // Bring the cell into view: it may not be attached or rendered yet.
+      try {
+        await this.scrollToItem(this.widgets.indexOf(cell), 'start', 0);
+      } catch {
+        // A newer scroll request replaced this one.
+      }
+      await Private.whenReadyOrDisposed(cell);
+      if (isTargetGone()) {
+        return;
+      }
+      if (cell instanceof MarkdownCell) {
+        await cell.waitForRendering();
+        if (isTargetGone()) {
+          return;
+        }
+      }
+
+      // The element can only be looked up once the cell has been rendered.
+      const element =
+        parsedFragment.kind === 'cell-id'
+          ? null
+          : this._findElementInCell(cell, Private.elementId(parsedFragment));
+
+      // Scroll notebook to set the target on top.
+      this.scrollElementIntoView(element ?? result.element ?? cell.node);
+    } finally {
+      userNavigationListener.dispose();
+    }
+  }
+
+  /**
+   * Find the cell and element targeted by a URI fragment.
+   */
+  private async _findFragmentTarget(
+    parsedFragment: Private.IFragmentData,
+    fragment: string
+  ): Promise<Private.IScrollTarget | null> {
+    let result: Private.IScrollTarget | null;
 
     switch (parsedFragment.kind) {
       case 'heading':
@@ -2540,38 +2634,22 @@ export class Notebook extends StaticNotebook {
         result = this._findCellById(parsedFragment.value);
         break;
       case 'legacy':
-        result = await this._findLegacy(parsedFragment.value);
+        result =
+          (await this._findLegacy(parsedFragment.value)) ??
+          // Cells may not be rendered yet; match headings from their source.
+          (await this._findHeading(parsedFragment.value));
         break;
-      default:
+      default: {
         console.warn(
           `Unknown target type for URI fragment ${fragment}, interpreting as a heading`
         );
-        result = await this._findLegacy(
-          parsedFragment.kind + '=' + parsedFragment.value
-        );
+        // The id of a heading such as `k = 2` contains `=`.
+        const id = Private.elementId(parsedFragment);
+        result = (await this._findLegacy(id)) ?? (await this._findHeading(id));
         break;
+      }
     }
-
-    if (result == null) {
-      return;
-    }
-    let { cell, element } = result;
-
-    // Activating a markdown cell in edit mode would unrender the target.
-    this.setMode('command', { focus: false });
-    // Scroll anchoring is enabled only for the active cell.
-    this.activeCellIndex = this.widgets.indexOf(cell);
-
-    if (!cell.inViewport) {
-      await this.scrollToCell(cell, 'center');
-    }
-
-    if (element == null) {
-      element = cell.node;
-    }
-
-    // Scroll notebook to set the target on top.
-    element.scrollIntoView();
+    return result;
   }
 
   /**
@@ -3171,7 +3249,8 @@ export class Notebook extends StaticNotebook {
         // Bail early
         continue;
       }
-      for (const heading of cell.headings) {
+      const headings = await cell.getHeadings();
+      for (const heading of headings) {
         let id: string | undefined | null = '';
         switch (heading.type) {
           case Cell.HeadingType.HTML:
@@ -3241,21 +3320,28 @@ export class Notebook extends StaticNotebook {
         continue;
       }
 
-      const attribute =
-        (this.rendermime.sanitizer.allowNamedProperties ?? false)
-          ? 'id'
-          : 'data-jupyter-id';
-      const element = cell.node.querySelector(
-        `[${attribute}="${CSS.escape(queryId)}"]`
-      );
+      const element = this._findElementInCell(cell, queryId);
       if (element !== null) {
         return {
           cell,
-          element: element as HTMLElement
+          element
         };
       }
     }
     return null;
+  }
+
+  /**
+   * Find the element of a cell with the given anchor id.
+   */
+  private _findElementInCell(cell: Cell, id: string): HTMLElement | null {
+    const attribute =
+      (this.rendermime.sanitizer.allowNamedProperties ?? false)
+        ? 'id'
+        : 'data-jupyter-id';
+    return cell.node.querySelector<HTMLElement>(
+      `[${attribute}="${CSS.escape(id)}"]`
+    );
   }
 
   /**
@@ -3898,6 +3984,7 @@ export class Notebook extends StaticNotebook {
   private _lastModifiedCellForwardStack: string[] = [];
   private static readonly MAX_MODIFIED_STACK = 50;
   private _activeCellIndex = -1;
+  private _fragmentRequest = 0;
   private _activeCell: Cell | null = null;
   private _mode: NotebookMode = 'command';
   private _drag: Drag | null = null;
@@ -3995,6 +4082,33 @@ export namespace Notebook {
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * Wait for a cell to be ready; a disposed cell never will be.
+   */
+  export function whenReadyOrDisposed(cell: Cell): Promise<void> {
+    if (cell.isDisposed) {
+      return Promise.resolve();
+    }
+    return new Promise(resolve => {
+      const done = () => {
+        cell.disposed.disconnect(done);
+        resolve();
+      };
+      cell.disposed.connect(done);
+      cell.ready.then(done, done);
+    });
+  }
+
+  /**
+   * Get the id of the element targeted by a fragment; an unknown prefix is
+   * part of the id.
+   */
+  export function elementId(fragment: IFragmentData): string {
+    return fragment.kind === 'legacy' || fragment.kind === 'heading'
+      ? fragment.value
+      : `${fragment.kind}=${fragment.value}`;
+  }
+
   /**
    * An attached property for the selected state of a cell.
    */

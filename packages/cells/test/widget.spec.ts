@@ -33,6 +33,7 @@ import {
   sleep
 } from '@jupyterlab/testing';
 import { WindowedList, WindowedListModel } from '@jupyterlab/ui-components';
+import { PromiseDelegate } from '@lumino/coreutils';
 import type { Message } from '@lumino/messaging';
 import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
@@ -1294,6 +1295,89 @@ describe('cells/widget', () => {
         widget.model.sharedModel.setSource('# Price');
         await widget.getHeadings();
         expect(calls[calls.length - 1]).toEqual(['# Price', mathParseOptions]);
+      });
+    });
+
+    describe('#waitForRendering()', () => {
+      const createCell = (render: (source: string) => Promise<string>) => {
+        const model = new MarkdownCellModel();
+        model.sharedModel.setSource('Rendered text');
+        const widget = new MarkdownCell({
+          model,
+          rendermime: rendermime.clone({ markdownParser: { render } }),
+          contentFactory,
+          placeholder: true
+        });
+        widget.initializeState();
+        Widget.attach(widget, document.body);
+        return widget;
+      };
+
+      const trackDone = (promise: Promise<void>) => {
+        const state = { isDone: false };
+        void promise.then(() => {
+          state.isDone = true;
+        });
+        return state;
+      };
+
+      it('should render a cell which was a placeholder', async () => {
+        const rendering = new PromiseDelegate<void>();
+        const render = jest.fn(async (source: string) => {
+          await rendering.promise;
+          return source;
+        });
+        const widget = createCell(render);
+
+        const waiting = widget.waitForRendering();
+        const state = trackDone(waiting);
+        await framePromise();
+        expect(render).toHaveBeenCalledTimes(1);
+        expect(state.isDone).toBe(false);
+
+        rendering.resolve();
+        await waiting;
+
+        const output = widget.node.querySelector('.jp-MarkdownOutput');
+        expect(output?.textContent).toContain('Rendered text');
+        widget.dispose();
+      });
+
+      it('should wait for a rendering already in progress', async () => {
+        const rendering = new PromiseDelegate<void>();
+        const render = jest.fn(async (source: string) => {
+          await rendering.promise;
+          return source;
+        });
+        const widget = createCell(render);
+        await widget.ready;
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        expect(render).toHaveBeenCalledTimes(1);
+
+        const waiting = widget.waitForRendering();
+        const state = trackDone(waiting);
+        await framePromise();
+        expect(render).toHaveBeenCalledTimes(1);
+        expect(state.isDone).toBe(false);
+
+        rendering.resolve();
+        await waiting;
+        widget.dispose();
+      });
+
+      it('should not render while the editor is shown', async () => {
+        const render = jest.fn(async (source: string) => source);
+        const widget = createCell(render);
+        await widget.ready;
+        widget.rendered = false;
+        render.mockClear();
+        const showEditor = jest.spyOn(widget.inputArea!, 'showEditor');
+
+        await widget.waitForRendering();
+
+        expect(render).not.toHaveBeenCalled();
+        expect(showEditor).not.toHaveBeenCalled();
+        widget.dispose();
       });
     });
 

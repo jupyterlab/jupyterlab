@@ -2373,6 +2373,24 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
 
   /**
+   * Wait until the current source of the cell has been rendered.
+   *
+   * #### Notes
+   * A placeholder cell is rendered once it is ready; like `ready`, this does
+   * not settle if the cell is disposed before that. Nothing is rendered while
+   * the cell shows its editor.
+   */
+  async waitForRendering(): Promise<void> {
+    await this.ready;
+    if (this.isDisposed || !this._rendered) {
+      return;
+    }
+    await this._handleRendered().catch(reason => {
+      console.error('Failed to render', reason);
+    });
+  }
+
+  /**
    * Signal emitted when the markdown cell rendered state changes
    */
   get renderedChanged(): ISignal<MarkdownCell, boolean> {
@@ -2607,8 +2625,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       this.removeClass(EMPTY_MARKDOWN_PLACEHOLDER_CLASS);
       this.showEditor();
     } else {
-      // TODO: It would be nice for the cell to provide a way for
-      // its consumers to hook into when the rendering is done.
       await this._updateRenderedInput();
       if (this._rendered) {
         // The rendered flag may be updated in the mean time
@@ -2634,9 +2650,12 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     if (text !== this._prevText) {
       const mimeModel = new MimeModel({ data: { 'text/markdown': text } });
       this._prevText = text;
-      return this._renderer.renderModel(mimeModel);
+      const rendering = this._renderer.renderModel(mimeModel);
+      // A failure is reported to the caller which started the rendering.
+      this._rendering = rendering.catch(() => undefined);
+      return rendering;
     }
-    return Promise.resolve();
+    return this._rendering;
   }
 
   /**
@@ -2667,6 +2686,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   private _rendermime: IRenderMimeRegistry;
   private _rendered = true;
   private _renderedChanged = new Signal<this, boolean>(this);
+  private _rendering: Promise<void> = Promise.resolve();
   private _showEditorForReadOnlyMarkdown = false;
   private _cachedHeadingText = '';
   private _headingResolved: boolean = false;
