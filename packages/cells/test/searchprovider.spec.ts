@@ -101,6 +101,40 @@ describe('cells/searchprovider', () => {
       provider.dispose();
     });
 
+    it('should highlight output matches when a placeholder cell renders after a search starts', async () => {
+      const model = new CodeCellModel({
+        sharedModel: createStandaloneCell({
+          cell_type: 'code',
+          source: 'print(text)',
+          outputs: [
+            {
+              output_type: 'stream',
+              name: 'stdout',
+              text: 'A needle in the hay.\n'
+            }
+          ]
+        }) as YCodeCell
+      });
+      cell = new CodeCell({
+        model,
+        rendermime: defaultRenderMime(),
+        contentFactory: NBTestUtils.createCodeCellFactory()
+      }).initializeState();
+      expect(cell.isPlaceholder()).toBe(true);
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/needle/g, { output: true });
+
+      Widget.attach(cell, document.body);
+      await cell.ready;
+      await framePromise();
+      await framePromise();
+
+      expect(cell.outputArea.node.querySelector('mark')?.textContent).toBe(
+        'needle'
+      );
+      provider.dispose();
+    });
+
     it('should not scroll the editor of a hidden input', async () => {
       const model = new CodeCellModel({
         sharedModel: createStandaloneCell({
