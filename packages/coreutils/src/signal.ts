@@ -20,8 +20,14 @@ export function signalToPromise<T, U>(
 ): Promise<[T, U]> {
   const waitForSignal = new PromiseDelegate<[T, U]>();
 
+  let timerId: ReturnType<typeof setTimeout> | undefined;
+
   function cleanup() {
     signal.disconnect(slot);
+    if (timerId !== undefined) {
+      clearTimeout(timerId);
+      timerId = undefined;
+    }
   }
 
   function slot(sender: T, args: U) {
@@ -31,7 +37,7 @@ export function signalToPromise<T, U>(
   signal.connect(slot);
 
   if ((timeout ?? 0) > 0) {
-    setTimeout(() => {
+    timerId = setTimeout(() => {
       cleanup();
       waitForSignal.reject(`Signal not emitted within ${timeout} ms.`);
     }, timeout);
