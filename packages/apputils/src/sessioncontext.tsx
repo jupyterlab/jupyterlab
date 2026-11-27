@@ -306,6 +306,21 @@ export namespace ISessionContext {
      * Skip showing the kernel restart dialog if checked (default `false`).
      */
     readonly skipKernelRestartDialog?: boolean;
+
+    /**
+     * Lock the kernel choice to the kernel named by `name`.
+     *
+     * #### Notes
+     * When `true`, the automatic kernel start and a restart after a shutdown
+     * use only `name`, without falling back to `language` or to the server
+     * default, and the kernel name toolbar item and the kernel selection
+     * dialog keep users from changing the kernel. Calls to `changeKernel()`
+     * are not blocked. When `undefined`, the kernel selection dialog does not
+     * show the lock checkbox.
+     *
+     * @experimental
+     */
+    readonly locked?: boolean;
   }
 
   export type KernelDisplayStatus =
@@ -815,6 +830,10 @@ export class SessionContext implements ISessionContext {
    * #### Notes
    * If a server session exists on the current path, we will connect to it
    * unless `kernelPreference.shouldReuse === false`.
+   * If `kernelPreference.locked` is `true` and that session runs another
+   * kernel, we ask the user before we switch it to the locked kernel.
+   * When the locked kernel is not installed, we do not connect to that
+   * session and resolve with `true`.
    * If preferences include disabling `canStart` or `shouldStart`, no
    * server session will be started.
    * If a kernel id is given, we attempt to start a session with that id.
@@ -854,12 +873,38 @@ export class SessionContext implements ISessionContext {
         return item.path === this._path;
       });
       if (model) {
+        const lockedName = preference.locked === true ? preference.name : '';
+        const mismatch = !!lockedName && model.kernel?.name !== lockedName;
+        let switchKernel = mismatch;
+        if (mismatch) {
+          await this.specsManager.ready;
+          if (!this.specsManager.specs?.kernelspecs[lockedName!]) {
+            return true;
+          }
+          // Switching shuts down the running kernel, so ask first.
+          if (model.kernel) {
+            switchKernel = await this._confirmLockedKernelSwitch(
+              lockedName!,
+              model.kernel.name
+            );
+          }
+          if (this.isDisposed) {
+            return false;
+          }
+        }
         try {
           const session = manager.connectTo({ model });
           this._handleNewSession(session);
         } catch (err) {
           void this._handleSessionError(err as ServerConnection.ResponseError);
           return Promise.reject(err);
+        }
+        if (switchKernel) {
+          try {
+            await this._changeKernel({ name: lockedName });
+          } catch (err) {
+            /* no-op */
+          }
         }
       }
     }
@@ -1113,6 +1158,41 @@ export class SessionContext implements ISessionContext {
     }));
     await dialog.launch();
     this._dialog = null;
+  }
+
+  /**
+   * Ask whether to switch the kernel of a reused session to the locked kernel.
+   *
+   * @returns Whether the user chose to switch.
+   */
+  private async _confirmLockedKernelSwitch(
+    lockedName: string,
+    runningName: string
+  ): Promise<boolean> {
+    const specs = this.specsManager.specs?.kernelspecs;
+    const locked = specs?.[lockedName]?.display_name ?? lockedName;
+    const running = specs?.[runningName]?.display_name ?? runningName;
+    const dialog = (this._dialog = new Dialog({
+      title: this._trans.__('Switch to the Locked Kernel?'),
+      body: this._trans.__(
+        'This notebook is locked to the %1 kernel, but the %2 kernel is already running for it. Switching shuts down the %2 kernel, and its variables are lost.',
+        locked,
+        running
+      ),
+      buttons: [
+        Dialog.cancelButton({ label: this._trans.__('Keep Running Kernel') }),
+        Dialog.warnButton({ label: this._trans.__('Switch Kernel') })
+      ]
+    }));
+    try {
+      const result = await dialog.launch();
+      return result.button.accept;
+    } catch {
+      // Disposing the session context disposes the dialog.
+      return false;
+    } finally {
+      this._dialog = null;
+    }
   }
 
   /**
@@ -1412,6 +1492,24 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     const translator = this._translator;
     const trans = translator.load('jupyterlab');
 
+    const name = sessionContext.kernelPreference.name;
+    // A lock without a kernel name applies to the kernel chosen in this dialog.
+    const wasLocked = sessionContext.kernelPreference.locked === true && !!name;
+    if (wasLocked) {
+      const specs = sessionContext.specsManager.specs;
+      if (sessionContext.hasNoKernel && !specs?.kernelspecs[name]) {
+        await showDialog({
+          title: trans.__('Kernel Unavailable'),
+          body: trans.__(
+            'This notebook requires the %1 kernel, which is not available.',
+            name
+          ),
+          buttons: [Dialog.okButton({ label: trans.__('Ok') })]
+        });
+        return;
+      }
+    }
+
     // If there is no existing kernel, offer the option to keep no kernel.
     let label = trans.__('Cancel');
     if (sessionContext.hasNoKernel) {
@@ -1425,22 +1523,10 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       })
     ];
 
-    const autoStartDefault = sessionContext.kernelPreference.autoStartDefault;
-    const hasCheckbox = typeof autoStartDefault === 'boolean';
-
     const dialog = new Dialog({
       title: trans.__('Select Kernel'),
       body: Private.createKernelSelector(sessionContext, translator),
-      buttons,
-      checkbox: hasCheckbox
-        ? {
-            label: trans.__('Always start the preferred kernel'),
-            caption: trans.__(
-              'Remember my choice and always start the preferred kernel'
-            ),
-            checked: autoStartDefault
-          }
-        : null
+      buttons
     });
 
     const result = await dialog.launch();
@@ -1449,14 +1535,35 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       return;
     }
 
-    if (hasCheckbox && result.isChecked !== null) {
+    const { model, autoStartDefault, locked } = result.value ?? {
+      model: null,
+      autoStartDefault: null,
+      locked: null
+    };
+
+    if (autoStartDefault !== null) {
       sessionContext.kernelPreference = {
         ...sessionContext.kernelPreference,
-        autoStartDefault: result.isChecked
+        autoStartDefault
+      };
+    }
+    if (locked !== null) {
+      sessionContext.kernelPreference = {
+        ...sessionContext.kernelPreference,
+        locked
       };
     }
 
-    const model = result.value;
+    // A notebook with a locked kernel can only start its required kernel when none is running.
+    if (wasLocked && locked === true) {
+      const startsRequired =
+        sessionContext.hasNoKernel &&
+        model?.name === sessionContext.kernelPreference.name;
+      if (!startsRequired) {
+        return;
+      }
+    }
+
     if (model === null && !sessionContext.hasNoKernel) {
       return sessionContext.shutdown();
     }
@@ -1473,7 +1580,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
    * #### Notes
    * If there is a running kernel, present a dialog.
    * If there is no kernel, we start a kernel with the last run
-   * kernel name and resolves with `true`.
+   * kernel name (or the locked kernel name) and resolves with `true`.
    */
   async restart(
     sessionContext: ISessionContext,
@@ -1486,10 +1593,13 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       throw new Error('session already disposed');
     }
     const kernel = sessionContext.session?.kernel;
-    if (!kernel && sessionContext.prevKernelName) {
-      await sessionContext.changeKernel({
-        name: sessionContext.prevKernelName
-      });
+    // Ensure a locked notebook only start its locked kernel.
+    const kernelName =
+      sessionContext.kernelPreference.locked === true
+        ? sessionContext.kernelPreference.name
+        : sessionContext.prevKernelName;
+    if (!kernel && kernelName) {
+      await sessionContext.changeKernel({ name: kernelName });
       return true;
     }
     // Bail if there is no previous kernel to start.
@@ -1870,9 +1980,23 @@ namespace Private {
     /**
      * Get the value of the kernel selector widget.
      */
-    getValue(): Kernel.IModel {
+    getValue(): {
+      model: Kernel.IModel;
+      autoStartDefault: boolean | null;
+      locked: boolean | null;
+    } {
       const selector = this.node.querySelector<HTMLSelectElement>('select')!;
-      return JSON.parse(selector.value) as Kernel.IModel;
+      const autoStartCheckbox = this.node.querySelector<HTMLInputElement>(
+        'input[data-role="autoStartDefault"]'
+      );
+      const lockCheckbox = this.node.querySelector<HTMLInputElement>(
+        'input[data-role="kernelLock"]'
+      );
+      return {
+        model: JSON.parse(selector.value) as Kernel.IModel,
+        autoStartDefault: autoStartCheckbox ? autoStartCheckbox.checked : null,
+        locked: lockCheckbox ? lockCheckbox.checked : null
+      };
     }
   }
 
@@ -1913,6 +2037,65 @@ namespace Private {
       select.appendChild(optgroup);
     }
     body.appendChild(select);
+
+    const preference = sessionContext.kernelPreference;
+
+    const addCheckbox = (
+      role: string,
+      label: string,
+      caption: string,
+      checked: boolean
+    ): HTMLInputElement => {
+      const checkboxLabel = document.createElement('label');
+      checkboxLabel.className = 'jp-Dialog-checkbox';
+      checkboxLabel.style.alignSelf = 'flex-start';
+      checkboxLabel.title = caption;
+      checkboxLabel.textContent = label;
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.checked = checked;
+      input.dataset.role = role;
+      checkboxLabel.insertAdjacentElement('afterbegin', input);
+      body.appendChild(checkboxLabel);
+      return input;
+    };
+
+    if (typeof preference.autoStartDefault === 'boolean') {
+      addCheckbox(
+        'autoStartDefault',
+        trans.__('Always start the preferred kernel'),
+        trans.__('Remember my choice and always start the preferred kernel'),
+        preference.autoStartDefault
+      );
+    }
+
+    if (typeof preference.locked === 'boolean') {
+      const lockInput = addCheckbox(
+        'kernelLock',
+        trans.__('Lock kernel choice'),
+        trans.__('Prevent changing the kernel for this notebook'),
+        preference.locked
+      );
+      // Do not let user lock the kernel choice for "No Kernel".
+      const updateLock = () => {
+        const noKernel = select.value === 'null';
+        lockInput.disabled = noKernel;
+        if (noKernel) {
+          lockInput.checked = preference.locked === true;
+        }
+      };
+      select.addEventListener('change', updateLock);
+      updateLock();
+      if (preference.locked && preference.name) {
+        // A choice in the list is ignored while the lock stays checked.
+        const updateSelect = () => {
+          select.disabled = options.disabled || lockInput.checked;
+        };
+        lockInput.addEventListener('change', updateSelect);
+        updateSelect();
+      }
+    }
+
     return body;
   }
 
@@ -1923,7 +2106,7 @@ namespace Private {
     options: SessionContext.IKernelSearch
   ): string | null {
     const { specs, preference } = options;
-    const { name, language, canStart, autoStartDefault } = preference;
+    const { name, language, canStart, autoStartDefault, locked } = preference;
 
     if (!specs || canStart === false) {
       return null;
@@ -1940,6 +2123,11 @@ namespace Private {
       if (specName === name) {
         return name;
       }
+    }
+
+    // If kernel is locked don't use other kernel.
+    if (locked) {
+      return null;
     }
 
     // Bail if there is no language.

@@ -1,12 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { Context } from '@jupyterlab/docregistry';
+import { SessionContextDialogs } from '@jupyterlab/apputils';
+import { Context } from '@jupyterlab/docregistry';
 import { initNotebookContext } from '@jupyterlab/notebook/lib/testutils';
-import { JupyterServer } from '@jupyterlab/testing';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
+import { JupyterServer, testEmission } from '@jupyterlab/testing';
 import { Toolbar } from '@jupyterlab/ui-components';
 import type { INotebookModel } from '@jupyterlab/notebook';
-import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
+import {
+  Notebook,
+  NotebookModel,
+  NotebookModelFactory,
+  NotebookPanel
+} from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 /**
@@ -145,6 +152,116 @@ describe('@jupyterlab/notebook', () => {
         panel.dispose();
         expect(panel.isDisposed).toBe(true);
       });
+    });
+
+    describe('#kernelLock', () => {
+      it('should apply the `kernel_lock` metadata to the kernel preference on load', async () => {
+        const panel = utils.createNotebookPanel(context);
+        await context.initialize(true);
+        await context.ready;
+        panel.model!.setMetadata('kernel_lock', true);
+        // The metadata change propagates into the kernel preference.
+        expect(context.sessionContext.kernelPreference.locked).toBe(true);
+      });
+
+      it('should propagate later `kernel_lock` metadata changes to the preference', async () => {
+        const panel = utils.createNotebookPanel(context);
+        await context.initialize(true);
+        await context.ready;
+        expect(context.sessionContext.kernelPreference.locked).toBeFalsy();
+
+        // Changing the metadata directly (e.g. from the Common Tools dropdown)
+        // must be reflected in the kernel preference.
+        panel.model!.setMetadata('kernel_lock', true);
+        expect(context.sessionContext.kernelPreference.locked).toBe(true);
+
+        panel.model!.setMetadata('kernel_lock', false);
+        expect(context.sessionContext.kernelPreference.locked).toBe(false);
+      });
+
+      it('should persist preference lock changes into the metadata', async () => {
+        const panel = utils.createNotebookPanel(context);
+        await context.initialize(true);
+        await context.ready;
+
+        // Locking through the kernel dialog must be written to the notebook metadata.
+        context.sessionContext.kernelPreference = {
+          ...context.sessionContext.kernelPreference,
+          locked: true
+        };
+        expect(panel.model!.getMetadata('kernel_lock')).toBe(true);
+
+        context.sessionContext.kernelPreference = {
+          ...context.sessionContext.kernelPreference,
+          locked: false
+        };
+        expect(panel.model!.getMetadata('kernel_lock')).toBeUndefined();
+      });
+
+      it('should keep the `kernel_lock` metadata of a notebook that the context cannot save', async () => {
+        const manager = new ServiceManagerMock();
+        const saved = new NotebookModel();
+        saved.setMetadata('kernel_lock', true);
+        await manager.contents.save('locked.ipynb', {
+          type: 'notebook',
+          format: 'json',
+          content: saved.toJSON()
+        });
+        saved.dispose();
+        const lockedContext = new Context<INotebookModel>({
+          manager,
+          factory: new NotebookModelFactory(),
+          path: 'locked.ipynb'
+        });
+        // As for a read-only file or a collaborative document.
+        jest.spyOn(lockedContext, 'canSave', 'get').mockReturnValue(false);
+        const panel = utils.createNotebookPanel(lockedContext);
+        await lockedContext.initialize(false);
+        await lockedContext.ready;
+
+        expect(panel.model!.getMetadata('kernel_lock')).toBe(true);
+        lockedContext.dispose();
+      });
+
+      it('should keep the `kernel_lock` metadata when a preference without `locked` is set', async () => {
+        const panel = utils.createNotebookPanel(context);
+        await context.ready;
+        panel.model!.setMetadata('kernel_lock', true);
+
+        context.sessionContext.kernelPreference = { autoStartDefault: true };
+        expect(panel.model!.getMetadata('kernel_lock')).toBe(true);
+      });
+
+      it('should restart the locked kernel after switching, locking and shutting down', async () => {
+        context.dispose();
+        context = await initNotebookContext({ startKernel: true });
+        const panel = utils.createNotebookPanel(context);
+        await context.ready;
+        const sessionContext = context.sessionContext;
+        const first = sessionContext.session!.kernel!.name;
+        const specs = sessionContext.specsManager.specs!;
+        const second = Object.keys(specs.kernelspecs).find(
+          name => name !== first
+        )!;
+
+        // Switch to another kernel, then lock it.
+        const specUpdated = testEmission(panel.model!.metadataChanged, {
+          find: () => panel.model!.defaultKernelName === second
+        });
+        await sessionContext.changeKernel({ name: second });
+        await specUpdated;
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          locked: true
+        };
+        // The restart should use the locked kernel.
+        await sessionContext.shutdown();
+        await new SessionContextDialogs().restart(sessionContext);
+
+        expect(sessionContext.session?.kernel?.name).toBe(second);
+        expect(panel.model!.defaultKernelName).toBe(second);
+        expect(panel.model!.getMetadata('kernel_lock')).toBe(true);
+      }, 30000);
     });
 
     describe('.ContentFactory', () => {
