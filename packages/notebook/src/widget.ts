@@ -1927,16 +1927,7 @@ export class Notebook extends StaticNotebook {
     sender: CellList,
     args: IObservableList.IChangedArgs<ICellModel>
   ): void {
-    const activeCellId = this.activeCell?.model.id;
     super._onCellsChanged(sender, args);
-    if (activeCellId) {
-      const newActiveCellIndex = this.model?.sharedModel.cells.findIndex(
-        cell => cell.getId() === activeCellId
-      );
-      if (newActiveCellIndex != null) {
-        this.activeCellIndex = newActiveCellIndex;
-      }
-    }
     switch (args.type) {
       case 'add':
       case 'set':

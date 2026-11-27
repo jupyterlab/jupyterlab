@@ -1748,6 +1748,7 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
+    const restoreActiveCell = Private.rememberActiveCell(notebook, state);
     const trans = notebook.translator.load('jupyterlab');
     notebook.mode = 'command';
 
@@ -1821,8 +1822,9 @@ export namespace NotebookActions {
       }
     });
 
+    const activeCellMoved = restoreActiveCell();
     notebook.deselectAll();
-    void Private.handleState(notebook, state);
+    void Private.handleState(notebook, state, activeCellMoved);
   }
 
   /**
@@ -1839,6 +1841,7 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
+    const restoreActiveCell = Private.rememberActiveCell(notebook, state);
     const redoExecutions = Private.captureRedoExecutions(notebook);
     const undoManager = (notebook.model.sharedModel as YNotebook).undoManager;
     const redoItem = undoManager.redoStack[undoManager.redoStack.length - 1];
@@ -1861,8 +1864,9 @@ export namespace NotebookActions {
         executionCaptureSource
       );
     }
+    const activeCellMoved = restoreActiveCell();
     notebook.deselectAll();
-    void Private.handleState(notebook, state);
+    void Private.handleState(notebook, state, activeCellMoved);
   }
 
   /**
@@ -3318,6 +3322,36 @@ namespace Private {
     return {
       wasFocused: notebook.node.contains(document.activeElement),
       activeCellId: notebook.activeCell?.model.id ?? null
+    };
+  }
+
+  /**
+   * Remember the active cell before an undo or redo. The returned function
+   * activates that cell again if the undo or redo replaced it with a new
+   * widget, and returns whether the cell moved.
+   */
+  export function rememberActiveCell(
+    notebook: Notebook,
+    state: IState
+  ): () => boolean {
+    const { activeCell, activeCellIndex } = notebook;
+    const { activeCellId } = state;
+    // Two cells share an id when a cut cell is pasted after undoing the cut
+    const isIdShared = notebook.widgets.some(
+      cell => cell !== activeCell && cell.model.id === activeCellId
+    );
+    return () => {
+      if (isIdShared || notebook.activeCell?.model.id === activeCellId) {
+        return false;
+      }
+      const index = notebook.widgets.findIndex(
+        cell => cell.model.id === activeCellId
+      );
+      if (index === -1) {
+        return false;
+      }
+      notebook.activeCellIndex = index;
+      return index !== activeCellIndex;
     };
   }
 
