@@ -441,11 +441,8 @@ class CodeCellSearchProvider extends CellSearchProvider {
 
     this.currentProviderIndex = -1;
     this.outputsProvider = (this.cell as CodeCell).outputArea.widgets
-      .filter(
-        output =>
-          !output.hasClass('jp-TrimmedOutputs') &&
-          !output.node.querySelector('.jp-TrimmedOutputs')
-      )
+      // The "Show more outputs" widget is wrapped in an output panel
+      .filter(output => !output.node.querySelector('.jp-TrimmedOutputs'))
       .map(output => new GenericSearchProvider(output));
 
     if (this.isActive && this.query && this.filters?.output !== false) {
