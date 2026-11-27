@@ -122,20 +122,8 @@ Create multiple synchronized views of a single notebook:
 
 (collapse-code)=
 
-## Collapsing Cells
-
-When you collapse a cell, the first line of the code remains visible. This allows you
-to identify the cell's purpose without viewing the entire code block, which is
-particularly useful when working with large notebooks containing many cells.
-
-![Cell folding with first line visible](../_images/notebook_cell_folding_first_line.png)
-
-To collapse or expand a cell, you can:
-- Click the blue vertical bar on the left edge of the cell
-- Use the View menu to collapse or expand all cells
-- Click directly on a collapsed cell to expand it
-
-Code and output collapsing:
+Collapse and expand code and output using the View menu or the blue
+collapser button on left of each cell:
 
 ```{raw} html
 <div class="jp-youtube-video">
@@ -143,19 +131,13 @@ Code and output collapsing:
 </div>
 ```
 
-(cell-folding-behavior)=
-
-### Cell Folding Behavior
-
 When you collapse a cell, the first line of the code remains visible. This allows you
 to identify the cell's purpose without viewing the entire code block, which is
-particularly useful when working with large notebooks containing many cells.
+particularly useful when working with large notebooks containing many cells:
 
-To collapse or expand a cell, you can:
+![Cell folding with first line visible](../_images/notebook_cell_folding_first_line.png)
 
-- Click the blue vertical bar on the left edge of the cell
-- Use the View menu to collapse or expand all cells
-- Click directly on a collapsed cell to expand it
+Click the first line of a collapsed cell to expand it.
 
 (enable-scrolling)=
 
