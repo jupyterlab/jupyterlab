@@ -1,6 +1,10 @@
 import { expect, test } from '@jupyterlab/galata';
 
 test.use({ autoGoto: false });
+test.skip(
+  ({ collectTrustedTypes }) => !collectTrustedTypes,
+  'Set GALATA_TRUSTED_TYPES=1 to collect Trusted Types sinks'
+);
 
 test('Trusted Types collector is live', async ({
   page,

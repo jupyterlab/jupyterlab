@@ -326,7 +326,6 @@ suppress-none-returning = true
 # F821 Undefined name `c`
 "galata/jupyter_server_test_config.py" = ["F821"]
 "galata/jupyter_server_csp_test_config.py" = ["F821"]
-"galata/jupyter_server_tt_report_config.py" = ["F821"]
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
 "jupyterlab/browser_check.py" = ["RUF012"]
 # C901 method is too complex

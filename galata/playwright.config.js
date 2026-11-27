@@ -85,8 +85,9 @@ module.exports = {
         launchOptions: {
           args: chromiumArgs
         },
-        // Record raw strings reaching Trusted Types sinks
-        collectTrustedTypes: true
+        // Record raw strings reaching Trusted Types sinks; the server sends the
+        // report-only CSP with the same variable (jupyter_server_test_config.py)
+        collectTrustedTypes: process.env.GALATA_TRUSTED_TYPES === '1'
       }
     },
     {
@@ -101,9 +102,7 @@ module.exports = {
           // https://github.com/microsoft/playwright/issues/13037
           permissions: []
         },
-        browserName: 'firefox',
-        // Record raw strings reaching Trusted Types sinks
-        collectTrustedTypes: true
+        browserName: 'firefox'
       },
       // We do not want to match exactly on Firefox
       ignoreSnapshots: true
