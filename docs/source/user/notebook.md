@@ -135,11 +135,6 @@ To collapse or expand a cell, you can:
 - Use the View menu to collapse or expand all cells
 - Click directly on a collapsed cell to expand it
 
-**Important behavioral notes:**
-- When a cell is collapsed, clicking anywhere on the cell (not just the blue bar) will expand it
-- In command mode, you can navigate to collapsed cells using arrow keys and execute them with `Shift+Enter`
-- Keyboard navigation in command mode works with both collapsed and expanded cells
-
 Code and output collapsing:
 
 ```{raw} html
@@ -161,12 +156,6 @@ To collapse or expand a cell, you can:
 - Click the blue vertical bar on the left edge of the cell
 - Use the View menu to collapse or expand all cells
 - Click directly on a collapsed cell to expand it
-
-**Important behavioral notes:**
-
-- When a cell is collapsed, clicking anywhere on the cell (not just the blue bar) will expand it
-- In command mode, you can navigate to collapsed cells using arrow keys and execute them with `Shift+Enter`
-- Keyboard navigation in command mode works with both collapsed and expanded cells
 
 (enable-scrolling)=
 
