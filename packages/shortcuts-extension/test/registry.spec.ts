@@ -31,6 +31,7 @@ describe('@jupyterlab/shortcut-extension', () => {
       user: { shortcuts: [] as CommandRegistry.IKeyBindingOptions[] }
     };
     let options: ShortcutRegistry.IOptions;
+    let settings: DummySettings;
 
     beforeEach(async () => {
       commandRegistry = new CommandRegistry();
@@ -50,7 +51,7 @@ describe('@jupyterlab/shortcut-extension', () => {
         remove: jest.fn()
       };
       const settingRegistry = new SettingRegistry({ connector });
-      const settings = new DummySettings({
+      settings = new DummySettings({
         plugin: plugin as any,
         registry: settingRegistry
       });
@@ -133,6 +134,40 @@ describe('@jupyterlab/shortcut-extension', () => {
         const shortcutRegistry = new ShortcutRegistry(options);
         const target = [...shortcutRegistry.values()][0];
         expect(target.keybindings[0].isDefault).toBe(false);
+      });
+
+      it('should mark keybindings created by user with a selector of JupyterLab 4.0 as non-default', () => {
+        const shortcut = {
+          command: 'test:command',
+          keys: ['Ctrl W'],
+          selector:
+            '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus'
+        };
+        data.composite.shortcuts.push(shortcut);
+        data.user.shortcuts.push({
+          ...shortcut,
+          selector: '.jp-Notebook:focus'
+        });
+        const shortcutRegistry = new ShortcutRegistry(options);
+        const target = [...shortcutRegistry.values()][0];
+        expect(target.keybindings[0].isDefault).toBe(false);
+      });
+
+      it('should not mark default shortcuts with a selector of JupyterLab 4.0 as user defined', () => {
+        const shortcut = {
+          command: 'test:command',
+          keys: ['Shift B'],
+          selector: '.jp-Notebook:focus'
+        };
+        jest.spyOn(settings, 'default').mockReturnValue([shortcut]);
+        data.composite.shortcuts.push({
+          ...shortcut,
+          selector:
+            '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus'
+        });
+        const shortcutRegistry = new ShortcutRegistry(options);
+        const target = [...shortcutRegistry.values()][0];
+        expect(target.userDefined).toBe(false);
       });
 
       it('should mark default keybindings as default', () => {
