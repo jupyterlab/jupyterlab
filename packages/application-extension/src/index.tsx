@@ -54,7 +54,7 @@ import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
 import type { DockLayout, DockPanel } from '@lumino/widgets';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { topbar } from './topbar';
+import { topbar, userMenu, userMenuBar } from './topbar';
 /**
  * Default context menu item rank
  */
@@ -2180,6 +2180,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   propertyInspector,
   jupyterLogo,
   topbar,
+  userMenu,
+  userMenuBar,
   moveWidgetPlugin
 ];
 

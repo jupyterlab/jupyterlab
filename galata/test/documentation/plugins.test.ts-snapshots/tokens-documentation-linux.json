@@ -19,6 +19,7 @@
   "@jupyterlab/apputils:ISplashScreen": "A service for the splash screen for the application.\n  Use this if you want to show the splash screen for your own purposes.",
   "@jupyterlab/apputils:IThemeManager": "A service for the theme manager for the application. This is used primarily in theme extensions to register new themes.",
   "@jupyterlab/apputils:IToolbarWidgetRegistry": "A registry for toolbar widgets. Require this\n  if you want to build the toolbar dynamically from a data definition (stored in settings for example).",
+  "@jupyterlab/apputils:IUserMenu": "The user menu displayed in the top bar with the current user's avatar.\n  Require this to add items to the user menu; it is empty by default.",
   "@jupyterlab/apputils:IWindowResolver": "A service for a window resolver for the\n  application. JupyterLab workspaces are given a name, which are determined using\n  the window resolver. Require this if you want to use the name of the current workspace.",
   "@jupyterlab/codeeditor:IEditorServices": "A service for the text editor provider\n  for the application. Use this to create new text editors and host them in your\n  UI elements.",
   "@jupyterlab/codeeditor:IPositionModel": "A service to handle an code editor cursor position.",

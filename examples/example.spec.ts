@@ -162,6 +162,10 @@ test('should load the example', async ({ page }) => {
             .jp-ConsolePanel .cm-cursor {
               visibility: hidden !important;
             }
+
+            #jp-UserMenu {
+              visibility: hidden !important;
+            }
           `
         })
       )

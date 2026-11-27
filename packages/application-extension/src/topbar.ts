@@ -10,11 +10,15 @@ import type {
 import {
   createToolbarFactory,
   IToolbarWidgetRegistry,
-  setToolbar
+  IUserMenu,
+  RendererUserMenu,
+  setToolbar,
+  UserMenu
 } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { Toolbar } from '@jupyterlab/ui-components';
+import { MenuBar } from '@lumino/widgets';
 
 const TOPBAR_FACTORY = 'TopBar';
 
@@ -52,5 +56,55 @@ export const topbar: JupyterFrontEndPlugin<void> = {
     );
 
     app.shell.add(toolbar, 'top', { rank: 900 });
+  }
+};
+
+/**
+ * A plugin providing the user menu.
+ *
+ * The menu is empty by default, so the avatar is not clickable until
+ * an extension adds items to it.
+ */
+export const userMenu: JupyterFrontEndPlugin<IUserMenu> = {
+  id: '@jupyterlab/application-extension:user-menu',
+  description: 'Provides the user menu.',
+  provides: IUserMenu,
+  activate: (app: JupyterFrontEnd): IUserMenu => {
+    const { commands } = app;
+    const { user } = app.serviceManager;
+    // TODO: add default items (e.g. user details, log out) once agreed on.
+    // See https://github.com/jupyterlab/jupyterlab/issues/20534
+    return new UserMenu({ commands, user });
+  }
+};
+
+/**
+ * A plugin adding the user menu with the current user's avatar to the top bar.
+ */
+export const userMenuBar: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:user-menu-bar',
+  description:
+    "Adds the user menu with the current user's avatar to the top bar.",
+  autoStart: true,
+  requires: [IUserMenu, IToolbarWidgetRegistry],
+  activate: (
+    app: JupyterFrontEnd,
+    menu: IUserMenu,
+    toolbarRegistry: IToolbarWidgetRegistry
+  ): void => {
+    const { user } = app.serviceManager;
+
+    const menuBar = new MenuBar({
+      forceItemsPosition: {
+        forceX: false,
+        forceY: false
+      },
+      renderer: new RendererUserMenu(user)
+    });
+    menuBar.id = 'jp-UserMenu';
+    user.userChanged.connect(() => menuBar.update());
+    menuBar.addMenu(menu as UserMenu);
+
+    toolbarRegistry.addFactory(TOPBAR_FACTORY, 'user-menu', () => menuBar);
   }
 };
