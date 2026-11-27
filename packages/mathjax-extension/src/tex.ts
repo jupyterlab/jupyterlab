@@ -4,6 +4,8 @@
 /* eslint-disable jupyter/prefer-lazy-imports -- index.ts loads this module with import() */
 
 import { Loader } from '@mathjax/src/mjs/components/loader.js';
+import { MapHandler } from '@mathjax/src/mjs/input/tex/MapHandler.js';
+import { CommandMap } from '@mathjax/src/mjs/input/tex/TokenMap.js';
 
 import '@mathjax/src/mjs/input/tex/base/BaseConfiguration.js';
 import '@mathjax/src/mjs/input/tex/action/ActionConfiguration.js';
@@ -82,3 +84,9 @@ Loader.preLoaded(
     name => `[tex]/${name}`
   )
 );
+
+// Keep the html macros of MathJax 3: \data, new in MathJax 4, sets any data-* attribute.
+const htmlMacros = MapHandler.getMap('html_macros');
+if (htmlMacros instanceof CommandMap) {
+  htmlMacros.remove('data');
+}

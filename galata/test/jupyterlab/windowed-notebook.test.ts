@@ -595,6 +595,44 @@ test('should display cells below on scrolling after inserting a cell on top', as
   await expect(lastCell).toBeVisible();
 });
 
+test('should show the next heading after collapsing a long section', async ({
+  page,
+  tmpPath
+}) => {
+  const notebookName = 'two_sections.ipynb';
+  const cells = ['A', 'B'].flatMap(section => [
+    galata.Notebook.makeCell({
+      cell_type: 'markdown',
+      source: [`# Section ${section}`]
+    }),
+    ...Array.from({ length: 30 }, (_, i) =>
+      galata.Notebook.makeCell({ cell_type: 'code', source: [`x = ${i}`] })
+    )
+  ]);
+  await page.contents.uploadContent(
+    JSON.stringify(galata.Notebook.makeNotebook(cells)),
+    'text',
+    `${tmpPath}/${notebookName}`
+  );
+  await page.notebook.openByPath(`${tmpPath}/${notebookName}`);
+  // Code cells rendered on idle time stay in the DOM with `display: none`
+  await page.waitForFunction(() => {
+    const panel = window.jupyterapp.shell.currentWidget as NotebookPanel;
+    return panel.content.widgets.every(cell => !cell.isPlaceholder());
+  });
+
+  const notebook = (await page.notebook.getNotebookInPanelLocator())!;
+  const firstHeading = notebook.locator(
+    '.jp-Cell[data-windowed-list-index="0"]'
+  );
+  await firstHeading.hover();
+  await firstHeading.locator('.jp-collapseHeadingButton').click();
+
+  await expect(
+    notebook.locator('.jp-Cell[data-windowed-list-index="31"]')
+  ).toBeInViewport();
+});
+
 test('should not scroll back to a newly inserted cell when scrolling away', async ({
   page,
   tmpPath
@@ -750,6 +788,19 @@ test('should rendered injected JavaScript snippets of out-of-viewport cells', as
   );
 });
 
+/**
+ * Scroll the notebook back to its first cell with the mouse wheel.
+ */
+async function scrollToTop(page: IJupyterLabPageFixture) {
+  const notebook = (await page.notebook.getNotebookInPanelLocator())!;
+  const bbox = (await notebook.boundingBox())!;
+  await page.mouse.move(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
+  await Promise.all([
+    notebook.locator('.jp-Cell[data-windowed-list-index="0"]').waitFor(),
+    page.mouse.wheel(0, -10000)
+  ]);
+}
+
 test('should navigate to a search hit in a out-of-viewport cell', async ({
   page,
   tmpPath
@@ -761,6 +812,8 @@ test('should navigate to a search hit in a out-of-viewport cell', async ({
 
   await page.getByPlaceholder('Find').fill('IFrame');
   await page.getByText('1/2').waitFor();
+  // Typing a query scrolls to its first match
+  await scrollToTop(page);
   await expect
     .soft(page.locator('.jp-Cell[data-windowed-list-index="11"]'))
     .not.toBeVisible();
@@ -774,6 +827,7 @@ test('should navigate to a search hit in a out-of-viewport cell', async ({
 
   await page.getByPlaceholder('Find').fill('Final');
   await page.getByText('1/1').waitFor();
+  await scrollToTop(page);
   await expect
     .soft(page.locator('.jp-Cell[data-windowed-list-index="18"]'))
     .not.toBeVisible();
