@@ -35,6 +35,8 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       YARN_ENABLE_GLOBAL_CACHE: '1'
+      # Report-only Trusted Types CSP on the server and the sink collector in the tests
+      GALATA_TRUSTED_TYPES: ${{ matrix.project == 'jupyterlab' && '1' || '' }}
     permissions:
       contents: read
       pull-requests: read
@@ -320,6 +322,33 @@ jobs:
             exit 1
           fi
 
+      - name: List Trusted Types violations
+        if: ${{ !cancelled() && env.GALATA_TRUSTED_TYPES == '1' }}
+        env:
+          SHARD_NUMBER: ${{ matrix.shard }}
+        run: |
+          set -euxo pipefail
+          cd core/galata
+          if [[ ! -d tt-violations ]]; then
+            echo "No Trusted Types records in this shard"
+            exit 0
+          fi
+          # The server from "Launch JupyterLab" is still running; the script fetches
+          # the bundles from it to read their source maps. source-map is in yarn.lock.
+          node tt-aggregate.mjs tt-violations --json > "tt-sites-${SHARD_NUMBER}.json"
+
+      - name: Upload Trusted Types violations
+        if: ${{ !cancelled() && env.GALATA_TRUSTED_TYPES == '1' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: tt-sites-${{ matrix.shard }}
+          path: |
+            core/galata/tt-sites-*.json
+            core/galata/tt-violations
+          if-no-files-found: ignore
+          overwrite: true
+          retention-days: 7
+
       - name: Upload test assets
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -604,3 +633,111 @@ jobs:
           delete-merged: true
           retention-days: 1
           compression-level: 1
+
+  trusted-types-report:
+    name: Trusted Types report
+    if: ${{ !cancelled() && (github.event_name != 'schedule' || github.repository == 'jupyterlab/jupyterlab') }}
+    needs: [test]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Download per-shard results
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: tt-sites-*
+          path: tt
+          merge-multiple: true
+      - name: List files changed by this PR
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              per_page: 100
+            });
+            require('fs').writeFileSync(
+              'changed-files.json',
+              JSON.stringify(files.map(f => f.filename))
+            );
+
+      - name: Write the report to the run summary
+        run: |
+          set -euo pipefail
+          FILES=$(find tt -name 'tt-sites-*.json' 2> /dev/null | wc -l)
+          if [[ "$FILES" -eq 0 ]]; then
+            echo "### Trusted Types violations: no data" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          find tt -name 'tt-sites-*.json' -print0 | xargs -0 cat | jq -s '
+            add
+            | group_by(.site + "|" + .sink)
+            | map({site: .[0].site, sink: .[0].sink, type: .[0].type,
+                   tests: (map(.tests) | add), hits: (map(.hits) | add)})
+            | sort_by(-.tests)' > tt-sites.json
+          # Turns rows of tt-sites.json into GitHub warning annotations.
+          # Workflow commands need %, CR and LF escaped; properties also need : and ,
+          cat > annotate.jq <<'JQ'
+          def esc: gsub("%"; "%25") | gsub("\r"; "%0D") | gsub("\n"; "%0A");
+          def prop: esc | gsub(":"; "%3A") | gsub(","; "%2C");
+          .[$start:$start + 10][]
+          | "Raw string reaches \(.sink) (\(.tests) test runs). Needs a Trusted Types policy or a DOM API; see the Trusted Types report in the run summary." as $msg
+          | if (.site | test("^(packages|dev_mode)/.+:[0-9]+$")) then
+              (.site | capture("^(?<file>.+):(?<line>[0-9]+)$")) as $loc
+              | "::warning file=\($loc.file | prop),line=\($loc.line),title=Trusted Types::\($msg | esc)"
+            else
+              "::warning title=Trusted Types::\(.site + ": " + $msg | esc)"
+            end
+          JQ
+          # Annotation order: sites in files this PR changes, other repository files,
+          # then job-level sites; most test runs first within each group.
+          [[ -f changed-files.json ]] || echo '[]' > changed-files.json
+          jq --slurpfile changed changed-files.json '
+            map(. + {file: ((.site | capture("^(?<f>(?:packages|dev_mode)/.+):[0-9]+$") | .f) // null)})
+            | sort_by(
+                (if .file != null and (.file | IN($changed[0][])) then 0
+                 elif .file != null then 1
+                 else 2 end),
+                -.tests)' tt-sites.json > tt-annotate.json
+          {
+            echo "### Trusted Types violations: $(jq length tt-sites.json) distinct sites"
+            echo
+            echo "Report-only CSP, nothing is blocked. Collected from ${FILES} test shards."
+            echo
+            echo "<details>"
+            echo "<summary>All sites</summary>"
+            echo
+            echo "| # | Site | Sink | Type | Test runs | Hits |"
+            echo "| --- | --- | --- | --- | --- | --- |"
+            jq -r 'to_entries[] | "| \(.key + 1) | `\(.value.site)` | \(.value.sink) | \(.value.type) | \(.value.tests) | \(.value.hits) |"' tt-sites.json
+            echo
+            echo "</details>"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Annotate Trusted Types sites 1-10
+        run: |
+          [[ -f tt-annotate.json ]] || exit 0
+          jq -r --argjson start 0 -f annotate.jq tt-annotate.json
+
+      - name: Annotate Trusted Types sites 11-20
+        run: |
+          [[ -f tt-annotate.json ]] || exit 0
+          jq -r --argjson start 10 -f annotate.jq tt-annotate.json
+
+      - name: Annotate Trusted Types sites 21-30
+        run: |
+          [[ -f tt-annotate.json ]] || exit 0
+          jq -r --argjson start 20 -f annotate.jq tt-annotate.json
+
+      - name: Annotate Trusted Types sites 31-40
+        run: |
+          [[ -f tt-annotate.json ]] || exit 0
+          jq -r --argjson start 30 -f annotate.jq tt-annotate.json
+          TOTAL=$(jq length tt-annotate.json)
+          if (( TOTAL > 40 )); then
+            echo "::notice title=Trusted Types::$((TOTAL - 40)) more sites are listed only in the run summary"
+          fi

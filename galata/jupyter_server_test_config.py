@@ -47,3 +47,11 @@ if zmq.has("ipc"):
 
 # Uncomment to set server log level to debug level
 # c.ServerApp.log_level = "DEBUG"
+
+# Trusted Types, report-only: the browser checks every DOM sink but blocks nothing.
+# With GALATA_TRUSTED_TYPES=1, the jupyterlab UI tests also record raw strings that
+# reach sinks (collectTrustedTypes in playwright.config.js).
+if os.environ.get("GALATA_TRUSTED_TYPES") == "1":
+    c.ServerApp.tornado_settings = {
+        "headers": {"Content-Security-Policy-Report-Only": "require-trusted-types-for 'script'"}
+    }
