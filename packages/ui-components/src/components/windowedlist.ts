@@ -25,12 +25,21 @@ import { Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 
 /**
- * For how long after the scroll request should the target position
- * be corrected to account for resize of other widgets?
+ * For how long after the scroll request, or after the last resize of an item,
+ * should the target position be corrected to account for resize of other
+ * widgets?
  *
  * The time is given in milliseconds.
  */
 const MAXIMUM_TIME_FOR_SCROLLBACK = 3000;
+
+/**
+ * For how long after `scrollElementIntoView` should the element be kept in
+ * view? Unlike `MAXIMUM_TIME_FOR_SCROLLBACK`, resizes do not extend it.
+ *
+ * The time is given in milliseconds.
+ */
+const MAXIMUM_TIME_FOLLOWING_ELEMENT = 3000;
 
 /**
  * How long should we wait for programmatic scroll resolution?
@@ -65,6 +74,24 @@ function isUserNavigation(event: Event): boolean {
     event instanceof KeyboardEvent &&
     ['Alt', 'AltGraph', 'Control', 'Meta', 'Shift'].includes(event.key)
   );
+}
+
+/**
+ * An element that the list keeps in view, see `scrollElementIntoView`.
+ */
+interface IFollowedElement {
+  /**
+   * Index of the item holding the element.
+   */
+  index: number;
+  /**
+   * Element to keep in view.
+   */
+  element: HTMLElement;
+  /**
+   * Distance to the top of the list after the last scroll to the element.
+   */
+  top?: number;
 }
 
 /*
@@ -1242,24 +1269,30 @@ export class WindowedList<
   /**
    * Scroll an element of an item into view and keep it there.
    *
-   * The element is scrolled back into view when the size of the content
-   * changes or its item is attached again, until the user interacts with the
-   * list, an item is requested or `MAXIMUM_TIME_FOR_SCROLLBACK` has passed.
+   * #### Notes
+   * Browser scroll anchoring is not enough to keep the element in view: the
+   * item may not be attached yet, and the browser may anchor another element
+   * above it, such as an output that is still growing. So the list scrolls
+   * the element back into view whenever the size of the list content changes,
+   * and in full windowing mode it attaches the item again, for
+   * `MAXIMUM_TIME_FOLLOWING_ELEMENT`. The list stops earlier on input from
+   * the user in the list (see `addUserNavigationListener`), on a scroll that
+   * moves the element, and on a call to `scrollToItem`.
    *
    * @param index - Index of the item holding the element
    * @param element - Element to scroll into view
    */
   protected scrollElementIntoView(index: number, element: HTMLElement): void {
-    const target = { index, element };
+    const target: IFollowedElement = { index, element };
     this._followElement(target);
     window.setTimeout(() => {
-      if (this._scrollToElement === target) {
+      if (this._followedElement === target) {
         this._stopFollowingElement();
       }
-    }, MAXIMUM_TIME_FOR_SCROLLBACK);
+    }, MAXIMUM_TIME_FOLLOWING_ELEMENT);
     // A scroll requested earlier must not override this one.
     this._scrollUpdateWasRequested = false;
-    this._scrollBackToItemOnResize();
+    this._scrollBackToElement(target);
   }
 
   /**
@@ -1570,7 +1603,7 @@ export class WindowedList<
       this._scrollbarResizeObserver.observe(this._scrollbarElement);
     }
 
-    // Observe all items for size changes, regardless of windowing mode
+    // Observe the items that the list renders, regardless of windowing mode
     if (!this._itemsResizeObserver) {
       this._itemsResizeObserver = new ResizeObserver(
         this._onItemResize.bind(this)
@@ -1582,6 +1615,8 @@ export class WindowedList<
         this._itemsResizeObserver?.unobserve(widget.node)
       );
     }
+    // Observe the whole content in every mode, for a followed element: items
+    // that a subclass attaches itself are not observed one by one.
     if (!this._areaResizeObserver) {
       this._areaResizeObserver = new ResizeObserver(
         this._onAreaResize.bind(this)
@@ -1717,7 +1752,7 @@ export class WindowedList<
    * Handle viewport area resize.
    */
   private _onAreaResize(_entries: ResizeObserverEntry[]): void {
-    this._scrollBackToItemOnResize();
+    this._scrollBackOnResize();
   }
 
   /**
@@ -1777,12 +1812,28 @@ export class WindowedList<
         this._updateTotalSize(true);
         this._outerElement.scrollTop = this.viewModel.scrollOffset;
       }
-      this._scrollBackToItemOnResize();
+      this._scrollBackOnResize();
       // Update the list
       this.update();
-    } else if (this._scrollToElement) {
+    } else if (this._followedElement) {
       // The item holding the element may just have been attached.
-      this._scrollBackToItemOnResize();
+      this._scrollBackToElement(this._followedElement);
+    }
+  }
+
+  /**
+   * Keep the requested position after the size of the content changed.
+   *
+   * The list keeps an element given to `scrollElementIntoView` in view in
+   * every windowing mode. Otherwise, in full windowing mode, it scrolls to the
+   * item last given to `scrollToItem` again; outside of full windowing mode,
+   * browser scroll anchoring keeps the position instead.
+   */
+  private _scrollBackOnResize(): void {
+    if (this._followedElement) {
+      this._scrollBackToElement(this._followedElement);
+    } else if (this.viewModel.windowingActive) {
+      this._scrollBackToItem();
     }
   }
 
@@ -1805,73 +1856,71 @@ export class WindowedList<
    * (see `this._resetScrollToItem()`).
    *
    * This is taken care by browser scroll anchoring outside of full windowing mode.
-   * An element followed with `scrollElementIntoView` is scrolled back in all
-   * modes, as anchoring does not apply to an item which is not attached yet.
    */
-  private _scrollBackToItemOnResize() {
-    const target = this._scrollToElement;
-    if (target && (this.isHidden || this.isParentHidden)) {
+  private _scrollBackToItem(): void {
+    if (!this._scrollToItem) {
+      return;
+    }
+    this.scrollToItem(...this._scrollToItem).catch(reason => {
+      console.log(reason);
+    });
+  }
+
+  /**
+   * Scroll a followed element back into view.
+   */
+  private _scrollBackToElement(target: IFollowedElement): void {
+    if (this.isHidden || this.isParentHidden) {
       // Nothing can be scrolled, and the offset must be kept for later.
       return;
     }
-    if (target?.element.isConnected) {
-      this._scrollToItem = null;
+    if (!target.element.isConnected) {
       if (this.viewModel.windowingActive) {
-        // The window comes from the stored sizes, which lag behind a resize.
-        const item = target.element.closest<HTMLElement>(
-          '[data-windowed-list-index]'
-        );
-        const height = item?.getBoundingClientRect().height ?? 0;
-        if (item && height > 0) {
-          this.viewModel.setWidgetSize([
-            {
-              index: parseInt(item.dataset.windowedListIndex!, 10),
-              size: height
-            }
-          ]);
-        }
-      }
-      target.element.scrollIntoView();
-      target.top = this._getElementTop(target.element);
-      const { scrollTop } = this._outerElement;
-      if (scrollTop !== this.viewModel.scrollOffset) {
-        // This scroll must not be mistaken for one made by the user.
-        this.viewModel.scrollOffset = scrollTop;
-        this._renderScrollbar();
-        if (this.viewModel.windowingActive) {
-          // The scroll event will not update the list: attach the new items.
-          this.update();
-        }
+        // Attaching the item is how the element gets back in the DOM.
+        this.scrollToItem(target.index, 'start', 0).catch(reason => {
+          console.log(reason);
+        });
+        // `scrollToItem` stops following.
+        this._followElement(target);
       }
       return;
     }
-    if (!this.viewModel.windowingActive) {
-      return;
+    // The list must not scroll back to an item requested earlier.
+    this._scrollToItem = null;
+    if (this.viewModel.windowingActive) {
+      // The window comes from the stored sizes, which lag behind a resize.
+      const item = target.element.closest<HTMLElement>(
+        '[data-windowed-list-index]'
+      );
+      const height = item?.getBoundingClientRect().height ?? 0;
+      if (item && height > 0) {
+        this.viewModel.setWidgetSize([
+          {
+            index: parseInt(item.dataset.windowedListIndex!, 10),
+            size: height
+          }
+        ]);
+      }
     }
-    const request: Parameters<WindowedList['scrollToItem']> | null = target
-      ? [target.index, 'start', 0]
-      : this._scrollToItem;
-    if (!request) {
-      return;
-    }
-    this.scrollToItem(...request).catch(reason => {
-      console.log(reason);
-    });
-    if (target) {
-      // Attaching the item is how the element gets back in the DOM.
-      this._followElement(target);
+    target.element.scrollIntoView();
+    target.top = this._getElementTop(target.element);
+    const { scrollTop } = this._outerElement;
+    if (scrollTop !== this.viewModel.scrollOffset) {
+      // This scroll must not be mistaken for one made by the user.
+      this.viewModel.scrollOffset = scrollTop;
+      this._renderScrollbar();
+      if (this.viewModel.windowingActive) {
+        // The scroll event will not update the list: attach the new items.
+        this.update();
+      }
     }
   }
 
   /**
    * Keep an element in view until the user moves on.
    */
-  private _followElement(target: {
-    index: number;
-    element: HTMLElement;
-    top?: number;
-  }) {
-    this._scrollToElement = target;
+  private _followElement(target: IFollowedElement) {
+    this._followedElement = target;
     if (!this._userNavigationListener) {
       this._userNavigationListener = this.addUserNavigationListener(
         this._stopFollowingElement
@@ -1883,7 +1932,7 @@ export class WindowedList<
    * Stop keeping an element in view.
    */
   private _stopFollowingElement = () => {
-    this._scrollToElement = null;
+    this._followedElement = null;
     this._userNavigationListener?.dispose();
     this._userNavigationListener = null;
   };
@@ -1892,7 +1941,7 @@ export class WindowedList<
    * Whether the followed element is where the list last scrolled it to.
    */
   private _isFollowedElementInPlace(): boolean {
-    const target = this._scrollToElement;
+    const target = this._followedElement;
     if (!target?.element.isConnected || target.top === undefined) {
       return false;
     }
@@ -2068,7 +2117,7 @@ export class WindowedList<
       this._updateTotalSize();
       // The scroll height changes only after deferred size updates are applied.
       // Re-run scrollback using the final post-scroll geometry.
-      this._scrollBackToItemOnResize();
+      this._scrollBackOnResize();
     }
     this._requiresTotalSizeUpdate = false;
   }
@@ -2121,12 +2170,7 @@ export class WindowedList<
         WindowedList.BaseScrollToAlignment | undefined
       ]
     | null;
-  private _scrollToElement: {
-    index: number;
-    element: HTMLElement;
-    // Distance to the top of the list after the last scroll to the element.
-    top?: number;
-  } | null = null;
+  private _followedElement: IFollowedElement | null = null;
   private _scrollUpdateWasRequested: boolean;
   private _updater: Throttler;
   private _userNavigationListener: IDisposable | null = null;

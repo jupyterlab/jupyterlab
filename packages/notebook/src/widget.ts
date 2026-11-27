@@ -2464,6 +2464,15 @@ export class Notebook extends StaticNotebook {
 
   /**
    * Set URI fragment identifier.
+   *
+   * #### Notes
+   * The notebook scrolls to the target of the fragment (a heading, an element
+   * or a cell) once the cells above the target are ready and the target is
+   * rendered. The notebook then keeps the target in view for a few seconds
+   * while the content above the target changes size (see
+   * `scrollElementIntoView`). A newer fragment, input from the user in the
+   * notebook, or the activation of another cell cancels a fragment that is
+   * still waiting.
    */
   async setFragment(fragment: string): Promise<void> {
     const parsedFragment = this._parseFragment(fragment);
