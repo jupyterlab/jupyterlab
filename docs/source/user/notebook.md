@@ -135,7 +135,11 @@ When you collapse a cell, the first line of the code remains visible. This allow
 to identify the cell's purpose without viewing the entire code block, which is
 particularly useful when working with large notebooks containing many cells:
 
-![Cell folding with first line visible](../_images/notebook_cell_folding_first_line.png)
+```{image} ../images/notebook-cell-folding-first-line.png
+:align: center
+:alt: Two collapsed code cells that show only their first line, a comment, above an expanded code cell
+:class: jp-screenshot
+```
 
 Click the first line of a collapsed cell to expand it.
 

@@ -6,24 +6,17 @@ import { expect, galata, test } from '@jupyterlab/galata';
 test.use({
   autoGoto: false,
   mockState: galata.DEFAULT_DOCUMENTATION_STATE,
-  viewport: { height: 720, width: 1280 }
+  // Narrow, so that the cells fit the documentation page, but wider than
+  // 760px, below which the notebook switches to its mobile layout.
+  viewport: { height: 600, width: 800 }
 });
 
 test.describe('Notebook Cell Folding', () => {
   test('Cell folding with first line visible', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
 
-    // Hide the development mode border
-    await page.addStyleTag({
-      content: `.jp-LabShell.jp-mod-devMode {
-        border-top: none;
-      }`
-    });
-
-    // Create a new notebook
     await page.notebook.createNew();
 
-    // Add code cells with multi-line content
     await page.notebook.setCell(
       0,
       'code',
@@ -57,33 +50,31 @@ print(f'Mean: {mean_value}')
 print(f'Std Dev: {std_value}')`
     );
 
-    // Wait for cells to be rendered
-    await page.waitForTimeout(300);
+    for (const index of [0, 1]) {
+      const cell = await page.notebook.getCellLocator(index);
+      await cell!.locator('.jp-InputCollapser').click();
+    }
+    await expect(page.locator('.jp-InputPlaceholder')).toHaveCount(2);
 
-    // Collapse the first cell by clicking the collapser button
-    const firstCellCollapser = page.locator(
-      '.jp-Cell:first-child .jp-InputCollapser'
-    );
-    await firstCellCollapser.click();
+    // A collapsed cell is shorter, so the pointer now hovers another cell
+    await page.mouse.move(0, 0);
 
-    // Wait for collapse animation
-    await page.waitForTimeout(200);
+    const firstCell = await page.notebook.getCellLocator(0);
+    const lastCell = await page.notebook.getCellLocator(2);
+    const top = (await firstCell!.boundingBox())!;
+    const bottom = (await lastCell!.boundingBox())!;
+    // The focus ring of the active cell is drawn outside of the cell box
+    const margin = 4;
 
-    // Collapse the second cell
-    const secondCellCollapser = page.locator(
-      '.jp-Cell:nth-child(2) .jp-InputCollapser'
-    );
-    await secondCellCollapser.click();
-
-    // Wait for collapse animation
-    await page.waitForTimeout(200);
-
-    // Take screenshot showing collapsed cells with first line visible
-    const notebookPanel = await page.notebook.getNotebookInPanelLocator();
-    expect(await notebookPanel!.screenshot({
-      clip: { x: 0, y: 0, width: 1280, height: 500 }
-    })).toMatchSnapshot(
-      'notebook_cell_folding_first_line.png'
-    );
+    expect(
+      await page.screenshot({
+        clip: {
+          x: top.x - margin,
+          y: top.y - margin,
+          width: top.width + 2 * margin,
+          height: bottom.y + bottom.height - top.y + 2 * margin
+        }
+      })
+    ).toMatchSnapshot('notebook_cell_folding_first_line.png');
   });
 });
