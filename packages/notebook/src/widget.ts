@@ -2554,10 +2554,7 @@ export class Notebook extends StaticNotebook {
           : this._findElementInCell(cell, Private.elementId(parsedFragment));
 
       // Scroll notebook to set the target on top.
-      this.scrollElementIntoView(
-        this.widgets.indexOf(cell),
-        element ?? result.element ?? cell.node
-      );
+      this.scrollElementIntoView(element ?? result.element ?? cell.node);
     } finally {
       userNavigationListener.dispose();
     }

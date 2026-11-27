@@ -1305,16 +1305,33 @@ describe('@jupyter/notebook', () => {
 
     describe('#setFragment()', () => {
       const originalScrollIntoView = HTMLElement.prototype.scrollIntoView;
+      const OriginalResizeObserver = window.ResizeObserver;
       let scrollIntoView: jest.Mock;
+      let resizeCallbacks: ResizeObserverCallback[];
 
       beforeEach(() => {
         scrollIntoView = jest.fn();
         HTMLElement.prototype.scrollIntoView = scrollIntoView;
+        resizeCallbacks = [];
+        window.ResizeObserver = class extends OriginalResizeObserver {
+          constructor(callback: ResizeObserverCallback) {
+            super(callback);
+            resizeCallbacks.push(callback);
+          }
+        };
       });
 
       afterEach(() => {
         HTMLElement.prototype.scrollIntoView = originalScrollIntoView;
+        window.ResizeObserver = OriginalResizeObserver;
       });
+
+      // Report a size change of the notebook content, as the browser would.
+      const reportContentResize = () => {
+        resizeCallbacks
+          .filter(callback => callback.name.includes('_onAreaResize'))
+          .forEach(callback => callback([], {} as ResizeObserver));
+      };
 
       const markdown = (source: string) => ({
         cell_type: 'markdown',
@@ -1338,7 +1355,7 @@ describe('@jupyter/notebook', () => {
       };
 
       const createNotebook = (
-        windowingMode: 'defer' | 'none',
+        windowingMode: 'defer' | 'full' | 'none',
         markdownParser: IMarkdownParser = firstLineParser
       ) => {
         const widget = new LogNotebook({
@@ -1380,6 +1397,30 @@ describe('@jupyter/notebook', () => {
         const ready = new PromiseDelegate<void>();
         jest.spyOn(cell, 'ready', 'get').mockReturnValue(ready.promise);
         return ready;
+      };
+
+      // Follow a link in full windowing mode to a cell that background
+      // rendering has already rendered and detached, with scrolling mocked.
+      const followDetachedTarget = async () => {
+        const { widget, target, link } = createNotebook('full');
+        widget.model!.sharedModel.insertCell(widget.widgets.length, {
+          cell_type: 'markdown',
+          source: 'After the target'
+        });
+        for (
+          let frame = 0;
+          frame < 50 && (target.isPlaceholder() || target.node.isConnected);
+          frame++
+        ) {
+          await framePromise();
+        }
+        expect(target.node.isConnected).toBe(false);
+        const scrollToItem = jest
+          .spyOn(widget, 'scrollToItem')
+          .mockResolvedValue();
+        await widget.setFragment(link);
+        scrollToItem.mockClear();
+        return { widget, target, scrollToItem };
       };
 
       it('should keep a markdown target rendered when in edit mode', async () => {
@@ -1769,6 +1810,33 @@ describe('@jupyter/notebook', () => {
 
         await expect(navigation).resolves.toBeUndefined();
         expect(scrollIntoView).not.toHaveBeenCalled();
+      });
+
+      it('should attach a detached target at its index after a cell is inserted above', async () => {
+        const { widget, target, scrollToItem } = await followDetachedTarget();
+
+        widget.model!.sharedModel.insertCell(0, {
+          cell_type: 'markdown',
+          source: 'Inserted'
+        });
+        reportContentResize();
+
+        expect(scrollToItem).toHaveBeenCalledWith(
+          widget.widgets.indexOf(target),
+          'start',
+          0
+        );
+        widget.dispose();
+      });
+
+      it('should not attach another cell after a detached target is deleted', async () => {
+        const { widget, target, scrollToItem } = await followDetachedTarget();
+
+        widget.model!.sharedModel.deleteCell(widget.widgets.indexOf(target));
+        reportContentResize();
+
+        expect(scrollToItem).not.toHaveBeenCalled();
+        widget.dispose();
       });
     });
 

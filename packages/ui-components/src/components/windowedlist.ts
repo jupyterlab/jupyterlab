@@ -81,10 +81,6 @@ function isUserNavigation(event: Event): boolean {
  */
 interface IFollowedElement {
   /**
-   * Index of the item holding the element.
-   */
-  index: number;
-  /**
    * Element to keep in view.
    */
   element: HTMLElement;
@@ -1275,15 +1271,17 @@ export class WindowedList<
    * above it, such as an output that is still growing. So the list scrolls
    * the element back into view whenever the size of the list content changes,
    * and in full windowing mode it attaches the item again, for
-   * `MAXIMUM_TIME_FOLLOWING_ELEMENT`. The list stops earlier on input from
-   * the user in the list (see `addUserNavigationListener`), on a scroll that
-   * moves the element, and on a call to `scrollToItem`.
+   * `MAXIMUM_TIME_FOLLOWING_ELEMENT`. The item is the closest ancestor of the
+   * element with a `data-windowed-list-index` attribute. The list stops
+   * earlier on input from the user in the list (see
+   * `addUserNavigationListener`), on a scroll that moves the element, on a
+   * call to `scrollToItem`, and when that attribute no longer gives the index
+   * of the item, such as after the item was removed.
    *
-   * @param index - Index of the item holding the element
    * @param element - Element to scroll into view
    */
-  protected scrollElementIntoView(index: number, element: HTMLElement): void {
-    const target: IFollowedElement = { index, element };
+  protected scrollElementIntoView(element: HTMLElement): void {
+    const target: IFollowedElement = { element };
     this._followElement(target);
     window.setTimeout(() => {
       if (this._followedElement === target) {
@@ -1875,9 +1873,14 @@ export class WindowedList<
       return;
     }
     if (!target.element.isConnected) {
+      const index = this._getItemIndex(target.element);
+      if (index === null) {
+        this._stopFollowingElement();
+        return;
+      }
       if (this.viewModel.windowingActive) {
         // Attaching the item is how the element gets back in the DOM.
-        this.scrollToItem(target.index, 'start', 0).catch(reason => {
+        this.scrollToItem(index, 'start', 0).catch(reason => {
           console.log(reason);
         });
         // `scrollToItem` stops following.
@@ -1956,6 +1959,23 @@ export class WindowedList<
       element.getBoundingClientRect().top -
       this._outerElement.getBoundingClientRect().top
     );
+  }
+
+  /**
+   * Get the index of the item holding an element, or `null` if the element
+   * is not in an item that the list holds.
+   */
+  private _getItemIndex(element: HTMLElement): number | null {
+    const item = element.closest<HTMLElement>('[data-windowed-list-index]');
+    if (!item) {
+      return null;
+    }
+    const index = parseInt(item.dataset.windowedListIndex!, 10);
+    if (!(index >= 0 && index < this.viewModel.widgetCount)) {
+      return null;
+    }
+    // A removed item keeps the index it had.
+    return this.viewModel.widgetRenderer(index).node === item ? index : null;
   }
 
   /**

@@ -400,14 +400,26 @@ describe('@jupyterlab/ui-components', () => {
   describe('WindowedList', () => {
     describe('#scrollElementIntoView()', () => {
       class TestList extends WindowedList {
-        scrollElementIntoView(index: number, element: HTMLElement): void {
-          super.scrollElementIntoView(index, element);
+        scrollElementIntoView(element: HTMLElement): void {
+          super.scrollElementIntoView(element);
         }
+      }
+
+      // Items keep their widget, as the cells of a notebook do.
+      class ItemsModel extends WindowedListModel {
+        constructor(
+          readonly items: Widget[],
+          options: WindowedList.IModelOptions = {}
+        ) {
+          super({ ...options, count: items.length });
+        }
+        estimateWidgetSize = (_index: number): number => FIXED_ESTIMATED_SIZE;
+        widgetRenderer = (index: number): Widget => this.items[index];
       }
 
       const OriginalResizeObserver = window.ResizeObserver;
       let resizeCallbacks: ResizeObserverCallback[];
-      let model: TestModel;
+      let model: ItemsModel;
       let list: TestList;
       let element: HTMLElement;
       let scrollIntoView: jest.Mock;
@@ -427,7 +439,10 @@ describe('@jupyterlab/ui-components', () => {
             resizeCallbacks.push(callback);
           }
         };
-        model = new TestModel({ count: 3, windowingActive: true });
+        model = new ItemsModel(
+          Array.from({ length: 3 }, () => new Widget()),
+          { windowingActive: true }
+        );
         list = new TestList({ model });
         Widget.attach(list, document.body);
         element = document.createElement('h2');
@@ -442,8 +457,16 @@ describe('@jupyterlab/ui-components', () => {
         window.ResizeObserver = OriginalResizeObserver;
       });
 
+      // Put the element in item 1, which the list does not show.
+      const putInItem = () => {
+        const item = model.items[1];
+        item.dataset.windowedListIndex = '1';
+        item.node.appendChild(element);
+        return item;
+      };
+
       it('should scroll the element into view', () => {
-        list.scrollElementIntoView(1, element);
+        list.scrollElementIntoView(element);
         expect(scrollIntoView).toHaveBeenCalledTimes(1);
       });
 
@@ -460,7 +483,7 @@ describe('@jupyterlab/ui-components', () => {
             resizeCallbacks = [];
             model.windowingActive = false;
           }
-          list.scrollElementIntoView(1, element);
+          list.scrollElementIntoView(element);
           scrollIntoView.mockClear();
           reportResize(observer);
           expect(scrollIntoView).toHaveBeenCalledTimes(1);
@@ -470,7 +493,7 @@ describe('@jupyterlab/ui-components', () => {
       it('should keep the scroll offset while hidden', () => {
         list.outerNode.scrollTop = 500;
         list.outerNode.dispatchEvent(new Event('scroll'));
-        list.scrollElementIntoView(1, element);
+        list.scrollElementIntoView(element);
         scrollIntoView.mockClear();
         list.hide();
         list.outerNode.scrollTop = 0;
@@ -484,7 +507,7 @@ describe('@jupyterlab/ui-components', () => {
         scrollIntoView.mockImplementation(() => {
           list.outerNode.scrollTop = 500;
         });
-        list.scrollElementIntoView(1, element);
+        list.scrollElementIntoView(element);
         expect(model.scrollOffset).toBe(500);
         expect(update).toHaveBeenCalledTimes(1);
 
@@ -502,19 +525,15 @@ describe('@jupyterlab/ui-components', () => {
         scrollIntoView.mockImplementation(() => {
           list.outerNode.scrollTop = 500;
         });
-        list.scrollElementIntoView(1, element);
+        list.scrollElementIntoView(element);
         expect(createScrollbarItem).toHaveBeenCalled();
         createScrollbarItem.mockRestore();
       });
 
       it('should keep the element attached when its item grew', async () => {
         const items = Array.from({ length: 10 }, () => new Widget());
-        class ItemsModel extends WindowedListModel {
-          estimateWidgetSize = (_index: number): number => FIXED_ESTIMATED_SIZE;
-          widgetRenderer = (index: number): Widget => items[index];
-        }
         const itemsList = new TestList({
-          model: new ItemsModel({ count: items.length, windowingActive: true })
+          model: new ItemsModel(items, { windowingActive: true })
         });
         Widget.attach(itemsList, document.body);
         itemsList.update();
@@ -531,7 +550,7 @@ describe('@jupyterlab/ui-components', () => {
         };
         items[1].node.appendChild(heading);
 
-        itemsList.scrollElementIntoView(1, heading);
+        itemsList.scrollElementIntoView(heading);
         await framePromise();
         await framePromise();
 
@@ -541,21 +560,21 @@ describe('@jupyterlab/ui-components', () => {
 
       it('should request the item while the element is detached', () => {
         const scrollToItem = jest.spyOn(list, 'scrollToItem');
-        element.remove();
-        list.scrollElementIntoView(1, element);
+        const item = putInItem();
+        list.scrollElementIntoView(element);
         expect(scrollIntoView).not.toHaveBeenCalled();
         expect(scrollToItem).toHaveBeenCalledWith(1, 'start', 0);
 
-        list.viewportNode.appendChild(element);
+        list.viewportNode.appendChild(item.node);
         reportResize('_onItemResize');
         expect(scrollIntoView).toHaveBeenCalledTimes(1);
       });
 
       it('should forget the item requested for a detached element', () => {
         jest.useFakeTimers();
-        element.remove();
-        list.scrollElementIntoView(1, element);
-        list.viewportNode.appendChild(element);
+        const item = putInItem();
+        list.scrollElementIntoView(element);
+        list.viewportNode.appendChild(item.node);
         reportResize('_onItemResize');
         jest.advanceTimersByTime(3000);
 
@@ -566,7 +585,7 @@ describe('@jupyterlab/ui-components', () => {
 
       it('should stop after a fixed time despite resizes', () => {
         jest.useFakeTimers();
-        list.scrollElementIntoView(1, element);
+        list.scrollElementIntoView(element);
         jest.advanceTimersByTime(2000);
         reportResize('_onItemResize');
         scrollIntoView.mockClear();
@@ -583,7 +602,7 @@ describe('@jupyterlab/ui-components', () => {
           .mockImplementation(
             () => ({ top: 100 - list.outerNode.scrollTop }) as DOMRect
           );
-        list.scrollElementIntoView(1, element);
+        list.scrollElementIntoView(element);
         scrollIntoView.mockClear();
         list.outerNode.scrollTop = 500;
         list.outerNode.dispatchEvent(new Event('scroll'));
@@ -592,7 +611,7 @@ describe('@jupyterlab/ui-components', () => {
       });
 
       it('should keep following when a scroll keeps the element in place', () => {
-        list.scrollElementIntoView(1, element);
+        list.scrollElementIntoView(element);
         scrollIntoView.mockClear();
         // Scroll anchoring scrolls the list when the content above grows.
         list.outerNode.scrollTop = 500;
@@ -604,7 +623,7 @@ describe('@jupyterlab/ui-components', () => {
       it.each(['wheel', 'touchmove', 'pointerdown', 'keydown'])(
         'should stop after a %s event',
         type => {
-          list.scrollElementIntoView(1, element);
+          list.scrollElementIntoView(element);
           scrollIntoView.mockClear();
           list.node.dispatchEvent(new Event(type));
           reportResize('_onItemResize');
@@ -613,7 +632,7 @@ describe('@jupyterlab/ui-components', () => {
       );
 
       it('should keep following after a lone modifier key', () => {
-        list.scrollElementIntoView(1, element);
+        list.scrollElementIntoView(element);
         scrollIntoView.mockClear();
         list.node.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift' }));
         reportResize('_onItemResize');
@@ -621,16 +640,16 @@ describe('@jupyterlab/ui-components', () => {
       });
 
       it('should stop on user input after requesting its item', () => {
-        element.remove();
-        list.scrollElementIntoView(1, element);
-        list.viewportNode.appendChild(element);
+        const item = putInItem();
+        list.scrollElementIntoView(element);
+        list.viewportNode.appendChild(item.node);
         list.node.dispatchEvent(new Event('pointerdown'));
         reportResize('_onItemResize');
         expect(scrollIntoView).not.toHaveBeenCalled();
       });
 
       it.each([1, 2])('should stop when item %d is requested', index => {
-        list.scrollElementIntoView(1, element);
+        list.scrollElementIntoView(element);
         scrollIntoView.mockClear();
         void list.scrollToItem(index, 'start');
         reportResize('_onItemResize');
@@ -638,7 +657,7 @@ describe('@jupyterlab/ui-components', () => {
       });
 
       it('should stop listening for user input when disposed', () => {
-        list.scrollElementIntoView(1, element);
+        list.scrollElementIntoView(element);
         const removeEventListener = jest.spyOn(
           list.node,
           'removeEventListener'
@@ -656,7 +675,7 @@ describe('@jupyterlab/ui-components', () => {
       it('should not return to an item requested earlier', () => {
         jest.useFakeTimers();
         void list.scrollToItem(2, 'start');
-        list.scrollElementIntoView(1, element);
+        list.scrollElementIntoView(element);
         // An item resize would keep the earlier request alive.
         jest.advanceTimersByTime(2000);
         reportResize('_onItemResize');
