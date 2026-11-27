@@ -1842,6 +1842,26 @@
     }
   },
   {
+    "id": "debugger:disable",
+    "label": "Disable Debugger",
+    "caption": "Disable Debugger",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "id": "debugger:enable",
+    "label": "Enable Debugger",
+    "caption": "Enable Debugger",
+    "shortcuts": [],
+    "args": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
     "id": "debugger:evaluate",
     "label": "Evaluate Code",
     "caption": "Evaluate Code",

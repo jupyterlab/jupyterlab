@@ -124,7 +124,8 @@ const consoles: JupyterFrontEndPlugin<void> = {
       type: 'console',
       shell: app.shell,
       service: debug,
-      translator: translator
+      translator: translator,
+      commands: app.commands
     });
 
     handler.executionDone.connect(debug.displayModules.bind(debug));
@@ -235,7 +236,8 @@ const files: JupyterFrontEndPlugin<void> = {
       type: 'file',
       shell: app.shell,
       service: debug,
-      translator: translator
+      translator: translator,
+      commands: app.commands
     });
 
     handler.executionDone.connect(debug.displayModules.bind(debug));
@@ -341,7 +343,8 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
       type: 'notebook',
       shell: app.shell,
       service,
-      translator: translator
+      translator: translator,
+      commands: app.commands
     });
 
     handler.executionDone.connect(service.displayModules.bind(service));
@@ -1220,6 +1223,61 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    commands.addCommand(CommandIDs.enable, {
+      label: trans.__('Enable Debugger'),
+      caption: trans.__('Enable Debugger'),
+      icon: Debugger.Icons.enableIcon,
+      isEnabled: (args?: { widget?: Widget }) => {
+        const match = Debugger.Handler.findHandler(
+          args?.widget ?? shell.currentWidget
+        );
+        return match
+          ? match.handler.isAvailable(match.widget) &&
+              !match.handler.isDebuggerOn(match.widget)
+          : false;
+      },
+      execute: async (args?: { widget?: Widget }) => {
+        const match = Debugger.Handler.findHandler(
+          args?.widget ?? shell.currentWidget
+        );
+        if (match) {
+          await match.handler.enable(match.widget);
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
+    commands.addCommand(CommandIDs.disable, {
+      label: trans.__('Disable Debugger'),
+      caption: trans.__('Disable Debugger'),
+      icon: Debugger.Icons.disableIcon,
+      isEnabled: (args?: { widget?: Widget }) => {
+        const match = Debugger.Handler.findHandler(
+          args?.widget ?? shell.currentWidget
+        );
+        return match ? match.handler.isDebuggerOn(match.widget) : false;
+      },
+      execute: async (args?: { widget?: Widget }) => {
+        const match = Debugger.Handler.findHandler(
+          args?.widget ?? shell.currentWidget
+        );
+        if (match) {
+          await match.handler.disable(match.widget);
+        }
+      },
+      describedBy: {
+        args: {
+          type: 'object',
+          properties: {}
+        }
+      }
+    });
+
     commands.addCommand(CommandIDs.debugContinue, {
       label: () => {
         return service.hasStoppedThreads()
@@ -1426,6 +1484,8 @@ const main: JupyterFrontEndPlugin<void> = {
     if (palette) {
       const category = trans.__('Debugger');
       [
+        CommandIDs.enable,
+        CommandIDs.disable,
         CommandIDs.debugContinue,
         CommandIDs.terminate,
         CommandIDs.next,

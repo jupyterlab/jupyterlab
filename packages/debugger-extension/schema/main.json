@@ -13,8 +13,16 @@
             "rank": 1.2
           },
           {
+            "command": "debugger:enable",
+            "rank": 1.21
+          },
+          {
+            "command": "debugger:disable",
+            "rank": 1.22
+          },
+          {
             "command": "debugger:restart-debug",
-            "rank": 1.2
+            "rank": 1.23
           }
         ]
       },
