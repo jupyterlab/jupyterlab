@@ -1001,6 +1001,11 @@ mapping. For example for the notebook panel:
 }
 ```
 
+A command button with an icon shows only the icon by default. To display text beside it, set
+`label` on the toolbar item, for example
+`{ "name": "insert", "command": "notebook:insert-cell-below", "label": "Insert cell" }`.
+For a button without an icon, omitting the toolbar item's `label` uses the command label.
+
 The settings registry will merge those definitions from settings schema with any
 user-provided overrides (customizations) transparently and save them under the
 `toolbar` property in the final settings object. The `toolbar` list will be used to
