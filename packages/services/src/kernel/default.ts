@@ -1255,6 +1255,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * the socket if you plan to reconnect.
    */
   private _clearSocket(): void {
+    if (this._getModelTimeout !== null) {
+      clearTimeout(this._getModelTimeout);
+      this._getModelTimeout = null;
+    }
     if (this._ws !== null) {
       // Clear the websocket event handlers and the socket itself.
       this._ws.onopen = this._noOp;
@@ -1476,6 +1480,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     let alreadyCalledOnclose = false;
 
     const getKernelModel = async (evt: CloseEvent | ErrorEvent) => {
+      this._getModelTimeout = null;
       if (this._isDisposed) {
         return;
       }
@@ -1483,6 +1488,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
       this._model = undefined;
       try {
         const model = await this._kernelAPIClient.getModel(this._id);
+        if (this._isDisposed) {
+          return;
+        }
         this._model = model;
         if (model?.execution_state === 'dead') {
           this._updateStatus('dead');
@@ -1499,8 +1507,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
           err.response?.status === 503 ||
           err.response?.status === 424
         ) {
-          const timeout = Private.getRandomIntInclusive(10, 30) * 1e3;
-          setTimeout(getKernelModel, timeout, evt);
+          if (!this._isDisposed) {
+            const timeout = Private.getRandomIntInclusive(10, 30) * 1e3;
+            this._getModelTimeout = setTimeout(getKernelModel, timeout, evt);
+          }
         } else {
           this._reason = 'Kernel died unexpectedly';
           this._updateStatus('dead');
@@ -1868,6 +1878,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
   private _reconnectTimeout: any = null;
+  private _getModelTimeout: ReturnType<typeof setTimeout> | null = null;
   private _supportedProtocols: string[] = Object.values(
     KernelMessage.supportedKernelWebSocketProtocols
   );
