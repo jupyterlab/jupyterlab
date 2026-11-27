@@ -109,4 +109,122 @@ test.describe('Output Scrolling', () => {
       /jp-mod-outputsScrolled/
     );
   });
+
+  test.describe('Configurable default height', () => {
+    test.use({
+      mockSettings: {
+        ...galata.DEFAULT_SETTINGS,
+        '@jupyterlab/notebook-extension:tracker': {
+          ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
+          scrolledOutputMaxHeight: '120px'
+        }
+      }
+    });
+
+    test('uses the configured default scrolled output height', async ({
+      page
+    }) => {
+      await page.notebook.selectCells(0);
+      await page.evaluate(() => {
+        return window.jupyterapp.commands.execute(
+          'notebook:enable-output-scrolling'
+        );
+      });
+      await expect(page.locator(`${cellSelector} >> nth=0`)).toHaveClass(
+        /jp-mod-outputsScrolled/
+      );
+
+      const outputArea = page.locator(
+        `${cellSelector} >> nth=0 >> .jp-Cell-outputArea`
+      );
+      await expect(outputArea).toHaveCSS('max-height', '120px');
+    });
+
+    test('updates the default height when the setting changes', async ({
+      page
+    }) => {
+      await page.notebook.selectCells(0);
+      await page.evaluate(() => {
+        return window.jupyterapp.commands.execute(
+          'notebook:enable-output-scrolling'
+        );
+      });
+
+      const outputArea = page.locator(
+        `${cellSelector} >> nth=0 >> .jp-Cell-outputArea`
+      );
+      await expect(outputArea).toHaveCSS('max-height', '120px');
+
+      await page.evaluate(async () => {
+        const settingRegistry = await window.galata.getPlugin(
+          '@jupyterlab/apputils-extension:settings'
+        );
+        const settings = await settingRegistry!.load(
+          '@jupyterlab/notebook-extension:tracker'
+        );
+        await settings.set('scrolledOutputMaxHeight', '80px');
+      });
+
+      await expect(outputArea).toHaveCSS('max-height', '80px');
+    });
+
+    test('manual resize still overrides the default height', async ({
+      page
+    }) => {
+      await page.notebook.selectCells(0);
+      await page.evaluate(() => {
+        return window.jupyterapp.commands.execute(
+          'notebook:enable-output-scrolling'
+        );
+      });
+      await expect(page.locator(`${cellSelector} >> nth=0`)).toHaveClass(
+        /jp-mod-outputsScrolled/
+      );
+
+      const outputArea = page.locator(
+        `${cellSelector} >> nth=0 >> .jp-Cell-outputArea`
+      );
+      await expect(outputArea).toHaveCSS('max-height', '120px');
+
+      // The resize handle is in the bottom right corner
+      const box = (await outputArea.boundingBox())!;
+      await page.mouse.move(box.x + box.width - 3, box.y + box.height - 3);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width - 3, box.y + box.height + 97);
+      await page.mouse.up();
+      await expect(outputArea).toHaveCSS('max-height', 'none');
+      await expect(outputArea).toHaveCSS('height', '220px');
+    });
+
+    test('does not scroll an output shorter than the maximum height', async ({
+      page
+    }) => {
+      await page.notebook.selectCells(0);
+      await page.evaluate(() => {
+        return window.jupyterapp.commands.execute(
+          'notebook:enable-output-scrolling'
+        );
+      });
+
+      // Above the output height, which is more than half the output width
+      await page.evaluate(async () => {
+        const settingRegistry = await window.galata.getPlugin(
+          '@jupyterlab/apputils-extension:settings'
+        );
+        const settings = await settingRegistry!.load(
+          '@jupyterlab/notebook-extension:tracker'
+        );
+        await settings.set('scrolledOutputMaxHeight', '600px');
+      });
+
+      const outputArea = page.locator(
+        `${cellSelector} >> nth=0 >> .jp-Cell-outputArea`
+      );
+      await expect(outputArea).toHaveCSS('max-height', '600px');
+      const overflow = await outputArea.evaluate(
+        el => el.scrollHeight - el.clientHeight
+      );
+      expect(overflow).toBe(0);
+    });
+  });
 });

@@ -920,11 +920,57 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           return;
         }
         NotebookActions.setHeadingCollapse(cell, collapsed, this);
+        if (!collapsed) {
+          this._sizeExpandedCells(cell);
+        }
         this._cellCollapsed.emit(cell);
       })
       .catch(error => {
         console.warn('Failed to resolve headings: ', error);
       });
+  }
+
+  /**
+   * Size the expanded cells that are out of view by their estimate.
+   *
+   * #### Notes
+   * The windowed list measured them at 0 px while they were hidden, and it
+   * measures them again only once it renders them.
+   *
+   * @param heading - Heading of the expanded section
+   */
+  private _sizeExpandedCells(heading: Cell): void {
+    const start = this.widgets.indexOf(heading) + 1;
+    if (
+      !this.viewModel.windowingActive ||
+      !(heading instanceof MarkdownCell) ||
+      start === 0
+    ) {
+      return;
+    }
+    const end = Math.min(start + heading.numberChildNodes, this.widgets.length);
+    const indices: number[] = [];
+    for (let index = start; index < end; index++) {
+      const cell = this.widgets[index];
+      if (!cell.isHidden && !cell.inViewport) {
+        indices.push(index);
+      }
+    }
+    // Cells above the view keep their size, so the visible cells do not move
+    if (
+      indices.length === 0 ||
+      this.viewModel.getSpan(indices[0], indices[0])[0] <
+        this.viewModel.scrollOffset
+    ) {
+      return;
+    }
+    this.viewModel.setWidgetSize(
+      indices.map(index => ({
+        index,
+        size: this.viewModel.estimateWidgetSize(index)
+      }))
+    );
+    this.update();
   }
 
   /**
@@ -1042,12 +1088,21 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   ): Promise<void> {
     const startTime = Date.now();
     let cellIdx = 0;
+    // The list renders the cells in its window, and the removal below can hide them
+    const listRange =
+      this.notebookConfig.windowingMode === 'full'
+        ? this.viewModel.getRangeToRender({ virtual: true })
+        : null;
     while (
       Date.now() - startTime < remainingTime &&
       cellIdx < this.cellsArray.length
     ) {
       const cell = this.cellsArray[cellIdx];
-      if (cell.isPlaceholder()) {
+      const inListRange =
+        listRange !== null &&
+        cellIdx >= listRange[0] &&
+        cellIdx <= listRange[1];
+      if (cell.isPlaceholder() && !inListRange) {
         if (
           ['defer', 'full', 'contentVisibility'].includes(
             this.notebookConfig.windowingMode
@@ -1057,16 +1112,22 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           if (this.notebookConfig.windowingMode === 'full') {
             // We need to delay slightly the removal to let codemirror properly initialize
             requestAnimationFrame(() => {
-              this.viewModel.setEstimatedWidgetSize(
-                cell.model.id,
-                cell.node.getBoundingClientRect().height
-              );
+              // A hidden cell measures 0 px, which is not its height once
+              // its heading is expanded.
+              if (!cell.isHidden) {
+                this.viewModel.setEstimatedWidgetSize(
+                  cell.model.id,
+                  cell.node.getBoundingClientRect().height
+                );
+              }
               this.layout.removeWidget(cell);
             });
           } else if (
             this.notebookConfig.windowingMode === 'contentVisibility' &&
-            // Cells in hidden notebooks do not have a measurable height.
-            this.isVisible
+            // Cells in hidden notebooks, and hidden cells, do not have a
+            // measurable height.
+            this.isVisible &&
+            !cell.isHidden
           ) {
             // Update height estimate in the view model
             const height = cell.node.getBoundingClientRect().height;

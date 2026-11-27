@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { SessionContext } from '@jupyterlab/apputils';
+import { Sanitizer } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import type {
   IOutputAreaModel,
@@ -30,6 +31,14 @@ import { simulate } from 'simulate-event';
  * The default rendermime instance to use for testing.
  */
 const rendermime = defaultRenderMime();
+
+/**
+ * A rendermime instance that writes text once the output is attached, as the
+ * application does.
+ */
+const incrementalRendermime = defaultRenderMime().clone({
+  sanitizer: new Sanitizer()
+});
 
 const CODE = 'print("hello")';
 
@@ -94,6 +103,22 @@ function createDisplayDataMessage(
   });
 }
 
+/**
+ * Attach an output area and wait for the frame of its isolated output to load.
+ */
+async function attachIsolated(widget: OutputArea): Promise<HTMLIFrameElement> {
+  Widget.attach(widget, document.body);
+  const iframe = widget.node.querySelector('iframe')!;
+  // jsdom fires the load event again on close(), which browsers do not.
+  jest
+    .spyOn(iframe.contentDocument!, 'close')
+    .mockImplementation(() => undefined);
+  await new Promise(resolve =>
+    iframe.addEventListener('load', resolve, { once: true })
+  );
+  return iframe;
+}
+
 class LogOutputArea extends OutputArea {
   methods: string[] = [];
 
@@ -146,6 +171,7 @@ describe('outputarea/widget', () => {
   afterEach(() => {
     model.dispose();
     widget.dispose();
+    jest.useRealTimers();
   });
 
   describe('OutputArea', () => {
@@ -698,6 +724,70 @@ describe('outputarea/widget', () => {
           }
         });
         expect(widget.node.innerHTML).not.toContain('<iframe');
+      });
+
+      it('should show isolated text in its frame', async () => {
+        jest.useFakeTimers();
+        model.clear();
+        const area = new OutputArea({
+          rendermime: incrementalRendermime,
+          model
+        });
+        model.add({
+          output_type: 'display_data',
+          data: { 'text/plain': 'hello, world' },
+          metadata: { isolated: true }
+        });
+
+        const iframe = await attachIsolated(area);
+        jest.runAllTimers();
+
+        expect(iframe.contentDocument!.body?.textContent).toBe('hello, world');
+        area.dispose();
+      });
+
+      it('should show isolated stderr in its frame', async () => {
+        // A stderr stream has no metadata, so it cannot be isolated.
+        jest.useFakeTimers();
+        model.clear();
+        const area = new OutputArea({
+          rendermime: incrementalRendermime,
+          model
+        });
+        model.add({
+          output_type: 'display_data',
+          data: { 'application/vnd.jupyter.stderr': 'hello, world' },
+          metadata: { isolated: true }
+        });
+
+        const iframe = await attachIsolated(area);
+        jest.runAllTimers();
+
+        expect(iframe.contentDocument!.body?.textContent).toBe('hello, world');
+        area.dispose();
+      });
+
+      it('should show isolated text attached after more than 1,000 frames', async () => {
+        // Collapsed outputs are attached when they are expanded.
+        jest.useFakeTimers();
+        model.clear();
+        const area = new OutputArea({
+          rendermime: incrementalRendermime,
+          model
+        });
+        model.add({
+          output_type: 'display_data',
+          data: { 'text/plain': 'hello, world' },
+          metadata: { isolated: true }
+        });
+        // About 1,250 frames at ~16ms per fake-timer frame.
+        jest.advanceTimersByTime(20000);
+
+        const iframe = await attachIsolated(area);
+        jest.runAllTimers();
+
+        expect(iframe.contentDocument!.body?.textContent).toBe('hello, world');
+        area.dispose();
       });
     });
 

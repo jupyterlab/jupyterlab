@@ -11,6 +11,9 @@ from tempfile import TemporaryDirectory
 import pytest
 import tornado
 
+from jupyterlab.commands import AppOptions
+from jupyterlab.handlers import build_handler
+
 
 def expected_http_error(error, expected_code, expected_message=None):
     """Check that the error matches the expected output error."""
@@ -119,3 +122,36 @@ class TestBuildAPI:
 
         r = await build_api_tester.clear()
         assert r.code == 204
+
+
+async def test_cancel_stops_the_running_build(monkeypatch, tmp_path):
+    stopped = []
+
+    def wait_for_cancel(app_options, clean_staging=False):
+        stopped.append(app_options.kill_event.wait(timeout=10))
+        if stopped[-1]:
+            msg = "Process was aborted"
+            raise ValueError(msg)
+
+    monkeypatch.setattr(build_handler, "build", wait_for_cancel)
+    builder = build_handler.Builder(False, AppOptions(app_dir=str(tmp_path)))
+    running = builder.build()
+    await builder.cancel()
+    await running
+    assert stopped == [True]
+
+
+async def test_build_is_retried_after_a_failure(monkeypatch, build_api_tester):
+    attempts = []
+
+    def fail_first_attempt(app_options, clean_staging=False):
+        attempts.append(clean_staging)
+        if len(attempts) == 1:
+            msg = "npm dependencies failed to install"
+            raise RuntimeError(msg)
+
+    monkeypatch.setattr(build_handler, "build", fail_first_attempt)
+    r = await build_api_tester.fetch(
+        build_api_tester.url, method="POST", body="{}", raise_error=False
+    )
+    assert r.code == 200

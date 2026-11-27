@@ -581,7 +581,10 @@ export class ListModel extends VDomModel {
   ): Promise<IActionReply> {
     const bodyJson: Record<string, string> = {
       cmd: action,
-      extension_name: entry.name
+      extension_name:
+        action === 'install' || action === 'uninstall'
+          ? Private.packageName(entry)
+          : entry.name
     };
 
     if (actionOptions.useVersion) {
@@ -733,6 +736,21 @@ namespace Private {
    */
   export function installedComparator(a: IEntry, b: IEntry): number {
     return a.name.localeCompare(b.name);
+  }
+
+  /**
+   * Get the name of the Python package that installed an extension.
+   *
+   * #### Notes
+   * It can differ from the extension name: `jupyterlab-lsp` installs
+   * `@jupyter-lsp/jupyterlab-lsp`.
+   */
+  export function packageName(entry: IEntry): string {
+    const install = entry.install;
+    if (install?.packageManager === 'python' && install.packageName) {
+      return install.packageName;
+    }
+    return entry.name;
   }
 
   const LINK_PARSER = /<([^>]+)>; rel="([^"]+)",?/g;

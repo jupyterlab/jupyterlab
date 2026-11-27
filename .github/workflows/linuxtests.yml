@@ -196,6 +196,7 @@ jobs:
           persist-credentials: false
       - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@b9d5c28489f8b460cef48868f303b97c20f8fe1b # v1.1.2
       - run: |
+          node scripts/ci_skip_lib_check.js
           pip install -vv --group builder
           jlpm
           jlpm build:packages

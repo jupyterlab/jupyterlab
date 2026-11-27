@@ -132,6 +132,7 @@ params
 pdf
 pilcrow
 pipenv
+pixi
 plotly
 pluggable
 png
