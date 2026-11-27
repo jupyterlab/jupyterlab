@@ -229,6 +229,38 @@ describe('fileeditorcodewrapper', () => {
         cursor = widget.editor.getCursorPosition();
         expect(cursor.line).toBe(2);
       });
+
+      it('should ignore malformed #line fragments without throwing', async () => {
+        await context.initialize(true);
+        await context.ready;
+        const widget = documentWidget.content;
+
+        await expect(documentWidget.setFragment('#line')).resolves.toBe(
+          undefined
+        );
+        await expect(documentWidget.setFragment('#line=')).resolves.toBe(
+          undefined
+        );
+        await expect(documentWidget.setFragment('#line=abc')).resolves.toBe(
+          undefined
+        );
+        await expect(documentWidget.setFragment('#line=-1')).resolves.toBe(
+          undefined
+        );
+        expect(widget.editor.getCursorPosition().line).toBe(0);
+      });
+
+      it('should not update cursor if disposed before context is ready', async () => {
+        const setCursorSpy = jest.spyOn(
+          documentWidget.content.editor,
+          'setCursorPosition'
+        );
+        const promise = documentWidget.setFragment('#line=2');
+        documentWidget.dispose();
+        await context.initialize(true);
+        await promise;
+        expect(setCursorSpy).not.toHaveBeenCalled();
+      });
     });
   });
 
