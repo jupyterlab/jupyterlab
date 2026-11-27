@@ -8,10 +8,12 @@
 
 import { parseMathIPython } from '@jupyterlab/codemirror';
 import { Tree } from '@lezer/common';
+import { highlightTree } from '@lezer/highlight';
 import type { MarkdownParser } from '@lezer/markdown';
 import { parser } from '@lezer/markdown';
 import { StreamLanguage } from '@codemirror/language';
 import { stexMath } from '@codemirror/legacy-modes/mode/stex';
+import { jupyterHighlightStyle } from '../src/theme';
 
 const ipythonParser = parser.configure([parseMathIPython()]);
 const mixedParser = parser.configure([
@@ -306,4 +308,61 @@ describe('markdown parser', () => {
     const inputText = '$$$$';
     expect(() => mixedParser.parse(inputText)).not.toThrow();
   });
+
+  it('should highlight LaTeX math tokens inside a multiline $$ block', () => {
+    const text = '$$\n100 \\times 0.66754 - C = 0.66753 \\times\n$$';
+    const tree = mixedParser.parse(text);
+    const highlighted: { text: string; classes: string }[] = [];
+    highlightTree(
+      tree,
+      jupyterHighlightStyle,
+      (from: number, to: number, classes: string) => {
+        highlighted.push({ text: text.slice(from, to), classes });
+      }
+    );
+    expect(highlighted).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ text: '100' }),
+        expect.objectContaining({ text: '\\times' }),
+        expect.objectContaining({ text: '0.66754' }),
+        expect.objectContaining({ text: 'C' }),
+        expect.objectContaining({ text: '0.66753' })
+      ])
+    );
+  });
+
+  it.each([
+    '$$  \n100 \\times C\n$$',
+    '$$\n100 \\times C\n  $$',
+    '$$\r\n100 \\times C\r\n$$',
+    '$$\n  100 \\times C\n$$',
+    '$$   \r\n   100 \\times C   \r\n   $$',
+    '\\\\[\n100 \\times C\n\\\\]',
+    '$100 \\times C$',
+    '\\\\(100 \\times C\\\\)'
+  ])('should highlight math tokens in %s', text => {
+    const tree = mixedParser.parse(text);
+    const highlighted: { text: string; classes: string }[] = [];
+    highlightTree(
+      tree,
+      jupyterHighlightStyle,
+      (from: number, to: number, classes: string) => {
+        highlighted.push({ text: text.slice(from, to), classes });
+      }
+    );
+    expect(highlighted).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ text: '100' }),
+        expect.objectContaining({ text: '\\times' }),
+        expect.objectContaining({ text: 'C' })
+      ])
+    );
+  });
+
+  it.each(['$$\n$$', '$$   $$'])(
+    'should parse empty math block %s without error',
+    text => {
+      expect(() => mixedParser.parse(text)).not.toThrow();
+    }
+  );
 });
