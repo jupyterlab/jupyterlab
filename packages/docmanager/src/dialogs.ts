@@ -208,7 +208,11 @@ export function renameFile(
   newPath: string
 ): Promise<Contents.IModel | null> {
   return manager.rename(oldPath, newPath).catch(async error => {
-    if (error?.response?.status !== 409) {
+    const isConflict =
+      error?.response?.status === 409 ||
+      error?.status === 409 ||
+      error?.statusCode === 409;
+    if (!isConflict) {
       // if it's not caused by an already existing file, rethrow
       throw error;
     }

@@ -106,6 +106,18 @@ describe('docregistry/dialog', () => {
           ])
         ).rejects.toBe(alreadyExistsError);
       });
+      it('should show overwrite dialog when non-HTTP error has status 409', async () => {
+        const errorWithoutResponse: any = new Error('File already exists');
+        errorWithoutResponse.status = 409;
+        const spyRename = jest.spyOn(manager, 'rename');
+        spyRename.mockRejectedValueOnce(errorWithoutResponse);
+        await expect(
+          Promise.all([
+            dismissDialog(),
+            renameFile(manager, 'foo.ipynb', 'bar.ipynb')
+          ])
+        ).rejects.toBe('File not renamed');
+      });
       it('should not offer to overwrite a directory', async () => {
         const directory = await services.contents.newUntitled({
           type: 'directory'

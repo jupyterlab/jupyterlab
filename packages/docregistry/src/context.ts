@@ -314,13 +314,32 @@ export class Context<
       return true;
     }
 
-    // Make sure the path does not exist.
+    // Check if the target path already exists.
+    let model: Contents.IModel | null = null;
     try {
       await this._manager.ready;
-      const model = await this._manager.contents.get(newPath, {
+      model = await this._manager.contents.get(newPath, {
         contentProviderId: this._contentProviderId,
         content: false
       });
+    } catch (err: unknown) {
+      const responseStatus =
+        typeof err === 'object' && err !== null && 'response' in err
+          ? (err as { response?: { status?: number } }).response?.status
+          : undefined;
+      const status =
+        typeof err === 'object' && err !== null && 'status' in err
+          ? (err as { status?: number }).status
+          : undefined;
+      if (
+        (responseStatus !== undefined && responseStatus !== 404) ||
+        (status !== undefined && status !== 404)
+      ) {
+        throw err;
+      }
+    }
+
+    if (model) {
       if (model.type === 'directory') {
         void showErrorMessage(
           this._trans.__('Save As Error'),
@@ -333,15 +352,11 @@ export class Context<
         );
         return false;
       }
-      await this._maybeOverWrite(newPath);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      if (!err.response || err.response.status !== 404) {
+      try {
+        await this._maybeOverWrite(newPath);
+      } catch {
         // Dialog rejection (user cancelled)
-        if (!err.response) {
-          return false;
-        }
-        throw err;
+        return false;
       }
     }
     await this._finishSaveAs(newPath);

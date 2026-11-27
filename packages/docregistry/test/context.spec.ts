@@ -849,6 +849,46 @@ describe('docregistry/context', () => {
         await promise;
         expect(saveEmitted).toEqual(false);
       });
+
+      it('should save the document when the contents drive throws an error without response property (non-HTTP drive)', async () => {
+        const initialize = context.initialize(true);
+        const newPath = UUID.uuid4() + '.txt';
+
+        const get = manager.contents.get as jest.MockedFunction<
+          typeof manager.contents.get
+        >;
+        const getImplementation = get.getMockImplementation();
+        if (!getImplementation) {
+          throw new Error('Missing contents get mock implementation');
+        }
+
+        get.mockImplementation((path, options) => {
+          if (path === newPath) {
+            return Promise.reject(new Error(`File not found: ${newPath}`));
+          }
+          return getImplementation(path, options);
+        });
+
+        try {
+          const func = async () => {
+            await initialize;
+            await waitForDialog();
+            const dialog = document.body.getElementsByClassName('jp-Dialog')[0];
+            const input = dialog.getElementsByTagName('input')[0];
+            input.value = newPath;
+            await acceptDialog();
+          };
+          const promise = func();
+          await initialize;
+
+          const result = await context.saveAs();
+          await promise;
+
+          expect(result).toBe(true);
+        } finally {
+          get.mockImplementation(getImplementation);
+        }
+      });
     });
 
     describe('#revert()', () => {
