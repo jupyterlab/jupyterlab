@@ -270,8 +270,8 @@ These lines:
   - [ ] https://github.com/jupyterlab/jupyter-renderers
 - [ ] Publish a release (with a **updated tag**) to the [extension template](https://github.com/jupyterlab/extension-template/releases) with the new JupyterLab version
 - [ ] Update the extension examples:
-  - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/main/docs/source/extension/notebook.rst#adding-a-button-to-the-toolbar)
-  - [ ] [Notebook widget](https://github.com/jupyterlab/jupyterlab/blob/main/docs/source/extension/notebook.rst#adding-a-widget-to-the-notebook-header)
+  - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/main/docs/source/extension/notebook.md#adding-a-button-to-the-toolbar)
+  - [ ] [Notebook widget](https://github.com/jupyterlab/jupyterlab/blob/main/docs/source/extension/notebook.md#adding-a-widget-to-the-notebook-header)
 - [ ] Update the [extension tutorial](https://github.com/jupyterlab/jupyterlab/blob/main/RELEASE.md#updating-the-extension-tutorial)
 - [ ] At this point, there may have been some more commits merged. Run `python scripts/milestone_check.py` to check the issues assigned to this milestone one more time. Update changelog if necessary.
 
