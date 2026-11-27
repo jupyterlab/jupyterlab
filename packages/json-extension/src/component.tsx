@@ -367,7 +367,14 @@ function useTreeItem(
   // Keys of the ARIA tree view pattern, https://www.w3.org/WAI/ARIA/apg/patterns/treeview/
   const onKeyDown = (event: React.KeyboardEvent<HTMLLIElement>) => {
     const current = event.currentTarget;
-    if (event.target !== current) {
+    // Keys with modifiers are shortcuts, such as Shift+Enter to run a cell.
+    if (
+      event.target !== current ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey
+    ) {
       return;
     }
     switch (event.key) {
