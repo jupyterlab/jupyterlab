@@ -2038,7 +2038,7 @@ class _AppHandler:
         a package name, or run `npm pack` locally if `source` is a
         directory.
         """
-        is_dir = osp.exists(source) and osp.isdir(source)
+        is_dir = _is_local_package_dir(source)
         if is_dir and not osp.exists(pjoin(source, "node_modules")):
             self._run(["node", YARN_PATH, "install"], cwd=source)
 
@@ -2294,11 +2294,26 @@ def _ensure_logger(logger: logging.Logger | None = None) -> logging.Logger:
 
 
 def _normalize_path(extension: str | os.PathLike[str]) -> str:
-    """Normalize a given extension if it is a path."""
+    """Normalize a given extension if it is a path.
+
+    Only paths that `npm pack` can use (a directory with a `package.json` or a
+    tarball) are made absolute, so that a package name is not mistaken for an
+    unrelated file or directory of the same name in the current directory.
+    """
     extension = osp.expanduser(extension)
-    if osp.exists(extension):
+    if _is_local_package_dir(extension) or _is_local_tarball(extension):
         extension = osp.abspath(extension)
     return extension
+
+
+def _is_local_package_dir(path: str | os.PathLike[str]) -> bool:
+    """Whether a path is a local directory containing an npm package."""
+    return osp.isdir(path) and osp.isfile(pjoin(path, "package.json"))
+
+
+def _is_local_tarball(path: str | os.PathLike[str]) -> bool:
+    """Whether a path is a local npm package tarball."""
+    return osp.isfile(path) and str(path).endswith((".tgz", ".tar.gz", ".tar"))
 
 
 def _rmtree(path: str | os.PathLike[str], logger: logging.Logger) -> None:
