@@ -830,6 +830,10 @@ export class SessionContext implements ISessionContext {
    * #### Notes
    * If a server session exists on the current path, we will connect to it
    * unless `kernelPreference.shouldReuse === false`.
+   * If `kernelPreference.locked` is `true` and that session runs another
+   * kernel, we ask the user before we switch it to the locked kernel.
+   * When the locked kernel is not installed, we do not connect to that
+   * session and resolve with `true`.
    * If preferences include disabling `canStart` or `shouldStart`, no
    * server session will be started.
    * If a kernel id is given, we attempt to start a session with that id.
@@ -869,13 +873,23 @@ export class SessionContext implements ISessionContext {
         return item.path === this._path;
       });
       if (model) {
-        // Ensure a locked notebook always runs on the locked kernel.
         const lockedName = preference.locked === true ? preference.name : '';
         const mismatch = !!lockedName && model.kernel?.name !== lockedName;
+        let switchKernel = mismatch;
         if (mismatch) {
           await this.specsManager.ready;
           if (!this.specsManager.specs?.kernelspecs[lockedName!]) {
             return true;
+          }
+          // Switching shuts down the running kernel, so ask first.
+          if (model.kernel) {
+            switchKernel = await this._confirmLockedKernelSwitch(
+              lockedName!,
+              model.kernel.name
+            );
+          }
+          if (this.isDisposed) {
+            return false;
           }
         }
         try {
@@ -885,7 +899,7 @@ export class SessionContext implements ISessionContext {
           void this._handleSessionError(err as ServerConnection.ResponseError);
           return Promise.reject(err);
         }
-        if (mismatch) {
+        if (switchKernel) {
           try {
             await this._changeKernel({ name: lockedName });
           } catch (err) {
@@ -1144,6 +1158,41 @@ export class SessionContext implements ISessionContext {
     }));
     await dialog.launch();
     this._dialog = null;
+  }
+
+  /**
+   * Ask whether to switch the kernel of a reused session to the locked kernel.
+   *
+   * @returns Whether the user chose to switch.
+   */
+  private async _confirmLockedKernelSwitch(
+    lockedName: string,
+    runningName: string
+  ): Promise<boolean> {
+    const specs = this.specsManager.specs?.kernelspecs;
+    const locked = specs?.[lockedName]?.display_name ?? lockedName;
+    const running = specs?.[runningName]?.display_name ?? runningName;
+    const dialog = (this._dialog = new Dialog({
+      title: this._trans.__('Switch to the Locked Kernel?'),
+      body: this._trans.__(
+        'This notebook is locked to the %1 kernel, but the %2 kernel is already running for it. Switching shuts down the %2 kernel, and its variables are lost.',
+        locked,
+        running
+      ),
+      buttons: [
+        Dialog.cancelButton({ label: this._trans.__('Keep Running Kernel') }),
+        Dialog.warnButton({ label: this._trans.__('Switch Kernel') })
+      ]
+    }));
+    try {
+      const result = await dialog.launch();
+      return result.button.accept;
+    } catch {
+      // Disposing the session context disposes the dialog.
+      return false;
+    } finally {
+      this._dialog = null;
+    }
   }
 
   /**

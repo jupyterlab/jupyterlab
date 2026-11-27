@@ -305,7 +305,7 @@ describe('@jupyterlab/apputils', () => {
         other.dispose();
       });
 
-      it('should switch an existing path session to the locked kernel', async () => {
+      it('should switch an existing path session to the locked kernel when confirmed', async () => {
         const lockedName = specsManager.specs!.default;
         const otherName = Object.keys(specsManager.specs!.kernelspecs).find(
           name => name !== lockedName
@@ -322,9 +322,33 @@ describe('@jupyterlab/apputils', () => {
           locked: true
         };
 
-        await sessionContext.initialize();
+        await Promise.all([sessionContext.initialize(), acceptDialog()]);
         expect(sessionContext.session?.id).toBe(other.id);
         expect(sessionContext.session?.kernel?.name).toBe(lockedName);
+        await other.shutdown();
+        other.dispose();
+      });
+
+      it('should keep the kernel of an existing path session when the switch to the locked kernel is declined', async () => {
+        const lockedName = specsManager.specs!.default;
+        const otherName = Object.keys(specsManager.specs!.kernelspecs).find(
+          name => name !== lockedName
+        )!;
+        const other = await sessionManager.startNew({
+          name: '',
+          path,
+          type: 'test',
+          kernel: { name: otherName }
+        });
+        const otherKernelId = other.kernel!.id;
+        sessionContext.kernelPreference = {
+          ...sessionContext.kernelPreference,
+          name: lockedName,
+          locked: true
+        };
+
+        await Promise.all([sessionContext.initialize(), dismissDialog()]);
+        expect(sessionContext.session?.kernel?.id).toBe(otherKernelId);
         await other.shutdown();
         other.dispose();
       });
