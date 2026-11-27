@@ -1571,8 +1571,10 @@ export namespace NotebookActions {
    *
    * @param clipboardInteractionValues — The cells to use for clipboard signal comparison.
    *
+   * @param activeIndex - The index in `values` of the cell to activate.
+   *
    * #### Notes
-   * The last added cell becomes the active cell.
+   * The last added cell becomes the active cell, unless `activeIndex` is given.
    * This is a no-op if values is an empty array.
    * This action can be undone.
    */
@@ -1582,9 +1584,10 @@ export namespace NotebookActions {
     mode: 'below' | 'belowSelected' | 'above' | 'replace' = 'below',
     values: nbformat.IBaseCell[],
     cellsFromClipboard: boolean = false,
-    clipboardInteractionValues: nbformat.IBaseCell[] = values
+    clipboardInteractionValues: nbformat.IBaseCell[] = values,
+    activeIndex: number = values.length - 1
   ): void {
-    if (!notebook.model || !notebook.activeCell) {
+    if (!notebook.model || !notebook.activeCell || values.length === 0) {
       return;
     }
 
@@ -1594,7 +1597,6 @@ export namespace NotebookActions {
     notebook.mode = 'command';
 
     let index = 0;
-    const prevActiveCellIndex = notebook.activeCellIndex;
 
     model.sharedModel.transact(() => {
       // Set the starting index of the paste operation depending upon the mode.
@@ -1628,6 +1630,8 @@ export namespace NotebookActions {
             }
           });
 
+          index = toDelete[0] ?? notebook.activeCellIndex;
+
           // If cells are not deletable, we may not have anything to delete.
           if (toDelete.length > 0) {
             // Delete the cells as one undo event.
@@ -1635,7 +1639,6 @@ export namespace NotebookActions {
               model.sharedModel.deleteCell(i);
             });
           }
-          index = toDelete[0];
           break;
         }
         default:
@@ -1656,7 +1659,7 @@ export namespace NotebookActions {
       );
     });
 
-    notebook.activeCellIndex = prevActiveCellIndex + values.length;
+    notebook.activeCellIndex = index + activeIndex;
     notebook.deselectAll();
     if (cellsFromClipboard) {
       notebook.recordCellClipboardInteraction(

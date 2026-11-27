@@ -3,6 +3,7 @@
 
 import type { IJupyterLabPageFixture } from '@jupyterlab/galata';
 import { expect, galata, test } from '@jupyterlab/galata';
+import { waitForActiveCellToolbar } from './utils';
 
 const fileName = 'notebook.ipynb';
 
@@ -163,7 +164,13 @@ test.describe('Notebook Edit', () => {
     await page.menu.clickMenuItem('Edit>Paste Cell Above');
     let nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    await nbPanel!.locator('.jp-mod-active .jp-cell-toolbar').waitFor();
+    // The pasted Markdown cell is active and its text hides the toolbar
+    await waitForActiveCellToolbar(page);
+    // The pasted heading can get its collapse button after the toolbar
+    const pastedCell = await page.notebook.getCellLocator(0);
+    await pastedCell!
+      .locator('.jp-collapseHeadingButton')
+      .waitFor({ state: 'attached' });
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 

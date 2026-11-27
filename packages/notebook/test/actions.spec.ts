@@ -2383,6 +2383,21 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#duplicate()', () => {
+      it('should activate the last added cell when duplicating above', () => {
+        widget.activeCellIndex = 1;
+        NotebookActions.duplicate(widget, 'above');
+        expect(widget.activeCellIndex).toBe(1);
+      });
+
+      it('should activate the last added cell when duplicating with mode replace', () => {
+        widget.activeCellIndex = 1;
+        widget.select(widget.widgets[2]);
+        NotebookActions.duplicate(widget, 'replace');
+        expect(widget.activeCellIndex).toBe(2);
+      });
+    });
+
     describe('#paste()', () => {
       it('should paste cells from a utils.clipboard', () => {
         const source = widget.activeCell!.model.sharedModel.getSource();
@@ -2535,6 +2550,25 @@ describe('@jupyterlab/notebook', () => {
         expect(signals.length).toBe(1);
         expect(signals[0].cellCount).toBe(1);
         expect(signals[0].previousInteraction).toBeNull();
+      });
+
+      it('should activate the last added cell when pasting above', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        NotebookActions.copy(widget);
+        widget.activeCellIndex = 1;
+        NotebookActions.paste(widget, 'above');
+        expect(widget.activeCellIndex).toBe(1);
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
+      });
+
+      it('should activate the last added cell when pasting with mode replace', () => {
+        const source = widget.activeCell!.model.sharedModel.getSource();
+        NotebookActions.copy(widget);
+        widget.activeCellIndex = 1;
+        widget.select(widget.widgets[2]);
+        NotebookActions.paste(widget, 'replace');
+        expect(widget.activeCellIndex).toBe(1);
+        expect(widget.activeCell!.model.sharedModel.getSource()).toBe(source);
       });
     });
 
