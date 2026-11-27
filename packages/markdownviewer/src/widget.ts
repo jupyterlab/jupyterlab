@@ -46,7 +46,13 @@ export class MarkdownViewer extends Widget {
     layout.addWidget(this.renderer);
 
     void this.context.ready.then(async () => {
+      if (this.isDisposed) {
+        return;
+      }
       await this._render();
+      if (this.isDisposed) {
+        return;
+      }
 
       // Throttle the rendering rate of the widget.
       this._monitor = new ActivityMonitor({
@@ -232,7 +238,8 @@ export class MarkdownViewer extends Widget {
   private _trans: TranslationBundle;
   private _config = { ...MarkdownViewer.defaultConfig };
   private _fragment = '';
-  private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null;
+  private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null =
+    null;
   private _ready = new PromiseDelegate<void>();
   private _renderPending = false;
   private _isRendering = false;
