@@ -112,6 +112,12 @@ class="jp-screenshot">
 
 The toolbar of the current notebook can now be hidden with View → Appearance → Show Toolbar. The choice is not saved, so the toolbar shows again after a reload.
 
+Panels of the main area can now be resized in both directions at once by dragging the point where a vertical and a horizontal handle meet. The pointer shows a move cursor there. The handles between main area panels are also easier to grab with the mouse: 8 px wide instead of 5 px.
+
+<img alt="An animation of three files in the main area: the pointer moves to the point where the handle between the two columns meets the handle of the right column, shows a move cursor, and drags that point up and to the left, so all three files change size"
+src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.7-resize-junction.gif"
+class="jp-screenshot">
+
 ### Debugger and console improvements
 
 The Kernel Sources panel now shows the modules as a tree grouped by package, with "Open" and "Copy Path" in the context menu. The new "Hide the kernel's own sources" setting of the Debugger, off by default and on in the picture, hides the modules that the kernel loads for itself, such as IPython and debugpy.
@@ -173,6 +179,8 @@ class="jp-screenshot">
 
 The new ["Default delimiter"](https://jupyterlab.readthedocs.io/en/latest/user/file_formats.html#view-csv) setting of the CSV Viewer sets the delimiter for opening files, for example `;`. The number of columns now comes from the widest of the first 500 rows, so longer rows are shown in full. Go to Line now scrolls to the correct row, and editing the file in another tab keeps the column widths.
 
+On Linux and Windows, <kbd>Shift</kbd> + mouse wheel now scrolls the CSV viewer sideways. A selection dragged past the right edge now scrolls to the last column.
+
 ### Terminal enhancements
 
 The terminal now uses xterm.js 6. Without WebGL, it falls back to the DOM renderer, because xterm.js 6 no longer includes the canvas renderer.
@@ -197,7 +205,9 @@ class="jp-screenshot">
 - The plugin list of the Settings Editor can now be reached with <kbd>Tab</kbd> and browsed with the arrow keys.
 - In the Keyboard Shortcuts settings, each shortcut and the buttons next to it can now be reached with the keyboard.
 - Screen readers now announce the menu entries that can be checked as checkboxes.
-- On touch screens, menus respond to taps again, as they did before JupyterLab 4.6. The close buttons of tabs also respond to taps, and the handles between panels can be dragged.
+- <kbd>Tab</kbd> now enters a tab bar at the selected tab, such as the tab of the document shown in the main area.
+- <kbd>Tab</kbd> and screen readers now reach the sections of the Debugger panel, the menu bar of the Simple interface and the activity bar at the top in the order shown on screen.
+- On touch screens, menus respond to taps again, as they did before JupyterLab 4.6. The close buttons of tabs also respond to taps, and the handles between panels can be dragged, also between two Launchers.
 
 ### Server and deployment
 
