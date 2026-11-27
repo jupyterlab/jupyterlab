@@ -671,7 +671,7 @@ export class DirListing extends Widget {
           this._sortFileNamesNaturally,
           this.translator
         );
-        this.headerNode.innerHTML = '';
+        this.headerNode.replaceChildren();
         this._renderer.populateHeaderNode(
           this.headerNode,
           this.translator,
@@ -1398,7 +1398,7 @@ export class DirListing extends Widget {
       this._hiddenColumns.add(name);
     }
 
-    this.headerNode.innerHTML = '';
+    this.headerNode.replaceChildren();
     this._renderer.populateHeaderNode(
       this.headerNode,
       this.translator,

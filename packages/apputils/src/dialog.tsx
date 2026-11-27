@@ -1053,10 +1053,9 @@ export namespace Dialog {
       footer.addClass('jp-Dialog-footer');
       if (checkbox) {
         footer.node.appendChild(checkbox);
-        footer.node.insertAdjacentHTML(
-          'beforeend',
-          '<div class="jp-Dialog-spacer"></div>'
-        );
+        const spacer = document.createElement('div');
+        spacer.className = 'jp-Dialog-spacer';
+        footer.node.append(spacer);
       }
       const footerButton = document.createElement('div');
       footerButton.classList.add('jp-Dialog-footerButtons');

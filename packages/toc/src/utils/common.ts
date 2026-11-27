@@ -203,10 +203,10 @@ export function getPrefix(
  * @param numbering Numbering prefix to add
  */
 function addNumbering(el: Element, numbering: string): void {
-  el.insertAdjacentHTML(
-    'afterbegin',
-    `<span class="${NUMBERING_CLASS}">${numbering}</span>`
-  );
+  const span = document.createElement('span');
+  span.className = NUMBERING_CLASS;
+  span.textContent = numbering;
+  el.prepend(span);
 }
 
 /**
