@@ -849,9 +849,9 @@ namespace Private {
   }
 
   /**
-   * Whether a CSS color is dark, by its YIQ brightness.
+   * Whether a CSS color is dark, by its Rec. 709 luma.
    *
-   * A color that the browser does not accept counts as light.
+   * A color that `ColorUtils.parse()` rejects counts as light.
    */
   function isDark(color: string): boolean {
     const rgba = ColorUtils.parse(color);
@@ -859,7 +859,6 @@ namespace Private {
       return false;
     }
     const { red, green, blue } = rgba;
-    // YIQ equation from http://24ways.org/2010/calculating-color-contrast
     return (red * 2126 + green * 7152 + blue * 722) / 10000 < 128;
   }
 }
