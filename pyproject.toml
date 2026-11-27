@@ -369,6 +369,7 @@ suppress-none-returning = true
 # PLR2004 Magic value used in comparison
 "jupyterlab/tests/*" = ["C901", "S101", "N802", "E501", "EM101", "EM102", "EM103", "PLR2004"]
 "jupyterlab/tests/**" = ["ANN"]
+"scripts/tests/**" = ["ANN", "S101", "PLR2004"]
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
 "jupyterlab/tests/echo_kernel.py" = ["RUF012"]
 # T201 `print` found
