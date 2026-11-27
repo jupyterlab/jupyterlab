@@ -3345,6 +3345,50 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.mode).toBe('command');
       });
 
+      it.each([0, 3])(
+        'should keep cell %i active without scrolling when its type change is undone',
+        index => {
+          widget.activeCellIndex = index;
+          const id = widget.activeCell!.model.id;
+          NotebookActions.changeCellType(widget, 'markdown');
+          const scrollSpy = mockScrollToItem();
+          NotebookActions.undo(widget);
+          expect(widget.activeCellIndex).toBe(index);
+          expect(widget.activeCell!.model.id).toBe(id);
+          expect(scrollSpy).not.toHaveBeenCalled();
+        }
+      );
+
+      it('should keep a moved cell active and scroll to it when the move is undone', () => {
+        widget.activeCellIndex = 3;
+        const id = widget.activeCell!.model.id;
+        NotebookActions.moveDown(widget);
+        const scrollSpy = mockScrollToItem();
+        NotebookActions.undo(widget);
+        expect(widget.activeCellIndex).toBe(3);
+        expect(widget.activeCell!.model.id).toBe(id);
+        expect(scrollSpy).toHaveBeenCalledTimes(1);
+        expect(scrollSpy.mock.calls[0][0]).toBe(3);
+      });
+
+      it('should activate the cell above when an insertion is undone', () => {
+        widget.activeCellIndex = 3;
+        NotebookActions.insertBelow(widget);
+        NotebookActions.undo(widget);
+        expect(widget.activeCellIndex).toBe(3);
+      });
+
+      it('should not activate another cell with the same id', () => {
+        // A cut cell pasted after undoing the cut keeps its id
+        widget.activeCellIndex = 3;
+        NotebookActions.cut(widget);
+        NotebookActions.undo(widget);
+        widget.activeCellIndex = 5;
+        NotebookActions.paste(widget, 'below');
+        NotebookActions.undo(widget);
+        expect(widget.activeCellIndex).toBe(5);
+      });
+
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.undo(widget);
@@ -4352,6 +4396,17 @@ describe('@jupyterlab/notebook', () => {
         widget.mode = 'edit';
         NotebookActions.redo(widget);
         expect(widget.mode).toBe('command');
+      });
+
+      it('should keep a moved cell active when the move is redone', () => {
+        widget.activeCellIndex = 3;
+        const id = widget.activeCell!.model.id;
+        NotebookActions.moveDown(widget);
+        NotebookActions.undo(widget);
+        widget.activeCellIndex = 3;
+        NotebookActions.redo(widget);
+        expect(widget.activeCellIndex).toBe(4);
+        expect(widget.activeCell!.model.id).toBe(id);
       });
 
       it('should be a no-op if there is no model', () => {
