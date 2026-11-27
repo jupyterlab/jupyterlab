@@ -51,6 +51,7 @@
     "@lumino/widgets": "^2.11.0",
     "@xterm/addon-fit": "0.12.0-beta.333",
     "@xterm/addon-search": "0.17.0-beta.331",
+    "@xterm/addon-unicode11": "0.10.0-beta.331",
     "@xterm/addon-web-links": "0.13.0-beta.331",
     "@xterm/addon-webgl": "0.20.0-beta.330",
     "@xterm/xterm": "6.1.0-beta.337",

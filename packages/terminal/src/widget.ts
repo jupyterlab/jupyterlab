@@ -19,6 +19,7 @@ import type {
 } from '@xterm/xterm';
 import type { FitAddon } from '@xterm/addon-fit';
 import type { SearchAddon } from '@xterm/addon-search';
+import type { Unicode11Addon } from '@xterm/addon-unicode11';
 import type { WebLinksAddon } from '@xterm/addon-web-links';
 import type { WebglAddon } from '@xterm/addon-webgl';
 import Color from 'color';
@@ -81,7 +82,8 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     const { theme, ...other } = this._options;
     const xtermOptions = {
       theme: Private.getXTermTheme(theme),
-      allowProposedApi: true, // To support xtermjs SearchAddon coloring.
+      // To support xtermjs SearchAddon coloring and the Unicode 11 addon.
+      allowProposedApi: true,
       // Handle OSC 8 escape-sequence hyperlinks.
       linkHandler: {
         activate: (event: MouseEvent, uri: string) => {
@@ -857,6 +859,7 @@ namespace Private {
   let FitAddon_: typeof FitAddon;
   let WeblinksAddon_: typeof WebLinksAddon;
   let SearchAddon_: typeof SearchAddon;
+  let Unicode11Addon_: typeof Unicode11Addon;
   let WebglAddon_: typeof WebglAddon | undefined;
   let initPromise: Promise<void> | undefined;
 
@@ -887,18 +890,19 @@ namespace Private {
    * Load the xterm.js modules, at most once.
    */
   async function initialize(): Promise<void> {
-    const [xterm_, fitAddon_, weblinksAddon_, searchAddon_] = await Promise.all(
-      [
+    const [xterm_, fitAddon_, weblinksAddon_, searchAddon_, unicode11Addon_] =
+      await Promise.all([
         import('@xterm/xterm'),
         import('@xterm/addon-fit'),
         import('@xterm/addon-web-links'),
-        import('@xterm/addon-search')
-      ]
-    );
+        import('@xterm/addon-search'),
+        import('@xterm/addon-unicode11')
+      ]);
     Xterm_ = xterm_.Terminal;
     FitAddon_ = fitAddon_.FitAddon;
     WeblinksAddon_ = weblinksAddon_.WebLinksAddon;
     SearchAddon_ = searchAddon_.SearchAddon;
+    Unicode11Addon_ = unicode11Addon_.Unicode11Addon;
     if (hasWebGL2Context()) {
       try {
         const webglAddon_ = await import('@xterm/addon-webgl');
@@ -976,6 +980,8 @@ namespace Private {
       })
     );
     term.loadAddon(searchAddon);
+    term.loadAddon(new Unicode11Addon_());
+    term.unicode.activeVersion = '11';
     return [term, fitAddon, searchAddon];
   }
 

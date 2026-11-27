@@ -471,6 +471,47 @@ test.describe('Terminal', () => {
       await expect.poll(sliderTop).toBeGreaterThan(pageUpPosition);
     });
   });
+
+  test.describe('Emoji', () => {
+    test('should give emoji two cells when printing and editing', async ({
+      page
+    }) => {
+      const terminal = page.locator(TERMINAL_SELECTOR);
+      await waitForTerminal(page);
+      const terminalBody = terminal.locator('.jp-Terminal-body:visible');
+
+      await page.terminal.runCommand('echo a😀🚀🌍b', { terminal });
+      // The text appears once in the command and once in its output.
+      await expect(terminalBody).toContainText(/a😀🚀🌍b.*a😀🚀🌍b/s);
+
+      await page.keyboard.type('echo c🍕🎉🥳d');
+      for (let i = 0; i < 2; i++) {
+        await page.keyboard.press('ArrowLeft');
+      }
+      await page.keyboard.press('Backspace');
+      await page.keyboard.type('X');
+      await expect(terminalBody).toContainText('echo c🍕X🥳d');
+
+      // Crop the screenshot below the last line of text.
+      const terminalBox = await terminal.boundingBox();
+      const lineBox = await terminalBody
+        .getByText('echo c🍕X🥳d')
+        .boundingBox();
+      if (!terminalBox || !lineBox) {
+        throw new Error('Could not get the position of the terminal text');
+      }
+      expect(
+        await page.screenshot({
+          clip: {
+            x: terminalBox.x,
+            y: terminalBox.y,
+            width: terminalBox.width,
+            height: lineBox.y + lineBox.height + 8 - terminalBox.y
+          }
+        })
+      ).toMatchSnapshot('unicode-emoji.png');
+    });
+  });
 });
 
 test.describe('Terminal on macOS', () => {
