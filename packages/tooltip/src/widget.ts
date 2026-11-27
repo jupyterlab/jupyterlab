@@ -112,7 +112,10 @@ export class Tooltip extends Widget {
 
     switch (event.type) {
       case 'keydown':
-        if (node.contains(target)) {
+        if (
+          node.contains(target) &&
+          (event as KeyboardEvent).key !== 'Escape'
+        ) {
           return;
         }
         this.dispose();
