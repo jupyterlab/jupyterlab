@@ -65,6 +65,12 @@ is simple:
 - Where possible, private variables should be defined and scoped under
   an appropriate selector other than `:root`.
 
+For a new private variable, choose the closest ancestor shared by its consumers.
+For example, `.jp-DocumentSearch-overlay` defines
+`--jp-private-document-search-button-height` so its buttons inherit the value.
+Check where the elements are attached before choosing a scope. A tab that moves
+to the document body during a drag can no longer inherit from its original panel.
+
 ### CSS variable usage
 
 JupyterLab includes a default set of CSS variables in the file
