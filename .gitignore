@@ -160,3 +160,4 @@ pixi.lock
 
 # temporary files, useful for testing
 tmp
+.venv/
