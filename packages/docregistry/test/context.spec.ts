@@ -573,7 +573,7 @@ describe('docregistry/context', () => {
         await waitForDialog();
         const dialog = document.body.getElementsByClassName('jp-Dialog')[0];
         const reload = Array.from(dialog.getElementsByTagName('button')).find(
-          button => button.textContent === 'Reload from Disk'
+          button => button.textContent === 'Revert'
         );
         reload!.click();
         await promise;
