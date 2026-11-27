@@ -1115,10 +1115,10 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
               // A hidden cell measures 0 px, which is not its height once
               // its heading is expanded.
               if (!cell.isHidden) {
-                this.viewModel.setEstimatedWidgetSize(
-                  cell.model.id,
-                  cell.node.getBoundingClientRect().height
-                );
+                const height = cell.node.getBoundingClientRect().height;
+                if (height > 0) {
+                  this.viewModel.setEstimatedWidgetSize(cell.model.id, height);
+                }
               }
               // A search can scroll to the cell before this frame
               const range = this.viewModel.getRangeToRender({ virtual: true });
@@ -1136,8 +1136,10 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           ) {
             // Update height estimate in the view model
             const height = cell.node.getBoundingClientRect().height;
-            this.viewModel.setEstimatedWidgetSize(cell.model.id, height);
-            cell.node.style.containIntrinsicSize = `auto ${height}px`;
+            if (height > 0) {
+              this.viewModel.setEstimatedWidgetSize(cell.model.id, height);
+              cell.node.style.containIntrinsicSize = `auto ${height}px`;
+            }
           }
         }
       }
