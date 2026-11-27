@@ -2634,14 +2634,16 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCellIndex).toBe(2);
       });
 
-      it('should activate the last added cell when duplicating below a collapsed heading', () => {
+      it('should activate the copied heading when duplicating a collapsed heading', () => {
         const heading = widget.widgets[1] as MarkdownCell;
         heading.numberChildNodes = 2;
         heading.headingCollapsed = true;
+        widget.widgets[2].setHidden(true);
+        widget.widgets[3].setHidden(true);
         widget.activeCellIndex = 1;
         NotebookActions.duplicate(widget, 'below');
-        // The heading and its 2 children are inserted at index 4.
-        expect(widget.activeCellIndex).toBe(6);
+        // The heading and its 2 hidden children are inserted at index 4.
+        expect(widget.activeCellIndex).toBe(4);
       });
     });
 
