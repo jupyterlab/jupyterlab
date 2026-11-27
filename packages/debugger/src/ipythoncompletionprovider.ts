@@ -127,9 +127,8 @@ export class DebuggerIPythonCompletionProvider implements ICompletionProvider {
         await this._debuggerService.session?.connection?.kernel?.info;
       return info?.language_info?.name === 'python';
     } catch {
-      // A rejection here (e.g. the kernel connection closing) would
-      // otherwise reject the reconciliator's Promise.all and disable
-      // completions from all providers.
+      // A rejection here (e.g. the kernel connection closing) is expected,
+      // and the reconciliator would log it as a provider error.
       return false;
     }
   }

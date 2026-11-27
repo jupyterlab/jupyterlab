@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { EditorView } from '@codemirror/view';
 import type { YCodeCell, YMarkdownCell } from '@jupyter/ydoc';
 import { createStandaloneCell } from '@jupyter/ydoc';
 import {
@@ -12,6 +13,8 @@ import {
 } from '@jupyterlab/cells';
 import { NBTestUtils } from '@jupyterlab/cells/lib/testutils';
 import { defaultRenderMime } from '@jupyterlab/rendermime/lib/testutils';
+import { framePromise } from '@jupyterlab/testing';
+import { Widget } from '@lumino/widgets';
 
 /**
  * Create a code cell which was never rendered, like the cells a windowed
@@ -95,6 +98,56 @@ describe('cells/searchprovider', () => {
       expect(provider.getCurrentMatch()?.readOnly).toBe(false);
       expect(await provider.replaceAllMatches('bar')).toBe(true);
       expect(cell.model.sharedModel.getSource()).toBe('bar bar');
+      provider.dispose();
+    });
+
+    it('should not scroll the editor of a hidden input', async () => {
+      const model = new CodeCellModel({
+        sharedModel: createStandaloneCell({
+          cell_type: 'code',
+          source: 'test1 test2'
+        }) as YCodeCell
+      });
+      cell = new CodeCell({
+        model,
+        rendermime: defaultRenderMime(),
+        contentFactory: NBTestUtils.createCodeCellFactory(),
+        placeholder: false
+      }).initializeState();
+      Widget.attach(cell, document.body);
+      cell.inputHidden = true;
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+      // A hidden editor scrolls to the match when the input is shown again
+      const scrollIntoView = jest.spyOn(EditorView, 'scrollIntoView');
+
+      // The notebook scrolls each cell to the first match of a new query
+      await provider.highlightNext(false, {
+        from: 'selection-start',
+        scroll: true,
+        select: false
+      });
+      expect(scrollIntoView).not.toHaveBeenCalled();
+      scrollIntoView.mockRestore();
+      provider.dispose();
+    });
+
+    it('should not scroll the editor of a hidden input which renders after the search starts', async () => {
+      // A notebook renders the cells out of view when the browser is idle
+      cell = createPlaceholderCell();
+      cell.inputHidden = true;
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+      await provider.highlightNext();
+      // A hidden editor scrolls to the match when the input is shown again
+      const scrollIntoView = jest.spyOn(EditorView, 'scrollIntoView');
+
+      Widget.attach(cell, document.body);
+      cell.inViewport = true;
+      await framePromise();
+
+      expect(scrollIntoView).not.toHaveBeenCalled();
+      scrollIntoView.mockRestore();
       provider.dispose();
     });
   });

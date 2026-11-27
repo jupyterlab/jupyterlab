@@ -10,6 +10,7 @@ import { nullTranslator } from '@jupyterlab/translation';
 import escape from 'lodash.escape';
 import { LiveText, mergeNodes } from './livetext';
 import { removeMath, replaceMath } from './latex';
+import { cancelWhenAttached, whenAttached } from './utils';
 
 /**
  * Render HTML into a host node.
@@ -848,8 +849,10 @@ function renderTextual(
   const { host, sanitizer, source } = options;
 
   // Settle the completion promise of any previous render for this host - it is
-  // being superseded by this call.
+  // being superseded by this call - and stop it from resuming when the host is
+  // attached.
   Private.settleRender(host);
+  cancelWhenAttached(host);
 
   // Escape hatch: when incremental auto-linking is disabled, render
   // synchronously in a single pass (legacy behavior). Links then appear
@@ -878,9 +881,10 @@ function renderTextual(
 
   // First-paint promise: resolves as soon as the plain text is written to the
   // DOM (the first working frame), which is the milestone `renderText`
-  // reports. It resolves well before `rendered`, whose auto-linking tail can
-  // run for a long time - especially for off-screen outputs deferred to the
-  // browser's idle time (see `renderText`).
+  // reports, or when the render starts to wait for the host to be attached
+  // (see `waitForAttach`). It resolves well before `rendered`, whose
+  // auto-linking tail can run for a long time - especially for off-screen
+  // outputs deferred to the browser's idle time (see `renderText`).
   let resolveFirstPainted!: () => void;
   const firstPainted = new Promise<void>(resolve => {
     resolveFirstPainted = resolve;
@@ -937,13 +941,6 @@ function renderTextual(
   // per frame, which drives the adaptive budget (see `MAX_FRAME_BUDGET`).
   let lastFrameEnd = 0;
 
-  // Number of frames for which rendering has been delayed because the host is
-  // not yet attached to the DOM (see the `!host.isConnected` handling below).
-  // Bounded so that a host that is disposed before ever attaching does not keep
-  // an animation-frame/watchdog loop alive indefinitely.
-  let disconnectedAttempts = 0;
-  const maxDisconnectedAttempts = 1000;
-
   // Observe visibility (lazily - one persistent observer per host, not one per
   // render, which with streamed outputs would mean one per chunk): rendering is
   // deprioritized while the output is off-screen - work continues in the
@@ -960,12 +957,7 @@ function renderTextual(
     // subsequent renders (e.g. further stream chunks) reuse it.
     Private.removeFromQueue(host);
     // Clear the first-paint watchdog: rendering is over for this host, so
-    // there is nothing left to force-paint. On paths that painted this is a
-    // no-op (the watchdog is cleared on first paint); it matters for renders
-    // which stop without ever painting (a host discarded before being
-    // attached), where a stale watchdog would otherwise keep re-arming its
-    // timer - and strongly referencing the host - for as long as animation
-    // frames keep being produced.
+    // there is nothing left to force-paint.
     Private.clearFallbackWatchdog(host);
     // Wrap up the live DOM now that rendering has finished (frees the consumed
     // tail records); the live state itself is kept for the next render (stream
@@ -979,8 +971,8 @@ function renderTextual(
   // Schedule the next frame on the tier matching the current visibility:
   // off-screen hosts which have already painted are parked in the background
   // (idle) tier where they keep making progress during browser idle time;
-  // everything else (visible hosts, and hosts awaiting their first paint or
-  // attachment) goes through the animation-frame render queue.
+  // everything else (visible hosts, and hosts awaiting their first paint) goes
+  // through the animation-frame render queue.
   const scheduleNextFrame = () => {
     if (!Private.isHostVisible(host) && Private.hasPainted(host)) {
       Private.scheduleIdleRendering(host, renderFrame);
@@ -1009,23 +1001,14 @@ function renderTextual(
       // The host is not in the DOM. Note that even in full windowing notebook
       // mode the output nodes are never removed; instead the cell gets hidden
       // (usually with `display: none`, or for the active cell via opacity), so
-      // it stays connected. A disconnected host therefore means one of:
-      // - it has not been attached yet (the notebook is still being laid out,
-      //   which under load can outlast the first scheduled frame or the fallback
-      //   watchdog) - in which case we must wait rather than give up, otherwise
-      //   the first paint is lost while the synchronously-rendered siblings
-      //   (HTML/Markdown) still appear;
-      // - it has already painted and was then detached (e.g. the cell was
-      //   removed) - in which case we stop.
-      if (!Private.hasPainted(host)) {
-        if (disconnectedAttempts < maxDisconnectedAttempts) {
-          disconnectedAttempts += 1;
-          return delayRendering();
-        }
-        // Give up eventually so a host disposed before ever attaching does not
-        // keep the render loop alive forever.
-      }
-      return stopRendering();
+      // it stays connected. A disconnected host is either not attached yet (a
+      // windowed notebook attaches its cells in idle time, long after their
+      // outputs are created) or detached for now (collapsed outputs are
+      // detached until expanded, and a running cell still streams into them).
+      // Wait for it to be attached, however long that takes, otherwise the
+      // text stays blank or stale.
+      Private.waitForAttach(host, startRendering);
+      return RenderingResult.delay;
     }
 
     // Gates applied to regular animation frames only:
@@ -1148,7 +1131,7 @@ function renderTextual(
       // the seeded progress: adoption trims the committed region back to
       // exactly this point, before the steps below advance it.
       liveText = new LiveText(host, pre, fullPreTextContent);
-      liveText.seed(linkedNodes, alreadyAutoLinked.length);
+      liveText.seed(linkedNodes, alreadyAutoLinked.length, timestamp);
     }
     let moreWorkToBeDone: boolean;
     let elapsed: number;
@@ -1219,7 +1202,7 @@ function renderTextual(
     // Note: we set `keepExisting` to `true` in `IRenderMime.IRenderer`s which
     // use this method to ensure that the previous node is not removed from DOM
     // when new chunks of data comes from the stream.
-    liveText!.commit(linkedNodes, alreadyAutoLinked.length);
+    liveText!.commit(linkedNodes, alreadyAutoLinked.length, timestamp);
 
     if (invocation === FrameInvocation.animation) {
       lastFrameEnd = performance.now();
@@ -1237,8 +1220,8 @@ function renderTextual(
   };
 
   // Schedule the first paint through the normal animation-frame render queue.
-  Private.scheduleRendering(host, renderFrame);
-
+  // A render that waited for its host to be attached starts again from here.
+  //
   // Until the host has painted, keep a watchdog that force-paints it if
   // `requestAnimationFrame` turns out to be starved (background tab or heavy
   // resource pressure), so the plain text is shown even when frames stop being
@@ -1248,18 +1231,15 @@ function renderTextual(
   // passes, stream updates) rely on animation frames and idle slices alone, so
   // auto-linking naturally backs off under resource pressure rather than
   // competing for it.
-  //
-  // The callback returns `true` when the host still needs watching (the forced
-  // frame could not paint yet because the host is not attached), so the watchdog
-  // keeps trying until the host attaches and paints.
-  if (!Private.hasPainted(host)) {
-    Private.armFallbackWatchdog(
-      host,
-      () =>
-        renderFrame(performance.now(), FrameInvocation.forced) ===
-        RenderingResult.delay
-    );
-  }
+  const startRendering = () => {
+    Private.scheduleRendering(host, renderFrame);
+    if (!Private.hasPainted(host)) {
+      Private.armFallbackWatchdog(host, () =>
+        renderFrame(performance.now(), FrameInvocation.forced)
+      );
+    }
+  };
+  startRendering();
 
   return { firstPainted, completed: rendered };
 }
@@ -1665,13 +1645,13 @@ namespace Private {
    * are, it just re-arms and lets the queue deliver this host; only when frames
    * have genuinely stopped does it force a paint.
    *
-   * `forcePaint` returns `true` if the host still needs watching afterwards -
-   * i.e. the forced frame could not paint yet because the host is not attached -
-   * in which case the watchdog re-arms and keeps trying until it attaches.
+   * A forced frame of a host that is not attached yet makes the render wait
+   * for the host (see `waitForAttach`), which arms a new watchdog when the
+   * host is attached.
    */
   export function armFallbackWatchdog(
     host: HTMLElement,
-    forcePaint: () => boolean
+    forcePaint: () => void
   ): void {
     clearFallbackWatchdog(host);
     const rearm = () =>
@@ -1692,12 +1672,21 @@ namespace Private {
       // Cancel the pending (starved) animation frame so it does not fire later
       // and re-render on top of the forced paint.
       cancelRenderingRequest(host);
-      if (forcePaint()) {
-        // The host was not ready to paint (not attached yet); keep watching.
-        rearm();
-      }
+      forcePaint();
     };
     rearm();
+  }
+
+  /**
+   * Wait for a host that is not attached, without a frame request or a
+   * watchdog, then call `resume`. The first-paint promise resolves now,
+   * because some callers attach the host only after it resolves.
+   */
+  export function waitForAttach(host: HTMLElement, resume: () => void): void {
+    removeFromQueue(host);
+    clearFallbackWatchdog(host);
+    resolveFirstPaint(host);
+    whenAttached(host, resume);
   }
 
   export function clearFallbackWatchdog(host: HTMLElement): void {
@@ -1747,9 +1736,9 @@ namespace Private {
    * Resolvers for the per-host first-paint promise (the `firstPainted` promise
    * `renderTextual` returns, which is what `renderText` resolves on). Released
    * as soon as the output's text is first written to the DOM (`markPainted`),
-   * or when the render ends without ever painting - superseded by a later
-   * render, or given up before the host attaches - via `settleRender`, so
-   * callers never hang.
+   * when the render starts to wait for the host to be attached
+   * (`waitForAttach`), or when the render ends without ever painting -
+   * superseded by a later render - via `settleRender`, so callers never hang.
    */
   const firstPaintResolvers = new WeakMap<HTMLElement, () => void>();
 
@@ -1774,8 +1763,8 @@ namespace Private {
    * later render supersedes it (start of `renderTextual`).
    */
   export function settleRender(host: HTMLElement): void {
-    // A render settled without ever painting (superseded, or given up before
-    // attaching) must still release its first-paint promise.
+    // A render settled without ever painting (superseded) must still release
+    // its first-paint promise.
     resolveFirstPaint(host);
     const resolve = renderResolvers.get(host);
     if (resolve) {

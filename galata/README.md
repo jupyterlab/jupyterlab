@@ -454,6 +454,33 @@ Possible values are:
 
 By default the user is stored in-memory.
 
+### mockPageConfig
+
+- type: \< boolean | Record\<string, unknown> >
+
+Mock JupyterLab PageConfig (`#jupyter-config-data`) or not.
+Possible values are:
+
+- false (default): PageConfig will not be mocked.
+- true: Same as an empty mapping, PageConfig keeps the server values.
+- Record\<string, unknown>: Mapping of PageConfig keys and values to override (e.g. `{ serverLocale: 'fr_FR' }`). A key set to `undefined` is removed.
+
+Example:
+
+```ts
+test.use({
+  mockPageConfig: {
+    serverLocale: 'fr_FR'
+  }
+});
+
+test('should return the mocked PageConfig', async ({ page }) => {
+  expect(await page.getOption('serverLocale')).toEqual('fr_FR');
+});
+```
+
+To mock PageConfig in one test, call `galata.Mock.mockPageConfig(page, pageConfig)` before the page loads or reloads. Each call replaces the mapping of the fixture and of earlier calls, so pass every key that the test changes.
+
 ### kernels
 
 - type: \<Map\<string, Kernel.IModel> | null>

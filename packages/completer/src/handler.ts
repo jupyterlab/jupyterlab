@@ -7,6 +7,7 @@ import type {
   ISharedBaseCell,
   ISharedFile,
   ISharedText,
+  IYText,
   SourceChange
 } from '@jupyter/ydoc';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
@@ -81,6 +82,8 @@ export class CompletionHandler implements IDisposable {
       model.selections.changed.disconnect(this.onSelectionsChanged, this);
       model.sharedModel.changed.disconnect(this._onSharedModelChanged, this);
     }
+    this._ydoc?.off('beforeObserverCalls', this._onBeforeObserverCalls);
+    this._ydoc = null;
 
     // Reset completer state.
     this.completer.reset();
@@ -102,6 +105,9 @@ export class CompletionHandler implements IDisposable {
       // but also fires on changes to metadata, outputs, execution count,
       // and state changes, hence we need to filter the change type.
       sharedModel.changed.connect(this._onSharedModelChanged, this);
+      // Yjs emits `beforeObserverCalls` before the observers that emit `changed`.
+      this._ydoc = (sharedModel as Partial<IYText>).ysource?.doc ?? null;
+      this._ydoc?.on('beforeObserverCalls', this._onBeforeObserverCalls);
       // On initial load, manually check the cursor position.
       this.onSelectionsChanged();
       if (this.inlineCompleter) {
@@ -136,6 +142,8 @@ export class CompletionHandler implements IDisposable {
       return;
     }
     this._isDisposed = true;
+    this._ydoc?.off('beforeObserverCalls', this._onBeforeObserverCalls);
+    this._ydoc = null;
     Signal.clearData(this);
   }
 
@@ -337,17 +345,38 @@ export class CompletionHandler implements IDisposable {
     if (!this._enabled) {
       return;
     }
+    // Read before the first `await`, while the Yjs transaction is current.
+    const isRemote = this._isRemoteChange;
 
     const model = this.completer.model;
     const editor = this.editor;
     if (!editor) {
       return;
     }
+
+    if (model && isRemote) {
+      // Accepting after a collaborator's change would replace the wrong text.
+      if (model.original) {
+        model.reset(true);
+      }
+    } else if (model) {
+      // If there is a text selection, no completion is allowed.
+      const { start, end } = editor.getSelection();
+      if (start.column === end.column && start.line === end.line) {
+        // Run before the first `await`: `onSelectionsChanged()` compares the
+        // new cursor with this state, and resets an open completer if it is stale.
+        model.handleTextChange(
+          this.getState(editor, editor.getCursorPosition())
+        );
+      }
+    }
+
     const position = editor.getCursorPosition();
     const state = this.getState(editor, position);
     if (
       model &&
       this._autoCompletion &&
+      !isRemote &&
       this._reconciliator.shouldShowContinuousHint &&
       (await this._reconciliator.shouldShowContinuousHint(
         this.completer.isVisible,
@@ -360,6 +389,14 @@ export class CompletionHandler implements IDisposable {
 
     const inlineModel = this.inlineCompleter?.model;
     if (inlineModel) {
+      if (isRemote) {
+        // Filtering by a collaborator's text corrupts the suggestion.
+        this._fetchingInline += 1;
+        if (inlineModel.completions) {
+          inlineModel.reset();
+        }
+        return;
+      }
       // Dispatch the text change to inline completer
       // (this happens before request is sent)
       inlineModel.handleTextChange(changed);
@@ -369,16 +406,6 @@ export class CompletionHandler implements IDisposable {
           InlineCompletionTriggerKind.Automatic
         );
       }
-    }
-
-    if (model) {
-      // If there is a text selection, no completion is allowed.
-      const { start, end } = editor.getSelection();
-      if (start.column !== end.column || start.line !== end.line) {
-        return;
-      }
-      // Dispatch the text change.
-      model.handleTextChange(this.getState(editor, editor.getCursorPosition()));
     }
   }
 
@@ -412,6 +439,13 @@ export class CompletionHandler implements IDisposable {
       await this.onTextChanged(str, changed);
     }
   }
+
+  /**
+   * Record whether a collaborator made the current Yjs transaction.
+   */
+  private _onBeforeObserverCalls = (transaction: { local: boolean }): void => {
+    this._isRemoteChange = !transaction.local;
+  };
 
   /**
    * Make a completion request.
@@ -609,6 +643,8 @@ export class CompletionHandler implements IDisposable {
   private _editor: CodeEditor.IEditor | null | undefined = null;
   private _enabled = false;
   private _isDisposed = false;
+  private _isRemoteChange = false;
+  private _ydoc: IYText['ysource']['doc'] = null;
   private _autoCompletion = false;
   private _continuousInline = true;
   private _tabCompleterActive = false;

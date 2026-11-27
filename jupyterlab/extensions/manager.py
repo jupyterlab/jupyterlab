@@ -594,15 +594,16 @@ class ExtensionManager(PluginManager):
                 status = "error"
 
             normalized_name = self._normalize_name(name)
+            version = self._get_installed_version(data)
             pkg = ExtensionPackage(
                 name=normalized_name,
                 description=pkg_info.get("description", ""),
                 homepage_url=data.get("url", ""),
                 enabled=(name not in info["disabled"]),
                 core=False,
-                latest_version=ExtensionManager.get_semver_version(data["version"]),
+                latest_version=version,
                 installed=True,
-                installed_version=ExtensionManager.get_semver_version(data["version"]),
+                installed_version=version,
                 status=status,
                 install=data.get("install", {}),
                 pkg_type="prebuilt",
@@ -652,7 +653,7 @@ class ExtensionManager(PluginManager):
         if get_latest_version:
             installed_pkgs = [pkg for pkg in extensions.values() if pkg.installed]
             results = await asyncio.gather(
-                *(self.get_latest_version(pkg.name) for pkg in installed_pkgs),
+                *(self.get_latest_version(self.get_normalized_name(pkg)) for pkg in installed_pkgs),
                 return_exceptions=True,
             )
             for pkg, result in zip(installed_pkgs, results, strict=True):
@@ -692,6 +693,16 @@ class ExtensionManager(PluginManager):
                     repository_url=data.get("repository", {}).get("url", data.get("repository")),
                 )
         return packages
+
+    def _get_installed_version(self, data: dict) -> str:
+        """Get the installed version of a prebuilt extension.
+
+        Args:
+            data: The extension metadata from its package.json and install.json
+        Returns:
+            The installed version
+        """
+        return ExtensionManager.get_semver_version(data["version"])
 
     def _get_companion(self, data: dict) -> str | None:
         companion = None

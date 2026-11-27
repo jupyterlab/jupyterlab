@@ -84,7 +84,10 @@ module.exports = {
         },
         launchOptions: {
           args: chromiumArgs
-        }
+        },
+        // Record raw strings reaching Trusted Types sinks; the server sends the
+        // report-only CSP with the same variable (jupyter_server_test_config.py)
+        collectTrustedTypes: process.env.GALATA_TRUSTED_TYPES === '1'
       }
     },
     {

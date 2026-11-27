@@ -23,3 +23,6 @@
 @*.code-workspace
 @.history
 @.vscode
+
+# pixi environments
+.pixi

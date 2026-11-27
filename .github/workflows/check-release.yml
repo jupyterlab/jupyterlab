@@ -14,6 +14,8 @@ permissions:
 jobs:
 
   check_release:
+    # The changelog and npm checks need the tags and repository URL of jupyterlab/jupyterlab
+    if: github.repository == 'jupyterlab/jupyterlab'
     runs-on: ubuntu-latest
     env:
       YARN_ENABLE_GLOBAL_CACHE: "1"
