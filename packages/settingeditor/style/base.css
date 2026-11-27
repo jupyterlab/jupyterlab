@@ -28,8 +28,11 @@
   font-size: var(--jp-ui-font-size1);
 }
 
-#setting-editor > .lm-Widget,
-#json-setting-editor > .lm-Widget {
+/* The document search overlay is attached directly to the panel node by the
+ * document search extension, so it must not be stretched to fill the panel
+ * like the layout children are; it positions itself at the top-right. */
+#setting-editor > .lm-Widget:not(.jp-DocumentSearch-overlay),
+#json-setting-editor > .lm-Widget:not(.jp-DocumentSearch-overlay) {
   position: absolute;
   top: 0;
   bottom: 0;

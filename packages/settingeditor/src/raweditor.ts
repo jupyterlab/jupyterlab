@@ -178,6 +178,13 @@ export class RawEditor extends SplitPanel {
   }
 
   /**
+   * The inspectable read-only editor for the system defaults.
+   */
+  get defaults(): CodeEditor.IEditor {
+    return this._defaults.editor;
+  }
+
+  /**
    * Dispose of the resources held by the raw editor.
    */
   dispose(): void {
