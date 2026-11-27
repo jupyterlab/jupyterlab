@@ -1204,6 +1204,21 @@ describe('@jupyter/notebook', () => {
         const widget = createActiveWidget();
         expect(widget.activeCell).toBe(widget.widgets[0]);
       });
+
+      it('should stay the same when a cell above it is replaced', () => {
+        const widget = createActiveWidget();
+        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
+        widget.activeCellIndex = 3;
+        const id = widget.activeCell!.model.id;
+        const sharedModel = widget.model!.sharedModel;
+        const cell = sharedModel.getCell(1).toJSON();
+        sharedModel.transact(() => {
+          sharedModel.deleteCell(1);
+          sharedModel.insertCell(1, cell);
+        });
+        expect(widget.activeCellIndex).toBe(3);
+        expect(widget.activeCell!.model.id).toBe(id);
+      });
     });
 
     describe('#headingCollapsedChanged', () => {
