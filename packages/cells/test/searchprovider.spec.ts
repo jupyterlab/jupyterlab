@@ -411,6 +411,23 @@ describe('cells/searchprovider', () => {
       provider.dispose();
     });
 
+    it('should mark the current match in the rendered text of a cell which renders after the search reaches it', async () => {
+      // A notebook renders the cells out of view when the browser is idle
+      cell = createMarkdownCell('test1 test2', { placeholder: true });
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+      await provider.highlightNext();
+
+      Widget.attach(cell, document.body);
+      await cell.ready;
+      await framePromise();
+      await framePromise();
+
+      expect(cell.rendered).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+      provider.dispose();
+    });
+
     it('should step through visible and hidden matches in source order', async () => {
       cell = createMarkdownCell(
         'The lists are [here](https://example.com/lists) and the lists grow.',

@@ -485,6 +485,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    */
   async clearHighlight(): Promise<void> {
     this._currentMatchInRendered = false;
+    this._matchToShowOnRender = null;
     this._hideReadOnlyEditor();
     await super.clearHighlight();
     await this.renderedProvider.clearHighlight();
@@ -506,6 +507,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    */
   async endQuery(): Promise<void> {
     this._currentMatchInRendered = false;
+    this._matchToShowOnRender = null;
     this._placement = null;
     this._renderedMatches = null;
     await super.endQuery();
@@ -598,6 +600,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    */
   async startQuery(query: RegExp | null, filters?: IFilters): Promise<void> {
     this._currentMatchInRendered = false;
+    this._matchToShowOnRender = null;
     await super.startQuery(query, filters);
     const cell = this.cell as MarkdownCell;
     if (cell.rendered) {
@@ -712,7 +715,8 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   /**
    * Mark the current match again after the rendered text changed, as when a
    * diagram is drawn again: the rendered text was searched again, and the new
-   * search has no current match.
+   * search has no current match. Show the match of a step which reached the
+   * cell before it rendered.
    */
   private async _onRenderedTextSearched(): Promise<void> {
     this._renderedMatches = null;
@@ -725,6 +729,13 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
       !(this.cell as MarkdownCell).rendered ||
       sourceIndex === null
     ) {
+      return;
+    }
+    const waiting = this._matchToShowOnRender === sourceIndex;
+    this._matchToShowOnRender = null;
+    if (waiting) {
+      // The cell rendered after the search reached the match
+      await this._showCurrentMatch(super.getCurrentMatch(), { scroll: false });
       return;
     }
     const index = await this._renderedMatchIndex(sourceIndex);
@@ -800,6 +811,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     options?: IHighlightAdjacentMatchOptions
   ): Promise<ISearchMatch | undefined> {
     const cell = this.cell as MarkdownCell;
+    this._matchToShowOnRender = null;
     if (!match || this.currentIndex === null) {
       this._currentMatchInRendered = false;
       await this.renderedProvider.clearHighlight();
@@ -807,6 +819,11 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     }
 
     const sourceIndex = this.currentIndex;
+    if (cell.isPlaceholder()) {
+      // The rendered text exists only once the cell renders
+      this._matchToShowOnRender = sourceIndex;
+      return match;
+    }
     const renderedIndex = await this._renderedMatchIndex(sourceIndex);
     if (this.currentIndex !== sourceIndex || !cell.rendered) {
       // Another step moved the current match, or the cell shows its editor,
@@ -1037,6 +1054,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   private _unrenderedByHighlight = false;
   private _currentMatchInRendered = false;
   private _showsReadOnlyEditor = false;
+  private _matchToShowOnRender: number | null = null;
   private _placement: { key: string; placement: Private.Placement } | null =
     null;
   private _renderedMatches: Private.IRenderedMatches | null = null;
