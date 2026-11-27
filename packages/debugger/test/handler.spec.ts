@@ -538,14 +538,17 @@ describe('DebuggerHandler', () => {
       const button = handler['_iconButtons'][fileWidget.id]!;
 
       button.onClick();
-      while (!handler.isDebuggerOn(fileWidget)) {
+      while (
+        !fileWidget.node.hasAttribute('data-jp-debugger') ||
+        handler['_pendingToggle']
+      ) {
         await sleep(50);
       }
       expect(enabledCalled).toBe(true);
       expect(handler.isDebuggerOn(fileWidget)).toBe(true);
 
       button.onClick();
-      while (handler.isDebuggerOn(fileWidget)) {
+      while (handler.isDebuggerOn(fileWidget) || handler['_pendingToggle']) {
         await sleep(50);
       }
       expect(disabledCalled).toBe(true);
