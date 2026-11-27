@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { ISharedFile } from '@jupyter/ydoc';
 import { SessionContext } from '@jupyterlab/apputils';
 import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Context, TextModelFactory } from '@jupyterlab/docregistry';
@@ -494,6 +495,15 @@ describe('docregistry/context', () => {
     });
 
     describe('#save()', () => {
+      // Edit the text as the editor does, which marks the document as dirty.
+      const edit = (
+        context: Context<DocumentRegistry.IModel>,
+        from: number,
+        to: number,
+        text: string
+      ) =>
+        (context.model.sharedModel as ISharedFile).updateSource(from, to, text);
+
       it('should save the contents of the file to disk', async () => {
         await context.initialize(true);
         context.model.fromString('foo');
@@ -507,6 +517,69 @@ describe('docregistry/context', () => {
         const model = await manager.contents.get(context.path, opts);
 
         expect(model.content).toBe('foo');
+      });
+
+      it('should mark the document as saved', async () => {
+        await context.initialize(true);
+        edit(context, 0, 0, 'foo');
+        expect(context.model.dirty).toBe(true);
+        await context.save();
+        expect(context.model.dirty).toBe(false);
+      });
+
+      it('should keep the document dirty if it changes during the save', async () => {
+        await context.initialize(true);
+        edit(context, 0, 0, 'foo');
+        const save = manager.contents.save.bind(manager.contents);
+        jest
+          .mocked(manager.contents.save)
+          .mockImplementationOnce((path, options) => {
+            // The content to save was read before this edit.
+            edit(context, 3, 3, ' bar');
+            return save(path, options);
+          });
+        await context.save();
+
+        const opts: Contents.IFetchOptions = {
+          format: factory.fileFormat,
+          type: factory.contentType,
+          content: true
+        };
+        expect((await manager.contents.get(context.path, opts)).content).toBe(
+          'foo'
+        );
+        expect(context.model.dirty).toBe(true);
+
+        await context.save();
+        expect((await manager.contents.get(context.path, opts)).content).toBe(
+          'foo bar'
+        );
+        expect(context.model.dirty).toBe(false);
+      });
+
+      it('should mark the document as not dirty if the save reloads it from disk', async () => {
+        context = new Context({
+          manager,
+          factory,
+          // The contents manager mock returns a random hash for this path,
+          // so the save finds that the file changed on disk.
+          path: 'random-hash.txt'
+        });
+        context.model.fromString('foo');
+        await context.initialize(true);
+        edit(context, 3, 3, ' bar');
+
+        const promise = context.save();
+        await waitForDialog();
+        const dialog = document.body.getElementsByClassName('jp-Dialog')[0];
+        const reload = Array.from(dialog.getElementsByTagName('button')).find(
+          button => button.textContent === 'Revert'
+        );
+        reload!.click();
+        await promise;
+
+        expect(context.model.toString()).toBe('foo');
+        expect(context.model.dirty).toBe(false);
       });
 
       it('should should preserve LF line endings upon save', async () => {
@@ -741,6 +814,16 @@ describe('docregistry/context', () => {
         context.model.fromString('bar');
         await context.revert();
         expect(context.model.toString()).toBe('foo');
+      });
+
+      it('should mark the document as not dirty', async () => {
+        await context.initialize(true);
+        context.model.fromString('foo');
+        await context.save();
+        context.model.fromString('bar');
+        context.model.dirty = true;
+        await context.revert();
+        expect(context.model.dirty).toBe(false);
       });
 
       it('should normalize CRLF line endings to LF', async () => {
