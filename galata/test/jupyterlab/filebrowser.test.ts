@@ -147,3 +147,27 @@ test.describe('Kernel specs arriving late', () => {
     ).toHaveCount(1);
   });
 });
+
+test.describe('Default layout', () => {
+  test.use({ autoGoto: false });
+
+  test('should open the file browser on a wide viewport', async ({ page }) => {
+    await page.goto();
+
+    expect(await page.sidebar.isTabOpen('filebrowser')).toBe(true);
+  });
+
+  test.describe('on a narrow viewport', () => {
+    test.use({ viewport: { width: 412, height: 839 } });
+
+    test('should keep the left sidebar collapsed', async ({ page }) => {
+      await page.goto();
+
+      expect(await page.sidebar.isOpen('left')).toBe(false);
+
+      await page.sidebar.openTab('filebrowser');
+
+      expect(await page.sidebar.isTabOpen('filebrowser')).toBe(true);
+    });
+  });
+});
