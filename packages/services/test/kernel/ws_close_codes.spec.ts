@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { testEmission } from '@jupyterlab/testing';
+import { Kernel, KernelConnection, ServerConnection } from '../../src';
 import { KernelTester } from '../utils';
 
 /**
@@ -81,5 +82,57 @@ describe('KernelConnection WebSocket close code handling', () => {
     // Close with code 1011 (Internal Error) - should reconnect
     await tester.closeWithCode(1011, 'Internal error');
     await expect(emission).resolves.not.toThrow();
+  });
+});
+
+describe('KernelConnection', () => {
+  describe('#dispose()', () => {
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should cancel pending getKernelModel retry timer on early WebSocket close', async () => {
+      jest.useFakeTimers();
+
+      const mockSocket = {
+        onopen: null as (() => void) | null,
+        onclose: null as ((evt: CloseEvent) => void) | null,
+        onerror: null as ((evt: Event) => void) | null,
+        onmessage: null as ((evt: MessageEvent) => void) | null,
+        binaryType: 'arraybuffer',
+        close: jest.fn()
+      };
+      const MockWebSocket = jest.fn(() => mockSocket);
+      const getModel = jest
+        .fn()
+        .mockRejectedValue(
+          new ServerConnection.NetworkError(new TypeError('Failed to fetch'))
+        );
+
+      const serverSettings = ServerConnection.makeSettings({
+        WebSocket: MockWebSocket as unknown as typeof WebSocket
+      });
+      const kernelAPIClient = {
+        getModel
+      } as unknown as Kernel.IKernelAPIClient;
+
+      const kernel = new KernelConnection({
+        model: { id: 'test-kernel-id', name: 'python3' },
+        serverSettings,
+        kernelAPIClient
+      });
+
+      mockSocket.onclose?.({ code: 1006, reason: '' } as CloseEvent);
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(getModel).toHaveBeenCalledTimes(1);
+
+      kernel.dispose();
+      jest.advanceTimersByTime(35000);
+      await Promise.resolve();
+
+      expect(getModel).toHaveBeenCalledTimes(1);
+    });
   });
 });
