@@ -29,9 +29,9 @@ from urllib.error import URLError
 from urllib.parse import quote, urljoin
 from urllib.request import Request, urlopen
 
-from jupyter_builder.commands import _compare_ranges, _test_overlap
 from jupyter_builder.jlpm import YARN_PATH
 from jupyter_builder.jupyterlab_semver import Range, gte, make_semver
+from jupyter_builder.version_ranges import compare_ranges, ranges_overlap
 from jupyter_core.paths import jupyter_config_dir
 from jupyter_server.extension.serverextension import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 from jupyterlab_server.config import (
@@ -2186,7 +2186,7 @@ class _AppHandler:
                     # Drop prereleases in comparisons to allow extension authors
                     # to not have to update their versions for each
                     # Jupyterlab prerelease version.
-                    c = _compare_ranges(core_deps[key], value, drop_prerelease1=True)
+                    c = compare_ranges(core_deps[key], value, drop_prerelease1=True)
                     if c is None:
                         # Compatibility could not be determined.
                         continue
@@ -2430,7 +2430,7 @@ def _validate_compatibility(
             # Drop prereleases in comparisons to allow extension authors
             # to not have to update their versions for each
             # Jupyterlab prerelease version.
-            overlap = _test_overlap(core_deps[key], value, drop_prerelease1=True)
+            overlap = ranges_overlap(core_deps[key], value, drop_prerelease1=True)
             if overlap is False:
                 errors.append((key, core_deps[key], value))
 
@@ -2578,7 +2578,7 @@ def _compat_error_age(errors: list[tuple[str, str, str]]) -> int:
         # Drop prereleases in comparisons to allow extension authors
         # to not have to update their versions for each
         # Jupyterlab prerelease version.
-        c = _compare_ranges(ext, jlab, drop_prerelease1=True)
+        c = compare_ranges(ext, jlab, drop_prerelease1=True)
         if c is None:
             # Compatibility could not be determined.
             continue

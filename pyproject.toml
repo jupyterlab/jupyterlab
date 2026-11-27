@@ -2,7 +2,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 [build-system]
-requires = ["hatchling>=1.27.0", "jupyter-builder>=1.3.0"]
+requires = ["hatchling>=1.27.0", "jupyter-builder>=1.3.1"]
 build-backend = "hatchling.build"
 
 [project]
@@ -35,7 +35,7 @@ classifiers = [
     "Programming Language :: Python :: 3.15",
 ]
 dependencies = [
-    "jupyter-builder>=1.3.0",
+    "jupyter-builder>=1.3.1",
     "async_lru>=2.0.0",
     "httpx2>=2,<3",
     "ipykernel>=6.5.0,!=6.30.0",
@@ -124,7 +124,7 @@ upgrade-extension = [
 
 [dependency-groups]
 builder = [
-    "jupyter-builder>=1.3.0",
+    "jupyter-builder>=1.3.1",
 ]
 docs = [
     { include-group = "builder" },
@@ -280,7 +280,7 @@ before-build-python = [
 ]
 after-publish-assets = [
     # Install is needed again because `before-bump-version` is skipped on restart of half-completed release runs
-    "pip install jupyter-builder>=1.3.0",
+    "pip install jupyter-builder>=1.3.1",
     "npm run after:publish:assets",
 ]
 
