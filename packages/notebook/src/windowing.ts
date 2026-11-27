@@ -269,7 +269,7 @@ export class NotebookViewModel extends WindowedListModel {
       if (this.cellsEstimatedHeight.has(cellId)) {
         this.cellsEstimatedHeight.delete(cellId);
       }
-    } else {
+    } else if (size > 0) {
       this.cellsEstimatedHeight.set(cellId, size);
       this._emitEstimatedHeightChanged.invoke().catch(error => {
         console.error(
