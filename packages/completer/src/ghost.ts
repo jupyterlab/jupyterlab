@@ -257,7 +257,7 @@ class GhostTextWidget extends WidgetType {
     const minLines = Math.min(this.options.minLines ?? 0, maxLines);
     const linesToAdd = Math.max(0, minLines - content.split('\n').length + 1);
     const placeHolderLines = new Array(linesToAdd).fill('').join('\n');
-    dom.innerHTML = '';
+    dom.replaceChildren();
 
     if (this.isSpacer) {
       dom.innerText = content + placeHolderLines;

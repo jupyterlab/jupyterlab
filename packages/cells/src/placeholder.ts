@@ -80,7 +80,7 @@ export class Placeholder extends Widget {
     const trans = (options.translator ?? nullTranslator).load('jupyterlab');
     const innerNode = document.createElement('div');
     innerNode.className = options.promptClass ?? '';
-    node.insertAdjacentHTML('afterbegin', innerNode.outerHTML);
+    node.prepend(innerNode);
     this._cell = document.createElement('div');
     this._cell.classList.add(CONTENT_CLASS);
     this._cell.title = trans.__('Click to expand');

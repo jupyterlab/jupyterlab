@@ -308,15 +308,19 @@ namespace Private {
   function createPalette(): HTMLDivElement {
     const div = document.createElement('div');
     div.className = 'jp-DebuggerVariables-colorPalette';
-    div.innerHTML = `
-        <div class="jp-mod-void"></div>
-        <div class="jp-mod-background"></div>
-        <div class="jp-mod-header-background"></div>
-        <div class="jp-mod-grid-line"></div>
-        <div class="jp-mod-header-grid-line"></div>
-        <div class="jp-mod-selection"></div>
-        <div class="jp-mod-text"></div>
-      `;
+    for (const className of [
+      'jp-mod-void',
+      'jp-mod-background',
+      'jp-mod-header-background',
+      'jp-mod-grid-line',
+      'jp-mod-header-grid-line',
+      'jp-mod-selection',
+      'jp-mod-text'
+    ]) {
+      const child = document.createElement('div');
+      child.className = className;
+      div.append(child);
+    }
     return div;
   }
 
