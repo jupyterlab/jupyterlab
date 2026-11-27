@@ -308,11 +308,17 @@ export namespace ISessionContext {
     readonly skipKernelRestartDialog?: boolean;
 
     /**
-     * Lock the kernel.
+     * Lock the kernel choice to the kernel named by `name`.
      *
      * #### Notes
-     * When `true`, the notebook kernel cannot be changed. When `undefined`,
-     * the lock feature is disabled.
+     * When `true`, the automatic kernel start and a restart after a shutdown
+     * use only `name`, without falling back to `language` or to the server
+     * default, and the kernel name toolbar item and the kernel selection
+     * dialog keep users from changing the kernel. Calls to `changeKernel()`
+     * are not blocked. When `undefined`, the kernel selection dialog does not
+     * show the lock checkbox.
+     *
+     * @experimental
      */
     readonly locked?: boolean;
   }
