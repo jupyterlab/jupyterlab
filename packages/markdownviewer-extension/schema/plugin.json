@@ -1,6 +1,7 @@
 {
   "jupyter.lab.setting-icon": "ui-components:markdown",
   "jupyter.lab.setting-icon-label": "Markdown Viewer",
+  "jupyter.lab.transform": true,
   "title": "Markdown Viewer",
   "description": "Markdown viewer settings.",
   "jupyter.lab.menus": {
@@ -30,9 +31,6 @@
     },
     "lineWidth": {
       "type": ["number", "null"]
-    },
-    "hideFrontMatter": {
-      "type": "boolean"
     },
     "renderTimeout": {
       "type": "number"
@@ -64,10 +62,19 @@
       "default": null
     },
     "hideFrontMatter": {
-      "title": "Hide Front Matter",
-      "description": "Whether to hide YAML front matter.\nThe YAML front matter must be placed at the top of the document,\nstarted by a line of three dashes (---) and ended by a line of\nthree dashes (---) or three points (...).",
-      "$ref": "#/definitions/hideFrontMatter",
+      "type": "boolean",
       "default": true
+    },
+    "frontMatter": {
+      "title": "Front Matter",
+      "description": "How to display YAML front matter. The opening line must be three dashes (---). The closing line must be three dashes (---) or three dots (...).",
+      "type": "string",
+      "oneOf": [
+        { "const": "hide", "title": "Hide" },
+        { "const": "markdown", "title": "Display as Markdown" },
+        { "const": "raw", "title": "Display Raw" }
+      ],
+      "default": null
     },
     "renderTimeout": {
       "title": "Render Timeout",
@@ -75,6 +82,9 @@
       "$ref": "#/definitions/renderTimeout",
       "default": 1000
     }
+  },
+  "patternProperties": {
+    "^hideFrontMatter$": { "type": "boolean" }
   },
   "additionalProperties": false,
   "type": "object"
