@@ -101,6 +101,12 @@ button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
   top: 0;
 }
 
+.jp-Toolbar-responsive-popup > .jp-Toolbar-item {
+  height: auto;
+  min-height: calc(var(--jp-private-toolbar-height) - 6px);
+  align-self: stretch;
+}
+
 #jp-main-dock-panel[data-mode='single-document']
   .jp-MainAreaWidget
   > .jp-Toolbar.jp-Toolbar-micro {
