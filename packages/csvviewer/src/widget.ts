@@ -414,6 +414,9 @@ export class CSVViewer extends Widget {
     }
     const { BasicKeyHandler, BasicMouseHandler, DataGrid } =
       await Private.ensureDataGrid();
+    if (this.isDisposed) {
+      return;
+    }
     this._defaultStyle = DataGrid.defaultStyle;
     this._grid = new DataGrid({
       defaultSizes: {
@@ -440,7 +443,13 @@ export class CSVViewer extends Widget {
     this._searchService.changed.connect(this._updateRenderer, this);
 
     await this._context.ready;
+    if (this.isDisposed) {
+      return;
+    }
     await this._updateGrid();
+    if (this.isDisposed) {
+      return;
+    }
     this._revealed.resolve(undefined);
     // Throttle the rendering rate of the widget.
     this._monitor = new ActivityMonitor({
@@ -560,7 +569,7 @@ export class CSVViewer extends Widget {
     const updateId = ++this._updateId;
     const { BasicSelectionModel } = await Private.ensureDataGrid();
     const { DSVModel } = await Private.ensureDSVModel();
-    if (updateId !== this._updateId) {
+    if (this.isDisposed || updateId !== this._updateId) {
       return;
     }
     const data: string = this._context.model.toString();

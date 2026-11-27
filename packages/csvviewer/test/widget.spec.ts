@@ -5,7 +5,7 @@ import type { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Context, TextModelFactory } from '@jupyterlab/docregistry';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { framePromise, signalToPromise } from '@jupyterlab/testing';
-import { UUID } from '@lumino/coreutils';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 import type { TextRenderer } from '@lumino/datagrid';
 import { CellRenderer, DataGrid, DataModel, JSONModel } from '@lumino/datagrid';
 import { MessageLoop } from '@lumino/messaging';
@@ -361,6 +361,26 @@ describe('csvviewer/widget', () => {
         widget.dispose();
         widget.dispose();
         expect(widget.isDisposed).toBe(true);
+      });
+
+      it('should not create an ActivityMonitor if disposed before context is ready', async () => {
+        const localContext = createContext();
+        const ready = new PromiseDelegate<void>();
+        const readySpy = jest
+          .spyOn(localContext, 'ready', 'get')
+          .mockReturnValue(ready.promise);
+
+        const widget = new CSVViewer({ context: localContext });
+        widget.dispose();
+
+        ready.resolve(undefined);
+        await widget.ready;
+
+        expect(
+          (widget as unknown as { _monitor: unknown })._monitor
+        ).toBeNull();
+        readySpy.mockRestore();
+        localContext.dispose();
       });
     });
 
