@@ -159,7 +159,7 @@ describe('@jupyterlab/notebook', () => {
         const panel = utils.createNotebookPanel(context);
         await context.initialize(true);
         await context.ready;
-        panel.model!.setKernelLocked(true);
+        panel.model!.setMetadata('kernel_lock', true);
         // The metadata change propagates into the kernel preference.
         expect(context.sessionContext.kernelPreference.locked).toBe(true);
       });
@@ -172,10 +172,10 @@ describe('@jupyterlab/notebook', () => {
 
         // Changing the metadata directly (e.g. from the Common Tools dropdown)
         // must be reflected in the kernel preference.
-        panel.model!.setKernelLocked(true);
+        panel.model!.setMetadata('kernel_lock', true);
         expect(context.sessionContext.kernelPreference.locked).toBe(true);
 
-        panel.model!.setKernelLocked(false);
+        panel.model!.setMetadata('kernel_lock', false);
         expect(context.sessionContext.kernelPreference.locked).toBe(false);
       });
 
@@ -189,19 +189,19 @@ describe('@jupyterlab/notebook', () => {
           ...context.sessionContext.kernelPreference,
           locked: true
         };
-        expect(panel.model!.kernelLocked).toBe(true);
+        expect(panel.model!.getMetadata('kernel_lock')).toBe(true);
 
         context.sessionContext.kernelPreference = {
           ...context.sessionContext.kernelPreference,
           locked: false
         };
-        expect(panel.model!.kernelLocked).toBe(false);
+        expect(panel.model!.getMetadata('kernel_lock')).toBeUndefined();
       });
 
       it('should keep the `kernel_lock` metadata of a notebook that the context cannot save', async () => {
         const manager = new ServiceManagerMock();
         const saved = new NotebookModel();
-        saved.setKernelLocked(true);
+        saved.setMetadata('kernel_lock', true);
         await manager.contents.save('locked.ipynb', {
           type: 'notebook',
           format: 'json',
@@ -219,17 +219,17 @@ describe('@jupyterlab/notebook', () => {
         await lockedContext.initialize(false);
         await lockedContext.ready;
 
-        expect(panel.model!.kernelLocked).toBe(true);
+        expect(panel.model!.getMetadata('kernel_lock')).toBe(true);
         lockedContext.dispose();
       });
 
       it('should keep the `kernel_lock` metadata when a preference without `locked` is set', async () => {
         const panel = utils.createNotebookPanel(context);
         await context.ready;
-        panel.model!.setKernelLocked(true);
+        panel.model!.setMetadata('kernel_lock', true);
 
         context.sessionContext.kernelPreference = { autoStartDefault: true };
-        expect(panel.model!.kernelLocked).toBe(true);
+        expect(panel.model!.getMetadata('kernel_lock')).toBe(true);
       });
 
       it('should restart the locked kernel after switching, locking and shutting down', async () => {
@@ -260,7 +260,7 @@ describe('@jupyterlab/notebook', () => {
 
         expect(sessionContext.session?.kernel?.name).toBe(second);
         expect(panel.model!.defaultKernelName).toBe(second);
-        expect(panel.model!.kernelLocked).toBe(true);
+        expect(panel.model!.getMetadata('kernel_lock')).toBe(true);
       }, 30000);
     });
 

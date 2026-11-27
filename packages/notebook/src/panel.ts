@@ -317,7 +317,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     if (!model) {
       return;
     }
-    const locked = model.kernelLocked;
+    const locked = model.getMetadata('kernel_lock') === true;
     let preference = {
       ...this.context.sessionContext.kernelPreference,
       locked
@@ -359,8 +359,15 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     if (typeof locked !== 'boolean') {
       return;
     }
-    if (this.model && locked !== this.model.kernelLocked) {
-      this.model.setKernelLocked(locked);
+    const model = this.model;
+    if (!model) {
+      return;
+    }
+    const wasLocked = model.getMetadata('kernel_lock') === true;
+    if (locked && !wasLocked) {
+      model.setMetadata('kernel_lock', true);
+    } else if (!locked && wasLocked) {
+      model.deleteMetadata('kernel_lock');
     }
   }
 
