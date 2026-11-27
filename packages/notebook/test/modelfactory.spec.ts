@@ -101,6 +101,23 @@ describe('@jupyterlab/notebook', () => {
       expect(height).toBe(0);
     });
 
+    test('should estimate no height for a cell hidden under a collapsed heading', () => {
+      const sharedModel = createStandaloneCell({
+        cell_type: 'code',
+        source: ['x = 1'],
+        metadata: {}
+      }) as YCodeCell;
+      const model: ICodeCellModel = new CodeCellModel({ sharedModel });
+      notebook.cells.push({ model, isHidden: true } as Cell<ICodeCellModel>);
+      notebook.cells.push({ model, isHidden: false } as Cell<ICodeCellModel>);
+
+      expect(notebook.estimateWidgetSize(0)).toBe(0);
+      expect(notebook.estimateWidgetSize(1)).toBe(39); // 1 source_line * 17 (line_height) + 22 (cell_margin)
+      // Without windowing, the estimate is the cell's size once it is shown.
+      notebook.windowingActive = false;
+      expect(notebook.estimateWidgetSize(0)).toBe(39);
+    });
+
     test('should calculate height based on number of lines in source and output (string output)', () => {
       const outputObj = [
         {

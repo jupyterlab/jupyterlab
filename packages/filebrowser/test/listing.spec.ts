@@ -189,6 +189,28 @@ describe('filebrowser/listing', () => {
     });
 
     describe('#rename', () => {
+      it('should rename the selected item when the focused item is filtered out', async () => {
+        const items = [...dirListing.sortedItems()];
+        dirListing.selectNext();
+        dirListing.selectNext();
+        dirListing['_focusItem'](3);
+        const refreshed = signalToPromise(dirListing.model.refreshed);
+        dirListing.model.setFilter(item =>
+          item.path === items[0].path || item.path === items[1].path ? {} : null
+        );
+        await refreshed;
+        await framePromise();
+        expect([...dirListing.sortedItems()]).toHaveLength(2);
+        expect(dirListing['_focusIndex']).toBe(3);
+        const renamed = dirListing.rename().catch((error: unknown) => error);
+        const editNode = dirListing['_editNode'];
+        expect(editNode.value).toBe(items[1].name);
+        simulate(editNode, 'keydown', { key: 'Escape' });
+        await expect(renamed).resolves.toBe(items[1].name);
+        simulate(document.activeElement!, 'keydown', { key: 'ArrowUp' });
+        expect([...dirListing.selectedItems()]).toEqual([items[0]]);
+      });
+
       it('backspace during rename does not trigger goUp method', async () => {
         dirListing.selectNext();
         const newNamePromise = dirListing.rename();

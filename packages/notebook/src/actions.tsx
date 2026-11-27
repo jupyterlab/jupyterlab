@@ -2783,6 +2783,16 @@ namespace Private {
     timing?: JSONObject;
     /** Whether the execution was still running when it was captured. */
     wasRunning: boolean;
+    /**
+     * Whether the execution had ended when it was captured, known from the
+     * next microtask on; clearing the outputs of a running cell makes it idle.
+     */
+    hadEnded: () => boolean;
+    /**
+     * The prompt number when it was captured: final for an execution that
+     * had ended, even if its outputs were cleared since its reply.
+     */
+    executionCount: nbformat.ExecutionCount;
   }
 
   const pendingOutputExecutions = new WeakMap<CodeCell, IStoredCellExecution>();
@@ -2814,14 +2824,22 @@ namespace Private {
     storedExecution: IStoredCellExecution,
     recordTiming: boolean
   ): void {
-    const { future } = storedExecution;
+    const { future, wasRunning, hadEnded, executionCount } = storedExecution;
+    if (!wasRunning && cell.model.executionCount !== executionCount) {
+      // A cell that was not running keeps the prompt it had then, also
+      // after an undo that rolled it back.
+      cell.model.executionCount = executionCount;
+    }
     void future.done.then(
       reply => {
         if (!cell.isDisposed) {
-          // The future is authoritative for the prompt number; a snapshot
-          // taken before completion would be stale (still null). Setting a
-          // non-null execution count also flips the state back to 'idle'.
-          cell.model.executionCount = reply.content.execution_count;
+          // For an execution that had not ended, the future is authoritative
+          // for the prompt number; a snapshot taken before completion would
+          // be stale (still null). Setting a non-null execution count also
+          // flips the state back to 'idle'.
+          if (!hadEnded()) {
+            cell.model.executionCount = reply.content.execution_count;
+          }
           cell.model.executionState = 'idle';
           if (recordTiming) {
             const started = reply.metadata.started as string | undefined;
@@ -2948,6 +2966,9 @@ namespace Private {
       pending.displayIdMap = cell.outputArea.displayIdMap;
       pending.timing = cell.model.getMetadata('execution');
       pending.wasRunning = cell.model.executionState === 'running';
+      // Outputs wait for the user only once the execution has ended.
+      pending.hadEnded = () => true;
+      pending.executionCount = cell.model.executionCount;
       return pending;
     }
     const future = cell.outputArea.detachFuture();
@@ -2967,6 +2988,11 @@ namespace Private {
         failedAt = new Date().toISOString();
       }
     );
+    // Runs after the callbacks above when `done` had already settled.
+    let hadEnded = false;
+    void Promise.resolve().then(() => {
+      hadEnded = done;
+    });
     const buffered: IBufferedMessage[] = [];
     future.onIOPub = msg => {
       buffered.push({ channel: 'iopub', msg });
@@ -2986,7 +3012,9 @@ namespace Private {
       buffered,
       displayIdMap,
       timing: cell.model.getMetadata('execution'),
-      wasRunning: cell.model.executionState === 'running'
+      wasRunning: cell.model.executionState === 'running',
+      hadEnded: () => hadEnded,
+      executionCount: cell.model.executionCount
     };
   }
 

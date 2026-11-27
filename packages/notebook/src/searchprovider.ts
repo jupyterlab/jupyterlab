@@ -2,12 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 import type { IMapChange } from '@jupyter/ydoc';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import type {
-  CellSearchProvider,
-  ICellModel,
+import type { CellSearchProvider, ICellModel } from '@jupyterlab/cells';
+import {
+  CodeCell,
+  createCellSearchProvider,
   MarkdownCell
 } from '@jupyterlab/cells';
-import { CodeCell, createCellSearchProvider } from '@jupyterlab/cells';
 import type { IHighlightAdjacentMatchOptions } from '@jupyterlab/codemirror';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
 import type { IChangedArgs } from '@jupyterlab/coreutils';
@@ -470,25 +470,25 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     let replaceOccurred = false;
 
     const unrenderMarkdownCell = async (
+      cellIndex: number | null,
       highlightNext = false
     ): Promise<void> => {
-      // Unrendered markdown cell
-      const activeCell = this.widget?.content.activeCell;
-      if (
-        activeCell?.model.type === 'markdown' &&
-        (activeCell as MarkdownCell).rendered
-      ) {
-        (activeCell as MarkdownCell).rendered = false;
+      if (cellIndex === null || !this.widget) {
+        return;
+      }
+      const cell = this.widget.content.widgets[cellIndex];
+      if (cell instanceof MarkdownCell && cell.rendered) {
+        cell.rendered = false;
         // A read-only cell stays rendered when its editor is hidden, and
         // highlighting the next match would then skip the current one
-        if (highlightNext && !(activeCell as MarkdownCell).rendered) {
+        if (highlightNext && !cell.rendered) {
           await this.highlightNext(loop);
         }
       }
     };
 
     if (this._currentProviderIndex !== null) {
-      await unrenderMarkdownCell();
+      await unrenderMarkdownCell(this._currentProviderIndex);
 
       const searchEngine = this._searchProviders[this._currentProviderIndex];
       replaceOccurred = await searchEngine.replaceCurrentMatch(
@@ -509,9 +509,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     // A match marked in the rendered text is already current, and
     // highlighting the next match would skip it
     if (!current || !('node' in current)) {
-      // TODO: markdown unrendering/highlighting sequence is likely incorrect
       // Force highlighting the first hit in the unrendered cell
-      await unrenderMarkdownCell(true);
+      await unrenderMarkdownCell(this._currentProviderIndex, true);
     }
     return replaceOccurred;
   }
@@ -651,9 +650,49 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     loop = false,
     options?: Private.IStepOptions
   ): Promise<ISearchMatch | null> {
+    // Whether the cell was rendered and attached when it was searched, so
+    // that its editor could scroll to the match
+    let cellWasShown = true;
+
+    // Scroll to the match of a new query without activating its cell. The
+    // search does not wait for it, because a cell may render only when the
+    // browser is idle.
+    const scrollToMatchInCell = async (match: ISearchMatch) => {
+      const index = this._currentProviderIndex!;
+      const queryKey = this._queryKey;
+      const cell = this.widget.content.widgets[index];
+      const isCurrent = () =>
+        this._queryKey === queryKey &&
+        this._currentProviderIndex === index &&
+        this.getCurrentMatch()?.position === match.position;
+      await cell.ready;
+      if (!isCurrent()) {
+        return;
+      }
+      try {
+        await this.widget.content.scrollToItem(index);
+      } catch {
+        // A newer scroll request replaced this one
+      }
+      const editor = cell.editor;
+      // A hidden editor, as in a rendered Markdown cell, would scroll when it
+      // is shown again
+      if (
+        isCurrent() &&
+        !('node' in match) &&
+        editor &&
+        editor.host.checkVisibility?.() !== false
+      ) {
+        editor.revealPosition(editor.getPositionAt(match.position)!);
+      }
+    };
+
     const activateNewMatch = async (match: ISearchMatch) => {
       const shouldScroll = options?.scroll ?? true;
       if (!shouldScroll) {
+        if (options?.scrollInCell && !cellWasShown) {
+          void scrollToMatchInCell(match);
+        }
         // do not activate the match if scrolling was disabled
         return;
       }
@@ -707,17 +746,37 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this._selectionLock = false;
     };
 
+    // Only the first cell that the search visits starts from its selection,
+    // because the selection of another cell stays where it was last edited
+    let isFirstVisit = true;
+
     const highlightInCell = async (
       index: number
     ): Promise<ISearchMatch | undefined> => {
       const searchEngine = this._searchProviders[index];
+      const searchWholeCell =
+        !isFirstVisit &&
+        (options?.from === 'selection' || options?.from === 'selection-start');
+      isFirstVisit = false;
       if (options?.skipReadOnly && searchEngine.isReadOnlyProvider()) {
         // Treat it as a cell without matches, so the loop below still ends
         return undefined;
       }
-      const cellOptions = options?.scrollInCell
-        ? { ...options, scroll: true }
-        : options;
+      // A placeholder cell has no editor yet, and the full windowing mode
+      // does not attach a cell out of the view
+      const cell = this.widget.content.widgets[index];
+      cellWasShown = !cell.isPlaceholder() && cell.isAttached;
+      let cellOptions = options;
+      if (searchWholeCell) {
+        // Without a match in the cell yet, 'previous-match' starts at its end
+        cellOptions = {
+          ...cellOptions,
+          from: reverse ? 'previous-match' : 'start'
+        };
+      }
+      if (options?.scrollInCell) {
+        cellOptions = { ...cellOptions, scroll: true };
+      }
       return reverse
         ? searchEngine.highlightPrevious(false, cellOptions)
         : searchEngine.highlightNext(false, cellOptions);

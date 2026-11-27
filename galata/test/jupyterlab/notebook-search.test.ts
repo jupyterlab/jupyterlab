@@ -968,6 +968,42 @@ test.describe('Notebook Search', () => {
   });
 });
 
+test.describe('Notebook Search in the full windowing mode', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:tracker': { windowingMode: 'full' }
+    }
+  });
+
+  test('Scroll to the first match when typing a query', async ({
+    page,
+    tmpPath
+  }) => {
+    const notebook = galata.Notebook.generateNotebook(40, 'code', [
+      'Only hay here.'
+    ]);
+    notebook.cells[30].source = ['The needle is here.'];
+    await page.contents.uploadContent(
+      JSON.stringify(notebook),
+      'text',
+      `${tmpPath}/haystack.ipynb`
+    );
+    await page.notebook.openByPath(`${tmpPath}/haystack.ipynb`);
+    await page.notebook.activate('haystack.ipynb');
+
+    await page.keyboard.press('Control+f');
+    await page.fill('[placeholder="Find"]', 'needle');
+    await expect(page.locator('.jp-DocumentSearch-index-counter')).toHaveText(
+      '1/1'
+    );
+
+    await expect(page.locator('.jp-CodeCell .jp-current-match')).toBeInViewport(
+      { ratio: 1 }
+    );
+  });
+});
+
 test.describe('Auto search in multiple selection', async () => {
   test.use({
     mockSettings: {

@@ -284,6 +284,25 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#startQuery()', () => {
+      it('should start from the first match of a cell below the active cell', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: '' },
+          { cell_type: 'code', source: "print('test')" }
+        ]);
+        // The cursor of the cell stays after the text typed last
+        panel.content.widgets[1].editor!.setCursorPosition({
+          line: 0,
+          column: 13
+        });
+        panel.content.activeCellIndex = 0;
+        await provider.startQuery(/test/, undefined);
+        expect(provider.currentMatchIndex).toBe(0);
+        await provider.endQuery();
+      });
+    });
+
     describe('#highlightNext()', () => {
       afterEach(() => {
         if (panel.isAttached) {
@@ -1118,6 +1137,26 @@ describe('@jupyterlab/notebook', () => {
         expect(replaced).toBe(false);
         const source = panel.model!.cells.get(0).sharedModel.getSource();
         expect(source).toBe('test1');
+      });
+
+      it('should not unrender an active markdown cell when replacing a match in another cell', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'markdown', source: 'active markdown cell' },
+          { cell_type: 'code', source: 'target match' }
+        ]);
+        const mdCell = panel.content.widgets[0] as MarkdownCell;
+        mdCell.rendered = true;
+        panel.content.activeCellIndex = 0;
+        await provider.cellChangeHandled;
+
+        await provider.startQuery(/target/, undefined);
+        expect(provider.currentMatchIndex).toBe(0);
+        expect(mdCell.rendered).toBe(true);
+
+        const replaced = await provider.replaceCurrentMatch('replaced');
+        expect(replaced).toBe(true);
+        expect(mdCell.rendered).toBe(true);
       });
     });
 
