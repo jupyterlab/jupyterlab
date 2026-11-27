@@ -1,7 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Dialog, Notification, showDialog } from '@jupyterlab/apputils';
+import {
+  ColorUtils,
+  Dialog,
+  Notification,
+  showDialog
+} from '@jupyterlab/apputils';
 import type { Terminal as TerminalNS } from '@jupyterlab/services';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
@@ -21,7 +26,6 @@ import type { FitAddon } from '@xterm/addon-fit';
 import type { SearchAddon } from '@xterm/addon-search';
 import type { WebLinksAddon } from '@xterm/addon-web-links';
 import type { WebglAddon } from '@xterm/addon-webgl';
-import Color from 'color';
 import { ITerminal } from '.';
 
 /**
@@ -809,12 +813,8 @@ namespace Private {
     const background = bodyStyle.getPropertyValue('--jp-layout-color0').trim();
 
     let activeMatchBackground = '#ffee58'; // md-yellow-400 for light mode background
-    try {
-      if (Color(background).isDark()) {
-        activeMatchBackground = '#F57F17'; // md-yellow-900 for dark mode background
-      }
-    } catch (e) {
-      // Use the light mode default.
+    if (isDark(background)) {
+      activeMatchBackground = '#F57F17'; // md-yellow-900 for dark mode background
     }
 
     return {
@@ -846,6 +846,20 @@ namespace Private {
       default:
         return inheritTheme();
     }
+  }
+
+  /**
+   * Whether a CSS color is dark, by its Rec. 709 luma.
+   *
+   * A color that `ColorUtils.parse()` rejects counts as light.
+   */
+  function isDark(color: string): boolean {
+    const rgba = ColorUtils.parse(color);
+    if (!rgba) {
+      return false;
+    }
+    const { red, green, blue } = rgba;
+    return (red * 2126 + green * 7152 + blue * 722) / 10000 < 128;
   }
 }
 

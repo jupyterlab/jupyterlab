@@ -11,13 +11,104 @@
   overflow: hidden;
 }
 
-/* Override react-json-tree inline styles */
-.jp-RenderedJSON *:not(mark) {
-  background-color: transparent !important;
+/* Tree */
+.jp-RenderedJSON-tree,
+.jp-RenderedJSON-tree ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  user-select: none;
 }
 
-.jp-RenderedJSON ul {
-  margin: 0 !important;
+.jp-RenderedJSON-node,
+.jp-RenderedJSON-range {
+  padding-top: 0.25em;
+}
+
+.jp-RenderedJSON-node:not(.jp-mod-root),
+.jp-RenderedJSON-value {
+  margin-left: 0.875em;
+}
+
+.jp-RenderedJSON-node.jp-mod-empty {
+  padding-left: 1.125em;
+}
+
+.jp-RenderedJSON-value {
+  padding: 0.25em 0 0 2.125em;
+  text-indent: -0.5em;
+  overflow-wrap: break-word;
+  word-break: break-all;
+  user-select: text;
+}
+
+.jp-RenderedJSON-value.jp-mod-root {
+  padding-left: 1.25em;
+}
+
+.jp-RenderedJSON-row {
+  width: fit-content;
+}
+
+.jp-RenderedJSON-tree [aria-expanded] > .jp-RenderedJSON-row {
+  cursor: pointer;
+}
+
+.jp-RenderedJSON-label,
+.jp-RenderedJSON-arrow {
+  display: inline-block;
+}
+
+.jp-RenderedJSON-value .jp-RenderedJSON-label {
+  margin-right: 0.5em;
+}
+
+.jp-RenderedJSON-itemCount {
+  padding-left: 0.5em;
+}
+
+.jp-RenderedJSON-itemType {
+  margin: 0 0.3em;
+}
+
+.jp-RenderedJSON-arrow {
+  padding-right: 0.5em;
+}
+
+.jp-RenderedJSON-arrow.jp-mod-double {
+  padding-left: 1em;
+}
+
+.jp-RenderedJSON-arrowSign {
+  display: block;
+  position: relative;
+  font-size: 75%;
+  line-height: 1.1em;
+  transition: transform 150ms;
+  transform-origin: 45% 50%;
+}
+
+.jp-RenderedJSON-arrowSign::before,
+.jp-mod-double > .jp-RenderedJSON-arrowSign::after {
+  content: '\25B6';
+}
+
+.jp-mod-double > .jp-RenderedJSON-arrowSign::after {
+  position: absolute;
+  top: 0;
+  left: -0.4em;
+}
+
+[aria-expanded='true'] > .jp-RenderedJSON-row .jp-RenderedJSON-arrowSign {
+  transform: rotate(90deg);
+}
+
+.jp-RenderedJSON-tree [role='treeitem']:focus {
+  outline: none;
+}
+
+.jp-RenderedJSON-tree [role='treeitem']:focus-visible > .jp-RenderedJSON-row {
+  outline: var(--jp-border-width) solid var(--jp-brand-color1);
 }
 
 .jp-RenderedJSON .container {

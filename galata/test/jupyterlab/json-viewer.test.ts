@@ -112,3 +112,70 @@ test.describe('JSON viewer find', () => {
     ).toBeVisible();
   });
 });
+
+test.describe('JSON viewer keyboard', () => {
+  /**
+   * The key of the focused node.
+   */
+  function focusedKey(page: IJupyterLabPageFixture): Promise<string | null> {
+    return page.evaluate(
+      () =>
+        document.activeElement?.querySelector(
+          ':scope > .jp-RenderedJSON-row > .jp-RenderedJSON-label'
+        )?.textContent ?? null
+    );
+  }
+
+  test.beforeEach(async ({ page, tmpPath }) => {
+    const viewer = await openJSON(page, tmpPath, 'config.json', CONFIG);
+    await viewer.getByPlaceholder('Find…').focus();
+    await page.keyboard.press('Tab');
+    await expect.poll(() => focusedKey(page)).toBe('root');
+  });
+
+  test('moves the focus between the visible nodes', async ({ page }) => {
+    await page.keyboard.press('ArrowDown');
+    await expect.poll(() => focusedKey(page)).toBe('name');
+    await page.keyboard.press('End');
+    await expect.poll(() => focusedKey(page)).toBe('client');
+    await page.keyboard.press('ArrowUp');
+    await expect.poll(() => focusedKey(page)).toBe('server');
+    await page.keyboard.press('Home');
+    await expect.poll(() => focusedKey(page)).toBe('root');
+  });
+
+  test('toggles a node with the right and left arrow keys', async ({
+    page
+  }) => {
+    const viewer = page.locator('.jp-RenderedJSON');
+    const host = viewer.getByText('"localhost"', { exact: true });
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await expect.poll(() => focusedKey(page)).toBe('server');
+
+    await page.keyboard.press('ArrowRight');
+    await expect(host).toBeVisible();
+    await page.keyboard.press('ArrowLeft');
+    await expect(host).toHaveCount(0);
+  });
+});
+
+test.describe('JSON viewer in a notebook', () => {
+  test('runs the cell with Shift+Enter from a node', async ({ page }) => {
+    await page.notebook.createNew();
+    await page.notebook.setCell(
+      0,
+      'code',
+      'from IPython.display import JSON\nJSON({"alpha": {"beta": 1}})'
+    );
+    await page.notebook.addCell('code', '1');
+    await page.notebook.runCell(0, true);
+    const output = (await page.notebook.getCellOutputLocator(0))!;
+    await output.getByText('alpha', { exact: true }).click();
+
+    await page.keyboard.press('Shift+Enter');
+
+    const next = (await page.notebook.getCellLocator(1))!;
+    await expect(next).toHaveClass(/jp-mod-active/);
+  });
+});

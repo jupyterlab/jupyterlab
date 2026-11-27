@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MainAreaWidget } from '@jupyterlab/apputils';
+import { ColorUtils, MainAreaWidget } from '@jupyterlab/apputils';
 import type {
   IReplaceOptions,
   ISearchProvider
@@ -14,7 +14,6 @@ import type {
   ISearchDecorationOptions,
   ISearchOptions
 } from '@xterm/addon-search';
-import Color from 'color';
 
 // The type for which isApplicable returns true
 export type TerminalWidget = MainAreaWidget<Terminal>;
@@ -180,17 +179,19 @@ export class TerminalSearchProvider extends SearchProvider<TerminalWidget> {
    * @returns Color string of form '#rrggbb'
    */
   private _colorToRRGGBB(color: string, backgroundColor: string): string {
-    try {
-      let converted = Color(color);
-      const alpha = converted.alpha();
-      if (alpha < 1) {
-        converted = converted.mix(Color(backgroundColor), alpha);
-      }
-      return converted.hex();
-    } catch (e) {
-      // Return a valid color rather than propagate exception.
+    const foreground = ColorUtils.parse(color);
+    if (!foreground) {
+      // The search addon needs a valid color.
       return '#888888';
     }
+    if (foreground.alpha === 1) {
+      return Private.toHex(foreground);
+    }
+    const background = ColorUtils.parse(backgroundColor);
+    if (!background) {
+      return '#888888';
+    }
+    return Private.toHex(Private.mix(background, foreground, foreground.alpha));
   }
 
   private _next(): void {
@@ -273,4 +274,42 @@ export class TerminalSearchProvider extends SearchProvider<TerminalWidget> {
   private _currentMatchIndex: number | null = null;
   private _matchesCount: number | null = null;
   private _searchDecorationOptions?: ISearchDecorationOptions;
+}
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * Mix two colors with the Sass formula, as the `color` package did.
+   *
+   * `weight` is the share of the first color, adjusted by the difference of
+   * the alphas, see https://github.com/sass/libsass/blob/0e6b4a2850092356aa3ece07c6b249f0221caced/functions.cpp#L209
+   */
+  export function mix(
+    first: ColorUtils.IRGBA,
+    second: ColorUtils.IRGBA,
+    weight: number
+  ): ColorUtils.IRGBA {
+    const w = 2 * weight - 1;
+    const a = first.alpha - second.alpha;
+    const firstWeight = ((w * a === -1 ? w : (w + a) / (1 + w * a)) + 1) / 2;
+    const secondWeight = 1 - firstWeight;
+    return {
+      red: firstWeight * first.red + secondWeight * second.red,
+      green: firstWeight * first.green + secondWeight * second.green,
+      blue: firstWeight * first.blue + secondWeight * second.blue,
+      alpha: first.alpha * weight + second.alpha * (1 - weight)
+    };
+  }
+
+  /**
+   * Format the red, green and blue of a color as `#RRGGBB`.
+   */
+  export function toHex(color: ColorUtils.IRGBA): string {
+    const hex = [color.red, color.green, color.blue].map(channel =>
+      Math.round(channel).toString(16).padStart(2, '0')
+    );
+    return `#${hex.join('').toUpperCase()}`;
+  }
 }
