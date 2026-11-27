@@ -57,6 +57,9 @@ class AvailableList extends VDomRenderer<PluginListModel> {
   }
 
   render(): JSX.Element {
+    if (this.model.isLoading) {
+      this._sortEnabledSnapshot = null;
+    }
     return (
       <>
         {this.model.statusError !== null ? (
@@ -76,6 +79,9 @@ class AvailableList extends VDomRenderer<PluginListModel> {
               return <div>{this.trans.__('No entries')}</div>;
             }}
             sortKey={'plugin-id'}
+            onSort={() => {
+              this._sortEnabledSnapshot = null;
+            }}
             rows={this.model.available
               .filter(pkg => {
                 const pattern = new RegExp(this.model.query, 'i');
@@ -211,7 +217,13 @@ class AvailableList extends VDomRenderer<PluginListModel> {
                     )}
                   </>
                 ),
-                sort: (a: IEntry, b: IEntry) => +a.enabled - +b.enabled
+                sort: (a: IEntry, b: IEntry) => {
+                  const aEnabled =
+                    this._sortEnabledSnapshot?.get(a.id) ?? a.enabled;
+                  const bEnabled =
+                    this._sortEnabledSnapshot?.get(b.id) ?? b.enabled;
+                  return +aEnabled - +bEnabled || a.id.localeCompare(b.id);
+                }
               }
             ]}
           />
@@ -227,6 +239,11 @@ class AvailableList extends VDomRenderer<PluginListModel> {
    * @param entry The entry to perform the action on.
    */
   onAction(action: Action, entry: IEntry): Promise<void> {
+    if (!this._sortEnabledSnapshot) {
+      this._sortEnabledSnapshot = new Map(
+        this.model.available.map(item => [item.id, item.enabled])
+      );
+    }
     switch (action) {
       case 'enable':
         return this.model.enable(entry);
@@ -236,6 +253,8 @@ class AvailableList extends VDomRenderer<PluginListModel> {
         throw new Error(`Invalid action: ${action}`);
     }
   }
+
+  private _sortEnabledSnapshot: Map<string, boolean> | null = null;
 }
 
 class Disclaimer extends VDomRenderer<PluginListModel> {

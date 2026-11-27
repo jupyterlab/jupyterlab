@@ -27,6 +27,7 @@ export namespace Table {
     rows: IRow<T>[];
     columns: IColumn<T>[];
     onRowClick?: React.MouseEventHandler<HTMLTableRowElement>;
+    onSort?: (state: ISortState) => void;
     blankIndicator: () => ReactNode;
   }
   /**
@@ -61,14 +62,15 @@ export function Table<T>(props: Table.IOptions<T>) {
   });
 
   const sort = (key: string) => {
-    if (key === sortState.sortKey) {
-      setSortState({
-        sortKey: key,
-        sortDirection: (sortState.sortDirection * -1) as -1 | 1
-      });
-    } else {
-      setSortState({ sortKey: key, sortDirection: 1 });
-    }
+    const nextState: Table.ISortState =
+      key === sortState.sortKey
+        ? {
+            sortKey: key,
+            sortDirection: (sortState.sortDirection * -1) as -1 | 1
+          }
+        : { sortKey: key, sortDirection: 1 };
+    setSortState(nextState);
+    props.onSort?.(nextState);
   };
 
   let rows = props.rows;
