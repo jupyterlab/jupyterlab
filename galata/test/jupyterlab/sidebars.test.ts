@@ -869,11 +869,6 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
       }
     }
   });
-  test.skip(
-    ({ browserName }) => browserName === 'firefox',
-    'Some cases fail on Firefox'
-  );
-
   Object.keys(sidebarElementIds).forEach(sideBar => {
     test(`Open ${sideBar} via keyboard navigation`, async ({ page }) => {
       const keyValueArray: string[] = sidebarElementIds[sideBar];

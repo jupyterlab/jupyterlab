@@ -76,6 +76,16 @@ window.Element.prototype.scrollTo = (
   // no-op
 };
 
+/**
+ * Shim scrollIntoView because jsdom does not implement it, see:
+ * https://github.com/jsdom/jsdom/issues/1695
+ */
+window.Element.prototype.scrollIntoView = (
+  _arg?: boolean | ScrollIntoViewOptions
+) => {
+  // no-op
+};
+
 // https://github.com/jsdom/jsdom/issues/3368
 class ResizeObserverMock {
   constructor(_callback: ResizeObserverCallback) {

@@ -146,7 +146,7 @@ def fetch_long(
         # Add auth keys to header
         headers = headers or {}
         headers.update(jp_auth_header)
-        # Make request.
-        return http_server_client.fetch(url, headers=headers, request_timeout=250, **kwargs)
+        # A production build on a slow CI runner takes over 250 s.
+        return http_server_client.fetch(url, headers=headers, request_timeout=600, **kwargs)
 
     return client_fetch

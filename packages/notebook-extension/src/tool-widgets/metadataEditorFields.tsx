@@ -3,9 +3,12 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+/* global WeakRef */
+
 import React from 'react';
 import type { FieldProps } from '@rjsf/utils';
-import type { INotebookTracker } from '@jupyterlab/notebook';
+import type { ICellModel } from '@jupyterlab/cells';
+import type { INotebookModel, INotebookTracker } from '@jupyterlab/notebook';
 import { NotebookTools } from '@jupyterlab/notebook';
 import type { ITranslator } from '@jupyterlab/translation';
 import type { CodeEditor } from '@jupyterlab/codeeditor';
@@ -65,7 +68,12 @@ export class CellMetadataField extends NotebookTools.MetadataEditorTool {
       return;
     }
     const activeCell = this._tracker.activeCell?.model.sharedModel;
-    if (activeCell && this.editor.source) {
+    // A hidden editor keeps the source of the cell it last rendered.
+    if (
+      activeCell &&
+      activeCell === this._sourceCell?.deref() &&
+      this.editor.source
+    ) {
       const metadataKeys = Object.keys(activeCell.metadata ?? {});
       const source = this.editor.source.toJSON() ?? {};
 
@@ -85,6 +93,7 @@ export class CellMetadataField extends NotebookTools.MetadataEditorTool {
     this.editor.source = cell
       ? new ObservableJSON({ values: cell.model.metadata as JSONObject })
       : null;
+    this._sourceCell = cell ? new WeakRef(cell.model.sharedModel) : null;
     previousSource?.dispose();
     this.editor.source?.changed.connect(this._onSourceChanged, this);
     // The `source` setter above resets `readOnly` based only on whether a
@@ -103,6 +112,7 @@ export class CellMetadataField extends NotebookTools.MetadataEditorTool {
   }
 
   private _tracker: INotebookTracker;
+  private _sourceCell: WeakRef<ICellModel['sharedModel']> | null = null;
 }
 
 /**
@@ -127,10 +137,14 @@ export class NotebookMetadataField extends NotebookTools.MetadataEditorTool {
     if (this._tracker.currentWidget?.viewOnly === true) {
       return;
     }
-    if (this.editor.source) {
-      this._tracker.currentWidget?.model?.sharedModel.setMetadata(
-        this.editor.source.toJSON()
-      );
+    const notebook = this._tracker.currentWidget?.model;
+    // A hidden editor keeps the source of the notebook it last rendered.
+    if (
+      notebook &&
+      notebook === this._sourceNotebook?.deref() &&
+      this.editor.source
+    ) {
+      notebook.sharedModel.setMetadata(this.editor.source.toJSON());
     }
   }
 
@@ -141,6 +155,7 @@ export class NotebookMetadataField extends NotebookTools.MetadataEditorTool {
     this.editor.source = notebook
       ? new ObservableJSON({ values: notebook.model?.metadata as JSONObject })
       : null;
+    this._sourceNotebook = notebook?.model ? new WeakRef(notebook.model) : null;
     previousSource?.dispose();
     this.editor.source?.changed.connect(this._onSourceChanged, this);
     // The `source` setter above resets `readOnly` based only on whether a
@@ -156,4 +171,5 @@ export class NotebookMetadataField extends NotebookTools.MetadataEditorTool {
   }
 
   private _tracker: INotebookTracker;
+  private _sourceNotebook: WeakRef<INotebookModel> | null = null;
 }

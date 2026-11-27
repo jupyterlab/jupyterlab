@@ -18,17 +18,16 @@ export function base64EncodeFile(filePath: string): string {
 }
 
 /**
- * Private page config data for the Jupyter application.
+ * Page config data of each page, until the page loads another document.
  */
-let configData: { [key: string]: string } | null = null;
+const configDataByPage = new WeakMap<Page, { [key: string]: string }>();
 
 // Get config data
 async function getConfigData(page: Page): Promise<{ [key: string]: string }> {
-  if (configData) {
-    return configData;
+  const cached = configDataByPage.get(page);
+  if (cached) {
+    return cached;
   }
-
-  configData = Object.create(null);
 
   const el = await page.$('#jupyter-config-data');
 
@@ -36,7 +35,9 @@ async function getConfigData(page: Page): Promise<{ [key: string]: string }> {
     return {};
   }
 
-  configData = JSON.parse((await el?.textContent()) ?? '{}');
+  const configData: { [key: string]: string } = JSON.parse(
+    (await el?.textContent()) ?? '{}'
+  );
 
   for (const key in configData) {
     // PageConfig expects strings
@@ -45,7 +46,9 @@ async function getConfigData(page: Page): Promise<{ [key: string]: string }> {
     }
   }
 
-  return configData!;
+  configDataByPage.set(page, configData);
+  page.once('domcontentloaded', () => configDataByPage.delete(page));
+  return configData;
 }
 
 /**

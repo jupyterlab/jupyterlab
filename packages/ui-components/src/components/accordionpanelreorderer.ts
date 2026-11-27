@@ -115,15 +115,18 @@ export class AccordionPanelReorderer
       return;
     }
     this._panel.insertWidget(index, widget);
-    // Lumino only repositions the section, so move its title, body and
-    // handle to keep the Tab order the same as the visual order.
-    const next = this._panel.titles[index + 1] ?? null;
-    for (const node of [
-      this._panel.titles[index],
-      widget.node,
-      this._panel.handles[index]
-    ]) {
-      this._panel.node.insertBefore(node, next);
+    // Without `moveBefore` (Safari), Lumino leaves the nodes in place, so move
+    // them to keep the Tab order; moving placed nodes resets their scroll.
+    const title = this._panel.titles[index];
+    const previous =
+      index > 0
+        ? this._panel.handles[index - 1].nextSibling
+        : this._panel.node.firstChild;
+    if (previous !== title) {
+      const next = this._panel.titles[index + 1] ?? null;
+      for (const node of [title, widget.node, this._panel.handles[index]]) {
+        this._panel.node.insertBefore(node, next);
+      }
     }
     this._reordered.emit(widget);
   }

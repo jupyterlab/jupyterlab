@@ -41,3 +41,43 @@ describe('Context#ready', () => {
     expect(context.model.sharedModel.canUndo()).toBe(false);
   });
 });
+
+describe('Context#save', () => {
+  let manager: ServiceManager.IManager;
+
+  beforeAll(() => {
+    manager = new ServiceManagerMock();
+    return manager.ready;
+  });
+
+  it('should keep the notebook dirty if a cell changes during the save', async () => {
+    const context = await initNotebookContext({ manager });
+    context.model.fromJSON(DEFAULT_CONTENT);
+    await context.initialize(true);
+    const cell = context.model.sharedModel.cells[0];
+    cell.updateSource(0, 0, 'a = 1\n');
+    expect(context.model.dirty).toBe(true);
+
+    const save = manager.contents.save.bind(manager.contents);
+    jest
+      .mocked(manager.contents.save)
+      .mockImplementationOnce((path, options) => {
+        // The content to save was read before this edit.
+        cell.updateSource(0, 0, '# edited\n');
+        return save(path, options);
+      });
+    await context.save();
+
+    const opts = { type: 'notebook', format: 'json', content: true } as const;
+    expect(
+      JSON.stringify((await manager.contents.get(context.path, opts)).content)
+    ).not.toContain('# edited');
+    expect(context.model.dirty).toBe(true);
+
+    await context.save();
+    expect(
+      JSON.stringify((await manager.contents.get(context.path, opts)).content)
+    ).toContain('# edited');
+    expect(context.model.dirty).toBe(false);
+  });
+});
