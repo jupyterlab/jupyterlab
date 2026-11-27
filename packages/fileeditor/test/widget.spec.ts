@@ -141,6 +141,26 @@ describe('fileeditorcodewrapper', () => {
           expect(widget.editor.hasFocus()).toBe(true);
         });
       });
+
+      describe('keydown', () => {
+        it('should escape editor focus on Escape', () => {
+          widget.editor.focus();
+          expect(widget.editor.hasFocus()).toBe(true);
+          simulate(widget.node, 'keydown', { key: 'Escape' });
+          expect(widget.events).toContain('keydown');
+          expect(widget.editor.hasFocus()).toBe(false);
+          expect(widget.node.tabIndex).toBe(0);
+        });
+
+        it('should re-focus editor on Enter from command mode', () => {
+          widget.editor.focus();
+          simulate(widget.node, 'keydown', { key: 'Escape' });
+          expect(widget.editor.hasFocus()).toBe(false);
+          simulate(widget.node, 'keydown', { key: 'Enter' });
+          expect(widget.editor.hasFocus()).toBe(true);
+          expect(widget.node.tabIndex).toBe(-1);
+        });
+      });
     });
 
     describe('#onAfterAttach()', () => {
