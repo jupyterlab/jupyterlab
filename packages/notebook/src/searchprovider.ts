@@ -550,7 +550,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       const reply = await showDialog({
         title: trans.__('Confirmation'),
         body: trans.__(
-          'Searching outputs requires you to run all cells and render their outputs. Are you sure you want to search in the cell outputs?'
+          'Searching outputs requires rendering all cell outputs, including the ones hidden by the output limit. Are you sure you want to search in the cell outputs?'
         ),
         buttons: [
           Dialog.cancelButton({ label: trans.__('Cancel') }),
