@@ -148,4 +148,32 @@ describe('terminal', () => {
       });
     });
   });
+
+  describe('TerminalManager', () => {
+    describe('#runningChanged', () => {
+      it('should not emit when running terminals have not changed', async () => {
+        await manager.refreshRunning();
+        const spy = jest.fn();
+        manager.runningChanged.connect(spy);
+        try {
+          await manager.refreshRunning();
+          expect(spy).not.toHaveBeenCalled();
+        } finally {
+          manager.runningChanged.disconnect(spy);
+        }
+      });
+
+      it('should emit when running terminals change', async () => {
+        const spy = jest.fn();
+        manager.runningChanged.connect(spy);
+        try {
+          const tempSession = await manager.startNew();
+          expect(spy).toHaveBeenCalled();
+          await tempSession.shutdown();
+        } finally {
+          manager.runningChanged.disconnect(spy);
+        }
+      });
+    });
+  });
 });

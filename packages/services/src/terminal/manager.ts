@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { JSONExt } from '@lumino/coreutils';
 import { Poll } from '@lumino/polling';
 
 import type { ISignal } from '@lumino/signaling';
@@ -238,7 +239,7 @@ export class TerminalManager extends BaseManager implements Terminal.IManager {
     }
 
     const names = models.map(({ name }) => name).sort();
-    if (names === this._names) {
+    if (JSONExt.deepEqual(names, this._names)) {
       // Identical models list, so just return
       return;
     }
