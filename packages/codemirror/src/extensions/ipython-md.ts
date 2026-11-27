@@ -304,22 +304,10 @@ export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
           const delimiterLength = DELIMITER_LENGTH[node.type.name];
           if (delimiterLength) {
             let contentFrom = node.from + delimiterLength;
-            let contentTo = node.to - delimiterLength;
-            // Trim leading and trailing newlines so that the LaTeX parser
-            // does not start on a blank line, which would reset stex out of math mode.
-            while (
-              contentFrom < contentTo &&
-              (input.read(contentFrom, contentFrom + 1) === '\n' ||
-                input.read(contentFrom, contentFrom + 1) === '\r')
-            ) {
+            const contentTo = node.to - delimiterLength;
+            // A blank first line would switch stex out of math mode.
+            if (input.read(contentFrom, contentFrom + 1) === '\n') {
               contentFrom++;
-            }
-            while (
-              contentTo > contentFrom &&
-              (input.read(contentTo - 1, contentTo) === '\n' ||
-                input.read(contentTo - 1, contentTo) === '\r')
-            ) {
-              contentTo--;
             }
             if (contentTo - contentFrom > 0) {
               return {
