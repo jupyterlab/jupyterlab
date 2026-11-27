@@ -227,7 +227,7 @@ export class SettingsFormEditor extends React.Component<
       ]
     });
 
-    if (!result.button.accept) {
+    if (this._isUnmounted || !result.button.accept) {
       return;
     }
 
