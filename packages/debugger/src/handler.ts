@@ -166,7 +166,12 @@ export class DebuggerHandler implements DebuggerHandler.IHandler, IDisposable {
     }
     for (const id in this._widgets) {
       const w = this._widgets[id];
-      if (w && (w === widget || w.node.contains(widget.node))) {
+      if (
+        w &&
+        (w === widget ||
+          w.node.contains(widget.node) ||
+          widget.node.contains(w.node))
+      ) {
         return w;
       }
     }
@@ -686,11 +691,8 @@ export class DebuggerHandler implements DebuggerHandler.IHandler, IDisposable {
     );
 
     // listen to the disposed signals
-    widget.disposed.connect(async () => {
-      if (this.isDebuggerOn(widget)) {
-        this._service.session!.connection = connection;
-        await this._service.stop();
-      }
+    widget.disposed.connect(() => {
+      const isDebugging = this.isDebuggerOn(widget);
       this._removeHandlers(widget, connection, onDebuggerStopped);
       // The connections made by `update()` are removed by
       // `Signal.clearData(widget)` during widget disposal (every connect
@@ -709,6 +711,10 @@ export class DebuggerHandler implements DebuggerHandler.IHandler, IDisposable {
         this._activeWidget = null;
       }
       this._notifyCommands();
+      if (isDebugging) {
+        this._service.session!.connection = connection;
+        void this._service.stop();
+      }
     });
 
     const debuggingEnabled = await this._service.isAvailable(connection);

@@ -1227,18 +1227,18 @@ const main: JupyterFrontEndPlugin<void> = {
       label: trans.__('Enable Debugger'),
       caption: trans.__('Enable Debugger'),
       icon: Debugger.Icons.enableIcon,
-      isEnabled: (args: { widget?: Widget } = {}) => {
+      isEnabled: (args?: { widget?: Widget }) => {
         const match = Debugger.Handler.findHandler(
-          args.widget ?? shell.currentWidget
+          args?.widget ?? shell.currentWidget
         );
         return match
           ? match.handler.isAvailable(match.widget) &&
               !match.handler.isDebuggerOn(match.widget)
           : false;
       },
-      execute: async (args: { widget?: Widget } = {}) => {
+      execute: async (args?: { widget?: Widget }) => {
         const match = Debugger.Handler.findHandler(
-          args.widget ?? shell.currentWidget
+          args?.widget ?? shell.currentWidget
         );
         if (match) {
           await match.handler.enable(match.widget);
@@ -1256,15 +1256,15 @@ const main: JupyterFrontEndPlugin<void> = {
       label: trans.__('Disable Debugger'),
       caption: trans.__('Disable Debugger'),
       icon: Debugger.Icons.disableIcon,
-      isEnabled: (args: { widget?: Widget } = {}) => {
+      isEnabled: (args?: { widget?: Widget }) => {
         const match = Debugger.Handler.findHandler(
-          args.widget ?? shell.currentWidget
+          args?.widget ?? shell.currentWidget
         );
         return match ? match.handler.isDebuggerOn(match.widget) : false;
       },
-      execute: async (args: { widget?: Widget } = {}) => {
+      execute: async (args?: { widget?: Widget }) => {
         const match = Debugger.Handler.findHandler(
-          args.widget ?? shell.currentWidget
+          args?.widget ?? shell.currentWidget
         );
         if (match) {
           await match.handler.disable(match.widget);
