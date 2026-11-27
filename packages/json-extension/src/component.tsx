@@ -53,6 +53,17 @@ export class Component extends React.Component<IProps, IState> {
     StyleModule.mount(document, jupyterHighlightStyle.module!);
   }
 
+  componentDidUpdate(): void {
+    // New data can unmount the item that Tab reaches.
+    const tree = this._tree.current;
+    if (tree && !tree.querySelector('[role="treeitem"][tabindex="0"]')) {
+      const root = tree.querySelector<HTMLElement>('[role="treeitem"]');
+      if (root) {
+        root.tabIndex = 0;
+      }
+    }
+  }
+
   handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const { value } = event.target;
     this.setState({ value });
@@ -94,6 +105,7 @@ export class Component extends React.Component<IProps, IState> {
         />
         <ul
           key={this.state.filter}
+          ref={this._tree}
           className="jp-RenderedJSON-tree"
           role="tree"
           aria-label={trans.__('JSON tree')}
@@ -114,6 +126,8 @@ export class Component extends React.Component<IProps, IState> {
    * A new search remounts the tree, so this keeps them.
    */
   private _expanded = new Map<string, boolean>();
+
+  private _tree = React.createRef<HTMLUListElement>();
 }
 
 /**
