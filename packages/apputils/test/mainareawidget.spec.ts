@@ -42,6 +42,35 @@ describe('@jupyterlab/apputils', () => {
         );
         expect(widget.content.node.getAttribute('role')).toEqual('region');
       });
+
+      it('should preserve existing aria-label, aria-labelledby, or title on content', () => {
+        const labeled = new Widget();
+        labeled.node.setAttribute('aria-label', 'Custom content');
+        new MainAreaWidget({ content: labeled });
+        expect(labeled.node.getAttribute('aria-label')).toEqual(
+          'Custom content'
+        );
+
+        const labelledBy = new Widget();
+        labelledBy.node.setAttribute('aria-labelledby', 'heading-id');
+        new MainAreaWidget({ content: labelledBy });
+        expect(labelledBy.node.hasAttribute('aria-label')).toBe(false);
+
+        const titled = new Widget();
+        titled.node.setAttribute('title', 'Titled content');
+        new MainAreaWidget({ content: titled });
+        expect(titled.node.hasAttribute('aria-label')).toBe(false);
+      });
+
+      it('should preserve existing aria-label on custom toolbar', () => {
+        const content = new Widget();
+        const toolbar = new Toolbar();
+        toolbar.node.setAttribute('aria-label', 'Custom toolbar');
+        const widget = new MainAreaWidget({ content, toolbar });
+        expect(widget.toolbar.node.getAttribute('aria-label')).toEqual(
+          'Custom toolbar'
+        );
+      });
     });
 
     describe('contentHeader', () => {
