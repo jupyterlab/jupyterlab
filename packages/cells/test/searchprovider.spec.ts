@@ -12,8 +12,10 @@ import {
   MarkdownCellModel
 } from '@jupyterlab/cells';
 import { NBTestUtils } from '@jupyterlab/cells/lib/testutils';
+import type { IRenderMime } from '@jupyterlab/rendermime';
 import { defaultRenderMime } from '@jupyterlab/rendermime/lib/testutils';
 import { framePromise } from '@jupyterlab/testing';
+import { TableOfContentsUtils } from '@jupyterlab/toc';
 import { Widget } from '@lumino/widgets';
 
 /**
@@ -36,25 +38,132 @@ function createPlaceholderCell(editable = true): CodeCell {
 }
 
 /**
+ * A Markdown parser which renders only images, links, autolinks, reference
+ * definitions, block quote markers and ordered list markers. Without a
+ * parser, the rendered text of a cell is its source.
+ */
+const LINK_PARSER: IRenderMime.IMarkdownParser = {
+  render: async source =>
+    source
+      .replace(/^\[[^\]]+\]:.*$/gm, '')
+      .replace(/^>[ \t]?/gm, '')
+      .replace(/^\d+\.[ \t]/gm, '')
+      .replace(/<(https?:[^\s<>]*)>/g, '<a href="$1">$1</a>')
+      .replace(/!\[([^\]]*)\]\(([^)]*)\)/g, '<img alt="$1" src="$2">')
+      .replace(
+        /\[([^\]]*)\]\(((?:[^()]|\([^()]*\))*)\)/g,
+        '<a href="$2">$1</a>'
+      )
+      .replace(/\[([^\]]*)\]\[[^\]]*\]/g, '<a href="#">$1</a>')
+};
+
+/**
+ * A Markdown parser which renders only code fences: it leaves out the fence
+ * lines, and shows the Markdown syntax in code as it is.
+ */
+const FENCE_PARSER: IRenderMime.IMarkdownParser = {
+  render: async source => source.replace(/^```.*$/gm, '')
+};
+
+/**
+ * A typesetter which draws the formulas `$x$`, `$x_a^a$`, `$n-1$` and
+ * `$\lambda$` as MathJax does: each character is a mathematical symbol, such
+ * as 𝑥, in a text node of its own, and a superscript comes before the
+ * subscript of the same base.
+ */
+const FORMULA_TYPESETTER: IRenderMime.ILatexTypesetter = {
+  typeset: host => {
+    if (host.innerHTML.includes('$\\lambda$')) {
+      host.innerHTML = host.innerHTML.replace(
+        '$\\lambda$',
+        '<mjx-container class="MathJax" jax="CHTML"><mjx-math>' +
+          '<mjx-mi><mjx-c>𝜆</mjx-c></mjx-mi></mjx-math></mjx-container>'
+      );
+    }
+    if (host.innerHTML.includes('$x$')) {
+      host.innerHTML = host.innerHTML.replace(
+        '$x$',
+        '<mjx-container class="MathJax" jax="CHTML"><mjx-math>' +
+          '<mjx-mi><mjx-c>𝑥</mjx-c></mjx-mi></mjx-math></mjx-container>'
+      );
+    }
+    if (host.innerHTML.includes('$x_a^a$')) {
+      host.innerHTML = host.innerHTML.replace(
+        '$x_a^a$',
+        '<mjx-container class="MathJax" jax="CHTML"><mjx-math><mjx-msubsup>' +
+          '<mjx-mi><mjx-c>𝑥</mjx-c></mjx-mi><mjx-script>' +
+          '<mjx-mi><mjx-c>𝑎</mjx-c></mjx-mi><mjx-spacer></mjx-spacer>' +
+          '<mjx-mi><mjx-c>𝑎</mjx-c></mjx-mi></mjx-script></mjx-msubsup>' +
+          '</mjx-math></mjx-container>'
+      );
+    }
+    if (host.innerHTML.includes('$n-1$')) {
+      host.innerHTML = host.innerHTML.replace(
+        '$n-1$',
+        '<mjx-container class="MathJax" jax="CHTML"><mjx-math>' +
+          '<mjx-mi><mjx-c>𝑛</mjx-c></mjx-mi><mjx-mo><mjx-c>−</mjx-c></mjx-mo>' +
+          '<mjx-mn><mjx-c>1</mjx-c></mjx-mn></mjx-math></mjx-container>'
+      );
+    }
+  }
+};
+
+/**
+ * Create a Markdown cell with the given source, which starts rendered.
+ */
+function createMarkdownCell(
+  source: string,
+  options: {
+    editable?: boolean;
+    placeholder?: boolean;
+    showEditorForReadOnlyMarkdown?: boolean;
+    markdownParser?: IRenderMime.IMarkdownParser;
+  } = {}
+): MarkdownCell {
+  const {
+    editable = true,
+    placeholder = false,
+    showEditorForReadOnlyMarkdown = true,
+    markdownParser = LINK_PARSER
+  } = options;
+  const model = new MarkdownCellModel({
+    sharedModel: createStandaloneCell({
+      cell_type: 'markdown',
+      source,
+      metadata: editable ? {} : { editable: false }
+    }) as YMarkdownCell
+  });
+  return new MarkdownCell({
+    model,
+    rendermime: defaultRenderMime().clone({
+      markdownParser,
+      latexTypesetter: FORMULA_TYPESETTER
+    }),
+    contentFactory: NBTestUtils.createBaseCellFactory(),
+    placeholder,
+    showEditorForReadOnlyMarkdown
+  }).initializeState();
+}
+
+/**
  * Create a read-only Markdown cell, which starts rendered.
  */
 function createReadOnlyMarkdownCell(
   showEditorForReadOnlyMarkdown: boolean
 ): MarkdownCell {
-  const model = new MarkdownCellModel({
-    sharedModel: createStandaloneCell({
-      cell_type: 'markdown',
-      source: 'test1 test2',
-      metadata: { editable: false }
-    }) as YMarkdownCell
-  });
-  return new MarkdownCell({
-    model,
-    rendermime: defaultRenderMime(),
-    contentFactory: NBTestUtils.createBaseCellFactory(),
-    placeholder: false,
+  return createMarkdownCell('test1 test2', {
+    editable: false,
     showEditorForReadOnlyMarkdown
-  }).initializeState();
+  });
+}
+
+/**
+ * Text of the match currently marked in the rendered cell, if any.
+ */
+function renderedCurrentMatch(cell: MarkdownCell): string | null {
+  return (
+    cell.renderer.node.querySelector('.jp-current-match')?.textContent ?? null
+  );
 }
 
 describe('cells/searchprovider', () => {
@@ -165,25 +274,6 @@ describe('cells/searchprovider', () => {
       scrollIntoView.mockRestore();
       provider.dispose();
     });
-
-    it('should not scroll the editor of a hidden input which renders after the search starts', async () => {
-      // A notebook renders the cells out of view when the browser is idle
-      cell = createPlaceholderCell();
-      cell.inputHidden = true;
-      const provider = createCellSearchProvider(cell);
-      await provider.startQuery(/test\d/, {});
-      await provider.highlightNext();
-      // A hidden editor scrolls to the match when the input is shown again
-      const scrollIntoView = jest.spyOn(EditorView, 'scrollIntoView');
-
-      Widget.attach(cell, document.body);
-      cell.inViewport = true;
-      await framePromise();
-
-      expect(scrollIntoView).not.toHaveBeenCalled();
-      scrollIntoView.mockRestore();
-      provider.dispose();
-    });
   });
 
   describe('MarkdownCellSearchProvider', () => {
@@ -243,13 +333,627 @@ describe('cells/searchprovider', () => {
       provider.dispose();
     });
 
-    it('should unrender a read-only cell which shows its editor', async () => {
+    it('should unrender a read-only cell which shows its editor for a match the rendered text does not show', async () => {
+      cell = createMarkdownCell(
+        'See the [docs](https://example.com) for details.',
+        { editable: false, showEditorForReadOnlyMarkdown: true }
+      );
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/example/, {});
+
+      const match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'example', readOnly: true });
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
+    it('should keep a read-only cell which shows its editor rendered for a match the rendered text shows', async () => {
       cell = createReadOnlyMarkdownCell(true);
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+
+      const match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'test1', readOnly: true });
+      expect(cell.rendered).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+      provider.dispose();
+    });
+
+    it('should mark the current match in the rendered text', async () => {
+      cell = createReadOnlyMarkdownCell(false);
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+
+      let match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'test1', readOnly: true });
+      let current = provider.getCurrentMatch();
+      expect(current && 'node' in current).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+
+      match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'test2', readOnly: true });
+      expect(renderedCurrentMatch(cell)).toBe('test2');
+
+      match = await provider.highlightPrevious();
+      expect(match).toMatchObject({ text: 'test1', readOnly: true });
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+      provider.dispose();
+    });
+
+    it('should mark the current match in the rendered text of a cell in a hidden tab', async () => {
+      cell = createReadOnlyMarkdownCell(false);
+      Widget.attach(cell, document.body);
+      await framePromise();
+      // A hidden tab hides each of its elements with `content-visibility`
+      cell.node.checkVisibility = () => false;
+      cell.renderer.node.checkVisibility = () => false;
       const provider = createCellSearchProvider(cell);
       await provider.startQuery(/test\d/, {});
 
       await provider.highlightNext();
+      expect(cell.rendered).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+      provider.dispose();
+    });
+
+    it('should unrender a cell in a collapsed section for a match in hidden text', async () => {
+      cell = createMarkdownCell(
+        'A needle. <span style="display: none">A hidden needle.</span>'
+      );
+      Widget.attach(cell, document.body);
+      await framePromise();
+      // The section shows the cell when the search activates it
+      cell.node.checkVisibility = () => false;
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/needle/, {});
+
+      await provider.highlightNext();
+      expect(renderedCurrentMatch(cell)).toBe('needle');
+      await provider.highlightNext();
       expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
+    it('should not skip the matches before the cursor of the hidden editor', async () => {
+      cell = createMarkdownCell('test1 test2');
+      Widget.attach(cell, document.body);
+      await framePromise();
+      // The cursor stays where it was when the cell was rendered
+      cell.editor!.setCursorPosition({ line: 0, column: 11 });
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+
+      // The notebook searches from the selection when a query starts
+      const match = await provider.highlightNext(false, {
+        from: 'selection-start'
+      });
+      expect(match?.text).toBe('test1');
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+      provider.dispose();
+    });
+
+    it('should not scroll the hidden editor of a rendered cell', async () => {
+      cell = createMarkdownCell('test1 test2');
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+      // A hidden editor scrolls to the match when the cell shows it again
+      const scrollIntoView = jest.spyOn(EditorView, 'scrollIntoView');
+
+      await provider.highlightNext();
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+      expect(scrollIntoView).not.toHaveBeenCalled();
+      scrollIntoView.mockRestore();
+      provider.dispose();
+    });
+
+    it('should not scroll the hidden editor of a cell which renders after the search starts', async () => {
+      // A notebook renders the cells out of view when the browser is idle
+      cell = createMarkdownCell('test1 test2', { placeholder: true });
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+      await provider.highlightNext();
+      const scrollIntoView = jest.spyOn(EditorView, 'scrollIntoView');
+
+      Widget.attach(cell, document.body);
+      // jsdom has no layout: hide the editor as the rendered cell does
+      cell.editor!.host.checkVisibility = () => false;
+      cell.inViewport = true;
+      await framePromise();
+
+      expect(scrollIntoView).not.toHaveBeenCalled();
+      scrollIntoView.mockRestore();
+      provider.dispose();
+    });
+
+    it('should mark the current match in the rendered text of a cell which renders after the search reaches it', async () => {
+      // A notebook renders the cells out of view when the browser is idle
+      cell = createMarkdownCell('test1 test2', { placeholder: true });
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+      await provider.highlightNext();
+
+      Widget.attach(cell, document.body);
+      await cell.ready;
+      await framePromise();
+      await framePromise();
+
+      expect(cell.rendered).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+      provider.dispose();
+    });
+
+    it('should step through visible and hidden matches in source order', async () => {
+      cell = createMarkdownCell(
+        'The lists are [here](https://example.com/lists) and the lists grow.',
+        { editable: false, showEditorForReadOnlyMarkdown: true }
+      );
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/lists/, {});
+
+      let match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'lists', readOnly: true });
+      expect(cell.rendered).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe('lists');
+      let current = provider.getCurrentMatch();
+      expect(current && 'node' in current).toBe(true);
+
+      match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'lists', readOnly: true });
+      expect(cell.rendered).toBe(false);
+      current = provider.getCurrentMatch();
+      expect(current && 'node' in current).toBe(false);
+
+      match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'lists', readOnly: true });
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
+    it('should unrender the cell when a match is in an HTML attribute', async () => {
+      cell = createMarkdownCell('<img src="apple.png">\n\nAn apple a day.');
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/apple/, {});
+
+      const match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'apple', position: 10 });
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
+    it('should unrender the cell for a match in a link destination with parentheses', async () => {
+      cell = createMarkdownCell(
+        'The [Python](https://example.com/Python_(language)) page is about Python.'
+      );
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/Python/, {});
+
+      let match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'Python' });
+      expect(cell.rendered).toBe(true);
+
+      match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'Python', position: 33 });
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
+    it('should show the hidden editor of a read-only cell for a match the rendered text does not show', async () => {
+      cell = createMarkdownCell(
+        'See the [docs](https://example.com) for details.',
+        { editable: false, showEditorForReadOnlyMarkdown: false }
+      );
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/example/, {});
+
+      const match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'example', readOnly: true });
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
+    it('should render a read-only cell again when the current match moves to another cell', async () => {
+      cell = createMarkdownCell(
+        'See the [docs](https://example.com) for details.',
+        { editable: false, showEditorForReadOnlyMarkdown: false }
+      );
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/example/, {});
+      await provider.highlightNext();
+      expect(cell.rendered).toBe(false);
+
+      // The notebook moves to the next cell when the cell has no next match
+      expect(await provider.highlightNext(false)).toBeUndefined();
+      expect(cell.rendered).toBe(true);
+      provider.dispose();
+    });
+
+    it('should render a read-only cell again when the search ends', async () => {
+      cell = createMarkdownCell(
+        'See the [docs](https://example.com) for details.',
+        { editable: false, showEditorForReadOnlyMarkdown: false }
+      );
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/example/, {});
+      await provider.highlightNext();
+      expect(cell.rendered).toBe(false);
+
+      await provider.endQuery();
+      expect(cell.rendered).toBe(true);
+      provider.dispose();
+    });
+
+    it.each([
+      [
+        'the alternative text of an image',
+        'An apple, ![apple logo](logo.png).'
+      ],
+      [
+        'the image of a badge',
+        'An apple, [![apple badge](https://example.com/apple.svg)](https://example.com/apple)'
+      ],
+      [
+        'the label of a reference link',
+        'An apple, [more][apple].\n\n[apple]: https://example.com'
+      ],
+      [
+        'a reference definition',
+        'An apple, [more][ref].\n\n[ref]: https://example.com/apple'
+      ],
+      ['an HTML comment', 'An apple, <!-- an apple --> here.'],
+      ['an HTML attribute', 'An apple, <img src="apple.png"> here.'],
+      [
+        'a closed details element',
+        'An apple, <details><summary>Hint</summary>an apple</details>'
+      ],
+      [
+        'the fallback text of a video',
+        'An apple, <video src="clip.mp4">an apple</video>'
+      ],
+      ['a text area', 'An apple, <textarea>an apple</textarea>'],
+      [
+        'the fallback text of a progress bar',
+        'An apple, <progress value="0.4">an apple</progress>'
+      ],
+      [
+        'the fallback text of a meter',
+        'An apple, <meter value="0.4">an apple</meter>'
+      ],
+      [
+        'text for screen readers only',
+        'An apple, <span class="jp-sr-only">an apple</span>'
+      ]
+    ])('should unrender the cell for a match in %s', async (_, source) => {
+      cell = createMarkdownCell(source);
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/apple/, {});
+
+      // The rendered text shows the first match only
+      await provider.highlightNext();
+      expect(cell.rendered).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe('apple');
+
+      const match = await provider.highlightNext();
+      expect(match?.position).toBe(source.indexOf('apple', 4));
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
+    it('should not mark the text of a character reference for a match in an HTML tag', async () => {
+      // The rendered `>` comes from `&gt;`, and the source `>` from the tag
+      const source = 'Use the &lt;br&gt; tag.<br>Like this.';
+      cell = createMarkdownCell(source);
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/>/, {});
+
+      const match = await provider.highlightNext();
+      expect(match?.position).toBe(source.indexOf('<br>') + 3);
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
+    it('should not mark the text of a character reference for a match at the start of an HTML tag', async () => {
+      // The rendered `<` comes from `&lt;`, and the source `<` from the tag
+      const source = 'Press <kbd>&lt;</kbd> to go back.';
+      cell = createMarkdownCell(source);
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/</, {});
+
+      const match = await provider.highlightNext();
+      expect(match?.position).toBe(source.indexOf('<kbd>'));
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
+    it.each([
+      ['a block quote marker', '> Use &gt; to redirect the output.', '>'],
+      [
+        'an autolink',
+        'Write &lt;b&gt; for bold, see <https://example.com>.',
+        '<'
+      ]
+    ])(
+      'should not mark the text of a character reference for a match in %s',
+      async (_, source, character) => {
+        // The rendered character comes from the reference, and the source
+        // character from the Markdown syntax
+        cell = createMarkdownCell(source);
+        Widget.attach(cell, document.body);
+        await framePromise();
+        const provider = createCellSearchProvider(cell);
+        await provider.startQuery(new RegExp(character), {});
+
+        const match = await provider.highlightNext();
+        expect(match?.position).toBe(source.indexOf(character));
+        expect(cell.rendered).toBe(false);
+        provider.dispose();
+      }
+    );
+
+    it('should unrender the cell for a match in the language of a code block', async () => {
+      const source =
+        '```python\nprint("hello")\n```\n\nWrite `[docs](https://docs.python.org)`.';
+      cell = createMarkdownCell(source, { markdownParser: FENCE_PARSER });
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/python/, {});
+
+      const match = await provider.highlightNext();
+      expect(match?.position).toBe(source.indexOf('python'));
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
+    it('should not mark another occurrence for a match in a formula command', async () => {
+      // The l of \lambda would be paired with the l of wavelength
+      cell = createMarkdownCell(
+        'See $\\lambda$ for wavelength, and `[x](link)` for links.',
+        { markdownParser: FENCE_PARSER }
+      );
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/l/, {});
+
+      await provider.highlightNext();
+      expect(renderedCurrentMatch(cell)).toBeNull();
+      provider.dispose();
+    });
+
+    it('should not mark a link written in code for a match in a formula command', async () => {
+      // The formula hides its \lambda, while the code shows the link as it is
+      const source =
+        'Write `\\lambda` to get $\\lambda$, or link with `[docs](https://example.com/lambda)`.';
+      cell = createMarkdownCell(source, { markdownParser: FENCE_PARSER });
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/lambda/, {});
+
+      await provider.highlightNext();
+      const match = await provider.highlightNext();
+      expect(match?.position).toBe(source.indexOf('$\\lambda$') + 2);
+      provider.dispose();
+    });
+
+    it('should not mark the number which the table of contents adds to a heading', async () => {
+      // The rendered text shows no number of the ordered list
+      const source = '# Setup\n\n1. Install the package.';
+      cell = createMarkdownCell(source);
+      Widget.attach(cell, document.body);
+      await framePromise();
+      cell.renderer.node.insertAdjacentHTML(
+        'afterbegin',
+        `<span class="${TableOfContentsUtils.NUMBERING_CLASS}">1. </span>`
+      );
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/1/, {});
+
+      const match = await provider.highlightNext();
+      expect(match?.position).toBe(source.indexOf('1'));
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
+    it('should mark the current match in a typeset formula', async () => {
+      cell = createMarkdownCell('Take $x$ from the box.');
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/x/, {});
+
+      const match = await provider.highlightNext();
+      expect(match?.text).toBe('𝑥');
+      expect(cell.rendered).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe('𝑥');
+      provider.dispose();
+    });
+
+    it('should mark the current match in a typeset formula with a minus sign', async () => {
+      cell = createMarkdownCell('Divide by $n-1$, as n-1 is the divisor.');
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/n-1/, {});
+
+      const match = await provider.highlightNext();
+      expect(match?.text).toBe('𝑛−1');
+      expect(cell.rendered).toBe(true);
+      provider.dispose();
+    });
+
+    it('should unrender the cell for a match in a subscript which the formula shows after the superscript', async () => {
+      const source = 'Sum $x_a^a$ here.';
+      cell = createMarkdownCell(source);
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/a/, {});
+
+      const match = await provider.highlightNext();
+      expect(match?.position).toBe(source.indexOf('_a') + 1);
+      expect(cell.rendered).toBe(false);
+      provider.dispose();
+    });
+
+    it('should not flag a rendered match in an editable cell as read-only', async () => {
+      cell = createMarkdownCell('test1 test2');
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+
+      const match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'test1', readOnly: false });
+      expect(cell.rendered).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+      expect(provider.getCurrentMatch()?.readOnly).toBe(false);
+      provider.dispose();
+    });
+
+    it('should flag a rendered match in a non-editable cell as read-only', async () => {
+      cell = createReadOnlyMarkdownCell(true);
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+
+      const match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'test1', readOnly: true });
+      expect(cell.rendered).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+      expect(provider.getCurrentMatch()?.readOnly).toBe(true);
+      provider.dispose();
+    });
+
+    it('should replace the source of a match marked in the rendered text', async () => {
+      // The element puts the match in a text node of its own, at another
+      // position than in the source
+      cell = createMarkdownCell('<b>An</b> apple a day.');
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/apple/, {});
+      await provider.highlightNext();
+      expect(renderedCurrentMatch(cell)).toBe('apple');
+
+      expect(await provider.replaceCurrentMatch('pear')).toBe(true);
+      expect(cell.model.sharedModel.getSource()).toBe('<b>An</b> pear a day.');
+      provider.dispose();
+    });
+
+    it('should have no current match after replacing all matches', async () => {
+      cell = createMarkdownCell('test1 test2');
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+      await provider.highlightNext();
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+
+      expect(await provider.replaceAllMatches('bar')).toBe(true);
+      expect(provider.getCurrentMatch()).toBeUndefined();
+      provider.dispose();
+    });
+
+    it('should mark the current match again after the rendered text changes', async () => {
+      cell = createMarkdownCell('test1 test2');
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+      await provider.highlightNext();
+      await provider.highlightNext();
+      expect(renderedCurrentMatch(cell)).toBe('test2');
+
+      // A diagram or a formula drawn again changes the rendered text
+      cell.renderer.node.appendChild(document.createElement('span'));
+      await framePromise();
+
+      expect(renderedCurrentMatch(cell)).toBe('test2');
+      expect(provider.getCurrentMatch()?.text).toBe('test2');
+      provider.dispose();
+    });
+
+    it('should mark the current match when the rendered text changes while a step renders the source', async () => {
+      let pause: Promise<void> | null = null;
+      let resume: () => void = () => undefined;
+      // The character reference puts a rendered match before the first
+      // source match, so marking it takes more than one step
+      cell = createMarkdownCell('&#116;est9 test1 test2 test3', {
+        markdownParser: {
+          render: async source => {
+            await pause;
+            return source;
+          }
+        }
+      });
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+      pause = new Promise(resolve => (resume = resolve));
+      const step = provider.highlightNext();
+      await framePromise();
+
+      // A formula typeset while the step waits for the offscreen rendering
+      cell.renderer.node.appendChild(document.createElement('span'));
+      await framePromise();
+      resume();
+      await step;
+
+      expect(renderedCurrentMatch(cell)).toBe('test1');
+      provider.dispose();
+    });
+
+    it('should re-highlight the same source match when the cell is un-rendered mid-search', async () => {
+      cell = createMarkdownCell('test1 test2');
+      Widget.attach(cell, document.body);
+      await framePromise();
+      const provider = createCellSearchProvider(cell);
+      await provider.startQuery(/test\d/, {});
+
+      await provider.highlightNext();
+      const match = await provider.highlightNext();
+      expect(match).toMatchObject({ text: 'test2' });
+      expect(cell.rendered).toBe(true);
+      expect(renderedCurrentMatch(cell)).toBe('test2');
+
+      // Simulate a double-click into edit mode while searching.
+      cell.rendered = false;
+      await framePromise();
+
+      expect(cell.rendered).toBe(false);
+      const current = provider.getCurrentMatch();
+      expect(current).toMatchObject({ text: 'test2' });
+      expect(current && 'node' in current).toBe(false);
+      expect(provider.currentMatchIndex).toBe(1);
       provider.dispose();
     });
   });

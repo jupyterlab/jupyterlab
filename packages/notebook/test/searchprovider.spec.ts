@@ -304,6 +304,62 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#highlightNext()', () => {
+      afterEach(() => {
+        if (panel.isAttached) {
+          Widget.detach(panel);
+        }
+        jest.useFakeTimers();
+      });
+
+      it('should not mark an escaped link for a match in a link destination', async () => {
+        // A Markdown cell renders only in the document, on a real timer
+        jest.useRealTimers();
+        Widget.attach(panel, document.body);
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          {
+            cell_type: 'markdown',
+            source:
+              'Get the [Paper [PDF]](https://example.com/paper.pdf). Write \\[name\\](file.pdf) to show the syntax.'
+          }
+        ]);
+        const cell = panel.content.widgets[0] as MarkdownCell;
+        while (!cell.renderer.node.textContent) {
+          await framePromise();
+        }
+        await provider.startQuery(/pdf/i, undefined);
+
+        // The second match is in the URL, which the rendered text hides
+        await provider.highlightNext();
+        expect(
+          cell.renderer.node.querySelector('.jp-current-match')
+        ).toBeNull();
+      });
+
+      it('should not mark a bracket in the link text for a match in the bracket that opens the link', async () => {
+        // A Markdown cell renders only in the document, on a real timer
+        jest.useRealTimers();
+        Widget.attach(panel, document.body);
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          {
+            cell_type: 'markdown',
+            source: 'See [[1]](https://example.com/paper) for details.'
+          }
+        ]);
+        const cell = panel.content.widgets[0] as MarkdownCell;
+        while (!cell.renderer.node.textContent) {
+          await framePromise();
+        }
+
+        // The first match is the bracket of the link, which the rendered
+        // text hides
+        await provider.startQuery(/\[/, undefined);
+        expect(
+          cell.renderer.node.querySelector('.jp-current-match')
+        ).toBeNull();
+      });
+
       it('should highlight next match', async () => {
         await provider.startQuery(/test/, undefined);
         expect(provider.currentMatchIndex).toBe(0);
@@ -783,6 +839,10 @@ describe('@jupyterlab/notebook', () => {
 
       afterEach(() => {
         readOnlyChecks.mockRestore();
+        if (panel.isAttached) {
+          Widget.detach(panel);
+        }
+        jest.useFakeTimers();
       });
 
       it('should replace with a shorter text and highlight next', async () => {
@@ -966,6 +1026,27 @@ describe('@jupyterlab/notebook', () => {
           },
           { cell_type: 'code', source: 'test1 test2 test3' }
         ]);
+        panel.content.activeCellIndex = 0;
+        await provider.startQuery(/test\d/, undefined);
+        expect(provider.getCurrentMatch()?.text).toBe('test1');
+
+        await provider.replaceCurrentMatch('bar');
+        expect(provider.getCurrentMatch()?.text).toBe('test2');
+      });
+
+      it('should move to the first match of the next Markdown cell', async () => {
+        // A Markdown cell renders only in the document, on a real timer
+        jest.useRealTimers();
+        Widget.attach(panel, document.body);
+        panel.model!.sharedModel.deleteCellRange(0, panel.model!.cells.length);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1' },
+          { cell_type: 'markdown', source: 'test2 test3' }
+        ]);
+        const markdownCell = panel.content.widgets[1] as MarkdownCell;
+        while (!markdownCell.renderer.node.textContent) {
+          await framePromise();
+        }
         panel.content.activeCellIndex = 0;
         await provider.startQuery(/test\d/, undefined);
         expect(provider.getCurrentMatch()?.text).toBe('test1');
