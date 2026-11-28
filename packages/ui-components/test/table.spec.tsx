@@ -173,4 +173,3 @@ describe('Table', () => {
     ).toBe(true);
   });
 });
-
