@@ -89,6 +89,7 @@ export function Table<T>(props: Table.IOptions<T>) {
   );
   const tableRef = useRef<HTMLTableElement | null>(null);
   const cleanupResizeRef = useRef<(() => void) | null>(null);
+  const didResizeRef = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -127,6 +128,7 @@ export function Table<T>(props: Table.IOptions<T>) {
       });
 
     const onMouseMove = (moveEvent: MouseEvent) => {
+      didResizeRef.current = true;
       const nextWidth = Math.max(
         minWidth,
         Math.round(startWidth + (moveEvent.clientX - startX))
@@ -142,6 +144,10 @@ export function Table<T>(props: Table.IOptions<T>) {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', cleanup);
       cleanupResizeRef.current = null;
+      // Clear on the next tick so the trailing click event on <th> does not trigger sort.
+      setTimeout(() => {
+        didResizeRef.current = false;
+      }, 0);
     };
 
     cleanupResizeRef.current = cleanup;
@@ -227,6 +233,10 @@ export function Table<T>(props: Table.IOptions<T>) {
         )
       }
       onSort={() => {
+        if (didResizeRef.current) {
+          didResizeRef.current = false;
+          return;
+        }
         sort(column.id);
       }}
     />
