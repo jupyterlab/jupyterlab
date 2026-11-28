@@ -13,6 +13,7 @@ import { ILayoutRestorer } from '@jupyterlab/application';
 import {
   Clipboard,
   ICommandPalette,
+  InputDialog,
   IThemeManager,
   MainAreaWidget,
   showErrorMessage,
@@ -64,6 +65,8 @@ namespace CommandIDs {
   export const open = 'terminal:open';
 
   export const refresh = 'terminal:refresh';
+
+  export const rename = 'terminal:rename';
 
   export const increaseFont = 'terminal:increase-font';
 
@@ -476,7 +479,15 @@ function addRunningSessionManager(
   });
 }
 
-class RunningTerminalSignaler {
+/**
+ * A signaler that tracks the titles of the running terminals.
+ *
+ * #### Notes
+ * The titles set by the shell (via escape sequences) or by the user (via
+ * the `terminal:rename` command) are persisted in the workspace state
+ * database, so that they can be restored when a terminal tab is re-opened.
+ */
+export class RunningTerminalSignaler {
   constructor(
     manager: Terminal.IManager,
     tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>,
@@ -509,6 +520,28 @@ class RunningTerminalSignaler {
   async title(name: string): Promise<string | undefined> {
     await this._ready;
     return this._titles.get(name);
+  }
+
+  /**
+   * Set the user-provided title of a terminal.
+   *
+   * #### Notes
+   * An empty `label` resets the terminal to the default
+   * `terminals/<name>` title.
+   */
+  setTitle(name: string, label: string): void {
+    const value = label.trim() || `terminals/${name}`;
+    void this._ready.then(() => {
+      this._titles.set(name, value);
+      this._saveTitles();
+      this._emitRunningChanged();
+      const widget = Array.from(this._widgets).find(
+        widget => widget.content.session.name === name
+      );
+      if (widget) {
+        widget.title.label = value;
+      }
+    });
   }
 
   private _watchWidget(widget: MainAreaWidget<ITerminal.ITerminal>): void {
@@ -930,6 +963,37 @@ function addCommands(
     }
   });
 
+  /**
+   * Add rename command
+   */
+  commands.addCommand(CommandIDs.rename, {
+    label: trans.__('Rename Terminal…'),
+    caption: trans.__('Rename the terminal'),
+    execute: async () => {
+      const widget = contextMenuTerminal();
+      if (!widget) {
+        return;
+      }
+      const name = widget.content.session.name;
+      const result = await InputDialog.getText({
+        title: trans.__('Rename Terminal'),
+        okLabel: trans.__('Rename'),
+        text: TabBarSvg.titleLabel(widget.title)
+      });
+      if (!result.button.accept) {
+        return;
+      }
+      signaler?.setTitle(name, result.value ?? '');
+    },
+    isEnabled: () => signaler !== null && contextMenuTerminal() !== null,
+    describedBy: {
+      args: {
+        type: 'object',
+        properties: {}
+      }
+    }
+  });
+
   commands.addCommand(CommandIDs.shutdown, {
     label: trans.__('Shutdown Terminal'),
     execute: () => {
@@ -1056,7 +1120,8 @@ function addCommands(
     CommandIDs.refresh,
     CommandIDs.copy,
     CommandIDs.paste,
-    CommandIDs.shutdown
+    CommandIDs.shutdown,
+    CommandIDs.rename
   ];
   const notify = () => {
     commandIds.forEach(id => commands.notifyCommandChanged(id));

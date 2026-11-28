@@ -24,6 +24,11 @@
         "rank": 3
       },
       {
+        "command": "terminal:rename",
+        "selector": ".jp-Terminal",
+        "rank": 3.5
+      },
+      {
         "command": "terminal:open-folder-in-terminal",
         "selector": ".jp-DirListing-item[data-isdir=\"true\"]",
         "rank": 2

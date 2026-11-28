@@ -61,6 +61,18 @@ title has not been observed in that workspace displays `terminals/<name>` in the
 Running panel. Title changes made in another client are reflected only when the
 terminal sends a title to an open tab in this client.
 
+(rename-terminal)=
+
+## Renaming a Terminal
+
+Terminals can be given a custom name, which makes it easier to tell them
+apart when several of them are open at the same time. Right-click a
+terminal and select `Rename Terminal…`, then enter the new name.
+
+The new name is shown on the terminal tab and in the Running panel, and it
+is restored when the terminal tab is re-opened in the same workspace.
+Clearing the name restores the default `terminals/<name>` title.
+
 (copy-paste)=
 
 ## Copy/Paste
