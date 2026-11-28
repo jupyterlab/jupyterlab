@@ -176,6 +176,55 @@
   padding-left: 4px;
 }
 
+.jp-extensionmanager-entry.jp-extensionmanager-entry-warning {
+  border-left: solid 8px var(--jp-warn-color2);
+  padding-left: 4px;
+}
+
+.jp-extensionmanager-entry-companions {
+  margin-top: 4px;
+  font-size: var(--jp-ui-font-size0);
+  color: var(--jp-ui-font-color2);
+}
+
+.jp-extensionmanager-companion-item + .jp-extensionmanager-companion-item {
+  margin-top: 4px;
+}
+
+.jp-extensionmanager-companion-warning {
+  color: var(--jp-warn-color0);
+}
+
+.jp-extensionmanager-companion-ok {
+  color: var(--jp-success-color0);
+}
+
+.jp-extensionmanager-companion-unverified {
+  margin-top: 2px;
+  color: var(--jp-ui-font-color2);
+}
+
+.jp-extensionmanager-companion-kernels {
+  margin: 2px 0 0;
+  padding-left: 16px;
+}
+
+.jp-extensionmanager-companion-commands {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.jp-extensionmanager-companion-command {
+  font-family: var(--jp-code-font-family);
+  font-size: var(--jp-code-font-size);
+  background-color: var(--jp-layout-color2);
+  padding: 1px 4px;
+  border-radius: var(--jp-border-radius);
+  overflow-wrap: anywhere;
+}
+
 .jp-extensionmanager-entry-name {
   font-size: var(--jp-ui-font-size1);
   font-weight: 600;

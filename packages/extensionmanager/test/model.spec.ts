@@ -6,9 +6,10 @@
 
 import { Dialog } from '@jupyterlab/apputils';
 import { PageConfig } from '@jupyterlab/coreutils';
-import type { ServiceManager } from '@jupyterlab/services';
+import type { ServiceManager, Session } from '@jupyterlab/services';
 import { ServerConnection } from '@jupyterlab/services';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
+import { Signal } from '@lumino/signaling';
 import { ListModel } from '@jupyterlab/extensionmanager';
 import type { IEntry } from '@jupyterlab/extensionmanager';
 
@@ -315,6 +316,74 @@ describe('@jupyterlab/extensionmanager', () => {
         expect(model.installed.map(entry => entry.name)).toEqual([
           'an-extension'
         ]);
+      });
+    });
+
+    describe('#activeKernelNames', () => {
+      function createSessionServiceManager(initialKernels: string[] = []): {
+        manager: ServiceManager.IManager;
+        setKernels: (kernels: string[]) => void;
+      } {
+        let runningSessions: Session.IModel[] = initialKernels.map(
+          (name, i) => ({
+            id: `session-${i}`,
+            path: `nb-${i}.ipynb`,
+            name: `nb-${i}.ipynb`,
+            type: 'notebook',
+            kernel: { id: `kernel-${i}`, name }
+          })
+        );
+        const sessions = {
+          running: () => runningSessions[Symbol.iterator]()
+        } as unknown as Session.IManager;
+        const runningChanged = new Signal<Session.IManager, Session.IModel[]>(
+          sessions
+        );
+        Object.defineProperty(sessions, 'runningChanged', {
+          value: runningChanged
+        });
+        const manager = {
+          sessions
+        } as unknown as ServiceManager.IManager;
+        return {
+          manager,
+          setKernels: (kernels: string[]) => {
+            runningSessions = kernels.map((name, i) => ({
+              id: `session-${i}`,
+              path: `nb-${i}.ipynb`,
+              name: `nb-${i}.ipynb`,
+              type: 'notebook',
+              kernel: { id: `kernel-${i}`, name }
+            }));
+            runningChanged.emit(runningSessions);
+          }
+        };
+      }
+
+      it('should track running session kernel names and emit stateChanged', () => {
+        const { manager, setKernels } = createSessionServiceManager();
+        PageConfig.setOption('extensionManager', '{}');
+        const model = new TestModel(manager);
+        models.push(model);
+        expect(model.activeKernelNames.size).toBe(0);
+
+        let emitted = 0;
+        model.stateChanged.connect(() => {
+          emitted += 1;
+        });
+
+        setKernels(['python3']);
+
+        expect(model.activeKernelNames.has('python3')).toBe(true);
+        expect(emitted).toBe(1);
+      });
+
+      it('should initialize activeKernelNames from already running sessions', () => {
+        const { manager } = createSessionServiceManager(['custom-py']);
+        PageConfig.setOption('extensionManager', '{}');
+        const model = new TestModel(manager);
+        models.push(model);
+        expect(model.activeKernelNames.has('custom-py')).toBe(true);
       });
     });
   });

@@ -18,7 +18,16 @@ import type { AccordionLayout } from '@lumino/widgets';
 import { AccordionPanel } from '@lumino/widgets';
 import * as React from 'react';
 import ReactPaginate from 'react-paginate';
-import type { Action, IActionOptions, IEntry } from './model';
+import type {
+  Action,
+  IActionOptions,
+  ICompanionCheck,
+  ICompanionPackage,
+  IEntry,
+  IKernelCompanion,
+  IKernelCompanionCheck,
+  IServerCompanion
+} from './model';
 import { ListModel } from './model';
 
 const BADGE_SIZE = 32;
@@ -51,11 +60,237 @@ function isProtocolAllowed(url: string): boolean {
   }
 }
 
+function getCompanionInstallCommands(
+  companion: Pick<IServerCompanion, 'base' | 'managers' | 'overrides'>
+): string[] {
+  const commands: string[] = [];
+  for (const manager of companion.managers) {
+    const pkg: ICompanionPackage | undefined =
+      companion.overrides?.[manager] ?? companion.base;
+    const name = pkg?.name;
+    if (!name) {
+      continue;
+    }
+    const version = pkg?.version ?? companion.base.version;
+    if (manager === 'pip') {
+      commands.push(
+        version ? `pip install "${name}${version}"` : `pip install ${name}`
+      );
+    } else if (manager === 'conda') {
+      commands.push(`conda install -c conda-forge ${name}`);
+    }
+  }
+  return commands;
+}
+
+function formatCompanionTarget(base: ICompanionPackage): string {
+  return base.version ? `${base.name} (${base.version})` : base.name;
+}
+
+function isCompanionIssue(check?: ICompanionCheck): boolean {
+  return check?.status === 'missing' || check?.status === 'incompatible';
+}
+
+function sortKernelChecks(
+  checks: readonly IKernelCompanionCheck[],
+  activeKernelNames?: ReadonlySet<string>
+): IKernelCompanionCheck[] {
+  const rank = (check: IKernelCompanionCheck): number => {
+    const activeOffset = activeKernelNames?.has(check.kernelName) ? 0 : 4;
+    switch (check.status) {
+      case 'incompatible':
+        return activeOffset + 0;
+      case 'missing':
+        return activeOffset + 1;
+      case 'unknown':
+        return activeOffset + 2;
+      case 'ok':
+        return activeOffset + 3;
+    }
+  };
+  return [...checks].sort((a, b) => rank(a) - rank(b));
+}
+
+function CompanionDetails(props: {
+  entry: IEntry;
+  activeKernelNames?: ReadonlySet<string>;
+  trans: TranslationBundle;
+}): React.ReactElement | null {
+  const { entry, activeKernelNames, trans } = props;
+  const { companion, companions } = entry;
+
+  if (!companions && !companion) {
+    return null;
+  }
+
+  const renderServer = (server: IServerCompanion) => {
+    const target = formatCompanionTarget(server.base);
+    const check = server.check;
+    const hasIssue = isCompanionIssue(check);
+    const commands = hasIssue ? getCompanionInstallCommands(server) : [];
+
+    return (
+      <div
+        key="server"
+        className={`jp-extensionmanager-companion-item ${
+          hasIssue ? 'jp-extensionmanager-companion-warning' : ''
+        }`}
+      >
+        <div>
+          {check?.status === 'missing'
+            ? trans.__('Server companion missing: %1', target)
+            : check?.status === 'incompatible'
+              ? trans.__(
+                  'Server companion mismatch: %1 (installed %2)',
+                  target,
+                  check.installedVersion ?? ''
+                )
+              : check?.status === 'ok' && check.installedVersion
+                ? trans.__(
+                    'Server companion: %1 (installed %2)',
+                    target,
+                    check.installedVersion
+                  )
+                : trans.__('Server companion: %1', target)}
+        </div>
+        {commands.length > 0 && (
+          <div className="jp-extensionmanager-companion-commands">
+            {commands.map(cmd => (
+              <code key={cmd} className="jp-extensionmanager-companion-command">
+                {cmd}
+              </code>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderKernel = (kernel: IKernelCompanion, index: number) => {
+    const target = formatCompanionTarget(kernel.base);
+    const checks = sortKernelChecks(kernel.checks ?? [], activeKernelNames);
+    const hasIssue = checks.some(isCompanionIssue);
+    const visibleChecks = checks.filter(
+      check =>
+        check.status !== 'unknown' ||
+        (activeKernelNames?.has(check.kernelName) ?? false)
+    );
+    const unverifiedCount = checks.length - visibleChecks.length;
+    const showCommands =
+      hasIssue ||
+      checks.length === 0 ||
+      checks.every(c => c.status === 'unknown');
+    const commands = showCommands ? getCompanionInstallCommands(kernel) : [];
+
+    return (
+      <div
+        key={`kernel-${index}-${kernel.base.name}`}
+        className="jp-extensionmanager-companion-item"
+      >
+        <div
+          className={
+            hasIssue ? 'jp-extensionmanager-companion-warning' : undefined
+          }
+        >
+          {trans.__('Kernel companion: %1', target)}
+        </div>
+        {visibleChecks.length > 0 && (
+          <ul className="jp-extensionmanager-companion-kernels">
+            {visibleChecks.map(check => {
+              const isActive =
+                activeKernelNames?.has(check.kernelName) ?? false;
+              const checkIssue = isCompanionIssue(check);
+              let statusText: string;
+              switch (check.status) {
+                case 'missing':
+                  statusText = trans.__('missing');
+                  break;
+                case 'incompatible':
+                  statusText = trans.__(
+                    'installed %1 (incompatible)',
+                    check.installedVersion ?? ''
+                  );
+                  break;
+                case 'ok':
+                  statusText = check.installedVersion
+                    ? trans.__('installed %1', check.installedVersion)
+                    : trans.__('ok');
+                  break;
+                case 'unknown':
+                  statusText = trans.__('not verified');
+                  break;
+              }
+              return (
+                <li
+                  key={check.kernelName}
+                  className={
+                    checkIssue
+                      ? 'jp-extensionmanager-companion-warning'
+                      : check.status === 'ok'
+                        ? 'jp-extensionmanager-companion-ok'
+                        : 'jp-extensionmanager-companion-kernel'
+                  }
+                >
+                  <span>
+                    {isActive
+                      ? trans.__(
+                          '%1 (active): %2',
+                          check.displayName,
+                          statusText
+                        )
+                      : trans.__('%1: %2', check.displayName, statusText)}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        {unverifiedCount > 0 && (
+          <div className="jp-extensionmanager-companion-unverified">
+            {trans._n(
+              '%1 other matching kernel could not be verified',
+              '%1 other matching kernels could not be verified',
+              unverifiedCount
+            )}
+          </div>
+        )}
+        {commands.length > 0 && (
+          <div className="jp-extensionmanager-companion-commands">
+            {commands.map(cmd => (
+              <code key={cmd} className="jp-extensionmanager-companion-command">
+                {cmd}
+              </code>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="jp-extensionmanager-entry-companions">
+      {companions ? (
+        <>
+          {companions.server && renderServer(companions.server)}
+          {companions.kernel?.map(renderKernel)}
+        </>
+      ) : (
+        <div className="jp-extensionmanager-companion-item">
+          {companion === 'server'
+            ? trans.__('Requires a server companion package.')
+            : trans.__('Requires a kernel companion package.')}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /**
  * VDOM for visualizing an extension entry.
  */
 function ListEntry(props: ListEntry.IProperties): React.ReactElement {
-  const { canFetch, entry, supportInstallation, trans } = props;
+  const { activeKernelNames, canFetch, entry, supportInstallation, trans } =
+    props;
   const isLanguagePack = entry.pkg_type === 'language-pack';
   const flagClasses = [];
   if (entry.status && ['ok', 'warning', 'error'].indexOf(entry.status) !== -1) {
@@ -141,6 +376,11 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement {
           <div className="jp-extensionmanager-entry-description">
             {entry.description}
           </div>
+          <CompanionDetails
+            entry={entry}
+            activeKernelNames={activeKernelNames}
+            trans={trans}
+          />
           {props.performAction && (
             <div className="jp-extensionmanager-entry-buttons">
               {entry.installed ? (
@@ -222,6 +462,11 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement {
 namespace ListEntry {
   export interface IProperties {
     /**
+     * Kernel names used by currently active sessions.
+     */
+    activeKernelNames?: ReadonlySet<string>;
+
+    /**
      * Whether thumbnails can be fetched from external webservices or not.
      */
     canFetch: boolean;
@@ -258,7 +503,13 @@ namespace ListEntry {
  * List view widget for extensions
  */
 function ListView(props: ListView.IProperties): React.ReactElement {
-  const { canFetch, performAction, supportInstallation, trans } = props;
+  const {
+    activeKernelNames,
+    canFetch,
+    performAction,
+    supportInstallation,
+    trans
+  } = props;
 
   return (
     <div className="jp-extensionmanager-listview-wrapper">
@@ -267,6 +518,7 @@ function ListView(props: ListView.IProperties): React.ReactElement {
           {props.entries.map(entry => (
             <ListEntry
               key={entry.name}
+              activeKernelNames={activeKernelNames}
               canFetch={canFetch}
               entry={entry}
               performAction={performAction}
@@ -307,6 +559,11 @@ function ListView(props: ListView.IProperties): React.ReactElement {
  */
 namespace ListView {
   export interface IProperties {
+    /**
+     * Kernel names used by currently active sessions.
+     */
+    activeKernelNames?: ReadonlySet<string>;
+
     /**
      * Whether thumbnails can be fetched from external webservices or not.
      */
@@ -514,6 +771,7 @@ class InstalledList extends ReactWidget {
           </div>
         ) : (
           <ListView
+            activeKernelNames={this.model.activeKernelNames}
             canFetch={this.model.canFetch}
             entries={this.model.installed.filter(
               pkg =>
@@ -644,6 +902,7 @@ class SearchResult extends ReactWidget {
           </div>
         ) : (
           <ListView
+            activeKernelNames={this.model.activeKernelNames}
             canFetch={this.model.canFetch}
             entries={this.model.searchResult}
             initialPage={this.model.page}
