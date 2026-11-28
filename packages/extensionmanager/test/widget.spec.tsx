@@ -158,5 +158,90 @@ describe('@jupyterlab/extensionmanager', () => {
       expect(resultsShownWhenFound).toBe(true);
       expect(linkWhenFound).toContain(`q=${found.name}`);
     });
+
+    it('should display kernel and server companion warnings and install commands', async () => {
+      const companionModel = new TestModel(new ServiceManagerMock());
+      jest
+        .spyOn(companionModel, 'activeKernelNames', 'get')
+        .mockReturnValue(new Set(['python3']));
+      const companionEntry: IEntry = {
+        ...INSTALLED[0],
+        name: '@jupyter-widgets/jupyterlab-manager',
+        status: 'warning',
+        companion: 'kernel',
+        companions: {
+          kernel: [
+            {
+              kernel_spec: { language: '^python$' },
+              base: { name: 'ipywidgets', version: '>=8.0.0,<9.0.0' },
+              managers: ['pip', 'conda'],
+              checks: [
+                {
+                  kernelName: 'python3',
+                  displayName: 'Python 3 (ipykernel)',
+                  language: 'python',
+                  status: 'incompatible',
+                  installedVersion: '7.8.1',
+                  requiredVersion: '>=8.0.0,<9.0.0',
+                  message:
+                    'Installed version 7.8.1 does not satisfy >=8.0.0,<9.0.0'
+                },
+                {
+                  kernelName: 'clean-env',
+                  displayName: 'Clean Env',
+                  language: 'python',
+                  status: 'missing',
+                  installedVersion: null,
+                  requiredVersion: '>=8.0.0,<9.0.0'
+                }
+              ]
+            }
+          ]
+        }
+      };
+
+      jest
+        .spyOn(
+          companionModel as unknown as {
+            fetchInstalled: () => Promise<IEntry[]>;
+          },
+          'fetchInstalled'
+        )
+        .mockResolvedValue([companionEntry]);
+
+      const companionPanel = new ExtensionsPanel({
+        model: companionModel,
+        translator: nullTranslator
+      });
+      Widget.attach(companionPanel, document.body);
+      await companionModel.refreshInstalled();
+      const installed = companionPanel.node.querySelector(
+        '#jp-extensionmanager-installed'
+      )!;
+      for (
+        let i = 0;
+        i < 10 &&
+        !installed.querySelector('.jp-extensionmanager-entry-companions');
+        i++
+      ) {
+        await framePromise();
+      }
+
+      const content = installed.textContent ?? '';
+      const warningEntry = installed.querySelector(
+        '.jp-extensionmanager-entry-warning'
+      );
+      companionPanel.dispose();
+      companionModel.dispose();
+
+      expect(warningEntry).not.toBeNull();
+      expect(content).toContain('ipywidgets (>=8.0.0,<9.0.0)');
+      expect(content).toContain(
+        'Python 3 (ipykernel) (active): installed 7.8.1 (incompatible)'
+      );
+      expect(content).toContain('Clean Env: missing');
+      expect(content).toContain('pip install "ipywidgets>=8.0.0,<9.0.0"');
+      expect(content).toContain('conda install -c conda-forge ipywidgets');
+    });
   });
 });

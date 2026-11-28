@@ -25,6 +25,7 @@ from jupyterlab.commands import (
     enable_extension,
     get_app_info,
 )
+from jupyterlab.extensions.companions import get_all_kernelspecs, inspect_companions
 
 PYTHON_TO_SEMVER = {"a": "-alpha.", "b": "-beta.", "rc": "-rc."}
 
@@ -68,6 +69,7 @@ class ExtensionPackage:
         allowed: [optional] Whether this extension is allowed or not - default True
         approved: [optional] Whether the package is approved by your administrators - default False
         companion: [optional] Type of companion for the frontend extension - [None, "kernel", "server"]; default None
+        companions: [optional] Structured companion metadata and compatibility checks - default None
         core: [optional] Whether the package is a core package or not - default False
         enabled: [optional] Whether the package is enabled or not - default False
         install: [optional] Extension package installation instructions - default None
@@ -90,6 +92,7 @@ class ExtensionPackage:
     allowed: bool = True
     approved: bool = False
     companion: str | None = None
+    companions: dict[str, Any] | None = None
     core: bool = False
     enabled: bool = False
     install: dict | None = None
@@ -585,13 +588,17 @@ class ExtensionManager(PluginManager):
         build_check_info = _build_check_info(app_options)
         _ensure_compat_errors(info, app_options)
         extensions = {}
+        kernelspecs = self._get_companion_kernelspecs(info)
 
         # TODO: the three for-loops below can be run concurrently
         for name, data in info["federated_extensions"].items():
             status = "ok"
             pkg_info = data
+            companions, has_companion_issue = inspect_companions(data, kernelspecs)
             if info["compat_errors"].get(name, None):
                 status = "error"
+            elif has_companion_issue:
+                status = "warning"
 
             normalized_name = self._normalize_name(name)
             version = self._get_installed_version(data)
@@ -608,6 +615,7 @@ class ExtensionManager(PluginManager):
                 install=data.get("install", {}),
                 pkg_type="prebuilt",
                 companion=self._get_companion(data),
+                companions=companions,
                 author=data.get("author", {}).get("name", data.get("author")),
                 license=data.get("license"),
                 bug_tracker_url=data.get("bugs", {}).get("url"),
@@ -620,6 +628,7 @@ class ExtensionManager(PluginManager):
             if name in info["shadowed_exts"]:
                 continue
             status = "ok"
+            companions, has_companion_issue = inspect_companions(data, kernelspecs)
 
             if info["compat_errors"].get(name, None):
                 status = "error"
@@ -627,6 +636,8 @@ class ExtensionManager(PluginManager):
                 for packages in build_check_info.values():
                     if name in packages:
                         status = "warning"
+                if status == "ok" and has_companion_issue:
+                    status = "warning"
 
             normalized_name = self._normalize_name(name)
             pkg = ExtensionPackage(
@@ -641,6 +652,7 @@ class ExtensionManager(PluginManager):
                 status=status,
                 pkg_type="source",
                 companion=self._get_companion(data),
+                companions=companions,
                 author=data.get("author", {}).get("name", data.get("author")),
                 license=data.get("license"),
                 bug_tracker_url=data.get("bugs", {}).get("url"),
@@ -651,22 +663,25 @@ class ExtensionManager(PluginManager):
         extensions.update(self._get_scheduled_uninstall_packages(build_check_info["uninstall"]))
 
         if get_latest_version:
-            installed_pkgs = [pkg for pkg in extensions.values() if pkg.installed]
-            results = await asyncio.gather(
-                *(self.get_latest_version(self.get_normalized_name(pkg)) for pkg in installed_pkgs),
-                return_exceptions=True,
-            )
-            for pkg, result in zip(installed_pkgs, results, strict=True):
-                if isinstance(result, BaseException):
-                    self.log.info(
-                        "Failed to fetch latest version for %s: %s",
-                        pkg.name,
-                        result,
-                    )
-                elif result is not None:
-                    extensions[pkg.name] = replace(pkg, latest_version=result)
+            await self._populate_latest_versions(extensions)
 
         return extensions
+
+    async def _populate_latest_versions(self, extensions: dict[str, ExtensionPackage]) -> None:
+        installed_pkgs = [pkg for pkg in extensions.values() if pkg.installed]
+        results = await asyncio.gather(
+            *(self.get_latest_version(self.get_normalized_name(pkg)) for pkg in installed_pkgs),
+            return_exceptions=True,
+        )
+        for pkg, result in zip(installed_pkgs, results, strict=True):
+            if isinstance(result, BaseException):
+                self.log.info(
+                    "Failed to fetch latest version for %s: %s",
+                    pkg.name,
+                    result,
+                )
+            elif result is not None:
+                extensions[pkg.name] = replace(pkg, latest_version=result)
 
     def _get_scheduled_uninstall_packages(
         self, uninstall_names: list[str]
@@ -704,12 +719,29 @@ class ExtensionManager(PluginManager):
         """
         return ExtensionManager.get_semver_version(data["version"])
 
+    def _get_companion_kernelspecs(self, info: dict[str, Any]) -> dict[str, dict[str, Any]] | None:
+        all_ext_data = [
+            *info["federated_extensions"].values(),
+            *(
+                data
+                for name, data in info["extensions"].items()
+                if name not in info["shadowed_exts"]
+            ),
+        ]
+        needs_kernelspecs = any(
+            isinstance((d.get("jupyterlab") or {}).get("discovery"), dict)
+            and "kernel" in (d.get("jupyterlab") or {})["discovery"]
+            for d in all_ext_data
+        )
+        return get_all_kernelspecs() if needs_kernelspecs else None
+
     def _get_companion(self, data: dict) -> str | None:
         companion = None
-        if "discovery" in data["jupyterlab"]:
-            if "server" in data["jupyterlab"]["discovery"]:
+        discovery = (data.get("jupyterlab") or {}).get("discovery")
+        if isinstance(discovery, dict):
+            if "server" in discovery:
                 companion = "server"
-            elif "kernel" in data["jupyterlab"]["discovery"]:
+            elif "kernel" in discovery:
                 companion = "kernel"
         return companion
 

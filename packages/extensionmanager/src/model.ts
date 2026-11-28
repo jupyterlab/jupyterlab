@@ -16,6 +16,148 @@ import * as semver from 'semver';
 import { reportInstallError } from './dialog';
 
 /**
+ * Compatibility status of a companion package in a target environment.
+ */
+export type CompanionCheckStatus =
+  | 'ok'
+  | 'missing'
+  | 'incompatible'
+  | 'unknown';
+
+/**
+ * Package name and optional version constraint for a companion dependency.
+ */
+export interface ICompanionPackage {
+  /**
+   * The companion package name.
+   */
+  name: string;
+
+  /**
+   * Optional PEP 440 version specifier required by the extension.
+   */
+  version?: string | null;
+}
+
+/**
+ * Result of checking a companion package in a target environment.
+ */
+export interface ICompanionCheck {
+  /**
+   * Compatibility status of the companion package.
+   */
+  status: CompanionCheckStatus;
+
+  /**
+   * Installed version found in the target environment, or null if missing/unknown.
+   */
+  installedVersion: string | null;
+
+  /**
+   * Required version specifier, if declared.
+   */
+  requiredVersion?: string | null;
+
+  /**
+   * Optional diagnostic message explaining incompatibility or errors.
+   */
+  message?: string | null;
+}
+
+/**
+ * Result of checking a kernel companion package against a matching kernelspec.
+ */
+export interface IKernelCompanionCheck extends ICompanionCheck {
+  /**
+   * Kernelspec identifier.
+   */
+  kernelName: string;
+
+  /**
+   * Human-readable kernelspec display name.
+   */
+  displayName: string;
+
+  /**
+   * Kernel language.
+   */
+  language: string;
+}
+
+/**
+ * Server companion declaration and compatibility check result.
+ */
+export interface IServerCompanion {
+  /**
+   * Base package metadata.
+   */
+  base: ICompanionPackage;
+
+  /**
+   * Package managers offering the companion package.
+   */
+  managers: string[];
+
+  /**
+   * Per-manager package name or version overrides.
+   */
+  overrides?: { [manager: string]: ICompanionPackage | undefined };
+
+  /**
+   * Compatibility check against the server environment.
+   */
+  check?: ICompanionCheck;
+}
+
+/**
+ * Kernel companion declaration and compatibility checks across kernelspecs.
+ */
+export interface IKernelCompanion {
+  /**
+   * Regular expressions matching target kernelspecs.
+   */
+  kernel_spec: {
+    language?: string;
+    display_name?: string;
+  };
+
+  /**
+   * Base package metadata.
+   */
+  base: ICompanionPackage;
+
+  /**
+   * Package managers offering the companion package.
+   */
+  managers: string[];
+
+  /**
+   * Per-manager package name or version overrides.
+   */
+  overrides?: { [manager: string]: ICompanionPackage | undefined };
+
+  /**
+   * Compatibility checks for matching kernelspecs.
+   */
+  checks?: IKernelCompanionCheck[];
+}
+
+/**
+ * Companion metadata declared under `jupyterlab.discovery`.
+ */
+export interface ICompanions {
+  /**
+   * Required server extension companion, if any.
+   */
+  server?: IServerCompanion;
+
+  /**
+   * Required kernel companions, if any.
+   */
+  kernel?: IKernelCompanion[];
+}
+
+/**
  * Information about an extension.
  */
 export interface IEntry {
@@ -78,6 +220,16 @@ export interface IEntry {
    * The information about extension installation.
    */
   install?: IInstall | null;
+
+  /**
+   * Companion type declared by the extension (`"kernel"` or `"server"`).
+   */
+  companion?: 'kernel' | 'server' | null;
+
+  /**
+   * Structured companion metadata and compatibility check results.
+   */
+  companions?: ICompanions | null;
 
   /**
    * Package author.
@@ -221,6 +373,11 @@ export class ListModel extends VDomModel {
     this._lastSearchResult = [];
     this.serviceManager = serviceManager;
     this._debouncedSearch = new Debouncer(this.search.bind(this), 1000);
+    this._updateActiveKernels();
+    this.serviceManager.sessions?.runningChanged.connect(
+      this._onRunningSessionsChanged,
+      this
+    );
   }
 
   /**
@@ -250,6 +407,13 @@ export class ListModel extends VDomModel {
    * Extensions installation path.
    */
   installPath: string | null;
+
+  /**
+   * Kernel names used by currently running sessions.
+   */
+  get activeKernelNames(): ReadonlySet<string> {
+    return this._activeKernelNames;
+  }
 
   /**
    * A readonly array of the installed extensions.
@@ -387,6 +551,10 @@ export class ListModel extends VDomModel {
     if (this.isDisposed) {
       return;
     }
+    this.serviceManager.sessions?.runningChanged.disconnect(
+      this._onRunningSessionsChanged,
+      this
+    );
     this._debouncedSearch.dispose();
     super.dispose();
   }
@@ -699,6 +867,33 @@ export class ListModel extends VDomModel {
   private _pagination: number = 30;
   private _lastPage: number = 1;
 
+  private _onRunningSessionsChanged(): void {
+    if (this._updateActiveKernels()) {
+      this.stateChanged.emit();
+    }
+  }
+
+  private _updateActiveKernels(): boolean {
+    const next = new Set<string>();
+    const sessions = this.serviceManager.sessions;
+    if (sessions) {
+      for (const session of sessions.running()) {
+        if (session.kernel?.name) {
+          next.add(session.kernel.name);
+        }
+      }
+    }
+    if (
+      next.size === this._activeKernelNames.size &&
+      [...next].every(name => this._activeKernelNames.has(name))
+    ) {
+      return false;
+    }
+    this._activeKernelNames = next;
+    return true;
+  }
+
+  private _activeKernelNames = new Set<string>();
   private _installed: IEntry[];
   private _lastSearchResult: IEntry[];
   private _pendingActions: Promise<any>[] = [];

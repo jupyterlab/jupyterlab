@@ -488,7 +488,7 @@ kernel, or on a notebook server extension, you can add metadata to indicate
 this to the extension manager by adding metadata to your package.json file.
 The full options available are:
 
-```
+```json
 "jupyterlab": {
   "discovery": {
     "kernel": [
@@ -498,11 +498,13 @@ The full options available are:
           "display_name": "<regexp for matching kernel display name>"   // optional
         },
         "base": {
-          "name": "<the name of the kernel package>"
+          "name": "<the name of the kernel package>",
+          "version": "<optional PEP 440 version specifier, e.g. '>=1.0.0,<2.0.0'>"
         },
         "overrides": {   // optional
           "<manager name, e.g. 'pip'>": {
-            "name": "<name of kernel package on pip, if it differs from base name>"
+            "name": "<name of kernel package on pip, if it differs from base name>",
+            "version": "<optional PEP 440 version specifier for this manager>"
           }
         },
         "managers": [   // list of package managers that have your kernel package
@@ -513,11 +515,13 @@ The full options available are:
     ],
     "server": {
       "base": {
-        "name": "<the name of the server extension package>"
+        "name": "<the name of the server extension package>",
+        "version": "<optional PEP 440 version specifier, e.g. '>=1.0.0,<2.0.0'>"
       },
       "overrides": {   // optional
         "<manager name, e.g. 'pip'>": {
-          "name": "<name of server extension package on pip, if it differs from base name>"
+          "name": "<name of server extension package on pip, if it differs from base name>",
+          "version": "<optional PEP 440 version specifier for this manager>"
         }
       },
       "managers": [   // list of package managers that have your server extension package
@@ -529,9 +533,15 @@ The full options available are:
 }
 ```
 
+An optional `version` specifier in `base` or `overrides` (using
+[PEP 440 version specifiers](https://packaging.python.org/en/latest/specifications/version-specifiers/),
+such as `">=8.0.0,<9.0.0"`) lets the Extension Manager detect version drift
+between the frontend extension and its companion package in the server or local
+Python kernel environments.
+
 A typical setup for e.g. a jupyter-widget based package will then be:
 
-```
+```json
 "keywords": [
     "jupyterlab-extension",
     "jupyter",
@@ -544,10 +554,11 @@ A typical setup for e.g. a jupyter-widget based package will then be:
     "kernel": [
       {
         "kernel_spec": {
-          "language": "^python",
+          "language": "^python"
         },
         "base": {
-          "name": "myipywidgetspackage"
+          "name": "myipywidgetspackage",
+          "version": ">=1.0.0,<2.0.0"
         },
         "managers": [
             "pip",

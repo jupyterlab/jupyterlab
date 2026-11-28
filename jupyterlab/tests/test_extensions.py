@@ -977,3 +977,163 @@ async def test_handler_blocks_uninstall_when_name_is_not_allowed():
     assert "was blocked" in exc_info.value.log_message
     handler.manager.is_uninstall_allowed.assert_awaited_once_with("-r/tmp/requirements.txt")
     handler.manager.uninstall.assert_not_called()
+
+
+def _create_kernel_venv(tmp_path, name, packages):
+    """Create a fake Python environment with dist-info metadata for kernelspec testing."""
+    env_dir = tmp_path / name
+    bin_dir = env_dir / "bin"
+    site_packages = env_dir / "lib" / "python3.12" / "site-packages"
+    bin_dir.mkdir(parents=True)
+    site_packages.mkdir(parents=True)
+    python_exe = bin_dir / "python"
+    python_exe.write_text("", encoding="utf-8")
+    for pkg_name, version in packages.items():
+        dist_info = site_packages / f"{pkg_name.replace('-', '_')}-{version}.dist-info"
+        dist_info.mkdir()
+        (dist_info / "METADATA").write_text(
+            f"Name: {pkg_name}\nVersion: {version}\n", encoding="utf-8"
+        )
+    return python_exe
+
+
+@pytest.mark.parametrize(
+    "installed_version, expected_check_status, expected_pkg_status",
+    [
+        ("8.1.9", "ok", "ok"),
+        ("7.8.1", "incompatible", "warning"),
+        (None, "missing", "warning"),
+    ],
+)
+async def test_ExtensionManager_kernel_companion_version_checks(
+    monkeypatch,
+    federated_extensions,
+    tmp_path,
+    installed_version,
+    expected_check_status,
+    expected_pkg_status,
+):
+    packages = {"ipywidgets": installed_version} if installed_version is not None else {}
+    kernel_python = _create_kernel_venv(tmp_path, "kernel_env", packages)
+    federated_extensions(
+        {
+            "@jupyter-widgets/jupyterlab-manager": {
+                "version": "5.0.13",
+                "jupyterlab": {
+                    "discovery": {
+                        "kernel": [
+                            {
+                                "kernel_spec": {"language": "^python$"},
+                                "base": {"name": "ipywidgets", "version": ">=8.0.0,<9.0.0"},
+                                "managers": ["pip", "conda"],
+                            }
+                        ]
+                    }
+                },
+                "install": {},
+            }
+        }
+    )
+    monkeypatch.setattr(
+        "jupyterlab.extensions.manager.get_all_kernelspecs",
+        lambda: {
+            "python3": {
+                "spec": {
+                    "display_name": "Python 3 (ipykernel)",
+                    "language": "python",
+                    "argv": [
+                        str(kernel_python),
+                        "-m",
+                        "ipykernel_launcher",
+                        "-f",
+                        "{connection_file}",
+                    ],
+                }
+            }
+        },
+    )
+
+    manager = ReadOnlyExtensionManager()
+    installed = await manager._get_installed_extensions(get_latest_version=False)
+    pkg = installed["@jupyter-widgets/jupyterlab-manager"]
+
+    assert pkg.companion == "kernel"
+    assert pkg.status == expected_pkg_status
+    assert pkg.companions is not None
+    kernel_checks = pkg.companions["kernel"][0]["checks"]
+    assert len(kernel_checks) == 1
+    assert kernel_checks[0]["kernelName"] == "python3"
+    assert kernel_checks[0]["displayName"] == "Python 3 (ipykernel)"
+    assert kernel_checks[0]["status"] == expected_check_status
+    assert kernel_checks[0]["installedVersion"] == installed_version
+    assert kernel_checks[0]["requiredVersion"] == ">=8.0.0,<9.0.0"
+
+
+async def test_ExtensionManager_exposes_server_and_kernel_companions_with_overrides(
+    monkeypatch, federated_extensions, python_packages, tmp_path
+):
+    kernel_python = _create_kernel_venv(tmp_path, "wrapper_env", {"custom-kernel-pip": "2.1.0"})
+    python_packages({"my-server-pkg": "0.5.0"})
+    federated_extensions(
+        {
+            "my-full-extension": {
+                "version": "1.0.0",
+                "jupyterlab": {
+                    "discovery": {
+                        "server": {
+                            "base": {"name": "my-server-pkg", "version": ">=1.0.0"},
+                            "managers": ["pip"],
+                        },
+                        "kernel": [
+                            {
+                                "kernel_spec": {"language": "^python$"},
+                                "base": {"name": "custom-kernel"},
+                                "overrides": {
+                                    "pip": {"name": "custom-kernel-pip", "version": ">=2.0.0"}
+                                },
+                                "managers": ["pip", "conda"],
+                            }
+                        ],
+                    }
+                },
+                "install": {},
+            }
+        }
+    )
+    monkeypatch.setattr(
+        "jupyterlab.extensions.companions.distribution",
+        lambda name: next(distributions(name=name, path=[str(tmp_path)])),
+    )
+    monkeypatch.setattr(
+        "jupyterlab.extensions.manager.get_all_kernelspecs",
+        lambda: {
+            "py-local": {
+                "spec": {
+                    "display_name": "Local Python",
+                    "language": "python",
+                    "argv": [str(kernel_python), "-m", "ipykernel_launcher"],
+                }
+            },
+            "py-remote": {
+                "spec": {
+                    "display_name": "Remote Python",
+                    "language": "python",
+                    "argv": ["conda", "run", "-n", "remote", "python", "-m", "ipykernel"],
+                }
+            },
+        },
+    )
+
+    manager = ReadOnlyExtensionManager()
+    installed = await manager._get_installed_extensions(get_latest_version=False)
+    pkg = installed["my-full-extension"]
+
+    assert pkg.status == "warning"
+    assert pkg.companions is not None
+    assert pkg.companions["server"]["check"]["status"] == "incompatible"
+    assert pkg.companions["server"]["check"]["installedVersion"] == "0.5.0"
+
+    checks = {c["kernelName"]: c for c in pkg.companions["kernel"][0]["checks"]}
+    assert checks["py-local"]["status"] == "ok"
+    assert checks["py-local"]["installedVersion"] == "2.1.0"
+    assert checks["py-remote"]["status"] == "unknown"
