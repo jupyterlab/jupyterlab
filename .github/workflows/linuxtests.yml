@@ -159,6 +159,7 @@ jobs:
         with:
           name: "sdist"
           path: dist/*.tar.gz
+          retention-days: 7
 
   test_sdist:
     runs-on: ubuntu-latest
