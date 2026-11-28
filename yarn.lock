@@ -3839,6 +3839,7 @@ __metadata:
     eslint: ^9.26.0
     eslint-config-prettier: ^10.0.0
     eslint-plugin-jest: ^28.0.0
+    eslint-plugin-no-unsanitized: 4.1.5
     eslint-plugin-playwright: ^2.2.0
     eslint-plugin-regexp: ^3.1.0
     eslint-plugin-tsdoc: ^0.5.2
@@ -9663,6 +9664,15 @@ __metadata:
     jest:
       optional: true
   checksum: 7daeb0ebc360ba159474246cef8ea7f0a3e020652571d948022af73bec7a53dd436b48de81332fd4d5d5556ef1046cec0e6a2213287a461e4e81390ce76ad2e7
+  languageName: node
+  linkType: hard
+
+"eslint-plugin-no-unsanitized@npm:4.1.5":
+  version: 4.1.5
+  resolution: "eslint-plugin-no-unsanitized@npm:4.1.5"
+  peerDependencies:
+    eslint: ^9 || ^10
+  checksum: 99f4b2555357da2999cc40dfd654b891a9244fd8da933d59df235d2a9a0a1a09369aea67527f8fadfae989b5c51ed81743df5f4b1a4de4558145f4a72f3ec967
   languageName: node
   linkType: hard
 
