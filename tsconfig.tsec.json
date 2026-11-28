@@ -1,0 +1,40 @@
+{
+  "extends": "./tsconfigbase",
+  "compilerOptions": {
+    "composite": false,
+    "declaration": false,
+    "incremental": false,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2018",
+      "ES2020.BigInt",
+      "ES2020.Intl",
+      "ES2020.String",
+      "ES2021.WeakRef"
+    ],
+    "types": ["node", "webpack-env"],
+    "paths": {
+      "@jupyterlab/*": ["./packages/*/src"],
+      "@jupyterlab/csvviewer/lib/*": ["./packages/csvviewer/src/*"],
+      "@jupyterlab/services/lib/*": ["./packages/services/src/*"],
+      "@jupyterlab/settingeditor/lib/*": ["./packages/settingeditor/src/*"]
+    },
+    "plugins": [
+      {
+        "name": "tsec",
+        "exemptionConfig": "./tsec-exemptions.json",
+        "reportTsecDiagnosticsOnly": true
+      }
+    ]
+  },
+  "include": ["packages/*/src/**/*"],
+  "exclude": [
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "packages/*/src/testutils.ts",
+    "packages/testing/**"
+  ]
+}

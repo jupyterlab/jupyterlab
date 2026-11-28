@@ -1,0 +1,9 @@
+{
+  "*": [
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "packages/*/test/**",
+    "packages/*/src/testutils.ts",
+    "packages/testing/**"
+  ]
+}
