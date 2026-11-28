@@ -18,6 +18,7 @@ import {
   dropCursor,
   EditorView,
   highlightActiveLine,
+  highlightActiveLineGutter,
   highlightSpecialChars,
   highlightTrailingWhitespace,
   highlightWhitespace,
@@ -662,7 +663,11 @@ export namespace EditorExtensionRegistry {
       Object.freeze({
         name: 'highlightActiveLine',
         default: false,
-        factory: () => createConditionalExtension(highlightActiveLine()),
+        factory: () =>
+          createConditionalExtension([
+            highlightActiveLine(),
+            highlightActiveLineGutter()
+          ]),
         schema: {
           type: 'boolean',
           title: trans.__('Highlight the active line')
