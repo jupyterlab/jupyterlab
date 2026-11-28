@@ -42,7 +42,7 @@ export class GalataInpage implements IGalataInpage {
     pluginId: K
   ): Promise<IPluginNameToInterfaceMap[K] | undefined> {
     return new Promise((resolve, reject) => {
-      const app = this._app;
+      const app = this.app;
       const hasPlugin = app.hasPlugin(pluginId);
 
       if (hasPlugin) {
@@ -368,10 +368,10 @@ export class GalataInpage implements IGalataInpage {
    * Delete all cells of the active notebook
    */
   async deleteNotebookCells(): Promise<void> {
-    const nbPanel = this._app.shell.currentWidget as NotebookPanel;
+    const nbPanel = this.app.shell.currentWidget as NotebookPanel;
     const nb = nbPanel.content;
 
-    void this._app.commands.execute('notebook:delete-cell');
+    void this.app.commands.execute('notebook:delete-cell');
 
     nb.update();
   }
@@ -383,11 +383,11 @@ export class GalataInpage implements IGalataInpage {
    * @returns Action success result
    */
   addNotebookCell(cellType: nbformat.CellType, source: string): boolean {
-    const nbPanel = this._app.shell.currentWidget as NotebookPanel;
+    const nbPanel = this.app.shell.currentWidget as NotebookPanel;
     const nb = nbPanel.content;
 
     if (nb !== null) {
-      void this._app.commands.execute('notebook:insert-cell-below');
+      void this.app.commands.execute('notebook:insert-cell-below');
 
       if (nb.model) {
         const sharedModel = nb.model.sharedModel;
@@ -410,7 +410,7 @@ export class GalataInpage implements IGalataInpage {
    * @param cellIndex Cell index
    */
   resetExecutionCount(cellIndex?: number): void {
-    const nbPanel = this._app.shell.currentWidget as NotebookPanel;
+    const nbPanel = this.app.shell.currentWidget as NotebookPanel;
     const nb = nbPanel.content;
 
     if (nb) {
@@ -444,7 +444,7 @@ export class GalataInpage implements IGalataInpage {
     cellType: nbformat.CellType,
     source: string
   ): boolean {
-    const nbPanel = this._app.shell.currentWidget as NotebookPanel;
+    const nbPanel = this.app.shell.currentWidget as NotebookPanel;
     const nb = nbPanel.content;
 
     if (nb) {
@@ -475,7 +475,7 @@ export class GalataInpage implements IGalataInpage {
    * @returns Whether the cell is selected or not
    */
   isNotebookCellSelected(cellIndex: number): boolean {
-    const nbPanel = this._app.shell.currentWidget as NotebookPanel;
+    const nbPanel = this.app.shell.currentWidget as NotebookPanel;
     const nb = nbPanel.content;
 
     const numCells = nb.widgets.length;
@@ -490,7 +490,7 @@ export class GalataInpage implements IGalataInpage {
    * Save the active notebook
    */
   async saveActiveNotebook(): Promise<void> {
-    const nbPanel = this._app.shell.currentWidget as NotebookPanel;
+    const nbPanel = this.app.shell.currentWidget as NotebookPanel;
     await nbPanel.context.save();
   }
 
@@ -617,7 +617,7 @@ export class GalataInpage implements IGalataInpage {
   async runActiveNotebookCellByCell(
     callback?: INotebookRunCallback
   ): Promise<void> {
-    const nbPanel = this._app.shell.currentWidget as NotebookPanel;
+    const nbPanel = this.app.shell.currentWidget as NotebookPanel;
     const notebook = nbPanel.content;
     if (!notebook.widgets) {
       console.error('NOTEBOOK CELL PROBLEM', notebook);
@@ -628,14 +628,14 @@ export class GalataInpage implements IGalataInpage {
       return;
     }
 
-    void this._app.commands.execute('notebook:deselect-all');
+    void this.app.commands.execute('notebook:deselect-all');
 
     for (let i = 0; i < numCells; ++i) {
       const cell = notebook.widgets[i];
       notebook.activeCellIndex = i;
       notebook.select(cell);
 
-      await this._app.commands.execute('notebook:run-cell');
+      await this.app.commands.execute('notebook:run-cell');
 
       await this.waitForCellRun(cell);
 
@@ -667,7 +667,7 @@ export class GalataInpage implements IGalataInpage {
    * It checks that no cells have a `null` execution count.
    */
   haveBeenExecuted(cellIndex?: number): boolean {
-    const nbPanel = this._app.shell.currentWidget as NotebookPanel;
+    const nbPanel = this.app.shell.currentWidget as NotebookPanel;
     const nb = nbPanel.content;
 
     let counter = 0;
@@ -707,7 +707,7 @@ export class GalataInpage implements IGalataInpage {
    * @returns Index
    */
   getNotebookToolbarItemIndex(itemName: string): number {
-    const nbPanel = this._app.shell.currentWidget as NotebookPanel;
+    const nbPanel = this.app.shell.currentWidget as NotebookPanel;
     return findIndex(nbPanel.toolbar.names(), name => name === itemName);
   }
 
@@ -727,7 +727,7 @@ export class GalataInpage implements IGalataInpage {
    * @param themeName Theme name
    */
   async setTheme(themeName: string): Promise<void> {
-    await this._app.commands.execute('apputils:change-theme', {
+    await this.app.commands.execute('apputils:change-theme', {
       theme: themeName
     });
 
@@ -744,6 +744,10 @@ export class GalataInpage implements IGalataInpage {
       this._app = window.jupyterapp;
     }
     return this._app;
+  }
+
+  set app(value: JupyterFrontEnd) {
+    this._app = value;
   }
 
   private _app: JupyterFrontEnd;

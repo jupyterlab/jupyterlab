@@ -20,21 +20,24 @@ export type {
 
 export { IGalataHelpers } from './tokens';
 
+const galata = new GalataInpage();
+
 /**
  * Galata in-page object
  */
-window.galata = new GalataInpage();
+window.galata = galata;
 /**
  * Galata in-page object
  * @deprecated
  */
-window.galataip = window.galata;
+window.galataip = galata;
 
 const galataPlugin: JupyterFrontEndPlugin<IGalataHelpers> = {
   id: PLUGIN_ID_GALATA_HELPERS,
   description: 'Galata in-page extension helpers.',
   autoStart: true,
   activate: (app: JupyterFrontEnd): IGalataHelpers => {
+    galata.app = app;
     return Object.freeze({
       notifications: Notification.manager,
       dialogs: Dialog.tracker
