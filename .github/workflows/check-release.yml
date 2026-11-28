@@ -46,3 +46,4 @@ jobs:
           name: jupyterlab-releaser-dist-${{ github.run_number }}
           path: |
             .jupyter_releaser_checkout/dist/*.*
+          retention-days: 7
