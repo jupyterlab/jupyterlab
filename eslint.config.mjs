@@ -15,6 +15,7 @@ import tseslint from 'typescript-eslint';
 import * as jsoncParser from 'jsonc-eslint-parser';
 import jupyterPlugin from '@jupyter/eslint-plugin';
 import lazyImports from '@jupyter/eslint-plugin/lib/utils/lazy-imports.js';
+import noUnsanitizedPlugin from 'eslint-plugin-no-unsanitized';
 
 // Kernel session types added to the plugin's application-lifetime sender
 // types for the signal lifetime rules: a session (and its context) outlives
@@ -24,6 +25,41 @@ const LONG_LIVED_TYPES = [
   'SessionContext',
   'IKernelConnection',
   'KernelConnection'
+];
+
+// Trusted Types sinks that eslint-plugin-no-unsanitized does not cover.
+const UNSANITIZED_SINK_SYNTAX = [
+  {
+    selector: "CallExpression[callee.property.name='parseFromString']",
+    message:
+      'DOMParser.parseFromString() is a Trusted Types sink. Build the nodes with DOM APIs or pass a TrustedHTML value.'
+  },
+  {
+    selector: "AssignmentExpression[left.property.name='srcdoc']",
+    message:
+      'srcdoc is a Trusted Types sink. Pass a TrustedHTML value or load the frame from a URL.'
+  },
+  {
+    selector:
+      "CallExpression[callee.property.name='setAttribute'][arguments.0.value='srcdoc']",
+    message:
+      'srcdoc is a Trusted Types sink. Pass a TrustedHTML value or load the frame from a URL.'
+  },
+  {
+    selector: "JSXAttribute[name.name='srcDoc']",
+    message:
+      'srcdoc is a Trusted Types sink. Pass a TrustedHTML value or load the frame from a URL.'
+  },
+  {
+    selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']",
+    message:
+      'dangerouslySetInnerHTML assigns innerHTML, a Trusted Types sink. Render React elements instead.'
+  },
+  {
+    selector: "Property[key.name='dangerouslySetInnerHTML']",
+    message:
+      'dangerouslySetInnerHTML assigns innerHTML, a Trusted Types sink. Render React elements instead.'
+  }
 ];
 
 // Filter globals to remove any with leading/trailing whitespace
@@ -596,6 +632,26 @@ export default defineConfig([
       'playwright/no-networkidle': 'error',
       'playwright/prefer-to-have-count': 'error',
       'playwright/prefer-web-first-assertions': 'error'
+    }
+  },
+  {
+    // Static check for DOM injection sinks; the Trusted Types CSP in the UI tests is the reference.
+    files: ['packages/*/src/**/*.ts', 'packages/*/src/**/*.tsx'],
+    ignores: [
+      '**/*.spec.ts',
+      '**/*.spec.tsx',
+      'packages/*/src/testutils.ts',
+      'packages/testing/src/**'
+    ],
+    plugins: { 'no-unsanitized': noUnsanitizedPlugin },
+    rules: {
+      'no-unsanitized/method': 'error',
+      'no-unsanitized/property': 'error',
+      'no-eval': 'error',
+      'no-new-func': 'error',
+      'no-implied-eval': 'error',
+      // galata/test/** sets its own no-restricted-syntax; the file globs must not overlap.
+      'no-restricted-syntax': ['error', ...UNSANITIZED_SINK_SYNTAX]
     }
   },
   {
