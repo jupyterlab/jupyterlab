@@ -43,7 +43,8 @@ describe('CodeMirrorEditor', () => {
           'lineNumbers',
           'lineWrap',
           'readOnly',
-          'allowMultipleSelections'
+          'allowMultipleSelections',
+          'highlightActiveLine'
         ].includes(ext.name)
       )
       .forEach(ext => {
@@ -582,6 +583,18 @@ describe('CodeMirrorEditor', () => {
       editor.setSelection({ start, end });
       editor.replaceSelection('b');
       expect(model.sharedModel.source).toBe('abc');
+    });
+  });
+
+  describe('#setOption()', () => {
+    it('should highlight the active line gutter when highlightActiveLine is enabled', async () => {
+      model.sharedModel.setSource('line 1\nline 2');
+      await sleep(0.01);
+      editor.setOption('lineNumbers', true);
+      editor.setOption('highlightActiveLine', true);
+      expect(host.querySelectorAll('.cm-activeLineGutter')).toHaveLength(1);
+      editor.setOption('highlightActiveLine', false);
+      expect(host.querySelectorAll('.cm-activeLineGutter')).toHaveLength(0);
     });
   });
 });
